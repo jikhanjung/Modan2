@@ -28,7 +28,6 @@ PROGRAM_VERSION = "0.0.1"
 
 from MdModel import *
 
-
 class PreferencesDialog(QDialog):
     '''
     PreferencesDialog shows preferences.
@@ -126,6 +125,13 @@ class PreferencesDialog(QDialog):
 
 form_class = uic.loadUiType("Modan2.ui")[0]
 class ModanMainWindow(QMainWindow, form_class):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        self.setWindowTitle(PROGRAM_NAME)
+        self.read_settings()
+        self.check_db()
+
     def check_db(self):
         gDatabase.connect()
         tables = gDatabase.get_tables()
@@ -135,12 +141,38 @@ class ModanMainWindow(QMainWindow, form_class):
         else:
             gDatabase.create_tables([MdDataset, MdObject, MdImage, ])
 
-    def __init__(self):
-        super().__init__()
-        self.setupUi(self)
-        self.read_settings()
-        self.check_db()
+    def read_settings(self):
+        #return
+        settings = QSettings("Modan2", "Modan2")
+        self.server_address = settings.value("server_address", "localhost")
+        self.server_port = settings.value("server_port", "8000")
+        self.data_folder = Path(settings.value("data_folder", "C:/Modan2/data"))
+        #print("main window data folder:", self.data_folder)
+        #print("main window server address:", self.server_address)
+    
+    def write_settings(self):
+        settings = QSettings("Modan2", "Modan2")
+        settings.setValue("server_address", self.server_address)
+        settings.setValue("server_port", self.server_port)
+        settings.setValue("data_folder", str(self.data_folder))
+        #print("main window data folder:", self.data_folder)
+        #print("main window server address:", self.server_address)
 
+    def closeEvent(self, event):
+        self.write_settings()
+        event.accept()
+
+    def on_actionPreferences_triggered(self):
+        dlg = PreferencesDialog(self)
+        dlg.exec_()
+        self.server_address = dlg.server_address
+        self.server_port = dlg.server_port
+        self.data_folder = dlg.data_folder
+        #print("main window data folder:", self.data_folder)
+        #print("main window server address:", self.server_address)
+    
+    def on_actionExit_triggered(self):
+        self.close()
 
 if __name__ == "__main__":
     #QApplication : 프로그램을 실행시켜주는 클래스

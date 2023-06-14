@@ -2,6 +2,7 @@ from peewee import *
 
 gDatabase = SqliteDatabase('Modan2.db')
 
+
 class MdDataset(Model):
     dataset_name = CharField()
     dataset_desc = CharField()
@@ -41,3 +42,5 @@ class MdImage(Model):
     created_at = DateTimeField()
     modified_at = DateTimeField()
     object = ForeignKeyField(MdObject, backref='images')
+    class Meta:
+        database = gDatabase

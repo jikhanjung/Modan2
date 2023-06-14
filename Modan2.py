@@ -174,6 +174,43 @@ class ModanMainWindow(QMainWindow, form_class):
     def on_actionExit_triggered(self):
         self.close()
 
+    def reset_views(self):
+        self.dataset_model = QStandardItemModel()
+        self.object_model = QStandardItemModel()
+        self.object_model.setColumnCount(3)
+        self.object_model.setHorizontalHeaderLabels(["ID", "Name", "Count"])
+        self.treeView.setModel(self.dataset_model)
+        self.proxy_model = QSortFilterProxyModel()
+        self.proxy_model.setSourceModel(self.object_model)
+        self.tableView.setModel(self.proxy_model)
+        self.tableView.setColumnWidth(0, 50)
+        self.tableView.setColumnWidth(1, 200)
+        self.tableView.hideColumn(2)
+        self.tableView.verticalHeader().setDefaultSectionSize(20)
+        self.treeView.setHeaderHidden(True)
+        self.tableView.verticalHeader().setVisible(False)
+
+        self.dataset_selection_model = self.treeView.selectionModel()
+        self.dataset_selection_model.selectionChanged.connect(self.on_dataset_selection_changed)
+        self.object_selection_model = self.tableView.selectionModel()
+        self.object_selection_model.selectionChanged.connect(self.on_object_selection_changed)
+    
+    def on_dataset_selection_changed(self, selected, deselected):
+        indexes = selected.indexes()
+        if indexes:
+            index = indexes[0]
+            dataset = index.internalPointer()
+            self.object_model.clear()
+            self.object_model.setHorizontalHeaderLabels(["ID", "Name", "Count"])
+            objects = MdObject.select().where(MdObject.dataset == dataset)
+            for obj in objects:
+                row = [obj.id, obj.name, obj.count]
+                item = [QStandardItem(str(x)) for x in row]
+                self.object_model.appendRow(item)
+            self.tableView.resizeColumnsToContents()
+            self.tableView.hideColumn(2)
+            self.tableView.verticalHeader().setVisible(False)
+
 if __name__ == "__main__":
     #QApplication : 프로그램을 실행시켜주는 클래스
     app = QApplication(sys.argv)

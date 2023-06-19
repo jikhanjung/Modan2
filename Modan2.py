@@ -337,7 +337,8 @@ form_class = uic.loadUiType("Modan2.ui")[0]
 class ModanMainWindow(QMainWindow, form_class):
     def __init__(self):
         super().__init__()
-        QApplication.setOverrideCursor(Qt.WaitCursor)
+        #QApplication.setOverrideCursor(Qt.WaitCursor)
+        self.setGeometry(QRect(100, 100, 1280, 800))
         self.setupUi(self)
         self.initUI()
         self.setWindowTitle(PROGRAM_NAME)
@@ -345,7 +346,7 @@ class ModanMainWindow(QMainWindow, form_class):
         self.check_db()
         self.reset_views()
         self.load_dataset()
-        QApplication.restoreOverrideCursor()
+        #QApplication.restoreOverrideCursor()
         self.selected_dataset = None
         self.selected_object = None
 

@@ -2,11 +2,13 @@ from PyQt5.QtWidgets import QTableWidgetItem, QMainWindow, QHeaderView, QFileDia
                             QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QProgressBar, QApplication, \
                             QDialog, QLineEdit, QLabel, QPushButton, QAbstractItemView, \
                             QMessageBox, QListView, QTreeWidgetItem, QToolButton, QTreeView, QFileSystemModel, \
-                            QTableView, QSplitter, QRadioButton, QComboBox, QTextEdit, QAction, QMenu
+                            QTableView, QSplitter, QRadioButton, QComboBox, QTextEdit, QAction, QMenu, QSizePolicy, \
+                            QTableWidget
+
 
 from PyQt5 import uic
 from PyQt5.QtGui import QIcon, QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem,\
-                        QPainterPath, QFont, QImageReader
+                        QPainterPath, QFont, QImageReader, QPainter
 from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSettings, QEvent, QRegExp, QSize, \
                          QItemSelectionModel, QDateTime, QBuffer, QIODevice, QByteArray, QPoint, QModelIndex
 from PyQt5.QtCore import pyqtSlot
@@ -175,20 +177,73 @@ class ObjectDialog(QDialog):
         self.setWindowTitle("Object")
         self.parent = parent
         #print(self.parent.pos())
-        self.setGeometry(QRect(100, 100, 400, 300))
+        self.setGeometry(QRect(100, 100, 1280, 800))
         self.move(self.parent.pos()+QPoint(100,100))
 
+        self.hsplitter = QSplitter(Qt.Horizontal)
+        #self.vsplitter = QSplitter(Qt.Vertical)
+
+        #self.vsplitter.addWidget(self.tableView)
+        #self.vsplitter.addWidget(self.tableWidget)
+
+        #self.hsplitter.addWidget(self.treeView)
+        #self.hsplitter.addWidget(self.vsplitter)
+        self.hsplitter.setSizes([300, 800])
+
+        self.inputLayout = QHBoxLayout()
+        self.inputCoords = QWidget()
+        self.inputCoords.setLayout(self.inputLayout)
+        self.inputX = QLineEdit()
+        self.inputY = QLineEdit()
+        self.inputZ = QLineEdit()
+        self.inputX.setFixedWidth(60)
+        self.inputY.setFixedWidth(60)
+        self.inputZ.setFixedWidth(60)
+
+        self.inputLayout.addWidget(self.inputX)
+        self.inputLayout.addWidget(self.inputY)
+        self.inputLayout.addWidget(self.inputZ)
+        self.inputLayout.setContentsMargins(0,0,0,0)
+        self.inputLayout.setSpacing(0)
+
+
         self.edtObjectName = QLineEdit()
-        self.edtObjectDesc = QLineEdit()
-        self.edtLandmarkStr = QLineEdit()
+        self.edtObjectDesc = QTextEdit()
+        self.edtLandmarkStr = QTableWidget()
         self.lblDataset = QLabel()
 
-        self.main_layout = QFormLayout()
+        self.main_layout = QVBoxLayout()
+        self.sub_layout = QHBoxLayout()
         self.setLayout(self.main_layout)
-        self.main_layout.addRow("Dataset Name", self.lblDataset)
-        self.main_layout.addRow("Object Name", self.edtObjectName)
-        self.main_layout.addRow("Object Desc", self.edtObjectDesc)
-        self.main_layout.addRow("Landmarks", self.edtLandmarkStr)
+
+        self.image_label = QLabel()
+        self.image_label.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        self.pixmap = QPixmap(1024,768)
+        self.image_label.setPixmap(self.pixmap)
+        #self.image_label.setScaledContents(True)
+        self.image_layout = QHBoxLayout()
+        self.image_layout.addWidget(self.image_label)
+
+        self.form_layout = QFormLayout()
+        self.form_layout.addRow("Dataset Name", self.lblDataset)
+        self.form_layout.addRow("Object Name", self.edtObjectName)
+        self.form_layout.addRow("Object Desc", self.edtObjectDesc)
+        self.form_layout.addRow("Landmarks", self.edtLandmarkStr)
+        self.form_layout.addRow("", self.inputCoords)
+
+        #self.sub_layout.addLayout(self.form_layout)
+        #self.sub_layout.addLayout(self.image_layout)
+        self.left_widget = QWidget()
+        self.left_widget.setLayout(self.form_layout)
+        self.right_widget = QWidget()
+        self.right_widget.setLayout(self.image_layout)
+
+        self.hsplitter.addWidget(self.left_widget)
+        self.hsplitter.addWidget(self.image_label)
+
+        #self.main_layout.addLayout(self.sub_layout)
+        self.main_layout.addWidget(self.hsplitter)
+
 
         self.btnOkay = QPushButton()
         self.btnOkay.setText("Save")
@@ -201,9 +256,10 @@ class ObjectDialog(QDialog):
         btn_layout = QHBoxLayout()
         btn_layout.addWidget(self.btnOkay)
         btn_layout.addWidget(self.btnCancel)
-        self.main_layout.addRow(btn_layout)
+        self.main_layout.addLayout(btn_layout)
 
         self.dataset = None
+        self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
 
         #self.edtDataFolder.setText(str(self.data_folder.resolve()))
         #self.edtServerAddress.setText(self.server_address)
@@ -212,12 +268,26 @@ class ObjectDialog(QDialog):
     def set_dataset(self, dataset):
         self.dataset = dataset
         self.lblDataset.setText(dataset.dataset_name)
+        if self.dataset.dimension == 2:
+            self.edtLandmarkStr.setColumnCount(2)
+            self.edtLandmarkStr.setHorizontalHeaderLabels(["X", "Y"])
+            self.edtLandmarkStr.setColumnWidth(0, 80)
+            self.edtLandmarkStr.setColumnWidth(1, 80)
+        elif self.dataset.dimension == 3:
+            self.edtLandmarkStr.setColumnCount(3)
+            self.edtLandmarkStr.setHorizontalHeaderLabels(["X", "Y","Z"])
+            self.edtLandmarkStr.setColumnWidth(0, 55)
+            self.edtLandmarkStr.setColumnWidth(1, 55)
+            self.edtLandmarkStr.setColumnWidth(2, 55)
+        #self.edtLandmarkStr.setColumnCount(2)
+        
+
 
     def set_object(self, object):
         self.object = object
         self.edtObjectName.setText(object.object_name)
         self.edtObjectDesc.setText(object.object_desc)
-        self.edtLandmarkStr.setText(object.landmark_str)
+        #self.edtLandmarkStr.setText(object.landmark_str)
         self.set_dataset(object.dataset)
 
     def save_object(self):
@@ -235,6 +305,12 @@ class ObjectDialog(QDialog):
 
     def Cancel(self):
         self.close()
+
+    def resizeEvent(self, event):
+        print("Window has been resized",self.image_label.width(), self.image_label.height())
+        #self.pixmap.scaled(self.image_label.width(), self.image_label.height(), Qt.KeepAspectRatio)
+        #self.image_label.setPixmap(self.pixmap)
+        QDialog.resizeEvent(self, event)
 
 class PreferencesDialog(QDialog):
     '''
@@ -338,8 +414,8 @@ class ModanMainWindow(QMainWindow, form_class):
     def __init__(self):
         super().__init__()
         #QApplication.setOverrideCursor(Qt.WaitCursor)
-        self.setGeometry(QRect(100, 100, 1280, 800))
         self.setupUi(self)
+        self.setGeometry(QRect(100, 100, 1600, 1200))
         self.initUI()
         self.setWindowTitle(PROGRAM_NAME)
         #self.read_settings()

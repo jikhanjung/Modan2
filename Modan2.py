@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QTableWidgetItem, QMainWindow, QHeaderView, QFileDia
 
 from PyQt5 import uic
 from PyQt5.QtGui import QIcon, QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem,\
-                        QPainterPath, QFont, QImageReader, QPainter
+                        QPainterPath, QFont, QImageReader, QPainter, QBrush
 from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSettings, QEvent, QRegExp, QSize, \
                          QItemSelectionModel, QDateTime, QBuffer, QIODevice, QByteArray, QPoint, QModelIndex
 from PyQt5.QtCore import pyqtSlot
@@ -170,6 +170,58 @@ class DatasetDialog(QDialog):
     def Cancel(self):
         self.close()
 
+
+class dLabel(QLabel):
+    def __init__(self, widget):
+        super(dLabel, self).__init__(widget)
+        self.setAcceptDrops(True)
+        self.orig_pixmap = None
+        self.curr_pixmap = None
+
+    def dragEnterEvent(self, event):
+        file_name = event.mimeData().text()
+        if file_name.split('.')[-1] in ['png', 'jpg', 'jpeg','bmp','gif','tif','tiff']:
+            event.acceptProposedAction()
+        else:
+            event.ignore()
+
+    def dropEvent(self, event):
+        file_path = event.mimeData().text()
+        file_path = re.sub('file:///', '', file_path)
+        self.curr_pixmap = self.orig_pixmap = QPixmap(file_path)
+        self.orig_width = self.orig_pixmap.width()
+        self.orig_height = self.orig_pixmap.height()
+        self.setPixmap(self.curr_pixmap)
+        self.setScaledContents(True)
+        print( self.curr_pixmap.width(), self.curr_pixmap.height(), self.orig_pixmap.width(), self.orig_pixmap.height())
+        #self.setScaledContents(True)
+
+    def paintEvent(self, event):
+        #self.pixmap
+        #return super().paintEvent(event)
+        painter = QPainter(self)
+        #height = self.progress * self.height()
+        #if self.orig_pixmap is not None:
+            #painter.drawPixmap(self.rect(), self.orig_pixmap)
+        if self.curr_pixmap is not None:                
+            self.curr_pixmap = self.orig_pixmap.scaled(self.width(), self.height(), Qt.KeepAspectRatio)            
+            painter.drawPixmap(self.curr_pixmap.rect(), self.curr_pixmap)
+
+        r = QRect(0, self.height() - 20, self.width(), 20)
+        painter.fillRect(r, QBrush(Qt.blue))
+        pen = QPen(QColor("red"), 10)
+        painter.setPen(pen)
+        painter.drawRect(self.rect())
+    def resizeEvent(self, event):
+        print("resize",self.size())
+        # print size
+        #print(event.size())
+        #print(self.size())
+        if self.curr_pixmap is not None:                
+            self.curr_pixmap.scaled(self.width(), self.height(), Qt.KeepAspectRatio)
+            print( self.curr_pixmap.width(), self.curr_pixmap.height(), self.orig_pixmap.width(), self.orig_pixmap.height())
+        QLabel.resizeEvent(self, event)
+
 class ObjectDialog(QDialog):
     # NewDatasetDialog shows new dataset dialog.
     def __init__(self,parent):
@@ -220,7 +272,7 @@ class ObjectDialog(QDialog):
         self.sub_layout = QHBoxLayout()
         self.setLayout(self.main_layout)
 
-        self.image_label = QLabel()
+        self.image_label = dLabel(self)
         self.image_label.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
         self.pixmap = QPixmap(1024,768)
         self.image_label.setPixmap(self.pixmap)
@@ -402,8 +454,8 @@ class ObjectDialog(QDialog):
         self.close()
 
     def resizeEvent(self, event):
-        print("Window has been resized",self.image_label.width(), self.image_label.height())
-        #self.pixmap.scaled(self.image_label.width(), self.image_label.height(), Qt.KeepAspectRatio)
+        #print("Window has been resized",self.image_label.width(), self.image_label.height())
+        self.pixmap.scaled(self.image_label.width(), self.image_label.height(), Qt.KeepAspectRatio)
         #self.image_label.setPixmap(self.pixmap)
         QDialog.resizeEvent(self, event)
 

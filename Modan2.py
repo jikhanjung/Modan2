@@ -178,6 +178,15 @@ class dLabel(QLabel):
         self.orig_pixmap = None
         self.curr_pixmap = None
 
+    def set_image(self,file_path):
+        self.fullpath = file_path
+        self.curr_pixmap = self.orig_pixmap = QPixmap(file_path)
+        self.orig_width = self.orig_pixmap.width()
+        self.orig_height = self.orig_pixmap.height()
+        self.setPixmap(self.curr_pixmap)
+        self.setScaledContents(True)
+        #print( self.curr_pixmap.width(), self.curr_pixmap.height(), self.orig_pixmap.width(), self.orig_pixmap.height())
+
     def dragEnterEvent(self, event):
         file_name = event.mimeData().text()
         if file_name.split('.')[-1] in ['png', 'jpg', 'jpeg','bmp','gif','tif','tiff']:
@@ -188,13 +197,9 @@ class dLabel(QLabel):
     def dropEvent(self, event):
         file_path = event.mimeData().text()
         file_path = re.sub('file:///', '', file_path)
-        self.curr_pixmap = self.orig_pixmap = QPixmap(file_path)
-        self.orig_width = self.orig_pixmap.width()
-        self.orig_height = self.orig_pixmap.height()
-        self.setPixmap(self.curr_pixmap)
-        self.setScaledContents(True)
-        print( self.curr_pixmap.width(), self.curr_pixmap.height(), self.orig_pixmap.width(), self.orig_pixmap.height())
+        #print(file_path)
         #self.setScaledContents(True)
+        self.set_image(file_path)
 
     def paintEvent(self, event):
         #self.pixmap
@@ -207,19 +212,19 @@ class dLabel(QLabel):
             self.curr_pixmap = self.orig_pixmap.scaled(self.width(), self.height(), Qt.KeepAspectRatio)            
             painter.drawPixmap(self.curr_pixmap.rect(), self.curr_pixmap)
 
-        r = QRect(0, self.height() - 20, self.width(), 20)
-        painter.fillRect(r, QBrush(Qt.blue))
-        pen = QPen(QColor("red"), 10)
-        painter.setPen(pen)
-        painter.drawRect(self.rect())
+        #r = QRect(0, self.height() - 20, self.width(), 20)
+        #painter.fillRect(r, QBrush(Qt.blue))
+        #pen = QPen(QColor("red"), 10)
+        #painter.setPen(pen)
+        #painter.drawRect(self.rect())
     def resizeEvent(self, event):
-        print("resize",self.size())
+        #print("resize",self.size())
         # print size
         #print(event.size())
         #print(self.size())
         if self.curr_pixmap is not None:                
             self.curr_pixmap.scaled(self.width(), self.height(), Qt.KeepAspectRatio)
-            print( self.curr_pixmap.width(), self.curr_pixmap.height(), self.orig_pixmap.width(), self.orig_pixmap.height())
+            #print( self.curr_pixmap.width(), self.curr_pixmap.height(), self.orig_pixmap.width(), self.orig_pixmap.height())
         QLabel.resizeEvent(self, event)
 
 class ObjectDialog(QDialog):
@@ -229,7 +234,7 @@ class ObjectDialog(QDialog):
         self.setWindowTitle("Object")
         self.parent = parent
         #print(self.parent.pos())
-        self.setGeometry(QRect(100, 100, 1024, 768))
+        self.setGeometry(QRect(100, 100, 1024, 600))
         self.move(self.parent.pos()+QPoint(100,100))
 
         self.hsplitter = QSplitter(Qt.Horizontal)
@@ -240,7 +245,6 @@ class ObjectDialog(QDialog):
 
         #self.hsplitter.addWidget(self.treeView)
         #self.hsplitter.addWidget(self.vsplitter)
-        self.hsplitter.setSizes([300, 800])
 
         self.inputLayout = QHBoxLayout()
         self.inputCoords = QWidget()
@@ -261,7 +265,7 @@ class ObjectDialog(QDialog):
         self.inputY.returnPressed.connect(self.input_coords_process)
         self.inputZ.returnPressed.connect(self.input_coords_process)
         self.inputX.textChanged[str].connect(self.x_changed)
-
+        self.btnAddInput.clicked.connect(self.input_coords_process)
 
         self.edtObjectName = QLineEdit()
         self.edtObjectDesc = QTextEdit()
@@ -296,6 +300,7 @@ class ObjectDialog(QDialog):
 
         self.hsplitter.addWidget(self.left_widget)
         self.hsplitter.addWidget(self.image_label)
+        self.hsplitter.setSizes([200, 800])
 
         #self.main_layout.addLayout(self.sub_layout)
         self.main_layout.addWidget(self.hsplitter)
@@ -325,26 +330,29 @@ class ObjectDialog(QDialog):
         self.dataset = dataset
         self.lblDataset.setText(dataset.dataset_name)
 
+        header = self.edtLandmarkStr.horizontalHeader()    
         if self.dataset.dimension == 2:
             self.edtLandmarkStr.setColumnCount(2)
-            self.edtLandmarkStr.setHorizontalHeaderLabels(["X", "Y"])
-            self.edtLandmarkStr.setColumnWidth(0, 80)
-            self.edtLandmarkStr.setColumnWidth(1, 80)
+            self.edtLandmarkStr.setHorizontalHeaderLabels(["X","Y"])
+            #self.edtLandmarkStr.setColumnWidth(0, 80)
+            #self.edtLandmarkStr.setColumnWidth(1, 80)
+            header.setSectionResizeMode(0, QHeaderView.Stretch)
+            header.setSectionResizeMode(1, QHeaderView.Stretch)
             self.inputZ.hide()
             input_width = 80
         elif self.dataset.dimension == 3:
             self.edtLandmarkStr.setColumnCount(3)
-            self.edtLandmarkStr.setHorizontalHeaderLabels(["X", "Y","Z"])
-            self.edtLandmarkStr.setColumnWidth(0, 55)
-            self.edtLandmarkStr.setColumnWidth(1, 55)
-            self.edtLandmarkStr.setColumnWidth(2, 55)
+            self.edtLandmarkStr.setHorizontalHeaderLabels(["X","Y","Z"])
+            header.setSectionResizeMode(0, QHeaderView.Stretch)
+            header.setSectionResizeMode(1, QHeaderView.Stretch)
+            header.setSectionResizeMode(2, QHeaderView.Stretch)
             self.inputZ.show()
             input_width = 60
             
-        self.inputX.setFixedWidth(input_width)
-        self.inputY.setFixedWidth(input_width)
-        self.inputZ.setFixedWidth(input_width)
-        self.btnAddInput.setFixedWidth(input_width)
+        #self.inputX.setFixedWidth(input_width)
+        #self.inputY.setFixedWidth(input_width)
+        #self.inputZ.setFixedWidth(input_width)
+        #self.btnAddInput.setFixedWidth(input_width)
         
 
     @pyqtSlot(str)
@@ -362,9 +370,9 @@ class ObjectDialog(QDialog):
                         self.add_landmark(coords[0], coords[1])
                     elif self.dataset.dimension == 3 and len(coords) == 3:
                         self.add_landmark(coords[0], coords[1], coords[2])
-        self.inputX.setText("")
-        self.inputY.setText("")
-        self.inputZ.setText("")
+            self.inputX.setText("")
+            self.inputY.setText("")
+            self.inputZ.setText("")
 
     def add_landmark(self, x, y, z=None):
         #print("adding landmark", x, y, z)
@@ -407,6 +415,9 @@ class ObjectDialog(QDialog):
         self.edtObjectDesc.setText(object.object_desc)
         #self.edtLandmarkStr.setText(object.landmark_str)
         self.show_landmarks(object.landmark_str)
+        if object.image is not None and len(object.image) > 0:
+            img = object.image[0]
+            self.image_label.set_image(img.original_path)
         #self.set_dataset(object.dataset)
 
     def save_object(self):
@@ -418,6 +429,11 @@ class ObjectDialog(QDialog):
         #self.object.landmark_str = self.edtLandmarkStr.text()
         self.object.landmark_str = self.make_landmark_str()
         self.object.save()
+        if self.image_label.fullpath is not None:
+            md_image = MdImage()
+            md_image.object_id = self.object.id
+            md_image.load_file_info(self.image_label.fullpath)
+            md_image.save()
 
     def make_landmark_str(self):
         # from table, make landmark_str
@@ -434,17 +450,21 @@ class ObjectDialog(QDialog):
     def show_landmarks(self,landmark_str):
         # from landmark_str, show landmarks
         #landmark_str = self.object.landmark_str
-        print(landmark_str)
+        #print(landmark_str)
         if landmark_str == "":
             return
         lines = landmark_str.split("\n")
+        landmark_count = 0
+
         for line in lines:
             coords = line.split("\t")
-            if self.dataset.dimension == 2:
+            if len(coords) == 2 and self.dataset.dimension == 2:
                 self.add_landmark(coords[0], coords[1])
-            elif self.dataset.dimension == 3:
+                landmark_count += 1
+            elif len(coords) == 3 and self.dataset.dimension == 3:
                 self.add_landmark(coords[0], coords[1], coords[2])
-
+                landmark_count += 1
+        
 
     def Okay(self):
         self.save_object()
@@ -456,6 +476,7 @@ class ObjectDialog(QDialog):
     def resizeEvent(self, event):
         #print("Window has been resized",self.image_label.width(), self.image_label.height())
         self.pixmap.scaled(self.image_label.width(), self.image_label.height(), Qt.KeepAspectRatio)
+        #self.edtObjectDesc.resize(self.edtObjectDesc.height(),300)
         #self.image_label.setPixmap(self.pixmap)
         QDialog.resizeEvent(self, event)
 
@@ -809,8 +830,9 @@ class ModanMainWindow(QMainWindow, form_class):
         for obj in self.selected_dataset.objects:
             item1 = QStandardItem(str(obj.id))
             item2 = QStandardItem(obj.object_name)
+            item3 = QStandardItem(str(obj.count_landmarks()))
             item1.setData(obj)
-            self.object_model.appendRow([item1,item2] )
+            self.object_model.appendRow([item1,item2,item3] )
 
 
     def on_object_selection_changed(self, selected, deselected):

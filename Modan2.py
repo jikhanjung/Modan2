@@ -177,7 +177,7 @@ class ObjectDialog(QDialog):
         self.setWindowTitle("Object")
         self.parent = parent
         #print(self.parent.pos())
-        self.setGeometry(QRect(100, 100, 1280, 800))
+        self.setGeometry(QRect(100, 100, 1024, 768))
         self.move(self.parent.pos()+QPoint(100,100))
 
         self.hsplitter = QSplitter(Qt.Horizontal)
@@ -196,15 +196,19 @@ class ObjectDialog(QDialog):
         self.inputX = QLineEdit()
         self.inputY = QLineEdit()
         self.inputZ = QLineEdit()
-        self.inputX.setFixedWidth(60)
-        self.inputY.setFixedWidth(60)
-        self.inputZ.setFixedWidth(60)
 
         self.inputLayout.addWidget(self.inputX)
         self.inputLayout.addWidget(self.inputY)
         self.inputLayout.addWidget(self.inputZ)
         self.inputLayout.setContentsMargins(0,0,0,0)
         self.inputLayout.setSpacing(0)
+        self.btnAddInput = QPushButton()
+        self.btnAddInput.setText("Add")
+        self.inputLayout.addWidget(self.btnAddInput)
+        self.inputX.returnPressed.connect(self.input_coords_process)
+        self.inputY.returnPressed.connect(self.input_coords_process)
+        self.inputZ.returnPressed.connect(self.input_coords_process)
+        self.inputX.textChanged[str].connect(self.x_changed)
 
 
         self.edtObjectName = QLineEdit()
@@ -268,36 +272,127 @@ class ObjectDialog(QDialog):
     def set_dataset(self, dataset):
         self.dataset = dataset
         self.lblDataset.setText(dataset.dataset_name)
+
         if self.dataset.dimension == 2:
             self.edtLandmarkStr.setColumnCount(2)
             self.edtLandmarkStr.setHorizontalHeaderLabels(["X", "Y"])
             self.edtLandmarkStr.setColumnWidth(0, 80)
             self.edtLandmarkStr.setColumnWidth(1, 80)
+            self.inputZ.hide()
+            input_width = 80
         elif self.dataset.dimension == 3:
             self.edtLandmarkStr.setColumnCount(3)
             self.edtLandmarkStr.setHorizontalHeaderLabels(["X", "Y","Z"])
             self.edtLandmarkStr.setColumnWidth(0, 55)
             self.edtLandmarkStr.setColumnWidth(1, 55)
             self.edtLandmarkStr.setColumnWidth(2, 55)
-        #self.edtLandmarkStr.setColumnCount(2)
+            self.inputZ.show()
+            input_width = 60
+            
+        self.inputX.setFixedWidth(input_width)
+        self.inputY.setFixedWidth(input_width)
+        self.inputZ.setFixedWidth(input_width)
+        self.btnAddInput.setFixedWidth(input_width)
         
 
+    @pyqtSlot(str)
+    def x_changed(self, text):
+        # if text is multiline and tab separated, add to table
+        #print("x_changed called with", text)
+        if "\n" in text:
+            lines = text.split("\n")
+            for line in lines:
+                #print(line)
+                if "\t" in line:
+                    coords = line.split("\t")
+                    #add landmarks using add_landmark method
+                    if self.dataset.dimension == 2 and len(coords) == 2:
+                        self.add_landmark(coords[0], coords[1])
+                    elif self.dataset.dimension == 3 and len(coords) == 3:
+                        self.add_landmark(coords[0], coords[1], coords[2])
+        self.inputX.setText("")
+        self.inputY.setText("")
+        self.inputZ.setText("")
+
+    def add_landmark(self, x, y, z=None):
+        #print("adding landmark", x, y, z)
+        # show landmark count in table
+        #print(self.edtLandmarkStr.rowCount())
+        if self.dataset.dimension == 2:
+            self.edtLandmarkStr.setRowCount(self.edtLandmarkStr.rowCount()+1)
+            self.edtLandmarkStr.setItem(self.edtLandmarkStr.rowCount()-1, 0, QTableWidgetItem(x))
+            self.edtLandmarkStr.setItem(self.edtLandmarkStr.rowCount()-1, 1, QTableWidgetItem(y))
+        elif self.dataset.dimension == 3:
+            self.edtLandmarkStr.setRowCount(self.edtLandmarkStr.rowCount()+1)
+            self.edtLandmarkStr.setItem(self.edtLandmarkStr.rowCount()-1, 0, QTableWidgetItem(x))
+            self.edtLandmarkStr.setItem(self.edtLandmarkStr.rowCount()-1, 1, QTableWidgetItem(y))
+            self.edtLandmarkStr.setItem(self.edtLandmarkStr.rowCount()-1, 2, QTableWidgetItem(z))
+        #print(self.edtLandmarkStr.rowCount())
+
+
+    def input_coords_process(self):
+        x_str = self.inputX.text()
+        y_str = self.inputY.text()
+        z_str = self.inputZ.text()
+        if self.dataset.dimension == 2:
+            if x_str == "" or y_str == "":
+                return
+            # add landmark to table using add_landmark method
+            self.add_landmark(x_str, y_str)
+
+        elif self.dataset.dimension == 3:
+            if x_str == "" or y_str == "" or z_str == "":
+                return
+            self.add_landmark(x_str, y_str, z_str)
+        self.inputX.setText("")
+        self.inputY.setText("")
+        self.inputZ.setText("")
+        self.inputX.setFocus()
 
     def set_object(self, object):
         self.object = object
         self.edtObjectName.setText(object.object_name)
         self.edtObjectDesc.setText(object.object_desc)
         #self.edtLandmarkStr.setText(object.landmark_str)
-        self.set_dataset(object.dataset)
+        self.show_landmarks(object.landmark_str)
+        #self.set_dataset(object.dataset)
 
     def save_object(self):
         if self.object is None:
             self.object = MdObject()
         self.object.dataset_id = self.dataset.id
         self.object.object_name = self.edtObjectName.text()
-        self.object.object_desc = self.edtObjectDesc.text()
-        self.object.landmark_str = self.edtLandmarkStr.text()
+        self.object.object_desc = self.edtObjectDesc.toPlainText()
+        #self.object.landmark_str = self.edtLandmarkStr.text()
+        self.object.landmark_str = self.make_landmark_str()
         self.object.save()
+
+    def make_landmark_str(self):
+        # from table, make landmark_str
+        landmark_str = ""
+        for row in range(self.edtLandmarkStr.rowCount()):
+            for col in range(self.edtLandmarkStr.columnCount()):
+                landmark_str += self.edtLandmarkStr.item(row, col).text()
+                if col < self.edtLandmarkStr.columnCount()-1:
+                    landmark_str += "\t"
+            if row < self.edtLandmarkStr.rowCount()-1:
+                landmark_str += "\n"
+        return landmark_str
+
+    def show_landmarks(self,landmark_str):
+        # from landmark_str, show landmarks
+        #landmark_str = self.object.landmark_str
+        print(landmark_str)
+        if landmark_str == "":
+            return
+        lines = landmark_str.split("\n")
+        for line in lines:
+            coords = line.split("\t")
+            if self.dataset.dimension == 2:
+                self.add_landmark(coords[0], coords[1])
+            elif self.dataset.dimension == 3:
+                self.add_landmark(coords[0], coords[1], coords[2])
+
 
     def Okay(self):
         self.save_object()
@@ -415,7 +510,7 @@ class ModanMainWindow(QMainWindow, form_class):
         super().__init__()
         #QApplication.setOverrideCursor(Qt.WaitCursor)
         self.setupUi(self)
-        self.setGeometry(QRect(100, 100, 1600, 1200))
+        self.setGeometry(QRect(100, 100, 1200, 800))
         self.initUI()
         self.setWindowTitle(PROGRAM_NAME)
         #self.read_settings()
@@ -569,6 +664,7 @@ class ModanMainWindow(QMainWindow, form_class):
         #print("treeView double clicked")
         self.dlg = ObjectDialog(self)
         self.dlg.setModal(True)
+        self.dlg.set_dataset(self.selected_dataset)
         self.dlg.set_object( self.selected_object )
         #self.dlg.setWindowModality(Qt.ApplicationModal)
         #print("new dataset dialog")

@@ -8,9 +8,12 @@ from PyQt5.QtWidgets import QTableWidgetItem, QMainWindow, QHeaderView, QFileDia
 
 from PyQt5 import uic
 from PyQt5.QtGui import QIcon, QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem,\
-                        QPainterPath, QFont, QImageReader, QPainter, QBrush
+                        QPainterPath, QFont, QImageReader, QPainter, QBrush, QMouseEvent, QWheelEvent
 from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSettings, QEvent, QRegExp, QSize, \
-                         QItemSelectionModel, QDateTime, QBuffer, QIODevice, QByteArray, QPoint, QModelIndex
+                         QItemSelectionModel, QDateTime, QBuffer, QIODevice, QByteArray, QPoint, QModelIndex, \
+                         pyqtSignal
+
+
 from PyQt5.QtCore import pyqtSlot
 import re,os,sys
 from pathlib import Path
@@ -21,7 +24,7 @@ import requests
 from PIL import Image
 from PIL.ExifTags import TAGS
 #import imagesize
-from datetime import datetime
+#from datetime import datetime
 import time
 import io
 
@@ -172,11 +175,36 @@ class DatasetDialog(QDialog):
 
 
 class dLabel(QLabel):
+    #clicked = pyqtSignal()
+
+    def mousePressEvent(self, event):
+        #self.clicked.emit()
+        me = QMouseEvent(event)
+        print("event and pos", event, me.pos())
+        if me.button() == Qt.LeftButton:
+            print("left button clicked")
+        elif me.button() == Qt.RightButton:
+            print("right button clicked")
+        elif me.button() == Qt.MidButton:
+            print("middle button clicked")
+
+        
+        QLabel.mousePressEvent(self, event)
+
+    def wheelEvent(self, event):
+        we = QWheelEvent(event)
+        print("wheel event", we, we.angleDelta())
+        QLabel.wheelEvent(self, event)
+
     def __init__(self, widget):
         super(dLabel, self).__init__(widget)
         self.setAcceptDrops(True)
         self.orig_pixmap = None
         self.curr_pixmap = None
+        self.zoom = 1.0
+        self.fullpath = None
+        self.x_offset = 0
+        self.y_offset = 0
 
     def set_image(self,file_path):
         self.fullpath = file_path
@@ -184,7 +212,7 @@ class dLabel(QLabel):
         self.orig_width = self.orig_pixmap.width()
         self.orig_height = self.orig_pixmap.height()
         self.setPixmap(self.curr_pixmap)
-        self.setScaledContents(True)
+        #self.setScaledContents(True)
         #print( self.curr_pixmap.width(), self.curr_pixmap.height(), self.orig_pixmap.width(), self.orig_pixmap.height())
 
     def dragEnterEvent(self, event):
@@ -209,7 +237,7 @@ class dLabel(QLabel):
         #if self.orig_pixmap is not None:
             #painter.drawPixmap(self.rect(), self.orig_pixmap)
         if self.curr_pixmap is not None:                
-            self.curr_pixmap = self.orig_pixmap.scaled(self.width(), self.height(), Qt.KeepAspectRatio)            
+            self.curr_pixmap = self.orig_pixmap.scaled(self.width()*self.zoom, self.height()*self.zoom, Qt.KeepAspectRatio)            
             painter.drawPixmap(self.curr_pixmap.rect(), self.curr_pixmap)
 
         #r = QRect(0, self.height() - 20, self.width(), 20)
@@ -278,6 +306,8 @@ class ObjectDialog(QDialog):
 
         self.image_label = dLabel(self)
         self.image_label.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        #self.image_label.clicked.connect(self.on_image_clicked)
+
         self.pixmap = QPixmap(1024,768)
         self.image_label.setPixmap(self.pixmap)
         #self.image_label.setScaledContents(True)
@@ -325,6 +355,14 @@ class ObjectDialog(QDialog):
         #self.edtDataFolder.setText(str(self.data_folder.resolve()))
         #self.edtServerAddress.setText(self.server_address)
         #self.edtServerPort.setText(self.server_port)
+
+    '''
+    @pyqtSlot()
+    def on_image_clicked(self,event):
+        print("clicked")
+        print(event.pos())
+        #pass
+    '''
 
     def set_dataset(self, dataset):
         self.dataset = dataset

@@ -3,10 +3,10 @@ from PyQt5.QtWidgets import QTableWidgetItem, QMainWindow, QHeaderView, QFileDia
                             QDialog, QLineEdit, QLabel, QPushButton, QAbstractItemView, \
                             QMessageBox, QListView, QTreeWidgetItem, QToolButton, QTreeView, QFileSystemModel, \
                             QTableView, QSplitter, QRadioButton, QComboBox, QTextEdit, QAction, QMenu, QSizePolicy, \
-                            QTableWidget
+                            QTableWidget, QBoxLayout, QGridLayout, QAbstractButton
 
 
-from PyQt5 import uic
+from PyQt5 import QtGui, uic
 from PyQt5.QtGui import QIcon, QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem,\
                         QPainterPath, QFont, QImageReader, QPainter, QBrush, QMouseEvent, QWheelEvent
 from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSettings, QEvent, QRegExp, QSize, \
@@ -173,51 +173,144 @@ class DatasetDialog(QDialog):
     def Cancel(self):
         self.close()
 
+MODE_NONE = 0
+MODE_PAN = 12
+MODE_ADD_LANDMARK = 1
+import math
 
 class dLabel(QLabel):
     #clicked = pyqtSignal()
+    def __init__(self, widget):
+        super(dLabel, self).__init__(widget)
+        self.setAcceptDrops(True)
+        self.orig_pixmap = None
+        self.curr_pixmap = None
+        self.scale = 1.0
+        self.fullpath = None
+        self.temp_pan_x = 0
+        self.temp_pan_y = 0
+        self.mouse_down_x = 0
+        self.mouse_down_y = 0
+        self.pan_x = 0
+        self.pan_y = 0
+        self.setMouseTracking(True)
+        self.pan_mode = MODE_NONE
+        self.set_mode(MODE_ADD_LANDMARK)
+        #self.edit_mode = MODE_ADD_LANDMARK
+        self.first_resize = True
+        self.curr_mouse_x = 0
+        self.curr_mouse_y = 0
+        self.image_canvas_ratio = 1.0
+
+#function _2canx( coord ) { return Math.round(( coord / gImageCanvasRatio ) * gScale) + gPanX + gTempPanX; }
+#function _2cany( coord ) { return Math.round(( coord / gImageCanvasRatio ) * gScale) + gPanY + gTempPanY; }
+    def _2canx(self, coord):
+        return round((coord / self.image_canvas_ratio) * self.scale) + self.pan_x + self.temp_pan_x
+
+    def _2cany(self, coord):
+        return round((coord / self.image_canvas_ratio) * self.scale) + self.pan_y + self.temp_pan_y
+
+    def _2imgx(self, coord):
+        return round(((coord - self.pan_x) / self.scale) * self.image_canvas_ratio)
+
+    def _2imgy(self, coord):
+        return round(((coord - self.pan_y) / self.scale) * self.image_canvas_ratio)
+    
+    def set_mode(self, mode):
+        self.edit_mode = mode  
+        if self.edit_mode == MODE_ADD_LANDMARK:
+            self.setCursor(Qt.CrossCursor)
+        else:
+            self.setCursor(Qt.ArrowCursor)
+
+    def mouseMoveEvent(self, event):
+        me = QMouseEvent(event)
+        self.curr_mouse_x = me.x()
+        self.curr_mouse_y = me.y()
+        print("mouse move event", me, me.pos(), self.curr_mouse_x, self.curr_mouse_y, self._2imgx(self.curr_mouse_x), self._2imgy(self.curr_mouse_y))
+        if self.pan_mode == MODE_PAN:
+            self.temp_pan_x = self.curr_mouse_x - self.mouse_down_x
+            self.temp_pan_y = self.curr_mouse_y - self.mouse_down_y
+            #print("pan", self.pan_x, self.pan_y, self.temp_pan_x, self.temp_pan_y)
+            #self.downX = me.x()
+            #self.downY = me.y()
+        self.repaint()
+        QLabel.mouseMoveEvent(self, event)
 
     def mousePressEvent(self, event):
         #self.clicked.emit()
         me = QMouseEvent(event)
-        print("event and pos", event, me.pos())
+        #print("event and pos", event, me.pos())
         if me.button() == Qt.LeftButton:
-            print("left button clicked")
+
+            print("left button clicked", me.pos())
+            if self.edit_mode == MODE_ADD_LANDMARK:
+                print("add landmark")
+                print(self.object_dialog)
+                self.object_dialog.add_landmark(str(self._2imgx(self.curr_mouse_x)), str(self._2imgy(self.curr_mouse_y)))
         elif me.button() == Qt.RightButton:
-            print("right button clicked")
+            self.pan_mode = MODE_PAN
+            self.mouse_down_x = me.x()
+            self.mouse_down_y = me.y()
+            #print("right button clicked")
         elif me.button() == Qt.MidButton:
             print("middle button clicked")
 
         
         QLabel.mousePressEvent(self, event)
 
+    def mouseReleaseEvent(self, ev: QMouseEvent) -> None:
+        me = QMouseEvent(ev)
+        #print("mouse release event", me, me.pos())
+        if self.pan_mode == MODE_PAN:
+            self.pan_mode = MODE_NONE
+            self.pan_x += self.temp_pan_x
+            self.pan_y += self.temp_pan_y
+            self.temp_pan_x = 0
+            self.temp_pan_y = 0
+            self.repaint()
+            #print("right button released")
+
+        return super().mouseReleaseEvent(ev)    
+
     def wheelEvent(self, event):
         we = QWheelEvent(event)
-        print("wheel event", we, we.angleDelta())
-        QLabel.wheelEvent(self, event)
+        scale_delta = 0
+        #print(we.angleDelta())
+        if we.angleDelta().y() > 0:
+            scale_delta = 0.1
+        else:
+            scale_delta = -0.1
+        if self.scale <= 0.8 and scale_delta < 0:
+            return
+        if self.scale > 1:
+            scale_delta *= math.floor(self.scale)
+        
+        prev_scale = self.scale
+        self.scale += scale_delta
+        self.scale = round(self.scale * 10) / 10
+        scale_proportion = self.scale / prev_scale
+        self.curr_pixmap = self.orig_pixmap.scaled(int(self.orig_pixmap.width() * self.scale / self.image_canvas_ratio), int(self.orig_pixmap.height() * self.scale / self.image_canvas_ratio))
 
-    def __init__(self, widget):
-        super(dLabel, self).__init__(widget)
-        self.setAcceptDrops(True)
-        self.orig_pixmap = None
-        self.curr_pixmap = None
-        self.zoom = 1.0
-        self.fullpath = None
-        self.x_offset = 0
-        self.y_offset = 0
+        self.pan_x = int( we.pos().x() - (we.pos().x() - self.pan_x) * scale_proportion )
+        self.pan_y = int( we.pos().y() - (we.pos().y() - self.pan_y) * scale_proportion )
+
+        self.repaint()
+
+        #print("wheel event", we, we.angleDelta())
+        QLabel.wheelEvent(self, event)
 
     def set_image(self,file_path):
         self.fullpath = file_path
         self.curr_pixmap = self.orig_pixmap = QPixmap(file_path)
-        self.orig_width = self.orig_pixmap.width()
-        self.orig_height = self.orig_pixmap.height()
         self.setPixmap(self.curr_pixmap)
+
         #self.setScaledContents(True)
         #print( self.curr_pixmap.width(), self.curr_pixmap.height(), self.orig_pixmap.width(), self.orig_pixmap.height())
 
     def dragEnterEvent(self, event):
         file_name = event.mimeData().text()
-        if file_name.split('.')[-1] in ['png', 'jpg', 'jpeg','bmp','gif','tif','tiff']:
+        if file_name.split('.')[-1].lower() in ['png', 'jpg', 'jpeg','bmp','gif','tif','tiff']:
             event.acceptProposedAction()
         else:
             event.ignore()
@@ -237,8 +330,21 @@ class dLabel(QLabel):
         #if self.orig_pixmap is not None:
             #painter.drawPixmap(self.rect(), self.orig_pixmap)
         if self.curr_pixmap is not None:                
-            self.curr_pixmap = self.orig_pixmap.scaled(self.width()*self.zoom, self.height()*self.zoom, Qt.KeepAspectRatio)            
-            painter.drawPixmap(self.curr_pixmap.rect(), self.curr_pixmap)
+            #self.curr_pixmap = self.orig_pixmap.scaled(int(self.orig_width/self.image_canvas_ratio),int(self.orig_width/self.image_canvas_ratio), Qt.KeepAspectRatio)            
+            painter.drawPixmap(self.pan_x+self.temp_pan_x, self.pan_y+self.temp_pan_y,self.curr_pixmap)
+
+        # if edit_mode = MODE_ADD_LANDMARK draw a circle at the mouse position
+        #painter.setBrush(QBrush(Qt.red))
+        radius = 3
+        painter.setPen(QPen(Qt.red, 2))
+        if self.edit_mode == MODE_ADD_LANDMARK:
+            painter.drawEllipse(self.curr_mouse_x-radius, self.curr_mouse_y-radius, radius*2, radius*2)
+
+        for landmark in self.object_dialog.landmark_list:
+            if landmark[0] == "":
+                continue  
+            painter.drawEllipse(self._2canx(int(landmark[0]))-5, self._2cany(int(landmark[1]))-5, 10, 10)
+            #painter.drawText(self._2canvax(landmark.x)+10, self._2canvay(landmark.y)+10, landmark.name)
 
         #r = QRect(0, self.height() - 20, self.width(), 20)
         #painter.fillRect(r, QBrush(Qt.blue))
@@ -246,14 +352,53 @@ class dLabel(QLabel):
         #painter.setPen(pen)
         #painter.drawRect(self.rect())
     def resizeEvent(self, event):
-        #print("resize",self.size())
+        if self.first_resize and self.orig_pixmap is not None:
+            self.orig_width = self.orig_pixmap.width()
+            self.orig_height = self.orig_pixmap.height()
+            image_wh_ratio = self.orig_width / self.orig_height
+            label_wh_ratio = self.width() / self.height()
+            if image_wh_ratio > label_wh_ratio:
+                self.image_canvas_ratio = self.orig_width / self.width()
+            else:
+                self.image_canvas_ratio = self.orig_height / self.height()
+            self.curr_pixmap = self.orig_pixmap.scaled(int(self.orig_width/self.image_canvas_ratio),int(self.orig_width/self.image_canvas_ratio), Qt.KeepAspectRatio)
+            print("image_wh_ratio", image_wh_ratio, "label_wh_ratio", label_wh_ratio, "image_canvas_ratio", self.image_canvas_ratio)
+            self.first_resize = False
+        print("resize",self.size())
         # print size
         #print(event.size())
         #print(self.size())
         if self.curr_pixmap is not None:                
-            self.curr_pixmap.scaled(self.width(), self.height(), Qt.KeepAspectRatio)
-            #print( self.curr_pixmap.width(), self.curr_pixmap.height(), self.orig_pixmap.width(), self.orig_pixmap.height())
+            #self.curr_pixmap.scaled(self.width(), self.height(), Qt.KeepAspectRatio)
+            print( self.curr_pixmap.width(), self.curr_pixmap.height(), self.orig_pixmap.width(), self.orig_pixmap.height())
         QLabel.resizeEvent(self, event)
+
+class PicButton(QAbstractButton):
+    def __init__(self, pixmap, pixmap_hover, pixmap_pressed, parent=None):
+        super(PicButton, self).__init__(parent)
+        self.pixmap = pixmap
+        self.pixmap_hover = pixmap_hover
+        self.pixmap_pressed = pixmap_pressed
+
+        self.pressed.connect(self.update)
+        self.released.connect(self.update)
+
+    def paintEvent(self, event):
+        pix = self.pixmap_hover if self.underMouse() else self.pixmap
+        if self.isDown():
+            pix = self.pixmap_pressed
+
+        painter = QPainter(self)
+        painter.drawPixmap(self.rect(), pix)
+
+    def enterEvent(self, event):
+        self.update()
+
+    def leaveEvent(self, event):
+        self.update()
+
+    def sizeHint(self):
+        return QSize(200, 200)
 
 class ObjectDialog(QDialog):
     # NewDatasetDialog shows new dataset dialog.
@@ -305,6 +450,7 @@ class ObjectDialog(QDialog):
         self.setLayout(self.main_layout)
 
         self.image_label = dLabel(self)
+        self.image_label.object_dialog = self
         self.image_label.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
         #self.image_label.clicked.connect(self.on_image_clicked)
 
@@ -321,36 +467,59 @@ class ObjectDialog(QDialog):
         self.form_layout.addRow("Landmarks", self.edtLandmarkStr)
         self.form_layout.addRow("", self.inputCoords)
 
+
+        self.btnLandmark = PicButton(QPixmap("icon/landmark_24.png"), QPixmap("icon/landmark_24.png"), QPixmap("icon/landmark_24.png"))
+        self.btnLandmark2 = PicButton(QPixmap("icon/landmark_24.png"), QPixmap("icon/landmark_24.png"), QPixmap("icon/landmark_24.png"))
+        self.btnLandmark.setFixedSize(24,24)
+        self.btnLandmark2.setFixedSize(24,24)
+        #self.btnLandmark = QPushButton()
+        #self.btnLandmark2 = QPushButton()
+        #self.btnLandmark.setIcon(QIcon("icon/landmark_24.png"))
+        #self.btnLandmark.setText("1")
+        #self.btnLandmark2.setText("2")
+        self.btn_layout2 = QGridLayout()
+        self.btn_layout2.addWidget(self.btnLandmark,0,0)
+        self.btn_layout2.addWidget(self.btnLandmark2,0,1)
+        self.btnLandmark.clicked.connect(self.landmark_clicked)
+
         #self.sub_layout.addLayout(self.form_layout)
         #self.sub_layout.addLayout(self.image_layout)
         self.left_widget = QWidget()
         self.left_widget.setLayout(self.form_layout)
+        self.center_widget = QWidget()
+        self.center_widget.setLayout(self.image_layout)
         self.right_widget = QWidget()
-        self.right_widget.setLayout(self.image_layout)
+        self.right_widget.setLayout(self.btn_layout2)
 
         self.hsplitter.addWidget(self.left_widget)
         self.hsplitter.addWidget(self.image_label)
-        self.hsplitter.setSizes([200, 800])
-
-        #self.main_layout.addLayout(self.sub_layout)
-        self.main_layout.addWidget(self.hsplitter)
-
+        self.hsplitter.addWidget(self.right_widget)
+        self.hsplitter.setSizes([200,800,100])
+        self.hsplitter.setStretchFactor(0, 0)
+        self.hsplitter.setStretchFactor(1, 1)
+        self.hsplitter.setStretchFactor(2, 0)
 
         self.btnOkay = QPushButton()
         self.btnOkay.setText("Save")
         self.btnOkay.clicked.connect(self.Okay)
-
+        self.btnDelete = QPushButton()
+        self.btnDelete.setText("Delete")
+        self.btnDelete.clicked.connect(self.Delete)
         self.btnCancel = QPushButton()
         self.btnCancel.setText("Cancel")
         self.btnCancel.clicked.connect(self.Cancel)
-
         btn_layout = QHBoxLayout()
         btn_layout.addWidget(self.btnOkay)
+        btn_layout.addWidget(self.btnDelete)
         btn_layout.addWidget(self.btnCancel)
+
+        #self.main_layout.addLayout(self.sub_layout)
+        self.main_layout.addWidget(self.hsplitter)
         self.main_layout.addLayout(btn_layout)
 
         self.dataset = None
         self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
+        self.landmark_list = []
 
         #self.edtDataFolder.setText(str(self.data_folder.resolve()))
         #self.edtServerAddress.setText(self.server_address)
@@ -363,6 +532,11 @@ class ObjectDialog(QDialog):
         print(event.pos())
         #pass
     '''
+
+    def landmark_clicked(self):
+        #self.edit_mode = MODE_ADD_LANDMARK
+        self.image_label.set_mode(MODE_ADD_LANDMARK)
+        self.image_label.update()
 
     def set_dataset(self, dataset):
         self.dataset = dataset
@@ -420,11 +594,13 @@ class ObjectDialog(QDialog):
             self.edtLandmarkStr.setRowCount(self.edtLandmarkStr.rowCount()+1)
             self.edtLandmarkStr.setItem(self.edtLandmarkStr.rowCount()-1, 0, QTableWidgetItem(x))
             self.edtLandmarkStr.setItem(self.edtLandmarkStr.rowCount()-1, 1, QTableWidgetItem(y))
+            self.landmark_list.append([x,y])
         elif self.dataset.dimension == 3:
             self.edtLandmarkStr.setRowCount(self.edtLandmarkStr.rowCount()+1)
             self.edtLandmarkStr.setItem(self.edtLandmarkStr.rowCount()-1, 0, QTableWidgetItem(x))
             self.edtLandmarkStr.setItem(self.edtLandmarkStr.rowCount()-1, 1, QTableWidgetItem(y))
             self.edtLandmarkStr.setItem(self.edtLandmarkStr.rowCount()-1, 2, QTableWidgetItem(z))
+            self.landmark_list.append([x,y,z])
         #print(self.edtLandmarkStr.rowCount())
 
 
@@ -448,10 +624,12 @@ class ObjectDialog(QDialog):
         self.inputX.setFocus()
 
     def set_object(self, object):
+        #print("set_object", self.image_label.size())
         self.object = object
         self.edtObjectName.setText(object.object_name)
         self.edtObjectDesc.setText(object.object_desc)
         #self.edtLandmarkStr.setText(object.landmark_str)
+        self.landmark_list = []
         self.show_landmarks(object.landmark_str)
         if object.image is not None and len(object.image) > 0:
             img = object.image[0]
@@ -504,6 +682,13 @@ class ObjectDialog(QDialog):
                 landmark_count += 1
         
 
+    def Delete(self):
+        QMessageBox.question(self, "", "Are you sure to delete this object?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if QMessageBox.Yes:
+            self.object.delete_instance()
+        #self.delete_dataset()
+        self.close()
+
     def Okay(self):
         self.save_object()
         self.close()
@@ -513,7 +698,7 @@ class ObjectDialog(QDialog):
 
     def resizeEvent(self, event):
         #print("Window has been resized",self.image_label.width(), self.image_label.height())
-        self.pixmap.scaled(self.image_label.width(), self.image_label.height(), Qt.KeepAspectRatio)
+        #self.pixmap.scaled(self.image_label.width(), self.image_label.height(), Qt.KeepAspectRatio)
         #self.edtObjectDesc.resize(self.edtObjectDesc.height(),300)
         #self.image_label.setPixmap(self.pixmap)
         QDialog.resizeEvent(self, event)

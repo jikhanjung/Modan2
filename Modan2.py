@@ -11,7 +11,7 @@ from PyQt5.QtGui import QIcon, QColor, QPainter, QPen, QPixmap, QStandardItemMod
                         QPainterPath, QFont, QImageReader, QPainter, QBrush, QMouseEvent, QWheelEvent
 from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSettings, QEvent, QRegExp, QSize, \
                          QItemSelectionModel, QDateTime, QBuffer, QIODevice, QByteArray, QPoint, QModelIndex, \
-                         pyqtSignal
+                         pyqtSignal, QThread
 
 
 from PyQt5.QtCore import pyqtSlot
@@ -33,10 +33,180 @@ PROGRAM_VERSION = "0.0.1"
 
 from MdModel import *
 
-        
-    
-        
+class ImportDatasetDialog(QDialog):
+    # NewDatasetDialog shows new dataset dialog.
+    def __init__(self,parent):
+        super().__init__()
+        self.setWindowTitle("Import Dataset")
+        self.parent = parent
+        #print(self.parent.pos())
+        self.setGeometry(QRect(100, 100, 600, 400))
+        self.move(self.parent.pos()+QPoint(100,100))
 
+        # add file open dialog
+        self.btnOpenFile = QPushButton("Open File")
+        self.btnOpenFile.clicked.connect(self.open_file)
+        self.edtFilename = QLineEdit()
+        self.edtFilename.setReadOnly(True)
+        self.edtFilename.setText("")
+        self.edtFilename.setPlaceholderText("Select a file to import")
+        self.edtFilename.setMinimumWidth(400)
+        self.edtFilename.setMaximumWidth(400)
+        self.edtFilename.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
+        # add file type combo box
+        self.cbxFileType = QComboBox()
+        self.cbxFileType.addItem("TPS")
+        self.cbxFileType.addItem("X1Y1")
+        self.cbxFileType.addItem("Morphologika")
+        self.cbxFileType.addItem("Landmark")
+        self.cbxFileType.addItem("Image")
+        self.cbxFileType.addItem("Other")
+        self.cbxFileType.currentIndexChanged.connect(self.file_type_changed)
+
+        # add dataset name edit
+        self.edtDatasetName = QLineEdit()
+        self.edtDatasetName.setText("")
+        self.edtDatasetName.setPlaceholderText("Dataset Name")
+        self.edtDatasetName.setMinimumWidth(400)
+        self.edtDatasetName.setMaximumWidth(400)
+        self.edtDatasetName.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+                
+        # add object count edit
+        self.edtObjectCount = QLineEdit()
+        self.edtObjectCount.setReadOnly(True)
+        self.edtObjectCount.setText("")
+        self.edtObjectCount.setPlaceholderText("Object Count")
+        self.edtObjectCount.setMinimumWidth(100)
+        self.edtObjectCount.setMaximumWidth(100)
+        self.edtObjectCount.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+
+        self.btnImport = QPushButton("Excute Import")
+        self.btnImport.clicked.connect(self.import_file)
+        self.btnImport.setEnabled(False)
+
+        # add progress bar
+        self.prgImport = QProgressBar()
+        self.prgImport.setMinimum(0)
+        self.prgImport.setMaximum(100)
+        self.prgImport.setValue(0)
+        self.prgImport.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        
+        # add layout
+        self.main_layout = QFormLayout()
+        self.setLayout(self.main_layout)
+        self.main_layout.addRow("File", self.btnOpenFile)
+        self.main_layout.addRow("File Type", self.cbxFileType)
+        self.main_layout.addRow("Dataset Name", self.edtDatasetName)
+        self.main_layout.addRow("Object Count", self.edtObjectCount)
+        self.main_layout.addRow("Import", self.btnImport)
+        self.main_layout.addRow("Progress", self.prgImport)
+
+    def open_file(self):
+        filename, _ = QFileDialog.getOpenFileName(self, "Open File", "", "All Files (*.*)")
+        if filename:
+            self.edtFilename.setText(filename)
+            self.btnImport.setEnabled(True)
+            self.edtDatasetName.setText(Path(filename).stem)
+            self.edtObjectCount.setText("")
+            self.prgImport.setValue(0)
+    
+    def file_type_changed(self):
+        if self.cbxFileType.currentText() == "Image":
+            self.edtObjectCount.setReadOnly(False)
+        else:
+            self.edtObjectCount.setReadOnly(True)
+            self.edtObjectCount.setText("")
+
+    def import_file(self):
+        self.btnImport.setEnabled(False)
+        self.prgImport.setValue(0)
+        self.prgImport.setFormat("Importing...")
+        self.prgImport.update()
+        self.prgImport.repaint()
+        self.import_thread = ImportThread(self)
+        self.import_thread.start()
+        self.import_thread.finished.connect(self.import_finished)
+        self.import_thread.progress.connect(self.import_progress)
+
+    def import_finished(self):
+        self.btnImport.setEnabled(True)
+        self.prgImport.setValue(100)
+        self.prgImport.setFormat("Import Finished")
+        self.prgImport.update()
+        self.prgImport.repaint()
+        self.import_thread.quit()
+        self.import_thread.wait()
+
+    def import_progress(self, value):
+        self.prgImport.setValue(value)
+        self.prgImport.update()
+        self.prgImport.repaint()
+
+class ImportThread(QThread):
+
+    progress = pyqtSignal(int)
+    def __init__(self, parent):
+        super().__init__()
+        self.parent = parent
+
+    def run(self):
+        filename = self.parent.edtFilename.text()
+        filetype = self.parent.cbxFileType.currentText()
+        datasetname = self.parent.edtDatasetName.text()
+        objectcount = self.parent.edtObjectCount.text()
+        if filetype == "TPS":
+            self.import_tps(filename, datasetname)
+        elif filetype == "X1Y1":
+            self.import_x1y1(filename, datasetname)
+        elif filetype == "Morphologika":
+            self.import_morphologika(filename, datasetname)
+        else:
+            self.progress.emit(0)
+            return
+        self.progress.emit(100)
+
+    def import_tps(self, filename, datasetname):
+        # read tps file
+        tps = TPS(filename)
+        # create dataset
+        dataset = Dataset(datasetname)
+        # add landmarks
+        for i in range(tps.nlandmarks):
+            landmark = Landmark(tps.landmarks[i,0], tps.landmarks[i,1], tps.landmarks[i,2])
+            dataset.landmarks.append(landmark)
+        # add objects
+        for i in range(tps.nobjects):
+            object = Object()
+            object.name = tps.objectnames[i]
+            object.landmarks = []
+            for j in range(tps.nlandmarks):
+                object.landmarks.append(tps.objects[i,j,:])
+            dataset.objects.append(object)
+        # add dataset to project
+        self.parent.parent.project.datasets.append(dataset)
+        self.parent.parent.project.current_dataset = dataset
+
+    def import_x1y1(self, filename, datasetname):
+        # read x1y1 file
+        x1y1 = X1Y1(filename)
+        # create dataset
+        dataset = MdDataset(datasetname)
+        # add landmarks
+        for i in range(x1y1.nlandmarks):
+            landmark = Landmark(x1y1.landmarks[i,0], x1y1.landmarks[i,1], x1y1.landmarks[i,2])
+            dataset
+        # add objects
+        for i in range(x1y1.nobjects):
+            object = MdObject()
+            object.name = x1y1.objectnames[i]
+            object.landmarks = []
+            for j in range(x1y1.nlandmarks):
+                object.landmarks.append(x1y1.objects[i,j,:])
+            dataset.objects.append(object)
+        # add dataset to project
+        self.parent.parent.project.datasets.append(dataset)
+        self.parent.parent.project.current_dataset = dataset
 
 class DatasetDialog(QDialog):
     # NewDatasetDialog shows new dataset dialog.
@@ -994,6 +1164,12 @@ class ModanMainWindow(QMainWindow, form_class):
     @pyqtSlot()
     def on_action_import_dataset_triggered(self):
         print("import dataset")
+        # open import dataset dialog
+        self.dlg = ImportDatasetDialog(self)
+        self.dlg.setModal(True)
+        self.dlg.setWindowModality(Qt.ApplicationModal)
+        self.dlg.exec_()
+        self.load_dataset()        
 
     @pyqtSlot()
     def on_action_export_dataset_triggered(self):

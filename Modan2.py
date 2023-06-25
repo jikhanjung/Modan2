@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import QTableWidgetItem, QMainWindow, QHeaderView, QFileDia
                             QDialog, QLineEdit, QLabel, QPushButton, QAbstractItemView, \
                             QMessageBox, QListView, QTreeWidgetItem, QToolButton, QTreeView, QFileSystemModel, \
                             QTableView, QSplitter, QRadioButton, QComboBox, QTextEdit, QAction, QMenu, QSizePolicy, \
-                            QTableWidget, QBoxLayout, QGridLayout, QAbstractButton
+                            QTableWidget, QBoxLayout, QGridLayout, QAbstractButton, QButtonGroup
 
 
 from PyQt5 import QtGui, uic
@@ -32,6 +32,11 @@ PROGRAM_NAME = "Modan2"
 PROGRAM_VERSION = "0.0.1"
 
 from MdModel import *
+
+        
+    
+        
+
 
 class DatasetDialog(QDialog):
     # NewDatasetDialog shows new dataset dialog.
@@ -129,19 +134,27 @@ class DatasetDialog(QDialog):
             self.rbtn2D.setChecked(True)
         elif dataset.dimension == 3:
             self.rbtn3D.setChecked(True)
+        #print(dataset.dimension,self.dataset.objects)
+        if len(self.dataset.objects) > 0:
+            self.rbtn2D.setEnabled(False)
+            self.rbtn3D.setEnabled(False)
         self.edtWireframe.setText(dataset.wireframe)
         self.edtBaseline.setText(dataset.baseline)
         self.edtPolygons.setText(dataset.polygons)
         self.edtPropertyNameList.setText(dataset.propertyname_list)
-
     
-    def set_parent_dataset(self, parent_dataset_id):
+    def set_parent_dataset(self, parent_dataset):
         #print("parent:", parent_dataset_id, "dataset:", self.dataset)
-        if parent_dataset_id is None:
+        if parent_dataset is None:
             self.cbxParent.setCurrentIndex(-1)
         else:
-            self.cbxParent.setCurrentIndex(self.cbxParent.findData(parent_dataset_id))
-        
+            self.cbxParent.setCurrentIndex(self.cbxParent.findData(parent_dataset.id))
+            if parent_dataset.dimension == 2:
+                self.rbtn2D.setChecked(True)
+            elif parent_dataset.dimension == 3:
+                self.rbtn3D.setChecked(True)
+            #self.rbtn2D.setEnabled(False)
+            #self.rbtn3D.setEnabled(False)
 
     def Okay(self):
         if self.dataset is None:
@@ -161,21 +174,25 @@ class DatasetDialog(QDialog):
         #self.data
         #print(self.dataset.dataset_desc, self.dataset.dataset_name)
         self.dataset.save()
-        self.close()
+        self.accept()
 
     def Delete(self):
-        QMessageBox.question(self, "", "Are you sure to delete this dataset?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-        if QMessageBox.Yes:
+        ret = QMessageBox.question(self, "", "Are you sure to delete this dataset?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        print("ret:", ret)
+        if ret == QMessageBox.Yes:
             self.dataset.delete_instance()
+            self.parent.selected_dataset = None
+            #self.dataset.delete_dataset()
         #self.delete_dataset()
-        self.close()
+        self.accept()
 
     def Cancel(self):
-        self.close()
+        self.reject()
 
 MODE_NONE = 0
 MODE_PAN = 12
-MODE_ADD_LANDMARK = 1
+MODE_EDIT_LANDMARK = 1
+MODE_EDIT_WIREFRAME = 2
 import math
 
 class dLabel(QLabel):
@@ -195,7 +212,7 @@ class dLabel(QLabel):
         self.pan_y = 0
         self.setMouseTracking(True)
         self.pan_mode = MODE_NONE
-        self.set_mode(MODE_ADD_LANDMARK)
+        self.set_mode(MODE_EDIT_LANDMARK)
         #self.edit_mode = MODE_ADD_LANDMARK
         self.first_resize = True
         self.curr_mouse_x = 0
@@ -205,6 +222,7 @@ class dLabel(QLabel):
         self.show_index = True
         self.show_wireframe = False
         self.show_baseline = False
+        #self.repaint()
 
 #function _2canx( coord ) { return Math.round(( coord / gImageCanvasRatio ) * gScale) + gPanX + gTempPanX; }
 #function _2cany( coord ) { return Math.round(( coord / gImageCanvasRatio ) * gScale) + gPanY + gTempPanY; }
@@ -222,7 +240,7 @@ class dLabel(QLabel):
     
     def set_mode(self, mode):
         self.edit_mode = mode  
-        if self.edit_mode == MODE_ADD_LANDMARK:
+        if self.edit_mode == MODE_EDIT_LANDMARK:
             self.setCursor(Qt.CrossCursor)
         else:
             self.setCursor(Qt.ArrowCursor)
@@ -242,13 +260,15 @@ class dLabel(QLabel):
         QLabel.mouseMoveEvent(self, event)
 
     def mousePressEvent(self, event):
+        if self.orig_pixmap is None:
+            return
         #self.clicked.emit()
         me = QMouseEvent(event)
         #print("event and pos", event, me.pos())
         if me.button() == Qt.LeftButton:
 
             #print("left button clicked", me.pos())
-            if self.edit_mode == MODE_ADD_LANDMARK:
+            if self.edit_mode == MODE_EDIT_LANDMARK:
                 #print("add landmark")
                 #print(self.object_dialog)
                 img_x = self._2imgx(self.curr_mouse_x)
@@ -282,6 +302,8 @@ class dLabel(QLabel):
         return super().mouseReleaseEvent(ev)    
 
     def wheelEvent(self, event):
+        if self.orig_pixmap is None:
+            return
         we = QWheelEvent(event)
         scale_delta = 0
         #print(we.angleDelta())
@@ -329,11 +351,21 @@ class dLabel(QLabel):
         #print(file_path)
         #self.setScaledContents(True)
         self.set_image(file_path)
+        # resize self
+        self.calculate_resize()
+
+        #self.resize(self.width(), self.height())
 
     def paintEvent(self, event):
         #self.pixmap
         #return super().paintEvent(event)
         painter = QPainter(self)
+        painter.fillRect(self.rect(), QBrush(QColor(100,100,100)))
+
+        if self.orig_pixmap is None:
+            return
+        # fill background with dark gray
+        
         #height = self.progress * self.height()
         #if self.orig_pixmap is not None:
             #painter.drawPixmap(self.rect(), self.orig_pixmap)
@@ -345,40 +377,49 @@ class dLabel(QLabel):
         #painter.setBrush(QBrush(Qt.red))
         radius = 3
         painter.setPen(QPen(Qt.red, 2))
-        if self.edit_mode == MODE_ADD_LANDMARK:
-            painter.drawEllipse(self.curr_mouse_x-radius, self.curr_mouse_y-radius, radius*2, radius*2)
+        if self.edit_mode == MODE_EDIT_LANDMARK:
+            img_x = self._2imgx(self.curr_mouse_x)
+            img_y = self._2imgy(self.curr_mouse_y)
+            if img_x < 0 or img_x > self.orig_pixmap.width() or img_y < 0 or img_y > self.orig_pixmap.height():
+                pass
+            else:
+                painter.drawEllipse(self.curr_mouse_x-radius, self.curr_mouse_y-radius, radius*2, radius*2)
 
         for idx, landmark in enumerate(self.object_dialog.landmark_list):
             if landmark[0] == "":
                 continue  
             painter.drawEllipse(self._2canx(int(landmark[0]))-5, self._2cany(int(landmark[1]))-5, 10, 10)
-            painter.drawText(self._2canx(int(landmark[0]))+10, self._2cany(int(landmark[1]))+10, str(idx))
+            painter.drawText(self._2canx(int(landmark[0]))+10, self._2cany(int(landmark[1]))+10, str(idx+1))
 
         #r = QRect(0, self.height() - 20, self.width(), 20)
         #painter.fillRect(r, QBrush(Qt.blue))
         #pen = QPen(QColor("red"), 10)
         #painter.setPen(pen)
         #painter.drawRect(self.rect())
+    def calculate_resize(self):
+        self.orig_width = self.orig_pixmap.width()
+        self.orig_height = self.orig_pixmap.height()
+        image_wh_ratio = self.orig_width / self.orig_height
+        label_wh_ratio = self.width() / self.height()
+        if image_wh_ratio > label_wh_ratio:
+            self.image_canvas_ratio = self.orig_width / self.width()
+        else:
+            self.image_canvas_ratio = self.orig_height / self.height()
+        self.curr_pixmap = self.orig_pixmap.scaled(int(self.orig_width*self.scale/self.image_canvas_ratio),int(self.orig_width*self.scale/self.image_canvas_ratio), Qt.KeepAspectRatio)
+
     def resizeEvent(self, event):
         if self.orig_pixmap is not None:
-            self.orig_width = self.orig_pixmap.width()
-            self.orig_height = self.orig_pixmap.height()
-            image_wh_ratio = self.orig_width / self.orig_height
-            label_wh_ratio = self.width() / self.height()
-            if image_wh_ratio > label_wh_ratio:
-                self.image_canvas_ratio = self.orig_width / self.width()
-            else:
-                self.image_canvas_ratio = self.orig_height / self.height()
-            self.curr_pixmap = self.orig_pixmap.scaled(int(self.orig_width*self.scale/self.image_canvas_ratio),int(self.orig_width*self.scale/self.image_canvas_ratio), Qt.KeepAspectRatio)
-            print("image_wh_ratio", image_wh_ratio, "label_wh_ratio", label_wh_ratio, "image_canvas_ratio", self.image_canvas_ratio)
+            self.calculate_resize()
+            #print("image_wh_ratio", image_wh_ratio, "label_wh_ratio", label_wh_ratio, "image_canvas_ratio", self.image_canvas_ratio)
             self.first_resize = False
-        print("resize",self.size())
+        #print("resize",self.size())
         # print size
         #print(event.size())
         #print(self.size())
         if self.curr_pixmap is not None:                
             #self.curr_pixmap.scaled(self.width(), self.height(), Qt.KeepAspectRatio)
-            print( self.curr_pixmap.width(), self.curr_pixmap.height(), self.orig_pixmap.width(), self.orig_pixmap.height())
+            #print( self.curr_pixmap.width(), self.curr_pixmap.height(), self.orig_pixmap.width(), self.orig_pixmap.height())
+            pass
         QLabel.resizeEvent(self, event)
 
 class PicButton(QAbstractButton):
@@ -419,7 +460,7 @@ class ObjectDialog(QDialog):
         self.move(self.parent.pos()+QPoint(100,100))
 
         self.hsplitter = QSplitter(Qt.Horizontal)
-        #self.vsplitter = QSplitter(Qt.Vertical)
+        self.vsplitter = QSplitter(Qt.Vertical)
 
         #self.vsplitter.addWidget(self.tableView)
         #self.vsplitter.addWidget(self.tableWidget)
@@ -450,6 +491,7 @@ class ObjectDialog(QDialog):
 
         self.edtObjectName = QLineEdit()
         self.edtObjectDesc = QTextEdit()
+        self.edtObjectDesc.setMaximumHeight(100)
         self.edtLandmarkStr = QTableWidget()
         self.lblDataset = QLabel()
 
@@ -475,11 +517,23 @@ class ObjectDialog(QDialog):
         self.form_layout.addRow("Landmarks", self.edtLandmarkStr)
         self.form_layout.addRow("", self.inputCoords)
 
+        self.btnGroup = QButtonGroup() 
+        self.btnLandmark = PicButton(QPixmap("icon/landmark.png"), QPixmap("icon/landmark_hover.png"), QPixmap("icon/landmark_down.png"))
+        self.btnWireframe = PicButton(QPixmap("icon/wireframe.png"), QPixmap("icon/wireframe_hover.png"), QPixmap("icon/wireframe_down.png"))
+        self.btnGroup.addButton(self.btnLandmark, 0)
+        self.btnGroup.addButton(self.btnLandmark, 0)
+        self.btnLandmark.setCheckable(True)
+        self.btnWireframe.setCheckable(True)
+        self.btnLandmark.setChecked(True)
+        self.btnWireframe.setChecked(False)
+        self.btnLandmark.setAutoExclusive(True)
+        self.btnWireframe.setAutoExclusive(True)
+        self.btnLandmark.clicked.connect(self.landmark_clicked)
+        self.btnWireframe.clicked.connect(self.wireframe_clicked)
 
-        self.btnLandmark = PicButton(QPixmap("icon/landmark_24.png"), QPixmap("icon/landmark_24_1.png"), QPixmap("icon/landmark_24_2.png"))
-        self.btnLandmark2 = PicButton(QPixmap("icon/landmark_24.png"), QPixmap("icon/landmark_24.png"), QPixmap("icon/landmark_24.png"))
-        self.btnLandmark.setFixedSize(24,24)
-        self.btnLandmark2.setFixedSize(24,24)
+        self.btnLandmark.setFixedSize(32,32)
+        self.btnWireframe.setFixedSize(32,32)
+
         self.cbxShowIndex = QCheckBox()
         self.cbxShowIndex.setText("Show Index")
         self.cbxShowIndex.setChecked(True)
@@ -491,9 +545,8 @@ class ObjectDialog(QDialog):
         #self.btnLandmark2.setText("2")
         self.btn_layout2 = QGridLayout()
         self.btn_layout2.addWidget(self.btnLandmark,0,0)
-        self.btn_layout2.addWidget(self.btnLandmark2,0,1)
-        self.btn_layout2.addWidget(self.cbxShowIndex,1,0,1,2)
-        self.btnLandmark.clicked.connect(self.landmark_clicked)
+        self.btn_layout2.addWidget(self.btnWireframe,0,1)
+        #self.btn_layout2.addWidget(self.cbxShowIndex,1,0,1,2)
 
         #self.sub_layout.addLayout(self.form_layout)
         #self.sub_layout.addLayout(self.image_layout)
@@ -501,12 +554,20 @@ class ObjectDialog(QDialog):
         self.left_widget.setLayout(self.form_layout)
         self.center_widget = QWidget()
         self.center_widget.setLayout(self.image_layout)
-        self.right_widget = QWidget()
-        self.right_widget.setLayout(self.btn_layout2)
+        self.right_top_widget = QWidget()
+        self.right_top_widget.setLayout(self.btn_layout2)
+        self.right_bottom_widget = QWidget()
+
+        self.vsplitter.addWidget(self.right_top_widget)
+        self.vsplitter.addWidget(self.right_bottom_widget)
+        self.vsplitter.setSizes([50,400])
+        self.vsplitter.setStretchFactor(0, 0)
+        self.vsplitter.setStretchFactor(1, 1)
 
         self.hsplitter.addWidget(self.left_widget)
         self.hsplitter.addWidget(self.image_label)
-        self.hsplitter.addWidget(self.right_widget)
+        self.hsplitter.addWidget(self.vsplitter)
+        #self.hsplitter.addWidget(self.right_widget)
         self.hsplitter.setSizes([200,800,100])
         self.hsplitter.setStretchFactor(0, 0)
         self.hsplitter.setStretchFactor(1, 1)
@@ -548,8 +609,17 @@ class ObjectDialog(QDialog):
 
     def landmark_clicked(self):
         #self.edit_mode = MODE_ADD_LANDMARK
-        self.image_label.set_mode(MODE_ADD_LANDMARK)
+        self.image_label.set_mode(MODE_EDIT_LANDMARK)
         self.image_label.update()
+        self.btnLandmark.setDown(True)
+        self.btnLandmark.setChecked(True)
+
+    def wireframe_clicked(self):
+        #self.edit_mode = MODE_ADD_LANDMARK
+        self.image_label.set_mode(MODE_EDIT_WIREFRAME)
+        self.image_label.update()
+        self.btnWireframe.setDown(True)
+        self.btnWireframe.setChecked(True)
 
     def set_dataset(self, dataset):
         self.dataset = dataset
@@ -687,7 +757,7 @@ class ObjectDialog(QDialog):
 
         for line in lines:
             coords = line.split("\t")
-            if len(coords) == 2 and self.dataset.dimension == 2:
+            if len(coords) >= 2 and self.dataset.dimension == 2:
                 self.add_landmark(coords[0], coords[1])
                 landmark_count += 1
             elif len(coords) == 3 and self.dataset.dimension == 3:
@@ -696,18 +766,18 @@ class ObjectDialog(QDialog):
         
 
     def Delete(self):
-        QMessageBox.question(self, "", "Are you sure to delete this object?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-        if QMessageBox.Yes:
+        ret = QMessageBox.question(self, "", "Are you sure to delete this object?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if ret == QMessageBox.Yes:
             self.object.delete_instance()
         #self.delete_dataset()
-        self.close()
+        self.accept()
 
     def Okay(self):
         self.save_object()
-        self.close()
+        self.accept()
 
     def Cancel(self):
-        self.close()
+        self.reject()
 
     def resizeEvent(self, event):
         #print("Window has been resized",self.image_label.width(), self.image_label.height())
@@ -907,11 +977,11 @@ class ModanMainWindow(QMainWindow, form_class):
 
             level = 0
             index = indexes[0]
-            action_add_dataset = QAction("Add Dataset")
+            action_add_dataset = QAction("Add a child dataset")
             action_add_dataset.triggered.connect(self.on_action_new_dataset_triggered)
-            action_add_object = QAction("Add Object")
+            action_add_object = QAction("Add an object")
             action_add_object.triggered.connect(self.on_action_new_object_triggered)
-            action_refresh_tree = QAction("Refresh Tree")
+            action_refresh_tree = QAction("Reload")
             action_refresh_tree.triggered.connect(self.load_dataset)
 
             menu = QMenu()
@@ -919,6 +989,15 @@ class ModanMainWindow(QMainWindow, form_class):
             menu.addAction(action_add_object)
             menu.addAction(action_refresh_tree)
             menu.exec_(self.treeView.viewport().mapToGlobal(position))
+
+
+    @pyqtSlot()
+    def on_action_import_dataset_triggered(self):
+        print("import dataset")
+
+    @pyqtSlot()
+    def on_action_export_dataset_triggered(self):
+        print("export dataset")
 
     @pyqtSlot()
     def on_action_new_object_triggered(self):
@@ -945,15 +1024,17 @@ class ModanMainWindow(QMainWindow, form_class):
         self.dlg.setModal(True)
         if self.selected_dataset:
             print("selected exists")
-            self.dlg.set_parent_dataset( self.selected_dataset.id )
+            self.dlg.set_parent_dataset( self.selected_dataset )
         else:
             print("selected not exists")
             self.dlg.set_parent_dataset( None )
 
         #self.dlg.setWindowModality(Qt.ApplicationModal)
         #print("new dataset dialog")
-        self.dlg.exec_()
+        ret = self.dlg.exec_()
+        print("dataset edit result:", ret)
         self.load_dataset()
+        self.reset_tableView()
         #print("new dataset dialog shown")
         # create new dataset
 
@@ -965,8 +1046,39 @@ class ModanMainWindow(QMainWindow, form_class):
         self.dlg.set_dataset( self.selected_dataset )
         #self.dlg.setWindowModality(Qt.ApplicationModal)
         #print("new dataset dialog")
-        self.dlg.exec_()
-        self.load_dataset()
+        ret = self.dlg.exec_()
+        if ret == 0:
+            return
+        elif ret == 1:
+            if self.selected_dataset is None: #deleted
+                self.load_dataset()
+                self.reset_tableView()
+            else:
+                dataset = self.selected_dataset
+                self.load_dataset()
+                self.reset_tableView()
+                self.select_dataset(dataset)
+
+        print("dataset edit result:", ret, self.selected_dataset)
+        #self.load_dataset()
+        #self.reset_tableView()
+    
+    def select_dataset(self,dataset,node=None):
+        #print("select dataset:", dataset)
+        if dataset is None:
+            return
+        if node is None:
+            node = self.dataset_model.invisibleRootItem()
+        #print("node:", node)
+        for i in range(node.rowCount()):
+            item = node.child(i,1)
+            #print("item:", item, item.data(),dataset)
+
+            if item.data() == dataset:
+                self.treeView.setCurrentIndex(item.index())
+                break
+            self.select_dataset(dataset,node.child(i,0))
+
 
     @pyqtSlot()
     def on_tableView_doubleClicked(self):
@@ -986,6 +1098,19 @@ class ModanMainWindow(QMainWindow, form_class):
         self.treeView.setHeaderHidden(True)
         self.dataset_selection_model = self.treeView.selectionModel()
         self.dataset_selection_model.selectionChanged.connect(self.on_dataset_selection_changed)
+        #self.treeView
+        header = self.treeView.header()
+        #header.setStretchLastSection(False)
+        self.treeView.setSelectionBehavior(QTreeView.SelectRows)
+        #header.setSectionResizeMode(0, QHeaderView.Stretch)
+        #header.setSectionResizeMode(1, QHeaderView.Fixed)
+
+        #self.treeView.header().setSectionResizeMode(0, QHeaderView.Stretch)
+        #self.treeView.header().setSectionResizeMode(1, QHeaderView.Fixed)
+        #self.treeView.header().setSectionResizeMode(2, QHeaderView.Fixed)
+
+        self.treeView.setColumnWidth(1, 50)
+        #self.treeView.setColumnWidth(2, 50)
 
     def reset_tableView(self):
         self.object_model = QStandardItemModel()
@@ -1013,33 +1138,45 @@ class ModanMainWindow(QMainWindow, form_class):
         self.selected_dataset = None
         all_record = MdDataset.filter(parent=None)
         for rec in all_record:
-            item1 = QStandardItem(rec.dataset_name)
+            item1 = QStandardItem(rec.dataset_name + " (" + str(rec.objects.count()) + ")")
+            if rec.dimension == 2:
+                item1.setIcon(QIcon("icon/icons8-xlarge-icons-50.png"))
+            else:
+                item1.setIcon(QIcon("icon/icons8-3d-50.png"))
             item2 = QStandardItem(str(rec.id))
             item2.setData(rec)
+            #item3 = QStandardItem(str(rec.dimension))
             #print("dataset id:",item2.text())
             #item2 = QStandardItem(rec.objects.count())
             #sub_item2 = QStandardItem(str(Path(rec.path).as_posix()))
             #sub_item2 = QStandardItem(rec.)
             #sub_item.setData(rec)
             
-            self.dataset_model.appendRow([item1,item2] )
+            self.dataset_model.appendRow([item1,item2])#,item2,item3] )
             if rec.children.count() > 0:
                 self.load_subdataset(item1,item2.data())
         self.treeView.expandAll()
         self.treeView.hideColumn(1)
+        #self.treeView.hideColumn(2)
 
             #item.appendRow([sub_item1,sub_item2])
     def load_subdataset(self, parent_item, dataset):
         all_record = MdDataset.filter(parent=dataset)
         for rec in all_record:
-            item1 = QStandardItem(rec.dataset_name)
+            item1 = QStandardItem(rec.dataset_name + " (" + str(rec.objects.count()) + ")")
+            if rec.dimension == 2:
+                item1.setIcon(QIcon("icon/icons8-xlarge-icons-50.png")) #  https://icons8.com
+            else:
+                item1.setIcon(QIcon("icon/icons8-3d-50.png"))
+            #item1 = QStandardItem(rec.dataset_name)
             item2 = QStandardItem(str(rec.id))
             item2.setData(rec)
+            #item3 = QStandardItem(str(rec.dimension))
             #print("dataset id:",item2.text())
             #sub_item2 = QStandardItem(str(Path(rec.path).as_posix()))
             #sub_item2 = QStandardItem(rec.)
             #sub_item.setData(rec)
-            parent_item.appendRow([item1,item2] )
+            parent_item.appendRow([item1,item2])#,item3] )
             if rec.children.count() > 0:
                 self.load_subdataset(item1,item2.data())
 
@@ -1108,8 +1245,6 @@ class ModanMainWindow(QMainWindow, form_class):
         item1 = self.proxy_model.itemFromIndex(indexes[0])
         print(item1)
         #item2 = self.dir_model.itemFromIndex(index_list[1])
-
-
 
 if __name__ == "__main__":
     #QApplication : 프로그램을 실행시켜주는 클래스

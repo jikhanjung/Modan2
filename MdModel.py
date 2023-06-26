@@ -7,7 +7,7 @@ from PIL.ExifTags import TAGS
 import io
 from pathlib import Path
 import time
-gDatabase = SqliteDatabase('Modan2.db')
+gDatabase = SqliteDatabase('Modan2.db',pragmas={'foreign_keys': 1})
 
 
 class MdDataset(Model):
@@ -39,7 +39,7 @@ class MdObject(Model):
     def count_landmarks(self):
         if self.landmark_str is None or self.landmark_str == '':
             return 0
-        return len(self.landmark_str.split('\n'))
+        return len(self.landmark_str.strip().split('\n'))
 
     class Meta:
         database = gDatabase

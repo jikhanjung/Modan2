@@ -3,15 +3,15 @@ from PyQt5.QtWidgets import QTableWidgetItem, QMainWindow, QHeaderView, QFileDia
                             QDialog, QLineEdit, QLabel, QPushButton, QAbstractItemView, \
                             QMessageBox, QListView, QTreeWidgetItem, QToolButton, QTreeView, QFileSystemModel, \
                             QTableView, QSplitter, QRadioButton, QComboBox, QTextEdit, QAction, QMenu, QSizePolicy, \
-                            QTableWidget, QBoxLayout, QGridLayout, QAbstractButton, QButtonGroup
+                            QTableWidget, QBoxLayout, QGridLayout, QAbstractButton, QButtonGroup, QGroupBox
 
 
 from PyQt5 import QtGui, uic
 from PyQt5.QtGui import QIcon, QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem,\
-                        QPainterPath, QFont, QImageReader, QPainter, QBrush, QMouseEvent, QWheelEvent
+                        QPainterPath, QFont, QImageReader, QPainter, QBrush, QMouseEvent, QWheelEvent, QDrag
 from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSettings, QEvent, QRegExp, QSize, \
                          QItemSelectionModel, QDateTime, QBuffer, QIODevice, QByteArray, QPoint, QModelIndex, \
-                         pyqtSignal, QThread
+                         pyqtSignal, QThread, QMimeData
 
 
 from PyQt5.QtCore import pyqtSlot
@@ -54,15 +54,27 @@ class ImportDatasetDialog(QDialog):
         self.edtFilename.setMaximumWidth(400)
         self.edtFilename.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
-        # add file type combo box
-        self.cbxFileType = QComboBox()
-        self.cbxFileType.addItem("TPS")
-        self.cbxFileType.addItem("X1Y1")
-        self.cbxFileType.addItem("Morphologika")
-        self.cbxFileType.addItem("Landmark")
-        self.cbxFileType.addItem("Image")
-        self.cbxFileType.addItem("Other")
-        self.cbxFileType.currentIndexChanged.connect(self.file_type_changed)
+        # add file type checkbox group with TPS, X1Y1, Morphologika.
+        self.chkFileType = QButtonGroup()
+        self.rbnTPS = QRadioButton("TPS")
+        self.rbnX1Y1 = QRadioButton("X1Y1")
+        self.rbnMorphologika = QRadioButton("Morphologika")
+        self.chkFileType.addButton(self.rbnTPS)
+        self.chkFileType.addButton(self.rbnX1Y1)
+        self.chkFileType.addButton(self.rbnMorphologika)
+        self.chkFileType.buttonClicked.connect(self.file_type_changed)
+        self.chkFileType.setExclusive(True)
+        # add qgroupbox for file type
+        self.gbxFileType = QGroupBox()
+        self.gbxFileType.setLayout(QHBoxLayout())
+        self.gbxFileType.layout().addWidget(self.rbnTPS)
+        self.gbxFileType.layout().addWidget(self.rbnX1Y1)
+        self.gbxFileType.layout().addWidget(self.rbnMorphologika)
+        self.gbxFileType.layout().addStretch(1)
+        self.gbxFileType.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.gbxFileType.setMaximumHeight(50)
+        self.gbxFileType.setMinimumHeight(50)
+        #self.gbxFileType.setTitle("File Type")
 
         # add dataset name edit
         self.edtDatasetName = QLineEdit()
@@ -96,7 +108,8 @@ class ImportDatasetDialog(QDialog):
         self.main_layout = QFormLayout()
         self.setLayout(self.main_layout)
         self.main_layout.addRow("File", self.btnOpenFile)
-        self.main_layout.addRow("File Type", self.cbxFileType)
+        #self.main_layout.addRow("File Type", self.cbxFileType)
+        self.main_layout.addRow("File Type", self.gbxFileType)
         self.main_layout.addRow("Dataset Name", self.edtDatasetName)
         self.main_layout.addRow("Object Count", self.edtObjectCount)
         self.main_layout.addRow("Import", self.btnImport)
@@ -110,13 +123,34 @@ class ImportDatasetDialog(QDialog):
             self.edtDatasetName.setText(Path(filename).stem)
             self.edtObjectCount.setText("")
             self.prgImport.setValue(0)
+            # get file extension
+            self.file_ext = Path(filename).suffix
+            # if extension is tps, set file type to tps
+            if self.file_ext.lower() == ".tps":
+                self.rbnTPS.setChecked(True)
+                self.edtObjectCount.setText("")
+                self.file_type_changed()
+            elif self.file_ext.lower() == ".x1y1":
+                self.rbnX1Y1.setChecked(True)
+                self.file_type_changed()
+            elif self.file_ext.lower() == ".txt":
+                self.rbnMorphologika.setChecked(True)
+                self.file_type_changed()
+            else:
+                self.rbnTPS.setChecked(False)
+                self.rbnX1Y1.setChecked(False)
+                self.rbnMorphologika.setChecked(False)
+                self.btnImport.setEnabled(False)
+                self.edtObjectCount.setText("")
+                self.prgImport.setValue(0)
+                self.edtDatasetName.setText("")
+                self.edtFilename.setText("")
+                QMessageBox.warning(self, "Warning", "File type not supported.")
+                return
+            #else:
     
     def file_type_changed(self):
-        if self.cbxFileType.currentText() == "Image":
-            self.edtObjectCount.setReadOnly(False)
-        else:
-            self.edtObjectCount.setReadOnly(True)
-            self.edtObjectCount.setText("")
+        pass
 
     def import_file(self):
         self.btnImport.setEnabled(False)
@@ -152,7 +186,8 @@ class ImportThread(QThread):
 
     def run(self):
         filename = self.parent.edtFilename.text()
-        filetype = self.parent.cbxFileType.currentText()
+        #filetype = self.parent.cbxFileType.currentText()
+        filetype = self.parent.chkFileType.checkedButton().text()
         datasetname = self.parent.edtDatasetName.text()
         objectcount = self.parent.edtObjectCount.text()
         if filetype == "TPS":
@@ -168,24 +203,32 @@ class ImportThread(QThread):
 
     def import_tps(self, filename, datasetname):
         # read tps file
-        tps = TPS(filename)
+        tps = TPS(filename, datasetname)
+        print("objects:", tps.nobjects,tps.nlandmarks,tps.object_name_list)
         # create dataset
-        dataset = Dataset(datasetname)
-        # add landmarks
-        for i in range(tps.nlandmarks):
-            landmark = Landmark(tps.landmarks[i,0], tps.landmarks[i,1], tps.landmarks[i,2])
-            dataset.landmarks.append(landmark)
+        dataset = MdDataset()
+        dataset.dataset_name = datasetname
+        dataset.dimension = tps.dimension
+        dataset.save()
         # add objects
         for i in range(tps.nobjects):
-            object = Object()
-            object.name = tps.objectnames[i]
-            object.landmarks = []
-            for j in range(tps.nlandmarks):
-                object.landmarks.append(tps.objects[i,j,:])
-            dataset.objects.append(object)
+            object = MdObject()
+            object.object_name = tps.object_name_list[i]
+            print("object:", object.object_name)
+            object.dataset = dataset
+            object.landmark_str = ""
+            landmark_list = []
+            for landmark in tps.landmark_data[tps.object_name_list[i]]:
+                landmark_list.append("\t".join([ str(x) for x in landmark]))
+            object.landmark_str = "\n".join(landmark_list)
+
+            object.save()
+            self.progress.emit(int( (i / float(tps.nobjects)) * 100))
+            #progress = int( (i / float(tps.nobjects)) * 100)
+
         # add dataset to project
-        self.parent.parent.project.datasets.append(dataset)
-        self.parent.parent.project.current_dataset = dataset
+        #self.parent.parent.project.datasets.append(dataset)
+        #self.parent.parent.project.current_dataset = dataset
 
     def import_x1y1(self, filename, datasetname):
         # read x1y1 file
@@ -207,6 +250,101 @@ class ImportThread(QThread):
         # add dataset to project
         self.parent.parent.project.datasets.append(dataset)
         self.parent.parent.project.current_dataset = dataset
+
+class TPS:
+    def __init__(self, filename, datasetname):
+        self.filename = filename
+        self.datasetname = datasetname
+        self.dimension = 0
+        self.nobjects = 0
+        self.object_name_list = []
+        self.landmark_str_list = []
+        self.read()
+
+    def isNumber(self,s):
+        try:
+            float(s)
+            return True
+        except ValueError:
+            return False
+
+    def read(self):
+        with open(self.filename, 'r') as f:
+            tps_lines = f.readlines()
+
+            dataset = {}
+
+            object_count = 0
+            landmark_count = 0
+            data = []
+            object_name_list = []
+            threed = 0
+            twod = 0
+            objects = {}
+            header = ''
+            comment = ''
+            image_count = 0
+            for line in tps_lines:
+                line = line.strip()
+                if line == '':
+                    continue
+                if line.startswith("#"):
+                    continue
+                headerline = re.search('^(\w+)(\s*)=(\s*)(\d+)(.*)', line)
+                if headerline == None:
+                    if header == 'lm':
+                        point = [ float(x) for x in re.split('\s+', line)]
+                        if len(point) > 2 and self.isNumber(point[2]):
+                            threed += 1
+                        else:
+                            twod += 1
+
+                        if len(point)>1:
+                            data.append(point)
+                    continue
+                elif headerline.group(1).lower() == "lm":
+                    if len(data) > 0:
+                        if comment != '':
+                            key = comment
+                        else:
+                            key = self.datasetname + "_" + str(object_count + 1)
+                        objects[key] = data
+                        object_name_list.append(key)
+                        data = []
+                    header = 'lm'
+                    object_count += 1
+                    landmark_count, comment = int(headerline.group(4)), headerline.group(5).strip()
+                    print("landmark_count:", landmark_count)
+                    # landmark_count_list.append( landmark_count )
+                    # if not found:
+                    #found = True
+                elif headerline.group(1).lower() == "image":
+                    image_count += 1
+
+            if len(data) > 0:
+                if comment != '':
+                    key = comment
+                else:
+                    key = self.datasetname + "_" + str(object_count + 1)
+                objects[key] = data
+                data = []
+
+            if object_count == 0 and landmark_count == 0:
+                return None
+
+            if threed > twod:
+                self.dimension = 3
+            else:
+                self.dimension = 2
+
+            self.nobjects = len(object_name_list)
+            self.nlandmarks = landmark_count
+            self.landmark_data = objects
+            self.object_name_list = object_name_list
+
+            return dataset
+
+
 
 class DatasetDialog(QDialog):
     # NewDatasetDialog shows new dataset dialog.
@@ -1187,7 +1325,14 @@ class ModanMainWindow(QMainWindow, form_class):
         self.dlg.set_dataset(self.selected_dataset)
         #self.dlg.setWindowModality(Qt.ApplicationModal)
         #print("new dataset dialog")
-        self.dlg.exec_()
+        ret = self.dlg.exec_()
+        if ret == 0:
+            return
+
+        dataset = self.selected_dataset
+        self.load_dataset()
+        self.reset_tableView()
+        self.select_dataset(dataset)
         self.load_object()
         #print("new dataset dialog shown")
         # create new dataset
@@ -1278,6 +1423,12 @@ class ModanMainWindow(QMainWindow, form_class):
         header = self.treeView.header()
         #header.setStretchLastSection(False)
         self.treeView.setSelectionBehavior(QTreeView.SelectRows)
+        self.treeView.setDragEnabled(True)
+        self.treeView.setAcceptDrops(True)
+        self.treeView.setDropIndicatorShown(True)
+        self.treeView.setDragDropMode(QAbstractItemView.InternalMove)
+        #self.treeView.setSortingEnabled(True)
+
         #header.setSectionResizeMode(0, QHeaderView.Stretch)
         #header.setSectionResizeMode(1, QHeaderView.Fixed)
 
@@ -1288,12 +1439,56 @@ class ModanMainWindow(QMainWindow, form_class):
         self.treeView.setColumnWidth(1, 50)
         #self.treeView.setColumnWidth(2, 50)
 
+        #connect treeView's drop event to some handler
+        self.treeView.dropEvent = self.dropEvent
+
+
+
+    # accept drop event
+    def dropEvent(self, event):
+        # make dragged item a child of the drop target
+        #print("drop event")
+        print(event.source().model().itemFromIndex(event.source().currentIndex()).data())
+        print(event.mimeData().text())
+        event.acceptProposedAction()
+        return
+        print(event)
+        print(event.source())
+        print(event.source().model())
+        print(event.source().model().itemFromIndex(event.source().currentIndex()).data())
+        #print(event.source().model().itemFromIndex(event.source().currentIndex()).data())
+        #print(event.source().model().itemFromIndex(event.source().currentIndex()).data(Qt.UserRole))
+        #print(event.target())
+        #print(event.target().model())
+        #print(event.target().model().itemFromIndex(event.target().currentIndex()))
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton and self.treeView.indexAt(event.pos()).isValid():
+
+            drag =  QDrag(self)
+            mimeData =  QMimeData()
+
+            mimeData.setText("drag data")
+            drag.setMimeData(mimeData)
+
+            #drag.setPixmap(iconPixmap)
+
+            dropAction = drag.exec_()
+
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasFormat('text/plain'):
+            print(event.mimeData().text())
+            event.accept()
+        else:
+            event.ignore()
+
     def reset_tableView(self):
         self.object_model = QStandardItemModel()
         self.object_model.setColumnCount(4)
         self.object_model.setHorizontalHeaderLabels(["ID", "Name", "Count", "CSize"])
         self.proxy_model = QSortFilterProxyModel()
         self.proxy_model.setSourceModel(self.object_model)
+        self.tableView.setDragEnabled(True)
         self.tableView.setModel(self.proxy_model)
         self.tableView.setColumnWidth(0, 50)
         self.tableView.setColumnWidth(1, 200)

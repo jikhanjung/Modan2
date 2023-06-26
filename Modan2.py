@@ -1189,7 +1189,37 @@ class PreferencesDialog(QDialog):
             self.data_folder = Path(folder).resolve()
             self.edtDataFolder.setText(folder)
 
+class MyTreeView(QTreeView):
+    def __init__(self):
+        QTreeView.__init__(self)
 
+    def dragEnterEvent(self, event):
+        print("drag enter event")
+        #if event.mimeData().hasUrls:
+        event.accept()
+        #else:
+        #    event.ignore()
+
+    def dragMoveEvent(self, event):
+        print("drag move event from", event.source())
+        #if event.mimeData().hasUrls:
+        event.setDropAction(Qt.MoveAction)
+        event.accept()
+        #else:
+        #    event.ignore()
+
+    def dropEvent(self, event):
+        print("drop event from", event.source(), event.source().currentIndex())
+        #if event.mimeData().hasUrls:
+        event.setDropAction(Qt.MoveAction)
+        event.accept()
+        # to get a list of files:
+        drop_list = []
+        for url in event.mimeData().urls():
+            drop_list.append(str(url.toLocalFile()))
+        # handle the list here
+        #else:
+        #    event.ignore()
 
 form_class = uic.loadUiType("Modan2.ui")[0]
 class ModanMainWindow(QMainWindow, form_class):
@@ -1263,6 +1293,7 @@ class ModanMainWindow(QMainWindow, form_class):
         vsplitter.addWidget(self.tableView)
         vsplitter.addWidget(self.tableWidget)
 
+        #self.treeView = MyTreeView()
         hsplitter.addWidget(self.treeView)
         hsplitter.addWidget(vsplitter)
         hsplitter.setSizes([300, 800])
@@ -1392,7 +1423,7 @@ class ModanMainWindow(QMainWindow, form_class):
             node = self.dataset_model.invisibleRootItem()
         #print("node:", node)
         for i in range(node.rowCount()):
-            item = node.child(i,1)
+            item = node.child(i,0)
             #print("item:", item, item.data(),dataset)
 
             if item.data() == dataset:
@@ -1423,49 +1454,124 @@ class ModanMainWindow(QMainWindow, form_class):
         header = self.treeView.header()
         #header.setStretchLastSection(False)
         self.treeView.setSelectionBehavior(QTreeView.SelectRows)
+
+        #'''
         self.treeView.setDragEnabled(True)
         self.treeView.setAcceptDrops(True)
         self.treeView.setDropIndicatorShown(True)
-        self.treeView.setDragDropMode(QAbstractItemView.InternalMove)
-        #self.treeView.setSortingEnabled(True)
+        #self.treeView.setDragDropMode(QAbstractItemView.InternalMove)
+        #self.treeView.dropEvent = self.dropEvent
+        #'''
 
+        #self.treeView.setSortingEnabled(True)
         #header.setSectionResizeMode(0, QHeaderView.Stretch)
         #header.setSectionResizeMode(1, QHeaderView.Fixed)
-
         #self.treeView.header().setSectionResizeMode(0, QHeaderView.Stretch)
         #self.treeView.header().setSectionResizeMode(1, QHeaderView.Fixed)
         #self.treeView.header().setSectionResizeMode(2, QHeaderView.Fixed)
 
-        self.treeView.setColumnWidth(1, 50)
-        #self.treeView.setColumnWidth(2, 50)
 
         #connect treeView's drop event to some handler
         self.treeView.dropEvent = self.dropEvent
+        #self.tableView.mousePressEvent = self.mousePressEvent
+        #connect treeView's dragenter event to some handler  
+        #self.treeView.dragEnterEvent = self.dragEnterEvent
 
 
-
+    
     # accept drop event
     def dropEvent(self, event):
         # make dragged item a child of the drop target
         #print("drop event")
-        print(event.source().model().itemFromIndex(event.source().currentIndex()).data())
-        print(event.mimeData().text())
-        event.acceptProposedAction()
-        return
-        print(event)
-        print(event.source())
-        print(event.source().model())
-        print(event.source().model().itemFromIndex(event.source().currentIndex()).data())
+        if event.source() == self.treeView:
+            #print("drop event from treeView")
+            target_index=self.treeView.indexAt(event.pos())
+            target_item = self.dataset_model.itemFromIndex(target_index)
+            target_dataset = target_item.data()
+
+            source_index = event.source().currentIndex()
+            source_item = self.dataset_model.itemFromIndex(source_index)
+            source_dataset = source_item.data()
+
+            source_dataset.parent = target_dataset
+            source_dataset.save()
+            self.load_dataset()
+            self.reset_tableView()
+
+        elif event.source() == self.tableView:
+            #print("drop event from tableView")
+            target_index=self.treeView.indexAt(event.pos())
+            target_item = self.dataset_model.itemFromIndex(target_index)
+            target_dataset = target_item.data()
+
+            selection_model = self.tableView.selectionModel()
+            selected_indexes = selection_model.selectedIndexes()
+
+            new_index_list = []
+            model = selected_indexes[0].model()
+            if hasattr(model, 'mapToSource'):
+                for index in selected_indexes:
+                    new_index = model.mapToSource(index)
+                    new_index_list.append(new_index)
+
+            #print("selected_indexes:", selected_indexes)
+            #print("new_index_list:", new_index_list)
+            source_dataset = None
+            for index in new_index_list:
+                #print("index:", index)
+                source_item = self.object_model.itemFromIndex(index)
+                #print("source_item:", source_item)
+                source_object = source_item.data()
+                if source_object is not None:
+                    #print("source_object:", source_object,source_object.object_name,source_object.dataset)
+                    if source_object.dataset.dimension == target_dataset.dimension:
+                        source_dataset = source_object.dataset
+                        source_object.dataset = target_dataset
+                        source_object.save()
+                    else:
+                        #print("dimension mismatch")
+                        QMessageBox.warning(self, "Warning", "Dimension mismatch")
+            #self.selected_dataset = target_dataset
+            #self.reset_tableView()
+            #dataset = self.selected_dataset
+            if source_dataset is not None:
+                self.load_dataset()
+                self.reset_tableView()
+                self.select_dataset(source_dataset)
+            
+
+                #source_object.dataset = target_dataset
+                #source_object.save()
+        #show to which item we are dropping
+
+        #print(event)
+        #print(event.source())
+
+            #self.object_model.clear()
+            #self.reset_tableView()        
+            #item1 =self.dataset_model.itemFromIndex(indexes[0])
+            #item2 =self.dataset_model.itemFromIndex(indexes[1])
+            #ds = item2.data()
+            #self.selected_dataset = ds
+            #self.load_object()
+
+        #print(event.source().model().itemFromIndex(event.source().currentIndex()).data())
+        #print(event.mimeData().text())
+        #event.acceptProposedAction()
+        #return
+        #'''
         #print(event.source().model().itemFromIndex(event.source().currentIndex()).data())
         #print(event.source().model().itemFromIndex(event.source().currentIndex()).data(Qt.UserRole))
         #print(event.target())
         #print(event.target().model())
         #print(event.target().model().itemFromIndex(event.target().currentIndex()))
-
+    
+    """
     def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton and self.treeView.indexAt(event.pos()).isValid():
+        print("mouse press event",event.pos(),event.button(),self.tableView.indexAt(event.pos()).isValid())
+        if event.button() == Qt.LeftButton and self.tableView.indexAt(event.pos()).isValid():
 
-            drag =  QDrag(self)
+            drag =  QDrag(self.tableView)
             mimeData =  QMimeData()
 
             mimeData.setText("drag data")
@@ -1476,12 +1582,13 @@ class ModanMainWindow(QMainWindow, form_class):
             dropAction = drag.exec_()
 
     def dragEnterEvent(self, event):
+        print("drag enter event")
         if event.mimeData().hasFormat('text/plain'):
-            print(event.mimeData().text())
+            print("mimedata:",event.mimeData().text())
             event.accept()
         else:
             event.ignore()
-
+    """
     def reset_tableView(self):
         self.object_model = QStandardItemModel()
         self.object_model.setColumnCount(4)
@@ -1515,7 +1622,7 @@ class ModanMainWindow(QMainWindow, form_class):
             else:
                 item1.setIcon(QIcon("icon/icons8-3d-50.png"))
             item2 = QStandardItem(str(rec.id))
-            item2.setData(rec)
+            item1.setData(rec)
             #item3 = QStandardItem(str(rec.dimension))
             #print("dataset id:",item2.text())
             #item2 = QStandardItem(rec.objects.count())
@@ -1525,7 +1632,7 @@ class ModanMainWindow(QMainWindow, form_class):
             
             self.dataset_model.appendRow([item1,item2])#,item2,item3] )
             if rec.children.count() > 0:
-                self.load_subdataset(item1,item2.data())
+                self.load_subdataset(item1,item1.data())
         self.treeView.expandAll()
         self.treeView.hideColumn(1)
         #self.treeView.hideColumn(2)
@@ -1541,7 +1648,7 @@ class ModanMainWindow(QMainWindow, form_class):
                 item1.setIcon(QIcon("icon/icons8-3d-50.png"))
             #item1 = QStandardItem(rec.dataset_name)
             item2 = QStandardItem(str(rec.id))
-            item2.setData(rec)
+            item1.setData(rec)
             #item3 = QStandardItem(str(rec.dimension))
             #print("dataset id:",item2.text())
             #sub_item2 = QStandardItem(str(Path(rec.path).as_posix()))
@@ -1549,7 +1656,7 @@ class ModanMainWindow(QMainWindow, form_class):
             #sub_item.setData(rec)
             parent_item.appendRow([item1,item2])#,item3] )
             if rec.children.count() > 0:
-                self.load_subdataset(item1,item2.data())
+                self.load_subdataset(item1,item1.data())
 
             #item.appendRow([sub_item1,sub_item2]
 
@@ -1558,10 +1665,10 @@ class ModanMainWindow(QMainWindow, form_class):
         #print(indexes)
         if indexes:
             self.object_model.clear()
-            self.reset_tableView()        
+            #self.reset_tableView()
             item1 =self.dataset_model.itemFromIndex(indexes[0])
-            item2 =self.dataset_model.itemFromIndex(indexes[1])
-            ds = item2.data()
+            #item2 =self.dataset_model.itemFromIndex(indexes[1])
+            ds = item1.data()
             self.selected_dataset = ds
             self.load_object()
 

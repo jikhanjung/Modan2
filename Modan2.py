@@ -1307,11 +1307,41 @@ class ModanMainWindow(QMainWindow, form_class):
         self.tableView.setEditTriggers(QAbstractItemView.NoEditTriggers)
         
         self.treeView.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.treeView.customContextMenuRequested.connect(self.open_menu)
+        self.treeView.customContextMenuRequested.connect(self.open_dataset_menu)
+        self.tableView.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.tableView.customContextMenuRequested.connect(self.open_object_menu)
 
         #self.treeView.
+    def open_object_menu(self, position):
+        indexes = self.treeView.selectedIndexes()
+        if len(indexes) > 0:
+            level = 0
+            index = indexes[0]
+            action_delete_object = QAction("Delete")
+            action_delete_object.triggered.connect(self.on_action_delete_object_triggered)
+            action_refresh_table = QAction("Reload")
+            action_refresh_table.triggered.connect(self.load_object)
 
-    def open_menu(self, position):
+            menu = QMenu()
+            menu.addAction(action_delete_object)
+            menu.addAction(action_refresh_table)
+            menu.exec_(self.tableView.viewport().mapToGlobal(position))
+
+    @pyqtSlot()
+    def on_action_delete_object_triggered(self):
+        print("delete object")
+        ret = QMessageBox.warning(self, "Warning", "Are you sure to delete the selected object?", QMessageBox.Yes | QMessageBox.No)
+        if ret == QMessageBox.No:
+            return
+        
+        selected_object_list = self.get_selected_object_list()
+        if selected_object_list:
+            for object in selected_object_list:
+                object.delete_instance()
+            self.load_object()
+
+
+    def open_dataset_menu(self, position):
         indexes = self.treeView.selectedIndexes()
         if len(indexes) > 0:
 
@@ -1513,49 +1543,29 @@ class ModanMainWindow(QMainWindow, form_class):
             target_item = self.dataset_model.itemFromIndex(target_index)
             target_dataset = target_item.data()
 
-            selection_model = self.tableView.selectionModel()
-            selected_indexes = selection_model.selectedIndexes()
+            selected_object_list = self.get_selected_object_list()
 
-            new_index_list = []
-            model = selected_indexes[0].model()
-            if hasattr(model, 'mapToSource'):
-                for index in selected_indexes:
-                    new_index = model.mapToSource(index)
-                    new_index_list.append(new_index)
-
-            #print("selected_indexes:", selected_indexes)
-            #print("new_index_list:", new_index_list)
-            source_dataset = None
-            for index in new_index_list:
-                #print("index:", index)
-                source_item = self.object_model.itemFromIndex(index)
-                #print("source_item:", source_item)
-                source_object_id = source_item.data()
-                if source_object_id is None:
-                    continue
-                #print("source_object_id:", source_object_id)
-                source_object = MdObject.get_by_id(source_object_id)
-                if source_object is not None:
-                    #print("source_object:", source_object,source_object.object_name,source_object.dataset)
-                    if source_object.dataset.dimension == target_dataset.dimension:
-                        # if shift is pressed, move instead of copy
-                        if shift_clicked:
-                            source_dataset = source_object.dataset
-                            source_object.dataset = target_dataset
-                            source_object.save()
-                        else:
-                            source_dataset = source_object.dataset
-                            new_object = MdObject()
-                            new_object.object_name = source_object.object_name
-                            new_object.object_desc = source_object.object_desc
-                            new_object.scale = source_object.scale
-                            new_object.landmark_str = source_object.landmark_str
-                            new_object.property_list = source_object.property_list
-                            new_object.dataset = target_dataset
-                            new_object.save()
+            for source_object in selected_object_list:
+                if source_object.dataset.dimension == target_dataset.dimension:
+                    # if shift is pressed, move instead of copy
+                    if shift_clicked:
+                        source_dataset = source_object.dataset
+                        source_object.dataset = target_dataset
+                        source_object.save()
                     else:
-                        #print("dimension mismatch")
-                        QMessageBox.warning(self, "Warning", "Dimension mismatch")
+                        source_dataset = source_object.dataset
+                        new_object = MdObject()
+                        new_object.object_name = source_object.object_name
+                        new_object.object_desc = source_object.object_desc
+                        new_object.scale = source_object.scale
+                        new_object.landmark_str = source_object.landmark_str
+                        new_object.property_list = source_object.property_list
+                        new_object.dataset = target_dataset
+                        new_object.save()
+                else:
+                    #print("dimension mismatch")
+                    QMessageBox.warning(self, "Warning", "Dimension mismatch")
+                    break
             #self.selected_dataset = target_dataset
             #self.reset_tableView()
             #dataset = self.selected_dataset
@@ -1614,6 +1624,30 @@ class ModanMainWindow(QMainWindow, form_class):
         else:
             event.ignore()
     """
+
+    def get_selected_object_list(self):
+        selected_indexes = self.tableView.selectionModel().selectedRows()
+        if len(selected_indexes) == 0:
+            return None
+
+        new_index_list = []
+        model = selected_indexes[0].model()
+        if hasattr(model, 'mapToSource'):
+            for index in selected_indexes:
+                new_index = model.mapToSource(index)
+                new_index_list.append(new_index)
+            selected_indexes = new_index_list
+        
+        selected_object_list = []
+        for index in selected_indexes:
+            item = self.object_model.itemFromIndex(index)
+            object_id = item.text()
+            object_id = int(object_id)
+            object = MdObject.get_by_id(object_id)
+            selected_object_list.append(object)
+
+        return selected_object_list
+
     def reset_tableView(self):
         self.object_model = QStandardItemModel()
         self.object_model.setColumnCount(4)
@@ -1633,6 +1667,8 @@ class ModanMainWindow(QMainWindow, form_class):
         self.object_selection_model.selectionChanged.connect(self.on_object_selection_changed)
         self.tableView.setSortingEnabled(True)
         self.tableView.sortByColumn(0, Qt.AscendingOrder)
+
+        self.object_model.setSortRole(Qt.UserRole)
     #table.setSortingEnabled(True)
     #table.sortByColumn(0, Qt.AscendingOrder)
 
@@ -1708,10 +1744,13 @@ class ModanMainWindow(QMainWindow, form_class):
             return
         #objects = self.selected_dataset.objects
         for obj in self.selected_dataset.objects:
-            item1 = QStandardItem(str(obj.id))
+            item1 = QStandardItem()
+            item1.setData(obj.id,Qt.DisplayRole)
             item2 = QStandardItem(obj.object_name)
-            item3 = QStandardItem(str(obj.count_landmarks()))
-            item1.setData(obj.id)
+            lm_count = obj.count_landmarks()
+            item3 = QStandardItem()
+            item3.setData(lm_count,Qt.DisplayRole)
+
             self.object_model.appendRow([item1,item2,item3] )
 
 
@@ -1733,7 +1772,8 @@ class ModanMainWindow(QMainWindow, form_class):
             item = self.object_model.itemFromIndex(index)
             #print("item_text:",item.text())
             item_text_list.append(item)
-        object_id = int(item_text_list[0].data())
+        object_id = int(item_text_list[0].text())
+        print("object_id:",object_id, type(object_id))
 
         self.selected_object = MdObject.get_by_id(object_id)
         #print(selected_object,selected_object.object_name)

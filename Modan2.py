@@ -1329,7 +1329,7 @@ class ModanMainWindow(QMainWindow, form_class):
 
     @pyqtSlot()
     def on_action_delete_object_triggered(self):
-        print("delete object")
+        #print("delete object")
         ret = QMessageBox.warning(self, "Warning", "Are you sure to delete the selected object?", QMessageBox.Yes | QMessageBox.No)
         if ret == QMessageBox.No:
             return
@@ -1338,8 +1338,11 @@ class ModanMainWindow(QMainWindow, form_class):
         if selected_object_list:
             for object in selected_object_list:
                 object.delete_instance()
-            self.load_object()
-
+            dataset = self.selected_dataset
+            self.reset_treeView()
+            self.load_dataset()
+            self.reset_tableView()
+            self.select_dataset(dataset)
 
     def open_dataset_menu(self, position):
         indexes = self.treeView.selectedIndexes()
@@ -1438,11 +1441,12 @@ class ModanMainWindow(QMainWindow, form_class):
                 self.reset_tableView()
             else:
                 dataset = self.selected_dataset
+                self.reset_treeView()
                 self.load_dataset()
                 self.reset_tableView()
                 self.select_dataset(dataset)
 
-        print("dataset edit result:", ret, self.selected_dataset)
+        #print("dataset edit result:", ret, self.selected_dataset)
         #self.load_dataset()
         #self.reset_tableView()
     
@@ -1473,6 +1477,11 @@ class ModanMainWindow(QMainWindow, form_class):
         #self.dlg.setWindowModality(Qt.ApplicationModal)
         #print("new dataset dialog")
         self.dlg.exec_()
+        dataset = self.selected_dataset
+        self.reset_treeView()
+        self.load_dataset()
+        self.reset_tableView()
+        self.select_dataset(dataset)
         self.load_object()
 
     def reset_treeView(self):
@@ -1544,6 +1553,7 @@ class ModanMainWindow(QMainWindow, form_class):
             target_dataset = target_item.data()
 
             selected_object_list = self.get_selected_object_list()
+            source_dataset = None
 
             for source_object in selected_object_list:
                 if source_object.dataset.dimension == target_dataset.dimension:
@@ -1773,7 +1783,7 @@ class ModanMainWindow(QMainWindow, form_class):
             #print("item_text:",item.text())
             item_text_list.append(item)
         object_id = int(item_text_list[0].text())
-        print("object_id:",object_id, type(object_id))
+        #print("object_id:",object_id, type(object_id))
 
         self.selected_object = MdObject.get_by_id(object_id)
         #print(selected_object,selected_object.object_name)

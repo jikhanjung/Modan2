@@ -1228,6 +1228,7 @@ class ModanMainWindow(QMainWindow, form_class):
         #QApplication.setOverrideCursor(Qt.WaitCursor)
         self.setupUi(self)
         self.setGeometry(QRect(100, 100, 1200, 800))
+        self.setWindowIcon(QIcon('icon/modan.ico'))
         self.initUI()
         self.setWindowTitle(PROGRAM_NAME)
         #self.read_settings()
@@ -1732,7 +1733,9 @@ class ModanMainWindow(QMainWindow, form_class):
             item = self.object_model.itemFromIndex(index)
             #print("item_text:",item.text())
             item_text_list.append(item)
-        self.selected_object = item_text_list[0].data()
+        object_id = int(item_text_list[0].data())
+
+        self.selected_object = MdObject.get_by_id(object_id)
         #print(selected_object,selected_object.object_name)
         #filepath = item_text_list[1]
         #filename = item_text_list[0]
@@ -1765,3 +1768,9 @@ if __name__ == "__main__":
 
     #프로그램을 이벤트루프로 진입시키는(프로그램을 작동시키는) 코드
     app.exec_()
+
+
+''' 
+How to make exe file
+pyinstaller --onefile --noconsole --icon="icon/modan.ico" Modan2.py
+'''

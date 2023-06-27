@@ -61,34 +61,34 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionOpen_DB"/>
-    <addaction name="actionNew_DB"/>
-    <addaction name="actionSave_AS"/>
+    <addaction name="action_open_db"/>
+    <addaction name="action_new_db"/>
+    <addaction name="action_save_as"/>
     <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
      <string>Help</string>
     </property>
-    <addaction name="actionAbout"/>
+    <addaction name="action_about"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
      <string>Edit</string>
     </property>
-    <addaction name="actionPreference"/>
+    <addaction name="action_preferences"/>
    </widget>
    <widget class="QMenu" name="menuData">
     <property name="title">
      <string>Data</string>
     </property>
     <addaction name="action_new_dataset"/>
-    <addaction name="actionNew_Object"/>
+    <addaction name="action_new_object"/>
     <addaction name="separator"/>
-    <addaction name="actionAnalyze"/>
+    <addaction name="action_analyze_dataset"/>
     <addaction name="separator"/>
-    <addaction name="actionImport"/>
-    <addaction name="actionExport"/>
+    <addaction name="action_import_dataset"/>
+    <addaction name="action_export_dataset"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -106,17 +106,17 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionOpen_DB"/>
-   <addaction name="actionNew_DB"/>
-   <addaction name="actionSave_AS"/>
+   <addaction name="action_open_db"/>
+   <addaction name="action_new_db"/>
+   <addaction name="action_save_as"/>
    <addaction name="action_new_dataset"/>
-   <addaction name="actionNew_Object"/>
-   <addaction name="actionExport"/>
-   <addaction name="actionImport"/>
-   <addaction name="actionAnalyze"/>
-   <addaction name="actionPreference"/>
+   <addaction name="action_new_object"/>
+   <addaction name="action_export_dataset"/>
+   <addaction name="action_import_dataset"/>
+   <addaction name="action_analyze_dataset"/>
+   <addaction name="action_preferences"/>
   </widget>
-  <action name="actionOpen_DB">
+  <action name="action_open_db">
    <property name="icon">
     <iconset>
      <normaloff>icon/open.png</normaloff>icon/open.png</iconset>
@@ -125,7 +125,7 @@
     <string>Open DB</string>
    </property>
   </action>
-  <action name="actionSave_AS">
+  <action name="action_save_as">
    <property name="icon">
     <iconset>
      <normaloff>icon/saveas.png</normaloff>icon/saveas.png</iconset>
@@ -134,7 +134,7 @@
     <string>Save AS</string>
    </property>
   </action>
-  <action name="actionNew_DB">
+  <action name="action_new_db">
    <property name="icon">
     <iconset>
      <normaloff>icon/newdb.png</normaloff>icon/newdb.png</iconset>
@@ -152,7 +152,7 @@
     <string>New Dataset</string>
    </property>
   </action>
-  <action name="actionNew_Object">
+  <action name="action_new_object">
    <property name="icon">
     <iconset>
      <normaloff>icon/newobject.png</normaloff>icon/newobject.png</iconset>
@@ -161,49 +161,55 @@
     <string>New Object</string>
    </property>
   </action>
-  <action name="actionExport">
+  <action name="action_export_dataset">
    <property name="icon">
     <iconset>
      <normaloff>icon/export.png</normaloff>icon/export.png</iconset>
    </property>
    <property name="text">
-    <string>Export</string>
+    <string>Export Dataset</string>
    </property>
    <property name="toolTip">
-    <string>Export</string>
+    <string>Export Dataset</string>
    </property>
   </action>
-  <action name="actionImport">
+  <action name="action_import_dataset">
    <property name="icon">
     <iconset>
      <normaloff>icon/import.png</normaloff>icon/import.png</iconset>
    </property>
    <property name="text">
-    <string>Import</string>
+    <string>Import Dataset</string>
    </property>
    <property name="toolTip">
-    <string>Import</string>
+    <string>Import Dataset</string>
    </property>
   </action>
-  <action name="actionAnalyze">
+  <action name="action_analyze_dataset">
    <property name="icon">
     <iconset>
      <normaloff>icon/analyze.png</normaloff>icon/analyze.png</iconset>
    </property>
    <property name="text">
-    <string>Analyze</string>
+    <string>Analyze Dataset</string>
+   </property>
+   <property name="toolTip">
+    <string>Analyze Dataset</string>
    </property>
   </action>
-  <action name="actionPreference">
+  <action name="action_preferences">
    <property name="icon">
     <iconset>
      <normaloff>icon/preferences.png</normaloff>icon/preferences.png</iconset>
    </property>
    <property name="text">
-    <string>Preference</string>
+    <string>Preferences</string>
+   </property>
+   <property name="toolTip">
+    <string>Preferences</string>
    </property>
   </action>
-  <action name="actionAbout">
+  <action name="action_about">
    <property name="icon">
     <iconset>
      <normaloff>icon/about.png</normaloff>icon/about.png</iconset>

@@ -1500,6 +1500,14 @@ class ModanMainWindow(QMainWindow, form_class):
 
         elif event.source() == self.tableView:
             #print("drop event from tableView")
+            shift_clicked = False
+            modifiers = QApplication.keyboardModifiers()
+            if modifiers == Qt.ShiftModifier:
+                shift_clicked = True
+                #print('Shift+Click')
+            # default behavior is to copy and not move
+            # when shift is pressed, move instead
+
             target_index=self.treeView.indexAt(event.pos())
             target_item = self.dataset_model.itemFromIndex(target_index)
             target_dataset = target_item.data()
@@ -1521,13 +1529,29 @@ class ModanMainWindow(QMainWindow, form_class):
                 #print("index:", index)
                 source_item = self.object_model.itemFromIndex(index)
                 #print("source_item:", source_item)
-                source_object = source_item.data()
+                source_object_id = source_item.data()
+                if source_object_id is None:
+                    continue
+                #print("source_object_id:", source_object_id)
+                source_object = MdObject.get_by_id(source_object_id)
                 if source_object is not None:
                     #print("source_object:", source_object,source_object.object_name,source_object.dataset)
                     if source_object.dataset.dimension == target_dataset.dimension:
-                        source_dataset = source_object.dataset
-                        source_object.dataset = target_dataset
-                        source_object.save()
+                        # if shift is pressed, move instead of copy
+                        if shift_clicked:
+                            source_dataset = source_object.dataset
+                            source_object.dataset = target_dataset
+                            source_object.save()
+                        else:
+                            source_dataset = source_object.dataset
+                            new_object = MdObject()
+                            new_object.object_name = source_object.object_name
+                            new_object.object_desc = source_object.object_desc
+                            new_object.scale = source_object.scale
+                            new_object.landmark_str = source_object.landmark_str
+                            new_object.property_list = source_object.property_list
+                            new_object.dataset = target_dataset
+                            new_object.save()
                     else:
                         #print("dimension mismatch")
                         QMessageBox.warning(self, "Warning", "Dimension mismatch")
@@ -1606,6 +1630,10 @@ class ModanMainWindow(QMainWindow, form_class):
         self.tableView.setSelectionBehavior(QTableView.SelectRows)
         self.object_selection_model = self.tableView.selectionModel()
         self.object_selection_model.selectionChanged.connect(self.on_object_selection_changed)
+        self.tableView.setSortingEnabled(True)
+        self.tableView.sortByColumn(0, Qt.AscendingOrder)
+    #table.setSortingEnabled(True)
+    #table.sortByColumn(0, Qt.AscendingOrder)
 
     def reset_views(self):
         self.reset_treeView()
@@ -1682,7 +1710,7 @@ class ModanMainWindow(QMainWindow, form_class):
             item1 = QStandardItem(str(obj.id))
             item2 = QStandardItem(obj.object_name)
             item3 = QStandardItem(str(obj.count_landmarks()))
-            item1.setData(obj)
+            item1.setData(obj.id)
             self.object_model.appendRow([item1,item2,item3] )
 
 

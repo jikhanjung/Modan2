@@ -2,4 +2,5 @@ Modan2.db
 *.pyc
 build/
 dist/
+data/
 test*.py

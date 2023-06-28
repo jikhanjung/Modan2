@@ -13,7 +13,7 @@ from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSettings, QEvent, QR
                          QItemSelectionModel, QDateTime, QBuffer, QIODevice, QByteArray, QPoint, QModelIndex, \
                          pyqtSignal, QThread, QMimeData
 
-
+import math
 from PyQt5.QtCore import pyqtSlot
 import re,os,sys
 from pathlib import Path
@@ -23,15 +23,112 @@ from datetime import datetime, timezone
 import requests
 from PIL import Image
 from PIL.ExifTags import TAGS
-#import imagesize
-#from datetime import datetime
 import time
 import io
+import shutil
+
+from MdModel import *
 
 PROGRAM_NAME = "Modan2"
 PROGRAM_VERSION = "0.0.1"
+BASE_DIRECTORY = "."
+DEFAULT_STORAGE_DIRECTORY = os.path.join(BASE_DIRECTORY, "data/")
+MODE_NONE = 0
+MODE_PAN = 12
+MODE_EDIT_LANDMARK = 1
+MODE_EDIT_WIREFRAME = 2
 
-from MdModel import *
+class DatasetAnalysisDialog(QDialog):
+    def __init__(self,parent,dataset):
+        super().__init__()
+        self.setWindowTitle("Assorted Analyses")
+        self.parent = parent
+        #print(self.parent.pos())
+        self.setGeometry(QRect(100, 100, 1024, 600))
+        self.move(self.parent.pos()+QPoint(100,100))
+        print("dataset:",dataset.dataset_name)
+        
+        self.hsplitter = QSplitter(Qt.Horizontal)
+
+        self.lblShape = QLabel("Shape")
+        self.lblShape.setAlignment(Qt.AlignCenter)
+        self.lblShape.setMinimumWidth(400)
+        #self.lblShape.setMaximumWidth(200)
+        self.lblShape.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
+        self.lblGraph = QLabel("Graph")
+        self.lblGraph.setAlignment(Qt.AlignCenter)
+        self.lblGraph.setMinimumWidth(400)
+        #self.lblGraph.setMaximumWidth(200)
+        self.lblGraph.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
+        self.tableView = QTableView()
+        self.tableView.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.tableView.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.tableView.setSortingEnabled(True)
+        self.tableView.setAlternatingRowColors(True)
+        self.tableView.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        #self.tableView.setContextMenuPolicy(Qt.CustomContextMenu)
+        #self.tableView.customContextMenuRequested.connect(self.show_context_menu)
+        self.tableView.setSortingEnabled(True)
+
+        self.hsplitter.addWidget(self.lblShape)
+        self.hsplitter.addWidget(self.tableView)
+        self.hsplitter.addWidget(self.lblGraph)
+
+        self.main_layout = QVBoxLayout()
+        self.sub_layout = QHBoxLayout()
+
+        #self.hsplitter.addWidget(self.right_widget)
+        self.hsplitter.setSizes([400,200,400])
+        self.hsplitter.setStretchFactor(0, 1)
+        self.hsplitter.setStretchFactor(1, 0)
+        self.hsplitter.setStretchFactor(2, 1)
+
+        self.main_layout.addWidget(self.hsplitter)
+        self.setLayout(self.main_layout)
+
+
+        self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
+
+        self.dataset = dataset
+        self.reset_tableView()
+        self.load_object()
+
+
+    def load_object(self):
+        # load objects into tableView
+        #for object in self.dataset.object_list:
+        self.object_model.clear()
+        self.reset_tableView()
+        if self.dataset is None:
+            return
+        #objects = self.selected_dataset.objects
+        for obj in self.dataset.objects:
+            item1 = QStandardItem()
+            item1.setData(obj.id,Qt.DisplayRole)
+            item2 = QStandardItem(obj.object_name)
+            self.object_model.appendRow([item1,item2] )
+
+    def reset_tableView(self):
+        self.object_model = QStandardItemModel()
+        self.object_model.setColumnCount(2)
+        self.object_model.setHorizontalHeaderLabels(["", "Name"])
+        self.tableView.setModel(self.object_model)
+        self.tableView.setColumnWidth(0, 30)
+        self.tableView.setColumnWidth(1, 200)
+        self.tableView.verticalHeader().setDefaultSectionSize(20)
+        self.tableView.verticalHeader().setVisible(False)
+        self.tableView.setSelectionBehavior(QTableView.SelectRows)
+        self.object_selection_model = self.tableView.selectionModel()
+        #self.object_selection_model.selectionChanged.connect(self.on_object_selection_changed)
+        self.tableView.setSortingEnabled(True)
+        self.tableView.sortByColumn(0, Qt.AscendingOrder)
+        self.object_model.setSortRole(Qt.UserRole)
+
+        header = self.tableView.horizontalHeader()    
+        header.setSectionResizeMode(0, QHeaderView.Fixed)
+        header.setSectionResizeMode(1, QHeaderView.Stretch)
 
 class ImportDatasetDialog(QDialog):
     # NewDatasetDialog shows new dataset dialog.
@@ -204,7 +301,7 @@ class ImportThread(QThread):
     def import_tps(self, filename, datasetname):
         # read tps file
         tps = TPS(filename, datasetname)
-        print("objects:", tps.nobjects,tps.nlandmarks,tps.object_name_list)
+        #print("objects:", tps.nobjects,tps.nlandmarks,tps.object_name_list)
         # create dataset
         dataset = MdDataset()
         dataset.dataset_name = datasetname
@@ -214,7 +311,7 @@ class ImportThread(QThread):
         for i in range(tps.nobjects):
             object = MdObject()
             object.object_name = tps.object_name_list[i]
-            print("object:", object.object_name)
+            #print("object:", object.object_name)
             object.dataset = dataset
             object.landmark_str = ""
             landmark_list = []
@@ -497,16 +594,12 @@ class DatasetDialog(QDialog):
     def Cancel(self):
         self.reject()
 
-MODE_NONE = 0
-MODE_PAN = 12
-MODE_EDIT_LANDMARK = 1
-MODE_EDIT_WIREFRAME = 2
-import math
 
 class dLabel(QLabel):
     #clicked = pyqtSignal()
     def __init__(self, widget):
         super(dLabel, self).__init__(widget)
+        self.object_dialog = None
         self.setAcceptDrops(True)
         self.orig_pixmap = None
         self.curr_pixmap = None
@@ -659,9 +752,10 @@ class dLabel(QLabel):
         #print(file_path)
         #self.setScaledContents(True)
         self.set_image(file_path)
+        #filename_stem = Path(file_path).stem
         # resize self
         self.calculate_resize()
-
+        self.object_dialog.set_object_name(Path(file_path).stem)
         #self.resize(self.width(), self.height())
 
     def paintEvent(self, event):
@@ -902,6 +996,7 @@ class ObjectDialog(QDialog):
         self.dataset = None
         self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
         self.landmark_list = []
+        self.m_app = QApplication.instance()
 
         #self.edtDataFolder.setText(str(self.data_folder.resolve()))
         #self.edtServerAddress.setText(self.server_address)
@@ -928,6 +1023,12 @@ class ObjectDialog(QDialog):
         self.image_label.update()
         self.btnWireframe.setDown(True)
         self.btnWireframe.setChecked(True)
+
+    def set_object_name(self, name):
+        #print("set_object_name", self.edtObjectName.text(), name)
+
+        if self.edtObjectName.text() == "":
+            self.edtObjectName.setText(name)
 
     def set_dataset(self, dataset):
         self.dataset = dataset
@@ -1024,10 +1125,14 @@ class ObjectDialog(QDialog):
         self.show_landmarks(object.landmark_str)
         if object.image is not None and len(object.image) > 0:
             img = object.image[0]
-            self.image_label.set_image(img.original_path)
+            image_path = img.get_image_path(self.m_app.storage_directory)
+            #check if image_path exists
+            if os.path.exists(image_path):
+                self.image_label.set_image(image_path)
         #self.set_dataset(object.dataset)
 
     def save_object(self):
+
         if self.object is None:
             self.object = MdObject()
         self.object.dataset_id = self.dataset.id
@@ -1040,6 +1145,11 @@ class ObjectDialog(QDialog):
             md_image = MdImage()
             md_image.object_id = self.object.id
             md_image.load_file_info(self.image_label.fullpath)
+            new_filepath = md_image.get_image_path( self.m_app.storage_directory)
+            if not os.path.exists(os.path.dirname(new_filepath)):
+                os.makedirs(os.path.dirname(new_filepath))
+            #print("save object new filepath:", new_filepath)
+            shutil.copyfile(self.image_label.fullpath, new_filepath)
             md_image.save()
 
     def make_landmark_str(self):
@@ -1071,11 +1181,14 @@ class ObjectDialog(QDialog):
             elif len(coords) == 3 and self.dataset.dimension == 3:
                 self.add_landmark(coords[0], coords[1], coords[2])
                 landmark_count += 1
-        
 
     def Delete(self):
         ret = QMessageBox.question(self, "", "Are you sure to delete this object?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if ret == QMessageBox.Yes:
+            if self.object.image.count() > 0:
+                image_path = self.object.image[0].get_image_path(self.m_app.storage_directory)
+                if os.path.exists(image_path):
+                    os.remove(image_path)
             self.object.delete_instance()
         #self.delete_dataset()
         self.accept()
@@ -1238,6 +1351,18 @@ class ModanMainWindow(QMainWindow, form_class):
         #QApplication.restoreOverrideCursor()
         self.selected_dataset = None
         self.selected_object = None
+        self.m_app = QApplication.instance()
+        self.read_settings()
+
+    def read_settings(self):
+        self.m_app.settings = QSettings(QSettings.IniFormat, QSettings.UserScope,"DiploSoft", "Modan2")
+        self.m_app.settings.beginGroup("Defaults")
+        self.m_app.storage_directory = self.m_app.settings.value("Storage directory", os.path.abspath(DEFAULT_STORAGE_DIRECTORY))
+        dir = self.m_app.storage_directory
+
+        #print("storage directory:", self.m_app.storage_directory)
+        #print(os.path.abspath(dir), Path(dir).absolute())
+
 
     def check_db(self):
         gDatabase.connect()
@@ -1270,20 +1395,32 @@ class ModanMainWindow(QMainWindow, form_class):
         #self.write_settings()
         event.accept()
 
-    def on_actionPreferences_triggered(self):
-        dlg = PreferencesDialog(self)
-        dlg.exec_()
-        self.server_address = dlg.server_address
-        self.server_port = dlg.server_port
-        self.data_folder = dlg.data_folder
+    @pyqtSlot()
+    def on_action_edit_preferences_triggered(self):
+        print("edit preferences")
+        #dlg = PreferencesDialog(self)
+        #dlg.exec_()
         #print("main window data folder:", self.data_folder)
         #print("main window server address:", self.server_address)
     
-    def on_actionExit_triggered(self):
+    @pyqtSlot()
+    def on_action_exit_triggered(self):
         self.close()
 
-    def on_actionAbout_triggered(self):
+    @pyqtSlot()
+    def on_action_about_triggered(self):
         QMessageBox.about(self, "About", "Modan2")
+
+    @pyqtSlot()
+    def on_action_analyze_dataset_triggered(self):
+        #QMessageBox.about(self, "About", "Modan2")
+        print("analyze dataset")
+        if self.selected_dataset is None:
+            QMessageBox.warning(self, "Warning", "No dataset selected")
+            return
+        dlg = DatasetAnalysisDialog(self,self.selected_dataset)
+        dlg.exec_()
+
 
     def initUI(self):
         # add tableView and tableWidget to vertical layout
@@ -1559,10 +1696,23 @@ class ModanMainWindow(QMainWindow, form_class):
                 if source_object.dataset.dimension == target_dataset.dimension:
                     # if shift is pressed, move instead of copy
                     if shift_clicked:
+                        if source_object.image.count() > 0:
+                            source_image_path = source_object.image[0].get_image_path(self.m_app.storage_directory)
                         source_dataset = source_object.dataset
                         source_object.dataset = target_dataset
                         source_object.save()
+                        if source_object.image.count() > 0:
+                            target_image = source_object.image[0]
+                            target_image_path = target_image.get_image_path(self.m_app.storage_directory)
+                            if os.path.exists(source_image_path):
+                                if not os.path.exists(os.path.dirname(target_image_path)):
+                                    os.makedirs(os.path.dirname(target_image_path))
+
+                                if os.path.exists(target_image_path):
+                                    os.remove(target_image_path)
+                                os.rename(source_image_path, target_image_path)
                     else:
+                        # copy object
                         source_dataset = source_object.dataset
                         new_object = MdObject()
                         new_object.object_name = source_object.object_name
@@ -1572,6 +1722,27 @@ class ModanMainWindow(QMainWindow, form_class):
                         new_object.property_list = source_object.property_list
                         new_object.dataset = target_dataset
                         new_object.save()
+                        if source_object.image.count() > 0:
+                            old_image = source_object.image[0]
+                            source_image_path = old_image.get_image_path(self.m_app.storage_directory)
+                            new_image = MdImage()
+                            new_image.original_path = old_image.original_path
+                            new_image.original_filename = old_image.original_filename
+                            new_image.name = old_image.name
+                            new_image.md5hash = old_image.md5hash
+                            new_image.size = old_image.size
+                            new_image.exifdatetime = old_image.exifdatetime
+                            new_image.object = new_object
+                            new_image.save()
+                            new_image_path = new_image.get_image_path(self.m_app.storage_directory)
+                            #print(source_image_path, new_image_path)
+                            if os.path.exists(source_image_path):
+                                if not os.path.exists(os.path.dirname(new_image_path)):
+                                    os.makedirs(os.path.dirname(new_image_path))
+                                if os.path.exists(new_image_path):
+                                    os.remove(new_image_path)
+                                shutil.copyfile(source_image_path, new_image_path)
+
                 else:
                     #print("dimension mismatch")
                     QMessageBox.warning(self, "Warning", "Dimension mismatch")
@@ -1809,6 +1980,7 @@ if __name__ == "__main__":
     #QApplication : 프로그램을 실행시켜주는 클래스
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon('Modan2.ico'))
+    #app.preferences = QSettings("Modan", "Modan2")
 
     #WindowClass의 인스턴스 생성
     myWindow = ModanMainWindow()
@@ -1821,6 +1993,6 @@ if __name__ == "__main__":
 
 
 ''' 
-How to make exe file
+How to make an exe file
 pyinstaller --onefile --noconsole --icon="icon/modan.ico" Modan2.py
 '''

@@ -40,6 +40,7 @@ class MdObject(Model):
         if self.landmark_str is None or self.landmark_str == '':
             return 0
         return len(self.landmark_str.strip().split('\n'))
+    #def get_image_file_path(self):
 
     class Meta:
         database = gDatabase
@@ -57,6 +58,9 @@ class MdImage(Model):
     created_at = DateTimeField(default=datetime.datetime.now)
     modified_at = DateTimeField(default=datetime.datetime.now)
     object = ForeignKeyField(MdObject, backref='image', on_delete="CASCADE")
+
+    def get_image_path(self, base_path):
+        return os.path.join( base_path, str(self.object.dataset.id), str(self.object.id) + "." + self.original_path.split('.')[-1])
 
     class Meta:
         database = gDatabase

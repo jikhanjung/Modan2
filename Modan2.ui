@@ -54,7 +54,7 @@
      <x>0</x>
      <y>0</y>
      <width>1162</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -76,7 +76,7 @@
     <property name="title">
      <string>Edit</string>
     </property>
-    <addaction name="action_preferences"/>
+    <addaction name="action_edit_preferences"/>
    </widget>
    <widget class="QMenu" name="menuData">
     <property name="title">
@@ -114,7 +114,7 @@
    <addaction name="action_export_dataset"/>
    <addaction name="action_import_dataset"/>
    <addaction name="action_analyze_dataset"/>
-   <addaction name="action_preferences"/>
+   <addaction name="action_edit_preferences"/>
   </widget>
   <action name="action_open_db">
    <property name="icon">
@@ -197,7 +197,7 @@
     <string>Analyze Dataset</string>
    </property>
   </action>
-  <action name="action_preferences">
+  <action name="action_edit_preferences">
    <property name="icon">
     <iconset>
      <normaloff>icon/preferences.png</normaloff>icon/preferences.png</iconset>

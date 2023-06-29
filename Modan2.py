@@ -118,8 +118,11 @@ class ModanMainWindow(QMainWindow, form_class):
         if self.selected_dataset is None:
             QMessageBox.warning(self, "Warning", "No dataset selected")
             return
-        dlg = DatasetAnalysisDialog(self,self.selected_dataset)
-        dlg.exec_()
+        self.analysis_dialog = DatasetAnalysisDialog(self,self.selected_dataset)
+        self.analysis_dialog.show()
+
+        
+        #dlg.showNormal()
 
 
     def initUI(self):
@@ -302,7 +305,6 @@ class ModanMainWindow(QMainWindow, form_class):
                 self.treeView.setCurrentIndex(item.index())
                 break
             self.select_dataset(dataset,node.child(i,0))
-
 
     @pyqtSlot()
     def on_tableView_doubleClicked(self):
@@ -562,7 +564,7 @@ class ModanMainWindow(QMainWindow, form_class):
         self.selected_dataset = None
         all_record = MdDataset.filter(parent=None)
         for rec in all_record:
-            item1 = QStandardItem(rec.dataset_name + " (" + str(rec.objects.count()) + ")")
+            item1 = QStandardItem(rec.dataset_name + " (" + str(rec.object_list.count()) + ")")
             if rec.dimension == 2:
                 item1.setIcon(QIcon("icon/icons8-xlarge-icons-50.png"))
             else:
@@ -587,7 +589,7 @@ class ModanMainWindow(QMainWindow, form_class):
     def load_subdataset(self, parent_item, dataset):
         all_record = MdDataset.filter(parent=dataset)
         for rec in all_record:
-            item1 = QStandardItem(rec.dataset_name + " (" + str(rec.objects.count()) + ")")
+            item1 = QStandardItem(rec.dataset_name + " (" + str(rec.object_list.count()) + ")")
             if rec.dimension == 2:
                 item1.setIcon(QIcon("icon/icons8-xlarge-icons-50.png")) #  https://icons8.com
             else:
@@ -624,7 +626,7 @@ class ModanMainWindow(QMainWindow, form_class):
         if self.selected_dataset is None:
             return
         #objects = self.selected_dataset.objects
-        for obj in self.selected_dataset.objects:
+        for obj in self.selected_dataset.object_list:
             item1 = QStandardItem()
             item1.setData(obj.id,Qt.DisplayRole)
             item2 = QStandardItem(obj.object_name)

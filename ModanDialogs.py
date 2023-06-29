@@ -3,37 +3,29 @@ from PyQt5.QtWidgets import QTableWidgetItem, QMainWindow, QHeaderView, QFileDia
                             QDialog, QLineEdit, QLabel, QPushButton, QAbstractItemView, \
                             QMessageBox, QListView, QTreeWidgetItem, QToolButton, QTreeView, QFileSystemModel, \
                             QTableView, QSplitter, QRadioButton, QComboBox, QTextEdit, QAction, QMenu, QSizePolicy, \
-                            QTableWidget, QBoxLayout, QGridLayout, QAbstractButton, QButtonGroup, QGroupBox
-
+                            QTableWidget, QBoxLayout, QGridLayout, QAbstractButton, QButtonGroup, QGroupBox 
 
 from PyQt5 import QtGui, uic
 from PyQt5.QtGui import QIcon, QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem,\
                         QPainterPath, QFont, QImageReader, QPainter, QBrush, QMouseEvent, QWheelEvent, QDrag
-from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSettings, QEvent, QRegExp, QSize, \
-                         QItemSelectionModel, QDateTime, QBuffer, QIODevice, QByteArray, QPoint, QModelIndex, \
-                         pyqtSignal, QThread, QMimeData
+from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSettings, QEvent, QRegExp, QSize, QPoint,\
+                         pyqtSignal, QThread, QMimeData, pyqtSlot
 
-import math
-from PyQt5.QtCore import pyqtSlot
-import re,os,sys
+import pyqtgraph as pg
+
+import math, re, os
 from pathlib import Path
-from peewee import *
-import hashlib
-from datetime import datetime, timezone
-import requests
 from PIL import Image
 from PIL.ExifTags import TAGS
-import time
-import io
 import shutil
 
 from MdModel import *
+from MdStatistics import MdPrincipalComponent
 
 MODE_NONE = 0
 MODE_PAN = 12
 MODE_EDIT_LANDMARK = 1
 MODE_EDIT_WIREFRAME = 2
-
 
 class DatasetAnalysisDialog(QDialog):
     def __init__(self,parent,dataset):
@@ -43,7 +35,7 @@ class DatasetAnalysisDialog(QDialog):
         #print(self.parent.pos())
         self.setGeometry(QRect(100, 100, 1024, 600))
         self.move(self.parent.pos()+QPoint(100,100))
-        print("dataset:",dataset.dataset_name)
+        #print("dataset:",dataset.dataset_name)
         
         self.hsplitter = QSplitter(Qt.Horizontal)
 
@@ -68,10 +60,12 @@ class DatasetAnalysisDialog(QDialog):
         #self.tableView.setContextMenuPolicy(Qt.CustomContextMenu)
         #self.tableView.customContextMenuRequested.connect(self.show_context_menu)
         self.tableView.setSortingEnabled(True)
+        self.plot_widget = pg.PlotWidget()
+        self.plot_widget.setBackground('w')
 
         self.hsplitter.addWidget(self.lblShape)
         self.hsplitter.addWidget(self.tableView)
-        self.hsplitter.addWidget(self.lblGraph)
+        self.hsplitter.addWidget(self.plot_widget)
 
         self.main_layout = QVBoxLayout()
         self.sub_layout = QHBoxLayout()
@@ -82,16 +76,86 @@ class DatasetAnalysisDialog(QDialog):
         self.hsplitter.setStretchFactor(1, 0)
         self.hsplitter.setStretchFactor(2, 1)
 
-        self.main_layout.addWidget(self.hsplitter)
-        self.setLayout(self.main_layout)
+        self.button_layout = QHBoxLayout()
+        self.btnPCA = QPushButton("PCA")
+        self.btnPCA.clicked.connect(self.on_btnPCA_clicked)
+        self.button_layout.addWidget(self.btnPCA)
 
+        self.main_layout.addWidget(self.hsplitter)
+        self.main_layout.addLayout(self.button_layout)
+        self.setLayout(self.main_layout)
 
         self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
 
         self.dataset = dataset
         self.reset_tableView()
         self.load_object()
+        self.pca_result = None
+    
 
+
+    def on_btnPCA_clicked(self):
+        print("pca button clicked")
+        ds_ops = MdDatasetOps(self.dataset)
+        for obj in ds_ops.object_list[:2]:
+            print(obj.object_name, obj.landmark_list[:5])
+
+        ds_ops.procrustes_superimposition()
+
+        for obj in ds_ops.object_list[:2]:
+            print(obj.object_name, obj.landmark_list[:5])
+
+
+        self.pca_result = self.PerformPCA(ds_ops)
+        new_coords = self.pca_result.rotated_matrix.tolist()
+        for i, obj in enumerate(ds_ops.object_list):
+            obj.pca_result = new_coords[i]
+
+        #print("pca_result.nVariable:",pca_result.nVariable)
+        with open('pca_result.txt', 'w') as f:
+            for obj in ds_ops.object_list:
+                f.write(obj.object_name + "\t" + "\t".join([str(x) for x in obj.pca_result]) + "\n")
+        
+        x_val = []
+        y_val = []
+
+        for obj in ds_ops.object_list:
+            x_val.append(obj.pca_result[0])
+            y_val.append(obj.pca_result[1])
+
+        scatter = pg.ScatterPlotItem(size=10, brush=pg.mkBrush(255, 255, 255, 120))
+        scatter.addPoints(x=x_val, y=y_val)
+
+        self.plot_widget.setBackground('w')
+        self.plot_widget.setTitle("PCA Result")
+        self.plot_widget.setLabel("left", "PC2")
+        self.plot_widget.setLabel("bottom", "PC1")
+        self.plot_widget.addLegend()
+        self.plot_widget.showGrid(x=True, y=True)
+        self.plot_widget.addItem(scatter)
+        #self.plot_widget.plot(x=x_val, y=y_val, pen=pg.mkPen(width=2, color='r'), name="plot1")
+
+
+
+
+
+    def PerformPCA(self,dataset_ops):
+
+        pca = MdPrincipalComponent()
+        datamatrix = []
+        for obj in dataset_ops.object_list:
+            datum = []
+            for lm in obj.landmark_list:
+                datum.extend( lm )
+            datamatrix.append(datum)
+
+        pca.SetData(datamatrix)
+        pca.Analyze()
+
+        number_of_axes = min(pca.nObservation, pca.nVariable)
+        pca_done = True
+
+        return pca
 
     def load_object(self):
         # load objects into tableView
@@ -101,7 +165,7 @@ class DatasetAnalysisDialog(QDialog):
         if self.dataset is None:
             return
         #objects = self.selected_dataset.objects
-        for obj in self.dataset.objects:
+        for obj in self.dataset.object_list:
             item1 = QStandardItem()
             item1.setData(obj.id,Qt.DisplayRole)
             item2 = QStandardItem(obj.object_name)
@@ -329,22 +393,32 @@ class ImportThread(QThread):
         # read x1y1 file
         x1y1 = X1Y1(filename)
         # create dataset
-        dataset = MdDataset(datasetname)
-        # add landmarks
-        for i in range(x1y1.nlandmarks):
-            landmark = Landmark(x1y1.landmarks[i,0], x1y1.landmarks[i,1], x1y1.landmarks[i,2])
-            dataset
-        # add objects
+        dataset = MdDataset()
+        dataset.dataset_name = datasetname
+        dataset.dimension = x1y1.dimension
+        dataset.save()
         for i in range(x1y1.nobjects):
             object = MdObject()
-            object.name = x1y1.objectnames[i]
-            object.landmarks = []
-            for j in range(x1y1.nlandmarks):
-                object.landmarks.append(x1y1.objects[i,j,:])
-            dataset.objects.append(object)
-        # add dataset to project
-        self.parent.parent.project.datasets.append(dataset)
-        self.parent.parent.project.current_dataset = dataset
+            object.object_name = x1y1.object_name_list[i]
+            #print("object:", object.object_name)
+            object.dataset = dataset
+            object.landmark_str = ""
+            landmark_list = []
+            for landmark in x1y1.landmark_data[x1y1.object_name_list[i]]:
+                landmark_list.append("\t".join([ str(x) for x in landmark]))
+            object.landmark_str = "\n".join(landmark_list)
+
+            object.save()
+            self.progress.emit(int( (i / float(x1y1.nobjects)) * 100))
+
+class X1Y1:
+    def __init__(self, filename):
+        self.filename = filename
+        self.nobjects = 0
+        self.nlandmarks = 0
+        self.objectnames = []
+        self.landmarks = []
+        self.read()
 
 class TPS:
     def __init__(self, filename, datasetname):
@@ -538,7 +612,7 @@ class DatasetDialog(QDialog):
         elif dataset.dimension == 3:
             self.rbtn3D.setChecked(True)
         #print(dataset.dimension,self.dataset.objects)
-        if len(self.dataset.objects) > 0:
+        if len(self.dataset.object_list) > 0:
             self.rbtn2D.setEnabled(False)
             self.rbtn3D.setEnabled(False)
         self.edtWireframe.setText(dataset.wireframe)

@@ -26,7 +26,7 @@ MODE_NONE = 0
 MODE_PAN = 12
 MODE_EDIT_LANDMARK = 1
 MODE_EDIT_WIREFRAME = 2
-
+IMAGE_EXTENSION_LIST = ['png', 'jpg', 'jpeg','bmp','gif','tif','tiff']
 class DatasetAnalysisDialog(QDialog):
     def __init__(self,parent,dataset):
         super().__init__()
@@ -695,6 +695,7 @@ class dLabel(QLabel):
         self.show_index = True
         self.show_wireframe = False
         self.show_baseline = False
+        self.edit_mode = MODE_NONE
         #self.repaint()
 
 #function _2canx( coord ) { return Math.round(( coord / gImageCanvasRatio ) * gScale) + gPanX + gTempPanX; }
@@ -719,6 +720,8 @@ class dLabel(QLabel):
             self.setCursor(Qt.ArrowCursor)
 
     def mouseMoveEvent(self, event):
+        if self.orig_pixmap is None or self.object_dialog is None:
+            return
         me = QMouseEvent(event)
         self.curr_mouse_x = me.x()
         self.curr_mouse_y = me.y()
@@ -733,8 +736,9 @@ class dLabel(QLabel):
         QLabel.mouseMoveEvent(self, event)
 
     def mousePressEvent(self, event):
-        if self.orig_pixmap is None:
+        if self.orig_pixmap is None or self.object_dialog is None:
             return
+
         #self.clicked.emit()
         me = QMouseEvent(event)
         #print("event and pos", event, me.pos())
@@ -803,6 +807,8 @@ class dLabel(QLabel):
         #print("wheel event", we, we.angleDelta())
         QLabel.wheelEvent(self, event)
 
+
+
     def set_image(self,file_path):
         self.fullpath = file_path
         self.curr_pixmap = self.orig_pixmap = QPixmap(file_path)
@@ -812,13 +818,18 @@ class dLabel(QLabel):
         #print( self.curr_pixmap.width(), self.curr_pixmap.height(), self.orig_pixmap.width(), self.orig_pixmap.height())
 
     def dragEnterEvent(self, event):
+        if self.object_dialog is None:
+            return
         file_name = event.mimeData().text()
-        if file_name.split('.')[-1].lower() in ['png', 'jpg', 'jpeg','bmp','gif','tif','tiff']:
+        if file_name.split('.')[-1].lower() in IMAGE_EXTENSION_LIST:
             event.acceptProposedAction()
         else:
             event.ignore()
 
     def dropEvent(self, event):
+        if self.object_dialog is None:
+            return
+
         file_path = event.mimeData().text()
         file_path = re.sub('file:///', '', file_path)
         #print(file_path)
@@ -859,7 +870,13 @@ class dLabel(QLabel):
             else:
                 painter.drawEllipse(self.curr_mouse_x-radius, self.curr_mouse_y-radius, radius*2, radius*2)
 
-        for idx, landmark in enumerate(self.object_dialog.landmark_list):
+        if self.object_dialog is None:
+            landmark_list = self.landmark_list
+        else:
+            landmark_list = self.object_dialog.landmark_list
+        #print(landmark_list)
+
+        for idx, landmark in enumerate(landmark_list):
             if landmark[0] == "":
                 continue  
             painter.drawEllipse(self._2canx(int(landmark[0]))-5, self._2cany(int(landmark[1]))-5, 10, 10)
@@ -895,6 +912,24 @@ class dLabel(QLabel):
             #print( self.curr_pixmap.width(), self.curr_pixmap.height(), self.orig_pixmap.width(), self.orig_pixmap.height())
             pass
         QLabel.resizeEvent(self, event)
+
+    def set_object(self, object):
+        #print("set_object", object.object_name)
+        m_app = QApplication.instance()
+        if object.image.count() > 0:
+            #print("set_object", object.image[0].get_image_path(m_app.storage_directory))
+            self.set_image(object.image[0].get_image_path(m_app.storage_directory))
+            object.unpack_landmark()
+            self.landmark_list = object.landmark_list
+            #print("landmark_list", object.landmark_str)
+            self.calculate_resize()
+
+    def clear_object(self):
+        self.landmark_list = []
+        self.orig_pixmap = None
+        self.curr_pixmap = None
+        self.update()
+    
 
 class PicButton(QAbstractButton):
     def __init__(self, pixmap, pixmap_hover, pixmap_pressed, parent=None):
@@ -1240,8 +1275,9 @@ class ObjectDialog(QDialog):
         # from landmark_str, show landmarks
         #landmark_str = self.object.landmark_str
         #print(landmark_str)
-        if landmark_str == "":
+        if landmark_str == "" or landmark_str is None:
             return
+        
         lines = landmark_str.split("\n")
         landmark_count = 0
 

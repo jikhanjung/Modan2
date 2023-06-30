@@ -28,6 +28,7 @@ class MdDataset(Model):
     modified_at = DateTimeField(default=datetime.datetime.now)
     propertyname_list = CharField(null=True)
     edge_list = []
+    baseline_point_list = []
 
     class Meta:
         database = gDatabase
@@ -165,6 +166,8 @@ class MdObject(Model):
     def unpack_landmark(self):
         self.landmark_list = []
         # print "[", self.landmark_str,"]"
+        if self.landmark_str is None or self.landmark_str == '':
+            return
         lm_list = self.landmark_str.split(LINE_SEPARATOR)
         for lm in lm_list:
             if lm != "":
@@ -570,6 +573,7 @@ class MdDatasetOps:
             dataset.unpack_polygons()
         if dataset.baseline != '':
             dataset.unpack_baseline()
+        
         self.baseline_point_list = dataset.baseline_point_list
         #print self
     def set_reference_shape(self, shape):

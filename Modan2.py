@@ -28,12 +28,13 @@ import io
 import shutil
 
 from MdModel import *
-from ModanDialogs import DatasetAnalysisDialog, ObjectDialog, ImportDatasetDialog, DatasetDialog, PreferencesDialog
+from ModanDialogs import DatasetAnalysisDialog, ObjectDialog, ImportDatasetDialog, DatasetDialog, PreferencesDialog, dLabel, IMAGE_EXTENSION_LIST
 
 PROGRAM_NAME = "Modan2"
 PROGRAM_VERSION = "0.0.1"
 BASE_DIRECTORY = "."
 DEFAULT_STORAGE_DIRECTORY = os.path.join(BASE_DIRECTORY, "data/")
+
 
 form_class = uic.loadUiType("Modan2.ui")[0]
 class ModanMainWindow(QMainWindow, form_class):
@@ -128,11 +129,13 @@ class ModanMainWindow(QMainWindow, form_class):
     def initUI(self):
         # add tableView and tableWidget to vertical layout
         #widget = QWidget()
+        self.object_view = dLabel(self)
+
         hsplitter = QSplitter(Qt.Horizontal)
         vsplitter = QSplitter(Qt.Vertical)
 
         vsplitter.addWidget(self.tableView)
-        vsplitter.addWidget(self.tableWidget)
+        vsplitter.addWidget(self.object_view)
 
         #self.treeView = MyTreeView()
         hsplitter.addWidget(self.treeView)
@@ -293,6 +296,7 @@ class ModanMainWindow(QMainWindow, form_class):
     def select_dataset(self,dataset,node=None):
         #print("select dataset:", dataset)
         if dataset is None:
+            #print("dataset is None")
             return
         if node is None:
             node = self.dataset_model.invisibleRootItem()
@@ -303,6 +307,7 @@ class ModanMainWindow(QMainWindow, form_class):
 
             if item.data() == dataset:
                 self.treeView.setCurrentIndex(item.index())
+                #print("selected:", item.data())
                 break
             self.select_dataset(dataset,node.child(i,0))
 
@@ -352,12 +357,26 @@ class ModanMainWindow(QMainWindow, form_class):
 
         #connect treeView's drop event to some handler
         self.treeView.dropEvent = self.dropEvent
+        #self.treeView.dragEnterEvent = self.tableView_drag_enter_event
+        #self.treeView.dragMoveEvent = self.tableView_drag_move_event
+
         #self.tableView.mousePressEvent = self.mousePressEvent
         #connect treeView's dragenter event to some handler  
         #self.treeView.dragEnterEvent = self.dragEnterEvent
 
+    '''
+    def treeView_drag_enter_event(self, event):
 
-    
+        #event.acceptProposedAction()
+        QTreeView.dragEnterEvent(self.treeView, event)
+        #return
+
+    def treeView_drag_move_event(self, event):
+        #event.acceptProposedAction()
+        QTreeView.dragMoveEvent(self.treeView, event)
+        #return
+    '''
+
     # accept drop event
     def dropEvent(self, event):
         # make dragged item a child of the drop target
@@ -434,6 +453,8 @@ class ModanMainWindow(QMainWindow, form_class):
                             new_image.md5hash = old_image.md5hash
                             new_image.size = old_image.size
                             new_image.exifdatetime = old_image.exifdatetime
+                            new_image.file_created = old_image.file_created
+                            new_image.file_modified = old_image.file_modified
                             new_image.object = new_object
                             new_image.save()
                             new_image_path = new_image.get_image_path(self.m_app.storage_directory)
@@ -537,7 +558,6 @@ class ModanMainWindow(QMainWindow, form_class):
         self.object_model.setHorizontalHeaderLabels(["ID", "Name", "Count", "CSize"])
         self.proxy_model = QSortFilterProxyModel()
         self.proxy_model.setSourceModel(self.object_model)
-        self.tableView.setDragEnabled(True)
         self.tableView.setModel(self.proxy_model)
         self.tableView.setColumnWidth(0, 50)
         self.tableView.setColumnWidth(1, 200)
@@ -548,12 +568,115 @@ class ModanMainWindow(QMainWindow, form_class):
         self.tableView.setSelectionBehavior(QTableView.SelectRows)
         self.object_selection_model = self.tableView.selectionModel()
         self.object_selection_model.selectionChanged.connect(self.on_object_selection_changed)
+
+        self.tableView.setDragEnabled(True)
+        self.tableView.setAcceptDrops(True)
+        #print("tableview accept drops:", self.tableView.acceptDrops())
+        self.tableView.setDropIndicatorShown(True)
+        self.tableView.dropEvent = self.tableView_drop_event
+        self.tableView.dragEnterEvent = self.tableView_drag_enter_event
+        self.tableView.dragMoveEvent = self.tableView_drag_move_event
+
         self.tableView.setSortingEnabled(True)
         self.tableView.sortByColumn(0, Qt.AscendingOrder)
-
         self.object_model.setSortRole(Qt.UserRole)
+        self.clear_object_view()
     #table.setSortingEnabled(True)
     #table.sortByColumn(0, Qt.AscendingOrder)
+
+    def tableView_drop_event(self, event):
+        if self.selected_dataset is None:
+            return
+        file_name_list = event.mimeData().text().strip().split("\n")
+        #print("file name list:", file_name_list)
+        if len(file_name_list) == 0:
+            return
+        print("selected_dataset", self.selected_dataset)
+        QApplication.setOverrideCursor(Qt.WaitCursor)
+        for file_name in file_name_list:
+            file_name = re.sub('file:///', '', file_name)
+            #print("file name:", file_name)
+            ext = file_name.split('.')[-1].lower()
+            if ext in IMAGE_EXTENSION_LIST:
+                #print("drop file:", file_name)
+                object = MdObject()
+                object.dataset = self.selected_dataset
+                object.object_name = Path(file_name).stem
+                object.save()
+                img = MdImage()
+                img.object = object
+                img.load_file_info(file_name)
+                new_filepath = img.get_image_path( self.m_app.storage_directory)
+                if not os.path.exists(os.path.dirname(new_filepath)):
+                    os.makedirs(os.path.dirname(new_filepath))
+                #print("save object new filepath:", new_filepath)
+                shutil.copyfile(file_name, new_filepath)
+                img.save()
+            # see if file_name is directory
+            elif os.path.isdir(file_name):
+                pass
+                #print("drop directory:", file_name)
+                #for root, dirs, files in os.walk(file_name):
+                #    for file in files:
+                #        file_name = os.path.join(root, file)
+                #        ext = file_name.split('.')[-1].lower()
+                #        if ext in ['png', 'jpg', 'jpeg','bmp','gif','tif','tiff']:
+                #            print("drop file:", file_name)
+            else:
+                pass
+                #print("not image, not dir:", file_name)
+            self.load_object()
+        #print("selected_dataset", self.selected_dataset)
+        dataset = self.selected_dataset
+        self.load_dataset()
+        self.reset_tableView()
+        self.select_dataset(dataset)
+        self.load_object()
+        QApplication.restoreOverrideCursor()
+
+    def tableView_drag_enter_event(self, event):
+        event.accept()
+        return
+        print("drag enter",event.mimeData().text())
+        file_name_list = event.mimeData().text().strip().split("\n")
+        print("file name list:", file_name_list)
+        ext = file_name_list[0].split('.')[-1].lower()
+        print("ext:", ext)
+        if ext in ['png', 'jpg', 'jpeg','bmp','gif','tif','tiff']:
+            print("image file")
+            print("source:", event.source())
+            print("proposed action:", event.proposedAction())
+            print("drop action:", event.dropAction())
+            print("possible action:", int(event.possibleActions()))
+            print("kinds of drop actions:", Qt.CopyAction, Qt.MoveAction, Qt.LinkAction, Qt.ActionMask, Qt.TargetMoveAction)
+            #event.acceptProposedAction()
+            event.setDropAction(Qt.CopyAction)
+            event.accept()
+        else:
+            event.ignore()
+
+
+    def tableView_drag_move_event(self, event):
+        event.accept()
+        return
+        print("drag move",event.mimeData().text())
+        file_name_list = event.mimeData().text().strip().split("\n")
+        print("file name list:", file_name_list)
+        ext = file_name_list[0].split('.')[-1].lower()
+        print("ext:", ext)
+        if ext in ['png', 'jpg', 'jpeg','bmp','gif','tif','tiff']:
+            print("image file")
+            print("source:", event.source())
+            print("proposed action:", event.proposedAction())
+            print("drop action:", event.dropAction())
+            print("possible action:", int(event.possibleActions()))
+            print("kinds of drop actions:", Qt.CopyAction, Qt.MoveAction, Qt.LinkAction, Qt.ActionMask, Qt.TargetMoveAction)
+            #event.acceptProposedAction()
+            event.setDropAction(Qt.CopyAction)
+            event.accept()
+        else:
+            event.ignore()
+
 
     def reset_views(self):
         self.reset_treeView()
@@ -638,33 +761,27 @@ class ModanMainWindow(QMainWindow, form_class):
 
 
     def on_object_selection_changed(self, selected, deselected):
-        selected_index_list = self.object_selection_model.selection().indexes()
-        if len(selected_index_list) == 0:
+        selected_object_list = self.get_selected_object_list()
+        if selected_object_list is None or len(selected_object_list) != 1:
             return
-        #print("selected_index",selected_index_list)
-
-        new_index_list = []
-        model = selected_index_list[0].model()
-        if hasattr(model, 'mapToSource'):
-            for index in selected_index_list:
-                new_index = model.mapToSource(index)
-                new_index_list.append(new_index)
-        #print("new_index_list",new_index_list)
-        item_text_list = []
-        for index in new_index_list:
-            item = self.object_model.itemFromIndex(index)
-            #print("item_text:",item.text())
-            item_text_list.append(item)
-        object_id = int(item_text_list[0].text())
         #print("object_id:",object_id, type(object_id))
+        object_id = selected_object_list[0].id
 
         self.selected_object = MdObject.get_by_id(object_id)
+        #print("selected_object:",self.selected_object)
+        self.show_object(self.selected_object)
         #print(selected_object,selected_object.object_name)
         #filepath = item_text_list[1]
         #filename = item_text_list[0]
         #return filepath, filename
 
-
+    def show_object(self, obj):
+        #print("show_object:",obj)
+        self.object_view.clear_object()
+        self.object_view.set_object(obj)
+        #return
+    def clear_object_view(self):
+        self.object_view.clear_object()
 
     def _on_object_selection_changed(self, selected, deselected):
         indexes = selected.indexes()

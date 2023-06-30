@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import QTableWidgetItem, QMainWindow, QHeaderView, QFileDia
                             QDialog, QLineEdit, QLabel, QPushButton, QAbstractItemView, \
                             QMessageBox, QListView, QTreeWidgetItem, QToolButton, QTreeView, QFileSystemModel, \
                             QTableView, QSplitter, QRadioButton, QComboBox, QTextEdit, QAction, QMenu, QSizePolicy, \
-                            QTableWidget, QBoxLayout, QGridLayout, QAbstractButton, QButtonGroup, QGroupBox
+                            QStatusBar, QBoxLayout, QGridLayout, QAbstractButton, QButtonGroup, QGroupBox
 
 
 from PyQt5 import QtGui, uic
@@ -55,6 +55,8 @@ class ModanMainWindow(QMainWindow, form_class):
         self.selected_object = None
         self.m_app = QApplication.instance()
         self.read_settings()
+        self.statusBar = QStatusBar()
+        self.setStatusBar(self.statusBar)
 
     def read_settings(self):
         self.m_app.settings = QSettings(QSettings.IniFormat, QSettings.UserScope,"DiploSoft", "Modan2")
@@ -598,6 +600,10 @@ class ModanMainWindow(QMainWindow, form_class):
             #print("file name:", file_name)
             ext = file_name.split('.')[-1].lower()
             if ext in IMAGE_EXTENSION_LIST:
+                if self.selected_dataset.dimension != 2:
+                    QMessageBox.warning(self, "Warning", "Dimension mismatch.")
+                    #self.statusBar.showMessage("Dimension mismatch.",2000)
+                    break
                 #print("drop file:", file_name)
                 object = MdObject()
                 object.dataset = self.selected_dataset
@@ -614,7 +620,8 @@ class ModanMainWindow(QMainWindow, form_class):
                 img.save()
             # see if file_name is directory
             elif os.path.isdir(file_name):
-                pass
+                self.statusBar.showMessage("Cannot process directory...",2000)
+                #pass
                 #print("drop directory:", file_name)
                 #for root, dirs, files in os.walk(file_name):
                 #    for file in files:
@@ -623,7 +630,8 @@ class ModanMainWindow(QMainWindow, form_class):
                 #        if ext in ['png', 'jpg', 'jpeg','bmp','gif','tif','tiff']:
                 #            print("drop file:", file_name)
             else:
-                pass
+                self.statusBar.showMessage("Nothing to import.",2000)
+                #pass
                 #print("not image, not dir:", file_name)
             self.load_object()
         #print("selected_dataset", self.selected_dataset)

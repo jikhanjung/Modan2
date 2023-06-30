@@ -95,15 +95,16 @@ class DatasetAnalysisDialog(QDialog):
 
 
     def on_btnPCA_clicked(self):
-        print("pca button clicked")
+        #print("pca button clicked")
+
         ds_ops = MdDatasetOps(self.dataset)
-        for obj in ds_ops.object_list[:2]:
-            print(obj.object_name, obj.landmark_list[:5])
+        #for obj in ds_ops.object_list[:2]:
+        #    print(obj.object_name, obj.landmark_list[:5])
 
         ds_ops.procrustes_superimposition()
 
-        for obj in ds_ops.object_list[:2]:
-            print(obj.object_name, obj.landmark_list[:5])
+        #for obj in ds_ops.object_list[:2]:
+        #    print(obj.object_name, obj.landmark_list[:5])
 
 
         self.pca_result = self.PerformPCA(ds_ops)
@@ -112,9 +113,9 @@ class DatasetAnalysisDialog(QDialog):
             obj.pca_result = new_coords[i]
 
         #print("pca_result.nVariable:",pca_result.nVariable)
-        with open('pca_result.txt', 'w') as f:
-            for obj in ds_ops.object_list:
-                f.write(obj.object_name + "\t" + "\t".join([str(x) for x in obj.pca_result]) + "\n")
+        #with open('pca_result.txt', 'w') as f:
+        #    for obj in ds_ops.object_list:
+        #        f.write(obj.object_name + "\t" + "\t".join([str(x) for x in obj.pca_result]) + "\n")
         
         x_val = []
         y_val = []
@@ -1104,6 +1105,7 @@ class ObjectDialog(QDialog):
         self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
         self.landmark_list = []
         self.m_app = QApplication.instance()
+        self.landmark_clicked()
 
         #self.edtDataFolder.setText(str(self.data_folder.resolve()))
         #self.edtServerAddress.setText(self.server_address)

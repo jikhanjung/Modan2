@@ -172,6 +172,7 @@ class MdObject(Model):
         for lm in lm_list:
             if lm != "":
                 self.landmark_list.append([float(x) for x in lm.split(LANDMARK_SEPARATOR)])
+        return self.landmark_list
 
 
 class MdImage(Model):

@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QTableWidgetItem, QMainWindow, QHeaderView, QFileDialog, QCheckBox, \
                             QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QProgressBar, QApplication, \
-                            QDialog, QLineEdit, QLabel, QPushButton, QAbstractItemView, \
+                            QDialog, QLineEdit, QLabel, QPushButton, QAbstractItemView, QStatusBar,\
                             QMessageBox, QListView, QTreeWidgetItem, QToolButton, QTreeView, QFileSystemModel, \
                             QTableView, QSplitter, QRadioButton, QComboBox, QTextEdit, QAction, QMenu, QSizePolicy, \
                             QTableWidget, QBoxLayout, QGridLayout, QAbstractButton, QButtonGroup, QGroupBox 
@@ -26,6 +26,11 @@ MODE_NONE = 0
 MODE_PAN = 12
 MODE_EDIT_LANDMARK = 1
 MODE_EDIT_WIREFRAME = 2
+MODE_READY_MOVE_LANDMARK = 3
+MODE_MOVE_LANDMARK = 4
+
+DISTANCE_THRESHOLD = 5
+
 IMAGE_EXTENSION_LIST = ['png', 'jpg', 'jpeg','bmp','gif','tif','tiff']
 class DatasetAnalysisDialog(QDialog):
     def __init__(self,parent,dataset):
@@ -695,28 +700,41 @@ class dLabel(QLabel):
         self.setMinimumSize(640,480)
         self.show_index = True
         self.show_wireframe = False
-        self.show_baseline = False
+        self.show_baseline = False  
         self.edit_mode = MODE_NONE
+        self.selected_landmark_index = -1
+        self.landmark_list = []
         #self.repaint()
 
 #function _2canx( coord ) { return Math.round(( coord / gImageCanvasRatio ) * gScale) + gPanX + gTempPanX; }
 #function _2cany( coord ) { return Math.round(( coord / gImageCanvasRatio ) * gScale) + gPanY + gTempPanY; }
     def _2canx(self, coord):
-        return round((coord / self.image_canvas_ratio) * self.scale) + self.pan_x + self.temp_pan_x
+        return round((float(coord) / self.image_canvas_ratio) * self.scale) + self.pan_x + self.temp_pan_x
 
     def _2cany(self, coord):
-        return round((coord / self.image_canvas_ratio) * self.scale) + self.pan_y + self.temp_pan_y
+        return round((float(coord) / self.image_canvas_ratio) * self.scale) + self.pan_y + self.temp_pan_y
 
     def _2imgx(self, coord):
-        return round(((coord - self.pan_x) / self.scale) * self.image_canvas_ratio)
+        return round(((float(coord) - self.pan_x) / self.scale) * self.image_canvas_ratio)
 
     def _2imgy(self, coord):
-        return round(((coord - self.pan_y) / self.scale) * self.image_canvas_ratio)
-    
+        return round(((float(coord) - self.pan_y) / self.scale) * self.image_canvas_ratio)
+
+    def show_message(self, msg):
+        if self.object_dialog is not None:
+            self.object_dialog.status_bar.showMessage(msg) 
+
     def set_mode(self, mode):
         self.edit_mode = mode  
         if self.edit_mode == MODE_EDIT_LANDMARK:
             self.setCursor(Qt.CrossCursor)
+            self.show_message("Click on image to add landmark")
+        elif self.edit_mode == MODE_READY_MOVE_LANDMARK:
+            self.setCursor(Qt.SizeAllCursor)
+            self.show_message("Click on landmark to move")
+        elif self.edit_mode == MODE_MOVE_LANDMARK:
+            self.setCursor(Qt.SizeAllCursor)
+            self.show_message("Move landmark")
         else:
             self.setCursor(Qt.ArrowCursor)
 
@@ -733,8 +751,40 @@ class dLabel(QLabel):
             #print("pan", self.pan_x, self.pan_y, self.temp_pan_x, self.temp_pan_y)
             #self.downX = me.x()
             #self.downY = me.y()
+        elif self.edit_mode == MODE_EDIT_LANDMARK:
+            for index, landmark in enumerate(self.landmark_list):
+                # see if the mouse is close to any of the landmarks
+                #print("landmark", landmark)
+                curr_pos = [self.curr_mouse_x, self.curr_mouse_y]
+                lm_can_pos = [self._2canx(landmark[0]),self._2cany(landmark[1])]
+                if self.get_distance(curr_pos, lm_can_pos) < DISTANCE_THRESHOLD:
+                    #print("close to landmark", landmark)
+                    self.setCursor(Qt.SizeAllCursor)
+                    self.set_mode(MODE_READY_MOVE_LANDMARK)
+                    self.selected_landmark_index = index
+                    break
+        elif self.edit_mode == MODE_MOVE_LANDMARK:
+            #print("move landmark", self.selected_landmark_index)
+            if self.selected_landmark_index >= 0:
+                #print("move landmark", self.selected_landmark_index)
+                self.landmark_list[self.selected_landmark_index] = [self._2imgx(self.curr_mouse_x), self._2imgy(self.curr_mouse_y)]
+                if self.object_dialog is not None:
+                    self.object_dialog.update_landmark(self.selected_landmark_index, *self.landmark_list[self.selected_landmark_index])
+                #self.repaint()
+                #print("landmark list", self.landmark_list)
+        elif self.edit_mode == MODE_READY_MOVE_LANDMARK:
+            curr_pos = [self.curr_mouse_x, self.curr_mouse_y]
+            ready_landmark = self.landmark_list[self.selected_landmark_index]
+            lm_can_pos = [self._2canx(ready_landmark[0]),self._2cany(ready_landmark[1])]
+            if self.get_distance(curr_pos, lm_can_pos) > DISTANCE_THRESHOLD:
+                self.set_mode(MODE_EDIT_LANDMARK)
+                self.selected_landmark_index = -1
+            
         self.repaint()
         QLabel.mouseMoveEvent(self, event)
+
+    def get_distance(self, pos1, pos2):
+        return math.sqrt((pos1[0] - pos2[0])**2 + (pos1[1] - pos2[1])**2)
 
     def mousePressEvent(self, event):
         if self.orig_pixmap is None or self.object_dialog is None:
@@ -754,6 +804,10 @@ class dLabel(QLabel):
                 if img_x < 0 or img_x > self.orig_pixmap.width() or img_y < 0 or img_y > self.orig_pixmap.height():
                     return
                 self.object_dialog.add_landmark(str(img_x), str(img_y))
+                self.landmark_list.append([img_x, img_y])
+            elif self.edit_mode == MODE_READY_MOVE_LANDMARK:
+                self.set_mode(MODE_MOVE_LANDMARK)
+                
         elif me.button() == Qt.RightButton:
             self.pan_mode = MODE_PAN
             self.mouse_down_x = me.x()
@@ -776,6 +830,10 @@ class dLabel(QLabel):
             self.temp_pan_y = 0
             self.repaint()
             #print("right button released")
+        elif self.edit_mode == MODE_MOVE_LANDMARK:
+            self.set_mode(MODE_EDIT_LANDMARK)
+            self.selected_landmark_index = -1
+            #print("move landmark", self.selected_landmark_index)
 
         return super().mouseReleaseEvent(ev)    
 
@@ -968,6 +1026,7 @@ class ObjectDialog(QDialog):
         #print(self.parent.pos())
         self.setGeometry(QRect(100, 100, 1024, 600))
         self.move(self.parent.pos()+QPoint(100,100))
+        self.status_bar = QStatusBar()
 
         self.hsplitter = QSplitter(Qt.Horizontal)
         self.vsplitter = QSplitter(Qt.Vertical)
@@ -1038,8 +1097,8 @@ class ObjectDialog(QDialog):
         self.btnWireframe.setChecked(False)
         self.btnLandmark.setAutoExclusive(True)
         self.btnWireframe.setAutoExclusive(True)
-        self.btnLandmark.clicked.connect(self.landmark_clicked)
-        self.btnWireframe.clicked.connect(self.wireframe_clicked)
+        self.btnLandmark.clicked.connect(self.btnLandmark_clicked)
+        self.btnWireframe.clicked.connect(self.btnWireframe_clicked)
 
         self.btnLandmark.setFixedSize(32,32)
         self.btnWireframe.setFixedSize(32,32)
@@ -1097,15 +1156,17 @@ class ObjectDialog(QDialog):
         btn_layout.addWidget(self.btnDelete)
         btn_layout.addWidget(self.btnCancel)
 
+
         #self.main_layout.addLayout(self.sub_layout)
         self.main_layout.addWidget(self.hsplitter)
         self.main_layout.addLayout(btn_layout)
+        self.main_layout.addWidget(self.status_bar)
 
         self.dataset = None
         self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
         self.landmark_list = []
         self.m_app = QApplication.instance()
-        self.landmark_clicked()
+        self.btnLandmark_clicked()
 
         #self.edtDataFolder.setText(str(self.data_folder.resolve()))
         #self.edtServerAddress.setText(self.server_address)
@@ -1119,19 +1180,23 @@ class ObjectDialog(QDialog):
         #pass
     '''
 
-    def landmark_clicked(self):
+    def btnLandmark_clicked(self):
         #self.edit_mode = MODE_ADD_LANDMARK
         self.image_label.set_mode(MODE_EDIT_LANDMARK)
         self.image_label.update()
         self.btnLandmark.setDown(True)
         self.btnLandmark.setChecked(True)
+        self.btnWireframe.setDown(False)
+        self.btnWireframe.setChecked(False)
 
-    def wireframe_clicked(self):
+    def btnWireframe_clicked(self):
         #self.edit_mode = MODE_ADD_LANDMARK
         self.image_label.set_mode(MODE_EDIT_WIREFRAME)
         self.image_label.update()
         self.btnWireframe.setDown(True)
         self.btnWireframe.setChecked(True)
+        self.btnLandmark.setDown(False)
+        self.btnLandmark.setChecked(False)
 
     def set_object_name(self, name):
         #print("set_object_name", self.edtObjectName.text(), name)
@@ -1187,22 +1252,25 @@ class ObjectDialog(QDialog):
             self.inputY.setText("")
             self.inputZ.setText("")
 
-    def add_landmark(self, x, y, z=None):
-        #print("adding landmark", x, y, z)
-        # show landmark count in table
-        #print(self.edtLandmarkStr.rowCount())
+    def update_landmark(self, idx, x, y, z=None):
         if self.dataset.dimension == 2:
-            self.edtLandmarkStr.setRowCount(self.edtLandmarkStr.rowCount()+1)
-            self.edtLandmarkStr.setItem(self.edtLandmarkStr.rowCount()-1, 0, QTableWidgetItem(x))
-            self.edtLandmarkStr.setItem(self.edtLandmarkStr.rowCount()-1, 1, QTableWidgetItem(y))
+            self.landmark_list[idx] = [x,y]
+            self.edtLandmarkStr.setItem(idx, 0, QTableWidgetItem(str(x)))
+            self.edtLandmarkStr.setItem(idx, 1, QTableWidgetItem(str(y)))
+        elif self.dataset.dimension == 3:
+            self.edtLandmarkStr.setItem(idx, 0, QTableWidgetItem(str(x)))
+            self.edtLandmarkStr.setItem(idx, 1, QTableWidgetItem(str(y)))
+            self.edtLandmarkStr.setItem(idx, 2, QTableWidgetItem(str(z)))
+            self.landmark_list[idx] = [x,y,z]
+
+
+    def add_landmark(self, x, y, z=None):
+        print("adding landmark", x, y, z)
+        if self.dataset.dimension == 2:
             self.landmark_list.append([x,y])
         elif self.dataset.dimension == 3:
-            self.edtLandmarkStr.setRowCount(self.edtLandmarkStr.rowCount()+1)
-            self.edtLandmarkStr.setItem(self.edtLandmarkStr.rowCount()-1, 0, QTableWidgetItem(x))
-            self.edtLandmarkStr.setItem(self.edtLandmarkStr.rowCount()-1, 1, QTableWidgetItem(y))
-            self.edtLandmarkStr.setItem(self.edtLandmarkStr.rowCount()-1, 2, QTableWidgetItem(z))
             self.landmark_list.append([x,y,z])
-        #print(self.edtLandmarkStr.rowCount())
+        self.show_landmarks()
 
 
     def input_coords_process(self):
@@ -1224,20 +1292,33 @@ class ObjectDialog(QDialog):
         self.inputZ.setText("")
         self.inputX.setFocus()
 
+    def show_landmarks(self):
+        self.edtLandmarkStr.setRowCount(len(self.landmark_list))
+        for idx, lm in enumerate(self.landmark_list):
+            self.edtLandmarkStr.setItem(idx, 0, QTableWidgetItem(str(lm[0])))
+            self.edtLandmarkStr.setItem(idx, 1, QTableWidgetItem(str(lm[1])))
+
+            if self.dataset.dimension == 3:
+                self.edtLandmarkStr.setItem(idx, 2, QTableWidgetItem(str(lm[2])))
+
+
     def set_object(self, object):
-        #print("set_object", self.image_label.size())
+        print("set_object", self.image_label.size())
         self.object = object
         self.edtObjectName.setText(object.object_name)
         self.edtObjectDesc.setText(object.object_desc)
         #self.edtLandmarkStr.setText(object.landmark_str)
-        self.landmark_list = []
-        self.show_landmarks(object.landmark_str)
+        self.landmark_list = object.unpack_landmark()
+        #for lm in self.landmark_list:
+        #    self.show_landmark(*lm)
+        self.show_landmarks()
         if object.image is not None and len(object.image) > 0:
             img = object.image[0]
             image_path = img.get_image_path(self.m_app.storage_directory)
             #check if image_path exists
             if os.path.exists(image_path):
                 self.image_label.set_image(image_path)
+                self.image_label.landmark_list = self.landmark_list
         #self.set_dataset(object.dataset)
 
     def save_object(self):
@@ -1272,25 +1353,6 @@ class ObjectDialog(QDialog):
             if row < self.edtLandmarkStr.rowCount()-1:
                 landmark_str += "\n"
         return landmark_str
-
-    def show_landmarks(self,landmark_str):
-        # from landmark_str, show landmarks
-        #landmark_str = self.object.landmark_str
-        #print(landmark_str)
-        if landmark_str == "" or landmark_str is None:
-            return
-        
-        lines = landmark_str.split("\n")
-        landmark_count = 0
-
-        for line in lines:
-            coords = line.split("\t")
-            if len(coords) >= 2 and self.dataset.dimension == 2:
-                self.add_landmark(coords[0], coords[1])
-                landmark_count += 1
-            elif len(coords) == 3 and self.dataset.dimension == 3:
-                self.add_landmark(coords[0], coords[1], coords[2])
-                landmark_count += 1
 
     def Delete(self):
         ret = QMessageBox.question(self, "", "Are you sure to delete this object?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)

@@ -1265,7 +1265,7 @@ class ObjectDialog(QDialog):
 
 
     def add_landmark(self, x, y, z=None):
-        print("adding landmark", x, y, z)
+        #print("adding landmark", x, y, z)
         if self.dataset.dimension == 2:
             self.landmark_list.append([x,y])
         elif self.dataset.dimension == 3:
@@ -1303,7 +1303,7 @@ class ObjectDialog(QDialog):
 
 
     def set_object(self, object):
-        print("set_object", self.image_label.size())
+        #print("set_object", self.image_label.size())
         self.object = object
         self.edtObjectName.setText(object.object_name)
         self.edtObjectDesc.setText(object.object_desc)

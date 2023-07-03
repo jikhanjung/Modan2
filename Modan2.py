@@ -32,6 +32,7 @@ from ModanDialogs import DatasetAnalysisDialog, ObjectDialog, ImportDatasetDialo
 
 PROGRAM_NAME = "Modan2"
 PROGRAM_VERSION = "0.0.1"
+
 BASE_DIRECTORY = "."
 DEFAULT_STORAGE_DIRECTORY = os.path.join(BASE_DIRECTORY, "data/")
 
@@ -101,7 +102,7 @@ class ModanMainWindow(QMainWindow, form_class):
     @pyqtSlot()
     def on_action_edit_preferences_triggered(self):
         print("edit preferences")
-        #dlg = PreferencesDialog(self)
+        #dlg = PreferencesDialog(self)  
         #dlg.exec_()
         #print("main window data folder:", self.data_folder)
         #print("main window server address:", self.server_address)
@@ -695,6 +696,8 @@ class ModanMainWindow(QMainWindow, form_class):
         self.selected_dataset = None
         all_record = MdDataset.filter(parent=None)
         for rec in all_record:
+            rec.unpack_wireframe()
+            #print("wireframe:", rec.wireframe, rec.edge_list)
             item1 = QStandardItem(rec.dataset_name + " (" + str(rec.object_list.count()) + ")")
             if rec.dimension == 2:
                 item1.setIcon(QIcon("icon/icons8-xlarge-icons-50.png"))
@@ -720,6 +723,8 @@ class ModanMainWindow(QMainWindow, form_class):
     def load_subdataset(self, parent_item, dataset):
         all_record = MdDataset.filter(parent=dataset)
         for rec in all_record:
+            rec.unpack_wireframe()
+            #print("wireframe:", rec.wireframe, rec.edge_list)
             item1 = QStandardItem(rec.dataset_name + " (" + str(rec.object_list.count()) + ")")
             if rec.dimension == 2:
                 item1.setIcon(QIcon("icon/icons8-xlarge-icons-50.png")) #  https://icons8.com

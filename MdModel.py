@@ -27,8 +27,9 @@ class MdDataset(Model):
     created_at = DateTimeField(default=datetime.datetime.now)
     modified_at = DateTimeField(default=datetime.datetime.now)
     propertyname_list = CharField(null=True)
-    edge_list = []
     baseline_point_list = []
+    edge_list = []
+    polygon_list = []
 
     class Meta:
         database = gDatabase

@@ -36,38 +36,1018 @@ DISTANCE_THRESHOLD = LANDMARK_RADIUS * 3
 
 IMAGE_EXTENSION_LIST = ['png', 'jpg', 'jpeg','bmp','gif','tif','tiff']
 
-class MyPlotWidget(pg.PlotWidget):
+class LandmarkEditor(QLabel):
+    #clicked = pyqtSignal()
+    def __init__(self, widget):
+        super(LandmarkEditor, self).__init__(widget)
+        self.object_dialog = None
+        self.setAcceptDrops(True)
+        self.orig_pixmap = None
+        self.curr_pixmap = None
+        self.scale = 1.0
+        self.fullpath = None
+        self.temp_pan_x = 0
+        self.temp_pan_y = 0
+        self.mouse_down_x = 0
+        self.mouse_down_y = 0
+        self.pan_x = 0
+        self.pan_y = 0
+        self.setMouseTracking(True)
+        self.pan_mode = MODE_NONE
+        self.set_mode(MODE_EDIT_LANDMARK)
+        #self.edit_mode = MODE_ADD_LANDMARK
+        self.first_resize = True
+        self.curr_mouse_x = 0
+        self.curr_mouse_y = 0
+        self.image_canvas_ratio = 1.0
+        self.setMinimumSize(640,480)
+        self.show_index = True
+        self.show_wireframe = True
+        self.show_baseline = False  
+        self.edit_mode = MODE_NONE
+        self.selected_landmark_index = -1
+        self.landmark_list = []
+        self.wire_hover_index = -1
+        self.wire_start_index = -1
+        self.wire_end_index = -1
+        self.selected_edge_index = -1
+        
+        #self.repaint()
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+#function _2canx( coord ) { return Math.round(( coord / gImageCanvasRatio ) * gScale) + gPanX + gTempPanX; }
+#function _2cany( coord ) { return Math.round(( coord / gImageCanvasRatio ) * gScale) + gPanY + gTempPanY; }
+    def _2canx(self, coord):
+        return round((float(coord) / self.image_canvas_ratio) * self.scale) + self.pan_x + self.temp_pan_x
 
-        # self.scene() is a pyqtgraph.GraphicsScene.GraphicsScene.GraphicsScene
-        self.scene().sigMouseClicked.connect(self.mouse_clicked)    
+    def _2cany(self, coord):
+        return round((float(coord) / self.image_canvas_ratio) * self.scale) + self.pan_y + self.temp_pan_y
+
+    def _2imgx(self, coord):
+        return round(((float(coord) - self.pan_x) / self.scale) * self.image_canvas_ratio)
+
+    def _2imgy(self, coord):
+        return round(((float(coord) - self.pan_y) / self.scale) * self.image_canvas_ratio)
+
+    def show_message(self, msg):
+        if self.object_dialog is not None:
+            self.object_dialog.status_bar.showMessage(msg) 
+
+    def set_mode(self, mode):
+        self.edit_mode = mode  
+        if self.edit_mode == MODE_EDIT_LANDMARK:
+            self.setCursor(Qt.CrossCursor)
+            self.show_message("Click on image to add landmark")
+        elif self.edit_mode == MODE_READY_MOVE_LANDMARK:
+            self.setCursor(Qt.SizeAllCursor)
+            self.show_message("Click on landmark to move")
+        elif self.edit_mode == MODE_MOVE_LANDMARK:
+            self.setCursor(Qt.SizeAllCursor)
+            self.show_message("Move landmark")
+        else:
+            self.setCursor(Qt.ArrowCursor)
+
+    def get_index_within_threshold(self, curr_pos, threshold):
+
+        for index, landmark in enumerate(self.landmark_list):
+            lm_can_pos = [self._2canx(landmark[0]),self._2cany(landmark[1])]
+            dist = self.get_distance(curr_pos, lm_can_pos)
+            if dist < DISTANCE_THRESHOLD:
+                return index
+        return -1
+    
+    def get_edge_index_within_threshold(self, curr_pos, threshold):
+        if len(self.edge_list) == 0:
+            return -1
+
+        landmark_list = self.landmark_list
+        for index, wire in enumerate(self.edge_list):
+            #print("index", index, "wire:", wire)
+            if wire[0] >= len(self.landmark_list) or wire[1] >= len(self.landmark_list):
+                continue
+
+            wire_start = [self._2canx(float(self.landmark_list[wire[0]][0])),self._2cany(float(self.landmark_list[wire[0]][1]))]
+            wire_end = [self._2canx(float(self.landmark_list[wire[1]][0])),self._2cany(float(self.landmark_list[wire[1]][1]))]
+            dist = self.get_distance_to_line(curr_pos, wire_start, wire_end)
+            if dist < DISTANCE_THRESHOLD and dist > 0:
+                #print("dist:", dist, "threshold:", threshold, wire_start, wire_end)
+                return index
+        return -1
+    
+    def get_distance_to_line(self, curr_pos, line_start, line_end):
+        x1 = line_start[0]
+        y1 = line_start[1]
+        x2 = line_end[0]
+        y2 = line_end[1]
+        max_x = max(x1,x2)
+        min_x = min(x1,x2)
+        max_y = max(y1,y2)
+        min_y = min(y1,y2)
+        if curr_pos[0] > max_x or curr_pos[0] < min_x or curr_pos[1] > max_y or curr_pos[1] < min_y:
+            return -1
+        x0 = curr_pos[0]
+        y0 = curr_pos[1]
+        numerator = abs((y2-y1)*x0 - (x2-x1)*y0 + x2*y1 - y2*x1)
+        denominator = math.sqrt(math.pow(y2-y1,2) + math.pow(x2-x1,2))
+        return numerator/denominator
+    
+
+    def mouseMoveEvent(self, event):
+        if self.orig_pixmap is None or self.object_dialog is None:
+            return
+        me = QMouseEvent(event)
+        self.curr_mouse_x = me.x()
+        self.curr_mouse_y = me.y()
+        curr_pos = [self.curr_mouse_x, self.curr_mouse_y]
+    
+        #print("mouse move event", me, me.pos(), self.curr_mouse_x, self.curr_mouse_y, self._2imgx(self.curr_mouse_x), self._2imgy(self.curr_mouse_y))
+        if self.pan_mode == MODE_PAN:
+            self.temp_pan_x = self.curr_mouse_x - self.mouse_down_x
+            self.temp_pan_y = self.curr_mouse_y - self.mouse_down_y
+            #print("pan", self.pan_x, self.pan_y, self.temp_pan_x, self.temp_pan_y)
+            #self.downX = me.x()
+            #self.downY = me.y()
+        elif self.edit_mode == MODE_EDIT_LANDMARK:
+            near_idx = self.get_index_within_threshold(curr_pos, DISTANCE_THRESHOLD)
+            if near_idx >= 0:
+                #print("close to landmark", landmark, curr_pos, lm_can_pos, dist, DISTANCE_THRESHOLD)
+                self.setCursor(Qt.SizeAllCursor)
+                self.set_mode(MODE_READY_MOVE_LANDMARK)
+                self.selected_landmark_index = near_idx
+
+        elif self.edit_mode == MODE_WIREFRAME:
+            #if self.wire_hover_index < 0:
+            near_idx = self.get_index_within_threshold(curr_pos, DISTANCE_THRESHOLD)
+            #print("close to landmark", self.landmark_list[near_idx], curr_pos, near_idx, DISTANCE_THRESHOLD)
+            #print("start/end index", self.wire_start_index, self.wire_end_index)
+            if near_idx >= 0:
+                self.selected_edge_index = -1
+                if self.wire_hover_index < 0:
+                    self.wire_hover_index = near_idx
+                    #print("hover wire idx", near_idx, self.landmark_list[near_idx])
+                    #self.repaint()
+                else:
+                    pass
+            elif self.wire_start_index >= 0:
+                self.wire_hover_index = -1
+                #pass
+            else:
+                self.wire_hover_index = -1
+                #self.repaint()
+            
+                near_wire_idx = self.get_edge_index_within_threshold(curr_pos, DISTANCE_THRESHOLD)
+                if near_wire_idx >= 0:
+                    edge = self.edge_list[near_wire_idx]
+                    self.selected_edge_index = near_wire_idx
+                    #print("near wire idx", near_wire_idx, edge, self.landmark_list[edge[0]], self.landmark_list[edge[1]])
+                else:
+                    self.selected_edge_index = -1
+
+        elif self.edit_mode == MODE_MOVE_LANDMARK:
+            #print("move landmark", self.selected_landmark_index)
+            if self.selected_landmark_index >= 0:
+                #print("move landmark", self.selected_landmark_index)
+                self.landmark_list[self.selected_landmark_index] = [self._2imgx(self.curr_mouse_x), self._2imgy(self.curr_mouse_y)]
+                if self.object_dialog is not None:
+                    self.object_dialog.update_landmark(self.selected_landmark_index, *self.landmark_list[self.selected_landmark_index])
+                #self.repaint()
+                #print("landmark list", self.landmark_list)
+        elif self.edit_mode == MODE_READY_MOVE_LANDMARK:
+            curr_pos = [self.curr_mouse_x, self.curr_mouse_y]
+            ready_landmark = self.landmark_list[self.selected_landmark_index]
+            lm_can_pos = [self._2canx(ready_landmark[0]),self._2cany(ready_landmark[1])]
+            if self.get_distance(curr_pos, lm_can_pos) > DISTANCE_THRESHOLD:
+                self.set_mode(MODE_EDIT_LANDMARK)
+                self.selected_landmark_index = -1
+            
+        self.repaint()
+        QLabel.mouseMoveEvent(self, event)
+
+    def get_distance(self, pos1, pos2):
+        return math.sqrt((pos1[0] - pos2[0])**2 + (pos1[1] - pos2[1])**2)
+
+    def mousePressEvent(self, event):
+        if self.orig_pixmap is None or self.object_dialog is None:
+            return
+        #print("mouse press event")
+        #self.clicked.emit()
+        me = QMouseEvent(event)
+        #print("event and pos", event, me.pos())
+        if me.button() == Qt.LeftButton:
+
+            #print("left button clicked", me.pos())
+            if self.edit_mode == MODE_EDIT_LANDMARK:
+                #print("add landmark")
+                #print(self.object_dialog)
+                img_x = self._2imgx(self.curr_mouse_x)
+                img_y = self._2imgy(self.curr_mouse_y)
+                if img_x < 0 or img_x > self.orig_pixmap.width() or img_y < 0 or img_y > self.orig_pixmap.height():
+                    return
+                #print("add landmark", img_x, img_y)
+                #print("landmark list 0", self.landmark_list)
+                self.object_dialog.add_landmark(img_x, img_y)
+                #print("landmark list 1", self.landmark_list)
+                #self.landmark_list.append([img_x, img_y])
+                #print("landmark list 2", self.landmark_list)
+            elif self.edit_mode == MODE_READY_MOVE_LANDMARK:
+                self.set_mode(MODE_MOVE_LANDMARK)
+            elif self.edit_mode == MODE_WIREFRAME:
+                if self.wire_hover_index >= 0:
+                    if self.wire_start_index < 0:
+                        self.wire_start_index = self.wire_hover_index
+                        self.wire_hover_index = -1
+                        #self.edit_mode = MODE_DRAW_WIREFRAME
+
+        elif me.button() == Qt.RightButton:
+            if self.edit_mode == MODE_WIREFRAME:
+                #if self.
+                if self.wire_start_index >= 0:
+                    self.wire_start_index = -1
+                    self.wire_hover_index = -1
+                elif self.selected_edge_index >= 0:
+                    self.delete_edge(self.selected_edge_index)                    
+                    self.selected_edge_index = -1
+            elif self.edit_mode == MODE_READY_MOVE_LANDMARK:
+            #elif self.edit_mode == MODE_EDIT_LANDMARK:
+                if self.selected_landmark_index >= 0:
+                    #self.landmark_list.pop(self.selected_landmark_index)
+                    self.object_dialog.delete_landmark(self.selected_landmark_index)
+                    self.selected_landmark_index = -1
+                    #self.object_dialog.show_landmarks()
+            else:
+                self.pan_mode = MODE_PAN
+                self.mouse_down_x = me.x()
+                self.mouse_down_y = me.y()
+                #print("right button clicked")
+            #print("right button clicked")
+        elif me.button() == Qt.MidButton:
+            print("middle button clicked")
+
+        self.repaint()
+        #QLabel.mousePressEvent(self, event)
+
+    def mouseReleaseEvent(self, ev: QMouseEvent) -> None:
+        me = QMouseEvent(ev)
+        #print("mouse release event", me, me.pos())
+        if self.pan_mode == MODE_PAN:
+            self.pan_mode = MODE_NONE
+            self.pan_x += self.temp_pan_x
+            self.pan_y += self.temp_pan_y
+            self.temp_pan_x = 0
+            self.temp_pan_y = 0
+            self.repaint()
+            #print("right button released")
+        elif self.edit_mode == MODE_MOVE_LANDMARK:
+            self.set_mode(MODE_EDIT_LANDMARK)
+            self.selected_landmark_index = -1
+            #print("move landmark", self.selected_landmark_index)
+        elif self.edit_mode == MODE_WIREFRAME:
+            if self.wire_start_index >= 0 and self.wire_hover_index >= 0:
+                self.add_wire(self.wire_start_index, self.wire_hover_index)
+                self.wire_start_index = -1
+                self.wire_hover_index = -1
+                #self.edit_mode = MODE_EDIT_WIREFRAME
+                self.wire_end_index = -1
+                #self.repaint()
+
+        return super().mouseReleaseEvent(ev)    
+
+    def add_wire(self,wire_start_index, wire_end_index):
+        if wire_start_index == wire_end_index:
+            return
+        if wire_start_index > wire_end_index:
+            wire_start_index, wire_end_index = wire_end_index, wire_start_index
+        dataset = self.object.dataset
+        for wire in dataset.edge_list:
+            if wire[0] == wire_start_index and wire[1] == wire_end_index:
+                return
+        dataset.edge_list.append([wire_start_index, wire_end_index])
+        #print("wireframe", dataset.edge_list)
+        dataset.pack_wireframe()
+        #print("wireframe", dataset.wireframe)
+        dataset.save()
+        #print("dataset:", dataset)
+        self.repaint()
+        
+    def delete_edge(self, edge_index):
+        dataset = self.object.dataset
+        dataset.edge_list.pop(edge_index)
+        dataset.pack_wireframe()
+        dataset.save()
+        self.repaint()
+
+    def wheelEvent(self, event):
+        if self.orig_pixmap is None:
+            return
+        we = QWheelEvent(event)
+        scale_delta = 0
+        #print(we.angleDelta())
+        if we.angleDelta().y() > 0:
+            scale_delta = 0.1
+        else:
+            scale_delta = -0.1
+        if self.scale <= 0.8 and scale_delta < 0:
+            return
+        if self.scale > 1:
+            scale_delta *= math.floor(self.scale)
+        
+        prev_scale = self.scale
+        self.scale += scale_delta
+        self.scale = round(self.scale * 10) / 10
+        scale_proportion = self.scale / prev_scale
+        self.curr_pixmap = self.orig_pixmap.scaled(int(self.orig_pixmap.width() * self.scale / self.image_canvas_ratio), int(self.orig_pixmap.height() * self.scale / self.image_canvas_ratio))
+
+        self.pan_x = int( we.pos().x() - (we.pos().x() - self.pan_x) * scale_proportion )
+        self.pan_y = int( we.pos().y() - (we.pos().y() - self.pan_y) * scale_proportion )
+
+        self.repaint()
+
+        #print("wheel event", we, we.angleDelta())
+        QLabel.wheelEvent(self, event)
+
+    def set_image(self,file_path):
+        self.fullpath = file_path
+        self.curr_pixmap = self.orig_pixmap = QPixmap(file_path)
+        self.setPixmap(self.curr_pixmap)
+
+        #self.setScaledContents(True)
+        #print( self.curr_pixmap.width(), self.curr_pixmap.height(), self.orig_pixmap.width(), self.orig_pixmap.height())
+
+    def dragEnterEvent(self, event):
+        if self.object_dialog is None:
+            return
+        file_name = event.mimeData().text()
+        if file_name.split('.')[-1].lower() in IMAGE_EXTENSION_LIST:
+            event.acceptProposedAction()
+        else:
+            event.ignore()
+
+    def dropEvent(self, event):
+        if self.object_dialog is None:
+            return
+
+        file_path = event.mimeData().text()
+        file_path = re.sub('file:///', '', file_path)
+        #print(file_path)
+        #self.setScaledContents(True)
+        self.set_image(file_path)
+        #filename_stem = Path(file_path).stem
+        # resize self
+        self.calculate_resize()
+        self.object_dialog.set_object_name(Path(file_path).stem)
+        #self.resize(self.width(), self.height())
+
+    def paintEvent(self, event):
+        #self.pixmap
+        #return super().paintEvent(event)
+        painter = QPainter(self)
+        painter.fillRect(self.rect(), QBrush(QColor(100,100,100)))
+
+        if self.orig_pixmap is None:
+            return
+        # fill background with dark gray
+        
+        #height = self.progress * self.height()
+        #if self.orig_pixmap is not None:
+            #painter.drawPixmap(self.rect(), self.orig_pixmap)
+        if self.curr_pixmap is not None:                
+            #self.curr_pixmap = self.orig_pixmap.scaled(int(self.orig_width/self.image_canvas_ratio),int(self.orig_width/self.image_canvas_ratio), Qt.KeepAspectRatio)            
+            painter.drawPixmap(self.pan_x+self.temp_pan_x, self.pan_y+self.temp_pan_y,self.curr_pixmap)
+
+        # if edit_mode = MODE_ADD_LANDMARK draw a circle at the mouse position
+        #painter.setBrush(QBrush(Qt.red))
+        # draw wireframe
+        if self.show_wireframe == True:
+            painter.setPen(QPen(Qt.blue, 2))
+            painter.setBrush(QBrush(Qt.white))
+
+            #print("wireframe 2", dataset.edge_list, dataset.wireframe)
+            for wire in self.edge_list:
+                if wire[0] >= len(self.landmark_list) or wire[1] >= len(self.landmark_list):
+                    continue
+                [ from_x, from_y ] = self.landmark_list[wire[0]]
+                [ to_x, to_y ] = self.landmark_list[wire[1]]
+                painter.drawLine(int(self._2canx(from_x)), int(self._2cany(from_y)), int(self._2canx(to_x)), int(self._2cany(to_y)))
+                #painter.drawLine(self.landmark_list[wire[0]][0], self.landmark_list[wire[0]][1], self.landmark_list[wire[1]][0], self.landmark_list[wire[1]][1])
+            if self.selected_edge_index >= 0:
+                edge = self.edge_list[self.selected_edge_index]
+                painter.setPen(QPen(Qt.yellow, 2))
+                [ from_x, from_y ] = self.landmark_list[edge[0]]
+                [ to_x, to_y ] = self.landmark_list[edge[1]]
+                painter.drawLine(int(self._2canx(from_x)), int(self._2cany(from_y)), int(self._2canx(to_x)), int(self._2cany(to_y)))
 
 
-    def mouse_clicked(self, mouseClickEvent):
-        # mouseClickEvent is a pyqtgraph.GraphicsScene.mouseEvents.MouseClickEvent
-        print('clicked plot 0x{:x}, event: {}'.format(id(self), mouseClickEvent))
-        plot_item = self.getPlotItem()
-        print('plot_item: 0x{:x}'.format(id(plot_item)))
 
-class MyPlotItem(pg.ScatterPlotItem):
+        radius = LANDMARK_RADIUS
+        painter.setPen(QPen(Qt.red, 2))
+        painter.setBrush(QBrush(Qt.white))
+        if self.edit_mode == MODE_EDIT_LANDMARK:
+            img_x = self._2imgx(self.curr_mouse_x)
+            img_y = self._2imgy(self.curr_mouse_y)
+            if img_x < 0 or img_x > self.orig_pixmap.width() or img_y < 0 or img_y > self.orig_pixmap.height():
+                pass
+            else:
+                pass
+                #painter.drawEllipse(self.curr_mouse_x-radius, self.curr_mouse_y-radius, radius*2, radius*2)
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        #print(landmark_list)
 
-        # self.scene() is a pyqtgraph.GraphicsScene.GraphicsScene.GraphicsScene
-        self.sigClicked.connect(self.clicked)
+        #print("font:", painter.font().family(), painter.font().pointSize(), painter.font().pixelSize())
+        painter.setFont(QFont('Arial', 14))
+        for idx, landmark in enumerate(self.landmark_list):
+            if idx == self.wire_hover_index:
+                painter.setPen(QPen(Qt.blue, 2))
+                painter.setBrush(QBrush(Qt.yellow))
+                print("wire hover idx", idx)
+            elif idx == self.wire_start_index or idx == self.wire_end_index:
+                painter.setPen(QPen(Qt.blue, 2))
+                painter.setBrush(QBrush(Qt.blue))
+                print("wire start/end idx", idx)
+            else:
+                painter.setPen(QPen(Qt.red, 2))
+                painter.setBrush(QBrush(Qt.white))
+            painter.drawEllipse(self._2canx(int(landmark[0]))-radius, self._2cany(int(landmark[1]))-radius, radius*2, radius*2)
+            if self.show_index == True:
+                painter.drawText(self._2canx(int(landmark[0]))+10, self._2cany(int(landmark[1]))+10, str(idx+1))
 
 
-    def clicked(self, points, spotitem_list, ev):
-        # mouseClickEvent is a pyqtgraph.GraphicsScene.mouseEvents.MouseClickEvent
-        print('clicked plot 0x{:x}, points: {}, event: {}, xx:{}'.format(id(self), points, spotitem_list, ev))
-        #plot_item = self.getPlotItem()
-        #print('plot_item: 0x{:x}'.format(id(plot_item)))
-        points = self.pointsAt(ev.pos())
-        print("points:",points[0].data().object_name)
+        # draw wireframe being edited
+        if self.wire_start_index >= 0:
+            painter.setPen(QPen(Qt.blue, 2))
+            painter.setBrush(QBrush(Qt.blue))
+            start_lm = self.landmark_list[self.wire_start_index]
+            #painter.drawEllipse(self._2canx(int(start_lm[0]))-radius*2, self._2cany(int(start_lm[1]))-radius, radius*2, radius*2)
+            # draw line from start to mouse
+            painter.drawLine(self._2canx(int(start_lm[0])), self._2cany(int(start_lm[1])), self.curr_mouse_x, self.curr_mouse_y)
 
+
+        #r = QRect(0, self.height() - 20, self.width(), 20)
+        #painter.fillRect(r, QBrush(Qt.blue))
+        #pen = QPen(QColor("red"), 10)
+        #painter.setPen(pen)
+        #painter.drawRect(self.rect())
+    def calculate_resize(self):
+        self.orig_width = self.orig_pixmap.width()
+        self.orig_height = self.orig_pixmap.height()
+        image_wh_ratio = self.orig_width / self.orig_height
+        label_wh_ratio = self.width() / self.height()
+        if image_wh_ratio > label_wh_ratio:
+            self.image_canvas_ratio = self.orig_width / self.width()
+        else:
+            self.image_canvas_ratio = self.orig_height / self.height()
+        self.curr_pixmap = self.orig_pixmap.scaled(int(self.orig_width*self.scale/self.image_canvas_ratio),int(self.orig_width*self.scale/self.image_canvas_ratio), Qt.KeepAspectRatio)
+
+    def resizeEvent(self, event):
+        if self.orig_pixmap is not None:
+            self.calculate_resize()
+            #print("image_wh_ratio", image_wh_ratio, "label_wh_ratio", label_wh_ratio, "image_canvas_ratio", self.image_canvas_ratio)
+            self.first_resize = False
+        #print("resize",self.size())
+        # print size
+        #print(event.size())
+        #print(self.size())
+        if self.curr_pixmap is not None:                
+            #self.curr_pixmap.scaled(self.width(), self.height(), Qt.KeepAspectRatio)
+            #print( self.curr_pixmap.width(), self.curr_pixmap.height(), self.orig_pixmap.width(), self.orig_pixmap.height())
+            pass
+        QLabel.resizeEvent(self, event)
+
+    def set_object(self, object):
+        #print("set_object", object.object_name)
+        m_app = QApplication.instance()
+        self.object = object
+        if object.image.count() > 0:
+            #print("set_object", object.image[0].get_image_path(m_app.storage_directory))
+            self.set_image(object.image[0].get_image_path(m_app.storage_directory))
+            object.unpack_landmark()
+            object.dataset.unpack_wireframe()
+            self.landmark_list = object.landmark_list
+            self.edge_list = object.dataset.edge_list
+            #print("edge_list", self.edge_list)
+            #print("landmark_list", object.landmark_str)
+            self.calculate_resize()
+
+    def clear_object(self):
+        self.landmark_list = []
+        self.orig_pixmap = None
+        self.curr_pixmap = None
+        self.update()    
+
+class ObjectDialog(QDialog):
+    # NewDatasetDialog shows new dataset dialog.
+    def __init__(self,parent):
+        super().__init__()
+        self.setWindowTitle("Object")
+        self.parent = parent
+        #print(self.parent.pos())
+        self.setGeometry(QRect(100, 100, 1024, 600))
+        self.move(self.parent.pos()+QPoint(100,100))
+        self.status_bar = QStatusBar()
+
+        self.hsplitter = QSplitter(Qt.Horizontal)
+        self.vsplitter = QSplitter(Qt.Vertical)
+
+        #self.vsplitter.addWidget(self.tableView)
+        #self.vsplitter.addWidget(self.tableWidget)
+
+        #self.hsplitter.addWidget(self.treeView)
+        #self.hsplitter.addWidget(self.vsplitter)
+
+        self.inputLayout = QHBoxLayout()
+        self.inputCoords = QWidget()
+        self.inputCoords.setLayout(self.inputLayout)
+        self.inputX = QLineEdit()
+        self.inputY = QLineEdit()
+        self.inputZ = QLineEdit()
+
+        self.inputLayout.addWidget(self.inputX)
+        self.inputLayout.addWidget(self.inputY)
+        self.inputLayout.addWidget(self.inputZ)
+        self.inputLayout.setContentsMargins(0,0,0,0)
+        self.inputLayout.setSpacing(0)
+        self.btnAddInput = QPushButton()
+        self.btnAddInput.setText("Add")
+        self.inputLayout.addWidget(self.btnAddInput)
+        self.inputX.returnPressed.connect(self.input_coords_process)
+        self.inputY.returnPressed.connect(self.input_coords_process)
+        self.inputZ.returnPressed.connect(self.input_coords_process)
+        self.inputX.textChanged[str].connect(self.x_changed)
+        self.btnAddInput.clicked.connect(self.input_coords_process)
+
+        self.edtObjectName = QLineEdit()
+        self.edtObjectDesc = QTextEdit()
+        self.edtObjectDesc.setMaximumHeight(100)
+        self.edtLandmarkStr = QTableWidget()
+        self.lblDataset = QLabel()
+
+        self.main_layout = QVBoxLayout()
+        self.sub_layout = QHBoxLayout()
+        self.setLayout(self.main_layout)
+
+        self.image_label = LandmarkEditor(self)
+        self.image_label.object_dialog = self
+        self.image_label.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        #self.image_label.clicked.connect(self.on_image_clicked)
+
+        self.pixmap = QPixmap(1024,768)
+        self.image_label.setPixmap(self.pixmap)
+
+        self.form_layout = QFormLayout()
+        self.form_layout.addRow("Dataset Name", self.lblDataset)
+        self.form_layout.addRow("Object Name", self.edtObjectName)
+        self.form_layout.addRow("Object Desc", self.edtObjectDesc)
+        self.form_layout.addRow("Landmarks", self.edtLandmarkStr)
+        self.form_layout.addRow("", self.inputCoords)
+
+        self.btnGroup = QButtonGroup() 
+        self.btnLandmark = PicButton(QPixmap("icon/landmark.png"), QPixmap("icon/landmark_hover.png"), QPixmap("icon/landmark_down.png"))
+        self.btnWireframe = PicButton(QPixmap("icon/wireframe.png"), QPixmap("icon/wireframe_hover.png"), QPixmap("icon/wireframe_down.png"))
+        self.btnGroup.addButton(self.btnLandmark, 0)
+        self.btnGroup.addButton(self.btnLandmark, 0)
+        self.btnLandmark.setCheckable(True)
+        self.btnWireframe.setCheckable(True)
+        self.btnLandmark.setChecked(True)
+        self.btnWireframe.setChecked(False)
+        self.btnLandmark.setAutoExclusive(True)
+        self.btnWireframe.setAutoExclusive(True)
+        self.btnLandmark.clicked.connect(self.btnLandmark_clicked)
+        self.btnWireframe.clicked.connect(self.btnWireframe_clicked)
+        self.btnLandmark.setFixedSize(32,32)
+        self.btnWireframe.setFixedSize(32,32)
+        self.btn_layout2 = QGridLayout()
+        self.btn_layout2.addWidget(self.btnLandmark,0,0)
+        self.btn_layout2.addWidget(self.btnWireframe,0,1)
+
+        self.cbxShowIndex = QCheckBox()
+        self.cbxShowIndex.setText("Index")
+        self.cbxShowIndex.setChecked(True)
+        self.cbxShowWireframe = QCheckBox()
+        self.cbxShowWireframe.setText("Wireframe")
+        self.cbxShowWireframe.setChecked(True)
+        self.cbxShowBaseline = QCheckBox()
+        self.cbxShowBaseline.setText("Baseline")
+        self.cbxShowBaseline.setChecked(True)
+
+        self.left_widget = QWidget()
+        self.left_widget.setLayout(self.form_layout)
+
+        self.right_top_widget = QWidget()
+        self.right_top_widget.setLayout(self.btn_layout2)
+        self.right_middle_widget = QWidget()
+        self.right_middle_layout = QVBoxLayout()
+        self.right_middle_layout.addWidget(self.cbxShowIndex)
+        self.right_middle_layout.addWidget(self.cbxShowWireframe)
+        self.right_middle_layout.addWidget(self.cbxShowBaseline)
+        self.right_middle_widget.setLayout(self.right_middle_layout)
+        self.right_bottom_widget = QWidget()
+        self.vsplitter.addWidget(self.right_top_widget)
+        self.vsplitter.addWidget(self.right_middle_widget)
+        self.vsplitter.addWidget(self.right_bottom_widget)
+        self.vsplitter.setSizes([50,50,400])
+        self.vsplitter.setStretchFactor(0, 0)
+        self.vsplitter.setStretchFactor(1, 0)
+        self.vsplitter.setStretchFactor(2, 1)
+
+        self.hsplitter.addWidget(self.left_widget)
+        self.hsplitter.addWidget(self.image_label)
+        self.hsplitter.addWidget(self.vsplitter)
+        #self.hsplitter.addWidget(self.right_widget)
+        self.hsplitter.setSizes([200,800,100])
+        self.hsplitter.setStretchFactor(0, 0)
+        self.hsplitter.setStretchFactor(1, 1)
+        self.hsplitter.setStretchFactor(2, 0)
+
+        self.btnOkay = QPushButton()
+        self.btnOkay.setText("Save")
+        self.btnOkay.clicked.connect(self.Okay)
+        self.btnDelete = QPushButton()
+        self.btnDelete.setText("Delete")
+        self.btnDelete.clicked.connect(self.Delete)
+        self.btnCancel = QPushButton()
+        self.btnCancel.setText("Cancel")
+        self.btnCancel.clicked.connect(self.Cancel)
+        btn_layout = QHBoxLayout()
+        btn_layout.addWidget(self.btnOkay)
+        btn_layout.addWidget(self.btnDelete)
+        btn_layout.addWidget(self.btnCancel)
+
+
+        #self.main_layout.addLayout(self.sub_layout)
+        self.main_layout.addWidget(self.hsplitter)
+        self.main_layout.addLayout(btn_layout)
+        self.main_layout.addWidget(self.status_bar)
+
+        self.dataset = None
+        self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
+        self.landmark_list = []
+        self.m_app = QApplication.instance()
+        self.btnLandmark_clicked()
+
+        self.cbxShowIndex.stateChanged.connect(self.show_index_state_changed)
+        self.cbxShowWireframe.stateChanged.connect(self.show_wireframe_state_changed)
+        self.cbxShowBaseline.stateChanged.connect(self.show_baseline_state_changed)
+
+    def show_index_state_changed(self, int):
+        if self.cbxShowIndex.isChecked():
+            self.image_label.show_index = True
+            #print("show index CHECKED!")
+        else:
+            self.image_label.show_index = False
+            #print("show index UNCHECKED!")
+        self.image_label.update()
+
+    def show_baseline_state_changed(self, int):
+        if self.cbxShowBaseline.isChecked():
+            self.image_label.show_baseline = True
+            #print("show index CHECKED!")
+        else:
+            self.image_label.show_baseline = False
+            #print("show index UNCHECKED!")
+        self.image_label.update()
+
+    def show_wireframe_state_changed(self, int):
+        if self.cbxShowWireframe.isChecked():
+            self.image_label.show_wireframe = True
+            #print("show index CHECKED!")
+        else:
+            self.image_label.show_wireframe = False
+            #print("show index UNCHECKED!")
+        self.image_label.update()
+
+        #self.edtDataFolder.setText(str(self.data_folder.resolve()))
+        #self.edtServerAddress.setText(self.server_address)
+        #self.edtServerPort.setText(self.server_port)
+
+    '''
+    @pyqtSlot()
+    def on_image_clicked(self,event):
+        print("clicked")
+        print(event.pos())
+        #pass
+    '''
+
+    def btnLandmark_clicked(self):
+        #self.edit_mode = MODE_ADD_LANDMARK
+        self.image_label.set_mode(MODE_EDIT_LANDMARK)
+        self.image_label.update()
+        self.btnLandmark.setDown(True)
+        self.btnLandmark.setChecked(True)
+        self.btnWireframe.setDown(False)
+        self.btnWireframe.setChecked(False)
+
+    def btnWireframe_clicked(self):
+        #self.edit_mode = MODE_ADD_LANDMARK
+        self.image_label.set_mode(MODE_WIREFRAME)
+        self.image_label.update()
+        self.btnWireframe.setDown(True)
+        self.btnWireframe.setChecked(True)
+        self.btnLandmark.setDown(False)
+        self.btnLandmark.setChecked(False)
+
+    def set_object_name(self, name):
+        #print("set_object_name", self.edtObjectName.text(), name)
+
+        if self.edtObjectName.text() == "":
+            self.edtObjectName.setText(name)
+
+    def set_dataset(self, dataset):
+        self.dataset = dataset
+        self.lblDataset.setText(dataset.dataset_name)
+
+        header = self.edtLandmarkStr.horizontalHeader()    
+        if self.dataset.dimension == 2:
+            self.edtLandmarkStr.setColumnCount(2)
+            self.edtLandmarkStr.setHorizontalHeaderLabels(["X","Y"])
+            #self.edtLandmarkStr.setColumnWidth(0, 80)
+            #self.edtLandmarkStr.setColumnWidth(1, 80)
+            header.setSectionResizeMode(0, QHeaderView.Stretch)
+            header.setSectionResizeMode(1, QHeaderView.Stretch)
+            self.inputZ.hide()
+            input_width = 80
+        elif self.dataset.dimension == 3:
+            self.edtLandmarkStr.setColumnCount(3)
+            self.edtLandmarkStr.setHorizontalHeaderLabels(["X","Y","Z"])
+            header.setSectionResizeMode(0, QHeaderView.Stretch)
+            header.setSectionResizeMode(1, QHeaderView.Stretch)
+            header.setSectionResizeMode(2, QHeaderView.Stretch)
+            self.inputZ.show()
+            input_width = 60
+            
+        #self.inputX.setFixedWidth(input_width)
+        #self.inputY.setFixedWidth(input_width)
+        #self.inputZ.setFixedWidth(input_width)
+        #self.btnAddInput.setFixedWidth(input_width)
+        
+
+    @pyqtSlot(str)
+    def x_changed(self, text):
+        # if text is multiline and tab separated, add to table
+        #print("x_changed called with", text)
+        if "\n" in text:
+            lines = text.split("\n")
+            for line in lines:
+                #print(line)
+                if "\t" in line:
+                    coords = line.split("\t")
+                    #add landmarks using add_landmark method
+                    if self.dataset.dimension == 2 and len(coords) == 2:
+                        self.add_landmark(coords[0], coords[1])
+                    elif self.dataset.dimension == 3 and len(coords) == 3:
+                        self.add_landmark(coords[0], coords[1], coords[2])
+            self.inputX.setText("")
+            self.inputY.setText("")
+            self.inputZ.setText("")
+
+    def update_landmark(self, idx, x, y, z=None):
+        if self.dataset.dimension == 2:
+            self.landmark_list[idx] = [x,y]
+        elif self.dataset.dimension == 3:
+            self.landmark_list[idx] = [x,y,z]
+        self.show_landmarks()
+
+    def add_landmark(self, x, y, z=None):
+        #print("adding landmark", x, y, z)
+        if self.dataset.dimension == 2:
+            self.landmark_list.append([x,y])
+        elif self.dataset.dimension == 3:
+            self.landmark_list.append([x,y,z])
+        self.show_landmarks()
+
+    def delete_landmark(self, idx):
+        #print("delete_landmark", idx)
+        self.landmark_list.pop(idx)
+        self.show_landmarks()
+
+    def input_coords_process(self):
+        x_str = self.inputX.text()
+        y_str = self.inputY.text()
+        z_str = self.inputZ.text()
+        if self.dataset.dimension == 2:
+            if x_str == "" or y_str == "":
+                return
+            # add landmark to table using add_landmark method
+            self.add_landmark(x_str, y_str)
+
+        elif self.dataset.dimension == 3:
+            if x_str == "" or y_str == "" or z_str == "":
+                return
+            self.add_landmark(x_str, y_str, z_str)
+        self.inputX.setText("")
+        self.inputY.setText("")
+        self.inputZ.setText("")
+        self.inputX.setFocus()
+
+    def show_landmarks(self):
+        self.edtLandmarkStr.setRowCount(len(self.landmark_list))
+        for idx, lm in enumerate(self.landmark_list):
+
+            item_x = QTableWidgetItem(str(float(lm[0]*1.0)))
+            item_x.setTextAlignment(Qt.AlignRight|Qt.AlignVCenter)
+            self.edtLandmarkStr.setItem(idx, 0, item_x)
+
+            item_y = QTableWidgetItem(str(float(lm[1]*1.0)))
+            item_y.setTextAlignment(Qt.AlignRight|Qt.AlignVCenter)
+            self.edtLandmarkStr.setItem(idx, 1, item_y)
+
+            if self.dataset.dimension == 3:
+                item_z = QTableWidgetItem(str(float(lm[2]*1.0)))
+                item_z.setTextAlignment(Qt.AlignRight|Qt.AlignVCenter)
+                self.edtLandmarkStr.setItem(idx, 2, item_z)
+
+    def set_object(self, object):
+        #print("set_object", self.image_label.size())
+        self.object = object
+        self.edtObjectName.setText(object.object_name)
+        self.edtObjectDesc.setText(object.object_desc)
+        #self.edtLandmarkStr.setText(object.landmark_str)
+        self.landmark_list = object.unpack_landmark()
+        #for lm in self.landmark_list:
+        #    self.show_landmark(*lm)
+        self.show_landmarks()
+        if object.image is not None and len(object.image) > 0:
+            img = object.image[0]
+            image_path = img.get_image_path(self.m_app.storage_directory)
+            #check if image_path exists
+            if os.path.exists(image_path):
+                self.image_label.set_image(image_path)
+                self.image_label.set_object(object)
+                self.image_label.landmark_list = self.landmark_list
+        #self.set_dataset(object.dataset)
+
+    def save_object(self):
+
+        if self.object is None:
+            self.object = MdObject()
+        self.object.dataset_id = self.dataset.id
+        self.object.object_name = self.edtObjectName.text()
+        self.object.object_desc = self.edtObjectDesc.toPlainText()
+        #self.object.landmark_str = self.edtLandmarkStr.text()
+        self.object.landmark_str = self.make_landmark_str()
+        self.object.save()
+        if self.image_label.fullpath is not None and self.object.image.count() == 0:
+            md_image = MdImage()
+            md_image.object_id = self.object.id
+            md_image.load_file_info(self.image_label.fullpath)
+            new_filepath = md_image.get_image_path( self.m_app.storage_directory)
+            if not os.path.exists(os.path.dirname(new_filepath)):
+                os.makedirs(os.path.dirname(new_filepath))
+            #print("save object new filepath:", new_filepath)
+            shutil.copyfile(self.image_label.fullpath, new_filepath)
+            md_image.save()
+
+    def make_landmark_str(self):
+        # from table, make landmark_str
+        landmark_str = ""
+        for row in range(self.edtLandmarkStr.rowCount()):
+            for col in range(self.edtLandmarkStr.columnCount()):
+                landmark_str += self.edtLandmarkStr.item(row, col).text()
+                if col < self.edtLandmarkStr.columnCount()-1:
+                    landmark_str += "\t"
+            if row < self.edtLandmarkStr.rowCount()-1:
+                landmark_str += "\n"
+        return landmark_str
+
+    def Delete(self):
+        ret = QMessageBox.question(self, "", "Are you sure to delete this object?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if ret == QMessageBox.Yes:
+            if self.object.image.count() > 0:
+                image_path = self.object.image[0].get_image_path(self.m_app.storage_directory)
+                if os.path.exists(image_path):
+                    os.remove(image_path)
+            self.object.delete_instance()
+        #self.delete_dataset()
+        self.accept()
+
+    def Okay(self):
+        self.save_object()
+        self.accept()
+
+    def Cancel(self):
+        self.reject()
+
+    def resizeEvent(self, event):
+        #print("Window has been resized",self.image_label.width(), self.image_label.height())
+        #self.pixmap.scaled(self.image_label.width(), self.image_label.height(), Qt.KeepAspectRatio)
+        #self.edtObjectDesc.resize(self.edtObjectDesc.height(),300)
+        #self.image_label.setPixmap(self.pixmap)
+        QDialog.resizeEvent(self, event)
+
+class DatasetOpsViewer(QLabel):
+    #clicked = pyqtSignal()
+    def __init__(self, widget):
+        super(DatasetOpsViewer, self).__init__(widget)
+        self.ds_ops = None
+        self.scale = 1.0
+        self.pan_x = 0
+        self.pan_y = 0
+        self.show_index = True
+        self.show_wireframe = False
+        self.show_baseline = False
+        self.show_average = True
+        #self.setMinimumSize(200,200)
+
+    def set_ds_ops(self, ds_ops):
+        self.ds_ops = ds_ops
+        self.calculate_scale_and_pan()
+    
+    def calculate_scale_and_pan(self):
+        min_x = 100000000
+        max_x = -100000000
+        min_y = 100000000
+        max_y = -100000000
+
+        # get min and max x,y from landmarks
+        for obj in self.ds_ops.object_list:
+            for idx, landmark in enumerate(obj.landmark_list):
+                if landmark[0] < min_x:
+                    min_x = landmark[0]
+                if landmark[0] > max_x:
+                    max_x = landmark[0]
+                if landmark[1] < min_y:
+                    min_y = landmark[1]
+                if landmark[1] > max_y:
+                    max_y = landmark[1]
+        #print("min_x:", min_x, "max_x:", max_x, "min_y:", min_y, "max_y:", max_y)
+        width = max_x - min_x
+        height = max_y - min_y
+        w_scale = ( self.width() * 1.0 ) / ( width * 1.5 )
+        h_scale = ( self.height() * 1.0 ) / ( height * 1.5 )
+        self.scale = min(w_scale, h_scale)
+        self.pan_x = -min_x * self.scale + (self.width() - width * self.scale) / 2.0
+        self.pan_y = -min_y * self.scale + (self.height() - height * self.scale) / 2.0
+        #print("scale:", self.scale, "pan_x:", self.pan_x, "pan_y:", self.pan_y)
+        self.repaint()
+    
+    def resizeEvent(self, ev):
+        #print("resizeEvent")
+        self.calculate_scale_and_pan()
+        self.repaint()
+
+        return super().resizeEvent(ev)
+
+    def paintEvent(self, event):
+        #print("paint event")
+        #self.pixmap
+        #return super().paintEvent(event)
+        painter = QPainter(self)
+        painter.fillRect(self.rect(), QBrush(QColor(100,100,100)))
+
+        if self.ds_ops is None:
+            return
+
+        if self.show_wireframe == True:
+            painter.setPen(QPen(Qt.blue, 2))
+            painter.setBrush(QBrush(Qt.white))
+
+            #print("wireframe 2", dataset.edge_list, dataset.wireframe)
+            landmark_list = self.ds_ops.get_average_shape().landmark_list
+            #print("landmark_list:", landmark_list)
+            for wire in self.ds_ops.edge_list:
+                #print("wire:", wire, landmark_list[wire[0]], landmark_list[wire[1]])
+
+                if wire[0] >= len(landmark_list) or wire[1] >= len(landmark_list):
+                    continue
+                from_x = landmark_list[wire[0]][0]
+                from_y = landmark_list[wire[0]][1]
+                to_x = landmark_list[wire[1]][0]
+                to_y = landmark_list[wire[1]][1]
+                #[ from_x, from_y, from_z ] = landmark_list[wire[0]]
+                #[ to_x, to_y, to_z ] = landmark_list[wire[1]]
+                painter.drawLine(int(self._2canx(from_x)), int(self._2cany(from_y)), int(self._2canx(to_x)), int(self._2cany(to_y)))
+                #painter.drawLine(self.landmark_list[wire[0]][0], self.landmark_list[wire[0]][1], self.landmark_list[wire[1]][0], self.landmark_list[wire[1]][1])
+
+        radius = 1
+        painter.setFont(QFont('Arial', 14))
+        for obj in self.ds_ops.object_list:
+            #print("obj:", obj.id)
+            if obj.id in self.ds_ops.selected_object_id_list:
+                painter.setPen(QPen(Qt.yellow, 2))
+                painter.setBrush(QBrush(Qt.yellow))
+            else:
+                painter.setPen(QPen(Qt.red, 2))
+                painter.setBrush(QBrush(Qt.white))
+            for idx, landmark in enumerate(obj.landmark_list):
+                x = self._2canx(landmark[0])
+                y = self._2cany(landmark[1])
+                #print("x:", x, "y:", y, "lm", landmark[0], landmark[1], "scale:", self.scale, "pan_x:", self.pan_x, "pan_y:", self.pan_y)
+                painter.drawEllipse(x-radius, y-radius, radius*2, radius*2)
+                #painter.drawText(x+10, y+10, str(idx+1))
+
+        # show average shape
+        if self.show_average:
+            radius=3
+            for idx, landmark in enumerate(self.ds_ops.get_average_shape().landmark_list):
+                painter.setPen(QPen(Qt.blue, 2))
+                painter.setBrush(QBrush(Qt.white))
+                x = self._2canx(landmark[0])
+                y = self._2cany(landmark[1])
+                painter.drawEllipse(x-radius, y-radius, radius*2, radius*2)
+                if self.show_index:
+                    painter.drawText(x+10, y+10, str(idx+1))
+
+    def _2canx(self, x):
+        return int(x*self.scale + self.pan_x)
+    def _2cany(self, y):
+        return int(y*self.scale + self.pan_y)
 
 
 class DatasetAnalysisDialog(QDialog):
@@ -82,7 +1062,7 @@ class DatasetAnalysisDialog(QDialog):
         
         self.hsplitter = QSplitter(Qt.Horizontal)
 
-        self.lblShape = QLabel("Shape")
+        self.lblShape = DatasetOpsViewer(self)
         self.lblShape.setAlignment(Qt.AlignCenter)
         self.lblShape.setMinimumWidth(400)
         #self.lblShape.setMaximumWidth(200)
@@ -96,9 +1076,9 @@ class DatasetAnalysisDialog(QDialog):
 
         self.tableView = QTableView()
         self.tableView.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.tableView.setSelectionMode(QAbstractItemView.SingleSelection)
+        #self.tableView.setSelectionMode(QAbstractItemView.SingleSelection)
         self.tableView.setSortingEnabled(True)
-        self.tableView.setAlternatingRowColors(True)
+        #self.tableView.setAlternatingRowColors(True)
         self.tableView.setEditTriggers(QAbstractItemView.NoEditTriggers)
         #self.tableView.setContextMenuPolicy(Qt.CustomContextMenu)
         #self.tableView.customContextMenuRequested.connect(self.show_context_menu)
@@ -106,7 +1086,36 @@ class DatasetAnalysisDialog(QDialog):
         self.plot_widget = pg.PlotWidget()
         self.plot_widget.setBackground('w')
 
-        self.hsplitter.addWidget(self.lblShape)
+        # checkboxes
+        self.cbxShowIndex = QCheckBox()
+        self.cbxShowIndex.setText("Index")
+        self.cbxShowIndex.setChecked(True)
+        self.cbxShowWireframe = QCheckBox()
+        self.cbxShowWireframe.setText("Wireframe")
+        self.cbxShowWireframe.setChecked(False)
+        self.cbxShowBaseline = QCheckBox()
+        self.cbxShowBaseline.setText("Baseline")
+        self.cbxShowBaseline.setChecked(False)
+        self.cbxShowAverage = QCheckBox()
+        self.cbxShowAverage.setText("Average")
+        self.cbxShowAverage.setChecked(True)
+        self.checkbox_layout = QHBoxLayout()
+        self.checkbox_layout.addWidget(self.cbxShowIndex)
+        self.checkbox_layout.addWidget(self.cbxShowWireframe)
+        self.checkbox_layout.addWidget(self.cbxShowBaseline)
+        self.checkbox_layout.addWidget(self.cbxShowAverage)
+        self.cbx_widget = QWidget()
+        self.cbx_widget.setLayout(self.checkbox_layout)
+
+
+        self.svsplitter = QSplitter(Qt.Vertical)
+        self.svsplitter.addWidget(self.lblShape)
+        self.svsplitter.addWidget(self.cbx_widget)
+        self.svsplitter.setSizes([800,20])
+        self.svsplitter.setStretchFactor(0, 1)
+        self.svsplitter.setStretchFactor(1, 0)
+
+        self.hsplitter.addWidget(self.svsplitter)
         self.hsplitter.addWidget(self.tableView)
         self.hsplitter.addWidget(self.plot_widget)
 
@@ -119,14 +1128,69 @@ class DatasetAnalysisDialog(QDialog):
         self.hsplitter.setStretchFactor(1, 0)
         self.hsplitter.setStretchFactor(2, 1)
 
-        self.button_layout = QHBoxLayout()
-        self.btnPCA = QPushButton("PCA")
-        self.btnPCA.clicked.connect(self.on_btnPCA_clicked)
-        self.button_layout.addWidget(self.btnPCA)
+        self.left_bottom_layout = QVBoxLayout()
+        self.middle_bottom_layout = QVBoxLayout()
+        self.right_bottom_layout = QVBoxLayout()
 
-        self.main_layout.addWidget(self.hsplitter)
-        self.main_layout.addLayout(self.button_layout)
-        self.setLayout(self.main_layout)
+        rbbox_height = 70
+
+        self.rbProcrustes = QRadioButton("Procrustes")
+        self.rbBookstein = QRadioButton("Bookstein")
+        self.rbResistantFit = QRadioButton("Resistant Fit")
+        self.rbProcrustes.setChecked(True)
+        self.rbBookstein.setEnabled(False)
+        self.rbResistantFit.setEnabled(False)
+        self.lb1_layout = QVBoxLayout()
+        self.lb1_layout.addWidget(self.rbProcrustes)
+        self.lb1_layout.addWidget(self.rbBookstein)
+        self.lb1_layout.addWidget(self.rbResistantFit)
+        self.lb1_widget = QWidget()
+        self.lb1_widget.setMinimumHeight(rbbox_height)
+        self.lb1_widget.setMaximumHeight(rbbox_height)
+        self.lb1_widget.setLayout(self.lb1_layout)
+        #self.lb1_layout.setMinimumHeight(60)
+        self.btnSuperimpose = QPushButton("Superimpose")
+        self.btnSuperimpose.clicked.connect(self.on_btnSuperimpose_clicked)
+        self.left_bottom_layout.addWidget(self.lb1_widget)
+        self.left_bottom_layout.addWidget(self.btnSuperimpose)
+
+        self.rbPCA = QRadioButton("PCA")
+        self.rbCVA = QRadioButton("CVA")
+        self.rbPCA.setChecked(True)
+        self.rbCVA.setEnabled(False)
+        self.mb1_layout = QVBoxLayout()
+        self.mb1_layout.addWidget(self.rbPCA)
+        self.mb1_layout.addWidget(self.rbCVA)
+        self.mb1_widget = QWidget()
+        self.mb1_widget.setMinimumHeight(rbbox_height)
+        self.mb1_widget.setMaximumHeight(rbbox_height)
+        self.mb1_widget.setLayout(self.mb1_layout)
+        
+        #self.mb1_layout.setMinimumHeight(60)
+        self.btnAnalyze = QPushButton("Analyze")
+        self.btnAnalyze.clicked.connect(self.on_btnAnalyze_clicked)
+        self.middle_bottom_layout.addWidget(self.mb1_widget)
+        self.middle_bottom_layout.addWidget(self.btnAnalyze)
+
+        self.empty_widget = QWidget()
+        #self.empty_widget.setMinimumHeight(60)
+        self.btnSaveResults = QPushButton("Save Results")
+        self.btnSaveResults.clicked.connect(self.on_btnSaveResults_clicked)
+        self.rb1_layout = QVBoxLayout()
+        self.rb1_layout.addWidget(self.empty_widget)
+        self.rb1_widget = QWidget()
+        self.rb1_widget.setMinimumHeight(rbbox_height)
+        self.rb1_widget.setMaximumHeight(rbbox_height)
+        self.rb1_widget.setLayout(self.rb1_layout)
+        
+        self.right_bottom_layout.addWidget(self.rb1_widget)
+        self.right_bottom_layout.addWidget(self.btnSaveResults)
+        #self.rb1_layout.addWidget(self.btnSaveResults)
+
+        self.bottom_layout = QHBoxLayout()
+        self.bottom_layout.addLayout(self.left_bottom_layout)
+        self.bottom_layout.addLayout(self.middle_bottom_layout)
+        self.bottom_layout.addLayout(self.right_bottom_layout)
 
         self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
 
@@ -134,44 +1198,117 @@ class DatasetAnalysisDialog(QDialog):
         self.reset_tableView()
         self.load_object()
         self.pca_result = None
-    
+        self.selected_object_list = []
+        self.selected_object_id_list = []
 
+        self.status_bar = QStatusBar()
+        self.status_bar.setMaximumHeight(20)
+        #self.setStatusBar(self.status_bar)
+        self.main_layout.addWidget(self.hsplitter)
+        self.main_layout.addLayout(self.bottom_layout)
+        self.main_layout.addWidget(self.status_bar)
+        self.setLayout(self.main_layout)
+
+        self.cbxShowIndex.stateChanged.connect(self.show_index_state_changed)
+        self.cbxShowWireframe.stateChanged.connect(self.show_wireframe_state_changed)
+        self.cbxShowBaseline.stateChanged.connect(self.show_baseline_state_changed)
+        self.cbxShowAverage.stateChanged.connect(self.show_average_state_changed)
+        self.on_btnPCA_clicked()
+
+    def on_btnSuperimpose_clicked(self):
+        print("on_btnSuperimpose_clicked")
+
+    def on_btnAnalyze_clicked(self):
+        print("on_btnAnalyze_clicked")
+
+    def on_btnSaveResults_clicked(self):
+        print("on_btnSaveResults_clicked")
+        
+    def show_index_state_changed(self, int):
+        if self.cbxShowIndex.isChecked():
+            self.lblShape.show_index = True
+            #print("show index CHECKED!")
+        else:
+            self.lblShape.show_index = False
+            #print("show index UNCHECKED!")
+        self.lblShape.update()
+
+    def show_average_state_changed(self, int):
+        if self.cbxShowAverage.isChecked():
+            self.lblShape.show_average = True
+            #print("show index CHECKED!")
+        else:
+            self.lblShape.show_average = False
+            #print("show index UNCHECKED!")
+        self.lblShape.update()
+
+    def show_wireframe_state_changed(self, int):
+        if self.cbxShowWireframe.isChecked():
+            self.lblShape.show_wireframe = True
+            #print("show index CHECKED!")
+        else:
+            self.lblShape.show_wireframe = False
+            #print("show index UNCHECKED!")
+        self.lblShape.update()
+
+    def show_baseline_state_changed(self, int):
+        if self.cbxShowBaseline.isChecked():
+            self.lblShape.show_baseline = True
+            #print("show index CHECKED!")
+        else:
+            self.lblShape.show_baseline = False
+            #print("show index UNCHECKED!")
+        self.lblShape.update()
+
+        #connect 
+        #self.lblShape.sigPain
+
+    def show_object_shape(self):
+        self.lblShape.set_ds_ops(self.ds_ops)
+        self.lblShape.repaint()
 
     def on_btnPCA_clicked(self):
         #print("pca button clicked")
 
-        ds_ops = MdDatasetOps(self.dataset)
-        #for obj in ds_ops.object_list[:2]:
-        #    print(obj.object_name, obj.landmark_list[:5])
+        self.ds_ops = MdDatasetOps(self.dataset)
+        self.ds_ops.procrustes_superimposition()
+        self.show_object_shape()
 
-        ds_ops.procrustes_superimposition()
-
-        #for obj in ds_ops.object_list[:2]:
-        #    print(obj.object_name, obj.landmark_list[:5])
-
-
-        self.pca_result = self.PerformPCA(ds_ops)
+        self.pca_result = self.PerformPCA(self.ds_ops)
         new_coords = self.pca_result.rotated_matrix.tolist()
-        for i, obj in enumerate(ds_ops.object_list):
+        for i, obj in enumerate(self.ds_ops.object_list):
             obj.pca_result = new_coords[i]
 
+        self.show_pca_result()
         #print("pca_result.nVariable:",pca_result.nVariable)
         #with open('pca_result.txt', 'w') as f:
         #    for obj in ds_ops.object_list:
         #        f.write(obj.object_name + "\t" + "\t".join([str(x) for x in obj.pca_result]) + "\n")
-        
+
+    def show_pca_result(self):
+        self.plot_widget.clear()
+
         x_val = []
         y_val = []
         data = []
+        symbol = []
+        pen = []
 
-        for obj in ds_ops.object_list:
+        for obj in self.ds_ops.object_list:
             x_val.append(obj.pca_result[0])
             y_val.append(obj.pca_result[1])
             data.append(obj)
+            #print("obj.id:",obj.id,"self.selected_object_id_list:",self.selected_object_id_list)
+            if obj.id in self.selected_object_id_list:
+                symbol.append('o')
+                pen.append(pg.mkPen(color='b', width=1))
+            else:
+                symbol.append('x')
+                pen.append(pg.mkPen(color='r', width=1))
 
         #scatter = MyPlotItem(size=10, brush=pg.mkBrush(255, 255, 255, 120),hoverable=True,hoverPen=pg.mkPen(color='r', width=2))
         self.scatter_item = pg.ScatterPlotItem(size=10, brush=pg.mkBrush(255, 255, 255, 120),hoverable=True,hoverPen=pg.mkPen(color='r', width=2))
-        self.scatter_item.addPoints(x=x_val, y=y_val, data=data)
+        self.scatter_item.addPoints(x=x_val, y=y_val, data=data, symbol=symbol, pen=pen)
 
         self.plot_widget.setBackground('w')
         self.plot_widget.setTitle("PCA Result")
@@ -181,15 +1318,64 @@ class DatasetAnalysisDialog(QDialog):
         self.plot_widget.showGrid(x=True, y=True)
         ret = self.plot_widget.addItem(self.scatter_item)
         self.scatter_item.sigClicked.connect(self.on_scatter_item_clicked)
-        print("ret:",ret)
+        self.plot_widget.scene().sigMouseMoved.connect(self.on_mouse_moved)
+        self.plot_widget.scene().sigMouseClicked.connect(self.on_mouse_clicked)
+        #print("ret:",ret)
         #self.plot_widget.plot(x=x_val, y=y_val, pen=pg.mkPen(width=2, color='r'), name="plot1")
 
+        '''
+        https://stackoverflow.com/questions/48687464/how-to-set-equal-scale-for-axes-in-pyqtgraph-plot
 
+        1)
+        import pyqtgraph as pg
+        y = range(0, 100)
+        x = range(0, 100)
+        plt = pg.plot(x, y, pen='r')
+        plt.setFixedSize(1000, 1000)
+        plt.showGrid(x=True, y=True)
+
+        2)
+        import pyqtgraph as pg
+        import numpy as np
+        a = np.linspace(0,2*np.pi)
+        x =  2+np.cos(a)
+        y = -1+np.sin(a)
+        plt = pg.plot(x, y, pen='r')
+        plt.setAspectLocked()
+        plt.showGrid(x=True, y=True)
+        pg.QtGui.QApplication.exec_()
+        '''
+
+
+    def on_mouse_clicked(self, event):
+        #print("mouse clicked:",event)
+        #if event.double():
+        #    print("double clicked")
+        #else:
+        #    print("single clicked")
+        p = self.plot_widget.plotItem.vb.mapSceneToView(event.scenePos()) 
+        self.status_bar.showMessage("scene pos:" + str(event.scenePos()) + ", data pos:" + str(p))
+
+    def on_mouse_moved(self, pos):
+        p = self.plot_widget.plotItem.vb.mapSceneToView(pos)       
+        #print("plot widget:",self.plot_widget, "plotItem:",self.plot_widget.plotItem, "vb:",self.plot_widget.plotItem.vb, "mapSceneToView:",self.plot_widget.plotItem.vb.mapSceneToView(pos)) 
+        #print("pos:",pos, pos.x(), pos.y(), "p:",p, p.x(), p.y())
+
+        self.status_bar.showMessage("x: %d, y: %d, x2: %f, y2: %f" % (pos.x(), pos.y(), p.x(), p.y()))
 
     def on_scatter_item_clicked(self, plot, points):
+        #print("scatter item clicked:",plot,points)
+        self.selected_object_id_list = []
         for pt in points:
-            print("points:",pt.data().object_name)
-
+            #print("points:",str(pt.data()))
+            self.selected_object_id_list.append(pt.data().id)
+        # select rows in tableView
+        for obj_id in self.selected_object_id_list:
+            for row in range(self.object_model.rowCount()):
+                if int(self.object_model.item(row,0).text()) == obj_id:
+                    self.tableView.selectRow(row)
+                    #break
+            
 
     def PerformPCA(self,dataset_ops):
 
@@ -222,6 +1408,7 @@ class DatasetAnalysisDialog(QDialog):
             item1.setData(obj.id,Qt.DisplayRole)
             item2 = QStandardItem(obj.object_name)
             self.object_model.appendRow([item1,item2] )
+        
 
     def reset_tableView(self):
         self.object_model = QStandardItemModel()
@@ -234,7 +1421,7 @@ class DatasetAnalysisDialog(QDialog):
         self.tableView.verticalHeader().setVisible(False)
         self.tableView.setSelectionBehavior(QTableView.SelectRows)
         self.object_selection_model = self.tableView.selectionModel()
-        #self.object_selection_model.selectionChanged.connect(self.on_object_selection_changed)
+        self.object_selection_model.selectionChanged.connect(self.on_object_selection_changed)
         self.tableView.setSortingEnabled(True)
         self.tableView.sortByColumn(0, Qt.AscendingOrder)
         self.object_model.setSortRole(Qt.UserRole)
@@ -242,7 +1429,47 @@ class DatasetAnalysisDialog(QDialog):
         header = self.tableView.horizontalHeader()    
         header.setSectionResizeMode(0, QHeaderView.Fixed)
         header.setSectionResizeMode(1, QHeaderView.Stretch)
+        self.tableView.setStyleSheet("QTreeView::item:selected{background-color: palette(highlight); color: palette(highlightedText);};")
 
+    def on_object_selection_changed(self, selected, deselected):
+        self.selected_object_id_list = self.get_selected_object_id_list()
+        if len(self.selected_object_id_list) == 0:
+            return
+        #print("object_id:",object_id, type(object_id))
+        #for 
+        #for object_id in self.selected_object_id_list:
+            #print("selected object id:",object_id)
+        #object_id = selected_object_list[0].id
+        self.show_pca_result()
+        self.ds_ops.selected_object_id_list = self.selected_object_id_list
+        self.show_object_shape()
+
+        
+        #self.selected_object = MdObject.get_by_id(object_id)
+        #print("selected_object:",self.selected_object)
+        #self.show_object(self.selected_object)
+
+    def get_selected_object_id_list(self):
+        selected_indexes = self.tableView.selectionModel().selectedRows()
+        if len(selected_indexes) == 0:
+            return None
+
+        new_index_list = []
+        model = selected_indexes[0].model()
+        if hasattr(model, 'mapToSource'):
+            for index in selected_indexes:
+                new_index = model.mapToSource(index)
+                new_index_list.append(new_index)
+            selected_indexes = new_index_list
+        
+        selected_object_id_list = []
+        for index in selected_indexes:
+            item = self.object_model.itemFromIndex(index)
+            object_id = item.text()
+            object_id = int(object_id)
+            selected_object_id_list.append(object_id)
+
+        return selected_object_id_list
 
 class ImportDatasetDialog(QDialog):
     # NewDatasetDialog shows new dataset dialog.
@@ -565,8 +1792,6 @@ class TPS:
 
             return dataset
 
-
-
 class DatasetDialog(QDialog):
     # NewDatasetDialog shows new dataset dialog.
     def __init__(self,parent):
@@ -719,502 +1944,6 @@ class DatasetDialog(QDialog):
         self.reject()
 
 
-class dLabel(QLabel):
-    #clicked = pyqtSignal()
-    def __init__(self, widget):
-        super(dLabel, self).__init__(widget)
-        self.object_dialog = None
-        self.setAcceptDrops(True)
-        self.orig_pixmap = None
-        self.curr_pixmap = None
-        self.scale = 1.0
-        self.fullpath = None
-        self.temp_pan_x = 0
-        self.temp_pan_y = 0
-        self.mouse_down_x = 0
-        self.mouse_down_y = 0
-        self.pan_x = 0
-        self.pan_y = 0
-        self.setMouseTracking(True)
-        self.pan_mode = MODE_NONE
-        self.set_mode(MODE_EDIT_LANDMARK)
-        #self.edit_mode = MODE_ADD_LANDMARK
-        self.first_resize = True
-        self.curr_mouse_x = 0
-        self.curr_mouse_y = 0
-        self.image_canvas_ratio = 1.0
-        self.setMinimumSize(640,480)
-        self.show_index = True
-        self.show_wireframe = True
-        self.show_baseline = False  
-        self.edit_mode = MODE_NONE
-        self.selected_landmark_index = -1
-        self.landmark_list = []
-        self.wire_hover_index = -1
-        self.wire_start_index = -1
-        self.wire_end_index = -1
-        self.selected_edge_index = -1
-        
-        #self.repaint()
-
-#function _2canx( coord ) { return Math.round(( coord / gImageCanvasRatio ) * gScale) + gPanX + gTempPanX; }
-#function _2cany( coord ) { return Math.round(( coord / gImageCanvasRatio ) * gScale) + gPanY + gTempPanY; }
-    def _2canx(self, coord):
-        return round((float(coord) / self.image_canvas_ratio) * self.scale) + self.pan_x + self.temp_pan_x
-
-    def _2cany(self, coord):
-        return round((float(coord) / self.image_canvas_ratio) * self.scale) + self.pan_y + self.temp_pan_y
-
-    def _2imgx(self, coord):
-        return round(((float(coord) - self.pan_x) / self.scale) * self.image_canvas_ratio)
-
-    def _2imgy(self, coord):
-        return round(((float(coord) - self.pan_y) / self.scale) * self.image_canvas_ratio)
-
-    def show_message(self, msg):
-        if self.object_dialog is not None:
-            self.object_dialog.status_bar.showMessage(msg) 
-
-    def set_mode(self, mode):
-        self.edit_mode = mode  
-        if self.edit_mode == MODE_EDIT_LANDMARK:
-            self.setCursor(Qt.CrossCursor)
-            self.show_message("Click on image to add landmark")
-        elif self.edit_mode == MODE_READY_MOVE_LANDMARK:
-            self.setCursor(Qt.SizeAllCursor)
-            self.show_message("Click on landmark to move")
-        elif self.edit_mode == MODE_MOVE_LANDMARK:
-            self.setCursor(Qt.SizeAllCursor)
-            self.show_message("Move landmark")
-        else:
-            self.setCursor(Qt.ArrowCursor)
-
-    def get_index_within_threshold(self, curr_pos, threshold):
-
-        for index, landmark in enumerate(self.landmark_list):
-            lm_can_pos = [self._2canx(landmark[0]),self._2cany(landmark[1])]
-            dist = self.get_distance(curr_pos, lm_can_pos)
-            if dist < DISTANCE_THRESHOLD:
-                return index
-        return -1
-    
-    def get_edge_index_within_threshold(self, curr_pos, threshold):
-        if len(self.edge_list) == 0:
-            return -1
-
-        landmark_list = self.landmark_list
-        for index, wire in enumerate(self.edge_list):
-            #print("index", index, "wire:", wire)
-            if wire[0] >= len(self.landmark_list) or wire[1] >= len(self.landmark_list):
-                continue
-
-            wire_start = [self._2canx(float(self.landmark_list[wire[0]][0])),self._2cany(float(self.landmark_list[wire[0]][1]))]
-            wire_end = [self._2canx(float(self.landmark_list[wire[1]][0])),self._2cany(float(self.landmark_list[wire[1]][1]))]
-            dist = self.get_distance_to_line(curr_pos, wire_start, wire_end)
-            if dist < DISTANCE_THRESHOLD and dist > 0:
-                #print("dist:", dist, "threshold:", threshold, wire_start, wire_end)
-                return index
-        return -1
-    
-    def get_distance_to_line(self, curr_pos, line_start, line_end):
-        x1 = line_start[0]
-        y1 = line_start[1]
-        x2 = line_end[0]
-        y2 = line_end[1]
-        max_x = max(x1,x2)
-        min_x = min(x1,x2)
-        max_y = max(y1,y2)
-        min_y = min(y1,y2)
-        if curr_pos[0] > max_x or curr_pos[0] < min_x or curr_pos[1] > max_y or curr_pos[1] < min_y:
-            return -1
-        x0 = curr_pos[0]
-        y0 = curr_pos[1]
-        numerator = abs((y2-y1)*x0 - (x2-x1)*y0 + x2*y1 - y2*x1)
-        denominator = math.sqrt(math.pow(y2-y1,2) + math.pow(x2-x1,2))
-        return numerator/denominator
-    
-
-    def mouseMoveEvent(self, event):
-        if self.orig_pixmap is None or self.object_dialog is None:
-            return
-        me = QMouseEvent(event)
-        self.curr_mouse_x = me.x()
-        self.curr_mouse_y = me.y()
-        curr_pos = [self.curr_mouse_x, self.curr_mouse_y]
-    
-        #print("mouse move event", me, me.pos(), self.curr_mouse_x, self.curr_mouse_y, self._2imgx(self.curr_mouse_x), self._2imgy(self.curr_mouse_y))
-        if self.pan_mode == MODE_PAN:
-            self.temp_pan_x = self.curr_mouse_x - self.mouse_down_x
-            self.temp_pan_y = self.curr_mouse_y - self.mouse_down_y
-            #print("pan", self.pan_x, self.pan_y, self.temp_pan_x, self.temp_pan_y)
-            #self.downX = me.x()
-            #self.downY = me.y()
-        elif self.edit_mode == MODE_EDIT_LANDMARK:
-            near_idx = self.get_index_within_threshold(curr_pos, DISTANCE_THRESHOLD)
-            if near_idx >= 0:
-                #print("close to landmark", landmark, curr_pos, lm_can_pos, dist, DISTANCE_THRESHOLD)
-                self.setCursor(Qt.SizeAllCursor)
-                self.set_mode(MODE_READY_MOVE_LANDMARK)
-                self.selected_landmark_index = near_idx
-
-        elif self.edit_mode == MODE_WIREFRAME:
-            #if self.wire_hover_index < 0:
-            near_idx = self.get_index_within_threshold(curr_pos, DISTANCE_THRESHOLD)
-            print("close to landmark", self.landmark_list[near_idx], curr_pos, near_idx, DISTANCE_THRESHOLD)
-            print("start/end index", self.wire_start_index, self.wire_end_index)
-            if near_idx >= 0:
-                self.selected_edge_index = -1
-                if self.wire_hover_index < 0:
-                    self.wire_hover_index = near_idx
-                    print("hover wire idx", near_idx, self.landmark_list[near_idx])
-                    #self.repaint()
-                else:
-                    pass
-            elif self.wire_start_index >= 0:
-                self.wire_hover_index = -1
-                #pass
-            else:
-                self.wire_hover_index = -1
-                #self.repaint()
-            
-                near_wire_idx = self.get_edge_index_within_threshold(curr_pos, DISTANCE_THRESHOLD)
-                if near_wire_idx >= 0:
-                    edge = self.edge_list[near_wire_idx]
-                    self.selected_edge_index = near_wire_idx
-                    #print("near wire idx", near_wire_idx, edge, self.landmark_list[edge[0]], self.landmark_list[edge[1]])
-                else:
-                    self.selected_edge_index = -1
-
-        elif self.edit_mode == MODE_MOVE_LANDMARK:
-            #print("move landmark", self.selected_landmark_index)
-            if self.selected_landmark_index >= 0:
-                #print("move landmark", self.selected_landmark_index)
-                self.landmark_list[self.selected_landmark_index] = [self._2imgx(self.curr_mouse_x), self._2imgy(self.curr_mouse_y)]
-                if self.object_dialog is not None:
-                    self.object_dialog.update_landmark(self.selected_landmark_index, *self.landmark_list[self.selected_landmark_index])
-                #self.repaint()
-                #print("landmark list", self.landmark_list)
-        elif self.edit_mode == MODE_READY_MOVE_LANDMARK:
-            curr_pos = [self.curr_mouse_x, self.curr_mouse_y]
-            ready_landmark = self.landmark_list[self.selected_landmark_index]
-            lm_can_pos = [self._2canx(ready_landmark[0]),self._2cany(ready_landmark[1])]
-            if self.get_distance(curr_pos, lm_can_pos) > DISTANCE_THRESHOLD:
-                self.set_mode(MODE_EDIT_LANDMARK)
-                self.selected_landmark_index = -1
-            
-        self.repaint()
-        QLabel.mouseMoveEvent(self, event)
-
-    def get_distance(self, pos1, pos2):
-        return math.sqrt((pos1[0] - pos2[0])**2 + (pos1[1] - pos2[1])**2)
-
-    def mousePressEvent(self, event):
-        if self.orig_pixmap is None or self.object_dialog is None:
-            return
-        #print("mouse press event")
-        #self.clicked.emit()
-        me = QMouseEvent(event)
-        #print("event and pos", event, me.pos())
-        if me.button() == Qt.LeftButton:
-
-            #print("left button clicked", me.pos())
-            if self.edit_mode == MODE_EDIT_LANDMARK:
-                #print("add landmark")
-                #print(self.object_dialog)
-                img_x = self._2imgx(self.curr_mouse_x)
-                img_y = self._2imgy(self.curr_mouse_y)
-                if img_x < 0 or img_x > self.orig_pixmap.width() or img_y < 0 or img_y > self.orig_pixmap.height():
-                    return
-                #print("add landmark", img_x, img_y)
-                #print("landmark list 0", self.landmark_list)
-                self.object_dialog.add_landmark(img_x, img_y)
-                #print("landmark list 1", self.landmark_list)
-                #self.landmark_list.append([img_x, img_y])
-                #print("landmark list 2", self.landmark_list)
-            elif self.edit_mode == MODE_READY_MOVE_LANDMARK:
-                self.set_mode(MODE_MOVE_LANDMARK)
-            elif self.edit_mode == MODE_WIREFRAME:
-                if self.wire_hover_index >= 0:
-                    if self.wire_start_index < 0:
-                        self.wire_start_index = self.wire_hover_index
-                        self.wire_hover_index = -1
-                        #self.edit_mode = MODE_DRAW_WIREFRAME
-
-        elif me.button() == Qt.RightButton:
-            if self.edit_mode == MODE_WIREFRAME:
-                #if self.
-                if self.wire_start_index >= 0:
-                    self.wire_start_index = -1
-                    self.wire_hover_index = -1
-                elif self.selected_edge_index >= 0:
-                    self.delete_edge(self.selected_edge_index)                    
-                    self.selected_edge_index = -1
-            elif self.edit_mode == MODE_READY_MOVE_LANDMARK:
-            #elif self.edit_mode == MODE_EDIT_LANDMARK:
-                if self.selected_landmark_index >= 0:
-                    #self.landmark_list.pop(self.selected_landmark_index)
-                    self.object_dialog.delete_landmark(self.selected_landmark_index)
-                    self.selected_landmark_index = -1
-                    #self.object_dialog.show_landmarks()
-            else:
-                self.pan_mode = MODE_PAN
-                self.mouse_down_x = me.x()
-                self.mouse_down_y = me.y()
-                #print("right button clicked")
-            #print("right button clicked")
-        elif me.button() == Qt.MidButton:
-            print("middle button clicked")
-
-        self.repaint()
-        #QLabel.mousePressEvent(self, event)
-
-    def mouseReleaseEvent(self, ev: QMouseEvent) -> None:
-        me = QMouseEvent(ev)
-        #print("mouse release event", me, me.pos())
-        if self.pan_mode == MODE_PAN:
-            self.pan_mode = MODE_NONE
-            self.pan_x += self.temp_pan_x
-            self.pan_y += self.temp_pan_y
-            self.temp_pan_x = 0
-            self.temp_pan_y = 0
-            self.repaint()
-            #print("right button released")
-        elif self.edit_mode == MODE_MOVE_LANDMARK:
-            self.set_mode(MODE_EDIT_LANDMARK)
-            self.selected_landmark_index = -1
-            #print("move landmark", self.selected_landmark_index)
-        elif self.edit_mode == MODE_WIREFRAME:
-            if self.wire_start_index >= 0 and self.wire_hover_index >= 0:
-                self.add_wire(self.wire_start_index, self.wire_hover_index)
-                self.wire_start_index = -1
-                self.wire_hover_index = -1
-                #self.edit_mode = MODE_EDIT_WIREFRAME
-                self.wire_end_index = -1
-                #self.repaint()
-
-        return super().mouseReleaseEvent(ev)    
-
-    def add_wire(self,wire_start_index, wire_end_index):
-        if wire_start_index == wire_end_index:
-            return
-        if wire_start_index > wire_end_index:
-            wire_start_index, wire_end_index = wire_end_index, wire_start_index
-        dataset = self.object.dataset
-        for wire in dataset.edge_list:
-            if wire[0] == wire_start_index and wire[1] == wire_end_index:
-                return
-        dataset.edge_list.append([wire_start_index, wire_end_index])
-        #print("wireframe", dataset.edge_list)
-        dataset.pack_wireframe()
-        #print("wireframe", dataset.wireframe)
-        dataset.save()
-        #print("dataset:", dataset)
-        self.repaint()
-        
-    def delete_edge(self, edge_index):
-        dataset = self.object.dataset
-        dataset.edge_list.pop(edge_index)
-        dataset.pack_wireframe()
-        dataset.save()
-        self.repaint()
-
-    def wheelEvent(self, event):
-        if self.orig_pixmap is None:
-            return
-        we = QWheelEvent(event)
-        scale_delta = 0
-        #print(we.angleDelta())
-        if we.angleDelta().y() > 0:
-            scale_delta = 0.1
-        else:
-            scale_delta = -0.1
-        if self.scale <= 0.8 and scale_delta < 0:
-            return
-        if self.scale > 1:
-            scale_delta *= math.floor(self.scale)
-        
-        prev_scale = self.scale
-        self.scale += scale_delta
-        self.scale = round(self.scale * 10) / 10
-        scale_proportion = self.scale / prev_scale
-        self.curr_pixmap = self.orig_pixmap.scaled(int(self.orig_pixmap.width() * self.scale / self.image_canvas_ratio), int(self.orig_pixmap.height() * self.scale / self.image_canvas_ratio))
-
-        self.pan_x = int( we.pos().x() - (we.pos().x() - self.pan_x) * scale_proportion )
-        self.pan_y = int( we.pos().y() - (we.pos().y() - self.pan_y) * scale_proportion )
-
-        self.repaint()
-
-        #print("wheel event", we, we.angleDelta())
-        QLabel.wheelEvent(self, event)
-
-    def set_image(self,file_path):
-        self.fullpath = file_path
-        self.curr_pixmap = self.orig_pixmap = QPixmap(file_path)
-        self.setPixmap(self.curr_pixmap)
-
-        #self.setScaledContents(True)
-        #print( self.curr_pixmap.width(), self.curr_pixmap.height(), self.orig_pixmap.width(), self.orig_pixmap.height())
-
-    def dragEnterEvent(self, event):
-        if self.object_dialog is None:
-            return
-        file_name = event.mimeData().text()
-        if file_name.split('.')[-1].lower() in IMAGE_EXTENSION_LIST:
-            event.acceptProposedAction()
-        else:
-            event.ignore()
-
-    def dropEvent(self, event):
-        if self.object_dialog is None:
-            return
-
-        file_path = event.mimeData().text()
-        file_path = re.sub('file:///', '', file_path)
-        #print(file_path)
-        #self.setScaledContents(True)
-        self.set_image(file_path)
-        #filename_stem = Path(file_path).stem
-        # resize self
-        self.calculate_resize()
-        self.object_dialog.set_object_name(Path(file_path).stem)
-        #self.resize(self.width(), self.height())
-
-    def paintEvent(self, event):
-        #self.pixmap
-        #return super().paintEvent(event)
-        painter = QPainter(self)
-        painter.fillRect(self.rect(), QBrush(QColor(100,100,100)))
-
-        if self.orig_pixmap is None:
-            return
-        # fill background with dark gray
-        
-        #height = self.progress * self.height()
-        #if self.orig_pixmap is not None:
-            #painter.drawPixmap(self.rect(), self.orig_pixmap)
-        if self.curr_pixmap is not None:                
-            #self.curr_pixmap = self.orig_pixmap.scaled(int(self.orig_width/self.image_canvas_ratio),int(self.orig_width/self.image_canvas_ratio), Qt.KeepAspectRatio)            
-            painter.drawPixmap(self.pan_x+self.temp_pan_x, self.pan_y+self.temp_pan_y,self.curr_pixmap)
-
-        # if edit_mode = MODE_ADD_LANDMARK draw a circle at the mouse position
-        #painter.setBrush(QBrush(Qt.red))
-        # draw wireframe
-        if self.show_wireframe == True:
-            painter.setPen(QPen(Qt.blue, 2))
-            painter.setBrush(QBrush(Qt.white))
-
-            #print("wireframe 2", dataset.edge_list, dataset.wireframe)
-            for wire in self.edge_list:
-                if wire[0] >= len(self.landmark_list) or wire[1] >= len(self.landmark_list):
-                    continue
-                [ from_x, from_y ] = self.landmark_list[wire[0]]
-                [ to_x, to_y ] = self.landmark_list[wire[1]]
-                painter.drawLine(int(self._2canx(from_x)), int(self._2cany(from_y)), int(self._2canx(to_x)), int(self._2cany(to_y)))
-                #painter.drawLine(self.landmark_list[wire[0]][0], self.landmark_list[wire[0]][1], self.landmark_list[wire[1]][0], self.landmark_list[wire[1]][1])
-            if self.selected_edge_index >= 0:
-                edge = self.edge_list[self.selected_edge_index]
-                painter.setPen(QPen(Qt.yellow, 2))
-                [ from_x, from_y ] = self.landmark_list[edge[0]]
-                [ to_x, to_y ] = self.landmark_list[edge[1]]
-                painter.drawLine(int(self._2canx(from_x)), int(self._2cany(from_y)), int(self._2canx(to_x)), int(self._2cany(to_y)))
-
-
-
-        radius = LANDMARK_RADIUS
-        painter.setPen(QPen(Qt.red, 2))
-        painter.setBrush(QBrush(Qt.white))
-        if self.edit_mode == MODE_EDIT_LANDMARK:
-            img_x = self._2imgx(self.curr_mouse_x)
-            img_y = self._2imgy(self.curr_mouse_y)
-            if img_x < 0 or img_x > self.orig_pixmap.width() or img_y < 0 or img_y > self.orig_pixmap.height():
-                pass
-            else:
-                pass
-                #painter.drawEllipse(self.curr_mouse_x-radius, self.curr_mouse_y-radius, radius*2, radius*2)
-
-        #print(landmark_list)
-
-        #print("font:", painter.font().family(), painter.font().pointSize(), painter.font().pixelSize())
-        painter.setFont(QFont('Arial', 14))
-        for idx, landmark in enumerate(self.landmark_list):
-            if idx == self.wire_hover_index:
-                painter.setPen(QPen(Qt.blue, 2))
-                painter.setBrush(QBrush(Qt.yellow))
-                print("wire hover idx", idx)
-            elif idx == self.wire_start_index or idx == self.wire_end_index:
-                painter.setPen(QPen(Qt.blue, 2))
-                painter.setBrush(QBrush(Qt.blue))
-                print("wire start/end idx", idx)
-            else:
-                painter.setPen(QPen(Qt.red, 2))
-                painter.setBrush(QBrush(Qt.white))
-            painter.drawEllipse(self._2canx(int(landmark[0]))-radius*2, self._2cany(int(landmark[1]))-radius, radius*2, radius*2)
-            painter.drawText(self._2canx(int(landmark[0]))+10, self._2cany(int(landmark[1]))+10, str(idx+1))
-
-
-        # draw wireframe being edited
-        if self.wire_start_index >= 0:
-            painter.setPen(QPen(Qt.blue, 2))
-            painter.setBrush(QBrush(Qt.blue))
-            start_lm = self.landmark_list[self.wire_start_index]
-            #painter.drawEllipse(self._2canx(int(start_lm[0]))-radius*2, self._2cany(int(start_lm[1]))-radius, radius*2, radius*2)
-            # draw line from start to mouse
-            painter.drawLine(self._2canx(int(start_lm[0])), self._2cany(int(start_lm[1])), self.curr_mouse_x, self.curr_mouse_y)
-
-
-        #r = QRect(0, self.height() - 20, self.width(), 20)
-        #painter.fillRect(r, QBrush(Qt.blue))
-        #pen = QPen(QColor("red"), 10)
-        #painter.setPen(pen)
-        #painter.drawRect(self.rect())
-    def calculate_resize(self):
-        self.orig_width = self.orig_pixmap.width()
-        self.orig_height = self.orig_pixmap.height()
-        image_wh_ratio = self.orig_width / self.orig_height
-        label_wh_ratio = self.width() / self.height()
-        if image_wh_ratio > label_wh_ratio:
-            self.image_canvas_ratio = self.orig_width / self.width()
-        else:
-            self.image_canvas_ratio = self.orig_height / self.height()
-        self.curr_pixmap = self.orig_pixmap.scaled(int(self.orig_width*self.scale/self.image_canvas_ratio),int(self.orig_width*self.scale/self.image_canvas_ratio), Qt.KeepAspectRatio)
-
-    def resizeEvent(self, event):
-        if self.orig_pixmap is not None:
-            self.calculate_resize()
-            #print("image_wh_ratio", image_wh_ratio, "label_wh_ratio", label_wh_ratio, "image_canvas_ratio", self.image_canvas_ratio)
-            self.first_resize = False
-        #print("resize",self.size())
-        # print size
-        #print(event.size())
-        #print(self.size())
-        if self.curr_pixmap is not None:                
-            #self.curr_pixmap.scaled(self.width(), self.height(), Qt.KeepAspectRatio)
-            #print( self.curr_pixmap.width(), self.curr_pixmap.height(), self.orig_pixmap.width(), self.orig_pixmap.height())
-            pass
-        QLabel.resizeEvent(self, event)
-
-    def set_object(self, object):
-        #print("set_object", object.object_name)
-        m_app = QApplication.instance()
-        self.object = object
-        if object.image.count() > 0:
-            #print("set_object", object.image[0].get_image_path(m_app.storage_directory))
-            self.set_image(object.image[0].get_image_path(m_app.storage_directory))
-            object.unpack_landmark()
-            object.dataset.unpack_wireframe()
-            self.landmark_list = object.landmark_list
-            self.edge_list = object.dataset.edge_list
-            #print("edge_list", self.edge_list)
-            #print("landmark_list", object.landmark_str)
-            self.calculate_resize()
-
-    def clear_object(self):
-        self.landmark_list = []
-        self.orig_pixmap = None
-        self.curr_pixmap = None
-        self.update()
-    
-
 class PicButton(QAbstractButton):
     def __init__(self, pixmap, pixmap_hover, pixmap_pressed, parent=None):
         super(PicButton, self).__init__(parent)
@@ -1241,360 +1970,6 @@ class PicButton(QAbstractButton):
 
     def sizeHint(self):
         return QSize(200, 200)
-
-class ObjectDialog(QDialog):
-    # NewDatasetDialog shows new dataset dialog.
-    def __init__(self,parent):
-        super().__init__()
-        self.setWindowTitle("Object")
-        self.parent = parent
-        #print(self.parent.pos())
-        self.setGeometry(QRect(100, 100, 1024, 600))
-        self.move(self.parent.pos()+QPoint(100,100))
-        self.status_bar = QStatusBar()
-
-        self.hsplitter = QSplitter(Qt.Horizontal)
-        self.vsplitter = QSplitter(Qt.Vertical)
-
-        #self.vsplitter.addWidget(self.tableView)
-        #self.vsplitter.addWidget(self.tableWidget)
-
-        #self.hsplitter.addWidget(self.treeView)
-        #self.hsplitter.addWidget(self.vsplitter)
-
-        self.inputLayout = QHBoxLayout()
-        self.inputCoords = QWidget()
-        self.inputCoords.setLayout(self.inputLayout)
-        self.inputX = QLineEdit()
-        self.inputY = QLineEdit()
-        self.inputZ = QLineEdit()
-
-        self.inputLayout.addWidget(self.inputX)
-        self.inputLayout.addWidget(self.inputY)
-        self.inputLayout.addWidget(self.inputZ)
-        self.inputLayout.setContentsMargins(0,0,0,0)
-        self.inputLayout.setSpacing(0)
-        self.btnAddInput = QPushButton()
-        self.btnAddInput.setText("Add")
-        self.inputLayout.addWidget(self.btnAddInput)
-        self.inputX.returnPressed.connect(self.input_coords_process)
-        self.inputY.returnPressed.connect(self.input_coords_process)
-        self.inputZ.returnPressed.connect(self.input_coords_process)
-        self.inputX.textChanged[str].connect(self.x_changed)
-        self.btnAddInput.clicked.connect(self.input_coords_process)
-
-        self.edtObjectName = QLineEdit()
-        self.edtObjectDesc = QTextEdit()
-        self.edtObjectDesc.setMaximumHeight(100)
-        self.edtLandmarkStr = QTableWidget()
-        self.lblDataset = QLabel()
-
-        self.main_layout = QVBoxLayout()
-        self.sub_layout = QHBoxLayout()
-        self.setLayout(self.main_layout)
-
-        self.image_label = dLabel(self)
-        self.image_label.object_dialog = self
-        self.image_label.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
-        #self.image_label.clicked.connect(self.on_image_clicked)
-
-        self.pixmap = QPixmap(1024,768)
-        self.image_label.setPixmap(self.pixmap)
-
-        self.form_layout = QFormLayout()
-        self.form_layout.addRow("Dataset Name", self.lblDataset)
-        self.form_layout.addRow("Object Name", self.edtObjectName)
-        self.form_layout.addRow("Object Desc", self.edtObjectDesc)
-        self.form_layout.addRow("Landmarks", self.edtLandmarkStr)
-        self.form_layout.addRow("", self.inputCoords)
-
-        self.btnGroup = QButtonGroup() 
-        self.btnLandmark = PicButton(QPixmap("icon/landmark.png"), QPixmap("icon/landmark_hover.png"), QPixmap("icon/landmark_down.png"))
-        self.btnWireframe = PicButton(QPixmap("icon/wireframe.png"), QPixmap("icon/wireframe_hover.png"), QPixmap("icon/wireframe_down.png"))
-        self.btnGroup.addButton(self.btnLandmark, 0)
-        self.btnGroup.addButton(self.btnLandmark, 0)
-        self.btnLandmark.setCheckable(True)
-        self.btnWireframe.setCheckable(True)
-        self.btnLandmark.setChecked(True)
-        self.btnWireframe.setChecked(False)
-        self.btnLandmark.setAutoExclusive(True)
-        self.btnWireframe.setAutoExclusive(True)
-        self.btnLandmark.clicked.connect(self.btnLandmark_clicked)
-        self.btnWireframe.clicked.connect(self.btnWireframe_clicked)
-        self.btnLandmark.setFixedSize(32,32)
-        self.btnWireframe.setFixedSize(32,32)
-        self.btn_layout2 = QGridLayout()
-        self.btn_layout2.addWidget(self.btnLandmark,0,0)
-        self.btn_layout2.addWidget(self.btnWireframe,0,1)
-
-        self.cbxShowIndex = QCheckBox()
-        self.cbxShowIndex.setText("Show Index")
-        self.cbxShowIndex.setChecked(True)
-
-        self.left_widget = QWidget()
-        self.left_widget.setLayout(self.form_layout)
-
-        self.right_top_widget = QWidget()
-        self.right_top_widget.setLayout(self.btn_layout2)
-        self.right_bottom_widget = QWidget()
-        self.vsplitter.addWidget(self.right_top_widget)
-        self.vsplitter.addWidget(self.right_bottom_widget)
-        self.vsplitter.setSizes([50,400])
-        self.vsplitter.setStretchFactor(0, 0)
-        self.vsplitter.setStretchFactor(1, 1)
-
-        self.hsplitter.addWidget(self.left_widget)
-        self.hsplitter.addWidget(self.image_label)
-        self.hsplitter.addWidget(self.vsplitter)
-        #self.hsplitter.addWidget(self.right_widget)
-        self.hsplitter.setSizes([200,800,100])
-        self.hsplitter.setStretchFactor(0, 0)
-        self.hsplitter.setStretchFactor(1, 1)
-        self.hsplitter.setStretchFactor(2, 0)
-
-        self.btnOkay = QPushButton()
-        self.btnOkay.setText("Save")
-        self.btnOkay.clicked.connect(self.Okay)
-        self.btnDelete = QPushButton()
-        self.btnDelete.setText("Delete")
-        self.btnDelete.clicked.connect(self.Delete)
-        self.btnCancel = QPushButton()
-        self.btnCancel.setText("Cancel")
-        self.btnCancel.clicked.connect(self.Cancel)
-        btn_layout = QHBoxLayout()
-        btn_layout.addWidget(self.btnOkay)
-        btn_layout.addWidget(self.btnDelete)
-        btn_layout.addWidget(self.btnCancel)
-
-
-        #self.main_layout.addLayout(self.sub_layout)
-        self.main_layout.addWidget(self.hsplitter)
-        self.main_layout.addLayout(btn_layout)
-        self.main_layout.addWidget(self.status_bar)
-
-        self.dataset = None
-        self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
-        self.landmark_list = []
-        self.m_app = QApplication.instance()
-        self.btnLandmark_clicked()
-
-        #self.edtDataFolder.setText(str(self.data_folder.resolve()))
-        #self.edtServerAddress.setText(self.server_address)
-        #self.edtServerPort.setText(self.server_port)
-
-    '''
-    @pyqtSlot()
-    def on_image_clicked(self,event):
-        print("clicked")
-        print(event.pos())
-        #pass
-    '''
-
-    def btnLandmark_clicked(self):
-        #self.edit_mode = MODE_ADD_LANDMARK
-        self.image_label.set_mode(MODE_EDIT_LANDMARK)
-        self.image_label.update()
-        self.btnLandmark.setDown(True)
-        self.btnLandmark.setChecked(True)
-        self.btnWireframe.setDown(False)
-        self.btnWireframe.setChecked(False)
-
-    def btnWireframe_clicked(self):
-        #self.edit_mode = MODE_ADD_LANDMARK
-        self.image_label.set_mode(MODE_WIREFRAME)
-        self.image_label.update()
-        self.btnWireframe.setDown(True)
-        self.btnWireframe.setChecked(True)
-        self.btnLandmark.setDown(False)
-        self.btnLandmark.setChecked(False)
-
-    def set_object_name(self, name):
-        #print("set_object_name", self.edtObjectName.text(), name)
-
-        if self.edtObjectName.text() == "":
-            self.edtObjectName.setText(name)
-
-    def set_dataset(self, dataset):
-        self.dataset = dataset
-        self.lblDataset.setText(dataset.dataset_name)
-
-        header = self.edtLandmarkStr.horizontalHeader()    
-        if self.dataset.dimension == 2:
-            self.edtLandmarkStr.setColumnCount(2)
-            self.edtLandmarkStr.setHorizontalHeaderLabels(["X","Y"])
-            #self.edtLandmarkStr.setColumnWidth(0, 80)
-            #self.edtLandmarkStr.setColumnWidth(1, 80)
-            header.setSectionResizeMode(0, QHeaderView.Stretch)
-            header.setSectionResizeMode(1, QHeaderView.Stretch)
-            self.inputZ.hide()
-            input_width = 80
-        elif self.dataset.dimension == 3:
-            self.edtLandmarkStr.setColumnCount(3)
-            self.edtLandmarkStr.setHorizontalHeaderLabels(["X","Y","Z"])
-            header.setSectionResizeMode(0, QHeaderView.Stretch)
-            header.setSectionResizeMode(1, QHeaderView.Stretch)
-            header.setSectionResizeMode(2, QHeaderView.Stretch)
-            self.inputZ.show()
-            input_width = 60
-            
-        #self.inputX.setFixedWidth(input_width)
-        #self.inputY.setFixedWidth(input_width)
-        #self.inputZ.setFixedWidth(input_width)
-        #self.btnAddInput.setFixedWidth(input_width)
-        
-
-    @pyqtSlot(str)
-    def x_changed(self, text):
-        # if text is multiline and tab separated, add to table
-        #print("x_changed called with", text)
-        if "\n" in text:
-            lines = text.split("\n")
-            for line in lines:
-                #print(line)
-                if "\t" in line:
-                    coords = line.split("\t")
-                    #add landmarks using add_landmark method
-                    if self.dataset.dimension == 2 and len(coords) == 2:
-                        self.add_landmark(coords[0], coords[1])
-                    elif self.dataset.dimension == 3 and len(coords) == 3:
-                        self.add_landmark(coords[0], coords[1], coords[2])
-            self.inputX.setText("")
-            self.inputY.setText("")
-            self.inputZ.setText("")
-
-    def update_landmark(self, idx, x, y, z=None):
-        if self.dataset.dimension == 2:
-            self.landmark_list[idx] = [x,y]
-        elif self.dataset.dimension == 3:
-            self.landmark_list[idx] = [x,y,z]
-        self.show_landmarks()
-
-    def add_landmark(self, x, y, z=None):
-        #print("adding landmark", x, y, z)
-        if self.dataset.dimension == 2:
-            self.landmark_list.append([x,y])
-        elif self.dataset.dimension == 3:
-            self.landmark_list.append([x,y,z])
-        self.show_landmarks()
-
-    def delete_landmark(self, idx):
-        #print("delete_landmark", idx)
-        self.landmark_list.pop(idx)
-        self.show_landmarks()
-
-    def input_coords_process(self):
-        x_str = self.inputX.text()
-        y_str = self.inputY.text()
-        z_str = self.inputZ.text()
-        if self.dataset.dimension == 2:
-            if x_str == "" or y_str == "":
-                return
-            # add landmark to table using add_landmark method
-            self.add_landmark(x_str, y_str)
-
-        elif self.dataset.dimension == 3:
-            if x_str == "" or y_str == "" or z_str == "":
-                return
-            self.add_landmark(x_str, y_str, z_str)
-        self.inputX.setText("")
-        self.inputY.setText("")
-        self.inputZ.setText("")
-        self.inputX.setFocus()
-
-    def show_landmarks(self):
-        self.edtLandmarkStr.setRowCount(len(self.landmark_list))
-        for idx, lm in enumerate(self.landmark_list):
-
-            item_x = QTableWidgetItem(str(float(lm[0]*1.0)))
-            item_x.setTextAlignment(Qt.AlignRight|Qt.AlignVCenter)
-            self.edtLandmarkStr.setItem(idx, 0, item_x)
-
-            item_y = QTableWidgetItem(str(float(lm[1]*1.0)))
-            item_y.setTextAlignment(Qt.AlignRight|Qt.AlignVCenter)
-            self.edtLandmarkStr.setItem(idx, 1, item_y)
-
-            if self.dataset.dimension == 3:
-                item_z = QTableWidgetItem(str(float(lm[2]*1.0)))
-                item_z.setTextAlignment(Qt.AlignRight|Qt.AlignVCenter)
-                self.edtLandmarkStr.setItem(idx, 2, item_z)
-
-    def set_object(self, object):
-        #print("set_object", self.image_label.size())
-        self.object = object
-        self.edtObjectName.setText(object.object_name)
-        self.edtObjectDesc.setText(object.object_desc)
-        #self.edtLandmarkStr.setText(object.landmark_str)
-        self.landmark_list = object.unpack_landmark()
-        #for lm in self.landmark_list:
-        #    self.show_landmark(*lm)
-        self.show_landmarks()
-        if object.image is not None and len(object.image) > 0:
-            img = object.image[0]
-            image_path = img.get_image_path(self.m_app.storage_directory)
-            #check if image_path exists
-            if os.path.exists(image_path):
-                self.image_label.set_image(image_path)
-                self.image_label.set_object(object)
-                self.image_label.landmark_list = self.landmark_list
-        #self.set_dataset(object.dataset)
-
-    def save_object(self):
-
-        if self.object is None:
-            self.object = MdObject()
-        self.object.dataset_id = self.dataset.id
-        self.object.object_name = self.edtObjectName.text()
-        self.object.object_desc = self.edtObjectDesc.toPlainText()
-        #self.object.landmark_str = self.edtLandmarkStr.text()
-        self.object.landmark_str = self.make_landmark_str()
-        self.object.save()
-        if self.image_label.fullpath is not None and self.object.image.count() == 0:
-            md_image = MdImage()
-            md_image.object_id = self.object.id
-            md_image.load_file_info(self.image_label.fullpath)
-            new_filepath = md_image.get_image_path( self.m_app.storage_directory)
-            if not os.path.exists(os.path.dirname(new_filepath)):
-                os.makedirs(os.path.dirname(new_filepath))
-            #print("save object new filepath:", new_filepath)
-            shutil.copyfile(self.image_label.fullpath, new_filepath)
-            md_image.save()
-
-    def make_landmark_str(self):
-        # from table, make landmark_str
-        landmark_str = ""
-        for row in range(self.edtLandmarkStr.rowCount()):
-            for col in range(self.edtLandmarkStr.columnCount()):
-                landmark_str += self.edtLandmarkStr.item(row, col).text()
-                if col < self.edtLandmarkStr.columnCount()-1:
-                    landmark_str += "\t"
-            if row < self.edtLandmarkStr.rowCount()-1:
-                landmark_str += "\n"
-        return landmark_str
-
-    def Delete(self):
-        ret = QMessageBox.question(self, "", "Are you sure to delete this object?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-        if ret == QMessageBox.Yes:
-            if self.object.image.count() > 0:
-                image_path = self.object.image[0].get_image_path(self.m_app.storage_directory)
-                if os.path.exists(image_path):
-                    os.remove(image_path)
-            self.object.delete_instance()
-        #self.delete_dataset()
-        self.accept()
-
-    def Okay(self):
-        self.save_object()
-        self.accept()
-
-    def Cancel(self):
-        self.reject()
-
-    def resizeEvent(self, event):
-        #print("Window has been resized",self.image_label.width(), self.image_label.height())
-        #self.pixmap.scaled(self.image_label.width(), self.image_label.height(), Qt.KeepAspectRatio)
-        #self.edtObjectDesc.resize(self.edtObjectDesc.height(),300)
-        #self.image_label.setPixmap(self.pixmap)
-        QDialog.resizeEvent(self, event)
 
 class PreferencesDialog(QDialog):
     '''
@@ -1691,6 +2066,31 @@ class PreferencesDialog(QDialog):
             self.data_folder = Path(folder).resolve()
             self.edtDataFolder.setText(folder)
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+'''
+
+
+
+
+
+
+
+
+
+
+
 class MyTreeView(QTreeView):
     def __init__(self):
         QTreeView.__init__(self)
@@ -1722,3 +2122,36 @@ class MyTreeView(QTreeView):
         # handle the list here
         #else:
         #    event.ignore()
+
+class MyPlotWidget(pg.PlotWidget):
+
+    def __init__(self, **kwargs):   
+        super().__init__(**kwargs)
+
+        # self.scene() is a pyqtgraph.GraphicsScene.GraphicsScene.GraphicsScene
+        self.scene().sigMouseClicked.connect(self.mouse_clicked)    
+
+
+    def mouse_clicked(self, mouseClickEvent):
+        # mouseClickEvent is a pyqtgraph.GraphicsScene.mouseEvents.MouseClickEvent
+        print('clicked plot 0x{:x}, event: {}, pos: {}, {}, {}'.format(id(self), mouseClickEvent, mouseClickEvent.pos(), mouseClickEvent.scenePos(), mouseClickEvent.screenPos()))
+        plot_item = self.getPlotItem()
+        print('plot_item: 0x{:x}'.format(id(plot_item)))
+
+class MyPlotItem(pg.ScatterPlotItem):
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        # self.scene() is a pyqtgraph.GraphicsScene.GraphicsScene.GraphicsScene
+        self.sigClicked.connect(self.clicked)
+
+
+    def clicked(self, points, spotitem_list, ev):
+        # mouseClickEvent is a pyqtgraph.GraphicsScene.mouseEvents.MouseClickEvent
+        print('clicked plot 0x{:x}, points: {}, event: {}, xx:{}'.format(id(self), points, spotitem_list, ev))
+        #plot_item = self.getPlotItem()
+        #print('plot_item: 0x{:x}'.format(id(plot_item)))
+        points = self.pointsAt(ev.pos())
+        print("points:",points[0].data().object_name)        
+'''        

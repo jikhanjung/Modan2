@@ -151,6 +151,9 @@ class MdObject(Model):
 
     def __str__(self):
         return self.object_name
+    def __repr__(self):
+        return self.object_name
+    
     def count_landmarks(self):
         if self.landmark_str is None or self.landmark_str == '':
             return 0
@@ -314,6 +317,7 @@ class MdImage(Model):
 
 class MdObjectOps:
     def __init__(self,mdobject):
+        self.id = mdobject.id
         self.object_name = mdobject.object_name
         self.object_desc = mdobject.object_desc
         #self.scale = mdobject.scale
@@ -563,6 +567,7 @@ class MdDatasetOps:
         self.baseline = dataset.baseline
         self.polygons = dataset.polygons
         self.object_list = []
+        self.selected_object_id_list = []
         for mo in dataset.object_list:
             #self.object_list.append(mo.copy())
             self.object_list.append(MdObjectOps(mo))

@@ -28,7 +28,7 @@ import io
 import shutil
 
 from MdModel import *
-from ModanDialogs import DatasetAnalysisDialog, ObjectDialog, ImportDatasetDialog, DatasetDialog, PreferencesDialog, dLabel, IMAGE_EXTENSION_LIST
+from ModanDialogs import DatasetAnalysisDialog, ObjectDialog, ImportDatasetDialog, DatasetDialog, PreferencesDialog, LandmarkEditor, IMAGE_EXTENSION_LIST
 
 PROGRAM_NAME = "Modan2"
 PROGRAM_VERSION = "0.0.1"
@@ -111,28 +111,24 @@ class ModanMainWindow(QMainWindow, form_class):
     def on_action_exit_triggered(self):
         self.close()
 
-    @pyqtSlot()
+    @pyqtSlot() 
     def on_action_about_triggered(self):
         QMessageBox.about(self, "About", "Modan2")
 
     @pyqtSlot()
     def on_action_analyze_dataset_triggered(self):
         #QMessageBox.about(self, "About", "Modan2")
-        print("analyze dataset")
+        #print("analyze dataset")
         if self.selected_dataset is None:
             QMessageBox.warning(self, "Warning", "No dataset selected")
             return
         self.analysis_dialog = DatasetAnalysisDialog(self,self.selected_dataset)
         self.analysis_dialog.show()
 
-        
-        #dlg.showNormal()
-
-
     def initUI(self):
         # add tableView and tableWidget to vertical layout
         #widget = QWidget()
-        self.object_view = dLabel(self)
+        self.object_view = LandmarkEditor(self)
 
         hsplitter = QSplitter(Qt.Horizontal)
         vsplitter = QSplitter(Qt.Vertical)
@@ -212,7 +208,7 @@ class ModanMainWindow(QMainWindow, form_class):
 
     @pyqtSlot()
     def on_action_import_dataset_triggered(self):
-        print("import dataset")
+        #print("import dataset")
         # open import dataset dialog
         self.dlg = ImportDatasetDialog(self)
         self.dlg.setModal(True)

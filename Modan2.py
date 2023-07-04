@@ -553,8 +553,11 @@ class ModanMainWindow(QMainWindow, form_class):
 
     def reset_tableView(self):
         self.object_model = QStandardItemModel()
+        header_labels = ["ID", "Name", "Count", "CSize"]
+        if self.selected_dataset is not None and self.selected_dataset.property_list is not None:
+            header_labels = ["ID", "Name", "Count", "CSize", "Dataset"]
         self.object_model.setColumnCount(4)
-        self.object_model.setHorizontalHeaderLabels(["ID", "Name", "Count", "CSize"])
+        self.object_model.setHorizontalHeaderLabels()
         self.proxy_model = QSortFilterProxyModel()
         self.proxy_model.setSourceModel(self.object_model)
         self.tableView.setModel(self.proxy_model)

@@ -12,6 +12,9 @@ import numpy
 
 LANDMARK_SEPARATOR = "\t"
 LINE_SEPARATOR = "\n"
+PROPERTY_SEPARATOR = ","
+EDGE_SEPARATOR = "-"
+WIREFRAME_SEPARATOR = ","
 
 gDatabase = SqliteDatabase('Modan2.db',pragmas={'foreign_keys': 1})
 
@@ -26,13 +29,31 @@ class MdDataset(Model):
     parent = ForeignKeyField('self', backref='children', null=True,on_delete="CASCADE")
     created_at = DateTimeField(default=datetime.datetime.now)
     modified_at = DateTimeField(default=datetime.datetime.now)
-    propertyname_list = CharField(null=True)
+    propertyname_str = CharField(null=True)
     baseline_point_list = []
     edge_list = []
     polygon_list = []
+    propertyname_list = []
 
     class Meta:
         database = gDatabase
+
+    def pack_propertynames(self, propertyname_list=None):
+        if propertyname_list is None:
+            propertyname_list = self.propertyname_list
+        self.propertyname_str = PROPERTY_SEPARATOR.join(propertyname_list)
+        return self.propertyname_str
+
+    def unpack_propertynames(self, propertyname_str=''):
+        if propertyname_str == '' and self.propertyname_str != '':
+            propertyname_str = self.propertyname_str
+
+        self.propertyname_list = []
+        if propertyname_str is None or propertyname_str == '':
+            return []
+
+        self.propertyname_list = [x for x in propertyname_str.split(PROPERTY_SEPARATOR)]
+        return self.propertyname_list
 
     def pack_wireframe(self, edge_list=None):
         if edge_list is None:
@@ -47,8 +68,8 @@ class MdDataset(Model):
             # print points
             if len(points) != 2:
                 continue
-            new_edges.append("-".join([str(x) for x in points]))
-        self.wireframe = ",".join(new_edges)
+            new_edges.append(EDGE_SEPARATOR.join([str(x) for x in points]))
+        self.wireframe = WIREFRAME_SEPARATOR.join(new_edges)
         return self.wireframe
 
     def unpack_wireframe(self, wireframe=''):
@@ -61,11 +82,11 @@ class MdDataset(Model):
             return []
 
         # print wireframe
-        for edge in wireframe.split(","):
+        for edge in wireframe.split(WIREFRAME_SEPARATOR):
             has_edge = True
             if edge != '':
                 #print edge
-                verts = edge.split("-")
+                verts = edge.split(EDGE_SEPARATOR)
                 int_edge = []
                 for v in verts:
                     try:
@@ -146,7 +167,7 @@ class MdObject(Model):
     dataset = ForeignKeyField(MdDataset, backref='object_list', on_delete="CASCADE")
     created_at = DateTimeField(default=datetime.datetime.now)
     modified_at = DateTimeField(default=datetime.datetime.now)
-    property_list = CharField(null=True)
+    property_str = CharField(null=True)
     landmark_list = []
 
     def __str__(self):
@@ -178,6 +199,20 @@ class MdObject(Model):
                 self.landmark_list.append([float(x) for x in lm.split(LANDMARK_SEPARATOR)])
         return self.landmark_list
 
+    def pack_property(self, property_list=None):
+        if property_list is None:
+            property_list = self.property_list
+        self.property_str = LINE_SEPARATOR.join([PROPERTY_SEPARATOR.join([str(x) for x in p]) for p in property_list])
+
+    def unpack_property(self):
+        self.property_list = []
+        if self.property_str is None or self.property_str == '':
+            return
+        prop_list = self.property_str.split(LINE_SEPARATOR)
+        for prop in prop_list:
+            if prop != "":
+                self.property_list.append([x for x in prop.split(PROPERTY_SEPARATOR)])
+        return self.property_list
 
 class MdImage(Model):
     original_path = CharField(null=True)

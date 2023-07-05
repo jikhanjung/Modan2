@@ -18,7 +18,10 @@ from pathlib import Path
 from PIL import Image
 from PIL.ExifTags import TAGS
 import shutil
-
+#import matplotlib.pyplot as plt
+from matplotlib.backends.backend_qt5agg import FigureCanvas as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.figure import Figure
 from MdModel import *
 from MdStatistics import MdPrincipalComponent
 
@@ -1099,8 +1102,25 @@ class DatasetAnalysisDialog(QDialog):
         #self.tableView.setContextMenuPolicy(Qt.CustomContextMenu)
         #self.tableView.customContextMenuRequested.connect(self.show_context_menu)
         self.tableView.setSortingEnabled(True)
-        self.plot_widget = pg.PlotWidget()
-        self.plot_widget.setBackground('w')
+
+        #self.plot_widget = pg.PlotWidget()
+        #self.plot_widget.setBackground('w')
+
+        self.plot_widget2 = FigureCanvas(Figure(figsize=(5, 3)))
+        self.plot_widget3 = FigureCanvas(Figure(figsize=(5, 3)))
+        self.ax3 = self.plot_widget2.figure.add_subplot()
+        self.ax2 = self.plot_widget3.figure.add_subplot(projection='3d')
+
+        #fig = plt.figure()
+        
+        #self.ax.set_axis_off()
+        #self.ax.set_xticks([])
+        #self.ax.set_yticks([])
+        #self.ax.set_zticks([])
+        #self.ax.grid(False)
+
+
+        #self.plot_widget = pg.useOpenGL.GLViewWidget()        
 
         # checkboxes
         self.cbxShowIndex = QCheckBox()
@@ -1142,20 +1162,34 @@ class DatasetAnalysisDialog(QDialog):
         self.plot_control_widget2.setLayout(self.plot_control_layout2)
         self.lblAxis1 = QLabel("Axis 1")
         self.lblAxis2 = QLabel("Axis 2")
+        self.lblAxis3 = QLabel("Axis 3")
+        self.comboDim = QComboBox()
+        self.comboDim.currentIndexChanged.connect(self.on_comboDim_changed)
+        self.comboDim.addItem("2D")
+        self.comboDim.addItem("3D")
+        self.comboDim.setCurrentIndex(1)
         self.comboAxis1 = QComboBox()
         self.comboAxis2 = QComboBox()
+        self.comboAxis3 = QComboBox()
         self.cbxFlipAxis1 = QCheckBox()
         self.cbxFlipAxis1.setText("Flip")
         self.cbxFlipAxis1.setChecked(False)
         self.cbxFlipAxis2 = QCheckBox()
         self.cbxFlipAxis2.setText("Flip")
         self.cbxFlipAxis2.setChecked(False)
+        self.cbxFlipAxis3 = QCheckBox()
+        self.cbxFlipAxis3.setText("Flip")
+        self.cbxFlipAxis3.setChecked(False)
+        self.plot_control_layout.addWidget(self.comboDim)
         self.plot_control_layout.addWidget(self.lblAxis1)
         self.plot_control_layout.addWidget(self.comboAxis1)
         self.plot_control_layout.addWidget(self.cbxFlipAxis1)
         self.plot_control_layout.addWidget(self.lblAxis2)
         self.plot_control_layout.addWidget(self.comboAxis2)
         self.plot_control_layout.addWidget(self.cbxFlipAxis2)
+        self.plot_control_layout.addWidget(self.lblAxis3)
+        self.plot_control_layout.addWidget(self.comboAxis3)
+        self.plot_control_layout.addWidget(self.cbxFlipAxis3)
         # connect checkboxes
         self.cbxFlipAxis1.stateChanged.connect(self.flip_axis_changed)
         self.cbxFlipAxis2.stateChanged.connect(self.flip_axis_changed)
@@ -1169,7 +1203,8 @@ class DatasetAnalysisDialog(QDialog):
         self.comboPropertyName.setCurrentIndex(-1)
         self.comboPropertyName.currentIndexChanged.connect(self.propertyname_changed)
 
-        self.plot_layout.addWidget(self.plot_widget)
+        self.plot_layout.addWidget(self.plot_widget2)
+        self.plot_layout.addWidget(self.plot_widget3)
         self.plot_layout.addWidget(self.plot_control_widget)
         self.plot_layout.addWidget(self.plot_control_widget2)
 
@@ -1180,9 +1215,11 @@ class DatasetAnalysisDialog(QDialog):
         for i in range(1,11):
             self.comboAxis1.addItem("PC"+str(i))
             self.comboAxis2.addItem("PC"+str(i))
+            self.comboAxis3.addItem("PC"+str(i))
 
         self.comboAxis1.setCurrentIndex(0)
         self.comboAxis2.setCurrentIndex(1)
+        self.comboAxis3.setCurrentIndex(2)
         
         # add event to comboaxic
         self.comboAxis1.currentIndexChanged.connect(self.axis_changed)
@@ -1289,6 +1326,23 @@ class DatasetAnalysisDialog(QDialog):
         self.cbxShowBaseline.stateChanged.connect(self.show_baseline_state_changed)
         self.cbxShowAverage.stateChanged.connect(self.show_average_state_changed)
         self.on_btnPCA_clicked()
+
+    def on_comboDim_changed(self):
+        if self.comboDim.currentText() == "2D":
+            self.plot_widget2.show()
+            self.plot_widget3.hide()
+            self.lblAxis3.hide()
+            self.comboAxis3.hide()
+            self.cbxFlipAxis3.hide()
+        else:
+            self.plot_widget3.show()
+            self.plot_widget2.hide()
+            self.lblAxis3.show()
+            self.comboAxis3.show()
+            self.cbxFlipAxis3.show()
+
+        if self.ds_ops is not None:
+            self.show_pca_result()
 
     def set_dataset(self, dataset):
         self.dataset = dataset
@@ -1407,10 +1461,11 @@ class DatasetAnalysisDialog(QDialog):
         #        f.write(obj.object_name + "\t" + "\t".join([str(x) for x in obj.pca_result]) + "\n")
 
     def show_pca_result(self):
-        self.plot_widget.clear()
+        #self.plot_widget.clear()
 
         x_val = []
         y_val = []
+        z_val = []
         data = []
         symbol = []
         pen = []
@@ -1418,6 +1473,7 @@ class DatasetAnalysisDialog(QDialog):
         # get axis1 and axis2 value from comboAxis1 and 2 index
         axis1 = self.comboAxis1.currentIndex() +1
         axis2 = self.comboAxis2.currentIndex() +1
+        axis3 = self.comboAxis3.currentIndex() +1
         #print("axis1: ", axis1) +1
         #print("axis2: ", axis2)
         flip_axis1 = self.cbxFlipAxis1.isChecked()
@@ -1432,16 +1488,27 @@ class DatasetAnalysisDialog(QDialog):
         else:
             flip_axis2 = 1.0
 
+        flip_axis3 = self.cbxFlipAxis3.isChecked()
+        if flip_axis3:
+            flip_axis3 = -1.0
+        else:
+            flip_axis3 = 1.0
+
         symbol_candidate = ['o','x','+','s','d','v','^','<','>','p','h']
         color_candidate = ['r','b','c','m','y','k','w','g']
         prop_list = []
         symbol_list = []
+        size_list = []
+        color_list = []
         self.property_index = self.comboPropertyName.currentIndex()
 
         for obj in self.ds_ops.object_list:
             x_val.append( flip_axis1 * obj.pca_result[axis1])
             y_val.append( flip_axis2 * obj.pca_result[axis2])
+            z_val.append( flip_axis3 * obj.pca_result[axis3])
             data.append(obj)
+            size_list.append(10)
+            color_list.append('b')
             curr_symbol = ''
             curr_color = ''
             #print("property_index:",self.property_index,"len(obj.property_list):",len(obj.property_list),"obj.property_list:",obj.property_list)
@@ -1457,7 +1524,6 @@ class DatasetAnalysisDialog(QDialog):
                 curr_symbol = symbol_candidate[0]
                 curr_color = color_candidate[0]
 
-
             #print("obj.id:",obj.id,"self.selected_object_id_list:",self.selected_object_id_list)
             if obj.id in self.selected_object_id_list:
                 curr_symbol = 'o'
@@ -1467,21 +1533,30 @@ class DatasetAnalysisDialog(QDialog):
                     curr_symbol = 'x'
                 pen.append(pg.mkPen(color=curr_color, width=1))
             symbol_list.append(curr_symbol)
-
+        print("x_val:",x_val,"y_val:",y_val,"z_val:",z_val)
+        if self.comboDim.currentText() == '2D':
+            print("2d")
+            #self.ax = self.plot_widget.figure.add_subplot()#projection='3d')
+            self.ax2.clear()
+            self.ax2.plot(x_val, y_val)#,s=size_list,c=color_list)
+        else:
+            print("3d")
+            self.ax3.clear()
+            self.ax3.plot(x_val, y_val, z_val)
         #scatter = MyPlotItem(size=10, brush=pg.mkBrush(255, 255, 255, 120),hoverable=True,hoverPen=pg.mkPen(color='r', width=2))
-        self.scatter_item = pg.ScatterPlotItem(size=10, brush=pg.mkBrush(255, 255, 255, 120),hoverable=True,hoverPen=pg.mkPen(color='r', width=2))
-        self.scatter_item.addPoints(x=x_val, y=y_val, data=data, symbol=symbol_list, pen=pen)
+        #self.scatter_item = pg.ScatterPlotItem(size=10, brush=pg.mkBrush(255, 255, 255, 120),hoverable=True,hoverPen=pg.mkPen(color='r', width=2))
+        #self.scatter_item.addPoints(x=x_val, y=y_val, data=data, symbol=symbol_list, pen=pen)
 
-        self.plot_widget.setBackground('w')
-        self.plot_widget.setTitle("PCA Result")
-        self.plot_widget.setLabel("left", "PC2")
-        self.plot_widget.setLabel("bottom", "PC1")
-        self.plot_widget.addLegend()
-        self.plot_widget.showGrid(x=True, y=True)
-        ret = self.plot_widget.addItem(self.scatter_item)
-        self.scatter_item.sigClicked.connect(self.on_scatter_item_clicked)
-        self.plot_widget.scene().sigMouseMoved.connect(self.on_mouse_moved)
-        self.plot_widget.scene().sigMouseClicked.connect(self.on_mouse_clicked)
+        #self.plot_widget.setBackground('w')
+        #self.plot_widget.setTitle("PCA Result")
+        #self.plot_widget.setLabel("left", "PC2")
+        #self.plot_widget.setLabel("bottom", "PC1")
+        #self.plot_widget.addLegend()
+        #self.plot_widget.showGrid(x=True, y=True)
+        #ret = self.plot_widget.addItem(self.scatter_item)
+        #self.scatter_item.sigClicked.connect(self.on_scatter_item_clicked)
+        #self.plot_widget.scene().sigMouseMoved.connect(self.on_mouse_moved)
+        #self.plot_widget.scene().sigMouseClicked.connect(self.on_mouse_clicked)
         #print("ret:",ret)
         #self.plot_widget.plot(x=x_val, y=y_val, pen=pg.mkPen(width=2, color='r'), name="plot1")
 

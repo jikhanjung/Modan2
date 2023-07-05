@@ -301,16 +301,16 @@ class ModanMainWindow(QMainWindow, form_class):
         self.dlg = DatasetDialog(self)
         self.dlg.setModal(True)
         if self.selected_dataset:
-            print("selected exists")
+            #print("selected exists")
             self.dlg.set_parent_dataset( self.selected_dataset )
         else:
-            print("selected not exists")
+            #print("selected not exists")
             self.dlg.set_parent_dataset( None )
 
         #self.dlg.setWindowModality(Qt.ApplicationModal)
         #print("new dataset dialog")
         ret = self.dlg.exec_()
-        print("dataset edit result:", ret)
+        #print("dataset edit result:", ret)
         self.load_dataset()
         self.reset_tableView()
         #print("new dataset dialog shown")

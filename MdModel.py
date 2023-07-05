@@ -38,13 +38,13 @@ class MdDataset(Model):
     class Meta:
         database = gDatabase
 
-    def pack_propertynames(self, propertyname_list=None):
+    def pack_propertyname_str(self, propertyname_list=None):
         if propertyname_list is None:
             propertyname_list = self.propertyname_list
         self.propertyname_str = PROPERTY_SEPARATOR.join(propertyname_list)
         return self.propertyname_str
 
-    def unpack_propertynames(self, propertyname_str=''):
+    def unpack_propertyname_str(self, propertyname_str=''):
         if propertyname_str == '' and self.propertyname_str != '':
             propertyname_str = self.propertyname_str
 
@@ -169,6 +169,7 @@ class MdObject(Model):
     modified_at = DateTimeField(default=datetime.datetime.now)
     property_str = CharField(null=True)
     landmark_list = []
+    property_list = []
 
     def __str__(self):
         return self.object_name
@@ -190,9 +191,9 @@ class MdObject(Model):
 
     def unpack_landmark(self):
         self.landmark_list = []
-        # print "[", self.landmark_str,"]"
+        #print "[", self.landmark_str,"]"
         if self.landmark_str is None or self.landmark_str == '':
-            return
+            return self.landmark_list
         lm_list = self.landmark_str.split(LINE_SEPARATOR)
         for lm in lm_list:
             if lm != "":
@@ -202,16 +203,13 @@ class MdObject(Model):
     def pack_property(self, property_list=None):
         if property_list is None:
             property_list = self.property_list
-        self.property_str = LINE_SEPARATOR.join([PROPERTY_SEPARATOR.join([str(x) for x in p]) for p in property_list])
+        self.property_str = PROPERTY_SEPARATOR.join(property_list)
 
     def unpack_property(self):
         self.property_list = []
         if self.property_str is None or self.property_str == '':
-            return
-        prop_list = self.property_str.split(LINE_SEPARATOR)
-        for prop in prop_list:
-            if prop != "":
-                self.property_list.append([x for x in prop.split(PROPERTY_SEPARATOR)])
+            return []
+        self.property_list = [x for x in self.property_str.split(PROPERTY_SEPARATOR)]
         return self.property_list
 
 class MdImage(Model):
@@ -357,11 +355,17 @@ class MdObjectOps:
         self.object_desc = mdobject.object_desc
         #self.scale = mdobject.scale
         self.landmark_str = mdobject.landmark_str
+        self.property_str = mdobject.property_str
         if self.landmark_str is not None and self.landmark_str != "":
             mdobject.unpack_landmark()
         self.landmark_list = []
         for lm in mdobject.landmark_list:
             self.landmark_list.append(lm)
+        self.property_list = []
+        if self.property_str is not None and self.property_str != "":
+            mdobject.unpack_property()
+        for prop in mdobject.property_list:
+            self.property_list.append(prop)
 
         self.centroid_size = -1
 

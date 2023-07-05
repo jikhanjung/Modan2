@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import QTableWidgetItem, QMainWindow, QHeaderView, QFileDia
                             QDialog, QLineEdit, QLabel, QPushButton, QAbstractItemView, \
                             QMessageBox, QListView, QTreeWidgetItem, QToolButton, QTreeView, QFileSystemModel, \
                             QTableView, QSplitter, QRadioButton, QComboBox, QTextEdit, QAction, QMenu, QSizePolicy, \
-                            QStatusBar, QBoxLayout, QGridLayout, QAbstractButton, QButtonGroup, QGroupBox
+                            QStatusBar, QBoxLayout, QGridLayout, QAbstractButton, QButtonGroup, QGroupBox, QInputDialog
 
 
 from PyQt5 import QtGui, uic
@@ -48,12 +48,12 @@ class ModanMainWindow(QMainWindow, form_class):
         self.initUI()
         self.setWindowTitle(PROGRAM_NAME)
         #self.read_settings()
+        self.selected_dataset = None
+        self.selected_object = None
         self.check_db()
         self.reset_views()
         self.load_dataset()
         #QApplication.restoreOverrideCursor()
-        self.selected_dataset = None
-        self.selected_object = None
         self.m_app = QApplication.instance()
         self.read_settings()
         self.statusBar = QStatusBar()
@@ -155,19 +155,69 @@ class ModanMainWindow(QMainWindow, form_class):
 
         #self.treeView.
     def open_object_menu(self, position):
-        indexes = self.treeView.selectedIndexes()
-        if len(indexes) > 0:
+        indexes = self.tableView.selectedIndexes()
+        selected_object_list = self.get_selected_object_list()
+        if len(selected_object_list) > 0:
             level = 0
             index = indexes[0]
+            action_edit_object = QAction("Edit")
+            action_edit_object.triggered.connect(self.on_tableView_doubleClicked)
             action_delete_object = QAction("Delete")
             action_delete_object.triggered.connect(self.on_action_delete_object_triggered)
             action_refresh_table = QAction("Reload")
             action_refresh_table.triggered.connect(self.load_object)
+            action_edit_property_list = []
+            if self.selected_dataset is not None and len(self.selected_dataset.propertyname_list)>0:
+                
+                for index, propertyname in enumerate(self.selected_dataset.propertyname_list):
+                    action_edit_property_list.append(QAction("- Edit " + propertyname))
+                    action_edit_property_list[-1].triggered.connect(lambda checked,index=index: self.on_edit_property(index))
+                    #action.triggered.connect(lambda arg=my_argument: my_slot(arg))
+
+
 
             menu = QMenu()
+            if len(selected_object_list) == 1:
+                menu.addAction(action_edit_object)
             menu.addAction(action_delete_object)
             menu.addAction(action_refresh_table)
+            if len(action_edit_property_list) > 0:
+                menu.addSeparator()
+                for action in action_edit_property_list:
+                    menu.addAction(action)
+
+
             menu.exec_(self.tableView.viewport().mapToGlobal(position))
+
+    def on_edit_property(self,idx):
+        object_list = self.get_selected_object_list()
+        if len(object_list) == 0:
+            return
+
+        for obj in object_list:
+            obj.unpack_property()
+
+        # get property from qmessagebox input
+        propertyname = self.selected_dataset.propertyname_list[idx]
+        #propertyvalue = object_list[0].get_property(propertyname)
+        text, ok = QInputDialog.getText(self, 'Input Dialog', 'Enter new value for ' + propertyname, text="")
+        if ok:
+            for object in object_list:
+                object.unpack_property()
+                #print("1", object.object_name, "property_list:", object.property_list)
+                if len(object.property_list) < idx+1:
+                    # extend property_list to idx
+                    while len(object.property_list) < idx+1:
+                        object.property_list.append("")
+                #print("2", object.object_name, "property_list:", object.property_list)
+
+                object.property_list[idx] = text
+                #print("3", object.object_name, "property_list:", object.property_list)
+                object.pack_property()
+                #print("3", object.object_name, "property_str:", object.property_str)
+                object.save()
+            self.load_object()
+
 
     @pyqtSlot()
     def on_action_delete_object_triggered(self):
@@ -554,17 +604,23 @@ class ModanMainWindow(QMainWindow, form_class):
     def reset_tableView(self):
         self.object_model = QStandardItemModel()
         header_labels = ["ID", "Name", "Count", "CSize"]
-        if self.selected_dataset is not None and self.selected_dataset.property_list is not None:
-            header_labels = ["ID", "Name", "Count", "CSize", "Dataset"]
-        self.object_model.setColumnCount(4)
-        self.object_model.setHorizontalHeaderLabels()
+        if self.selected_dataset is not None:
+            #print("selected_dataset:",self.selected_dataset.dataset_name)
+            self.selected_dataset.unpack_propertyname_str()
+            if self.selected_dataset.propertyname_list is not None and len( self.selected_dataset.propertyname_list ) > 0:
+                #print("propertyname_list:",self.selected_dataset.propertyname_list,"propertyname_str:",self.selected_dataset.propertyname_str)
+                header_labels.extend( self.selected_dataset.propertyname_list )
+        self.object_model.setColumnCount(len(header_labels))
+        self.object_model.setHorizontalHeaderLabels( header_labels )
         self.proxy_model = QSortFilterProxyModel()
         self.proxy_model.setSourceModel(self.object_model)
         self.tableView.setModel(self.proxy_model)
         self.tableView.setColumnWidth(0, 50)
         self.tableView.setColumnWidth(1, 200)
-        self.tableView.setColumnWidth(2, 200)
-        self.tableView.setColumnWidth(3, 200)
+        self.tableView.setColumnWidth(2, 50)
+        self.tableView.setColumnWidth(3, 50)
+        header = self.tableView.horizontalHeader()    
+        header.setSectionResizeMode(1, QHeaderView.Stretch)
         self.tableView.verticalHeader().setDefaultSectionSize(20)
         self.tableView.verticalHeader().setVisible(False)
         self.tableView.setSelectionBehavior(QTableView.SelectRows)
@@ -593,7 +649,7 @@ class ModanMainWindow(QMainWindow, form_class):
         #print("file name list:", file_name_list)
         if len(file_name_list) == 0:
             return
-        print("selected_dataset", self.selected_dataset)
+        #print("selected_dataset", self.selected_dataset)
         QApplication.setOverrideCursor(Qt.WaitCursor)
         for file_name in file_name_list:
             file_name = re.sub('file:///', '', file_name)
@@ -768,8 +824,17 @@ class ModanMainWindow(QMainWindow, form_class):
             lm_count = obj.count_landmarks()
             item3 = QStandardItem()
             item3.setData(lm_count,Qt.DisplayRole)
-
-            self.object_model.appendRow([item1,item2,item3] )
+            item4 = QStandardItem()
+            item4.setData('',Qt.DisplayRole)
+            item_list = [item1,item2,item3,item4]
+            if len(self.selected_dataset.propertyname_list) > 0:
+                property_list = obj.unpack_property()
+                #print("obj",obj.object_name,"property list:",property_list)
+                for idx,prop in enumerate(self.selected_dataset.propertyname_list):
+                    item = QStandardItem()
+                    item.setData(property_list[idx],Qt.DisplayRole)
+                    item_list.append(item)
+            self.object_model.appendRow(item_list)
 
 
     def on_object_selection_changed(self, selected, deselected):

@@ -30,6 +30,9 @@ import shutil
 from MdModel import *
 from ModanDialogs import DatasetAnalysisDialog, ObjectDialog, ImportDatasetDialog, DatasetDialog, PreferencesDialog, LandmarkEditor, IMAGE_EXTENSION_LIST
 
+#import matplotlib
+#matplotlib.use('Qt5Agg')
+
 PROGRAM_NAME = "Modan2"
 PROGRAM_VERSION = "0.0.1"
 

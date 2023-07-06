@@ -3,6 +3,7 @@
 
 """PySide6 port of the qt3d/simple-cpp example from Qt v5.x"""
 
+import pyqtgraph.opengl as gl
 import sys
 from PyQt5.QtCore import pyqtSignal, QObject, QPropertyAnimation, QMetaProperty, pyqtProperty
 from PyQt5.QtGui import QGuiApplication, QMatrix4x4, QQuaternion, QVector3D

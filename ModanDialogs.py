@@ -12,6 +12,7 @@ from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSettings, QEvent, QR
                          pyqtSignal, QThread, QMimeData, pyqtSlot
 
 import pyqtgraph as pg
+import pyqtgraph.opengl as gl
 
 import math, re, os
 from pathlib import Path
@@ -22,9 +23,9 @@ import shutil
 from matplotlib.backends.backend_qt5agg import FigureCanvas as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
+
 from MdModel import *
 from MdStatistics import MdPrincipalComponent
-
 MODE_NONE = 0
 MODE_PAN = 12
 MODE_EDIT_LANDMARK = 1
@@ -1066,6 +1067,21 @@ class DatasetOpsViewer(QLabel):
         return int(x*self.scale + self.pan_x)
     def _2cany(self, y):
         return int(y*self.scale + self.pan_y)
+class MyGLViewWidget(gl.GLViewWidget):
+    def __init__(self, widget):
+        super(MyGLViewWidget, self).__init__(widget)
+        self.ds_ops = None
+        self.scale = 1.0
+        self.pan_x = 0
+        self.pan_y = 0
+        self.show_index = True
+        self.show_wireframe = False
+        self.show_baseline = False
+        self.show_average = True
+        #self.setMinimumSize(200,200)
+
+    def set_ds_ops(self, ds_ops):
+        self.ds_ops = ds_ops
 
 
 class DatasetAnalysisDialog(QDialog):
@@ -1081,11 +1097,11 @@ class DatasetAnalysisDialog(QDialog):
         
         self.hsplitter = QSplitter(Qt.Horizontal)
 
-        self.lblShape = DatasetOpsViewer(self)
-        self.lblShape.setAlignment(Qt.AlignCenter)
-        self.lblShape.setMinimumWidth(400)
+        self.lblShape2 = DatasetOpsViewer(self)
+        self.lblShape2.setAlignment(Qt.AlignCenter)
+        self.lblShape2.setMinimumWidth(400)
         #self.lblShape.setMaximumWidth(200)
-        self.lblShape.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.lblShape2.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.lblGraph = QLabel("Graph")
         self.lblGraph.setAlignment(Qt.AlignCenter)
@@ -1106,10 +1122,19 @@ class DatasetAnalysisDialog(QDialog):
         #self.plot_widget = pg.PlotWidget()
         #self.plot_widget.setBackground('w')
 
-        self.plot_widget2 = FigureCanvas(Figure(figsize=(5, 3)))
-        self.plot_widget3 = FigureCanvas(Figure(figsize=(5, 3)))
-        self.ax3 = self.plot_widget2.figure.add_subplot()
-        self.ax2 = self.plot_widget3.figure.add_subplot(projection='3d')
+        self.plot_widget2 = FigureCanvas(Figure(figsize=(20, 16),dpi=100))
+        self.plot_widget3 = FigureCanvas(Figure(figsize=(20, 16),dpi=100))
+        self.fig2 = self.plot_widget2.figure
+        self.ax2 = self.fig2.add_subplot()
+        self.fig3 = self.plot_widget3.figure
+        self.ax3 = self.fig3.add_subplot(projection='3d')
+
+        #sc = MplCanvas(self, width=5, height=4, dpi=100)
+        #sc.axes.plot([0,1,2,3,4], [10,1,20,3,40])
+
+        # Create toolbar, passing canvas as first parament, parent (self, the MainWindow) as second.
+        self.toolbar2 = NavigationToolbar(self.plot_widget2, self)
+        self.toolbar3 = NavigationToolbar(self.plot_widget3, self)        
 
         #fig = plt.figure()
         
@@ -1145,7 +1170,22 @@ class DatasetAnalysisDialog(QDialog):
 
 
         self.svsplitter = QSplitter(Qt.Vertical)
+
+        # try adding a 3d plot
+        self.lblShape3 = MyGLViewWidget(self)
+        z = pg.gaussianFilter(numpy.random.normal(size=(50,50)), (1,1))
+        p13d = gl.GLSurfacePlotItem(z=z, shader='shaded', color=(0.5, 0.5, 1, 1))
+        self.lblShape3.addItem(p13d)
+
+        if dataset.dimension == 3:
+            self.lblShape2.hide()
+            self.lblShape = self.lblShape3
+        else:
+            self.lblShape3.hide()
+            self.lblShape = self.lblShape2
+
         self.svsplitter.addWidget(self.lblShape)
+
         self.svsplitter.addWidget(self.cbx_widget)
         self.svsplitter.setSizes([800,20])
         self.svsplitter.setStretchFactor(0, 1)
@@ -1164,10 +1204,6 @@ class DatasetAnalysisDialog(QDialog):
         self.lblAxis2 = QLabel("Axis 2")
         self.lblAxis3 = QLabel("Axis 3")
         self.comboDim = QComboBox()
-        self.comboDim.currentIndexChanged.connect(self.on_comboDim_changed)
-        self.comboDim.addItem("2D")
-        self.comboDim.addItem("3D")
-        self.comboDim.setCurrentIndex(1)
         self.comboAxis1 = QComboBox()
         self.comboAxis2 = QComboBox()
         self.comboAxis3 = QComboBox()
@@ -1180,6 +1216,10 @@ class DatasetAnalysisDialog(QDialog):
         self.cbxFlipAxis3 = QCheckBox()
         self.cbxFlipAxis3.setText("Flip")
         self.cbxFlipAxis3.setChecked(False)
+        self.comboDim.currentIndexChanged.connect(self.on_comboDim_changed)
+        self.comboDim.addItem("2D")
+        self.comboDim.addItem("3D")
+        self.comboDim.setCurrentIndex(1)
         self.plot_control_layout.addWidget(self.comboDim)
         self.plot_control_layout.addWidget(self.lblAxis1)
         self.plot_control_layout.addWidget(self.comboAxis1)
@@ -1203,7 +1243,9 @@ class DatasetAnalysisDialog(QDialog):
         self.comboPropertyName.setCurrentIndex(-1)
         self.comboPropertyName.currentIndexChanged.connect(self.propertyname_changed)
 
+        self.plot_layout.addWidget(self.toolbar2)
         self.plot_layout.addWidget(self.plot_widget2)
+        self.plot_layout.addWidget(self.toolbar3)
         self.plot_layout.addWidget(self.plot_widget3)
         self.plot_layout.addWidget(self.plot_control_widget)
         self.plot_layout.addWidget(self.plot_control_widget2)
@@ -1224,6 +1266,7 @@ class DatasetAnalysisDialog(QDialog):
         # add event to comboaxic
         self.comboAxis1.currentIndexChanged.connect(self.axis_changed)
         self.comboAxis2.currentIndexChanged.connect(self.axis_changed)
+        self.comboAxis3.currentIndexChanged.connect(self.axis_changed)
 
         self.hsplitter.addWidget(self.svsplitter)
         self.hsplitter.addWidget(self.tableView)
@@ -1331,12 +1374,16 @@ class DatasetAnalysisDialog(QDialog):
         if self.comboDim.currentText() == "2D":
             self.plot_widget2.show()
             self.plot_widget3.hide()
+            self.toolbar2.show()
+            self.toolbar3.hide()
             self.lblAxis3.hide()
             self.comboAxis3.hide()
             self.cbxFlipAxis3.hide()
         else:
             self.plot_widget3.show()
             self.plot_widget2.hide()
+            self.toolbar2.hide()
+            self.toolbar3.show()
             self.lblAxis3.show()
             self.comboAxis3.show()
             self.cbxFlipAxis3.show()
@@ -1372,6 +1419,7 @@ class DatasetAnalysisDialog(QDialog):
         axis2 = self.comboAxis2.currentText()
         #print("axis1: ", axis1)
         #print("axis2: ", axis2)
+        print("axis changed")
         self.show_pca_result()
 
     def flip_axis_changed(self, int):
@@ -1493,6 +1541,7 @@ class DatasetAnalysisDialog(QDialog):
             flip_axis3 = -1.0
         else:
             flip_axis3 = 1.0
+        #print("axis 1, 2, 3:", axis1, axis2, axis3)
 
         symbol_candidate = ['o','x','+','s','d','v','^','<','>','p','h']
         color_candidate = ['r','b','c','m','y','k','w','g']
@@ -1533,16 +1582,36 @@ class DatasetAnalysisDialog(QDialog):
                     curr_symbol = 'x'
                 pen.append(pg.mkPen(color=curr_color, width=1))
             symbol_list.append(curr_symbol)
-        print("x_val:",x_val,"y_val:",y_val,"z_val:",z_val)
+        #print("x_val:",x_val)
+        #print("y_val:",y_val)
+        #print("z_val:",z_val)
+
         if self.comboDim.currentText() == '2D':
-            print("2d")
+            #print("2d")
             #self.ax = self.plot_widget.figure.add_subplot()#projection='3d')
             self.ax2.clear()
-            self.ax2.plot(x_val, y_val)#,s=size_list,c=color_list)
+            self.ax2.scatter(x_val, y_val)#,s=size_list,c=color_list)
+            self.fig2.tight_layout()
+            #self.fig2.canvas.setGeometry(QRect(0, 0, 1600, 1200))
+            self.fig2.canvas.draw()
+            self.fig2.canvas.flush_events()
+
         else:
-            print("3d")
+            #print("3d", self.ax3)
+            #self.canvas.axes.cla()  # Clear the canvas.
+            #self.canvas.axes.plot(self.xdata, self.ydata, 'r')
+
             self.ax3.clear()
-            self.ax3.plot(x_val, y_val, z_val)
+            self.ax3.scatter(x_val, y_val, z_val, s=100, marker='+', color="green", depthshade=True)
+            self.fig3.tight_layout()
+            #self.fig3.canvas.setGeometry(QRect(0, 0, 1600, 1200))
+            self.fig3.canvas.draw()
+            self.fig3.canvas.flush_events()
+            #print("sp:",sp)
+            #sp.set_data(x_val, y_val,z_val)
+            
+            #print("ax3:", self.ax3, type(self.ax3))
+            #self.ax3.scatter(x_val, y_val, z_val, s=10)
         #scatter = MyPlotItem(size=10, brush=pg.mkBrush(255, 255, 255, 120),hoverable=True,hoverPen=pg.mkPen(color='r', width=2))
         #self.scatter_item = pg.ScatterPlotItem(size=10, brush=pg.mkBrush(255, 255, 255, 120),hoverable=True,hoverPen=pg.mkPen(color='r', width=2))
         #self.scatter_item.addPoints(x=x_val, y=y_val, data=data, symbol=symbol_list, pen=pen)
@@ -1557,6 +1626,85 @@ class DatasetAnalysisDialog(QDialog):
         #self.scatter_item.sigClicked.connect(self.on_scatter_item_clicked)
         #self.plot_widget.scene().sigMouseMoved.connect(self.on_mouse_moved)
         #self.plot_widget.scene().sigMouseClicked.connect(self.on_mouse_clicked)
+        #print("ret:",ret)
+        #self.plot_widget.plot(x=x_val, y=y_val, pen=pg.mkPen(width=2, color='r'), name="plot1")
+
+    def show_pca_result_pyqtgraph(self):
+        self.plot_widget.clear()
+
+        x_val = []
+        y_val = []
+        data = []
+        symbol = []
+        pen = []
+
+        # get axis1 and axis2 value from comboAxis1 and 2 index
+        axis1 = self.comboAxis1.currentIndex() +1
+        axis2 = self.comboAxis2.currentIndex() +1
+        #print("axis1: ", axis1) +1
+        #print("axis2: ", axis2)
+        flip_axis1 = self.cbxFlipAxis1.isChecked()
+        if flip_axis1:
+            flip_axis1 = -1.0
+        else:
+            flip_axis1 = 1.0
+
+        flip_axis2 = self.cbxFlipAxis2.isChecked()
+        if flip_axis2:
+            flip_axis2 = -1.0
+        else:
+            flip_axis2 = 1.0
+
+        symbol_candidate = ['o','x','+','s','d','v','^','<','>','p','h']
+        color_candidate = ['r','b','c','m','y','k','w','g']
+        prop_list = []
+        symbol_list = []
+        self.property_index = self.comboPropertyName.currentIndex()
+
+        for obj in self.ds_ops.object_list:
+            x_val.append( flip_axis1 * obj.pca_result[axis1])
+            y_val.append( flip_axis2 * obj.pca_result[axis2])
+            data.append(obj)
+            curr_symbol = ''
+            curr_color = ''
+            #print("property_index:",self.property_index,"len(obj.property_list):",len(obj.property_list),"obj.property_list:",obj.property_list)
+            if self.property_index > -1:
+                if self.property_index < len(obj.property_list):
+                    prop = obj.property_list[self.property_index]
+                    if prop not in prop_list:
+                        prop_list.append(prop)
+                    index = prop_list.index(prop)
+                    curr_symbol = symbol_candidate[index]
+                    curr_color = color_candidate[index]
+            else:
+                curr_symbol = symbol_candidate[0]
+                curr_color = color_candidate[0]
+
+
+            #print("obj.id:",obj.id,"self.selected_object_id_list:",self.selected_object_id_list)
+            if obj.id in self.selected_object_id_list:
+                curr_symbol = 'o'
+                pen.append(pg.mkPen(color='b', width=1))
+            else:
+                if curr_symbol == '':
+                    curr_symbol = 'x'
+                pen.append(pg.mkPen(color=curr_color, width=1))
+            symbol_list.append(curr_symbol)
+
+        #scatter = MyPlotItem(size=10, brush=pg.mkBrush(255, 255, 255, 120),hoverable=True,hoverPen=pg.mkPen(color='r', width=2))
+        self.scatter_item = pg.ScatterPlotItem(size=10, brush=pg.mkBrush(255, 255, 255, 120),hoverable=True,hoverPen=pg.mkPen(color='r', width=2))
+        self.scatter_item.addPoints(x=x_val, y=y_val, data=data, symbol=symbol_list, pen=pen)
+
+        self.plot_widget.setBackground('w')
+        self.plot_widget.setTitle("PCA Result")
+        self.plot_widget.setLabel("left", "PC2")
+        self.plot_widget.setLabel("bottom", "PC1")
+        self.plot_widget.addLegend()
+        self.plot_widget.showGrid(x=True, y=True)
+        ret = self.plot_widget.addItem(self.scatter_item)
+        self.scatter_item.sigClicked.connect(self.on_scatter_item_clicked)
+        self.plot_widget.scene().sigMouseMoved.connect(self.on_mouse_moved)
+        self.plot_widget.scene().sigMouseClicked.connect(self.on_mouse_clicked)
         #print("ret:",ret)
         #self.plot_widget.plot(x=x_val, y=y_val, pen=pg.mkPen(width=2, color='r'), name="plot1")
 

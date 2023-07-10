@@ -1090,7 +1090,7 @@ class DatasetAnalysisDialog(QDialog):
         self.setWindowTitle("Assorted Analyses")
         self.parent = parent
         #print(self.parent.pos())
-        self.setGeometry(QRect(100, 100, 1024, 600))
+        self.setGeometry(QRect(100, 100, 1200, 800))
         self.move(self.parent.pos()+QPoint(100,100))
         #print("dataset:",dataset.dataset_name)
         self.ds_ops = None
@@ -1196,14 +1196,26 @@ class DatasetAnalysisDialog(QDialog):
         self.plot_control_layout2 = QHBoxLayout()
         self.plot_control_widget = QWidget()
         self.plot_control_widget2 = QWidget()
-        self.plot_control_widget.setMaximumHeight(40)
+        self.plot_control_widget.setMaximumHeight(70)
         self.plot_control_widget.setLayout(self.plot_control_layout)
-        self.plot_control_widget2.setMaximumHeight(40)
+        self.plot_control_widget2.setMaximumHeight(70)
         self.plot_control_widget2.setLayout(self.plot_control_layout2)
-        self.lblAxis1 = QLabel("Axis 1")
-        self.lblAxis2 = QLabel("Axis 2")
-        self.lblAxis3 = QLabel("Axis 3")
-        self.comboDim = QComboBox()
+
+        self.rb2DChartDim = QRadioButton("2D")
+        self.rb3DChartDim = QRadioButton("3D")
+        self.rb2DChartDim.toggled.connect(self.on_chart_dim_changed)
+        self.rb3DChartDim.toggled.connect(self.on_chart_dim_changed)
+        self.cbxDepthShade = QCheckBox()
+        self.cbxDepthShade.setText("Depth Shade")
+        self.cbxDepthShade.setChecked(False)
+        self.cbxDepthShade.toggled.connect(self.on_chart_dim_changed)
+        self.gbChartDim = QGroupBox()
+        self.gbChartDim.setTitle("Chart Dimension")
+        self.gbChartDim.setLayout(QHBoxLayout())
+        self.gbChartDim.layout().addWidget(self.rb2DChartDim)
+        self.gbChartDim.layout().addWidget(self.rb3DChartDim)
+        self.gbChartDim.layout().addWidget(self.cbxDepthShade)
+
         self.comboAxis1 = QComboBox()
         self.comboAxis2 = QComboBox()
         self.comboAxis3 = QComboBox()
@@ -1216,11 +1228,39 @@ class DatasetAnalysisDialog(QDialog):
         self.cbxFlipAxis3 = QCheckBox()
         self.cbxFlipAxis3.setText("Flip")
         self.cbxFlipAxis3.setChecked(False)
-        self.comboDim.currentIndexChanged.connect(self.on_comboDim_changed)
-        self.comboDim.addItem("2D")
-        self.comboDim.addItem("3D")
-        self.comboDim.setCurrentIndex(1)
-        self.plot_control_layout.addWidget(self.comboDim)
+
+        self.gbAxis1 = QGroupBox()
+        self.gbAxis1.setTitle("Axis 1")
+        self.gbAxis1.setLayout(QHBoxLayout())
+        #self.gbAxis1.layout().addWidget(self.lblAxis1)
+        self.gbAxis1.layout().addWidget(self.comboAxis1)
+        self.gbAxis1.layout().addWidget(self.cbxFlipAxis1)
+        self.gbAxis2 = QGroupBox()
+        self.gbAxis2.setTitle("Axis 2")
+        self.gbAxis2.setLayout(QHBoxLayout())
+        #self.gbAxis2.layout().addWidget(self.lblAxis2)
+        self.gbAxis2.layout().addWidget(self.comboAxis2)
+        self.gbAxis2.layout().addWidget(self.cbxFlipAxis2)
+        self.gbAxis3 = QGroupBox()
+        self.gbAxis3.setTitle("Axis 3")
+        self.gbAxis3.setLayout(QHBoxLayout())
+        #self.gbAxis3.layout().addWidget(self.lblAxis3)
+        self.gbAxis3.layout().addWidget(self.comboAxis3)
+        self.gbAxis3.layout().addWidget(self.cbxFlipAxis3)
+
+
+        self.plot_control_layout.addWidget(self.gbChartDim)
+        self.plot_control_layout.addWidget(self.gbAxis1)
+        self.plot_control_layout.addWidget(self.gbAxis2)
+        self.plot_control_layout.addWidget(self.gbAxis3)
+        # connect checkboxes
+        self.cbxFlipAxis1.stateChanged.connect(self.flip_axis_changed)
+        self.cbxFlipAxis2.stateChanged.connect(self.flip_axis_changed)
+        self.cbxFlipAxis3.stateChanged.connect(self.flip_axis_changed)
+
+        '''
+        self.plot_control_layout.addWidget(self.rb2DChartDim)
+        self.plot_control_layout.addWidget(self.rb3DChartDim)
         self.plot_control_layout.addWidget(self.lblAxis1)
         self.plot_control_layout.addWidget(self.comboAxis1)
         self.plot_control_layout.addWidget(self.cbxFlipAxis1)
@@ -1230,18 +1270,23 @@ class DatasetAnalysisDialog(QDialog):
         self.plot_control_layout.addWidget(self.lblAxis3)
         self.plot_control_layout.addWidget(self.comboAxis3)
         self.plot_control_layout.addWidget(self.cbxFlipAxis3)
-        # connect checkboxes
-        self.cbxFlipAxis1.stateChanged.connect(self.flip_axis_changed)
-        self.cbxFlipAxis2.stateChanged.connect(self.flip_axis_changed)
+        '''
 
-        self.lblPropertyName = QLabel("Property Name")
+        self.gbGroupBy = QGroupBox()
+        self.gbGroupBy.setTitle("Group By")
+        self.gbGroupBy.setLayout(QHBoxLayout())
         self.comboPropertyName = QComboBox()
-        self.plot_control_layout2.addWidget(self.lblPropertyName)
-        self.plot_control_layout2.addWidget(self.comboPropertyName)
+        self.gbGroupBy.layout().addWidget(self.comboPropertyName)
+
+        self.plot_control_layout2.addWidget(self.gbChartDim)
+        self.plot_control_layout2.addWidget(self.gbGroupBy)
+
         #self.comboPropertyName..connect(self.propertyname_changed)
         #connect comboPropertyname change to plot
         self.comboPropertyName.setCurrentIndex(-1)
         self.comboPropertyName.currentIndexChanged.connect(self.propertyname_changed)
+        self.btnChartOptions = QPushButton("Chart Options")
+        self.btnChartOptions.clicked.connect(self.chart_options_clicked)
 
         self.plot_layout.addWidget(self.toolbar2)
         self.plot_layout.addWidget(self.plot_widget2)
@@ -1249,6 +1294,12 @@ class DatasetAnalysisDialog(QDialog):
         self.plot_layout.addWidget(self.plot_widget3)
         self.plot_layout.addWidget(self.plot_control_widget)
         self.plot_layout.addWidget(self.plot_control_widget2)
+        self.plot_layout.addWidget(self.btnChartOptions)
+
+        #self.comboDim.addItem("2D")
+        #self.comboDim.addItem("3D")
+        #self.comboDim.currentIndexChanged.connect(self.on_comboDim_changed)
+
 
         self.plot_all_widget = QWidget()
         self.plot_all_widget.setLayout(self.plot_layout)
@@ -1285,7 +1336,7 @@ class DatasetAnalysisDialog(QDialog):
         self.middle_bottom_layout = QVBoxLayout()
         self.right_bottom_layout = QVBoxLayout()
 
-        rbbox_height = 70
+        rbbox_height = 50
 
         self.rbProcrustes = QRadioButton("Procrustes")
         self.rbBookstein = QRadioButton("Bookstein")
@@ -1293,6 +1344,19 @@ class DatasetAnalysisDialog(QDialog):
         self.rbProcrustes.setChecked(True)
         self.rbBookstein.setEnabled(False)
         self.rbResistantFit.setEnabled(False)
+        self.btnSuperimpose = QPushButton("Superimpose")
+        self.btnSuperimpose.clicked.connect(self.on_btnSuperimpose_clicked)
+
+        self.gbSuperimposition = QGroupBox()
+        self.gbSuperimposition.setTitle("Superimposition")
+        self.gbSuperimposition.setLayout(QHBoxLayout())
+        self.gbSuperimposition.layout().addWidget(self.rbProcrustes)
+        self.gbSuperimposition.layout().addWidget(self.rbBookstein)
+        self.gbSuperimposition.layout().addWidget(self.rbResistantFit)
+        self.gbSuperimposition.setMaximumHeight(rbbox_height)
+        #self.gbSuperimposition.layout().setContentsMargins(0, 0, 0, 0)
+        #self.gbSuperimposition.layout().addWidget(self.btnSuperimpose)
+        '''
         self.lb1_layout = QVBoxLayout()
         self.lb1_layout.addWidget(self.rbProcrustes)
         self.lb1_layout.addWidget(self.rbBookstein)
@@ -1300,29 +1364,38 @@ class DatasetAnalysisDialog(QDialog):
         self.lb1_widget = QWidget()
         self.lb1_widget.setMinimumHeight(rbbox_height)
         self.lb1_widget.setMaximumHeight(rbbox_height)
-        self.lb1_widget.setLayout(self.lb1_layout)
+        self.lb1_widget.setLayout(self.lb1_layout)'''
         #self.lb1_layout.setMinimumHeight(60)
-        self.btnSuperimpose = QPushButton("Superimpose")
-        self.btnSuperimpose.clicked.connect(self.on_btnSuperimpose_clicked)
-        self.left_bottom_layout.addWidget(self.lb1_widget)
+        self.left_bottom_layout.addWidget(self.gbSuperimposition)
         self.left_bottom_layout.addWidget(self.btnSuperimpose)
 
         self.rbPCA = QRadioButton("PCA")
         self.rbCVA = QRadioButton("CVA")
         self.rbPCA.setChecked(True)
         self.rbCVA.setEnabled(False)
-        self.mb1_layout = QVBoxLayout()
-        self.mb1_layout.addWidget(self.rbPCA)
-        self.mb1_layout.addWidget(self.rbCVA)
+        self.gbAnalysis = QGroupBox()
+        self.gbAnalysis.setTitle("Method")
+        self.gbAnalysis.setLayout(QHBoxLayout())
+        #self.gbAnalysis.layout().setContentsMargins(0, 0, 0, 0)
+        self.gbAnalysis.layout().addWidget(self.rbPCA)
+        self.gbAnalysis.layout().addWidget(self.rbCVA)
+        self.gbAnalysis.setMaximumHeight(rbbox_height)
+
+
+        '''
+        #self.mb1_layout = QVBoxLayout()
+        #self.mb1_layout.addWidget(self.rbPCA)
+        #self.mb1_layout.addWidget(self.rbCVA)
         self.mb1_widget = QWidget()
         self.mb1_widget.setMinimumHeight(rbbox_height)
         self.mb1_widget.setMaximumHeight(rbbox_height)
         self.mb1_widget.setLayout(self.mb1_layout)
+        '''
         
         #self.mb1_layout.setMinimumHeight(60)
-        self.btnAnalyze = QPushButton("Analyze")
+        self.btnAnalyze = QPushButton("Perform Analysis")
         self.btnAnalyze.clicked.connect(self.on_btnAnalyze_clicked)
-        self.middle_bottom_layout.addWidget(self.mb1_widget)
+        self.middle_bottom_layout.addWidget(self.gbAnalysis)
         self.middle_bottom_layout.addWidget(self.btnAnalyze)
 
         self.empty_widget = QWidget()
@@ -1349,6 +1422,7 @@ class DatasetAnalysisDialog(QDialog):
 
         #print("c")
         self.set_dataset(dataset)
+
         #print("d")
         self.reset_tableView()
         self.load_object()
@@ -1368,68 +1442,73 @@ class DatasetAnalysisDialog(QDialog):
         self.cbxShowWireframe.stateChanged.connect(self.show_wireframe_state_changed)
         self.cbxShowBaseline.stateChanged.connect(self.show_baseline_state_changed)
         self.cbxShowAverage.stateChanged.connect(self.show_average_state_changed)
-        self.on_btnPCA_clicked()
 
-    def on_comboDim_changed(self):
-        if self.comboDim.currentText() == "2D":
+        self.show_chart_options = True
+        self.chart_options_clicked()
+
+        #self.comboDim.setCurrentIndex(1)
+        self.rb3DChartDim.setChecked(True)
+        self.on_chart_dim_changed()
+        self.on_btnPCA_clicked()
+        self.btnSaveResults.setFocus()
+
+    def chart_options_clicked(self):
+        self.show_chart_options = not self.show_chart_options
+        if self.show_chart_options:
+            #self.gbChartOptions.show()
+            self.plot_control_widget.show()
+            self.plot_control_widget2.show()
+        else:
+            #self.gbChartOptions.hide()
+            self.plot_control_widget.hide()
+            self.plot_control_widget2.hide()
+
+
+    def on_chart_dim_changed(self):
+        if self.rb2DChartDim.isChecked():
             self.plot_widget2.show()
             self.plot_widget3.hide()
             self.toolbar2.show()
             self.toolbar3.hide()
-            self.lblAxis3.hide()
+            self.gbAxis3.hide()
             self.comboAxis3.hide()
             self.cbxFlipAxis3.hide()
+            self.cbxDepthShade.hide()
         else:
             self.plot_widget3.show()
             self.plot_widget2.hide()
             self.toolbar2.hide()
             self.toolbar3.show()
-            self.lblAxis3.show()
+            self.gbAxis3.show()
             self.comboAxis3.show()
             self.cbxFlipAxis3.show()
+            self.cbxDepthShade.show()
 
         if self.ds_ops is not None:
             self.show_pca_result()
 
     def set_dataset(self, dataset):
         self.dataset = dataset
+        self.comboPropertyName.clear()
+        self.comboPropertyName.addItem("Select Property")
         if len(self.dataset.propertyname_list) > 0:
             for propertyname in self.dataset.propertyname_list:
                 self.comboPropertyName.addItem(propertyname)
                 #self.comboAxis2.addItem(propertyname)
-        self.comboPropertyName.setCurrentIndex(-1)
+        self.comboPropertyName.setCurrentIndex(0)
         self.comboPropertyName.currentIndexChanged.connect(self.propertyname_changed)
+
     def propertyname_changed(self):
         if self.ds_ops is not None:
             self.show_pca_result()
-        return
-        self.property_index = 1
-        if self.property_index < 0:
-            return
-
-        print("propertyname_changed: property_index:", self.property_index)
-        #self.show_pca_result()
-
-
-        #return
 
     def axis_changed(self):
-        # get axis values from comboAxis1 and 2
-        axis1 = self.comboAxis1.currentText()
-        axis2 = self.comboAxis2.currentText()
-        #print("axis1: ", axis1)
-        #print("axis2: ", axis2)
-        print("axis changed")
-        self.show_pca_result()
+        if self.ds_ops is not None:
+            self.show_pca_result()
 
     def flip_axis_changed(self, int):
-        if self.cbxFlipAxis1.isChecked():
-            self.lblShape.show_index = True
-            #print("show index CHECKED!")
-        else:
-            self.lblShape.show_index = False
-            #print("show index UNCHECKED!")
-        self.show_pca_result()
+        if self.ds_ops is not None:
+            self.show_pca_result()
 
     def on_btnSuperimpose_clicked(self):
         print("on_btnSuperimpose_clicked")
@@ -1443,7 +1522,6 @@ class DatasetAnalysisDialog(QDialog):
         self.show_pca_result()
         self.show_object_shape()
         
-
     def on_btnSaveResults_clicked(self):
         print("on_btnSaveResults_clicked")
         
@@ -1511,123 +1589,84 @@ class DatasetAnalysisDialog(QDialog):
     def show_pca_result(self):
         #self.plot_widget.clear()
 
-        x_val = []
-        y_val = []
-        z_val = []
-        data = []
-        symbol = []
-        pen = []
-
         # get axis1 and axis2 value from comboAxis1 and 2 index
+        depth_shade = self.cbxDepthShade.isChecked()
         axis1 = self.comboAxis1.currentIndex() +1
         axis2 = self.comboAxis2.currentIndex() +1
         axis3 = self.comboAxis3.currentIndex() +1
-        #print("axis1: ", axis1) +1
-        #print("axis2: ", axis2)
-        flip_axis1 = self.cbxFlipAxis1.isChecked()
-        if flip_axis1:
-            flip_axis1 = -1.0
-        else:
-            flip_axis1 = 1.0
+        flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
+        flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
+        flip_axis3 = -1.0 if self.cbxFlipAxis3.isChecked() == True else 1.0
 
-        flip_axis2 = self.cbxFlipAxis2.isChecked()
-        if flip_axis2:
-            flip_axis2 = -1.0
-        else:
-            flip_axis2 = 1.0
+        symbol_candidate = ['o','s','^','x','+','d','v','<','>','p','h']
+        color_candidate = ['blue','green','black','cyan','magenta','yellow','white','gray','red']
+        self.propertyname_index = self.comboPropertyName.currentIndex() -1
+        group_hash = {}
 
-        flip_axis3 = self.cbxFlipAxis3.isChecked()
-        if flip_axis3:
-            flip_axis3 = -1.0
-        else:
-            flip_axis3 = 1.0
-        #print("axis 1, 2, 3:", axis1, axis2, axis3)
-
-        symbol_candidate = ['o','x','+','s','d','v','^','<','>','p','h']
-        color_candidate = ['r','b','c','m','y','k','w','g']
-        prop_list = []
-        symbol_list = []
-        size_list = []
-        color_list = []
-        self.property_index = self.comboPropertyName.currentIndex()
+        key_list = []
+        key_list.append('__default__')
+        group_hash['__default__'] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'hoverinfo':[], 'text':[], 'property':'', 'symbol':'o', 'color':'blue', 'size':50}
+        if len(self.selected_object_id_list) > 0:
+            group_hash['__selected__'] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'hoverinfo':[], 'text':[], 'property':'', 'symbol':'o', 'color':'red', 'size':100}
+            key_list.append('__selected__')
 
         for obj in self.ds_ops.object_list:
-            x_val.append( flip_axis1 * obj.pca_result[axis1])
-            y_val.append( flip_axis2 * obj.pca_result[axis2])
-            z_val.append( flip_axis3 * obj.pca_result[axis3])
-            data.append(obj)
-            size_list.append(10)
-            color_list.append('b')
-            curr_symbol = ''
-            curr_color = ''
-            #print("property_index:",self.property_index,"len(obj.property_list):",len(obj.property_list),"obj.property_list:",obj.property_list)
-            if self.property_index > -1:
-                if self.property_index < len(obj.property_list):
-                    prop = obj.property_list[self.property_index]
-                    if prop not in prop_list:
-                        prop_list.append(prop)
-                    index = prop_list.index(prop)
-                    curr_symbol = symbol_candidate[index]
-                    curr_color = color_candidate[index]
-            else:
-                curr_symbol = symbol_candidate[0]
-                curr_color = color_candidate[0]
+            key_name = '__default__'
 
-            #print("obj.id:",obj.id,"self.selected_object_id_list:",self.selected_object_id_list)
             if obj.id in self.selected_object_id_list:
-                curr_symbol = 'o'
-                pen.append(pg.mkPen(color='b', width=1))
-            else:
-                if curr_symbol == '':
-                    curr_symbol = 'x'
-                pen.append(pg.mkPen(color=curr_color, width=1))
-            symbol_list.append(curr_symbol)
-        #print("x_val:",x_val)
-        #print("y_val:",y_val)
-        #print("z_val:",z_val)
+                key_name = '__selected__'
+            elif self.propertyname_index > -1 and self.propertyname_index < len(obj.property_list):
+                key_name = obj.property_list[self.propertyname_index]
 
-        if self.comboDim.currentText() == '2D':
-            #print("2d")
-            #self.ax = self.plot_widget.figure.add_subplot()#projection='3d')
+            if key_name not in group_hash.keys():
+                group_hash[key_name] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'property':key_name, 'symbol':'', 'color':'', 'size':50}
+
+            group_hash[key_name]['x_val'].append(flip_axis1 * obj.pca_result[axis1])
+            group_hash[key_name]['y_val'].append(flip_axis2 * obj.pca_result[axis2])
+            group_hash[key_name]['z_val'].append(flip_axis3 * obj.pca_result[axis3])
+            #group_hash[key_name]['data'].append(obj)
+            #group_hash[key_name]['text'].append(obj.object_name)
+            #group_hash[key_name]['hoverinfo'].append(obj.id)
+
+        # remove empty group
+        if len(group_hash['__default__']['x_val']) == 0:
+            del group_hash['__default__']
+
+        # assign color and symbol
+        sc_idx = 0
+        for key_name in group_hash.keys():
+            if group_hash[key_name]['color'] == '':
+                group_hash[key_name]['color'] = color_candidate[sc_idx % len(color_candidate)]
+                group_hash[key_name]['symbol'] = symbol_candidate[sc_idx % len(symbol_candidate)]
+                sc_idx += 1
+
+        if self.rb2DChartDim.isChecked():
             self.ax2.clear()
-            self.ax2.scatter(x_val, y_val)#,s=size_list,c=color_list)
+            for name in group_hash.keys():
+                #print("name", name, "len(group_hash[name]['x_val'])", len(group_hash[name]['x_val']), group_hash[name]['symbol'])
+                group = group_hash[name]
+                if len(group['x_val']) > 0:
+                    ret = self.ax2.scatter(group['x_val'], group['y_val'], s=group['size'], marker=group['symbol'], color=group['color'], data=group['data'], picker=True, pickradius=5)
+                    print("ret", ret)
             self.fig2.tight_layout()
-            #self.fig2.canvas.setGeometry(QRect(0, 0, 1600, 1200))
             self.fig2.canvas.draw()
             self.fig2.canvas.flush_events()
+            self.fig2.canvas.mpl_connect('pick_event',self.onpick)
 
         else:
-            #print("3d", self.ax3)
-            #self.canvas.axes.cla()  # Clear the canvas.
-            #self.canvas.axes.plot(self.xdata, self.ydata, 'r')
-
             self.ax3.clear()
-            self.ax3.scatter(x_val, y_val, z_val, s=100, marker='+', color="green", depthshade=True)
+            for name in group_hash.keys():
+                #print("name", name, "len(group_hash[name]['x_val'])", len(group_hash[name]['x_val']), group_hash[name]['symbol'])
+                group = group_hash[name]
+                if len(group_hash[name]['x_val']) > 0:
+                    ret = self.ax3.scatter(group['x_val'], group['y_val'], group['z_val'], s=group['size'], marker=group['symbol'], color=group['color'], data=group['data'],depthshade=depth_shade)
+                    print("ret", ret)
             self.fig3.tight_layout()
-            #self.fig3.canvas.setGeometry(QRect(0, 0, 1600, 1200))
             self.fig3.canvas.draw()
             self.fig3.canvas.flush_events()
-            #print("sp:",sp)
-            #sp.set_data(x_val, y_val,z_val)
-            
-            #print("ax3:", self.ax3, type(self.ax3))
-            #self.ax3.scatter(x_val, y_val, z_val, s=10)
-        #scatter = MyPlotItem(size=10, brush=pg.mkBrush(255, 255, 255, 120),hoverable=True,hoverPen=pg.mkPen(color='r', width=2))
-        #self.scatter_item = pg.ScatterPlotItem(size=10, brush=pg.mkBrush(255, 255, 255, 120),hoverable=True,hoverPen=pg.mkPen(color='r', width=2))
-        #self.scatter_item.addPoints(x=x_val, y=y_val, data=data, symbol=symbol_list, pen=pen)
 
-        #self.plot_widget.setBackground('w')
-        #self.plot_widget.setTitle("PCA Result")
-        #self.plot_widget.setLabel("left", "PC2")
-        #self.plot_widget.setLabel("bottom", "PC1")
-        #self.plot_widget.addLegend()
-        #self.plot_widget.showGrid(x=True, y=True)
-        #ret = self.plot_widget.addItem(self.scatter_item)
-        #self.scatter_item.sigClicked.connect(self.on_scatter_item_clicked)
-        #self.plot_widget.scene().sigMouseMoved.connect(self.on_mouse_moved)
-        #self.plot_widget.scene().sigMouseClicked.connect(self.on_mouse_clicked)
-        #print("ret:",ret)
-        #self.plot_widget.plot(x=x_val, y=y_val, pen=pg.mkPen(width=2, color='r'), name="plot1")
+    def onpick(self,evt):
+        print("evt", evt, evt.ind, evt.artist )
 
     def show_pca_result_pyqtgraph(self):
         self.plot_widget.clear()
@@ -1659,7 +1698,7 @@ class DatasetAnalysisDialog(QDialog):
         color_candidate = ['r','b','c','m','y','k','w','g']
         prop_list = []
         symbol_list = []
-        self.property_index = self.comboPropertyName.currentIndex()
+        self.propertyname_index = self.comboPropertyName.currentIndex()
 
         for obj in self.ds_ops.object_list:
             x_val.append( flip_axis1 * obj.pca_result[axis1])
@@ -1668,9 +1707,9 @@ class DatasetAnalysisDialog(QDialog):
             curr_symbol = ''
             curr_color = ''
             #print("property_index:",self.property_index,"len(obj.property_list):",len(obj.property_list),"obj.property_list:",obj.property_list)
-            if self.property_index > -1:
-                if self.property_index < len(obj.property_list):
-                    prop = obj.property_list[self.property_index]
+            if self.propertyname_index > -1:
+                if self.propertyname_index < len(obj.property_list):
+                    prop = obj.property_list[self.propertyname_index]
                     if prop not in prop_list:
                         prop_list.append(prop)
                     index = prop_list.index(prop)
@@ -1805,6 +1844,7 @@ class DatasetAnalysisDialog(QDialog):
         self.tableView.verticalHeader().setDefaultSectionSize(20)
         self.tableView.verticalHeader().setVisible(False)
         self.tableView.setSelectionBehavior(QTableView.SelectRows)
+        #self.tableView.clicked.connect(self.on_tableView_clicked)
         self.object_selection_model = self.tableView.selectionModel()
         self.object_selection_model.selectionChanged.connect(self.on_object_selection_changed)
         self.tableView.setSortingEnabled(True)
@@ -1816,10 +1856,17 @@ class DatasetAnalysisDialog(QDialog):
         header.setSectionResizeMode(1, QHeaderView.Stretch)
         self.tableView.setStyleSheet("QTreeView::item:selected{background-color: palette(highlight); color: palette(highlightedText);};")
 
+    '''
+    def on_tableView_clicked(self, index):
+        self.selected_object_id_list = self.get_selected_object_id_list()
+        #if len(self.selected_object_id_list) == 0:
+        #    return
+    '''
+
     def on_object_selection_changed(self, selected, deselected):
         self.selected_object_id_list = self.get_selected_object_id_list()
-        if len(self.selected_object_id_list) == 0:
-            return
+        #if len(self.selected_object_id_list) == 0:
+        #    return
         #print("object_id:",object_id, type(object_id))
         #for 
         #for object_id in self.selected_object_id_list:

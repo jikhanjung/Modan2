@@ -61,6 +61,7 @@ class ModanMainWindow(QMainWindow, form_class):
         self.read_settings()
         self.statusBar = QStatusBar()
         self.setStatusBar(self.statusBar)
+        self.analysis_dialog = None
 
     def read_settings(self):
         self.m_app.settings = QSettings(QSettings.IniFormat, QSettings.UserScope,"DiploSoft", "Modan2")
@@ -100,6 +101,8 @@ class ModanMainWindow(QMainWindow, form_class):
 
     def closeEvent(self, event):
         #self.write_settings()
+        if self.analysis_dialog is not None:
+            self.analysis_dialog.close()
         event.accept()
 
     @pyqtSlot()

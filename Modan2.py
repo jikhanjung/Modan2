@@ -838,7 +838,10 @@ class ModanMainWindow(QMainWindow, form_class):
                 #print("obj",obj.object_name,"property list:",property_list)
                 for idx,prop in enumerate(self.selected_dataset.propertyname_list):
                     item = QStandardItem()
-                    item.setData(property_list[idx],Qt.DisplayRole)
+                    if idx < len(property_list):
+                        item.setData(property_list[idx],Qt.DisplayRole)
+                    else:
+                        item.setData('',Qt.DisplayRole)
                     item_list.append(item)
             self.object_model.appendRow(item_list)
 

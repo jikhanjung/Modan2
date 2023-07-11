@@ -9,7 +9,7 @@ from PyQt5 import QtGui, uic
 from PyQt5.QtGui import QIcon, QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem,\
                         QPainterPath, QFont, QImageReader, QPainter, QBrush, QMouseEvent, QWheelEvent, QDrag
 from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSettings, QEvent, QRegExp, QSize, QPoint,\
-                         pyqtSignal, QThread, QMimeData, pyqtSlot
+                         pyqtSignal, QThread, QMimeData, pyqtSlot, QItemSelectionModel
 
 import pyqtgraph as pg
 import pyqtgraph.opengl as gl
@@ -1067,6 +1067,7 @@ class DatasetOpsViewer(QLabel):
         return int(x*self.scale + self.pan_x)
     def _2cany(self, y):
         return int(y*self.scale + self.pan_y)
+    
 class MyGLViewWidget(gl.GLViewWidget):
     def __init__(self, widget):
         super(MyGLViewWidget, self).__init__(widget)
@@ -1088,64 +1089,34 @@ class DatasetAnalysisDialog(QDialog):
     def __init__(self,parent,dataset):
         super().__init__()
         self.setWindowTitle("Assorted Analyses")
+        self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
         self.parent = parent
-        #print(self.parent.pos())
         self.setGeometry(QRect(100, 100, 1200, 800))
         self.move(self.parent.pos()+QPoint(100,100))
-        #print("dataset:",dataset.dataset_name)
-        self.ds_ops = None
-        
-        self.hsplitter = QSplitter(Qt.Horizontal)
 
+        self.ds_ops = None
+        self.object_hash = {}
+        
+        self.main_hsplitter = QSplitter(Qt.Horizontal)
+
+        # 2d shape
         self.lblShape2 = DatasetOpsViewer(self)
         self.lblShape2.setAlignment(Qt.AlignCenter)
         self.lblShape2.setMinimumWidth(400)
-        #self.lblShape.setMaximumWidth(200)
         self.lblShape2.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
-        self.lblGraph = QLabel("Graph")
-        self.lblGraph.setAlignment(Qt.AlignCenter)
-        self.lblGraph.setMinimumWidth(400)
-        #self.lblGraph.setMaximumWidth(200)
-        self.lblGraph.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        # 3d shape
+        self.lblShape3 = MyGLViewWidget(self)
+        z = pg.gaussianFilter(numpy.random.normal(size=(50,50)), (1,1))
+        p13d = gl.GLSurfacePlotItem(z=z, shader='shaded', color=(0.5, 0.5, 1, 1))
+        self.lblShape3.addItem(p13d)
 
-        self.tableView = QTableView()
-        self.tableView.setSelectionBehavior(QAbstractItemView.SelectRows)
-        #self.tableView.setSelectionMode(QAbstractItemView.SingleSelection)
-        self.tableView.setSortingEnabled(True)
-        #self.tableView.setAlternatingRowColors(True)
-        self.tableView.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        #self.tableView.setContextMenuPolicy(Qt.CustomContextMenu)
-        #self.tableView.customContextMenuRequested.connect(self.show_context_menu)
-        self.tableView.setSortingEnabled(True)
-
-        #self.plot_widget = pg.PlotWidget()
-        #self.plot_widget.setBackground('w')
-
-        self.plot_widget2 = FigureCanvas(Figure(figsize=(20, 16),dpi=100))
-        self.plot_widget3 = FigureCanvas(Figure(figsize=(20, 16),dpi=100))
-        self.fig2 = self.plot_widget2.figure
-        self.ax2 = self.fig2.add_subplot()
-        self.fig3 = self.plot_widget3.figure
-        self.ax3 = self.fig3.add_subplot(projection='3d')
-
-        #sc = MplCanvas(self, width=5, height=4, dpi=100)
-        #sc.axes.plot([0,1,2,3,4], [10,1,20,3,40])
-
-        # Create toolbar, passing canvas as first parament, parent (self, the MainWindow) as second.
-        self.toolbar2 = NavigationToolbar(self.plot_widget2, self)
-        self.toolbar3 = NavigationToolbar(self.plot_widget3, self)        
-
-        #fig = plt.figure()
-        
-        #self.ax.set_axis_off()
-        #self.ax.set_xticks([])
-        #self.ax.set_yticks([])
-        #self.ax.set_zticks([])
-        #self.ax.grid(False)
-
-
-        #self.plot_widget = pg.useOpenGL.GLViewWidget()        
+        if dataset.dimension == 3:
+            self.lblShape2.hide()
+            self.lblShape = self.lblShape3
+        else:
+            self.lblShape3.hide()
+            self.lblShape = self.lblShape2
 
         # checkboxes
         self.cbxShowIndex = QCheckBox()
@@ -1160,6 +1131,12 @@ class DatasetAnalysisDialog(QDialog):
         self.cbxShowAverage = QCheckBox()
         self.cbxShowAverage.setText("Average")
         self.cbxShowAverage.setChecked(True)
+
+        self.cbxShowIndex.stateChanged.connect(self.show_index_state_changed)
+        self.cbxShowWireframe.stateChanged.connect(self.show_wireframe_state_changed)
+        self.cbxShowBaseline.stateChanged.connect(self.show_baseline_state_changed)
+        self.cbxShowAverage.stateChanged.connect(self.show_average_state_changed)
+
         self.checkbox_layout = QHBoxLayout()
         self.checkbox_layout.addWidget(self.cbxShowIndex)
         self.checkbox_layout.addWidget(self.cbxShowWireframe)
@@ -1168,38 +1145,74 @@ class DatasetAnalysisDialog(QDialog):
         self.cbx_widget = QWidget()
         self.cbx_widget.setLayout(self.checkbox_layout)
 
+        self.shape_vsplitter = QSplitter(Qt.Vertical)
+        self.shape_vsplitter.addWidget(self.lblShape)
+        self.shape_vsplitter.addWidget(self.cbx_widget)
+        self.shape_vsplitter.setSizes([800,20])
+        self.shape_vsplitter.setStretchFactor(0, 1)
+        self.shape_vsplitter.setStretchFactor(1, 0)
 
-        self.svsplitter = QSplitter(Qt.Vertical)
+        self.tableView = QTableView()
+        self.tableView.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.tableView.setSortingEnabled(True)
+        self.tableView.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.tableView.setSortingEnabled(True)
 
-        # try adding a 3d plot
-        self.lblShape3 = MyGLViewWidget(self)
-        z = pg.gaussianFilter(numpy.random.normal(size=(50,50)), (1,1))
-        p13d = gl.GLSurfacePlotItem(z=z, shader='shaded', color=(0.5, 0.5, 1, 1))
-        self.lblShape3.addItem(p13d)
-
-        if dataset.dimension == 3:
-            self.lblShape2.hide()
-            self.lblShape = self.lblShape3
-        else:
-            self.lblShape3.hide()
-            self.lblShape = self.lblShape2
-
-        self.svsplitter.addWidget(self.lblShape)
-
-        self.svsplitter.addWidget(self.cbx_widget)
-        self.svsplitter.setSizes([800,20])
-        self.svsplitter.setStretchFactor(0, 1)
-        self.svsplitter.setStretchFactor(1, 0)
+        # plot widgets
+        self.plot_widget2 = FigureCanvas(Figure(figsize=(20, 16),dpi=100))
+        self.fig2 = self.plot_widget2.figure
+        self.ax2 = self.fig2.add_subplot()
+        self.toolbar2 = NavigationToolbar(self.plot_widget2, self)
+        self.plot_widget3 = FigureCanvas(Figure(figsize=(20, 16),dpi=100))
+        self.fig3 = self.plot_widget3.figure
+        self.ax3 = self.fig3.add_subplot(projection='3d')
+        self.toolbar3 = NavigationToolbar(self.plot_widget3, self)        
 
         self.plot_layout = QVBoxLayout()
-        self.plot_control_layout = QHBoxLayout()
+        self.plot_control_layout1 = QHBoxLayout()
         self.plot_control_layout2 = QHBoxLayout()
-        self.plot_control_widget = QWidget()
+        self.plot_control_widget1 = QWidget()
         self.plot_control_widget2 = QWidget()
-        self.plot_control_widget.setMaximumHeight(70)
-        self.plot_control_widget.setLayout(self.plot_control_layout)
+        self.plot_control_widget1.setMaximumHeight(70)
+        self.plot_control_widget1.setLayout(self.plot_control_layout1)
         self.plot_control_widget2.setMaximumHeight(70)
         self.plot_control_widget2.setLayout(self.plot_control_layout2)
+
+        # chart options
+        self.comboAxis1 = QComboBox()
+        self.comboAxis2 = QComboBox()
+        self.comboAxis3 = QComboBox()
+        self.cbxFlipAxis1 = QCheckBox()
+        self.cbxFlipAxis1.setText("Flip")
+        self.cbxFlipAxis1.setChecked(False)
+        self.cbxFlipAxis2 = QCheckBox()
+        self.cbxFlipAxis2.setText("Flip")
+        self.cbxFlipAxis2.setChecked(False)
+        self.cbxFlipAxis3 = QCheckBox()
+        self.cbxFlipAxis3.setText("Flip")
+        self.cbxFlipAxis3.setChecked(False)
+        self.gbAxis1 = QGroupBox()
+        self.gbAxis1.setTitle("Axis 1")
+        self.gbAxis1.setLayout(QHBoxLayout())
+        self.gbAxis1.layout().addWidget(self.comboAxis1)
+        self.gbAxis1.layout().addWidget(self.cbxFlipAxis1)
+        self.gbAxis2 = QGroupBox()
+        self.gbAxis2.setTitle("Axis 2")
+        self.gbAxis2.setLayout(QHBoxLayout())
+        self.gbAxis2.layout().addWidget(self.comboAxis2)
+        self.gbAxis2.layout().addWidget(self.cbxFlipAxis2)
+        self.gbAxis3 = QGroupBox()
+        self.gbAxis3.setTitle("Axis 3")
+        self.gbAxis3.setLayout(QHBoxLayout())
+        self.gbAxis3.layout().addWidget(self.comboAxis3)
+        self.gbAxis3.layout().addWidget(self.cbxFlipAxis3)
+        self.plot_control_layout1.addWidget(self.gbAxis1)
+        self.plot_control_layout1.addWidget(self.gbAxis2)
+        self.plot_control_layout1.addWidget(self.gbAxis3)
+
+        self.cbxFlipAxis1.stateChanged.connect(self.flip_axis_changed)
+        self.cbxFlipAxis2.stateChanged.connect(self.flip_axis_changed)
+        self.cbxFlipAxis3.stateChanged.connect(self.flip_axis_changed)
 
         self.rb2DChartDim = QRadioButton("2D")
         self.rb3DChartDim = QRadioButton("3D")
@@ -1215,76 +1228,17 @@ class DatasetAnalysisDialog(QDialog):
         self.gbChartDim.layout().addWidget(self.rb2DChartDim)
         self.gbChartDim.layout().addWidget(self.rb3DChartDim)
         self.gbChartDim.layout().addWidget(self.cbxDepthShade)
-
-        self.comboAxis1 = QComboBox()
-        self.comboAxis2 = QComboBox()
-        self.comboAxis3 = QComboBox()
-        self.cbxFlipAxis1 = QCheckBox()
-        self.cbxFlipAxis1.setText("Flip")
-        self.cbxFlipAxis1.setChecked(False)
-        self.cbxFlipAxis2 = QCheckBox()
-        self.cbxFlipAxis2.setText("Flip")
-        self.cbxFlipAxis2.setChecked(False)
-        self.cbxFlipAxis3 = QCheckBox()
-        self.cbxFlipAxis3.setText("Flip")
-        self.cbxFlipAxis3.setChecked(False)
-
-        self.gbAxis1 = QGroupBox()
-        self.gbAxis1.setTitle("Axis 1")
-        self.gbAxis1.setLayout(QHBoxLayout())
-        #self.gbAxis1.layout().addWidget(self.lblAxis1)
-        self.gbAxis1.layout().addWidget(self.comboAxis1)
-        self.gbAxis1.layout().addWidget(self.cbxFlipAxis1)
-        self.gbAxis2 = QGroupBox()
-        self.gbAxis2.setTitle("Axis 2")
-        self.gbAxis2.setLayout(QHBoxLayout())
-        #self.gbAxis2.layout().addWidget(self.lblAxis2)
-        self.gbAxis2.layout().addWidget(self.comboAxis2)
-        self.gbAxis2.layout().addWidget(self.cbxFlipAxis2)
-        self.gbAxis3 = QGroupBox()
-        self.gbAxis3.setTitle("Axis 3")
-        self.gbAxis3.setLayout(QHBoxLayout())
-        #self.gbAxis3.layout().addWidget(self.lblAxis3)
-        self.gbAxis3.layout().addWidget(self.comboAxis3)
-        self.gbAxis3.layout().addWidget(self.cbxFlipAxis3)
-
-
-        self.plot_control_layout.addWidget(self.gbChartDim)
-        self.plot_control_layout.addWidget(self.gbAxis1)
-        self.plot_control_layout.addWidget(self.gbAxis2)
-        self.plot_control_layout.addWidget(self.gbAxis3)
-        # connect checkboxes
-        self.cbxFlipAxis1.stateChanged.connect(self.flip_axis_changed)
-        self.cbxFlipAxis2.stateChanged.connect(self.flip_axis_changed)
-        self.cbxFlipAxis3.stateChanged.connect(self.flip_axis_changed)
-
-        '''
-        self.plot_control_layout.addWidget(self.rb2DChartDim)
-        self.plot_control_layout.addWidget(self.rb3DChartDim)
-        self.plot_control_layout.addWidget(self.lblAxis1)
-        self.plot_control_layout.addWidget(self.comboAxis1)
-        self.plot_control_layout.addWidget(self.cbxFlipAxis1)
-        self.plot_control_layout.addWidget(self.lblAxis2)
-        self.plot_control_layout.addWidget(self.comboAxis2)
-        self.plot_control_layout.addWidget(self.cbxFlipAxis2)
-        self.plot_control_layout.addWidget(self.lblAxis3)
-        self.plot_control_layout.addWidget(self.comboAxis3)
-        self.plot_control_layout.addWidget(self.cbxFlipAxis3)
-        '''
-
         self.gbGroupBy = QGroupBox()
         self.gbGroupBy.setTitle("Group By")
         self.gbGroupBy.setLayout(QHBoxLayout())
         self.comboPropertyName = QComboBox()
+        self.comboPropertyName.setCurrentIndex(-1)
+        self.comboPropertyName.currentIndexChanged.connect(self.propertyname_changed)
         self.gbGroupBy.layout().addWidget(self.comboPropertyName)
 
         self.plot_control_layout2.addWidget(self.gbChartDim)
         self.plot_control_layout2.addWidget(self.gbGroupBy)
 
-        #self.comboPropertyName..connect(self.propertyname_changed)
-        #connect comboPropertyname change to plot
-        self.comboPropertyName.setCurrentIndex(-1)
-        self.comboPropertyName.currentIndexChanged.connect(self.propertyname_changed)
         self.btnChartOptions = QPushButton("Chart Options")
         self.btnChartOptions.clicked.connect(self.chart_options_clicked)
 
@@ -1292,14 +1246,9 @@ class DatasetAnalysisDialog(QDialog):
         self.plot_layout.addWidget(self.plot_widget2)
         self.plot_layout.addWidget(self.toolbar3)
         self.plot_layout.addWidget(self.plot_widget3)
-        self.plot_layout.addWidget(self.plot_control_widget)
+        self.plot_layout.addWidget(self.plot_control_widget1)
         self.plot_layout.addWidget(self.plot_control_widget2)
         self.plot_layout.addWidget(self.btnChartOptions)
-
-        #self.comboDim.addItem("2D")
-        #self.comboDim.addItem("3D")
-        #self.comboDim.currentIndexChanged.connect(self.on_comboDim_changed)
-
 
         self.plot_all_widget = QWidget()
         self.plot_all_widget.setLayout(self.plot_layout)
@@ -1309,34 +1258,28 @@ class DatasetAnalysisDialog(QDialog):
             self.comboAxis1.addItem("PC"+str(i))
             self.comboAxis2.addItem("PC"+str(i))
             self.comboAxis3.addItem("PC"+str(i))
-
         self.comboAxis1.setCurrentIndex(0)
         self.comboAxis2.setCurrentIndex(1)
         self.comboAxis3.setCurrentIndex(2)
-        
-        # add event to comboaxic
         self.comboAxis1.currentIndexChanged.connect(self.axis_changed)
         self.comboAxis2.currentIndexChanged.connect(self.axis_changed)
         self.comboAxis3.currentIndexChanged.connect(self.axis_changed)
 
-        self.hsplitter.addWidget(self.svsplitter)
-        self.hsplitter.addWidget(self.tableView)
-        self.hsplitter.addWidget(self.plot_all_widget)
+        self.main_hsplitter.addWidget(self.shape_vsplitter)
+        self.main_hsplitter.addWidget(self.tableView)
+        self.main_hsplitter.addWidget(self.plot_all_widget)
 
-        self.main_layout = QVBoxLayout()
-        self.sub_layout = QHBoxLayout()
+        self.main_hsplitter.setSizes([400,200,400])
+        self.main_hsplitter.setStretchFactor(0, 1)
+        self.main_hsplitter.setStretchFactor(1, 0)
+        self.main_hsplitter.setStretchFactor(2, 1)
 
-        #self.hsplitter.addWidget(self.right_widget)
-        self.hsplitter.setSizes([400,200,400])
-        self.hsplitter.setStretchFactor(0, 1)
-        self.hsplitter.setStretchFactor(1, 0)
-        self.hsplitter.setStretchFactor(2, 1)
+        # bottom layout
+        rbbox_height = 50
 
         self.left_bottom_layout = QVBoxLayout()
         self.middle_bottom_layout = QVBoxLayout()
         self.right_bottom_layout = QVBoxLayout()
-
-        rbbox_height = 50
 
         self.rbProcrustes = QRadioButton("Procrustes")
         self.rbBookstein = QRadioButton("Bookstein")
@@ -1346,7 +1289,6 @@ class DatasetAnalysisDialog(QDialog):
         self.rbResistantFit.setEnabled(False)
         self.btnSuperimpose = QPushButton("Superimpose")
         self.btnSuperimpose.clicked.connect(self.on_btnSuperimpose_clicked)
-
         self.gbSuperimposition = QGroupBox()
         self.gbSuperimposition.setTitle("Superimposition")
         self.gbSuperimposition.setLayout(QHBoxLayout())
@@ -1354,18 +1296,7 @@ class DatasetAnalysisDialog(QDialog):
         self.gbSuperimposition.layout().addWidget(self.rbBookstein)
         self.gbSuperimposition.layout().addWidget(self.rbResistantFit)
         self.gbSuperimposition.setMaximumHeight(rbbox_height)
-        #self.gbSuperimposition.layout().setContentsMargins(0, 0, 0, 0)
-        #self.gbSuperimposition.layout().addWidget(self.btnSuperimpose)
-        '''
-        self.lb1_layout = QVBoxLayout()
-        self.lb1_layout.addWidget(self.rbProcrustes)
-        self.lb1_layout.addWidget(self.rbBookstein)
-        self.lb1_layout.addWidget(self.rbResistantFit)
-        self.lb1_widget = QWidget()
-        self.lb1_widget.setMinimumHeight(rbbox_height)
-        self.lb1_widget.setMaximumHeight(rbbox_height)
-        self.lb1_widget.setLayout(self.lb1_layout)'''
-        #self.lb1_layout.setMinimumHeight(60)
+
         self.left_bottom_layout.addWidget(self.gbSuperimposition)
         self.left_bottom_layout.addWidget(self.btnSuperimpose)
 
@@ -1376,30 +1307,15 @@ class DatasetAnalysisDialog(QDialog):
         self.gbAnalysis = QGroupBox()
         self.gbAnalysis.setTitle("Method")
         self.gbAnalysis.setLayout(QHBoxLayout())
-        #self.gbAnalysis.layout().setContentsMargins(0, 0, 0, 0)
         self.gbAnalysis.layout().addWidget(self.rbPCA)
         self.gbAnalysis.layout().addWidget(self.rbCVA)
         self.gbAnalysis.setMaximumHeight(rbbox_height)
-
-
-        '''
-        #self.mb1_layout = QVBoxLayout()
-        #self.mb1_layout.addWidget(self.rbPCA)
-        #self.mb1_layout.addWidget(self.rbCVA)
-        self.mb1_widget = QWidget()
-        self.mb1_widget.setMinimumHeight(rbbox_height)
-        self.mb1_widget.setMaximumHeight(rbbox_height)
-        self.mb1_widget.setLayout(self.mb1_layout)
-        '''
-        
-        #self.mb1_layout.setMinimumHeight(60)
         self.btnAnalyze = QPushButton("Perform Analysis")
         self.btnAnalyze.clicked.connect(self.on_btnAnalyze_clicked)
         self.middle_bottom_layout.addWidget(self.gbAnalysis)
         self.middle_bottom_layout.addWidget(self.btnAnalyze)
 
         self.empty_widget = QWidget()
-        #self.empty_widget.setMinimumHeight(60)
         self.btnSaveResults = QPushButton("Save Results")
         self.btnSaveResults.clicked.connect(self.on_btnSaveResults_clicked)
         self.rb1_layout = QVBoxLayout()
@@ -1408,59 +1324,56 @@ class DatasetAnalysisDialog(QDialog):
         self.rb1_widget.setMinimumHeight(rbbox_height)
         self.rb1_widget.setMaximumHeight(rbbox_height)
         self.rb1_widget.setLayout(self.rb1_layout)
-        
         self.right_bottom_layout.addWidget(self.rb1_widget)
         self.right_bottom_layout.addWidget(self.btnSaveResults)
-        #self.rb1_layout.addWidget(self.btnSaveResults)
 
         self.bottom_layout = QHBoxLayout()
         self.bottom_layout.addLayout(self.left_bottom_layout)
         self.bottom_layout.addLayout(self.middle_bottom_layout)
         self.bottom_layout.addLayout(self.right_bottom_layout)
 
-        self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
-
-        #print("c")
-        self.set_dataset(dataset)
-
-        #print("d")
-        self.reset_tableView()
-        self.load_object()
-        self.pca_result = None
-        self.selected_object_list = []
-        self.selected_object_id_list = []
-
         self.status_bar = QStatusBar()
         self.status_bar.setMaximumHeight(20)
-        #self.setStatusBar(self.status_bar)
-        self.main_layout.addWidget(self.hsplitter)
+
+        # final layout done
+        self.main_layout = QVBoxLayout()
+        self.sub_layout = QHBoxLayout()
+        self.main_layout.addWidget(self.main_hsplitter)
         self.main_layout.addLayout(self.bottom_layout)
         self.main_layout.addWidget(self.status_bar)
         self.setLayout(self.main_layout)
 
-        self.cbxShowIndex.stateChanged.connect(self.show_index_state_changed)
-        self.cbxShowWireframe.stateChanged.connect(self.show_wireframe_state_changed)
-        self.cbxShowBaseline.stateChanged.connect(self.show_baseline_state_changed)
-        self.cbxShowAverage.stateChanged.connect(self.show_average_state_changed)
+        # initialization
+        self.pca_result = None
+        self.selected_object_list = []
+        self.selected_object_id_list = []
+        self.scatter_result = {}
+        self.scatter_data = {}
 
         self.show_chart_options = True
-        self.chart_options_clicked()
+        self.selection_changed_off = False
+        self.onpick_happened = False
 
-        #self.comboDim.setCurrentIndex(1)
+        # data setting
+        self.set_dataset(dataset)
+        self.reset_tableView()
+        self.load_object()
+        self.chart_options_clicked()
         self.rb3DChartDim.setChecked(True)
         self.on_chart_dim_changed()
         self.on_btnPCA_clicked()
+
         self.btnSaveResults.setFocus()
 
     def chart_options_clicked(self):
         self.show_chart_options = not self.show_chart_options
         if self.show_chart_options:
             #self.gbChartOptions.show()
-            self.plot_control_widget.show()
+            self.plot_control_widget1.show()
             self.plot_control_widget2.show()
         else:
             #self.gbChartOptions.hide()
-            self.plot_control_widget.hide()
+            self.plot_control_widget1.hide()
             self.plot_control_widget2.hide()
 
 
@@ -1601,13 +1514,14 @@ class DatasetAnalysisDialog(QDialog):
         symbol_candidate = ['o','s','^','x','+','d','v','<','>','p','h']
         color_candidate = ['blue','green','black','cyan','magenta','yellow','white','gray','red']
         self.propertyname_index = self.comboPropertyName.currentIndex() -1
-        group_hash = {}
+        self.scatter_data = {}
+        self.scatter_result = {}
 
         key_list = []
         key_list.append('__default__')
-        group_hash['__default__'] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'hoverinfo':[], 'text':[], 'property':'', 'symbol':'o', 'color':'blue', 'size':50}
+        self.scatter_data['__default__'] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'hoverinfo':[], 'text':[], 'property':'', 'symbol':'o', 'color':'blue', 'size':50}
         if len(self.selected_object_id_list) > 0:
-            group_hash['__selected__'] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'hoverinfo':[], 'text':[], 'property':'', 'symbol':'o', 'color':'red', 'size':100}
+            self.scatter_data['__selected__'] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'hoverinfo':[], 'text':[], 'property':'', 'symbol':'o', 'color':'red', 'size':100}
             key_list.append('__selected__')
 
         for obj in self.ds_ops.object_list:
@@ -1618,55 +1532,105 @@ class DatasetAnalysisDialog(QDialog):
             elif self.propertyname_index > -1 and self.propertyname_index < len(obj.property_list):
                 key_name = obj.property_list[self.propertyname_index]
 
-            if key_name not in group_hash.keys():
-                group_hash[key_name] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'property':key_name, 'symbol':'', 'color':'', 'size':50}
+            if key_name not in self.scatter_data.keys():
+                self.scatter_data[key_name] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'property':key_name, 'symbol':'', 'color':'', 'size':50}
 
-            group_hash[key_name]['x_val'].append(flip_axis1 * obj.pca_result[axis1])
-            group_hash[key_name]['y_val'].append(flip_axis2 * obj.pca_result[axis2])
-            group_hash[key_name]['z_val'].append(flip_axis3 * obj.pca_result[axis3])
-            #group_hash[key_name]['data'].append(obj)
+            self.scatter_data[key_name]['x_val'].append(flip_axis1 * obj.pca_result[axis1])
+            self.scatter_data[key_name]['y_val'].append(flip_axis2 * obj.pca_result[axis2])
+            self.scatter_data[key_name]['z_val'].append(flip_axis3 * obj.pca_result[axis3])
+            self.scatter_data[key_name]['data'].append(obj)
             #group_hash[key_name]['text'].append(obj.object_name)
             #group_hash[key_name]['hoverinfo'].append(obj.id)
 
         # remove empty group
-        if len(group_hash['__default__']['x_val']) == 0:
-            del group_hash['__default__']
+        if len(self.scatter_data['__default__']['x_val']) == 0:
+            del self.scatter_data['__default__']
 
         # assign color and symbol
         sc_idx = 0
-        for key_name in group_hash.keys():
-            if group_hash[key_name]['color'] == '':
-                group_hash[key_name]['color'] = color_candidate[sc_idx % len(color_candidate)]
-                group_hash[key_name]['symbol'] = symbol_candidate[sc_idx % len(symbol_candidate)]
+        for key_name in self.scatter_data.keys():
+            if self.scatter_data[key_name]['color'] == '':
+                self.scatter_data[key_name]['color'] = color_candidate[sc_idx % len(color_candidate)]
+                self.scatter_data[key_name]['symbol'] = symbol_candidate[sc_idx % len(symbol_candidate)]
                 sc_idx += 1
 
         if self.rb2DChartDim.isChecked():
             self.ax2.clear()
-            for name in group_hash.keys():
+            for name in self.scatter_data.keys():
                 #print("name", name, "len(group_hash[name]['x_val'])", len(group_hash[name]['x_val']), group_hash[name]['symbol'])
-                group = group_hash[name]
+                group = self.scatter_data[name]
                 if len(group['x_val']) > 0:
-                    ret = self.ax2.scatter(group['x_val'], group['y_val'], s=group['size'], marker=group['symbol'], color=group['color'], data=group['data'], picker=True, pickradius=5)
-                    print("ret", ret)
+                    self.scatter_result[name] = self.ax2.scatter(group['x_val'], group['y_val'], s=group['size'], marker=group['symbol'], color=group['color'], data=group['data'], picker=True, pickradius=5)
+                    #print("ret", ret)
             self.fig2.tight_layout()
             self.fig2.canvas.draw()
             self.fig2.canvas.flush_events()
-            self.fig2.canvas.mpl_connect('pick_event',self.onpick)
+            self.fig2.canvas.mpl_connect('pick_event',self.on_pick)
+            self.fig2.canvas.mpl_connect('button_press_event', self.on_canvas_button_press)
+            self.fig2.canvas.mpl_connect('button_release_event', self.on_canvas_button_release)
 
         else:
             self.ax3.clear()
-            for name in group_hash.keys():
-                #print("name", name, "len(group_hash[name]['x_val'])", len(group_hash[name]['x_val']), group_hash[name]['symbol'])
-                group = group_hash[name]
-                if len(group_hash[name]['x_val']) > 0:
-                    ret = self.ax3.scatter(group['x_val'], group['y_val'], group['z_val'], s=group['size'], marker=group['symbol'], color=group['color'], data=group['data'],depthshade=depth_shade)
-                    print("ret", ret)
+            for name in self.scatter_data.keys():
+                group = self.scatter_data[name]
+                #print("name", name, "len(group_hash[name]['x_val'])", len(group['x_val']), group['symbol'])
+                if len(self.scatter_data[name]['x_val']) > 0:
+                    self.scatter_result[name] = self.ax3.scatter(group['x_val'], group['y_val'], group['z_val'], s=group['size'], marker=group['symbol'], color=group['color'], data=group['data'],depthshade=depth_shade, picker=True, pickradius=5)
+                    #print("ret", ret)
             self.fig3.tight_layout()
             self.fig3.canvas.draw()
             self.fig3.canvas.flush_events()
+            self.fig3.canvas.mpl_connect('pick_event',self.on_pick)
+            self.fig3.canvas.mpl_connect('button_press_event', self.on_canvas_button_press)
+            self.fig3.canvas.mpl_connect('button_release_event', self.on_canvas_button_release)
 
-    def onpick(self,evt):
-        print("evt", evt, evt.ind, evt.artist )
+    def on_canvas_button_press(self, evt):
+        #print("button_press", evt)
+        self.canvas_down_xy = (evt.x, evt.y)
+        #self.tableView.selectionModel().clearSelection()
+
+    def on_canvas_button_release(self, evt):
+        #print("button_release", evt)
+        if self.onpick_happened == True:
+            self.onpick_happened = False
+            return
+        self.canvas_up_xy = (evt.x, evt.y)
+        if self.canvas_down_xy == self.canvas_up_xy:
+            self.tableView.selectionModel().clearSelection()
+
+
+    def on_pick(self,evt):
+        #print("onpick", evt)
+        self.onpick_happened = True
+        #print("evt", evt, evt.ind, evt.artist )
+        selected_object_id_list = []
+        for key_name in self.scatter_data.keys():
+            if evt.artist == self.scatter_result[key_name]:
+                #print("key_name", key_name)
+                for idx in evt.ind:
+                    obj = self.scatter_data[key_name]['data'][idx]
+                    #print("obj", obj)
+                    selected_object_id_list.append(obj.id)
+                    #self.ds_ops.select_object(obj.id)
+
+        #print("selected_object_id_list", selected_object_id_list)
+        # select rows in tableView
+        #self.tableView.clearSelection()
+        #selectionModel = self.tableView.selectionModel()
+
+        #print("selected_object_id_list", selected_object_id_list)
+        self.selection_changed_off = True
+        for id in selected_object_id_list:
+            #item = self.object_model.findItems(str(id), Qt.MatchExactly, 0)
+            item = self.object_hash[id]
+            self.tableView.selectionModel().select(item.index(),QItemSelectionModel.Rows | QItemSelectionModel.Select)
+        self.selection_changed_off = False
+        self.on_object_selection_changed([],[])
+            
+        #for row in range(self.object_model.rowCount()):
+        #    if int(self.object_model.item(row,0).text()) in selected_object_id_list:
+        #        self.tableView.selectionModel().select(self.object_model.item(row,0).index(),QItemSelectionModel.Rows | QItemSelectionModel.Select)
+
 
     def show_pca_result_pyqtgraph(self):
         self.plot_widget.clear()
@@ -1827,10 +1791,12 @@ class DatasetAnalysisDialog(QDialog):
         if self.dataset is None:
             return
         #objects = self.selected_dataset.objects
+        self.object_hash = {}
         for obj in self.dataset.object_list:
             item1 = QStandardItem()
             item1.setData(obj.id,Qt.DisplayRole)
             item2 = QStandardItem(obj.object_name)
+            self.object_hash[obj.id] = item1
             self.object_model.appendRow([item1,item2] )
         
 
@@ -1864,17 +1830,20 @@ class DatasetAnalysisDialog(QDialog):
     '''
 
     def on_object_selection_changed(self, selected, deselected):
-        self.selected_object_id_list = self.get_selected_object_id_list()
-        #if len(self.selected_object_id_list) == 0:
-        #    return
-        #print("object_id:",object_id, type(object_id))
-        #for 
-        #for object_id in self.selected_object_id_list:
-            #print("selected object id:",object_id)
-        #object_id = selected_object_list[0].id
-        self.show_pca_result()
-        self.ds_ops.selected_object_id_list = self.selected_object_id_list
-        self.show_object_shape()
+        if self.selection_changed_off:
+            pass
+        else:
+            self.selected_object_id_list = self.get_selected_object_id_list()
+            #if len(self.selected_object_id_list) == 0:
+            #    return
+            #print("object_id:",object_id, type(object_id))
+            #for 
+            #for object_id in self.selected_object_id_list:
+                #print("selected object id:",object_id)
+            #object_id = selected_object_list[0].id
+            self.show_pca_result()
+            self.ds_ops.selected_object_id_list = self.selected_object_id_list
+            self.show_object_shape()
 
         
         #self.selected_object = MdObject.get_by_id(object_id)

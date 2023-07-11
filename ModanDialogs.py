@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import QTableWidgetItem, QMainWindow, QHeaderView, QFileDia
                             QDialog, QLineEdit, QLabel, QPushButton, QAbstractItemView, QStatusBar,\
                             QMessageBox, QListView, QTreeWidgetItem, QToolButton, QTreeView, QFileSystemModel, \
                             QTableView, QSplitter, QRadioButton, QComboBox, QTextEdit, QAction, QMenu, QSizePolicy, \
-                            QTableWidget, QBoxLayout, QGridLayout, QAbstractButton, QButtonGroup, QGroupBox 
+                            QTableWidget, QBoxLayout, QGridLayout, QAbstractButton, QButtonGroup, QGroupBox, QOpenGLWidget
 
 from PyQt5 import QtGui, uic
 from PyQt5.QtGui import QIcon, QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem,\
@@ -1085,6 +1085,54 @@ class MyGLViewWidget(gl.GLViewWidget):
         self.ds_ops = ds_ops
 
 
+import OpenGL.GL as gl
+from OpenGL import GLU
+
+class MyOpenGLWidget(QOpenGLWidget):
+    def __init__(self, widget):
+        super(MyOpenGLWidget, self).__init__(widget)
+        self.ds_ops = None
+        self.scale = 1.0
+        self.pan_x = 0
+        self.pan_y = 0
+        self.show_index = True
+        self.show_wireframe = False
+        self.show_baseline = False
+        self.show_average = True
+        #self.setMinimumSize(200,200)
+
+    def set_ds_ops(self, ds_ops):
+        self.ds_ops = ds_ops
+
+    def paintEvent(self, event):
+        pass
+
+    def initGeometry(self):
+        pass
+
+    def initializeGL(self):
+        gl.glClearColor(0.5,0.5,0.5,0.5)
+        gl.glEnable(gl.GL_DEPTH_TEST)
+
+        #self.initGeometry()
+        #return super().initializeGL()
+    
+    def resizeGL(self, width, height):
+        gl.glViewport(0, 0, width, height)
+        gl.glMatrixMode(gl.GL_PROJECTION)
+        gl.glLoadIdentity()
+        aspect = width / float(height)
+
+        GLU.gluPerspective(45.0, aspect, 1.0, 100.0)
+        gl.glMatrixMode(gl.GL_MODELVIEW)        
+        #return super().resizeGL(w, h)
+    
+    def paintGL(self):
+        gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
+        #return super().paintGL()
+    
+
+
 class DatasetAnalysisDialog(QDialog):
     def __init__(self,parent,dataset):
         super().__init__()
@@ -1106,10 +1154,12 @@ class DatasetAnalysisDialog(QDialog):
         self.lblShape2.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         # 3d shape
-        self.lblShape3 = MyGLViewWidget(self)
-        z = pg.gaussianFilter(numpy.random.normal(size=(50,50)), (1,1))
-        p13d = gl.GLSurfacePlotItem(z=z, shader='shaded', color=(0.5, 0.5, 1, 1))
-        self.lblShape3.addItem(p13d)
+        #self.lblShape3 = MyGLViewWidget(self)
+        #z = pg.gaussianFilter(numpy.random.normal(size=(50,50)), (1,1))
+        #p13d = gl.GLSurfacePlotItem(z=z, shader='shaded', color=(0.5, 0.5, 1, 1))
+        #self.lblShape3.addItem(p13d)
+
+        self.lblShape3 = MyOpenGLWidget(self)
 
         if dataset.dimension == 3:
             self.lblShape2.hide()
@@ -1173,9 +1223,9 @@ class DatasetAnalysisDialog(QDialog):
         self.plot_control_layout2 = QHBoxLayout()
         self.plot_control_widget1 = QWidget()
         self.plot_control_widget2 = QWidget()
-        self.plot_control_widget1.setMaximumHeight(70)
+        self.plot_control_widget1.setMaximumHeight(80)
         self.plot_control_widget1.setLayout(self.plot_control_layout1)
-        self.plot_control_widget2.setMaximumHeight(70)
+        self.plot_control_widget2.setMaximumHeight(80)
         self.plot_control_widget2.setLayout(self.plot_control_layout2)
 
         # chart options

@@ -26,6 +26,9 @@ from matplotlib.figure import Figure
 
 from MdModel import *
 from MdStatistics import MdPrincipalComponent
+import numpy as np
+from OpenGL.arrays import vbo
+
 MODE_NONE = 0
 MODE_PAN = 12
 MODE_EDIT_LANDMARK = 1
@@ -588,13 +591,18 @@ class ObjectDialog(QDialog):
         self.sub_layout = QHBoxLayout()
         self.setLayout(self.main_layout)
 
-        self.image_label = LandmarkEditor(self)
-        self.image_label.object_dialog = self
-        self.image_label.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        self.object_view_3d = MyOpenGLWidget(self)
+        self.object_view_3d.setMinimumWidth(300)
+        self.object_view_3d.setMinimumHeight(300)
+        self.object_view_3d.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
+        self.object_view_2d = LandmarkEditor(self)
+        self.object_view_2d.object_dialog = self
+        self.object_view_2d.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
         #self.image_label.clicked.connect(self.on_image_clicked)
 
         self.pixmap = QPixmap(1024,768)
-        self.image_label.setPixmap(self.pixmap)
+        self.object_view_2d.setPixmap(self.pixmap)
 
         self.form_layout = QFormLayout()
         self.form_layout.addRow("Dataset Name", self.lblDataset)
@@ -652,8 +660,16 @@ class ObjectDialog(QDialog):
         self.vsplitter.setStretchFactor(1, 0)
         self.vsplitter.setStretchFactor(2, 1)
 
+        self.object_view_layout = QVBoxLayout()
+        self.object_view_layout.addWidget(self.object_view_2d)
+        self.object_view_layout.addWidget(self.object_view_3d)
+        self.object_view_widget = QWidget()
+        self.object_view_widget.setLayout(self.object_view_layout)
+
+
         self.hsplitter.addWidget(self.left_widget)
-        self.hsplitter.addWidget(self.image_label)
+        self.hsplitter.addWidget(self.object_view_widget)
+        #self.hsplitter.addWidget(self.object_view_3d)
         self.hsplitter.addWidget(self.vsplitter)
         #self.hsplitter.addWidget(self.right_widget)
         self.hsplitter.setSizes([200,800,100])
@@ -675,7 +691,7 @@ class ObjectDialog(QDialog):
         btn_layout.addWidget(self.btnDelete)
         btn_layout.addWidget(self.btnCancel)
 
-
+        self.status_bar.setMaximumHeight(20)
         #self.main_layout.addLayout(self.sub_layout)
         self.main_layout.addWidget(self.hsplitter)
         self.main_layout.addLayout(btn_layout)
@@ -692,30 +708,30 @@ class ObjectDialog(QDialog):
 
     def show_index_state_changed(self, int):
         if self.cbxShowIndex.isChecked():
-            self.image_label.show_index = True
+            self.object_view_2d.show_index = True
             #print("show index CHECKED!")
         else:
-            self.image_label.show_index = False
+            self.object_view_2d.show_index = False
             #print("show index UNCHECKED!")
-        self.image_label.update()
+        self.object_view_2d.update()
 
     def show_baseline_state_changed(self, int):
         if self.cbxShowBaseline.isChecked():
-            self.image_label.show_baseline = True
+            self.object_view_2d.show_baseline = True
             #print("show index CHECKED!")
         else:
-            self.image_label.show_baseline = False
+            self.object_view_2d.show_baseline = False
             #print("show index UNCHECKED!")
-        self.image_label.update()
+        self.object_view_2d.update()
 
     def show_wireframe_state_changed(self, int):
         if self.cbxShowWireframe.isChecked():
-            self.image_label.show_wireframe = True
+            self.object_view_2d.show_wireframe = True
             #print("show index CHECKED!")
         else:
-            self.image_label.show_wireframe = False
+            self.object_view_2d.show_wireframe = False
             #print("show index UNCHECKED!")
-        self.image_label.update()
+        self.object_view_2d.update()
 
         #self.edtDataFolder.setText(str(self.data_folder.resolve()))
         #self.edtServerAddress.setText(self.server_address)
@@ -731,8 +747,8 @@ class ObjectDialog(QDialog):
 
     def btnLandmark_clicked(self):
         #self.edit_mode = MODE_ADD_LANDMARK
-        self.image_label.set_mode(MODE_EDIT_LANDMARK)
-        self.image_label.update()
+        self.object_view_2d.set_mode(MODE_EDIT_LANDMARK)
+        self.object_view_2d.update()
         self.btnLandmark.setDown(True)
         self.btnLandmark.setChecked(True)
         self.btnWireframe.setDown(False)
@@ -740,8 +756,8 @@ class ObjectDialog(QDialog):
 
     def btnWireframe_clicked(self):
         #self.edit_mode = MODE_ADD_LANDMARK
-        self.image_label.set_mode(MODE_WIREFRAME)
-        self.image_label.update()
+        self.object_view_2d.set_mode(MODE_WIREFRAME)
+        self.object_view_2d.update()
         self.btnWireframe.setDown(True)
         self.btnWireframe.setChecked(True)
         self.btnLandmark.setDown(False)
@@ -766,6 +782,7 @@ class ObjectDialog(QDialog):
             header.setSectionResizeMode(0, QHeaderView.Stretch)
             header.setSectionResizeMode(1, QHeaderView.Stretch)
             self.inputZ.hide()
+            self.object_view_3d.hide()
             input_width = 80
         elif self.dataset.dimension == 3:
             self.edtLandmarkStr.setColumnCount(3)
@@ -774,6 +791,7 @@ class ObjectDialog(QDialog):
             header.setSectionResizeMode(1, QHeaderView.Stretch)
             header.setSectionResizeMode(2, QHeaderView.Stretch)
             self.inputZ.show()
+            self.object_view_2d.hide()
             input_width = 60
         if self.dataset.propertyname_str is not None and self.dataset.propertyname_str != "":
             self.edtPropertyList = []
@@ -884,9 +902,14 @@ class ObjectDialog(QDialog):
             image_path = img.get_image_path(self.m_app.storage_directory)
             #check if image_path exists
             if os.path.exists(image_path):
-                self.image_label.set_image(image_path)
-                self.image_label.set_object(object)
-                self.image_label.landmark_list = self.landmark_list
+                self.object_view_2d.set_image(image_path)
+                self.object_view_2d.set_object(object)
+                self.object_view_2d.landmark_list = self.landmark_list
+        
+        if object.dataset.dimension == 3:
+            obj_ops = MdObjectOps(object)
+            self.object_view_3d.set_object(obj_ops)
+            #self.object_view_3d.landmark_list = self.landmark_list
         #self.set_dataset(object.dataset)
 
     def save_object(self):
@@ -902,15 +925,15 @@ class ObjectDialog(QDialog):
             self.object.property_str = ",".join([ edt.text() for edt in self.edtPropertyList ])
 
         self.object.save()
-        if self.image_label.fullpath is not None and self.object.image.count() == 0:
+        if self.object_view_2d.fullpath is not None and self.object.image.count() == 0:
             md_image = MdImage()
             md_image.object_id = self.object.id
-            md_image.load_file_info(self.image_label.fullpath)
+            md_image.load_file_info(self.object_view_2d.fullpath)
             new_filepath = md_image.get_image_path( self.m_app.storage_directory)
             if not os.path.exists(os.path.dirname(new_filepath)):
                 os.makedirs(os.path.dirname(new_filepath))
             #print("save object new filepath:", new_filepath)
-            shutil.copyfile(self.image_label.fullpath, new_filepath)
+            shutil.copyfile(self.object_view_2d.fullpath, new_filepath)
             md_image.save()
 
     def make_landmark_str(self):
@@ -1086,51 +1109,159 @@ class MyGLViewWidget(gl.GLViewWidget):
 
 
 import OpenGL.GL as gl
-from OpenGL import GLU
+from OpenGL import GLU as glu
+from OpenGL import GLUT as glut
+from PyQt5.QtOpenGL import *
+import sys
 
-class MyOpenGLWidget(QOpenGLWidget):
-    def __init__(self, widget):
-        super(MyOpenGLWidget, self).__init__(widget)
+OBJECT_MODE = 1
+DATASET_MODE = 2
+
+class MyOpenGLWidget(QGLWidget):
+    def __init__(self, parent):
+        QGLWidget.__init__(self,parent)
         self.ds_ops = None
+        self.obj_ops = None
         self.scale = 1.0
         self.pan_x = 0
         self.pan_y = 0
+        self.last_pan_x = 0
+        self.last_pan_y = 0
+        self.last_pan_pos_x = 0
+        self.last_pan_pos_y = 0
         self.show_index = True
         self.show_wireframe = False
         self.show_baseline = False
         self.show_average = True
+        self.curr_x = 0
+        self.curr_y = 0
+        self.last_x = 0
+        self.last_y = 0
+        self.last_xangle = 0
+        self.last_yangle = 0
+        self.mode = OBJECT_MODE
         #self.setMinimumSize(200,200)
 
     def set_ds_ops(self, ds_ops):
         self.ds_ops = ds_ops
+        #self.calculate_scale_and_pan()
+        self.mode = DATASET_MODE
+        average_shape = self.ds_ops.get_average_shape()
+        scale = self.get_scale_from_object(average_shape)
+        average_shape.rescale(scale)
+        for obj in self.ds_ops.object_list:
+            obj.rescale(scale)
+            #obj.translate(-average_shape.get_centroid())
 
-    def paintEvent(self, event):
-        pass
+    def get_scale_from_object(self, obj_ops):
+        centroid_size = obj_ops.get_centroid_size()
+        min_x, max_x = min( [ lm[0] for lm in obj_ops.landmark_list] ), max( [ lm[0] for lm in obj_ops.landmark_list] )
+        min_y, max_y = min( [ lm[1] for lm in obj_ops.landmark_list] ), max( [ lm[1] for lm in obj_ops.landmark_list] )
+        min_z, max_z = min( [ lm[2] for lm in obj_ops.landmark_list] ), max( [ lm[2] for lm in obj_ops.landmark_list] )
+        #obj_ops.rescale(5)
+        width = max_x - min_x
+        height = max_y - min_y
+        depth = max_z - min_z
+        _3D_SCREEN_WIDTH = 5
+        _3D_SCREEN_HEIGHT = 5
+        scale = min( _3D_SCREEN_WIDTH / width, _3D_SCREEN_HEIGHT / height )
+        #print("scale:", scale)
+        return scale*0.5
 
-    def initGeometry(self):
-        pass
+    def set_object(self, obj_ops):
+        obj_ops.move_to_center()
+        centroid_size = obj_ops.get_centroid_size()
+        obj_ops.rescale_to_unitsize()
+        scale = self.get_scale_from_object(obj_ops)
+        obj_ops.rescale(scale)
+        self.obj_ops = obj_ops
+        self.mode = OBJECT_MODE
 
     def initializeGL(self):
-        gl.glClearColor(0.5,0.5,0.5,0.5)
+        gl.glClearDepth(1.0)              
+        gl.glDepthFunc(gl.GL_LESS)
         gl.glEnable(gl.GL_DEPTH_TEST)
+        gl.glShadeModel(gl.GL_SMOOTH)
 
-        #self.initGeometry()
-        #return super().initializeGL()
-    
+        gl.glEnable(gl.GL_LIGHTING)
+        gl.glEnable(gl.GL_LIGHT0)
+
+        gl.glMatrixMode(gl.GL_PROJECTION)
+        gl.glLoadIdentity()
+        aspect_ratio = self.width() / self.height()
+        glu.gluPerspective(45.0,aspect_ratio,0.1, 100.0) # 시야각, 종횡비, 근거리 클리핑, 원거리 클리핑
+        gl.glMatrixMode(gl.GL_MODELVIEW)
+        glut.glutInit(sys.argv)
+
+    def paintGL(self):
+        gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
+        gl.glLoadIdentity()
+        gl.glTranslatef(0, 0, -5.0)   # x, y, z 
+
+        gl.glColor3f( 1.0, 1.5, 0.0 )
+        if self.mode == OBJECT_MODE:
+            self.draw_object(self.obj_ops)
+        else:
+            for obj in self.ds_ops.object_list:
+                self.draw_object(obj)
+        gl.glFlush()
+
+
+    def draw_object(self,object,single_mode=True):
+        #print("single_mode:", single_mode)
+        if single_mode:
+            for lm in object.landmark_list:
+                gl.glPushMatrix()
+                gl.glTranslate(lm[0], lm[1], lm[2])
+                glut.glutSolidSphere(0.05, 10, 10)
+                gl.glPopMatrix()
+        else:
+            gl.glPointSize(3)
+            gl.glDisable(gl.GL_LIGHTING)
+
+            gl.glBegin(gl.GL_POINTS)
+            for lm in object.landmark_list:
+                gl.glVertex3f(lm[0], lm[1], lm[2])
+            gl.glEnd()
+            gl.glEnable(gl.GL_LIGHTING)
+
     def resizeGL(self, width, height):
         gl.glViewport(0, 0, width, height)
         gl.glMatrixMode(gl.GL_PROJECTION)
         gl.glLoadIdentity()
         aspect = width / float(height)
+        glu.gluPerspective(45.0, aspect, 0.1, 100.0)
+        gl.glMatrixMode(gl.GL_MODELVIEW)
 
-        GLU.gluPerspective(45.0, aspect, 1.0, 100.0)
-        gl.glMatrixMode(gl.GL_MODELVIEW)        
-        #return super().resizeGL(w, h)
-    
-    def paintGL(self):
-        gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
-        #return super().paintGL()
-    
+
+
+    def calculate_scale_and_pan(self):
+        min_x = 100000000
+        max_x = -100000000
+        min_y = 100000000
+        max_y = -100000000
+
+        # get min and max x,y from landmarks
+        for obj in self.ds_ops.object_list:
+            for idx, landmark in enumerate(obj.landmark_list):
+                if landmark[0] < min_x:
+                    min_x = landmark[0]
+                if landmark[0] > max_x:
+                    max_x = landmark[0]
+                if landmark[1] < min_y:
+                    min_y = landmark[1]
+                if landmark[1] > max_y:
+                    max_y = landmark[1]
+        #print("min_x:", min_x, "max_x:", max_x, "min_y:", min_y, "max_y:", max_y)
+        width = max_x - min_x
+        height = max_y - min_y
+        w_scale = ( self.width() * 1.0 ) / ( width * 1.5 )
+        h_scale = ( self.height() * 1.0 ) / ( height * 1.5 )
+        self.scale = min(w_scale, h_scale)
+        self.pan_x = -min_x * self.scale + (self.width() - width * self.scale) / 2.0
+        self.pan_y = -min_y * self.scale + (self.height() - height * self.scale) / 2.0
+        #print("scale:", self.scale, "pan_x:", self.pan_x, "pan_y:", self.pan_y)
+        #self.repaint()
 
 
 class DatasetAnalysisDialog(QDialog):

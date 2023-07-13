@@ -28,7 +28,7 @@ import io
 import shutil
 
 from MdModel import *
-from ModanDialogs import DatasetAnalysisDialog, ObjectDialog, ImportDatasetDialog, DatasetDialog, PreferencesDialog, LandmarkEditor, IMAGE_EXTENSION_LIST
+from ModanDialogs import DatasetAnalysisDialog, ObjectDialog, ImportDatasetDialog, DatasetDialog, PreferencesDialog, LandmarkEditor, IMAGE_EXTENSION_LIST, MyGLWidget
 
 #import matplotlib
 #matplotlib.use('Qt5Agg')
@@ -134,13 +134,17 @@ class ModanMainWindow(QMainWindow, form_class):
     def initUI(self):
         # add tableView and tableWidget to vertical layout
         #widget = QWidget()
-        self.object_view = LandmarkEditor(self)
+        self.object_view_2d = LandmarkEditor(self)
+        self.object_view_3d = MyGLWidget(self)
+        self.object_view = self.object_view_2d
+        self.object_view_3d.hide()
 
         hsplitter = QSplitter(Qt.Horizontal)
         vsplitter = QSplitter(Qt.Vertical)
 
         vsplitter.addWidget(self.tableView)
-        vsplitter.addWidget(self.object_view)
+        vsplitter.addWidget(self.object_view_2d)
+        vsplitter.addWidget(self.object_view_3d)
 
         #self.treeView = MyTreeView()
         hsplitter.addWidget(self.treeView)
@@ -191,7 +195,6 @@ class ModanMainWindow(QMainWindow, form_class):
                 menu.addSeparator()
                 for action in action_edit_property_list:
                     menu.addAction(action)
-
 
             menu.exec_(self.tableView.viewport().mapToGlobal(position))
 
@@ -382,6 +385,7 @@ class ModanMainWindow(QMainWindow, form_class):
         self.reset_tableView()
         self.select_dataset(dataset)
         self.load_object()
+        self.object_view.clear_object()
 
     def reset_treeView(self):
         self.dataset_model = QStandardItemModel()
@@ -616,6 +620,14 @@ class ModanMainWindow(QMainWindow, form_class):
             if self.selected_dataset.propertyname_list is not None and len( self.selected_dataset.propertyname_list ) > 0:
                 #print("propertyname_list:",self.selected_dataset.propertyname_list,"propertyname_str:",self.selected_dataset.propertyname_str)
                 header_labels.extend( self.selected_dataset.propertyname_list )
+            if self.selected_dataset.dimension == 2:
+                self.object_view = self.object_view_2d
+                self.object_view_2d.show()
+                self.object_view_3d.hide()
+            else:
+                self.object_view = self.object_view_3d
+                self.object_view_2d.hide()
+                self.object_view_3d.show()
         self.object_model.setColumnCount(len(header_labels))
         self.object_model.setHorizontalHeaderLabels( header_labels )
         self.proxy_model = QSortFilterProxyModel()
@@ -863,10 +875,12 @@ class ModanMainWindow(QMainWindow, form_class):
 
     def show_object(self, obj):
         #print("show_object:",obj)
+        #print("object:", obj)
         self.object_view.clear_object()
         self.object_view.set_object(obj)
         #return
     def clear_object_view(self):
+        #print("clear object view")
         self.object_view.clear_object()
 
     def _on_object_selection_changed(self, selected, deselected):

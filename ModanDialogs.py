@@ -3,16 +3,25 @@ from PyQt5.QtWidgets import QTableWidgetItem, QMainWindow, QHeaderView, QFileDia
                             QDialog, QLineEdit, QLabel, QPushButton, QAbstractItemView, QStatusBar,\
                             QMessageBox, QListView, QTreeWidgetItem, QToolButton, QTreeView, QFileSystemModel, \
                             QTableView, QSplitter, QRadioButton, QComboBox, QTextEdit, QAction, QMenu, QSizePolicy, \
-                            QTableWidget, QBoxLayout, QGridLayout, QAbstractButton, QButtonGroup, QGroupBox, QOpenGLWidget
+                            QTableWidget, QBoxLayout, QGridLayout, QAbstractButton, QButtonGroup, QGroupBox, QOpenGLWidget, \
+                            QTabWidget
 
 from PyQt5 import QtGui, uic
 from PyQt5.QtGui import QIcon, QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem,\
                         QPainterPath, QFont, QImageReader, QPainter, QBrush, QMouseEvent, QWheelEvent, QDrag
 from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSettings, QEvent, QRegExp, QSize, QPoint,\
-                         pyqtSignal, QThread, QMimeData, pyqtSlot, QItemSelectionModel
+                         pyqtSignal, QThread, QMimeData, pyqtSlot, QItemSelectionModel, QTimer
 
 import pyqtgraph as pg
-import pyqtgraph.opengl as gl
+#import pyqtgraph.opengl as gl
+
+import OpenGL.GL as gl
+from OpenGL import GLU as glu
+from OpenGL import GLUT as glut
+from PyQt5.QtOpenGL import *
+import sys
+
+
 
 import math, re, os
 from pathlib import Path
@@ -42,6 +51,15 @@ LANDMARK_RADIUS = 3
 DISTANCE_THRESHOLD = LANDMARK_RADIUS * 3
 
 IMAGE_EXTENSION_LIST = ['png', 'jpg', 'jpeg','bmp','gif','tif','tiff']
+
+# glview modes
+OBJECT_MODE = 1
+DATASET_MODE = 2
+VIEW_MODE = 1
+PAN_MODE = 2
+ROTATE_MODE = 3
+ZOOM_MODE = 4
+
 
 class LandmarkEditor(QLabel):
     #clicked = pyqtSignal()
@@ -519,7 +537,7 @@ class LandmarkEditor(QLabel):
         QLabel.resizeEvent(self, event)
 
     def set_object(self, object):
-        #print("set_object", object.object_name)
+        #print("Landmark Editor set_object", object.object_name)
         m_app = QApplication.instance()
         self.object = object
         if object.image.count() > 0:
@@ -534,6 +552,7 @@ class LandmarkEditor(QLabel):
             self.calculate_resize()
 
     def clear_object(self):
+        #print("Landmark Editor clear_object")
         self.landmark_list = []
         self.orig_pixmap = None
         self.curr_pixmap = None
@@ -591,7 +610,7 @@ class ObjectDialog(QDialog):
         self.sub_layout = QHBoxLayout()
         self.setLayout(self.main_layout)
 
-        self.object_view_3d = MyOpenGLWidget(self)
+        self.object_view_3d = MyGLWidget(self)
         self.object_view_3d.setMinimumWidth(300)
         self.object_view_3d.setMinimumHeight(300)
         self.object_view_3d.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -1091,61 +1110,106 @@ class DatasetOpsViewer(QLabel):
     def _2cany(self, y):
         return int(y*self.scale + self.pan_y)
     
-class MyGLViewWidget(gl.GLViewWidget):
-    def __init__(self, widget):
-        super(MyGLViewWidget, self).__init__(widget)
-        self.ds_ops = None
-        self.scale = 1.0
-        self.pan_x = 0
-        self.pan_y = 0
-        self.show_index = True
-        self.show_wireframe = False
-        self.show_baseline = False
-        self.show_average = True
-        #self.setMinimumSize(200,200)
-
-    def set_ds_ops(self, ds_ops):
-        self.ds_ops = ds_ops
-
-
-import OpenGL.GL as gl
-from OpenGL import GLU as glu
-from OpenGL import GLUT as glut
-from PyQt5.QtOpenGL import *
-import sys
-
-OBJECT_MODE = 1
-DATASET_MODE = 2
-
-class MyOpenGLWidget(QGLWidget):
+class MyGLWidget(QGLWidget):
     def __init__(self, parent):
         QGLWidget.__init__(self,parent)
+        self.parent = parent
         self.ds_ops = None
         self.obj_ops = None
         self.scale = 1.0
         self.pan_x = 0
         self.pan_y = 0
-        self.last_pan_x = 0
-        self.last_pan_y = 0
-        self.last_pan_pos_x = 0
-        self.last_pan_pos_y = 0
+        self.temp_pan_x = 0
+        self.temp_pan_y = 0
+        self.rotate_x = 0
+        self.rotate_y = 0
+        self.temp_rotate_x = 0
+        self.temp_rotate_y = 0
         self.show_index = True
         self.show_wireframe = False
         self.show_baseline = False
         self.show_average = True
         self.curr_x = 0
         self.curr_y = 0
-        self.last_x = 0
-        self.last_y = 0
-        self.last_xangle = 0
-        self.last_yangle = 0
-        self.mode = OBJECT_MODE
-        #self.setMinimumSize(200,200)
+        self.down_x = 0
+        self.down_y = 0
+        self.temp_dolly = 0
+        self.dolly = 0
+        self.data_mode = OBJECT_MODE
+        self.view_mode = VIEW_MODE
+        self.auto_rotate = True
+        self.is_dragging = False
+        self.setMinimumSize(400,400)
+        self.timer = QTimer(self)
+        self.timer.setInterval(50)
+        self.timer.timeout.connect(self.timeout)
+        self.timer.start()
+
+    def mousePressEvent(self, event):
+        # left button: rotate
+        # right button: zoom
+        # middle button: pan
+
+        self.down_x = event.x()
+        self.down_y = event.y()
+        #print("down_x:", self.down_x, "down_y:", self.down_y)
+        if event.buttons() == Qt.LeftButton:
+            self.view_mode = ROTATE_MODE
+        elif event.buttons() == Qt.RightButton:
+            self.view_mode = ZOOM_MODE
+        elif event.buttons() == Qt.MiddleButton:
+            self.view_mode = PAN_MODE
+
+    def mouseReleaseEvent(self, event):
+        self.is_dragging = False
+        self.curr_x = event.x()
+        self.curr_y = event.y()
+        #print("curr_x:", self.curr_x, "curr_y:", self.curr_y)
+        if event.button() == Qt.LeftButton:
+            self.rotate_x += self.temp_rotate_x
+            self.rotate_y += self.temp_rotate_y
+            self.temp_rotate_x = 0
+            self.temp_rotate_y = 0
+        elif event.button() == Qt.RightButton:
+            self.dolly += self.temp_dolly 
+            self.temp_dolly = 0
+        elif event.button() == Qt.MiddleButton:
+            self.pan_x += self.temp_pan_x
+            self.pan_y += self.temp_pan_y
+            self.temp_pan_x = 0
+            self.temp_pan_y = 0
+        self.view_mode = VIEW_MODE
+        self.updateGL()
+        #self.parent.update_status()
+
+
+
+    def mouseMoveEvent(self, event):
+        self.curr_x = event.x()
+        self.curr_y = event.y()
+        #print("curr_x:", self.curr_x, "curr_y:", self.curr_y)
+        if event.buttons() == Qt.LeftButton and self.view_mode == ROTATE_MODE:
+            self.is_dragging = True
+            self.temp_rotate_x = self.curr_x - self.down_x
+            self.temp_rotate_y = self.curr_y - self.down_y
+        elif event.buttons() == Qt.RightButton and self.view_mode == ZOOM_MODE:
+            self.is_dragging = True
+            self.temp_dolly = ( self.curr_y - self.down_y ) / 100.0
+        elif event.buttons() == Qt.MiddleButton and self.view_mode == PAN_MODE:
+            self.is_dragging = True
+            self.temp_pan_x = self.curr_x - self.down_x
+            self.temp_pan_y = self.curr_y - self.down_y
+        self.updateGL()
+
+    def wheelEvent(self, event):
+        #print("wheel event", event.angleDelta().y())
+        self.dolly -= event.angleDelta().y() / 240.0
+        self.updateGL()
 
     def set_ds_ops(self, ds_ops):
         self.ds_ops = ds_ops
         #self.calculate_scale_and_pan()
-        self.mode = DATASET_MODE
+        self.data_mode = DATASET_MODE
         average_shape = self.ds_ops.get_average_shape()
         scale = self.get_scale_from_object(average_shape)
         average_shape.rescale(scale)
@@ -1169,13 +1233,21 @@ class MyOpenGLWidget(QGLWidget):
         return scale*0.5
 
     def set_object(self, obj_ops):
+        #print("set_object 1",type(obj_ops))
+        if isinstance(obj_ops, MdObject):
+            obj_ops = MdObjectOps(obj_ops)
+        #print("set_object 2",type(obj_ops))
         obj_ops.move_to_center()
         centroid_size = obj_ops.get_centroid_size()
         obj_ops.rescale_to_unitsize()
         scale = self.get_scale_from_object(obj_ops)
         obj_ops.rescale(scale)
         self.obj_ops = obj_ops
-        self.mode = OBJECT_MODE
+        self.data_mode = OBJECT_MODE
+        self.pan_x = self.pan_y = 0
+        self.rotate_x = self.rotate_y = 0
+        self.auto_rotate = True
+        #print("data_mode:", self.data_mode)
 
     def initializeGL(self):
         gl.glClearDepth(1.0)              
@@ -1196,16 +1268,29 @@ class MyOpenGLWidget(QGLWidget):
     def paintGL(self):
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
         gl.glLoadIdentity()
-        gl.glTranslatef(0, 0, -5.0)   # x, y, z 
+        if self.ds_ops is None and self.obj_ops is None:
+            return
+        gl.glTranslatef(0, 0, -5.0 + self.dolly + self.temp_dolly)   # x, y, z 
+        gl.glTranslatef((self.pan_x + self.temp_pan_x)/100.0, (self.pan_y + self.temp_pan_y)/-100.0, 0.0)
+        gl.glRotatef(self.rotate_y + self.temp_rotate_y, 1.0, 0.0, 0.0)
+        gl.glRotatef(self.rotate_x + self.temp_rotate_x, 0.0, 1.0, 0.0)
 
         gl.glColor3f( 1.0, 1.5, 0.0 )
-        if self.mode == OBJECT_MODE:
+        if self.data_mode == OBJECT_MODE:
             self.draw_object(self.obj_ops)
         else:
-            for obj in self.ds_ops.object_list:
-                self.draw_object(obj)
+            self.draw_dataset(self.ds_ops)
         gl.glFlush()
 
+    def draw_dataset(self, ds_ops):
+        for obj in ds_ops.object_list:
+            if obj.id in ds_ops.selected_object_id_list:
+                gl.glColor3f( 1.0, 0.0, 0.0 )
+            else:
+                gl.glColor3f( 0.0, 0.0, 1.0 )
+            self.draw_object(obj, single_mode=False)
+        if self.show_average:
+            self.draw_object(ds_ops.get_average_shape(), single_mode=True)
 
     def draw_object(self,object,single_mode=True):
         #print("single_mode:", single_mode)
@@ -1216,7 +1301,7 @@ class MyOpenGLWidget(QGLWidget):
                 glut.glutSolidSphere(0.05, 10, 10)
                 gl.glPopMatrix()
         else:
-            gl.glPointSize(3)
+            gl.glPointSize(5)
             gl.glDisable(gl.GL_LIGHTING)
 
             gl.glBegin(gl.GL_POINTS)
@@ -1233,41 +1318,28 @@ class MyOpenGLWidget(QGLWidget):
         glu.gluPerspective(45.0, aspect, 0.1, 100.0)
         gl.glMatrixMode(gl.GL_MODELVIEW)
 
+    def timeout(self):
+        #print("timeout")
+        if self.auto_rotate == False:
+            #print "no rotate"
+            return
+        if self.is_dragging:
+            #print "dragging"
+            return
 
+        self.rotate_x += 1
+        self.updateGL()
 
-    def calculate_scale_and_pan(self):
-        min_x = 100000000
-        max_x = -100000000
-        min_y = 100000000
-        max_y = -100000000
-
-        # get min and max x,y from landmarks
-        for obj in self.ds_ops.object_list:
-            for idx, landmark in enumerate(obj.landmark_list):
-                if landmark[0] < min_x:
-                    min_x = landmark[0]
-                if landmark[0] > max_x:
-                    max_x = landmark[0]
-                if landmark[1] < min_y:
-                    min_y = landmark[1]
-                if landmark[1] > max_y:
-                    max_y = landmark[1]
-        #print("min_x:", min_x, "max_x:", max_x, "min_y:", min_y, "max_y:", max_y)
-        width = max_x - min_x
-        height = max_y - min_y
-        w_scale = ( self.width() * 1.0 ) / ( width * 1.5 )
-        h_scale = ( self.height() * 1.0 ) / ( height * 1.5 )
-        self.scale = min(w_scale, h_scale)
-        self.pan_x = -min_x * self.scale + (self.width() - width * self.scale) / 2.0
-        self.pan_y = -min_y * self.scale + (self.height() - height * self.scale) / 2.0
-        #print("scale:", self.scale, "pan_x:", self.pan_x, "pan_y:", self.pan_y)
-        #self.repaint()
-
+    def clear_object(self):
+        self.obj_ops = None
+        #gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
+        #gl.glFlush()
+        #self.data_mode = DATASET_MODE
 
 class DatasetAnalysisDialog(QDialog):
     def __init__(self,parent,dataset):
         super().__init__()
-        self.setWindowTitle("Assorted Analyses")
+        self.setWindowTitle("Dataset Analyses")
         self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
         self.parent = parent
         self.setGeometry(QRect(100, 100, 1200, 800))
@@ -1283,14 +1355,10 @@ class DatasetAnalysisDialog(QDialog):
         self.lblShape2.setAlignment(Qt.AlignCenter)
         self.lblShape2.setMinimumWidth(400)
         self.lblShape2.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-
         # 3d shape
-        #self.lblShape3 = MyGLViewWidget(self)
-        #z = pg.gaussianFilter(numpy.random.normal(size=(50,50)), (1,1))
-        #p13d = gl.GLSurfacePlotItem(z=z, shader='shaded', color=(0.5, 0.5, 1, 1))
-        #self.lblShape3.addItem(p13d)
-
-        self.lblShape3 = MyOpenGLWidget(self)
+        self.lblShape3 = MyGLWidget(self)
+        self.lblShape3.setMinimumWidth(400)
+        self.lblShape3.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         if dataset.dimension == 3:
             self.lblShape2.hide()
@@ -1423,10 +1491,26 @@ class DatasetAnalysisDialog(QDialog):
         self.btnChartOptions = QPushButton("Chart Options")
         self.btnChartOptions.clicked.connect(self.chart_options_clicked)
 
-        self.plot_layout.addWidget(self.toolbar2)
-        self.plot_layout.addWidget(self.plot_widget2)
-        self.plot_layout.addWidget(self.toolbar3)
-        self.plot_layout.addWidget(self.plot_widget3)
+        self.plot_view = QWidget()
+        self.plot_view.setLayout(QVBoxLayout())
+        self.plot_view.layout().addWidget(self.toolbar2)
+        self.plot_view.layout().addWidget(self.plot_widget2)
+        self.plot_view.layout().addWidget(self.toolbar3)
+        self.plot_view.layout().addWidget(self.plot_widget3)
+
+        self.plot_tab = QTabWidget()
+        self.plot_tab.addTab(self.plot_view, "Chart")
+        self.plot_data = QTableWidget()
+        self.plot_data.setColumnCount(10)
+        self.plot_data.setHorizontalHeaderLabels(["PC1","PC2","PC3","PC4","PC5","PC6","PC7","PC8","PC9","PC10"])
+        self.plot_tab.addTab(self.plot_data, "Data")
+
+
+        self.plot_layout.addWidget(self.plot_tab)
+        #self.plot_layout.addWidget(self.toolbar2)
+        #self.plot_layout.addWidget(self.plot_widget2)
+        #self.plot_layout.addWidget(self.toolbar3)
+        #self.plot_layout.addWidget(self.plot_widget3)
         self.plot_layout.addWidget(self.plot_control_widget1)
         self.plot_layout.addWidget(self.plot_control_widget2)
         self.plot_layout.addWidget(self.btnChartOptions)

@@ -46,7 +46,7 @@ class ModanMainWindow(QMainWindow, form_class):
         super().__init__()
         #QApplication.setOverrideCursor(Qt.WaitCursor)
         self.setupUi(self)
-        self.setGeometry(QRect(100, 100, 1200, 800))
+        self.setGeometry(QRect(100, 100, 1400, 900))
         self.setWindowIcon(QIcon('icon/modan.ico'))
         self.initUI()
         self.setWindowTitle(PROGRAM_NAME)

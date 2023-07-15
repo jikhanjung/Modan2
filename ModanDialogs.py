@@ -60,6 +60,23 @@ PAN_MODE = 2
 ROTATE_MODE = 3
 ZOOM_MODE = 4
 
+COLOR_RED = ( 1, 0, 0 )
+COLOR_GREEN = ( 0, 1, 0 )
+COLOR_BLUE = ( 0, 0, 1 )
+COLOR_YELLOW = ( 1, 1, 0 )
+COLOR_CYAN = ( 0, 1, 1 )
+COLOR_MAGENTA = ( 1, 0, 1 )
+COLOR_WHITE = ( 1, 1, 1 )
+COLOR_LIGHT_GRAY = ( 0.8, 0.8, 0.8 )
+
+COLOR_SINGLE_SHAPE = COLOR_RED
+COLOR_AVERAGE_SHAPE = COLOR_LIGHT_GRAY
+COLOR_NORMAL_SHAPE = COLOR_BLUE
+COLOR_NORMAL_TEXT = COLOR_BLUE
+COLOR_SELECTED_SHAPE = COLOR_RED
+COLOR_SELECTED_TEXT = COLOR_RED
+
+
 
 class LandmarkEditor(QLabel):
     #clicked = pyqtSignal()
@@ -482,11 +499,11 @@ class LandmarkEditor(QLabel):
             if idx == self.wire_hover_index:
                 painter.setPen(QPen(Qt.blue, 2))
                 painter.setBrush(QBrush(Qt.yellow))
-                print("wire hover idx", idx)
+                #print("wire hover idx", idx)
             elif idx == self.wire_start_index or idx == self.wire_end_index:
                 painter.setPen(QPen(Qt.blue, 2))
                 painter.setBrush(QBrush(Qt.blue))
-                print("wire start/end idx", idx)
+                #print("wire start/end idx", idx)
             else:
                 painter.setPen(QPen(Qt.red, 2))
                 painter.setBrush(QBrush(Qt.white))
@@ -658,6 +675,9 @@ class ObjectDialog(QDialog):
         self.cbxShowBaseline = QCheckBox()
         self.cbxShowBaseline.setText("Baseline")
         self.cbxShowBaseline.setChecked(True)
+        self.cbxAutoRotate = QCheckBox()
+        self.cbxAutoRotate.setText("Rotate")
+        self.cbxAutoRotate.setChecked(True)
 
         self.left_widget = QWidget()
         self.left_widget.setLayout(self.form_layout)
@@ -669,6 +689,7 @@ class ObjectDialog(QDialog):
         self.right_middle_layout.addWidget(self.cbxShowIndex)
         self.right_middle_layout.addWidget(self.cbxShowWireframe)
         self.right_middle_layout.addWidget(self.cbxShowBaseline)
+        self.right_middle_layout.addWidget(self.cbxAutoRotate)
         self.right_middle_widget.setLayout(self.right_middle_layout)
         self.right_bottom_widget = QWidget()
         self.vsplitter.addWidget(self.right_top_widget)
@@ -724,31 +745,47 @@ class ObjectDialog(QDialog):
         self.cbxShowIndex.stateChanged.connect(self.show_index_state_changed)
         self.cbxShowWireframe.stateChanged.connect(self.show_wireframe_state_changed)
         self.cbxShowBaseline.stateChanged.connect(self.show_baseline_state_changed)
+        self.cbxAutoRotate.stateChanged.connect(self.auto_rotate_state_changed)
 
     def show_index_state_changed(self, int):
         if self.cbxShowIndex.isChecked():
             self.object_view_2d.show_index = True
+            self.object_view_3d.show_index = True
             #print("show index CHECKED!")
         else:
             self.object_view_2d.show_index = False
+            self.object_view_3d.show_index = False
             #print("show index UNCHECKED!")
         self.object_view_2d.update()
 
     def show_baseline_state_changed(self, int):
         if self.cbxShowBaseline.isChecked():
             self.object_view_2d.show_baseline = True
+            self.object_view_3d.show_baseline = True
             #print("show index CHECKED!")
         else:
             self.object_view_2d.show_baseline = False
+            self.object_view_3d.show_baseline = False
             #print("show index UNCHECKED!")
         self.object_view_2d.update()
+
+    def auto_rotate_state_changed(self, int):
+        if self.cbxAutoRotate.isChecked():
+            self.object_view_3d.auto_rotate = True
+            #print("show index CHECKED!")
+        else:
+            self.object_view_3d.auto_rotate = False
+            #print("show index UNCHECKED!")
+        #self.object_view_2d.update()
 
     def show_wireframe_state_changed(self, int):
         if self.cbxShowWireframe.isChecked():
             self.object_view_2d.show_wireframe = True
+            self.object_view_3d.show_wireframe = True
             #print("show index CHECKED!")
         else:
             self.object_view_2d.show_wireframe = False
+            self.object_view_3d.show_wireframe = False
             #print("show index UNCHECKED!")
         self.object_view_2d.update()
 
@@ -928,6 +965,9 @@ class ObjectDialog(QDialog):
         if object.dataset.dimension == 3:
             obj_ops = MdObjectOps(object)
             self.object_view_3d.set_object(obj_ops)
+            self.cbxAutoRotate.show()
+        else:
+            self.cbxAutoRotate.hide()
             #self.object_view_3d.landmark_list = self.landmark_list
         #self.set_dataset(object.dataset)
 
@@ -1109,7 +1149,7 @@ class DatasetOpsViewer(QLabel):
         return int(x*self.scale + self.pan_x)
     def _2cany(self, y):
         return int(y*self.scale + self.pan_y)
-    
+
 class MyGLWidget(QGLWidget):
     def __init__(self, parent):
         QGLWidget.__init__(self,parent)
@@ -1253,6 +1293,7 @@ class MyGLWidget(QGLWidget):
         gl.glClearDepth(1.0)              
         gl.glDepthFunc(gl.GL_LESS)
         gl.glEnable(gl.GL_DEPTH_TEST)
+        gl.glEnable(gl.GL_COLOR_MATERIAL)
         gl.glShadeModel(gl.GL_SMOOTH)
 
         gl.glEnable(gl.GL_LIGHTING)
@@ -1266,16 +1307,22 @@ class MyGLWidget(QGLWidget):
         glut.glutInit(sys.argv)
 
     def paintGL(self):
+        self.draw_all()
+
+    def draw_all(self):
+        gl.glMatrixMode(gl.GL_MODELVIEW)
+        gl.glClearColor(0.2,0.2,0.2,1.0)
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
         gl.glLoadIdentity()
         if self.ds_ops is None and self.obj_ops is None:
             return
+        
+        # pan, rotate, dolly
         gl.glTranslatef(0, 0, -5.0 + self.dolly + self.temp_dolly)   # x, y, z 
         gl.glTranslatef((self.pan_x + self.temp_pan_x)/100.0, (self.pan_y + self.temp_pan_y)/-100.0, 0.0)
         gl.glRotatef(self.rotate_y + self.temp_rotate_y, 1.0, 0.0, 0.0)
         gl.glRotatef(self.rotate_x + self.temp_rotate_x, 0.0, 1.0, 0.0)
 
-        gl.glColor3f( 1.0, 1.5, 0.0 )
         if self.data_mode == OBJECT_MODE:
             self.draw_object(self.obj_ops)
         else:
@@ -1283,28 +1330,41 @@ class MyGLWidget(QGLWidget):
         gl.glFlush()
 
     def draw_dataset(self, ds_ops):
+        
         for obj in ds_ops.object_list:
             if obj.id in ds_ops.selected_object_id_list:
-                gl.glColor3f( 1.0, 0.0, 0.0 )
+                object_color = COLOR_SELECTED_SHAPE
             else:
-                gl.glColor3f( 0.0, 0.0, 1.0 )
-            self.draw_object(obj, single_mode=False)
+                object_color = COLOR_NORMAL_SHAPE
+            self.draw_object(obj, landmark_as_sphere=False, color=object_color)
         if self.show_average:
-            self.draw_object(ds_ops.get_average_shape(), single_mode=True)
+            object_color = COLOR_AVERAGE_SHAPE
+            self.draw_object(ds_ops.get_average_shape(), landmark_as_sphere=True, color=object_color)
 
-    def draw_object(self,object,single_mode=True):
-        #print("single_mode:", single_mode)
-        if single_mode:
-            for lm in object.landmark_list:
+    def draw_object(self,object,landmark_as_sphere=True,color=COLOR_NORMAL_SHAPE):
+        if landmark_as_sphere:
+            for i, lm in enumerate(object.landmark_list):
                 gl.glPushMatrix()
                 gl.glTranslate(lm[0], lm[1], lm[2])
-                glut.glutSolidSphere(0.05, 10, 10)
+                #print("color: yellow")
+                gl.glColor3f( *color )
+                glut.glutSolidSphere(0.03, 10, 10)
                 gl.glPopMatrix()
+
+                if self.show_index:
+                    gl.glDisable(gl.GL_LIGHTING)
+                    gl.glColor3f( *COLOR_NORMAL_TEXT )
+                    gl.glRasterPos3f(lm[0] + 0.05, lm[1] + 0.05, lm[2])
+                    for letter in list(str(i)):
+                        glut.glutBitmapCharacter(glut.GLUT_BITMAP_HELVETICA_12, ord(letter))
+                    gl.glEnable(gl.GL_LIGHTING)
+
         else:
             gl.glPointSize(5)
             gl.glDisable(gl.GL_LIGHTING)
-
+            gl.glColor3f( *color )
             gl.glBegin(gl.GL_POINTS)
+            #gl.glColor3f( 1.0, 1.0, 0.0 )
             for lm in object.landmark_list:
                 gl.glVertex3f(lm[0], lm[1], lm[2])
             gl.glEnd()
@@ -1319,7 +1379,7 @@ class MyGLWidget(QGLWidget):
         gl.glMatrixMode(gl.GL_MODELVIEW)
 
     def timeout(self):
-        #print("timeout")
+        #print("timeout, auto_rotate:", self.auto_rotate)
         if self.auto_rotate == False:
             #print "no rotate"
             return
@@ -1327,7 +1387,7 @@ class MyGLWidget(QGLWidget):
             #print "dragging"
             return
 
-        self.rotate_x += 1
+        self.rotate_x += 0.5
         self.updateGL()
 
     def clear_object(self):
@@ -1336,13 +1396,71 @@ class MyGLWidget(QGLWidget):
         #gl.glFlush()
         #self.data_mode = DATASET_MODE
 
+    def hit_test(self, x, y):
+        print( 'is cursor on landmark')
+
+        SIZE = 1024
+        gl.glSelectBuffer(SIZE)  # allocate a selection buffer of SIZE elements
+
+        viewport = gl.glGetIntegerv(gl.GL_VIEWPORT)
+        gl.glMatrixMode(gl.GL_PROJECTION)
+        gl.glPushMatrix()
+
+        gl.glRenderMode(gl.GL_SELECT)
+        self.render_mode = gl.GL_SELECT
+
+        gl.glLoadIdentity()
+        glu.gluPickMatrix(x, (viewport[3] - y), 10, 10, viewport)
+        gl.glFrustum(self.frustum_args['width'] * -1.0, self.frustum_args['width'], self.frustum_args['height'] * -1.0,
+                     self.frustum_args['height'], self.frustum_args['znear'], self.frustum_args['zfar'])
+        glu.gluLookAt(0.0, 0.0, self.offset * -1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0)
+
+        self.draw_all()
+
+        buffer = gl.glRenderMode(gl.GL_RENDER)
+        self.render_mode = gl.GL_RENDER
+
+        hit = False
+        top_lmidx = -1
+
+        gl.glMatrixMode(gl.GL_PROJECTION)
+        gl.glPopMatrix()
+        gl.glMatrixMode(gl.GL_MODELVIEW)
+
+        for hit_record in buffer:
+            min_depth, max_depth, names = hit_record  
+            if names[0] > 1000:
+                pass  #print "wire " + self.wirename[names[0]]
+            else:
+                #print "you hit point #" + str( names[0] )
+                lmidx = names[0]
+                if not hit:
+                    hit = True
+                    top_lmidx = lmidx
+                    return hit, lmidx
+
+        for hit_record in buffer:
+            min_depth, max_depth, names = hit_record  # do something with the record
+            if names[0] > 1000:
+                hit = True
+                idx = names[0]
+                return hit, idx
+
+            #self.object.landmarks[lmidx].selected = True
+            #self.Refresh(False)
+            #glMatrixMode( GL_MODELVIEW )
+
+            #    print "a"
+        self.updateGL()
+        return hit, top_lmidx
+
 class DatasetAnalysisDialog(QDialog):
     def __init__(self,parent,dataset):
         super().__init__()
         self.setWindowTitle("Dataset Analyses")
         self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
         self.parent = parent
-        self.setGeometry(QRect(100, 100, 1200, 800))
+        self.setGeometry(QRect(100, 100, 1400, 900))
         self.move(self.parent.pos()+QPoint(100,100))
 
         self.ds_ops = None
@@ -1380,17 +1498,22 @@ class DatasetAnalysisDialog(QDialog):
         self.cbxShowAverage = QCheckBox()
         self.cbxShowAverage.setText("Average")
         self.cbxShowAverage.setChecked(True)
+        self.cbxAutoRotate = QCheckBox()
+        self.cbxAutoRotate.setText("Rotate")
+        self.cbxAutoRotate.setChecked(True)
 
         self.cbxShowIndex.stateChanged.connect(self.show_index_state_changed)
         self.cbxShowWireframe.stateChanged.connect(self.show_wireframe_state_changed)
         self.cbxShowBaseline.stateChanged.connect(self.show_baseline_state_changed)
         self.cbxShowAverage.stateChanged.connect(self.show_average_state_changed)
+        self.cbxAutoRotate.stateChanged.connect(self.auto_rotate_state_changed)
 
         self.checkbox_layout = QHBoxLayout()
         self.checkbox_layout.addWidget(self.cbxShowIndex)
         self.checkbox_layout.addWidget(self.cbxShowWireframe)
         self.checkbox_layout.addWidget(self.cbxShowBaseline)
         self.checkbox_layout.addWidget(self.cbxShowAverage)
+        self.checkbox_layout.addWidget(self.cbxAutoRotate)
         self.cbx_widget = QWidget()
         self.cbx_widget.setLayout(self.checkbox_layout)
 
@@ -1502,8 +1625,14 @@ class DatasetAnalysisDialog(QDialog):
         self.plot_tab.addTab(self.plot_view, "Chart")
         self.plot_data = QTableWidget()
         self.plot_data.setColumnCount(10)
-        self.plot_data.setHorizontalHeaderLabels(["PC1","PC2","PC3","PC4","PC5","PC6","PC7","PC8","PC9","PC10"])
-        self.plot_tab.addTab(self.plot_data, "Data")
+        self.rotation_matrix_data = QTableWidget()
+        self.rotation_matrix_data.setColumnCount(10)
+        self.eigenvalue_data = QTableWidget()
+        self.eigenvalue_data.setColumnCount(2)
+
+        self.plot_tab.addTab(self.plot_data, "PCA result")
+        self.plot_tab.addTab(self.rotation_matrix_data, "Rotation matrix")
+        self.plot_tab.addTab(self.eigenvalue_data, "Eigen value")
 
 
         self.plot_layout.addWidget(self.plot_tab)
@@ -1666,6 +1795,7 @@ class DatasetAnalysisDialog(QDialog):
             self.show_pca_result()
 
     def set_dataset(self, dataset):
+        #print("dataset:", dataset)
         self.dataset = dataset
         self.comboPropertyName.clear()
         self.comboPropertyName.addItem("Select Property")
@@ -1675,6 +1805,10 @@ class DatasetAnalysisDialog(QDialog):
                 #self.comboAxis2.addItem(propertyname)
         self.comboPropertyName.setCurrentIndex(0)
         self.comboPropertyName.currentIndexChanged.connect(self.propertyname_changed)
+        if self.dataset.dimension == 3:
+            self.cbxAutoRotate.show()
+        else:
+            self.cbxAutoRotate.hide()
 
     def propertyname_changed(self):
         if self.ds_ops is not None:
@@ -1719,6 +1853,16 @@ class DatasetAnalysisDialog(QDialog):
         else:
             self.lblShape.show_average = False
             #print("show index UNCHECKED!")
+        self.lblShape.update()
+
+    def auto_rotate_state_changed(self, int):
+        #print("auto_rotate_state_changed", self.cbxAutoRotate.isChecked())
+        if self.cbxAutoRotate.isChecked():
+            self.lblShape.auto_rotate = True
+            #print("auto rotate CHECKED!")
+        else:
+            self.lblShape.auto_rotate = False
+            #print("auto rotate UNCHECKED!")
         self.lblShape.update()
 
     def show_wireframe_state_changed(self, int):
@@ -1767,6 +1911,7 @@ class DatasetAnalysisDialog(QDialog):
     def show_pca_result(self):
         #self.plot_widget.clear()
 
+        self.show_pca_table()
         # get axis1 and axis2 value from comboAxis1 and 2 index
         depth_shade = self.cbxDepthShade.isChecked()
         axis1 = self.comboAxis1.currentIndex() +1
@@ -1848,6 +1993,48 @@ class DatasetAnalysisDialog(QDialog):
             self.fig3.canvas.mpl_connect('pick_event',self.on_pick)
             self.fig3.canvas.mpl_connect('button_press_event', self.on_canvas_button_press)
             self.fig3.canvas.mpl_connect('button_release_event', self.on_canvas_button_release)
+
+    def show_pca_table(self):
+        self.plot_data.clear()
+        self.rotation_matrix_data.clear()
+
+        # PCA data
+        # set header as "PC1", "PC2", "PC3", ... "PCn
+        header = ["PC"+str(i+1) for i in range(len(self.pca_result.rotated_matrix.tolist()[0]))]
+        #print("header", header)
+        self.plot_data.setColumnCount(len(header)+1)
+        self.plot_data.setHorizontalHeaderLabels(["Name"] + header)
+
+        new_coords = self.pca_result.rotated_matrix.tolist()
+        self.plot_data.setColumnCount(len(new_coords[0])+1)
+        for i, obj in enumerate(self.ds_ops.object_list):
+            self.plot_data.insertRow(i)
+            self.plot_data.setItem(i, 0, QTableWidgetItem(obj.object_name))
+            for j, val in enumerate(new_coords[i]):
+                self.plot_data.setItem(i, j+1, QTableWidgetItem(str(int(val*10000)/10000.0)))
+
+        # rotation matrix
+        rotation_matrix = self.pca_result.rotation_matrix.tolist()
+        #print("rotation_matrix[0][0]", [0][0], len(self.pca_result.rotation_matrix[0][0]))
+        self.rotation_matrix_data.setColumnCount(len(rotation_matrix[0]))
+        for i, row in enumerate(rotation_matrix):
+            self.rotation_matrix_data.insertRow(i)
+            for j, val in enumerate(row):
+                self.rotation_matrix_data.setItem(i, j, QTableWidgetItem(str(int(val*10000)/10000.0)))
+        
+        # eigen values
+        self.eigenvalue_data.setColumnCount(2)
+        for i, val in enumerate(self.pca_result.raw_eigen_values):
+            val2 = self.pca_result.eigen_value_percentages[i]
+            self.eigenvalue_data.insertRow(i)
+            self.eigenvalue_data.setItem(i, 0, QTableWidgetItem(str(int(val*10000)/10000.0)))
+            self.eigenvalue_data.setItem(i, 1, QTableWidgetItem(str(int(val2*10000)/10000.0)))
+
+
+        #self.eigen_value_percentages.append(ss / sum)
+        #self.raw_eigen_values = s
+        #self.loading = v
+
 
     def on_canvas_button_press(self, evt):
         #print("button_press", evt)

@@ -46,7 +46,7 @@ class ModanMainWindow(QMainWindow, form_class):
         super().__init__()
         #QApplication.setOverrideCursor(Qt.WaitCursor)
         self.setupUi(self)
-        self.setGeometry(QRect(100, 100, 1400, 900))
+        self.setGeometry(QRect(50, 50, 1400, 800))
         self.setWindowIcon(QIcon('icon/modan.ico'))
         self.initUI()
         self.setWindowTitle(PROGRAM_NAME)
@@ -286,7 +286,7 @@ class ModanMainWindow(QMainWindow, form_class):
         if not self.selected_dataset:
             return
         self.dlg = ObjectDialog(self)
-        self.dlg.setModal(True)
+        #self.dlg.setModal(True)
         self.dlg.object = None
         self.dlg.set_dataset(self.selected_dataset)
         #self.dlg.setWindowModality(Qt.ApplicationModal)

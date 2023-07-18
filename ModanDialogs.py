@@ -1810,7 +1810,7 @@ class MyGLWidget(QGLWidget):
         gl.glMatrixMode(gl.GL_MODELVIEW)
 
         if self.picker_buffer is not None and self.edit_mode == WIREFRAME_MODE:
-            print("resize picker buffer", width, height)
+            #print("resize picker buffer", width, height)
 
             # Resize the renderbuffer
             gl.glBindRenderbuffer(gl.GL_RENDERBUFFER, self.render_buffer)
@@ -2991,6 +2991,14 @@ class ExportDatasetDialog(QDialog):
         for object in self.dataset.object_list:
             self.lstExportList.addItem(object.object_name)
         
+    def on_rbProcrustes_clicked(self):
+        pass
+    def on_rbBookstein_clicked(self):
+
+        pass
+    def on_rbRFTRA_clicked(self):
+        pass
+
 
 
     def on_rbTPS_clicked(self):
@@ -3010,10 +3018,13 @@ class ExportDatasetDialog(QDialog):
             self.lstExportList.takeItem(self.lstExportList.row(item))
             self.lstObjectList.addItem(item)
     def export_dataset(self):
-        export_list = []
-        for i in range(self.lstExportList.count()):
-            item = self.lstExportList.item(i)
-            export_list.append(item.text())
+        ##export_list = []
+        #for i in range(self.lstExportList.count()):
+        ##    item = self.lstExportList.item(i)
+        #    export_list.append(item.text())
+        self.ds_ops.procrustes_superimposition()
+        object_list = self.ds_ops.object_list
+
         if self.rbTPS.isChecked():
             today = datetime.datetime.now()
             date_str = today.strftime("%Y%m%d_%H%M%S")
@@ -3021,8 +3032,16 @@ class ExportDatasetDialog(QDialog):
 
             filename, _ = QFileDialog.getSaveFileName(self, "Save File As", filename_candidate, "TPS format (*.tps)")
             if filename:
-                for object_id in export_list:
-                    pass
+                # open text file
+                with open(filename, 'w') as f:
+                    for object in object_list:
+                        f.write('LM={} {}\n'.format(len(object.landmark_list),object.object_name))
+                        for lm in object.landmark_list:
+                            if self.ds_ops.dimension == 2:
+                                f.write('{}\t{}\n'.format(*lm))
+                            else:
+                                f.write('{}\t{}\t{}\n'.format(*lm))
+                        #pass#
                     
 
 

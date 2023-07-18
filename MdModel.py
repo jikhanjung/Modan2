@@ -608,6 +608,7 @@ class MdDatasetOps:
         self.polygons = dataset.polygons
         self.object_list = []
         self.selected_object_id_list = []
+        self.edge_list = []
         for mo in dataset.object_list:
             #self.object_list.append(mo.copy())
             self.object_list.append(MdObjectOps(mo))

@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QTableWidgetItem, QMainWindow, QHeaderView, QFileDia
 
 from PyQt5 import QtGui, uic
 from PyQt5.QtGui import QIcon, QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem,\
-                        QPainterPath, QFont, QImageReader, QPainter, QBrush, QMouseEvent, QWheelEvent, QDrag
+                        QPainterPath, QFont, QImageReader, QPainter, QBrush, QMouseEvent, QWheelEvent, QDrag, QDoubleValidator
 from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSettings, QEvent, QRegExp, QSize, QPoint,\
                          pyqtSignal, QThread, QMimeData, pyqtSlot, QItemSelectionModel, QTimer
 
@@ -22,7 +22,6 @@ from PyQt5.QtOpenGL import *
 import sys
 
 
-import struct, random
 
 import math, re, os
 from pathlib import Path
@@ -46,6 +45,7 @@ MODE_WIREFRAME = 2
 MODE_READY_MOVE_LANDMARK = 3
 MODE_MOVE_LANDMARK = 4
 MODE_PRE_WIRE_FROM = 5
+MODE_CALIBRATION = 6
 
 
 LANDMARK_RADIUS = 3
@@ -116,6 +116,10 @@ class LandmarkEditor(QLabel):
         self.wire_start_index = -1
         self.wire_end_index = -1
         self.selected_edge_index = -1
+        self.calibration_from_img_x = -1
+        self.calibration_from_img_y = -1
+        self.calibration_from_to_x = -1
+        self.calibration_from_to_y = -1
         
         #self.repaint()
 
@@ -148,6 +152,9 @@ class LandmarkEditor(QLabel):
         elif self.edit_mode == MODE_MOVE_LANDMARK:
             self.setCursor(Qt.SizeAllCursor)
             self.show_message("Move landmark")
+        if self.edit_mode == MODE_CALIBRATION:
+            self.setCursor(Qt.CrossCursor)
+            self.show_message("Click on image to add landmark")
         else:
             self.setCursor(Qt.ArrowCursor)
 
@@ -301,6 +308,9 @@ class LandmarkEditor(QLabel):
                         self.wire_start_index = self.wire_hover_index
                         self.wire_hover_index = -1
                         #self.edit_mode = MODE_DRAW_WIREFRAME
+            elif self.edit_mode == MODE_CALIBRATION:
+                self.calibration_from_img_x = self._2imgx(self.curr_mouse_x)
+                self.calibration_from_img_y = self._2imgy(self.curr_mouse_y)
 
         elif me.button() == Qt.RightButton:
             if self.edit_mode == MODE_WIREFRAME:
@@ -353,6 +363,18 @@ class LandmarkEditor(QLabel):
                 #self.edit_mode = MODE_EDIT_WIREFRAME
                 self.wire_end_index = -1
                 #self.repaint()
+        elif self.edit_mode == MODE_CALIBRATION:
+            self.calibration_to_img_x = self._2imgx(self.curr_mouse_x)
+            self.calibration_to_img_y = self._2imgy(self.curr_mouse_y)
+
+            diff_x = self.calibration_to_img_x - self.calibration_from_img_x
+            diff_y = self.calibration_to_img_y - self.calibration_from_img_y
+            dist = math.sqrt(diff_x * diff_x + diff_y * diff_y)
+            self.object_dialog.calibrate(dist)
+            self.calibration_to_img_x = -1
+            self.calibration_to_img_y = -1
+            self.calibration_from_img_x = -1
+            self.calibration_from_img_y = -1
 
         return super().mouseReleaseEvent(ev)    
 
@@ -493,7 +515,16 @@ class LandmarkEditor(QLabel):
             else:
                 pass
                 #painter.drawEllipse(self.curr_mouse_x-radius, self.curr_mouse_y-radius, radius*2, radius*2)
+        elif self.edit_mode == MODE_CALIBRATION:
+            if self.calibration_from_img_x >= 0 and self.calibration_from_img_y >= 0:
+                x1 = int(self._2canx(self.calibration_from_img_x))
+                y1 = int(self._2cany(self.calibration_from_img_y))
+                x2 = self.curr_mouse_x
+                y2 = self.curr_mouse_y
+                #print("calibration", x1, y1, x2, y2)
 
+                painter.setPen(QPen(Qt.red, 2))
+                painter.drawLine(x1,y1,x2,y2)
         #print(landmark_list)
 
         #print("font:", painter.font().family(), painter.font().pointSize(), painter.font().pixelSize())
@@ -578,6 +609,65 @@ class LandmarkEditor(QLabel):
         self.curr_pixmap = None
         self.update()    
 
+class CalibrationDialog(QDialog):
+    def __init__(self,parent,dist):
+        super().__init__()
+        self.setWindowTitle("Calibration")
+        self.parent = parent
+        #print(self.parent.pos())
+        self.setGeometry(QRect(100, 100, 320, 180))
+        self.move(self.parent.pos()+QPoint(100,100))
+        self.status_bar = QStatusBar()
+        self.lblText1 = QLabel("Calibration", self)
+        self.lblText2 = QLabel("Calibration", self)
+        self.edtLength = QLineEdit(self)
+        self.edtLength.setValidator(QDoubleValidator())
+        self.edtLength.setText("1.0")
+        self.edtLength.setFixedWidth(100)
+        self.edtLength.setFixedHeight(30)
+        self.cbxUnit = QComboBox(self)
+        self.cbxUnit.addItem("nm")
+        self.cbxUnit.addItem("um")
+        self.cbxUnit.addItem("mm")
+        self.cbxUnit.addItem("cm")
+        self.cbxUnit.addItem("m")
+        self.cbxUnit.setFixedWidth(100)
+        self.cbxUnit.setFixedHeight(30)
+        self.btnOK = QPushButton("OK", self)
+        self.btnOK.setFixedWidth(100)
+        self.btnOK.setFixedHeight(30)
+        self.btnCancel = QPushButton("Cancel", self)
+        self.btnCancel.setFixedWidth(100)
+        self.btnCancel.setFixedHeight(30)
+        self.btnOK.clicked.connect(self.btnOK_clicked)
+        self.btnCancel.clicked.connect(self.btnCancel_clicked)  
+        self.hbox = QHBoxLayout()
+        self.hbox.addWidget(self.edtLength)
+        self.hbox.addWidget(self.cbxUnit)
+        self.hbox.addWidget(self.btnOK)
+        self.hbox.addWidget(self.btnCancel)
+        self.vbox = QVBoxLayout()
+        self.vbox.addWidget(self.lblText1)
+        self.vbox.addWidget(self.lblText2)
+        self.vbox.addLayout(self.hbox)
+        self.setLayout(self.vbox)
+        if dist is not None:
+            self.set_pixel_number(dist)
+
+    def set_pixel_number(self, pixel_number):
+        self.pixel_number = pixel_number
+        # show number of pixel in calibration text 
+        self.lblText1.setText("Enter the unit length in metric scale.")
+        self.lblText2.setText("%d pixels are equivalent to:" % self.pixel_number)
+        
+    def btnOK_clicked(self):
+        self.parent.calibration_length = float(self.edtLength.text())
+        self.parent.calibration_unit = self.cbxUnit.currentText()
+        self.close()
+    
+    def btnCancel_clicked(self):
+        self.close()
+
 class ObjectDialog(QDialog):
     # NewDatasetDialog shows new dataset dialog.
     def __init__(self,parent):
@@ -657,21 +747,29 @@ class ObjectDialog(QDialog):
         self.btnGroup = QButtonGroup() 
         self.btnLandmark = PicButton(QPixmap("icon/landmark.png"), QPixmap("icon/landmark_hover.png"), QPixmap("icon/landmark_down.png"))
         self.btnWireframe = PicButton(QPixmap("icon/wireframe.png"), QPixmap("icon/wireframe_hover.png"), QPixmap("icon/wireframe_down.png"))
-        self.btnGroup.addButton(self.btnLandmark, 0)
-        self.btnGroup.addButton(self.btnLandmark, 0)
+        self.btnCalibration = PicButton(QPixmap("icon/caliper.png"), QPixmap("icon/caliper_hover.png"), QPixmap("icon/caliper_down.png"))
+        self.btnGroup.addButton(self.btnLandmark)
+        self.btnGroup.addButton(self.btnWireframe)
+        self.btnGroup.addButton(self.btnCalibration)
         self.btnLandmark.setCheckable(True)
         self.btnWireframe.setCheckable(True)
+        self.btnCalibration.setCheckable(True)
         self.btnLandmark.setChecked(True)
         self.btnWireframe.setChecked(False)
+        self.btnCalibration.setChecked(False)
         self.btnLandmark.setAutoExclusive(True)
         self.btnWireframe.setAutoExclusive(True)
+        self.btnCalibration.setAutoExclusive(True)
         self.btnLandmark.clicked.connect(self.btnLandmark_clicked)
         self.btnWireframe.clicked.connect(self.btnWireframe_clicked)
+        self.btnCalibration.clicked.connect(self.btnCalibration_clicked)
         self.btnLandmark.setFixedSize(32,32)
         self.btnWireframe.setFixedSize(32,32)
+        self.btnCalibration.setFixedSize(32,32)
         self.btn_layout2 = QGridLayout()
         self.btn_layout2.addWidget(self.btnLandmark,0,0)
         self.btn_layout2.addWidget(self.btnWireframe,0,1)
+        self.btn_layout2.addWidget(self.btnCalibration,1,0)
 
         self.cbxShowIndex = QCheckBox()
         self.cbxShowIndex.setText("Index")
@@ -785,6 +883,24 @@ class ObjectDialog(QDialog):
         self.btnLandmark.setChecked(True)
         self.btnWireframe.setDown(False)
         self.btnWireframe.setChecked(False)
+        self.btnCalibration.setDown(False)
+        self.btnCalibration.setChecked(False)
+
+    def btnCalibration_clicked(self):
+        #self.edit_mode = MODE_ADD_LANDMARK
+        self.object_view_2d.set_mode(MODE_CALIBRATION)
+        self.object_view_2d.update()
+        self.btnCalibration.setDown(True)
+        self.btnCalibration.setChecked(True)
+        self.btnLandmark.setDown(False)
+        self.btnLandmark.setChecked(False)
+        self.btnWireframe.setDown(False)
+        self.btnWireframe.setChecked(False)
+
+    def calibrate(self, dist):
+        self.calibrate_dlg = CalibrationDialog(self, dist)
+        self.calibrate_dlg.setModal(True)
+        self.calibrate_dlg.exec_()
 
     def btnWireframe_clicked(self):
         #self.edit_mode = MODE_ADD_LANDMARK
@@ -794,6 +910,8 @@ class ObjectDialog(QDialog):
         self.btnWireframe.setChecked(True)
         self.btnLandmark.setDown(False)
         self.btnLandmark.setChecked(False)
+        self.btnCalibration.setDown(False)
+        self.btnCalibration.setChecked(False)
 
     def set_object_name(self, name):
         #print("set_object_name", self.edtObjectName.text(), name)
@@ -1665,8 +1783,8 @@ class DatasetAnalysisDialog(QDialog):
         self.setWindowTitle("Dataset Analyses")
         self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
         self.parent = parent
-        self.setGeometry(QRect(100, 100, 1400, 900))
-        self.move(self.parent.pos()+QPoint(100,100))
+        self.setGeometry(QRect(100, 100, 1400, 800))
+        self.move(self.parent.pos()+QPoint(50,50))
 
         self.ds_ops = None
         self.object_hash = {}
@@ -2040,7 +2158,50 @@ class DatasetAnalysisDialog(QDialog):
         self.show_object_shape()
         
     def on_btnSaveResults_clicked(self):
-        print("on_btnSaveResults_clicked")
+        today = datetime. datetime. now()
+        date_str = today. strftime("%Y%m%d_%H%M%S")
+
+        filename_candidate = '{}_analysis_{}.xlsx'.format(self.ds_ops.dataset_name, date_str)
+        filename, _ = QFileDialog.getSaveFileName(self, "Save File As", filename_candidate, "Excel format (*.xlsx)")
+        if filename:
+            #print("filename:", filename)
+            doc = xlsxwriter.Workbook(filename)
+            
+            # PCA result
+            header = [ "object_name" ]
+            header.extend( ["PC"+str(i+1) for i in range(len(self.pca_result.rotated_matrix.tolist()[0]))] )
+            worksheet = doc.add_worksheet("PCA coordinates")
+            row_index = 0
+            column_index = 0
+
+            for colname in header:
+                worksheet.write(row_index, column_index, colname )
+                column_index+=1
+            
+            new_coords = self.pca_result.rotated_matrix.tolist()
+            for i, obj in enumerate(self.ds_ops.object_list):
+                worksheet.write(i+1, 0, obj.object_name )
+                for j, val in enumerate(new_coords[i]):
+                    worksheet.write(i+1, j+1, val )
+                    #self.plot_data.setItem(i, j+1, QTableWidgetItem(str(int(val*10000)/10000.0)))
+
+            worksheet = doc.add_worksheet("Rotation matrix")
+            row_index = 0
+            column_index = 0
+            rotation_matrix = self.pca_result.rotation_matrix.tolist()
+            #print("rotation_matrix[0][0]", [0][0], len(self.pca_result.rotation_matrix[0][0]))
+            for i, row in enumerate(rotation_matrix):
+                for j, val in enumerate(row):
+                    worksheet.write(i, j, val )                  
+
+            worksheet = doc.add_worksheet("Eigenvalues")
+            for i, val in enumerate(self.pca_result.raw_eigen_values):
+                val2 = self.pca_result.eigen_value_percentages[i]
+                worksheet.write(i, 0, val )
+                worksheet.write(i, 1, val2 )
+
+            doc.close()
+        #print("on_btnSaveResults_clicked")
         
     def show_index_state_changed(self, int):
         if self.cbxShowIndex.isChecked():
@@ -2654,48 +2815,15 @@ class ImportDatasetDialog(QDialog):
         self.prgImport.setFormat("Importing...")
         self.prgImport.update()
         self.prgImport.repaint()
-        self.import_thread = ImportThread(self)
-        self.import_thread.start()
-        self.import_thread.finished.connect(self.import_finished)
-        self.import_thread.progress.connect(self.import_progress)
 
-    def import_finished(self):
-        self.btnImport.setEnabled(True)
-        self.prgImport.setValue(100)
-        self.prgImport.setFormat("Import Finished")
-        self.prgImport.update()
-        self.prgImport.repaint()
-        self.import_thread.quit()
-        self.import_thread.wait()
-
-    def import_progress(self, value):
-        self.prgImport.setValue(value)
-        self.prgImport.update()
-        self.prgImport.repaint()
-
-class ImportThread(QThread):
-
-    progress = pyqtSignal(int)
-    def __init__(self, parent):
-        super().__init__()
-        self.parent = parent
-
-    def run(self):
-        filename = self.parent.edtFilename.text()
-        #filetype = self.parent.cbxFileType.currentText()
-        filetype = self.parent.chkFileType.checkedButton().text()
-        datasetname = self.parent.edtDatasetName.text()
-        objectcount = self.parent.edtObjectCount.text()
+        filename = self.edtFilename.text()
+        filetype = self.chkFileType.checkedButton().text()
+        datasetname = self.edtDatasetName.text()
+        objectcount = self.edtObjectCount.text()
         if filetype == "TPS":
             self.import_tps(filename, datasetname)
-        elif filetype == "X1Y1":
-            self.import_x1y1(filename, datasetname)
-        elif filetype == "Morphologika":
-            self.import_morphologika(filename, datasetname)
         else:
-            self.progress.emit(0)
-            return
-        self.progress.emit(100)
+            pass
 
     def import_tps(self, filename, datasetname):
         # read tps file
@@ -2719,43 +2847,30 @@ class ImportThread(QThread):
             object.landmark_str = "\n".join(landmark_list)
 
             object.save()
-            self.progress.emit(int( (i / float(tps.nobjects)) * 100))
+            val = int( (float(i+1)*100.0 / float(tps.nobjects)) )
+            print("progress:", i+1, tps.nobjects, val)
+            self.update_progress(val)
             #progress = int( (i / float(tps.nobjects)) * 100)
 
+        print("tps import done")
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Information)
+
+        msg.setText("Finished importing a TPS file.")
+        msg.setStandardButtons(QMessageBox.Ok)
+            
+        retval = msg.exec_()
+        self.close()
         # add dataset to project
         #self.parent.parent.project.datasets.append(dataset)
         #self.parent.parent.project.current_dataset = dataset
 
-    def import_x1y1(self, filename, datasetname):
-        # read x1y1 file
-        x1y1 = X1Y1(filename)
-        # create dataset
-        dataset = MdDataset()
-        dataset.dataset_name = datasetname
-        dataset.dimension = x1y1.dimension
-        dataset.save()
-        for i in range(x1y1.nobjects):
-            object = MdObject()
-            object.object_name = x1y1.object_name_list[i]
-            #print("object:", object.object_name)
-            object.dataset = dataset
-            object.landmark_str = ""
-            landmark_list = []
-            for landmark in x1y1.landmark_data[x1y1.object_name_list[i]]:
-                landmark_list.append("\t".join([ str(x) for x in landmark]))
-            object.landmark_str = "\n".join(landmark_list)
-
-            object.save()
-            self.progress.emit(int( (i / float(x1y1.nobjects)) * 100))
-
-class X1Y1:
-    def __init__(self, filename):
-        self.filename = filename
-        self.nobjects = 0
-        self.nlandmarks = 0
-        self.objectnames = []
-        self.landmarks = []
-        self.read()
+    def update_progress(self, value):
+        self.prgImport.setValue(value)
+        self.prgImport.setFormat("Importing...{}%".format(value))
+        self.prgImport.update()
+        self.prgImport.repaint()
+        QApplication.processEvents()
 
 class TPS:
     def __init__(self, filename, datasetname):
@@ -2832,7 +2947,9 @@ class TPS:
                     key = comment
                 else:
                     key = self.datasetname + "_" + str(object_count + 1)
+                #print("key:", key, "data:", data)
                 objects[key] = data
+                object_name_list.append(key)
                 data = []
 
             if object_count == 0 and landmark_count == 0:

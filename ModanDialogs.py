@@ -22,6 +22,7 @@ from PyQt5.QtOpenGL import *
 import sys
 
 
+import struct, random
 
 import math, re, os
 from pathlib import Path
@@ -59,6 +60,8 @@ VIEW_MODE = 1
 PAN_MODE = 2
 ROTATE_MODE = 3
 ZOOM_MODE = 4
+LANDMARK_MODE = 1
+WIREFRAME_MODE = 2
 
 COLOR_RED = ( 1, 0, 0 )
 COLOR_GREEN = ( 0, 1, 0 )
@@ -627,10 +630,14 @@ class ObjectDialog(QDialog):
         self.sub_layout = QHBoxLayout()
         self.setLayout(self.main_layout)
 
+        self.object_view = None
+
         self.object_view_3d = MyGLWidget(self)
         self.object_view_3d.setMinimumWidth(300)
         self.object_view_3d.setMinimumHeight(300)
         self.object_view_3d.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.object_view_3d.object_dialog = self
+        self.object_view_3d.setMouseTracking(True)
 
         self.object_view_2d = LandmarkEditor(self)
         self.object_view_2d.object_dialog = self
@@ -678,6 +685,10 @@ class ObjectDialog(QDialog):
         self.cbxAutoRotate = QCheckBox()
         self.cbxAutoRotate.setText("Rotate")
         self.cbxAutoRotate.setChecked(True)
+        #self.btnFBO = QPushButton()
+        #self.btnFBO.setText("FBO")
+        #self.btnFBO.clicked.connect(self.btnFBO_clicked)
+
 
         self.left_widget = QWidget()
         self.left_widget.setLayout(self.form_layout)
@@ -690,6 +701,7 @@ class ObjectDialog(QDialog):
         self.right_middle_layout.addWidget(self.cbxShowWireframe)
         self.right_middle_layout.addWidget(self.cbxShowBaseline)
         self.right_middle_layout.addWidget(self.cbxAutoRotate)
+        #self.right_middle_layout.addWidget(self.btnFBO)
         self.right_middle_widget.setLayout(self.right_middle_layout)
         self.right_bottom_widget = QWidget()
         self.vsplitter.addWidget(self.right_top_widget)
@@ -740,71 +752,35 @@ class ObjectDialog(QDialog):
         self.dataset = None
         self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
         self.m_app = QApplication.instance()
-        self.btnLandmark_clicked()
+        #self.btnLandmark_clicked()
 
         self.cbxShowIndex.stateChanged.connect(self.show_index_state_changed)
         self.cbxShowWireframe.stateChanged.connect(self.show_wireframe_state_changed)
         self.cbxShowBaseline.stateChanged.connect(self.show_baseline_state_changed)
         self.cbxAutoRotate.stateChanged.connect(self.auto_rotate_state_changed)
 
+    #def btnFBO_clicked(self):
+    #    self.object_view_3d.show_picker_buffer()
+
     def show_index_state_changed(self, int):
-        if self.cbxShowIndex.isChecked():
-            self.object_view_2d.show_index = True
-            self.object_view_3d.show_index = True
-            #print("show index CHECKED!")
-        else:
-            self.object_view_2d.show_index = False
-            self.object_view_3d.show_index = False
-            #print("show index UNCHECKED!")
-        self.object_view_2d.update()
+        self.object_view.show_index = self.cbxShowIndex.isChecked()
+        self.object_view.update()
 
     def show_baseline_state_changed(self, int):
-        if self.cbxShowBaseline.isChecked():
-            self.object_view_2d.show_baseline = True
-            self.object_view_3d.show_baseline = True
-            #print("show index CHECKED!")
-        else:
-            self.object_view_2d.show_baseline = False
-            self.object_view_3d.show_baseline = False
-            #print("show index UNCHECKED!")
-        self.object_view_2d.update()
+        self.object_view.show_baseline = self.cbxShowBaseline.isChecked()
+        self.object_view.update()
 
     def auto_rotate_state_changed(self, int):
-        if self.cbxAutoRotate.isChecked():
-            self.object_view_3d.auto_rotate = True
-            #print("show index CHECKED!")
-        else:
-            self.object_view_3d.auto_rotate = False
-            #print("show index UNCHECKED!")
-        #self.object_view_2d.update()
+        self.object_view.auto_rotate = self.cbxAutoRotate.isChecked()
 
     def show_wireframe_state_changed(self, int):
-        if self.cbxShowWireframe.isChecked():
-            self.object_view_2d.show_wireframe = True
-            self.object_view_3d.show_wireframe = True
-            #print("show index CHECKED!")
-        else:
-            self.object_view_2d.show_wireframe = False
-            self.object_view_3d.show_wireframe = False
-            #print("show index UNCHECKED!")
-        self.object_view_2d.update()
-
-        #self.edtDataFolder.setText(str(self.data_folder.resolve()))
-        #self.edtServerAddress.setText(self.server_address)
-        #self.edtServerPort.setText(self.server_port)
-
-    '''
-    @pyqtSlot()
-    def on_image_clicked(self,event):
-        print("clicked")
-        print(event.pos())
-        #pass
-    '''
+        self.object_view.show_wireframe = self.cbxShowWireframe.isChecked()
+        self.object_view.update()
 
     def btnLandmark_clicked(self):
         #self.edit_mode = MODE_ADD_LANDMARK
-        self.object_view_2d.set_mode(MODE_EDIT_LANDMARK)
-        self.object_view_2d.update()
+        self.object_view.set_mode(MODE_EDIT_LANDMARK)
+        self.object_view.update()
         self.btnLandmark.setDown(True)
         self.btnLandmark.setChecked(True)
         self.btnWireframe.setDown(False)
@@ -812,8 +788,8 @@ class ObjectDialog(QDialog):
 
     def btnWireframe_clicked(self):
         #self.edit_mode = MODE_ADD_LANDMARK
-        self.object_view_2d.set_mode(MODE_WIREFRAME)
-        self.object_view_2d.update()
+        self.object_view.set_mode(MODE_WIREFRAME)
+        self.object_view.update()
         self.btnWireframe.setDown(True)
         self.btnWireframe.setChecked(True)
         self.btnLandmark.setDown(False)
@@ -826,6 +802,7 @@ class ObjectDialog(QDialog):
             self.edtObjectName.setText(name)
 
     def set_dataset(self, dataset):
+        print("object dialog set_dataset", dataset.dataset_name)
         self.dataset = dataset
         self.lblDataset.setText(dataset.dataset_name)
 
@@ -839,6 +816,7 @@ class ObjectDialog(QDialog):
             header.setSectionResizeMode(1, QHeaderView.Stretch)
             self.inputZ.hide()
             self.object_view_3d.hide()
+            self.object_view = self.object_view_2d
             input_width = 80
         elif self.dataset.dimension == 3:
             self.edtLandmarkStr.setColumnCount(3)
@@ -848,6 +826,7 @@ class ObjectDialog(QDialog):
             header.setSectionResizeMode(2, QHeaderView.Stretch)
             self.inputZ.show()
             self.object_view_2d.hide()
+            self.object_view = self.object_view_3d
             input_width = 60
         if self.dataset.propertyname_str is not None and self.dataset.propertyname_str != "":
             self.edtPropertyList = []
@@ -936,7 +915,7 @@ class ObjectDialog(QDialog):
                 self.edtLandmarkStr.setItem(idx, 2, item_z)
 
     def set_object(self, object):
-        #print("set_object", self.image_label.size())
+        print("set_object", object.object_name, object.dataset.dimension)
         self.object = object
         self.edtObjectName.setText(object.object_name)
         self.edtObjectDesc.setText(object.object_desc)
@@ -945,6 +924,18 @@ class ObjectDialog(QDialog):
         #for lm in self.landmark_list:
         #    self.show_landmark(*lm)
         self.show_landmarks()
+
+        if object.dataset.dimension == 3:
+            print("set_object 3d")
+            self.object_view = self.object_view_3d
+            obj_ops = MdObjectOps(object)
+            self.object_view.set_object(obj_ops)
+            self.cbxAutoRotate.show()
+        else:
+            print("set_object 2d")
+            self.object_view = self.object_view_2d
+            self.cbxAutoRotate.hide()
+
 
         if len(self.dataset.propertyname_list) >0:
             self.object.unpack_property()
@@ -958,16 +949,10 @@ class ObjectDialog(QDialog):
             image_path = img.get_image_path(self.m_app.storage_directory)
             #check if image_path exists
             if os.path.exists(image_path):
-                self.object_view_2d.set_image(image_path)
-                self.object_view_2d.set_object(object)
-                self.object_view_2d.landmark_list = self.landmark_list
+                self.object_view.set_image(image_path)
+                self.object_view.set_object(object)
+                self.object_view.landmark_list = self.landmark_list
         
-        if object.dataset.dimension == 3:
-            obj_ops = MdObjectOps(object)
-            self.object_view_3d.set_object(obj_ops)
-            self.cbxAutoRotate.show()
-        else:
-            self.cbxAutoRotate.hide()
             #self.object_view_3d.landmark_list = self.landmark_list
         #self.set_dataset(object.dataset)
 
@@ -1154,6 +1139,7 @@ class MyGLWidget(QGLWidget):
     def __init__(self, parent):
         QGLWidget.__init__(self,parent)
         self.parent = parent
+        self.object_dialog = None
         self.ds_ops = None
         self.obj_ops = None
         self.scale = 1.0
@@ -1177,6 +1163,7 @@ class MyGLWidget(QGLWidget):
         self.dolly = 0
         self.data_mode = OBJECT_MODE
         self.view_mode = VIEW_MODE
+        self.edit_mode = MODE_NONE
         self.auto_rotate = True
         self.is_dragging = False
         self.setMinimumSize(400,400)
@@ -1184,6 +1171,35 @@ class MyGLWidget(QGLWidget):
         self.timer.setInterval(50)
         self.timer.timeout.connect(self.timeout)
         self.timer.start()
+        self.frustum_args = {'width': 1.0, 'height': 1.0, 'znear': 0.1, 'zfar': 1000.0}
+        self.color_to_lm_idx = {}
+        self.lm_idx_to_color = {}
+        self.picker_buffer = None
+        #self.no_drawing = False
+
+    def show_message(self, msg):
+        if self.object_dialog is not None:
+            self.object_dialog.status_bar.showMessage(msg) 
+
+    def set_mode(self, mode):
+        self.edit_mode = mode  
+        if self.edit_mode == MODE_EDIT_LANDMARK:
+            self.setCursor(Qt.CrossCursor)
+            self.show_message("Click on image to add landmark")
+        elif self.edit_mode == MODE_READY_MOVE_LANDMARK:
+            self.setCursor(Qt.SizeAllCursor)
+            self.show_message("Click on landmark to move")
+        elif self.edit_mode == MODE_MOVE_LANDMARK:
+            self.setCursor(Qt.SizeAllCursor)
+            self.show_message("Move landmark")
+        elif self.edit_mode == MODE_WIREFRAME:
+            #print("self.obj_ops:", self.obj_ops)
+            self.initialize_colors()
+            self.setCursor(Qt.ArrowCursor)
+            self.show_message("Wireframe mode")
+        else:
+            self.setCursor(Qt.ArrowCursor)
+        self.update()
 
     def mousePressEvent(self, event):
         # left button: rotate
@@ -1225,9 +1241,19 @@ class MyGLWidget(QGLWidget):
 
 
     def mouseMoveEvent(self, event):
+        #@print("mouse move event",event)
         self.curr_x = event.x()
         self.curr_y = event.y()
         #print("curr_x:", self.curr_x, "curr_y:", self.curr_y)
+        if self.edit_mode == WIREFRAME_MODE:
+            print("wireframe mode. about to do hit_test")
+
+            hit, lm_idx = self.hit_test(self.curr_x, self.curr_y)
+            print("hit_test",hit, lm_idx)
+            #print( "cursor on landmark", self.curr_x, self.curr_y, hit, lm_idx)
+            #if hit:
+            #    self.parent.update_status("cursor on landmark %d" % lm_idx)
+
         if event.buttons() == Qt.LeftButton and self.view_mode == ROTATE_MODE:
             self.is_dragging = True
             self.temp_rotate_x = self.curr_x - self.down_x
@@ -1289,7 +1315,8 @@ class MyGLWidget(QGLWidget):
         self.auto_rotate = True
         #print("data_mode:", self.data_mode)
 
-    def initializeGL(self):
+    def initialize_frame_buffer(self, frame_buffer_id=0):
+        gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, frame_buffer_id)
         gl.glClearDepth(1.0)              
         gl.glDepthFunc(gl.GL_LESS)
         gl.glEnable(gl.GL_DEPTH_TEST)
@@ -1305,15 +1332,46 @@ class MyGLWidget(QGLWidget):
         glu.gluPerspective(45.0,aspect_ratio,0.1, 100.0) # 시야각, 종횡비, 근거리 클리핑, 원거리 클리핑
         gl.glMatrixMode(gl.GL_MODELVIEW)
         glut.glutInit(sys.argv)
+        gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, 0)
+
+    def initializeGL(self):
+        self.initialize_frame_buffer()
+        self.picker_buffer = self.create_picker_buffer()
+        self.initialize_frame_buffer(self.picker_buffer)
 
     def paintGL(self):
+        if self.edit_mode == WIREFRAME_MODE:
+            print("wireframe mode and draw picker buffer")
+            self.draw_picker_buffer()
+
+        #if self.no_drawing == False:
         self.draw_all()
+
+    def show_picker_buffer(self):
+        return
+        gl.glBindFramebuffer(gl.GL_READ_FRAMEBUFFER, self.picker_buffer)
+        gl.glBindFramebuffer(gl.GL_DRAW_FRAMEBUFFER, 0)  # 0 is the default framebuffer
+
+        # Blit from offscreen FBO to default FBO
+        gl.glBlitFramebuffer(
+            0, 0, self.width(), self.height(),  # Source rectangle
+            0, 0, self.width(), self.height(),  # Destination rectangle
+            gl.GL_COLOR_BUFFER_BIT,  # We're blitting the color buffer
+            gl.GL_NEAREST  # Interpolation method
+        )
+
+        # Unbind the offscreen FBO
+        gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, 0)
+        self.no_drawing = True
+        self.update()
+        self.no_drawing = False
 
     def draw_all(self):
         gl.glMatrixMode(gl.GL_MODELVIEW)
         gl.glClearColor(0.2,0.2,0.2,1.0)
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
         gl.glLoadIdentity()
+        gl.glEnable(gl.GL_POINT_SMOOTH)
         if self.ds_ops is None and self.obj_ops is None:
             return
         
@@ -1341,14 +1399,73 @@ class MyGLWidget(QGLWidget):
             object_color = COLOR_AVERAGE_SHAPE
             self.draw_object(ds_ops.get_average_shape(), landmark_as_sphere=True, color=object_color)
 
+    def create_picker_buffer(self):
+        # Create a new framebuffer
+        picker_buffer = gl.glGenFramebuffers(1)
+        print("picker_buffer:", self.picker_buffer)
+        gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, picker_buffer)
+
+        # Create a texture to hold the color buffer
+        self.texture_buffer = gl.glGenTextures(1)
+        gl.glBindTexture(gl.GL_TEXTURE_2D, self.texture_buffer)
+        gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGB, self.width(), self.height(), 0, gl.GL_RGB, gl.GL_UNSIGNED_BYTE, None)
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR)
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR)
+
+        # Attach the texture to the framebuffer
+        gl.glFramebufferTexture2D(gl.GL_FRAMEBUFFER, gl.GL_COLOR_ATTACHMENT0, gl.GL_TEXTURE_2D, self.texture_buffer, 0)
+
+        # Create a renderbuffer for the depth buffer
+        self.render_buffer = gl.glGenRenderbuffers(1)
+        gl.glBindRenderbuffer(gl.GL_RENDERBUFFER, self.render_buffer)
+        gl.glRenderbufferStorage(gl.GL_RENDERBUFFER, gl.GL_DEPTH_COMPONENT, self.width(), self.height())
+
+        # Attach the renderbuffer to the framebuffer
+        gl.glFramebufferRenderbuffer(gl.GL_FRAMEBUFFER, gl.GL_DEPTH_ATTACHMENT, gl.GL_RENDERBUFFER, self.render_buffer)
+
+        # Check that the framebuffer is complete
+        if gl.glCheckFramebufferStatus(gl.GL_FRAMEBUFFER) != gl.GL_FRAMEBUFFER_COMPLETE:
+            raise Exception("Failed to create framebuffer")
+        return picker_buffer
+
+    def draw_picker_buffer(self):
+
+        # Now you can render to this framebuffer instead of the default one
+        gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, self.picker_buffer)
+        gl.glViewport(0, 0, self.width(), self.height())
+
+        # Render your scene...
+        #self.
+        self.draw_all()
+
+        # Don't forget to unbind the framebuffer when you're done to revert back to the default framebuffer
+        gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, 0)
+
+    def delete_picker_buffer(self):
+        #gl.glDeleteFramebuffers(1, self.picker_buffer)
+        gl.glDeleteTextures([self.texture_buffer])
+        gl.glDeleteRenderbuffers([self.render_buffer])
+        gl.glDeleteFramebuffers([self.picker_buffer])
+        self.picker_buffer = None
+
     def draw_object(self,object,landmark_as_sphere=True,color=COLOR_NORMAL_SHAPE):
+        current_buffer = gl.glGetIntegerv(gl.GL_FRAMEBUFFER_BINDING)
         if landmark_as_sphere:
+            lm_count = len(object.landmark_list)
             for i, lm in enumerate(object.landmark_list):
                 gl.glPushMatrix()
                 gl.glTranslate(lm[0], lm[1], lm[2])
                 #print("color: yellow")
                 gl.glColor3f( *color )
+                if current_buffer == self.picker_buffer:
+                    gl.glDisable(gl.GL_LIGHTING)
+                    #print("color:",*self.lm_idx_to_color[i])
+                    color = self.lm_idx_to_color[str(i)]
+                    print(self.lm_idx_to_color, i, current_buffer)
+                    gl.glColor3ub( *color )
                 glut.glutSolidSphere(0.03, 10, 10)
+                if current_buffer == self.picker_buffer:
+                    gl.glEnable(gl.GL_LIGHTING)
                 gl.glPopMatrix()
 
                 if self.show_index:
@@ -1378,6 +1495,30 @@ class MyGLWidget(QGLWidget):
         glu.gluPerspective(45.0, aspect, 0.1, 100.0)
         gl.glMatrixMode(gl.GL_MODELVIEW)
 
+        if self.picker_buffer is not None and self.edit_mode == WIREFRAME_MODE:
+            print("resize picker buffer", width, height)
+
+            # Resize the renderbuffer
+            gl.glBindRenderbuffer(gl.GL_RENDERBUFFER, self.render_buffer)
+            gl.glRenderbufferStorage(gl.GL_RENDERBUFFER, gl.GL_DEPTH_COMPONENT, width, height)
+            
+            # Don't forget to update the size of your texture if you have one attached to the FBO
+            gl.glBindTexture(gl.GL_TEXTURE_2D, self.texture_buffer)
+            gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGB, width, height, 0, gl.GL_RGB, gl.GL_UNSIGNED_BYTE, None)
+            gl.glBindTexture(gl.GL_TEXTURE_2D, 0)
+            
+            # Unbind the renderbuffer
+            gl.glBindRenderbuffer(gl.GL_RENDERBUFFER, 0)            
+
+            gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, self.picker_buffer)
+            gl.glViewport(0, 0, width, height)
+            gl.glMatrixMode(gl.GL_PROJECTION)
+            gl.glLoadIdentity()
+            aspect = width / float(height)
+            glu.gluPerspective(45.0, aspect, 0.1, 100.0)
+            gl.glMatrixMode(gl.GL_MODELVIEW)
+            gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, 0)
+
     def timeout(self):
         #print("timeout, auto_rotate:", self.auto_rotate)
         if self.auto_rotate == False:
@@ -1397,16 +1538,80 @@ class MyGLWidget(QGLWidget):
         #self.data_mode = DATASET_MODE
 
     def hit_test(self, x, y):
-        print( 'is cursor on landmark')
+        gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, self.picker_buffer)
+        #gl.glReadBuffer(gl.GL_BACK)
+        pixels = gl.glReadPixels(x, self.height()-y, 1, 1, gl.GL_RGB, gl.GL_UNSIGNED_BYTE)
+        r, g, b = struct.unpack('BBB', pixels)
+        rgb_tuple = (r, g, b)
+        print("hit test", x, y, rgb_tuple)
 
-        SIZE = 1024
-        gl.glSelectBuffer(SIZE)  # allocate a selection buffer of SIZE elements
+        if rgb_tuple in self.color_to_lm_idx.keys():
+            lm_idx = self.color_to_lm_idx[rgb_tuple]
+            return True, lm_idx
+        else:
+            return False,-1
+
+    def draw(self):
+        gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
+        for obj in self.objects:
+            gl.glColor3ub(*self.object_to_color[obj.id])
+            obj.draw()
+
+    def initialize_colors(self):
+        if self.obj_ops is None:
+            pass
+        self.color_to_lm_idx = {}
+        self.lm_idx_to_color = {}
+        for i in range(len(self.obj_ops.landmark_list)):
+            while True:
+                color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+                if color not in self.color_to_lm_idx:
+                    break
+            self.color_to_lm_idx[color] = str(i)
+            self.lm_idx_to_color[str(i)] = color
+        print("color_to_lm_idx", self.color_to_lm_idx)
+        print("lm_idx_to_color", self.lm_idx_to_color)
+
+    def __hit_test(self, x, y):
 
         viewport = gl.glGetIntegerv(gl.GL_VIEWPORT)
         gl.glMatrixMode(gl.GL_PROJECTION)
         gl.glPushMatrix()
+        gl.glSelectBuffer(512)
+        gl.glRenderMode(gl.GL_SELECT)
+        gl.glLoadIdentity()
+        
+        #glu.gluPickMatrix(event.x(), viewport[3] - event.y(), 4, 4, viewport)
+
+        aspect = viewport[2] / viewport[3]
+        glu.gluPerspective(60, aspect, 1.0, 400)
+        gl.glMatrixMode(gl.GL_MODELVIEW)
+        self.paintGL()
+        gl.glMatrixMode(gl.GL_PROJECTION)
+        #if right == False:
+        #    parseLeftButtonNameStack(gl.glRenderMode(gl.GL_RENDER))
+        #else:
+        #    parseRightButtonNameStack(gl.glRenderMode(gl.GL_RENDER))
+        gl.glPopMatrix()
+        gl.glMatrixMode(gl.GL_MODELVIEW)        
+
+    def _hit_test(self, x, y):
+        print( 'is cursor on landmark')
+
+        SIZE = 1024
+        select_buffer = np.array([0] * SIZE,dtype=np.uint32)
+        select_buffer = [0] * SIZE
+        #a = np.array([127, 128, 129], dtype=np.int8)
+        select_buffer = gl.glSelectBuffer(SIZE)  # allocate a selection buffer of SIZE elements
+        print("select buffer", SIZE, select_buffer)
+
+        viewport = gl.glGetIntegerv(gl.GL_VIEWPORT)
+        print("viewport:", viewport)
+        gl.glMatrixMode(gl.GL_PROJECTION)
+        gl.glPushMatrix()
 
         gl.glRenderMode(gl.GL_SELECT)
+        print("render mode:")
         self.render_mode = gl.GL_SELECT
 
         gl.glLoadIdentity()

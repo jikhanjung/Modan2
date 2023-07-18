@@ -357,7 +357,7 @@ class ModanMainWindow(QMainWindow, form_class):
             #print("dataset is None")
             return
         if node is None:
-            node = self.dataset_model.invisibleRootItem()
+            node = self.dataset_model.invisibleRootItem()   
         #print("node:", node)
         for i in range(node.rowCount()):
             item = node.child(i,0)
@@ -371,7 +371,7 @@ class ModanMainWindow(QMainWindow, form_class):
 
     @pyqtSlot()
     def on_tableView_doubleClicked(self):
-        #print("treeView double clicked")
+        print("tableView double clicked")   
         self.dlg = ObjectDialog(self)
         self.dlg.setModal(True)
         self.dlg.set_dataset(self.selected_dataset)

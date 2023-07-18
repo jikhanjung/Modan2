@@ -162,7 +162,7 @@ class MdDataset(Model):
 class MdObject(Model):
     object_name = CharField()
     object_desc = CharField(null=True)
-    scale = FloatField(null=True)
+    pixels_per_mm = DoubleField(null=True)
     landmark_str = CharField(null=True)
     dataset = ForeignKeyField(MdDataset, backref='object_list', on_delete="CASCADE")
     created_at = DateTimeField(default=datetime.datetime.now)
@@ -353,6 +353,7 @@ class MdObjectOps:
         self.id = mdobject.id
         self.object_name = mdobject.object_name
         self.object_desc = mdobject.object_desc
+        #self.dataset_id = mdobject.dataset
         #self.scale = mdobject.scale
         self.landmark_str = mdobject.landmark_str
         self.property_str = mdobject.property_str

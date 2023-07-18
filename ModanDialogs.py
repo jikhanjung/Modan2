@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QTableWidgetItem, QMainWindow, QHeaderView, QFileDia
                             QMessageBox, QListView, QTreeWidgetItem, QToolButton, QTreeView, QFileSystemModel, \
                             QTableView, QSplitter, QRadioButton, QComboBox, QTextEdit, QAction, QMenu, QSizePolicy, \
                             QTableWidget, QBoxLayout, QGridLayout, QAbstractButton, QButtonGroup, QGroupBox, QOpenGLWidget, \
-                            QTabWidget
+                            QTabWidget, QListWidget
 
 from PyQt5 import QtGui, uic
 from PyQt5.QtGui import QIcon, QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem,\
@@ -21,7 +21,9 @@ from OpenGL import GLUT as glut
 from PyQt5.QtOpenGL import *
 import sys
 
-
+import random
+import struct
+import xlsxwriter
 
 import math, re, os
 from pathlib import Path
@@ -71,14 +73,17 @@ COLOR_CYAN = ( 0, 1, 1 )
 COLOR_MAGENTA = ( 1, 0, 1 )
 COLOR_WHITE = ( 1, 1, 1 )
 COLOR_LIGHT_GRAY = ( 0.8, 0.8, 0.8 )
+COLOR_BLACK = (0,0,0)
 
-COLOR_SINGLE_SHAPE = COLOR_RED
+COLOR_SINGLE_SHAPE = COLOR_GREEN
 COLOR_AVERAGE_SHAPE = COLOR_LIGHT_GRAY
 COLOR_NORMAL_SHAPE = COLOR_BLUE
-COLOR_NORMAL_TEXT = COLOR_BLUE
+COLOR_NORMAL_TEXT = COLOR_WHITE
 COLOR_SELECTED_SHAPE = COLOR_RED
 COLOR_SELECTED_TEXT = COLOR_RED
-
+COLOR_SELECTED_LANDMARK = COLOR_RED
+COLOR_WIREFRAME = COLOR_YELLOW
+COLOR_BACKGROUND = COLOR_BLACK
 
 
 class LandmarkEditor(QLabel):
@@ -118,8 +123,9 @@ class LandmarkEditor(QLabel):
         self.selected_edge_index = -1
         self.calibration_from_img_x = -1
         self.calibration_from_img_y = -1
-        self.calibration_from_to_x = -1
-        self.calibration_from_to_y = -1
+        self.calibration_to_img_x = -1
+        self.calibration_to_img_y = -1
+        self.pixels_per_mm = -1
         
         #self.repaint()
 
@@ -556,11 +562,46 @@ class LandmarkEditor(QLabel):
             painter.drawLine(self._2canx(int(start_lm[0])), self._2cany(int(start_lm[1])), self.curr_mouse_x, self.curr_mouse_y)
 
 
-        #r = QRect(0, self.height() - 20, self.width(), 20)
-        #painter.fillRect(r, QBrush(Qt.blue))
-        #pen = QPen(QColor("red"), 10)
-        #painter.setPen(pen)
-        #painter.drawRect(self.rect())
+        if self.object.pixels_per_mm is not None and self.object.pixels_per_mm > 0:
+            pixels_per_mm = self.object.pixels_per_mm
+            max_scalebar_size = 120
+            #print("scalebar", self.pixels_per_mm, self.scale, max_scalebar_size)
+
+            bar_width = ( float(pixels_per_mm) / self.image_canvas_ratio ) * self.scale
+            actual_length = 1.0
+            while bar_width > max_scalebar_size:
+                bar_width /= 10.0
+                actual_length /= 10.0
+            if bar_width * 10.0 < max_scalebar_size:
+                bar_width *= 10.0
+                actual_length *= 10.0
+            elif bar_width * 5.0 < max_scalebar_size:
+                bar_width *= 5.0
+                actual_length *= 5.0
+            elif bar_width * 2.0 < max_scalebar_size:
+                bar_width *= 2.0
+                actual_length *= 2.0
+
+            bar_width = int(math.floor(bar_width + 0.5))
+            x = self.width() - 15 - ( bar_width + 20 )
+            y = self.height() - 15 - 35
+
+            painter.setPen(QPen(Qt.white, 1))
+            painter.setBrush(QBrush(Qt.white))
+            painter.drawRect(x, y, bar_width + 20, 30)
+            x += 10
+            y += 20
+            painter.setPen(QPen(Qt.black, 1))
+            painter.drawLine(x, y, x + bar_width, y)
+            painter.drawLine(x, y - 5, x, y + 5)
+            painter.drawLine(x + bar_width, y - 5, x + bar_width, y + 5)
+            length_text = str(actual_length) + " mm"
+            #print length_text, len( length_text )
+            painter.setPen(QPen(Qt.black, 1))
+            #painter.setBrush(QBrush(Qt.black))
+            painter.setFont(QFont('Arial', 10))
+            painter.drawText(x + int(math.floor(float(bar_width) / 2.0 + 0.5)) - len(length_text) * 4, y - 5, length_text)
+
     def calculate_resize(self):
         self.orig_width = self.orig_pixmap.width()
         self.orig_height = self.orig_pixmap.height()
@@ -591,6 +632,9 @@ class LandmarkEditor(QLabel):
         #print("Landmark Editor set_object", object.object_name)
         m_app = QApplication.instance()
         self.object = object
+        if self.object.pixels_per_mm is not None and self.object.pixels_per_mm > 0:
+            self.pixels_per_mm = self.object.pixels_per_mm
+
         if object.image.count() > 0:
             #print("set_object", object.image[0].get_image_path(m_app.storage_directory))
             self.set_image(object.image[0].get_image_path(m_app.storage_directory))
@@ -661,8 +705,9 @@ class CalibrationDialog(QDialog):
         self.lblText2.setText("%d pixels are equivalent to:" % self.pixel_number)
         
     def btnOK_clicked(self):
-        self.parent.calibration_length = float(self.edtLength.text())
-        self.parent.calibration_unit = self.cbxUnit.currentText()
+        #self.parent.calibration_length = float(self.edtLength.text())
+        #self.parent.calibration_unit = self.cbxUnit.currentText()
+        self.parent.set_object_calibration( self.pixel_number, float(self.edtLength.text()),self.cbxUnit.currentText())
         self.close()
     
     def btnCancel_clicked(self):
@@ -857,6 +902,23 @@ class ObjectDialog(QDialog):
         self.cbxShowBaseline.stateChanged.connect(self.show_baseline_state_changed)
         self.cbxAutoRotate.stateChanged.connect(self.auto_rotate_state_changed)
 
+        #self.calibration
+    def set_object_calibration(self, pixels, calibration_length, calibration_unit):
+        self.object.pixels_per_mm = pixels * 1.0 / calibration_length
+        if calibration_unit == 'mm':
+            self.object.pixels_per_mm /= 1.0
+        elif calibration_unit == 'cm':
+            self.object.pixels_per_mm /= 10.0
+        elif calibration_unit == 'm':
+            self.object.pixels_per_mm /= 1000.0
+        elif calibration_unit == 'um':
+            self.object.pixels_per_mm /= 0.001
+        elif calibration_unit == 'nm':
+            self.object.pixels_per_mm /= 0.000001
+        self.object_view_2d.pixels_per_mm = self.object.pixels_per_mm
+        #print(pixels, calibration_length, calibration_unit, self.object.pixels_per_mm)
+        #self.object.save()
+
     #def btnFBO_clicked(self):
     #    self.object_view_3d.show_picker_buffer()
 
@@ -920,7 +982,7 @@ class ObjectDialog(QDialog):
             self.edtObjectName.setText(name)
 
     def set_dataset(self, dataset):
-        print("object dialog set_dataset", dataset.dataset_name)
+        #print("object dialog set_dataset", dataset.dataset_name)
         self.dataset = dataset
         self.lblDataset.setText(dataset.dataset_name)
 
@@ -1033,24 +1095,26 @@ class ObjectDialog(QDialog):
                 self.edtLandmarkStr.setItem(idx, 2, item_z)
 
     def set_object(self, object):
-        print("set_object", object.object_name, object.dataset.dimension)
+        #print("set_object", object.object_name, object.dataset.dimension)
         self.object = object
         self.edtObjectName.setText(object.object_name)
         self.edtObjectDesc.setText(object.object_desc)
         #self.edtLandmarkStr.setText(object.landmark_str)
         self.landmark_list = object.unpack_landmark()
+        self.edge_list = object.dataset.unpack_wireframe()
         #for lm in self.landmark_list:
         #    self.show_landmark(*lm)
         self.show_landmarks()
 
         if object.dataset.dimension == 3:
-            print("set_object 3d")
+            #print("set_object 3d")
             self.object_view = self.object_view_3d
-            obj_ops = MdObjectOps(object)
-            self.object_view.set_object(obj_ops)
+            #obj_ops = MdObjectOps(object)
+            self.object_view.set_object(object)
+            #self.object_view.set_dataset(object.dataset)
             self.cbxAutoRotate.show()
         else:
-            print("set_object 2d")
+            #print("set_object 2d")
             self.object_view = self.object_view_2d
             self.cbxAutoRotate.hide()
 
@@ -1083,6 +1147,7 @@ class ObjectDialog(QDialog):
         self.object.object_desc = self.edtObjectDesc.toPlainText()
         #self.object.landmark_str = self.edtLandmarkStr.text()
         self.object.landmark_str = self.make_landmark_str()
+        #print("scale:", self.object.pixels_per_mm)
         if self.dataset.propertyname_str is not None and self.dataset.propertyname_str != "":
             self.object.property_str = ",".join([ edt.text() for edt in self.edtPropertyList ])
 
@@ -1270,7 +1335,7 @@ class MyGLWidget(QGLWidget):
         self.temp_rotate_x = 0
         self.temp_rotate_y = 0
         self.show_index = True
-        self.show_wireframe = False
+        self.show_wireframe = True
         self.show_baseline = False
         self.show_average = True
         self.curr_x = 0
@@ -1294,6 +1359,12 @@ class MyGLWidget(QGLWidget):
         self.lm_idx_to_color = {}
         self.picker_buffer = None
         #self.no_drawing = False
+        self.wireframe_from_idx = -1
+        self.wireframe_to_idx = -1
+        self.selected_landmark_idx = -1
+        self.no_hit_count = 0
+        self.edge_list = []
+
 
     def show_message(self, msg):
         if self.object_dialog is not None:
@@ -1328,7 +1399,11 @@ class MyGLWidget(QGLWidget):
         self.down_y = event.y()
         #print("down_x:", self.down_x, "down_y:", self.down_y)
         if event.buttons() == Qt.LeftButton:
-            self.view_mode = ROTATE_MODE
+            if self.edit_mode == MODE_WIREFRAME and self.selected_landmark_idx > -1:
+                self.wireframe_from_idx = self.selected_landmark_idx
+                #self.edit_mode = MODE_ADD_WIRE
+            else:                
+                self.view_mode = ROTATE_MODE
         elif event.buttons() == Qt.RightButton:
             self.view_mode = ZOOM_MODE
         elif event.buttons() == Qt.MiddleButton:
@@ -1340,10 +1415,17 @@ class MyGLWidget(QGLWidget):
         self.curr_y = event.y()
         #print("curr_x:", self.curr_x, "curr_y:", self.curr_y)
         if event.button() == Qt.LeftButton:
-            self.rotate_x += self.temp_rotate_x
-            self.rotate_y += self.temp_rotate_y
-            self.temp_rotate_x = 0
-            self.temp_rotate_y = 0
+            if self.edit_mode == MODE_WIREFRAME and self.wireframe_from_idx > -1 and self.selected_landmark_idx > -1 and self.selected_landmark_idx != self.wireframe_from_idx:
+                self.wireframe_to_idx = self.selected_landmark_idx
+                self.add_wire(self.wireframe_from_idx, self.wireframe_to_idx)
+                self.wireframe_from_idx = -1
+                self.wireframe_to_idx = -1
+                self.update()
+            else:
+                self.rotate_x += self.temp_rotate_x
+                self.rotate_y += self.temp_rotate_y
+                self.temp_rotate_x = 0
+                self.temp_rotate_y = 0
         elif event.button() == Qt.RightButton:
             self.dolly += self.temp_dolly 
             self.temp_dolly = 0
@@ -1364,10 +1446,20 @@ class MyGLWidget(QGLWidget):
         self.curr_y = event.y()
         #print("curr_x:", self.curr_x, "curr_y:", self.curr_y)
         if self.edit_mode == WIREFRAME_MODE:
-            print("wireframe mode. about to do hit_test")
+            #print("wireframe mode. about to do hit_test")
 
             hit, lm_idx = self.hit_test(self.curr_x, self.curr_y)
-            print("hit_test",hit, lm_idx)
+            if hit:
+                self.selected_landmark_idx = lm_idx
+                self.no_hit_count = 0
+            elif self.selected_landmark_idx > -1:
+                self.no_hit_count += 1
+                if self.no_hit_count > 5:
+                    self.selected_landmark_idx = -1
+                    self.no_hit_count = 0
+
+
+            #print("hit_test result:",hit, lm_idx)
             #print( "cursor on landmark", self.curr_x, self.curr_y, hit, lm_idx)
             #if hit:
             #    self.parent.update_status("cursor on landmark %d" % lm_idx)
@@ -1385,6 +1477,24 @@ class MyGLWidget(QGLWidget):
             self.temp_pan_y = self.curr_y - self.down_y
         self.updateGL()
 
+    def add_wire(self, wire_start_index, wire_end_index):
+        if wire_start_index == wire_end_index:
+            return
+        if wire_start_index > wire_end_index:
+            wire_start_index, wire_end_index = wire_end_index, wire_start_index
+        dataset = self.object.dataset
+        if len(dataset.edge_list) == 0 and dataset.wireframe is not None and dataset.wireframe != "":
+            dataset.unpack_wireframe()
+        for wire in dataset.edge_list:
+            if wire[0] == wire_start_index and wire[1] == wire_end_index:
+                return
+        dataset.edge_list.append([wire_start_index, wire_end_index])
+        #print("wireframe", dataset.edge_list)
+        dataset.pack_wireframe()
+        #print("wireframe", dataset.wireframe)
+        dataset.save()
+        
+
     def wheelEvent(self, event):
         #print("wheel event", event.angleDelta().y())
         self.dolly -= event.angleDelta().y() / 240.0
@@ -1400,6 +1510,29 @@ class MyGLWidget(QGLWidget):
         for obj in self.ds_ops.object_list:
             obj.rescale(scale)
             #obj.translate(-average_shape.get_centroid())
+        self.edge_list = ds_ops.edge_list
+
+    def set_object(self, object):
+        #print("set_object 1",type(obj_ops))
+        if isinstance(object, MdObject):
+            self.object = object
+            obj_ops = MdObjectOps(object)
+        else:
+            print("object is not MdObject")
+        #print("set_object 2",type(obj_ops))
+        obj_ops.move_to_center()
+        centroid_size = obj_ops.get_centroid_size()
+        obj_ops.rescale_to_unitsize()
+        scale = self.get_scale_from_object(obj_ops)
+        obj_ops.rescale(scale)
+        self.obj_ops = obj_ops
+        self.data_mode = OBJECT_MODE
+        self.pan_x = self.pan_y = 0
+        self.rotate_x = self.rotate_y = 0
+        self.auto_rotate = True
+        self.dataset = object.dataset
+        self.edge_list = self.dataset.unpack_wireframe()
+        #print("data_mode:", self.data_mode)
 
     def get_scale_from_object(self, obj_ops):
         centroid_size = obj_ops.get_centroid_size()
@@ -1415,23 +1548,6 @@ class MyGLWidget(QGLWidget):
         scale = min( _3D_SCREEN_WIDTH / width, _3D_SCREEN_HEIGHT / height )
         #print("scale:", scale)
         return scale*0.5
-
-    def set_object(self, obj_ops):
-        #print("set_object 1",type(obj_ops))
-        if isinstance(obj_ops, MdObject):
-            obj_ops = MdObjectOps(obj_ops)
-        #print("set_object 2",type(obj_ops))
-        obj_ops.move_to_center()
-        centroid_size = obj_ops.get_centroid_size()
-        obj_ops.rescale_to_unitsize()
-        scale = self.get_scale_from_object(obj_ops)
-        obj_ops.rescale(scale)
-        self.obj_ops = obj_ops
-        self.data_mode = OBJECT_MODE
-        self.pan_x = self.pan_y = 0
-        self.rotate_x = self.rotate_y = 0
-        self.auto_rotate = True
-        #print("data_mode:", self.data_mode)
 
     def initialize_frame_buffer(self, frame_buffer_id=0):
         gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, frame_buffer_id)
@@ -1459,7 +1575,7 @@ class MyGLWidget(QGLWidget):
 
     def paintGL(self):
         if self.edit_mode == WIREFRAME_MODE:
-            print("wireframe mode and draw picker buffer")
+            #print("wireframe mode and draw picker buffer")
             self.draw_picker_buffer()
 
         #if self.no_drawing == False:
@@ -1486,7 +1602,7 @@ class MyGLWidget(QGLWidget):
 
     def draw_all(self):
         gl.glMatrixMode(gl.GL_MODELVIEW)
-        gl.glClearColor(0.2,0.2,0.2,1.0)
+        gl.glClearColor(*COLOR_BACKGROUND, 1)
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
         gl.glLoadIdentity()
         gl.glEnable(gl.GL_POINT_SMOOTH)
@@ -1517,10 +1633,129 @@ class MyGLWidget(QGLWidget):
             object_color = COLOR_AVERAGE_SHAPE
             self.draw_object(ds_ops.get_average_shape(), landmark_as_sphere=True, color=object_color)
 
+    def draw_line_from_point_to_cursor(self,point_3d):
+        # Get the viewport and modelview and projection matrices
+        viewport = gl.glGetIntegerv(gl.GL_VIEWPORT)
+        modelview = gl.glGetDoublev(gl.GL_MODELVIEW_MATRIX)
+        projection = gl.glGetDoublev(gl.GL_PROJECTION_MATRIX)
+
+        # Convert cursor position to normalized device coordinates (NDC)
+        cursor_x, cursor_y = self.curr_x, self.curr_y
+        cursor_z = gl.glReadPixels(cursor_x, cursor_y, 1, 1, gl.GL_DEPTH_COMPONENT, gl.GL_FLOAT)
+        print("cursor_z:", cursor_z)
+        cursor_pos = np.array([cursor_x, cursor_y, cursor_z[0,0], 1.0], dtype=np.float32)
+        print("cursor_pos:", cursor_pos)
+        print("viewport:", viewport)
+
+        # Step 1: Subtract the first two elements of viewport from cursor_pos
+        step1 = cursor_pos - np.array([viewport[0], viewport[1], 0.0, 0.0])
+
+        # Step 2: Divide the result from Step 1 by the last two elements of viewport
+        step2 = step1 / np.array([viewport[2], viewport[3], 1.0, 1.0])
+
+        # Step 3: Multiply the result from Step 2 by 2.0
+        step3 = step2 * 2.0
+
+        # Step 4: Subtract 1.0 from the result from Step 3
+        cursor_pos = step3 - 1.0
+
+        #cursor_pos = 2.0 * (cursor_pos - viewport[:2]) / viewport[2:] - 1.0
+
+        # Unproject the cursor position from NDC to 3D world coordinates
+        unprojected_cursor_pos = glu.gluUnProject(
+            cursor_pos[0], cursor_pos[1], cursor_pos[2],
+            modelview, projection, viewport
+        )
+        print(point_3d, unprojected_cursor_pos,cursor_pos)
+
+        # Draw the line from the 3D point to the cursor position
+        gl.glDisable(gl.GL_LIGHTING)
+        gl.glColor3f(*COLOR_SELECTED_LANDMARK)
+        gl.glBegin(gl.GL_LINES)
+        gl.glVertex3fv(point_3d)
+        gl.glVertex3fv(unprojected_cursor_pos)
+        gl.glEnd()
+        gl.glEnable(gl.GL_LIGHTING)
+
+    def draw_object(self,object,landmark_as_sphere=True,color=COLOR_NORMAL_SHAPE):
+        current_buffer = gl.glGetIntegerv(gl.GL_FRAMEBUFFER_BINDING)
+        if landmark_as_sphere:
+            if self.show_wireframe and len(self.edge_list) > 0:
+                #print("draw wireframe",self.edge_list)
+                for edge in self.edge_list:
+                    #gl.glDisable(gl.GL_LIGHTING)
+                    gl.glColor3f( *COLOR_WIREFRAME )
+                    gl.glBegin(gl.GL_LINE_STRIP)
+                    #print(self.down_x, self.down_y, self.curr_x, self.curr_y)
+                    for lm_idx in edge:
+                        lm = object.landmark_list[lm_idx]
+                        gl.glVertex3f(*lm)
+                    gl.glEnd()
+                pass
+
+            if self.wireframe_from_idx > -1 and self.wireframe_to_idx == -1:
+                # try to draw a line from down xy to curr xy in glwidget, but it doesn't work
+                pass
+                #print("draw wireframe from down xy to curr xy")
+                #print(self.down_x, self.down_y, self.curr_x, self.curr_y)
+                #self.draw_line_from_point_to_cursor(object.landmark_list[self.wireframe_from_idx])
+
+                '''
+                #gl.glDisable(gl.GL_LIGHTING)
+                gl.glColor3f( *COLOR_SELECTED_LANDMARK )
+                gl.glBegin(gl.GL_LINE_STRIP)
+                
+                gl.glVertex2i(self.down_x, self.down_y)
+                gl.glVertex2i(self.curr_x, self.curr_y)
+                gl.glEnd()
+                #gl.glEnable(gl.GL_LIGHTING)
+                '''
+                
+            lm_count = len(object.landmark_list)
+            for i, lm in enumerate(object.landmark_list):
+                gl.glPushMatrix()
+                gl.glTranslate(*lm)
+                #print("color: yellow")
+                gl.glColor3f( *color )
+                if i in [ self.selected_landmark_idx, self.wireframe_from_idx, self.wireframe_to_idx ]:
+                    gl.glColor3f( *COLOR_SELECTED_LANDMARK )
+
+                if current_buffer == self.picker_buffer and self.object_dialog is not None:
+                    gl.glDisable(gl.GL_LIGHTING)
+                    #print("color:",*self.lm_idx_to_color[i])
+                    key = "lm_"+str(i)
+                    #print("i:",i,"key:",key, "color:",self.lm_idx_to_color[key], "current_buffer:",current_buffer, "picker_buffer:",self.picker_buffer)
+                    color = self.lm_idx_to_color[key]
+                    #print(self.lm_idx_to_color, i, current_buffer)
+                    gl.glColor3f( *[ c * 1.0 / 255 for c in color] )
+                glut.glutSolidSphere(0.03, 10, 10)
+                if current_buffer == self.picker_buffer:
+                    gl.glEnable(gl.GL_LIGHTING)
+                gl.glPopMatrix()
+
+                if self.show_index:
+                    gl.glDisable(gl.GL_LIGHTING)
+                    gl.glColor3f( *COLOR_NORMAL_TEXT )
+                    gl.glRasterPos3f(lm[0] + 0.05, lm[1] + 0.05, lm[2])
+                    for letter in list(str(i)):
+                        glut.glutBitmapCharacter(glut.GLUT_BITMAP_HELVETICA_12, ord(letter))
+                    gl.glEnable(gl.GL_LIGHTING)
+
+        else:
+            gl.glPointSize(5)
+            gl.glDisable(gl.GL_LIGHTING)
+            gl.glColor3f( *color )
+            gl.glBegin(gl.GL_POINTS)
+            #gl.glColor3f( 1.0, 1.0, 0.0 )
+            for lm in object.landmark_list:
+                gl.glVertex3f(lm[0], lm[1], lm[2])
+            gl.glEnd()
+            gl.glEnable(gl.GL_LIGHTING)
+
     def create_picker_buffer(self):
         # Create a new framebuffer
         picker_buffer = gl.glGenFramebuffers(1)
-        print("picker_buffer:", self.picker_buffer)
+        #print("picker_buffer:", self.picker_buffer)
         gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, picker_buffer)
 
         # Create a texture to hold the color buffer
@@ -1565,45 +1800,6 @@ class MyGLWidget(QGLWidget):
         gl.glDeleteRenderbuffers([self.render_buffer])
         gl.glDeleteFramebuffers([self.picker_buffer])
         self.picker_buffer = None
-
-    def draw_object(self,object,landmark_as_sphere=True,color=COLOR_NORMAL_SHAPE):
-        current_buffer = gl.glGetIntegerv(gl.GL_FRAMEBUFFER_BINDING)
-        if landmark_as_sphere:
-            lm_count = len(object.landmark_list)
-            for i, lm in enumerate(object.landmark_list):
-                gl.glPushMatrix()
-                gl.glTranslate(lm[0], lm[1], lm[2])
-                #print("color: yellow")
-                gl.glColor3f( *color )
-                if current_buffer == self.picker_buffer:
-                    gl.glDisable(gl.GL_LIGHTING)
-                    #print("color:",*self.lm_idx_to_color[i])
-                    color = self.lm_idx_to_color[str(i)]
-                    print(self.lm_idx_to_color, i, current_buffer)
-                    gl.glColor3ub( *color )
-                glut.glutSolidSphere(0.03, 10, 10)
-                if current_buffer == self.picker_buffer:
-                    gl.glEnable(gl.GL_LIGHTING)
-                gl.glPopMatrix()
-
-                if self.show_index:
-                    gl.glDisable(gl.GL_LIGHTING)
-                    gl.glColor3f( *COLOR_NORMAL_TEXT )
-                    gl.glRasterPos3f(lm[0] + 0.05, lm[1] + 0.05, lm[2])
-                    for letter in list(str(i)):
-                        glut.glutBitmapCharacter(glut.GLUT_BITMAP_HELVETICA_12, ord(letter))
-                    gl.glEnable(gl.GL_LIGHTING)
-
-        else:
-            gl.glPointSize(5)
-            gl.glDisable(gl.GL_LIGHTING)
-            gl.glColor3f( *color )
-            gl.glBegin(gl.GL_POINTS)
-            #gl.glColor3f( 1.0, 1.0, 0.0 )
-            for lm in object.landmark_list:
-                gl.glVertex3f(lm[0], lm[1], lm[2])
-            gl.glEnd()
-            gl.glEnable(gl.GL_LIGHTING)
 
     def resizeGL(self, width, height):
         gl.glViewport(0, 0, width, height)
@@ -1659,13 +1855,16 @@ class MyGLWidget(QGLWidget):
         gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, self.picker_buffer)
         #gl.glReadBuffer(gl.GL_BACK)
         pixels = gl.glReadPixels(x, self.height()-y, 1, 1, gl.GL_RGB, gl.GL_UNSIGNED_BYTE)
+#        print(pixels)
         r, g, b = struct.unpack('BBB', pixels)
         rgb_tuple = (r, g, b)
-        print("hit test", x, y, rgb_tuple)
+        #print("hit test", x, y, rgb_tuple)
 
         if rgb_tuple in self.color_to_lm_idx.keys():
             lm_idx = self.color_to_lm_idx[rgb_tuple]
-            return True, lm_idx
+            #print("hit test", x, y, rgb_tuple, lm_idx)
+            #text, idx = lm_idx.split("_")
+            return True, int(lm_idx)
         else:
             return False,-1
 
@@ -1683,12 +1882,12 @@ class MyGLWidget(QGLWidget):
         for i in range(len(self.obj_ops.landmark_list)):
             while True:
                 color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-                if color not in self.color_to_lm_idx:
+                if color not in self.color_to_lm_idx.keys():
                     break
             self.color_to_lm_idx[color] = str(i)
-            self.lm_idx_to_color[str(i)] = color
-        print("color_to_lm_idx", self.color_to_lm_idx)
-        print("lm_idx_to_color", self.lm_idx_to_color)
+            self.lm_idx_to_color["lm_"+str(i)] = color
+        #print("color_to_lm_idx", self.color_to_lm_idx)
+        #print("lm_idx_to_color", self.lm_idx_to_color)
 
     def __hit_test(self, x, y):
 
@@ -2690,6 +2889,149 @@ class DatasetAnalysisDialog(QDialog):
 
         return selected_object_id_list
 
+class ExportDatasetDialog(QDialog):
+    def __init__(self,parent):
+        super().__init__()
+        self.setWindowTitle("Export Dataset")
+        self.parent = parent
+        #print(self.parent.pos())
+        self.setGeometry(QRect(100, 100, 600, 400))
+        self.move(self.parent.pos()+QPoint(100,100))
+
+        self.lblDatasetName = QLabel("Dataset Name")
+        self.lblDatasetName.setMaximumHeight(20)
+        self.edtDatasetName = QLineEdit()
+        self.edtDatasetName.setMaximumHeight(20)
+        self.lblObjectList = QLabel("Object List")
+        self.lblExportList = QLabel("Export List")
+        self.lblObjectList.setMaximumHeight(20)
+        self.lblExportList.setMaximumHeight(20)
+        self.lstObjectList = QListWidget()
+        self.lstExportList = QListWidget()
+        self.lstObjectList.setMinimumHeight(400)
+        self.lstExportList.setMinimumHeight(400)
+        self.btnExport = QPushButton("Export")
+        self.btnExport.clicked.connect(self.export_dataset)
+        self.btnCancel = QPushButton("Cancel")
+        self.btnCancel.clicked.connect(self.close)
+        self.btnMoveRight = QPushButton(">")
+        self.btnMoveRight.clicked.connect(self.move_right)
+        self.btnMoveLeft = QPushButton("<")
+        self.btnMoveLeft.clicked.connect(self.move_left)
+
+        self.lblExport = QLabel("Export Format")
+        self.rbTPS = QRadioButton("TPS")
+        self.rbTPS.setChecked(True)
+        self.rbTPS.clicked.connect(self.on_rbTPS_clicked)
+        self.rbTPS.setEnabled(False)
+        self.rbX1Y1 = QRadioButton("X1Y1")
+        self.rbX1Y1.clicked.connect(self.on_rbX1Y1_clicked)
+        self.rbX1Y1.setEnabled(False)
+        self.rbX1Y1.setChecked(False)
+        self.rbMorphologika = QRadioButton("Morphologika")
+        self.rbMorphologika.clicked.connect(self.on_rbMorphologika_clicked)
+        self.rbMorphologika.setEnabled(False)
+        self.rbMorphologika.setChecked(False)
+
+        self.lblSuperimposition = QLabel("Superimposition")
+        self.rbProcrustes = QRadioButton("Procrustes")
+        self.rbProcrustes.clicked.connect(self.on_rbProcrustes_clicked)
+        self.rbProcrustes.setEnabled(False)
+        self.rbProcrustes.setChecked(True)
+        self.rbBookstein = QRadioButton("Bookstein")
+        self.rbBookstein.clicked.connect(self.on_rbBookstein_clicked)
+        self.rbBookstein.setEnabled(False)
+        self.rbBookstein.setChecked(False)
+        self.rbRFTRA = QRadioButton("RFTRA")
+        self.rbRFTRA.clicked.connect(self.on_rbRFTRA_clicked)
+        self.rbRFTRA.setEnabled(False)
+        self.rbRFTRA.setChecked(False)
+
+
+
+
+        self.form_layout = QGridLayout()
+        self.form_layout.addWidget(self.lblDatasetName,0,0)
+        self.form_layout.addWidget(self.edtDatasetName,0,1,1,2)
+        self.form_layout.addWidget(self.lblObjectList,1,0)
+        self.form_layout.addWidget(self.lstObjectList,2,0,2,1)
+        self.form_layout.addWidget(self.btnMoveRight,2,1)
+        self.form_layout.addWidget(self.btnMoveLeft,3,1)
+        self.form_layout.addWidget(self.lblExportList,1,2)
+        self.form_layout.addWidget(self.lstExportList,2,2,2,1)
+        
+        self.button_layout1 = QHBoxLayout()
+        self.button_layout1.addWidget(self.btnExport)
+        self.button_layout1.addWidget(self.btnCancel)
+
+        self.button_layout2 = QHBoxLayout()
+        self.button_layout2.addWidget(self.lblExport)
+        self.button_layout2.addWidget(self.rbTPS)
+        self.button_layout2.addWidget(self.rbX1Y1)
+        self.button_layout2.addWidget(self.rbMorphologika)
+
+        self.button_layout3 = QHBoxLayout()
+        self.button_layout3.addWidget(self.lblSuperimposition)
+        self.button_layout3.addWidget(self.rbProcrustes)
+        self.button_layout3.addWidget(self.rbBookstein)
+        self.button_layout3.addWidget(self.rbRFTRA)
+
+        self.layout = QVBoxLayout()
+        self.layout.addLayout(self.form_layout)
+        self.layout.addLayout(self.button_layout2)
+        self.layout.addLayout(self.button_layout3)
+        self.layout.addLayout(self.button_layout1)
+
+        self.setLayout(self.layout)
+
+    def set_dataset(self,dataset):
+        self.dataset = dataset
+        self.ds_ops = MdDatasetOps(dataset)
+        self.edtDatasetName.setText(self.dataset.dataset_name)
+        for object in self.dataset.object_list:
+            self.lstExportList.addItem(object.object_name)
+        
+
+
+    def on_rbTPS_clicked(self):
+        pass
+    def on_rbX1Y1_clicked(self):
+        pass
+    def on_rbMorphologika_clicked(self):
+        pass
+    def move_right(self):
+        selected_items = self.lstObjectList.selectedItems()
+        for item in selected_items:
+            self.lstObjectList.takeItem(self.lstObjectList.row(item))
+            self.lstExportList.addItem(item)
+    def move_left(self):
+        selected_items = self.lstExportList.selectedItems()
+        for item in selected_items:
+            self.lstExportList.takeItem(self.lstExportList.row(item))
+            self.lstObjectList.addItem(item)
+    def export_dataset(self):
+        export_list = []
+        for i in range(self.lstExportList.count()):
+            item = self.lstExportList.item(i)
+            export_list.append(item.text())
+        if self.rbTPS.isChecked():
+            today = datetime.datetime.now()
+            date_str = today.strftime("%Y%m%d_%H%M%S")
+            filename_candidate = '{}_{}.tps'.format(self.ds_ops.dataset_name, date_str)
+
+            filename, _ = QFileDialog.getSaveFileName(self, "Save File As", filename_candidate, "TPS format (*.tps)")
+            if filename:
+                for object_id in export_list:
+                    pass
+                    
+
+
+
+        self.close()
+
+
+
+
 class ImportDatasetDialog(QDialog):
     # NewDatasetDialog shows new dataset dialog.
     def __init__(self,parent):
@@ -2848,11 +3190,11 @@ class ImportDatasetDialog(QDialog):
 
             object.save()
             val = int( (float(i+1)*100.0 / float(tps.nobjects)) )
-            print("progress:", i+1, tps.nobjects, val)
+            #print("progress:", i+1, tps.nobjects, val)
             self.update_progress(val)
             #progress = int( (i / float(tps.nobjects)) * 100)
 
-        print("tps import done")
+        #print("tps import done")
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Information)
 

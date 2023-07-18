@@ -28,7 +28,8 @@ import io
 import shutil
 
 from MdModel import *
-from ModanDialogs import DatasetAnalysisDialog, ObjectDialog, ImportDatasetDialog, DatasetDialog, PreferencesDialog, LandmarkEditor, IMAGE_EXTENSION_LIST, MyGLWidget
+from ModanDialogs import DatasetAnalysisDialog, ObjectDialog, ImportDatasetDialog, DatasetDialog, PreferencesDialog, LandmarkEditor, \
+    IMAGE_EXTENSION_LIST, MyGLWidget, ExportDatasetDialog
 
 #import matplotlib
 #matplotlib.use('Qt5Agg')
@@ -277,7 +278,15 @@ class ModanMainWindow(QMainWindow, form_class):
 
     @pyqtSlot()
     def on_action_export_dataset_triggered(self):
-        print("export dataset")
+        #print("export dataset")
+        # open export dataset dialog
+        self.dlg = ExportDatasetDialog(self)
+        self.dlg.setModal(True)
+        self.dlg.set_dataset(self.selected_dataset)
+        self.dlg.setWindowModality(Qt.ApplicationModal)
+        self.dlg.exec_()
+        #self.load_dataset()
+
 
     @pyqtSlot()
     def on_action_new_object_triggered(self):
@@ -371,7 +380,7 @@ class ModanMainWindow(QMainWindow, form_class):
 
     @pyqtSlot()
     def on_tableView_doubleClicked(self):
-        print("tableView double clicked")   
+        #print("tableView double clicked")   
         self.dlg = ObjectDialog(self)
         self.dlg.setModal(True)
         self.dlg.set_dataset(self.selected_dataset)

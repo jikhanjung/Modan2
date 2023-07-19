@@ -1003,6 +1003,8 @@ class ObjectDialog(QDialog):
             #self.edtLandmarkStr.setColumnWidth(1, 80)
             header.setSectionResizeMode(0, QHeaderView.Stretch)
             header.setSectionResizeMode(1, QHeaderView.Stretch)
+            self.cbxAutoRotate.hide()
+            self.btnCalibration.show()
             self.inputZ.hide()
             self.object_view_3d.hide()
             self.object_view = self.object_view_2d
@@ -1013,6 +1015,8 @@ class ObjectDialog(QDialog):
             header.setSectionResizeMode(0, QHeaderView.Stretch)
             header.setSectionResizeMode(1, QHeaderView.Stretch)
             header.setSectionResizeMode(2, QHeaderView.Stretch)
+            self.cbxAutoRotate.show()
+            self.btnCalibration.hide()
             self.inputZ.show()
             self.object_view_2d.hide()
             self.object_view = self.object_view_3d
@@ -1118,6 +1122,7 @@ class ObjectDialog(QDialog):
         if object.dataset.dimension == 3:
             #print("set_object 3d")
             self.object_view = self.object_view_3d
+            self.object_view.auto_rotate = True
             #obj_ops = MdObjectOps(object)
             self.object_view.set_object(object)
             #self.object_view.set_dataset(object.dataset)
@@ -1356,7 +1361,7 @@ class MyGLWidget(QGLWidget):
         self.data_mode = OBJECT_MODE
         self.view_mode = VIEW_MODE
         self.edit_mode = MODE_NONE
-        self.auto_rotate = True
+        self.auto_rotate = False
         self.is_dragging = False
         self.setMinimumSize(400,400)
         self.timer = QTimer(self)
@@ -1433,6 +1438,20 @@ class MyGLWidget(QGLWidget):
             else:
                 self.rotate_x += self.temp_rotate_x
                 self.rotate_y += self.temp_rotate_y
+                if self.data_mode == OBJECT_MODE:
+                    #print("x rotate:", self.rotate_x, "y rotate:", self.rotate_y)
+                    self.obj_ops.rotate_3d(math.radians(-1*self.rotate_x),'Y')
+                    self.obj_ops.rotate_3d(math.radians(self.rotate_y),'X')
+                    self.rotate_x = 0
+                    self.rotate_y = 0
+                else:
+                    #self.ds_ops.average_shape.rotate_3d(math.radians(-1*self.rotate_x),'Y')
+                    #self.ds_ops.average_shape.rotate_3d(math.radians(self.rotate_y),'X')
+                    for obj in self.ds_ops.object_list:
+                        obj.rotate_3d(math.radians(-1*self.rotate_x),'Y')
+                        obj.rotate_3d(math.radians(self.rotate_y),'X')
+                    self.rotate_x = 0
+                    self.rotate_y = 0
                 self.temp_rotate_x = 0
                 self.temp_rotate_y = 0
         elif event.button() == Qt.RightButton:
@@ -1538,9 +1557,10 @@ class MyGLWidget(QGLWidget):
         self.data_mode = OBJECT_MODE
         self.pan_x = self.pan_y = 0
         self.rotate_x = self.rotate_y = 0
-        self.auto_rotate = True
+        #self.auto_rotate = True
         self.dataset = object.dataset
         self.edge_list = self.dataset.unpack_wireframe()
+        self.updateGL()
         #print("data_mode:", self.data_mode)
 
     def get_scale_from_object(self, obj_ops):
@@ -1697,8 +1717,9 @@ class MyGLWidget(QGLWidget):
                     gl.glBegin(gl.GL_LINE_STRIP)
                     #print(self.down_x, self.down_y, self.curr_x, self.curr_y)
                     for lm_idx in edge:
-                        lm = object.landmark_list[lm_idx]
-                        gl.glVertex3f(*lm)
+                        if lm_idx < len(object.landmark_list):
+                            lm = object.landmark_list[lm_idx]
+                            gl.glVertex3f(*lm)
                     gl.glEnd()
                 pass
 
@@ -2032,7 +2053,7 @@ class DatasetAnalysisDialog(QDialog):
         self.cbxShowAverage.setChecked(True)
         self.cbxAutoRotate = QCheckBox()
         self.cbxAutoRotate.setText("Rotate")
-        self.cbxAutoRotate.setChecked(True)
+        self.cbxAutoRotate.setChecked(False)
 
         self.cbxShowIndex.stateChanged.connect(self.show_index_state_changed)
         self.cbxShowWireframe.stateChanged.connect(self.show_wireframe_state_changed)
@@ -2281,15 +2302,24 @@ class DatasetAnalysisDialog(QDialog):
         self.onpick_happened = False
 
         # data setting
-        self.set_dataset(dataset)
-        self.reset_tableView()
-        self.load_object()
-        self.chart_options_clicked()
-        self.rb3DChartDim.setChecked(True)
-        self.on_chart_dim_changed()
-        self.on_btnPCA_clicked()
+        set_result = self.set_dataset(dataset)
+        #print("set dataset result: ", set_result)
+        if set_result is False:
+            self.close()
+            return
+        elif set_result is None:
+            self.close()
+            return
+        else:
 
-        self.btnSaveResults.setFocus()
+            self.reset_tableView()
+            self.load_object()
+            self.chart_options_clicked()
+            self.rb3DChartDim.setChecked(True)
+            self.on_chart_dim_changed()
+            self.on_btnPCA_clicked()
+
+            self.btnSaveResults.setFocus()
 
     def chart_options_clicked(self):
         self.show_chart_options = not self.show_chart_options
@@ -2329,6 +2359,22 @@ class DatasetAnalysisDialog(QDialog):
     def set_dataset(self, dataset):
         #print("dataset:", dataset)
         self.dataset = dataset
+        prev_lm_count = -1
+        for obj in dataset.object_list:
+            obj.unpack_landmark()
+            lm_count = len(obj.landmark_list)
+            #print("prev_lm_count:", prev_lm_count, "lm_count:", lm_count)
+            if prev_lm_count != lm_count and prev_lm_count != -1:
+                # show messagebox and close the window
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Critical)
+                msg.setText("Error: landmark count is not consistent")
+                msg.setWindowTitle("Error")
+                msg.exec_()
+                self.close()
+                return False
+            prev_lm_count = lm_count
+
         self.comboPropertyName.clear()
         self.comboPropertyName.addItem("Select Property")
         if len(self.dataset.propertyname_list) > 0:
@@ -2341,6 +2387,8 @@ class DatasetAnalysisDialog(QDialog):
             self.cbxAutoRotate.show()
         else:
             self.cbxAutoRotate.hide()
+
+        return True
 
     def propertyname_changed(self):
         if self.ds_ops is not None:

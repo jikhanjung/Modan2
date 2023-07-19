@@ -486,14 +486,14 @@ class MdObjectOps:
             r_mx[2][2] = cos_theta
         # print "rotation matrix", r_mx
 
-        for lm in self.landmark_list:
+        for i, lm in enumerate(self.landmark_list):
             coords = [0,0,0]
             for j in range(len(lm)):
                 coords[j] = lm[j]
             x_rotated = coords[0] * r_mx[0][0] + coords[1] * r_mx[1][0] + coords[2] * r_mx[2][0]
             y_rotated = coords[0] * r_mx[0][1] + coords[1] * r_mx[1][1] + coords[2] * r_mx[2][1]
             z_rotated = coords[0] * r_mx[0][2] + coords[1] * r_mx[1][2] + coords[2] * r_mx[2][2]
-            lm = [ x_rotated, y_rotated, z_rotated ]
+            self.landmark_list[i] = [ x_rotated, y_rotated, z_rotated ]
 
     def trim_decimal(self, dec=4):
         factor = math.pow(10, dec)

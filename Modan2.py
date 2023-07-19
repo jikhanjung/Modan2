@@ -172,6 +172,21 @@ class ModanMainWindow(QMainWindow):
         if self.selected_dataset is None:
             QMessageBox.warning(self, "Warning", "No dataset selected")
             return
+        prev_lm_count = -1
+        for obj in self.selected_dataset.object_list:
+            obj.unpack_landmark()
+            lm_count = len(obj.landmark_list)
+            #print("prev_lm_count:", prev_lm_count, "lm_count:", lm_count)
+            if prev_lm_count != lm_count and prev_lm_count != -1:
+                # show messagebox and close the window
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Critical)
+                msg.setText("Error: landmark count is not consistent")
+                msg.setWindowTitle("Error")
+                msg.exec_()
+                return
+            prev_lm_count = lm_count
+        
         self.analysis_dialog = DatasetAnalysisDialog(self,self.selected_dataset)
         self.analysis_dialog.show()
 
@@ -431,9 +446,11 @@ class ModanMainWindow(QMainWindow):
             target_index=self.treeView.indexAt(event.pos())
             target_item = self.dataset_model.itemFromIndex(target_index)
             target_dataset = target_item.data()
+            #print("target_dataset",target_dataset)
 
             selected_object_list = self.get_selected_object_list()
             source_dataset = None
+            #print("selected_object_list",selected_object_list)
 
             for source_object in selected_object_list:
                 if source_object.dataset.dimension == target_dataset.dimension:
@@ -460,7 +477,7 @@ class ModanMainWindow(QMainWindow):
                         new_object = MdObject()
                         new_object.object_name = source_object.object_name
                         new_object.object_desc = source_object.object_desc
-                        new_object.scale = source_object.scale
+                        new_object.pixels_per_mm = source_object.pixels_per_mm
                         new_object.landmark_str = source_object.landmark_str
                         new_object.property_list = source_object.property_list
                         new_object.dataset = target_dataset

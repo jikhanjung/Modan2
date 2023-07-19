@@ -8,7 +8,7 @@ a = Analysis(
     ['Modan2.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[('modan.ico', '.'), ('icons/*', 'icons'), ('Modan2.ui', '.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -41,5 +41,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['icon\\modan.ico'],
+    icon=['modan.ico'],
 )

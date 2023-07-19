@@ -40,6 +40,15 @@ from MdStatistics import MdPrincipalComponent
 import numpy as np
 from OpenGL.arrays import vbo
 
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
+
 MODE_NONE = 0
 MODE_PAN = 12
 MODE_EDIT_LANDMARK = 1
@@ -790,9 +799,9 @@ class ObjectDialog(QDialog):
         self.form_layout.addRow("", self.inputCoords)
 
         self.btnGroup = QButtonGroup() 
-        self.btnLandmark = PicButton(QPixmap("icon/landmark.png"), QPixmap("icon/landmark_hover.png"), QPixmap("icon/landmark_down.png"))
-        self.btnWireframe = PicButton(QPixmap("icon/wireframe.png"), QPixmap("icon/wireframe_hover.png"), QPixmap("icon/wireframe_down.png"))
-        self.btnCalibration = PicButton(QPixmap("icon/caliper.png"), QPixmap("icon/caliper_hover.png"), QPixmap("icon/caliper_down.png"))
+        self.btnLandmark = PicButton(QPixmap(resource_path("icons/landmark.png")), QPixmap(resource_path("icons/landmark_hover.png")), QPixmap(resource_path("icons/landmark_down.png")))
+        self.btnWireframe = PicButton(QPixmap(resource_path("icons/wireframe.png")), QPixmap(resource_path("icons/wireframe_hover.png")), QPixmap(resource_path("icons/wireframe_down.png")))
+        self.btnCalibration = PicButton(QPixmap(resource_path("icons/caliper.png")), QPixmap(resource_path("icons/caliper_hover.png")), QPixmap(resource_path("icons/caliper_down.png")))
         self.btnGroup.addButton(self.btnLandmark)
         self.btnGroup.addButton(self.btnWireframe)
         self.btnGroup.addButton(self.btnCalibration)
@@ -1979,7 +1988,8 @@ class MyGLWidget(QGLWidget):
 class DatasetAnalysisDialog(QDialog):
     def __init__(self,parent,dataset):
         super().__init__()
-        self.setWindowTitle("Dataset Analyses")
+        self.setWindowTitle("Modan2 - Dataset Analyses")
+        self.setWindowIcon(QIcon(resource_path('icons/modan.ico')))
         self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
         self.parent = parent
         self.setGeometry(QRect(100, 100, 1400, 800))
@@ -2221,7 +2231,7 @@ class DatasetAnalysisDialog(QDialog):
         self.rbPCA.setChecked(True)
         self.rbCVA.setEnabled(False)
         self.gbAnalysis = QGroupBox()
-        self.gbAnalysis.setTitle("Method")
+        self.gbAnalysis.setTitle("Analysis")
         self.gbAnalysis.setLayout(QHBoxLayout())
         self.gbAnalysis.layout().addWidget(self.rbPCA)
         self.gbAnalysis.layout().addWidget(self.rbCVA)
@@ -2923,10 +2933,10 @@ class ExportDatasetDialog(QDialog):
         self.rbTPS = QRadioButton("TPS")
         self.rbTPS.setChecked(True)
         self.rbTPS.clicked.connect(self.on_rbTPS_clicked)
-        self.rbTPS.setEnabled(False)
+        self.rbTPS.setEnabled(True)
         self.rbX1Y1 = QRadioButton("X1Y1")
         self.rbX1Y1.clicked.connect(self.on_rbX1Y1_clicked)
-        self.rbX1Y1.setEnabled(False)
+        self.rbX1Y1.setEnabled(True)
         self.rbX1Y1.setChecked(False)
         self.rbMorphologika = QRadioButton("Morphologika")
         self.rbMorphologika.clicked.connect(self.on_rbMorphologika_clicked)
@@ -2936,7 +2946,7 @@ class ExportDatasetDialog(QDialog):
         self.lblSuperimposition = QLabel("Superimposition")
         self.rbProcrustes = QRadioButton("Procrustes")
         self.rbProcrustes.clicked.connect(self.on_rbProcrustes_clicked)
-        self.rbProcrustes.setEnabled(False)
+        self.rbProcrustes.setEnabled(True)
         self.rbProcrustes.setChecked(True)
         self.rbBookstein = QRadioButton("Bookstein")
         self.rbBookstein.clicked.connect(self.on_rbBookstein_clicked)
@@ -2946,8 +2956,10 @@ class ExportDatasetDialog(QDialog):
         self.rbRFTRA.clicked.connect(self.on_rbRFTRA_clicked)
         self.rbRFTRA.setEnabled(False)
         self.rbRFTRA.setChecked(False)
-
-
+        self.rbNone = QRadioButton("None")
+        self.rbNone.clicked.connect(self.on_rbNone_clicked)
+        self.rbNone.setEnabled(True)
+        self.rbNone.setChecked(False)
 
 
         self.form_layout = QGridLayout()
@@ -2969,12 +2981,23 @@ class ExportDatasetDialog(QDialog):
         self.button_layout2.addWidget(self.rbTPS)
         self.button_layout2.addWidget(self.rbX1Y1)
         self.button_layout2.addWidget(self.rbMorphologika)
+        self.button_group2 = QButtonGroup()
+        self.button_group2.addButton(self.rbTPS)
+        self.button_group2.addButton(self.rbX1Y1)
+        self.button_group2.addButton(self.rbMorphologika)
 
         self.button_layout3 = QHBoxLayout()
         self.button_layout3.addWidget(self.lblSuperimposition)
+        self.button_layout3.addWidget(self.rbNone)
         self.button_layout3.addWidget(self.rbProcrustes)
         self.button_layout3.addWidget(self.rbBookstein)
         self.button_layout3.addWidget(self.rbRFTRA)
+        self.button_group3 = QButtonGroup()
+        self.button_group3.addButton(self.rbNone)
+        self.button_group3.addButton(self.rbProcrustes)
+        self.button_group3.addButton(self.rbBookstein)
+        self.button_group3.addButton(self.rbRFTRA)
+
 
         self.layout = QVBoxLayout()
         self.layout.addLayout(self.form_layout)
@@ -2985,6 +3008,7 @@ class ExportDatasetDialog(QDialog):
         self.setLayout(self.layout)
 
     def set_dataset(self,dataset):
+
         self.dataset = dataset
         self.ds_ops = MdDatasetOps(dataset)
         self.edtDatasetName.setText(self.dataset.dataset_name)
@@ -2997,6 +3021,8 @@ class ExportDatasetDialog(QDialog):
 
         pass
     def on_rbRFTRA_clicked(self):
+        pass
+    def on_rbNone_clicked(self):
         pass
 
 
@@ -3022,7 +3048,8 @@ class ExportDatasetDialog(QDialog):
         #for i in range(self.lstExportList.count()):
         ##    item = self.lstExportList.item(i)
         #    export_list.append(item.text())
-        self.ds_ops.procrustes_superimposition()
+        if self.rbProcrustes.isChecked():
+            self.ds_ops.procrustes_superimposition()
         object_list = self.ds_ops.object_list
 
         if self.rbTPS.isChecked():
@@ -3035,21 +3062,14 @@ class ExportDatasetDialog(QDialog):
                 # open text file
                 with open(filename, 'w') as f:
                     for object in object_list:
-                        f.write('LM={} {}\n'.format(len(object.landmark_list),object.object_name))
+                        f.write('LM={}\t{}\n'.format(len(object.landmark_list),object.object_name))
                         for lm in object.landmark_list:
                             if self.ds_ops.dimension == 2:
                                 f.write('{}\t{}\n'.format(*lm))
                             else:
                                 f.write('{}\t{}\t{}\n'.format(*lm))
                         #pass#
-                    
-
-
-
         self.close()
-
-
-
 
 class ImportDatasetDialog(QDialog):
     # NewDatasetDialog shows new dataset dialog.

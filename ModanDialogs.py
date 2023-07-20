@@ -92,54 +92,57 @@ COLOR_SELECTED_SHAPE = COLOR_RED
 COLOR_SELECTED_TEXT = COLOR_RED
 COLOR_SELECTED_LANDMARK = COLOR_RED
 COLOR_WIREFRAME = COLOR_YELLOW
+COLOR_SELECTED_EDGE = COLOR_RED
 COLOR_BACKGROUND = COLOR_BLACK
+
+def as_qt_color(color):
+    return QColor( *[ int(x*255) for x in color ] )
+
+class ObjectViewer2D(QLabel):
+    def __init__(self, widget):
+        super(ObjectViewer2D, self).__init__(widget)
 
 
 class LandmarkEditor(QLabel):
     #clicked = pyqtSignal()
     def __init__(self, widget):
         super(LandmarkEditor, self).__init__(widget)
+        self.setMinimumSize(400,300)
         self.object_dialog = None
         self.setAcceptDrops(True)
         self.orig_pixmap = None
         self.curr_pixmap = None
         self.scale = 1.0
         self.fullpath = None
+        self.setMouseTracking(True)
+        self.set_mode(MODE_EDIT_LANDMARK)
+        self.pan_mode = MODE_NONE
+        self.edit_mode = MODE_NONE
+
+        self.show_index = True
+        self.show_wireframe = True
+        self.show_baseline = False  
+
+        self.pan_x = 0
+        self.pan_y = 0
         self.temp_pan_x = 0
         self.temp_pan_y = 0
         self.mouse_down_x = 0
         self.mouse_down_y = 0
-        self.pan_x = 0
-        self.pan_y = 0
-        self.setMouseTracking(True)
-        self.pan_mode = MODE_NONE
-        self.set_mode(MODE_EDIT_LANDMARK)
-        #self.edit_mode = MODE_ADD_LANDMARK
-        self.first_resize = True
-        self.curr_mouse_x = 0
-        self.curr_mouse_y = 0
-        self.image_canvas_ratio = 1.0
-        self.setMinimumSize(640,480)
-        self.show_index = True
-        self.show_wireframe = True
-        self.show_baseline = False  
-        self.edit_mode = MODE_NONE
-        self.selected_landmark_index = -1
+        self.mouse_curr_x = 0
+        self.mouse_curr_y = 0
+
         self.landmark_list = []
+        self.image_canvas_ratio = 1.0
+        self.selected_landmark_index = -1
+        self.selected_edge_index = -1
         self.wire_hover_index = -1
         self.wire_start_index = -1
         self.wire_end_index = -1
-        self.selected_edge_index = -1
         self.calibration_from_img_x = -1
         self.calibration_from_img_y = -1
-        self.calibration_to_img_x = -1
-        self.calibration_to_img_y = -1
         self.pixels_per_mm = -1
         
-        #self.repaint()
-
-#function _2canx( coord ) { return Math.round(( coord / gImageCanvasRatio ) * gScale) + gPanX + gTempPanX; }
-#function _2cany( coord ) { return Math.round(( coord / gImageCanvasRatio ) * gScale) + gPanY + gTempPanY; }
     def _2canx(self, coord):
         return round((float(coord) / self.image_canvas_ratio) * self.scale) + self.pan_x + self.temp_pan_x
 
@@ -222,14 +225,14 @@ class LandmarkEditor(QLabel):
         if self.orig_pixmap is None or self.object_dialog is None:
             return
         me = QMouseEvent(event)
-        self.curr_mouse_x = me.x()
-        self.curr_mouse_y = me.y()
-        curr_pos = [self.curr_mouse_x, self.curr_mouse_y]
+        self.mouse_curr_x = me.x()
+        self.mouse_curr_y = me.y()
+        curr_pos = [self.mouse_curr_x, self.mouse_curr_y]
     
         #print("mouse move event", me, me.pos(), self.curr_mouse_x, self.curr_mouse_y, self._2imgx(self.curr_mouse_x), self._2imgy(self.curr_mouse_y))
         if self.pan_mode == MODE_PAN:
-            self.temp_pan_x = self.curr_mouse_x - self.mouse_down_x
-            self.temp_pan_y = self.curr_mouse_y - self.mouse_down_y
+            self.temp_pan_x = self.mouse_curr_x - self.mouse_down_x
+            self.temp_pan_y = self.mouse_curr_y - self.mouse_down_y
             #print("pan", self.pan_x, self.pan_y, self.temp_pan_x, self.temp_pan_y)
             #self.downX = me.x()
             #self.downY = me.y()
@@ -273,13 +276,13 @@ class LandmarkEditor(QLabel):
             #print("move landmark", self.selected_landmark_index)
             if self.selected_landmark_index >= 0:
                 #print("move landmark", self.selected_landmark_index)
-                self.landmark_list[self.selected_landmark_index] = [self._2imgx(self.curr_mouse_x), self._2imgy(self.curr_mouse_y)]
+                self.landmark_list[self.selected_landmark_index] = [self._2imgx(self.mouse_curr_x), self._2imgy(self.mouse_curr_y)]
                 if self.object_dialog is not None:
                     self.object_dialog.update_landmark(self.selected_landmark_index, *self.landmark_list[self.selected_landmark_index])
                 #self.repaint()
                 #print("landmark list", self.landmark_list)
         elif self.edit_mode == MODE_READY_MOVE_LANDMARK:
-            curr_pos = [self.curr_mouse_x, self.curr_mouse_y]
+            curr_pos = [self.mouse_curr_x, self.mouse_curr_y]
             ready_landmark = self.landmark_list[self.selected_landmark_index]
             lm_can_pos = [self._2canx(ready_landmark[0]),self._2cany(ready_landmark[1])]
             if self.get_distance(curr_pos, lm_can_pos) > DISTANCE_THRESHOLD:
@@ -305,8 +308,8 @@ class LandmarkEditor(QLabel):
             if self.edit_mode == MODE_EDIT_LANDMARK:
                 #print("add landmark")
                 #print(self.object_dialog)
-                img_x = self._2imgx(self.curr_mouse_x)
-                img_y = self._2imgy(self.curr_mouse_y)
+                img_x = self._2imgx(self.mouse_curr_x)
+                img_y = self._2imgy(self.mouse_curr_y)
                 if img_x < 0 or img_x > self.orig_pixmap.width() or img_y < 0 or img_y > self.orig_pixmap.height():
                     return
                 #print("add landmark", img_x, img_y)
@@ -324,8 +327,8 @@ class LandmarkEditor(QLabel):
                         self.wire_hover_index = -1
                         #self.edit_mode = MODE_DRAW_WIREFRAME
             elif self.edit_mode == MODE_CALIBRATION:
-                self.calibration_from_img_x = self._2imgx(self.curr_mouse_x)
-                self.calibration_from_img_y = self._2imgy(self.curr_mouse_y)
+                self.calibration_from_img_x = self._2imgx(self.mouse_curr_x)
+                self.calibration_from_img_y = self._2imgy(self.mouse_curr_y)
 
         elif me.button() == Qt.RightButton:
             if self.edit_mode == MODE_WIREFRAME:
@@ -379,15 +382,11 @@ class LandmarkEditor(QLabel):
                 self.wire_end_index = -1
                 #self.repaint()
         elif self.edit_mode == MODE_CALIBRATION:
-            self.calibration_to_img_x = self._2imgx(self.curr_mouse_x)
-            self.calibration_to_img_y = self._2imgy(self.curr_mouse_y)
 
-            diff_x = self.calibration_to_img_x - self.calibration_from_img_x
-            diff_y = self.calibration_to_img_y - self.calibration_from_img_y
+            diff_x = self._2imgx(self.mouse_curr_x) - self.calibration_from_img_x
+            diff_y = self._2imgy(self.mouse_curr_y) - self.calibration_from_img_y
             dist = math.sqrt(diff_x * diff_x + diff_y * diff_y)
             self.object_dialog.calibrate(dist)
-            self.calibration_to_img_x = -1
-            self.calibration_to_img_y = -1
             self.calibration_from_img_x = -1
             self.calibration_from_img_y = -1
 
@@ -482,7 +481,7 @@ class LandmarkEditor(QLabel):
         #self.pixmap
         #return super().paintEvent(event)
         painter = QPainter(self)
-        painter.fillRect(self.rect(), QBrush(QColor(100,100,100)))
+        painter.fillRect(self.rect(), QBrush(as_qt_color(COLOR_BACKGROUND)))
 
         if self.orig_pixmap is None:
             return
@@ -499,8 +498,8 @@ class LandmarkEditor(QLabel):
         #painter.setBrush(QBrush(Qt.red))
         # draw wireframe
         if self.show_wireframe == True:
-            painter.setPen(QPen(Qt.blue, 2))
-            painter.setBrush(QBrush(Qt.white))
+            painter.setPen(QPen(as_qt_color(COLOR_WIREFRAME), 2))
+            painter.setBrush(QBrush(as_qt_color(COLOR_WIREFRAME)))
 
             #print("wireframe 2", dataset.edge_list, dataset.wireframe)
             for wire in self.edge_list:
@@ -512,7 +511,7 @@ class LandmarkEditor(QLabel):
                 #painter.drawLine(self.landmark_list[wire[0]][0], self.landmark_list[wire[0]][1], self.landmark_list[wire[1]][0], self.landmark_list[wire[1]][1])
             if self.selected_edge_index >= 0:
                 edge = self.edge_list[self.selected_edge_index]
-                painter.setPen(QPen(Qt.yellow, 2))
+                painter.setPen(QPen(as_qt_color(COLOR_SELECTED_EDGE), 2))
                 [ from_x, from_y ] = self.landmark_list[edge[0]]
                 [ to_x, to_y ] = self.landmark_list[edge[1]]
                 painter.drawLine(int(self._2canx(from_x)), int(self._2cany(from_y)), int(self._2canx(to_x)), int(self._2cany(to_y)))
@@ -520,11 +519,11 @@ class LandmarkEditor(QLabel):
 
 
         radius = LANDMARK_RADIUS
-        painter.setPen(QPen(Qt.red, 2))
-        painter.setBrush(QBrush(Qt.white))
+        painter.setPen(QPen(Qt.blue, 2))
+        painter.setBrush(QBrush(Qt.blue))
         if self.edit_mode == MODE_EDIT_LANDMARK:
-            img_x = self._2imgx(self.curr_mouse_x)
-            img_y = self._2imgy(self.curr_mouse_y)
+            img_x = self._2imgx(self.mouse_curr_x)
+            img_y = self._2imgy(self.mouse_curr_y)
             if img_x < 0 or img_x > self.orig_pixmap.width() or img_y < 0 or img_y > self.orig_pixmap.height():
                 pass
             else:
@@ -534,8 +533,8 @@ class LandmarkEditor(QLabel):
             if self.calibration_from_img_x >= 0 and self.calibration_from_img_y >= 0:
                 x1 = int(self._2canx(self.calibration_from_img_x))
                 y1 = int(self._2cany(self.calibration_from_img_y))
-                x2 = self.curr_mouse_x
-                y2 = self.curr_mouse_y
+                x2 = self.mouse_curr_x
+                y2 = self.mouse_curr_y
                 #print("calibration", x1, y1, x2, y2)
 
                 painter.setPen(QPen(Qt.red, 2))
@@ -546,16 +545,16 @@ class LandmarkEditor(QLabel):
         painter.setFont(QFont('Arial', 14))
         for idx, landmark in enumerate(self.landmark_list):
             if idx == self.wire_hover_index:
-                painter.setPen(QPen(Qt.blue, 2))
-                painter.setBrush(QBrush(Qt.yellow))
+                painter.setPen(QPen(as_qt_color(COLOR_SELECTED_LANDMARK), 2))
+                painter.setBrush(QBrush(as_qt_color(COLOR_SELECTED_LANDMARK)))
                 #print("wire hover idx", idx)
             elif idx == self.wire_start_index or idx == self.wire_end_index:
-                painter.setPen(QPen(Qt.blue, 2))
-                painter.setBrush(QBrush(Qt.blue))
+                painter.setPen(QPen(as_qt_color(COLOR_SELECTED_LANDMARK), 2))
+                painter.setBrush(QBrush(as_qt_color(COLOR_SELECTED_LANDMARK)))
                 #print("wire start/end idx", idx)
             else:
-                painter.setPen(QPen(Qt.red, 2))
-                painter.setBrush(QBrush(Qt.white))
+                painter.setPen(QPen(as_qt_color(COLOR_NORMAL_SHAPE), 2))
+                painter.setBrush(QBrush(as_qt_color(COLOR_NORMAL_SHAPE)))
             painter.drawEllipse(self._2canx(int(landmark[0]))-radius, self._2cany(int(landmark[1]))-radius, radius*2, radius*2)
             if self.show_index == True:
                 painter.drawText(self._2canx(int(landmark[0]))+10, self._2cany(int(landmark[1]))+10, str(idx+1))
@@ -563,12 +562,12 @@ class LandmarkEditor(QLabel):
 
         # draw wireframe being edited
         if self.wire_start_index >= 0:
-            painter.setPen(QPen(Qt.blue, 2))
-            painter.setBrush(QBrush(Qt.blue))
+            painter.setPen(QPen(as_qt_color(COLOR_WIREFRAME), 2))
+            painter.setBrush(QBrush(as_qt_color(COLOR_WIREFRAME)))
             start_lm = self.landmark_list[self.wire_start_index]
             #painter.drawEllipse(self._2canx(int(start_lm[0]))-radius*2, self._2cany(int(start_lm[1]))-radius, radius*2, radius*2)
             # draw line from start to mouse
-            painter.drawLine(self._2canx(int(start_lm[0])), self._2cany(int(start_lm[1])), self.curr_mouse_x, self.curr_mouse_y)
+            painter.drawLine(self._2canx(int(start_lm[0])), self._2cany(int(start_lm[1])), self.mouse_curr_x, self.mouse_curr_y)
 
 
         if self.object.pixels_per_mm is not None and self.object.pixels_per_mm > 0:
@@ -604,8 +603,18 @@ class LandmarkEditor(QLabel):
             painter.drawLine(x, y, x + bar_width, y)
             painter.drawLine(x, y - 5, x, y + 5)
             painter.drawLine(x + bar_width, y - 5, x + bar_width, y + 5)
-            length_text = str(actual_length) + " mm"
-            #print length_text, len( length_text )
+            if actual_length >= 1000:
+                length_text = str(int(actual_length / 1000.0)) + " m"
+            elif actual_length >= 10:
+                length_text = str(int(actual_length /10)) + " cm"
+            elif actual_length >= 1:
+                length_text = str(int(actual_length)) + " mm"
+            elif actual_length >= 0.001:
+                length_text = str(int(actual_length * 1000.0)) + " um"
+            else:
+                length_text = str(round(actual_length * 1000000.0 *1000)/1000) + " nm"
+            #length_text = str(actual_length) + " mm"
+            #print( length_text, len( length_text ) )
             painter.setPen(QPen(Qt.black, 1))
             #painter.setBrush(QBrush(Qt.black))
             painter.setFont(QFont('Arial', 10))
@@ -626,7 +635,7 @@ class LandmarkEditor(QLabel):
         if self.orig_pixmap is not None:
             self.calculate_resize()
             #print("image_wh_ratio", image_wh_ratio, "label_wh_ratio", label_wh_ratio, "image_canvas_ratio", self.image_canvas_ratio)
-            self.first_resize = False
+
         #print("resize",self.size())
         # print size
         #print(event.size())
@@ -641,6 +650,7 @@ class LandmarkEditor(QLabel):
         #print("Landmark Editor set_object", object.object_name)
         m_app = QApplication.instance()
         self.object = object
+
         if self.object.pixels_per_mm is not None and self.object.pixels_per_mm > 0:
             self.pixels_per_mm = self.object.pixels_per_mm
 
@@ -678,14 +688,15 @@ class CalibrationDialog(QDialog):
         self.edtLength.setText("1.0")
         self.edtLength.setFixedWidth(100)
         self.edtLength.setFixedHeight(30)
-        self.cbxUnit = QComboBox(self)
-        self.cbxUnit.addItem("nm")
-        self.cbxUnit.addItem("um")
-        self.cbxUnit.addItem("mm")
-        self.cbxUnit.addItem("cm")
-        self.cbxUnit.addItem("m")
-        self.cbxUnit.setFixedWidth(100)
-        self.cbxUnit.setFixedHeight(30)
+        self.comboUnit = QComboBox(self)
+        self.comboUnit.addItem("nm")
+        self.comboUnit.addItem("um")
+        self.comboUnit.addItem("mm")
+        self.comboUnit.addItem("cm")
+        self.comboUnit.addItem("m")
+        self.comboUnit.setFixedWidth(100)
+        self.comboUnit.setFixedHeight(30)
+        self.comboUnit.setCurrentText("mm")
         self.btnOK = QPushButton("OK", self)
         self.btnOK.setFixedWidth(100)
         self.btnOK.setFixedHeight(30)
@@ -696,7 +707,7 @@ class CalibrationDialog(QDialog):
         self.btnCancel.clicked.connect(self.btnCancel_clicked)  
         self.hbox = QHBoxLayout()
         self.hbox.addWidget(self.edtLength)
-        self.hbox.addWidget(self.cbxUnit)
+        self.hbox.addWidget(self.comboUnit)
         self.hbox.addWidget(self.btnOK)
         self.hbox.addWidget(self.btnCancel)
         self.vbox = QVBoxLayout()
@@ -716,7 +727,7 @@ class CalibrationDialog(QDialog):
     def btnOK_clicked(self):
         #self.parent.calibration_length = float(self.edtLength.text())
         #self.parent.calibration_unit = self.cbxUnit.currentText()
-        self.parent.set_object_calibration( self.pixel_number, float(self.edtLength.text()),self.cbxUnit.currentText())
+        self.parent.set_object_calibration( self.pixel_number, float(self.edtLength.text()),self.comboUnit.currentText())
         self.close()
     
     def btnCancel_clicked(self):
@@ -1131,7 +1142,17 @@ class ObjectDialog(QDialog):
             #print("set_object 2d")
             self.object_view = self.object_view_2d
             self.cbxAutoRotate.hide()
-
+            if object.image is not None and len(object.image) > 0:
+                img = object.image[0]
+                image_path = img.get_image_path(self.m_app.storage_directory)
+                #check if image_path exists
+                if os.path.exists(image_path):
+                    self.object_view.set_image(image_path)
+                    self.object_view.set_object(object)
+                    self.object_view.landmark_list = self.landmark_list
+            elif len(self.landmark_list) > 0:
+                self.object_view.set_object(object)
+                self.object_view.landmark_list = self.landmark_list
 
         if len(self.dataset.propertyname_list) >0:
             self.object.unpack_property()
@@ -1140,15 +1161,6 @@ class ObjectDialog(QDialog):
                 if idx < len(object.property_list):
                     self.edtPropertyList[idx].setText(object.property_list[idx])
 
-        if object.image is not None and len(object.image) > 0:
-            img = object.image[0]
-            image_path = img.get_image_path(self.m_app.storage_directory)
-            #check if image_path exists
-            if os.path.exists(image_path):
-                self.object_view.set_image(image_path)
-                self.object_view.set_object(object)
-                self.object_view.landmark_list = self.landmark_list
-        
             #self.object_view_3d.landmark_list = self.landmark_list
         #self.set_dataset(object.dataset)
 
@@ -1272,14 +1284,14 @@ class DatasetOpsViewer(QLabel):
         #self.pixmap
         #return super().paintEvent(event)
         painter = QPainter(self)
-        painter.fillRect(self.rect(), QBrush(QColor(100,100,100)))
+        painter.fillRect(self.rect(), QBrush(as_qt_color(COLOR_BACKGROUND)))
 
         if self.ds_ops is None:
             return
 
         if self.show_wireframe == True:
-            painter.setPen(QPen(Qt.blue, 2))
-            painter.setBrush(QBrush(Qt.white))
+            painter.setPen(QPen(as_qt_color(COLOR_WIREFRAME), 2))
+            painter.setBrush(QBrush(as_qt_color(COLOR_WIREFRAME)))
 
             #print("wireframe 2", dataset.edge_list, dataset.wireframe)
             landmark_list = self.ds_ops.get_average_shape().landmark_list
@@ -1303,11 +1315,11 @@ class DatasetOpsViewer(QLabel):
         for obj in self.ds_ops.object_list:
             #print("obj:", obj.id)
             if obj.id in self.ds_ops.selected_object_id_list:
-                painter.setPen(QPen(Qt.yellow, 2))
-                painter.setBrush(QBrush(Qt.yellow))
+                painter.setPen(QPen(as_qt_color(COLOR_SELECTED_SHAPE), 2))
+                painter.setBrush(QBrush(as_qt_color(COLOR_SELECTED_SHAPE)))
             else:
-                painter.setPen(QPen(Qt.red, 2))
-                painter.setBrush(QBrush(Qt.white))
+                painter.setPen(QPen(as_qt_color(COLOR_NORMAL_SHAPE), 2))
+                painter.setBrush(QBrush(as_qt_color(COLOR_NORMAL_SHAPE)))
             for idx, landmark in enumerate(obj.landmark_list):
                 x = self._2canx(landmark[0])
                 y = self._2cany(landmark[1])
@@ -1319,8 +1331,8 @@ class DatasetOpsViewer(QLabel):
         if self.show_average:
             radius=3
             for idx, landmark in enumerate(self.ds_ops.get_average_shape().landmark_list):
-                painter.setPen(QPen(Qt.blue, 2))
-                painter.setBrush(QBrush(Qt.white))
+                painter.setPen(QPen(as_qt_color(COLOR_AVERAGE_SHAPE), 2))
+                painter.setBrush(QBrush(as_qt_color(COLOR_AVERAGE_SHAPE)))
                 x = self._2canx(landmark[0])
                 y = self._2cany(landmark[1])
                 painter.drawEllipse(x-radius, y-radius, radius*2, radius*2)
@@ -1349,7 +1361,7 @@ class MyGLWidget(QGLWidget):
         self.temp_rotate_x = 0
         self.temp_rotate_y = 0
         self.show_index = True
-        self.show_wireframe = True
+        self.show_wireframe = False
         self.show_baseline = False
         self.show_average = True
         self.curr_x = 0
@@ -1767,7 +1779,7 @@ class MyGLWidget(QGLWidget):
                     gl.glDisable(gl.GL_LIGHTING)
                     gl.glColor3f( *COLOR_NORMAL_TEXT )
                     gl.glRasterPos3f(lm[0] + 0.05, lm[1] + 0.05, lm[2])
-                    for letter in list(str(i)):
+                    for letter in list(str(i+1)):
                         glut.glutBitmapCharacter(glut.GLUT_BITMAP_HELVETICA_12, ord(letter))
                     gl.glEnable(gl.GL_LIGHTING)
 
@@ -3250,13 +3262,14 @@ class ImportDatasetDialog(QDialog):
         datasetname = self.edtDatasetName.text()
         objectcount = self.edtObjectCount.text()
         if filetype == "TPS":
-            self.import_tps(filename, datasetname)
+            self.import_tps(filename, datasetname)            
         else:
             pass
 
     def import_tps(self, filename, datasetname):
         # read tps file
         tps = TPS(filename, datasetname)
+        self.edtObjectCount.setText(str(tps.nobjects))
         #print("objects:", tps.nobjects,tps.nlandmarks,tps.object_name_list)
         # create dataset
         dataset = MdDataset()
@@ -3357,14 +3370,14 @@ class TPS:
                         if comment != '':
                             key = comment
                         else:
-                            key = self.datasetname + "_" + str(object_count + 1)
+                            key = self.datasetname + "_" + str(object_count)
                         objects[key] = data
                         object_name_list.append(key)
                         data = []
                     header = 'lm'
-                    object_count += 1
                     landmark_count, comment = int(headerline.group(4)), headerline.group(5).strip()
-                    print("landmark_count:", landmark_count)
+                    #print("landmark_count:", landmark_count, "object_count:", object_count, "comment:", comment)
+                    object_count += 1
                     # landmark_count_list.append( landmark_count )
                     # if not found:
                     #found = True
@@ -3375,7 +3388,7 @@ class TPS:
                 if comment != '':
                     key = comment
                 else:
-                    key = self.datasetname + "_" + str(object_count + 1)
+                    key = self.datasetname + "_" + str(object_count)
                 #print("key:", key, "data:", data)
                 objects[key] = data
                 object_name_list.append(key)

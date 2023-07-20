@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import QTableWidgetItem, QMainWindow, QHeaderView, QFileDia
 
 from PyQt5 import QtGui, uic
 from PyQt5.QtGui import QIcon, QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem,\
-                        QPainterPath, QFont, QImageReader, QPainter, QBrush, QMouseEvent, QWheelEvent, QDrag
+                        QPainterPath, QFont, QImageReader, QPainter, QBrush, QMouseEvent, QWheelEvent, QDrag, QKeySequence
 from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSettings, QEvent, QRegExp, QSize, \
                          QItemSelectionModel, QDateTime, QBuffer, QIODevice, QByteArray, QPoint, QModelIndex, \
                          pyqtSignal, QThread, QMimeData
@@ -63,37 +63,70 @@ class ModanMainWindow(QMainWindow):
 
         self.toolbar = QToolBar("Main Toolbar")
         self.toolbar.setIconSize(QSize(32,32))
-        self.toolbar.addAction(QIcon(resource_path('icons/open.png')), "Open", self.on_action_open_db_triggered)
-        self.toolbar.addAction(QIcon(resource_path('icons/newdb.png')), "New", self.on_action_new_db_triggered)
-        self.toolbar.addAction(QIcon(resource_path('icons/saveas.png')), "Save As", self.on_action_save_as_triggered)
-        self.toolbar.addAction(QIcon(resource_path('icons/newdataset.png')), "New Dataset", self.on_action_new_dataset_triggered)
-        self.toolbar.addAction(QIcon(resource_path('icons/newobject.png')), "New Object", self.on_action_new_object_triggered)
-        self.toolbar.addAction(QIcon(resource_path('icons/import.png')), "Import", self.on_action_import_dataset_triggered)
-        self.toolbar.addAction(QIcon(resource_path('icons/export.png')), "Export", self.on_action_export_dataset_triggered)
-        self.toolbar.addAction(QIcon(resource_path('icons/analyze.png')), "Analyze", self.on_action_analyze_dataset_triggered)
-        self.toolbar.addAction(QIcon(resource_path('icons/preferences.png')), "Preferences", self.on_action_edit_preferences_triggered)
-        self.toolbar.addAction(QIcon(resource_path('icons/exit.png')), "Exit", self.on_action_exit_triggered)
+        #self.toolbar.addAction(QIcon(resource_path('icons/open.png')), "Open", self.on_action_open_db_triggered)
+        #self.toolbar.addAction(QIcon(resource_path('icons/newdb.png')), "New", self.on_action_new_db_triggered)
+        #self.toolbar.addAction(QIcon(resource_path('icons/saveas.png')), "Save As", self.on_action_save_as_triggered)
+        self.actionNewDataset = QAction(QIcon(resource_path('icons/newdataset.png')), "New Dataset", self)
+        self.actionNewDataset.triggered.connect(self.on_action_new_dataset_triggered)
+        self.actionNewDataset.setShortcut(QKeySequence("Ctrl+N"))
+        self.actionNewObject = QAction(QIcon(resource_path('icons/newobject.png')), "New Object", self)
+        self.actionNewObject.triggered.connect(self.on_action_new_object_triggered)
+        self.actionNewObject.setShortcut(QKeySequence("Ctrl+Shift+N"))
+        self.actionImport = QAction(QIcon(resource_path('icons/import.png')), "Import", self)
+        self.actionImport.triggered.connect(self.on_action_import_dataset_triggered)
+        self.actionImport.setShortcut(QKeySequence("Ctrl+I"))
+        self.actionExport = QAction(QIcon(resource_path('icons/export.png')), "Export", self)
+        self.actionExport.triggered.connect(self.on_action_export_dataset_triggered)
+        self.actionExport.setShortcut(QKeySequence("Ctrl+E"))
+        self.actionAnalyze = QAction(QIcon(resource_path('icons/analyze.png')), "Analyze", self)
+        self.actionAnalyze.triggered.connect(self.on_action_analyze_dataset_triggered)
+        self.actionAnalyze.setShortcut(QKeySequence("Ctrl+G"))
+        self.actionPreferences = QAction(QIcon(resource_path('icons/preferences.png')), "Preferences", self)
+        self.actionPreferences.triggered.connect(self.on_action_edit_preferences_triggered)
+        self.actionExit = QAction(QIcon(resource_path('icons/exit.png')), "Exit", self)
+        self.actionExit.triggered.connect(self.on_action_exit_triggered)
+        self.actionExit.setShortcut(QKeySequence("Ctrl+W"))
+        self.actionAbout = QAction(QIcon(resource_path('icons/about.png')), "About", self)
+        self.actionAbout.triggered.connect(self.on_action_about_triggered)
+        self.actionAbout.setShortcut(QKeySequence("F1"))
+        self.toolbar.addAction(self.actionNewDataset)
+        self.toolbar.addAction(self.actionNewObject)
+        self.toolbar.addAction(self.actionImport)
+        self.toolbar.addAction(self.actionExport)
+        self.toolbar.addAction(self.actionAnalyze)
+        self.toolbar.addAction(self.actionPreferences)
+        self.toolbar.addAction(self.actionAbout)
+
+        #self.toolbar.addAction(QIcon(resource_path('icons/newdataset.png')), "New Dataset", self.on_action_new_dataset_triggered)
+        #self.toolbar.addAction(QIcon(resource_path('icons/newobject.png')), "New Object", self.on_action_new_object_triggered)
+        #self.toolbar.addAction(QIcon(resource_path('icons/import.png')), "Import", self.on_action_import_dataset_triggered)
+        #self.toolbar.addAction(QIcon(resource_path('icons/export.png')), "Export", self.on_action_export_dataset_triggered)
+        #self.toolbar.addAction(QIcon(resource_path('icons/analyze.png')), "Analyze", self.on_action_analyze_dataset_triggered)
+        #self.toolbar.addAction(QIcon(resource_path('icons/preferences.png')), "Preferences", self.on_action_edit_preferences_triggered)
+        #self.toolbar.addAction(QIcon(resource_path('icons/exit.png')), "Exit", self.on_action_exit_triggered)
         self.addToolBar(self.toolbar)
 
         self.main_menu = self.menuBar()
         self.file_menu = self.main_menu.addMenu("File")
-        self.file_menu.addAction("Open", self.on_action_open_db_triggered)
-        self.file_menu.addAction("New", self.on_action_new_db_triggered)
-        self.file_menu.addAction("Save As", self.on_action_save_as_triggered)
-        self.file_menu.addSeparator()
-        self.file_menu.addAction("Exit", self.on_action_exit_triggered)
+        #self.file_menu.addAction("Open", self.on_action_open_db_triggered)
+        #self.file_menu.addAction("New", self.on_action_new_db_triggered)
+        #self.file_menu.addAction("Save As", self.on_action_save_as_triggered)
+        #self.file_menu.addSeparator()
+        self.file_menu.addAction("Exit\tCtrl+W", self.on_action_exit_triggered)
+        #self.file_menu.addAction("Exit", self.on_action_exit_triggered)
         self.edit_menu = self.main_menu.addMenu("Edit")
-        self.edit_menu.addAction("Preferences", self.on_action_edit_preferences_triggered)
+        self.edit_menu.addAction(self.actionPreferences)
+        #self.edit_menu.addAction("Preferences", self.on_action_edit_preferences_triggered)
         self.data_menu = self.main_menu.addMenu("Data")
-        self.data_menu.addAction("New Dataset", self.on_action_new_dataset_triggered)
-        self.data_menu.addAction("New Object", self.on_action_new_object_triggered)
+        self.data_menu.addAction("New Dataset\tCtrl+N", self.on_action_new_dataset_triggered)
+        self.data_menu.addAction("New Object\tCtrl+Shift+N", self.on_action_new_object_triggered)
         self.data_menu.addSeparator()
-        self.data_menu.addAction("Analyze", self.on_action_analyze_dataset_triggered)
+        self.data_menu.addAction("Analyze\tCtrl+G", self.on_action_analyze_dataset_triggered)
         self.data_menu.addSeparator()
-        self.data_menu.addAction("Import", self.on_action_import_dataset_triggered)
-        self.data_menu.addAction("Export", self.on_action_export_dataset_triggered)
+        self.data_menu.addAction("Import\tCtrl+I", self.on_action_import_dataset_triggered)
+        self.data_menu.addAction("Export\tCtrl+E", self.on_action_export_dataset_triggered)
         self.help_menu = self.main_menu.addMenu("Help")
-        self.help_menu.addAction("About", self.on_action_about_triggered)
+        self.help_menu.addAction("About\tF1", self.on_action_about_triggered)
 
         self.initUI()
         
@@ -165,7 +198,23 @@ class ModanMainWindow(QMainWindow):
 
     @pyqtSlot() 
     def on_action_about_triggered(self):
-        QMessageBox.about(self, "About", "Modan2")
+        text = PROGRAM_NAME + " ver. " + PROGRAM_VERSION + "\n\n"
+        text += "Morphometrics made easy\n\n"
+        text += "This software is distributed under the terms of the MIT License.\n\n"
+        text += "© 2023 Jikhan Jung\n"
+
+        QMessageBox.about(self, "About", text)
+
+        license_text = """
+Modan2
+Copyright 2023 Jikhan Jung
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+"""
 
     @pyqtSlot()
     def on_action_analyze_dataset_triggered(self):

@@ -81,7 +81,7 @@ class ModanMainWindow(QMainWindow):
         self.actionAnalyze = QAction(QIcon(resource_path('icons/analyze.png')), "Analyze", self)
         self.actionAnalyze.triggered.connect(self.on_action_analyze_dataset_triggered)
         self.actionAnalyze.setShortcut(QKeySequence("Ctrl+G"))
-        self.actionPreferences = QAction(QIcon(resource_path('icons/preferences.png')), "Preferences", self)
+        self.actionPreferences = QAction(QIcon(resource_path('icons/calibration_32x32.png')), "Preferences", self)
         self.actionPreferences.triggered.connect(self.on_action_edit_preferences_triggered)
         self.actionExit = QAction(QIcon(resource_path('icons/exit.png')), "Exit", self)
         self.actionExit.triggered.connect(self.on_action_exit_triggered)

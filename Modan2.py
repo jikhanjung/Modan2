@@ -30,7 +30,7 @@ import shutil
 
 from MdModel import *
 from ModanDialogs import DatasetAnalysisDialog, ObjectDialog, ImportDatasetDialog, DatasetDialog, PreferencesDialog, LandmarkEditor, \
-    IMAGE_EXTENSION_LIST, MyGLWidget, ExportDatasetDialog
+    IMAGE_EXTENSION_LIST, MyGLWidget, ExportDatasetDialog, ObjectViewer2D
 
 #import matplotlib
 #matplotlib.use('Qt5Agg')
@@ -241,7 +241,8 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
     def initUI(self):
         # add tableView and tableWidget to vertical layout
-        self.object_view_2d = LandmarkEditor(self)
+        #self.object_view_2d = LandmarkEditor(self)
+        self.object_view_2d = ObjectViewer2D(self)
         self.object_view_3d = MyGLWidget(self)
         self.object_view = self.object_view_2d
         self.object_view_3d.hide()
@@ -802,10 +803,13 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             return
 
         object_id = selected_object_list[0].id
+        #print("selected object id:", object_id)
         self.selected_object = MdObject.get_by_id(object_id)
+        #print("selected object:", self.selected_object)
         self.show_object(self.selected_object)
 
     def show_object(self, obj):
+        #print("show object")
         self.object_view.clear_object()
         self.object_view.set_object(obj)
 

@@ -101,7 +101,505 @@ def as_qt_color(color):
 class ObjectViewer2D(QLabel):
     def __init__(self, widget):
         super(ObjectViewer2D, self).__init__(widget)
+        self.setMinimumSize(400,300)
+        self.object_dialog = None
+        self.object = None
+        self.orig_pixmap = None
+        self.curr_pixmap = None
+        self.scale = 1.0
+        self.fullpath = None
+        self.pan_mode = MODE_NONE
+        self.edit_mode = MODE_NONE
 
+        self.setAcceptDrops(True)
+        self.setMouseTracking(True)
+        self.set_mode(MODE_EDIT_LANDMARK)
+
+        self.show_index = True
+        self.show_wireframe = True
+        self.show_baseline = False  
+
+        self.pan_x = 0
+        self.pan_y = 0
+        self.temp_pan_x = 0
+        self.temp_pan_y = 0
+        self.mouse_down_x = 0
+        self.mouse_down_y = 0
+        self.mouse_curr_x = 0
+        self.mouse_curr_y = 0
+
+        self.landmark_list = []
+        self.edge_list = []
+        self.image_canvas_ratio = 1.0
+        self.selected_landmark_index = -1
+        self.selected_edge_index = -1
+        self.wire_hover_index = -1
+        self.wire_start_index = -1
+        self.wire_end_index = -1
+        self.calibration_from_img_x = -1
+        self.calibration_from_img_y = -1
+        self.pixels_per_mm = -1
+        self.orig_width = -1
+        self.orig_height = -1
+        
+    def _2canx(self, coord):
+        return round((float(coord) / self.image_canvas_ratio) * self.scale) + self.pan_x + self.temp_pan_x
+    def _2cany(self, coord):
+        return round((float(coord) / self.image_canvas_ratio) * self.scale) + self.pan_y + self.temp_pan_y
+    def _2imgx(self, coord):
+        return round(((float(coord) - self.pan_x) / self.scale) * self.image_canvas_ratio)
+    def _2imgy(self, coord):
+        return round(((float(coord) - self.pan_y) / self.scale) * self.image_canvas_ratio)
+
+    def show_message(self, msg):
+        if self.object_dialog is not None:
+            self.object_dialog.status_bar.showMessage(msg) 
+
+    def set_mode(self, mode):
+        self.edit_mode = mode  
+        if self.edit_mode == MODE_EDIT_LANDMARK:
+            self.setCursor(Qt.CrossCursor)
+            self.show_message("Click on image to add landmark")
+        elif self.edit_mode == MODE_READY_MOVE_LANDMARK:
+            self.setCursor(Qt.SizeAllCursor)
+            self.show_message("Click on landmark to move")
+        elif self.edit_mode == MODE_MOVE_LANDMARK:
+            self.setCursor(Qt.SizeAllCursor)
+            self.show_message("Move landmark")
+        if self.edit_mode == MODE_CALIBRATION:
+            self.setCursor(Qt.CrossCursor)
+            self.show_message("Click on image to add landmark")
+        else:
+            self.setCursor(Qt.ArrowCursor)
+
+    def get_landmark_index_within_threshold(self, curr_pos, threshold=DISTANCE_THRESHOLD):
+        for index, landmark in enumerate(self.landmark_list):
+            lm_can_pos = [self._2canx(landmark[0]),self._2cany(landmark[1])]
+            dist = self.get_distance(curr_pos, lm_can_pos)
+            if dist < threshold:
+                return index
+        return -1
+    
+    def get_edge_index_within_threshold(self, curr_pos, threshold=DISTANCE_THRESHOLD):
+        if len(self.edge_list) == 0:
+            return -1
+
+        landmark_list = self.landmark_list
+        for index, wire in enumerate(self.edge_list):
+            if wire[0] >= len(self.landmark_list) or wire[1] >= len(self.landmark_list):
+                continue
+
+            wire_start = [self._2canx(float(self.landmark_list[wire[0]][0])),self._2cany(float(self.landmark_list[wire[0]][1]))]
+            wire_end = [self._2canx(float(self.landmark_list[wire[1]][0])),self._2cany(float(self.landmark_list[wire[1]][1]))]
+            dist = self.get_distance_to_line(curr_pos, wire_start, wire_end)
+            if dist < threshold and dist > 0:
+                return index
+        return -1
+    
+    def get_distance_to_line(self, curr_pos, line_start, line_end):
+        x1 = line_start[0]
+        y1 = line_start[1]
+        x2 = line_end[0]
+        y2 = line_end[1]
+        max_x = max(x1,x2)
+        min_x = min(x1,x2)
+        max_y = max(y1,y2)
+        min_y = min(y1,y2)
+        if curr_pos[0] > max_x or curr_pos[0] < min_x or curr_pos[1] > max_y or curr_pos[1] < min_y:
+            return -1
+        x0 = curr_pos[0]
+        y0 = curr_pos[1]
+        numerator = abs((y2-y1)*x0 - (x2-x1)*y0 + x2*y1 - y2*x1)
+        denominator = math.sqrt(math.pow(y2-y1,2) + math.pow(x2-x1,2))
+        return numerator/denominator
+
+    def get_distance(self, pos1, pos2):
+        return math.sqrt((pos1[0] - pos2[0])**2 + (pos1[1] - pos2[1])**2)
+
+    def mouseMoveEvent(self, event):
+        if self.orig_pixmap is None or self.object_dialog is None:
+            return
+        me = QMouseEvent(event)
+        self.mouse_curr_x = me.x()
+        self.mouse_curr_y = me.y()
+        curr_pos = [self.mouse_curr_x, self.mouse_curr_y]
+    
+        if self.pan_mode == MODE_PAN:
+            self.temp_pan_x = self.mouse_curr_x - self.mouse_down_x
+            self.temp_pan_y = self.mouse_curr_y - self.mouse_down_y
+
+        elif self.edit_mode == MODE_EDIT_LANDMARK:
+            near_idx = self.get_landmark_index_within_threshold(curr_pos, DISTANCE_THRESHOLD)
+            if near_idx >= 0:
+                self.setCursor(Qt.SizeAllCursor)
+                self.set_mode(MODE_READY_MOVE_LANDMARK)
+                self.selected_landmark_index = near_idx
+
+        elif self.edit_mode == MODE_WIREFRAME:
+            near_idx = self.get_landmark_index_within_threshold(curr_pos, DISTANCE_THRESHOLD)
+            if near_idx >= 0:
+                self.selected_edge_index = -1
+                if self.wire_hover_index < 0:
+                    self.wire_hover_index = near_idx
+                else:
+                    pass
+            elif self.wire_start_index >= 0:
+                self.wire_hover_index = -1
+            else:
+                self.wire_hover_index = -1
+            
+                near_wire_idx = self.get_edge_index_within_threshold(curr_pos, DISTANCE_THRESHOLD)
+                if near_wire_idx >= 0:
+                    edge = self.edge_list[near_wire_idx]
+                    self.selected_edge_index = near_wire_idx
+                else:
+                    self.selected_edge_index = -1
+
+        elif self.edit_mode == MODE_MOVE_LANDMARK:
+            if self.selected_landmark_index >= 0:
+                self.landmark_list[self.selected_landmark_index] = [self._2imgx(self.mouse_curr_x), self._2imgy(self.mouse_curr_y)]
+                if self.object_dialog is not None:
+                    self.object_dialog.update_landmark(self.selected_landmark_index, *self.landmark_list[self.selected_landmark_index])
+
+        elif self.edit_mode == MODE_READY_MOVE_LANDMARK:
+            curr_pos = [self.mouse_curr_x, self.mouse_curr_y]
+            ready_landmark = self.landmark_list[self.selected_landmark_index]
+            lm_can_pos = [self._2canx(ready_landmark[0]),self._2cany(ready_landmark[1])]
+            if self.get_distance(curr_pos, lm_can_pos) > DISTANCE_THRESHOLD:
+                self.set_mode(MODE_EDIT_LANDMARK)
+                self.selected_landmark_index = -1
+            
+        self.repaint()
+        QLabel.mouseMoveEvent(self, event)
+
+    def mousePressEvent(self, event):
+        if self.orig_pixmap is None or self.object_dialog is None:
+            return
+
+        me = QMouseEvent(event)
+        if me.button() == Qt.LeftButton:
+            if self.edit_mode == MODE_EDIT_LANDMARK:
+                img_x = self._2imgx(self.mouse_curr_x)
+                img_y = self._2imgy(self.mouse_curr_y)
+                if img_x < 0 or img_x > self.orig_pixmap.width() or img_y < 0 or img_y > self.orig_pixmap.height():
+                    return
+                self.object_dialog.add_landmark(img_x, img_y)
+            elif self.edit_mode == MODE_READY_MOVE_LANDMARK:
+                self.set_mode(MODE_MOVE_LANDMARK)
+            elif self.edit_mode == MODE_WIREFRAME:
+                if self.wire_hover_index >= 0:
+                    if self.wire_start_index < 0:
+                        self.wire_start_index = self.wire_hover_index
+                        self.wire_hover_index = -1
+            elif self.edit_mode == MODE_CALIBRATION:
+                self.calibration_from_img_x = self._2imgx(self.mouse_curr_x)
+                self.calibration_from_img_y = self._2imgy(self.mouse_curr_y)
+
+        elif me.button() == Qt.RightButton:
+            if self.edit_mode == MODE_WIREFRAME:
+                #if self.
+                if self.wire_start_index >= 0:
+                    self.wire_start_index = -1
+                    self.wire_hover_index = -1
+                elif self.selected_edge_index >= 0:
+                    self.delete_edge(self.selected_edge_index)                    
+                    self.selected_edge_index = -1
+            elif self.edit_mode == MODE_READY_MOVE_LANDMARK:
+                if self.selected_landmark_index >= 0:
+                    self.object_dialog.delete_landmark(self.selected_landmark_index)
+                    self.selected_landmark_index = -1
+            else:
+                self.pan_mode = MODE_PAN
+                self.mouse_down_x = me.x()
+                self.mouse_down_y = me.y()
+        elif me.button() == Qt.MidButton:
+            print("middle button clicked")
+
+        self.repaint()
+
+    def mouseReleaseEvent(self, ev: QMouseEvent) -> None:
+        me = QMouseEvent(ev)
+        if self.pan_mode == MODE_PAN:
+            self.pan_mode = MODE_NONE
+            self.pan_x += self.temp_pan_x
+            self.pan_y += self.temp_pan_y
+            self.temp_pan_x = 0
+            self.temp_pan_y = 0
+            self.repaint()
+        elif self.edit_mode == MODE_MOVE_LANDMARK:
+            self.set_mode(MODE_EDIT_LANDMARK)
+            self.selected_landmark_index = -1
+        elif self.edit_mode == MODE_WIREFRAME:
+            if self.wire_start_index >= 0 and self.wire_hover_index >= 0:
+                self.add_edge(self.wire_start_index, self.wire_hover_index)
+                self.wire_start_index = -1
+                self.wire_hover_index = -1
+                self.wire_end_index = -1
+        elif self.edit_mode == MODE_CALIBRATION:
+            diff_x = self._2imgx(self.mouse_curr_x) - self.calibration_from_img_x
+            diff_y = self._2imgy(self.mouse_curr_y) - self.calibration_from_img_y
+            dist = math.sqrt(diff_x * diff_x + diff_y * diff_y)
+            self.object_dialog.calibrate(dist)
+            self.calibration_from_img_x = -1
+            self.calibration_from_img_y = -1
+
+        return super().mouseReleaseEvent(ev)    
+
+    def wheelEvent(self, event):
+        if self.orig_pixmap is None:
+            return
+        we = QWheelEvent(event)
+        scale_delta = 0
+        if we.angleDelta().y() > 0:
+            scale_delta = 0.1
+        else:
+            scale_delta = -0.1
+        if self.scale <= 0.8 and scale_delta < 0:
+            return
+        if self.scale > 1:
+            scale_delta *= math.floor(self.scale)
+        
+        prev_scale = self.scale
+        self.scale += scale_delta
+        self.scale = round(self.scale * 10) / 10
+        scale_proportion = self.scale / prev_scale
+        self.curr_pixmap = self.orig_pixmap.scaled(int(self.orig_pixmap.width() * self.scale / self.image_canvas_ratio), int(self.orig_pixmap.height() * self.scale / self.image_canvas_ratio))
+
+        self.pan_x = int( we.pos().x() - (we.pos().x() - self.pan_x) * scale_proportion )
+        self.pan_y = int( we.pos().y() - (we.pos().y() - self.pan_y) * scale_proportion )
+
+        self.repaint()
+
+        QLabel.wheelEvent(self, event)
+
+    def dragEnterEvent(self, event):
+        if self.object_dialog is None:
+            return
+        file_name = event.mimeData().text()
+        if file_name.split('.')[-1].lower() in IMAGE_EXTENSION_LIST:
+            event.acceptProposedAction()
+        else:
+            event.ignore()
+
+    def dropEvent(self, event):
+        if self.object_dialog is None:
+            return
+
+        file_path = event.mimeData().text()
+        file_path = re.sub('file:///', '', file_path)
+        self.set_image(file_path)
+        self.calculate_resize()
+        if self.object_dialog is not None:
+            self.object_dialog.set_object_name(Path(file_path).stem)
+
+    def paintEvent(self, event):
+        # fill background with dark gray
+        if self.object is None:
+            return
+
+        painter = QPainter(self)
+        painter.fillRect(self.rect(), QBrush(as_qt_color(COLOR_BACKGROUND)))
+
+        #if self.orig_pixmap is None:
+        #    return
+        
+        if self.curr_pixmap is not None:                
+            painter.drawPixmap(self.pan_x+self.temp_pan_x, self.pan_y+self.temp_pan_y,self.curr_pixmap)
+
+        #print("paintEvent", self.landmark_list, self.edge_list)
+        # draw wireframe
+        if self.show_wireframe == True:
+            painter.setPen(QPen(as_qt_color(COLOR_WIREFRAME), 2))
+            painter.setBrush(QBrush(as_qt_color(COLOR_WIREFRAME)))
+
+            #print("wireframe 2", dataset.edge_list, dataset.wireframe)
+            for wire in self.edge_list:
+                if wire[0] >= len(self.landmark_list) or wire[1] >= len(self.landmark_list):
+                    continue
+                [ from_x, from_y ] = self.landmark_list[wire[0]]
+                [ to_x, to_y ] = self.landmark_list[wire[1]]
+                painter.drawLine(int(self._2canx(from_x)), int(self._2cany(from_y)), int(self._2canx(to_x)), int(self._2cany(to_y)))
+                #painter.drawLine(self.landmark_list[wire[0]][0], self.landmark_list[wire[0]][1], self.landmark_list[wire[1]][0], self.landmark_list[wire[1]][1])
+            if self.selected_edge_index >= 0:
+                edge = self.edge_list[self.selected_edge_index]
+                painter.setPen(QPen(as_qt_color(COLOR_SELECTED_EDGE), 2))
+                [ from_x, from_y ] = self.landmark_list[edge[0]]
+                [ to_x, to_y ] = self.landmark_list[edge[1]]
+                painter.drawLine(int(self._2canx(from_x)), int(self._2cany(from_y)), int(self._2canx(to_x)), int(self._2cany(to_y)))
+
+        radius = LANDMARK_RADIUS
+        painter.setPen(QPen(Qt.blue, 2))
+        painter.setBrush(QBrush(Qt.blue))
+        if self.edit_mode == MODE_CALIBRATION:
+            if self.calibration_from_img_x >= 0 and self.calibration_from_img_y >= 0:
+                x1 = int(self._2canx(self.calibration_from_img_x))
+                y1 = int(self._2cany(self.calibration_from_img_y))
+                x2 = self.mouse_curr_x
+                y2 = self.mouse_curr_y
+                painter.setPen(QPen(as_qt_color(COLOR_SELECTED_LANDMARK), 2))
+                painter.drawLine(x1,y1,x2,y2)
+
+        painter.setFont(QFont('Arial', 14))
+        for idx, landmark in enumerate(self.landmark_list):
+            if idx == self.wire_hover_index:
+                painter.setPen(QPen(as_qt_color(COLOR_SELECTED_LANDMARK), 2))
+                painter.setBrush(QBrush(as_qt_color(COLOR_SELECTED_LANDMARK)))
+            elif idx == self.wire_start_index or idx == self.wire_end_index:
+                painter.setPen(QPen(as_qt_color(COLOR_SELECTED_LANDMARK), 2))
+                painter.setBrush(QBrush(as_qt_color(COLOR_SELECTED_LANDMARK)))
+            else:
+                painter.setPen(QPen(as_qt_color(COLOR_NORMAL_SHAPE), 2))
+                painter.setBrush(QBrush(as_qt_color(COLOR_NORMAL_SHAPE)))
+            painter.drawEllipse(int(self._2canx(landmark[0])-radius), int(self._2cany(landmark[1]))-radius, radius*2, radius*2)
+            if self.show_index == True:
+                painter.drawText(int(self._2canx(landmark[0])+10), int(self._2cany(landmark[1]))+10, str(idx+1))
+
+
+        # draw wireframe being edited
+        if self.wire_start_index >= 0:
+            painter.setPen(QPen(as_qt_color(COLOR_WIREFRAME), 2))
+            painter.setBrush(QBrush(as_qt_color(COLOR_WIREFRAME)))
+            start_lm = self.landmark_list[self.wire_start_index]
+            painter.drawLine(self._2canx(int(start_lm[0])), self._2cany(int(start_lm[1])), self.mouse_curr_x, self.mouse_curr_y)
+
+
+        if self.object.pixels_per_mm is not None and self.object.pixels_per_mm > 0:
+            pixels_per_mm = self.object.pixels_per_mm
+            max_scalebar_size = 120
+            bar_width = ( float(pixels_per_mm) / self.image_canvas_ratio ) * self.scale
+            actual_length = 1.0
+            while bar_width > max_scalebar_size:
+                bar_width /= 10.0
+                actual_length /= 10.0
+            if bar_width * 10.0 < max_scalebar_size:
+                bar_width *= 10.0
+                actual_length *= 10.0
+            elif bar_width * 5.0 < max_scalebar_size:
+                bar_width *= 5.0
+                actual_length *= 5.0
+            elif bar_width * 2.0 < max_scalebar_size:
+                bar_width *= 2.0
+                actual_length *= 2.0
+
+            bar_width = int(math.floor(bar_width + 0.5))
+            x = self.width() - 15 - ( bar_width + 20 )
+            y = self.height() - 15 - 35
+
+            painter.setPen(QPen(Qt.white, 1))
+            painter.setBrush(QBrush(Qt.white))
+            painter.drawRect(x, y, bar_width + 20, 30)
+            x += 10
+            y += 20
+            painter.setPen(QPen(Qt.black, 1))
+            painter.drawLine(x, y, x + bar_width, y)
+            painter.drawLine(x, y - 5, x, y + 5)
+            painter.drawLine(x + bar_width, y - 5, x + bar_width, y + 5)
+            if actual_length >= 1000:
+                length_text = str(int(actual_length / 1000.0)) + " m"
+            elif actual_length >= 10:
+                length_text = str(int(actual_length /10)) + " cm"
+            elif actual_length >= 1:
+                length_text = str(int(actual_length)) + " mm"
+            elif actual_length >= 0.001:
+                length_text = str(int(actual_length * 1000.0)) + " um"
+            else:
+                length_text = str(round(actual_length * 1000000.0 *1000)/1000) + " nm"
+            painter.setPen(QPen(Qt.black, 1))
+            painter.setFont(QFont('Arial', 10))
+            painter.drawText(x + int(math.floor(float(bar_width) / 2.0 + 0.5)) - len(length_text) * 4, y - 5, length_text)
+
+    def calculate_resize(self):
+        if self.orig_pixmap is not None:
+            self.orig_width = self.orig_pixmap.width()
+            self.orig_height = self.orig_pixmap.height()
+            image_wh_ratio = self.orig_width / self.orig_height
+            label_wh_ratio = self.width() / self.height()
+            if image_wh_ratio > label_wh_ratio:
+                self.image_canvas_ratio = self.orig_width / self.width()
+            else:
+                self.image_canvas_ratio = self.orig_height / self.height()
+            self.curr_pixmap = self.orig_pixmap.scaled(int(self.orig_width*self.scale/self.image_canvas_ratio),int(self.orig_width*self.scale/self.image_canvas_ratio), Qt.KeepAspectRatio)
+        else:
+            # no image landmark showing
+            min_x = 999999999
+            max_x = -999999999
+            min_y = 999999999
+            max_y = -999999999
+            for idx, landmark in enumerate(self.object.landmark_list):
+                if landmark[0] < min_x:
+                    min_x = landmark[0]
+                if landmark[0] > max_x:
+                    max_x = landmark[0]
+                if landmark[1] < min_y:
+                    min_y = landmark[1]
+                if landmark[1] > max_y:
+                    max_y = landmark[1]
+            #print("min_x:", min_x, "max_x:", max_x, "min_y:", min_y, "max_y:", max_y)
+            width = max_x - min_x
+            height = max_y - min_y
+            w_scale = ( self.width() * 1.0 ) / ( width * 1.5 )
+            h_scale = ( self.height() * 1.0 ) / ( height * 1.5 )
+            self.scale = min(w_scale, h_scale)
+            self.pan_x = -min_x * self.scale + (self.width() - width * self.scale) / 2.0
+            self.pan_y = -min_y * self.scale + (self.height() - height * self.scale) / 2.0
+            #print("scale:", self.scale, "pan_x:", self.pan_x, "pan_y:", self.pan_y)            pass
+
+    def resizeEvent(self, event):
+        if self.orig_pixmap is not None:
+            self.calculate_resize()
+        if self.curr_pixmap is not None:                
+            pass
+        QLabel.resizeEvent(self, event)
+
+    def set_object(self, object):
+        #print("set object", object, object.pixels_per_mm)
+        m_app = QApplication.instance()
+        self.object = object
+
+        if self.object.pixels_per_mm is not None and self.object.pixels_per_mm > 0:
+            self.pixels_per_mm = self.object.pixels_per_mm
+
+        if object.image.count() > 0:
+            self.set_image(object.image[0].get_image_path(m_app.storage_directory))
+        object.unpack_landmark()
+        object.dataset.unpack_wireframe()
+        self.landmark_list = object.landmark_list
+        self.edge_list = object.dataset.edge_list
+        self.calculate_resize()
+
+    def set_image(self,file_path):
+        self.fullpath = file_path
+        self.curr_pixmap = self.orig_pixmap = QPixmap(file_path)
+        self.setPixmap(self.curr_pixmap)
+
+    def clear_object(self):
+        self.landmark_list = []
+        self.edge_list = []
+        self.orig_pixmap = None
+        self.curr_pixmap = None
+        self.object = None
+        self.update()
+
+    def add_edge(self,wire_start_index, wire_end_index):
+        if wire_start_index == wire_end_index:
+            return
+        if wire_start_index > wire_end_index:
+            wire_start_index, wire_end_index = wire_end_index, wire_start_index
+        dataset = self.object.dataset
+        for wire in dataset.edge_list:
+            if wire[0] == wire_start_index and wire[1] == wire_end_index:
+                return
+        dataset.edge_list.append([wire_start_index, wire_end_index])
+        dataset.pack_wireframe()
+        dataset.save()
+        self.repaint()
+        
+    def delete_edge(self, edge_index):
+        dataset = self.object.dataset
+        dataset.edge_list.pop(edge_index)
+        dataset.pack_wireframe()
+        dataset.save()
+        self.repaint()
 
 class LandmarkEditor(QLabel):
     #clicked = pyqtSignal()
@@ -1616,32 +2114,20 @@ class MyGLWidget(QGLWidget):
 
     def paintGL(self):
         if self.edit_mode == WIREFRAME_MODE:
-            #print("wireframe mode and draw picker buffer")
             self.draw_picker_buffer()
 
-        #if self.no_drawing == False:
         self.draw_all()
 
-    def show_picker_buffer(self):
-        return
-        gl.glBindFramebuffer(gl.GL_READ_FRAMEBUFFER, self.picker_buffer)
-        gl.glBindFramebuffer(gl.GL_DRAW_FRAMEBUFFER, 0)  # 0 is the default framebuffer
-
-        # Blit from offscreen FBO to default FBO
-        gl.glBlitFramebuffer(
-            0, 0, self.width(), self.height(),  # Source rectangle
-            0, 0, self.width(), self.height(),  # Destination rectangle
-            gl.GL_COLOR_BUFFER_BIT,  # We're blitting the color buffer
-            gl.GL_NEAREST  # Interpolation method
-        )
-
-        # Unbind the offscreen FBO
-        gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, 0)
-        self.no_drawing = True
-        self.update()
-        self.no_drawing = False
-
     def draw_all(self):
+        gl.glMatrixMode(gl.GL_PROJECTION)
+        gl.glLoadIdentity()
+        glu.gluPerspective(45.0, self.aspect, 0.1, 100.0)
+        gl.glTranslatef(0, 0, -5.0 + self.dolly + self.temp_dolly)   # x, y, z 
+        gl.glTranslatef((self.pan_x + self.temp_pan_x)/100.0, (self.pan_y + self.temp_pan_y)/-100.0, 0.0)
+        gl.glRotatef(self.rotate_y + self.temp_rotate_y, 1.0, 0.0, 0.0)
+        gl.glRotatef(self.rotate_x + self.temp_rotate_x, 0.0, 1.0, 0.0)
+        #gl.glLoadIdentity()
+
         gl.glMatrixMode(gl.GL_MODELVIEW)
         gl.glClearColor(*COLOR_BACKGROUND, 1)
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
@@ -1651,10 +2137,6 @@ class MyGLWidget(QGLWidget):
             return
         
         # pan, rotate, dolly
-        gl.glTranslatef(0, 0, -5.0 + self.dolly + self.temp_dolly)   # x, y, z 
-        gl.glTranslatef((self.pan_x + self.temp_pan_x)/100.0, (self.pan_y + self.temp_pan_y)/-100.0, 0.0)
-        gl.glRotatef(self.rotate_y + self.temp_rotate_y, 1.0, 0.0, 0.0)
-        gl.glRotatef(self.rotate_x + self.temp_rotate_x, 0.0, 1.0, 0.0)
 
         if self.data_mode == OBJECT_MODE:
             self.draw_object(self.obj_ops)
@@ -1674,50 +2156,6 @@ class MyGLWidget(QGLWidget):
             object_color = COLOR_AVERAGE_SHAPE
             self.draw_object(ds_ops.get_average_shape(), landmark_as_sphere=True, color=object_color)
 
-    def draw_line_from_point_to_cursor(self,point_3d):
-        # Get the viewport and modelview and projection matrices
-        viewport = gl.glGetIntegerv(gl.GL_VIEWPORT)
-        modelview = gl.glGetDoublev(gl.GL_MODELVIEW_MATRIX)
-        projection = gl.glGetDoublev(gl.GL_PROJECTION_MATRIX)
-
-        # Convert cursor position to normalized device coordinates (NDC)
-        cursor_x, cursor_y = self.curr_x, self.curr_y
-        cursor_z = gl.glReadPixels(cursor_x, cursor_y, 1, 1, gl.GL_DEPTH_COMPONENT, gl.GL_FLOAT)
-        print("cursor_z:", cursor_z)
-        cursor_pos = np.array([cursor_x, cursor_y, cursor_z[0,0], 1.0], dtype=np.float32)
-        print("cursor_pos:", cursor_pos)
-        print("viewport:", viewport)
-
-        # Step 1: Subtract the first two elements of viewport from cursor_pos
-        step1 = cursor_pos - np.array([viewport[0], viewport[1], 0.0, 0.0])
-
-        # Step 2: Divide the result from Step 1 by the last two elements of viewport
-        step2 = step1 / np.array([viewport[2], viewport[3], 1.0, 1.0])
-
-        # Step 3: Multiply the result from Step 2 by 2.0
-        step3 = step2 * 2.0
-
-        # Step 4: Subtract 1.0 from the result from Step 3
-        cursor_pos = step3 - 1.0
-
-        #cursor_pos = 2.0 * (cursor_pos - viewport[:2]) / viewport[2:] - 1.0
-
-        # Unproject the cursor position from NDC to 3D world coordinates
-        unprojected_cursor_pos = glu.gluUnProject(
-            cursor_pos[0], cursor_pos[1], cursor_pos[2],
-            modelview, projection, viewport
-        )
-        print(point_3d, unprojected_cursor_pos,cursor_pos)
-
-        # Draw the line from the 3D point to the cursor position
-        gl.glDisable(gl.GL_LIGHTING)
-        gl.glColor3f(*COLOR_SELECTED_LANDMARK)
-        gl.glBegin(gl.GL_LINES)
-        gl.glVertex3fv(point_3d)
-        gl.glVertex3fv(unprojected_cursor_pos)
-        gl.glEnd()
-        gl.glEnable(gl.GL_LIGHTING)
-
     def draw_object(self,object,landmark_as_sphere=True,color=COLOR_NORMAL_SHAPE):
         current_buffer = gl.glGetIntegerv(gl.GL_FRAMEBUFFER_BINDING)
         if landmark_as_sphere:
@@ -1733,26 +2171,7 @@ class MyGLWidget(QGLWidget):
                             lm = object.landmark_list[lm_idx]
                             gl.glVertex3f(*lm)
                     gl.glEnd()
-                pass
 
-            if self.wireframe_from_idx > -1 and self.wireframe_to_idx == -1:
-                # try to draw a line from down xy to curr xy in glwidget, but it doesn't work
-                pass
-                #print("draw wireframe from down xy to curr xy")
-                #print(self.down_x, self.down_y, self.curr_x, self.curr_y)
-                #self.draw_line_from_point_to_cursor(object.landmark_list[self.wireframe_from_idx])
-
-                '''
-                #gl.glDisable(gl.GL_LIGHTING)
-                gl.glColor3f( *COLOR_SELECTED_LANDMARK )
-                gl.glBegin(gl.GL_LINE_STRIP)
-                
-                gl.glVertex2i(self.down_x, self.down_y)
-                gl.glVertex2i(self.curr_x, self.curr_y)
-                gl.glEnd()
-                #gl.glEnable(gl.GL_LIGHTING)
-                '''
-                
             lm_count = len(object.landmark_list)
             for i, lm in enumerate(object.landmark_list):
                 gl.glPushMatrix()
@@ -1793,6 +2212,15 @@ class MyGLWidget(QGLWidget):
                 gl.glVertex3f(lm[0], lm[1], lm[2])
             gl.glEnd()
             gl.glEnable(gl.GL_LIGHTING)
+        
+        # https://github.com/yarolig/OBJFileLoader
+        #from OBJFileLoader import OBJ
+        #box = OBJ('box.obj')
+        #gl.glPushMatrix()
+        #gl.glColor3f( *COLOR_RED )
+        #gl.glTranslatef(box_x, box_y, box_z)
+        #box.render()
+        #gl.glPopMatrix()
 
     def create_picker_buffer(self):
         # Create a new framebuffer
@@ -1847,8 +2275,9 @@ class MyGLWidget(QGLWidget):
         gl.glViewport(0, 0, width, height)
         gl.glMatrixMode(gl.GL_PROJECTION)
         gl.glLoadIdentity()
-        aspect = width / float(height)
-        glu.gluPerspective(45.0, aspect, 0.1, 100.0)
+        self.aspect = width / float(height)
+        glu.gluPerspective(45.0, self.aspect, 0.1, 100.0)
+        #gl.glTranslatef(0, 0, 2.0)
         gl.glMatrixMode(gl.GL_MODELVIEW)
 
         if self.picker_buffer is not None and self.edit_mode == WIREFRAME_MODE:

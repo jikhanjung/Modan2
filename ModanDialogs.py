@@ -509,6 +509,7 @@ class ObjectViewer2D(QLabel):
             painter.drawText(x + int(math.floor(float(bar_width) / 2.0 + 0.5)) - len(length_text) * 4, y - 5, length_text)
 
     def calculate_resize(self):
+        #print("objectviewer calculate resize", self.object.landmark_list, self.landmark_list)
         if self.orig_pixmap is not None:
             self.orig_width = self.orig_pixmap.width()
             self.orig_height = self.orig_pixmap.height()
@@ -525,7 +526,7 @@ class ObjectViewer2D(QLabel):
             max_x = -999999999
             min_y = 999999999
             max_y = -999999999
-            for idx, landmark in enumerate(self.object.landmark_list):
+            for idx, landmark in enumerate(self.landmark_list):
                 if landmark[0] < min_x:
                     min_x = landmark[0]
                 if landmark[0] > max_x:
@@ -542,14 +543,17 @@ class ObjectViewer2D(QLabel):
             self.scale = min(w_scale, h_scale)
             self.pan_x = -min_x * self.scale + (self.width() - width * self.scale) / 2.0
             self.pan_y = -min_y * self.scale + (self.height() - height * self.scale) / 2.0
-            #print("scale:", self.scale, "pan_x:", self.pan_x, "pan_y:", self.pan_y)            pass
+            #print("scale:", self.scale, "pan_x:", self.pan_x, "pan_y:", self.pan_y)
+        self.repaint()
 
     def resizeEvent(self, event):
-        if self.orig_pixmap is not None:
-            self.calculate_resize()
-        if self.curr_pixmap is not None:                
-            pass
+        #if self.orig_pixmap is not None:
+        #print("resize")
+        self.calculate_resize()
+        #if self.curr_pixmap is not None:                
+        #    pass
         QLabel.resizeEvent(self, event)
+        #
 
     def set_object(self, object):
         #print("set object", object, object.pixels_per_mm)
@@ -1292,7 +1296,7 @@ class ObjectDialog(QDialog):
         self.object_view_3d.object_dialog = self
         self.object_view_3d.setMouseTracking(True)
 
-        self.object_view_2d = LandmarkEditor(self)
+        self.object_view_2d = ObjectViewer2D(self)
         self.object_view_2d.object_dialog = self
         self.object_view_2d.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
         #self.image_label.clicked.connect(self.on_image_clicked)
@@ -1570,9 +1574,9 @@ class ObjectDialog(QDialog):
     def add_landmark(self, x, y, z=None):
         #print("adding landmark", x, y, z)
         if self.dataset.dimension == 2:
-            self.landmark_list.append([x,y])
+            self.landmark_list.append([float(x),float(y)])
         elif self.dataset.dimension == 3:
-            self.landmark_list.append([x,y,z])
+            self.landmark_list.append([float(x),float(y),float(z)])
         self.show_landmarks()
 
     def delete_landmark(self, idx):
@@ -1598,21 +1602,23 @@ class ObjectDialog(QDialog):
         self.inputY.setText("")
         self.inputZ.setText("")
         self.inputX.setFocus()
+        self.object_view.calculate_resize()
 
     def show_landmarks(self):
         self.edtLandmarkStr.setRowCount(len(self.landmark_list))
         for idx, lm in enumerate(self.landmark_list):
+            #print(idx, lm)
 
-            item_x = QTableWidgetItem(str(float(lm[0]*1.0)))
+            item_x = QTableWidgetItem(str(float(lm[0])*1.0))
             item_x.setTextAlignment(Qt.AlignRight|Qt.AlignVCenter)
             self.edtLandmarkStr.setItem(idx, 0, item_x)
 
-            item_y = QTableWidgetItem(str(float(lm[1]*1.0)))
+            item_y = QTableWidgetItem(str(float(lm[1])*1.0))
             item_y.setTextAlignment(Qt.AlignRight|Qt.AlignVCenter)
             self.edtLandmarkStr.setItem(idx, 1, item_y)
 
             if self.dataset.dimension == 3:
-                item_z = QTableWidgetItem(str(float(lm[2]*1.0)))
+                item_z = QTableWidgetItem(str(float(lm[2])*1.0))
                 item_z.setTextAlignment(Qt.AlignRight|Qt.AlignVCenter)
                 self.edtLandmarkStr.setItem(idx, 2, item_z)
 
@@ -2958,8 +2964,13 @@ class DatasetAnalysisDialog(QDialog):
         #print("pca button clicked")
 
         self.ds_ops = MdDatasetOps(self.dataset)
+
         self.ds_ops.procrustes_superimposition()
         self.show_object_shape()
+
+        if self.dataset.object_list is None or len(self.dataset.object_list) < 5:
+            print("too small number of objects for PCA analysis")            
+            return
 
         self.pca_result = self.PerformPCA(self.ds_ops)
         new_coords = self.pca_result.rotated_matrix.tolist()

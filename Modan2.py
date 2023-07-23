@@ -384,8 +384,10 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         if not self.selected_dataset:
             return
         self.dlg = ObjectDialog(self)
-        self.dlg.object = None
         self.dlg.set_dataset(self.selected_dataset)
+        object = MdObject()
+        object.dataset = self.selected_dataset
+        self.dlg.set_object(object)
         ret = self.dlg.exec_()
         if ret == 0:
             return

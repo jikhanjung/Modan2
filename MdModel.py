@@ -373,8 +373,8 @@ class MdObjectOps:
     def get_centroid_coord(self):
         c = [0, 0, 0]
 
-        if len(self.landmark_list) == 0 and self.landmark_str != "":
-            self.unpack_landmark()
+        #if len(self.landmark_list) == 0 and self.landmark_str != "":
+        #    self.unpack_landmark()
 
         if len(self.landmark_list) == 0:
             return c
@@ -398,11 +398,13 @@ class MdObjectOps:
 
     def get_centroid_size(self, refresh=False):
 
-        if len(self.landmark_list) == 0 and self.landmark_str != "":
-            self.unpack_landmark()
+        #if len(self.landmark_list) == 0 and self.landmark_str != "":
+        #    self.unpack_landmark()
 
         if len(self.landmark_list) == 0:
             return -1
+        elif len(self.landmark_list)== 1:
+            return 1
         if ( self.centroid_size > 0 ) and ( refresh == False ):
             return self.centroid_size
 

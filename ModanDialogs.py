@@ -166,6 +166,7 @@ class ObjectViewer2D(QLabel):
         for index, landmark in enumerate(self.landmark_list):
             lm_can_pos = [self._2canx(landmark[0]),self._2cany(landmark[1])]
             dist = self.get_distance(curr_pos, lm_can_pos)
+            #print(curr_pos, "lm_can_pos", lm_can_pos, "dist:", dist, "idx:", index)
             if dist < threshold:
                 return index
         return -1
@@ -207,12 +208,13 @@ class ObjectViewer2D(QLabel):
         return math.sqrt((pos1[0] - pos2[0])**2 + (pos1[1] - pos2[1])**2)
 
     def mouseMoveEvent(self, event):
-        if self.orig_pixmap is None or self.object_dialog is None:
+        if self.object_dialog is None:
             return
         me = QMouseEvent(event)
         self.mouse_curr_x = me.x()
         self.mouse_curr_y = me.y()
         curr_pos = [self.mouse_curr_x, self.mouse_curr_y]
+        #print("self.edit_mode", self.edit_mode, "curr pos:", curr_pos)
     
         if self.pan_mode == MODE['PAN']:
             self.temp_pan_x = self.mouse_curr_x - self.mouse_down_x
@@ -263,7 +265,7 @@ class ObjectViewer2D(QLabel):
         QLabel.mouseMoveEvent(self, event)
 
     def mousePressEvent(self, event):
-        if self.orig_pixmap is None or self.object_dialog is None:
+        if self.object_dialog is None:
             return
 
         me = QMouseEvent(event)
@@ -442,7 +444,7 @@ class ObjectViewer2D(QLabel):
             painter.setPen(QPen(as_qt_color(COLOR['WIREFRAME']), 2))
             painter.setBrush(QBrush(as_qt_color(COLOR['WIREFRAME'])))
             start_lm = self.landmark_list[self.wire_start_index]
-            painter.drawLine(self._2canx(int(start_lm[0])), self._2cany(int(start_lm[1])), self.mouse_curr_x, self.mouse_curr_y)
+            painter.drawLine(int(self._2canx(start_lm[0])), int(self._2cany(start_lm[1])), self.mouse_curr_x, self.mouse_curr_y)
 
         if self.object.pixels_per_mm is not None and self.object.pixels_per_mm > 0:
             pixels_per_mm = self.object.pixels_per_mm
@@ -1034,9 +1036,9 @@ class LandmarkEditor(QLabel):
             else:
                 painter.setPen(QPen(as_qt_color(COLOR['NORMAL_SHAPE']), 2))
                 painter.setBrush(QBrush(as_qt_color(COLOR['NORMAL_SHAPE'])))
-            painter.drawEllipse(self._2canx(int(landmark[0]))-radius, self._2cany(int(landmark[1]))-radius, radius*2, radius*2)
+            painter.drawEllipse(int(self._2canx(landmark[0]))-radius, int(self._2cany(landmark[1]))-radius, radius*2, radius*2)
             if self.show_index == True:
-                painter.drawText(self._2canx(int(landmark[0]))+10, self._2cany(int(landmark[1]))+10, str(idx+1))
+                painter.drawText(int(self._2canx(landmark[0]))+10, int(self._2cany(landmark[1]))+10, str(idx+1))
 
 
         # draw wireframe being edited
@@ -1046,7 +1048,7 @@ class LandmarkEditor(QLabel):
             start_lm = self.landmark_list[self.wire_start_index]
             #painter.drawEllipse(self._2canx(int(start_lm[0]))-radius*2, self._2cany(int(start_lm[1]))-radius, radius*2, radius*2)
             # draw line from start to mouse
-            painter.drawLine(self._2canx(int(start_lm[0])), self._2cany(int(start_lm[1])), self.mouse_curr_x, self.mouse_curr_y)
+            painter.drawLine(int(self._2canx(start_lm[0])), int(self._2cany(start_lm[1])), self.mouse_curr_x, self.mouse_curr_y)
 
 
         if self.object.pixels_per_mm is not None and self.object.pixels_per_mm > 0:
@@ -1324,6 +1326,7 @@ class ObjectDialog(QDialog):
         self.cbxShowBaseline = QCheckBox()
         self.cbxShowBaseline.setText("Baseline")
         self.cbxShowBaseline.setChecked(True)
+        self.cbxShowBaseline.hide()
         self.cbxAutoRotate = QCheckBox()
         self.cbxAutoRotate.setText("Rotate")
         self.cbxAutoRotate.setChecked(True)
@@ -1393,6 +1396,7 @@ class ObjectDialog(QDialog):
 
         self.dataset = None
         self.object = None
+        self.edtPropertyList = []
         self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
         self.m_app = QApplication.instance()
         #self.btnLandmark_clicked()
@@ -1439,6 +1443,8 @@ class ObjectDialog(QDialog):
 
     def btnLandmark_clicked(self):
         #self.edit_mode = MODE_ADD_LANDMARK
+        if self.object.image.count() == 0:
+            return
         self.object_view.set_mode(MODE['EDIT_LANDMARK'])
         self.object_view.update()
         self.btnLandmark.setDown(True)
@@ -1846,7 +1852,7 @@ class MyGLWidget(QGLWidget):
         self.temp_rotate_x = 0
         self.temp_rotate_y = 0
         self.show_index = True
-        self.show_wireframe = False
+        self.show_wireframe = True
         self.show_baseline = False
         self.show_average = True
         self.curr_x = 0
@@ -1935,7 +1941,7 @@ class MyGLWidget(QGLWidget):
             else:
                 self.rotate_x += self.temp_rotate_x
                 self.rotate_y += self.temp_rotate_y
-                if self.data_mode == OBJECT_MODE:
+                if self.data_mode == OBJECT_MODE and self.obj_ops is not None:
                     #print("x rotate:", self.rotate_x, "y rotate:", self.rotate_y)
                     self.obj_ops.rotate_3d(math.radians(-1*self.rotate_x),'Y')
                     self.obj_ops.rotate_3d(math.radians(self.rotate_y),'X')

@@ -29,8 +29,8 @@ import io
 import shutil
 
 from MdModel import *
-from ModanDialogs import DatasetAnalysisDialog, ObjectDialog, ImportDatasetDialog, DatasetDialog, PreferencesDialog, LandmarkEditor, \
-    IMAGE_EXTENSION_LIST, MyGLWidget, ExportDatasetDialog, ObjectViewer2D
+from ModanDialogs import DatasetAnalysisDialog, ObjectDialog, ImportDatasetDialog, DatasetDialog, PreferencesDialog, \
+    IMAGE_EXTENSION_LIST, MyGLWidget, ExportDatasetDialog, ObjectViewer2D, ProgressDialog
 
 #import matplotlib
 #matplotlib.use('Qt5Agg')
@@ -49,13 +49,29 @@ def resource_path(relative_path):
 
     return os.path.join(base_path, relative_path)
 
-#form_class = uic.loadUiType(resource_path("Modan2.ui"))[0]
+ICON = {}
+ICON['new_dataset'] = resource_path('icons/M2NewDataset_1.png')
+ICON['new_object'] = resource_path('icons/M2NewObject_2.png')
+ICON['import'] = resource_path('icons/M2Import_1.png')
+ICON['export'] = resource_path('icons/M2Export_1.png')
+ICON['analyze'] = resource_path('icons/M2Analysis_1.png')
+ICON['preferences'] = resource_path('icons/M2Preferences_1.png')
+ICON['about'] = resource_path('icons/M2About_1.png')
+ICON['exit'] = resource_path('icons/exit.png')
+ICON['Modan2'] = resource_path('icons/Modan2_2.png')
+#ICON['dataset_2d'] = resource_path('icons/icons8-xlarge-icons-50.png') #  https://icons8.com
+#ICON['dataset_3d'] = resource_path('icons/icons8-3d-50.png') #  https://icons8.com
+#ICON['dataset_2d'] = resource_path('icons/2D_1616_1.png')
+#ICON['dataset_3d'] = resource_path('icons/3D_1616_1.png')
+ICON['dataset_2d'] = resource_path('icons/M2Dataset2D_2.png')
+ICON['dataset_3d'] = resource_path('icons/M2Dataset3D_2.png')
+
 class ModanMainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         #self.setupUi(self)
         self.setGeometry(QRect(50, 50, 1400, 800))
-        self.setWindowIcon(QIcon(resource_path('modan.ico')))
+        self.setWindowIcon(QIcon(resource_path('icons/Modan2_2.png')))
         self.setWindowTitle(PROGRAM_NAME)
 
         self.tableView = QTableView()
@@ -66,27 +82,27 @@ class ModanMainWindow(QMainWindow):
         #self.toolbar.addAction(QIcon(resource_path('icons/open.png')), "Open", self.on_action_open_db_triggered)
         #self.toolbar.addAction(QIcon(resource_path('icons/newdb.png')), "New", self.on_action_new_db_triggered)
         #self.toolbar.addAction(QIcon(resource_path('icons/saveas.png')), "Save As", self.on_action_save_as_triggered)
-        self.actionNewDataset = QAction(QIcon(resource_path('icons/newdataset.png')), "New Dataset", self)
+        self.actionNewDataset = QAction(QIcon(resource_path(ICON['new_dataset'])), "New Dataset", self)
         self.actionNewDataset.triggered.connect(self.on_action_new_dataset_triggered)
         self.actionNewDataset.setShortcut(QKeySequence("Ctrl+N"))
-        self.actionNewObject = QAction(QIcon(resource_path('icons/newobject.png')), "New Object", self)
+        self.actionNewObject = QAction(QIcon(resource_path(ICON['new_object'])), "New Object", self)
         self.actionNewObject.triggered.connect(self.on_action_new_object_triggered)
         self.actionNewObject.setShortcut(QKeySequence("Ctrl+Shift+N"))
-        self.actionImport = QAction(QIcon(resource_path('icons/import.png')), "Import", self)
+        self.actionImport = QAction(QIcon(resource_path(ICON['import'])), "Import", self)
         self.actionImport.triggered.connect(self.on_action_import_dataset_triggered)
         self.actionImport.setShortcut(QKeySequence("Ctrl+I"))
-        self.actionExport = QAction(QIcon(resource_path('icons/export.png')), "Export", self)
+        self.actionExport = QAction(QIcon(resource_path(ICON['export'])), "Export", self)
         self.actionExport.triggered.connect(self.on_action_export_dataset_triggered)
         self.actionExport.setShortcut(QKeySequence("Ctrl+E"))
-        self.actionAnalyze = QAction(QIcon(resource_path('icons/analyze.png')), "Analyze", self)
+        self.actionAnalyze = QAction(QIcon(resource_path(ICON['analyze'])), "Analyze", self)
         self.actionAnalyze.triggered.connect(self.on_action_analyze_dataset_triggered)
         self.actionAnalyze.setShortcut(QKeySequence("Ctrl+G"))
-        self.actionPreferences = QAction(QIcon(resource_path('icons/calibration_32x32.png')), "Preferences", self)
+        self.actionPreferences = QAction(QIcon(resource_path(ICON['preferences'])), "Preferences", self)
         self.actionPreferences.triggered.connect(self.on_action_edit_preferences_triggered)
-        self.actionExit = QAction(QIcon(resource_path('icons/exit.png')), "Exit", self)
+        self.actionExit = QAction(QIcon(resource_path(ICON['exit'])), "Exit", self)
         self.actionExit.triggered.connect(self.on_action_exit_triggered)
         self.actionExit.setShortcut(QKeySequence("Ctrl+W"))
-        self.actionAbout = QAction(QIcon(resource_path('icons/about.png')), "About", self)
+        self.actionAbout = QAction(QIcon(resource_path(ICON['about'])), "About", self)
         self.actionAbout.triggered.connect(self.on_action_about_triggered)
         self.actionAbout.setShortcut(QKeySequence("F1"))
         self.toolbar.addAction(self.actionNewDataset)
@@ -96,6 +112,7 @@ class ModanMainWindow(QMainWindow):
         self.toolbar.addAction(self.actionAnalyze)
         self.toolbar.addAction(self.actionPreferences)
         self.toolbar.addAction(self.actionAbout)
+        self.toolbar.setIconSize(QSize(48,48))
 
         #self.toolbar.addAction(QIcon(resource_path('icons/newdataset.png')), "New Dataset", self.on_action_new_dataset_triggered)
         #self.toolbar.addAction(QIcon(resource_path('icons/newobject.png')), "New Object", self.on_action_new_object_triggered)
@@ -312,8 +329,26 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
         propertyname = self.selected_dataset.propertyname_list[idx]
         text, ok = QInputDialog.getText(self, 'Input Dialog', 'Enter new value for ' + propertyname, text="")
+
+
         if ok:
+            total_count = len(object_list)
+            current_count = 0
+            self.progress_dialog = ProgressDialog()
+            self.progress_dialog.setModal(True)
+            label_text = "Updating {} values...".format(propertyname)
+            self.progress_dialog.lbl_text.setText(label_text)
+            self.progress_dialog.pb_progress.setValue(0)
+            self.progress_dialog.show()
+
             for object in object_list:
+                current_count += 1
+                self.progress_dialog.pb_progress.setValue(int((current_count/float(total_count))*100))
+                self.progress_dialog.update()
+                QApplication.processEvents()
+                #if self.progress_dialog.stop_progress:
+                #    break
+
                 object.unpack_property()
                 if len(object.property_list) < idx+1:
                     while len(object.property_list) < idx+1:
@@ -323,6 +358,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 object.pack_property()
                 object.save()
             self.load_object()
+            self.progress_dialog.close()
 
     @pyqtSlot()
     def on_action_delete_object_triggered(self):
@@ -504,7 +540,28 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             source_dataset = None
             #print("selected_object_list",selected_object_list)
 
+            total_count = len(selected_object_list)
+            current_count = 0
+
+            self.progress_dialog = ProgressDialog()
+            self.progress_dialog.setModal(True)
+            if shift_clicked:
+                label_text = "Moving {} objects...".format(total_count)
+            else:
+                label_text = "Copying {} objects...".format(total_count)
+            self.progress_dialog.lbl_text.setText(label_text)
+            self.progress_dialog.pb_progress.setValue(0)
+            self.progress_dialog.show()
+
+
             for source_object in selected_object_list:
+                current_count += 1
+                self.progress_dialog.pb_progress.setValue(int((current_count/float(total_count))*100))
+                self.progress_dialog.update()
+                QApplication.processEvents()
+                if self.progress_dialog.stop_progress:
+                    break
+
                 if source_object.dataset.dimension == target_dataset.dimension:
                     # if shift is pressed, move instead of copy
                     if shift_clicked:
@@ -560,6 +617,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 else:
                     QMessageBox.warning(self, "Warning", "Dimension mismatch")
                     break
+            self.progress_dialog.close()
 
             if source_dataset is not None:
                 self.load_dataset()
@@ -733,9 +791,9 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             rec.unpack_wireframe()
             item1 = QStandardItem(rec.dataset_name + " (" + str(rec.object_list.count()) + ")")
             if rec.dimension == 2:
-                item1.setIcon(QIcon(resource_path("icons/icons8-xlarge-icons-50.png")))
+                item1.setIcon(QIcon(resource_path(ICON['dataset_2d'])))
             else:
-                item1.setIcon(QIcon(resource_path("icons/icons8-3d-50.png")))
+                item1.setIcon(QIcon(resource_path(ICON['dataset_3d'])))
             item2 = QStandardItem(str(rec.id))
             item1.setData(rec)
             
@@ -744,6 +802,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 self.load_subdataset(item1,item1.data())
         self.treeView.expandAll()
         self.treeView.hideColumn(1)
+        #self.treeView.setIconSize(QSize(16,16))
 
     def load_subdataset(self, parent_item, dataset):
         all_record = MdDataset.filter(parent=dataset)
@@ -751,9 +810,9 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             rec.unpack_wireframe()
             item1 = QStandardItem(rec.dataset_name + " (" + str(rec.object_list.count()) + ")")
             if rec.dimension == 2:
-                item1.setIcon(QIcon(resource_path("icons/icons8-xlarge-icons-50.png"))) #  https://icons8.com
+                item1.setIcon(QIcon(resource_path(ICON['dataset_2d']))) 
             else:
-                item1.setIcon(QIcon(resource_path("icons/icons8-3d-50.png")))
+                item1.setIcon(QIcon(resource_path(ICON['dataset_3d'])))
             item2 = QStandardItem(str(rec.id))
             item1.setData(rec)
             parent_item.appendRow([item1,item2])#,item3] )
@@ -821,7 +880,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 if __name__ == "__main__":
     #QApplication : 프로그램을 실행시켜주는 클래스
     app = QApplication(sys.argv)
-    app.setWindowIcon(QIcon(resource_path('modan.ico')))
+    app.setWindowIcon(QIcon(resource_path('icons/Modan2_2.png')))
     #app.preferences = QSettings("Modan", "Modan2")
 
     #WindowClass의 인스턴스 생성

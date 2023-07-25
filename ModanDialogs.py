@@ -919,8 +919,8 @@ class ObjectDialog(QDialog):
 
     def btnLandmark_clicked(self):
         #self.edit_mode = MODE_ADD_LANDMARK
-        if self.object.image.count() == 0:
-            return
+        #if self.object.image.count() == 0:
+        #    return
         self.object_view.set_mode(MODE['EDIT_LANDMARK'])
         self.object_view.update()
         self.btnLandmark.setDown(True)

@@ -57,6 +57,7 @@ MODE['READY_MOVE_LANDMARK'] = 3
 MODE['MOVE_LANDMARK'] = 4
 MODE['PRE_WIRE_FROM'] = 5
 MODE['CALIBRATION'] = 6
+MODE['VIEW'] = 7
 
 LANDMARK_RADIUS = 3
 DISTANCE_THRESHOLD = LANDMARK_RADIUS * 3
@@ -89,12 +90,14 @@ ICON = {}
 ICON['landmark'] = resource_path('icons/M2Landmark_2.png')
 ICON['landmark_hover'] = resource_path('icons/M2Landmark_2_hover.png')
 ICON['landmark_down'] = resource_path('icons/M2Landmark_2_down.png')
+ICON['landmark_disabled'] = resource_path('icons/M2Landmark_2_disabled.png')
 ICON['wireframe'] = resource_path('icons/M2Wireframe_2.png')
 ICON['wireframe_hover'] = resource_path('icons/M2Wireframe_2_hover.png')
 ICON['wireframe_down'] = resource_path('icons/M2Wireframe_2_down.png')
 ICON['calibration'] = resource_path('icons/M2Calibration_2.png')
 ICON['calibration_hover'] = resource_path('icons/M2Calibration_2_hover.png')
 ICON['calibration_down'] = resource_path('icons/M2Calibration_2_down.png')
+ICON['calibration_disabled'] = resource_path('icons/M2Calibration_2_disabled.png')
 
 def as_qt_color(color):
     return QColor( *[ int(x*255) for x in color ] )
@@ -153,6 +156,7 @@ class ObjectViewer2D(QLabel):
         self.show_index = True
         self.show_wireframe = True
         self.show_baseline = False  
+        self.read_only = False
 
         self.pan_x = 0
         self.pan_y = 0
@@ -194,18 +198,23 @@ class ObjectViewer2D(QLabel):
         self.edit_mode = mode  
         if self.edit_mode == MODE['EDIT_LANDMARK']:
             self.setCursor(Qt.CrossCursor)
+            #QApplication.setOverrideCursor(Qt.CrossCursor)
             self.show_message("Click on image to add landmark")
         elif self.edit_mode == MODE['READY_MOVE_LANDMARK']:
             self.setCursor(Qt.SizeAllCursor)
+            #QApplication.setOverrideCursor(Qt.SizeAllCursor)
             self.show_message("Click on landmark to move")
         elif self.edit_mode == MODE['MOVE_LANDMARK']:
+            #QApplication.setOverrideCursor(Qt.SizeAllCursor)
             self.setCursor(Qt.SizeAllCursor)
             self.show_message("Move landmark")
-        if self.edit_mode == MODE['CALIBRATION']:
+        elif self.edit_mode == MODE['CALIBRATION']:
+            #QApplication.setOverrideCursor(Qt.CrossCursor)
             self.setCursor(Qt.CrossCursor)
             self.show_message("Click on image to add landmark")
         else:
             self.setCursor(Qt.ArrowCursor)
+            #QApplication.setOverrideCursor(Qt.ArrowCursor)
 
     def get_landmark_index_within_threshold(self, curr_pos, threshold=DISTANCE_THRESHOLD):
         for index, landmark in enumerate(self.landmark_list):
@@ -262,13 +271,13 @@ class ObjectViewer2D(QLabel):
         #print("self.edit_mode", self.edit_mode, "curr pos:", curr_pos)
     
         if self.pan_mode == MODE['PAN']:
-            self.temp_pan_x = self.mouse_curr_x - self.mouse_down_x
-            self.temp_pan_y = self.mouse_curr_y - self.mouse_down_y
+            self.temp_pan_x = int(self.mouse_curr_x - self.mouse_down_x)
+            self.temp_pan_y = int(self.mouse_curr_y - self.mouse_down_y)
 
         elif self.edit_mode == MODE['EDIT_LANDMARK']:
             near_idx = self.get_landmark_index_within_threshold(curr_pos, DISTANCE_THRESHOLD)
             if near_idx >= 0:
-                self.setCursor(Qt.SizeAllCursor)
+                #self.setCursor(Qt.SizeAllCursor)                
                 self.set_mode(MODE['READY_MOVE_LANDMARK'])
                 self.selected_landmark_index = near_idx
 
@@ -355,6 +364,8 @@ class ObjectViewer2D(QLabel):
         self.repaint()
 
     def mouseReleaseEvent(self, ev: QMouseEvent) -> None:
+        if self.object_dialog is None:
+            return
         me = QMouseEvent(ev)
         if self.pan_mode == MODE['PAN']:
             self.pan_mode = MODE['NONE']
@@ -436,8 +447,11 @@ class ObjectViewer2D(QLabel):
 
         painter = QPainter(self)
         painter.fillRect(self.rect(), QBrush(as_qt_color(COLOR['BACKGROUND'])))
-        if self.curr_pixmap is not None:                
+        if self.curr_pixmap is not None:
+            #print("paintEvent", self.curr_pixmap.width(), self.curr_pixmap.height())
             painter.drawPixmap(self.pan_x+self.temp_pan_x, self.pan_y+self.temp_pan_y,self.curr_pixmap)
+            #print("paintEvent", self.pan_x+self.temp_pan_x, self.pan_y+self.temp_pan_y,self.curr_pixmap.width(), self.curr_pixmap.height())
+            #print("pan_x", self.pan_x, "pan_y", self.pan_y, "temp_pan_x", self.temp_pan_x, "temp_pan_y", self.temp_pan_y)
 
         if self.show_wireframe == True:
             painter.setPen(QPen(as_qt_color(COLOR['WIREFRAME']), 2))
@@ -475,6 +489,9 @@ class ObjectViewer2D(QLabel):
                 painter.setPen(QPen(as_qt_color(COLOR['SELECTED_LANDMARK']), 2))
                 painter.setBrush(QBrush(as_qt_color(COLOR['SELECTED_LANDMARK'])))
             elif idx == self.wire_start_index or idx == self.wire_end_index:
+                painter.setPen(QPen(as_qt_color(COLOR['SELECTED_LANDMARK']), 2))
+                painter.setBrush(QBrush(as_qt_color(COLOR['SELECTED_LANDMARK'])))
+            elif idx == self.selected_landmark_index:
                 painter.setPen(QPen(as_qt_color(COLOR['SELECTED_LANDMARK']), 2))
                 painter.setBrush(QBrush(as_qt_color(COLOR['SELECTED_LANDMARK'])))
             else:
@@ -571,9 +588,9 @@ class ObjectViewer2D(QLabel):
             w_scale = ( self.width() * 1.0 ) / ( width * 1.5 )
             h_scale = ( self.height() * 1.0 ) / ( height * 1.5 )
             self.scale = min(w_scale, h_scale)
-            self.pan_x = -min_x * self.scale + (self.width() - width * self.scale) / 2.0
-            self.pan_y = -min_y * self.scale + (self.height() - height * self.scale) / 2.0
-            #print("scale:", self.scale, "pan_x:", self.pan_x, "pan_y:", self.pan_y)
+            self.pan_x = int( -min_x * self.scale + (self.width() - width * self.scale) / 2.0 )
+            self.pan_y = int( -min_y * self.scale + (self.height() - height * self.scale) / 2.0 )
+            #print("scale:", self.scale, "pan_x:", self.pan_x, "pan_y:", self.pan_y, "image_canvas_ratio:", self.image_canvas_ratio)
         self.repaint()
 
     def resizeEvent(self, event):
@@ -606,6 +623,12 @@ class ObjectViewer2D(QLabel):
         self.orig_pixmap = None
         self.curr_pixmap = None
         self.object = None
+        self.pan_x = 0
+        self.pan_y = 0
+        self.temp_pan_x = 0
+        self.temp_pan_y = 0
+        self.scale = 1.0
+        self.image_canvas_ratio = 1.0
         self.update()
 
     def add_edge(self,wire_start_index, wire_end_index):
@@ -694,7 +717,7 @@ class ObjectDialog(QDialog):
     # NewDatasetDialog shows new dataset dialog.
     def __init__(self,parent):
         super().__init__()
-        self.setWindowTitle("Object")
+        self.setWindowTitle("Modan2 - Object Information")
         self.parent = parent
         #print(self.parent.pos())
         self.setGeometry(QRect(100, 100, 1400, 800))
@@ -767,9 +790,9 @@ class ObjectDialog(QDialog):
         self.form_layout.addRow("", self.inputCoords)
 
         self.btnGroup = QButtonGroup() 
-        self.btnLandmark = PicButton(QPixmap(ICON['landmark']), QPixmap(ICON['landmark_hover']), QPixmap(ICON['landmark_down']))
+        self.btnLandmark = PicButton(QPixmap(ICON['landmark']), QPixmap(ICON['landmark_hover']), QPixmap(ICON['landmark_down']), QPixmap(ICON['landmark_disabled']))
         self.btnWireframe = PicButton(QPixmap(ICON['wireframe']), QPixmap(ICON['wireframe_hover']), QPixmap(ICON['wireframe_down']))
-        self.btnCalibration = PicButton(QPixmap(ICON['calibration']), QPixmap(ICON['calibration_hover']), QPixmap(ICON['calibration_down']))
+        self.btnCalibration = PicButton(QPixmap(ICON['calibration']), QPixmap(ICON['calibration_hover']), QPixmap(ICON['calibration_down']),QPixmap(ICON['calibration_disabled']))
         self.btnGroup.addButton(self.btnLandmark)
         self.btnGroup.addButton(self.btnWireframe)
         self.btnGroup.addButton(self.btnCalibration)
@@ -785,9 +808,10 @@ class ObjectDialog(QDialog):
         self.btnLandmark.clicked.connect(self.btnLandmark_clicked)
         self.btnWireframe.clicked.connect(self.btnWireframe_clicked)
         self.btnCalibration.clicked.connect(self.btnCalibration_clicked)
-        self.btnLandmark.setFixedSize(48,48)
-        self.btnWireframe.setFixedSize(48,48)
-        self.btnCalibration.setFixedSize(48,48)
+        BUTTON_SIZE = 48
+        self.btnLandmark.setFixedSize(BUTTON_SIZE,BUTTON_SIZE)
+        self.btnWireframe.setFixedSize(BUTTON_SIZE,BUTTON_SIZE)
+        self.btnCalibration.setFixedSize(BUTTON_SIZE,BUTTON_SIZE)
         self.btn_layout2 = QGridLayout()
         self.btn_layout2.addWidget(self.btnLandmark,0,0)
         self.btn_layout2.addWidget(self.btnWireframe,0,1)
@@ -932,8 +956,8 @@ class ObjectDialog(QDialog):
 
     def btnCalibration_clicked(self):
         #self.edit_mode = MODE_ADD_LANDMARK
-        self.object_view_2d.set_mode(MODE['CALIBRATION'])
-        self.object_view_2d.update()
+        self.object_view.set_mode(MODE['CALIBRATION'])
+        self.object_view.update()
         self.btnCalibration.setDown(True)
         self.btnCalibration.setChecked(True)
         self.btnLandmark.setDown(False)
@@ -977,7 +1001,7 @@ class ObjectDialog(QDialog):
             header.setSectionResizeMode(0, QHeaderView.Stretch)
             header.setSectionResizeMode(1, QHeaderView.Stretch)
             self.cbxAutoRotate.hide()
-            self.btnCalibration.show()
+            #self.btnCalibration.show()
             self.inputZ.hide()
             self.object_view_3d.hide()
             self.object_view = self.object_view_2d
@@ -989,7 +1013,7 @@ class ObjectDialog(QDialog):
             header.setSectionResizeMode(1, QHeaderView.Stretch)
             header.setSectionResizeMode(2, QHeaderView.Stretch)
             self.cbxAutoRotate.show()
-            self.btnCalibration.hide()
+            #self.btnCalibration.hide()
             self.inputZ.show()
             self.object_view_2d.hide()
             self.object_view = self.object_view_3d
@@ -1026,6 +1050,8 @@ class ObjectDialog(QDialog):
             self.object_view.set_object(object)
             self.object_view.landmark_list = self.landmark_list
             #self.object_view.set_dataset(object.dataset)
+            self.btnLandmark.setDisabled(True)
+            self.btnCalibration.setDisabled(True)
             self.cbxAutoRotate.show()
         else:
             #print("set_object 2d")
@@ -1038,8 +1064,15 @@ class ObjectDialog(QDialog):
                     #check if image_path exists
                     if os.path.exists(image_path):
                         self.object_view.set_image(image_path)
-                        self.object_view.set_object(object)
-                        self.object_view.landmark_list = self.landmark_list
+                    self.object_view.set_mode(MODE['EDIT_LANDMARK'])
+                    self.btnCalibration.setEnabled(True)
+                    self.btnLandmark.setEnabled(True)
+                    self.btnLandmark.setDown(True)
+                else:
+                    self.object_view.set_mode(MODE['VIEW'])
+                    self.btnCalibration.setDisabled(True)
+                    self.btnLandmark.setDisabled(True)
+                    self.btnLandmark.setDown(False)
                 #elif len(self.landmark_list) > 0:
                 self.object_view.set_object(object)
                 self.object_view.landmark_list = self.landmark_list
@@ -1844,7 +1877,7 @@ class MyGLWidget(QGLWidget):
 class DatasetAnalysisDialog(QDialog):
     def __init__(self,parent,dataset):
         super().__init__()
-        self.setWindowTitle("Modan2 - Dataset Analyses")
+        self.setWindowTitle("Modan2 - Dataset Analysis")
         self.setWindowIcon(QIcon(resource_path('icons/modan.ico')))
         self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
         self.parent = parent
@@ -2790,7 +2823,7 @@ class DatasetAnalysisDialog(QDialog):
 class ExportDatasetDialog(QDialog):
     def __init__(self,parent):
         super().__init__()
-        self.setWindowTitle("Export Dataset")
+        self.setWindowTitle("Modan2 - Export")
         self.parent = parent
         #print(self.parent.pos())
         self.setGeometry(QRect(100, 100, 600, 400))
@@ -2963,7 +2996,7 @@ class ImportDatasetDialog(QDialog):
     # NewDatasetDialog shows new dataset dialog.
     def __init__(self,parent):
         super().__init__()
-        self.setWindowTitle("Import Dataset")
+        self.setWindowTitle("Modan2 - Import")
         self.parent = parent
         #print(self.parent.pos())
         self.setGeometry(QRect(100, 100, 600, 400))
@@ -2985,6 +3018,8 @@ class ImportDatasetDialog(QDialog):
         self.rbnTPS = QRadioButton("TPS")
         self.rbnX1Y1 = QRadioButton("X1Y1")
         self.rbnMorphologika = QRadioButton("Morphologika")
+        self.rbnX1Y1.setDisabled(True)
+        self.rbnMorphologika.setDisabled(True)
         self.chkFileType.addButton(self.rbnTPS)
         self.chkFileType.addButton(self.rbnX1Y1)
         self.chkFileType.addButton(self.rbnMorphologika)
@@ -3241,7 +3276,7 @@ class DatasetDialog(QDialog):
     # NewDatasetDialog shows new dataset dialog.
     def __init__(self,parent):
         super().__init__()
-        self.setWindowTitle("Dataset")
+        self.setWindowTitle("Modan2 - Dataset Information")
         self.parent = parent
         #print(self.parent.pos())
         self.setGeometry(QRect(100, 100, 600, 400))
@@ -3390,11 +3425,18 @@ class DatasetDialog(QDialog):
 
 
 class PicButton(QAbstractButton):
-    def __init__(self, pixmap, pixmap_hover, pixmap_pressed, parent=None):
+    def __init__(self, pixmap, pixmap_hover, pixmap_pressed, pixmap_disabled=None, parent=None):
         super(PicButton, self).__init__(parent)
         self.pixmap = pixmap
         self.pixmap_hover = pixmap_hover
         self.pixmap_pressed = pixmap_pressed
+        if pixmap_disabled is None:
+            result = pixmap_hover.copy()
+            image = QtGui.QPixmap.toImage(result)
+            grayscale = image.convertToFormat(QtGui.QImage.Format_Grayscale8)
+            pixmap_disabled = QtGui.QPixmap.fromImage(grayscale)
+            #self.Changed_view.emit(pixmap)            
+        self.pixmap_disabled = pixmap_disabled
 
         self.pressed.connect(self.update)
         self.released.connect(self.update)
@@ -3403,6 +3445,8 @@ class PicButton(QAbstractButton):
         pix = self.pixmap_hover if self.underMouse() else self.pixmap
         if self.isDown():
             pix = self.pixmap_pressed
+        if self.isEnabled() == False and self.pixmap_disabled is not None:
+            pix = self.pixmap_disabled
 
         painter = QPainter(self)
         painter.drawPixmap(self.rect(), pix)

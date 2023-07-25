@@ -30,7 +30,7 @@ import shutil
 
 from MdModel import *
 from ModanDialogs import DatasetAnalysisDialog, ObjectDialog, ImportDatasetDialog, DatasetDialog, PreferencesDialog, \
-    IMAGE_EXTENSION_LIST, MyGLWidget, ExportDatasetDialog, ObjectViewer2D, ProgressDialog
+    IMAGE_EXTENSION_LIST, MODE, MyGLWidget, ExportDatasetDialog, ObjectViewer2D, ProgressDialog
 
 #import matplotlib
 #matplotlib.use('Qt5Agg')
@@ -63,8 +63,8 @@ ICON['Modan2'] = resource_path('icons/Modan2_2.png')
 #ICON['dataset_3d'] = resource_path('icons/icons8-3d-50.png') #  https://icons8.com
 #ICON['dataset_2d'] = resource_path('icons/2D_1616_1.png')
 #ICON['dataset_3d'] = resource_path('icons/3D_1616_1.png')
-ICON['dataset_2d'] = resource_path('icons/M2Dataset2D_2.png')
-ICON['dataset_3d'] = resource_path('icons/M2Dataset3D_2.png')
+ICON['dataset_2d'] = resource_path('icons/M2Dataset2D_3.png')
+ICON['dataset_3d'] = resource_path('icons/M2Dataset3D_4.png')
 
 class ModanMainWindow(QMainWindow):
     def __init__(self):
@@ -112,15 +112,7 @@ class ModanMainWindow(QMainWindow):
         self.toolbar.addAction(self.actionAnalyze)
         self.toolbar.addAction(self.actionPreferences)
         self.toolbar.addAction(self.actionAbout)
-        self.toolbar.setIconSize(QSize(48,48))
-
-        #self.toolbar.addAction(QIcon(resource_path('icons/newdataset.png')), "New Dataset", self.on_action_new_dataset_triggered)
-        #self.toolbar.addAction(QIcon(resource_path('icons/newobject.png')), "New Object", self.on_action_new_object_triggered)
-        #self.toolbar.addAction(QIcon(resource_path('icons/import.png')), "Import", self.on_action_import_dataset_triggered)
-        #self.toolbar.addAction(QIcon(resource_path('icons/export.png')), "Export", self.on_action_export_dataset_triggered)
-        #self.toolbar.addAction(QIcon(resource_path('icons/analyze.png')), "Analyze", self.on_action_analyze_dataset_triggered)
-        #self.toolbar.addAction(QIcon(resource_path('icons/preferences.png')), "Preferences", self.on_action_edit_preferences_triggered)
-        #self.toolbar.addAction(QIcon(resource_path('icons/exit.png')), "Exit", self.on_action_exit_triggered)
+        self.toolbar.setIconSize(QSize(32,32))
         self.addToolBar(self.toolbar)
 
         self.main_menu = self.menuBar()
@@ -260,6 +252,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         # add tableView and tableWidget to vertical layout
         #self.object_view_2d = LandmarkEditor(self)
         self.object_view_2d = ObjectViewer2D(self)
+        self.object_view_2d.set_mode(MODE['VIEW'])
         self.object_view_3d = MyGLWidget(self)
         self.object_view = self.object_view_2d
         self.object_view_3d.hide()
@@ -873,6 +866,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         #print("show object")
         self.object_view.clear_object()
         self.object_view.set_object(obj)
+        self.object_view.read_only = True
 
     def clear_object_view(self):
         self.object_view.clear_object()
@@ -895,5 +889,5 @@ if __name__ == "__main__":
 
 ''' 
 How to make an exe file
-pyinstaller --onefile --noconsole --add-data "modan.ico;." --add-data "icons/*;icons" --add-data "Modan2.ui;." --icon="modan.ico" Modan2.py
+pyinstaller --onefile --noconsole --add-data "icons/*.png;icons" --icon="icons/Modan2_2.png" Modan2.py
 '''

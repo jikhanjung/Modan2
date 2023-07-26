@@ -2169,6 +2169,12 @@ class DatasetAnalysisDialog(QDialog):
         self.selection_changed_off = False
         self.onpick_happened = False
 
+
+        # set wait cursor
+        QApplication.setOverrideCursor(Qt.WaitCursor)
+        QApplication.processEvents()
+
+
         # data setting
         set_result = self.set_dataset(dataset)
         #print("set dataset result: ", set_result)
@@ -2188,6 +2194,10 @@ class DatasetAnalysisDialog(QDialog):
             self.on_btnPCA_clicked()
 
             self.btnSaveResults.setFocus()
+
+        # end wait cursor
+        QApplication.restoreOverrideCursor()
+
 
     def chart_options_clicked(self):
         self.show_chart_options = not self.show_chart_options
@@ -2386,7 +2396,9 @@ class DatasetAnalysisDialog(QDialog):
 
         self.ds_ops = MdDatasetOps(self.dataset)
 
-        self.ds_ops.procrustes_superimposition()
+        if not self.ds_ops.procrustes_superimposition():
+            print("procrustes superimposition failed")
+            return
         self.show_object_shape()
 
         if self.dataset.object_list is None or len(self.dataset.object_list) < 5:
@@ -2855,6 +2867,10 @@ class ExportDatasetDialog(QDialog):
         self.rbTPS.setChecked(True)
         self.rbTPS.clicked.connect(self.on_rbTPS_clicked)
         self.rbTPS.setEnabled(True)
+        self.rbNTS = QRadioButton("NTS")
+        self.rbNTS.setChecked(True)
+        self.rbNTS.clicked.connect(self.on_rbNTS_clicked)
+        self.rbNTS.setEnabled(True)
         self.rbX1Y1 = QRadioButton("X1Y1")
         self.rbX1Y1.clicked.connect(self.on_rbX1Y1_clicked)
         self.rbX1Y1.setEnabled(True)
@@ -2946,9 +2962,9 @@ class ExportDatasetDialog(QDialog):
     def on_rbNone_clicked(self):
         pass
 
-
-
     def on_rbTPS_clicked(self):
+        pass
+    def on_rbNTS_clicked(self):
         pass
     def on_rbX1Y1_clicked(self):
         pass
@@ -3016,11 +3032,13 @@ class ImportDatasetDialog(QDialog):
         # add file type checkbox group with TPS, X1Y1, Morphologika.
         self.chkFileType = QButtonGroup()
         self.rbnTPS = QRadioButton("TPS")
+        self.rbnNTS = QRadioButton("NTS")
         self.rbnX1Y1 = QRadioButton("X1Y1")
         self.rbnMorphologika = QRadioButton("Morphologika")
         self.rbnX1Y1.setDisabled(True)
-        self.rbnMorphologika.setDisabled(True)
+        #self.rbnMorphologika.setDisabled(True)
         self.chkFileType.addButton(self.rbnTPS)
+        self.chkFileType.addButton(self.rbnNTS)
         self.chkFileType.addButton(self.rbnX1Y1)
         self.chkFileType.addButton(self.rbnMorphologika)
         self.chkFileType.buttonClicked.connect(self.file_type_changed)
@@ -3029,6 +3047,7 @@ class ImportDatasetDialog(QDialog):
         self.gbxFileType = QGroupBox()
         self.gbxFileType.setLayout(QHBoxLayout())
         self.gbxFileType.layout().addWidget(self.rbnTPS)
+        self.gbxFileType.layout().addWidget(self.rbnNTS)
         self.gbxFileType.layout().addWidget(self.rbnX1Y1)
         self.gbxFileType.layout().addWidget(self.rbnMorphologika)
         self.gbxFileType.layout().addStretch(1)
@@ -3091,6 +3110,10 @@ class ImportDatasetDialog(QDialog):
                 self.rbnTPS.setChecked(True)
                 self.edtObjectCount.setText("")
                 self.file_type_changed()
+            elif self.file_ext.lower() == ".nts":
+                self.rbnNTS.setChecked(True)
+                self.edtObjectCount.setText("")
+                self.file_type_changed()
             elif self.file_ext.lower() == ".x1y1":
                 self.rbnX1Y1.setChecked(True)
                 self.file_type_changed()
@@ -3099,6 +3122,7 @@ class ImportDatasetDialog(QDialog):
                 self.file_type_changed()
             else:
                 self.rbnTPS.setChecked(False)
+                self.rbnNTS.setChecked(False)
                 self.rbnX1Y1.setChecked(False)
                 self.rbnMorphologika.setChecked(False)
                 self.btnImport.setEnabled(False)
@@ -3114,45 +3138,62 @@ class ImportDatasetDialog(QDialog):
         pass
 
     def import_file(self):
+
+        filename = self.edtFilename.text()
+        filetype = self.chkFileType.checkedButton().text()
+        datasetname = self.edtDatasetName.text()
+        objectcount = self.edtObjectCount.text()
+        import_data = None
+        if filetype == "TPS":
+            import_data = TPS(filename, datasetname)
+        elif filetype == "NTS":
+            import_data = NTS(filename, datasetname)
+        elif filetype == "Morphologika":
+            import_data = Morphologika(filename, datasetname)
+
+        if import_data is None:
+            return
+
         self.btnImport.setEnabled(False)
         self.prgImport.setValue(0)
         self.prgImport.setFormat("Importing...")
         self.prgImport.update()
         self.prgImport.repaint()
 
-        filename = self.edtFilename.text()
-        filetype = self.chkFileType.checkedButton().text()
-        datasetname = self.edtDatasetName.text()
-        objectcount = self.edtObjectCount.text()
-        if filetype == "TPS":
-            self.import_tps(filename, datasetname)            
-        else:
-            pass
-
-    def import_tps(self, filename, datasetname):
-        # read tps file
-        tps = TPS(filename, datasetname)
-        self.edtObjectCount.setText(str(tps.nobjects))
+        self.edtObjectCount.setText(str(import_data.nobjects))
         #print("objects:", tps.nobjects,tps.nlandmarks,tps.object_name_list)
         # create dataset
         dataset = MdDataset()
         dataset.dataset_name = datasetname
-        dataset.dimension = tps.dimension
+        dataset.dimension = import_data.dimension
+        if len(import_data.propertyname_list) > 0:
+            dataset.propertyname_list = import_data.propertyname_list
+            dataset.pack_propertyname_str()
         dataset.save()
         # add objects
-        for i in range(tps.nobjects):
+        for i in range(import_data.nobjects):
             object = MdObject()
-            object.object_name = tps.object_name_list[i]
+            object.object_name = import_data.object_name_list[i]
             #print("object:", object.object_name)
             object.dataset = dataset
             object.landmark_str = ""
             landmark_list = []
-            for landmark in tps.landmark_data[tps.object_name_list[i]]:
+            #print("object_name", object.object_name, import_data.landmark_data.keys())
+            #if object.object_name in import_data.landmark_data.keys():
+            #    print("key exist")
+            #else:
+            #    print("key not exist")
+            for landmark in import_data.landmark_data[object.object_name]:
                 landmark_list.append("\t".join([ str(x) for x in landmark]))
             object.landmark_str = "\n".join(landmark_list)
+            if len(import_data.propertyname_list) > 0:
+                object.property_list = import_data.property_list_list[i]
+                object.pack_property()
+            if object.object_name in import_data.object_comment.keys():
+                object.object_desc = import_data.object_comment[import_data.object_name_list[i]]
 
             object.save()
-            val = int( (float(i+1)*100.0 / float(tps.nobjects)) )
+            val = int( (float(i+1)*100.0 / float(import_data.nobjects)) )
             #print("progress:", i+1, tps.nobjects, val)
             self.update_progress(val)
             #progress = int( (i / float(tps.nobjects)) * 100)
@@ -3161,7 +3202,7 @@ class ImportDatasetDialog(QDialog):
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Information)
 
-        msg.setText("Finished importing a TPS file.")
+        msg.setText("Finished importing a " + filetype + " file.")
         msg.setStandardButtons(QMessageBox.Ok)
             
         retval = msg.exec_()
@@ -3185,6 +3226,12 @@ class TPS:
         self.nobjects = 0
         self.object_name_list = []
         self.landmark_str_list = []
+        self.edge_list = []
+        self.polygon_list = []
+        self.propertyname_list = []
+        self.property_list_list = []
+        self.object_comment = {}
+        self.landmark_data = {}
         self.read()
 
     def isNumber(self,s):
@@ -3207,55 +3254,93 @@ class TPS:
             threed = 0
             twod = 0
             objects = {}
+            object_comment = {}
             header = ''
             comment = ''
             image_count = 0
+            currently_in_data_section = False
+            object_id = ''
+            object_image_path = ''
+            object_comment_1 = ''
+            object_comment_2 = ''
+            
             for line in tps_lines:
                 line = line.strip()
                 if line == '':
                     continue
                 if line.startswith("#"):
                     continue
-                headerline = re.search('^(\w+)(\s*)=(\s*)(\d+)(.*)', line)
-                if headerline == None:
-                    if header == 'lm':
+                if line.startswith('"') or line.startswith("'"):
+                    continue
+
+                # regular expression that finds the line "LM=xx comment", ignore case
+                headerline = re.search('^\s*LM\s*=\s*(\d+)\s*(.*)', line, re.IGNORECASE)
+
+                #headerline = re.search('^\s*[LM]+\s*=\s*(\d+)\s*(.*)', line)
+                if headerline is not None:
+                    #print("headerline:", headerline.group(1), headerline.group(2))
+                    if currently_in_data_section == True:
+                        if len(data) > 0:
+                            if object_id != '':
+                                key = object_id
+                            elif object_comment_1 != '':
+                                key = object_comment_1
+                                object_comment_1 = ''
+                            else:
+                                key = self.datasetname + "_" + str(object_count+1)
+                            objects[key] = data
+                            object_name_list.append(key)
+                            object_comment[key] = " ".join( [ object_comment_1, object_comment_2 ] ).strip()
+                            #print("data:", data)
+                            data = []
+                            object_id = ''
+                            object_comment_1 = ''
+                            object_comment_2 = ''
+                            object_image_path = ''
+                        landmark_count, object_comment_1 = int(headerline.group(1)), headerline.group(2).strip()
+                        #print("landmark_count:", landmark_count, "object_count:", object_count, "comment:", comment)
+                        object_count += 1
+                    else:
+                        currently_in_data_section = True
+                else:
+                    dataline = re.search('^\s*(\w+)\s*=(.+)', line)
+                    #print(line)
+                    if dataline is None:
+                        #print("actual data:", line)
                         point = [ float(x) for x in re.split('\s+', line)]
                         if len(point) > 2 and self.isNumber(point[2]):
                             threed += 1
                         else:
                             twod += 1
-
+                        #print("point:", point)
                         if len(point)>1:
                             data.append(point)
-                    continue
-                elif headerline.group(1).lower() == "lm":
-                    if len(data) > 0:
-                        if comment != '':
-                            key = comment
-                        else:
-                            key = self.datasetname + "_" + str(object_count)
-                        objects[key] = data
-                        object_name_list.append(key)
-                        data = []
-                    header = 'lm'
-                    landmark_count, comment = int(headerline.group(4)), headerline.group(5).strip()
-                    #print("landmark_count:", landmark_count, "object_count:", object_count, "comment:", comment)
-                    object_count += 1
-                    # landmark_count_list.append( landmark_count )
-                    # if not found:
-                    #found = True
-                elif headerline.group(1).lower() == "image":
-                    image_count += 1
+                    elif dataline.group(1).lower() == "image":
+                        #print("image:", dataline.group(2))
+                        object_image_path = dataline.group(2)
+                    elif dataline.group(1).lower() == "comment":
+                        #print("comment:", dataline.group(2))
+                        object_comment_2 = dataline.group(2)
+                    elif dataline.group(1).lower() == "id":
+                        #print("id:", dataline.group(2))
+                        #object_id = dataline.group(2)
+                        pass
+
+            #print("aa")
 
             if len(data) > 0:
-                if comment != '':
-                    key = comment
+                if object_id != '':
+                    key = object_id
+                elif object_comment_1 != '':
+                    key = object_comment_1
+                    object_comment_1 = ''
                 else:
-                    key = self.datasetname + "_" + str(object_count)
-                #print("key:", key, "data:", data)
+                    key = self.datasetname + "_" + str(object_count+1)
                 objects[key] = data
                 object_name_list.append(key)
-                data = []
+                object_comment[key] = " ".join( [ object_comment_1, object_comment_2 ] ).strip()
+
+            #print("bb", object_count, landmark_count)
 
             if object_count == 0 and landmark_count == 0:
                 return None
@@ -3264,13 +3349,261 @@ class TPS:
                 self.dimension = 3
             else:
                 self.dimension = 2
+            
+            #print ("dimension:", self.dimension)
+            #print("object_count:", object_count)
+            #print("landmark_count:", landmark_count)
+            #print("object_name_list:", object_name_list)
+            #print("object_comment:", object_comment)
+            #print("objects:", objects)
 
             self.nobjects = len(object_name_list)
             self.nlandmarks = landmark_count
             self.landmark_data = objects
             self.object_name_list = object_name_list
+            self.object_comment = object_comment
+            #print(self.landmark_data.keys(), self.object_name_list)
 
             return dataset
+
+class NTS:
+    def __init__(self, filename, datasetname):
+        self.filename = filename
+        self.datasetname = datasetname
+        self.dimension = 0
+        self.nobjects = 0
+        self.object_name_list = []
+        self.landmark_str_list = []
+        self.edge_list = []
+        self.polygon_list = []
+        self.propertyname_list = []
+        self.property_list_list = []
+        self.object_comment = {}
+        self.landmark_data = {}
+        self.read()
+
+    def isNumber(self,s):
+        try:
+            float(s)
+            return True
+        except ValueError:
+            return False
+
+    def read(self):
+        with open(self.filename, 'r') as f:
+            nts_lines = f.readlines()
+
+            dataset = {}
+
+            total_object_count = 0
+            landmark_count = 0
+            data = []
+            object_name_list = []
+            threed = 0
+            twod = 0
+            objects = {}
+            header = ''
+            comment = ''
+            image_count = 0
+            matrix_type = -1
+            total_object_count = -1
+            variable_count = -1
+            dimension = -1
+            headerline_processed = False
+            column_names_exist = False
+            column_names_read = False
+            row_names_read = False
+            row_names_exist_at_row_beginning = False
+            row_names_exist_at_row_ending = False
+            row_names_exist_in_separate_line = False
+
+            current_object_count = 0
+            comments = ""
+
+            for line in nts_lines:
+                line = line.strip()
+                if line == '':
+                    continue
+                if line.startswith('"') or line.startswith("'"):
+                    comments += line
+                    continue
+                #                          1    2     3   4    5     6    7   8    9    10   11   12   13    14
+                headerline = re.search('^(\d+)(\s+)(\d+)(\w*)(\s+)(\d+)(\w*)(\s+)(\d+)(\s+)(\d*)(\s*)(\w+)=(\d+)(.*)', line)
+                if headerline is not None:
+                    matrix_type = headerline.group(1)
+                    total_object_count = int(headerline.group(3))
+                    variable_count = int(headerline.group(6))
+                    self.dimension = int(headerline.group(14))
+                    if variable_count > 0 and dimension > 0:
+                        landmark_count = int( float(variable_count) / float(dimension) )
+                    if headerline.group(4).lower() == "l":
+                        row_names_exist_in_separate_line = True
+                    elif headerline.group(4).lower() == "b":
+                        row_names_exist_at_row_beginning = True
+                    elif headerline.group(4).lower() == "e":
+                        row_names_exist_at_row_ending = True
+                    if headerline.group(7).lower() == "l":
+                        column_names_exist = True
+                    if headerline.group(13).lower() == "dim":
+                        #print("dim:", headerline.group(14))
+                        self.dimension = int(headerline.group(14))
+                    
+                    headerline_processed = True
+                    #print(headerline_processed, headerline.group(6), headerline.group(7), column_names_exist, column_names_read)
+                    continue
+
+                if headerline_processed == True and row_names_exist_in_separate_line == True and row_names_read == False:
+                    row_names_list = re.split('\s+', line)
+                    row_names_read = True
+                    continue
+
+                if headerline_processed == True and column_names_exist == True and column_names_read == False:
+                    column_names_list = re.split('\s+', line)
+                    column_names_read = True
+                    continue
+
+                if headerline_processed == True:
+                    data_list = re.split('\s+', line)
+                    if row_names_exist_at_row_beginning == True:
+                        row_name = data_list.pop(0)
+                    elif row_names_exist_at_row_ending == True:
+                        row_name = data_list.pop(-1)
+                    elif len(row_names_list) > 0:
+                        row_name = row_names_list[current_object_count]
+                    else:
+                        row_name = self.datasetname + "_" + str(current_object_count+1)
+                    # turn data_list into coordinates of landmarks based on dimension
+                    data_list = [ float(x) for x in data_list ]
+                    #print(data_list, len(data_list), self.dimension)
+                    objects[row_name] = []
+                    for idx in range(0,len(data_list),self.dimension):
+                        #print point
+                        #print("idx:", idx, "dimension:", self.dimension, "lm:", data_list[idx:idx+self.dimension])
+                        objects[row_name].append(data_list[idx:idx+self.dimension])
+
+                    #print(objects[row_name])
+                    #objects[row_name] = data_list
+                    object_name_list.append(row_name)
+                    current_object_count += 1
+
+            if total_object_count == 0 and landmark_count == 0:
+                return None
+
+            self.nobjects = len(object_name_list)
+            self.nlandmarks = landmark_count
+            self.landmark_data = objects
+            self.object_name_list = object_name_list
+            self.description = comments
+
+            return dataset
+
+
+class Morphologika:
+    def __init__(self, filename, datasetname):
+        self.filename = filename
+        self.datasetname = datasetname
+        self.dimension = 0
+        self.nobjects = 0
+        self.object_name_list = []
+        self.landmark_str_list = []
+        self.edge_list = []
+        self.polygon_list = []
+        self.propertyname_list = []
+        self.property_list_list = []
+        self.object_comment = {}
+        self.landmark_data = {}
+        self.read()
+
+    def read(self):
+        f = open(self.filename, 'r')
+        morphologika_data = f.read()
+        f.close()
+
+        object_count = -1
+        landmark_count = -1
+        data_lines = [l.strip() for l in morphologika_data.split('\n')]
+        found = False
+        dsl = ''
+        dimension = 2
+        raw_data = {}
+        for line in data_lines:
+            line = line.strip()
+            if line == "":
+                continue
+            if line[0] == "'":
+                '''comment'''
+                continue
+            elif line[0] == '[':
+                dsl = re.search('(\w+)', line).group(0).lower()
+                raw_data[dsl] = []
+                continue
+            else:
+                raw_data[dsl].append(line)
+                if dsl == 'individuals':
+                    object_count = int(line)
+                if dsl == 'landmarks':
+                    landmark_count = int(line)
+                if dsl == 'dimensions':
+                    dimension = int(line)
+
+        if object_count < 0 or landmark_count < 0:
+            return False
+
+        self.raw_data = raw_data
+
+        self.nlandmarks = landmark_count
+        self.dimension = dimension
+
+        self.object_name_list = self.raw_data['names']
+        self.nobjects = len(self.object_name_list)
+        self.nobjects = object_count
+
+        # abc
+        objects = {}
+        #object_landmark_list = []
+        for i, name in enumerate(self.object_name_list):
+            begin = i * self.nlandmarks
+            count = self.nlandmarks
+            # print begin, begin + count
+            objects[name] = []
+            for point in self.raw_data['rawpoints'][begin:begin + count]:
+                #print point
+                coords = re.split('\s+', point)
+                objects[name].append(coords)
+
+        self.landmark_data = objects
+
+        self.edge_list = []
+        self.polygon_list = []
+        self.propertyname_list = []
+        self.property_list_list = []
+
+        if 'labels' in self.raw_data.keys():
+            for line in self.raw_data['labels']:
+                labels = re.split('\s+', line)
+                for label in labels:
+                    self.propertyname_list.append( label )
+                    
+        if 'labelvalues' in self.raw_data.keys():
+            for line in self.raw_data['labelvalues']:
+                property_list = re.split('\s+', line)
+                self.property_list_list.append(property_list)
+
+        if 'wireframe' in self.raw_data.keys():
+            for line in self.raw_data['wireframe']:
+                edge = [int(v) for v in re.split('\s+', line)]
+                edge.sort()
+                self.edge_list.append(edge)
+
+        if 'polygons' in self.raw_data.keys():
+            for line in self.raw_data['polygons']:
+                poly = [int(v) for v in re.split('\s+', line)]
+                poly.sort()
+                self.polygon_list.append(poly)
+
+        self.edge_list.sort()
+        self.polygon_list.sort()
+        return
 
 class DatasetDialog(QDialog):
     # NewDatasetDialog shows new dataset dialog.
@@ -3295,7 +3628,7 @@ class DatasetDialog(QDialog):
 
         self.edtWireframe = QTextEdit()
         self.edtBaseline = QLineEdit()
-        self.edtPolygons = QTextEdit()
+        #self.edtPolygons = QTextEdit()
         self.edtPropertyNameStr = QTextEdit()
 
         self.main_layout = QFormLayout()
@@ -3306,8 +3639,8 @@ class DatasetDialog(QDialog):
         self.main_layout.addRow("Dimension", dim_layout)
         self.main_layout.addRow("Wireframe", self.edtWireframe)
         self.main_layout.addRow("Baseline", self.edtBaseline)
-        self.main_layout.addRow("Polygons", self.edtPolygons)
-        self.main_layout.addRow("Property Name List", self.edtPropertyNameStr)
+        #self.main_layout.addRow("Polygons", self.edtPolygons)
+        self.main_layout.addRow("Property Names", self.edtPropertyNameStr)
 
 
         self.btnOkay = QPushButton()
@@ -3374,7 +3707,7 @@ class DatasetDialog(QDialog):
             self.rbtn3D.setEnabled(False)
         self.edtWireframe.setText(dataset.wireframe)
         self.edtBaseline.setText(dataset.baseline)
-        self.edtPolygons.setText(dataset.polygons)
+        #self.edtPolygons.setText(dataset.polygons)
         self.edtPropertyNameStr.setText(dataset.propertyname_str)
     
     def set_parent_dataset(self, parent_dataset):
@@ -3402,7 +3735,7 @@ class DatasetDialog(QDialog):
             self.dataset.dimension = 3
         self.dataset.wireframe = self.edtWireframe.toPlainText()
         self.dataset.baseline = self.edtBaseline.text()
-        self.dataset.polygons = self.edtPolygons.toPlainText()
+        #self.dataset.polygons = self.edtPolygons.toPlainText()
         self.dataset.propertyname_str = self.edtPropertyNameStr.toPlainText()
 
         #self.data
@@ -3412,7 +3745,7 @@ class DatasetDialog(QDialog):
 
     def Delete(self):
         ret = QMessageBox.question(self, "", "Are you sure to delete this dataset?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-        print("ret:", ret)
+        #print("ret:", ret)
         if ret == QMessageBox.Yes:
             self.dataset.delete_instance()
             self.parent.selected_dataset = None

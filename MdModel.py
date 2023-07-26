@@ -716,8 +716,8 @@ class MdDatasetOps:
         return average_shape
 
     def check_object_list(self):
-        min_number_of_landmarks = 999
-        max_number_of_landmarks = 0
+        min_number_of_landmarks = 999999
+        max_number_of_landmarks = -999999
         sum_val = 0
         for mo in self.object_list:
             number_of_landmarks = len(mo.landmark_list)
@@ -728,14 +728,14 @@ class MdDatasetOps:
         #average_number_of_landmarks = float( sum_val ) / len( self.objects )
         #print min_number_of_landmarks, max_number_of_landmarks
         if sum_val > 0 and min_number_of_landmarks != max_number_of_landmarks:
-            print("Inconsistent number of landmarks")
+            print("Inconsistent number of landmarks", min_number_of_landmarks, max_number_of_landmarks)
             return False
         return True
 
     def procrustes_superimposition(self):
         #print("begin_procrustes")
         if not self.check_object_list():
-            #print("check_object_list failed")
+            print("check_object_list failed")
             return False
 
         for mo in self.object_list:
@@ -765,6 +765,7 @@ class MdDatasetOps:
                 #self.objects[1].print_landmarks('bb')
                 #average_shape.print_landmarks('cc')
         #print("end procrustes")
+        return True
 
     def is_same_shape(self, shape1, shape2):
         if ( shape1 == None or shape2 == None ):

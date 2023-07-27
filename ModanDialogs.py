@@ -14,6 +14,7 @@ from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSettings, QEvent, QR
 
 import pyqtgraph as pg
 #import pyqtgraph.opengl as gl
+from OBJFileLoader import OBJ
 
 import OpenGL.GL as gl
 from OpenGL import GLU as glu
@@ -59,7 +60,7 @@ MODE['PRE_WIRE_FROM'] = 5
 MODE['CALIBRATION'] = 6
 MODE['VIEW'] = 7
 
-LANDMARK_RADIUS = 3
+LANDMARK_RADIUS = 2
 DISTANCE_THRESHOLD = LANDMARK_RADIUS * 3
 
 IMAGE_EXTENSION_LIST = ['png', 'jpg', 'jpeg','bmp','gif','tif','tiff']
@@ -73,7 +74,7 @@ ROTATE_MODE = 3
 ZOOM_MODE = 4
 LANDMARK_MODE = 1
 WIREFRAME_MODE = 2
-COLOR = { 'RED': (1,0,0), 'GREEN': (0,1,0), 'BLUE': (0,0,1), 'YELLOW': (1,1,0), 'CYAN': (0,1,1), 'MAGENTA': (1,0,1), 'WHITE': (1,1,1), 'LIGHT_GRAY': (0.8,0.8,0.8), 'BLACK': (0,0,0)}
+COLOR = { 'RED': (1,0,0), 'GREEN': (0,1,0), 'BLUE': (0,0,1), 'YELLOW': (1,1,0), 'CYAN': (0,1,1), 'MAGENTA': (1,0,1), 'WHITE': (1,1,1), 'LIGHT_GRAY': (0.8,0.8,0.8), 'GRAY': (0.5,0.5,0.5), 'BLACK': (0,0,0)}
 
 COLOR['SINGLE_SHAPE'] = COLOR['GREEN']
 COLOR['AVERAGE_SHAPE'] = COLOR['LIGHT_GRAY']
@@ -84,7 +85,7 @@ COLOR['SELECTED_TEXT'] = COLOR['RED']
 COLOR['SELECTED_LANDMARK'] = COLOR['RED']
 COLOR['WIREFRAME'] = COLOR['YELLOW']
 COLOR['SELECTED_EDGE'] = COLOR['RED']
-COLOR['BACKGROUND'] = COLOR['BLACK']
+COLOR['BACKGROUND'] = COLOR['GRAY']
 
 ICON = {}
 ICON['landmark'] = resource_path('icons/M2Landmark_2.png')
@@ -319,11 +320,11 @@ class ObjectViewer2D(QLabel):
         QLabel.mouseMoveEvent(self, event)
 
     def mousePressEvent(self, event):
-        if self.object_dialog is None:
-            return
 
         me = QMouseEvent(event)
         if me.button() == Qt.LeftButton:
+            #if self.object_dialog is None:
+            #    return
             if self.edit_mode == MODE['EDIT_LANDMARK']:
                 img_x = self._2imgx(self.mouse_curr_x)
                 img_y = self._2imgy(self.mouse_curr_y)
@@ -394,8 +395,8 @@ class ObjectViewer2D(QLabel):
         return super().mouseReleaseEvent(ev)    
 
     def wheelEvent(self, event):
-        if self.orig_pixmap is None:
-            return
+        #if self.orig_pixmap is None:
+        #    return
         we = QWheelEvent(event)
         scale_delta = 0
         if we.angleDelta().y() > 0:
@@ -411,7 +412,8 @@ class ObjectViewer2D(QLabel):
         self.scale += scale_delta
         self.scale = round(self.scale * 10) / 10
         scale_proportion = self.scale / prev_scale
-        self.curr_pixmap = self.orig_pixmap.scaled(int(self.orig_pixmap.width() * self.scale / self.image_canvas_ratio), int(self.orig_pixmap.height() * self.scale / self.image_canvas_ratio))
+        if self.orig_pixmap is not None:
+            self.curr_pixmap = self.orig_pixmap.scaled(int(self.orig_pixmap.width() * self.scale / self.image_canvas_ratio), int(self.orig_pixmap.height() * self.scale / self.image_canvas_ratio))
 
         self.pan_x = int( we.pos().x() - (we.pos().x() - self.pan_x) * scale_proportion )
         self.pan_y = int( we.pos().y() - (we.pos().y() - self.pan_y) * scale_proportion )
@@ -442,11 +444,11 @@ class ObjectViewer2D(QLabel):
 
     def paintEvent(self, event):
         # fill background with dark gray
-        if self.object is None:
-            return
 
         painter = QPainter(self)
         painter.fillRect(self.rect(), QBrush(as_qt_color(COLOR['BACKGROUND'])))
+        if self.object is None:
+            return
         if self.curr_pixmap is not None:
             #print("paintEvent", self.curr_pixmap.width(), self.curr_pixmap.height())
             painter.drawPixmap(self.pan_x+self.temp_pan_x, self.pan_y+self.temp_pan_y,self.curr_pixmap)
@@ -483,7 +485,7 @@ class ObjectViewer2D(QLabel):
                 painter.setPen(QPen(as_qt_color(COLOR['SELECTED_LANDMARK']), 2))
                 painter.drawLine(x1,y1,x2,y2)
 
-        painter.setFont(QFont('Arial', 14))
+        painter.setFont(QFont('Helvetica', 10))
         for idx, landmark in enumerate(self.landmark_list):
             if idx == self.wire_hover_index:
                 painter.setPen(QPen(as_qt_color(COLOR['SELECTED_LANDMARK']), 2))
@@ -499,6 +501,8 @@ class ObjectViewer2D(QLabel):
                 painter.setBrush(QBrush(as_qt_color(COLOR['NORMAL_SHAPE'])))
             painter.drawEllipse(int(self._2canx(landmark[0])-radius), int(self._2cany(landmark[1]))-radius, radius*2, radius*2)
             if self.show_index == True:
+                painter.setPen(QPen(as_qt_color(COLOR['NORMAL_TEXT']), 2))
+                painter.setBrush(QBrush(as_qt_color(COLOR['NORMAL_TEXT'])))
                 painter.drawText(int(self._2canx(landmark[0])+10), int(self._2cany(landmark[1]))+10, str(idx+1))
 
         # draw wireframe being edited
@@ -550,7 +554,7 @@ class ObjectViewer2D(QLabel):
             else:
                 length_text = str(round(actual_length * 1000000.0 *1000)/1000) + " nm"
             painter.setPen(QPen(Qt.black, 1))
-            painter.setFont(QFont('Arial', 10))
+            painter.setFont(QFont('Helvetica', 10))
             painter.drawText(x + int(math.floor(float(bar_width) / 2.0 + 0.5)) - len(length_text) * 4, y - 5, length_text)
 
     def calculate_resize(self):
@@ -1311,7 +1315,7 @@ class DatasetOpsViewer(QLabel):
                 #painter.drawLine(self.landmark_list[wire[0]][0], self.landmark_list[wire[0]][1], self.landmark_list[wire[1]][0], self.landmark_list[wire[1]][1])
 
         radius = 1
-        painter.setFont(QFont('Arial', 14))
+        painter.setFont(QFont('Helvetica', 12))
         for obj in self.ds_ops.object_list:
             #print("obj:", obj.id)
             if obj.id in self.ds_ops.selected_object_id_list:
@@ -1348,6 +1352,7 @@ class MyGLWidget(QGLWidget):
     def __init__(self, parent):
         QGLWidget.__init__(self,parent)
         self.parent = parent
+        self.setMinimumSize(400,300)
         self.object_dialog = None
         self.ds_ops = None
         self.obj_ops = None
@@ -1375,7 +1380,7 @@ class MyGLWidget(QGLWidget):
         self.edit_mode = MODE['NONE']
         self.auto_rotate = False
         self.is_dragging = False
-        self.setMinimumSize(400,400)
+        #self.setMinimumSize(400,400)
         self.timer = QTimer(self)
         self.timer.setInterval(50)
         self.timer.timeout.connect(self.timeout)
@@ -1390,7 +1395,7 @@ class MyGLWidget(QGLWidget):
         self.selected_landmark_idx = -1
         self.no_hit_count = 0
         self.edge_list = []
-
+        self.test_obj = None
 
     def show_message(self, msg):
         if self.object_dialog is not None:
@@ -1452,10 +1457,17 @@ class MyGLWidget(QGLWidget):
                 self.rotate_y += self.temp_rotate_y
                 if self.data_mode == OBJECT_MODE and self.obj_ops is not None:
                     #print("x rotate:", self.rotate_x, "y rotate:", self.rotate_y)
+                    #print( "test_obj vert 1 before rotation:", self.test_obj.vertices[0])
                     self.obj_ops.rotate_3d(math.radians(-1*self.rotate_x),'Y')
                     self.obj_ops.rotate_3d(math.radians(self.rotate_y),'X')
+                    if self.test_obj is not None:
+                        self.test_obj.rotate_3d(math.radians(-1*self.rotate_x),'Y')
+                        self.test_obj.rotate_3d(math.radians(self.rotate_y),'X')
+                        self.test_obj.generate()
+                    #print( "test_obj vert 1 after rotation:", self.test_obj.vertices[0])
                     self.rotate_x = 0
                     self.rotate_y = 0
+                    #self.obj
                 elif self.data_mode == DATASET_MODE and self.ds_ops is not None:
                     #self.ds_ops.average_shape.rotate_3d(math.radians(-1*self.rotate_x),'Y')
                     #self.ds_ops.average_shape.rotate_3d(math.radians(self.rotate_y),'X')
@@ -1616,6 +1628,10 @@ class MyGLWidget(QGLWidget):
         self.initialize_frame_buffer()
         self.picker_buffer = self.create_picker_buffer()
         self.initialize_frame_buffer(self.picker_buffer)
+        #print("test_obj1:", self.test_obj)
+        #self.test_obj = OBJ('Estaingia_simulation_base_20221125.obj')
+        #print("test_obj2:", self.test_obj)
+
 
     def paintGL(self):
         if self.edit_mode == WIREFRAME_MODE:
@@ -1717,14 +1733,23 @@ class MyGLWidget(QGLWidget):
                 gl.glVertex3f(lm[0], lm[1], lm[2])
             gl.glEnd()
             gl.glEnable(gl.GL_LIGHTING)
-        
+
+        '''
+        import pywavefront
+        from pywavefront import visualization
+
+        #[create a window and set up your OpenGl context]
+        obj = pywavefront.Wavefront('Estaingia_simulation_base_20221125.obj')
+
+        ##[inside your drawing loop]
+        #visualization.draw(obj)
+        '''
+
         # https://github.com/yarolig/OBJFileLoader
-        #from OBJFileLoader import OBJ
-        #box = OBJ('box.obj')
         #gl.glPushMatrix()
-        #gl.glColor3f( *COLOR['RED )
+        #gl.glColor3f( *COLOR['RED'] )
         #gl.glTranslatef(box_x, box_y, box_z)
-        #box.render()
+        #self.test_obj.render()
         #gl.glPopMatrix()
 
     def create_picker_buffer(self):
@@ -1822,9 +1847,11 @@ class MyGLWidget(QGLWidget):
         self.updateGL()
 
     def clear_object(self):
+        #print("clear oject")
         self.obj_ops = None
-        #gl.glClear(gl.GL_COLOR['BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
-        #gl.glFlush()
+        gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
+        gl.glFlush()
+        self.updateGL()
         #self.data_mode = DATASET_MODE
 
     def hit_test(self, x, y):
@@ -2015,12 +2042,17 @@ class DatasetAnalysisDialog(QDialog):
         self.cbxDepthShade.setText("Depth Shade")
         self.cbxDepthShade.setChecked(False)
         self.cbxDepthShade.toggled.connect(self.on_chart_dim_changed)
+        self.cbxLegend = QCheckBox()
+        self.cbxLegend.setText("Legend")
+        self.cbxLegend.setChecked(False)
+        self.cbxLegend.toggled.connect(self.on_chart_dim_changed)
         self.gbChartDim = QGroupBox()
-        self.gbChartDim.setTitle("Chart Dimension")
+        self.gbChartDim.setTitle("Chart")
         self.gbChartDim.setLayout(QHBoxLayout())
         self.gbChartDim.layout().addWidget(self.rb2DChartDim)
         self.gbChartDim.layout().addWidget(self.rb3DChartDim)
         self.gbChartDim.layout().addWidget(self.cbxDepthShade)
+        self.gbChartDim.layout().addWidget(self.cbxLegend)
         self.gbGroupBy = QGroupBox()
         self.gbGroupBy.setTitle("Group By")
         self.gbGroupBy.setLayout(QHBoxLayout())
@@ -2170,9 +2202,6 @@ class DatasetAnalysisDialog(QDialog):
         self.onpick_happened = False
 
 
-        # set wait cursor
-        QApplication.setOverrideCursor(Qt.WaitCursor)
-        QApplication.processEvents()
 
 
         # data setting
@@ -2195,10 +2224,6 @@ class DatasetAnalysisDialog(QDialog):
 
             self.btnSaveResults.setFocus()
 
-        # end wait cursor
-        QApplication.restoreOverrideCursor()
-
-
     def chart_options_clicked(self):
         self.show_chart_options = not self.show_chart_options
         if self.show_chart_options:
@@ -2209,7 +2234,6 @@ class DatasetAnalysisDialog(QDialog):
             #self.gbChartOptions.hide()
             self.plot_control_widget1.hide()
             self.plot_control_widget2.hide()
-
 
     def on_chart_dim_changed(self):
         if self.rb2DChartDim.isChecked():
@@ -2393,6 +2417,9 @@ class DatasetAnalysisDialog(QDialog):
 
     def on_btnPCA_clicked(self):
         #print("pca button clicked")
+        # set wait cursor
+        QApplication.setOverrideCursor(Qt.WaitCursor)
+        QApplication.processEvents()
 
         self.ds_ops = MdDatasetOps(self.dataset)
 
@@ -2411,6 +2438,10 @@ class DatasetAnalysisDialog(QDialog):
             obj.pca_result = new_coords[i]
 
         self.show_pca_result()
+
+        # end wait cursor
+        QApplication.restoreOverrideCursor()
+
         #print("pca_result.nVariable:",pca_result.nVariable)
         #with open('pca_result.txt', 'w') as f:
         #    for obj in ds_ops.object_list:
@@ -2422,6 +2453,7 @@ class DatasetAnalysisDialog(QDialog):
         self.show_pca_table()
         # get axis1 and axis2 value from comboAxis1 and 2 index
         depth_shade = self.cbxDepthShade.isChecked()
+        show_legend = self.cbxLegend.isChecked()
         axis1 = self.comboAxis1.currentIndex() +1
         axis2 = self.comboAxis2.currentIndex() +1
         axis3 = self.comboAxis3.currentIndex() +1
@@ -2430,16 +2462,18 @@ class DatasetAnalysisDialog(QDialog):
         flip_axis3 = -1.0 if self.cbxFlipAxis3.isChecked() == True else 1.0
 
         symbol_candidate = ['o','s','^','x','+','d','v','<','>','p','h']
-        color_candidate = ['blue','green','black','cyan','magenta','yellow','white','gray','red']
+        color_candidate = ['blue','green','black','cyan','magenta','yellow','gray','red']
         self.propertyname_index = self.comboPropertyName.currentIndex() -1
         self.scatter_data = {}
         self.scatter_result = {}
+        SCATTER_SMALL_SIZE = 30
+        SCATTER_LARGE_SIZE = 60
 
         key_list = []
         key_list.append('__default__')
-        self.scatter_data['__default__'] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'hoverinfo':[], 'text':[], 'property':'', 'symbol':'o', 'color':'blue', 'size':50}
+        self.scatter_data['__default__'] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'hoverinfo':[], 'text':[], 'property':'', 'symbol':'o', 'color':'blue', 'size':SCATTER_SMALL_SIZE}
         if len(self.selected_object_id_list) > 0:
-            self.scatter_data['__selected__'] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'hoverinfo':[], 'text':[], 'property':'', 'symbol':'o', 'color':'red', 'size':100}
+            self.scatter_data['__selected__'] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'hoverinfo':[], 'text':[], 'property':'', 'symbol':'o', 'color':'red', 'size':SCATTER_LARGE_SIZE}
             key_list.append('__selected__')
 
         for obj in self.ds_ops.object_list:
@@ -2451,7 +2485,7 @@ class DatasetAnalysisDialog(QDialog):
                 key_name = obj.property_list[self.propertyname_index]
 
             if key_name not in self.scatter_data.keys():
-                self.scatter_data[key_name] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'property':key_name, 'symbol':'', 'color':'', 'size':50}
+                self.scatter_data[key_name] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'property':key_name, 'symbol':'', 'color':'', 'size':SCATTER_SMALL_SIZE}
 
             self.scatter_data[key_name]['x_val'].append(flip_axis1 * obj.pca_result[axis1])
             self.scatter_data[key_name]['y_val'].append(flip_axis2 * obj.pca_result[axis2])
@@ -2480,6 +2514,8 @@ class DatasetAnalysisDialog(QDialog):
                 if len(group['x_val']) > 0:
                     self.scatter_result[name] = self.ax2.scatter(group['x_val'], group['y_val'], s=group['size'], marker=group['symbol'], color=group['color'], data=group['data'], picker=True, pickradius=5)
                     #print("ret", ret)
+            if show_legend:
+                self.ax2.legend(self.scatter_result.values(), self.scatter_result.keys(), loc='upper left', bbox_to_anchor=(1.05, 1))
             self.fig2.tight_layout()
             self.fig2.canvas.draw()
             self.fig2.canvas.flush_events()
@@ -2495,6 +2531,8 @@ class DatasetAnalysisDialog(QDialog):
                 if len(self.scatter_data[name]['x_val']) > 0:
                     self.scatter_result[name] = self.ax3.scatter(group['x_val'], group['y_val'], group['z_val'], s=group['size'], marker=group['symbol'], color=group['color'], data=group['data'],depthshade=depth_shade, picker=True, pickradius=5)
                     #print("ret", ret)
+            if show_legend:
+                self.ax3.legend(self.scatter_result.values(), self.scatter_result.keys(), loc='upper left', bbox_to_anchor=(1.05, 1))
             self.fig3.tight_layout()
             self.fig3.canvas.draw()
             self.fig3.canvas.flush_events()
@@ -2765,7 +2803,7 @@ class DatasetAnalysisDialog(QDialog):
         self.object_model.setColumnCount(2)
         self.object_model.setHorizontalHeaderLabels(["", "Name"])
         self.tableView.setModel(self.object_model)
-        self.tableView.setColumnWidth(0, 30)
+        self.tableView.setColumnWidth(0, 50)
         self.tableView.setColumnWidth(1, 200)
         self.tableView.verticalHeader().setDefaultSectionSize(20)
         self.tableView.verticalHeader().setVisible(False)

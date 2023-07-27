@@ -3,12 +3,13 @@
 import os
 import pygame
 from OpenGL.GL import *
-
+import math
 
 class OBJ:
     generate_on_init = True
     @classmethod
     def loadTexture(cls, imagefile):
+        #return None
         surf = pygame.image.load(imagefile)
         image = pygame.image.tostring(surf, 'RGBA', 1)
         ix, iy = surf.get_rect().size
@@ -21,6 +22,7 @@ class OBJ:
 
     @classmethod
     def loadMaterial(cls, filename):
+        #return None
         contents = {}
         mtl = None
         dirname = os.path.dirname(filename)
@@ -69,8 +71,10 @@ class OBJ:
             elif values[0] == 'vt':
                 self.texcoords.append(list(map(float, values[1:3])))
             elif values[0] in ('usemtl', 'usemat'):
+                #pass
                 material = values[1]
             elif values[0] == 'mtllib':
+                #pass
                 self.mtl = self.loadMaterial(os.path.join(dirname, values[1]))
             elif values[0] == 'f':
                 face = []
@@ -99,13 +103,14 @@ class OBJ:
             vertices, normals, texture_coords, material = face
 
             mtl = self.mtl[material]
-            if 'texture_Kd' in mtl:
+            if False: #'texture_Kd' in mtl:
                 # use diffuse texmap
                 glEnable(GL_TEXTURE_2D)
                 glBindTexture(GL_TEXTURE_2D, mtl['texture_Kd'])
             else:
                 # just use diffuse colour
-                glColor(*mtl['Kd'])
+                #glColor(*mtl['Kd'])
+                glColor(0.8, 0.8, 0.8, 1)
 
             glBegin(GL_POLYGON)
             for i in range(len(vertices)):
@@ -124,3 +129,47 @@ class OBJ:
 
     def free(self):
         glDeleteLists([self.gl_list])
+
+    def rotate_3d(self, theta, axis):
+        cos_theta = math.cos(theta)
+        sin_theta = math.sin(theta)
+        r_mx = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+        if ( axis == 'Z' ):
+            r_mx[0][0] = cos_theta
+            r_mx[0][1] = sin_theta
+            r_mx[1][0] = -1 * sin_theta
+            r_mx[1][1] = cos_theta
+        elif ( axis == 'Y' ):
+            r_mx[0][0] = cos_theta
+            r_mx[0][2] = sin_theta
+            r_mx[2][0] = -1 * sin_theta
+            r_mx[2][2] = cos_theta
+        elif ( axis == 'X' ):
+            r_mx[1][1] = cos_theta
+            r_mx[1][2] = sin_theta
+            r_mx[2][1] = -1 * sin_theta
+            r_mx[2][2] = cos_theta
+        # print "rotation matrix", r_mx
+
+        for i, lm in enumerate(self.vertices):
+            coords = [0,0,0]
+            #print("vertex", i, lm)
+            x, y, z = lm
+            #for j in range(len(self.vertices)):
+            #    coords[j] = self.vertices[j]
+            x_rotated = x * r_mx[0][0] + y * r_mx[1][0] + z * r_mx[2][0]
+            y_rotated = x * r_mx[0][1] + y * r_mx[1][1] + z * r_mx[2][1]
+            z_rotated = x * r_mx[0][2] + y * r_mx[1][2] + z * r_mx[2][2]
+            self.vertices[i] = x_rotated, y_rotated, z_rotated
+            #print("rotated", self.vertices[i])
+        for i, normal in enumerate(self.normals):
+            coords = [0,0,0]
+            #print("vertex", i, lm)
+            x, y, z = normal
+            #for j in range(len(self.vertices)):
+            #    coords[j] = self.vertices[j]
+            x_rotated = x * r_mx[0][0] + y * r_mx[1][0] + z * r_mx[2][0]
+            y_rotated = x * r_mx[0][1] + y * r_mx[1][1] + z * r_mx[2][1]
+            z_rotated = x * r_mx[0][2] + y * r_mx[1][2] + z * r_mx[2][2]
+            self.normals[i] = x_rotated, y_rotated, z_rotated
+            

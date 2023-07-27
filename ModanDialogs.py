@@ -1628,10 +1628,7 @@ class MyGLWidget(QGLWidget):
         self.initialize_frame_buffer()
         self.picker_buffer = self.create_picker_buffer()
         self.initialize_frame_buffer(self.picker_buffer)
-        #print("test_obj1:", self.test_obj)
         #self.test_obj = OBJ('Estaingia_simulation_base_20221125.obj')
-        #print("test_obj2:", self.test_obj)
-
 
     def paintGL(self):
         if self.edit_mode == WIREFRAME_MODE:
@@ -1749,7 +1746,8 @@ class MyGLWidget(QGLWidget):
         #gl.glPushMatrix()
         #gl.glColor3f( *COLOR['RED'] )
         #gl.glTranslatef(box_x, box_y, box_z)
-        #self.test_obj.render()
+        if self.test_obj is not None:
+            self.test_obj.render()
         #gl.glPopMatrix()
 
     def create_picker_buffer(self):

@@ -74,7 +74,7 @@ ROTATE_MODE = 3
 ZOOM_MODE = 4
 LANDMARK_MODE = 1
 WIREFRAME_MODE = 2
-COLOR = { 'RED': (1,0,0), 'GREEN': (0,1,0), 'BLUE': (0,0,1), 'YELLOW': (1,1,0), 'CYAN': (0,1,1), 'MAGENTA': (1,0,1), 'WHITE': (1,1,1), 'LIGHT_GRAY': (0.8,0.8,0.8), 'GRAY': (0.5,0.5,0.5), 'BLACK': (0,0,0)}
+COLOR = { 'RED': (1,0,0), 'GREEN': (0,1,0), 'BLUE': (0,0,1), 'YELLOW': (1,1,0), 'CYAN': (0,1,1), 'MAGENTA': (1,0,1), 'WHITE': (1,1,1), 'LIGHT_GRAY': (0.8,0.8,0.8), 'GRAY': (0.5,0.5,0.5), 'DARK_GRAY': (0.3,0.3,0.3), 'BLACK': (0,0,0)}
 
 COLOR['SINGLE_SHAPE'] = COLOR['GREEN']
 COLOR['AVERAGE_SHAPE'] = COLOR['LIGHT_GRAY']
@@ -85,7 +85,7 @@ COLOR['SELECTED_TEXT'] = COLOR['RED']
 COLOR['SELECTED_LANDMARK'] = COLOR['RED']
 COLOR['WIREFRAME'] = COLOR['YELLOW']
 COLOR['SELECTED_EDGE'] = COLOR['RED']
-COLOR['BACKGROUND'] = COLOR['GRAY']
+COLOR['BACKGROUND'] = COLOR['DARK_GRAY']
 
 ICON = {}
 ICON['landmark'] = resource_path('icons/M2Landmark_2.png')
@@ -1970,11 +1970,46 @@ class DatasetAnalysisDialog(QDialog):
         self.shape_vsplitter.setStretchFactor(0, 1)
         self.shape_vsplitter.setStretchFactor(1, 0)
 
-        self.tableView = QTableView()
-        self.tableView.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.tableView.setSortingEnabled(True)
-        self.tableView.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.tableView.setSortingEnabled(True)
+        self.table_widget = QWidget()
+        self.table_layout = QVBoxLayout()
+        self.table_widget.setLayout(self.table_layout)
+
+        self.table_tab = QTabWidget()
+
+        self.tableView1 = QTableView()
+        self.tableView1.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.tableView1.setSortingEnabled(True)
+        self.tableView1.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.tableView1.setSortingEnabled(True)
+
+        self.tableView2 = QTableView()
+        self.tableView2.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.tableView2.setEditTriggers(QAbstractItemView.NoEditTriggers)
+
+        self.table_tab.addTab(self.tableView1, "Objects")
+        self.table_tab.addTab(self.tableView2, "Groups")
+        self.table_layout.addWidget(self.table_tab)
+
+        self.table_control_widget = QWidget()
+        self.table_control_layout = QHBoxLayout()
+        self.table_control_widget.setLayout(self.table_control_layout)
+        self.btnSelectAll = QPushButton()
+        self.btnSelectAll.setText("All")
+        self.btnSelectAll.clicked.connect(self.select_all)
+        self.btnSelectNone = QPushButton()
+        self.btnSelectNone.setText("None")
+        self.btnSelectNone.clicked.connect(self.select_none)
+        self.btnSelectInvert = QPushButton()
+        self.btnSelectInvert.setText("Invert")
+        self.btnSelectInvert.clicked.connect(self.select_invert)
+        self.table_control_layout.addWidget(self.btnSelectAll)
+        self.table_control_layout.addWidget(self.btnSelectNone)
+        self.table_control_layout.addWidget(self.btnSelectInvert)
+        self.table_control_layout.addStretch(1)
+        
+        self.table_layout.addWidget(self.table_control_widget)
+
+
 
         # plot widgets
         self.plot_widget2 = FigureCanvas(Figure(figsize=(20, 16),dpi=100))
@@ -2111,7 +2146,7 @@ class DatasetAnalysisDialog(QDialog):
         self.comboAxis3.currentIndexChanged.connect(self.axis_changed)
 
         self.main_hsplitter.addWidget(self.shape_vsplitter)
-        self.main_hsplitter.addWidget(self.tableView)
+        self.main_hsplitter.addWidget(self.table_widget)
         self.main_hsplitter.addWidget(self.plot_all_widget)
 
         self.main_hsplitter.setSizes([400,200,400])
@@ -2222,6 +2257,13 @@ class DatasetAnalysisDialog(QDialog):
 
             self.btnSaveResults.setFocus()
 
+    def select_all(self):
+        pass
+    def select_none(self):
+        pass
+    def select_invert(self):
+        pass
+
     def chart_options_clicked(self):
         self.show_chart_options = not self.show_chart_options
         if self.show_chart_options:
@@ -2262,6 +2304,8 @@ class DatasetAnalysisDialog(QDialog):
         prev_lm_count = -1
         for obj in dataset.object_list:
             obj.unpack_landmark()
+            obj.unpack_property()
+            #print("property:", obj.property_list)
             lm_count = len(obj.landmark_list)
             #print("prev_lm_count:", prev_lm_count, "lm_count:", lm_count)
             if prev_lm_count != lm_count and prev_lm_count != -1:
@@ -2292,6 +2336,8 @@ class DatasetAnalysisDialog(QDialog):
 
     def propertyname_changed(self):
         if self.ds_ops is not None:
+            self.reset_tableView()
+            self.load_object()
             self.show_pca_result()
 
     def axis_changed(self):
@@ -2592,7 +2638,7 @@ class DatasetAnalysisDialog(QDialog):
             return
         self.canvas_up_xy = (evt.x, evt.y)
         if self.canvas_down_xy == self.canvas_up_xy:
-            self.tableView.selectionModel().clearSelection()
+            self.tableView1.selectionModel().clearSelection()
 
 
     def on_pick(self,evt):
@@ -2619,7 +2665,7 @@ class DatasetAnalysisDialog(QDialog):
         for id in selected_object_id_list:
             #item = self.object_model.findItems(str(id), Qt.MatchExactly, 0)
             item = self.object_hash[id]
-            self.tableView.selectionModel().select(item.index(),QItemSelectionModel.Rows | QItemSelectionModel.Select)
+            self.tableView1.selectionModel().select(item.index(),QItemSelectionModel.Rows | QItemSelectionModel.Select)
         self.selection_changed_off = False
         self.on_object_selection_changed([],[])
             
@@ -2757,7 +2803,7 @@ class DatasetAnalysisDialog(QDialog):
         for obj_id in self.selected_object_id_list:
             for row in range(self.object_model.rowCount()):
                 if int(self.object_model.item(row,0).text()) == obj_id:
-                    self.tableView.selectRow(row)
+                    self.tableView1.selectRow(row)
                     #break
             
 
@@ -2783,40 +2829,91 @@ class DatasetAnalysisDialog(QDialog):
         # load objects into tableView
         #for object in self.dataset.object_list:
         self.object_model.clear()
+        self.property_model.clear()
         self.reset_tableView()
         if self.dataset is None:
             return
         #objects = self.selected_dataset.objects
         self.object_hash = {}
+
+        self.propertyname_index = self.comboPropertyName.currentIndex() -1
+        self.propertyname = self.comboPropertyName.currentText()
+
+        self.property_list = []
         for obj in self.dataset.object_list:
+            item0 = QStandardItem()
+            item0.setCheckable(True)
+            item0.setCheckState(Qt.Checked)
+            item0.setData(obj.id,Qt.DisplayRole)
+
             item1 = QStandardItem()
             item1.setData(obj.id,Qt.DisplayRole)
             item2 = QStandardItem(obj.object_name)
             self.object_hash[obj.id] = item1
-            self.object_model.appendRow([item1,item2] )
+            if self.propertyname_index >= 0:
+                obj.unpack_property()
+                #print(obj.property_list)
+                item3 = QStandardItem(obj.property_list[self.propertyname_index])
+                if obj.property_list[self.propertyname_index] not in self.property_list:
+                    self.property_list.append(obj.property_list[self.propertyname_index])
+                    p_item0 = QStandardItem()
+                    p_item0.setCheckable(True)
+                    p_item0.setCheckState(Qt.Checked)
+                    self.property_model.appendRow([p_item0,QStandardItem(obj.property_list[self.propertyname_index])])
+                #self.property_list.append(obj.property_list[self.propertyname_index])
+                self.object_model.appendRow([item0,item1,item2,item3] )
+            else:
+                self.object_model.appendRow([item0,item1,item2] )
         
 
     def reset_tableView(self):
+        self.property_model = QStandardItemModel()
+        self.property_model.setColumnCount(2)
+        self.property_model.setHorizontalHeaderLabels(["", "Group"])
+        self.tableView2.setModel(self.property_model)
+
+        self.tableView2.setColumnWidth(0, 20)
+        self.tableView2.setColumnWidth(1, 200)
+        header2 = self.tableView2.horizontalHeader()
+        header2.setSectionResizeMode(0, QHeaderView.Fixed)
+        header2.setSectionResizeMode(1, QHeaderView.Stretch)
+
+
         self.object_model = QStandardItemModel()
-        self.object_model.setColumnCount(2)
-        self.object_model.setHorizontalHeaderLabels(["", "Name"])
-        self.tableView.setModel(self.object_model)
-        self.tableView.setColumnWidth(0, 50)
-        self.tableView.setColumnWidth(1, 200)
-        self.tableView.verticalHeader().setDefaultSectionSize(20)
-        self.tableView.verticalHeader().setVisible(False)
-        self.tableView.setSelectionBehavior(QTableView.SelectRows)
+        self.proxy_model = QSortFilterProxyModel()
+        self.proxy_model.setSourceModel(self.object_model)
+        self.propertyname_index = self.comboPropertyName.currentIndex() -1
+        self.propertyname = self.comboPropertyName.currentText()
+        self.object_model.setColumnCount(3)
+        self.object_model.setHorizontalHeaderLabels(["", "ID", "Name"])
+        self.tableView1.setModel(self.proxy_model)
+        #self.tableView.setModel(self.object_model)
+        self.tableView1.setColumnWidth(0, 20)
+        self.tableView1.setColumnWidth(1, 50)
+        self.tableView1.setColumnWidth(2, 150)
+        self.tableView1.verticalHeader().setDefaultSectionSize(20)
+        self.tableView1.verticalHeader().setVisible(False)
+        self.tableView1.setSelectionBehavior(QTableView.SelectRows)
         #self.tableView.clicked.connect(self.on_tableView_clicked)
-        self.object_selection_model = self.tableView.selectionModel()
+        self.object_selection_model = self.tableView1.selectionModel()
         self.object_selection_model.selectionChanged.connect(self.on_object_selection_changed)
-        self.tableView.setSortingEnabled(True)
-        self.tableView.sortByColumn(0, Qt.AscendingOrder)
+        self.tableView1.setSortingEnabled(True)
+        self.tableView1.sortByColumn(0, Qt.AscendingOrder)
         self.object_model.setSortRole(Qt.UserRole)
 
-        header = self.tableView.horizontalHeader()    
+        header = self.tableView1.horizontalHeader()    
         header.setSectionResizeMode(0, QHeaderView.Fixed)
-        header.setSectionResizeMode(1, QHeaderView.Stretch)
-        self.tableView.setStyleSheet("QTreeView::item:selected{background-color: palette(highlight); color: palette(highlightedText);};")
+        header.setSectionResizeMode(1, QHeaderView.Fixed)
+        header.setSectionResizeMode(2, QHeaderView.Stretch)
+
+        if self.propertyname_index >= 0:
+            self.object_model.setColumnCount(4)
+            self.object_model.setHorizontalHeaderLabels(["", "ID", "Name", self.propertyname])
+            self.tableView1.setColumnWidth(3, 150)
+            header.setSectionResizeMode(3, QHeaderView.Stretch)
+            self.property_model.setHorizontalHeaderLabels(["", self.propertyname])
+        
+        self.tableView1.setStyleSheet("QTreeView::item:selected{background-color: palette(highlight); color: palette(highlightedText);};")
 
     '''
     def on_tableView_clicked(self, index):
@@ -2847,7 +2944,7 @@ class DatasetAnalysisDialog(QDialog):
         #self.show_object(self.selected_object)
 
     def get_selected_object_id_list(self):
-        selected_indexes = self.tableView.selectionModel().selectedRows()
+        selected_indexes = self.tableView1.selectionModel().selectedRows()
         if len(selected_indexes) == 0:
             return []
 

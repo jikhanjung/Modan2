@@ -1350,6 +1350,7 @@ class DatasetOpsViewer(QLabel):
 
 class MyGLWidget(QGLWidget):
     def __init__(self, parent):
+        #print("MyGLWidget init")
         QGLWidget.__init__(self,parent)
         self.parent = parent
         self.setMinimumSize(400,300)
@@ -1545,6 +1546,7 @@ class MyGLWidget(QGLWidget):
         self.updateGL()
 
     def set_ds_ops(self, ds_ops):
+        #print("set_ds_ops")
         self.ds_ops = ds_ops
         #self.calculate_scale_and_pan()
         self.data_mode = DATASET_MODE
@@ -1557,7 +1559,7 @@ class MyGLWidget(QGLWidget):
         self.edge_list = ds_ops.edge_list
 
     def set_object(self, object):
-        #print("set_object 1",type(obj_ops))
+        #print("set_object 1",type(object))
         if isinstance(object, MdObject):
             self.object = object
             obj_ops = MdObjectOps(object)
@@ -1606,6 +1608,7 @@ class MyGLWidget(QGLWidget):
         return scale*0.5
 
     def initialize_frame_buffer(self, frame_buffer_id=0):
+        #print("initialize_frame_buffer")
         gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, frame_buffer_id)
         gl.glClearDepth(1.0)              
         gl.glDepthFunc(gl.GL_LESS)
@@ -1625,18 +1628,21 @@ class MyGLWidget(QGLWidget):
         gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, 0)
 
     def initializeGL(self):
+        #print("initializeGL")
         self.initialize_frame_buffer()
         self.picker_buffer = self.create_picker_buffer()
         self.initialize_frame_buffer(self.picker_buffer)
         #self.test_obj = OBJ('Estaingia_simulation_base_20221125.obj')
 
     def paintGL(self):
+        #print("paintGL")
         if self.edit_mode == WIREFRAME_MODE:
             self.draw_picker_buffer()
 
         self.draw_all()
 
     def draw_all(self):
+        #print("draw_all")
         gl.glMatrixMode(gl.GL_PROJECTION)
         gl.glLoadIdentity()
         glu.gluPerspective(45.0, self.aspect, 0.1, 100.0)
@@ -1751,6 +1757,7 @@ class MyGLWidget(QGLWidget):
         #gl.glPopMatrix()
 
     def create_picker_buffer(self):
+        #print("create_picker_buffer")
         # Create a new framebuffer
         picker_buffer = gl.glGenFramebuffers(1)
         #print("picker_buffer:", self.picker_buffer)
@@ -1780,7 +1787,7 @@ class MyGLWidget(QGLWidget):
         return picker_buffer
 
     def draw_picker_buffer(self):
-
+        #print("draw_picker_buffer")
         # Now you can render to this framebuffer instead of the default one
         gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, self.picker_buffer)
         gl.glViewport(0, 0, self.width(), self.height())
@@ -1800,6 +1807,7 @@ class MyGLWidget(QGLWidget):
         self.picker_buffer = None
 
     def resizeGL(self, width, height):
+        #print("resizeGL")
         gl.glViewport(0, 0, width, height)
         gl.glMatrixMode(gl.GL_PROJECTION)
         gl.glLoadIdentity()
@@ -1845,10 +1853,14 @@ class MyGLWidget(QGLWidget):
         self.updateGL()
 
     def clear_object(self):
+        #print("clear object")
         #print("clear oject")
         self.obj_ops = None
-        gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
-        gl.glFlush()
+        self.object = None
+        self.landmark_list = []
+        #print("current buffer:", gl.glGetIntegerv(gl.GL_FRAMEBUFFER_BINDING))
+        #gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
+        #gl.glFlush()
         self.updateGL()
         #self.data_mode = DATASET_MODE
 

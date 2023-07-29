@@ -254,19 +254,19 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.object_view = self.object_view_2d
         self.object_view_3d.hide()
 
-        hsplitter = QSplitter(Qt.Horizontal)
-        vsplitter = QSplitter(Qt.Vertical)
+        self.hsplitter = QSplitter(Qt.Horizontal)
+        self.vsplitter = QSplitter(Qt.Vertical)
 
-        vsplitter.addWidget(self.tableView)
-        vsplitter.addWidget(self.object_view_2d)
-        vsplitter.addWidget(self.object_view_3d)
+        self.vsplitter.addWidget(self.tableView)
+        self.vsplitter.addWidget(self.object_view_2d)
+        self.vsplitter.addWidget(self.object_view_3d)
 
         #self.treeView = MyTreeView()
-        hsplitter.addWidget(self.treeView)
-        hsplitter.addWidget(vsplitter)
-        hsplitter.setSizes([300, 800])
+        self.hsplitter.addWidget(self.treeView)
+        self.hsplitter.addWidget(self.vsplitter)
+        self.hsplitter.setSizes([300, 800])
 
-        self.setCentralWidget(hsplitter)
+        self.setCentralWidget(self.hsplitter)
 
         self.treeView.doubleClicked.connect(self.on_treeView_doubleClicked)
         self.treeView.setEditTriggers(QAbstractItemView.NoEditTriggers)
@@ -405,26 +405,6 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.dlg.exec_()
 
     @pyqtSlot()
-    def on_action_new_object_triggered(self):
-        # open new object dialog
-        if not self.selected_dataset:
-            return
-        self.dlg = ObjectDialog(self)
-        self.dlg.set_dataset(self.selected_dataset)
-        object = MdObject()
-        object.dataset = self.selected_dataset
-        self.dlg.set_object(object)
-        ret = self.dlg.exec_()
-        if ret == 0:
-            return
-
-        dataset = self.selected_dataset
-        self.load_dataset()
-        self.reset_tableView()
-        self.select_dataset(dataset)
-        self.load_object()
-
-    @pyqtSlot()
     def on_action_new_dataset_triggered(self):
         # open new dataset dialog
         self.dlg = DatasetDialog(self)
@@ -469,6 +449,26 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 self.treeView.setCurrentIndex(item.index())
                 break
             self.select_dataset(dataset,node.child(i,0))
+
+    @pyqtSlot()
+    def on_action_new_object_triggered(self):
+        # open new object dialog
+        if not self.selected_dataset:
+            return
+        self.dlg = ObjectDialog(self)
+        self.dlg.set_dataset(self.selected_dataset)
+        object = MdObject()
+        object.dataset = self.selected_dataset
+        self.dlg.set_object(object)
+        ret = self.dlg.exec_()
+        if ret == 0:
+            return
+
+        dataset = self.selected_dataset
+        self.load_dataset()
+        self.reset_tableView()
+        self.select_dataset(dataset)
+        self.load_object()
 
     @pyqtSlot()
     def on_tableView_doubleClicked(self):
@@ -649,7 +649,10 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 self.object_view_2d.show()
                 self.object_view_3d.hide()
             else:
+                #self.object_view_3d.deleteLater()
+                #self.object_view_3d = MyGLWidget(self)
                 self.object_view = self.object_view_3d
+                #self.vsplitter.addWidget(self.object_view_3d)
                 self.object_view_2d.hide()
                 self.object_view_3d.show()
         self.object_model.setColumnCount(len(header_labels))

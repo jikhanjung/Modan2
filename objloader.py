@@ -47,6 +47,7 @@ class OBJ:
     def __init__(self, filename, swapyz=False):
         """Loads a Wavefront OBJ file. """
         self.vertices = []
+        self.original_vertices = []
         self.normals = []
         self.texcoords = []
         self.faces = []
@@ -63,6 +64,7 @@ class OBJ:
                 if swapyz:
                     v = v[0], v[2], v[1]
                 self.vertices.append(v)
+                self.original_vertices.append(v)
             elif values[0] == 'vn':
                 v = list(map(float, values[1:4]))
                 if swapyz:

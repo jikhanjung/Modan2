@@ -225,7 +225,7 @@ class MdImage(Model):
     modified_at = DateTimeField(default=datetime.datetime.now)
     object = ForeignKeyField(MdObject, backref='image', on_delete="CASCADE")
 
-    def get_image_path(self, base_path):
+    def get_file_path(self, base_path):
         return os.path.join( base_path, str(self.object.dataset.id), str(self.object.id) + "." + self.original_path.split('.')[-1])
 
     class Meta:
@@ -347,6 +347,47 @@ class MdImage(Model):
             image_info['date'] = "-".join( image_info['date'].split(":") )
         image_info['datetime'] = image_info['date'] + ' ' + image_info['time']
         return image_info
+
+class Md3DModel(Model):
+    original_path = CharField(null=True)
+    original_filename = CharField(null=True)
+    name = CharField(null=True)
+    md5hash = CharField(null=True)
+    size = IntegerField(null=True)
+    file_created = DateTimeField(null=True)
+    file_modified = DateTimeField(null=True)
+    created_at = DateTimeField(default=datetime.datetime.now)
+    modified_at = DateTimeField(default=datetime.datetime.now)
+    object = ForeignKeyField(MdObject, backref='3dmodel', on_delete="CASCADE")
+
+    def get_file_path(self, base_path):
+        return os.path.join( base_path, str(self.object.dataset.id), str(self.object.id) + "." + self.original_path.split('.')[-1])
+
+    class Meta:
+        database = gDatabase
+
+    def load_file_info(self, fullpath):
+
+        file_info = {}
+
+        ''' file stat '''
+        stat_result = os.stat(fullpath)
+        file_info['mtime'] = stat_result.st_mtime
+        file_info['ctime'] = stat_result.st_ctime
+        file_info['type'] = 'file'
+        file_info['size'] = stat_result.st_size
+
+        ''' md5 hash value '''
+        file_info['md5hash'], image_data = self.get_md5hash_info(fullpath)
+
+    def get_md5hash_info(self,filepath):
+        afile = open(filepath, 'rb')
+        hasher = hashlib.md5()
+        image_data = afile.read()
+        hasher.update(image_data)
+        afile.close()
+        md5hash = hasher.hexdigest()
+        return md5hash, image_data
 
 class MdObjectOps:
     def __init__(self,mdobject):

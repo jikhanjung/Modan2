@@ -64,6 +64,7 @@ LANDMARK_RADIUS = 2
 DISTANCE_THRESHOLD = LANDMARK_RADIUS * 3
 
 IMAGE_EXTENSION_LIST = ['png', 'jpg', 'jpeg','bmp','gif','tif','tiff']
+MODEL_EXTENSION_LIST = ['obj', 'ply', 'stl']
 
 # glview modes
 OBJECT_MODE = 1
@@ -609,7 +610,7 @@ class ObjectViewer2D(QLabel):
         if self.object.pixels_per_mm is not None and self.object.pixels_per_mm > 0:
             self.pixels_per_mm = self.object.pixels_per_mm
         if object.image.count() > 0:
-            self.set_image(object.image[0].get_image_path(m_app.storage_directory))
+            self.set_image(object.image[0].get_file_path(m_app.storage_directory))
         object.unpack_landmark()
         object.dataset.unpack_wireframe()
         self.landmark_list = object.landmark_list
@@ -1054,7 +1055,7 @@ class ObjectDialog(QDialog):
             self.object_view.set_object(object)
             self.object_view.landmark_list = self.landmark_list
             #self.object_view.set_dataset(object.dataset)
-            self.btnLandmark.setDisabled(True)
+            #self.btnLandmark.setDisabled(True)
             self.btnCalibration.setDisabled(True)
             self.cbxAutoRotate.show()
         else:
@@ -1064,7 +1065,7 @@ class ObjectDialog(QDialog):
             if object is not None:
                 if object.image is not None and len(object.image) > 0:
                     img = object.image[0]
-                    image_path = img.get_image_path(self.m_app.storage_directory)
+                    image_path = img.get_file_path(self.m_app.storage_directory)
                     #check if image_path exists
                     if os.path.exists(image_path):
                         self.object_view.set_image(image_path)
@@ -1186,7 +1187,7 @@ class ObjectDialog(QDialog):
             md_image = MdImage()
             md_image.object_id = self.object.id
             md_image.load_file_info(self.object_view_2d.fullpath)
-            new_filepath = md_image.get_image_path( self.m_app.storage_directory)
+            new_filepath = md_image.get_file_path( self.m_app.storage_directory)
             if not os.path.exists(os.path.dirname(new_filepath)):
                 os.makedirs(os.path.dirname(new_filepath))
             #print("save object new filepath:", new_filepath)
@@ -1209,7 +1210,7 @@ class ObjectDialog(QDialog):
         ret = QMessageBox.question(self, "", "Are you sure to delete this object?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if ret == QMessageBox.Yes:
             if self.object.image.count() > 0:
-                image_path = self.object.image[0].get_image_path(self.m_app.storage_directory)
+                image_path = self.object.image[0].get_file_path(self.m_app.storage_directory)
                 if os.path.exists(image_path):
                     os.remove(image_path)
             self.object.delete_instance()
@@ -1354,6 +1355,8 @@ class MyGLWidget(QGLWidget):
         QGLWidget.__init__(self,parent)
         self.parent = parent
         self.setMinimumSize(400,300)
+        self.setAcceptDrops(True)
+        self.setMouseTracking(True)
         self.object_dialog = None
         self.ds_ops = None
         self.obj_ops = None
@@ -1396,7 +1399,8 @@ class MyGLWidget(QGLWidget):
         self.selected_landmark_idx = -1
         self.no_hit_count = 0
         self.edge_list = []
-        self.test_obj = None
+        self.threed_model = None
+        self.cursor_on_vertice = -1
 
     def show_message(self, msg):
         if self.object_dialog is not None:
@@ -1434,6 +1438,11 @@ class MyGLWidget(QGLWidget):
             if self.edit_mode == MODE['WIREFRAME'] and self.selected_landmark_idx > -1:
                 self.wireframe_from_idx = self.selected_landmark_idx
                 #self.edit_mode = MODE_ADD_WIRE
+            elif self.edit_mode == MODE['EDIT_LANDMARK'] and self.cursor_on_vertice > -1:
+                x, y, z = self.threed_model.original_vertices[self.cursor_on_vertice]
+                #print(x,y,z, self.landmark_list)
+                self.object_dialog.add_landmark(x,y,z)
+                self.calculate_resize()
             else:                
                 self.view_mode = ROTATE_MODE
         elif event.buttons() == Qt.RightButton:
@@ -1461,10 +1470,10 @@ class MyGLWidget(QGLWidget):
                     #print( "test_obj vert 1 before rotation:", self.test_obj.vertices[0])
                     self.obj_ops.rotate_3d(math.radians(-1*self.rotate_x),'Y')
                     self.obj_ops.rotate_3d(math.radians(self.rotate_y),'X')
-                    if self.test_obj is not None:
-                        self.test_obj.rotate_3d(math.radians(-1*self.rotate_x),'Y')
-                        self.test_obj.rotate_3d(math.radians(self.rotate_y),'X')
-                        self.test_obj.generate()
+                    if self.threed_model is not None:
+                        self.threed_model.rotate_3d(math.radians(-1*self.rotate_x),'Y')
+                        self.threed_model.rotate_3d(math.radians(self.rotate_y),'X')
+                        self.threed_model.generate()
                     #print( "test_obj vert 1 after rotation:", self.test_obj.vertices[0])
                     self.rotate_x = 0
                     self.rotate_y = 0
@@ -1520,6 +1529,19 @@ class MyGLWidget(QGLWidget):
             self.is_dragging = True
             self.temp_pan_x = self.curr_x - self.down_x
             self.temp_pan_y = self.curr_y - self.down_y
+        elif self.edit_mode == MODE['EDIT_LANDMARK']:
+            #print("edit 3d landmark mode")
+            ## call unproject_mouse
+            closest_element = self.pick_element(self.curr_x, self.curr_y)
+            #if closest_element is not None:
+                #print("closest element:", closest_element)
+
+            #near, ray_direction = self.unproject_mouse(self.curr_x, self.curr_y)
+           
+            # call hit_test
+            # if hit, set selected_landmark_idx
+            # if selected_landmark_idx > -1, call update_landmark
+
         self.updateGL()
 
     def add_wire(self, wire_start_index, wire_end_index):
@@ -1606,6 +1628,32 @@ class MyGLWidget(QGLWidget):
         scale = min( _3D_SCREEN_WIDTH / width, _3D_SCREEN_HEIGHT / height )
         #print("scale:", scale)
         return scale*0.5
+
+    def dragEnterEvent(self, event):
+        if self.object_dialog is None:
+            return
+        file_name = event.mimeData().text()
+        if file_name.split('.')[-1].lower() in MODEL_EXTENSION_LIST:
+            event.acceptProposedAction()
+        else:
+            event.ignore()
+
+    def dropEvent(self, event):
+        if self.object_dialog is None:
+            return
+
+        file_path = event.mimeData().text()
+        file_path = re.sub('file:///', '', file_path)
+        self.load_threed_model(file_path)
+        self.calculate_resize()
+        if self.object_dialog is not None:
+            self.object_dialog.set_object_name(Path(file_path).stem)
+
+    def load_threed_model(self, file_path):
+        if file_path.split('.')[-1].lower() == 'obj':
+            #self.test_obj = OBJ('Estaingia_simulation_base_20221125.obj')
+            self.threed_model = OBJ(file_path)
+        self.updateGL()
 
     def initialize_frame_buffer(self, frame_buffer_id=0):
         #print("initialize_frame_buffer")
@@ -1752,8 +1800,19 @@ class MyGLWidget(QGLWidget):
         #gl.glPushMatrix()
         #gl.glColor3f( *COLOR['RED'] )
         #gl.glTranslatef(box_x, box_y, box_z)
-        if self.test_obj is not None:
-            self.test_obj.render()
+        if self.threed_model is not None:
+            self.threed_model.render()
+
+            if self.cursor_on_vertice > -1:
+                lm = self.threed_model.vertices[self.cursor_on_vertice]
+                gl.glPushMatrix()
+                gl.glTranslate(*lm)
+                #print("color: yellow")
+                gl.glColor3f( *COLOR['SELECTED_LANDMARK'] )
+                glut.glutSolidSphere(0.03, 10, 10)
+                gl.glPopMatrix()
+
+
         #gl.glPopMatrix()
 
     def create_picker_buffer(self):
@@ -1901,6 +1960,9 @@ class MyGLWidget(QGLWidget):
             self.lm_idx_to_color["lm_"+str(i)] = color
 
     def calculate_resize(self):
+        #print("obj_ops:", self.obj_ops)
+        if len(self.landmark_list) == 0:
+            return
         self.obj_ops.landmark_list = self.landmark_list
         self.obj_ops.move_to_center()
         centroid_size = self.obj_ops.get_centroid_size()
@@ -1910,6 +1972,118 @@ class MyGLWidget(QGLWidget):
         #self.auto_rotate = True
         self.updateGL()
         return
+
+    def unproject_mouse(self, x, y):
+        # Get the view and projection matrices from your OpenGL code
+        modelview = gl.glGetDoublev(gl.GL_MODELVIEW_MATRIX)
+        projection = gl.glGetDoublev(gl.GL_PROJECTION_MATRIX)
+        viewport = gl.glGetIntegerv(gl.GL_VIEWPORT)
+        # Unproject the mouse coordinates to get the 3D ray
+        near = glu.gluUnProject(x, viewport[3] - y, 0.0, modelview, projection, viewport)
+        far = glu.gluUnProject(x, viewport[3] - y, 1.0, modelview, projection, viewport)
+        ray_direction = np.array(far) - np.array(near)
+        ray_direction /= np.linalg.norm(ray_direction)
+        return near, ray_direction
+
+    def pick_element(self, x, y):
+        near, ray_direction = self.unproject_mouse(x, y)
+        
+        # Initialize variables to keep track of the closest intersection
+        closest_distance = float('inf')
+        closest_element = None
+        vert_is_closest = False
+
+        faces = self.threed_model.faces
+        vertices = self.threed_model.vertices
+        # Iterate over the faces of the 3D object and check for ray-triangle intersection
+        for face_entity in faces:
+            #print(face)
+            face = face_entity[0]
+            #print("face:", face)
+            v0, v1, v2 = np.array(vertices[face[0]-1]), np.array(vertices[face[1]-1]), np.array(vertices[face[2]-1])
+            intersection_point, distance = self.ray_triangle_intersection(near, ray_direction, v0, v1, v2)
+
+            # Check if there's a valid intersection and if it's closer than the current closest
+            if intersection_point is not None and distance < closest_distance:
+                closest_distance = distance
+                closest_element = face
+                #print("closest face:", closest_element)
+
+        # Iterate over the vertices of the 3D object and check for distance to ray
+        for i, vertex in enumerate(vertices):
+            distance = self.distance_to_ray(near, ray_direction, np.array(vertex))
+
+            # Check if the distance is within a threshold (pick radius) and if it's closer than the current closest
+            pick_radius = 0.1  # Adjust this value according to your needs
+            if distance is not None and distance < closest_distance and distance < pick_radius:
+                closest_distance = distance
+                closest_element = i
+                vert_is_closest = True
+                #print("closest vert:", closest_element)
+        if vert_is_closest:
+            self.cursor_on_vertice = closest_element
+        else:
+            self.cursor_on_vertice = -1
+
+        return closest_element
+
+    def ray_triangle_intersection(self, ray_origin, ray_direction, v0, v1, v2):
+        # Compute the triangle's normal
+        edge1 = v1 - v0
+        edge2 = v2 - v0
+        normal = np.cross(edge1, edge2)
+        normal /= np.linalg.norm(normal)
+
+        # Check if the ray is parallel to the triangle (dot product of the ray direction and normal)
+        epsilon = 1e-6
+        if abs(np.dot(ray_direction, normal)) < epsilon:
+            return None, None  # No intersection
+
+        # Compute the distance from the ray origin to the plane containing the triangle
+        d = np.dot(v0 - ray_origin, normal) / np.dot(ray_direction, normal)
+
+        # Check if the intersection point is behind the ray origin
+        if d < 0:
+            return None, None  # No intersection
+
+        # Compute the intersection point
+        intersection_point = ray_origin + d * ray_direction
+
+        # Check if the intersection point is inside the triangle
+        edge0 = v0 - v2
+        C0 = intersection_point - v0
+        C1 = intersection_point - v1
+        C2 = intersection_point - v2
+        dot00 = np.dot(edge0, edge0)
+        dot01 = np.dot(edge0, edge1)
+        dot02 = np.dot(edge0, edge2)
+        dot11 = np.dot(edge1, edge1)
+        dot12 = np.dot(edge1, edge2)
+        inv_denom = 1.0 / (dot00 * dot11 - dot01 * dot01)
+        u = (dot11 * np.dot(C0, edge0) - dot01 * np.dot(C0, edge1)) * inv_denom
+        v = (dot00 * np.dot(C1, edge1) - dot01 * np.dot(C1, edge0)) * inv_denom
+
+        if (u >= 0) and (v >= 0) and (u + v <= 1):
+            # Intersection point is inside the triangle
+            return intersection_point, d
+        else:
+            return None, None  # No intersection
+
+    def distance_to_ray(self, ray_origin, ray_direction, point):
+        # Calculate the vector from the ray origin to the point
+        point_vector = point - ray_origin
+
+        # Calculate the projection of point_vector onto the ray direction
+        projection = np.dot(point_vector, ray_direction)
+
+        # Check if the projection is negative (point is behind the ray origin)
+        if projection < 0:
+            return None
+
+        # Calculate the distance to the ray
+        distance = np.linalg.norm(point_vector - projection * ray_direction)
+
+        return distance
 
 class DatasetAnalysisDialog(QDialog):
     def __init__(self,parent,dataset):

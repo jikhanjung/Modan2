@@ -157,7 +157,7 @@ class ModanMainWindow(QMainWindow):
         pass
 
     def read_settings(self):
-        self.m_app.settings = QSettings(QSettings.IniFormat, QSettings.UserScope,"DiploSoft", "Modan2")
+        self.m_app.settings = QSettings(QSettings.IniFormat, QSettings.UserScope,"PaleoBytes", "Modan2")
         self.m_app.settings.beginGroup("Defaults")
         self.m_app.storage_directory = self.m_app.settings.value("Storage directory", os.path.abspath(DEFAULT_STORAGE_DIRECTORY))
         dir = self.m_app.storage_directory
@@ -169,7 +169,7 @@ class ModanMainWindow(QMainWindow):
             return
             print(tables)
         else:
-            gDatabase.create_tables([MdDataset, MdObject, MdImage, ])
+            gDatabase.create_tables([MdDataset, MdObject, MdImage, MdThreeDModel,])
 
     '''
     def read_settings(self):

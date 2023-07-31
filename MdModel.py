@@ -348,7 +348,7 @@ class MdImage(Model):
         image_info['datetime'] = image_info['date'] + ' ' + image_info['time']
         return image_info
 
-class Md3DModel(Model):
+class MdThreeDModel(Model):
     original_path = CharField(null=True)
     original_filename = CharField(null=True)
     name = CharField(null=True)
@@ -358,13 +358,13 @@ class Md3DModel(Model):
     file_modified = DateTimeField(null=True)
     created_at = DateTimeField(default=datetime.datetime.now)
     modified_at = DateTimeField(default=datetime.datetime.now)
-    object = ForeignKeyField(MdObject, backref='3dmodel', on_delete="CASCADE")
-
-    def get_file_path(self, base_path):
-        return os.path.join( base_path, str(self.object.dataset.id), str(self.object.id) + "." + self.original_path.split('.')[-1])
+    object = ForeignKeyField(MdObject, backref='threed_model', on_delete="CASCADE")
 
     class Meta:
         database = gDatabase
+
+    def get_file_path(self, base_path):
+        return os.path.join( base_path, str(self.object.dataset.id), str(self.object.id) + "." + self.original_path.split('.')[-1])
 
     def load_file_info(self, fullpath):
 
@@ -379,6 +379,13 @@ class Md3DModel(Model):
 
         ''' md5 hash value '''
         file_info['md5hash'], image_data = self.get_md5hash_info(fullpath)
+
+        self.original_path = fullpath
+        self.original_filename = Path(fullpath).name
+        self.md5hash = file_info['md5hash']
+        self.size = file_info['size']
+        self.file_created = file_info['ctime']
+        self.file_modified = file_info['mtime']
 
     def get_md5hash_info(self,filepath):
         afile = open(filepath, 'rb')
@@ -400,14 +407,13 @@ class MdObjectOps:
         self.property_str = mdobject.property_str
         if self.landmark_str is not None and self.landmark_str != "":
             mdobject.unpack_landmark()
-        self.landmark_list = []
-        for lm in mdobject.landmark_list:
-            self.landmark_list.append(lm)
+        self.landmark_list = mdobject.landmark_list.copy()
+        #for lm in mdobject.landmark_list:
+        #    self.landmark_list.append(lm)
         self.property_list = []
         if self.property_str is not None and self.property_str != "":
             mdobject.unpack_property()
-        for prop in mdobject.property_list:
-            self.property_list.append(prop)
+        self.property_list = mdobject.property_list.copy()
 
         self.centroid_size = -1
 

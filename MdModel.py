@@ -8,7 +8,7 @@ import io
 from pathlib import Path
 import time
 import math
-import numpy
+import numpy as np
 
 LANDMARK_SEPARATOR = "\t"
 LINE_SEPARATOR = "\n"
@@ -485,11 +485,16 @@ class MdObjectOps:
         return centroid_size
 
     def move(self, x, y, z=0):
+        new_landmark_list = []
+        #print("move 1:", id(self.landmark_list), self.landmark_list[0])
         for lm in self.landmark_list:
             lm[0] = lm[0] + x
             lm[1] = lm[1] + y
             if len(lm) == 3:
                 lm[2] = lm[2] + z
+            new_landmark_list.append(lm)
+        self.landmark_list = new_landmark_list
+        #print("move 2:", id(self.landmark_list), self.landmark_list[0])
 
     def move_to_center(self):
         centroid = self.get_centroid_coord()
@@ -509,6 +514,14 @@ class MdObjectOps:
         centroid_size = self.get_centroid_size(True)
         
         self.rescale(( 1 / centroid_size ))
+
+    def apply_rotation_matrix(self, rotation_matrix):
+        if len(self.landmark_list)>0:
+            ones_column = np.ones((np.array(self.landmark_list).shape[0], 1))
+            vertices_with_ones = np.hstack((self.landmark_list, ones_column))
+            new_vertices = np.dot(vertices_with_ones, rotation_matrix.T)
+            self.landmark_list = new_vertices[:, 0:3].tolist()
+
 
     def rotate_2d(self, theta):
         self.rotate_3d(theta, 'Z')
@@ -683,8 +696,8 @@ class MdDatasetOps:
 
         mo = self.object_list[object_index]
         nlandmarks = len(mo.landmark_list)
-        target_shape = numpy.zeros((nlandmarks, 3))
-        reference_shape = numpy.zeros((nlandmarks, 3))
+        target_shape = np.zeros((nlandmarks, 3))
+        reference_shape = np.zeros((nlandmarks, 3))
 
         i = 0
         for lm in ( mo.landmark_list ):
@@ -700,11 +713,11 @@ class MdDatasetOps:
 
         rotation_matrix = self.rotation_matrix(reference_shape, target_shape)
         #print rotation_matrix
-        #target_transposed = numpy.transpose( target_shape )
+        #target_transposed = np.transpose( target_shape )
         #print target_transposed
         #print rotation_matrix.shape
         #print target_transposed.shape
-        rotated_shape = numpy.transpose(numpy.dot(rotation_matrix, numpy.transpose(target_shape)))
+        rotated_shape = np.transpose(np.dot(rotation_matrix, np.transpose(target_shape)))
 
         #print rotated_shape
 
@@ -723,12 +736,12 @@ class MdDatasetOps:
         #assert( ref[0] == 3 )
         #assert( ref.shape == target.shape )
 
-        correlation_matrix = numpy.dot(numpy.transpose(ref), target)
-        v, s, w = numpy.linalg.svd(correlation_matrix)
-        is_reflection = ( numpy.linalg.det(v) * numpy.linalg.det(w) ) < 0.0
+        correlation_matrix = np.dot(np.transpose(ref), target)
+        v, s, w = np.linalg.svd(correlation_matrix)
+        is_reflection = ( np.linalg.det(v) * np.linalg.det(w) ) < 0.0
         if is_reflection:
             v[-1, :] = -v[-1, :]
-        rot_mx = numpy.dot(v, w)
+        rot_mx = np.dot(v, w)
         #print("rotation_matrix:",rot_mx)
         return rot_mx
 
@@ -891,12 +904,12 @@ class MdDatasetOps:
 
         target_shape = self.object_list[object_index]
         nlandmarks = len(target_shape.landmark_list)
-        #target_shape = numpy.zeros((nlandmarks,3))
+        #target_shape = np.zeros((nlandmarks,3))
         reference_shape = self.reference_shape
 
         #rotation_matrix = self.rotation_matrix( reference_shape, target_shape )
 
-        #rotated_shape = numpy.transpose( numpy.dot( rotation_matrix, numpy.transpose( target_shape ) ) )
+        #rotated_shape = np.transpose( np.dot( rotation_matrix, np.transpose( target_shape ) ) )
 
         # obtain scale factor using repeated median
         landmark_count = len(reference_shape.landmark_list)
@@ -940,10 +953,10 @@ class MdDatasetOps:
         for i in range(landmark_count - 1):
             for j in range(i + 1, landmark_count):
                 # get vector
-                target_vector = numpy.array([target_shape.landmark_list[i][0] - target_shape.landmark_list[j][0],
+                target_vector = np.array([target_shape.landmark_list[i][0] - target_shape.landmark_list[j][0],
                                              target_shape.landmark_list[i][1] - target_shape.landmark_list[j][1],
                                              target_shape.landmark_list[i][2] - target_shape.landmark_list[j][2]])
-                reference_vector = numpy.array([reference_shape.landmark_list[i][0] - reference_shape.landmark_list[j][0],
+                reference_vector = np.array([reference_shape.landmark_list[i][0] - reference_shape.landmark_list[j][0],
                                              reference_shape.landmark_list[i][1] - reference_shape.landmark_list[j][1],
                                              reference_shape.landmark_list[i][2] - reference_shape.landmark_list[j][2]])
                 #       cos_val = ( target_vector[0] * reference_vector[0] + \
@@ -958,8 +971,8 @@ class MdDatasetOps:
                 #          print reference_vector
                 #          print math.acos( cos_val )
                 #          cos_val = 1.0
-                cos_val = numpy.vdot(target_vector, reference_vector) / numpy.linalg.norm(
-                    target_vector) * numpy.linalg.norm(reference_vector)
+                cos_val = np.vdot(target_vector, reference_vector) / np.linalg.norm(
+                    target_vector) * np.linalg.norm(reference_vector)
                 #        if( cos_val > 1.0 ):
                 #          print "cos_val 2: ", cos_val
                 #          cos_val = 1.0
@@ -972,7 +985,7 @@ class MdDatasetOps:
                 #          print "acos value error"
                 #          theta = 0.0
                 inner_theta_array.append(theta)
-                inner_vector_array.append(numpy.array([target_vector, reference_vector]))
+                inner_vector_array.append(np.array([target_vector, reference_vector]))
                 #print inner_vector_array[-1]
             median_index = self.get_median_index(inner_theta_array)
             #      print inner_vector_array[median_index]
@@ -985,8 +998,8 @@ class MdDatasetOps:
         vector_final = outer_vector_array[median_index]
         #    print vector_final
 
-        target_shape = numpy.zeros((1, 3))
-        reference_shape = numpy.zeros((1, 3))
+        target_shape = np.zeros((1, 3))
+        reference_shape = np.zeros((1, 3))
         #print vector_final
         target_shape[0] = vector_final[0]
         reference_shape[0] = vector_final[1]
@@ -996,28 +1009,28 @@ class MdDatasetOps:
         #rotation_matrix = self.rotation_matrix( reference_shape, target_shape )
         #print reference_shape
         #print target_shape
-        #rotated_shape = numpy.transpose( numpy.dot( rotation_matrix, numpy.transpose( target_shape ) ) )
+        #rotated_shape = np.transpose( np.dot( rotation_matrix, np.transpose( target_shape ) ) )
         #print rotated_shape
         #exit
-        target_shape = numpy.zeros((nlandmarks, 3))
+        target_shape = np.zeros((nlandmarks, 3))
         i = 0
         for lm in ( self.object_list[object_index].landmark_list ):
             target_shape[i] = lm
             i += 1
 
-        reference_shape = numpy.zeros((nlandmarks, 3))
+        reference_shape = np.zeros((nlandmarks, 3))
         i = 0
         for lm in ( self.reference_shape.landmark_list ):
             reference_shape[i] = lm
             i += 1
 
-        rotated_shape = numpy.transpose(numpy.dot(rotation_matrix, numpy.transpose(target_shape)))
+        rotated_shape = np.transpose(np.dot(rotation_matrix, np.transpose(target_shape)))
 
         #print "reference: ", reference_shape[0]
-        #print "target: ", target_shape[0], numpy.linalg.norm(target_shape[0])
+        #print "target: ", target_shape[0], np.linalg.norm(target_shape[0])
         #print "rotation: ", rotation_matrix
-        #print "rotated: ", rotated_shape[0], numpy.linalg.norm(rotated_shape[0])
-        #print "determinant: ", numpy.linalg.det( rotation_matrix )
+        #print "rotated: ", rotated_shape[0], np.linalg.norm(rotated_shape[0])
+        #print "determinant: ", np.linalg.det( rotation_matrix )
 
         i = 0
         for lm in ( self.object_list[object_index].landmark_list ):
@@ -1028,10 +1041,10 @@ class MdDatasetOps:
             #self.reference_shape.print_landmarks("ref:")
             #self.objects[object_index].print_landmarks(str(object_index))
             #print "reference: ", reference_shape[0]
-            #print "target: ", target_shape[0], numpy.linalg.norm(target_shape[0])
+            #print "target: ", target_shape[0], np.linalg.norm(target_shape[0])
             #print "rotation: ", rotation_matrix
-            #print "rotated: ", rotated_shape[0], numpy.linalg.norm(rotated_shape[0])
-            #print "determinant: ", numpy.linalg.det( rotation_matrix )
+            #print "rotated: ", rotated_shape[0], np.linalg.norm(rotated_shape[0])
+            #print "determinant: ", np.linalg.det( rotation_matrix )
 
     def get_vector_rotation_matrix(self, ref, target):
         ( x, y, z ) = ( 0, 1, 2 )
@@ -1080,8 +1093,8 @@ class MdDatasetOps:
         #print "4 ref", ref
         #print "4 target", target
 
-        r_mx1 = numpy.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
-        r_mx2 = numpy.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
+        r_mx1 = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
+        r_mx2 = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
         #print "shape:", r_mx1.shape
         #print "r_mx1", r_mx1
         #print "theta1", theta1
@@ -1109,7 +1122,7 @@ class MdDatasetOps:
         #print "r_mx2", r_mx2
         #print "theta2", theta2
 
-        rotation_matrix = numpy.dot(r_mx1, r_mx2)
+        rotation_matrix = np.dot(r_mx1, r_mx2)
         return rotation_matrix
 
 

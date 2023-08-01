@@ -8,7 +8,7 @@ import math
 import numpy as np
 
 class OBJ:
-    generate_on_init = True
+    generate_on_init = False
     @classmethod
     def loadTexture(cls, imagefile):
         return None
@@ -68,6 +68,8 @@ class OBJ:
         self.min_y = 9999999
         self.max_z = -9999999
         self.min_z = 9999999
+        self.scale = 1.0
+        self.generated = False
         dirname = os.path.dirname(filename)
 
         material = None
@@ -120,12 +122,24 @@ class OBJ:
         self.center_x = (self.max_x + self.min_x) / 2
         self.center_y = (self.max_y + self.min_y) / 2
         self.center_z = (self.max_z + self.min_z) / 2
+        self.width = self.max_x - self.min_x
+        self.height = self.max_y - self.min_y
+        self.depth = self.max_z - self.min_z
+
         # center vertices
         vertices = np.array(self.vertices)
         vertices[:, 0] -= self.center_x
         vertices[:, 1] -= self.center_y
         vertices[:, 2] -= self.center_z
+
         self.centered_vertices = vertices.tolist()
+
+        _3D_SCREEN_WIDTH = _3D_SCREEN_HEIGHT = 5
+        self.scale = min( _3D_SCREEN_WIDTH / self.width, _3D_SCREEN_HEIGHT / self.height ) * 0.5
+        vertices *= self.scale
+
+        self.scaled_centered_vertices = vertices.tolist()
+        self.vertices = vertices.tolist()
         
         if self.generate_on_init:
             self.generate()
@@ -156,8 +170,12 @@ class OBJ:
                 glVertex3fv(self.vertices[vertices[i] - 1])
             glEnd()
         glEndList()
+        self.generated = True
 
     def render(self):
+        if self.generated == False:
+            return
+        #print("render", self, self.gl_list)
         glCallList(self.gl_list)
         return
         #import datetime
@@ -178,7 +196,7 @@ class OBJ:
     def free(self):
         glDeleteLists([self.gl_list])
 
-    def rotate(self, rotationX_rad, rotationY_rad):
+    def rotate(self, rotationX_rad, rotationY_rad, apply_rotation_to_vertex = True):
         #print(rotationX_rad, rotationY_rad)
         rotationXMatrix = np.array([
             [1, 0, 0, 0],
@@ -198,14 +216,15 @@ class OBJ:
         new_rotation_matrix = np.dot(rotationXMatrix, rotationYMatrix)
         self.rotation_matrix = np.dot(new_rotation_matrix, self.rotation_matrix)
 
+        if apply_rotation_to_vertex == False:
+            return
         # Create a column of 1's with the same number of rows as vertices
-        ones_column = np.ones((np.array(self.centered_vertices).shape[0], 1))
-
-        # Use numpy.hstack() to concatenate the vertices with the ones column
-        vertices_with_ones = np.hstack((self.centered_vertices, ones_column))
+        ones_column = np.ones((np.array(self.scaled_centered_vertices).shape[0], 1))
+        vertices_with_ones = np.hstack((self.scaled_centered_vertices, ones_column))
         new_vertices = np.dot(vertices_with_ones, self.rotation_matrix.T)
         self.vertices = new_vertices[:, 0:3]
 
+        ones_column = np.ones((np.array(self.original_normals).shape[0], 1))
         normals_with_ones = np.hstack((self.original_normals, ones_column))
         new_normals = np.dot(normals_with_ones, self.rotation_matrix.T)
         self.normals = new_normals[:, 0:3]

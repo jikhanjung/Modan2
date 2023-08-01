@@ -30,7 +30,7 @@ import shutil
 
 from MdModel import *
 from ModanDialogs import DatasetAnalysisDialog, ObjectDialog, ImportDatasetDialog, DatasetDialog, PreferencesDialog, \
-    IMAGE_EXTENSION_LIST, MODE, MyGLWidget, ExportDatasetDialog, ObjectViewer2D, ProgressDialog
+    IMAGE_EXTENSION_LIST, MODE, MyGLWidget, ExportDatasetDialog, ObjectViewer2D, ProgressDialog, MODEL_EXTENSION_LIST
 
 #import matplotlib
 #matplotlib.use('Qt5Agg')
@@ -707,12 +707,27 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 img = MdImage()
                 img.object = object
                 img.load_file_info(file_name)
-                new_filepath = img.get_image_path( self.m_app.storage_directory)
+                new_filepath = img.get_file_path( self.m_app.storage_directory)
                 if not os.path.exists(os.path.dirname(new_filepath)):
                     os.makedirs(os.path.dirname(new_filepath))
                 shutil.copyfile(file_name, new_filepath)
                 img.save()
-
+            elif ext in MODEL_EXTENSION_LIST:
+                if self.selected_dataset.dimension != 3:
+                    QMessageBox.warning(self, "Warning", "Dimension mismatch.")
+                    break
+                object = MdObject()
+                object.dataset = self.selected_dataset
+                object.object_name = Path(file_name).stem
+                object.save()
+                mdl = MdThreeDModel()
+                mdl.object = object
+                mdl.load_file_info(file_name)
+                new_filepath = mdl.get_file_path( self.m_app.storage_directory)
+                if not os.path.exists(os.path.dirname(new_filepath)):
+                    os.makedirs(os.path.dirname(new_filepath))
+                shutil.copyfile(file_name, new_filepath)
+                mdl.save()
             elif os.path.isdir(file_name):
                 self.statusBar.showMessage("Cannot process directory...",2000)
 

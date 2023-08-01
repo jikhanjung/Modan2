@@ -40,6 +40,7 @@ from MdModel import *
 from MdStatistics import MdPrincipalComponent
 import numpy as np
 from OpenGL.arrays import vbo
+import copy
 
 def resource_path(relative_path):
     try:
@@ -151,14 +152,11 @@ class ObjectViewer2D(QLabel):
         self.pan_mode = MODE['NONE']
         self.edit_mode = MODE['NONE']
 
-        self.setAcceptDrops(True)
-        self.setMouseTracking(True)
-        self.set_mode(MODE['EDIT_LANDMARK'])
-
         self.show_index = True
         self.show_wireframe = True
         self.show_baseline = False  
         self.read_only = False
+        self.show_model = False
 
         self.pan_x = 0
         self.pan_y = 0
@@ -182,6 +180,10 @@ class ObjectViewer2D(QLabel):
         self.pixels_per_mm = -1
         self.orig_width = -1
         self.orig_height = -1
+
+        self.setAcceptDrops(True)
+        self.setMouseTracking(True)
+        self.set_mode(MODE['EDIT_LANDMARK'])
         
     def _2canx(self, coord):
         return round((float(coord) / self.image_canvas_ratio) * self.scale) + self.pan_x + self.temp_pan_x
@@ -197,7 +199,7 @@ class ObjectViewer2D(QLabel):
             self.object_dialog.status_bar.showMessage(msg) 
 
     def set_mode(self, mode):
-        self.edit_mode = mode  
+        self.edit_mode = mode
         if self.edit_mode == MODE['EDIT_LANDMARK']:
             self.setCursor(Qt.CrossCursor)
             #QApplication.setOverrideCursor(Qt.CrossCursor)
@@ -332,6 +334,9 @@ class ObjectViewer2D(QLabel):
                 if img_x < 0 or img_x > self.orig_pixmap.width() or img_y < 0 or img_y > self.orig_pixmap.height():
                     return
                 self.object_dialog.add_landmark(img_x, img_y)
+                #self.update_landmark_list()
+                #print(self.cursor_on_vertex, x,y,z, self.landmark_list[0], self.obj_ops.landmark_list[0])
+                #self.calculate_resize()
             elif self.edit_mode == MODE['READY_MOVE_LANDMARK']:
                 self.set_mode(MODE['MOVE_LANDMARK'])
             elif self.edit_mode == MODE['WIREFRAME']:
@@ -838,6 +843,9 @@ class ObjectDialog(QDialog):
         self.cbxAutoRotate = QCheckBox()
         self.cbxAutoRotate.setText("Rotate")
         self.cbxAutoRotate.setChecked(False)
+        self.cbxShowModel = QCheckBox()
+        self.cbxShowModel.setText("3D Model")
+        self.cbxShowModel.setChecked(True)
         #self.btnFBO = QPushButton()
         #self.btnFBO.setText("FBO")
         #self.btnFBO.clicked.connect(self.btnFBO_clicked)
@@ -853,6 +861,7 @@ class ObjectDialog(QDialog):
         self.right_middle_layout.addWidget(self.cbxShowIndex)
         self.right_middle_layout.addWidget(self.cbxShowWireframe)
         self.right_middle_layout.addWidget(self.cbxShowBaseline)
+        self.right_middle_layout.addWidget(self.cbxShowModel)
         self.right_middle_layout.addWidget(self.cbxAutoRotate)
         #self.right_middle_layout.addWidget(self.btnFBO)
         self.right_middle_widget.setLayout(self.right_middle_layout)
@@ -913,6 +922,7 @@ class ObjectDialog(QDialog):
         self.cbxShowWireframe.stateChanged.connect(self.show_wireframe_state_changed)
         self.cbxShowBaseline.stateChanged.connect(self.show_baseline_state_changed)
         self.cbxAutoRotate.stateChanged.connect(self.auto_rotate_state_changed)
+        self.cbxShowModel.stateChanged.connect(self.show_model_state_changed)
 
         #self.calibration
     def set_object_calibration(self, pixels, calibration_length, calibration_unit):
@@ -936,6 +946,10 @@ class ObjectDialog(QDialog):
 
     def show_index_state_changed(self, int):
         self.object_view.show_index = self.cbxShowIndex.isChecked()
+        self.object_view.update()
+
+    def show_model_state_changed(self, int):
+        self.object_view.show_model = self.cbxShowModel.isChecked()
         self.object_view.update()
 
     def show_baseline_state_changed(self, int):
@@ -1009,6 +1023,7 @@ class ObjectDialog(QDialog):
             header.setSectionResizeMode(0, QHeaderView.Stretch)
             header.setSectionResizeMode(1, QHeaderView.Stretch)
             self.cbxAutoRotate.hide()
+            self.cbxShowModel.hide()
             #self.btnCalibration.show()
             self.inputZ.hide()
             self.object_view_3d.hide()
@@ -1021,6 +1036,7 @@ class ObjectDialog(QDialog):
             header.setSectionResizeMode(1, QHeaderView.Stretch)
             header.setSectionResizeMode(2, QHeaderView.Stretch)
             self.cbxAutoRotate.show()
+            self.cbxShowModel.show()
             #self.btnCalibration.hide()
             self.inputZ.show()
             self.object_view_2d.hide()
@@ -1044,7 +1060,8 @@ class ObjectDialog(QDialog):
             self.edtObjectName.setText(object.object_name)
             self.edtObjectDesc.setText(object.object_desc)
             #self.edtLandmarkStr.setText(object.landmark_str)
-            self.landmark_list = object.unpack_landmark()
+            object.unpack_landmark()
+            self.landmark_list = object.landmark_list
             self.edge_list = object.dataset.unpack_wireframe()
             #for lm in self.landmark_list:
             #    self.show_landmark(*lm)
@@ -1061,23 +1078,12 @@ class ObjectDialog(QDialog):
             self.cbxAutoRotate.show()
             if object is not None:
                 if object.threed_model is not None and len(object.threed_model) > 0:
-                    print("3d model exists")
-                    threed_model = object.threed_model[0]
-                    threed_model_path = threed_model.get_file_path(self.m_app.storage_directory)
-                    #check if threed_model_path exists
-                    if os.path.exists(threed_model_path):
-                        self.object_view.set_threed_model(threed_model_path)
-                    self.object_view.set_mode(MODE['EDIT_LANDMARK'])
-                    #self.btnCalibration.setEnabled(True)
-                    self.btnLandmark.setEnabled(True)
-                    self.btnLandmark.setDown(True)
+                    self.enable_landmark_edit()
                 else:
-                    self.object_view.set_mode(MODE['VIEW'])
-                    self.btnCalibration.setDisabled(True)
-                    self.btnLandmark.setDisabled(True)
-                    self.btnLandmark.setDown(False)
+                    self.disable_landmark_edit()
                 self.object_view.set_object(object)
                 self.object_view.landmark_list = self.landmark_list
+                #self.object_view.landmark_list = self.landmark_list
 
         else:
             #print("set_object 2d")
@@ -1090,15 +1096,11 @@ class ObjectDialog(QDialog):
                     #check if image_path exists
                     if os.path.exists(image_path):
                         self.object_view.set_image(image_path)
-                    self.object_view.set_mode(MODE['EDIT_LANDMARK'])
                     self.btnCalibration.setEnabled(True)
-                    self.btnLandmark.setEnabled(True)
-                    self.btnLandmark.setDown(True)
+                    self.enable_landmark_edit()
                 else:
-                    self.object_view.set_mode(MODE['VIEW'])
                     self.btnCalibration.setDisabled(True)
-                    self.btnLandmark.setDisabled(True)
-                    self.btnLandmark.setDown(False)
+                    self.disable_landmark_edit()
                 #elif len(self.landmark_list) > 0:
                 self.object_view.set_object(object)
                 self.object_view.landmark_list = self.landmark_list
@@ -1112,6 +1114,17 @@ class ObjectDialog(QDialog):
 
             #self.object_view_3d.landmark_list = self.landmark_list
         #self.set_dataset(object.dataset)
+
+    def enable_landmark_edit(self):
+        self.btnLandmark.setEnabled(True)
+        self.btnLandmark.setDown(True)
+        self.object_view.set_mode(MODE['EDIT_LANDMARK'])
+
+    def disable_landmark_edit(self):
+        self.btnLandmark.setDisabled(True)
+        self.btnLandmark.setDown(False)
+        self.object_view.set_mode(MODE['VIEW'])
+
 
     @pyqtSlot(str)
     def x_changed(self, text):
@@ -1140,7 +1153,7 @@ class ObjectDialog(QDialog):
         self.show_landmarks()
 
     def add_landmark(self, x, y, z=None):
-        #print("adding landmark", x, y, z)
+        #print("adding landmark", x, y, z, self.landmark_list)
         if self.dataset.dimension == 2:
             self.landmark_list.append([float(x),float(y)])
         elif self.dataset.dimension == 3:
@@ -1404,6 +1417,7 @@ class MyGLWidget(QGLWidget):
         self.show_wireframe = True
         self.show_baseline = False
         self.show_average = True
+        self.show_model = True
         self.curr_x = 0
         self.curr_y = 0
         self.down_x = 0
@@ -1439,6 +1453,8 @@ class MyGLWidget(QGLWidget):
         [0, 0, 1, 0],
         [0, 0, 0, 1]
         ])
+        self.initialized = False
+        self.fullpath = None
 
     def show_message(self, msg):
         if self.object_dialog is not None:
@@ -1479,10 +1495,11 @@ class MyGLWidget(QGLWidget):
             elif self.edit_mode == MODE['EDIT_LANDMARK'] and self.cursor_on_vertex > -1:
                 #self.threed_model.landmark_list.append(self.cursor_on_vertex)
                 x, y, z = self.threed_model.original_vertices[self.cursor_on_vertex]
-                print(self.cursor_on_vertex, x,y,z, self.landmark_list)
+                #print(self.cursor_on_vertex, x,y,z, self.landmark_list[0], self.obj_ops.landmark_list[0])
                 self.object_dialog.add_landmark(x,y,z)
-                print(self.cursor_on_vertex, x,y,z, self.landmark_list)
-                #self.calculate_resize()
+                self.update_landmark_list()
+                #   print(self.cursor_on_vertex, x,y,z, self.landmark_list[0], self.obj_ops.landmark_list[0])
+                self.calculate_resize()
             else:                
                 self.view_mode = ROTATE_MODE
         elif event.buttons() == Qt.RightButton:
@@ -1515,11 +1532,16 @@ class MyGLWidget(QGLWidget):
                     if self.threed_model is not None:
                         #print("rotate_x:", self.rotate_x, "rotate_y:", self.rotate_y)
                         #print("1:",datetime.datetime.now())
-                        self.threed_model.rotate(math.radians(self.rotate_x),math.radians(self.rotate_y))
+                        if self.show_model == True:
+                            apply_rotation_to_vertex = True
+                        else:
+                            apply_rotation_to_vertex = False
+                        self.threed_model.rotate(math.radians(self.rotate_x),math.radians(self.rotate_y),apply_rotation_to_vertex)
                         #print("2:",datetime.datetime.now())
                         #self.threed_model.rotate_3d(math.radians(-1*self.rotate_x),'Y')
                         #self.threed_model.rotate_3d(math.radians(self.rotate_y),'X')
-                        self.threed_model.generate()
+                        if self.show_model == True:
+                            self.threed_model.generate()
                         #print("3:",datetime.datetime.now())
                     #print( "test_obj vert 1 after rotation:", self.test_obj.vertices[0])
                     self.rotate_x = 0
@@ -1579,7 +1601,8 @@ class MyGLWidget(QGLWidget):
         elif self.edit_mode == MODE['EDIT_LANDMARK']:
             #print("edit 3d landmark mode")
             ## call unproject_mouse
-            closest_element = self.pick_element(self.curr_x, self.curr_y)
+            if self.show_model == True:
+                closest_element = self.pick_element(self.curr_x, self.curr_y)
             #if closest_element is not None:
                 #print("closest element:", closest_element)
 
@@ -1629,6 +1652,8 @@ class MyGLWidget(QGLWidget):
 
     def set_object(self, object):
         #print("set_object 1",type(object))
+        #object.unpack_landmark()
+        #self.landmark_list = object.landmark_
         m_app = QApplication.instance()
         if isinstance(object, MdObject):
             self.object = object
@@ -1642,32 +1667,27 @@ class MyGLWidget(QGLWidget):
         #print("set_object 2",type(obj_ops))
         self.dataset = object.dataset
         self.obj_ops = obj_ops
+        #self.landmark_list = object.landmark_
         self.data_mode = OBJECT_MODE
         self.pan_x = self.pan_y = 0
         self.rotate_x = self.rotate_y = 0
         self.edge_list = self.dataset.unpack_wireframe()
 
-        if len(object.landmark_list)<2:
-            return
-
         if object.threed_model.count() > 0:
-            print("object has 3d model")
-            if self.threed_model is None:
-                print("and no 3d model in view yet")
-                self.set_threed_model(object.threed_model[0].get_file_path(m_app.storage_directory))
-                self.calculate_resize()
-
+            #print("object has 3d model", self, self.object, self.threed_model)
+            #print("and no 3d model in view yet", self )
+            filepath = object.threed_model[0].get_file_path(m_app.storage_directory)
+            #print("3d model from:", filepath)
+            self.set_threed_model(filepath)
         else:
-            obj_ops.move_to_center()
-            centroid_size = obj_ops.get_centroid_size()
-            obj_ops.rescale_to_unitsize()
-            scale = self.get_scale_from_object(obj_ops)
-            obj_ops.rescale(scale)
-            #self.auto_rotate = True
+            self.threed_model = None
+        self.calculate_resize()
         self.updateGL()
         #print("data_mode:", self.data_mode)
 
     def get_scale_from_object(self, obj_ops):
+        if len(obj_ops.landmark_list) == 0:
+            return 1.0
         centroid_size = obj_ops.get_centroid_size()
         min_x, max_x = min( [ lm[0] for lm in obj_ops.landmark_list] ), max( [ lm[0] for lm in obj_ops.landmark_list] )
         min_y, max_y = min( [ lm[1] for lm in obj_ops.landmark_list] ), max( [ lm[1] for lm in obj_ops.landmark_list] )
@@ -1705,6 +1725,7 @@ class MyGLWidget(QGLWidget):
         self.calculate_resize()
         if self.object_dialog is not None:
             self.object_dialog.set_object_name(Path(file_path).stem)
+            self.object_dialog.enable_landmark_edit()
 
     def set_threed_model(self, file_path):
         if file_path.split('.')[-1].lower() == 'obj':
@@ -1738,6 +1759,10 @@ class MyGLWidget(QGLWidget):
         self.initialize_frame_buffer()
         self.picker_buffer = self.create_picker_buffer()
         self.initialize_frame_buffer(self.picker_buffer)
+        self.initialized = True
+        if self.initialized == True and self.threed_model is not None and self.threed_model.generated == False:
+            self.threed_model.generate()
+
         #self.test_obj = OBJ('Estaingia_simulation_base_20221125.obj')
 
     def paintGL(self):
@@ -1787,6 +1812,7 @@ class MyGLWidget(QGLWidget):
             self.draw_object(ds_ops.get_average_shape(), landmark_as_sphere=True, color=object_color)
 
     def draw_object(self,object,landmark_as_sphere=True,color=COLOR['NORMAL_SHAPE']):
+        #print("draw object", object, object.landmark_list)
         current_buffer = gl.glGetIntegerv(gl.GL_FRAMEBUFFER_BINDING)
         if landmark_as_sphere:
             if self.show_wireframe and len(self.edge_list) > 0:
@@ -1858,8 +1884,8 @@ class MyGLWidget(QGLWidget):
         #gl.glPushMatrix()
         #gl.glColor3f( *COLOR['RED'] )
         #gl.glTranslatef(box_x, box_y, box_z)
-        if self.threed_model is not None:
-            print("view has threed_model", self.object_dialog, self.threed_model.gl_list)
+        if self.threed_model is not None and self.show_model is True:
+            #print("view has threed_model", self.object_dialog, self, self.threed_model, self.threed_model.gl_list)
             self.threed_model.render()
 
             if self.cursor_on_vertex > -1:
@@ -1871,12 +1897,13 @@ class MyGLWidget(QGLWidget):
                 glut.glutSolidSphere(0.03, 10, 10)
                 gl.glPopMatrix()
 
+            return
             if len(self.threed_model.landmark_list ) > 0:
+                print("printing landmark:", self.threed_model.landmark_list, COLOR['NORMAL_SHAPE'])
                 for idx in self.threed_model.landmark_list:
                     lm = self.threed_model.vertices[idx]
                     gl.glPushMatrix()
                     gl.glTranslate(*lm)
-                    #print("color: yellow")
                     gl.glColor3f( *COLOR['NORMAL_SHAPE'] )
                     glut.glutSolidSphere(0.03, 10, 10)
                     gl.glPopMatrix()
@@ -2028,13 +2055,35 @@ class MyGLWidget(QGLWidget):
             self.color_to_lm_idx[color] = str(i)
             self.lm_idx_to_color["lm_"+str(i)] = color
 
+    def update_landmark_list(self):
+        self.obj_ops.landmark_list = copy.deepcopy(self.landmark_list)
+        return
+
+        self.obj_ops.landmark_list = []
+        for lm in self.landmark_list:
+            x, y, z = lm[0], lm[1], lm[2]
+            self.obj_ops.landmark_list.append([float(x),float(y),float(z)])
+
     def calculate_resize(self):
         #print("obj_ops:", self.obj_ops)
         #if len(self.landmark_list) == 0:
         #    return
 
         if self.threed_model is not None:
-            self.threed_model
+            if self.initialized == True and self.threed_model.generated == False:
+                self.threed_model.generate()
+            #if len(self.landmark_list) > 0:
+            #    print("are they the same?", self.landmark_list is self.obj_ops.landmark_list)
+            #    print("calculate resize: self:", id(self.landmark_list), self.landmark_list[0] )
+            #print("calculate resize: obj_ops:", id(self.obj_ops.landmark_list), self.obj_ops.landmark_list[0])
+            #print("model center:", self.threed_model.center_x, self.threed_model.center_y, self.threed_model.center_z)
+            self.obj_ops.move(-1 * self.threed_model.center_x, -1 * self.threed_model.center_y, -1 * self.threed_model.center_z)
+            #if len(self.landmark_list) > 0:
+            #    print("calculate resize: self:", id(self.landmark_list), self.landmark_list[0] )
+            #print("calculate resize: obj_ops:", id(self.obj_ops.landmark_list), self.obj_ops.landmark_list[0])
+            self.obj_ops.rescale(self.threed_model.scale)
+            self.obj_ops.apply_rotation_matrix(self.threed_model.rotation_matrix)
+            #pass
         else:
             self.obj_ops.landmark_list = self.landmark_list.copy()
             self.obj_ops.move_to_center()

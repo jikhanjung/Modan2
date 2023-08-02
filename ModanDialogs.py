@@ -1512,16 +1512,14 @@ class MyGLWidget(QGLWidget):
                 self.wireframe_from_idx = self.selected_landmark_idx
                 #self.edit_mode = MODE_ADD_WIRE
             elif self.edit_mode == MODE['EDIT_LANDMARK'] and self.cursor_on_vertex > -1:
-                #self.threed_model.landmark_list.append(self.cursor_on_vertex)
-                x, y, z = self.threed_model.original_vertices[self.cursor_on_vertex]
-                #print(self.cursor_on_vertex, x,y,z, self.landmark_list[0], self.obj_ops.landmark_list[0], self.object_dialog.landmark_list[0])
-                self.object_dialog.add_landmark(x,y,z)
-                self.update_landmark_list()
-                self.calculate_resize()
+                pass
             else:                
                 self.view_mode = ROTATE_MODE
         elif event.buttons() == Qt.RightButton:
-            self.view_mode = ZOOM_MODE
+            if self.edit_mode == MODE['EDIT_LANDMARK'] and self.cursor_on_vertex > -1:
+                pass
+            else:
+                self.view_mode = ZOOM_MODE
         elif event.buttons() == Qt.MiddleButton:
             self.view_mode = PAN_MODE
 
@@ -1538,6 +1536,13 @@ class MyGLWidget(QGLWidget):
                 self.wireframe_from_idx = -1
                 self.wireframe_to_idx = -1
                 self.update()
+            elif self.edit_mode == MODE['EDIT_LANDMARK'] and self.cursor_on_vertex > -1 and self.curr_x == self.down_x and self.curr_y == self.down_y:
+                #self.threed_model.landmark_list.append(self.cursor_on_vertex)
+                x, y, z = self.threed_model.original_vertices[self.cursor_on_vertex]
+                #print(self.cursor_on_vertex, x,y,z, self.landmark_list[0], self.obj_ops.landmark_list[0], self.object_dialog.landmark_list[0])
+                self.object_dialog.add_landmark(x,y,z)
+                self.update_landmark_list()
+                self.calculate_resize()
             else:
                 self.rotate_x += self.temp_rotate_x
                 self.rotate_y += self.temp_rotate_y
@@ -1576,8 +1581,11 @@ class MyGLWidget(QGLWidget):
                 self.temp_rotate_x = 0
                 self.temp_rotate_y = 0
         elif event.button() == Qt.RightButton:
-            self.dolly += self.temp_dolly 
-            self.temp_dolly = 0
+            if self.edit_mode == MODE['EDIT_LANDMARK'] and self.cursor_on_vertex > -1 and self.curr_x == self.down_x and self.curr_y == self.down_y:
+                print("delete landmark")
+            else:
+                self.dolly += self.temp_dolly 
+                self.temp_dolly = 0
         elif event.button() == Qt.MiddleButton:
             self.pan_x += self.temp_pan_x
             self.pan_y += self.temp_pan_y

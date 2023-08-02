@@ -7,6 +7,8 @@ from OpenGL import GLUT as glut
 import math
 import numpy as np
 
+_3D_SCREEN_WIDTH = _3D_SCREEN_HEIGHT = 5
+
 class OBJ:
     generate_on_init = False
     @classmethod
@@ -134,7 +136,6 @@ class OBJ:
 
         self.centered_vertices = vertices.tolist()
 
-        _3D_SCREEN_WIDTH = _3D_SCREEN_HEIGHT = 5
         self.scale = min( _3D_SCREEN_WIDTH / self.width, _3D_SCREEN_HEIGHT / self.height ) * 0.5
         vertices *= self.scale
 

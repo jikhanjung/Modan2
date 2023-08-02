@@ -478,9 +478,12 @@ class ObjectViewer2D(QLabel):
             if self.selected_edge_index >= 0:
                 edge = self.edge_list[self.selected_edge_index]
                 painter.setPen(QPen(as_qt_color(COLOR['SELECTED_EDGE']), 2))
-                [ from_x, from_y ] = self.landmark_list[edge[0]]
-                [ to_x, to_y ] = self.landmark_list[edge[1]]
-                painter.drawLine(int(self._2canx(from_x)), int(self._2cany(from_y)), int(self._2canx(to_x)), int(self._2cany(to_y)))
+                if edge[0] >= len(self.landmark_list) or edge[1] >= len(self.landmark_list):
+                    pass
+                else:
+                    [ from_x, from_y ] = self.landmark_list[edge[0]]
+                    [ to_x, to_y ] = self.landmark_list[edge[1]]
+                    painter.drawLine(int(self._2canx(from_x)), int(self._2cany(from_y)), int(self._2canx(to_x)), int(self._2cany(to_y)))
 
         radius = LANDMARK_RADIUS
         painter.setPen(QPen(Qt.blue, 2))

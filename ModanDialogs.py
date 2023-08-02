@@ -102,6 +102,9 @@ ICON['calibration_hover'] = resource_path('icons/M2Calibration_2_hover.png')
 ICON['calibration_down'] = resource_path('icons/M2Calibration_2_down.png')
 ICON['calibration_disabled'] = resource_path('icons/M2Calibration_2_disabled.png')
 
+NEWLINE = '\n'
+
+
 def as_qt_color(color):
     return QColor( *[ int(x*255) for x in color ] )
 
@@ -562,6 +565,9 @@ class ObjectViewer2D(QLabel):
             painter.setPen(QPen(Qt.black, 1))
             painter.setFont(QFont('Helvetica', 10))
             painter.drawText(x + int(math.floor(float(bar_width) / 2.0 + 0.5)) - len(length_text) * 4, y - 5, length_text)
+
+    def update_landmark_list(self):
+        return
 
     def calculate_resize(self):
         #print("objectviewer calculate resize", self, self.object, self.object.landmark_list, self.landmark_list)
@@ -1061,11 +1067,11 @@ class ObjectDialog(QDialog):
             self.edtObjectDesc.setText(object.object_desc)
             #self.edtLandmarkStr.setText(object.landmark_str)
             object.unpack_landmark()
-            self.landmark_list = object.landmark_list
+            self.landmark_list = copy.deepcopy(object.landmark_list)
             self.edge_list = object.dataset.unpack_wireframe()
             #for lm in self.landmark_list:
             #    self.show_landmark(*lm)
-            self.show_landmarks()
+            #self.show_landmarks()
 
         if self.dataset.dimension == 3:
             #print("set_object 3d")
@@ -1081,10 +1087,12 @@ class ObjectDialog(QDialog):
                     self.enable_landmark_edit()
                 else:
                     self.disable_landmark_edit()
+                #print("object dialog self.landmark_list in set object 3d", self.landmark_list)
                 self.object_view.set_object(object)
                 self.object_view.landmark_list = self.landmark_list
+                self.object_view.update_landmark_list()
+                self.object_view.calculate_resize()
                 #self.object_view.landmark_list = self.landmark_list
-
         else:
             #print("set_object 2d")
             self.object_view = self.object_view_2d
@@ -1102,8 +1110,11 @@ class ObjectDialog(QDialog):
                     self.btnCalibration.setDisabled(True)
                     self.disable_landmark_edit()
                 #elif len(self.landmark_list) > 0:
+                #print("objectdialog self.landmark_list in set object 2d", self.landmark_list)
                 self.object_view.set_object(object)
                 self.object_view.landmark_list = self.landmark_list
+                self.object_view.update_landmark_list()
+                self.object_view.calculate_resize()
 
         if len(self.dataset.propertyname_list) >0:
             self.object.unpack_property()
@@ -1114,6 +1125,7 @@ class ObjectDialog(QDialog):
 
             #self.object_view_3d.landmark_list = self.landmark_list
         #self.set_dataset(object.dataset)
+        self.show_landmarks()
 
     def enable_landmark_edit(self):
         self.btnLandmark.setEnabled(True)
@@ -1159,6 +1171,7 @@ class ObjectDialog(QDialog):
         elif self.dataset.dimension == 3:
             self.landmark_list.append([float(x),float(y),float(z)])
         self.show_landmarks()
+        #self.object_view.calculate_resize()
 
     def delete_landmark(self, idx):
         #print("delete_landmark", idx)
@@ -1183,6 +1196,7 @@ class ObjectDialog(QDialog):
         self.inputY.setText("")
         self.inputZ.setText("")
         self.inputX.setFocus()
+        self.object_view.update_landmark_list()
         self.object_view.calculate_resize()
 
     def show_landmarks(self):
@@ -1202,6 +1216,7 @@ class ObjectDialog(QDialog):
                 item_z = QTableWidgetItem(str(float(lm[2])*1.0))
                 item_z.setTextAlignment(Qt.AlignRight|Qt.AlignVCenter)
                 self.edtLandmarkStr.setItem(idx, 2, item_z)
+        
 
     def save_object(self):
 
@@ -1444,7 +1459,6 @@ class MyGLWidget(QGLWidget):
         self.wireframe_to_idx = -1
         self.selected_landmark_idx = -1
         self.no_hit_count = 0
-        self.edge_list = []
         self.threed_model = None
         self.cursor_on_vertex = -1
         self.rotation_matrix = np.array([
@@ -1455,6 +1469,8 @@ class MyGLWidget(QGLWidget):
         ])
         self.initialized = False
         self.fullpath = None
+        self.edge_list = []
+        self.landmark_list = []
 
     def show_message(self, msg):
         if self.object_dialog is not None:
@@ -1495,10 +1511,9 @@ class MyGLWidget(QGLWidget):
             elif self.edit_mode == MODE['EDIT_LANDMARK'] and self.cursor_on_vertex > -1:
                 #self.threed_model.landmark_list.append(self.cursor_on_vertex)
                 x, y, z = self.threed_model.original_vertices[self.cursor_on_vertex]
-                #print(self.cursor_on_vertex, x,y,z, self.landmark_list[0], self.obj_ops.landmark_list[0])
+                #print(self.cursor_on_vertex, x,y,z, self.landmark_list[0], self.obj_ops.landmark_list[0], self.object_dialog.landmark_list[0])
                 self.object_dialog.add_landmark(x,y,z)
                 self.update_landmark_list()
-                #   print(self.cursor_on_vertex, x,y,z, self.landmark_list[0], self.obj_ops.landmark_list[0])
                 self.calculate_resize()
             else:                
                 self.view_mode = ROTATE_MODE
@@ -1602,7 +1617,16 @@ class MyGLWidget(QGLWidget):
             #print("edit 3d landmark mode")
             ## call unproject_mouse
             if self.show_model == True:
-                closest_element = self.pick_element(self.curr_x, self.curr_y)
+                on_background = self.hit_background_test(self.curr_x, self.curr_y)
+                #print("on_background:", on_background)
+                if on_background == True:
+                    self.cursor_on_vertex = -1
+                else:
+                    closest_element = self.pick_element(self.curr_x, self.curr_y)
+                    if closest_element is not None:
+                        self.cursor_on_vertex = closest_element
+                    else:
+                        self.cursor_on_vertex = -1
             #if closest_element is not None:
                 #print("closest element:", closest_element)
 
@@ -1628,6 +1652,7 @@ class MyGLWidget(QGLWidget):
         dataset.edge_list.append([wire_start_index, wire_end_index])
         #print("wireframe", dataset.edge_list)
         dataset.pack_wireframe()
+        self.edge_list = dataset.edge_list
         #print("wireframe", dataset.wireframe)
         dataset.save()
         
@@ -1672,6 +1697,8 @@ class MyGLWidget(QGLWidget):
         self.pan_x = self.pan_y = 0
         self.rotate_x = self.rotate_y = 0
         self.edge_list = self.dataset.unpack_wireframe()
+        #print("edge_list:", self.edge_list)
+        #self.landmark_list = object.landmark_list
 
         if object.threed_model.count() > 0:
             #print("object has 3d model", self, self.object, self.threed_model)
@@ -1812,7 +1839,7 @@ class MyGLWidget(QGLWidget):
             self.draw_object(ds_ops.get_average_shape(), landmark_as_sphere=True, color=object_color)
 
     def draw_object(self,object,landmark_as_sphere=True,color=COLOR['NORMAL_SHAPE']):
-        #print("draw object", object, object.landmark_list)
+        #print("draw object", object, self.edge_list)
         current_buffer = gl.glGetIntegerv(gl.GL_FRAMEBUFFER_BINDING)
         if landmark_as_sphere:
             if self.show_wireframe and len(self.edge_list) > 0:
@@ -2019,6 +2046,20 @@ class MyGLWidget(QGLWidget):
         self.updateGL()
         #self.data_mode = DATASET_MODE
 
+    def hit_background_test(self, x, y):
+        pixels = gl.glReadPixels(x, self.height()-y, 1, 1, gl.GL_RGB, gl.GL_UNSIGNED_BYTE)
+#        print(pixels)
+        r, g, b = struct.unpack('BBB', pixels)
+        rgb_list = [r, g, b]
+        bg_color = [int(255* c) for c in COLOR['BACKGROUND']]
+        #print( bg_color, rgb_list)
+        if bg_color == rgb_list:
+            return True
+        else:
+            return False
+        #print("hit test", x, y, rgb_tuple)
+
+
     def hit_test(self, x, y):
         gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, self.picker_buffer)
         #gl.glReadBuffer(gl.GL_BACK)
@@ -2056,6 +2097,7 @@ class MyGLWidget(QGLWidget):
             self.lm_idx_to_color["lm_"+str(i)] = color
 
     def update_landmark_list(self):
+        #self.landmark_list = copy.deepcopy(self.object_dialog.landmark_list)
         self.obj_ops.landmark_list = copy.deepcopy(self.landmark_list)
         return
 
@@ -2068,24 +2110,25 @@ class MyGLWidget(QGLWidget):
         #print("obj_ops:", self.obj_ops)
         #if len(self.landmark_list) == 0:
         #    return
-
         if self.threed_model is not None:
+            #print("calculate resize, has threed_model")
             if self.initialized == True and self.threed_model.generated == False:
                 self.threed_model.generate()
             #if len(self.landmark_list) > 0:
             #    print("are they the same?", self.landmark_list is self.obj_ops.landmark_list)
-            #    print("calculate resize: self:", id(self.landmark_list), self.landmark_list[0] )
-            #print("calculate resize: obj_ops:", id(self.obj_ops.landmark_list), self.obj_ops.landmark_list[0])
+            #    print("calculate resize: self 1:", id(self.landmark_list), self.landmark_list[0] )
+            #print("calculate resize: obj_ops 1:", id(self.obj_ops.landmark_list), self.obj_ops.landmark_list[0])
             #print("model center:", self.threed_model.center_x, self.threed_model.center_y, self.threed_model.center_z)
             self.obj_ops.move(-1 * self.threed_model.center_x, -1 * self.threed_model.center_y, -1 * self.threed_model.center_z)
             #if len(self.landmark_list) > 0:
-            #    print("calculate resize: self:", id(self.landmark_list), self.landmark_list[0] )
-            #print("calculate resize: obj_ops:", id(self.obj_ops.landmark_list), self.obj_ops.landmark_list[0])
+            #    print("calculate resize: self 2:", id(self.landmark_list), self.landmark_list[0] )
+            #print("calculate resize: obj_ops 2:", id(self.obj_ops.landmark_list), self.obj_ops.landmark_list[0])
             self.obj_ops.rescale(self.threed_model.scale)
             self.obj_ops.apply_rotation_matrix(self.threed_model.rotation_matrix)
+            #print("calculate resize: obj_ops 3:", id(self.obj_ops.landmark_list), self.obj_ops.landmark_list[0])
             #pass
         else:
-            self.obj_ops.landmark_list = self.landmark_list.copy()
+            self.obj_ops.landmark_list = copy.deepcopy(self.landmark_list)
             self.obj_ops.move_to_center()
             centroid_size = self.obj_ops.get_centroid_size()
             self.obj_ops.rescale_to_unitsize()
@@ -2148,6 +2191,7 @@ class MyGLWidget(QGLWidget):
         faces = self.threed_model.faces
         vertices = self.threed_model.vertices
         # Iterate over the faces of the 3D object and check for ray-triangle intersection
+        '''
         for face_entity in faces:
             #print(face)
             face = face_entity[0]
@@ -2160,6 +2204,7 @@ class MyGLWidget(QGLWidget):
                 closest_distance = distance
                 closest_element = face
                 #print("closest face:", closest_element)
+        '''
 
         # Iterate over the vertices of the 3D object and check for distance to ray
         for i, vertex in enumerate(vertices):
@@ -2172,10 +2217,11 @@ class MyGLWidget(QGLWidget):
                 closest_element = i
                 vert_is_closest = True
                 #print("closest vert:", closest_element)
-        if vert_is_closest:
-            self.cursor_on_vertex = closest_element
-        else:
-            self.cursor_on_vertex = -1
+
+        #if vert_is_closest:
+        #    self.cursor_on_vertex = closest_element
+        #else:
+        #    self.cursor_on_vertex = -1
 
         return closest_element
 
@@ -3348,8 +3394,8 @@ class ExportDatasetDialog(QDialog):
         self.rbX1Y1.setChecked(False)
         self.rbMorphologika = QRadioButton("Morphologika")
         self.rbMorphologika.clicked.connect(self.on_rbMorphologika_clicked)
-        self.rbMorphologika.setEnabled(False)
-        self.rbMorphologika.setChecked(False)
+        #self.rbMorphologika.setEnabled(False)
+        #self.rbMorphologika.setChecked(False)
 
         self.lblSuperimposition = QLabel("Superimposition")
         self.rbProcrustes = QRadioButton("Procrustes")
@@ -3459,10 +3505,10 @@ class ExportDatasetDialog(QDialog):
         if self.rbProcrustes.isChecked():
             self.ds_ops.procrustes_superimposition()
         object_list = self.ds_ops.object_list
+        today = datetime.datetime.now()
+        date_str = today.strftime("%Y%m%d_%H%M%S")
 
         if self.rbTPS.isChecked():
-            today = datetime.datetime.now()
-            date_str = today.strftime("%Y%m%d_%H%M%S")
             filename_candidate = '{}_{}.tps'.format(self.ds_ops.dataset_name, date_str)
 
             filename, _ = QFileDialog.getSaveFileName(self, "Save File As", filename_candidate, "TPS format (*.tps)")
@@ -3476,7 +3522,45 @@ class ExportDatasetDialog(QDialog):
                                 f.write('{}\t{}\n'.format(*lm))
                             else:
                                 f.write('{}\t{}\t{}\n'.format(*lm))
-                        #pass#
+
+        elif self.rbMorphologika.isChecked():
+            filename_candidate = '{}_{}.txt'.format(self.ds_ops.dataset_name, date_str)
+            filename, _ = QFileDialog.getSaveFileName(self, "Save File As", filename_candidate, "Morphologika format (*.txt)")
+            if filename:
+                result_str = ""
+                result_str += "[individuals]" + NEWLINE + str(len(self.ds_ops.object_list)) + NEWLINE
+                result_str += "[landmarks]" + NEWLINE + str(len(self.ds_ops.object_list[0].landmark_list)) + NEWLINE
+                result_str += "[Dimensions]" + NEWLINE + str(self.ds_ops.dimension) + NEWLINE
+                label_values = "[labels]" + NEWLINE + "\t".join(self.dataset.propertyname_list) + NEWLINE
+                label_values += "[labelvalues]" + NEWLINE
+                rawpoint_values = "[rawpoints]" + NEWLINE
+                name_values = "[names]" + NEWLINE
+                for mo in self.ds_ops.object_list:
+                    label_values += '\t'.join(mo.property_list).strip() + NEWLINE
+                    name_values += mo.object_name + NEWLINE
+                    #print mo.objname
+                    rawpoint_values += "'#" + mo.object_name + NEWLINE
+                    for lm in mo.landmark_list:
+                        rawpoint_values += '\t'.join([str(c) for c in lm])
+                        rawpoint_values += NEWLINE
+                #print name_values
+                result_str += name_values + label_values + rawpoint_values
+                if len(self.dataset.edge_list) > 0:
+                    result_str += "[wireframe]" + NEWLINE
+                    self.dataset.unpack_wireframe()
+                    for edge in self.dataset.edge_list:
+                        #print edge
+                        result_str += '\t'.join([str(v) for v in edge]) + NEWLINE
+                if len(self.dataset.polygon_list) > 0:
+                    result_str += "[polygons]" + NEWLINE
+                    self.dataset.unpack_polygons()
+                    for polygon in self.dataset.polygon_list:
+                        #print edge
+                        result_str += '\t'.join([str(v) for v in polygon]) + NEWLINE
+
+                # open text file
+                with open(filename, 'w') as f:
+                    f.write(result_str)
         self.close()
 
 class ImportDatasetDialog(QDialog):
@@ -3773,6 +3857,7 @@ class TPS:
                         object_count += 1
                     else:
                         currently_in_data_section = True
+                        landmark_count, object_comment_1 = int(headerline.group(1)), headerline.group(2).strip()
                 else:
                     dataline = re.search('^\s*(\w+)\s*=(.+)', line)
                     #print(line)

@@ -9,6 +9,7 @@ from pathlib import Path
 import time
 import math
 import numpy as np
+import copy
 
 LANDMARK_SEPARATOR = "\t"
 LINE_SEPARATOR = "\n"
@@ -407,13 +408,14 @@ class MdObjectOps:
         self.property_str = mdobject.property_str
         if self.landmark_str is not None and self.landmark_str != "":
             mdobject.unpack_landmark()
-        self.landmark_list = mdobject.landmark_list.copy()
+        self.landmark_list = copy.deepcopy(mdobject.landmark_list)
+        #print("landmark list:", self.landmark_list)
         #for lm in mdobject.landmark_list:
         #    self.landmark_list.append(lm)
         self.property_list = []
         if self.property_str is not None and self.property_str != "":
             mdobject.unpack_property()
-        self.property_list = mdobject.property_list.copy()
+        self.property_list = copy.deepcopy(mdobject.property_list)
 
         self.centroid_size = -1
 

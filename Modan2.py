@@ -27,6 +27,7 @@ from PIL.ExifTags import TAGS
 import time
 import io
 import shutil
+import copy
 
 from MdModel import *
 from ModanDialogs import DatasetAnalysisDialog, ObjectDialog, ImportDatasetDialog, DatasetDialog, PreferencesDialog, \
@@ -115,7 +116,7 @@ class ModanMainWindow(QMainWindow):
         self.toolbar.setIconSize(QSize(32,32))
         self.addToolBar(self.toolbar)
 
-        self.actionExport.setDisabled(True)
+        #self.actionExport.setDisabled(True)
         self.actionPreferences.setDisabled(True)
 
         self.main_menu = self.menuBar()
@@ -876,12 +877,14 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         object_id = selected_object_list[0].id
         #print("selected object id:", object_id)
         self.selected_object = MdObject.get_by_id(object_id)
+        self.selected_object.unpack_landmark()
         #print("selected object:", self.selected_object)
         self.show_object(self.selected_object)
 
     def show_object(self, obj):
         #print("show object")
         self.object_view.clear_object()
+        self.object_view.landmark_list = copy.deepcopy(obj.landmark_list)
         self.object_view.set_object(obj)
         self.object_view.read_only = True
 

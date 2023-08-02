@@ -694,7 +694,24 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             return
 
         QApplication.setOverrideCursor(Qt.WaitCursor)
+        total_count = len(file_name_list)
+        current_count = 0
+        self.progress_dialog = ProgressDialog()
+        self.progress_dialog.setModal(True)
+        if self.selected_dataset.dimension == 3:
+            label_text = "Importing 3d model files..."
+        else:
+            label_text = "Importing image files..."
+        self.progress_dialog.lbl_text.setText(label_text)
+        self.progress_dialog.pb_progress.setValue(0)
+        self.progress_dialog.show()
+
         for file_name in file_name_list:
+            current_count += 1
+            self.progress_dialog.pb_progress.setValue(int((current_count/float(total_count))*100))
+            self.progress_dialog.update()
+            QApplication.processEvents()
+
             file_name = re.sub('file:///', '', file_name)
             ext = file_name.split('.')[-1].lower()
             if ext in IMAGE_EXTENSION_LIST:
@@ -736,6 +753,8 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 self.statusBar.showMessage("Nothing to import.",2000)
 
             self.load_object()
+
+        self.progress_dialog.close()
 
         dataset = self.selected_dataset
         self.load_dataset()

@@ -2474,6 +2474,10 @@ class DatasetAnalysisDialog(QDialog):
         self.cbxLegend.setText("Legend")
         self.cbxLegend.setChecked(False)
         self.cbxLegend.toggled.connect(self.on_chart_dim_changed)
+        self.cbxAxisLabel = QCheckBox()
+        self.cbxAxisLabel.setText("Axis")
+        self.cbxAxisLabel.setChecked(False)
+        self.cbxAxisLabel.toggled.connect(self.on_chart_dim_changed)
         self.gbChartDim = QGroupBox()
         self.gbChartDim.setTitle("Chart")
         self.gbChartDim.setLayout(QHBoxLayout())
@@ -2481,6 +2485,7 @@ class DatasetAnalysisDialog(QDialog):
         self.gbChartDim.layout().addWidget(self.rb3DChartDim)
         self.gbChartDim.layout().addWidget(self.cbxDepthShade)
         self.gbChartDim.layout().addWidget(self.cbxLegend)
+        self.gbChartDim.layout().addWidget(self.cbxAxisLabel)
         self.gbGroupBy = QGroupBox()
         self.gbGroupBy.setTitle("Group By")
         self.gbGroupBy.setLayout(QHBoxLayout())
@@ -2672,8 +2677,8 @@ class DatasetAnalysisDialog(QDialog):
 
     def on_chart_dim_changed(self):
         if self.rb2DChartDim.isChecked():
-            self.plot_widget2.show()
             self.plot_widget3.hide()
+            self.plot_widget2.show()
             self.toolbar2.show()
             self.toolbar3.hide()
             self.gbAxis3.hide()
@@ -2681,8 +2686,8 @@ class DatasetAnalysisDialog(QDialog):
             self.cbxFlipAxis3.hide()
             self.cbxDepthShade.hide()
         else:
-            self.plot_widget3.show()
             self.plot_widget2.hide()
+            self.plot_widget3.show()
             self.toolbar2.hide()
             self.toolbar3.show()
             self.gbAxis3.show()
@@ -2893,9 +2898,13 @@ class DatasetAnalysisDialog(QDialog):
         # get axis1 and axis2 value from comboAxis1 and 2 index
         depth_shade = self.cbxDepthShade.isChecked()
         show_legend = self.cbxLegend.isChecked()
+        show_axis_label = self.cbxAxisLabel.isChecked()
         axis1 = self.comboAxis1.currentIndex() +1
         axis2 = self.comboAxis2.currentIndex() +1
         axis3 = self.comboAxis3.currentIndex() +1
+        axis1_title = self.comboAxis1.currentText()
+        axis2_title = self.comboAxis2.currentText()
+        axis3_title = self.comboAxis3.currentText()
         flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
         flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
         flip_axis3 = -1.0 if self.cbxFlipAxis3.isChecked() == True else 1.0
@@ -2955,13 +2964,16 @@ class DatasetAnalysisDialog(QDialog):
                     #print("ret", ret)
             if show_legend:
                 self.ax2.legend(self.scatter_result.values(), self.scatter_result.keys(), loc='upper left', bbox_to_anchor=(1.05, 1))
+            if show_axis_label:
+                self.ax2.set_xlabel(axis1_title)
+                self.ax2.set_ylabel(axis2_title)
             self.fig2.tight_layout()
             self.fig2.canvas.draw()
             self.fig2.canvas.flush_events()
             self.fig2.canvas.mpl_connect('pick_event',self.on_pick)
             self.fig2.canvas.mpl_connect('button_press_event', self.on_canvas_button_press)
-            self.fig2.canvas.mpl_connect('button_release_event', self.on_canvas_button_release)
 
+            self.fig2.canvas.mpl_connect('button_release_event', self.on_canvas_button_release)
         else:
             self.ax3.clear()
             for name in self.scatter_data.keys():
@@ -2972,6 +2984,10 @@ class DatasetAnalysisDialog(QDialog):
                     #print("ret", ret)
             if show_legend:
                 self.ax3.legend(self.scatter_result.values(), self.scatter_result.keys(), loc='upper left', bbox_to_anchor=(1.05, 1))
+            if show_axis_label:
+                self.ax3.set_xlabel(axis1_title)
+                self.ax3.set_ylabel(axis2_title)
+                self.ax3.set_zlabel(axis3_title)
             self.fig3.tight_layout()
             self.fig3.canvas.draw()
             self.fig3.canvas.flush_events()

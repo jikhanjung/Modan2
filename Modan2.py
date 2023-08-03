@@ -579,7 +579,8 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                         new_object.object_desc = source_object.object_desc
                         new_object.pixels_per_mm = source_object.pixels_per_mm
                         new_object.landmark_str = source_object.landmark_str
-                        new_object.property_list = source_object.property_list
+                        #new_object.property_list = source_object.property_list
+                        new_object.property_str = source_object.property_str
                         new_object.dataset = target_dataset
                         new_object.save()
                         if source_object.image.count() > 0:

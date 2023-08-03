@@ -2771,7 +2771,7 @@ class DatasetAnalysisDialog(QDialog):
             doc = xlsxwriter.Workbook(filename)
             
             # PCA result
-            header = [ "object_name" ]
+            header = [ "object_name", *self.ds_ops.propertyname_list ]
             header.extend( ["PC"+str(i+1) for i in range(len(self.pca_result.rotated_matrix.tolist()[0]))] )
             worksheet = doc.add_worksheet("PCA coordinates")
             row_index = 0
@@ -2784,8 +2784,12 @@ class DatasetAnalysisDialog(QDialog):
             new_coords = self.pca_result.rotated_matrix.tolist()
             for i, obj in enumerate(self.ds_ops.object_list):
                 worksheet.write(i+1, 0, obj.object_name )
-                for j, val in enumerate(new_coords[i]):
-                    worksheet.write(i+1, j+1, val )
+                #print(obj.property_list)
+                for j, property in enumerate(obj.property_list):
+                    worksheet.write(i+1, j+1, property )
+
+                for k, val in enumerate(new_coords[i]):
+                    worksheet.write(i+1, k+len(obj.property_list)+1, val )
                     #self.plot_data.setItem(i, j+1, QTableWidgetItem(str(int(val*10000)/10000.0)))
 
             worksheet = doc.add_worksheet("Rotation matrix")
@@ -2899,9 +2903,9 @@ class DatasetAnalysisDialog(QDialog):
         depth_shade = self.cbxDepthShade.isChecked()
         show_legend = self.cbxLegend.isChecked()
         show_axis_label = self.cbxAxisLabel.isChecked()
-        axis1 = self.comboAxis1.currentIndex() +1
-        axis2 = self.comboAxis2.currentIndex() +1
-        axis3 = self.comboAxis3.currentIndex() +1
+        axis1 = self.comboAxis1.currentIndex()
+        axis2 = self.comboAxis2.currentIndex()
+        axis3 = self.comboAxis3.currentIndex()
         axis1_title = self.comboAxis1.currentText()
         axis2_title = self.comboAxis2.currentText()
         axis3_title = self.comboAxis3.currentText()

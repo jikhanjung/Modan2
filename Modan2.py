@@ -859,9 +859,9 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             self.load_object()
 
     def load_object(self):
+        #print("load_object")
         self.object_model.clear()
         self.reset_tableView()
-        #print("load_object")
         self.clear_object_view()
         if self.selected_dataset is None:
             return
@@ -874,7 +874,15 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             item3 = QStandardItem()
             item3.setData(lm_count,Qt.DisplayRole)
             item4 = QStandardItem()
-            item4.setData('',Qt.DisplayRole)
+            if len(obj.landmark_list) == 0 and obj.landmark_str is not None and len(obj.landmark_str) > 0:
+                obj.unpack_landmark()
+            csize = obj.get_centroid_size()
+            csize = round(csize,2)
+            csize_str = str(csize)
+            if csize < 0:
+                csize_str = ""
+            item4.setData(csize_str,Qt.DisplayRole)
+
             item_list = [item1,item2,item3,item4]
             if len(self.selected_dataset.propertyname_list) > 0:
                 property_list = obj.unpack_property()

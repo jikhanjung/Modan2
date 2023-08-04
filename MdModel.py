@@ -171,6 +171,7 @@ class MdObject(Model):
     property_str = CharField(null=True)
     landmark_list = []
     property_list = []
+    centroid_size = -1
 
     def __str__(self):
         return self.object_name
@@ -212,6 +213,73 @@ class MdObject(Model):
             return []
         self.property_list = [x for x in self.property_str.split(PROPERTY_SEPARATOR)]
         return self.property_list
+
+    def get_centroid_size(self, refresh=False):
+
+        #if len(self.landmark_list) == 0 and self.landmark_str != "":
+        #    self.unpack_landmark()
+
+        if len(self.landmark_list) == 0:
+            return -1
+        elif len(self.landmark_list)== 1:
+            return 1
+        if ( self.centroid_size > 0 ) and ( refresh == False ):
+            return self.centroid_size
+
+        centroid = self.get_centroid_coord()
+        # print "centroid:", centroid.xcoord, centroid.ycoord, centroid.zcoord
+        sum_of_x_squared = 0
+        sum_of_y_squared = 0
+        sum_of_z_squared = 0
+        sum_of_x = 0
+        sum_of_y = 0
+        sum_of_z = 0
+        lm_count = len(self.landmark_list)
+        for lm in self.landmark_list:
+            sum_of_x_squared += ( lm[0] - centroid[0]) ** 2
+            sum_of_y_squared += ( lm[1] - centroid[1]) ** 2
+            if len(lm) == 3:
+                sum_of_z_squared += ( lm[2] - centroid[2]) ** 2
+            sum_of_x += lm[0] - centroid[0]
+            sum_of_y += lm[1] - centroid[1]
+            if len(lm) == 3:
+                sum_of_z += lm[2] - centroid[2]
+        centroid_size = sum_of_x_squared + sum_of_y_squared + sum_of_z_squared
+        #centroid_size = sum_of_x_squared + sum_of_y_squared + sum_of_z_squared \
+        #              - sum_of_x * sum_of_x / lm_count \
+        #              - sum_of_y * sum_of_y / lm_count \
+        #              - sum_of_z * sum_of_z / lm_count
+        #print centroid_size
+        centroid_size = math.sqrt(centroid_size)
+        self.centroid_size = centroid_size
+        #centroid_size = float( int(  * 100 ) ) / 100
+        return centroid_size
+
+    def get_centroid_coord(self):
+        c = [0, 0, 0]
+
+        #if len(self.landmark_list) == 0 and self.landmark_str != "":
+        #    self.unpack_landmark()
+
+        if len(self.landmark_list) == 0:
+            return c
+        
+        sum_of_x = 0
+        sum_of_y = 0
+        sum_of_z = 0
+        lm_dim = 2
+        for lm in ( self.landmark_list ):
+            sum_of_x += lm[0]
+            sum_of_y += lm[1]
+            if len(lm) == 3:
+                lm_dim = 3
+                sum_of_z += lm[2]
+        lm_count = len(self.landmark_list)
+        c[0] = sum_of_x / lm_count
+        c[1] = sum_of_y / lm_count
+        if lm_dim == 3:
+            c[2] = sum_of_z / lm_count
+        return c
 
 class MdImage(Model):
     original_path = CharField(null=True)

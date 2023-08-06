@@ -115,7 +115,6 @@ class ModanMainWindow(QMainWindow):
         self.toolbar.addAction(self.actionAnalyze)
         self.toolbar.addAction(self.actionPreferences)
         self.toolbar.addAction(self.actionAbout)
-        self.toolbar.setIconSize(QSize(32,32))
         self.addToolBar(self.toolbar)
 
         #self.actionExport.setDisabled(True)
@@ -145,12 +144,24 @@ class ModanMainWindow(QMainWindow):
         self.reset_views()
         self.load_dataset()
 
-        self.remember_geometry = True
-        self.m_app = QApplication.instance()
-        self.read_settings()
         self.statusBar = QStatusBar()
         self.setStatusBar(self.statusBar)
         self.analysis_dialog = None
+
+        # read preferences and set window size, toolbar icon size, etc.
+        self.remember_geometry = True
+        self.toolbar_icon_size = "Small"
+
+        self.m_app = QApplication.instance()
+        self.read_settings()
+
+        self.set_toolbar_icon_size(self.toolbar_icon_size)
+
+    def set_toolbar_icon_size(self, size):
+        if size.lower() == 'small':
+            self.toolbar.setIconSize(QSize(32,32))
+        else:
+            self.toolbar.setIconSize(QSize(48,48))
 
     def on_action_open_db_triggered(self):
         pass
@@ -163,6 +174,7 @@ class ModanMainWindow(QMainWindow):
 
     def read_settings(self):
         self.m_app.settings = QSettings(QSettings.IniFormat, QSettings.UserScope,"PaleoBytes", "Modan2")
+        self.toolbar_icon_size = self.m_app.settings.value("ToolbarIconSize", "Small")
         self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
         if self.remember_geometry is True:
             #print('loading geometry', self.remember_geometry)

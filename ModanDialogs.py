@@ -4512,6 +4512,20 @@ class PreferencesDialog(QDialog):
         self.gbRememberGeomegry.layout().addWidget(self.rbRememberGeometryYes)
         self.gbRememberGeomegry.layout().addWidget(self.rbRememberGeometryNo)
 
+        
+        self.toolbar_icon_large = True if self.toolbar_icon_size.lower() == "large" else False
+        self.rbToolbarIconLarge = QRadioButton("Large")
+        self.rbToolbarIconLarge.setChecked(self.toolbar_icon_large)
+        self.rbToolbarIconLarge.clicked.connect(self.on_rbToolbarIconLarge_clicked)
+        self.rbToolbarIconSmall = QRadioButton("Small")
+        self.rbToolbarIconSmall.setChecked(not self.toolbar_icon_large)
+        self.rbToolbarIconSmall.clicked.connect(self.on_rbToolbarIconSmall_clicked)
+
+        self.gbToolbarIconSize = QGroupBox()
+        self.gbToolbarIconSize.setLayout(QHBoxLayout())
+        self.gbToolbarIconSize.layout().addWidget(self.rbToolbarIconLarge)
+        self.gbToolbarIconSize.layout().addWidget(self.rbToolbarIconSmall)
+
         self.btnOkay = QPushButton()
         self.btnOkay.setText("Close")
         self.btnOkay.clicked.connect(self.Okay)
@@ -4523,12 +4537,14 @@ class PreferencesDialog(QDialog):
         self.main_layout = QFormLayout()
         self.setLayout(self.main_layout)
         self.main_layout.addRow("Remember Geometry", self.gbRememberGeomegry)
+        self.main_layout.addRow("Toolbar Icon Size", self.gbToolbarIconSize)
         self.main_layout.addRow("", self.btnOkay)
 
         self.read_settings()
 
     def read_settings(self):
         self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
+        self.toolbar_icon_size = self.m_app.settings.value("ToolbarIconSize", "Small")
         if self.remember_geometry is True:
             self.setGeometry(self.m_app.settings.value("WindowGeometry/PreferencesDialog", QRect(100, 100, 600, 400)))
         else:
@@ -4536,6 +4552,7 @@ class PreferencesDialog(QDialog):
             self.move(self.parent.pos()+QPoint(100,100))
 
     def write_settings(self):
+        self.m_app.settings.setValue("ToolbarIconSize", self.toolbar_icon_size)
         self.m_app.settings.setValue("WindowGeometry/RememberGeometry", self.remember_geometry)
         if self.remember_geometry is True:
             self.m_app.settings.setValue("WindowGeometry/PreferencesDialog", self.geometry())
@@ -4543,6 +4560,16 @@ class PreferencesDialog(QDialog):
     def closeEvent(self, event):
         self.write_settings()
         event.accept()
+
+    def on_rbToolbarIconLarge_clicked(self):
+        self.toolbar_icon_large = True
+        self.toolbar_icon_size = "Large"
+        self.parent.set_toolbar_icon_size( self.toolbar_icon_size )
+
+    def on_rbToolbarIconSmall_clicked(self):
+        self.toolbar_icon_large = False
+        self.toolbar_icon_size = "Small"
+        self.parent.set_toolbar_icon_size( self.toolbar_icon_size )
 
     def on_rbRememberGeometryYes_clicked(self):
         self.remember_geometry = True

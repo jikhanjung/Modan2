@@ -30,14 +30,16 @@ import shutil
 import copy
 
 from MdModel import *
+import MdUtils as mu
+
 from ModanDialogs import DatasetAnalysisDialog, ObjectDialog, ImportDatasetDialog, DatasetDialog, PreferencesDialog, \
-    IMAGE_EXTENSION_LIST, MODE, MyGLWidget, ExportDatasetDialog, ObjectViewer2D, ProgressDialog, MODEL_EXTENSION_LIST
+    IMAGE_EXTENSION_LIST, MODE, ObjectViewer3D, ExportDatasetDialog, ObjectViewer2D, ProgressDialog, MODEL_EXTENSION_LIST
 
 #import matplotlib
 #matplotlib.use('Qt5Agg')
 
 PROGRAM_NAME = "Modan2"
-PROGRAM_VERSION = "0.0.1"
+PROGRAM_VERSION = "0.1.0"
 
 BASE_DIRECTORY = "."
 DEFAULT_STORAGE_DIRECTORY = os.path.join(BASE_DIRECTORY, "data/")
@@ -71,9 +73,9 @@ class ModanMainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         #self.setupUi(self)
-        self.setGeometry(QRect(50, 50, 1400, 800))
+        #self.setGeometry(QRect(50, 50, 1400, 800))
         self.setWindowIcon(QIcon(resource_path('icons/Modan2_2.png')))
-        self.setWindowTitle(PROGRAM_NAME)
+        self.setWindowTitle("{} v{}".format(PROGRAM_NAME, PROGRAM_VERSION))
 
         self.tableView = QTableView()
         self.treeView = QTreeView()
@@ -117,7 +119,7 @@ class ModanMainWindow(QMainWindow):
         self.addToolBar(self.toolbar)
 
         #self.actionExport.setDisabled(True)
-        self.actionPreferences.setDisabled(True)
+        #self.actionPreferences.setDisabled(True)
 
         self.main_menu = self.menuBar()
         self.file_menu = self.main_menu.addMenu("File")
@@ -142,6 +144,8 @@ class ModanMainWindow(QMainWindow):
         self.check_db()
         self.reset_views()
         self.load_dataset()
+
+        self.remember_geometry = True
         self.m_app = QApplication.instance()
         self.read_settings()
         self.statusBar = QStatusBar()
@@ -159,9 +163,17 @@ class ModanMainWindow(QMainWindow):
 
     def read_settings(self):
         self.m_app.settings = QSettings(QSettings.IniFormat, QSettings.UserScope,"PaleoBytes", "Modan2")
-        self.m_app.settings.beginGroup("Defaults")
-        self.m_app.storage_directory = self.m_app.settings.value("Storage directory", os.path.abspath(DEFAULT_STORAGE_DIRECTORY))
-        dir = self.m_app.storage_directory
+        self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
+        if self.remember_geometry is True:
+            #print('loading geometry', self.remember_geometry)
+            self.setGeometry(self.m_app.settings.value("WindowGeometry/MainWindow", QRect(100, 100, 1400, 800)))
+        else:
+            self.setGeometry(QRect(100, 100, 1400, 800))
+
+    def write_settings(self):
+        self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
+        if self.remember_geometry is True:
+            self.m_app.settings.setValue("WindowGeometry/MainWindow", self.geometry())
 
     def check_db(self):
         gDatabase.connect()
@@ -191,13 +203,18 @@ class ModanMainWindow(QMainWindow):
     '''
 
     def closeEvent(self, event):
+        self.write_settings()
         if self.analysis_dialog is not None:
             self.analysis_dialog.close()
         event.accept()
 
     @pyqtSlot()
     def on_action_edit_preferences_triggered(self):
-        print("edit preferences")
+        #print("edit preferences")
+        self.preferences_dialog = PreferencesDialog(self)
+        self.preferences_dialog.setWindowModality(Qt.ApplicationModal)
+        self.preferences_dialog.exec_()
+
     
     @pyqtSlot()
     def on_action_exit_triggered(self):
@@ -251,7 +268,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         #self.object_view_2d = LandmarkEditor(self)
         self.object_view_2d = ObjectViewer2D(self)
         self.object_view_2d.set_mode(MODE['VIEW'])
-        self.object_view_3d = MyGLWidget(self)
+        self.object_view_3d = ObjectViewer3D(self)
         self.object_view = self.object_view_2d
         self.object_view_3d.hide()
 
@@ -325,7 +342,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         if ok:
             total_count = len(object_list)
             current_count = 0
-            self.progress_dialog = ProgressDialog()
+            self.progress_dialog = ProgressDialog(self)
             self.progress_dialog.setModal(True)
             label_text = "Updating {} values...".format(propertyname)
             self.progress_dialog.lbl_text.setText(label_text)
@@ -534,7 +551,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             total_count = len(selected_object_list)
             current_count = 0
 
-            self.progress_dialog = ProgressDialog()
+            self.progress_dialog = ProgressDialog(self)
             self.progress_dialog.setModal(True)
             if shift_clicked:
                 label_text = "Moving {} objects...".format(total_count)
@@ -697,7 +714,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         QApplication.setOverrideCursor(Qt.WaitCursor)
         total_count = len(file_name_list)
         current_count = 0
-        self.progress_dialog = ProgressDialog()
+        self.progress_dialog = ProgressDialog(self)
         self.progress_dialog.setModal(True)
         if self.selected_dataset.dimension == 3:
             label_text = "Importing 3d model files..."
@@ -923,6 +940,7 @@ if __name__ == "__main__":
     #QApplication : 프로그램을 실행시켜주는 클래스
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon(resource_path('icons/Modan2_2.png')))
+    #app.settings = 
     #app.preferences = QSettings("Modan", "Modan2")
 
     #WindowClass의 인스턴스 생성

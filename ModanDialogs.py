@@ -37,6 +37,8 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigatio
 from matplotlib.figure import Figure
 
 from MdModel import *
+import MdUtils as mu
+
 from MdStatistics import MdPrincipalComponent
 import numpy as np
 from OpenGL.arrays import vbo
@@ -107,40 +109,6 @@ NEWLINE = '\n'
 
 def as_qt_color(color):
     return QColor( *[ int(x*255) for x in color ] )
-
-class ProgressDialog(QDialog):
-    def __init__(self):
-        super().__init__()
-        #self.setupUi(self)
-        self.lbl_text = QLabel(self)
-        self.lbl_text.setGeometry(50, 50, 320, 80)
-        #self.pb_progress = QProgressBar(self)
-        self.pb_progress = QProgressBar(self)
-        self.pb_progress.setGeometry(50, 150, 320, 40)
-        self.pb_progress.setValue(0)
-        self.setGeometry(200, 250, 400, 250)
-        self.stop_progress = False
-        self.btnStop = QPushButton(self)
-        self.btnStop.setGeometry(175, 200, 50, 30)
-        self.btnStop.setText("Stop")
-        self.btnStop.clicked.connect(self.set_stop_progress)
-
-    def set_stop_progress(self):
-        self.stop_progress = True
-
-    def set_progress_text(self,text_format):
-        self.text_format = text_format
-
-    def set_max_value(self,max_value):
-        self.max_value = max_value
-
-    def set_curr_value(self,curr_value):
-        self.curr_value = curr_value
-        self.pb_progress.setValue(int((self.curr_value/float(self.max_value))*100))
-        self.lbl_text.setText(self.text_format.format(self.curr_value, self.max_value))
-        #self.lbl_text.setText(label_text)
-        self.update()
-        QApplication.processEvents()
 
 class ObjectViewer2D(QLabel):
     def __init__(self, widget):
@@ -674,744 +642,7 @@ class ObjectViewer2D(QLabel):
         dataset.save()
         self.repaint()
 
-class CalibrationDialog(QDialog):
-    def __init__(self,parent,dist):
-        super().__init__()
-        self.setWindowTitle("Calibration")
-        self.parent = parent
-        #print(self.parent.pos())
-        self.setGeometry(QRect(100, 100, 320, 180))
-        self.move(self.parent.pos()+QPoint(100,100))
-        self.status_bar = QStatusBar()
-        self.lblText1 = QLabel("Calibration", self)
-        self.lblText2 = QLabel("Calibration", self)
-        self.edtLength = QLineEdit(self)
-        self.edtLength.setValidator(QDoubleValidator())
-        self.edtLength.setText("1.0")
-        self.edtLength.setFixedWidth(100)
-        self.edtLength.setFixedHeight(30)
-        self.comboUnit = QComboBox(self)
-        self.comboUnit.addItem("nm")
-        self.comboUnit.addItem("um")
-        self.comboUnit.addItem("mm")
-        self.comboUnit.addItem("cm")
-        self.comboUnit.addItem("m")
-        self.comboUnit.setFixedWidth(100)
-        self.comboUnit.setFixedHeight(30)
-        self.comboUnit.setCurrentText("mm")
-        self.btnOK = QPushButton("OK", self)
-        self.btnOK.setFixedWidth(100)
-        self.btnOK.setFixedHeight(30)
-        self.btnCancel = QPushButton("Cancel", self)
-        self.btnCancel.setFixedWidth(100)
-        self.btnCancel.setFixedHeight(30)
-        self.btnOK.clicked.connect(self.btnOK_clicked)
-        self.btnCancel.clicked.connect(self.btnCancel_clicked)  
-        self.hbox = QHBoxLayout()
-        self.hbox.addWidget(self.edtLength)
-        self.hbox.addWidget(self.comboUnit)
-        self.hbox.addWidget(self.btnOK)
-        self.hbox.addWidget(self.btnCancel)
-        self.vbox = QVBoxLayout()
-        self.vbox.addWidget(self.lblText1)
-        self.vbox.addWidget(self.lblText2)
-        self.vbox.addLayout(self.hbox)
-        self.setLayout(self.vbox)
-        if dist is not None:
-            self.set_pixel_number(dist)
-
-    def set_pixel_number(self, pixel_number):
-        self.pixel_number = pixel_number
-        # show number of pixel in calibration text 
-        self.lblText1.setText("Enter the unit length in metric scale.")
-        self.lblText2.setText("%d pixels are equivalent to:" % self.pixel_number)
-        
-    def btnOK_clicked(self):
-        #self.parent.calibration_length = float(self.edtLength.text())
-        #self.parent.calibration_unit = self.cbxUnit.currentText()
-        self.parent.set_object_calibration( self.pixel_number, float(self.edtLength.text()),self.comboUnit.currentText())
-        self.close()
-    
-    def btnCancel_clicked(self):
-        self.close()
-
-class ObjectDialog(QDialog):
-    # NewDatasetDialog shows new dataset dialog.
-    def __init__(self,parent):
-        super().__init__()
-        self.setWindowTitle("Modan2 - Object Information")
-        self.parent = parent
-        #print(self.parent.pos())
-        self.setGeometry(QRect(100, 100, 1400, 800))
-        self.move(self.parent.pos()+QPoint(50,50))
-        self.status_bar = QStatusBar()
-        self.landmark_list = []
-
-        self.hsplitter = QSplitter(Qt.Horizontal)
-        self.vsplitter = QSplitter(Qt.Vertical)
-
-        #self.vsplitter.addWidget(self.tableView)
-        #self.vsplitter.addWidget(self.tableWidget)
-
-        #self.hsplitter.addWidget(self.treeView)
-        #self.hsplitter.addWidget(self.vsplitter)
-
-        self.inputLayout = QHBoxLayout()
-        self.inputCoords = QWidget()
-        self.inputCoords.setLayout(self.inputLayout)
-        self.inputX = QLineEdit()
-        self.inputY = QLineEdit()
-        self.inputZ = QLineEdit()
-
-        self.inputLayout.addWidget(self.inputX)
-        self.inputLayout.addWidget(self.inputY)
-        self.inputLayout.addWidget(self.inputZ)
-        self.inputLayout.setContentsMargins(0,0,0,0)
-        self.inputLayout.setSpacing(0)
-        self.btnAddInput = QPushButton()
-        self.btnAddInput.setText("Add")
-        self.inputLayout.addWidget(self.btnAddInput)
-        self.inputX.returnPressed.connect(self.input_coords_process)
-        self.inputY.returnPressed.connect(self.input_coords_process)
-        self.inputZ.returnPressed.connect(self.input_coords_process)
-        self.inputX.textChanged[str].connect(self.x_changed)
-        self.btnAddInput.clicked.connect(self.input_coords_process)
-
-        self.edtObjectName = QLineEdit()
-        self.edtObjectDesc = QTextEdit()
-        self.edtObjectDesc.setMaximumHeight(100)
-        self.edtLandmarkStr = QTableWidget()
-        self.lblDataset = QLabel()
-
-        self.main_layout = QVBoxLayout()
-        self.sub_layout = QHBoxLayout()
-        self.setLayout(self.main_layout)
-
-        self.object_view = None
-
-        self.object_view_3d = MyGLWidget(self)
-        self.object_view_3d.setMinimumWidth(300)
-        self.object_view_3d.setMinimumHeight(300)
-        self.object_view_3d.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.object_view_3d.object_dialog = self
-        self.object_view_3d.setMouseTracking(True)
-
-        self.object_view_2d = ObjectViewer2D(self)
-        self.object_view_2d.object_dialog = self
-        self.object_view_2d.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
-        #self.image_label.clicked.connect(self.on_image_clicked)
-
-        self.pixmap = QPixmap(1024,768)
-        self.object_view_2d.setPixmap(self.pixmap)
-
-        self.form_layout = QFormLayout()
-        self.form_layout.addRow("Dataset Name", self.lblDataset)
-        self.form_layout.addRow("Object Name", self.edtObjectName)
-        self.form_layout.addRow("Object Desc", self.edtObjectDesc)
-        self.form_layout.addRow("Landmarks", self.edtLandmarkStr)
-        self.form_layout.addRow("", self.inputCoords)
-
-        self.btnGroup = QButtonGroup() 
-        self.btnLandmark = PicButton(QPixmap(ICON['landmark']), QPixmap(ICON['landmark_hover']), QPixmap(ICON['landmark_down']), QPixmap(ICON['landmark_disabled']))
-        self.btnWireframe = PicButton(QPixmap(ICON['wireframe']), QPixmap(ICON['wireframe_hover']), QPixmap(ICON['wireframe_down']))
-        self.btnCalibration = PicButton(QPixmap(ICON['calibration']), QPixmap(ICON['calibration_hover']), QPixmap(ICON['calibration_down']),QPixmap(ICON['calibration_disabled']))
-        self.btnGroup.addButton(self.btnLandmark)
-        self.btnGroup.addButton(self.btnWireframe)
-        self.btnGroup.addButton(self.btnCalibration)
-        self.btnLandmark.setCheckable(True)
-        self.btnWireframe.setCheckable(True)
-        self.btnCalibration.setCheckable(True)
-        self.btnLandmark.setChecked(True)
-        self.btnWireframe.setChecked(False)
-        self.btnCalibration.setChecked(False)
-        self.btnLandmark.setAutoExclusive(True)
-        self.btnWireframe.setAutoExclusive(True)
-        self.btnCalibration.setAutoExclusive(True)
-        self.btnLandmark.clicked.connect(self.btnLandmark_clicked)
-        self.btnWireframe.clicked.connect(self.btnWireframe_clicked)
-        self.btnCalibration.clicked.connect(self.btnCalibration_clicked)
-        BUTTON_SIZE = 48
-        self.btnLandmark.setFixedSize(BUTTON_SIZE,BUTTON_SIZE)
-        self.btnWireframe.setFixedSize(BUTTON_SIZE,BUTTON_SIZE)
-        self.btnCalibration.setFixedSize(BUTTON_SIZE,BUTTON_SIZE)
-        self.btn_layout2 = QGridLayout()
-        self.btn_layout2.addWidget(self.btnLandmark,0,0)
-        self.btn_layout2.addWidget(self.btnWireframe,0,1)
-        self.btn_layout2.addWidget(self.btnCalibration,1,0)
-
-        self.cbxShowIndex = QCheckBox()
-        self.cbxShowIndex.setText("Index")
-        self.cbxShowIndex.setChecked(True)
-        self.cbxShowWireframe = QCheckBox()
-        self.cbxShowWireframe.setText("Wireframe")
-        self.cbxShowWireframe.setChecked(True)
-        self.cbxShowBaseline = QCheckBox()
-        self.cbxShowBaseline.setText("Baseline")
-        self.cbxShowBaseline.setChecked(True)
-        self.cbxShowBaseline.hide()
-        self.cbxAutoRotate = QCheckBox()
-        self.cbxAutoRotate.setText("Rotate")
-        self.cbxAutoRotate.setChecked(False)
-        self.cbxShowModel = QCheckBox()
-        self.cbxShowModel.setText("3D Model")
-        self.cbxShowModel.setChecked(True)
-        #self.btnFBO = QPushButton()
-        #self.btnFBO.setText("FBO")
-        #self.btnFBO.clicked.connect(self.btnFBO_clicked)
-
-
-        self.left_widget = QWidget()
-        self.left_widget.setLayout(self.form_layout)
-
-        self.right_top_widget = QWidget()
-        self.right_top_widget.setLayout(self.btn_layout2)
-        self.right_middle_widget = QWidget()
-        self.right_middle_layout = QVBoxLayout()
-        self.right_middle_layout.addWidget(self.cbxShowIndex)
-        self.right_middle_layout.addWidget(self.cbxShowWireframe)
-        self.right_middle_layout.addWidget(self.cbxShowBaseline)
-        self.right_middle_layout.addWidget(self.cbxShowModel)
-        self.right_middle_layout.addWidget(self.cbxAutoRotate)
-        #self.right_middle_layout.addWidget(self.btnFBO)
-        self.right_middle_widget.setLayout(self.right_middle_layout)
-        self.right_bottom_widget = QWidget()
-        self.vsplitter.addWidget(self.right_top_widget)
-        self.vsplitter.addWidget(self.right_middle_widget)
-        self.vsplitter.addWidget(self.right_bottom_widget)
-        self.vsplitter.setSizes([50,50,400])
-        self.vsplitter.setStretchFactor(0, 0)
-        self.vsplitter.setStretchFactor(1, 0)
-        self.vsplitter.setStretchFactor(2, 1)
-
-        self.object_view_layout = QVBoxLayout()
-        self.object_view_layout.addWidget(self.object_view_2d)
-        self.object_view_layout.addWidget(self.object_view_3d)
-        self.object_view_widget = QWidget()
-        self.object_view_widget.setLayout(self.object_view_layout)
-
-
-        self.hsplitter.addWidget(self.left_widget)
-        self.hsplitter.addWidget(self.object_view_widget)
-        #self.hsplitter.addWidget(self.object_view_3d)
-        self.hsplitter.addWidget(self.vsplitter)
-        #self.hsplitter.addWidget(self.right_widget)
-        self.hsplitter.setSizes([200,800,100])
-        self.hsplitter.setStretchFactor(0, 0)
-        self.hsplitter.setStretchFactor(1, 1)
-        self.hsplitter.setStretchFactor(2, 0)
-
-        self.btnOkay = QPushButton()
-        self.btnOkay.setText("Save")
-        self.btnOkay.clicked.connect(self.Okay)
-        self.btnDelete = QPushButton()
-        self.btnDelete.setText("Delete")
-        self.btnDelete.clicked.connect(self.Delete)
-        self.btnCancel = QPushButton()
-        self.btnCancel.setText("Cancel")
-        self.btnCancel.clicked.connect(self.Cancel)
-        btn_layout = QHBoxLayout()
-        btn_layout.addWidget(self.btnOkay)
-        btn_layout.addWidget(self.btnDelete)
-        btn_layout.addWidget(self.btnCancel)
-
-        self.status_bar.setMaximumHeight(20)
-        #self.main_layout.addLayout(self.sub_layout)
-        self.main_layout.addWidget(self.hsplitter)
-        self.main_layout.addLayout(btn_layout)
-        self.main_layout.addWidget(self.status_bar)
-
-        self.dataset = None
-        self.object = None
-        self.edtPropertyList = []
-        self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
-        self.m_app = QApplication.instance()
-        #self.btnLandmark_clicked()
-
-        self.cbxShowIndex.stateChanged.connect(self.show_index_state_changed)
-        self.cbxShowWireframe.stateChanged.connect(self.show_wireframe_state_changed)
-        self.cbxShowBaseline.stateChanged.connect(self.show_baseline_state_changed)
-        self.cbxAutoRotate.stateChanged.connect(self.auto_rotate_state_changed)
-        self.cbxShowModel.stateChanged.connect(self.show_model_state_changed)
-
-        #self.calibration
-    def set_object_calibration(self, pixels, calibration_length, calibration_unit):
-        self.object.pixels_per_mm = pixels * 1.0 / calibration_length
-        if calibration_unit == 'mm':
-            self.object.pixels_per_mm /= 1.0
-        elif calibration_unit == 'cm':
-            self.object.pixels_per_mm /= 10.0
-        elif calibration_unit == 'm':
-            self.object.pixels_per_mm /= 1000.0
-        elif calibration_unit == 'um':
-            self.object.pixels_per_mm /= 0.001
-        elif calibration_unit == 'nm':
-            self.object.pixels_per_mm /= 0.000001
-        self.object_view_2d.pixels_per_mm = self.object.pixels_per_mm
-        #print(pixels, calibration_length, calibration_unit, self.object.pixels_per_mm)
-        #self.object.save()
-
-    #def btnFBO_clicked(self):
-    #    self.object_view_3d.show_picker_buffer()
-
-    def show_index_state_changed(self, int):
-        self.object_view.show_index = self.cbxShowIndex.isChecked()
-        self.object_view.update()
-
-    def show_model_state_changed(self, int):
-        self.object_view.show_model = self.cbxShowModel.isChecked()
-        self.object_view.update()
-
-    def show_baseline_state_changed(self, int):
-        self.object_view.show_baseline = self.cbxShowBaseline.isChecked()
-        self.object_view.update()
-
-    def auto_rotate_state_changed(self, int):
-        self.object_view.auto_rotate = self.cbxAutoRotate.isChecked()
-
-    def show_wireframe_state_changed(self, int):
-        self.object_view.show_wireframe = self.cbxShowWireframe.isChecked()
-        self.object_view.update()
-
-    def btnLandmark_clicked(self):
-        #self.edit_mode = MODE_ADD_LANDMARK
-        #if self.object.image.count() == 0:
-        #    return
-        self.object_view.set_mode(MODE['EDIT_LANDMARK'])
-        self.object_view.update()
-        self.btnLandmark.setDown(True)
-        self.btnLandmark.setChecked(True)
-        self.btnWireframe.setDown(False)
-        self.btnWireframe.setChecked(False)
-        self.btnCalibration.setDown(False)
-        self.btnCalibration.setChecked(False)
-
-    def btnCalibration_clicked(self):
-        #self.edit_mode = MODE_ADD_LANDMARK
-        self.object_view.set_mode(MODE['CALIBRATION'])
-        self.object_view.update()
-        self.btnCalibration.setDown(True)
-        self.btnCalibration.setChecked(True)
-        self.btnLandmark.setDown(False)
-        self.btnLandmark.setChecked(False)
-        self.btnWireframe.setDown(False)
-        self.btnWireframe.setChecked(False)
-
-    def calibrate(self, dist):
-        self.calibrate_dlg = CalibrationDialog(self, dist)
-        self.calibrate_dlg.setModal(True)
-        self.calibrate_dlg.exec_()
-
-    def btnWireframe_clicked(self):
-        #self.edit_mode = MODE_ADD_LANDMARK
-        self.object_view.set_mode(MODE['WIREFRAME'])
-        self.object_view.update()
-        self.btnWireframe.setDown(True)
-        self.btnWireframe.setChecked(True)
-        self.btnLandmark.setDown(False)
-        self.btnLandmark.setChecked(False)
-        self.btnCalibration.setDown(False)
-        self.btnCalibration.setChecked(False)
-
-    def set_object_name(self, name):
-        #print("set_object_name", self.edtObjectName.text(), name)
-
-        if self.edtObjectName.text() == "":
-            self.edtObjectName.setText(name)
-
-    def set_dataset(self, dataset):
-        #print("object dialog set_dataset", dataset.dataset_name)
-        self.dataset = dataset
-        self.lblDataset.setText(dataset.dataset_name)
-
-        header = self.edtLandmarkStr.horizontalHeader()    
-        if self.dataset.dimension == 2:
-            self.edtLandmarkStr.setColumnCount(2)
-            self.edtLandmarkStr.setHorizontalHeaderLabels(["X","Y"])
-            #self.edtLandmarkStr.setColumnWidth(0, 80)
-            #self.edtLandmarkStr.setColumnWidth(1, 80)
-            header.setSectionResizeMode(0, QHeaderView.Stretch)
-            header.setSectionResizeMode(1, QHeaderView.Stretch)
-            self.cbxAutoRotate.hide()
-            self.cbxShowModel.hide()
-            #self.btnCalibration.show()
-            self.inputZ.hide()
-            self.object_view_3d.hide()
-            self.object_view = self.object_view_2d
-            input_width = 80
-        elif self.dataset.dimension == 3:
-            self.edtLandmarkStr.setColumnCount(3)
-            self.edtLandmarkStr.setHorizontalHeaderLabels(["X","Y","Z"])
-            header.setSectionResizeMode(0, QHeaderView.Stretch)
-            header.setSectionResizeMode(1, QHeaderView.Stretch)
-            header.setSectionResizeMode(2, QHeaderView.Stretch)
-            self.cbxAutoRotate.show()
-            self.cbxShowModel.show()
-            #self.btnCalibration.hide()
-            self.inputZ.show()
-            self.object_view_2d.hide()
-            self.object_view = self.object_view_3d
-            input_width = 60
-        if self.dataset.propertyname_str is not None and self.dataset.propertyname_str != "":
-            self.edtPropertyList = []
-            self.dataset.unpack_propertyname_str()
-            for propertyname in self.dataset.propertyname_list:
-                self.edtPropertyList.append( QLineEdit() )
-                self.form_layout.addRow(propertyname, self.edtPropertyList[-1])
-        #self.inputX.setFixedWidth(input_width)
-        #self.inputY.setFixedWidth(input_width)
-        #self.inputZ.setFixedWidth(input_width)
-        #self.btnAddInput.setFixedWidth(input_width)
-
-    def set_object(self, object):
-        #print("set_object", object.object_name, object.dataset.dimension)
-        if object is not None:
-            self.object = object
-            self.edtObjectName.setText(object.object_name)
-            self.edtObjectDesc.setText(object.object_desc)
-            #self.edtLandmarkStr.setText(object.landmark_str)
-            object.unpack_landmark()
-            self.landmark_list = copy.deepcopy(object.landmark_list)
-            self.edge_list = object.dataset.unpack_wireframe()
-            #for lm in self.landmark_list:
-            #    self.show_landmark(*lm)
-            #self.show_landmarks()
-
-        if self.dataset.dimension == 3:
-            #print("set_object 3d")
-            self.object_view = self.object_view_3d
-            self.object_view.auto_rotate = False
-            #obj_ops = MdObjectOps(object)
-            #self.object_view.set_dataset(object.dataset)
-            #self.btnLandmark.setDisabled(True)
-            self.btnCalibration.setDisabled(True)
-            self.cbxAutoRotate.show()
-            if object is not None:
-                if object.threed_model is not None and len(object.threed_model) > 0:
-                    self.enable_landmark_edit()
-                else:
-                    self.disable_landmark_edit()
-                #print("object dialog self.landmark_list in set object 3d", self.landmark_list)
-                self.object_view.set_object(object)
-                self.object_view.landmark_list = self.landmark_list
-                self.object_view.update_landmark_list()
-                self.object_view.calculate_resize()
-                #self.object_view.landmark_list = self.landmark_list
-        else:
-            #print("set_object 2d")
-            self.object_view = self.object_view_2d
-            self.cbxAutoRotate.hide()
-            if object is not None:
-                if object.image is not None and len(object.image) > 0:
-                    img = object.image[0]
-                    image_path = img.get_file_path(self.m_app.storage_directory)
-                    #check if image_path exists
-                    if os.path.exists(image_path):
-                        self.object_view.set_image(image_path)
-                    self.btnCalibration.setEnabled(True)
-                    self.enable_landmark_edit()
-                else:
-                    self.btnCalibration.setDisabled(True)
-                    self.disable_landmark_edit()
-                #elif len(self.landmark_list) > 0:
-                #print("objectdialog self.landmark_list in set object 2d", self.landmark_list)
-                self.object_view.set_object(object)
-                self.object_view.landmark_list = self.landmark_list
-                self.object_view.update_landmark_list()
-                self.object_view.calculate_resize()
-
-        if len(self.dataset.propertyname_list) >0:
-            self.object.unpack_property()
-            self.dataset.unpack_propertyname_str()
-            for idx, propertyname in enumerate(self.dataset.propertyname_list):
-                if idx < len(object.property_list):
-                    self.edtPropertyList[idx].setText(object.property_list[idx])
-
-            #self.object_view_3d.landmark_list = self.landmark_list
-        #self.set_dataset(object.dataset)
-        self.show_landmarks()
-
-    def enable_landmark_edit(self):
-        self.btnLandmark.setEnabled(True)
-        self.btnLandmark.setDown(True)
-        self.object_view.set_mode(MODE['EDIT_LANDMARK'])
-
-    def disable_landmark_edit(self):
-        self.btnLandmark.setDisabled(True)
-        self.btnLandmark.setDown(False)
-        self.object_view.set_mode(MODE['VIEW'])
-
-
-    @pyqtSlot(str)
-    def x_changed(self, text):
-        # if text is multiline and tab separated, add to table
-        #print("x_changed called with", text)
-        if "\n" in text:
-            lines = text.split("\n")
-            for line in lines:
-                #print(line)
-                if "\t" in line:
-                    coords = line.split("\t")
-                    #add landmarks using add_landmark method
-                    if self.dataset.dimension == 2 and len(coords) == 2:
-                        self.add_landmark(coords[0], coords[1])
-                    elif self.dataset.dimension == 3 and len(coords) == 3:
-                        self.add_landmark(coords[0], coords[1], coords[2])
-            self.inputX.setText("")
-            self.inputY.setText("")
-            self.inputZ.setText("")
-
-    def update_landmark(self, idx, x, y, z=None):
-        if self.dataset.dimension == 2:
-            self.landmark_list[idx] = [x,y]
-        elif self.dataset.dimension == 3:
-            self.landmark_list[idx] = [x,y,z]
-        self.show_landmarks()
-
-    def add_landmark(self, x, y, z=None):
-        #print("adding landmark", x, y, z, self.landmark_list)
-        if self.dataset.dimension == 2:
-            self.landmark_list.append([float(x),float(y)])
-        elif self.dataset.dimension == 3:
-            self.landmark_list.append([float(x),float(y),float(z)])
-        self.show_landmarks()
-        #self.object_view.calculate_resize()
-
-    def delete_landmark(self, idx):
-        #print("delete_landmark", idx)
-        self.landmark_list.pop(idx)
-        self.show_landmarks()
-
-    def input_coords_process(self):
-        x_str = self.inputX.text()
-        y_str = self.inputY.text()
-        z_str = self.inputZ.text()
-        if self.dataset.dimension == 2:
-            if x_str == "" or y_str == "":
-                return
-            # add landmark to table using add_landmark method
-            self.add_landmark(x_str, y_str)
-
-        elif self.dataset.dimension == 3:
-            if x_str == "" or y_str == "" or z_str == "":
-                return
-            self.add_landmark(x_str, y_str, z_str)
-        self.inputX.setText("")
-        self.inputY.setText("")
-        self.inputZ.setText("")
-        self.inputX.setFocus()
-        self.object_view.update_landmark_list()
-        self.object_view.calculate_resize()
-
-    def show_landmarks(self):
-        self.edtLandmarkStr.setRowCount(len(self.landmark_list))
-        for idx, lm in enumerate(self.landmark_list):
-            #print(idx, lm)
-
-            item_x = QTableWidgetItem(str(float(lm[0])*1.0))
-            item_x.setTextAlignment(Qt.AlignRight|Qt.AlignVCenter)
-            self.edtLandmarkStr.setItem(idx, 0, item_x)
-
-            item_y = QTableWidgetItem(str(float(lm[1])*1.0))
-            item_y.setTextAlignment(Qt.AlignRight|Qt.AlignVCenter)
-            self.edtLandmarkStr.setItem(idx, 1, item_y)
-
-            if self.dataset.dimension == 3:
-                item_z = QTableWidgetItem(str(float(lm[2])*1.0))
-                item_z.setTextAlignment(Qt.AlignRight|Qt.AlignVCenter)
-                self.edtLandmarkStr.setItem(idx, 2, item_z)
-        
-
-    def save_object(self):
-
-        if self.object is None:
-            self.object = MdObject()
-        self.object.dataset_id = self.dataset.id
-        self.object.object_name = self.edtObjectName.text()
-        self.object.object_desc = self.edtObjectDesc.toPlainText()
-        #self.object.landmark_str = self.edtLandmarkStr.text()
-        self.object.landmark_str = self.make_landmark_str()
-        #print("scale:", self.object.pixels_per_mm)
-        if self.dataset.propertyname_str is not None and self.dataset.propertyname_str != "":
-            self.object.property_str = ",".join([ edt.text() for edt in self.edtPropertyList ])
-
-        self.object.save()
-        if self.object_view_2d.fullpath is not None and self.object.image.count() == 0:
-            md_image = MdImage()
-            md_image.object_id = self.object.id
-            md_image.load_file_info(self.object_view_2d.fullpath)
-            new_filepath = md_image.get_file_path( self.m_app.storage_directory)
-            if not os.path.exists(os.path.dirname(new_filepath)):
-                os.makedirs(os.path.dirname(new_filepath))
-            #print("save object new filepath:", new_filepath)
-            shutil.copyfile(self.object_view_2d.fullpath, new_filepath)
-            md_image.save()
-        elif self.object_view_3d.fullpath is not None and self.object.threed_model.count() == 0:
-            md_3dmodel = MdThreeDModel()
-            md_3dmodel.object_id = self.object.id
-            md_3dmodel.load_file_info(self.object_view_3d.fullpath)
-            new_filepath = md_3dmodel.get_file_path( self.m_app.storage_directory)
-            if not os.path.exists(os.path.dirname(new_filepath)):
-                os.makedirs(os.path.dirname(new_filepath))
-            #print("save object new filepath:", new_filepath)
-            shutil.copyfile(self.object_view_3d.fullpath, new_filepath)
-            md_3dmodel.save()
-
-    def make_landmark_str(self):
-        # from table, make landmark_str
-        landmark_str = ""
-        for row in range(self.edtLandmarkStr.rowCount()):
-            for col in range(self.edtLandmarkStr.columnCount()):
-                landmark_str += self.edtLandmarkStr.item(row, col).text()
-                if col < self.edtLandmarkStr.columnCount()-1:
-                    landmark_str += "\t"
-            if row < self.edtLandmarkStr.rowCount()-1:
-                landmark_str += "\n"
-        return landmark_str
-
-    def Delete(self):
-        ret = QMessageBox.question(self, "", "Are you sure to delete this object?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-        if ret == QMessageBox.Yes:
-            if self.object.image.count() > 0:
-                image_path = self.object.image[0].get_file_path(self.m_app.storage_directory)
-                if os.path.exists(image_path):
-                    os.remove(image_path)
-            self.object.delete_instance()
-        #self.delete_dataset()
-        self.accept()
-
-    def Okay(self):
-        self.save_object()
-        self.accept()
-
-    def Cancel(self):
-        self.reject()
-
-    def resizeEvent(self, event):
-        #print("Window has been resized",self.image_label.width(), self.image_label.height())
-        #self.pixmap.scaled(self.image_label.width(), self.image_label.height(), Qt.KeepAspectRatio)
-        #self.edtObjectDesc.resize(self.edtObjectDesc.height(),300)
-        #self.image_label.setPixmap(self.pixmap)
-        QDialog.resizeEvent(self, event)
-
-class DatasetOpsViewer(QLabel):
-    #clicked = pyqtSignal()
-    def __init__(self, widget):
-        super(DatasetOpsViewer, self).__init__(widget)
-        self.ds_ops = None
-        self.scale = 1.0
-        self.pan_x = 0
-        self.pan_y = 0
-        self.show_index = True
-        self.show_wireframe = False
-        self.show_baseline = False
-        self.show_average = True
-        #self.setMinimumSize(200,200)
-
-    def set_ds_ops(self, ds_ops):
-        self.ds_ops = ds_ops
-        self.calculate_scale_and_pan()
-    
-    def calculate_scale_and_pan(self):
-        min_x = 100000000
-        max_x = -100000000
-        min_y = 100000000
-        max_y = -100000000
-
-        # get min and max x,y from landmarks
-        for obj in self.ds_ops.object_list:
-            for idx, landmark in enumerate(obj.landmark_list):
-                if landmark[0] < min_x:
-                    min_x = landmark[0]
-                if landmark[0] > max_x:
-                    max_x = landmark[0]
-                if landmark[1] < min_y:
-                    min_y = landmark[1]
-                if landmark[1] > max_y:
-                    max_y = landmark[1]
-        #print("min_x:", min_x, "max_x:", max_x, "min_y:", min_y, "max_y:", max_y)
-        width = max_x - min_x
-        height = max_y - min_y
-        w_scale = ( self.width() * 1.0 ) / ( width * 1.5 )
-        h_scale = ( self.height() * 1.0 ) / ( height * 1.5 )
-        self.scale = min(w_scale, h_scale)
-        self.pan_x = -min_x * self.scale + (self.width() - width * self.scale) / 2.0
-        self.pan_y = -min_y * self.scale + (self.height() - height * self.scale) / 2.0
-        #print("scale:", self.scale, "pan_x:", self.pan_x, "pan_y:", self.pan_y)
-        self.repaint()
-    
-    def resizeEvent(self, ev):
-        #print("resizeEvent")
-        self.calculate_scale_and_pan()
-        self.repaint()
-
-        return super().resizeEvent(ev)
-
-    def paintEvent(self, event):
-        #print("paint event")
-        #self.pixmap
-        #return super().paintEvent(event)
-        painter = QPainter(self)
-        painter.fillRect(self.rect(), QBrush(as_qt_color(COLOR['BACKGROUND'])))
-
-        if self.ds_ops is None:
-            return
-
-        if self.show_wireframe == True:
-            painter.setPen(QPen(as_qt_color(COLOR['WIREFRAME']), 2))
-            painter.setBrush(QBrush(as_qt_color(COLOR['WIREFRAME'])))
-
-            #print("wireframe 2", dataset.edge_list, dataset.wireframe)
-            landmark_list = self.ds_ops.get_average_shape().landmark_list
-            #print("landmark_list:", landmark_list)
-            for wire in self.ds_ops.edge_list:
-                #print("wire:", wire, landmark_list[wire[0]], landmark_list[wire[1]])
-
-                if wire[0] >= len(landmark_list) or wire[1] >= len(landmark_list):
-                    continue
-                from_x = landmark_list[wire[0]][0]
-                from_y = landmark_list[wire[0]][1]
-                to_x = landmark_list[wire[1]][0]
-                to_y = landmark_list[wire[1]][1]
-                #[ from_x, from_y, from_z ] = landmark_list[wire[0]]
-                #[ to_x, to_y, to_z ] = landmark_list[wire[1]]
-                painter.drawLine(int(self._2canx(from_x)), int(self._2cany(from_y)), int(self._2canx(to_x)), int(self._2cany(to_y)))
-                #painter.drawLine(self.landmark_list[wire[0]][0], self.landmark_list[wire[0]][1], self.landmark_list[wire[1]][0], self.landmark_list[wire[1]][1])
-
-        radius = 1
-        painter.setFont(QFont('Helvetica', 12))
-        for obj in self.ds_ops.object_list:
-            #print("obj:", obj.id)
-            if obj.id in self.ds_ops.selected_object_id_list:
-                painter.setPen(QPen(as_qt_color(COLOR['SELECTED_SHAPE']), 2))
-                painter.setBrush(QBrush(as_qt_color(COLOR['SELECTED_SHAPE'])))
-            else:
-                painter.setPen(QPen(as_qt_color(COLOR['NORMAL_SHAPE']), 2))
-                painter.setBrush(QBrush(as_qt_color(COLOR['NORMAL_SHAPE'])))
-            for idx, landmark in enumerate(obj.landmark_list):
-                x = self._2canx(landmark[0])
-                y = self._2cany(landmark[1])
-                #print("x:", x, "y:", y, "lm", landmark[0], landmark[1], "scale:", self.scale, "pan_x:", self.pan_x, "pan_y:", self.pan_y)
-                painter.drawEllipse(x-radius, y-radius, radius*2, radius*2)
-                #painter.drawText(x+10, y+10, str(idx+1))
-
-        # show average shape
-        if self.show_average:
-            radius=3
-            for idx, landmark in enumerate(self.ds_ops.get_average_shape().landmark_list):
-                painter.setPen(QPen(as_qt_color(COLOR['AVERAGE_SHAPE']), 2))
-                painter.setBrush(QBrush(as_qt_color(COLOR['AVERAGE_SHAPE'])))
-                x = self._2canx(landmark[0])
-                y = self._2cany(landmark[1])
-                painter.drawEllipse(x-radius, y-radius, radius*2, radius*2)
-                if self.show_index:
-                    painter.drawText(x+10, y+10, str(idx+1))
-
-    def _2canx(self, x):
-        return int(x*self.scale + self.pan_x)
-    def _2cany(self, y):
-        return int(y*self.scale + self.pan_y)
-
-class MyGLWidget(QGLWidget):
+class ObjectViewer3D(QGLWidget):
     def __init__(self, parent):
         #print("MyGLWidget init")
         QGLWidget.__init__(self,parent)
@@ -2294,16 +1525,1410 @@ class MyGLWidget(QGLWidget):
 
         return distance
 
+class DatasetOpsViewer(QLabel):
+    #clicked = pyqtSignal()
+    def __init__(self, widget):
+        super(DatasetOpsViewer, self).__init__(widget)
+        self.ds_ops = None
+        self.scale = 1.0
+        self.pan_x = 0
+        self.pan_y = 0
+        self.show_index = True
+        self.show_wireframe = False
+        self.show_baseline = False
+        self.show_average = True
+        #self.setMinimumSize(200,200)
+
+    def set_ds_ops(self, ds_ops):
+        self.ds_ops = ds_ops
+        self.calculate_scale_and_pan()
+    
+    def calculate_scale_and_pan(self):
+        min_x = 100000000
+        max_x = -100000000
+        min_y = 100000000
+        max_y = -100000000
+
+        # get min and max x,y from landmarks
+        for obj in self.ds_ops.object_list:
+            for idx, landmark in enumerate(obj.landmark_list):
+                if landmark[0] < min_x:
+                    min_x = landmark[0]
+                if landmark[0] > max_x:
+                    max_x = landmark[0]
+                if landmark[1] < min_y:
+                    min_y = landmark[1]
+                if landmark[1] > max_y:
+                    max_y = landmark[1]
+        #print("min_x:", min_x, "max_x:", max_x, "min_y:", min_y, "max_y:", max_y)
+        width = max_x - min_x
+        height = max_y - min_y
+        w_scale = ( self.width() * 1.0 ) / ( width * 1.5 )
+        h_scale = ( self.height() * 1.0 ) / ( height * 1.5 )
+        self.scale = min(w_scale, h_scale)
+        self.pan_x = -min_x * self.scale + (self.width() - width * self.scale) / 2.0
+        self.pan_y = -min_y * self.scale + (self.height() - height * self.scale) / 2.0
+        #print("scale:", self.scale, "pan_x:", self.pan_x, "pan_y:", self.pan_y)
+        self.repaint()
+    
+    def resizeEvent(self, ev):
+        #print("resizeEvent")
+        self.calculate_scale_and_pan()
+        self.repaint()
+
+        return super().resizeEvent(ev)
+
+    def paintEvent(self, event):
+        #print("paint event")
+        #self.pixmap
+        #return super().paintEvent(event)
+        painter = QPainter(self)
+        painter.fillRect(self.rect(), QBrush(as_qt_color(COLOR['BACKGROUND'])))
+
+        if self.ds_ops is None:
+            return
+
+        if self.show_wireframe == True:
+            painter.setPen(QPen(as_qt_color(COLOR['WIREFRAME']), 2))
+            painter.setBrush(QBrush(as_qt_color(COLOR['WIREFRAME'])))
+
+            #print("wireframe 2", dataset.edge_list, dataset.wireframe)
+            landmark_list = self.ds_ops.get_average_shape().landmark_list
+            #print("landmark_list:", landmark_list)
+            for wire in self.ds_ops.edge_list:
+                #print("wire:", wire, landmark_list[wire[0]], landmark_list[wire[1]])
+
+                if wire[0] >= len(landmark_list) or wire[1] >= len(landmark_list):
+                    continue
+                from_x = landmark_list[wire[0]][0]
+                from_y = landmark_list[wire[0]][1]
+                to_x = landmark_list[wire[1]][0]
+                to_y = landmark_list[wire[1]][1]
+                #[ from_x, from_y, from_z ] = landmark_list[wire[0]]
+                #[ to_x, to_y, to_z ] = landmark_list[wire[1]]
+                painter.drawLine(int(self._2canx(from_x)), int(self._2cany(from_y)), int(self._2canx(to_x)), int(self._2cany(to_y)))
+                #painter.drawLine(self.landmark_list[wire[0]][0], self.landmark_list[wire[0]][1], self.landmark_list[wire[1]][0], self.landmark_list[wire[1]][1])
+
+        radius = 1
+        painter.setFont(QFont('Helvetica', 12))
+        for obj in self.ds_ops.object_list:
+            #print("obj:", obj.id)
+            if obj.id in self.ds_ops.selected_object_id_list:
+                painter.setPen(QPen(as_qt_color(COLOR['SELECTED_SHAPE']), 2))
+                painter.setBrush(QBrush(as_qt_color(COLOR['SELECTED_SHAPE'])))
+            else:
+                painter.setPen(QPen(as_qt_color(COLOR['NORMAL_SHAPE']), 2))
+                painter.setBrush(QBrush(as_qt_color(COLOR['NORMAL_SHAPE'])))
+            for idx, landmark in enumerate(obj.landmark_list):
+                x = self._2canx(landmark[0])
+                y = self._2cany(landmark[1])
+                #print("x:", x, "y:", y, "lm", landmark[0], landmark[1], "scale:", self.scale, "pan_x:", self.pan_x, "pan_y:", self.pan_y)
+                painter.drawEllipse(x-radius, y-radius, radius*2, radius*2)
+                #painter.drawText(x+10, y+10, str(idx+1))
+
+        # show average shape
+        if self.show_average:
+            radius=3
+            for idx, landmark in enumerate(self.ds_ops.get_average_shape().landmark_list):
+                painter.setPen(QPen(as_qt_color(COLOR['AVERAGE_SHAPE']), 2))
+                painter.setBrush(QBrush(as_qt_color(COLOR['AVERAGE_SHAPE'])))
+                x = self._2canx(landmark[0])
+                y = self._2cany(landmark[1])
+                painter.drawEllipse(x-radius, y-radius, radius*2, radius*2)
+                if self.show_index:
+                    painter.drawText(x+10, y+10, str(idx+1))
+
+    def _2canx(self, x):
+        return int(x*self.scale + self.pan_x)
+    def _2cany(self, y):
+        return int(y*self.scale + self.pan_y)
+
+class TPS:
+    def __init__(self, filename, datasetname):
+        self.filename = filename
+        self.datasetname = datasetname
+        self.dimension = 0
+        self.nobjects = 0
+        self.object_name_list = []
+        self.landmark_str_list = []
+        self.edge_list = []
+        self.polygon_list = []
+        self.propertyname_list = []
+        self.property_list_list = []
+        self.object_comment = {}
+        self.landmark_data = {}
+        self.read()
+
+    def isNumber(self,s):
+        try:
+            float(s)
+            return True
+        except ValueError:
+            return False
+
+    def read(self):
+        with open(self.filename, 'r') as f:
+            tps_lines = f.readlines()
+
+            dataset = {}
+
+            object_count = 0
+            landmark_count = 0
+            data = []
+            object_name_list = []
+            threed = 0
+            twod = 0
+            objects = {}
+            object_comment = {}
+            header = ''
+            comment = ''
+            image_count = 0
+            currently_in_data_section = False
+            object_id = ''
+            object_image_path = ''
+            object_comment_1 = ''
+            object_comment_2 = ''
+            
+            for line in tps_lines:
+                line = line.strip()
+                if line == '':
+                    continue
+                if line.startswith("#"):
+                    continue
+                if line.startswith('"') or line.startswith("'"):
+                    continue
+
+                # regular expression that finds the line "LM=xx comment", ignore case
+                headerline = re.search('^\s*LM\s*=\s*(\d+)\s*(.*)', line, re.IGNORECASE)
+
+                #headerline = re.search('^\s*[LM]+\s*=\s*(\d+)\s*(.*)', line)
+                if headerline is not None:
+                    #print("headerline:", headerline.group(1), headerline.group(2))
+                    if currently_in_data_section == True:
+                        if len(data) > 0:
+                            if object_id != '':
+                                key = object_id
+                            elif object_comment_1 != '':
+                                key = object_comment_1
+                                object_comment_1 = ''
+                            else:
+                                key = self.datasetname + "_" + str(object_count+1)
+                            objects[key] = data
+                            object_name_list.append(key)
+                            object_comment[key] = " ".join( [ object_comment_1, object_comment_2 ] ).strip()
+                            #print("data:", data)
+                            data = []
+                            object_id = ''
+                            object_comment_1 = ''
+                            object_comment_2 = ''
+                            object_image_path = ''
+                        landmark_count, object_comment_1 = int(headerline.group(1)), headerline.group(2).strip()
+                        #print("landmark_count:", landmark_count, "object_count:", object_count, "comment:", comment)
+                        object_count += 1
+                    else:
+                        currently_in_data_section = True
+                        landmark_count, object_comment_1 = int(headerline.group(1)), headerline.group(2).strip()
+                else:
+                    dataline = re.search('^\s*(\w+)\s*=(.+)', line)
+                    #print(line)
+                    if dataline is None:
+                        #print("actual data:", line)
+                        point = [ float(x) for x in re.split('\s+', line)]
+                        if len(point) > 2 and self.isNumber(point[2]):
+                            threed += 1
+                        else:
+                            twod += 1
+                        #print("point:", point)
+                        if len(point)>1:
+                            data.append(point)
+                    elif dataline.group(1).lower() == "image":
+                        #print("image:", dataline.group(2))
+                        object_image_path = dataline.group(2)
+                    elif dataline.group(1).lower() == "comment":
+                        #print("comment:", dataline.group(2))
+                        object_comment_2 = dataline.group(2)
+                    elif dataline.group(1).lower() == "id":
+                        #print("id:", dataline.group(2))
+                        #object_id = dataline.group(2)
+                        pass
+
+            #print("aa")
+
+            if len(data) > 0:
+                if object_id != '':
+                    key = object_id
+                elif object_comment_1 != '':
+                    key = object_comment_1
+                    object_comment_1 = ''
+                else:
+                    key = self.datasetname + "_" + str(object_count+1)
+                objects[key] = data
+                object_name_list.append(key)
+                object_comment[key] = " ".join( [ object_comment_1, object_comment_2 ] ).strip()
+
+            #print("bb", object_count, landmark_count)
+
+            if object_count == 0 and landmark_count == 0:
+                return None
+
+            if threed > twod:
+                self.dimension = 3
+            else:
+                self.dimension = 2
+            
+            #print ("dimension:", self.dimension)
+            #print("object_count:", object_count)
+            #print("landmark_count:", landmark_count)
+            #print("object_name_list:", object_name_list)
+            #print("object_comment:", object_comment)
+            #print("objects:", objects)
+
+            self.nobjects = len(object_name_list)
+            self.nlandmarks = landmark_count
+            self.landmark_data = objects
+            self.object_name_list = object_name_list
+            self.object_comment = object_comment
+            #print(self.landmark_data.keys(), self.object_name_list)
+
+            return dataset
+
+class NTS:
+    def __init__(self, filename, datasetname):
+        self.filename = filename
+        self.datasetname = datasetname
+        self.dimension = 0
+        self.nobjects = 0
+        self.object_name_list = []
+        self.landmark_str_list = []
+        self.edge_list = []
+        self.polygon_list = []
+        self.propertyname_list = []
+        self.property_list_list = []
+        self.object_comment = {}
+        self.landmark_data = {}
+        self.read()
+
+    def isNumber(self,s):
+        try:
+            float(s)
+            return True
+        except ValueError:
+            return False
+
+    def read(self):
+        with open(self.filename, 'r') as f:
+            nts_lines = f.readlines()
+
+            dataset = {}
+
+            total_object_count = 0
+            landmark_count = 0
+            data = []
+            object_name_list = []
+            threed = 0
+            twod = 0
+            objects = {}
+            header = ''
+            comment = ''
+            image_count = 0
+            matrix_type = -1
+            total_object_count = -1
+            variable_count = -1
+            dimension = -1
+            headerline_processed = False
+            column_names_exist = False
+            column_names_read = False
+            row_names_read = False
+            row_names_exist_at_row_beginning = False
+            row_names_exist_at_row_ending = False
+            row_names_exist_in_separate_line = False
+
+            current_object_count = 0
+            comments = ""
+
+            for line in nts_lines:
+                line = line.strip()
+                if line == '':
+                    continue
+                if line.startswith('"') or line.startswith("'"):
+                    comments += line
+                    continue
+                #                          1    2     3   4    5     6    7   8    9    10   11   12   13    14
+                headerline = re.search('^(\d+)(\s+)(\d+)(\w*)(\s+)(\d+)(\w*)(\s+)(\d+)(\s+)(\d*)(\s*)(\w+)=(\d+)(.*)', line)
+                if headerline is not None:
+                    matrix_type = headerline.group(1)
+                    total_object_count = int(headerline.group(3))
+                    variable_count = int(headerline.group(6))
+                    self.dimension = int(headerline.group(14))
+                    if variable_count > 0 and dimension > 0:
+                        landmark_count = int( float(variable_count) / float(dimension) )
+                    if headerline.group(4).lower() == "l":
+                        row_names_exist_in_separate_line = True
+                    elif headerline.group(4).lower() == "b":
+                        row_names_exist_at_row_beginning = True
+                    elif headerline.group(4).lower() == "e":
+                        row_names_exist_at_row_ending = True
+                    if headerline.group(7).lower() == "l":
+                        column_names_exist = True
+                    if headerline.group(13).lower() == "dim":
+                        #print("dim:", headerline.group(14))
+                        self.dimension = int(headerline.group(14))
+                    
+                    headerline_processed = True
+                    #print(headerline_processed, headerline.group(6), headerline.group(7), column_names_exist, column_names_read)
+                    continue
+
+                if headerline_processed == True and row_names_exist_in_separate_line == True and row_names_read == False:
+                    row_names_list = re.split('\s+', line)
+                    row_names_read = True
+                    continue
+
+                if headerline_processed == True and column_names_exist == True and column_names_read == False:
+                    column_names_list = re.split('\s+', line)
+                    column_names_read = True
+                    continue
+
+                if headerline_processed == True:
+                    data_list = re.split('\s+', line)
+                    if row_names_exist_at_row_beginning == True:
+                        row_name = data_list.pop(0)
+                    elif row_names_exist_at_row_ending == True:
+                        row_name = data_list.pop(-1)
+                    elif len(row_names_list) > 0:
+                        row_name = row_names_list[current_object_count]
+                    else:
+                        row_name = self.datasetname + "_" + str(current_object_count+1)
+                    # turn data_list into coordinates of landmarks based on dimension
+                    data_list = [ float(x) for x in data_list ]
+                    #print(data_list, len(data_list), self.dimension)
+                    objects[row_name] = []
+                    for idx in range(0,len(data_list),self.dimension):
+                        #print point
+                        #print("idx:", idx, "dimension:", self.dimension, "lm:", data_list[idx:idx+self.dimension])
+                        objects[row_name].append(data_list[idx:idx+self.dimension])
+
+                    #print(objects[row_name])
+                    #objects[row_name] = data_list
+                    object_name_list.append(row_name)
+                    current_object_count += 1
+
+            if total_object_count == 0 and landmark_count == 0:
+                return None
+
+            self.nobjects = len(object_name_list)
+            self.nlandmarks = landmark_count
+            self.landmark_data = objects
+            self.object_name_list = object_name_list
+            self.description = comments
+
+            return dataset
+
+class Morphologika:
+    def __init__(self, filename, datasetname):
+        self.filename = filename
+        self.datasetname = datasetname
+        self.dimension = 0
+        self.nobjects = 0
+        self.object_name_list = []
+        self.landmark_str_list = []
+        self.edge_list = []
+        self.polygon_list = []
+        self.propertyname_list = []
+        self.property_list_list = []
+        self.object_comment = {}
+        self.landmark_data = {}
+        self.read()
+
+    def read(self):
+        f = open(self.filename, 'r')
+        morphologika_data = f.read()
+        f.close()
+
+        object_count = -1
+        landmark_count = -1
+        data_lines = [l.strip() for l in morphologika_data.split('\n')]
+        found = False
+        dsl = ''
+        dimension = 2
+        raw_data = {}
+        for line in data_lines:
+            line = line.strip()
+            if line == "":
+                continue
+            if line[0] == "'":
+                '''comment'''
+                continue
+            elif line[0] == '[':
+                dsl = re.search('(\w+)', line).group(0).lower()
+                raw_data[dsl] = []
+                continue
+            else:
+                raw_data[dsl].append(line)
+                if dsl == 'individuals':
+                    object_count = int(line)
+                if dsl == 'landmarks':
+                    landmark_count = int(line)
+                if dsl == 'dimensions':
+                    dimension = int(line)
+
+        if object_count < 0 or landmark_count < 0:
+            return False
+
+        self.raw_data = raw_data
+
+        self.nlandmarks = landmark_count
+        self.dimension = dimension
+
+        self.object_name_list = self.raw_data['names']
+        self.nobjects = len(self.object_name_list)
+        self.nobjects = object_count
+
+        # abc
+        objects = {}
+        #object_landmark_list = []
+        for i, name in enumerate(self.object_name_list):
+            begin = i * self.nlandmarks
+            count = self.nlandmarks
+            # print begin, begin + count
+            objects[name] = []
+            for point in self.raw_data['rawpoints'][begin:begin + count]:
+                #print point
+                coords = re.split('\s+', point)
+                objects[name].append(coords)
+
+        self.landmark_data = objects
+
+        self.edge_list = []
+        self.polygon_list = []
+        self.propertyname_list = []
+        self.property_list_list = []
+
+        if 'labels' in self.raw_data.keys():
+            for line in self.raw_data['labels']:
+                labels = re.split('\s+', line)
+                for label in labels:
+                    self.propertyname_list.append( label )
+                    
+        if 'labelvalues' in self.raw_data.keys():
+            for line in self.raw_data['labelvalues']:
+                property_list = re.split('\s+', line)
+                self.property_list_list.append(property_list)
+
+        if 'wireframe' in self.raw_data.keys():
+            for line in self.raw_data['wireframe']:
+                edge = [int(v) for v in re.split('\s+', line)]
+                edge.sort()
+                self.edge_list.append(edge)
+
+        if 'polygons' in self.raw_data.keys():
+            for line in self.raw_data['polygons']:
+                poly = [int(v) for v in re.split('\s+', line)]
+                poly.sort()
+                self.polygon_list.append(poly)
+
+        self.edge_list.sort()
+        self.polygon_list.sort()
+        return
+
+class PicButton(QAbstractButton):
+    def __init__(self, pixmap, pixmap_hover, pixmap_pressed, pixmap_disabled=None, parent=None):
+        super(PicButton, self).__init__(parent)
+        self.pixmap = pixmap
+        self.pixmap_hover = pixmap_hover
+        self.pixmap_pressed = pixmap_pressed
+        if pixmap_disabled is None:
+            result = pixmap_hover.copy()
+            image = QtGui.QPixmap.toImage(result)
+            grayscale = image.convertToFormat(QtGui.QImage.Format_Grayscale8)
+            pixmap_disabled = QtGui.QPixmap.fromImage(grayscale)
+            #self.Changed_view.emit(pixmap)            
+        self.pixmap_disabled = pixmap_disabled
+
+        self.pressed.connect(self.update)
+        self.released.connect(self.update)
+
+    def paintEvent(self, event):
+        pix = self.pixmap_hover if self.underMouse() else self.pixmap
+        if self.isDown():
+            pix = self.pixmap_pressed
+        if self.isEnabled() == False and self.pixmap_disabled is not None:
+            pix = self.pixmap_disabled
+
+        painter = QPainter(self)
+        painter.drawPixmap(self.rect(), pix)
+
+    def enterEvent(self, event):
+        self.update()
+
+    def leaveEvent(self, event):
+        self.update()
+
+    def sizeHint(self):
+        return QSize(200, 200)
+
+class ProgressDialog(QDialog):
+    def __init__(self,parent):
+        super().__init__()
+        #self.setupUi(self)
+        #self.setGeometry(200, 250, 400, 250)
+        self.setWindowTitle("Modan2 - Progress Dialog")
+        self.parent = parent
+        self.setGeometry(QRect(100, 100, 320, 180))
+        self.move(self.parent.pos()+QPoint(100,100))
+
+        self.layout = QVBoxLayout(self)
+        self.layout.setContentsMargins(50,50, 50, 50)
+
+        self.lbl_text = QLabel(self)
+        #self.lbl_text.setGeometry(50, 50, 320, 80)
+        #self.pb_progress = QProgressBar(self)
+        self.pb_progress = QProgressBar(self)
+        #self.pb_progress.setGeometry(50, 150, 320, 40)
+        self.pb_progress.setValue(0)
+        self.stop_progress = False
+        self.btnStop = QPushButton(self)
+        #self.btnStop.setGeometry(175, 200, 50, 30)
+        self.btnStop.setText("Stop")
+        self.btnStop.clicked.connect(self.set_stop_progress)
+        self.layout.addWidget(self.lbl_text)
+        self.layout.addWidget(self.pb_progress)
+        self.layout.addWidget(self.btnStop)
+        self.setLayout(self.layout)
+
+    def set_stop_progress(self):
+        self.stop_progress = True
+
+    def set_progress_text(self,text_format):
+        self.text_format = text_format
+
+    def set_max_value(self,max_value):
+        self.max_value = max_value
+
+    def set_curr_value(self,curr_value):
+        self.curr_value = curr_value
+        self.pb_progress.setValue(int((self.curr_value/float(self.max_value))*100))
+        self.lbl_text.setText(self.text_format.format(self.curr_value, self.max_value))
+        #self.lbl_text.setText(label_text)
+        self.update()
+        QApplication.processEvents()
+
+class CalibrationDialog(QDialog):
+    def __init__(self,parent,dist):
+        super().__init__()
+        self.setWindowTitle("Calibration")
+        self.parent = parent
+        #print(self.parent.pos())
+        self.setGeometry(QRect(100, 100, 320, 180))
+        self.move(self.parent.pos()+QPoint(100,100))
+        self.status_bar = QStatusBar()
+        self.lblText1 = QLabel("Calibration", self)
+        self.lblText2 = QLabel("Calibration", self)
+        self.edtLength = QLineEdit(self)
+        self.edtLength.setValidator(QDoubleValidator())
+        self.edtLength.setText("1.0")
+        self.edtLength.setFixedWidth(100)
+        self.edtLength.setFixedHeight(30)
+        self.comboUnit = QComboBox(self)
+        self.comboUnit.addItem("nm")
+        self.comboUnit.addItem("um")
+        self.comboUnit.addItem("mm")
+        self.comboUnit.addItem("cm")
+        self.comboUnit.addItem("m")
+        self.comboUnit.setFixedWidth(100)
+        self.comboUnit.setFixedHeight(30)
+        self.comboUnit.setCurrentText("mm")
+        self.btnOK = QPushButton("OK", self)
+        self.btnOK.setFixedWidth(100)
+        self.btnOK.setFixedHeight(30)
+        self.btnCancel = QPushButton("Cancel", self)
+        self.btnCancel.setFixedWidth(100)
+        self.btnCancel.setFixedHeight(30)
+        self.btnOK.clicked.connect(self.btnOK_clicked)
+        self.btnCancel.clicked.connect(self.btnCancel_clicked)  
+        self.hbox = QHBoxLayout()
+        self.hbox.addWidget(self.edtLength)
+        self.hbox.addWidget(self.comboUnit)
+        self.hbox.addWidget(self.btnOK)
+        self.hbox.addWidget(self.btnCancel)
+        self.vbox = QVBoxLayout()
+        self.vbox.addWidget(self.lblText1)
+        self.vbox.addWidget(self.lblText2)
+        self.vbox.addLayout(self.hbox)
+        self.setLayout(self.vbox)
+        if dist is not None:
+            self.set_pixel_number(dist)
+
+    def set_pixel_number(self, pixel_number):
+        self.pixel_number = pixel_number
+        # show number of pixel in calibration text 
+        self.lblText1.setText("Enter the unit length in metric scale.")
+        self.lblText2.setText("%d pixels are equivalent to:" % self.pixel_number)
+        
+    def btnOK_clicked(self):
+        #self.parent.calibration_length = float(self.edtLength.text())
+        #self.parent.calibration_unit = self.cbxUnit.currentText()
+        self.parent.set_object_calibration( self.pixel_number, float(self.edtLength.text()),self.comboUnit.currentText())
+        self.close()
+    
+    def btnCancel_clicked(self):
+        self.close()
+
+class DatasetDialog(QDialog):
+    # NewDatasetDialog shows new dataset dialog.
+    def __init__(self,parent):
+        super().__init__()
+        self.setWindowTitle("Modan2 - Dataset Information")
+        self.parent = parent
+        #print(self.parent.pos())
+        #self.setGeometry(QRect(100, 100, 600, 400))
+        self.remember_geometry = True
+        self.m_app = QApplication.instance()
+        self.read_settings()
+        #self.move(self.parent.pos()+QPoint(100,100))
+
+        self.cbxParent = QComboBox()
+        self.edtDatasetName = QLineEdit()
+        self.edtDatasetDesc = QLineEdit()
+
+        self.rbtn2D = QRadioButton("2D")
+        self.rbtn2D.setChecked(True)
+        self.rbtn3D = QRadioButton("3D")
+        dim_layout = QHBoxLayout()
+        dim_layout.addWidget(self.rbtn2D)
+        dim_layout.addWidget(self.rbtn3D)
+
+        self.edtWireframe = QTextEdit()
+        self.edtBaseline = QLineEdit()
+        #self.edtPolygons = QTextEdit()
+        self.edtPropertyNameStr = QTextEdit()
+
+        self.main_layout = QFormLayout()
+        self.setLayout(self.main_layout)
+        self.main_layout.addRow("Parent", self.cbxParent)
+        self.main_layout.addRow("Dataset Name", self.edtDatasetName)
+        self.main_layout.addRow("Description", self.edtDatasetDesc)
+        self.main_layout.addRow("Dimension", dim_layout)
+        self.main_layout.addRow("Wireframe", self.edtWireframe)
+        self.main_layout.addRow("Baseline", self.edtBaseline)
+        #self.main_layout.addRow("Polygons", self.edtPolygons)
+        self.main_layout.addRow("Property Names", self.edtPropertyNameStr)
+
+
+        self.btnOkay = QPushButton()
+        self.btnOkay.setText("Save")
+        self.btnOkay.clicked.connect(self.Okay)
+
+        self.btnDelete = QPushButton()
+        self.btnDelete.setText("Delete")
+        self.btnDelete.clicked.connect(self.Delete)
+
+        self.btnCancel = QPushButton()
+        self.btnCancel.setText("Cancel")
+        self.btnCancel.clicked.connect(self.Cancel)
+
+        btn_layout = QHBoxLayout()
+        btn_layout.addWidget(self.btnOkay)
+        btn_layout.addWidget(self.btnDelete)
+        btn_layout.addWidget(self.btnCancel)
+        self.main_layout.addRow(btn_layout)
+
+
+        self.dataset = None
+        self.load_parent_dataset()
+
+        #self.edtDataFolder.setText(str(self.data_folder.resolve()))
+        #self.edtServerAddress.setText(self.server_address)
+        #self.edtServerPort.setText(self.server_port)
+
+    def read_settings(self):
+        self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
+        if self.remember_geometry is True:
+            self.setGeometry(self.m_app.settings.value("WindowGeometry/DatasetDialog", QRect(100, 100, 600, 400)))
+        else:
+            self.setGeometry(QRect(100, 100, 600, 400))
+            self.move(self.parent.pos()+QPoint(100,100))
+
+
+    def write_settings(self):
+        if self.remember_geometry is True:
+            self.m_app.settings.setValue("WindowGeometry/DatasetDialog", self.geometry())
+
+    def closeEvent(self, event):
+        self.write_settings()
+        event.accept()
+
+    def load_parent_dataset(self,curr_dataset_id = None):
+        self.cbxParent.clear()
+        datasets = MdDataset.select()
+        for dataset in datasets:
+            if curr_dataset_id is None or dataset.id != curr_dataset_id:
+                self.cbxParent.addItem(dataset.dataset_name, dataset.id)
+
+    def read_dataset(self, dataset_id):
+        try:
+            dataset = MdDataset.get(dataset.id == dataset_id)
+        except:
+            dataset = None
+        self.dataset = dataset
+        #self
+        #return dataset
+
+    def set_dataset(self, dataset):
+        if dataset is None:
+            self.dataset = None
+            self.cbxParent.setCurrentIndex(-1)
+            return
+
+        self.dataset = dataset
+        self.load_parent_dataset(dataset.id)
+        self.cbxParent.setCurrentIndex(self.cbxParent.findData(dataset.parent_id))
+
+        self.edtDatasetName.setText(dataset.dataset_name)
+        self.edtDatasetDesc.setText(dataset.dataset_desc)
+        if dataset.dimension == 2:
+            self.rbtn2D.setChecked(True)
+        elif dataset.dimension == 3:
+            self.rbtn3D.setChecked(True)
+        #print(dataset.dimension,self.dataset.objects)
+        if len(self.dataset.object_list) > 0:
+            self.rbtn2D.setEnabled(False)
+            self.rbtn3D.setEnabled(False)
+        self.edtWireframe.setText(dataset.wireframe)
+        self.edtBaseline.setText(dataset.baseline)
+        #self.edtPolygons.setText(dataset.polygons)
+        self.edtPropertyNameStr.setText(dataset.propertyname_str)
+    
+    def set_parent_dataset(self, parent_dataset):
+        #print("parent:", parent_dataset_id, "dataset:", self.dataset)
+        if parent_dataset is None:
+            self.cbxParent.setCurrentIndex(-1)
+        else:
+            self.cbxParent.setCurrentIndex(self.cbxParent.findData(parent_dataset.id))
+            if parent_dataset.dimension == 2:
+                self.rbtn2D.setChecked(True)
+            elif parent_dataset.dimension == 3:
+                self.rbtn3D.setChecked(True)
+            #self.rbtn2D.setEnabled(False)
+            #self.rbtn3D.setEnabled(False)
+
+    def Okay(self):
+        if self.dataset is None:
+            self.dataset = MdDataset()
+        self.dataset.parent_id = self.cbxParent.currentData()
+        self.dataset.dataset_name = self.edtDatasetName.text()
+        self.dataset.dataset_desc = self.edtDatasetDesc.text()
+        if self.rbtn2D.isChecked():
+            self.dataset.dimension = 2
+        elif self.rbtn3D.isChecked():
+            self.dataset.dimension = 3
+        self.dataset.wireframe = self.edtWireframe.toPlainText()
+        self.dataset.baseline = self.edtBaseline.text()
+        #self.dataset.polygons = self.edtPolygons.toPlainText()
+        self.dataset.propertyname_str = self.edtPropertyNameStr.toPlainText()
+
+        #self.data
+        #print(self.dataset.dataset_desc, self.dataset.dataset_name)
+        self.dataset.save()
+        self.accept()
+
+    def Delete(self):
+        ret = QMessageBox.question(self, "", "Are you sure to delete this dataset?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        #print("ret:", ret)
+        if ret == QMessageBox.Yes:
+            self.dataset.delete_instance()
+            self.parent.selected_dataset = None
+            #self.dataset.delete_dataset()
+        #self.delete_dataset()
+        self.accept()
+
+    def Cancel(self):
+        self.reject()
+
+class ObjectDialog(QDialog):
+    # NewDatasetDialog shows new dataset dialog.
+    def __init__(self,parent):
+        super().__init__()
+        self.setWindowTitle("Modan2 - Object Information")
+        self.parent = parent
+        #print(self.parent.pos())
+        self.remember_geometry = True
+        self.m_app = QApplication.instance()
+        self.read_settings()
+        #self.move(self.parent.pos()+QPoint(50,50))
+
+        self.status_bar = QStatusBar()
+        self.landmark_list = []
+
+        self.hsplitter = QSplitter(Qt.Horizontal)
+        self.vsplitter = QSplitter(Qt.Vertical)
+
+        #self.vsplitter.addWidget(self.tableView)
+        #self.vsplitter.addWidget(self.tableWidget)
+
+        #self.hsplitter.addWidget(self.treeView)
+        #self.hsplitter.addWidget(self.vsplitter)
+
+        self.inputLayout = QHBoxLayout()
+        self.inputCoords = QWidget()
+        self.inputCoords.setLayout(self.inputLayout)
+        self.inputX = QLineEdit()
+        self.inputY = QLineEdit()
+        self.inputZ = QLineEdit()
+
+        self.inputLayout.addWidget(self.inputX)
+        self.inputLayout.addWidget(self.inputY)
+        self.inputLayout.addWidget(self.inputZ)
+        self.inputLayout.setContentsMargins(0,0,0,0)
+        self.inputLayout.setSpacing(0)
+        self.btnAddInput = QPushButton()
+        self.btnAddInput.setText("Add")
+        self.inputLayout.addWidget(self.btnAddInput)
+        self.inputX.returnPressed.connect(self.input_coords_process)
+        self.inputY.returnPressed.connect(self.input_coords_process)
+        self.inputZ.returnPressed.connect(self.input_coords_process)
+        self.inputX.textChanged[str].connect(self.x_changed)
+        self.btnAddInput.clicked.connect(self.input_coords_process)
+
+        self.edtObjectName = QLineEdit()
+        self.edtObjectDesc = QTextEdit()
+        self.edtObjectDesc.setMaximumHeight(100)
+        self.edtLandmarkStr = QTableWidget()
+        self.lblDataset = QLabel()
+
+        self.main_layout = QVBoxLayout()
+        self.sub_layout = QHBoxLayout()
+        self.setLayout(self.main_layout)
+
+        self.object_view = None
+
+        self.object_view_3d = ObjectViewer3D(self)
+        self.object_view_3d.setMinimumWidth(300)
+        self.object_view_3d.setMinimumHeight(300)
+        self.object_view_3d.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.object_view_3d.object_dialog = self
+        self.object_view_3d.setMouseTracking(True)
+
+        self.object_view_2d = ObjectViewer2D(self)
+        self.object_view_2d.object_dialog = self
+        self.object_view_2d.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        #self.image_label.clicked.connect(self.on_image_clicked)
+
+        self.pixmap = QPixmap(1024,768)
+        self.object_view_2d.setPixmap(self.pixmap)
+
+        self.form_layout = QFormLayout()
+        self.form_layout.addRow("Dataset Name", self.lblDataset)
+        self.form_layout.addRow("Object Name", self.edtObjectName)
+        self.form_layout.addRow("Object Desc", self.edtObjectDesc)
+        self.form_layout.addRow("Landmarks", self.edtLandmarkStr)
+        self.form_layout.addRow("", self.inputCoords)
+
+        self.btnGroup = QButtonGroup() 
+        self.btnLandmark = PicButton(QPixmap(ICON['landmark']), QPixmap(ICON['landmark_hover']), QPixmap(ICON['landmark_down']), QPixmap(ICON['landmark_disabled']))
+        self.btnWireframe = PicButton(QPixmap(ICON['wireframe']), QPixmap(ICON['wireframe_hover']), QPixmap(ICON['wireframe_down']))
+        self.btnCalibration = PicButton(QPixmap(ICON['calibration']), QPixmap(ICON['calibration_hover']), QPixmap(ICON['calibration_down']),QPixmap(ICON['calibration_disabled']))
+        self.btnGroup.addButton(self.btnLandmark)
+        self.btnGroup.addButton(self.btnWireframe)
+        self.btnGroup.addButton(self.btnCalibration)
+        self.btnLandmark.setCheckable(True)
+        self.btnWireframe.setCheckable(True)
+        self.btnCalibration.setCheckable(True)
+        self.btnLandmark.setChecked(True)
+        self.btnWireframe.setChecked(False)
+        self.btnCalibration.setChecked(False)
+        self.btnLandmark.setAutoExclusive(True)
+        self.btnWireframe.setAutoExclusive(True)
+        self.btnCalibration.setAutoExclusive(True)
+        self.btnLandmark.clicked.connect(self.btnLandmark_clicked)
+        self.btnWireframe.clicked.connect(self.btnWireframe_clicked)
+        self.btnCalibration.clicked.connect(self.btnCalibration_clicked)
+        BUTTON_SIZE = 48
+        self.btnLandmark.setFixedSize(BUTTON_SIZE,BUTTON_SIZE)
+        self.btnWireframe.setFixedSize(BUTTON_SIZE,BUTTON_SIZE)
+        self.btnCalibration.setFixedSize(BUTTON_SIZE,BUTTON_SIZE)
+        self.btn_layout2 = QGridLayout()
+        self.btn_layout2.addWidget(self.btnLandmark,0,0)
+        self.btn_layout2.addWidget(self.btnWireframe,0,1)
+        self.btn_layout2.addWidget(self.btnCalibration,1,0)
+
+        self.cbxShowIndex = QCheckBox()
+        self.cbxShowIndex.setText("Index")
+        self.cbxShowIndex.setChecked(True)
+        self.cbxShowWireframe = QCheckBox()
+        self.cbxShowWireframe.setText("Wireframe")
+        self.cbxShowWireframe.setChecked(True)
+        self.cbxShowBaseline = QCheckBox()
+        self.cbxShowBaseline.setText("Baseline")
+        self.cbxShowBaseline.setChecked(True)
+        self.cbxShowBaseline.hide()
+        self.cbxAutoRotate = QCheckBox()
+        self.cbxAutoRotate.setText("Rotate")
+        self.cbxAutoRotate.setChecked(False)
+        self.cbxShowModel = QCheckBox()
+        self.cbxShowModel.setText("3D Model")
+        self.cbxShowModel.setChecked(True)
+        #self.btnFBO = QPushButton()
+        #self.btnFBO.setText("FBO")
+        #self.btnFBO.clicked.connect(self.btnFBO_clicked)
+
+
+        self.left_widget = QWidget()
+        self.left_widget.setLayout(self.form_layout)
+
+        self.right_top_widget = QWidget()
+        self.right_top_widget.setLayout(self.btn_layout2)
+        self.right_middle_widget = QWidget()
+        self.right_middle_layout = QVBoxLayout()
+        self.right_middle_layout.addWidget(self.cbxShowIndex)
+        self.right_middle_layout.addWidget(self.cbxShowWireframe)
+        self.right_middle_layout.addWidget(self.cbxShowBaseline)
+        self.right_middle_layout.addWidget(self.cbxShowModel)
+        self.right_middle_layout.addWidget(self.cbxAutoRotate)
+        #self.right_middle_layout.addWidget(self.btnFBO)
+        self.right_middle_widget.setLayout(self.right_middle_layout)
+        self.right_bottom_widget = QWidget()
+        self.vsplitter.addWidget(self.right_top_widget)
+        self.vsplitter.addWidget(self.right_middle_widget)
+        self.vsplitter.addWidget(self.right_bottom_widget)
+        self.vsplitter.setSizes([50,50,400])
+        self.vsplitter.setStretchFactor(0, 0)
+        self.vsplitter.setStretchFactor(1, 0)
+        self.vsplitter.setStretchFactor(2, 1)
+
+        self.object_view_layout = QVBoxLayout()
+        self.object_view_layout.addWidget(self.object_view_2d)
+        self.object_view_layout.addWidget(self.object_view_3d)
+        self.object_view_widget = QWidget()
+        self.object_view_widget.setLayout(self.object_view_layout)
+
+
+        self.hsplitter.addWidget(self.left_widget)
+        self.hsplitter.addWidget(self.object_view_widget)
+        #self.hsplitter.addWidget(self.object_view_3d)
+        self.hsplitter.addWidget(self.vsplitter)
+        #self.hsplitter.addWidget(self.right_widget)
+        self.hsplitter.setSizes([200,800,100])
+        self.hsplitter.setStretchFactor(0, 0)
+        self.hsplitter.setStretchFactor(1, 1)
+        self.hsplitter.setStretchFactor(2, 0)
+
+        self.btnOkay = QPushButton()
+        self.btnOkay.setText("Save")
+        self.btnOkay.clicked.connect(self.Okay)
+        self.btnDelete = QPushButton()
+        self.btnDelete.setText("Delete")
+        self.btnDelete.clicked.connect(self.Delete)
+        self.btnCancel = QPushButton()
+        self.btnCancel.setText("Cancel")
+        self.btnCancel.clicked.connect(self.Cancel)
+        btn_layout = QHBoxLayout()
+        btn_layout.addWidget(self.btnOkay)
+        btn_layout.addWidget(self.btnDelete)
+        btn_layout.addWidget(self.btnCancel)
+
+        self.status_bar.setMaximumHeight(20)
+        #self.main_layout.addLayout(self.sub_layout)
+        self.main_layout.addWidget(self.hsplitter)
+        self.main_layout.addLayout(btn_layout)
+        self.main_layout.addWidget(self.status_bar)
+
+        self.dataset = None
+        self.object = None
+        self.edtPropertyList = []
+        self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
+
+        self.cbxShowIndex.stateChanged.connect(self.show_index_state_changed)
+        self.cbxShowWireframe.stateChanged.connect(self.show_wireframe_state_changed)
+        self.cbxShowBaseline.stateChanged.connect(self.show_baseline_state_changed)
+        self.cbxAutoRotate.stateChanged.connect(self.auto_rotate_state_changed)
+        self.cbxShowModel.stateChanged.connect(self.show_model_state_changed)
+
+    def read_settings(self):
+        self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
+        if self.remember_geometry is True:
+            self.setGeometry(self.m_app.settings.value("WindowGeometry/ObjectDialog", QRect(100, 100, 1400, 800)))
+        else:
+            self.setGeometry(QRect(100, 100, 1400, 800))
+            self.move(self.parent.pos()+QPoint(100,100))
+
+    def write_settings(self):
+        if self.remember_geometry is True:
+            self.m_app.settings.setValue("WindowGeometry/ObjectDialog", self.geometry())
+
+    def closeEvent(self, event):
+        self.write_settings()
+        event.accept()
+
+    def set_object_calibration(self, pixels, calibration_length, calibration_unit):
+        self.object.pixels_per_mm = pixels * 1.0 / calibration_length
+        if calibration_unit == 'mm':
+            self.object.pixels_per_mm /= 1.0
+        elif calibration_unit == 'cm':
+            self.object.pixels_per_mm /= 10.0
+        elif calibration_unit == 'm':
+            self.object.pixels_per_mm /= 1000.0
+        elif calibration_unit == 'um':
+            self.object.pixels_per_mm /= 0.001
+        elif calibration_unit == 'nm':
+            self.object.pixels_per_mm /= 0.000001
+        self.object_view_2d.pixels_per_mm = self.object.pixels_per_mm
+        #print(pixels, calibration_length, calibration_unit, self.object.pixels_per_mm)
+        #self.object.save()
+
+    #def btnFBO_clicked(self):
+    #    self.object_view_3d.show_picker_buffer()
+
+    def show_index_state_changed(self, int):
+        self.object_view.show_index = self.cbxShowIndex.isChecked()
+        self.object_view.update()
+
+    def show_model_state_changed(self, int):
+        self.object_view.show_model = self.cbxShowModel.isChecked()
+        self.object_view.update()
+
+    def show_baseline_state_changed(self, int):
+        self.object_view.show_baseline = self.cbxShowBaseline.isChecked()
+        self.object_view.update()
+
+    def auto_rotate_state_changed(self, int):
+        self.object_view.auto_rotate = self.cbxAutoRotate.isChecked()
+
+    def show_wireframe_state_changed(self, int):
+        self.object_view.show_wireframe = self.cbxShowWireframe.isChecked()
+        self.object_view.update()
+
+    def btnLandmark_clicked(self):
+        #self.edit_mode = MODE_ADD_LANDMARK
+        #if self.object.image.count() == 0:
+        #    return
+        self.object_view.set_mode(MODE['EDIT_LANDMARK'])
+        self.object_view.update()
+        self.btnLandmark.setDown(True)
+        self.btnLandmark.setChecked(True)
+        self.btnWireframe.setDown(False)
+        self.btnWireframe.setChecked(False)
+        self.btnCalibration.setDown(False)
+        self.btnCalibration.setChecked(False)
+
+    def btnCalibration_clicked(self):
+        #self.edit_mode = MODE_ADD_LANDMARK
+        self.object_view.set_mode(MODE['CALIBRATION'])
+        self.object_view.update()
+        self.btnCalibration.setDown(True)
+        self.btnCalibration.setChecked(True)
+        self.btnLandmark.setDown(False)
+        self.btnLandmark.setChecked(False)
+        self.btnWireframe.setDown(False)
+        self.btnWireframe.setChecked(False)
+
+    def calibrate(self, dist):
+        self.calibrate_dlg = CalibrationDialog(self, dist)
+        self.calibrate_dlg.setModal(True)
+        self.calibrate_dlg.exec_()
+
+    def btnWireframe_clicked(self):
+        #self.edit_mode = MODE_ADD_LANDMARK
+        self.object_view.set_mode(MODE['WIREFRAME'])
+        self.object_view.update()
+        self.btnWireframe.setDown(True)
+        self.btnWireframe.setChecked(True)
+        self.btnLandmark.setDown(False)
+        self.btnLandmark.setChecked(False)
+        self.btnCalibration.setDown(False)
+        self.btnCalibration.setChecked(False)
+
+    def set_object_name(self, name):
+        #print("set_object_name", self.edtObjectName.text(), name)
+
+        if self.edtObjectName.text() == "":
+            self.edtObjectName.setText(name)
+
+    def set_dataset(self, dataset):
+        #print("object dialog set_dataset", dataset.dataset_name)
+        self.dataset = dataset
+        self.lblDataset.setText(dataset.dataset_name)
+
+        header = self.edtLandmarkStr.horizontalHeader()    
+        if self.dataset.dimension == 2:
+            self.edtLandmarkStr.setColumnCount(2)
+            self.edtLandmarkStr.setHorizontalHeaderLabels(["X","Y"])
+            #self.edtLandmarkStr.setColumnWidth(0, 80)
+            #self.edtLandmarkStr.setColumnWidth(1, 80)
+            header.setSectionResizeMode(0, QHeaderView.Stretch)
+            header.setSectionResizeMode(1, QHeaderView.Stretch)
+            self.cbxAutoRotate.hide()
+            self.cbxShowModel.hide()
+            #self.btnCalibration.show()
+            self.inputZ.hide()
+            self.object_view_3d.hide()
+            self.object_view = self.object_view_2d
+            input_width = 80
+        elif self.dataset.dimension == 3:
+            self.edtLandmarkStr.setColumnCount(3)
+            self.edtLandmarkStr.setHorizontalHeaderLabels(["X","Y","Z"])
+            header.setSectionResizeMode(0, QHeaderView.Stretch)
+            header.setSectionResizeMode(1, QHeaderView.Stretch)
+            header.setSectionResizeMode(2, QHeaderView.Stretch)
+            self.cbxAutoRotate.show()
+            self.cbxShowModel.show()
+            #self.btnCalibration.hide()
+            self.inputZ.show()
+            self.object_view_2d.hide()
+            self.object_view = self.object_view_3d
+            input_width = 60
+        if self.dataset.propertyname_str is not None and self.dataset.propertyname_str != "":
+            self.edtPropertyList = []
+            self.dataset.unpack_propertyname_str()
+            for propertyname in self.dataset.propertyname_list:
+                self.edtPropertyList.append( QLineEdit() )
+                self.form_layout.addRow(propertyname, self.edtPropertyList[-1])
+        #self.inputX.setFixedWidth(input_width)
+        #self.inputY.setFixedWidth(input_width)
+        #self.inputZ.setFixedWidth(input_width)
+        #self.btnAddInput.setFixedWidth(input_width)
+
+    def set_object(self, object):
+        #print("set_object", object.object_name, object.dataset.dimension)
+        if object is not None:
+            self.object = object
+            self.edtObjectName.setText(object.object_name)
+            self.edtObjectDesc.setText(object.object_desc)
+            #self.edtLandmarkStr.setText(object.landmark_str)
+            object.unpack_landmark()
+            self.landmark_list = copy.deepcopy(object.landmark_list)
+            self.edge_list = object.dataset.unpack_wireframe()
+            #for lm in self.landmark_list:
+            #    self.show_landmark(*lm)
+            #self.show_landmarks()
+
+        if self.dataset.dimension == 3:
+            #print("set_object 3d")
+            self.object_view = self.object_view_3d
+            self.object_view.auto_rotate = False
+            #obj_ops = MdObjectOps(object)
+            #self.object_view.set_dataset(object.dataset)
+            #self.btnLandmark.setDisabled(True)
+            self.btnCalibration.setDisabled(True)
+            self.cbxAutoRotate.show()
+            if object is not None:
+                if object.threed_model is not None and len(object.threed_model) > 0:
+                    self.enable_landmark_edit()
+                else:
+                    self.disable_landmark_edit()
+                #print("object dialog self.landmark_list in set object 3d", self.landmark_list)
+                self.object_view.set_object(object)
+                self.object_view.landmark_list = self.landmark_list
+                self.object_view.update_landmark_list()
+                self.object_view.calculate_resize()
+                #self.object_view.landmark_list = self.landmark_list
+        else:
+            #print("set_object 2d")
+            self.object_view = self.object_view_2d
+            self.cbxAutoRotate.hide()
+            if object is not None:
+                if object.image is not None and len(object.image) > 0:
+                    img = object.image[0]
+                    image_path = img.get_file_path(self.m_app.storage_directory)
+                    #check if image_path exists
+                    if os.path.exists(image_path):
+                        self.object_view.set_image(image_path)
+                    self.btnCalibration.setEnabled(True)
+                    self.enable_landmark_edit()
+                else:
+                    self.btnCalibration.setDisabled(True)
+                    self.disable_landmark_edit()
+                #elif len(self.landmark_list) > 0:
+                #print("objectdialog self.landmark_list in set object 2d", self.landmark_list)
+                self.object_view.set_object(object)
+                self.object_view.landmark_list = self.landmark_list
+                self.object_view.update_landmark_list()
+                self.object_view.calculate_resize()
+
+        if len(self.dataset.propertyname_list) >0:
+            self.object.unpack_property()
+            self.dataset.unpack_propertyname_str()
+            for idx, propertyname in enumerate(self.dataset.propertyname_list):
+                if idx < len(object.property_list):
+                    self.edtPropertyList[idx].setText(object.property_list[idx])
+
+            #self.object_view_3d.landmark_list = self.landmark_list
+        #self.set_dataset(object.dataset)
+        self.show_landmarks()
+
+    def enable_landmark_edit(self):
+        self.btnLandmark.setEnabled(True)
+        self.btnLandmark.setDown(True)
+        self.object_view.set_mode(MODE['EDIT_LANDMARK'])
+
+    def disable_landmark_edit(self):
+        self.btnLandmark.setDisabled(True)
+        self.btnLandmark.setDown(False)
+        self.object_view.set_mode(MODE['VIEW'])
+
+
+    @pyqtSlot(str)
+    def x_changed(self, text):
+        # if text is multiline and tab separated, add to table
+        #print("x_changed called with", text)
+        if "\n" in text:
+            lines = text.split("\n")
+            for line in lines:
+                #print(line)
+                if "\t" in line:
+                    coords = line.split("\t")
+                    #add landmarks using add_landmark method
+                    if self.dataset.dimension == 2 and len(coords) == 2:
+                        self.add_landmark(coords[0], coords[1])
+                    elif self.dataset.dimension == 3 and len(coords) == 3:
+                        self.add_landmark(coords[0], coords[1], coords[2])
+            self.inputX.setText("")
+            self.inputY.setText("")
+            self.inputZ.setText("")
+
+    def update_landmark(self, idx, x, y, z=None):
+        if self.dataset.dimension == 2:
+            self.landmark_list[idx] = [x,y]
+        elif self.dataset.dimension == 3:
+            self.landmark_list[idx] = [x,y,z]
+        self.show_landmarks()
+
+    def add_landmark(self, x, y, z=None):
+        #print("adding landmark", x, y, z, self.landmark_list)
+        if self.dataset.dimension == 2:
+            self.landmark_list.append([float(x),float(y)])
+        elif self.dataset.dimension == 3:
+            self.landmark_list.append([float(x),float(y),float(z)])
+        self.show_landmarks()
+        #self.object_view.calculate_resize()
+
+    def delete_landmark(self, idx):
+        #print("delete_landmark", idx)
+        self.landmark_list.pop(idx)
+        self.show_landmarks()
+
+    def input_coords_process(self):
+        x_str = self.inputX.text()
+        y_str = self.inputY.text()
+        z_str = self.inputZ.text()
+        if self.dataset.dimension == 2:
+            if x_str == "" or y_str == "":
+                return
+            # add landmark to table using add_landmark method
+            self.add_landmark(x_str, y_str)
+
+        elif self.dataset.dimension == 3:
+            if x_str == "" or y_str == "" or z_str == "":
+                return
+            self.add_landmark(x_str, y_str, z_str)
+        self.inputX.setText("")
+        self.inputY.setText("")
+        self.inputZ.setText("")
+        self.inputX.setFocus()
+        self.object_view.update_landmark_list()
+        self.object_view.calculate_resize()
+
+    def show_landmarks(self):
+        self.edtLandmarkStr.setRowCount(len(self.landmark_list))
+        for idx, lm in enumerate(self.landmark_list):
+            #print(idx, lm)
+
+            item_x = QTableWidgetItem(str(float(lm[0])*1.0))
+            item_x.setTextAlignment(Qt.AlignRight|Qt.AlignVCenter)
+            self.edtLandmarkStr.setItem(idx, 0, item_x)
+
+            item_y = QTableWidgetItem(str(float(lm[1])*1.0))
+            item_y.setTextAlignment(Qt.AlignRight|Qt.AlignVCenter)
+            self.edtLandmarkStr.setItem(idx, 1, item_y)
+
+            if self.dataset.dimension == 3:
+                item_z = QTableWidgetItem(str(float(lm[2])*1.0))
+                item_z.setTextAlignment(Qt.AlignRight|Qt.AlignVCenter)
+                self.edtLandmarkStr.setItem(idx, 2, item_z)
+        
+
+    def save_object(self):
+
+        if self.object is None:
+            self.object = MdObject()
+        self.object.dataset_id = self.dataset.id
+        self.object.object_name = self.edtObjectName.text()
+        self.object.object_desc = self.edtObjectDesc.toPlainText()
+        #self.object.landmark_str = self.edtLandmarkStr.text()
+        self.object.landmark_str = self.make_landmark_str()
+        #print("scale:", self.object.pixels_per_mm)
+        if self.dataset.propertyname_str is not None and self.dataset.propertyname_str != "":
+            self.object.property_str = ",".join([ edt.text() for edt in self.edtPropertyList ])
+
+        self.object.save()
+        if self.object_view_2d.fullpath is not None and self.object.image.count() == 0:
+            md_image = MdImage()
+            md_image.object_id = self.object.id
+            md_image.load_file_info(self.object_view_2d.fullpath)
+            new_filepath = md_image.get_file_path( self.m_app.storage_directory)
+            if not os.path.exists(os.path.dirname(new_filepath)):
+                os.makedirs(os.path.dirname(new_filepath))
+            #print("save object new filepath:", new_filepath)
+            shutil.copyfile(self.object_view_2d.fullpath, new_filepath)
+            md_image.save()
+        elif self.object_view_3d.fullpath is not None and self.object.threed_model.count() == 0:
+            md_3dmodel = MdThreeDModel()
+            md_3dmodel.object_id = self.object.id
+            md_3dmodel.load_file_info(self.object_view_3d.fullpath)
+            new_filepath = md_3dmodel.get_file_path( self.m_app.storage_directory)
+            if not os.path.exists(os.path.dirname(new_filepath)):
+                os.makedirs(os.path.dirname(new_filepath))
+            #print("save object new filepath:", new_filepath)
+            shutil.copyfile(self.object_view_3d.fullpath, new_filepath)
+            md_3dmodel.save()
+
+    def make_landmark_str(self):
+        # from table, make landmark_str
+        landmark_str = ""
+        for row in range(self.edtLandmarkStr.rowCount()):
+            for col in range(self.edtLandmarkStr.columnCount()):
+                landmark_str += self.edtLandmarkStr.item(row, col).text()
+                if col < self.edtLandmarkStr.columnCount()-1:
+                    landmark_str += "\t"
+            if row < self.edtLandmarkStr.rowCount()-1:
+                landmark_str += "\n"
+        return landmark_str
+
+    def Delete(self):
+        ret = QMessageBox.question(self, "", "Are you sure to delete this object?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if ret == QMessageBox.Yes:
+            if self.object.image.count() > 0:
+                image_path = self.object.image[0].get_file_path(self.m_app.storage_directory)
+                if os.path.exists(image_path):
+                    os.remove(image_path)
+            self.object.delete_instance()
+        #self.delete_dataset()
+        self.accept()
+
+    def Okay(self):
+        self.save_object()
+        self.accept()
+
+    def Cancel(self):
+        self.reject()
+
+    def resizeEvent(self, event):
+        #print("Window has been resized",self.image_label.width(), self.image_label.height())
+        #self.pixmap.scaled(self.image_label.width(), self.image_label.height(), Qt.KeepAspectRatio)
+        #self.edtObjectDesc.resize(self.edtObjectDesc.height(),300)
+        #self.image_label.setPixmap(self.pixmap)
+        QDialog.resizeEvent(self, event)
+
 class DatasetAnalysisDialog(QDialog):
     def __init__(self,parent,dataset):
         super().__init__()
         self.setWindowTitle("Modan2 - Dataset Analysis")
-        self.setWindowIcon(QIcon(resource_path('icons/modan.ico')))
         self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
         self.parent = parent
-        self.setGeometry(QRect(100, 100, 1400, 800))
-        self.move(self.parent.pos()+QPoint(50,50))
-
+        self.remember_geometry = True
+        self.m_app = QApplication.instance()
+        self.read_settings()
+        #self.setGeometry(QRect(100, 100, 1400, 800))
+        
         self.ds_ops = None
         self.object_hash = {}
         
@@ -2315,7 +2940,7 @@ class DatasetAnalysisDialog(QDialog):
         self.lblShape2.setMinimumWidth(400)
         self.lblShape2.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         # 3d shape
-        self.lblShape3 = MyGLWidget(self)
+        self.lblShape3 = ObjectViewer3D(self)
         self.lblShape3.setMinimumWidth(400)
         self.lblShape3.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
@@ -2635,8 +3260,6 @@ class DatasetAnalysisDialog(QDialog):
         self.onpick_happened = False
 
 
-
-
         # data setting
         set_result = self.set_dataset(dataset)
         #print("set dataset result: ", set_result)
@@ -2656,6 +3279,24 @@ class DatasetAnalysisDialog(QDialog):
             self.on_btnPCA_clicked()
 
             self.btnSaveResults.setFocus()
+
+    def read_settings(self):
+        self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
+        if self.remember_geometry is True:
+            self.setGeometry(self.m_app.settings.value("WindowGeometry/DatasetAnalysisWindow", QRect(100, 100, 1400, 800)))
+        else:
+            self.setGeometry(QRect(100, 100, 1400, 800))
+            self.move(self.parent.pos()+QPoint(50,50))
+
+    def write_settings(self):
+        if self.remember_geometry is True:
+            self.m_app.settings.setValue("WindowGeometry/DatasetAnalysisWindow", self.geometry())
+
+
+
+    def closeEvent(self, event):
+        self.write_settings()
+        event.accept()
 
     def select_all(self):
         pass
@@ -3386,8 +4027,9 @@ class ExportDatasetDialog(QDialog):
         self.setWindowTitle("Modan2 - Export")
         self.parent = parent
         #print(self.parent.pos())
-        self.setGeometry(QRect(100, 100, 600, 400))
-        self.move(self.parent.pos()+QPoint(100,100))
+        self.remember_geometry = True
+        self.m_app = QApplication.instance()
+        self.read_settings()
 
         self.lblDatasetName = QLabel("Dataset Name")
         self.lblDatasetName.setMaximumHeight(20)
@@ -3491,6 +4133,22 @@ class ExportDatasetDialog(QDialog):
         self.layout.addLayout(self.button_layout1)
 
         self.setLayout(self.layout)
+
+    def read_settings(self):
+        self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
+        if self.remember_geometry is True:
+            self.setGeometry(self.m_app.settings.value("WindowGeometry/ExportDialog", QRect(100, 100, 600, 400)))
+        else:
+            self.setGeometry(QRect(100, 100, 600, 400))
+            self.move(self.parent.pos()+QPoint(50,50))
+
+    def write_settings(self):
+        if self.remember_geometry is True:
+            self.m_app.settings.setValue("WindowGeometry/ExportDialog", self.geometry())
+
+    def closeEvent(self, event):
+        self.write_settings()
+        event.accept()
 
     def set_dataset(self,dataset):
 
@@ -3601,8 +4259,11 @@ class ImportDatasetDialog(QDialog):
         self.setWindowTitle("Modan2 - Import")
         self.parent = parent
         #print(self.parent.pos())
-        self.setGeometry(QRect(100, 100, 600, 400))
-        self.move(self.parent.pos()+QPoint(100,100))
+        self.remember_geometry = True
+        self.m_app = QApplication.instance()
+        self.read_settings()
+        #self.setGeometry(QRect(100, 100, 600, 400))
+        #self.move(self.parent.pos()+QPoint(100,100))
 
         # add file open dialog
         self.btnOpenFile = QPushButton("Open File")
@@ -3680,6 +4341,22 @@ class ImportDatasetDialog(QDialog):
         self.main_layout.addRow("Object Count", self.edtObjectCount)
         self.main_layout.addRow("Import", self.btnImport)
         self.main_layout.addRow("Progress", self.prgImport)
+
+    def read_settings(self):
+        self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
+        if self.remember_geometry is True:
+            self.setGeometry(self.m_app.settings.value("WindowGeometry/ImportDialog", QRect(100, 100, 600, 400)))
+        else:
+            self.setGeometry(QRect(100, 100, 600, 400))
+            self.move(self.parent.pos()+QPoint(50,50))
+
+    def write_settings(self):
+        if self.remember_geometry is True:
+            self.m_app.settings.setValue("WindowGeometry/ImportDialog", self.geometry())
+
+    def closeEvent(self, event):
+        self.write_settings()
+        event.accept()
 
     def open_file(self):
         filename, _ = QFileDialog.getOpenFileName(self, "Open File", "", "All Files (*.*)")
@@ -3804,582 +4481,6 @@ class ImportDatasetDialog(QDialog):
         self.prgImport.repaint()
         QApplication.processEvents()
 
-class TPS:
-    def __init__(self, filename, datasetname):
-        self.filename = filename
-        self.datasetname = datasetname
-        self.dimension = 0
-        self.nobjects = 0
-        self.object_name_list = []
-        self.landmark_str_list = []
-        self.edge_list = []
-        self.polygon_list = []
-        self.propertyname_list = []
-        self.property_list_list = []
-        self.object_comment = {}
-        self.landmark_data = {}
-        self.read()
-
-    def isNumber(self,s):
-        try:
-            float(s)
-            return True
-        except ValueError:
-            return False
-
-    def read(self):
-        with open(self.filename, 'r') as f:
-            tps_lines = f.readlines()
-
-            dataset = {}
-
-            object_count = 0
-            landmark_count = 0
-            data = []
-            object_name_list = []
-            threed = 0
-            twod = 0
-            objects = {}
-            object_comment = {}
-            header = ''
-            comment = ''
-            image_count = 0
-            currently_in_data_section = False
-            object_id = ''
-            object_image_path = ''
-            object_comment_1 = ''
-            object_comment_2 = ''
-            
-            for line in tps_lines:
-                line = line.strip()
-                if line == '':
-                    continue
-                if line.startswith("#"):
-                    continue
-                if line.startswith('"') or line.startswith("'"):
-                    continue
-
-                # regular expression that finds the line "LM=xx comment", ignore case
-                headerline = re.search('^\s*LM\s*=\s*(\d+)\s*(.*)', line, re.IGNORECASE)
-
-                #headerline = re.search('^\s*[LM]+\s*=\s*(\d+)\s*(.*)', line)
-                if headerline is not None:
-                    #print("headerline:", headerline.group(1), headerline.group(2))
-                    if currently_in_data_section == True:
-                        if len(data) > 0:
-                            if object_id != '':
-                                key = object_id
-                            elif object_comment_1 != '':
-                                key = object_comment_1
-                                object_comment_1 = ''
-                            else:
-                                key = self.datasetname + "_" + str(object_count+1)
-                            objects[key] = data
-                            object_name_list.append(key)
-                            object_comment[key] = " ".join( [ object_comment_1, object_comment_2 ] ).strip()
-                            #print("data:", data)
-                            data = []
-                            object_id = ''
-                            object_comment_1 = ''
-                            object_comment_2 = ''
-                            object_image_path = ''
-                        landmark_count, object_comment_1 = int(headerline.group(1)), headerline.group(2).strip()
-                        #print("landmark_count:", landmark_count, "object_count:", object_count, "comment:", comment)
-                        object_count += 1
-                    else:
-                        currently_in_data_section = True
-                        landmark_count, object_comment_1 = int(headerline.group(1)), headerline.group(2).strip()
-                else:
-                    dataline = re.search('^\s*(\w+)\s*=(.+)', line)
-                    #print(line)
-                    if dataline is None:
-                        #print("actual data:", line)
-                        point = [ float(x) for x in re.split('\s+', line)]
-                        if len(point) > 2 and self.isNumber(point[2]):
-                            threed += 1
-                        else:
-                            twod += 1
-                        #print("point:", point)
-                        if len(point)>1:
-                            data.append(point)
-                    elif dataline.group(1).lower() == "image":
-                        #print("image:", dataline.group(2))
-                        object_image_path = dataline.group(2)
-                    elif dataline.group(1).lower() == "comment":
-                        #print("comment:", dataline.group(2))
-                        object_comment_2 = dataline.group(2)
-                    elif dataline.group(1).lower() == "id":
-                        #print("id:", dataline.group(2))
-                        #object_id = dataline.group(2)
-                        pass
-
-            #print("aa")
-
-            if len(data) > 0:
-                if object_id != '':
-                    key = object_id
-                elif object_comment_1 != '':
-                    key = object_comment_1
-                    object_comment_1 = ''
-                else:
-                    key = self.datasetname + "_" + str(object_count+1)
-                objects[key] = data
-                object_name_list.append(key)
-                object_comment[key] = " ".join( [ object_comment_1, object_comment_2 ] ).strip()
-
-            #print("bb", object_count, landmark_count)
-
-            if object_count == 0 and landmark_count == 0:
-                return None
-
-            if threed > twod:
-                self.dimension = 3
-            else:
-                self.dimension = 2
-            
-            #print ("dimension:", self.dimension)
-            #print("object_count:", object_count)
-            #print("landmark_count:", landmark_count)
-            #print("object_name_list:", object_name_list)
-            #print("object_comment:", object_comment)
-            #print("objects:", objects)
-
-            self.nobjects = len(object_name_list)
-            self.nlandmarks = landmark_count
-            self.landmark_data = objects
-            self.object_name_list = object_name_list
-            self.object_comment = object_comment
-            #print(self.landmark_data.keys(), self.object_name_list)
-
-            return dataset
-
-class NTS:
-    def __init__(self, filename, datasetname):
-        self.filename = filename
-        self.datasetname = datasetname
-        self.dimension = 0
-        self.nobjects = 0
-        self.object_name_list = []
-        self.landmark_str_list = []
-        self.edge_list = []
-        self.polygon_list = []
-        self.propertyname_list = []
-        self.property_list_list = []
-        self.object_comment = {}
-        self.landmark_data = {}
-        self.read()
-
-    def isNumber(self,s):
-        try:
-            float(s)
-            return True
-        except ValueError:
-            return False
-
-    def read(self):
-        with open(self.filename, 'r') as f:
-            nts_lines = f.readlines()
-
-            dataset = {}
-
-            total_object_count = 0
-            landmark_count = 0
-            data = []
-            object_name_list = []
-            threed = 0
-            twod = 0
-            objects = {}
-            header = ''
-            comment = ''
-            image_count = 0
-            matrix_type = -1
-            total_object_count = -1
-            variable_count = -1
-            dimension = -1
-            headerline_processed = False
-            column_names_exist = False
-            column_names_read = False
-            row_names_read = False
-            row_names_exist_at_row_beginning = False
-            row_names_exist_at_row_ending = False
-            row_names_exist_in_separate_line = False
-
-            current_object_count = 0
-            comments = ""
-
-            for line in nts_lines:
-                line = line.strip()
-                if line == '':
-                    continue
-                if line.startswith('"') or line.startswith("'"):
-                    comments += line
-                    continue
-                #                          1    2     3   4    5     6    7   8    9    10   11   12   13    14
-                headerline = re.search('^(\d+)(\s+)(\d+)(\w*)(\s+)(\d+)(\w*)(\s+)(\d+)(\s+)(\d*)(\s*)(\w+)=(\d+)(.*)', line)
-                if headerline is not None:
-                    matrix_type = headerline.group(1)
-                    total_object_count = int(headerline.group(3))
-                    variable_count = int(headerline.group(6))
-                    self.dimension = int(headerline.group(14))
-                    if variable_count > 0 and dimension > 0:
-                        landmark_count = int( float(variable_count) / float(dimension) )
-                    if headerline.group(4).lower() == "l":
-                        row_names_exist_in_separate_line = True
-                    elif headerline.group(4).lower() == "b":
-                        row_names_exist_at_row_beginning = True
-                    elif headerline.group(4).lower() == "e":
-                        row_names_exist_at_row_ending = True
-                    if headerline.group(7).lower() == "l":
-                        column_names_exist = True
-                    if headerline.group(13).lower() == "dim":
-                        #print("dim:", headerline.group(14))
-                        self.dimension = int(headerline.group(14))
-                    
-                    headerline_processed = True
-                    #print(headerline_processed, headerline.group(6), headerline.group(7), column_names_exist, column_names_read)
-                    continue
-
-                if headerline_processed == True and row_names_exist_in_separate_line == True and row_names_read == False:
-                    row_names_list = re.split('\s+', line)
-                    row_names_read = True
-                    continue
-
-                if headerline_processed == True and column_names_exist == True and column_names_read == False:
-                    column_names_list = re.split('\s+', line)
-                    column_names_read = True
-                    continue
-
-                if headerline_processed == True:
-                    data_list = re.split('\s+', line)
-                    if row_names_exist_at_row_beginning == True:
-                        row_name = data_list.pop(0)
-                    elif row_names_exist_at_row_ending == True:
-                        row_name = data_list.pop(-1)
-                    elif len(row_names_list) > 0:
-                        row_name = row_names_list[current_object_count]
-                    else:
-                        row_name = self.datasetname + "_" + str(current_object_count+1)
-                    # turn data_list into coordinates of landmarks based on dimension
-                    data_list = [ float(x) for x in data_list ]
-                    #print(data_list, len(data_list), self.dimension)
-                    objects[row_name] = []
-                    for idx in range(0,len(data_list),self.dimension):
-                        #print point
-                        #print("idx:", idx, "dimension:", self.dimension, "lm:", data_list[idx:idx+self.dimension])
-                        objects[row_name].append(data_list[idx:idx+self.dimension])
-
-                    #print(objects[row_name])
-                    #objects[row_name] = data_list
-                    object_name_list.append(row_name)
-                    current_object_count += 1
-
-            if total_object_count == 0 and landmark_count == 0:
-                return None
-
-            self.nobjects = len(object_name_list)
-            self.nlandmarks = landmark_count
-            self.landmark_data = objects
-            self.object_name_list = object_name_list
-            self.description = comments
-
-            return dataset
-
-
-class Morphologika:
-    def __init__(self, filename, datasetname):
-        self.filename = filename
-        self.datasetname = datasetname
-        self.dimension = 0
-        self.nobjects = 0
-        self.object_name_list = []
-        self.landmark_str_list = []
-        self.edge_list = []
-        self.polygon_list = []
-        self.propertyname_list = []
-        self.property_list_list = []
-        self.object_comment = {}
-        self.landmark_data = {}
-        self.read()
-
-    def read(self):
-        f = open(self.filename, 'r')
-        morphologika_data = f.read()
-        f.close()
-
-        object_count = -1
-        landmark_count = -1
-        data_lines = [l.strip() for l in morphologika_data.split('\n')]
-        found = False
-        dsl = ''
-        dimension = 2
-        raw_data = {}
-        for line in data_lines:
-            line = line.strip()
-            if line == "":
-                continue
-            if line[0] == "'":
-                '''comment'''
-                continue
-            elif line[0] == '[':
-                dsl = re.search('(\w+)', line).group(0).lower()
-                raw_data[dsl] = []
-                continue
-            else:
-                raw_data[dsl].append(line)
-                if dsl == 'individuals':
-                    object_count = int(line)
-                if dsl == 'landmarks':
-                    landmark_count = int(line)
-                if dsl == 'dimensions':
-                    dimension = int(line)
-
-        if object_count < 0 or landmark_count < 0:
-            return False
-
-        self.raw_data = raw_data
-
-        self.nlandmarks = landmark_count
-        self.dimension = dimension
-
-        self.object_name_list = self.raw_data['names']
-        self.nobjects = len(self.object_name_list)
-        self.nobjects = object_count
-
-        # abc
-        objects = {}
-        #object_landmark_list = []
-        for i, name in enumerate(self.object_name_list):
-            begin = i * self.nlandmarks
-            count = self.nlandmarks
-            # print begin, begin + count
-            objects[name] = []
-            for point in self.raw_data['rawpoints'][begin:begin + count]:
-                #print point
-                coords = re.split('\s+', point)
-                objects[name].append(coords)
-
-        self.landmark_data = objects
-
-        self.edge_list = []
-        self.polygon_list = []
-        self.propertyname_list = []
-        self.property_list_list = []
-
-        if 'labels' in self.raw_data.keys():
-            for line in self.raw_data['labels']:
-                labels = re.split('\s+', line)
-                for label in labels:
-                    self.propertyname_list.append( label )
-                    
-        if 'labelvalues' in self.raw_data.keys():
-            for line in self.raw_data['labelvalues']:
-                property_list = re.split('\s+', line)
-                self.property_list_list.append(property_list)
-
-        if 'wireframe' in self.raw_data.keys():
-            for line in self.raw_data['wireframe']:
-                edge = [int(v) for v in re.split('\s+', line)]
-                edge.sort()
-                self.edge_list.append(edge)
-
-        if 'polygons' in self.raw_data.keys():
-            for line in self.raw_data['polygons']:
-                poly = [int(v) for v in re.split('\s+', line)]
-                poly.sort()
-                self.polygon_list.append(poly)
-
-        self.edge_list.sort()
-        self.polygon_list.sort()
-        return
-
-class DatasetDialog(QDialog):
-    # NewDatasetDialog shows new dataset dialog.
-    def __init__(self,parent):
-        super().__init__()
-        self.setWindowTitle("Modan2 - Dataset Information")
-        self.parent = parent
-        #print(self.parent.pos())
-        self.setGeometry(QRect(100, 100, 600, 400))
-        self.move(self.parent.pos()+QPoint(100,100))
-
-        self.cbxParent = QComboBox()
-        self.edtDatasetName = QLineEdit()
-        self.edtDatasetDesc = QLineEdit()
-
-        self.rbtn2D = QRadioButton("2D")
-        self.rbtn2D.setChecked(True)
-        self.rbtn3D = QRadioButton("3D")
-        dim_layout = QHBoxLayout()
-        dim_layout.addWidget(self.rbtn2D)
-        dim_layout.addWidget(self.rbtn3D)
-
-        self.edtWireframe = QTextEdit()
-        self.edtBaseline = QLineEdit()
-        #self.edtPolygons = QTextEdit()
-        self.edtPropertyNameStr = QTextEdit()
-
-        self.main_layout = QFormLayout()
-        self.setLayout(self.main_layout)
-        self.main_layout.addRow("Parent", self.cbxParent)
-        self.main_layout.addRow("Dataset Name", self.edtDatasetName)
-        self.main_layout.addRow("Description", self.edtDatasetDesc)
-        self.main_layout.addRow("Dimension", dim_layout)
-        self.main_layout.addRow("Wireframe", self.edtWireframe)
-        self.main_layout.addRow("Baseline", self.edtBaseline)
-        #self.main_layout.addRow("Polygons", self.edtPolygons)
-        self.main_layout.addRow("Property Names", self.edtPropertyNameStr)
-
-
-        self.btnOkay = QPushButton()
-        self.btnOkay.setText("Save")
-        self.btnOkay.clicked.connect(self.Okay)
-
-        self.btnDelete = QPushButton()
-        self.btnDelete.setText("Delete")
-        self.btnDelete.clicked.connect(self.Delete)
-
-        self.btnCancel = QPushButton()
-        self.btnCancel.setText("Cancel")
-        self.btnCancel.clicked.connect(self.Cancel)
-
-        btn_layout = QHBoxLayout()
-        btn_layout.addWidget(self.btnOkay)
-        btn_layout.addWidget(self.btnDelete)
-        btn_layout.addWidget(self.btnCancel)
-        self.main_layout.addRow(btn_layout)
-
-
-        self.dataset = None
-        self.load_parent_dataset()
-
-        #self.edtDataFolder.setText(str(self.data_folder.resolve()))
-        #self.edtServerAddress.setText(self.server_address)
-        #self.edtServerPort.setText(self.server_port)
-
-    def load_parent_dataset(self,curr_dataset_id = None):
-        self.cbxParent.clear()
-        datasets = MdDataset.select()
-        for dataset in datasets:
-            if curr_dataset_id is None or dataset.id != curr_dataset_id:
-                self.cbxParent.addItem(dataset.dataset_name, dataset.id)
-
-    def read_dataset(self, dataset_id):
-        try:
-            dataset = MdDataset.get(dataset.id == dataset_id)
-        except:
-            dataset = None
-        self.dataset = dataset
-        #self
-        #return dataset
-
-    def set_dataset(self, dataset):
-        if dataset is None:
-            self.dataset = None
-            self.cbxParent.setCurrentIndex(-1)
-            return
-
-        self.dataset = dataset
-        self.load_parent_dataset(dataset.id)
-        self.cbxParent.setCurrentIndex(self.cbxParent.findData(dataset.parent_id))
-
-        self.edtDatasetName.setText(dataset.dataset_name)
-        self.edtDatasetDesc.setText(dataset.dataset_desc)
-        if dataset.dimension == 2:
-            self.rbtn2D.setChecked(True)
-        elif dataset.dimension == 3:
-            self.rbtn3D.setChecked(True)
-        #print(dataset.dimension,self.dataset.objects)
-        if len(self.dataset.object_list) > 0:
-            self.rbtn2D.setEnabled(False)
-            self.rbtn3D.setEnabled(False)
-        self.edtWireframe.setText(dataset.wireframe)
-        self.edtBaseline.setText(dataset.baseline)
-        #self.edtPolygons.setText(dataset.polygons)
-        self.edtPropertyNameStr.setText(dataset.propertyname_str)
-    
-    def set_parent_dataset(self, parent_dataset):
-        #print("parent:", parent_dataset_id, "dataset:", self.dataset)
-        if parent_dataset is None:
-            self.cbxParent.setCurrentIndex(-1)
-        else:
-            self.cbxParent.setCurrentIndex(self.cbxParent.findData(parent_dataset.id))
-            if parent_dataset.dimension == 2:
-                self.rbtn2D.setChecked(True)
-            elif parent_dataset.dimension == 3:
-                self.rbtn3D.setChecked(True)
-            #self.rbtn2D.setEnabled(False)
-            #self.rbtn3D.setEnabled(False)
-
-    def Okay(self):
-        if self.dataset is None:
-            self.dataset = MdDataset()
-        self.dataset.parent_id = self.cbxParent.currentData()
-        self.dataset.dataset_name = self.edtDatasetName.text()
-        self.dataset.dataset_desc = self.edtDatasetDesc.text()
-        if self.rbtn2D.isChecked():
-            self.dataset.dimension = 2
-        elif self.rbtn3D.isChecked():
-            self.dataset.dimension = 3
-        self.dataset.wireframe = self.edtWireframe.toPlainText()
-        self.dataset.baseline = self.edtBaseline.text()
-        #self.dataset.polygons = self.edtPolygons.toPlainText()
-        self.dataset.propertyname_str = self.edtPropertyNameStr.toPlainText()
-
-        #self.data
-        #print(self.dataset.dataset_desc, self.dataset.dataset_name)
-        self.dataset.save()
-        self.accept()
-
-    def Delete(self):
-        ret = QMessageBox.question(self, "", "Are you sure to delete this dataset?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-        #print("ret:", ret)
-        if ret == QMessageBox.Yes:
-            self.dataset.delete_instance()
-            self.parent.selected_dataset = None
-            #self.dataset.delete_dataset()
-        #self.delete_dataset()
-        self.accept()
-
-    def Cancel(self):
-        self.reject()
-
-
-class PicButton(QAbstractButton):
-    def __init__(self, pixmap, pixmap_hover, pixmap_pressed, pixmap_disabled=None, parent=None):
-        super(PicButton, self).__init__(parent)
-        self.pixmap = pixmap
-        self.pixmap_hover = pixmap_hover
-        self.pixmap_pressed = pixmap_pressed
-        if pixmap_disabled is None:
-            result = pixmap_hover.copy()
-            image = QtGui.QPixmap.toImage(result)
-            grayscale = image.convertToFormat(QtGui.QImage.Format_Grayscale8)
-            pixmap_disabled = QtGui.QPixmap.fromImage(grayscale)
-            #self.Changed_view.emit(pixmap)            
-        self.pixmap_disabled = pixmap_disabled
-
-        self.pressed.connect(self.update)
-        self.released.connect(self.update)
-
-    def paintEvent(self, event):
-        pix = self.pixmap_hover if self.underMouse() else self.pixmap
-        if self.isDown():
-            pix = self.pixmap_pressed
-        if self.isEnabled() == False and self.pixmap_disabled is not None:
-            pix = self.pixmap_disabled
-
-        painter = QPainter(self)
-        painter.drawPixmap(self.rect(), pix)
-
-    def enterEvent(self, event):
-        self.update()
-
-    def leaveEvent(self, event):
-        self.update()
-
-    def sizeHint(self):
-        return QSize(200, 200)
-
 class PreferencesDialog(QDialog):
     '''
     PreferencesDialog shows preferences.
@@ -4393,74 +4494,61 @@ class PreferencesDialog(QDialog):
     def __init__(self,parent):
         super().__init__()
         self.parent = parent
-        self.setGeometry(QRect(0, 0, 400, 300))
-        self.setWindowTitle("설정")
+        self.remember_geometry = True
+        self.m_app = QApplication.instance()
+        self.read_settings()
+        self.setWindowTitle("Preferences")
         #self.lbl_main_view.setMinimumSize(400, 300)
 
-        self.lblServerAddress = QLabel()
-        self.edtServerAddress = QLineEdit()
-        self.edtServerPort = QLineEdit()
-        self.lblDataFolder = QLabel()
-        self.edtDataFolder = QLineEdit()
+        self.rbRememberGeometryYes = QRadioButton("Yes")
+        self.rbRememberGeometryYes.setChecked(self.remember_geometry)
+        self.rbRememberGeometryYes.clicked.connect(self.on_rbRememberGeometryYes_clicked)
+        self.rbRememberGeometryNo = QRadioButton("No")
+        self.rbRememberGeometryNo.setChecked(not self.remember_geometry)
+        self.rbRememberGeometryNo.clicked.connect(self.on_rbRememberGeometryNo_clicked)
 
-        self.edtServerPort.setFixedWidth(50)
-
-        self.btnDataFolder = QPushButton()
-        self.btnDataFolder.setText("선택")
-        self.btnDataFolder.clicked.connect(self.select_folder)
+        self.gbRememberGeomegry = QGroupBox()
+        self.gbRememberGeomegry.setLayout(QHBoxLayout())
+        self.gbRememberGeomegry.layout().addWidget(self.rbRememberGeometryYes)
+        self.gbRememberGeomegry.layout().addWidget(self.rbRememberGeometryNo)
 
         self.btnOkay = QPushButton()
-        self.btnOkay.setText("확인")
+        self.btnOkay.setText("Close")
         self.btnOkay.clicked.connect(self.Okay)
 
         self.btnCancel = QPushButton()
-        self.btnCancel.setText("취소")
+        self.btnCancel.setText("Cancel")
         self.btnCancel.clicked.connect(self.Cancel)
 
+        self.main_layout = QFormLayout()
+        self.setLayout(self.main_layout)
+        self.main_layout.addRow("Remember Geometry", self.gbRememberGeomegry)
+        self.main_layout.addRow("", self.btnOkay)
 
-        self.layout = QVBoxLayout()
-        self.layout1 = QHBoxLayout()
-        self.layout1.addWidget(self.lblServerAddress)
-        self.layout1.addWidget(self.edtServerAddress)
-        self.layout1.addWidget(self.edtServerPort)
-        self.layout3 = QHBoxLayout()
-        self.layout3.addWidget(self.lblDataFolder)
-        self.layout3.addWidget(self.edtDataFolder)
-        self.layout3.addWidget(self.btnDataFolder)
-        self.layout4 = QHBoxLayout()
-        self.layout4.addWidget(self.btnOkay)
-        self.layout4.addWidget(self.btnCancel)
-        self.layout.addLayout(self.layout1)
-        #self.layout.addLayout(self.layout2)
-        self.layout.addLayout(self.layout3)
-        self.layout.addLayout(self.layout4)
-        self.setLayout(self.layout)
-        self.server_address = ''
-        self.server_port = ''
-        self.data_folder = ''
-        #print("pref dlg data_folder:", self.data_folder)
         self.read_settings()
-        #print("pref dlg data_folder:", self.data_folder)
-        self.lblServerAddress.setText("서버 주소")
-        #self.lblServerPort.setText("Server Port")
-        self.lblDataFolder.setText("사진 위치")
-
-        #self.edtDataFolder.setText(str(self.data_folder.resolve()))
-        self.edtServerAddress.setText(self.server_address)
-        self.edtServerPort.setText(self.server_port)
-
-    def write_settings(self):
-        self.parent.server_address = self.edtServerAddress.text()
-        self.parent.server_port = self.edtServerPort.text()
-        self.parent.data_folder = Path(self.edtDataFolder.text())
-        #print( self.parent.server_address,self.parent.server_port, self.parent.data_folder)
 
     def read_settings(self):
-        self.server_address = self.parent.server_address
-        self.server_port = self.parent.server_port
-        self.data_folder = self.parent.data_folder.resolve()
-        #print("pref dlg data folder:", self.data_folder)
-        #print("pref dlg server address:", self.server_address)
+        self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
+        if self.remember_geometry is True:
+            self.setGeometry(self.m_app.settings.value("WindowGeometry/PreferencesDialog", QRect(100, 100, 600, 400)))
+        else:
+            self.setGeometry(QRect(100, 100, 600, 400))
+            self.move(self.parent.pos()+QPoint(100,100))
+
+    def write_settings(self):
+        self.m_app.settings.setValue("WindowGeometry/RememberGeometry", self.remember_geometry)
+        if self.remember_geometry is True:
+            self.m_app.settings.setValue("WindowGeometry/PreferencesDialog", self.geometry())
+
+    def closeEvent(self, event):
+        self.write_settings()
+        event.accept()
+
+    def on_rbRememberGeometryYes_clicked(self):
+        self.remember_geometry = True
+
+    def on_rbRememberGeometryNo_clicked(self):
+        self.remember_geometry = False        
 
     def Okay(self):
         self.write_settings()
@@ -4470,7 +4558,7 @@ class PreferencesDialog(QDialog):
         self.close()
 
     def select_folder(self):
-        folder = str(QFileDialog.getExistingDirectory(self, "폴더 선택", str(self.data_folder)))
+        folder = str(QFileDialog.getExistingDirectory(self, "Select a folder", str(self.data_folder)))
         if folder:
             self.data_folder = Path(folder).resolve()
             self.edtDataFolder.setText(folder)

@@ -21,6 +21,7 @@ from OpenGL import GLU as glu
 from OpenGL import GLUT as glut
 from PyQt5.QtOpenGL import *
 import sys
+import scipy as sp
 
 import random
 import struct
@@ -39,7 +40,7 @@ from matplotlib.figure import Figure
 from MdModel import *
 import MdUtils as mu
 
-from MdStatistics import MdPrincipalComponent
+from MdStatistics import MdPrincipalComponent, MdCanonicalVariate
 import numpy as np
 from OpenGL.arrays import vbo
 import copy
@@ -3101,7 +3102,7 @@ class DatasetAnalysisDialog(QDialog):
         self.cbxLegend.toggled.connect(self.on_chart_dim_changed)
         self.cbxAxisLabel = QCheckBox()
         self.cbxAxisLabel.setText("Axis")
-        self.cbxAxisLabel.setChecked(False)
+        self.cbxAxisLabel.setChecked(True)
         self.cbxAxisLabel.toggled.connect(self.on_chart_dim_changed)
         self.gbChartDim = QGroupBox()
         self.gbChartDim.setTitle("Chart")
@@ -3141,9 +3142,9 @@ class DatasetAnalysisDialog(QDialog):
         self.eigenvalue_data = QTableWidget()
         self.eigenvalue_data.setColumnCount(2)
 
-        self.plot_tab.addTab(self.plot_data, "PCA result")
+        self.plot_tab.addTab(self.plot_data, "Result table")
         self.plot_tab.addTab(self.rotation_matrix_data, "Rotation matrix")
-        self.plot_tab.addTab(self.eigenvalue_data, "Eigen value")
+        self.plot_tab.addTab(self.eigenvalue_data, "Eigenvalues")
 
 
         self.plot_layout.addWidget(self.plot_tab)
@@ -3206,9 +3207,11 @@ class DatasetAnalysisDialog(QDialog):
         self.left_bottom_layout.addWidget(self.btnSuperimpose)
 
         self.rbPCA = QRadioButton("PCA")
-        self.rbCVA = QRadioButton("CVA")
         self.rbPCA.setChecked(True)
+        self.rbPCA.toggled.connect(self.on_analysis_type_changed)
+        self.rbCVA = QRadioButton("CVA")
         self.rbCVA.setEnabled(False)
+        self.rbCVA.toggled.connect(self.on_analysis_type_changed)
         self.gbAnalysis = QGroupBox()
         self.gbAnalysis.setTitle("Analysis")
         self.gbAnalysis.setLayout(QHBoxLayout())
@@ -3216,7 +3219,7 @@ class DatasetAnalysisDialog(QDialog):
         self.gbAnalysis.layout().addWidget(self.rbCVA)
         self.gbAnalysis.setMaximumHeight(rbbox_height)
         self.btnAnalyze = QPushButton("Perform Analysis")
-        self.btnAnalyze.clicked.connect(self.on_btnAnalyze_clicked)
+        self.btnAnalyze.clicked.connect(self.on_btn_analysis_clicked)
         self.middle_bottom_layout.addWidget(self.gbAnalysis)
         self.middle_bottom_layout.addWidget(self.btnAnalyze)
 
@@ -3260,6 +3263,9 @@ class DatasetAnalysisDialog(QDialog):
         self.onpick_happened = False
 
 
+        self.analysis_type = "PCA"
+        self.analysis_done = False
+
         # data setting
         set_result = self.set_dataset(dataset)
         #print("set dataset result: ", set_result)
@@ -3276,7 +3282,7 @@ class DatasetAnalysisDialog(QDialog):
             self.chart_options_clicked()
             self.rb3DChartDim.setChecked(True)
             self.on_chart_dim_changed()
-            self.on_btnPCA_clicked()
+            self.on_btn_analysis_clicked()
 
             self.btnSaveResults.setFocus()
 
@@ -3292,12 +3298,34 @@ class DatasetAnalysisDialog(QDialog):
         if self.remember_geometry is True:
             self.m_app.settings.setValue("WindowGeometry/DatasetAnalysisWindow", self.geometry())
 
-
-
     def closeEvent(self, event):
         self.write_settings()
         event.accept()
 
+    def on_analysis_type_changed(self):
+        self.analysis_done = False
+        axis1 = self.comboAxis1.currentIndex()
+        axis2 = self.comboAxis2.currentIndex()
+        axis3 = self.comboAxis3.currentIndex()
+        self.comboAxis1.clear()
+        self.comboAxis2.clear()
+        self.comboAxis3.clear()
+        if self.rbPCA.isChecked():
+            header = "PC"
+        else:
+            header = "CV"
+
+        for i in range(1,11):
+            self.comboAxis1.addItem(header+str(i))
+            self.comboAxis2.addItem(header+str(i))
+            self.comboAxis3.addItem(header+str(i))
+        self.comboAxis1.setCurrentIndex(axis1)
+        self.comboAxis2.setCurrentIndex(axis2)
+        self.comboAxis3.setCurrentIndex(axis3)
+        #self.reset_tableView()
+        #self.load_object()
+        #self.on_btn_analysis_clicked()
+        
     def select_all(self):
         pass
     def select_none(self):
@@ -3337,7 +3365,7 @@ class DatasetAnalysisDialog(QDialog):
             self.cbxDepthShade.show()
 
         if self.ds_ops is not None:
-            self.show_pca_result()
+            self.show_analysis_result()
 
     def set_dataset(self, dataset):
         #print("dataset:", dataset)
@@ -3376,18 +3404,29 @@ class DatasetAnalysisDialog(QDialog):
         return True
 
     def propertyname_changed(self):
+        perform_analysis = False
+        if self.comboPropertyName.currentIndex() > 0:
+            self.rbCVA.setEnabled(True)
+            self.cbxLegend.setChecked(True)
+            perform_analysis = True
+        else:
+            self.rbCVA.setEnabled(False)
+            self.cbxLegend.setChecked(False)
+
         if self.ds_ops is not None:
             self.reset_tableView()
             self.load_object()
-            self.show_pca_result()
+            if perform_analysis:
+                self.on_btn_analysis_clicked()
+            self.show_analysis_result()
 
     def axis_changed(self):
-        if self.ds_ops is not None:
-            self.show_pca_result()
+        if self.ds_ops is not None and self.analysis_done is True:
+            self.show_analysis_result()
 
     def flip_axis_changed(self, int):
         if self.ds_ops is not None:
-            self.show_pca_result()
+            self.show_analysis_result()
 
     def on_btnSuperimpose_clicked(self):
         print("on_btnSuperimpose_clicked")
@@ -3398,7 +3437,7 @@ class DatasetAnalysisDialog(QDialog):
         self.ds_ops.selected_object_id_list = self.selected_object_id_list
         self.load_object()
         self.on_object_selection_changed([],[])
-        self.show_pca_result()
+        self.show_analysis_result()
         self.show_object_shape()
         
     def on_btnSaveResults_clicked(self):
@@ -3413,8 +3452,8 @@ class DatasetAnalysisDialog(QDialog):
             
             # PCA result
             header = [ "object_name", *self.ds_ops.propertyname_list ]
-            header.extend( ["PC"+str(i+1) for i in range(len(self.pca_result.rotated_matrix.tolist()[0]))] )
-            worksheet = doc.add_worksheet("PCA coordinates")
+            header.extend( [self.analysis_type[:2]+str(i+1) for i in range(len(self.analysis_result.rotated_matrix.tolist()[0]))] )
+            worksheet = doc.add_worksheet("Result coordinates")
             row_index = 0
             column_index = 0
 
@@ -3422,7 +3461,7 @@ class DatasetAnalysisDialog(QDialog):
                 worksheet.write(row_index, column_index, colname )
                 column_index+=1
             
-            new_coords = self.pca_result.rotated_matrix.tolist()
+            new_coords = self.analysis_result.rotated_matrix.tolist()
             for i, obj in enumerate(self.ds_ops.object_list):
                 worksheet.write(i+1, 0, obj.object_name )
                 #print(obj.property_list)
@@ -3436,15 +3475,15 @@ class DatasetAnalysisDialog(QDialog):
             worksheet = doc.add_worksheet("Rotation matrix")
             row_index = 0
             column_index = 0
-            rotation_matrix = self.pca_result.rotation_matrix.tolist()
+            rotation_matrix = self.analysis_result.rotation_matrix.tolist()
             #print("rotation_matrix[0][0]", [0][0], len(self.pca_result.rotation_matrix[0][0]))
             for i, row in enumerate(rotation_matrix):
                 for j, val in enumerate(row):
                     worksheet.write(i, j, val )                  
 
             worksheet = doc.add_worksheet("Eigenvalues")
-            for i, val in enumerate(self.pca_result.raw_eigen_values):
-                val2 = self.pca_result.eigen_value_percentages[i]
+            for i, val in enumerate(self.analysis_result.raw_eigen_values):
+                val2 = self.analysis_result.eigen_value_percentages[i]
                 worksheet.write(i, 0, val )
                 worksheet.write(i, 1, val2 )
 
@@ -3504,13 +3543,18 @@ class DatasetAnalysisDialog(QDialog):
         self.lblShape.set_ds_ops(self.ds_ops)
         self.lblShape.repaint()
 
-    def on_btnPCA_clicked(self):
+    def on_btn_analysis_clicked(self):
         #print("pca button clicked")
         # set wait cursor
         QApplication.setOverrideCursor(Qt.WaitCursor)
         QApplication.processEvents()
 
         self.ds_ops = MdDatasetOps(self.dataset)
+        self.analysis_done = False
+        if self.rbCVA.isChecked():
+            self.analysis_type = "CVA"
+        elif self.rbPCA.isChecked():
+            self.analysis_type = "PCA"
 
         if not self.ds_ops.procrustes_superimposition():
             print("procrustes superimposition failed")
@@ -3520,15 +3564,26 @@ class DatasetAnalysisDialog(QDialog):
         if self.dataset.object_list is None or len(self.dataset.object_list) < 5:
             print("too small number of objects for PCA analysis")            
             return
+        if self.analysis_type == "CVA":
+            #print("CVA analysis")
+            self.analysis_result = self.PerformCVA(self.ds_ops)
+            new_coords = self.analysis_result.rotated_matrix.tolist()
+            for i, obj in enumerate(self.ds_ops.object_list):
+                obj.analysis_result = new_coords[i]
 
-        self.pca_result = self.PerformPCA(self.ds_ops)
-        new_coords = self.pca_result.rotated_matrix.tolist()
-        for i, obj in enumerate(self.ds_ops.object_list):
-            obj.pca_result = new_coords[i]
+            self.show_analysis_result()
 
-        self.show_pca_result()
+        elif self.analysis_type == "PCA":
+            #print("PCA analysis")
+            self.analysis_result = self.PerformPCA(self.ds_ops)
+            new_coords = self.analysis_result.rotated_matrix.tolist()
+            for i, obj in enumerate(self.ds_ops.object_list):
+                obj.analysis_result = new_coords[i]
+
+            self.show_analysis_result()
 
         # end wait cursor
+        self.analysis_done = True
         QApplication.restoreOverrideCursor()
 
         #print("pca_result.nVariable:",pca_result.nVariable)
@@ -3536,10 +3591,10 @@ class DatasetAnalysisDialog(QDialog):
         #    for obj in ds_ops.object_list:
         #        f.write(obj.object_name + "\t" + "\t".join([str(x) for x in obj.pca_result]) + "\n")
 
-    def show_pca_result(self):
+    def show_analysis_result(self):
         #self.plot_widget.clear()
 
-        self.show_pca_table()
+        self.show_result_table()
         # get axis1 and axis2 value from comboAxis1 and 2 index
         depth_shade = self.cbxDepthShade.isChecked()
         show_legend = self.cbxLegend.isChecked()
@@ -3580,9 +3635,9 @@ class DatasetAnalysisDialog(QDialog):
             if key_name not in self.scatter_data.keys():
                 self.scatter_data[key_name] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'property':key_name, 'symbol':'', 'color':'', 'size':SCATTER_SMALL_SIZE}
 
-            self.scatter_data[key_name]['x_val'].append(flip_axis1 * obj.pca_result[axis1])
-            self.scatter_data[key_name]['y_val'].append(flip_axis2 * obj.pca_result[axis2])
-            self.scatter_data[key_name]['z_val'].append(flip_axis3 * obj.pca_result[axis3])
+            self.scatter_data[key_name]['x_val'].append(flip_axis1 * obj.analysis_result[axis1])
+            self.scatter_data[key_name]['y_val'].append(flip_axis2 * obj.analysis_result[axis2])
+            self.scatter_data[key_name]['z_val'].append(flip_axis3 * obj.analysis_result[axis3])
             self.scatter_data[key_name]['data'].append(obj)
             #group_hash[key_name]['text'].append(obj.object_name)
             #group_hash[key_name]['hoverinfo'].append(obj.id)
@@ -3640,18 +3695,22 @@ class DatasetAnalysisDialog(QDialog):
             self.fig3.canvas.mpl_connect('button_press_event', self.on_canvas_button_press)
             self.fig3.canvas.mpl_connect('button_release_event', self.on_canvas_button_release)
 
-    def show_pca_table(self):
+    def show_result_table(self):
+        
         self.plot_data.clear()
         self.rotation_matrix_data.clear()
 
         # PCA data
         # set header as "PC1", "PC2", "PC3", ... "PCn
-        header = ["PC"+str(i+1) for i in range(len(self.pca_result.rotated_matrix.tolist()[0]))]
+        if self.rbCVA.isChecked():
+            header = ["CV"+str(i+1) for i in range(len(self.analysis_result.rotated_matrix.tolist()[0]))]
+        else:
+            header = ["PC"+str(i+1) for i in range(len(self.analysis_result.rotated_matrix.tolist()[0]))]
         #print("header", header)
         self.plot_data.setColumnCount(len(header)+1)
         self.plot_data.setHorizontalHeaderLabels(["Name"] + header)
 
-        new_coords = self.pca_result.rotated_matrix.tolist()
+        new_coords = self.analysis_result.rotated_matrix.tolist()
         self.plot_data.setColumnCount(len(new_coords[0])+1)
         for i, obj in enumerate(self.ds_ops.object_list):
             self.plot_data.insertRow(i)
@@ -3660,7 +3719,7 @@ class DatasetAnalysisDialog(QDialog):
                 self.plot_data.setItem(i, j+1, QTableWidgetItem(str(int(val*10000)/10000.0)))
 
         # rotation matrix
-        rotation_matrix = self.pca_result.rotation_matrix.tolist()
+        rotation_matrix = self.analysis_result.rotation_matrix.tolist()
         #print("rotation_matrix[0][0]", [0][0], len(self.pca_result.rotation_matrix[0][0]))
         self.rotation_matrix_data.setColumnCount(len(rotation_matrix[0]))
         for i, row in enumerate(rotation_matrix):
@@ -3668,19 +3727,15 @@ class DatasetAnalysisDialog(QDialog):
             for j, val in enumerate(row):
                 self.rotation_matrix_data.setItem(i, j, QTableWidgetItem(str(int(val*10000)/10000.0)))
         
+        #self.analysis_result.rotated_matrix
+
         # eigen values
         self.eigenvalue_data.setColumnCount(2)
-        for i, val in enumerate(self.pca_result.raw_eigen_values):
-            val2 = self.pca_result.eigen_value_percentages[i]
+        for i, val in enumerate(self.analysis_result.raw_eigen_values):
+            val2 = self.analysis_result.eigen_value_percentages[i]
             self.eigenvalue_data.insertRow(i)
             self.eigenvalue_data.setItem(i, 0, QTableWidgetItem(str(int(val*10000)/10000.0)))
             self.eigenvalue_data.setItem(i, 1, QTableWidgetItem(str(int(val2*10000)/10000.0)))
-
-
-        #self.eigen_value_percentages.append(ss / sum)
-        #self.raw_eigen_values = s
-        #self.loading = v
-
 
     def on_canvas_button_press(self, evt):
         #print("button_press", evt)
@@ -3862,6 +3917,33 @@ class DatasetAnalysisDialog(QDialog):
                     self.tableView1.selectRow(row)
                     #break
             
+    def PerformCVA(self,dataset_ops):
+        cva = MdCanonicalVariate()
+
+        property_index = self.comboPropertyName.currentIndex() -1
+        #print("property_index:",property_index)
+        if property_index < 0:
+            QMessageBox.information(self, "Information", "Please select a property.")
+            return
+        datamatrix = []
+        category_list = []
+        #obj = dataset_ops.object_list[0]
+        #print(obj, obj.property_list, property_index)
+        for obj in dataset_ops.object_list:
+            datum = []
+            for lm in obj.landmark_list:
+                datum.extend(lm)
+            datamatrix.append(datum)
+            category_list.append(obj.property_list[property_index])
+
+        cva.SetData(datamatrix)
+        cva.SetCategory(category_list)
+        cva.Analyze()
+
+        number_of_axes = min(cva.nObservation, cva.nVariable)
+        cva_done = True
+
+        return cva
 
     def PerformPCA(self,dataset_ops):
 
@@ -3990,7 +4072,7 @@ class DatasetAnalysisDialog(QDialog):
             #for object_id in self.selected_object_id_list:
                 #print("selected object id:",object_id)
             #object_id = selected_object_list[0].id
-            self.show_pca_result()
+            self.show_analysis_result()
             self.ds_ops.selected_object_id_list = self.selected_object_id_list
             self.show_object_shape()
 

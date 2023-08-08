@@ -224,8 +224,8 @@ class ModanMainWindow(QMainWindow):
     def on_action_edit_preferences_triggered(self):
         #print("edit preferences")
         self.preferences_dialog = PreferencesDialog(self)
-        self.preferences_dialog.setWindowModality(Qt.ApplicationModal)
-        self.preferences_dialog.exec_()
+        #self.preferences_dialog.setWindowModality(Qt.ApplicationModal)
+        self.preferences_dialog.show()
 
     
     @pyqtSlot()

@@ -21,7 +21,7 @@ from OpenGL import GLU as glu
 from OpenGL import GLUT as glut
 from PyQt5.QtOpenGL import *
 import sys
-import scipy as sp
+#import scipy as sp
 
 import random
 import struct
@@ -44,6 +44,7 @@ from MdStatistics import MdPrincipalComponent, MdCanonicalVariate
 import numpy as np
 from OpenGL.arrays import vbo
 import copy
+from pyqt_color_picker import ColorPickerWidget, ColorPickerDialog
 
 def resource_path(relative_path):
     try:
@@ -3564,23 +3565,18 @@ class DatasetAnalysisDialog(QDialog):
         if self.dataset.object_list is None or len(self.dataset.object_list) < 5:
             print("too small number of objects for PCA analysis")            
             return
-        if self.analysis_type == "CVA":
-            #print("CVA analysis")
-            self.analysis_result = self.PerformCVA(self.ds_ops)
-            new_coords = self.analysis_result.rotated_matrix.tolist()
-            for i, obj in enumerate(self.ds_ops.object_list):
-                obj.analysis_result = new_coords[i]
 
-            self.show_analysis_result()
+        if self.analysis_type == "CVA":
+            self.analysis_result = self.PerformCVA(self.ds_ops)
 
         elif self.analysis_type == "PCA":
-            #print("PCA analysis")
             self.analysis_result = self.PerformPCA(self.ds_ops)
-            new_coords = self.analysis_result.rotated_matrix.tolist()
-            for i, obj in enumerate(self.ds_ops.object_list):
-                obj.analysis_result = new_coords[i]
 
-            self.show_analysis_result()
+        new_coords = self.analysis_result.rotated_matrix.tolist()
+        for i, obj in enumerate(self.ds_ops.object_list):
+            obj.analysis_result = new_coords[i]
+
+        self.show_analysis_result()
 
         # end wait cursor
         self.analysis_done = True
@@ -4608,6 +4604,25 @@ class PreferencesDialog(QDialog):
         self.gbToolbarIconSize.layout().addWidget(self.rbToolbarIconLarge)
         self.gbToolbarIconSize.layout().addWidget(self.rbToolbarIconSmall)
 
+
+        self.gbPlotColors = QGroupBox()
+        self.gbPlotColors.setLayout(QHBoxLayout())
+        #symbol_candidate = ['o','s','^','x','+','d','v','<','>','p','h']
+        self.color_list = ['blue','green','black','cyan','magenta','yellow','gray','red']
+
+        self.lblColor_list = []
+        for i in range(len(self.color_list)):
+            self.lblColor_list.append(QPushButton())
+            self.lblColor_list[i].setMinimumSize(20,20)
+            self.lblColor_list[i].setStyleSheet("background-color: " + self.color_list[i])
+            self.lblColor_list[i].setToolTip(self.color_list[i])
+            self.lblColor_list[i].setCursor(Qt.PointingHandCursor)
+            #self.lblColor_list[i].mousePressEvent = self.on_lblColor_clicked
+            self.lblColor_list[i].mousePressEvent = lambda event, index=i: self.on_lblColor_clicked(event, index)
+            self.gbPlotColors.layout().addWidget(self.lblColor_list[i])
+        #self.gbPlotColors.layout().addWidget(self.rbToolbarIconSmall)
+
+
         self.btnOkay = QPushButton()
         self.btnOkay.setText("Close")
         self.btnOkay.clicked.connect(self.Okay)
@@ -4620,9 +4635,26 @@ class PreferencesDialog(QDialog):
         self.setLayout(self.main_layout)
         self.main_layout.addRow("Remember Geometry", self.gbRememberGeomegry)
         self.main_layout.addRow("Toolbar Icon Size", self.gbToolbarIconSize)
+        self.main_layout.addRow("Plotting color", self.gbPlotColors)
         self.main_layout.addRow("", self.btnOkay)
 
         self.read_settings()
+
+    def on_colorPicker_colorSelected(self, color):
+        #lbl = self.sender()
+        self.current_lblColor.setStyleSheet("background-color: " + color.name())
+        self.current_lblColor.setToolTip(color.name())
+        self.color_list[self.lblColor_list.index(self.current_lblColor)] = color.name()
+
+    def on_lblColor_clicked(self,event, index):
+        self.current_lblColor = self.lblColor_list[index]
+        dialog = ColorPickerDialog(color=QColor(self.current_lblColor.toolTip()))
+        reply = dialog.exec()
+        if reply == QDialog.Accepted: 
+            color = dialog.getColor() # return type is QColor        
+        self.current_lblColor.setStyleSheet("background-color: " + color.name())
+        self.current_lblColor.setToolTip(color.name())
+        self.color_list[self.lblColor_list.index(self.current_lblColor)] = color.name()
 
     def read_settings(self):
         self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))

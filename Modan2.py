@@ -174,6 +174,7 @@ class ModanMainWindow(QMainWindow):
 
     def read_settings(self):
         self.m_app.settings = QSettings(QSettings.IniFormat, QSettings.UserScope,"PaleoBytes", "Modan2")
+        self.m_app.storage_directory = os.path.abspath(DEFAULT_STORAGE_DIRECTORY)
         self.toolbar_icon_size = self.m_app.settings.value("ToolbarIconSize", "Small")
         self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
         if self.remember_geometry is True:

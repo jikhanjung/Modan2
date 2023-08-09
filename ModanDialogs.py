@@ -4,50 +4,32 @@ from PyQt5.QtWidgets import QTableWidgetItem, QHeaderView, QFileDialog, QCheckBo
                             QTableView, QSplitter, QRadioButton, QComboBox, QTextEdit, QSizePolicy, \
                             QTableWidget, QGridLayout, QAbstractButton, QButtonGroup, QGroupBox, \
                             QTabWidget, QListWidget
-
-from PyQt5 import QtGui
-from PyQt5.QtGui import QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem,\
+from PyQt5.QtGui import QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem, QImage,\
                         QFont, QPainter, QBrush, QMouseEvent, QWheelEvent, QDoubleValidator
 from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSize, QPoint,\
                          pyqtSlot, QItemSelectionModel, QTimer
 
-import pyqtgraph as pg
 from OBJFileLoader import OBJ
 
 import OpenGL.GL as gl
 from OpenGL import GLU as glu
 from OpenGL import GLUT as glut
 from PyQt5.QtOpenGL import *
-import sys
 
-import random
-import struct
 import xlsxwriter
 
-import math, re, os
+import math, re, os, sys, shutil, copy, random, struct
 from pathlib import Path
 from PIL.ExifTags import TAGS
-import shutil
+import numpy as np
 
 from matplotlib.backends.backend_qt5agg import FigureCanvas as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 
+from MdStatistics import MdPrincipalComponent, MdCanonicalVariate
 from MdModel import *
 import MdUtils as mu
-
-from MdStatistics import MdPrincipalComponent, MdCanonicalVariate
-import numpy as np
-from OpenGL.arrays import vbo
-import copy
-
-def resource_path(relative_path):
-    try:
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath(".")
-
-    return os.path.join(base_path, relative_path)
 
 MODE = {}
 MODE['NONE'] = 0
@@ -86,17 +68,17 @@ COLOR['SELECTED_EDGE'] = COLOR['RED']
 COLOR['BACKGROUND'] = COLOR['DARK_GRAY']
 
 ICON = {}
-ICON['landmark'] = resource_path('icons/M2Landmark_2.png')
-ICON['landmark_hover'] = resource_path('icons/M2Landmark_2_hover.png')
-ICON['landmark_down'] = resource_path('icons/M2Landmark_2_down.png')
-ICON['landmark_disabled'] = resource_path('icons/M2Landmark_2_disabled.png')
-ICON['wireframe'] = resource_path('icons/M2Wireframe_2.png')
-ICON['wireframe_hover'] = resource_path('icons/M2Wireframe_2_hover.png')
-ICON['wireframe_down'] = resource_path('icons/M2Wireframe_2_down.png')
-ICON['calibration'] = resource_path('icons/M2Calibration_2.png')
-ICON['calibration_hover'] = resource_path('icons/M2Calibration_2_hover.png')
-ICON['calibration_down'] = resource_path('icons/M2Calibration_2_down.png')
-ICON['calibration_disabled'] = resource_path('icons/M2Calibration_2_disabled.png')
+ICON['landmark'] = mu.resource_path('icons/M2Landmark_2.png')
+ICON['landmark_hover'] = mu.resource_path('icons/M2Landmark_2_hover.png')
+ICON['landmark_down'] = mu.resource_path('icons/M2Landmark_2_down.png')
+ICON['landmark_disabled'] = mu.resource_path('icons/M2Landmark_2_disabled.png')
+ICON['wireframe'] = mu.resource_path('icons/M2Wireframe_2.png')
+ICON['wireframe_hover'] = mu.resource_path('icons/M2Wireframe_2_hover.png')
+ICON['wireframe_down'] = mu.resource_path('icons/M2Wireframe_2_down.png')
+ICON['calibration'] = mu.resource_path('icons/M2Calibration_2.png')
+ICON['calibration_hover'] = mu.resource_path('icons/M2Calibration_2_hover.png')
+ICON['calibration_down'] = mu.resource_path('icons/M2Calibration_2_down.png')
+ICON['calibration_disabled'] = mu.resource_path('icons/M2Calibration_2_disabled.png')
 
 NEWLINE = '\n'
 
@@ -397,7 +379,7 @@ class ObjectViewer2D(QLabel):
         if self.object_dialog is None:
             return
         file_name = event.mimeData().text()
-        if file_name.split('.')[-1].lower() in IMAGE_EXTENSION_LIST:
+        if file_name.split('.')[-1].lower() in mu.IMAGE_EXTENSION_LIST:
             event.acceptProposedAction()
         else:
             event.ignore()
@@ -973,7 +955,7 @@ class ObjectViewer3D(QGLWidget):
         if self.object_dialog is None:
             return
         file_name = event.mimeData().text()
-        if file_name.split('.')[-1].lower() in MODEL_EXTENSION_LIST:
+        if file_name.split('.')[-1].lower() in mu.MODEL_EXTENSION_LIST:
             event.acceptProposedAction()
         else:
             event.ignore()
@@ -2032,9 +2014,9 @@ class PicButton(QAbstractButton):
         self.pixmap_pressed = pixmap_pressed
         if pixmap_disabled is None:
             result = pixmap_hover.copy()
-            image = QtGui.QPixmap.toImage(result)
-            grayscale = image.convertToFormat(QtGui.QImage.Format_Grayscale8)
-            pixmap_disabled = QtGui.QPixmap.fromImage(grayscale)
+            image = QPixmap.toImage(result)
+            grayscale = image.convertToFormat(QImage.Format_Grayscale8)
+            pixmap_disabled = QPixmap.fromImage(grayscale)
             #self.Changed_view.emit(pixmap)            
         self.pixmap_disabled = pixmap_disabled
 
@@ -3779,109 +3761,6 @@ class DatasetAnalysisDialog(QDialog):
         #        self.tableView.selectionModel().select(self.object_model.item(row,0).index(),QItemSelectionModel.Rows | QItemSelectionModel.Select)
 
 
-    def show_pca_result_pyqtgraph(self):
-        self.plot_widget.clear()
-
-        x_val = []
-        y_val = []
-        data = []
-        symbol = []
-        pen = []
-
-        # get axis1 and axis2 value from comboAxis1 and 2 index
-        axis1 = self.comboAxis1.currentIndex() +1
-        axis2 = self.comboAxis2.currentIndex() +1
-        #print("axis1: ", axis1) +1
-        #print("axis2: ", axis2)
-        flip_axis1 = self.cbxFlipAxis1.isChecked()
-        if flip_axis1:
-            flip_axis1 = -1.0
-        else:
-            flip_axis1 = 1.0
-
-        flip_axis2 = self.cbxFlipAxis2.isChecked()
-        if flip_axis2:
-            flip_axis2 = -1.0
-        else:
-            flip_axis2 = 1.0
-
-        symbol_candidate = ['o','x','+','s','d','v','^','<','>','p','h']
-        color_candidate = ['r','b','c','m','y','k','w','g']
-        prop_list = []
-        symbol_list = []
-        self.propertyname_index = self.comboPropertyName.currentIndex()
-
-        for obj in self.ds_ops.object_list:
-            x_val.append( flip_axis1 * obj.pca_result[axis1])
-            y_val.append( flip_axis2 * obj.pca_result[axis2])
-            data.append(obj)
-            curr_symbol = ''
-            curr_color = ''
-            #print("property_index:",self.property_index,"len(obj.property_list):",len(obj.property_list),"obj.property_list:",obj.property_list)
-            if self.propertyname_index > -1:
-                if self.propertyname_index < len(obj.property_list):
-                    prop = obj.property_list[self.propertyname_index]
-                    if prop not in prop_list:
-                        prop_list.append(prop)
-                    index = prop_list.index(prop)
-                    curr_symbol = symbol_candidate[index]
-                    curr_color = color_candidate[index]
-            else:
-                curr_symbol = symbol_candidate[0]
-                curr_color = color_candidate[0]
-
-
-            #print("obj.id:",obj.id,"self.selected_object_id_list:",self.selected_object_id_list)
-            if obj.id in self.selected_object_id_list:
-                curr_symbol = 'o'
-                pen.append(pg.mkPen(color='b', width=1))
-            else:
-                if curr_symbol == '':
-                    curr_symbol = 'x'
-                pen.append(pg.mkPen(color=curr_color, width=1))
-            symbol_list.append(curr_symbol)
-
-        #scatter = MyPlotItem(size=10, brush=pg.mkBrush(255, 255, 255, 120),hoverable=True,hoverPen=pg.mkPen(color='r', width=2))
-        self.scatter_item = pg.ScatterPlotItem(size=10, brush=pg.mkBrush(255, 255, 255, 120),hoverable=True,hoverPen=pg.mkPen(color='r', width=2))
-        self.scatter_item.addPoints(x=x_val, y=y_val, data=data, symbol=symbol_list, pen=pen)
-
-        self.plot_widget.setBackground('w')
-        self.plot_widget.setTitle("PCA Result")
-        self.plot_widget.setLabel("left", "PC2")
-        self.plot_widget.setLabel("bottom", "PC1")
-        self.plot_widget.addLegend()
-        self.plot_widget.showGrid(x=True, y=True)
-        ret = self.plot_widget.addItem(self.scatter_item)
-        self.scatter_item.sigClicked.connect(self.on_scatter_item_clicked)
-        self.plot_widget.scene().sigMouseMoved.connect(self.on_mouse_moved)
-        self.plot_widget.scene().sigMouseClicked.connect(self.on_mouse_clicked)
-        #print("ret:",ret)
-        #self.plot_widget.plot(x=x_val, y=y_val, pen=pg.mkPen(width=2, color='r'), name="plot1")
-
-        '''
-        https://stackoverflow.com/questions/48687464/how-to-set-equal-scale-for-axes-in-pyqtgraph-plot
-
-        1)
-        import pyqtgraph as pg
-        y = range(0, 100)
-        x = range(0, 100)
-        plt = pg.plot(x, y, pen='r')
-        plt.setFixedSize(1000, 1000)
-        plt.showGrid(x=True, y=True)
-
-        2)
-        import pyqtgraph as pg
-        import numpy as np
-        a = np.linspace(0,2*np.pi)
-        x =  2+np.cos(a)
-        y = -1+np.sin(a)
-        plt = pg.plot(x, y, pen='r')
-        plt.setAspectLocked()
-        plt.showGrid(x=True, y=True)
-        pg.QtGui.QApplication.exec_()
-        '''
-
-
     def on_mouse_clicked(self, event):
         #print("mouse clicked:",event)
         #if event.double():
@@ -3991,7 +3870,10 @@ class DatasetAnalysisDialog(QDialog):
                     p_item0 = QStandardItem()
                     p_item0.setCheckable(True)
                     p_item0.setCheckState(Qt.Checked)
-                    self.property_model.appendRow([p_item0,QStandardItem(obj.property_list[self.propertyname_index])])
+                    p_item1 = QStandardItem()
+                    p_item1.setCheckable(True)
+                    p_item1.setCheckState(Qt.Checked)
+                    self.property_model.appendRow([p_item0,p_item1,QStandardItem(obj.property_list[self.propertyname_index])])
                 #self.property_list.append(obj.property_list[self.propertyname_index])
                 self.object_model.appendRow([item0,item1,item2,item3] )
             else:
@@ -4000,15 +3882,17 @@ class DatasetAnalysisDialog(QDialog):
 
     def reset_tableView(self):
         self.property_model = QStandardItemModel()
-        self.property_model.setColumnCount(2)
-        self.property_model.setHorizontalHeaderLabels(["", "Group"])
+        self.property_model.setColumnCount(3)
+        self.property_model.setHorizontalHeaderLabels(["Show","Avg","Group"])
         self.tableView2.setModel(self.property_model)
 
         self.tableView2.setColumnWidth(0, 20)
-        self.tableView2.setColumnWidth(1, 200)
+        self.tableView2.setColumnWidth(1, 20)
+        self.tableView2.setColumnWidth(1, 100)
         header2 = self.tableView2.horizontalHeader()
         header2.setSectionResizeMode(0, QHeaderView.Fixed)
-        header2.setSectionResizeMode(1, QHeaderView.Stretch)
+        header2.setSectionResizeMode(1, QHeaderView.Fixed)
+        header2.setSectionResizeMode(2, QHeaderView.Stretch)
 
 
         self.object_model = QStandardItemModel()
@@ -4033,47 +3917,32 @@ class DatasetAnalysisDialog(QDialog):
         self.tableView1.sortByColumn(0, Qt.AscendingOrder)
         self.object_model.setSortRole(Qt.UserRole)
 
-        header = self.tableView1.horizontalHeader()    
+        header = self.tableView1.horizontalHeader()   
         header.setSectionResizeMode(0, QHeaderView.Fixed)
         header.setSectionResizeMode(1, QHeaderView.Fixed)
         header.setSectionResizeMode(2, QHeaderView.Stretch)
+        header2 = self.tableView2.horizontalHeader()   
+        header2.setSectionResizeMode(0, QHeaderView.Fixed)
+        header2.setSectionResizeMode(1, QHeaderView.Fixed)
+        header2.setSectionResizeMode(2, QHeaderView.Stretch)
 
         if self.propertyname_index >= 0:
             self.object_model.setColumnCount(4)
             self.object_model.setHorizontalHeaderLabels(["", "ID", "Name", self.propertyname])
             self.tableView1.setColumnWidth(3, 150)
             header.setSectionResizeMode(3, QHeaderView.Stretch)
-            self.property_model.setHorizontalHeaderLabels(["", self.propertyname])
+            self.property_model.setHorizontalHeaderLabels(["Show", "Avg", self.propertyname])
         
         self.tableView1.setStyleSheet("QTreeView::item:selected{background-color: palette(highlight); color: palette(highlightedText);};")
-
-    '''
-    def on_tableView_clicked(self, index):
-        self.selected_object_id_list = self.get_selected_object_id_list()
-        #if len(self.selected_object_id_list) == 0:
-        #    return
-    '''
 
     def on_object_selection_changed(self, selected, deselected):
         if self.selection_changed_off:
             pass
         else:
             self.selected_object_id_list = self.get_selected_object_id_list()
-            #if len(self.selected_object_id_list) == 0:
-            #    return
-            #print("object_id:",object_id, type(object_id))
-            #for 
-            #for object_id in self.selected_object_id_list:
-                #print("selected object id:",object_id)
-            #object_id = selected_object_list[0].id
             self.show_analysis_result()
             self.ds_ops.selected_object_id_list = self.selected_object_id_list
             self.show_object_shape()
-
-        
-        #self.selected_object = MdObject.get_by_id(object_id)
-        #print("selected_object:",self.selected_object)
-        #self.show_object(self.selected_object)
 
     def get_selected_object_id_list(self):
         selected_indexes = self.tableView1.selectionModel().selectedRows()
@@ -4738,93 +4607,3 @@ class PreferencesDialog(QDialog):
         if folder:
             self.data_folder = Path(folder).resolve()
             self.edtDataFolder.setText(folder)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-'''
-
-
-
-
-
-
-
-
-
-
-
-class MyTreeView(QTreeView):
-    def __init__(self):
-        QTreeView.__init__(self)
-
-    def dragEnterEvent(self, event):
-        print("drag enter event")
-        #if event.mimeData().hasUrls:
-        event.accept()
-        #else:
-        #    event.ignore()
-
-    def dragMoveEvent(self, event):
-        print("drag move event from", event.source())
-        #if event.mimeData().hasUrls:
-        event.setDropAction(Qt.MoveAction)
-        event.accept()
-        #else:
-        #    event.ignore()
-
-    def dropEvent(self, event):
-        print("drop event from", event.source(), event.source().currentIndex())
-        #if event.mimeData().hasUrls:
-        event.setDropAction(Qt.MoveAction)
-        event.accept()
-        # to get a list of files:
-        drop_list = []
-        for url in event.mimeData().urls():
-            drop_list.append(str(url.toLocalFile()))
-        # handle the list here
-        #else:
-        #    event.ignore()
-
-class MyPlotWidget(pg.PlotWidget):
-
-    def __init__(self, **kwargs):   
-        super().__init__(**kwargs)
-
-        # self.scene() is a pyqtgraph.GraphicsScene.GraphicsScene.GraphicsScene
-        self.scene().sigMouseClicked.connect(self.mouse_clicked)    
-
-
-    def mouse_clicked(self, mouseClickEvent):
-        # mouseClickEvent is a pyqtgraph.GraphicsScene.mouseEvents.MouseClickEvent
-        print('clicked plot 0x{:x}, event: {}, pos: {}, {}, {}'.format(id(self), mouseClickEvent, mouseClickEvent.pos(), mouseClickEvent.scenePos(), mouseClickEvent.screenPos()))
-        plot_item = self.getPlotItem()
-        print('plot_item: 0x{:x}'.format(id(plot_item)))
-
-class MyPlotItem(pg.ScatterPlotItem):
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-        # self.scene() is a pyqtgraph.GraphicsScene.GraphicsScene.GraphicsScene
-        self.sigClicked.connect(self.clicked)
-
-
-    def clicked(self, points, spotitem_list, ev):
-        # mouseClickEvent is a pyqtgraph.GraphicsScene.mouseEvents.MouseClickEvent
-        print('clicked plot 0x{:x}, points: {}, event: {}, xx:{}'.format(id(self), points, spotitem_list, ev))
-        #plot_item = self.getPlotItem()
-        #print('plot_item: 0x{:x}'.format(id(plot_item)))
-        points = self.pointsAt(ev.pos())
-        print("points:",points[0].data().object_name)        
-'''        

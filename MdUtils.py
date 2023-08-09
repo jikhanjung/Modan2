@@ -1,5 +1,4 @@
-def value_to_bool(value):
-    return value.lower() == 'true' if isinstance(value, str) else bool(value)
+import sys, os
 
 IMAGE_EXTENSION_LIST = ['png', 'jpg', 'jpeg','bmp','gif','tif','tiff']
 MODEL_EXTENSION_LIST = ['obj', 'ply', 'stl']
@@ -48,3 +47,15 @@ PASTEL_COLOR_LIST = [
     "#AFEEEE",  # Pastel Turquoise
     "#FFD8B1"   # Pastel Apricot
 ]
+
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
+def value_to_bool(value):
+    return value.lower() == 'true' if isinstance(value, str) else bool(value)
+

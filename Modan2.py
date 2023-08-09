@@ -42,18 +42,12 @@ ICON['preferences'] = resource_path('icons/M2Preferences_1.png')
 ICON['about'] = resource_path('icons/M2About_1.png')
 ICON['exit'] = resource_path('icons/exit.png')
 ICON['Modan2'] = resource_path('icons/Modan2_2.png')
-#ICON['dataset_2d'] = resource_path('icons/icons8-xlarge-icons-50.png') #  https://icons8.com
-#ICON['dataset_3d'] = resource_path('icons/icons8-3d-50.png') #  https://icons8.com
-#ICON['dataset_2d'] = resource_path('icons/2D_1616_1.png')
-#ICON['dataset_3d'] = resource_path('icons/3D_1616_1.png')
 ICON['dataset_2d'] = resource_path('icons/M2Dataset2D_3.png')
 ICON['dataset_3d'] = resource_path('icons/M2Dataset3D_4.png')
 
 class ModanMainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        #self.setupUi(self)
-        #self.setGeometry(QRect(50, 50, 1400, 800))
         self.setWindowIcon(QIcon(resource_path('icons/Modan2_2.png')))
         self.setWindowTitle("{} v{}".format(PROGRAM_NAME, PROGRAM_VERSION))
 
@@ -212,7 +206,7 @@ class ModanMainWindow(QMainWindow):
 
     @pyqtSlot() 
     def on_action_about_triggered(self):
-        text = PROGRAM_NAME + " ver. " + PROGRAM_VERSION + "\n\n"
+        text = PROGRAM_NAME + " v" + PROGRAM_VERSION + "\n\n"
         text += "Morphometrics made easy\n\n"
         text += "This software is distributed under the terms of the MIT License.\n\n"
         text += "© 2023 Jikhan Jung\n"

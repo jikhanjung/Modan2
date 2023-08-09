@@ -1,6 +1,9 @@
 def value_to_bool(value):
     return value.lower() == 'true' if isinstance(value, str) else bool(value)
 
+IMAGE_EXTENSION_LIST = ['png', 'jpg', 'jpeg','bmp','gif','tif','tiff']
+MODEL_EXTENSION_LIST = ['obj', 'ply', 'stl']
+
 VIVID_COLOR_LIST =  [
     "#0000FF",  # Blue
     "#FF0000",  # Red

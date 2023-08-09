@@ -1,31 +1,14 @@
-from PyQt5.QtWidgets import QTableWidgetItem, QMainWindow, QHeaderView, QFileDialog, QCheckBox, \
-                            QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QProgressBar, QApplication, \
-                            QDialog, QLineEdit, QLabel, QPushButton, QAbstractItemView, \
-                            QMessageBox, QListView, QTreeWidgetItem, QToolButton, QTreeView, QFileSystemModel, \
-                            QTableView, QSplitter, QRadioButton, QComboBox, QTextEdit, QAction, QMenu, QSizePolicy, \
-                            QStatusBar, QBoxLayout, QGridLayout, QAbstractButton, QButtonGroup, QGroupBox, QInputDialog, \
-                            QToolBar
+from PyQt5.QtWidgets import QMainWindow, QHeaderView, QApplication, QAbstractItemView, \
+                            QMessageBox, QTreeView, QTableView, QSplitter, QAction, QMenu, \
+                            QStatusBar, QInputDialog, QToolBar
+from PyQt5.QtGui import QIcon, QStandardItemModel, QStandardItem, QKeySequence
+from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSettings, QSize
 
-
-from PyQt5 import QtGui, uic
-from PyQt5.QtGui import QIcon, QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem,\
-                        QPainterPath, QFont, QImageReader, QPainter, QBrush, QMouseEvent, QWheelEvent, QDrag, QKeySequence
-from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSettings, QEvent, QRegExp, QSize, \
-                         QItemSelectionModel, QDateTime, QBuffer, QIODevice, QByteArray, QPoint, QModelIndex, \
-                         pyqtSignal, QThread, QMimeData
-
-import math
 from PyQt5.QtCore import pyqtSlot
 import re,os,sys
 from pathlib import Path
 from peewee import *
-import hashlib
-from datetime import datetime, timezone
-import requests
-from PIL import Image
 from PIL.ExifTags import TAGS
-import time
-import io
 import shutil
 import copy
 
@@ -33,10 +16,7 @@ from MdModel import *
 import MdUtils as mu
 
 from ModanDialogs import DatasetAnalysisDialog, ObjectDialog, ImportDatasetDialog, DatasetDialog, PreferencesDialog, \
-    IMAGE_EXTENSION_LIST, MODE, ObjectViewer3D, ExportDatasetDialog, ObjectViewer2D, ProgressDialog, MODEL_EXTENSION_LIST
-
-#import matplotlib
-#matplotlib.use('Qt5Agg')
+    MODE, ObjectViewer3D, ExportDatasetDialog, ObjectViewer2D, ProgressDialog
 
 PROGRAM_NAME = "Modan2"
 PROGRAM_VERSION = "0.1.0"
@@ -116,9 +96,6 @@ class ModanMainWindow(QMainWindow):
         self.toolbar.addAction(self.actionPreferences)
         self.toolbar.addAction(self.actionAbout)
         self.addToolBar(self.toolbar)
-
-        #self.actionExport.setDisabled(True)
-        #self.actionPreferences.setDisabled(True)
 
         self.main_menu = self.menuBar()
         self.file_menu = self.main_menu.addMenu("File")
@@ -745,7 +722,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
             file_name = re.sub('file:///', '', file_name)
             ext = file_name.split('.')[-1].lower()
-            if ext in IMAGE_EXTENSION_LIST:
+            if ext in mu.IMAGE_EXTENSION_LIST:
                 if self.selected_dataset.dimension != 2:
                     QMessageBox.warning(self, "Warning", "Dimension mismatch.")
                     break
@@ -761,7 +738,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                     os.makedirs(os.path.dirname(new_filepath))
                 shutil.copyfile(file_name, new_filepath)
                 img.save()
-            elif ext in MODEL_EXTENSION_LIST:
+            elif ext in mu.MODEL_EXTENSION_LIST:
                 if self.selected_dataset.dimension != 3:
                     QMessageBox.warning(self, "Warning", "Dimension mismatch.")
                     break

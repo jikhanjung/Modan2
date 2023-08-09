@@ -2,7 +2,6 @@ import numpy
 
 class MdPrincipalComponent:
     def __init__(self):
-        # self.datamatrix = []
         return
 
     def SetData(self, data):
@@ -12,12 +11,8 @@ class MdPrincipalComponent:
 
     def Analyze(self):
         '''analyze'''
-        # print "analyze"
         self.raw_eigen_values = []
         self.eigen_value_percentages = []
-
-        #for d in self.datamatrix :
-        #print d
 
         sums = [0.0 for x in range(self.nVariable)]
         avrs = [0.0 for x in range(self.nVariable)]
@@ -29,30 +24,15 @@ class MdPrincipalComponent:
         for j in range(self.nVariable):
             avrs[j] = float(sums[j]) / float(self.nObservation)
 
-        #print "sum:", sums
-        #print "avgs:",avrs
-        #return
-
         for i in range(self.nObservation):
             for j in range(self.nVariable):
                 self.data[i][j] -= avrs[j]
-
-                #print self.datamatrix
-
-        log_str = ""
 
         ''' covariance matrix '''
         np_data = numpy.matrix(self.data)
         self.covariance_matrix = numpy.dot(numpy.transpose(np_data), np_data) / self.nObservation
 
-        #print "covariance_matrix", self.covariance_matrix
-
-        ''' zz '''
         v, s, w = numpy.linalg.svd(self.covariance_matrix)
-        #print "v", v
-        #print "w", w
-
-        #print "s[",
 
         self.raw_eigen_values = s
         sum = 0
@@ -77,10 +57,6 @@ class MdPrincipalComponent:
 
         self.rotated_matrix = numpy.dot(np_data, v)
         self.rotation_matrix = v
-        #print w
-        #print self.datamatrix[...,2]
-        #print self.rotated_matrix[...,2]
-        #print self.rotated_matrix
         self.loading = v
         return
 
@@ -104,7 +80,6 @@ class MdCanonicalVariate:
     def Analyze(self):
         '''analyze'''
         actual_data = self.data
-        # actual_data = [ [] for y in range( self.nVariable ) ]
         category_data = self.category_list
         category_set = set(category_data)
         num_category = len(category_set)
@@ -113,9 +88,6 @@ class MdCanonicalVariate:
         total_avg = [0.0 for x in range(self.nVariable)]
         total_sum = [0.0 for x in range(self.nVariable)]
         total_count = self.nObservation
-
-        #print self.nObservation, self.nVariable
-        #print category_data
 
         avg_by_category = {}
         sum_by_category = {}
@@ -126,10 +98,7 @@ class MdCanonicalVariate:
             sum_by_category[k] = [0.0 for x in range(self.nVariable)]
             avg_by_category[k] = [0.0 for x in range(self.nVariable)]
 
-        #print "total count:", total_count
-        #print "len category_data", len( category_data )
         for i in range(total_count):
-            #print i
             k = category_data[i]
             count_by_category[k] += 1
             for j in range(self.nVariable):
@@ -197,15 +166,6 @@ class MdCanonicalVariate:
                 q_ += 1
             p_ += 1
 
-        '''
-        log_str = ""
-        log_str += "within:\n"
-        for line in within_cov:
-            log_str += "\t".join( [ str( x ) for x in line ] )
-            log_str += "\n"
-        '''
-        #print "within", numpy.matrix( within_cov )
-
         p_ = 0
         for p in range(self.nVariable):
             if variances[p] == 0: continue
@@ -219,15 +179,6 @@ class MdCanonicalVariate:
                 q_ += 1
             p_ += 1
 
-        #set_printoptions(threshold='nan')
-        '''
-        log_str += "between:\n"
-        for line in between_cov:
-            log_str += "\t".join( [ str( x ) for x in line ] )
-            log_str += "\n"
-        print "between", numpy.matrix( between_cov )
-        '''
-
         w = numpy.matrix(within_cov)
         b = numpy.matrix(between_cov)
 
@@ -235,27 +186,7 @@ class MdCanonicalVariate:
         #print "wi", wi
         x = numpy.dot(wi, b)
 
-        '''
-        log_str += "WiB:\n"
-        for p in range( covariance_matrix_size ):
-            for q in range( covariance_matrix_size ):
-                log_str += str( x[p,q] ) 
-                log_str += "\t"
-            log_str += "\n"
-        '''
-
-        #print "x", x
-
         u, s, v = numpy.linalg.svd(x)
-
-        '''
-        log_str += "rotation:\n"
-        for p in range( covariance_matrix_size ):
-            for q in range( covariance_matrix_size ):
-                log_str += str( u[p,q] ) 
-                log_str += "\t"
-            log_str += "\n"
-        '''
 
         self.raw_eigen_values = s[:]
         s /= sum(s)
@@ -275,34 +206,12 @@ class MdCanonicalVariate:
                     q_ += 1
             if variances[p] != 0: p_ += 1
 
-        '''
-        log_str += "actual_rotation:\n"
-        for p in range( self.nVariable ):
-            for q in range( self.nVariable ):
-                log_str += str( rotation_matrix[p,q] ) 
-                log_str += "\t"
-            log_str += "\n"
-        '''
-
         np_data = numpy.zeros(( self.nObservation, self.nVariable ))
         for p in range(self.nObservation):
             for q in range(self.nVariable):
                 np_data[p, q] = float(actual_data[p][q])
 
-        '''
-        log_str += "data:\n"
-        for p in range( self.nObservation ):
-            for q in range( self.nVariable ):
-                log_str += str( np_data[p,q] ) 
-                log_str += "\t"
-            log_str += "\n"
-        '''
         self.rotation_matrix = rotation_matrix
-        #print np_data.shape, rotation_matrix.shape
-        #fh = file( "cva_log.txt", 'w' )
-        #fh.write( log_str )
-        #fh.close()
         self.rotated_matrix = numpy.dot(np_data, rotation_matrix)
         self.loading = rotation_matrix
         return
-        #if( i == 2 ) : print object.coords

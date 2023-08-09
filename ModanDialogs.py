@@ -1,19 +1,17 @@
-from PyQt5.QtWidgets import QTableWidgetItem, QMainWindow, QHeaderView, QFileDialog, QCheckBox, \
+from PyQt5.QtWidgets import QTableWidgetItem, QHeaderView, QFileDialog, QCheckBox, QColorDialog, \
                             QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QProgressBar, QApplication, \
-                            QDialog, QLineEdit, QLabel, QPushButton, QAbstractItemView, QStatusBar,\
-                            QMessageBox, QListView, QTreeWidgetItem, QToolButton, QTreeView, QFileSystemModel, \
-                            QTableView, QSplitter, QRadioButton, QComboBox, QTextEdit, QAction, QMenu, QSizePolicy, \
-                            QTableWidget, QBoxLayout, QGridLayout, QAbstractButton, QButtonGroup, QGroupBox, QOpenGLWidget, \
-                            QTabWidget, QListWidget, QColorDialog
+                            QDialog, QLineEdit, QLabel, QPushButton, QAbstractItemView, QStatusBar, QMessageBox, \
+                            QTableView, QSplitter, QRadioButton, QComboBox, QTextEdit, QSizePolicy, \
+                            QTableWidget, QGridLayout, QAbstractButton, QButtonGroup, QGroupBox, \
+                            QTabWidget, QListWidget
 
-from PyQt5 import QtGui, uic
-from PyQt5.QtGui import QIcon, QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem,\
-                        QPainterPath, QFont, QImageReader, QPainter, QBrush, QMouseEvent, QWheelEvent, QDrag, QDoubleValidator
-from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSettings, QEvent, QRegExp, QSize, QPoint,\
-                         pyqtSignal, QThread, QMimeData, pyqtSlot, QItemSelectionModel, QTimer
+from PyQt5 import QtGui
+from PyQt5.QtGui import QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem,\
+                        QFont, QPainter, QBrush, QMouseEvent, QWheelEvent, QDoubleValidator
+from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSize, QPoint,\
+                         pyqtSlot, QItemSelectionModel, QTimer
 
 import pyqtgraph as pg
-#import pyqtgraph.opengl as gl
 from OBJFileLoader import OBJ
 
 import OpenGL.GL as gl
@@ -21,7 +19,6 @@ from OpenGL import GLU as glu
 from OpenGL import GLUT as glut
 from PyQt5.QtOpenGL import *
 import sys
-#import scipy as sp
 
 import random
 import struct
@@ -29,10 +26,9 @@ import xlsxwriter
 
 import math, re, os
 from pathlib import Path
-from PIL import Image
 from PIL.ExifTags import TAGS
 import shutil
-#import matplotlib.pyplot as plt
+
 from matplotlib.backends.backend_qt5agg import FigureCanvas as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
@@ -44,7 +40,6 @@ from MdStatistics import MdPrincipalComponent, MdCanonicalVariate
 import numpy as np
 from OpenGL.arrays import vbo
 import copy
-#from pyqt_color_picker import ColorPickerWidget, ColorPickerDialog
 
 def resource_path(relative_path):
     try:
@@ -67,9 +62,6 @@ MODE['VIEW'] = 7
 
 LANDMARK_RADIUS = 2
 DISTANCE_THRESHOLD = LANDMARK_RADIUS * 3
-
-IMAGE_EXTENSION_LIST = ['png', 'jpg', 'jpeg','bmp','gif','tif','tiff']
-MODEL_EXTENSION_LIST = ['obj', 'ply', 'stl']
 
 # glview modes
 OBJECT_MODE = 1

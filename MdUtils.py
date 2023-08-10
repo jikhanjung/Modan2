@@ -48,6 +48,8 @@ PASTEL_COLOR_LIST = [
     "#FFD8B1"   # Pastel Apricot
 ]
 
+MARKER_LIST = ['o','s','^','x','+','d','v','<','>','p','h']
+
 def resource_path(relative_path):
     try:
         base_path = sys._MEIPASS

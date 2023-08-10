@@ -130,6 +130,8 @@ class ModanMainWindow(QMainWindow):
 
     def set_toolbar_icon_size(self, size):
         if size.lower() == 'small':
+            self.toolbar.setIconSize(QSize(24,24))
+        elif size.lower() == 'medium':
             self.toolbar.setIconSize(QSize(32,32))
         else:
             self.toolbar.setIconSize(QSize(48,48))
@@ -167,24 +169,6 @@ class ModanMainWindow(QMainWindow):
             print(tables)
         else:
             gDatabase.create_tables([MdDataset, MdObject, MdImage, MdThreeDModel,])
-
-    '''
-    def read_settings(self):
-        #return
-        settings = QSettings("Modan2", "Modan2")
-        self.server_address = settings.value("server_address", "localhost")
-        self.server_port = settings.value("server_port", "8000")
-        self.data_folder = Path(settings.value("data_folder", "C:/Modan2/data"))
-        #print("main window data folder:", self.data_folder)
-        #print("main window server address:", self.server_address)
-    def write_settings(self):
-        settings = QSettings("Modan2", "Modan2")
-        settings.setValue("server_address", self.server_address)
-        settings.setValue("server_port", self.server_port)
-        settings.setValue("data_folder", str(self.data_folder))
-        #print("main window data folder:", self.data_folder)
-        #print("main window server address:", self.server_address)
-    '''
 
     def closeEvent(self, event):
         self.write_settings()

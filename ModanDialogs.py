@@ -2904,9 +2904,9 @@ class DatasetAnalysisDialog(QDialog):
         self.m_app = QApplication.instance()
         self.default_color_list = mu.VIVID_COLOR_LIST[:]
         self.color_list = self.default_color_list[:]
+        self.marker_list = mu.MARKER_LIST[:]
         self.read_settings()
         #self.setGeometry(QRect(100, 100, 1400, 800))
-        
         self.ds_ops = None
         self.object_hash = {}
         
@@ -3267,6 +3267,8 @@ class DatasetAnalysisDialog(QDialog):
         self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
         for i in range(len(self.color_list)):
             self.color_list[i] = self.m_app.settings.value("DataPointColor/"+str(i), self.default_color_list[i])
+        for i in range(len(self.marker_list)):
+            self.marker_list[i] = self.m_app.settings.value("DataPointMarker/"+str(i), self.marker_list[i])
 
         if self.remember_geometry is True:
             self.setGeometry(self.m_app.settings.value("WindowGeometry/DatasetAnalysisWindow", QRect(100, 100, 1400, 800)))
@@ -3587,6 +3589,7 @@ class DatasetAnalysisDialog(QDialog):
         symbol_candidate = ['o','s','^','x','+','d','v','<','>','p','h']
         color_candidate = ['blue','green','black','cyan','magenta','yellow','gray','red']
         color_candidate = self.color_list[:]
+        symbol_candidate = self.marker_list[:]
         self.propertyname_index = self.comboPropertyName.currentIndex() -1
         self.scatter_data = {}
         self.scatter_result = {}
@@ -4440,10 +4443,14 @@ class PreferencesDialog(QDialog):
         super().__init__()
         self.parent = parent
         self.remember_geometry = True
+        self.toolbar_icon_small = False
+        self.toolbar_icon_medium = False
+        self.toolbar_icon_large = False
 
         self.default_color_list = mu.VIVID_COLOR_LIST[:]
         #['blue','green','black','cyan','magenta','yellow','gray','red']
         self.color_list = self.default_color_list[:]
+        self.marker_list = mu.MARKER_LIST[:]
 
         self.m_app = QApplication.instance()
         self.read_settings()
@@ -4468,18 +4475,39 @@ class PreferencesDialog(QDialog):
         self.rbToolbarIconLarge.setChecked(self.toolbar_icon_large)
         self.rbToolbarIconLarge.clicked.connect(self.on_rbToolbarIconLarge_clicked)
         self.rbToolbarIconSmall = QRadioButton("Small")
-        self.rbToolbarIconSmall.setChecked(not self.toolbar_icon_large)
+        self.rbToolbarIconSmall.setChecked(self.toolbar_icon_small)
         self.rbToolbarIconSmall.clicked.connect(self.on_rbToolbarIconSmall_clicked)
+        self.rbToolbarIconMedium = QRadioButton("Medium")
+        self.rbToolbarIconMedium.setChecked(self.toolbar_icon_medium)
+        self.rbToolbarIconMedium.clicked.connect(self.on_rbToolbarIconMedium_clicked)
 
         self.gbToolbarIconSize = QGroupBox()
         self.gbToolbarIconSize.setLayout(QHBoxLayout())
-        self.gbToolbarIconSize.layout().addWidget(self.rbToolbarIconLarge)
         self.gbToolbarIconSize.layout().addWidget(self.rbToolbarIconSmall)
-
+        self.gbToolbarIconSize.layout().addWidget(self.rbToolbarIconMedium)
+        self.gbToolbarIconSize.layout().addWidget(self.rbToolbarIconLarge)
 
         self.gbPlotColors = QGroupBox()
         self.gbPlotColors.setLayout(QGridLayout())
+        self.gbPlotMarkers = QGroupBox()
+        self.gbPlotMarkers.setLayout(QHBoxLayout())
         #symbol_candidate = ['o','s','^','x','+','d','v','<','>','p','h']
+
+        self.btnResetMarkers = QPushButton()
+        self.btnResetMarkers.setText("Reset")
+        self.btnResetMarkers.clicked.connect(self.on_btnResetMarkers_clicked)
+        self.btnResetMarkers.setMinimumSize(60,20)
+        self.btnResetMarkers.setMaximumSize(100,20)
+
+        self.comboMarker_list = []
+        for i in range(len(self.marker_list)):
+            self.comboMarker_list.append(QComboBox())
+            self.comboMarker_list[i].addItems(mu.MARKER_LIST)
+            self.comboMarker_list[i].setCurrentIndex(mu.MARKER_LIST.index(self.marker_list[i]))
+            self.comboMarker_list[i].currentIndexChanged.connect(lambda event, index=i: self.on_comboMarker_currentIndexChanged(event, index))
+            self.gbPlotMarkers.layout().addWidget(self.comboMarker_list[i])
+        self.gbPlotMarkers.layout().addWidget(self.btnResetMarkers)
+
         self.btnResetVivid = QPushButton()
         self.btnResetVivid.setText("Vivid")
         self.btnResetVivid.clicked.connect(self.on_btnResetVivid_clicked)
@@ -4490,7 +4518,6 @@ class PreferencesDialog(QDialog):
         self.btnResetPastel.clicked.connect(self.on_btnResetPastel_clicked)
         self.btnResetPastel.setMinimumSize(60,20)
         self.btnResetPastel.setMaximumSize(100,20)
-        
 
         self.lblColor_list = []
         for i in range(len(self.color_list)):
@@ -4524,20 +4551,15 @@ class PreferencesDialog(QDialog):
         self.main_layout.addRow("Remember Geometry", self.gbRememberGeomegry)
         self.main_layout.addRow("Toolbar Icon Size", self.gbToolbarIconSize)
         self.main_layout.addRow("Data point colors", self.gbPlotColors)
+        self.main_layout.addRow("Data point markers", self.gbPlotMarkers)
         self.main_layout.addRow("", self.btnOkay)
 
         self.read_settings()
 
-    def on_btnResetPastel_clicked(self):
-        self.color_list = mu.PASTEL_COLOR_LIST[:]
-        for i in range(len(self.color_list)):
-            self.lblColor_list[i].setStyleSheet("background-color: " + self.color_list[i])
-            self.lblColor_list[i].setToolTip(self.color_list[i])
-    def on_btnResetVivid_clicked(self):
-        self.color_list = mu.VIVID_COLOR_LIST[:]
-        for i in range(len(self.color_list)):
-            self.lblColor_list[i].setStyleSheet("background-color: " + self.color_list[i])
-            self.lblColor_list[i].setToolTip(self.color_list[i])
+    def on_comboMarker_currentIndexChanged(self, event, index):
+        self.current_lblMarker = self.comboMarker_list[index]
+        self.marker_list[self.comboMarker_list.index(self.current_lblMarker)] = self.current_lblMarker.currentText()
+        #print(self.marker_list)
 
     def on_lblColor_clicked(self,event, index):
         self.current_lblColor = self.lblColor_list[index]
@@ -4554,8 +4576,25 @@ class PreferencesDialog(QDialog):
     def read_settings(self):
         self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
         self.toolbar_icon_size = self.m_app.settings.value("ToolbarIconSize", "Small")
+        if self.toolbar_icon_size.lower() == "small":
+            self.toolbar_icon_small = True
+            self.toolbar_icon_large = False
+            self.toolbar_icon_medium = False
+        elif self.toolbar_icon_size.lower() == "medium":
+            self.toolbar_icon_small = False
+            self.toolbar_icon_medium = True
+            self.toolbar_icon_large = False
+        elif self.toolbar_icon_size.lower() == "large":
+            self.toolbar_icon_small = False
+            self.toolbar_icon_medium = False
+            self.toolbar_icon_large = True
+
         for i in range(len(self.color_list)):
             self.color_list[i] = self.m_app.settings.value("DataPointColor/"+str(i), self.default_color_list[i])
+
+        for i in range(len(self.marker_list)):
+            self.marker_list[i] = self.m_app.settings.value("DataPointMarker/"+str(i), self.marker_list[i])
+
         if self.remember_geometry is True:
             self.setGeometry(self.m_app.settings.value("WindowGeometry/PreferencesDialog", QRect(100, 100, 600, 400)))
         else:
@@ -4566,11 +4605,11 @@ class PreferencesDialog(QDialog):
         self.m_app.settings.setValue("ToolbarIconSize", self.toolbar_icon_size)
         self.m_app.settings.setValue("WindowGeometry/RememberGeometry", self.remember_geometry)
         #print(self.color_list)
+        for i in range(len(self.marker_list)):
+            self.m_app.settings.setValue("DataPointMarker/"+str(i), self.marker_list[i])
+
         for i in range(len(self.color_list)):
             self.m_app.settings.setValue("DataPointColor/"+str(i), self.color_list[i])
-
-
-
 
         if self.remember_geometry is True:
             self.m_app.settings.setValue("WindowGeometry/PreferencesDialog", self.geometry())
@@ -4579,14 +4618,42 @@ class PreferencesDialog(QDialog):
         self.write_settings()
         event.accept()
 
+    def on_btnResetMarkers_clicked(self):
+        self.marker_list = mu.MARKER_LIST[:]
+        for i in range(len(self.marker_list)):
+            self.comboMarker_list[i].setCurrentText(self.marker_list[i])
+
+    def on_btnResetPastel_clicked(self):
+        self.color_list = mu.PASTEL_COLOR_LIST[:]
+        for i in range(len(self.color_list)):
+            self.lblColor_list[i].setStyleSheet("background-color: " + self.color_list[i])
+            self.lblColor_list[i].setToolTip(self.color_list[i])
+            
+    def on_btnResetVivid_clicked(self):
+        self.color_list = mu.VIVID_COLOR_LIST[:]
+        for i in range(len(self.color_list)):
+            self.lblColor_list[i].setStyleSheet("background-color: " + self.color_list[i])
+            self.lblColor_list[i].setToolTip(self.color_list[i])
+
     def on_rbToolbarIconLarge_clicked(self):
         self.toolbar_icon_large = True
+        self.toolbar_icon_medium = False
+        self.toolbar_icon_small = False
         self.toolbar_icon_size = "Large"
         self.parent.set_toolbar_icon_size( self.toolbar_icon_size )
 
     def on_rbToolbarIconSmall_clicked(self):
+        self.toolbar_icon_small = True
+        self.toolbar_icon_medium = False
         self.toolbar_icon_large = False
         self.toolbar_icon_size = "Small"
+        self.parent.set_toolbar_icon_size( self.toolbar_icon_size )
+
+    def on_rbToolbarIconMedium_clicked(self):
+        self.toolbar_icon_small = False
+        self.toolbar_icon_medium = True
+        self.toolbar_icon_large = False
+        self.toolbar_icon_size = "Medium"
         self.parent.set_toolbar_icon_size( self.toolbar_icon_size )
 
     def on_rbRememberGeometryYes_clicked(self):

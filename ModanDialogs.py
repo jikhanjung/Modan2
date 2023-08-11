@@ -668,6 +668,7 @@ class ObjectViewer3D(QGLWidget):
         self.wireframe_from_idx = -1
         self.wireframe_to_idx = -1
         self.selected_landmark_idx = -1
+        self.selected_edge_index = -1
         self.no_hit_count = 0
         self.threed_model = None
         self.cursor_on_vertex = -1
@@ -689,6 +690,8 @@ class ObjectViewer3D(QGLWidget):
     def set_mode(self, mode):
         self.edit_mode = mode  
         if self.edit_mode == MODE['EDIT_LANDMARK']:
+            #print("edit landmark")
+            self.initialize_colors()
             self.setCursor(Qt.CrossCursor)
             self.show_message("Click on image to add landmark")
         elif self.edit_mode == MODE['READY_MOVE_LANDMARK']:
@@ -698,6 +701,7 @@ class ObjectViewer3D(QGLWidget):
             self.setCursor(Qt.SizeAllCursor)
             self.show_message("Move landmark")
         elif self.edit_mode == MODE['WIREFRAME']:
+            #print("wireframe")
             #print("self.obj_ops:", self.obj_ops)
             self.initialize_colors()
             self.setCursor(Qt.ArrowCursor)
@@ -718,12 +722,16 @@ class ObjectViewer3D(QGLWidget):
             if self.edit_mode == MODE['WIREFRAME'] and self.selected_landmark_idx > -1:
                 self.wireframe_from_idx = self.selected_landmark_idx
                 #self.edit_mode = MODE_ADD_WIRE
-            elif self.edit_mode == MODE['EDIT_LANDMARK'] and self.cursor_on_vertex > -1:
-                pass
+            elif self.edit_mode == MODE['EDIT_LANDMARK'] and self.selected_landmark_idx > -1:
+                self.set_mode(MODE['MOVE_LANDMARK'])
+                self.stored_landmark = { 'index': self.selected_landmark_idx, 'coords': self.threed_model.original_vertices[self.selected_landmark_idx] }
+                #pass
             else:                
                 self.view_mode = ROTATE_MODE
         elif event.buttons() == Qt.RightButton:
-            if self.edit_mode == MODE['EDIT_LANDMARK'] and self.cursor_on_vertex > -1:
+            if self.edit_mode == MODE['WIREFRAME'] and self.selected_edge_index > -1:
+                self.delete_wire(self.selected_edge_index)
+            elif self.edit_mode == MODE['EDIT_LANDMARK'] and self.cursor_on_vertex > -1:
                 pass
             else:
                 self.view_mode = ZOOM_MODE
@@ -749,7 +757,19 @@ class ObjectViewer3D(QGLWidget):
                 #print(self.cursor_on_vertex, x,y,z, self.landmark_list[0], self.obj_ops.landmark_list[0], self.object_dialog.landmark_list[0])
                 self.object_dialog.add_landmark(x,y,z)
                 self.update_landmark_list()
+                self.initialize_colors()
                 self.calculate_resize()
+            elif self.edit_mode == MODE['MOVE_LANDMARK'] and self.selected_landmark_idx > -1 and self.cursor_on_vertex > -1:
+                #self.threed_model.landmark_list.append(self.cursor_on_vertex)
+                #x, y, z = self.threed_model.original_vertices[self.cursor_on_vertex]
+                #print(self.cursor_on_vertex, x,y,z, self.landmark_list[0], self.obj_ops.landmark_list[0], self.object_dialog.landmark_list[0])
+                #self.object_dialog.add_landmark(x,y,z)
+                self.update_landmark_list()
+                self.initialize_colors()
+                self.calculate_resize()
+                self.selected_landmark_idx = -1
+                self.cursor_on_vertex = -1
+                self.set_mode(MODE['EDIT_LANDMARK'])
             else:
                 self.rotate_x += self.temp_rotate_x
                 self.rotate_y += self.temp_rotate_y
@@ -788,8 +808,12 @@ class ObjectViewer3D(QGLWidget):
                 self.temp_rotate_x = 0
                 self.temp_rotate_y = 0
         elif event.button() == Qt.RightButton:
-            if self.edit_mode == MODE['EDIT_LANDMARK'] and self.cursor_on_vertex > -1 and self.curr_x == self.down_x and self.curr_y == self.down_y:
-                print("delete landmark")
+            if self.edit_mode == MODE['EDIT_LANDMARK'] and self.selected_landmark_idx > -1 and self.curr_x == self.down_x and self.curr_y == self.down_y:
+                self.object_dialog.delete_landmark(self.selected_landmark_idx)
+                self.update_landmark_list()
+                self.initialize_colors()
+                self.calculate_resize()
+                #print("delete landmark")
             else:
                 self.dolly += self.temp_dolly 
                 self.temp_dolly = 0
@@ -807,18 +831,28 @@ class ObjectViewer3D(QGLWidget):
         self.curr_x = event.x()
         self.curr_y = event.y()
         #print("curr_x:", self.curr_x, "curr_y:", self.curr_y)
-        if self.edit_mode == WIREFRAME_MODE:
+        if self.edit_mode == MODE["WIREFRAME"]:
             #print("wireframe mode. about to do hit_test")
 
-            hit, lm_idx = self.hit_test(self.curr_x, self.curr_y)
-            if hit:
-                self.selected_landmark_idx = lm_idx
-                self.no_hit_count = 0
-            elif self.selected_landmark_idx > -1:
-                self.no_hit_count += 1
-                if self.no_hit_count > 5:
-                    self.selected_landmark_idx = -1
+            kind, idx = self.hit_test(self.curr_x, self.curr_y)
+            if kind == 'Landmark':
+                lm_idx = idx
+            
+                if lm_idx > -1:
+                    self.selected_landmark_idx = lm_idx
                     self.no_hit_count = 0
+                elif self.selected_landmark_idx > -1:
+                    self.no_hit_count += 1
+                    if self.no_hit_count > 5:
+                        self.selected_landmark_idx = -1
+                        self.no_hit_count = 0
+            elif kind == 'Edge':
+                self.selected_edge_index = idx
+                #print("selected edge index:", self.selected_edge_index)
+                self.selected_landmark_idx = -1
+            else:
+                self.selected_landmark_idx = -1
+                self.selected_edge_index = -1
 
         if event.buttons() == Qt.LeftButton and self.view_mode == ROTATE_MODE:
             self.is_dragging = True
@@ -834,6 +868,15 @@ class ObjectViewer3D(QGLWidget):
         elif self.edit_mode == MODE['EDIT_LANDMARK']:
             #print("edit 3d landmark mode")
             ## call unproject_mouse
+            ## if hit, set selected_landmark_idx
+            hit_type, hit_idx = self.hit_test(self.curr_x, self.curr_y)
+            if hit_type == 'Landmark':
+                self.selected_landmark_idx = hit_idx
+                self.no_hit_count = 0
+                #print("hit landmark:", hit_idx)
+            else:
+                self.selected_landmark_idx = -1
+
             if self.show_model == True:
                 on_background = self.hit_background_test(self.curr_x, self.curr_y)
                 #print("on_background:", on_background)
@@ -845,6 +888,26 @@ class ObjectViewer3D(QGLWidget):
                         self.cursor_on_vertex = closest_element
                     else:
                         self.cursor_on_vertex = -1
+        elif self.edit_mode == MODE['MOVE_LANDMARK']:
+            if self.show_model == True:
+                on_background = self.hit_background_test(self.curr_x, self.curr_y)
+                #print("on_background:", on_background)
+                if on_background == True:
+                    self.cursor_on_vertex = -1
+                    self.landmark_list[self.selected_landmark_idx] = self.stored_landmark['coords']
+                    self.selected_landmark_idx = -1
+                    self.set_mode(MODE['EDIT_LANDMARK'])
+                else:
+                    closest_element = self.pick_element(self.curr_x, self.curr_y)
+                    if closest_element is not None:
+                        self.cursor_on_vertex = closest_element
+                        if self.selected_landmark_idx >= 0:
+                            self.landmark_list[self.selected_landmark_idx] = self.threed_model.original_vertices[closest_element]
+                            if self.object_dialog is not None:
+                                self.object_dialog.update_landmark(self.selected_landmark_idx, *self.landmark_list[self.selected_landmark_idx])
+                    else:
+                        self.cursor_on_vertex = -1
+
             #if closest_element is not None:
                 #print("closest element:", closest_element)
 
@@ -873,7 +936,23 @@ class ObjectViewer3D(QGLWidget):
         self.edge_list = dataset.edge_list
         #print("wireframe", dataset.wireframe)
         dataset.save()
-        
+        self.initialize_colors()        
+
+    def delete_wire(self, selected_edge_index):
+        if selected_edge_index >= len(self.edge_list):
+            return
+
+        dataset = self.object.dataset
+        if len(dataset.edge_list) == 0 and dataset.wireframe is not None and dataset.wireframe != "":
+            dataset.unpack_wireframe()
+        dataset.edge_list.pop(selected_edge_index)
+        self.selected_edge_index = -1
+        #print("wireframe", dataset.edge_list)
+        dataset.pack_wireframe()
+        self.edge_list = dataset.edge_list
+        #print("wireframe", dataset.wireframe)
+        dataset.save()
+        self.initialize_colors()        
 
     def wheelEvent(self, event):
         #print("wheel event", event.angleDelta().y())
@@ -1012,7 +1091,7 @@ class ObjectViewer3D(QGLWidget):
 
     def paintGL(self):
         #print("paintGL")
-        if self.edit_mode == WIREFRAME_MODE:
+        if self.edit_mode == MODE['WIREFRAME'] or self.edit_mode == MODE['EDIT_LANDMARK']:
             self.draw_picker_buffer()
 
         self.draw_all()
@@ -1062,9 +1141,23 @@ class ObjectViewer3D(QGLWidget):
         if landmark_as_sphere:
             if self.show_wireframe and len(self.edge_list) > 0:
                 #print("draw wireframe",self.edge_list)
-                for edge in self.edge_list:
-                    #gl.glDisable(gl.GL_LIGHTING)
-                    gl.glColor3f( *COLOR['WIREFRAME'])
+                for i, edge in enumerate(self.edge_list):
+                    if current_buffer == self.picker_buffer and self.object_dialog is not None:
+                        gl.glDisable(gl.GL_LIGHTING)
+                        #print("color:",*self.lm_idx_to_color[i])
+                        key = "edge_"+str(i)
+                        #print("i:",i,"key:",key, "color:",self.lm_idx_to_color[key], "current_buffer:",current_buffer, "picker_buffer:",self.picker_buffer)
+                        color = self.edge_idx_to_color[key]
+                        #print(self.lm_idx_to_color, i, current_buffer)
+                        gl.glColor3f( *[ c * 1.0 / 255 for c in color] )
+                    else:
+
+                        if i == self.selected_edge_index:
+                            gl.glColor3f( *COLOR['SELECTED_EDGE'] )
+                        else:
+                        #gl.glDisable(gl.GL_LIGHTING)
+                            gl.glColor3f( *COLOR['WIREFRAME'])
+                    gl.glLineWidth(2.0)
                     gl.glBegin(gl.GL_LINE_STRIP)
                     #print(self.down_x, self.down_y, self.curr_x, self.curr_y)
                     for lm_idx in edge:
@@ -1072,6 +1165,9 @@ class ObjectViewer3D(QGLWidget):
                             lm = object.landmark_list[lm_idx]
                             gl.glVertex3f(*lm)
                     gl.glEnd()
+                    if current_buffer == self.picker_buffer:
+                        gl.glEnable(gl.GL_LIGHTING)
+
 
             lm_count = len(object.landmark_list)
             for i, lm in enumerate(object.landmark_list):
@@ -1253,8 +1349,7 @@ class ObjectViewer3D(QGLWidget):
         self.updateGL()
 
     def clear_object(self):
-        #print("clear object")
-        #print("clear oject")
+        print("clear object 3d")
         self.obj_ops = None
         self.object = None
         self.landmark_list = []
@@ -1291,9 +1386,11 @@ class ObjectViewer3D(QGLWidget):
             lm_idx = self.color_to_lm_idx[rgb_tuple]
             #print("hit test", x, y, rgb_tuple, lm_idx)
             #text, idx = lm_idx.split("_")
-            return True, int(lm_idx)
-        else:
-            return False,-1
+            return "Landmark", int(lm_idx)
+        elif rgb_tuple in self.color_to_edge_idx.keys():
+            edge_idx = self.color_to_edge_idx[rgb_tuple]
+            return "Edge", int(edge_idx)
+        return "", -1
 
     def draw(self):
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
@@ -1302,17 +1399,29 @@ class ObjectViewer3D(QGLWidget):
             obj.draw()
 
     def initialize_colors(self):
-        if self.obj_ops is None:
-            pass
+        #if self.obj_ops is None:
+        #    pass
+        #print("initializ colors", self.edge_list, self.landmark_list)
         self.color_to_lm_idx = {}
         self.lm_idx_to_color = {}
-        for i in range(len(self.obj_ops.landmark_list)):
+        for i in range(len(self.landmark_list)):
             while True:
                 color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
                 if color not in self.color_to_lm_idx.keys():
                     break
             self.color_to_lm_idx[color] = str(i)
             self.lm_idx_to_color["lm_"+str(i)] = color
+
+        self.color_to_edge_idx = {}
+        self.edge_idx_to_color = {}
+        for i in range(len(self.edge_list)):
+            while True:
+                color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+                if color not in self.color_to_lm_idx.keys() and color not in self.color_to_edge_idx.keys():
+                    break
+            self.color_to_edge_idx[color] = str(i)
+            self.edge_idx_to_color["edge_"+str(i)] = color
+        #print("edge_idx_to_color:", self.edge_idx_to_color.keys())
 
     def update_landmark_list(self):
         #self.landmark_list = copy.deepcopy(self.object_dialog.landmark_list)
@@ -2678,24 +2787,26 @@ class ObjectDialog(QDialog):
             #self.show_landmarks()
 
         if self.dataset.dimension == 3:
-            #print("set_object 3d")
+            #print("set_object 3d 1")
             self.object_view = self.object_view_3d
             self.object_view.auto_rotate = False
             #obj_ops = MdObjectOps(object)
             #self.object_view.set_dataset(object.dataset)
             #self.btnLandmark.setDisabled(True)
+            #print("set_object 3d 2")
             self.btnCalibration.setDisabled(True)
             self.cbxAutoRotate.show()
+            #print("set_object 3d 3")
             if object is not None:
-                if object.threed_model is not None and len(object.threed_model) > 0:
-                    self.enable_landmark_edit()
-                else:
-                    self.disable_landmark_edit()
                 #print("object dialog self.landmark_list in set object 3d", self.landmark_list)
                 self.object_view.set_object(object)
                 self.object_view.landmark_list = self.landmark_list
                 self.object_view.update_landmark_list()
                 self.object_view.calculate_resize()
+                if object.threed_model is not None and len(object.threed_model) > 0:
+                    self.enable_landmark_edit()
+                else:
+                    self.disable_landmark_edit()
                 #self.object_view.landmark_list = self.landmark_list
         else:
             #print("set_object 2d")

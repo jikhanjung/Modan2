@@ -459,9 +459,12 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     @pyqtSlot()
     def on_tableView_doubleClicked(self):
         self.dlg = ObjectDialog(self)
+        #print("object dialog created")
         self.dlg.setModal(True)
         self.dlg.set_dataset(self.selected_dataset)
+        #print("object dialog set dataset")
         self.dlg.set_object( self.selected_object )
+        #print("object dialog set object")
         self.dlg.exec_()
         dataset = self.selected_dataset
         self.reset_treeView()
@@ -895,11 +898,16 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.show_object(self.selected_object)
 
     def show_object(self, obj):
-        #print("show object")
+        print("show object")
         self.object_view.clear_object()
+        print("cleared object view")
         self.object_view.landmark_list = copy.deepcopy(obj.landmark_list)
+        print("landmark list copied")
         self.object_view.set_object(obj)
+        print("set object", obj)
         self.object_view.read_only = True
+        print("object_view:", self.object_view)
+        self.object_view.update()
 
     def clear_object_view(self):
         self.object_view.clear_object()

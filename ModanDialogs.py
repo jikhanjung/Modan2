@@ -745,12 +745,17 @@ class ObjectViewer3D(QGLWidget):
         self.curr_y = event.y()
         #print("curr_x:", self.curr_x, "curr_y:", self.curr_y)
         if event.button() == Qt.LeftButton:
-            if self.edit_mode == MODE['WIREFRAME'] and self.wireframe_from_idx > -1 and self.selected_landmark_idx > -1 and self.selected_landmark_idx != self.wireframe_from_idx:
-                self.wireframe_to_idx = self.selected_landmark_idx
-                self.add_wire(self.wireframe_from_idx, self.wireframe_to_idx)
-                self.wireframe_from_idx = -1
-                self.wireframe_to_idx = -1
-                self.update()
+            if self.edit_mode == MODE['WIREFRAME'] and self.wireframe_from_idx > -1:
+                if self.selected_landmark_idx > -1 and self.selected_landmark_idx != self.wireframe_from_idx:
+                    self.wireframe_to_idx = self.selected_landmark_idx
+                    self.add_wire(self.wireframe_from_idx, self.wireframe_to_idx)
+                    self.wireframe_from_idx = -1
+                    self.wireframe_to_idx = -1
+                    self.update()
+                else:
+                    self.wireframe_from_idx = -1
+                    self.wireframe_to_idx = -1
+                    self.update()
             elif self.edit_mode == MODE['EDIT_LANDMARK'] and self.cursor_on_vertex > -1 and self.curr_x == self.down_x and self.curr_y == self.down_y:
                 #self.threed_model.landmark_list.append(self.cursor_on_vertex)
                 x, y, z = self.threed_model.original_vertices[self.cursor_on_vertex]
@@ -1093,11 +1098,12 @@ class ObjectViewer3D(QGLWidget):
         #print("paintGL")
         if self.edit_mode == MODE['WIREFRAME'] or self.edit_mode == MODE['EDIT_LANDMARK']:
             self.draw_picker_buffer()
-
+        gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, 0)
         self.draw_all()
 
     def draw_all(self):
-        #print("draw_all")
+        current_buffer = gl.glGetIntegerv(gl.GL_FRAMEBUFFER_BINDING)
+        #print("draw all", object, self, current_buffer )
         gl.glMatrixMode(gl.GL_PROJECTION)
         gl.glLoadIdentity()
         glu.gluPerspective(45.0, self.aspect, 0.1, 100.0)
@@ -1136,8 +1142,8 @@ class ObjectViewer3D(QGLWidget):
             self.draw_object(ds_ops.get_average_shape(), landmark_as_sphere=True, color=object_color)
 
     def draw_object(self,object,landmark_as_sphere=True,color=COLOR['NORMAL_SHAPE']):
-        #print("draw object", object, self.edge_list)
         current_buffer = gl.glGetIntegerv(gl.GL_FRAMEBUFFER_BINDING)
+        #print("draw object", object, self, current_buffer )
         if landmark_as_sphere:
             if self.show_wireframe and len(self.edge_list) > 0:
                 #print("draw wireframe",self.edge_list)
@@ -1165,7 +1171,7 @@ class ObjectViewer3D(QGLWidget):
                             lm = object.landmark_list[lm_idx]
                             gl.glVertex3f(*lm)
                     gl.glEnd()
-                    if current_buffer == self.picker_buffer:
+                    if current_buffer == self.picker_buffer and self.object_dialog is not None:
                         gl.glEnable(gl.GL_LIGHTING)
 
 
@@ -1187,7 +1193,7 @@ class ObjectViewer3D(QGLWidget):
                     #print(self.lm_idx_to_color, i, current_buffer)
                     gl.glColor3f( *[ c * 1.0 / 255 for c in color] )
                 glut.glutSolidSphere(0.03, 10, 10)
-                if current_buffer == self.picker_buffer:
+                if current_buffer == self.picker_buffer and self.object_dialog is not None:
                     gl.glEnable(gl.GL_LIGHTING)
                 gl.glPopMatrix()
 
@@ -1283,7 +1289,7 @@ class ObjectViewer3D(QGLWidget):
         return picker_buffer
 
     def draw_picker_buffer(self):
-        #print("draw_picker_buffer")
+        #print("draw_picker_buffer", self, self.picker_buffer)
         # Now you can render to this framebuffer instead of the default one
         gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, self.picker_buffer)
         gl.glViewport(0, 0, self.width(), self.height())
@@ -1301,6 +1307,11 @@ class ObjectViewer3D(QGLWidget):
         gl.glDeleteRenderbuffers([self.render_buffer])
         gl.glDeleteFramebuffers([self.picker_buffer])
         self.picker_buffer = None
+        #gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, 0)
+
+    def closeEvent(self, event):
+        #print("closeEvent")
+        self.delete_picker_buffer()
 
     def resizeGL(self, width, height):
         #print("resizeGL")
@@ -1349,7 +1360,7 @@ class ObjectViewer3D(QGLWidget):
         self.updateGL()
 
     def clear_object(self):
-        print("clear object 3d")
+        #print("clear object 3d")
         self.obj_ops = None
         self.object = None
         self.landmark_list = []
@@ -3097,6 +3108,7 @@ class DatasetAnalysisDialog(QDialog):
 
         self.table_tab.addTab(self.tableView1, "Objects")
         self.table_tab.addTab(self.tableView2, "Groups")
+        self.table_tab.setTabVisible(1, False)
         self.table_layout.addWidget(self.table_tab)
 
         self.table_control_widget = QWidget()

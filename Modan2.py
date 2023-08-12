@@ -65,15 +65,18 @@ class ModanMainWindow(QMainWindow):
         self.actionNewObject = QAction(QIcon(resource_path(ICON['new_object'])), "New Object\tCtrl+Shift+N", self)
         self.actionNewObject.triggered.connect(self.on_action_new_object_triggered)
         self.actionNewObject.setShortcut(QKeySequence("Ctrl+Shift+N"))
+        #self.actionNewObject.setEnabled(False)
         self.actionImport = QAction(QIcon(resource_path(ICON['import'])), "Import\tCtrl+I", self)
         self.actionImport.triggered.connect(self.on_action_import_dataset_triggered)
         self.actionImport.setShortcut(QKeySequence("Ctrl+I"))
         self.actionExport = QAction(QIcon(resource_path(ICON['export'])), "Export\tCtrl+E", self)
         self.actionExport.triggered.connect(self.on_action_export_dataset_triggered)
         self.actionExport.setShortcut(QKeySequence("Ctrl+E"))
+        #self.actionExport.setEnabled(False)
         self.actionAnalyze = QAction(QIcon(resource_path(ICON['analyze'])), "Analyze\tCtrl+G", self)
         self.actionAnalyze.triggered.connect(self.on_action_analyze_dataset_triggered)
         self.actionAnalyze.setShortcut(QKeySequence("Ctrl+G"))
+        #self.actionAnalyze.setEnabled(False)
         self.actionPreferences = QAction(QIcon(resource_path(ICON['preferences'])), "Preferences", self)
         self.actionPreferences.triggered.connect(self.on_action_edit_preferences_triggered)
         self.actionExit = QAction(QIcon(resource_path(ICON['exit'])), "Exit\tCtrl+W", self)
@@ -255,6 +258,8 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.setCentralWidget(self.hsplitter)
 
         self.treeView.doubleClicked.connect(self.on_treeView_doubleClicked)
+        #self.treeView.mousePressEvent = self.on_treeView_clicked
+        #self.treeView.clicked.connect(self.on_treeView_clicked)
         self.treeView.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.tableView.doubleClicked.connect(self.on_tableView_doubleClicked)
         self.tableView.setEditTriggers(QAbstractItemView.NoEditTriggers)
@@ -403,6 +408,37 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         ret = self.dlg.exec_()
         self.load_dataset()
         self.reset_tableView()
+
+
+    def get_selected_dataset(self):
+        selected_indexes = self.treeView.selectionModel().selectedRows()
+        if len(selected_indexes) == 0:
+            return None
+        else:
+            selected_dataset_list = []
+            for index in selected_indexes:
+                item = self.dataset_model.itemFromIndex(index)
+                dataset = item.data()
+                selected_dataset_list.append(dataset)
+            return selected_dataset_list[0]
+
+    @pyqtSlot()
+    def on_treeView_clicked(self,event):
+        print("clicked")
+        event.accept()
+        self.selected_dataset = self.get_selected_dataset()
+        if self.selected_dataset is None:
+            print("no dataset selected")
+            self.actionNewObject.setEnabled(False)
+            self.actionExport.setEnabled(False)
+            self.actionAnalyze.setEnabled(False)
+        else:
+            self.actionNewObject.setEnabled(True)
+            self.actionExport.setEnabled(True)
+            self.actionAnalyze.setEnabled(True)
+            self.load_object()
+        #self.dlg = DatasetDialog(self)
+
 
     @pyqtSlot()
     def on_treeView_doubleClicked(self):
@@ -837,6 +873,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 self.load_subdataset(item1,item1.data())
 
     def on_dataset_selection_changed(self, selected, deselected):
+        print("dataset selection changed")
         indexes = selected.indexes()
         #print(indexes)
         if indexes:
@@ -845,6 +882,13 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             ds = item1.data()
             self.selected_dataset = ds
             self.load_object()
+            self.actionAnalyze.setEnabled(True)
+            self.actionNewObject.setEnabled(True)
+            self.actionExport.setEnabled(True)
+        else:
+            self.actionAnalyze.setEnabled(False)
+            self.actionNewObject.setEnabled(False)
+            self.actionExport.setEnabled(False)
 
     def load_object(self):
         #print("load_object")
@@ -898,15 +942,15 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.show_object(self.selected_object)
 
     def show_object(self, obj):
-        print("show object")
+        #print("show object")
         self.object_view.clear_object()
-        print("cleared object view")
+        #print("cleared object view")
         self.object_view.landmark_list = copy.deepcopy(obj.landmark_list)
-        print("landmark list copied")
+        #print("landmark list copied")
         self.object_view.set_object(obj)
-        print("set object", obj)
+        #print("set object", obj)
         self.object_view.read_only = True
-        print("object_view:", self.object_view)
+        #print("object_view:", self.object_view)
         self.object_view.update()
 
     def clear_object_view(self):

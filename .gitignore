@@ -4,3 +4,4 @@ build/
 dist/
 data/
 test*.py
+Output/

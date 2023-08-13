@@ -1,5 +1,30 @@
 import sys, os
 
+COMPANY_NAME = "PaleoBytes"
+PROGRAM_NAME = "Modan2"
+PROGRAM_VERSION = "0.1.0"
+
+DB_LOCATION = ""
+
+
+print(os.name)
+if os.name == 'nt':
+    user_data_dir = os.path.expandvars('%APPDATA%')
+else:
+    user_data_dir = os.path.expanduser('~')
+
+DEFAULT_DB_DIRECTORY = os.path.join( user_data_dir, COMPANY_NAME )
+DEFAULT_STORAGE_DIRECTORY = os.path.join(DEFAULT_DB_DIRECTORY, "data/")
+
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
+
 IMAGE_EXTENSION_LIST = ['png', 'jpg', 'jpeg','bmp','gif','tif','tiff']
 MODEL_EXTENSION_LIST = ['obj', 'ply', 'stl']
 

@@ -18,71 +18,58 @@ import MdUtils as mu
 from ModanDialogs import DatasetAnalysisDialog, ObjectDialog, ImportDatasetDialog, DatasetDialog, PreferencesDialog, \
     MODE, ObjectViewer3D, ExportDatasetDialog, ObjectViewer2D, ProgressDialog
 
-PROGRAM_NAME = "Modan2"
-PROGRAM_VERSION = "0.1.0"
-
-BASE_DIRECTORY = "."
-DEFAULT_STORAGE_DIRECTORY = os.path.join(BASE_DIRECTORY, "data/")
-
-def resource_path(relative_path):
-    try:
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath(".")
-
-    return os.path.join(base_path, relative_path)
 
 ICON = {}
-ICON['new_dataset'] = resource_path('icons/M2NewDataset_1.png')
-ICON['new_object'] = resource_path('icons/M2NewObject_2.png')
-ICON['import'] = resource_path('icons/M2Import_1.png')
-ICON['export'] = resource_path('icons/M2Export_1.png')
-ICON['analyze'] = resource_path('icons/M2Analysis_1.png')
-ICON['preferences'] = resource_path('icons/M2Preferences_1.png')
-ICON['about'] = resource_path('icons/M2About_1.png')
-ICON['exit'] = resource_path('icons/exit.png')
-ICON['Modan2'] = resource_path('icons/Modan2_2.png')
-ICON['dataset_2d'] = resource_path('icons/M2Dataset2D_3.png')
-ICON['dataset_3d'] = resource_path('icons/M2Dataset3D_4.png')
+ICON['new_dataset'] = mu.resource_path('icons/M2NewDataset_1.png')
+ICON['new_object'] = mu.resource_path('icons/M2NewObject_2.png')
+ICON['import'] = mu.resource_path('icons/M2Import_1.png')
+ICON['export'] = mu.resource_path('icons/M2Export_1.png')
+ICON['analyze'] = mu.resource_path('icons/M2Analysis_1.png')
+ICON['preferences'] = mu.resource_path('icons/M2Preferences_1.png')
+ICON['about'] = mu.resource_path('icons/M2About_1.png')
+ICON['exit'] = mu.resource_path('icons/exit.png')
+ICON['Modan2'] = mu.resource_path('icons/Modan2_2.png')
+ICON['dataset_2d'] = mu.resource_path('icons/M2Dataset2D_3.png')
+ICON['dataset_3d'] = mu.resource_path('icons/M2Dataset3D_4.png')
 
 class ModanMainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowIcon(QIcon(resource_path('icons/Modan2_2.png')))
-        self.setWindowTitle("{} v{}".format(PROGRAM_NAME, PROGRAM_VERSION))
+        self.setWindowIcon(QIcon(mu.resource_path('icons/Modan2_2.png')))
+        self.setWindowTitle("{} v{}".format(mu.PROGRAM_NAME, mu.PROGRAM_VERSION))
 
         self.tableView = QTableView()
         self.treeView = QTreeView()
 
         self.toolbar = QToolBar("Main Toolbar")
         self.toolbar.setIconSize(QSize(32,32))
-        #self.toolbar.addAction(QIcon(resource_path('icons/open.png')), "Open", self.on_action_open_db_triggered)
-        #self.toolbar.addAction(QIcon(resource_path('icons/newdb.png')), "New", self.on_action_new_db_triggered)
-        #self.toolbar.addAction(QIcon(resource_path('icons/saveas.png')), "Save As", self.on_action_save_as_triggered)
-        self.actionNewDataset = QAction(QIcon(resource_path(ICON['new_dataset'])), "New Dataset\tCtrl+N", self)
+        #self.toolbar.addAction(QIcon(mu.resource_path('icons/open.png')), "Open", self.on_action_open_db_triggered)
+        #self.toolbar.addAction(QIcon(mu.resource_path('icons/newdb.png')), "New", self.on_action_new_db_triggered)
+        #self.toolbar.addAction(QIcon(mu.resource_path('icons/saveas.png')), "Save As", self.on_action_save_as_triggered)
+        self.actionNewDataset = QAction(QIcon(mu.resource_path(ICON['new_dataset'])), "New Dataset\tCtrl+N", self)
         self.actionNewDataset.triggered.connect(self.on_action_new_dataset_triggered)
         self.actionNewDataset.setShortcut(QKeySequence("Ctrl+N"))
-        self.actionNewObject = QAction(QIcon(resource_path(ICON['new_object'])), "New Object\tCtrl+Shift+N", self)
+        self.actionNewObject = QAction(QIcon(mu.resource_path(ICON['new_object'])), "New Object\tCtrl+Shift+N", self)
         self.actionNewObject.triggered.connect(self.on_action_new_object_triggered)
         self.actionNewObject.setShortcut(QKeySequence("Ctrl+Shift+N"))
         #self.actionNewObject.setEnabled(False)
-        self.actionImport = QAction(QIcon(resource_path(ICON['import'])), "Import\tCtrl+I", self)
+        self.actionImport = QAction(QIcon(mu.resource_path(ICON['import'])), "Import\tCtrl+I", self)
         self.actionImport.triggered.connect(self.on_action_import_dataset_triggered)
         self.actionImport.setShortcut(QKeySequence("Ctrl+I"))
-        self.actionExport = QAction(QIcon(resource_path(ICON['export'])), "Export\tCtrl+E", self)
+        self.actionExport = QAction(QIcon(mu.resource_path(ICON['export'])), "Export\tCtrl+E", self)
         self.actionExport.triggered.connect(self.on_action_export_dataset_triggered)
         self.actionExport.setShortcut(QKeySequence("Ctrl+E"))
         #self.actionExport.setEnabled(False)
-        self.actionAnalyze = QAction(QIcon(resource_path(ICON['analyze'])), "Analyze\tCtrl+G", self)
+        self.actionAnalyze = QAction(QIcon(mu.resource_path(ICON['analyze'])), "Analyze\tCtrl+G", self)
         self.actionAnalyze.triggered.connect(self.on_action_analyze_dataset_triggered)
         self.actionAnalyze.setShortcut(QKeySequence("Ctrl+G"))
         #self.actionAnalyze.setEnabled(False)
-        self.actionPreferences = QAction(QIcon(resource_path(ICON['preferences'])), "Preferences", self)
+        self.actionPreferences = QAction(QIcon(mu.resource_path(ICON['preferences'])), "Preferences", self)
         self.actionPreferences.triggered.connect(self.on_action_edit_preferences_triggered)
-        self.actionExit = QAction(QIcon(resource_path(ICON['exit'])), "Exit\tCtrl+W", self)
+        self.actionExit = QAction(QIcon(mu.resource_path(ICON['exit'])), "Exit\tCtrl+W", self)
         self.actionExit.triggered.connect(self.on_action_exit_triggered)
         self.actionExit.setShortcut(QKeySequence("Ctrl+W"))
-        self.actionAbout = QAction(QIcon(resource_path(ICON['about'])), "About\tF1", self)
+        self.actionAbout = QAction(QIcon(mu.resource_path(ICON['about'])), "About\tF1", self)
         self.actionAbout.triggered.connect(self.on_action_about_triggered)
         self.actionAbout.setShortcut(QKeySequence("F1"))
         self.toolbar.addAction(self.actionNewDataset)
@@ -149,8 +136,8 @@ class ModanMainWindow(QMainWindow):
         pass
 
     def read_settings(self):
-        self.m_app.settings = QSettings(QSettings.IniFormat, QSettings.UserScope,"PaleoBytes", "Modan2")
-        self.m_app.storage_directory = os.path.abspath(DEFAULT_STORAGE_DIRECTORY)
+        self.m_app.settings = QSettings(QSettings.IniFormat, QSettings.UserScope,mu.COMPANY_NAME, mu.PROGRAM_NAME)
+        self.m_app.storage_directory = os.path.abspath(mu.DEFAULT_STORAGE_DIRECTORY)
         self.toolbar_icon_size = self.m_app.settings.value("ToolbarIconSize", "Small")
         self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
         if self.remember_geometry is True:
@@ -193,7 +180,7 @@ class ModanMainWindow(QMainWindow):
 
     @pyqtSlot() 
     def on_action_about_triggered(self):
-        text = PROGRAM_NAME + " v" + PROGRAM_VERSION + "\n\n"
+        text = mu.PROGRAM_NAME + " v" + mu.PROGRAM_VERSION + "\n\n"
         text += "Morphometrics made easy\n\n"
         text += "This software is distributed under the terms of the MIT License.\n\n"
         text += "© 2023 Jikhan Jung\n"
@@ -581,13 +568,13 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                     # if shift is pressed, move instead of copy
                     if shift_clicked:
                         if source_object.image.count() > 0:
-                            source_image_path = source_object.image[0].get_image_path(self.m_app.storage_directory)
+                            source_image_path = source_object.image[0].get_file_path(self.m_app.storage_directory)
                         source_dataset = source_object.dataset
                         source_object.dataset = target_dataset
                         source_object.save()
                         if source_object.image.count() > 0:
                             target_image = source_object.image[0]
-                            target_image_path = target_image.get_image_path(self.m_app.storage_directory)
+                            target_image_path = target_image.get_file_path(self.m_app.storage_directory)
                             if os.path.exists(source_image_path):
                                 if not os.path.exists(os.path.dirname(target_image_path)):
                                     os.makedirs(os.path.dirname(target_image_path))
@@ -609,7 +596,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                         new_object.save()
                         if source_object.image.count() > 0:
                             old_image = source_object.image[0]
-                            source_image_path = old_image.get_image_path(self.m_app.storage_directory)
+                            source_image_path = old_image.get_file_path(self.m_app.storage_directory)
                             new_image = MdImage()
                             new_image.original_path = old_image.original_path
                             new_image.original_filename = old_image.original_filename
@@ -621,7 +608,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                             new_image.file_modified = old_image.file_modified
                             new_image.object = new_object
                             new_image.save()
-                            new_image_path = new_image.get_image_path(self.m_app.storage_directory)
+                            new_image_path = new_image.get_file_path(self.m_app.storage_directory)
                             #print(source_image_path, new_image_path)
                             if os.path.exists(source_image_path):
                                 if not os.path.exists(os.path.dirname(new_image_path)):
@@ -844,9 +831,9 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             rec.unpack_wireframe()
             item1 = QStandardItem(rec.dataset_name + " (" + str(rec.object_list.count()) + ")")
             if rec.dimension == 2:
-                item1.setIcon(QIcon(resource_path(ICON['dataset_2d'])))
+                item1.setIcon(QIcon(mu.resource_path(ICON['dataset_2d'])))
             else:
-                item1.setIcon(QIcon(resource_path(ICON['dataset_3d'])))
+                item1.setIcon(QIcon(mu.resource_path(ICON['dataset_3d'])))
             item2 = QStandardItem(str(rec.id))
             item1.setData(rec)
             
@@ -863,9 +850,9 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             rec.unpack_wireframe()
             item1 = QStandardItem(rec.dataset_name + " (" + str(rec.object_list.count()) + ")")
             if rec.dimension == 2:
-                item1.setIcon(QIcon(resource_path(ICON['dataset_2d']))) 
+                item1.setIcon(QIcon(mu.resource_path(ICON['dataset_2d']))) 
             else:
-                item1.setIcon(QIcon(resource_path(ICON['dataset_3d'])))
+                item1.setIcon(QIcon(mu.resource_path(ICON['dataset_3d'])))
             item2 = QStandardItem(str(rec.id))
             item1.setData(rec)
             parent_item.appendRow([item1,item2])#,item3] )
@@ -873,7 +860,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 self.load_subdataset(item1,item1.data())
 
     def on_dataset_selection_changed(self, selected, deselected):
-        print("dataset selection changed")
+        #print("dataset selection changed")
         indexes = selected.indexes()
         #print(indexes)
         if indexes:
@@ -959,7 +946,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 if __name__ == "__main__":
     #QApplication : 프로그램을 실행시켜주는 클래스
     app = QApplication(sys.argv)
-    app.setWindowIcon(QIcon(resource_path('icons/Modan2_2.png')))
+    app.setWindowIcon(QIcon(mu.resource_path('icons/Modan2_2.png')))
     #app.settings = 
     #app.preferences = QSettings("Modan", "Modan2")
 

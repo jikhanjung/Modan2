@@ -6,8 +6,7 @@ PROGRAM_VERSION = "0.1.0"
 
 DB_LOCATION = ""
 
-
-print(os.name)
+#print(os.name)
 if os.name == 'nt':
     user_data_dir = os.path.expandvars('%APPDATA%')
 else:

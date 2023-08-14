@@ -172,7 +172,6 @@ class ModanMainWindow(QMainWindow):
         self.preferences_dialog = PreferencesDialog(self)
         #self.preferences_dialog.setWindowModality(Qt.ApplicationModal)
         self.preferences_dialog.show()
-
     
     @pyqtSlot()
     def on_action_exit_triggered(self):
@@ -297,7 +296,6 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
         propertyname = self.selected_dataset.propertyname_list[idx]
         text, ok = QInputDialog.getText(self, 'Input Dialog', 'Enter new value for ' + propertyname, text="")
-
 
         if ok:
             total_count = len(object_list)

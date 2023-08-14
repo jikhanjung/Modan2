@@ -10,7 +10,8 @@ import time
 import math
 import numpy as np
 import copy
-from MdUtils import *
+import MdUtils as mu
+#from MdUtils import *
 
 LANDMARK_SEPARATOR = "\t"
 LINE_SEPARATOR = "\n"
@@ -18,7 +19,7 @@ PROPERTY_SEPARATOR = ","
 EDGE_SEPARATOR = "-"
 WIREFRAME_SEPARATOR = ","
 
-database_path = os.path.join(DEFAULT_DB_DIRECTORY, 'Modan2.db')
+database_path = os.path.join(mu.DEFAULT_DB_DIRECTORY, 'Modan2.db')
 
 gDatabase = SqliteDatabase(database_path,pragmas={'foreign_keys': 1})
 

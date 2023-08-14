@@ -313,7 +313,8 @@ class ObjectViewer2D(QLabel):
                 self.mouse_down_x = me.x()
                 self.mouse_down_y = me.y()
         elif me.button() == Qt.MidButton:
-            print("middle button clicked")
+            #print("middle button clicked")
+            pass
 
         self.repaint()
 

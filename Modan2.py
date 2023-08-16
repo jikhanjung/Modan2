@@ -97,6 +97,9 @@ class ModanMainWindow(QMainWindow):
         self.help_menu = self.main_menu.addMenu("Help")
         self.help_menu.addAction(self.actionAbout)
 
+        self.m_app = QApplication.instance()
+        self.read_settings()
+
         self.initUI()
         
         self.selected_dataset = None
@@ -113,10 +116,15 @@ class ModanMainWindow(QMainWindow):
         self.remember_geometry = True
         self.toolbar_icon_size = "Small"
 
-        self.m_app = QApplication.instance()
-        self.read_settings()
-
         self.set_toolbar_icon_size(self.toolbar_icon_size)
+
+    def update_settings(self):
+        size = self.preferences_dialog.toolbar_icon_size
+        landmark_pref = self.preferences_dialog.landmark_pref
+        wireframe_pref = self.preferences_dialog.wireframe_pref
+        self.set_toolbar_icon_size(size)
+        self.object_view_2d.set_landmark_pref(landmark_pref['2D'],wireframe_pref['2D'])
+        self.object_view_3d.set_landmark_pref(landmark_pref['3D'],wireframe_pref['3D'])
 
     def set_toolbar_icon_size(self, size):
         if size.lower() == 'small':
@@ -943,6 +951,11 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 if __name__ == "__main__":
     #QApplication : 프로그램을 실행시켜주는 클래스
+    #with open('log.txt', 'w') as f:
+    #    f.write("hello\n")
+    #    # current directory
+    #    f.write("current directory 1:" + os.getcwd() + "\n")
+    #    f.write("current directory 2:" + os.path.abspath(".") + "\n")
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon(mu.resource_path('icons/Modan2_2.png')))
     #app.settings = 
@@ -960,5 +973,8 @@ if __name__ == "__main__":
 
 ''' 
 How to make an exe file
+
 pyinstaller --onefile --noconsole --add-data "icons/*.png;icons" --icon="icons/Modan2_2.png" Modan2.py
+
+pyinstaller --onedir --noconsole --add-data "icons/*.png;icons" --icon="icons/Modan2_2.png" Modan2.py
 '''

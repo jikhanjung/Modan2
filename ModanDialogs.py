@@ -42,8 +42,8 @@ MODE['PRE_WIRE_FROM'] = 5
 MODE['CALIBRATION'] = 6
 MODE['VIEW'] = 7
 
-LANDMARK_RADIUS = 2
-DISTANCE_THRESHOLD = LANDMARK_RADIUS * 3
+BASE_LANDMARK_RADIUS = 2
+DISTANCE_THRESHOLD = BASE_LANDMARK_RADIUS * 3
 
 # glview modes
 OBJECT_MODE = 1
@@ -86,10 +86,22 @@ NEWLINE = '\n'
 def as_qt_color(color):
     return QColor( *[ int(x*255) for x in color ] )
 
+def as_gl_color(color):
+    qcolor = QColor(color)
+    return qcolor.redF(), qcolor.greenF(), qcolor.blueF()
+
 class ObjectViewer2D(QLabel):
     def __init__(self, widget):
         super(ObjectViewer2D, self).__init__(widget)
         self.setMinimumSize(400,300)
+
+        self.landmark_size = 1
+        self.landmark_color = "#0000FF"
+        self.wireframe_thickness = 1
+        self.wireframe_color = "#FFFF00"
+        self.m_app = QApplication.instance()
+        self.read_settings()
+
         self.object_dialog = None
         self.object = None
         self.orig_pixmap = None
@@ -131,7 +143,19 @@ class ObjectViewer2D(QLabel):
         self.setAcceptDrops(True)
         self.setMouseTracking(True)
         self.set_mode(MODE['EDIT_LANDMARK'])
-        
+
+    def set_landmark_pref(self,lm_pref,wf_pref):
+        self.landmark_size = lm_pref['size']
+        self.landmark_color = lm_pref['color']
+        self.wireframe_thickness = wf_pref['thickness']
+        self.wireframe_color = wf_pref['color']
+
+    def read_settings(self):
+        self.landmark_size = self.m_app.settings.value("LandmarkSize/2D", self.landmark_size)
+        self.landmark_color = self.m_app.settings.value("LandmarkColor/2D", self.landmark_color)
+        self.wireframe_thickness = self.m_app.settings.value("WireframeThickness/2D", self.wireframe_thickness)
+        self.wireframe_color = self.m_app.settings.value("WireframeColor/2D", self.wireframe_color)
+
     def _2canx(self, coord):
         return round((float(coord) / self.image_canvas_ratio) * self.scale) + self.pan_x + self.temp_pan_x
     def _2cany(self, coord):
@@ -410,8 +434,12 @@ class ObjectViewer2D(QLabel):
             #print("pan_x", self.pan_x, "pan_y", self.pan_y, "temp_pan_x", self.temp_pan_x, "temp_pan_y", self.temp_pan_y)
 
         if self.show_wireframe == True:
-            painter.setPen(QPen(as_qt_color(COLOR['WIREFRAME']), 2))
-            painter.setBrush(QBrush(as_qt_color(COLOR['WIREFRAME'])))
+            color = QColor(self.wireframe_color)
+            #print("color:", color, "size", self.landmark_size, "radius", radius)
+            painter.setPen(QPen(color, 2))
+            painter.setBrush(QBrush(color))                
+            #painter.setPen(QPen(as_qt_color(COLOR['WIREFRAME']), 2))
+            #painter.setBrush(QBrush(as_qt_color(COLOR['WIREFRAME'])))
 
             for wire in self.edge_list:
                 if wire[0] >= len(self.landmark_list) or wire[1] >= len(self.landmark_list):
@@ -430,7 +458,8 @@ class ObjectViewer2D(QLabel):
                     [ to_x, to_y ] = self.landmark_list[edge[1]]
                     painter.drawLine(int(self._2canx(from_x)), int(self._2cany(from_y)), int(self._2canx(to_x)), int(self._2cany(to_y)))
 
-        radius = LANDMARK_RADIUS
+        radius = BASE_LANDMARK_RADIUS * (int(self.landmark_size) + 1) 
+        #print("radius", radius)
         painter.setPen(QPen(Qt.blue, 2))
         painter.setBrush(QBrush(Qt.blue))
         if self.edit_mode == MODE['CALIBRATION']:
@@ -454,8 +483,13 @@ class ObjectViewer2D(QLabel):
                 painter.setPen(QPen(as_qt_color(COLOR['SELECTED_LANDMARK']), 2))
                 painter.setBrush(QBrush(as_qt_color(COLOR['SELECTED_LANDMARK'])))
             else:
-                painter.setPen(QPen(as_qt_color(COLOR['NORMAL_SHAPE']), 2))
-                painter.setBrush(QBrush(as_qt_color(COLOR['NORMAL_SHAPE'])))
+                #painter.setPen(QPen(as_qt_color(COLOR['NORMAL_SHAPE']), 2))
+                #painter.setBrush(QBrush(as_qt_color(COLOR['NORMAL_SHAPE'])))
+                #print("landmark_color", self.landmark_color)
+                color = QColor(self.landmark_color)
+                #print("color:", color, "size", self.landmark_size, "radius", radius)
+                painter.setPen(QPen(color, 2))
+                painter.setBrush(QBrush(color))                
             painter.drawEllipse(int(self._2canx(landmark[0])-radius), int(self._2cany(landmark[1]))-radius, radius*2, radius*2)
             if self.show_index == True:
                 painter.setPen(QPen(as_qt_color(COLOR['NORMAL_TEXT']), 2))
@@ -625,6 +659,15 @@ class ObjectViewer3D(QGLWidget):
         QGLWidget.__init__(self,parent)
         self.parent = parent
         self.setMinimumSize(400,300)
+
+        self.landmark_size = 1
+        self.landmark_color = "#0000FF"
+        self.wireframe_thickness = 1
+        self.wireframe_color = "#FFFF00"
+        self.m_app = QApplication.instance()        
+        self.read_settings()
+        print("wireframe color:", self.wireframe_color)
+
         self.setAcceptDrops(True)
         self.setMouseTracking(True)
         self.object_dialog = None
@@ -683,6 +726,18 @@ class ObjectViewer3D(QGLWidget):
         self.fullpath = None
         self.edge_list = []
         self.landmark_list = []
+
+    def set_landmark_pref(self,lm_pref,wf_pref):
+        self.landmark_size = lm_pref['size']
+        self.landmark_color = lm_pref['color']
+        self.wireframe_thickness = wf_pref['thickness']
+        self.wireframe_color = wf_pref['color']
+
+    def read_settings(self):
+        self.landmark_size = self.m_app.settings.value("LandmarkSize/3D", self.landmark_size)
+        self.landmark_color = self.m_app.settings.value("LandmarkColor/3D", self.landmark_color)
+        self.wireframe_thickness = self.m_app.settings.value("WireframeThickness/3D", self.wireframe_thickness)
+        self.wireframe_color = self.m_app.settings.value("WireframeColor/3D", self.wireframe_color)
 
     def show_message(self, msg):
         if self.object_dialog is not None:
@@ -1125,7 +1180,11 @@ class ObjectViewer3D(QGLWidget):
         # pan, rotate, dolly
 
         if self.data_mode == OBJECT_MODE:
-            self.draw_object(self.obj_ops)
+            #print("normal shape", COLOR['NORMAL_SHAPE'])
+            object_color = as_gl_color(self.landmark_color) #COLOR['NORMAL_SHAPE']
+            #print("object_color:", object_color)
+
+            self.draw_object(self.obj_ops,color=object_color)
         else:
             self.draw_dataset(self.ds_ops)
         gl.glFlush()
@@ -1136,7 +1195,9 @@ class ObjectViewer3D(QGLWidget):
             if obj.id in ds_ops.selected_object_id_list:
                 object_color = COLOR['SELECTED_SHAPE']
             else:
-                object_color = COLOR['NORMAL_SHAPE']
+                #print("normal shape", COLOR['NORMAL_SHAPE'])
+                object_color = as_gl_color(self.landmark_color) #COLOR['NORMAL_SHAPE']
+                #print("object_color:", object_color)
             self.draw_object(obj, landmark_as_sphere=False, color=object_color)
         if self.show_average:
             object_color = COLOR['AVERAGE_SHAPE']
@@ -1163,7 +1224,10 @@ class ObjectViewer3D(QGLWidget):
                             gl.glColor3f( *COLOR['SELECTED_EDGE'] )
                         else:
                         #gl.glDisable(gl.GL_LIGHTING)
-                            gl.glColor3f( *COLOR['WIREFRAME'])
+                            print("wireframe color:", self.wireframe_color)
+                            wf_color = as_gl_color(self.wireframe_color)
+                            print("color:", wf_color)
+                            gl.glColor3f( *wf_color ) #*COLOR['WIREFRAME'])
                     gl.glLineWidth(2.0)
                     gl.glBegin(gl.GL_LINE_STRIP)
                     #print(self.down_x, self.down_y, self.curr_x, self.curr_y)
@@ -1193,7 +1257,7 @@ class ObjectViewer3D(QGLWidget):
                     color = self.lm_idx_to_color[key]
                     #print(self.lm_idx_to_color, i, current_buffer)
                     gl.glColor3f( *[ c * 1.0 / 255 for c in color] )
-                glut.glutSolidSphere(0.03, 10, 10)
+                glut.glutSolidSphere(0.02 * ( int(self.landmark_size) + 1 ), 10, 10)
                 if current_buffer == self.picker_buffer and self.object_dialog is not None:
                     gl.glEnable(gl.GL_LIGHTING)
                 gl.glPopMatrix()
@@ -3766,7 +3830,16 @@ class DatasetAnalysisDialog(QDialog):
                     self.scatter_result[name] = self.ax2.scatter(group['x_val'], group['y_val'], s=group['size'], marker=group['symbol'], color=group['color'], data=group['data'], picker=True, pickradius=5)
                     #print("ret", ret)
             if show_legend:
-                self.ax2.legend(self.scatter_result.values(), self.scatter_result.keys(), loc='upper left', bbox_to_anchor=(1.05, 1))
+                values = []
+                keys = []
+                for key in self.scatter_result.keys():
+                    #print("key", key)
+                    if key[0] == '_':
+                        continue
+                    else:
+                        keys.append(key)
+                        values.append(self.scatter_result[key])
+                self.ax2.legend(values, keys, loc='upper left', bbox_to_anchor=(1.05, 1))
             if show_axis_label:
                 self.ax2.set_xlabel(axis1_title)
                 self.ax2.set_ylabel(axis2_title)
@@ -3786,7 +3859,18 @@ class DatasetAnalysisDialog(QDialog):
                     self.scatter_result[name] = self.ax3.scatter(group['x_val'], group['y_val'], group['z_val'], s=group['size'], marker=group['symbol'], color=group['color'], data=group['data'],depthshade=depth_shade, picker=True, pickradius=5)
                     #print("ret", ret)
             if show_legend:
-                self.ax3.legend(self.scatter_result.values(), self.scatter_result.keys(), loc='upper left', bbox_to_anchor=(1.05, 1))
+                values = []
+                keys = []
+                for key in self.scatter_result.keys():
+                    #print("key", key)
+                    if key[0] == '_':
+                        continue
+                    else:
+                        keys.append(key)
+                        values.append(self.scatter_result[key])
+                self.ax3.legend(values, keys, loc='upper left', bbox_to_anchor=(1.05, 1))
+            #if show_legend:
+            #    self.ax3.legend(self.scatter_result.values(), self.scatter_result.keys(), loc='upper left', bbox_to_anchor=(1.05, 1))
             if show_axis_label:
                 self.ax3.set_xlabel(axis1_title)
                 self.ax3.set_ylabel(axis2_title)
@@ -4576,10 +4660,17 @@ class PreferencesDialog(QDialog):
         self.color_list = self.default_color_list[:]
         self.marker_list = mu.MARKER_LIST[:]
 
+        self.landmark_pref = {'2D':{'size':1,'color':'#0000FF'},'3D':{'size':1,'color':'#0000FF'}}
+        self.wireframe_pref = {'2D':{'thickness':1,'color':'#FFFF00'},'3D':{'thickness':1,'color':'#FFFF00'}}
+        #print("landmark_pref:", self.landmark_pref)
+        #print("wireframe_pref:", self.wireframe_pref)
+
         self.m_app = QApplication.instance()
         self.read_settings()
         self.setWindowTitle("Preferences")
         #self.lbl_main_view.setMinimumSize(400, 300)
+        #print("landmark_pref:", self.landmark_pref)
+        #print("wireframe_pref:", self.wireframe_pref)
 
         self.rbRememberGeometryYes = QRadioButton("Yes")
         self.rbRememberGeometryYes.setChecked(self.remember_geometry)
@@ -4604,6 +4695,86 @@ class PreferencesDialog(QDialog):
         self.rbToolbarIconMedium = QRadioButton("Medium")
         self.rbToolbarIconMedium.setChecked(self.toolbar_icon_medium)
         self.rbToolbarIconMedium.clicked.connect(self.on_rbToolbarIconMedium_clicked)
+
+        self.gb2DLandmarkPref = QGroupBox()
+        self.gb2DLandmarkPref.setLayout(QHBoxLayout())
+        self.gb2DLandmarkPref.setTitle("2D")
+        self.combo2DLandmarkSize = QComboBox()
+        self.combo2DLandmarkSize.addItems(["Small","Medium","Large"])
+        self.combo2DLandmarkSize.setCurrentIndex(int(self.landmark_pref['2D']['size']))
+        self.lbl2DLandmarkColor = QPushButton()
+        self.lbl2DLandmarkColor.setMinimumSize(20,20)
+        self.lbl2DLandmarkColor.setStyleSheet("background-color: " + self.landmark_pref['2D']['color'])
+        self.lbl2DLandmarkColor.setToolTip(self.landmark_pref['2D']['color'])
+        self.lbl2DLandmarkColor.setCursor(Qt.PointingHandCursor)
+        self.lbl2DLandmarkColor.mousePressEvent = lambda event, dim='2D': self.on_lblLmColor_clicked(event, '2D')
+        self.combo2DLandmarkSize.currentIndexChanged.connect(lambda event, dim='2D': self.on_comboLmSize_currentIndexChanged(event, '2D'))
+
+        self.gb2DLandmarkPref.layout().addWidget(self.combo2DLandmarkSize)
+        self.gb2DLandmarkPref.layout().addWidget(self.lbl2DLandmarkColor)
+
+        self.gb3DLandmarkPref = QGroupBox()
+        self.gb3DLandmarkPref.setLayout(QHBoxLayout())
+        self.gb3DLandmarkPref.setTitle("3D")
+        self.combo3DLandmarkSize = QComboBox()
+        self.combo3DLandmarkSize.addItems(["Small","Medium","Large"])
+        self.combo3DLandmarkSize.setCurrentIndex(int(self.landmark_pref['3D']['size']))
+        self.lbl3DLandmarkColor = QPushButton()
+        self.lbl3DLandmarkColor.setMinimumSize(20,20)
+        self.lbl3DLandmarkColor.setStyleSheet("background-color: " + self.landmark_pref['3D']['color'])
+        self.lbl3DLandmarkColor.setToolTip(self.landmark_pref['3D']['color'])
+        self.lbl3DLandmarkColor.setCursor(Qt.PointingHandCursor)
+        self.lbl3DLandmarkColor.mousePressEvent = lambda event, dim='3D': self.on_lblLmColor_clicked(event, '3D')
+        self.combo3DLandmarkSize.currentIndexChanged.connect(lambda event, dim='3D': self.on_comboLmSize_currentIndexChanged(event, '3D'))
+
+        self.gb3DLandmarkPref.layout().addWidget(self.combo3DLandmarkSize)
+        self.gb3DLandmarkPref.layout().addWidget(self.lbl3DLandmarkColor)
+
+        self.landmark_layout = QHBoxLayout()
+        self.landmark_layout.addWidget(self.gb2DLandmarkPref)
+        self.landmark_layout.addWidget(self.gb3DLandmarkPref)
+        self.landmark_widget = QWidget()
+        self.landmark_widget.setLayout(self.landmark_layout)
+
+        self.gb2DWireframePref = QGroupBox()
+        self.gb2DWireframePref.setLayout(QHBoxLayout())
+        self.gb2DWireframePref.setTitle("2D")
+        self.combo2DWireframeThickness = QComboBox()
+        self.combo2DWireframeThickness.addItems(["Thin","Medium","Thick"])
+        self.combo2DWireframeThickness.setCurrentIndex(int(self.wireframe_pref['2D']['thickness']))
+        self.lbl2DWireframeColor = QPushButton()
+        self.lbl2DWireframeColor.setMinimumSize(20,20)
+        self.lbl2DWireframeColor.setStyleSheet("background-color: " + self.wireframe_pref['2D']['color'])
+        self.lbl2DWireframeColor.setToolTip(self.wireframe_pref['2D']['color'])
+        self.lbl2DWireframeColor.setCursor(Qt.PointingHandCursor)
+        self.lbl2DWireframeColor.mousePressEvent = lambda event, dim='2D': self.on_lblWireframeColor_clicked(event, '2D')
+        self.combo2DWireframeThickness.currentIndexChanged.connect(lambda event, dim='2D': self.on_comboWireframeThickness_currentIndexChanged(event, '2D'))
+
+        self.gb2DWireframePref.layout().addWidget(self.combo2DWireframeThickness)
+        self.gb2DWireframePref.layout().addWidget(self.lbl2DWireframeColor)
+
+        self.gb3DWireframePref = QGroupBox()
+        self.gb3DWireframePref.setLayout(QHBoxLayout())
+        self.gb3DWireframePref.setTitle("3D")
+        self.combo3DWireframeThickness = QComboBox()
+        self.combo3DWireframeThickness.addItems(["Thin","Medium","Thick"])
+        self.combo3DWireframeThickness.setCurrentIndex(int(self.wireframe_pref['3D']['thickness']))
+        self.lbl3DWireframeColor = QPushButton()
+        self.lbl3DWireframeColor.setMinimumSize(20,20)
+        self.lbl3DWireframeColor.setStyleSheet("background-color: " + self.wireframe_pref['3D']['color'])
+        self.lbl3DWireframeColor.setToolTip(self.wireframe_pref['3D']['color'])
+        self.lbl3DWireframeColor.setCursor(Qt.PointingHandCursor)
+        self.lbl3DWireframeColor.mousePressEvent = lambda event, dim='3D': self.on_lblWireframeColor_clicked(event, '3D')
+        self.combo3DWireframeThickness.currentIndexChanged.connect(lambda event, dim='3D': self.on_comboWireframeThickness_currentIndexChanged(event, '3D'))
+
+        self.gb3DWireframePref.layout().addWidget(self.combo3DWireframeThickness)
+        self.gb3DWireframePref.layout().addWidget(self.lbl3DWireframeColor)
+
+        self.wireframe_layout = QHBoxLayout()
+        self.wireframe_layout.addWidget(self.gb2DWireframePref)
+        self.wireframe_layout.addWidget(self.gb3DWireframePref)
+        self.wireframe_widget = QWidget()
+        self.wireframe_widget.setLayout(self.wireframe_layout)
 
         self.gbToolbarIconSize = QGroupBox()
         self.gbToolbarIconSize.setLayout(QHBoxLayout())
@@ -4676,6 +4847,8 @@ class PreferencesDialog(QDialog):
         self.main_layout.addRow("Toolbar Icon Size", self.gbToolbarIconSize)
         self.main_layout.addRow("Data point colors", self.gbPlotColors)
         self.main_layout.addRow("Data point markers", self.gbPlotMarkers)
+        self.main_layout.addRow("Landmark", self.landmark_widget)
+        self.main_layout.addRow("Wireframe", self.wireframe_widget)
         self.main_layout.addRow("", self.btnOkay)
 
         self.read_settings()
@@ -4696,6 +4869,48 @@ class PreferencesDialog(QDialog):
             self.current_lblColor.setToolTip(color.name())
             self.color_list[self.lblColor_list.index(self.current_lblColor)] = color.name()
             #print(self.color_list)
+
+    def on_comboLmSize_currentIndexChanged(self, event, dim):
+        if dim == '2D':
+            self.current_comboLmSize = self.combo2DLandmarkSize
+        elif dim == '3D':
+            self.current_comboLmSize = self.combo3DLandmarkSize
+        self.landmark_pref[dim]['size'] = self.current_comboLmSize.currentIndex()
+        self.parent.update_settings()
+
+    def on_lblLmColor_clicked(self,event, dim):
+        if dim == '2D':
+            self.current_lblLmColor = self.lbl2DLandmarkColor
+        elif dim == '3D':
+            self.current_lblLmColor = self.lbl3DLandmarkColor
+        dialog = QColorDialog()
+        color = dialog.getColor(initial=QColor(self.current_lblLmColor.toolTip()))
+        if color is not None:
+            self.current_lblLmColor.setStyleSheet("background-color: " + color.name())
+            self.current_lblLmColor.setToolTip(color.name())
+            self.landmark_pref[dim]['color'] = color.name()
+        self.parent.update_settings()
+
+    def on_comboWireframeThickness_currentIndexChanged(self, event, dim):
+        if dim == '2D':
+            self.current_comboWireframeThickness = self.combo2DWireframeThickness
+        elif dim == '3D':
+            self.current_comboWireframeThickness = self.combo3DWireframeThickness
+        self.wireframe_pref[dim]['thickness'] = self.current_comboWireframeThickness.currentIndex()
+        self.parent.update_settings()
+
+    def on_lblWireframeColor_clicked(self,event, dim):
+        if dim == '2D':
+            self.current_lblWireframeColor = self.lbl2DWireframeColor
+        elif dim == '3D':
+            self.current_lblWireframeColor = self.lbl3DWireframeColor
+        dialog = QColorDialog()
+        color = dialog.getColor(initial=QColor(self.current_lblWireframeColor.toolTip()))
+        if color is not None:
+            self.current_lblWireframeColor.setStyleSheet("background-color: " + color.name())
+            self.current_lblWireframeColor.setToolTip(color.name())
+            self.wireframe_pref[dim]['color'] = color.name()
+        self.parent.update_settings()
 
     def read_settings(self):
         self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
@@ -4719,6 +4934,15 @@ class PreferencesDialog(QDialog):
         for i in range(len(self.marker_list)):
             self.marker_list[i] = self.m_app.settings.value("DataPointMarker/"+str(i), self.marker_list[i])
 
+        self.landmark_pref['2D']['size'] = self.m_app.settings.value("LandmarkSize/2D", self.landmark_pref['2D']['size'])
+        self.landmark_pref['2D']['color'] = self.m_app.settings.value("LandmarkColor/2D", self.landmark_pref['2D']['color'])
+        self.landmark_pref['3D']['size'] = self.m_app.settings.value("LandmarkSize/3D", self.landmark_pref['3D']['size'])
+        self.landmark_pref['3D']['color'] = self.m_app.settings.value("LandmarkColor/3D", self.landmark_pref['3D']['color'])
+        self.wireframe_pref['2D']['thickness'] = self.m_app.settings.value("WireframeThickness/2D", self.wireframe_pref['2D']['thickness'])
+        self.wireframe_pref['2D']['color'] = self.m_app.settings.value("WireframeColor/2D", self.wireframe_pref['2D']['color'])
+        self.wireframe_pref['3D']['thickness'] = self.m_app.settings.value("WireframeThickness/3D", self.wireframe_pref['3D']['thickness'])
+        self.wireframe_pref['3D']['color'] = self.m_app.settings.value("WireframeColor/3D", self.wireframe_pref['3D']['color'])
+
         if self.remember_geometry is True:
             self.setGeometry(self.m_app.settings.value("WindowGeometry/PreferencesDialog", QRect(100, 100, 600, 400)))
         else:
@@ -4737,6 +4961,15 @@ class PreferencesDialog(QDialog):
 
         if self.remember_geometry is True:
             self.m_app.settings.setValue("WindowGeometry/PreferencesDialog", self.geometry())
+
+        self.m_app.settings.setValue("LandmarkSize/2D", self.landmark_pref['2D']['size'])
+        self.m_app.settings.setValue("LandmarkColor/2D", self.landmark_pref['2D']['color'])
+        self.m_app.settings.setValue("LandmarkSize/3D", self.landmark_pref['3D']['size'])
+        self.m_app.settings.setValue("LandmarkColor/3D", self.landmark_pref['3D']['color'])
+        self.m_app.settings.setValue("WireframeThickness/2D", self.wireframe_pref['2D']['thickness'])
+        self.m_app.settings.setValue("WireframeColor/2D", self.wireframe_pref['2D']['color'])
+        self.m_app.settings.setValue("WireframeThickness/3D", self.wireframe_pref['3D']['thickness'])
+        self.m_app.settings.setValue("WireframeColor/3D", self.wireframe_pref['3D']['color'])
 
     def closeEvent(self, event):
         self.write_settings()
@@ -4764,21 +4997,21 @@ class PreferencesDialog(QDialog):
         self.toolbar_icon_medium = False
         self.toolbar_icon_small = False
         self.toolbar_icon_size = "Large"
-        self.parent.set_toolbar_icon_size( self.toolbar_icon_size )
+        self.parent.update_settings()
 
     def on_rbToolbarIconSmall_clicked(self):
         self.toolbar_icon_small = True
         self.toolbar_icon_medium = False
         self.toolbar_icon_large = False
         self.toolbar_icon_size = "Small"
-        self.parent.set_toolbar_icon_size( self.toolbar_icon_size )
+        self.parent.update_settings()
 
     def on_rbToolbarIconMedium_clicked(self):
         self.toolbar_icon_small = False
         self.toolbar_icon_medium = True
         self.toolbar_icon_large = False
         self.toolbar_icon_size = "Medium"
-        self.parent.set_toolbar_icon_size( self.toolbar_icon_size )
+        self.parent.update_settings()
 
     def on_rbRememberGeometryYes_clicked(self):
         self.remember_geometry = True

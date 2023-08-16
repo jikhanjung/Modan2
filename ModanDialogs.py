@@ -1224,9 +1224,9 @@ class ObjectViewer3D(QGLWidget):
                             gl.glColor3f( *COLOR['SELECTED_EDGE'] )
                         else:
                         #gl.glDisable(gl.GL_LIGHTING)
-                            print("wireframe color:", self.wireframe_color)
+                            #print("wireframe color:", self.wireframe_color)
                             wf_color = as_gl_color(self.wireframe_color)
-                            print("color:", wf_color)
+                            #print("color:", wf_color)
                             gl.glColor3f( *wf_color ) #*COLOR['WIREFRAME'])
                     gl.glLineWidth(2.0)
                     gl.glBegin(gl.GL_LINE_STRIP)

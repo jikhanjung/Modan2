@@ -730,7 +730,8 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             self.progress_dialog.update()
             QApplication.processEvents()
 
-            file_name = re.sub('file:///', '', file_name)
+            file_name = mu.process_dropped_file_name(file_name)
+
             ext = file_name.split('.')[-1].lower()
             if ext in mu.IMAGE_EXTENSION_LIST:
                 if self.selected_dataset.dimension != 2:

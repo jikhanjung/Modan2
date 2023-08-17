@@ -422,11 +422,18 @@ class ObjectViewer2D(QLabel):
             return
 
         file_path = event.mimeData().text()
-        file_path = re.sub('file:///', '', file_path)
+        #file_path = re.sub('file:///', '', file_path)
+        file_path = mu.process_dropped_file_name(file_path)
+
         self.set_image(file_path)
+        
         self.calculate_resize()
         if self.object_dialog is not None:
             self.object_dialog.set_object_name(Path(file_path).stem)
+            self.object_dialog.btnLandmark_clicked()
+            self.object_dialog.btnLandmark.setDown(True)
+            self.object_dialog.btnLandmark.setEnabled(True)
+
 
     def paintEvent(self, event):
         # fill background with dark gray
@@ -1120,7 +1127,9 @@ class ObjectViewer3D(QGLWidget):
             return
 
         file_path = event.mimeData().text()
-        file_path = re.sub('file:///', '', file_path)
+        #file_path = re.sub('file:///', '', file_path)
+        file_path = mu.process_dropped_file_name(file_path)
+
         self.set_threed_model(file_path)
         self.calculate_resize()
         if self.object_dialog is not None:

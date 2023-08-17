@@ -85,3 +85,16 @@ def resource_path(relative_path):
 def value_to_bool(value):
     return value.lower() == 'true' if isinstance(value, str) else bool(value)
 
+def process_dropped_file_name(file_name):
+    import os
+    from urllib.parse import urlparse, unquote
+    #print("file_name:", file_name)
+    url = file_name
+    parsed_url = urlparse(url)            
+    #print("parsed_url:", parsed_url)
+    file_path = unquote(parsed_url.path)
+    if os.name == 'nt':
+        file_path = file_path[1:]
+    else:
+        file_path = file_path
+    return file_path

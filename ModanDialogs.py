@@ -99,6 +99,9 @@ class ObjectViewer2D(QLabel):
         self.landmark_color = "#0000FF"
         self.wireframe_thickness = 1
         self.wireframe_color = "#FFFF00"
+        self.index_size = 1
+        self.index_color = "#FFFFFF"
+        self.bgcolor = "#AAAAAA"
         self.m_app = QApplication.instance()
         self.read_settings()
 
@@ -144,17 +147,22 @@ class ObjectViewer2D(QLabel):
         self.setMouseTracking(True)
         self.set_mode(MODE['EDIT_LANDMARK'])
 
-    def set_landmark_pref(self,lm_pref,wf_pref):
+    def set_landmark_pref(self,lm_pref,wf_pref,bgcolor):
         self.landmark_size = lm_pref['size']
         self.landmark_color = lm_pref['color']
         self.wireframe_thickness = wf_pref['thickness']
         self.wireframe_color = wf_pref['color']
+        self.bgcolor = bgcolor
 
     def read_settings(self):
         self.landmark_size = self.m_app.settings.value("LandmarkSize/2D", self.landmark_size)
         self.landmark_color = self.m_app.settings.value("LandmarkColor/2D", self.landmark_color)
         self.wireframe_thickness = self.m_app.settings.value("WireframeThickness/2D", self.wireframe_thickness)
         self.wireframe_color = self.m_app.settings.value("WireframeColor/2D", self.wireframe_color)
+        self.index_size = self.m_app.settings.value("IndexSize/2D", self.index_size)
+        self.index_color = self.m_app.settings.value("IndexColor/2D", self.index_color)
+        self.bgcolor = self.m_app.settings.value("BackgroundColor", self.bgcolor)
+        #print("2d object view read settings",self.bgcolor)
 
     def _2canx(self, coord):
         return round((float(coord) / self.image_canvas_ratio) * self.scale) + self.pan_x + self.temp_pan_x
@@ -424,7 +432,7 @@ class ObjectViewer2D(QLabel):
         # fill background with dark gray
 
         painter = QPainter(self)
-        painter.fillRect(self.rect(), QBrush(as_qt_color(COLOR['BACKGROUND'])))
+        painter.fillRect(self.rect(), QBrush(QColor(self.bgcolor)))#as_qt_color(COLOR['BACKGROUND'])))
         if self.object is None:
             return
         if self.curr_pixmap is not None:
@@ -436,7 +444,7 @@ class ObjectViewer2D(QLabel):
         if self.show_wireframe == True:
             color = QColor(self.wireframe_color)
             #print("color:", color, "size", self.landmark_size, "radius", radius)
-            painter.setPen(QPen(color, 2))
+            painter.setPen(QPen(color, int(self.wireframe_thickness)+1))
             painter.setBrush(QBrush(color))                
             #painter.setPen(QPen(as_qt_color(COLOR['WIREFRAME']), 2))
             #painter.setBrush(QBrush(as_qt_color(COLOR['WIREFRAME'])))
@@ -471,7 +479,7 @@ class ObjectViewer2D(QLabel):
                 painter.setPen(QPen(as_qt_color(COLOR['SELECTED_LANDMARK']), 2))
                 painter.drawLine(x1,y1,x2,y2)
 
-        painter.setFont(QFont('Helvetica', 10))
+        painter.setFont(QFont('Helvetica', 10 + int(self.index_size) * 3))
         for idx, landmark in enumerate(self.landmark_list):
             if idx == self.wire_hover_index:
                 painter.setPen(QPen(as_qt_color(COLOR['SELECTED_LANDMARK']), 2))
@@ -492,8 +500,9 @@ class ObjectViewer2D(QLabel):
                 painter.setBrush(QBrush(color))                
             painter.drawEllipse(int(self._2canx(landmark[0])-radius), int(self._2cany(landmark[1]))-radius, radius*2, radius*2)
             if self.show_index == True:
-                painter.setPen(QPen(as_qt_color(COLOR['NORMAL_TEXT']), 2))
-                painter.setBrush(QBrush(as_qt_color(COLOR['NORMAL_TEXT'])))
+                idx_color = QColor(self.index_color)
+                painter.setPen(QPen(idx_color, 2 ))
+                painter.setBrush(QBrush(idx_color))
                 painter.drawText(int(self._2canx(landmark[0])+10), int(self._2cany(landmark[1]))+10, str(idx+1))
 
         # draw wireframe being edited
@@ -664,9 +673,12 @@ class ObjectViewer3D(QGLWidget):
         self.landmark_color = "#0000FF"
         self.wireframe_thickness = 1
         self.wireframe_color = "#FFFF00"
+        self.index_size = 1
+        self.index_color = "#FFFFFF"
+        self.bgcolor = "#AAAAAA"
         self.m_app = QApplication.instance()        
         self.read_settings()
-        print("wireframe color:", self.wireframe_color)
+        #print("wireframe color:", self.wireframe_color)
 
         self.setAcceptDrops(True)
         self.setMouseTracking(True)
@@ -738,6 +750,9 @@ class ObjectViewer3D(QGLWidget):
         self.landmark_color = self.m_app.settings.value("LandmarkColor/3D", self.landmark_color)
         self.wireframe_thickness = self.m_app.settings.value("WireframeThickness/3D", self.wireframe_thickness)
         self.wireframe_color = self.m_app.settings.value("WireframeColor/3D", self.wireframe_color)
+        self.index_size = self.m_app.settings.value("IndexSize/3D", self.index_size)
+        self.index_color = self.m_app.settings.value("IndexColor/3D", self.index_color)
+        self.bgcolor = self.m_app.settings.value("BackgroundColor", self.bgcolor)
 
     def show_message(self, msg):
         if self.object_dialog is not None:
@@ -1170,7 +1185,8 @@ class ObjectViewer3D(QGLWidget):
         #gl.glLoadIdentity()
 
         gl.glMatrixMode(gl.GL_MODELVIEW)
-        gl.glClearColor(*COLOR['BACKGROUND'], 1)
+        bg_color = as_gl_color(self.bgcolor)
+        gl.glClearColor(*bg_color, 1)
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
         gl.glLoadIdentity()
         gl.glEnable(gl.GL_POINT_SMOOTH)
@@ -1228,7 +1244,7 @@ class ObjectViewer3D(QGLWidget):
                             wf_color = as_gl_color(self.wireframe_color)
                             #print("color:", wf_color)
                             gl.glColor3f( *wf_color ) #*COLOR['WIREFRAME'])
-                    gl.glLineWidth(2.0)
+                    gl.glLineWidth(int(self.wireframe_thickness)+1)
                     gl.glBegin(gl.GL_LINE_STRIP)
                     #print(self.down_x, self.down_y, self.curr_x, self.curr_y)
                     for lm_idx in edge:
@@ -1264,10 +1280,13 @@ class ObjectViewer3D(QGLWidget):
 
                 if self.show_index:
                     gl.glDisable(gl.GL_LIGHTING)
-                    gl.glColor3f( *COLOR['NORMAL_TEXT'] )
+                    index_color = as_gl_color(self.index_color)
+                    gl.glColor3f( *index_color ) #COLOR['NORMAL_TEXT'] )
                     gl.glRasterPos3f(lm[0] + 0.05, lm[1] + 0.05, lm[2])
+                    font_size_list = [ glut.GLUT_BITMAP_HELVETICA_10, glut.GLUT_BITMAP_HELVETICA_12, glut.GLUT_BITMAP_HELVETICA_18]
+
                     for letter in list(str(i+1)):
-                        glut.glutBitmapCharacter(glut.GLUT_BITMAP_HELVETICA_12, ord(letter))
+                        glut.glutBitmapCharacter(font_size_list[int(self.index_size)], ord(letter))
                     gl.glEnable(gl.GL_LIGHTING)
 
         else:
@@ -3092,6 +3111,7 @@ class DatasetAnalysisDialog(QDialog):
         self.default_color_list = mu.VIVID_COLOR_LIST[:]
         self.color_list = self.default_color_list[:]
         self.marker_list = mu.MARKER_LIST[:]
+        self.plot_size = "medium"
         self.read_settings()
         #self.setGeometry(QRect(100, 100, 1400, 800))
         self.ds_ops = None
@@ -3453,6 +3473,7 @@ class DatasetAnalysisDialog(QDialog):
 
     def read_settings(self):
         self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
+        self.plot_size = self.m_app.settings.value("PlotSize", self.plot_size)
         for i in range(len(self.color_list)):
             self.color_list[i] = self.m_app.settings.value("DataPointColor/"+str(i), self.default_color_list[i])
         for i in range(len(self.marker_list)):
@@ -3782,11 +3803,18 @@ class DatasetAnalysisDialog(QDialog):
         self.scatter_data = {}
         self.scatter_result = {}
         SCATTER_SMALL_SIZE = 30
+        SCATTER_MEDIUM_SIZE = 50
         SCATTER_LARGE_SIZE = 60
+        if self.plot_size.lower() == 'small':
+            scatter_size = SCATTER_SMALL_SIZE
+        elif self.plot_size.lower() == 'medium':
+            scatter_size = SCATTER_MEDIUM_SIZE
+        elif self.plot_size.lower() == 'large':
+            scatter_size = SCATTER_LARGE_SIZE
 
         key_list = []
         key_list.append('__default__')
-        self.scatter_data['__default__'] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'hoverinfo':[], 'text':[], 'property':'', 'symbol':'o', 'color':'blue', 'size':SCATTER_SMALL_SIZE}
+        self.scatter_data['__default__'] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'hoverinfo':[], 'text':[], 'property':'', 'symbol':'o', 'color':'blue', 'size':scatter_size}
         if len(self.selected_object_id_list) > 0:
             self.scatter_data['__selected__'] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'hoverinfo':[], 'text':[], 'property':'', 'symbol':'o', 'color':'red', 'size':SCATTER_LARGE_SIZE}
             key_list.append('__selected__')
@@ -3800,7 +3828,7 @@ class DatasetAnalysisDialog(QDialog):
                 key_name = obj.property_list[self.propertyname_index]
 
             if key_name not in self.scatter_data.keys():
-                self.scatter_data[key_name] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'property':key_name, 'symbol':'', 'color':'', 'size':SCATTER_SMALL_SIZE}
+                self.scatter_data[key_name] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'property':key_name, 'symbol':'', 'color':'', 'size':scatter_size}
 
             self.scatter_data[key_name]['x_val'].append(flip_axis1 * obj.analysis_result[axis1])
             self.scatter_data[key_name]['y_val'].append(flip_axis2 * obj.analysis_result[axis2])
@@ -4654,6 +4682,7 @@ class PreferencesDialog(QDialog):
         self.toolbar_icon_small = False
         self.toolbar_icon_medium = False
         self.toolbar_icon_large = False
+        self.plot_size = "medium"
 
         self.default_color_list = mu.VIVID_COLOR_LIST[:]
         #['blue','green','black','cyan','magenta','yellow','gray','red']
@@ -4662,6 +4691,8 @@ class PreferencesDialog(QDialog):
 
         self.landmark_pref = {'2D':{'size':1,'color':'#0000FF'},'3D':{'size':1,'color':'#0000FF'}}
         self.wireframe_pref = {'2D':{'thickness':1,'color':'#FFFF00'},'3D':{'thickness':1,'color':'#FFFF00'}}
+        self.index_pref = {'2D':{'size':1,'color':'#FFFFFF'},'3D':{'size':1,'color':'#FFFFFF'}}
+        self.bgcolor = '#AAAAAA'
         #print("landmark_pref:", self.landmark_pref)
         #print("wireframe_pref:", self.wireframe_pref)
 
@@ -4776,6 +4807,54 @@ class PreferencesDialog(QDialog):
         self.wireframe_widget = QWidget()
         self.wireframe_widget.setLayout(self.wireframe_layout)
 
+        self.gb2DIndexPref = QGroupBox()
+        self.gb2DIndexPref.setLayout(QHBoxLayout())
+        self.gb2DIndexPref.setTitle("2D")
+        self.combo2DIndexSize = QComboBox()
+        self.combo2DIndexSize.addItems(["Small","Medium","Large"])
+        self.combo2DIndexSize.setCurrentIndex(int(self.index_pref['2D']['size']))
+        self.lbl2DIndexColor = QPushButton()
+        self.lbl2DIndexColor.setMinimumSize(20,20)
+        self.lbl2DIndexColor.setStyleSheet("background-color: " + self.index_pref['2D']['color'])
+        self.lbl2DIndexColor.setToolTip(self.index_pref['2D']['color'])
+        self.lbl2DIndexColor.setCursor(Qt.PointingHandCursor)
+        self.lbl2DIndexColor.mousePressEvent = lambda event, dim='2D': self.on_lblIndexColor_clicked(event, '2D')
+        self.combo2DIndexSize.currentIndexChanged.connect(lambda event, dim='2D': self.on_comboIndexSize_currentIndexChanged(event, '2D'))
+
+        self.gb2DIndexPref.layout().addWidget(self.combo2DIndexSize)
+        self.gb2DIndexPref.layout().addWidget(self.lbl2DIndexColor)
+
+        self.gb3DIndexPref = QGroupBox()
+        self.gb3DIndexPref.setLayout(QHBoxLayout())
+        self.gb3DIndexPref.setTitle("3D")
+        self.combo3DIndexSize = QComboBox()
+        self.combo3DIndexSize.addItems(["Small","Medium","Large"])
+        self.combo3DIndexSize.setCurrentIndex(int(self.index_pref['3D']['size']))
+        self.lbl3DIndexColor = QPushButton()
+        self.lbl3DIndexColor.setMinimumSize(20,20)
+        self.lbl3DIndexColor.setStyleSheet("background-color: " + self.index_pref['3D']['color'])
+        self.lbl3DIndexColor.setToolTip(self.index_pref['3D']['color'])
+        self.lbl3DIndexColor.setCursor(Qt.PointingHandCursor)
+        self.lbl3DIndexColor.mousePressEvent = lambda event, dim='3D': self.on_lblIndexColor_clicked(event, '3D')
+        self.combo3DIndexSize.currentIndexChanged.connect(lambda event, dim='3D': self.on_comboIndexSize_currentIndexChanged(event, '3D'))
+
+        self.gb3DIndexPref.layout().addWidget(self.combo3DIndexSize)
+        self.gb3DIndexPref.layout().addWidget(self.lbl3DIndexColor)
+
+        self.index_layout = QHBoxLayout()
+        self.index_layout.addWidget(self.gb2DIndexPref)
+        self.index_layout.addWidget(self.gb3DIndexPref)
+        self.index_widget = QWidget()
+        self.index_widget.setLayout(self.index_layout)
+
+        self.lblBgcolor = QPushButton()
+        self.lblBgcolor.setMinimumSize(20,20)
+        self.lblBgcolor.setStyleSheet("background-color: " + self.bgcolor)
+        self.lblBgcolor.setToolTip(self.bgcolor)
+        self.lblBgcolor.setCursor(Qt.PointingHandCursor)
+        self.lblBgcolor.mousePressEvent = lambda event: self.on_lblBgcolor_clicked(event)
+
+
         self.gbToolbarIconSize = QGroupBox()
         self.gbToolbarIconSize.setLayout(QHBoxLayout())
         self.gbToolbarIconSize.layout().addWidget(self.rbToolbarIconSmall)
@@ -4787,6 +4866,22 @@ class PreferencesDialog(QDialog):
         self.gbPlotMarkers = QGroupBox()
         self.gbPlotMarkers.setLayout(QHBoxLayout())
         #symbol_candidate = ['o','s','^','x','+','d','v','<','>','p','h']
+
+        self.rbPlotLarge = QRadioButton("Large")
+        self.rbPlotLarge.setChecked(self.plot_size.lower() == "large")
+        self.rbPlotLarge.clicked.connect(self.on_rbPlotLarge_clicked)
+        self.rbPlotSmall = QRadioButton("Small")
+        self.rbPlotSmall.setChecked(self.plot_size.lower() == "small")
+        self.rbPlotSmall.clicked.connect(self.on_rbPlotSmall_clicked)
+        self.rbPlotMedium = QRadioButton("Medium")
+        self.rbPlotMedium.setChecked(self.plot_size.lower() == "medium")
+        self.rbPlotMedium.clicked.connect(self.on_rbPlotMedium_clicked)
+
+        self.gbPlotSize = QGroupBox()
+        self.gbPlotSize.setLayout(QHBoxLayout())
+        self.gbPlotSize.layout().addWidget(self.rbPlotSmall)
+        self.gbPlotSize.layout().addWidget(self.rbPlotMedium)
+        self.gbPlotSize.layout().addWidget(self.rbPlotLarge)
 
         self.btnResetMarkers = QPushButton()
         self.btnResetMarkers.setText("Reset")
@@ -4845,10 +4940,13 @@ class PreferencesDialog(QDialog):
         self.setLayout(self.main_layout)
         self.main_layout.addRow("Remember Geometry", self.gbRememberGeomegry)
         self.main_layout.addRow("Toolbar Icon Size", self.gbToolbarIconSize)
+        self.main_layout.addRow("Data point size", self.gbPlotSize)
         self.main_layout.addRow("Data point colors", self.gbPlotColors)
         self.main_layout.addRow("Data point markers", self.gbPlotMarkers)
         self.main_layout.addRow("Landmark", self.landmark_widget)
         self.main_layout.addRow("Wireframe", self.wireframe_widget)
+        self.main_layout.addRow("Index", self.index_widget)
+        self.main_layout.addRow("Background Color", self.lblBgcolor)
         self.main_layout.addRow("", self.btnOkay)
 
         self.read_settings()
@@ -4870,6 +4968,15 @@ class PreferencesDialog(QDialog):
             self.color_list[self.lblColor_list.index(self.current_lblColor)] = color.name()
             #print(self.color_list)
 
+    def on_lblBgcolor_clicked(self,event):
+        dialog = QColorDialog()
+        color = dialog.getColor(initial=QColor(self.bgcolor))
+        if color is not None:
+            self.bgcolor = color.name()
+            self.lblBgcolor.setStyleSheet("background-color: " + self.bgcolor)
+            self.lblBgcolor.setToolTip(self.bgcolor)
+        self.parent.update_settings()
+
     def on_comboLmSize_currentIndexChanged(self, event, dim):
         if dim == '2D':
             self.current_comboLmSize = self.combo2DLandmarkSize
@@ -4889,6 +4996,27 @@ class PreferencesDialog(QDialog):
             self.current_lblLmColor.setStyleSheet("background-color: " + color.name())
             self.current_lblLmColor.setToolTip(color.name())
             self.landmark_pref[dim]['color'] = color.name()
+        self.parent.update_settings()
+
+    def on_comboIndexSize_currentIndexChanged(self, event, dim):
+        if dim == '2D':
+            self.current_comboIndexSize = self.combo2DIndexSize
+        elif dim == '3D':
+            self.current_comboIndexSize = self.combo3DIndexSize
+        self.index_pref[dim]['size'] = self.current_comboIndexSize.currentIndex()
+        self.parent.update_settings()
+
+    def on_lblIndexColor_clicked(self,event, dim):
+        if dim == '2D':
+            self.current_lblIndexColor = self.lbl2DIndexColor
+        elif dim == '3D':
+            self.current_lblIndexColor = self.lbl3DIndexColor
+        dialog = QColorDialog()
+        color = dialog.getColor(initial=QColor(self.current_lblIndexColor.toolTip()))
+        if color is not None:
+            self.current_lblIndexColor.setStyleSheet("background-color: " + color.name())
+            self.current_lblIndexColor.setToolTip(color.name())
+            self.index_pref[dim]['color'] = color.name()
         self.parent.update_settings()
 
     def on_comboWireframeThickness_currentIndexChanged(self, event, dim):
@@ -4933,6 +5061,7 @@ class PreferencesDialog(QDialog):
 
         for i in range(len(self.marker_list)):
             self.marker_list[i] = self.m_app.settings.value("DataPointMarker/"+str(i), self.marker_list[i])
+        self.plot_size = self.m_app.settings.value("PlotSize", self.plot_size)
 
         self.landmark_pref['2D']['size'] = self.m_app.settings.value("LandmarkSize/2D", self.landmark_pref['2D']['size'])
         self.landmark_pref['2D']['color'] = self.m_app.settings.value("LandmarkColor/2D", self.landmark_pref['2D']['color'])
@@ -4942,6 +5071,11 @@ class PreferencesDialog(QDialog):
         self.wireframe_pref['2D']['color'] = self.m_app.settings.value("WireframeColor/2D", self.wireframe_pref['2D']['color'])
         self.wireframe_pref['3D']['thickness'] = self.m_app.settings.value("WireframeThickness/3D", self.wireframe_pref['3D']['thickness'])
         self.wireframe_pref['3D']['color'] = self.m_app.settings.value("WireframeColor/3D", self.wireframe_pref['3D']['color'])
+        self.index_pref['2D']['size'] = self.m_app.settings.value("IndexSize/2D", self.index_pref['2D']['size'])
+        self.index_pref['2D']['color'] = self.m_app.settings.value("IndexColor/2D", self.index_pref['2D']['color'])
+        self.index_pref['3D']['size'] = self.m_app.settings.value("IndexSize/3D", self.index_pref['3D']['size'])
+        self.index_pref['3D']['color'] = self.m_app.settings.value("IndexColor/3D", self.index_pref['3D']['color'])
+        self.bgcolor = self.m_app.settings.value("BackgroundColor", self.bgcolor)
 
         if self.remember_geometry is True:
             self.setGeometry(self.m_app.settings.value("WindowGeometry/PreferencesDialog", QRect(100, 100, 600, 400)))
@@ -4951,6 +5085,7 @@ class PreferencesDialog(QDialog):
 
     def write_settings(self):
         self.m_app.settings.setValue("ToolbarIconSize", self.toolbar_icon_size)
+        self.m_app.settings.setValue("PlotSize", self.plot_size)
         self.m_app.settings.setValue("WindowGeometry/RememberGeometry", self.remember_geometry)
         #print(self.color_list)
         for i in range(len(self.marker_list)):
@@ -4970,9 +5105,15 @@ class PreferencesDialog(QDialog):
         self.m_app.settings.setValue("WireframeColor/2D", self.wireframe_pref['2D']['color'])
         self.m_app.settings.setValue("WireframeThickness/3D", self.wireframe_pref['3D']['thickness'])
         self.m_app.settings.setValue("WireframeColor/3D", self.wireframe_pref['3D']['color'])
+        self.m_app.settings.setValue("BackgroundColor", self.bgcolor)
+        self.m_app.settings.setValue("IndexSize/2D", self.index_pref['2D']['size'])
+        self.m_app.settings.setValue("IndexColor/2D", self.index_pref['2D']['color'])
+        self.m_app.settings.setValue("IndexSize/3D", self.index_pref['3D']['size'])
+        self.m_app.settings.setValue("IndexColor/3D", self.index_pref['3D']['color'])
 
     def closeEvent(self, event):
         self.write_settings()
+        self.parent.update_settings()
         event.accept()
 
     def on_btnResetMarkers_clicked(self):
@@ -4991,6 +5132,15 @@ class PreferencesDialog(QDialog):
         for i in range(len(self.color_list)):
             self.lblColor_list[i].setStyleSheet("background-color: " + self.color_list[i])
             self.lblColor_list[i].setToolTip(self.color_list[i])
+
+    def on_rbPlotLarge_clicked(self):
+        self.plot_size = "Large"
+
+    def on_rbPlotMedium_clicked(self):
+        self.plot_size = "Medium"
+
+    def on_rbPlotSmall_clicked(self):
+        self.plot_size = "Small"
 
     def on_rbToolbarIconLarge_clicked(self):
         self.toolbar_icon_large = True

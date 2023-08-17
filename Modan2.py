@@ -97,6 +97,7 @@ class ModanMainWindow(QMainWindow):
         self.help_menu = self.main_menu.addMenu("Help")
         self.help_menu.addAction(self.actionAbout)
 
+        self.toolbar_icon_size = "Small"
         self.m_app = QApplication.instance()
         self.read_settings()
 
@@ -114,17 +115,16 @@ class ModanMainWindow(QMainWindow):
 
         # read preferences and set window size, toolbar icon size, etc.
         self.remember_geometry = True
-        self.toolbar_icon_size = "Small"
 
         self.set_toolbar_icon_size(self.toolbar_icon_size)
 
     def update_settings(self):
+        #print("update settings bgcolor",self.preferences_dialog.bgcolor)
+
         size = self.preferences_dialog.toolbar_icon_size
-        landmark_pref = self.preferences_dialog.landmark_pref
-        wireframe_pref = self.preferences_dialog.wireframe_pref
         self.set_toolbar_icon_size(size)
-        self.object_view_2d.set_landmark_pref(landmark_pref['2D'],wireframe_pref['2D'])
-        self.object_view_3d.set_landmark_pref(landmark_pref['3D'],wireframe_pref['3D'])
+        self.object_view_2d.read_settings()#set_landmark_pref(landmark_pref['2D'],wireframe_pref['2D'],bgcolor)
+        self.object_view_3d.read_settings()#.set_landmark_pref(landmark_pref['3D'],wireframe_pref['3D'],bgcolor)
 
     def set_toolbar_icon_size(self, size):
         if size.lower() == 'small':

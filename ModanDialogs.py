@@ -3814,7 +3814,7 @@ class DatasetAnalysisDialog(QDialog):
 
         key_list = []
         key_list.append('__default__')
-        self.scatter_data['__default__'] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'hoverinfo':[], 'text':[], 'property':'', 'symbol':'o', 'color':'blue', 'size':scatter_size}
+        self.scatter_data['__default__'] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'hoverinfo':[], 'text':[], 'property':'', 'symbol':'o', 'color':color_candidate[0], 'size':scatter_size}
         if len(self.selected_object_id_list) > 0:
             self.scatter_data['__selected__'] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'hoverinfo':[], 'text':[], 'property':'', 'symbol':'o', 'color':'red', 'size':SCATTER_LARGE_SIZE}
             key_list.append('__selected__')
@@ -3857,6 +3857,9 @@ class DatasetAnalysisDialog(QDialog):
                 if len(group['x_val']) > 0:
                     self.scatter_result[name] = self.ax2.scatter(group['x_val'], group['y_val'], s=group['size'], marker=group['symbol'], color=group['color'], data=group['data'], picker=True, pickradius=5)
                     #print("ret", ret)
+                if name == '__selected__':
+                    for idx, obj in enumerate(group['data']):
+                        self.ax2.annotate(obj.object_name, (group['x_val'][idx], group['y_val'][idx]))
             if show_legend:
                 values = []
                 keys = []
@@ -3885,6 +3888,9 @@ class DatasetAnalysisDialog(QDialog):
                 #print("name", name, "len(group_hash[name]['x_val'])", len(group['x_val']), group['symbol'])
                 if len(self.scatter_data[name]['x_val']) > 0:
                     self.scatter_result[name] = self.ax3.scatter(group['x_val'], group['y_val'], group['z_val'], s=group['size'], marker=group['symbol'], color=group['color'], data=group['data'],depthshade=depth_shade, picker=True, pickradius=5)
+                if name == '__selected__':
+                    for idx, obj in enumerate(group['data']):
+                        self.ax3.text(group['x_val'][idx], group['y_val'][idx], group['z_val'][idx],obj.object_name)
                     #print("ret", ret)
             if show_legend:
                 values = []

@@ -759,6 +759,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 object.save()
                 mdl = MdThreeDModel()
                 mdl.object = object
+                file_name = mu.process_3d_file(file_name)
                 mdl.load_file_info(file_name)
                 new_filepath = mdl.get_file_path( self.m_app.storage_directory)
                 if not os.path.exists(os.path.dirname(new_filepath)):

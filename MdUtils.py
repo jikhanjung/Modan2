@@ -1,4 +1,10 @@
 import sys, os
+import copy
+
+import numpy as np
+from stl import mesh
+import trimesh
+import tempfile
 
 COMPANY_NAME = "PaleoBytes"
 PROGRAM_NAME = "Modan2"
@@ -98,3 +104,59 @@ def process_dropped_file_name(file_name):
     else:
         file_path = file_path
     return file_path
+def process_3d_file(file_name):
+    # get extension
+    file_extension = os.path.splitext(file_name)[1][1:].lower()
+    #print("file_extension:", file_extension)
+    if file_extension == 'obj':
+        return file_name
+    
+    temp_dir = tempfile.mkdtemp()
+
+    # get filename without extension
+    file_name_only = os.path.splitext(file_name)[0]
+    # copy to temp dir
+    new_file_name = os.path.join(temp_dir, file_name_only + ".obj")
+    #print("new_file_name:", new_file_name)
+    
+    if file_extension == 'stl':
+
+        #stl_mesh = mesh.Mesh.from_file(file_name)
+        #tri_mesh = trimesh.Trimesh(stl_mesh.vectors, process=False)
+        tri_mesh = trimesh.load_mesh(file_name)
+        
+        # if vertices are not 2D array, convert to 2D array
+        # actually in that case vertices have faces data.
+        # so for each face, extract vertices and make a new array of vertices
+        # and make a new array of faces
+
+        if False and len(tri_mesh.vertices.shape) == 3:
+            print("tri_mesh.vertices.shape:", tri_mesh.vertices.shape)
+            tri_mesh.faces = []
+            vertices = []
+            faces = []
+            for i in range(tri_mesh.vertices.shape[0]):
+                temp_face = []
+                for j in range(tri_mesh.vertices.shape[1]):
+                    #if tri_mesh.vertices[i,j,:].all() not in vertices:
+                    vertices.append(tri_mesh.vertices[i,j,:])
+                    temp_face.append(len(vertices)-1)
+                faces.append(temp_face)
+            tri_mesh.vertices = np.array(vertices)
+            tri_mesh.faces = np.array(faces)
+            #print("tri_mesh.vertices.shape:", tri_mesh.vertices.shape)
+            #print("tri_mesh.faces.shape:", tri_mesh.faces.shape)
+        vn = tri_mesh.vertex_normals
+        #print("stl_mesh shape:", tri_mesh.vertices.shape)
+        #print("vertex normals:", tri_mesh.vertex_normals)
+        #print("stl_mesh vertices:", tri_mesh.vertices[0:5,:])
+        #print("stl_mesh faces:", tri_mesh.faces[0:5,:])
+        
+        tri_mesh.export( new_file_name, file_type='obj')
+    elif file_extension == 'ply':
+        ply_mesh = trimesh.load(file_name)
+        #print("ply_mesh shape:", ply_mesh.vertices.shape)
+        #print("ply_mesh vertices:", ply_mesh.vertices[0:5,:])
+        #print("ply_mesh faces:", ply_mesh.faces[0:5,:])
+        ply_mesh.export( new_file_name, file_type='obj')
+    return new_file_name

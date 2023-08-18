@@ -1130,6 +1130,9 @@ class ObjectViewer3D(QGLWidget):
         #file_path = re.sub('file:///', '', file_path)
         file_path = mu.process_dropped_file_name(file_path)
 
+        file_path = mu.process_3d_file(file_path)
+
+
         self.set_threed_model(file_path)
         self.calculate_resize()
         if self.object_dialog is not None:

@@ -12,6 +12,8 @@ import numpy as np
 import copy
 import MdUtils as mu
 #from MdUtils import *
+import shutil
+import copy
 
 LANDMARK_SEPARATOR = "\t"
 LINE_SEPARATOR = "\n"
@@ -167,6 +169,16 @@ class MdDataset(Model):
     def get_baseline_points(self):
         return self.baseline_point_list
 
+    def add_object(self, object_name, object_desc=None, pixels_per_mm=None, landmark_str=None, property_str=None):
+        obj = MdObject()
+        obj.object_name=object_name
+        obj.object_desc=object_desc
+        obj.pixels_per_mm=pixels_per_mm
+        obj.landmark_str=landmark_str
+        obj.property_str=property_str
+        obj.dataset=self
+        return obj
+
 
 class MdObject(Model):
     object_name = CharField()
@@ -181,6 +193,17 @@ class MdObject(Model):
     property_list = []
     centroid_size = -1
 
+    def copy_object(self, new_dataset):
+        new_object = MdObject()
+        new_object.object_name = self.object_name
+        new_object.object_desc = self.object_desc
+        new_object.pixels_per_mm = self.pixels_per_mm
+        new_object.landmark_str = self.landmark_str
+        new_object.dataset = new_dataset
+        new_object.property_str = self.property_str
+        #new_object.save()
+        return new_object
+
     def __str__(self):
         return self.object_name
     def __repr__(self):
@@ -191,6 +214,48 @@ class MdObject(Model):
             return 0
         return len(self.landmark_str.strip().split(LINE_SEPARATOR))
     #def get_image_file_path(self):
+
+    def add_image(self, file_name):
+        img = MdImage()
+        img.object = self
+        img.add_file(file_name)
+        return img
+
+    def add_model(self, file_name):
+        model = MdThreeDModel()
+        model.object = self
+        model.add_file(file_name)
+        return model
+    
+    def has_image(self):
+        return self.image.count() > 0
+
+    def get_image(self):
+        return self.image[0]
+
+    def has_threed_model(self):
+        return self.image.count() > 0
+
+    def get_threed_model(self):
+        return self.threed_model[0]
+
+    def change_dataset(self, dataset):
+        if self.has_image():
+            source_image_path = self.get_image().get_file_path()
+        source_dataset = self.dataset
+        self.dataset = dataset
+        self.save()
+        if self.has_image():
+            #target_image = self.get_image()
+            target_image_path = self.get_image().get_file_path()
+            if os.path.exists(source_image_path):
+                if not os.path.exists(os.path.dirname(target_image_path)):
+                    os.makedirs(os.path.dirname(target_image_path))
+
+                if os.path.exists(target_image_path):
+                    os.remove(target_image_path)
+                os.rename(source_image_path, target_image_path)
+
 
     class Meta:
         database = gDatabase
@@ -302,7 +367,29 @@ class MdImage(Model):
     modified_at = DateTimeField(default=datetime.datetime.now)
     object = ForeignKeyField(MdObject, backref='image', on_delete="CASCADE")
 
-    def get_file_path(self, base_path):
+    def copy_image(self, new_object):
+        new_image = MdImage()
+        new_image.object = new_object
+        new_image.original_path = self.original_path
+        new_image.original_filename = self.original_filename
+        new_image.name = self.name
+        new_image.md5hash = self.md5hash
+        new_image.size = self.size
+        new_image.exifdatetime = self.exifdatetime
+        new_image.file_created = self.file_created
+        new_image.file_modified = self.file_modified
+        new_image.add_file(self.get_file_path())
+        return new_image
+
+    def add_file(self, file_name):
+        self.load_file_info(file_name)
+        new_filepath = self.get_file_path()
+        if not os.path.exists(os.path.dirname(new_filepath)):
+            os.makedirs(os.path.dirname(new_filepath))
+        shutil.copyfile(file_name, new_filepath)
+        return self
+
+    def get_file_path(self, base_path =  mu.DEFAULT_STORAGE_DIRECTORY ):
         return os.path.join( base_path, str(self.object.dataset.id), str(self.object.id) + "." + self.original_path.split('.')[-1])
 
     class Meta:
@@ -440,7 +527,29 @@ class MdThreeDModel(Model):
     class Meta:
         database = gDatabase
 
-    def get_file_path(self, base_path):
+    def copy_threed_model(self, new_object):
+        new_model = MdThreeDModel()
+        new_model.object = new_object
+        new_model.original_path = self.original_path
+        new_model.original_filename = self.original_filename
+        new_model.name = self.name
+        new_model.md5hash = self.md5hash
+        new_model.size = self.size
+        new_model.file_created = self.file_created
+        new_model.file_modified = self.file_modified
+        new_model.add_file(self.get_file_path())
+        return new_model
+
+    def add_file(self, file_name):
+        file_name = mu.process_3d_file(file_name)
+        self.load_file_info(file_name)
+        new_filepath = self.get_file_path()
+        if not os.path.exists(os.path.dirname(new_filepath)):
+            os.makedirs(os.path.dirname(new_filepath))
+        shutil.copyfile(file_name, new_filepath)
+        return self
+
+    def get_file_path(self, base_path =  mu.DEFAULT_STORAGE_DIRECTORY ):
         return os.path.join( base_path, str(self.object.dataset.id), str(self.object.id) + "." + self.original_path.split('.')[-1])
 
     def load_file_info(self, fullpath):

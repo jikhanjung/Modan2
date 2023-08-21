@@ -727,6 +727,8 @@ class ObjectViewer3D(QGLWidget):
         self.lm_idx_to_color = {}
         self.picker_buffer = None
         self.gl_list = None
+        self.temp_edge = []
+
         #self.no_drawing = False
         self.wireframe_from_idx = -1
         self.wireframe_to_idx = -1
@@ -799,6 +801,7 @@ class ObjectViewer3D(QGLWidget):
         if event.buttons() == Qt.LeftButton:
             if self.edit_mode == MODE['WIREFRAME'] and self.selected_landmark_idx > -1:
                 self.wireframe_from_idx = self.selected_landmark_idx
+                self.temp_edge = [ self.obj_ops.landmark_list[self.wireframe_from_idx][:], self.obj_ops.landmark_list[self.wireframe_from_idx][:]]
                 #self.edit_mode = MODE_ADD_WIRE
             elif self.edit_mode == MODE['EDIT_LANDMARK'] and self.selected_landmark_idx > -1:
                 self.set_mode(MODE['MOVE_LANDMARK'])
@@ -834,6 +837,8 @@ class ObjectViewer3D(QGLWidget):
                     self.wireframe_from_idx = -1
                     self.wireframe_to_idx = -1
                     self.update()
+                self.temp_edge = []
+
             elif self.edit_mode == MODE['EDIT_LANDMARK'] and self.cursor_on_vertex > -1 and self.curr_x == self.down_x and self.curr_y == self.down_y:
                 #self.threed_model.landmark_list.append(self.cursor_on_vertex)
                 x, y, z = self.threed_model.original_vertices[self.cursor_on_vertex]
@@ -937,6 +942,12 @@ class ObjectViewer3D(QGLWidget):
                 self.selected_landmark_idx = -1
                 self.selected_edge_index = -1
 
+            if self.wireframe_from_idx > -1:
+                near, ray_direction = self.unproject_mouse(self.curr_x, self.curr_y)
+                self.temp_edge[1] = near #projected_vector.tolist()
+                #print("temp_edge:", self.temp_edge)
+                #self.updateGL()
+
         if event.buttons() == Qt.LeftButton and self.view_mode == ROTATE_MODE:
             self.is_dragging = True
             self.temp_rotate_x = self.curr_x - self.down_x
@@ -988,6 +999,9 @@ class ObjectViewer3D(QGLWidget):
                             self.landmark_list[self.selected_landmark_idx] = self.threed_model.original_vertices[closest_element]
                             if self.object_dialog is not None:
                                 self.object_dialog.update_landmark(self.selected_landmark_idx, *self.landmark_list[self.selected_landmark_idx])
+                                self.update_landmark_list()
+                                self.initialize_colors()
+                                self.calculate_resize()
                     else:
                         self.cursor_on_vertex = -1
 
@@ -1235,6 +1249,16 @@ class ObjectViewer3D(QGLWidget):
         current_buffer = gl.glGetIntegerv(gl.GL_FRAMEBUFFER_BINDING)
         #print("draw object", object, self, current_buffer )
         if landmark_as_sphere:
+
+            if self.show_wireframe and len(self.temp_edge) == 2:
+                wf_color = as_gl_color(self.wireframe_color)
+                gl.glColor3f( *wf_color ) #*COLOR['WIREFRAME'])
+                gl.glLineWidth(int(self.wireframe_thickness)+1)
+                gl.glBegin(gl.GL_LINE_STRIP)
+                for v in self.temp_edge:
+                    gl.glVertex3f(*v)
+                gl.glEnd()
+
             if self.show_wireframe and len(self.edge_list) > 0:
                 #print("draw wireframe",self.edge_list)
                 for i, edge in enumerate(self.edge_list):
@@ -1837,6 +1861,8 @@ class DatasetOpsViewer(QLabel):
 
 class TPS:
     def __init__(self, filename, datasetname):
+        #
+        self.dirname = os.path.dirname(filename) 
         self.filename = filename
         self.datasetname = datasetname
         self.dimension = 0
@@ -1872,6 +1898,7 @@ class TPS:
             twod = 0
             objects = {}
             object_comment = {}
+            object_images = {}
             header = ''
             comment = ''
             image_count = 0
@@ -1908,6 +1935,8 @@ class TPS:
                             objects[key] = data
                             object_name_list.append(key)
                             object_comment[key] = " ".join( [ object_comment_1, object_comment_2 ] ).strip()
+                            if object_image_path != '':
+                                object_images[key] = object_image_path
                             #print("data:", data)
                             data = []
                             object_id = ''
@@ -1957,6 +1986,8 @@ class TPS:
                 objects[key] = data
                 object_name_list.append(key)
                 object_comment[key] = " ".join( [ object_comment_1, object_comment_2 ] ).strip()
+                if object_image_path != '':
+                    object_images[key] = object_image_path
 
             #print("bb", object_count, landmark_count)
 
@@ -1980,6 +2011,7 @@ class TPS:
             self.landmark_data = objects
             self.object_name_list = object_name_list
             self.object_comment = object_comment
+            self.object_images = object_images
             #print(self.landmark_data.keys(), self.object_name_list)
 
             return dataset
@@ -4658,6 +4690,23 @@ class ImportDatasetDialog(QDialog):
                 object.object_desc = import_data.object_comment[import_data.object_name_list[i]]
 
             object.save()
+            if object.object_name in import_data.object_images.keys():
+                file_name = import_data.object_images[object.object_name]
+                # check if file_name exists
+                if not os.path.exists(file_name):
+                    file_name = os.path.join(import_data.dirname, file_name)
+                if not os.path.exists(file_name):
+                    print("file not found:", file_name)
+                else:
+                    new_image = MdImage()
+                    new_image.object = object
+                    new_image.load_file_info(file_name)
+                    new_filepath = new_image.get_file_path( self.m_app.storage_directory)
+                    if not os.path.exists(os.path.dirname(new_filepath)):
+                        os.makedirs(os.path.dirname(new_filepath))
+                    shutil.copyfile(file_name, new_filepath)
+                    new_image.save()
+
             val = int( (float(i+1)*100.0 / float(import_data.nobjects)) )
             #print("progress:", i+1, tps.nobjects, val)
             self.update_progress(val)

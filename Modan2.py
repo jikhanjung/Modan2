@@ -573,56 +573,19 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 if source_object.dataset.dimension == target_dataset.dimension:
                     # if shift is pressed, move instead of copy
                     if shift_clicked:
-                        if source_object.image.count() > 0:
-                            source_image_path = source_object.image[0].get_file_path(self.m_app.storage_directory)
-                        source_dataset = source_object.dataset
-                        source_object.dataset = target_dataset
+                        source_object.change_dataset(target_dataset)
                         source_object.save()
-                        if source_object.image.count() > 0:
-                            target_image = source_object.image[0]
-                            target_image_path = target_image.get_file_path(self.m_app.storage_directory)
-                            if os.path.exists(source_image_path):
-                                if not os.path.exists(os.path.dirname(target_image_path)):
-                                    os.makedirs(os.path.dirname(target_image_path))
-
-                                if os.path.exists(target_image_path):
-                                    os.remove(target_image_path)
-                                os.rename(source_image_path, target_image_path)
                     else:
                         # copy object
-                        source_dataset = source_object.dataset
-                        new_object = MdObject()
-                        new_object.object_name = source_object.object_name
-                        new_object.object_desc = source_object.object_desc
-                        new_object.pixels_per_mm = source_object.pixels_per_mm
-                        new_object.landmark_str = source_object.landmark_str
-                        #new_object.property_list = source_object.property_list
-                        new_object.property_str = source_object.property_str
-                        new_object.dataset = target_dataset
+                        new_object = source_object.copy_object(target_dataset)
                         new_object.save()
-                        if source_object.image.count() > 0:
-                            old_image = source_object.image[0]
-                            source_image_path = old_image.get_file_path(self.m_app.storage_directory)
-                            new_image = MdImage()
-                            new_image.original_path = old_image.original_path
-                            new_image.original_filename = old_image.original_filename
-                            new_image.name = old_image.name
-                            new_image.md5hash = old_image.md5hash
-                            new_image.size = old_image.size
-                            new_image.exifdatetime = old_image.exifdatetime
-                            new_image.file_created = old_image.file_created
-                            new_image.file_modified = old_image.file_modified
-                            new_image.object = new_object
+                        if source_object.has_image():
+                            new_image = source_object.get_image().copy_image(new_object)
                             new_image.save()
-                            new_image_path = new_image.get_file_path(self.m_app.storage_directory)
-                            #print(source_image_path, new_image_path)
-                            if os.path.exists(source_image_path):
-                                if not os.path.exists(os.path.dirname(new_image_path)):
-                                    os.makedirs(os.path.dirname(new_image_path))
-                                if os.path.exists(new_image_path):
-                                    os.remove(new_image_path)
-                                shutil.copyfile(source_image_path, new_image_path)
-
+                        elif source_object.has_threed_model():
+                            new_model = source_object.get_threed_model().copy_model(new_object)
+                            new_model.save()
+                            
                 else:
                     QMessageBox.warning(self, "Warning", "Dimension mismatch")
                     break
@@ -737,35 +700,20 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 if self.selected_dataset.dimension != 2:
                     QMessageBox.warning(self, "Warning", "Dimension mismatch.")
                     break
-                object = MdObject()
-                object.dataset = self.selected_dataset
-                object.object_name = Path(file_name).stem
-                object.save()
-                img = MdImage()
-                img.object = object
-                img.load_file_info(file_name)
-                new_filepath = img.get_file_path( self.m_app.storage_directory)
-                if not os.path.exists(os.path.dirname(new_filepath)):
-                    os.makedirs(os.path.dirname(new_filepath))
-                shutil.copyfile(file_name, new_filepath)
+                obj = self.selected_dataset.add_object(object_name=Path(file_name).stem)
+                obj.save()
+                img = obj.add_image(file_name)
                 img.save()
+
             elif ext in mu.MODEL_EXTENSION_LIST:
                 if self.selected_dataset.dimension != 3:
                     QMessageBox.warning(self, "Warning", "Dimension mismatch.")
                     break
-                object = MdObject()
-                object.dataset = self.selected_dataset
-                object.object_name = Path(file_name).stem
-                object.save()
-                mdl = MdThreeDModel()
-                mdl.object = object
-                file_name = mu.process_3d_file(file_name)
-                mdl.load_file_info(file_name)
-                new_filepath = mdl.get_file_path( self.m_app.storage_directory)
-                if not os.path.exists(os.path.dirname(new_filepath)):
-                    os.makedirs(os.path.dirname(new_filepath))
-                shutil.copyfile(file_name, new_filepath)
+                obj = self.selected_dataset.add_object(object_name=Path(file_name).stem)
+                obj.save()
+                mdl = obj.add_model(file_name)
                 mdl.save()
+
             elif os.path.isdir(file_name):
                 self.statusBar.showMessage("Cannot process directory...",2000)
 

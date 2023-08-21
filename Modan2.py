@@ -563,6 +563,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 
             for source_object in selected_object_list:
+                source_dataset = source_object.dataset
                 current_count += 1
                 self.progress_dialog.pb_progress.setValue(int((current_count/float(total_count))*100))
                 self.progress_dialog.update()
@@ -583,7 +584,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                             new_image = source_object.get_image().copy_image(new_object)
                             new_image.save()
                         elif source_object.has_threed_model():
-                            new_model = source_object.get_threed_model().copy_model(new_object)
+                            new_model = source_object.get_threed_model().copy_threed_model(new_object)
                             new_model.save()
                             
                 else:
@@ -711,7 +712,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                     break
                 obj = self.selected_dataset.add_object(object_name=Path(file_name).stem)
                 obj.save()
-                mdl = obj.add_model(file_name)
+                mdl = obj.add_threed_model(file_name)
                 mdl.save()
 
             elif os.path.isdir(file_name):

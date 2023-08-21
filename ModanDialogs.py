@@ -3086,26 +3086,12 @@ class ObjectDialog(QDialog):
             self.object.property_str = ",".join([ edt.text() for edt in self.edtPropertyList ])
 
         self.object.save()
-        if self.object_view_2d.fullpath is not None and self.object.image.count() == 0:
-            md_image = MdImage()
-            md_image.object_id = self.object.id
-            md_image.load_file_info(self.object_view_2d.fullpath)
-            new_filepath = md_image.get_file_path( self.m_app.storage_directory)
-            if not os.path.exists(os.path.dirname(new_filepath)):
-                os.makedirs(os.path.dirname(new_filepath))
-            #print("save object new filepath:", new_filepath)
-            shutil.copyfile(self.object_view_2d.fullpath, new_filepath)
-            md_image.save()
-        elif self.object_view_3d.fullpath is not None and self.object.threed_model.count() == 0:
-            md_3dmodel = MdThreeDModel()
-            md_3dmodel.object_id = self.object.id
-            md_3dmodel.load_file_info(self.object_view_3d.fullpath)
-            new_filepath = md_3dmodel.get_file_path( self.m_app.storage_directory)
-            if not os.path.exists(os.path.dirname(new_filepath)):
-                os.makedirs(os.path.dirname(new_filepath))
-            #print("save object new filepath:", new_filepath)
-            shutil.copyfile(self.object_view_3d.fullpath, new_filepath)
-            md_3dmodel.save()
+        if self.object_view_2d.fullpath is not None and not self.object.has_image():
+            img = self.object.add_image(self.object_view_2d.fullpath)
+            img.save()
+        elif self.object_view_3d.fullpath is not None and not self.object.has_threed_model():
+            mdl = self.object.add_threed_model(self.object_view_3d.fullpath)
+            mdl.save()
 
     def make_landmark_str(self):
         # from table, make landmark_str

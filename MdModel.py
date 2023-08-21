@@ -221,7 +221,7 @@ class MdObject(Model):
         img.add_file(file_name)
         return img
 
-    def add_model(self, file_name):
+    def add_threed_model(self, file_name):
         model = MdThreeDModel()
         model.object = self
         model.add_file(file_name)
@@ -234,27 +234,32 @@ class MdObject(Model):
         return self.image[0]
 
     def has_threed_model(self):
-        return self.image.count() > 0
+        return self.threed_model.count() > 0
 
     def get_threed_model(self):
         return self.threed_model[0]
 
     def change_dataset(self, dataset):
         if self.has_image():
-            source_image_path = self.get_image().get_file_path()
-        source_dataset = self.dataset
+            source_path = self.get_image().get_file_path()
+        if self.has_threed_model():
+            source_path = self.get_threed_model().get_file_path()
+
         self.dataset = dataset
         self.save()
-        if self.has_image():
-            #target_image = self.get_image()
-            target_image_path = self.get_image().get_file_path()
-            if os.path.exists(source_image_path):
-                if not os.path.exists(os.path.dirname(target_image_path)):
-                    os.makedirs(os.path.dirname(target_image_path))
 
-                if os.path.exists(target_image_path):
-                    os.remove(target_image_path)
-                os.rename(source_image_path, target_image_path)
+        if self.has_image():
+            target_path = self.get_image().get_file_path()
+        if self.has_threed_model():
+            target_path = self.get_threed_model().get_file_path()
+
+        if os.path.exists(source_path):
+            if not os.path.exists(os.path.dirname(target_path)):
+                os.makedirs(os.path.dirname(target_path))
+
+            if os.path.exists(target_path):
+                os.remove(target_path)
+            os.rename(source_path, target_path)
 
 
     class Meta:

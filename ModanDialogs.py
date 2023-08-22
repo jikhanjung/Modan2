@@ -1270,6 +1270,9 @@ class ObjectViewer3D(QGLWidget):
                         color = self.edge_idx_to_color[key]
                         #print(self.lm_idx_to_color, i, current_buffer)
                         gl.glColor3f( *[ c * 1.0 / 255 for c in color] )
+                        line_width = 3*(int(self.wireframe_thickness)+1)
+                        #print("buffer line width:", line_width)
+                        gl.glLineWidth(line_width)
                     else:
 
                         if i == self.selected_edge_index:
@@ -1280,7 +1283,9 @@ class ObjectViewer3D(QGLWidget):
                             wf_color = as_gl_color(self.wireframe_color)
                             #print("color:", wf_color)
                             gl.glColor3f( *wf_color ) #*COLOR['WIREFRAME'])
-                    gl.glLineWidth(int(self.wireframe_thickness)+1)
+                        line_width = 1*(int(self.wireframe_thickness)+1)
+                        #print("line width:", line_width)
+                        gl.glLineWidth(line_width)                        
                     gl.glBegin(gl.GL_LINE_STRIP)
                     #print(self.down_x, self.down_y, self.curr_x, self.curr_y)
                     for lm_idx in edge:
@@ -2691,6 +2696,10 @@ class ObjectDialog(QDialog):
         self.cbxShowModel = QCheckBox()
         self.cbxShowModel.setText("3D Model")
         self.cbxShowModel.setChecked(True)
+        self.btnAddFile = QPushButton()
+        self.btnAddFile.setText("Open File")
+        self.btnAddFile.clicked.connect(self.btnAddFile_clicked)
+
         #self.btnFBO = QPushButton()
         #self.btnFBO.setText("FBO")
         #self.btnFBO.clicked.connect(self.btnFBO_clicked)
@@ -2708,6 +2717,7 @@ class ObjectDialog(QDialog):
         self.right_middle_layout.addWidget(self.cbxShowBaseline)
         self.right_middle_layout.addWidget(self.cbxShowModel)
         self.right_middle_layout.addWidget(self.cbxAutoRotate)
+        self.right_middle_layout.addWidget(self.btnAddFile)
         #self.right_middle_layout.addWidget(self.btnFBO)
         self.right_middle_widget.setLayout(self.right_middle_layout)
         self.right_bottom_widget = QWidget()
@@ -2782,6 +2792,40 @@ class ObjectDialog(QDialog):
     def closeEvent(self, event):
         self.write_settings()
         event.accept()
+
+    def btnAddFile_clicked(self):
+        # open file dialog
+        #print("btnAddFile_clicked")
+        if self.dataset is None:
+
+            return
+        #print("btnAddFile_clicked")
+
+        if self.dataset.dimension == 2:
+            extension = " ".join([ "*."+x for x in mu.IMAGE_EXTENSION_LIST])
+            file_path, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Image Files ("+extension+")")
+            if file_path == "":
+                return
+            self.object_view.set_image(file_path)
+            self.object_view.calculate_resize()
+            self.set_object_name(Path(file_path).stem)
+            self.enable_landmark_edit()
+
+
+        else:
+            file_path, _ = QFileDialog.getOpenFileName(self, "Open File", "", "3D Files (*.obj *.stl *.ply)")
+            if file_path == "":
+                return
+            #print("file_path 1:", file_path)
+            file_path = mu.process_3d_file(file_path)
+            #print("file_path 2:", file_path)
+
+            self.object_view.set_threed_model(file_path)
+            self.object_view.calculate_resize()
+            self.set_object_name(Path(file_path).stem)
+            self.enable_landmark_edit()
+
+        
 
     def set_object_calibration(self, pixels, calibration_length, calibration_unit):
         self.object.pixels_per_mm = pixels * 1.0 / calibration_length

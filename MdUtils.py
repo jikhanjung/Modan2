@@ -2,7 +2,7 @@ import sys, os
 import copy
 
 import numpy as np
-from stl import mesh
+#from stl import mesh
 import trimesh
 import tempfile
 

@@ -2035,6 +2035,7 @@ class NTS:
         self.property_list_list = []
         self.object_comment = {}
         self.landmark_data = {}
+        self.object_images = {}
         self.read()
 
     def isNumber(self,s):
@@ -2166,6 +2167,7 @@ class Morphologika:
         self.property_list_list = []
         self.object_comment = {}
         self.landmark_data = {}
+        self.object_images = {}
         self.read()
 
     def read(self):
@@ -4530,6 +4532,8 @@ class ImportDatasetDialog(QDialog):
         #self.move(self.parent.pos()+QPoint(100,100))
 
         # add file open dialog
+        self.filename_layout = QHBoxLayout()
+        self.filename_widget = QWidget()
         self.btnOpenFile = QPushButton("Open File")
         self.btnOpenFile.clicked.connect(self.open_file)
         self.edtFilename = QLineEdit()
@@ -4539,6 +4543,9 @@ class ImportDatasetDialog(QDialog):
         self.edtFilename.setMinimumWidth(400)
         self.edtFilename.setMaximumWidth(400)
         self.edtFilename.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.filename_layout.addWidget(self.edtFilename)
+        self.filename_layout.addWidget(self.btnOpenFile)
+        self.filename_widget.setLayout(self.filename_layout)
 
         # add file type checkbox group with TPS, X1Y1, Morphologika.
         self.chkFileType = QButtonGroup()
@@ -4598,20 +4605,20 @@ class ImportDatasetDialog(QDialog):
         # add layout
         self.main_layout = QFormLayout()
         self.setLayout(self.main_layout)
-        self.main_layout.addRow("File", self.btnOpenFile)
+        self.main_layout.addRow("File", self.filename_widget)
         #self.main_layout.addRow("File Type", self.cbxFileType)
         self.main_layout.addRow("File Type", self.gbxFileType)
         self.main_layout.addRow("Dataset Name", self.edtDatasetName)
         self.main_layout.addRow("Object Count", self.edtObjectCount)
-        self.main_layout.addRow("Import", self.btnImport)
         self.main_layout.addRow("Progress", self.prgImport)
+        self.main_layout.addRow("", self.btnImport)
 
     def read_settings(self):
         self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
         if self.remember_geometry is True:
-            self.setGeometry(self.m_app.settings.value("WindowGeometry/ImportDialog", QRect(100, 100, 600, 400)))
+            self.setGeometry(self.m_app.settings.value("WindowGeometry/ImportDialog", QRect(100, 100, 500, 220)))
         else:
-            self.setGeometry(QRect(100, 100, 600, 400))
+            self.setGeometry(QRect(100, 100, 500, 220))
             self.move(self.parent.pos()+QPoint(50,50))
 
     def write_settings(self):

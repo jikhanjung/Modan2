@@ -21,6 +21,12 @@ else:
 DEFAULT_DB_DIRECTORY = os.path.join( user_data_dir, COMPANY_NAME )
 DEFAULT_STORAGE_DIRECTORY = os.path.join(DEFAULT_DB_DIRECTORY, "data/")
 
+if not os.path.exists(os.path.dirname(DEFAULT_DB_DIRECTORY)):
+    os.makedirs(os.path.dirname(DEFAULT_DB_DIRECTORY))
+if not os.path.exists(os.path.dirname(DEFAULT_STORAGE_DIRECTORY)):
+    os.makedirs(os.path.dirname(DEFAULT_STORAGE_DIRECTORY))
+
+
 def resource_path(relative_path):
     try:
         base_path = sys._MEIPASS

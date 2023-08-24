@@ -146,7 +146,7 @@ class ModanMainWindow(QMainWindow):
     def read_settings(self):
         self.m_app.settings = QSettings(QSettings.IniFormat, QSettings.UserScope,mu.COMPANY_NAME, mu.PROGRAM_NAME)
         self.m_app.storage_directory = os.path.abspath(mu.DEFAULT_STORAGE_DIRECTORY)
-        self.toolbar_icon_size = self.m_app.settings.value("ToolbarIconSize", "Small")
+        self.toolbar_icon_size = self.m_app.settings.value("ToolbarIconSize", "Medium")
         self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
         if self.remember_geometry is True:
             #print('loading geometry', self.remember_geometry)
@@ -927,5 +927,5 @@ How to make an exe file
 
 pyinstaller --onefile --noconsole --add-data "icons/*.png;icons" --icon="icons/Modan2_2.png" Modan2.py
 
-pyinstaller --onedir --noconsole --add-data "icons/*.png;icons" --icon="icons/Modan2_2.png" Modan2.py
+pyinstaller --onedir --noconsole --add-data "icons/*.png;icons" --icon="icons/Modan2_2.png" --noconfirm Modan2.py
 '''

@@ -13,18 +13,15 @@ PROGRAM_VERSION = "0.1.0"
 DB_LOCATION = ""
 
 #print(os.name)
-if os.name == 'nt':
-    user_data_dir = os.path.expandvars('%APPDATA%')
-else:
-    user_data_dir = os.path.expanduser('~')
+USER_PROFILE_DIRECTORY = os.path.expanduser('~')
 
-DEFAULT_DB_DIRECTORY = os.path.join( user_data_dir, COMPANY_NAME )
+DEFAULT_DB_DIRECTORY = os.path.join( USER_PROFILE_DIRECTORY, PROGRAM_NAME )
 DEFAULT_STORAGE_DIRECTORY = os.path.join(DEFAULT_DB_DIRECTORY, "data/")
 
-if not os.path.exists(os.path.dirname(DEFAULT_DB_DIRECTORY)):
-    os.makedirs(os.path.dirname(DEFAULT_DB_DIRECTORY))
-if not os.path.exists(os.path.dirname(DEFAULT_STORAGE_DIRECTORY)):
-    os.makedirs(os.path.dirname(DEFAULT_STORAGE_DIRECTORY))
+if not os.path.exists(DEFAULT_DB_DIRECTORY):
+    os.makedirs(DEFAULT_DB_DIRECTORY)
+if not os.path.exists(DEFAULT_STORAGE_DIRECTORY):
+    os.makedirs(DEFAULT_STORAGE_DIRECTORY)
 
 
 def resource_path(relative_path):

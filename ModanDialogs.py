@@ -2805,7 +2805,7 @@ class ObjectDialog(QDialog):
 
         if self.dataset.dimension == 2:
             extension = " ".join([ "*."+x for x in mu.IMAGE_EXTENSION_LIST])
-            file_path, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Image Files ("+extension+")")
+            file_path, _ = QFileDialog.getOpenFileName(self, "Open File", mu.USER_PROFILE_DIRECTORY, "Image Files ("+extension+")")
             if file_path == "":
                 return
             self.object_view.set_image(file_path)
@@ -2815,7 +2815,7 @@ class ObjectDialog(QDialog):
 
 
         else:
-            file_path, _ = QFileDialog.getOpenFileName(self, "Open File", "", "3D Files (*.obj *.stl *.ply)")
+            file_path, _ = QFileDialog.getOpenFileName(self, "Open File", mu.USER_PROFILE_DIRECTORY, "3D Files (*.obj *.stl *.ply)")
             if file_path == "":
                 return
             #print("file_path 1:", file_path)
@@ -3712,7 +3712,9 @@ class DatasetAnalysisDialog(QDialog):
         date_str = today. strftime("%Y%m%d_%H%M%S")
 
         filename_candidate = '{}_analysis_{}.xlsx'.format(self.ds_ops.dataset_name, date_str)
-        filename, _ = QFileDialog.getSaveFileName(self, "Save File As", filename_candidate, "Excel format (*.xlsx)")
+        filepath = os.path.join(mu.USER_PROFILE_DIRECTORY, filename_candidate)
+        #print("filepath:", filepath)
+        filename, _ = QFileDialog.getSaveFileName(self, "Save File As", filepath, "Excel format (*.xlsx)")
         if filename:
             #print("filename:", filename)
             doc = xlsxwriter.Workbook(filename)
@@ -4465,8 +4467,8 @@ class ExportDatasetDialog(QDialog):
 
         if self.rbTPS.isChecked():
             filename_candidate = '{}_{}.tps'.format(self.ds_ops.dataset_name, date_str)
-
-            filename, _ = QFileDialog.getSaveFileName(self, "Save File As", filename_candidate, "TPS format (*.tps)")
+            filepath = os.path.join(mu.USER_PROFILE_DIRECTORY, filename_candidate)
+            filename, _ = QFileDialog.getSaveFileName(self, "Save File As", filepath, "TPS format (*.tps)")
             if filename:
                 # open text file
                 with open(filename, 'w') as f:
@@ -4480,7 +4482,8 @@ class ExportDatasetDialog(QDialog):
 
         elif self.rbMorphologika.isChecked():
             filename_candidate = '{}_{}.txt'.format(self.ds_ops.dataset_name, date_str)
-            filename, _ = QFileDialog.getSaveFileName(self, "Save File As", filename_candidate, "Morphologika format (*.txt)")
+            filepath = os.path.join(mu.USER_PROFILE_DIRECTORY, filename_candidate)
+            filename, _ = QFileDialog.getSaveFileName(self, "Save File As", filepath, "Morphologika format (*.txt)")
             if filename:
                 result_str = ""
                 result_str += "[individuals]" + NEWLINE + str(len(self.ds_ops.object_list)) + NEWLINE
@@ -4630,7 +4633,7 @@ class ImportDatasetDialog(QDialog):
         event.accept()
 
     def open_file(self):
-        filename, _ = QFileDialog.getOpenFileName(self, "Open File", "", "All Files (*.*)")
+        filename, _ = QFileDialog.getOpenFileName(self, "Open File", mu.USER_PROFILE_DIRECTORY, "All Files (*.*)")
         if filename:
             self.edtFilename.setText(filename)
             self.btnImport.setEnabled(True)
@@ -5146,7 +5149,7 @@ class PreferencesDialog(QDialog):
 
     def read_settings(self):
         self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
-        self.toolbar_icon_size = self.m_app.settings.value("ToolbarIconSize", "Small")
+        self.toolbar_icon_size = self.m_app.settings.value("ToolbarIconSize", "Medium")
         if self.toolbar_icon_size.lower() == "small":
             self.toolbar_icon_small = True
             self.toolbar_icon_large = False

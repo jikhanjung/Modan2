@@ -4473,12 +4473,15 @@ class ExportDatasetDialog(QDialog):
                 # open text file
                 with open(filename, 'w') as f:
                     for object in object_list:
-                        f.write('LM={}\t{}\n'.format(len(object.landmark_list),object.object_name))
+                        f.write('LM={}\n'.format(len(object.landmark_list)))
                         for lm in object.landmark_list:
                             if self.ds_ops.dimension == 2:
                                 f.write('{}\t{}\n'.format(*lm))
                             else:
                                 f.write('{}\t{}\t{}\n'.format(*lm))
+                        if object.has_image():
+                            f.write('IMAGE={}\n'.format(object.image_filename))
+                        f.write('ID={}\n'.format(object.object_name))
 
         elif self.rbMorphologika.isChecked():
             filename_candidate = '{}_{}.txt'.format(self.ds_ops.dataset_name, date_str)
@@ -4488,7 +4491,7 @@ class ExportDatasetDialog(QDialog):
                 result_str = ""
                 result_str += "[individuals]" + NEWLINE + str(len(self.ds_ops.object_list)) + NEWLINE
                 result_str += "[landmarks]" + NEWLINE + str(len(self.ds_ops.object_list[0].landmark_list)) + NEWLINE
-                result_str += "[Dimensions]" + NEWLINE + str(self.ds_ops.dimension) + NEWLINE
+                result_str += "[dimensions]" + NEWLINE + str(self.ds_ops.dimension) + NEWLINE
                 label_values = "[labels]" + NEWLINE + "\t".join(self.dataset.propertyname_list) + NEWLINE
                 label_values += "[labelvalues]" + NEWLINE
                 rawpoint_values = "[rawpoints]" + NEWLINE

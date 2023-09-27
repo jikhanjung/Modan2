@@ -36,7 +36,7 @@ class ModanMainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowIcon(QIcon(mu.resource_path('icons/Modan2_2.png')))
-        self.setWindowTitle("{} v{}".format(mu.PROGRAM_NAME, mu.PROGRAM_VERSION))
+        self.setWindowTitle("{} v{}".format(self.tr("Modan2"), mu.PROGRAM_VERSION))
 
         self.tableView = QTableView()
         self.treeView = QTreeView()
@@ -912,7 +912,7 @@ if __name__ == "__main__":
     app.settings = QSettings(QSettings.IniFormat, QSettings.UserScope,mu.COMPANY_NAME, mu.PROGRAM_NAME)
 
     translator = QTranslator()
-    app.language = app.settings.value("language", "en")
+    app.language = app.settings.value("language", "ko")
     translator.load(mu.resource_path("translations/Modan2_{}.qm".format(app.language)))
     app.installTranslator(translator)
 
@@ -936,9 +936,9 @@ pyinstaller --onefile --noconsole --add-data "icons/*.png;icons" --add-data "tra
 
 pyinstaller --onedir --noconsole --add-data "icons/*.png;icons" --add-data "translations/*.qm;translations" --icon="icons/Modan2_2.png" --noconfirm Modan2.py
 
-pylupdate5 Modan2.py -ts Modan2_en.ts
-pylupdate5 Modan2.py -ts Modan2_ko.ts
-pylupdate5 Modan2.py -ts Modan2_ja.ts
+pylupdate5 Modan2.py -ts translations/Modan2_en.ts
+pylupdate5 Modan2.py -ts translations/Modan2_ko.ts
+pylupdate5 Modan2.py -ts translations/Modan2_ja.ts
 
 linguist
 

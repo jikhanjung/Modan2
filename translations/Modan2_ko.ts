@@ -6,7 +6,12 @@
     <message>
         <location filename="Modan2.py" line="49"/>
         <source>New Dataset	Ctrl+N</source>
-        <translation type="unfinished">새 데이터셋 Ctrl+N</translation>
+        <translation>새 데이터셋	Ctrl+N</translation>
+    </message>
+    <message>
+        <location filename="Modan2.py" line="39"/>
+        <source>Modan2</source>
+        <translation>모단2</translation>
     </message>
 </context>
 </TS>

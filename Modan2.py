@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QMainWindow, QHeaderView, QApplication, QAbstractIte
                             QMessageBox, QTreeView, QTableView, QSplitter, QAction, QMenu, \
                             QStatusBar, QInputDialog, QToolBar
 from PyQt5.QtGui import QIcon, QStandardItemModel, QStandardItem, QKeySequence
-from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSettings, QSize
+from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSettings, QSize, QTranslator
 
 from PyQt5.QtCore import pyqtSlot
 import re,os,sys
@@ -46,7 +46,7 @@ class ModanMainWindow(QMainWindow):
         #self.toolbar.addAction(QIcon(mu.resource_path('icons/open.png')), "Open", self.on_action_open_db_triggered)
         #self.toolbar.addAction(QIcon(mu.resource_path('icons/newdb.png')), "New", self.on_action_new_db_triggered)
         #self.toolbar.addAction(QIcon(mu.resource_path('icons/saveas.png')), "Save As", self.on_action_save_as_triggered)
-        self.actionNewDataset = QAction(QIcon(mu.resource_path(ICON['new_dataset'])), "New Dataset\tCtrl+N", self)
+        self.actionNewDataset = QAction(QIcon(mu.resource_path(ICON['new_dataset'])), self.tr("New Dataset\tCtrl+N"), self)
         self.actionNewDataset.triggered.connect(self.on_action_new_dataset_triggered)
         self.actionNewDataset.setShortcut(QKeySequence("Ctrl+N"))
         self.actionNewObject = QAction(QIcon(mu.resource_path(ICON['new_object'])), "New Object\tCtrl+Shift+N", self)
@@ -909,6 +909,13 @@ if __name__ == "__main__":
     #    f.write("current directory 2:" + os.path.abspath(".") + "\n")
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon(mu.resource_path('icons/Modan2_2.png')))
+    app.settings = QSettings(QSettings.IniFormat, QSettings.UserScope,mu.COMPANY_NAME, mu.PROGRAM_NAME)
+
+    translator = QTranslator()
+    app.language = app.settings.value("language", "en")
+    translator.load(mu.resource_path("translations/Modan2_{}.qm".format(app.language)))
+    app.installTranslator(translator)
+
     #app.settings = 
     #app.preferences = QSettings("Modan", "Modan2")
 
@@ -925,7 +932,15 @@ if __name__ == "__main__":
 ''' 
 How to make an exe file
 
-pyinstaller --onefile --noconsole --add-data "icons/*.png;icons" --icon="icons/Modan2_2.png" Modan2.py
+pyinstaller --onefile --noconsole --add-data "icons/*.png;icons" --add-data "translations/*.qm;translations" --icon="icons/Modan2_2.png" Modan2.py
 
-pyinstaller --onedir --noconsole --add-data "icons/*.png;icons" --icon="icons/Modan2_2.png" --noconfirm Modan2.py
+pyinstaller --onedir --noconsole --add-data "icons/*.png;icons" --add-data "translations/*.qm;translations" --icon="icons/Modan2_2.png" --noconfirm Modan2.py
+
+pylupdate5 Modan2.py -ts Modan2_en.ts
+pylupdate5 Modan2.py -ts Modan2_ko.ts
+pylupdate5 Modan2.py -ts Modan2_ja.ts
+
+linguist
+
+
 '''

@@ -4788,25 +4788,26 @@ class PreferencesDialog(QDialog):
     def __init__(self,parent):
         super().__init__()
         self.parent = parent
-        self.remember_geometry = True
+        self.m_app = QApplication.instance()
+
+        self.m_app.remember_geometry = True
         self.toolbar_icon_small = False
         self.toolbar_icon_medium = False
         self.toolbar_icon_large = False
-        self.plot_size = "medium"
+        self.m_app.plot_size = "medium"
 
         self.default_color_list = mu.VIVID_COLOR_LIST[:]
         #['blue','green','black','cyan','magenta','yellow','gray','red']
-        self.color_list = self.default_color_list[:]
-        self.marker_list = mu.MARKER_LIST[:]
+        self.m_app.color_list = self.default_color_list[:]
+        self.m_app.marker_list = mu.MARKER_LIST[:]
 
-        self.landmark_pref = {'2D':{'size':1,'color':'#0000FF'},'3D':{'size':1,'color':'#0000FF'}}
-        self.wireframe_pref = {'2D':{'thickness':1,'color':'#FFFF00'},'3D':{'thickness':1,'color':'#FFFF00'}}
-        self.index_pref = {'2D':{'size':1,'color':'#FFFFFF'},'3D':{'size':1,'color':'#FFFFFF'}}
-        self.bgcolor = '#AAAAAA'
+        self.m_app.landmark_pref = {'2D':{'size':1,'color':'#0000FF'},'3D':{'size':1,'color':'#0000FF'}}
+        self.m_app.wireframe_pref = {'2D':{'thickness':1,'color':'#FFFF00'},'3D':{'thickness':1,'color':'#FFFF00'}}
+        self.m_app.index_pref = {'2D':{'size':1,'color':'#FFFFFF'},'3D':{'size':1,'color':'#FFFFFF'}}
+        self.m_app.bgcolor = '#AAAAAA'
         #print("landmark_pref:", self.landmark_pref)
         #print("wireframe_pref:", self.wireframe_pref)
 
-        self.m_app = QApplication.instance()
         self.read_settings()
         self.setWindowTitle("Preferences")
         #self.lbl_main_view.setMinimumSize(400, 300)
@@ -4814,10 +4815,10 @@ class PreferencesDialog(QDialog):
         #print("wireframe_pref:", self.wireframe_pref)
 
         self.rbRememberGeometryYes = QRadioButton("Yes")
-        self.rbRememberGeometryYes.setChecked(self.remember_geometry)
+        self.rbRememberGeometryYes.setChecked(self.m_app.remember_geometry)
         self.rbRememberGeometryYes.clicked.connect(self.on_rbRememberGeometryYes_clicked)
         self.rbRememberGeometryNo = QRadioButton("No")
-        self.rbRememberGeometryNo.setChecked(not self.remember_geometry)
+        self.rbRememberGeometryNo.setChecked(not self.m_app.remember_geometry)
         self.rbRememberGeometryNo.clicked.connect(self.on_rbRememberGeometryNo_clicked)
 
         self.gbRememberGeomegry = QGroupBox()
@@ -4826,7 +4827,7 @@ class PreferencesDialog(QDialog):
         self.gbRememberGeomegry.layout().addWidget(self.rbRememberGeometryNo)
 
         
-        self.toolbar_icon_large = True if self.toolbar_icon_size.lower() == "large" else False
+        self.toolbar_icon_large = True if self.m_app.toolbar_icon_size.lower() == "large" else False
         self.rbToolbarIconLarge = QRadioButton("Large")
         self.rbToolbarIconLarge.setChecked(self.toolbar_icon_large)
         self.rbToolbarIconLarge.clicked.connect(self.on_rbToolbarIconLarge_clicked)
@@ -4842,11 +4843,11 @@ class PreferencesDialog(QDialog):
         self.gb2DLandmarkPref.setTitle("2D")
         self.combo2DLandmarkSize = QComboBox()
         self.combo2DLandmarkSize.addItems(["Small","Medium","Large"])
-        self.combo2DLandmarkSize.setCurrentIndex(int(self.landmark_pref['2D']['size']))
+        self.combo2DLandmarkSize.setCurrentIndex(int(self.m_app.landmark_pref['2D']['size']))
         self.lbl2DLandmarkColor = QPushButton()
         self.lbl2DLandmarkColor.setMinimumSize(20,20)
-        self.lbl2DLandmarkColor.setStyleSheet("background-color: " + self.landmark_pref['2D']['color'])
-        self.lbl2DLandmarkColor.setToolTip(self.landmark_pref['2D']['color'])
+        self.lbl2DLandmarkColor.setStyleSheet("background-color: " + self.m_app.landmark_pref['2D']['color'])
+        self.lbl2DLandmarkColor.setToolTip(self.m_app.landmark_pref['2D']['color'])
         self.lbl2DLandmarkColor.setCursor(Qt.PointingHandCursor)
         self.lbl2DLandmarkColor.mousePressEvent = lambda event, dim='2D': self.on_lblLmColor_clicked(event, '2D')
         self.combo2DLandmarkSize.currentIndexChanged.connect(lambda event, dim='2D': self.on_comboLmSize_currentIndexChanged(event, '2D'))
@@ -4859,11 +4860,11 @@ class PreferencesDialog(QDialog):
         self.gb3DLandmarkPref.setTitle("3D")
         self.combo3DLandmarkSize = QComboBox()
         self.combo3DLandmarkSize.addItems(["Small","Medium","Large"])
-        self.combo3DLandmarkSize.setCurrentIndex(int(self.landmark_pref['3D']['size']))
+        self.combo3DLandmarkSize.setCurrentIndex(int(self.m_app.landmark_pref['3D']['size']))
         self.lbl3DLandmarkColor = QPushButton()
         self.lbl3DLandmarkColor.setMinimumSize(20,20)
-        self.lbl3DLandmarkColor.setStyleSheet("background-color: " + self.landmark_pref['3D']['color'])
-        self.lbl3DLandmarkColor.setToolTip(self.landmark_pref['3D']['color'])
+        self.lbl3DLandmarkColor.setStyleSheet("background-color: " + self.m_app.landmark_pref['3D']['color'])
+        self.lbl3DLandmarkColor.setToolTip(self.m_app.landmark_pref['3D']['color'])
         self.lbl3DLandmarkColor.setCursor(Qt.PointingHandCursor)
         self.lbl3DLandmarkColor.mousePressEvent = lambda event, dim='3D': self.on_lblLmColor_clicked(event, '3D')
         self.combo3DLandmarkSize.currentIndexChanged.connect(lambda event, dim='3D': self.on_comboLmSize_currentIndexChanged(event, '3D'))
@@ -4882,11 +4883,11 @@ class PreferencesDialog(QDialog):
         self.gb2DWireframePref.setTitle("2D")
         self.combo2DWireframeThickness = QComboBox()
         self.combo2DWireframeThickness.addItems(["Thin","Medium","Thick"])
-        self.combo2DWireframeThickness.setCurrentIndex(int(self.wireframe_pref['2D']['thickness']))
+        self.combo2DWireframeThickness.setCurrentIndex(int(self.m_app.wireframe_pref['2D']['thickness']))
         self.lbl2DWireframeColor = QPushButton()
         self.lbl2DWireframeColor.setMinimumSize(20,20)
-        self.lbl2DWireframeColor.setStyleSheet("background-color: " + self.wireframe_pref['2D']['color'])
-        self.lbl2DWireframeColor.setToolTip(self.wireframe_pref['2D']['color'])
+        self.lbl2DWireframeColor.setStyleSheet("background-color: " + self.m_app.wireframe_pref['2D']['color'])
+        self.lbl2DWireframeColor.setToolTip(self.m_app.wireframe_pref['2D']['color'])
         self.lbl2DWireframeColor.setCursor(Qt.PointingHandCursor)
         self.lbl2DWireframeColor.mousePressEvent = lambda event, dim='2D': self.on_lblWireframeColor_clicked(event, '2D')
         self.combo2DWireframeThickness.currentIndexChanged.connect(lambda event, dim='2D': self.on_comboWireframeThickness_currentIndexChanged(event, '2D'))
@@ -4899,11 +4900,11 @@ class PreferencesDialog(QDialog):
         self.gb3DWireframePref.setTitle("3D")
         self.combo3DWireframeThickness = QComboBox()
         self.combo3DWireframeThickness.addItems(["Thin","Medium","Thick"])
-        self.combo3DWireframeThickness.setCurrentIndex(int(self.wireframe_pref['3D']['thickness']))
+        self.combo3DWireframeThickness.setCurrentIndex(int(self.m_app.wireframe_pref['3D']['thickness']))
         self.lbl3DWireframeColor = QPushButton()
         self.lbl3DWireframeColor.setMinimumSize(20,20)
-        self.lbl3DWireframeColor.setStyleSheet("background-color: " + self.wireframe_pref['3D']['color'])
-        self.lbl3DWireframeColor.setToolTip(self.wireframe_pref['3D']['color'])
+        self.lbl3DWireframeColor.setStyleSheet("background-color: " + self.m_app.wireframe_pref['3D']['color'])
+        self.lbl3DWireframeColor.setToolTip(self.m_app.wireframe_pref['3D']['color'])
         self.lbl3DWireframeColor.setCursor(Qt.PointingHandCursor)
         self.lbl3DWireframeColor.mousePressEvent = lambda event, dim='3D': self.on_lblWireframeColor_clicked(event, '3D')
         self.combo3DWireframeThickness.currentIndexChanged.connect(lambda event, dim='3D': self.on_comboWireframeThickness_currentIndexChanged(event, '3D'))
@@ -4922,11 +4923,11 @@ class PreferencesDialog(QDialog):
         self.gb2DIndexPref.setTitle("2D")
         self.combo2DIndexSize = QComboBox()
         self.combo2DIndexSize.addItems(["Small","Medium","Large"])
-        self.combo2DIndexSize.setCurrentIndex(int(self.index_pref['2D']['size']))
+        self.combo2DIndexSize.setCurrentIndex(int(self.m_app.index_pref['2D']['size']))
         self.lbl2DIndexColor = QPushButton()
         self.lbl2DIndexColor.setMinimumSize(20,20)
-        self.lbl2DIndexColor.setStyleSheet("background-color: " + self.index_pref['2D']['color'])
-        self.lbl2DIndexColor.setToolTip(self.index_pref['2D']['color'])
+        self.lbl2DIndexColor.setStyleSheet("background-color: " + self.m_app.index_pref['2D']['color'])
+        self.lbl2DIndexColor.setToolTip(self.m_app.index_pref['2D']['color'])
         self.lbl2DIndexColor.setCursor(Qt.PointingHandCursor)
         self.lbl2DIndexColor.mousePressEvent = lambda event, dim='2D': self.on_lblIndexColor_clicked(event, '2D')
         self.combo2DIndexSize.currentIndexChanged.connect(lambda event, dim='2D': self.on_comboIndexSize_currentIndexChanged(event, '2D'))
@@ -4939,11 +4940,11 @@ class PreferencesDialog(QDialog):
         self.gb3DIndexPref.setTitle("3D")
         self.combo3DIndexSize = QComboBox()
         self.combo3DIndexSize.addItems(["Small","Medium","Large"])
-        self.combo3DIndexSize.setCurrentIndex(int(self.index_pref['3D']['size']))
+        self.combo3DIndexSize.setCurrentIndex(int(self.m_app.index_pref['3D']['size']))
         self.lbl3DIndexColor = QPushButton()
         self.lbl3DIndexColor.setMinimumSize(20,20)
-        self.lbl3DIndexColor.setStyleSheet("background-color: " + self.index_pref['3D']['color'])
-        self.lbl3DIndexColor.setToolTip(self.index_pref['3D']['color'])
+        self.lbl3DIndexColor.setStyleSheet("background-color: " + self.m_app.index_pref['3D']['color'])
+        self.lbl3DIndexColor.setToolTip(self.m_app.index_pref['3D']['color'])
         self.lbl3DIndexColor.setCursor(Qt.PointingHandCursor)
         self.lbl3DIndexColor.mousePressEvent = lambda event, dim='3D': self.on_lblIndexColor_clicked(event, '3D')
         self.combo3DIndexSize.currentIndexChanged.connect(lambda event, dim='3D': self.on_comboIndexSize_currentIndexChanged(event, '3D'))
@@ -4959,8 +4960,8 @@ class PreferencesDialog(QDialog):
 
         self.lblBgcolor = QPushButton()
         self.lblBgcolor.setMinimumSize(20,20)
-        self.lblBgcolor.setStyleSheet("background-color: " + self.bgcolor)
-        self.lblBgcolor.setToolTip(self.bgcolor)
+        self.lblBgcolor.setStyleSheet("background-color: " + self.m_app.bgcolor)
+        self.lblBgcolor.setToolTip(self.m_app.bgcolor)
         self.lblBgcolor.setCursor(Qt.PointingHandCursor)
         self.lblBgcolor.mousePressEvent = lambda event: self.on_lblBgcolor_clicked(event)
 
@@ -4978,13 +4979,13 @@ class PreferencesDialog(QDialog):
         #symbol_candidate = ['o','s','^','x','+','d','v','<','>','p','h']
 
         self.rbPlotLarge = QRadioButton("Large")
-        self.rbPlotLarge.setChecked(self.plot_size.lower() == "large")
+        self.rbPlotLarge.setChecked(self.m_app.plot_size.lower() == "large")
         self.rbPlotLarge.clicked.connect(self.on_rbPlotLarge_clicked)
         self.rbPlotSmall = QRadioButton("Small")
-        self.rbPlotSmall.setChecked(self.plot_size.lower() == "small")
+        self.rbPlotSmall.setChecked(self.m_app.plot_size.lower() == "small")
         self.rbPlotSmall.clicked.connect(self.on_rbPlotSmall_clicked)
         self.rbPlotMedium = QRadioButton("Medium")
-        self.rbPlotMedium.setChecked(self.plot_size.lower() == "medium")
+        self.rbPlotMedium.setChecked(self.m_app.plot_size.lower() == "medium")
         self.rbPlotMedium.clicked.connect(self.on_rbPlotMedium_clicked)
 
         self.gbPlotSize = QGroupBox()
@@ -5000,10 +5001,10 @@ class PreferencesDialog(QDialog):
         self.btnResetMarkers.setMaximumSize(100,20)
 
         self.comboMarker_list = []
-        for i in range(len(self.marker_list)):
+        for i in range(len(self.m_app.marker_list)):
             self.comboMarker_list.append(QComboBox())
             self.comboMarker_list[i].addItems(mu.MARKER_LIST)
-            self.comboMarker_list[i].setCurrentIndex(mu.MARKER_LIST.index(self.marker_list[i]))
+            self.comboMarker_list[i].setCurrentIndex(mu.MARKER_LIST.index(self.m_app.marker_list[i]))
             self.comboMarker_list[i].currentIndexChanged.connect(lambda event, index=i: self.on_comboMarker_currentIndexChanged(event, index))
             self.gbPlotMarkers.layout().addWidget(self.comboMarker_list[i])
         self.gbPlotMarkers.layout().addWidget(self.btnResetMarkers)
@@ -5020,12 +5021,12 @@ class PreferencesDialog(QDialog):
         self.btnResetPastel.setMaximumSize(100,20)
 
         self.lblColor_list = []
-        for i in range(len(self.color_list)):
+        for i in range(len(self.m_app.color_list)):
             self.lblColor_list.append(QPushButton())
             self.lblColor_list[i].setMinimumSize(20,20)
             #self.lblColor_list[i].setMaximumSize(20,20)
-            self.lblColor_list[i].setStyleSheet("background-color: " + self.color_list[i])
-            self.lblColor_list[i].setToolTip(self.color_list[i])
+            self.lblColor_list[i].setStyleSheet("background-color: " + self.m_app.color_list[i])
+            self.lblColor_list[i].setToolTip(self.m_app.color_list[i])
             self.lblColor_list[i].setCursor(Qt.PointingHandCursor)
             self.lblColor_list[i].setText(str(i+1))
             #self.lblColor_list[i].mousePressEvent = self.on_lblColor_clicked
@@ -5037,6 +5038,16 @@ class PreferencesDialog(QDialog):
         #self.gbPlotColors.layout().addWidget(self.rbToolbarIconSmall)
         self.gbPlotColors.layout().addWidget(self.btnResetVivid,0,10)
         self.gbPlotColors.layout().addWidget(self.btnResetPastel,1,10)
+
+        self.lang_layout = QHBoxLayout()
+        self.comboLang = QComboBox()
+        self.comboLang.addItem(self.tr("English"))
+        self.comboLang.addItem(self.tr("Korean"))
+        self.comboLang.currentIndexChanged.connect(self.comboLangIndexChanged)
+        self.lang_layout.addWidget(self.comboLang)
+        self.lang_widget = QWidget()
+        self.lang_widget.setLayout(self.lang_layout)
+
 
         self.btnOkay = QPushButton()
         self.btnOkay.setText("Close")
@@ -5057,13 +5068,21 @@ class PreferencesDialog(QDialog):
         self.main_layout.addRow("Wireframe", self.wireframe_widget)
         self.main_layout.addRow("Index", self.index_widget)
         self.main_layout.addRow("Background Color", self.lblBgcolor)
+        self.main_layout.addRow("Language", self.lang_widget)
         self.main_layout.addRow("", self.btnOkay)
 
         self.read_settings()
 
+    def comboLangIndexChanged(self, index):
+        if index == 0:
+            self.m_app.language = "en"
+        elif index == 1:
+            self.m_app.language = "ko"
+
+
     def on_comboMarker_currentIndexChanged(self, event, index):
         self.current_lblMarker = self.comboMarker_list[index]
-        self.marker_list[self.comboMarker_list.index(self.current_lblMarker)] = self.current_lblMarker.currentText()
+        self.m_app.marker_list[self.comboMarker_list.index(self.current_lblMarker)] = self.current_lblMarker.currentText()
         #print(self.marker_list)
 
     def on_lblColor_clicked(self,event, index):
@@ -5075,16 +5094,16 @@ class PreferencesDialog(QDialog):
         if color is not None:
             self.current_lblColor.setStyleSheet("background-color: " + color.name())
             self.current_lblColor.setToolTip(color.name())
-            self.color_list[self.lblColor_list.index(self.current_lblColor)] = color.name()
+            self.m_app.color_list[self.lblColor_list.index(self.current_lblColor)] = color.name()
             #print(self.color_list)
 
     def on_lblBgcolor_clicked(self,event):
         dialog = QColorDialog()
         color = dialog.getColor(initial=QColor(self.bgcolor))
         if color is not None:
-            self.bgcolor = color.name()
-            self.lblBgcolor.setStyleSheet("background-color: " + self.bgcolor)
-            self.lblBgcolor.setToolTip(self.bgcolor)
+            self.m_app.bgcolor = color.name()
+            self.lblBgcolor.setStyleSheet("background-color: " + self.m_app.bgcolor)
+            self.lblBgcolor.setToolTip(self.m_app.bgcolor)
         self.parent.update_settings()
 
     def on_comboLmSize_currentIndexChanged(self, event, dim):
@@ -5092,7 +5111,7 @@ class PreferencesDialog(QDialog):
             self.current_comboLmSize = self.combo2DLandmarkSize
         elif dim == '3D':
             self.current_comboLmSize = self.combo3DLandmarkSize
-        self.landmark_pref[dim]['size'] = self.current_comboLmSize.currentIndex()
+        self.m_app.landmark_pref[dim]['size'] = self.current_comboLmSize.currentIndex()
         self.parent.update_settings()
 
     def on_lblLmColor_clicked(self,event, dim):
@@ -5105,7 +5124,7 @@ class PreferencesDialog(QDialog):
         if color is not None:
             self.current_lblLmColor.setStyleSheet("background-color: " + color.name())
             self.current_lblLmColor.setToolTip(color.name())
-            self.landmark_pref[dim]['color'] = color.name()
+            self.m_app.landmark_pref[dim]['color'] = color.name()
         self.parent.update_settings()
 
     def on_comboIndexSize_currentIndexChanged(self, event, dim):
@@ -5113,7 +5132,7 @@ class PreferencesDialog(QDialog):
             self.current_comboIndexSize = self.combo2DIndexSize
         elif dim == '3D':
             self.current_comboIndexSize = self.combo3DIndexSize
-        self.index_pref[dim]['size'] = self.current_comboIndexSize.currentIndex()
+        self.m_app.index_pref[dim]['size'] = self.current_comboIndexSize.currentIndex()
         self.parent.update_settings()
 
     def on_lblIndexColor_clicked(self,event, dim):
@@ -5126,7 +5145,7 @@ class PreferencesDialog(QDialog):
         if color is not None:
             self.current_lblIndexColor.setStyleSheet("background-color: " + color.name())
             self.current_lblIndexColor.setToolTip(color.name())
-            self.index_pref[dim]['color'] = color.name()
+            self.m_app.index_pref[dim]['color'] = color.name()
         self.parent.update_settings()
 
     def on_comboWireframeThickness_currentIndexChanged(self, event, dim):
@@ -5134,7 +5153,7 @@ class PreferencesDialog(QDialog):
             self.current_comboWireframeThickness = self.combo2DWireframeThickness
         elif dim == '3D':
             self.current_comboWireframeThickness = self.combo3DWireframeThickness
-        self.wireframe_pref[dim]['thickness'] = self.current_comboWireframeThickness.currentIndex()
+        self.m_app.wireframe_pref[dim]['thickness'] = self.current_comboWireframeThickness.currentIndex()
         self.parent.update_settings()
 
     def on_lblWireframeColor_clicked(self,event, dim):
@@ -5147,79 +5166,80 @@ class PreferencesDialog(QDialog):
         if color is not None:
             self.current_lblWireframeColor.setStyleSheet("background-color: " + color.name())
             self.current_lblWireframeColor.setToolTip(color.name())
-            self.wireframe_pref[dim]['color'] = color.name()
+            self.m_app.wireframe_pref[dim]['color'] = color.name()
         self.parent.update_settings()
 
     def read_settings(self):
-        self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
-        self.toolbar_icon_size = self.m_app.settings.value("ToolbarIconSize", "Medium")
-        if self.toolbar_icon_size.lower() == "small":
+        self.m_app.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
+        self.m_app.toolbar_icon_size = self.m_app.settings.value("ToolbarIconSize", "Medium")
+        #print("toolbar_icon_size:", self.m_app.toolbar_icon_size)
+        if self.m_app.toolbar_icon_size.lower() == "small":
             self.toolbar_icon_small = True
             self.toolbar_icon_large = False
             self.toolbar_icon_medium = False
-        elif self.toolbar_icon_size.lower() == "medium":
+        elif self.m_app.toolbar_icon_size.lower() == "medium":
             self.toolbar_icon_small = False
             self.toolbar_icon_medium = True
             self.toolbar_icon_large = False
-        elif self.toolbar_icon_size.lower() == "large":
+        elif self.m_app.toolbar_icon_size.lower() == "large":
             self.toolbar_icon_small = False
             self.toolbar_icon_medium = False
             self.toolbar_icon_large = True
 
-        for i in range(len(self.color_list)):
-            self.color_list[i] = self.m_app.settings.value("DataPointColor/"+str(i), self.default_color_list[i])
+        for i in range(len(self.m_app.color_list)):
+            self.m_app.color_list[i] = self.m_app.settings.value("DataPointColor/"+str(i), self.default_color_list[i])
 
-        for i in range(len(self.marker_list)):
-            self.marker_list[i] = self.m_app.settings.value("DataPointMarker/"+str(i), self.marker_list[i])
-        self.plot_size = self.m_app.settings.value("PlotSize", self.plot_size)
+        for i in range(len(self.m_app.marker_list)):
+            self.m_app.marker_list[i] = self.m_app.settings.value("DataPointMarker/"+str(i), self.m_app.marker_list[i])
+        self.m_app.plot_size = self.m_app.settings.value("PlotSize", self.m_app.plot_size)
 
-        self.landmark_pref['2D']['size'] = self.m_app.settings.value("LandmarkSize/2D", self.landmark_pref['2D']['size'])
-        self.landmark_pref['2D']['color'] = self.m_app.settings.value("LandmarkColor/2D", self.landmark_pref['2D']['color'])
-        self.landmark_pref['3D']['size'] = self.m_app.settings.value("LandmarkSize/3D", self.landmark_pref['3D']['size'])
-        self.landmark_pref['3D']['color'] = self.m_app.settings.value("LandmarkColor/3D", self.landmark_pref['3D']['color'])
-        self.wireframe_pref['2D']['thickness'] = self.m_app.settings.value("WireframeThickness/2D", self.wireframe_pref['2D']['thickness'])
-        self.wireframe_pref['2D']['color'] = self.m_app.settings.value("WireframeColor/2D", self.wireframe_pref['2D']['color'])
-        self.wireframe_pref['3D']['thickness'] = self.m_app.settings.value("WireframeThickness/3D", self.wireframe_pref['3D']['thickness'])
-        self.wireframe_pref['3D']['color'] = self.m_app.settings.value("WireframeColor/3D", self.wireframe_pref['3D']['color'])
-        self.index_pref['2D']['size'] = self.m_app.settings.value("IndexSize/2D", self.index_pref['2D']['size'])
-        self.index_pref['2D']['color'] = self.m_app.settings.value("IndexColor/2D", self.index_pref['2D']['color'])
-        self.index_pref['3D']['size'] = self.m_app.settings.value("IndexSize/3D", self.index_pref['3D']['size'])
-        self.index_pref['3D']['color'] = self.m_app.settings.value("IndexColor/3D", self.index_pref['3D']['color'])
-        self.bgcolor = self.m_app.settings.value("BackgroundColor", self.bgcolor)
+        self.m_app.landmark_pref['2D']['size'] = self.m_app.settings.value("LandmarkSize/2D", self.m_app.landmark_pref['2D']['size'])
+        self.m_app.landmark_pref['2D']['color'] = self.m_app.settings.value("LandmarkColor/2D", self.m_app.landmark_pref['2D']['color'])
+        self.m_app.landmark_pref['3D']['size'] = self.m_app.settings.value("LandmarkSize/3D", self.m_app.landmark_pref['3D']['size'])
+        self.m_app.landmark_pref['3D']['color'] = self.m_app.settings.value("LandmarkColor/3D", self.m_app.landmark_pref['3D']['color'])
+        self.m_app.wireframe_pref['2D']['thickness'] = self.m_app.settings.value("WireframeThickness/2D", self.m_app.wireframe_pref['2D']['thickness'])
+        self.m_app.wireframe_pref['2D']['color'] = self.m_app.settings.value("WireframeColor/2D", self.m_app.wireframe_pref['2D']['color'])
+        self.m_app.wireframe_pref['3D']['thickness'] = self.m_app.settings.value("WireframeThickness/3D", self.m_app.wireframe_pref['3D']['thickness'])
+        self.m_app.wireframe_pref['3D']['color'] = self.m_app.settings.value("WireframeColor/3D", self.m_app.wireframe_pref['3D']['color'])
+        self.m_app.index_pref['2D']['size'] = self.m_app.settings.value("IndexSize/2D", self.m_app.index_pref['2D']['size'])
+        self.m_app.index_pref['2D']['color'] = self.m_app.settings.value("IndexColor/2D", self.m_app.index_pref['2D']['color'])
+        self.m_app.index_pref['3D']['size'] = self.m_app.settings.value("IndexSize/3D", self.m_app.index_pref['3D']['size'])
+        self.m_app.index_pref['3D']['color'] = self.m_app.settings.value("IndexColor/3D", self.m_app.index_pref['3D']['color'])
+        self.m_app.bgcolor = self.m_app.settings.value("BackgroundColor", self.m_app.bgcolor)
 
-        if self.remember_geometry is True:
+        if self.m_app.remember_geometry is True:
             self.setGeometry(self.m_app.settings.value("WindowGeometry/PreferencesDialog", QRect(100, 100, 600, 400)))
         else:
             self.setGeometry(QRect(100, 100, 600, 400))
             self.move(self.parent.pos()+QPoint(100,100))
 
     def write_settings(self):
-        self.m_app.settings.setValue("ToolbarIconSize", self.toolbar_icon_size)
-        self.m_app.settings.setValue("PlotSize", self.plot_size)
-        self.m_app.settings.setValue("WindowGeometry/RememberGeometry", self.remember_geometry)
+        self.m_app.settings.setValue("ToolbarIconSize", self.m_app.toolbar_icon_size)
+        self.m_app.settings.setValue("PlotSize", self.m_app.plot_size)
+        self.m_app.settings.setValue("WindowGeometry/RememberGeometry", self.m_app.remember_geometry)
         #print(self.color_list)
-        for i in range(len(self.marker_list)):
-            self.m_app.settings.setValue("DataPointMarker/"+str(i), self.marker_list[i])
+        for i in range(len(self.m_app.marker_list)):
+            self.m_app.settings.setValue("DataPointMarker/"+str(i), self.m_app.marker_list[i])
 
-        for i in range(len(self.color_list)):
-            self.m_app.settings.setValue("DataPointColor/"+str(i), self.color_list[i])
+        for i in range(len(self.m_app.color_list)):
+            self.m_app.settings.setValue("DataPointColor/"+str(i), self.m_app.color_list[i])
 
-        if self.remember_geometry is True:
+        if self.m_app.remember_geometry is True:
             self.m_app.settings.setValue("WindowGeometry/PreferencesDialog", self.geometry())
 
-        self.m_app.settings.setValue("LandmarkSize/2D", self.landmark_pref['2D']['size'])
-        self.m_app.settings.setValue("LandmarkColor/2D", self.landmark_pref['2D']['color'])
-        self.m_app.settings.setValue("LandmarkSize/3D", self.landmark_pref['3D']['size'])
-        self.m_app.settings.setValue("LandmarkColor/3D", self.landmark_pref['3D']['color'])
-        self.m_app.settings.setValue("WireframeThickness/2D", self.wireframe_pref['2D']['thickness'])
-        self.m_app.settings.setValue("WireframeColor/2D", self.wireframe_pref['2D']['color'])
-        self.m_app.settings.setValue("WireframeThickness/3D", self.wireframe_pref['3D']['thickness'])
-        self.m_app.settings.setValue("WireframeColor/3D", self.wireframe_pref['3D']['color'])
-        self.m_app.settings.setValue("BackgroundColor", self.bgcolor)
-        self.m_app.settings.setValue("IndexSize/2D", self.index_pref['2D']['size'])
-        self.m_app.settings.setValue("IndexColor/2D", self.index_pref['2D']['color'])
-        self.m_app.settings.setValue("IndexSize/3D", self.index_pref['3D']['size'])
-        self.m_app.settings.setValue("IndexColor/3D", self.index_pref['3D']['color'])
+        self.m_app.settings.setValue("LandmarkSize/2D", self.m_app.landmark_pref['2D']['size'])
+        self.m_app.settings.setValue("LandmarkColor/2D", self.m_app.landmark_pref['2D']['color'])
+        self.m_app.settings.setValue("LandmarkSize/3D", self.m_app.landmark_pref['3D']['size'])
+        self.m_app.settings.setValue("LandmarkColor/3D", self.m_app.landmark_pref['3D']['color'])
+        self.m_app.settings.setValue("WireframeThickness/2D", self.m_app.wireframe_pref['2D']['thickness'])
+        self.m_app.settings.setValue("WireframeColor/2D", self.m_app.wireframe_pref['2D']['color'])
+        self.m_app.settings.setValue("WireframeThickness/3D", self.m_app.wireframe_pref['3D']['thickness'])
+        self.m_app.settings.setValue("WireframeColor/3D", self.m_app.wireframe_pref['3D']['color'])
+        self.m_app.settings.setValue("BackgroundColor", self.m_app.bgcolor)
+        self.m_app.settings.setValue("IndexSize/2D", self.m_app.index_pref['2D']['size'])
+        self.m_app.settings.setValue("IndexColor/2D", self.m_app.index_pref['2D']['color'])
+        self.m_app.settings.setValue("IndexSize/3D", self.m_app.index_pref['3D']['size'])
+        self.m_app.settings.setValue("IndexColor/3D", self.m_app.index_pref['3D']['color'])
 
     def closeEvent(self, event):
         self.write_settings()
@@ -5227,57 +5247,57 @@ class PreferencesDialog(QDialog):
         event.accept()
 
     def on_btnResetMarkers_clicked(self):
-        self.marker_list = mu.MARKER_LIST[:]
-        for i in range(len(self.marker_list)):
-            self.comboMarker_list[i].setCurrentText(self.marker_list[i])
+        self.m_app.marker_list = mu.MARKER_LIST[:]
+        for i in range(len(self.m_app.marker_list)):
+            self.comboMarker_list[i].setCurrentText(self.m_app.marker_list[i])
 
     def on_btnResetPastel_clicked(self):
-        self.color_list = mu.PASTEL_COLOR_LIST[:]
-        for i in range(len(self.color_list)):
-            self.lblColor_list[i].setStyleSheet("background-color: " + self.color_list[i])
-            self.lblColor_list[i].setToolTip(self.color_list[i])
+        self.m_app.color_list = mu.PASTEL_COLOR_LIST[:]
+        for i in range(len(self.m_app.color_list)):
+            self.lblColor_list[i].setStyleSheet("background-color: " + self.m_app.color_list[i])
+            self.lblColor_list[i].setToolTip(self.m_app.color_list[i])
             
     def on_btnResetVivid_clicked(self):
-        self.color_list = mu.VIVID_COLOR_LIST[:]
-        for i in range(len(self.color_list)):
-            self.lblColor_list[i].setStyleSheet("background-color: " + self.color_list[i])
-            self.lblColor_list[i].setToolTip(self.color_list[i])
+        self.m_app.color_list = mu.VIVID_COLOR_LIST[:]
+        for i in range(len(self.m_app.color_list)):
+            self.lblColor_list[i].setStyleSheet("background-color: " + self.m_app.color_list[i])
+            self.lblColor_list[i].setToolTip(self.m_app.color_list[i])
 
     def on_rbPlotLarge_clicked(self):
-        self.plot_size = "Large"
+        self.m_app.plot_size = "Large"
 
     def on_rbPlotMedium_clicked(self):
-        self.plot_size = "Medium"
+        self.m_app.plot_size = "Medium"
 
     def on_rbPlotSmall_clicked(self):
-        self.plot_size = "Small"
+        self.m_app.plot_size = "Small"
 
     def on_rbToolbarIconLarge_clicked(self):
         self.toolbar_icon_large = True
         self.toolbar_icon_medium = False
         self.toolbar_icon_small = False
-        self.toolbar_icon_size = "Large"
+        self.m_app.toolbar_icon_size = "Large"
         self.parent.update_settings()
 
     def on_rbToolbarIconSmall_clicked(self):
         self.toolbar_icon_small = True
         self.toolbar_icon_medium = False
         self.toolbar_icon_large = False
-        self.toolbar_icon_size = "Small"
+        self.m_app.toolbar_icon_size = "Small"
         self.parent.update_settings()
 
     def on_rbToolbarIconMedium_clicked(self):
         self.toolbar_icon_small = False
         self.toolbar_icon_medium = True
         self.toolbar_icon_large = False
-        self.toolbar_icon_size = "Medium"
+        self.m_app.toolbar_icon_size = "Medium"
         self.parent.update_settings()
 
     def on_rbRememberGeometryYes_clicked(self):
-        self.remember_geometry = True
+        self.m_app.remember_geometry = True
 
     def on_rbRememberGeometryNo_clicked(self):
-        self.remember_geometry = False        
+        self.m_app.remember_geometry = False        
 
     def Okay(self):
         self.write_settings()

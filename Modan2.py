@@ -97,8 +97,8 @@ class ModanMainWindow(QMainWindow):
         self.help_menu = self.main_menu.addMenu("Help")
         self.help_menu.addAction(self.actionAbout)
 
-        self.toolbar_icon_size = "Small"
         self.m_app = QApplication.instance()
+        self.m_app.toolbar_icon_size = "Small"
         self.read_settings()
 
         self.initUI()
@@ -116,12 +116,12 @@ class ModanMainWindow(QMainWindow):
         # read preferences and set window size, toolbar icon size, etc.
         self.remember_geometry = True
 
-        self.set_toolbar_icon_size(self.toolbar_icon_size)
+        self.set_toolbar_icon_size(self.m_app.toolbar_icon_size)
 
     def update_settings(self):
         #print("update settings bgcolor",self.preferences_dialog.bgcolor)
 
-        size = self.preferences_dialog.toolbar_icon_size
+        size = self.m_app.toolbar_icon_size
         self.set_toolbar_icon_size(size)
         self.object_view_2d.read_settings()#set_landmark_pref(landmark_pref['2D'],wireframe_pref['2D'],bgcolor)
         self.object_view_3d.read_settings()#.set_landmark_pref(landmark_pref['3D'],wireframe_pref['3D'],bgcolor)
@@ -144,19 +144,19 @@ class ModanMainWindow(QMainWindow):
         pass
 
     def read_settings(self):
-        self.m_app.settings = QSettings(QSettings.IniFormat, QSettings.UserScope,mu.COMPANY_NAME, mu.PROGRAM_NAME)
+        #self.m_app.settings = QSettings(QSettings.IniFormat, QSettings.UserScope,mu.COMPANY_NAME, mu.PROGRAM_NAME)
         self.m_app.storage_directory = os.path.abspath(mu.DEFAULT_STORAGE_DIRECTORY)
-        self.toolbar_icon_size = self.m_app.settings.value("ToolbarIconSize", "Medium")
-        self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
-        if self.remember_geometry is True:
+        self.m_app.toolbar_icon_size = self.m_app.settings.value("ToolbarIconSize", "Medium")
+        self.m_app.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
+        if self.m_app.remember_geometry is True:
             #print('loading geometry', self.remember_geometry)
             self.setGeometry(self.m_app.settings.value("WindowGeometry/MainWindow", QRect(100, 100, 1400, 800)))
         else:
             self.setGeometry(QRect(100, 100, 1400, 800))
 
     def write_settings(self):
-        self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
-        if self.remember_geometry is True:
+        self.m_app.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
+        if self.m_app.remember_geometry is True:
             self.m_app.settings.setValue("WindowGeometry/MainWindow", self.geometry())
 
     def check_db(self):
@@ -912,7 +912,7 @@ if __name__ == "__main__":
     app.settings = QSettings(QSettings.IniFormat, QSettings.UserScope,mu.COMPANY_NAME, mu.PROGRAM_NAME)
 
     translator = QTranslator()
-    app.language = app.settings.value("language", "ko")
+    app.language = app.settings.value("language", "en")
     translator.load(mu.resource_path("translations/Modan2_{}.qm".format(app.language)))
     app.installTranslator(translator)
 

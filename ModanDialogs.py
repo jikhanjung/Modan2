@@ -3402,10 +3402,13 @@ class DatasetAnalysisDialog(QDialog):
         self.rotation_matrix_data.setColumnCount(10)
         self.eigenvalue_data = QTableWidget()
         self.eigenvalue_data.setColumnCount(2)
+        self.shapes_data = QTableWidget()
+        self.shapes_data.setColumnCount(10)
 
         self.plot_tab.addTab(self.plot_data, "Result table")
         self.plot_tab.addTab(self.rotation_matrix_data, "Rotation matrix")
         self.plot_tab.addTab(self.eigenvalue_data, "Eigenvalues")
+        self.plot_tab.addTab(self.shapes_data, "Shapes")
 
 
         self.plot_layout.addWidget(self.plot_tab)
@@ -4035,6 +4038,86 @@ class DatasetAnalysisDialog(QDialog):
             self.eigenvalue_data.insertRow(i)
             self.eigenvalue_data.setItem(i, 0, QTableWidgetItem(str(int(val*10000)/10000.0)))
             self.eigenvalue_data.setItem(i, 1, QTableWidgetItem(str(int(val2*10000)/10000.0)))
+
+        # shapes tab
+        min_vector = self.analysis_result.rotated_matrix.min(axis=0)
+        max_vector = self.analysis_result.rotated_matrix.max(axis=0)
+        avg_vector = self.analysis_result.rotated_matrix.mean(axis=0)
+        # combine 3 vectors to 1 matrix
+        shapes = np.vstack((min_vector, avg_vector, max_vector))
+        self.shapes_data.clear()
+        self.shapes_data.setColumnCount(len(new_coords[0])+1)
+        axis1 = self.comboAxis1.currentIndex()
+        axis2 = self.comboAxis2.currentIndex()
+        axis3 = self.comboAxis3.currentIndex()
+        axis1_title = self.comboAxis1.currentText()
+        axis2_title = self.comboAxis2.currentText()
+        axis3_title = self.comboAxis3.currentText()
+        flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
+        flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
+        flip_axis3 = -1.0 if self.cbxFlipAxis3.isChecked() == True else 1.0
+        new_coords = self.analysis_result.rotated_matrix.tolist()
+        for i, obj in enumerate(self.ds_ops.object_list):
+            obj.analysis_result = new_coords[i]
+
+        #print("shapes", shapes.shape)
+
+        if self.rb2DChartDim.isChecked():
+            dim = 2
+            combination1 = [ axis1, axis2 ]
+            #combination2 = [ "min", "avg", "max" ]
+            row_header_list = []
+            shape_list = np.zeros((len(combination2)**dim,len(new_coords[0])))
+            idx = 0
+            for i1, m1 in enumerate(combination2):
+                for i2, m2 in enumerate(combination2):
+                    row_header_list.append(axis1_title + " " + m1 + " " + axis2_title + " " + m2)
+                    row_idx1 = int(( i1 - 1 ) * flip_axis1 + 1)
+                    row_idx2 = int(( i2 - 1 ) * flip_axis2 + 1)
+                    #print("row_idx1", row_idx1, "row_idx2", row_idx2)
+                    shape_list[idx,axis1] = flip_axis1 * shapes[ row_idx1, axis1] 
+                    shape_list[idx,axis2] = flip_axis2 * shapes[ row_idx2, axis2] 
+                    idx += 1
+
+        elif self.rb3DChartDim.isChecked():
+            dim = 3
+            combination1 = [ axis1, axis2, axis3 ]
+            combination2 = [ "min", "avg", "max" ]
+            row_header_list = []
+            shape_list = np.zeros((len(combination2)**dim,len(new_coords[0])))
+            idx = 0
+            for i1, m1 in enumerate(combination2):
+                for i2, m2 in enumerate(combination2):
+                    for i3, m3 in enumerate(combination2):
+                        row_header_list.append(axis1_title + " " + m1 + " " + axis2_title + " " + m2 + axis3_title + " " + m3)
+                        row_idx1 = int(( i1 - 1 ) * flip_axis1 + 1)
+                        row_idx2 = int(( i2 - 1 ) * flip_axis2 + 1)
+                        row_idx3 = int(( i3 - 1 ) * flip_axis3 + 1)
+                        #print("row_idx1", row_idx1, "row_idx2", row_idx2, "row_idx3", row_idx3)
+
+                        shape_list[idx,axis1] = flip_axis1 * shapes[ row_idx1, axis1]
+                        shape_list[idx,axis2] = flip_axis2 * shapes[ row_idx2, axis2]
+                        shape_list[idx,axis3] = flip_axis3 * shapes[ row_idx3, axis3]
+                        idx += 1
+        # add average shape to shape_list
+        row_header_list.append("Average")
+        average_shape = np.array(self.ds_ops.get_average_shape().landmark_list).reshape(1,-1)
+        #print(average_shape)
+
+        for i, shape in enumerate(shape_list.tolist()):
+            self.shapes_data.insertRow(i)
+            self.shapes_data.setItem(i, 0, QTableWidgetItem(row_header_list[i]))
+            for j, val in enumerate(shape):
+                self.shapes_data.setItem(i, j+1, QTableWidgetItem(str(int(val*10000)/10000.0)))
+        
+        inverted_matrix = np.linalg.inv(self.analysis_result.rotation_matrix)
+        #print("inverted_matrix", inverted_matrix)
+
+        unrotated_shapes = np.dot(shape_list, inverted_matrix)
+
+
+        unrotated_shapes += average_shape
+
 
     def on_canvas_button_press(self, evt):
         #print("button_press", evt)

@@ -1864,6 +1864,169 @@ class DatasetOpsViewer(QLabel):
     def _2cany(self, y):
         return int(y*self.scale + self.pan_y)
 
+class X1Y1:
+    def __init__(self, filename, datasetname):
+        #
+        self.dirname = os.path.dirname(filename) 
+        self.filename = filename
+        self.datasetname = datasetname
+        self.dimension = 0
+        self.nobjects = 0
+        self.object_name_list = []
+        self.landmark_str_list = []
+        self.edge_list = []
+        self.polygon_list = []
+        self.propertyname_list = []
+        self.property_list_list = []
+        self.object_comment = {}
+        self.landmark_data = {}
+        self.read()
+
+    def isNumber(self,s):
+        try:
+            float(s)
+            return True
+        except ValueError:
+            return False
+
+    def read(self):
+        with open(self.filename, 'r') as f:
+            lines = f.readlines()
+
+            dataset = {}
+
+            object_count = 0
+            landmark_count = 0
+            data = []
+            object_name_list = []
+            threed = 0
+            twod = 0
+            objects = {}
+            object_comment = {}
+            object_images = {}
+            header = ''
+            comment = ''
+            image_count = 0
+            currently_in_data_section = False
+            object_id = ''
+            object_image_path = ''
+            object_comment_1 = ''
+            object_comment_2 = ''
+            
+            for line in lines:
+                line = line.strip()
+                if line == '':
+                    continue
+                if line.startswith("#"):
+                    continue
+                if line.startswith('"') or line.startswith("'"):
+                    continue
+
+                fields_list = line.split("\t")
+                object_name = fields_list[0]
+                object_name_list.append(object_name)
+                
+
+                # regular expression that finds the line "LM=xx comment", ignore case
+                headerline = re.search('^\s*LM\s*=\s*(\d+)\s*(.*)', line, re.IGNORECASE)
+
+                #headerline = re.search('^\s*[LM]+\s*=\s*(\d+)\s*(.*)', line)
+                if headerline is not None:
+                    #print("headerline:", headerline.group(1), headerline.group(2))
+                    if currently_in_data_section == True:
+                        if len(data) > 0:
+                            if object_id != '':
+                                key = object_id
+                            elif object_comment_1 != '':
+                                key = object_comment_1
+                                object_comment_1 = ''
+                            else:
+                                key = self.datasetname + "_" + str(object_count+1)
+                            objects[key] = data
+                            object_name_list.append(key)
+                            object_comment[key] = " ".join( [ object_comment_1, object_comment_2 ] ).strip()
+                            if object_image_path != '':
+                                object_images[key] = object_image_path
+                            #print("data:", data)
+                            data = []
+                            object_id = ''
+                            object_comment_1 = ''
+                            object_comment_2 = ''
+                            object_image_path = ''
+                        landmark_count, object_comment_1 = int(headerline.group(1)), headerline.group(2).strip()
+                        #print("landmark_count:", landmark_count, "object_count:", object_count, "comment:", comment)
+                        object_count += 1
+                    else:
+                        currently_in_data_section = True
+                        landmark_count, object_comment_1 = int(headerline.group(1)), headerline.group(2).strip()
+                else:
+                    dataline = re.search('^\s*(\w+)\s*=(.+)', line)
+                    #print(line)
+                    if dataline is None:
+                        #print("actual data:", line)
+                        point = [ float(x) for x in re.split('\s+', line)]
+                        if len(point) > 2 and self.isNumber(point[2]):
+                            threed += 1
+                        else:
+                            twod += 1
+                        #print("point:", point)
+                        if len(point)>1:
+                            data.append(point)
+                    elif dataline.group(1).lower() == "image":
+                        #print("image:", dataline.group(2))
+                        object_image_path = dataline.group(2)
+                    elif dataline.group(1).lower() == "comment":
+                        #print("comment:", dataline.group(2))
+                        object_comment_2 = dataline.group(2)
+                    elif dataline.group(1).lower() == "id":
+                        #print("id:", dataline.group(2))
+                        #object_id = dataline.group(2)
+                        pass
+
+            #print("aa")
+
+            if len(data) > 0:
+                if object_id != '':
+                    key = object_id
+                elif object_comment_1 != '':
+                    key = object_comment_1
+                    object_comment_1 = ''
+                else:
+                    key = self.datasetname + "_" + str(object_count+1)
+                objects[key] = data
+                object_name_list.append(key)
+                object_comment[key] = " ".join( [ object_comment_1, object_comment_2 ] ).strip()
+                if object_image_path != '':
+                    object_images[key] = object_image_path
+
+            #print("bb", object_count, landmark_count)
+
+            if object_count == 0 and landmark_count == 0:
+                return None
+
+            if threed > twod:
+                self.dimension = 3
+            else:
+                self.dimension = 2
+            
+            #print ("dimension:", self.dimension)
+            #print("object_count:", object_count)
+            #print("landmark_count:", landmark_count)
+            #print("object_name_list:", object_name_list)
+            #print("object_comment:", object_comment)
+            #print("objects:", objects)
+
+            self.nobjects = len(object_name_list)
+            self.nlandmarks = landmark_count
+            self.landmark_data = objects
+            self.object_name_list = object_name_list
+            self.object_comment = object_comment
+            self.object_images = object_images
+            #print(self.landmark_data.keys(), self.object_name_list)
+
+            return dataset
+
+
 class TPS:
     def __init__(self, filename, datasetname):
         #
@@ -3192,6 +3355,8 @@ class DatasetAnalysisDialog(QDialog):
         #self.setGeometry(QRect(100, 100, 1400, 800))
         self.ds_ops = None
         self.object_hash = {}
+        self.shape_list = []
+        self.shape_name_list = []
         
         self.main_hsplitter = QSplitter(Qt.Horizontal)
 
@@ -3759,7 +3924,22 @@ class DatasetAnalysisDialog(QDialog):
                 worksheet.write(i, 0, val )
                 worksheet.write(i, 1, val2 )
 
+
+            # PCA result
+            #header = [ "object_name", *self.ds_ops.propertyname_list ]
+            #header.extend( [self.analysis_type[:2]+str(i+1) for i in range(len(self.analysis_result.rotated_matrix.tolist()[0]))] )
+            worksheet = doc.add_worksheet("Shapes")
+            row_index = 0
+            column_index = 0
+
+            for i, shape in enumerate(self.shape_list.tolist()):
+                worksheet.write(i, 0, self.shape_name_list[i])
+                for j, val in enumerate(shape):
+                    worksheet.write(i, j+1, val)
+                    #self.shapes_data.setItem(i, j+1, QTableWidgetItem(str(int(val*10000)/10000.0)))
+
             doc.close()
+
         #print("on_btnSaveResults_clicked")
         
     def show_index_state_changed(self, int):
@@ -4061,12 +4241,12 @@ class DatasetAnalysisDialog(QDialog):
             obj.analysis_result = new_coords[i]
 
         #print("shapes", shapes.shape)
-
+        row_header_list = []
+        header = [str(i+1) for i in range(len(self.analysis_result.rotated_matrix.tolist()[0]))]
+        self.shapes_data.setHorizontalHeaderLabels(["Name"] + header)
         if self.rb2DChartDim.isChecked():
             dim = 2
-            combination1 = [ axis1, axis2 ]
-            #combination2 = [ "min", "avg", "max" ]
-            row_header_list = []
+            combination2 = [ "min", "avg", "max" ]
             shape_list = np.zeros((len(combination2)**dim,len(new_coords[0])))
             idx = 0
             for i1, m1 in enumerate(combination2):
@@ -4081,9 +4261,7 @@ class DatasetAnalysisDialog(QDialog):
 
         elif self.rb3DChartDim.isChecked():
             dim = 3
-            combination1 = [ axis1, axis2, axis3 ]
             combination2 = [ "min", "avg", "max" ]
-            row_header_list = []
             shape_list = np.zeros((len(combination2)**dim,len(new_coords[0])))
             idx = 0
             for i1, m1 in enumerate(combination2):
@@ -4104,19 +4282,20 @@ class DatasetAnalysisDialog(QDialog):
         average_shape = np.array(self.ds_ops.get_average_shape().landmark_list).reshape(1,-1)
         #print(average_shape)
 
-        for i, shape in enumerate(shape_list.tolist()):
-            self.shapes_data.insertRow(i)
-            self.shapes_data.setItem(i, 0, QTableWidgetItem(row_header_list[i]))
-            for j, val in enumerate(shape):
-                self.shapes_data.setItem(i, j+1, QTableWidgetItem(str(int(val*10000)/10000.0)))
         
         inverted_matrix = np.linalg.inv(self.analysis_result.rotation_matrix)
         #print("inverted_matrix", inverted_matrix)
 
         unrotated_shapes = np.dot(shape_list, inverted_matrix)
-
-
         unrotated_shapes += average_shape
+        self.shape_list = unrotated_shapes
+        self.shape_name_list = row_header_list
+
+        for i, shape in enumerate(unrotated_shapes.tolist()):
+            self.shapes_data.insertRow(i)
+            self.shapes_data.setItem(i, 0, QTableWidgetItem(row_header_list[i]))
+            for j, val in enumerate(shape):
+                self.shapes_data.setItem(i, j+1, QTableWidgetItem(str(int(val*10000)/10000.0)))
 
 
     def on_canvas_button_press(self, evt):
@@ -4771,6 +4950,8 @@ class ImportDatasetDialog(QDialog):
             import_data = TPS(filename, datasetname)
         elif filetype == "NTS":
             import_data = NTS(filename, datasetname)
+        elif filetype == "X1Y1":
+            import_data = X1Y1(filename, datasetname)
         elif filetype == "Morphologika":
             import_data = Morphologika(filename, datasetname)
 

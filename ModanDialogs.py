@@ -701,7 +701,7 @@ class ObjectViewer3D(QGLWidget):
         self.rotate_y = 0
         self.temp_rotate_x = 0
         self.temp_rotate_y = 0
-        self.show_index = True
+        self.show_index = False
         self.show_wireframe = True
         self.show_baseline = False
         self.show_average = True
@@ -1072,7 +1072,7 @@ class ObjectViewer3D(QGLWidget):
     def set_object(self, object):
         #print("set_object 1",type(object))
         #object.unpack_landmark()
-        #self.landmark_list = object.landmark_
+        self.landmark_list = copy.deepcopy(object.landmark_list)
         m_app = QApplication.instance()
         if isinstance(object, MdObject):
             self.object = object
@@ -1085,6 +1085,11 @@ class ObjectViewer3D(QGLWidget):
             pass
         #print("set_object 2",type(obj_ops))
         self.dataset = object.dataset
+        #print("dataset", self.dataset)
+        if self.dataset.baseline is not None:
+            self.dataset.unpack_baseline()
+        self.ds_ops = MdDatasetOps(self.dataset)
+
         self.obj_ops = obj_ops
         #self.landmark_list = object.landmark_
         self.data_mode = OBJECT_MODE
@@ -1103,8 +1108,21 @@ class ObjectViewer3D(QGLWidget):
         else:
             self.threed_model = None
         self.calculate_resize()
+        if self.dataset.baseline is not None:
+            self.align_object()
         self.updateGL()
         #print("data_mode:", self.data_mode)
+
+    def align_object(self):
+        if self.data_mode == OBJECT_MODE:
+            print("baseline",self.ds_ops.baseline_point_list)
+            self.obj_ops.align(self.ds_ops.baseline_point_list)
+            #self.calculate_resize()
+            #self.updateGL()
+        #elif self.data_mode == DATASET_MODE:
+        #    self.ds_ops.align()
+        #    self.calculate_resize()
+        #    self.updateGL()
 
     def get_scale_from_object(self, obj_ops):
         if len(obj_ops.landmark_list) == 0:
@@ -1246,6 +1264,8 @@ class ObjectViewer3D(QGLWidget):
             self.draw_object(ds_ops.get_average_shape(), landmark_as_sphere=True, color=object_color)
 
     def draw_object(self,object,landmark_as_sphere=True,color=COLOR['NORMAL_SHAPE']):
+        if object is None:
+            return
         current_buffer = gl.glGetIntegerv(gl.GL_FRAMEBUFFER_BINDING)
         #print("draw object", object, self, current_buffer )
         if landmark_as_sphere:
@@ -1492,6 +1512,7 @@ class ObjectViewer3D(QGLWidget):
         #print("current buffer:", gl.glGetIntegerv(gl.GL_FRAMEBUFFER_BINDING))
         #gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
         #gl.glFlush()
+        #print("updateGL")
         self.updateGL()
         #self.data_mode = DATASET_MODE
 
@@ -1880,6 +1901,7 @@ class X1Y1:
         self.property_list_list = []
         self.object_comment = {}
         self.landmark_data = {}
+        self.object_images = {}
         self.read()
 
     def isNumber(self,s):
@@ -1912,6 +1934,18 @@ class X1Y1:
             object_image_path = ''
             object_comment_1 = ''
             object_comment_2 = ''
+
+            header = lines[0].strip().split("\t")
+            xyz_header_list = header[1:]
+            if xyz_header_list[2].lower()[0] == "x":
+                self.dimension = 2
+            else:
+                self.dimension = 3
+            lendmark_count = int(len(xyz_header_list) / self.dimension)
+            print("dimension", self.dimension)
+            
+
+            lines = lines[1:]
             
             for line in lines:
                 line = line.strip()
@@ -1922,106 +1956,26 @@ class X1Y1:
                 if line.startswith('"') or line.startswith("'"):
                     continue
 
+                data = []
                 fields_list = line.split("\t")
                 object_name = fields_list[0]
                 object_name_list.append(object_name)
+                landmark_list = fields_list[1:]
+                if len(landmark_list) > 0:
+                    if self.dimension == 2:
+                        for idx in range(0, len(landmark_list), 2):
+                            data.append([float(landmark_list[idx]), float(landmark_list[idx+1])])
+                    elif self.dimension == 3:
+                        for idx in range(0, len(landmark_list), 3):
+                            data.append([float(landmark_list[idx]), float(landmark_list[idx+1]), float(landmark_list[idx+2])])
+
+                objects[object_name] = data
                 
-
-                # regular expression that finds the line "LM=xx comment", ignore case
-                headerline = re.search('^\s*LM\s*=\s*(\d+)\s*(.*)', line, re.IGNORECASE)
-
-                #headerline = re.search('^\s*[LM]+\s*=\s*(\d+)\s*(.*)', line)
-                if headerline is not None:
-                    #print("headerline:", headerline.group(1), headerline.group(2))
-                    if currently_in_data_section == True:
-                        if len(data) > 0:
-                            if object_id != '':
-                                key = object_id
-                            elif object_comment_1 != '':
-                                key = object_comment_1
-                                object_comment_1 = ''
-                            else:
-                                key = self.datasetname + "_" + str(object_count+1)
-                            objects[key] = data
-                            object_name_list.append(key)
-                            object_comment[key] = " ".join( [ object_comment_1, object_comment_2 ] ).strip()
-                            if object_image_path != '':
-                                object_images[key] = object_image_path
-                            #print("data:", data)
-                            data = []
-                            object_id = ''
-                            object_comment_1 = ''
-                            object_comment_2 = ''
-                            object_image_path = ''
-                        landmark_count, object_comment_1 = int(headerline.group(1)), headerline.group(2).strip()
-                        #print("landmark_count:", landmark_count, "object_count:", object_count, "comment:", comment)
-                        object_count += 1
-                    else:
-                        currently_in_data_section = True
-                        landmark_count, object_comment_1 = int(headerline.group(1)), headerline.group(2).strip()
-                else:
-                    dataline = re.search('^\s*(\w+)\s*=(.+)', line)
-                    #print(line)
-                    if dataline is None:
-                        #print("actual data:", line)
-                        point = [ float(x) for x in re.split('\s+', line)]
-                        if len(point) > 2 and self.isNumber(point[2]):
-                            threed += 1
-                        else:
-                            twod += 1
-                        #print("point:", point)
-                        if len(point)>1:
-                            data.append(point)
-                    elif dataline.group(1).lower() == "image":
-                        #print("image:", dataline.group(2))
-                        object_image_path = dataline.group(2)
-                    elif dataline.group(1).lower() == "comment":
-                        #print("comment:", dataline.group(2))
-                        object_comment_2 = dataline.group(2)
-                    elif dataline.group(1).lower() == "id":
-                        #print("id:", dataline.group(2))
-                        #object_id = dataline.group(2)
-                        pass
-
-            #print("aa")
-
-            if len(data) > 0:
-                if object_id != '':
-                    key = object_id
-                elif object_comment_1 != '':
-                    key = object_comment_1
-                    object_comment_1 = ''
-                else:
-                    key = self.datasetname + "_" + str(object_count+1)
-                objects[key] = data
-                object_name_list.append(key)
-                object_comment[key] = " ".join( [ object_comment_1, object_comment_2 ] ).strip()
-                if object_image_path != '':
-                    object_images[key] = object_image_path
-
-            #print("bb", object_count, landmark_count)
-
-            if object_count == 0 and landmark_count == 0:
-                return None
-
-            if threed > twod:
-                self.dimension = 3
-            else:
-                self.dimension = 2
-            
-            #print ("dimension:", self.dimension)
-            #print("object_count:", object_count)
-            #print("landmark_count:", landmark_count)
-            #print("object_name_list:", object_name_list)
-            #print("object_comment:", object_comment)
-            #print("objects:", objects)
 
             self.nobjects = len(object_name_list)
             self.nlandmarks = landmark_count
             self.landmark_data = objects
             self.object_name_list = object_name_list
-            self.object_comment = object_comment
-            self.object_images = object_images
             #print(self.landmark_data.keys(), self.object_name_list)
 
             return dataset
@@ -3931,11 +3885,14 @@ class DatasetAnalysisDialog(QDialog):
             worksheet = doc.add_worksheet("Shapes")
             row_index = 0
             column_index = 0
+            for i, colname in enumerate(self.shape_column_header_list):
+                worksheet.write(row_index, i, colname )
+                #column_index+=1
 
             for i, shape in enumerate(self.shape_list.tolist()):
-                worksheet.write(i, 0, self.shape_name_list[i])
+                worksheet.write(i+1, 0, self.shape_name_list[i])
                 for j, val in enumerate(shape):
-                    worksheet.write(i, j+1, val)
+                    worksheet.write(i+1, j+1, val)
                     #self.shapes_data.setItem(i, j+1, QTableWidgetItem(str(int(val*10000)/10000.0)))
 
             doc.close()
@@ -4242,8 +4199,18 @@ class DatasetAnalysisDialog(QDialog):
 
         #print("shapes", shapes.shape)
         row_header_list = []
-        header = [str(i+1) for i in range(len(self.analysis_result.rotated_matrix.tolist()[0]))]
-        self.shapes_data.setHorizontalHeaderLabels(["Name"] + header)
+        dimension = self.ds_ops.dimension
+        vector_length = len(self.analysis_result.rotated_matrix.tolist()[0])
+        if dimension == 2:
+            axis_label = [ 'x', 'y' ]
+        elif dimension == 3:
+            axis_label = [ 'x', 'y', 'z' ]
+        
+        column_header_list = ["name"]
+        for i in range(vector_length):
+            column_header_list.append(axis_label[i%dimension] + str(int(i/dimension)+1))
+
+        self.shapes_data.setHorizontalHeaderLabels(column_header_list)
         if self.rb2DChartDim.isChecked():
             dim = 2
             combination2 = [ "min", "avg", "max" ]
@@ -4290,6 +4257,7 @@ class DatasetAnalysisDialog(QDialog):
         unrotated_shapes += average_shape
         self.shape_list = unrotated_shapes
         self.shape_name_list = row_header_list
+        self.shape_column_header_list = column_header_list
 
         for i, shape in enumerate(unrotated_shapes.tolist()):
             self.shapes_data.insertRow(i)
@@ -4821,7 +4789,7 @@ class ImportDatasetDialog(QDialog):
         self.rbnNTS = QRadioButton("NTS")
         self.rbnX1Y1 = QRadioButton("X1Y1")
         self.rbnMorphologika = QRadioButton("Morphologika")
-        self.rbnX1Y1.setDisabled(True)
+        #self.rbnX1Y1.setDisabled(True)
         #self.rbnMorphologika.setDisabled(True)
         self.chkFileType.addButton(self.rbnTPS)
         self.chkFileType.addButton(self.rbnNTS)
@@ -5363,7 +5331,7 @@ class PreferencesDialog(QDialog):
 
     def on_lblBgcolor_clicked(self,event):
         dialog = QColorDialog()
-        color = dialog.getColor(initial=QColor(self.bgcolor))
+        color = dialog.getColor(initial=QColor(self.m_app.bgcolor))
         if color is not None:
             self.m_app.bgcolor = color.name()
             self.lblBgcolor.setStyleSheet("background-color: " + self.m_app.bgcolor)

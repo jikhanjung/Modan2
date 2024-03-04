@@ -770,6 +770,13 @@ class MdObjectOps:
             point1 = baseline[0]
             point2 = baseline[1]
             point3 = baseline[2]
+        elif len(baseline) == 2:
+            point1 = baseline[0]
+            point2 = baseline[1]
+            point3 = baseline[0]
+        else:
+            return
+
 
         #print(self.landmark_list)
 

@@ -1115,7 +1115,7 @@ class ObjectViewer3D(QGLWidget):
 
     def align_object(self):
         if self.data_mode == OBJECT_MODE:
-            print("baseline",self.ds_ops.baseline_point_list)
+            #print("baseline",self.ds_ops.baseline_point_list)
             self.obj_ops.align(self.ds_ops.baseline_point_list)
             #self.calculate_resize()
             #self.updateGL()

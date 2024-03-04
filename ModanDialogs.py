@@ -3547,6 +3547,7 @@ class DatasetAnalysisDialog(QDialog):
             self.comboAxis1.addItem("PC"+str(i))
             self.comboAxis2.addItem("PC"+str(i))
             self.comboAxis3.addItem("PC"+str(i))
+        self.comboAxis1.addItem("CSize")
         self.comboAxis1.setCurrentIndex(0)
         self.comboAxis2.setCurrentIndex(1)
         self.comboAxis3.setCurrentIndex(2)
@@ -4047,8 +4048,13 @@ class DatasetAnalysisDialog(QDialog):
 
             if key_name not in self.scatter_data.keys():
                 self.scatter_data[key_name] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'property':key_name, 'symbol':'', 'color':'', 'size':scatter_size}
-
-            self.scatter_data[key_name]['x_val'].append(flip_axis1 * obj.analysis_result[axis1])
+            if axis1 == 10:
+                mdobject = MdObject.get_by_id(obj.id)
+                csize = mdobject.get_centroid_size(True)
+                #print("obj:", mdobject.id, "csize:", csize)
+                self.scatter_data[key_name]['x_val'].append(flip_axis1 * mdobject.get_centroid_size(True))
+            else:
+                self.scatter_data[key_name]['x_val'].append(flip_axis1 * obj.analysis_result[axis1])
             self.scatter_data[key_name]['y_val'].append(flip_axis2 * obj.analysis_result[axis2])
             self.scatter_data[key_name]['z_val'].append(flip_axis3 * obj.analysis_result[axis3])
             self.scatter_data[key_name]['data'].append(obj)

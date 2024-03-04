@@ -298,7 +298,10 @@ class MdObject(Model):
         #    self.unpack_landmark()
 
         if len(self.landmark_list) == 0:
-            return -1
+            if self.landmark_str is not None and self.landmark_str != "":
+                self.unpack_landmark()
+            if len(self.landmark_list) == 0:
+                return -1
         elif len(self.landmark_list)== 1:
             return 1
         if ( self.centroid_size > 0 ) and ( refresh == False ):

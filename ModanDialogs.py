@@ -3843,8 +3843,10 @@ class DatasetAnalysisDialog(QDialog):
             doc = xlsxwriter.Workbook(filename)
             
             # PCA result
-            header = [ "object_name", *self.ds_ops.propertyname_list ]
+            property_count = len(self.ds_ops.propertyname_list)
+            header = [ "object_name", * self.ds_ops.propertyname_list ]
             header.extend( [self.analysis_type[:2]+str(i+1) for i in range(len(self.analysis_result.rotated_matrix.tolist()[0]))] )
+            header.extend("CSize")
             worksheet = doc.add_worksheet("Result coordinates")
             row_index = 0
             column_index = 0
@@ -3857,12 +3859,16 @@ class DatasetAnalysisDialog(QDialog):
             for i, obj in enumerate(self.ds_ops.object_list):
                 worksheet.write(i+1, 0, obj.object_name )
                 #print(obj.property_list)
-                for j, property in enumerate(obj.property_list):
-                    worksheet.write(i+1, j+1, property )
+                for j in range(property_count):
+                #for j, property in enumerate(obj.property_list):
+                    worksheet.write(i+1, j+1, obj.property_list[j] )
 
                 for k, val in enumerate(new_coords[i]):
-                    worksheet.write(i+1, k+len(obj.property_list)+1, val )
+                    worksheet.write(i+1, k+property_count+1, val )
                     #self.plot_data.setItem(i, j+1, QTableWidgetItem(str(int(val*10000)/10000.0)))
+                obj = MdObject.get_by_id(obj.id)
+                worksheet.write(i+1, k+property_count+2, obj.get_centroid_size(True))
+                
 
             worksheet = doc.add_worksheet("Rotation matrix")
             row_index = 0
@@ -4151,17 +4157,22 @@ class DatasetAnalysisDialog(QDialog):
             header = ["CV"+str(i+1) for i in range(len(self.analysis_result.rotated_matrix.tolist()[0]))]
         else:
             header = ["PC"+str(i+1) for i in range(len(self.analysis_result.rotated_matrix.tolist()[0]))]
+        header.append("CSize")
         #print("header", header)
         self.plot_data.setColumnCount(len(header)+1)
         self.plot_data.setHorizontalHeaderLabels(["Name"] + header)
 
         new_coords = self.analysis_result.rotated_matrix.tolist()
-        self.plot_data.setColumnCount(len(new_coords[0])+1)
+        self.plot_data.setColumnCount(len(new_coords[0])+2)
         for i, obj in enumerate(self.ds_ops.object_list):
             self.plot_data.insertRow(i)
             self.plot_data.setItem(i, 0, QTableWidgetItem(obj.object_name))
             for j, val in enumerate(new_coords[i]):
                 self.plot_data.setItem(i, j+1, QTableWidgetItem(str(int(val*10000)/10000.0)))
+            mdobject = MdObject.get_by_id(obj.id)
+            csize = mdobject.get_centroid_size(True)
+            #print("obj:", mdobject.id, "csize:", csize)
+            self.plot_data.setItem(i, len(new_coords[0])+1, QTableWidgetItem(str(int(csize*10000)/10000.0)))
 
         # rotation matrix
         rotation_matrix = self.analysis_result.rotation_matrix.tolist()
@@ -4215,6 +4226,7 @@ class DatasetAnalysisDialog(QDialog):
         column_header_list = ["name"]
         for i in range(vector_length):
             column_header_list.append(axis_label[i%dimension] + str(int(i/dimension)+1))
+        #column_header_list.append("CSize")
 
         self.shapes_data.setHorizontalHeaderLabels(column_header_list)
         if self.rb2DChartDim.isChecked():

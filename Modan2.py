@@ -14,6 +14,7 @@ import copy
 
 from MdModel import *
 import MdUtils as mu
+from peewee_migrate import Router
 
 from ModanDialogs import DatasetAnalysisDialog, ObjectDialog, ImportDatasetDialog, DatasetDialog, PreferencesDialog, \
     MODE, ObjectViewer3D, ExportDatasetDialog, ObjectViewer2D, ProgressDialog
@@ -160,6 +161,14 @@ class ModanMainWindow(QMainWindow):
             self.m_app.settings.setValue("WindowGeometry/MainWindow", self.geometry())
 
     def check_db(self):
+        migrations_path = mu.resource_path("migrations")
+        gDatabase.connect()
+        router = Router(gDatabase, migrate_dir=migrations_path)
+
+        # Auto-discover and run migrations
+        router.run()        
+        return
+
         gDatabase.connect()
         tables = gDatabase.get_tables()
         if tables:

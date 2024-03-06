@@ -28,7 +28,7 @@ print("router: ", router)
 # set migration_name to YYYYMMDD_HHMMSS
 migration_name = get_timestamp()
 print("migration_name: ", migration_name)
-ret = router.create(auto=[MdDataset,MdObject,MdImage,MdThreeDModel], name=migration_name)
+ret = router.create(auto=[MdDataset,MdObject,MdImage,MdThreeDModel,MdAnalysis], name=migration_name)
 print("ret: ", ret)
 
 

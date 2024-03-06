@@ -1441,3 +1441,23 @@ class MdDatasetOps:
             return -1
         half_len = int(math.floor(len_arr / 2.0))
         return half_len
+
+class MdAnalysis(Model):
+    analysis_name = CharField()
+    analysis_desc = CharField(null=True)
+    dataset = ForeignKeyField(MdDataset, related_name='analyses', null=True)
+    dimension = IntegerField(default=2)
+    wireframe = CharField(null=True)
+    baseline = CharField(null=True)
+    polygons = CharField(null=True)
+    propertyname_str = CharField(null=True)
+    superimposition_method = CharField()
+
+    object_info_json = CharField(null=True) # object name and object id
+    raw_landmark_json = CharField(null=True)    # raw landmark info in matrix format
+    analysis_result_json = CharField(null=True) # PCA or CVA result in matrix format, plus centroid size and properties of each object
+    rotation_matrix_json = CharField(null=True) # rotation matrix from PCA or CVA
+    eigenvalues_json = CharField(null=True) # eigenvalues and percentages of variance    
+
+    created_at = DateTimeField(default=datetime.datetime.now)
+    modified_at = DateTimeField(default=datetime.datetime.now)

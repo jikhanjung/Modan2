@@ -1452,12 +1452,16 @@ class MdAnalysis(Model):
     polygons = CharField(null=True)
     propertyname_str = CharField(null=True)
     superimposition_method = CharField()
+    analysis_method = CharField() # PCA or CVA
 
     object_info_json = CharField(null=True) # object name and object id
-    raw_landmark_json = CharField(null=True)    # raw landmark info in matrix format
-    analysis_result_json = CharField(null=True) # PCA or CVA result in matrix format, plus centroid size and properties of each object
+    raw_landmark_json = CharField(null=True)    # raw landmark info in list of list format
+    superimposed_landmark_json = CharField(null=True) # superimposed landmark info in list of list format
+    analysis_result_json = CharField(null=True) # PCA or CVA result in list of list format, plus centroid size and properties of each object
     rotation_matrix_json = CharField(null=True) # rotation matrix from PCA or CVA
-    eigenvalues_json = CharField(null=True) # eigenvalues and percentages of variance    
+    eigenvalues_json = CharField(null=True) # eigenvalues and percentages of variance
+
+    virtual_specimens_json = CharField(null=True) # list of virtual specimens
 
     created_at = DateTimeField(default=datetime.datetime.now)
     modified_at = DateTimeField(default=datetime.datetime.now)

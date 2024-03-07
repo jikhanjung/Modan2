@@ -4959,6 +4959,10 @@ class ImportDatasetDialog(QDialog):
         if len(import_data.propertyname_list) > 0:
             dataset.propertyname_list = import_data.propertyname_list
             dataset.pack_propertyname_str()
+        if len(import_data.edge_list) > 0:
+            dataset.edge_list = import_data.edge_list
+            dataset.wireframe = dataset.pack_wireframe()
+            #dataset.pack_edge_str()
         dataset.save()
         # add objects
         for i in range(import_data.nobjects):

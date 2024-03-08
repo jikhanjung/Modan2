@@ -3142,6 +3142,7 @@ class ObjectDialog(QDialog):
 
             #self.object_view_3d.landmark_list = self.landmark_list
         #self.set_dataset(object.dataset)
+        self.object_view.align_object()
         self.show_landmarks()
 
     def enable_landmark_edit(self):

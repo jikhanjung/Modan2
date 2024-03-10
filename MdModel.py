@@ -787,8 +787,8 @@ class MdObjectOps:
 
         curr_vector1 = np.array(self.landmark_list[point2 - 1]) - np.array(self.landmark_list[point1 - 1])
         to_vector1 = np.array([1, 0, 0])
-        print("curr_vector1:", curr_vector1)
-        print("to_vector1:", to_vector1)
+        #print("curr_vector1:", curr_vector1)
+        #print("to_vector1:", to_vector1)
         v1_norm = curr_vector1 / np.linalg.norm(curr_vector1)
         to_norm = to_vector1 / np.linalg.norm(to_vector1)
 
@@ -825,14 +825,14 @@ class MdObjectOps:
             #r_mx[2][1] = -1 * sin_theta
             #r_mx[2][2] = cos_theta
 
-            print("rotation matrix:", r_mx)
+            #print("rotation matrix:", r_mx)
 
             # apply rotation matrix to all landmarks
             self.apply_rotation_matrix(np.array(r_mx))
 
             curr_vector1 = np.array(self.landmark_list[point2 - 1]) - np.array(self.landmark_list[point1 - 1])
-            print("curr_vector1 after rotation:", curr_vector1)
-            print(self.landmark_list[point2 - 1], self.landmark_list[point1 - 1])
+            #print("curr_vector1 after rotation:", curr_vector1)
+            #print(self.landmark_list[point2 - 1], self.landmark_list[point1 - 1])
 
         mid_point12 = np.array(self.landmark_list[point1 - 1]) + curr_vector1 / 2
         curr_vector2 = np.array(self.landmark_list[point3 - 1]) - np.array(mid_point12)
@@ -843,8 +843,8 @@ class MdObjectOps:
 
         curr_vector2 = curr_vector2 - projection_vector2
         to_vector2 = np.array([0, 1, 0])
-        print("curr_vector2:", curr_vector2)
-        print("to_vector2:", to_vector2)
+        #print("curr_vector2:", curr_vector2)
+        #print("to_vector2:", to_vector2)
 
         v2_norm = curr_vector2 / np.linalg.norm(curr_vector2)
         to_norm = to_vector2 / np.linalg.norm(to_vector2)
@@ -858,12 +858,12 @@ class MdObjectOps:
             # calculate cosine and sine of rotation angle
             cos_theta = np.dot(curr_vector2, to_vector2) / (np.linalg.norm(curr_vector2) * np.linalg.norm(to_vector2))
             sin_theta = np.sqrt(1 - cos_theta ** 2)
-            print("cos_theta:", cos_theta, "sin_theta:", sin_theta)
+            #print("cos_theta:", cos_theta, "sin_theta:", sin_theta)
 
             #calculate rotation axis
             rotation_axis = np.cross(curr_vector2, to_vector2)
             rotation_axis = rotation_axis / np.linalg.norm(rotation_axis)
-            print("rotation axis", rotation_axis)
+            #print("rotation axis", rotation_axis)
 
             # calculate rotation matrix to align vector1 to x-axis - Rodrigues' rotation formula
             # https://en.wikipedia.org/wiki/Rodrigues%27_rotation_formula

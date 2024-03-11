@@ -147,6 +147,9 @@ class ObjectViewer2D(QLabel):
         self.setMouseTracking(True)
         self.set_mode(MODE['EDIT_LANDMARK'])
 
+    def align_object(self):
+        return
+
     def set_landmark_pref(self,lm_pref,wf_pref,bgcolor):
         self.landmark_size = lm_pref['size']
         self.landmark_color = lm_pref['color']
@@ -4728,8 +4731,8 @@ class ExportDatasetDialog(QDialog):
                                 f.write('{}\t{}\n'.format(*lm))
                             else:
                                 f.write('{}\t{}\t{}\n'.format(*lm))
-                        if object.has_image():
-                            f.write('IMAGE={}\n'.format(object.image_filename))
+                        #if object.has_image():
+                        #    f.write('IMAGE={}\n'.format(object.image_filename))
                         f.write('ID={}\n'.format(object.object_name))
 
         elif self.rbMorphologika.isChecked():

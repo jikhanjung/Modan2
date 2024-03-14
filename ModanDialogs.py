@@ -31,6 +31,10 @@ from MdStatistics import MdPrincipalComponent, MdCanonicalVariate
 from MdModel import *
 import MdUtils as mu
 
+from MdLogger import setup_logger
+logger = setup_logger(__name__)
+
+
 MODE = {}
 MODE['NONE'] = 0
 MODE['PAN'] = 12
@@ -93,6 +97,7 @@ def as_gl_color(color):
 class ObjectViewer2D(QLabel):
     def __init__(self, widget):
         super(ObjectViewer2D, self).__init__(widget)
+        logger.info("object viewer 2d init")
         self.setMinimumSize(400,300)
 
         self.landmark_size = 1
@@ -623,7 +628,12 @@ class ObjectViewer2D(QLabel):
         if self.object.pixels_per_mm is not None and self.object.pixels_per_mm > 0:
             self.pixels_per_mm = self.object.pixels_per_mm
         if object.image.count() > 0:
-            self.set_image(object.image[0].get_file_path(m_app.storage_directory))
+            image_path = object.image[0].get_file_path(m_app.storage_directory)
+            if image_path is not None and os.path.exists(image_path):
+                self.set_image(image_path)
+            else:
+                self.clear_object()
+                print("Image file not found:", image_path)
 
         object.unpack_landmark()
         object.dataset.unpack_wireframe()

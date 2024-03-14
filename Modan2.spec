@@ -8,7 +8,7 @@ a = Analysis(
     ['Modan2.py'],
     pathex=[],
     binaries=[],
-    datas=[('icons/*.png', 'icons'), ('translations/*.qm', 'translations')],
+    datas=[('icons/*.png', 'icons'), ('translations/*.qm', 'translations'), ('migrations/*', 'migrations')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

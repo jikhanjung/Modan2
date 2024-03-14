@@ -19,6 +19,9 @@ from peewee_migrate import Router
 from ModanDialogs import DatasetAnalysisDialog, ObjectDialog, ImportDatasetDialog, DatasetDialog, PreferencesDialog, \
     MODE, ObjectViewer3D, ExportDatasetDialog, ObjectViewer2D, ProgressDialog
 
+from MdLogger import setup_logger
+logger = setup_logger(mu.PROGRAM_NAME)
+
 
 ICON = {}
 ICON['new_dataset'] = mu.resource_path('icons/M2NewDataset_1.png')
@@ -162,6 +165,8 @@ class ModanMainWindow(QMainWindow):
 
     def check_db(self):
         migrations_path = mu.resource_path("migrations")
+        logger.info("migrations path: %s", migrations_path)
+        #print("migrations path:", migrations_path)
         gDatabase.connect()
         router = Router(gDatabase, migrate_dir=migrations_path)
 
@@ -941,9 +946,9 @@ if __name__ == "__main__":
 ''' 
 How to make an exe file
 
-pyinstaller --onefile --noconsole --add-data "icons/*.png;icons" --add-data "translations/*.qm;translations" --icon="icons/Modan2_2.png" Modan2.py
+pyinstaller --onefile --noconsole --add-data "icons/*.png;icons" --add-data "translations/*.qm;translations" --add-data "migrations/*;migrations" --icon="icons/Modan2_2.png" Modan2.py
 
-pyinstaller --onedir --noconsole --add-data "icons/*.png;icons" --add-data "translations/*.qm;translations" --icon="icons/Modan2_2.png" --noconfirm Modan2.py
+pyinstaller --onedir --noconsole --add-data "icons/*.png;icons" --add-data "translations/*.qm;translations" --add-data "migrations/*;migrations" --icon="icons/Modan2_2.png" --noconfirm Modan2.py
 
 pylupdate5 Modan2.py -ts translations/Modan2_en.ts
 pylupdate5 Modan2.py -ts translations/Modan2_ko.ts

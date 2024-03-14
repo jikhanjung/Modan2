@@ -17,11 +17,14 @@ USER_PROFILE_DIRECTORY = os.path.expanduser('~')
 
 DEFAULT_DB_DIRECTORY = os.path.join( USER_PROFILE_DIRECTORY, COMPANY_NAME, PROGRAM_NAME )
 DEFAULT_STORAGE_DIRECTORY = os.path.join(DEFAULT_DB_DIRECTORY, "data/")
+DEFAULT_LOG_DIRECTORY = os.path.join(DEFAULT_DB_DIRECTORY, "logs/")
 
 if not os.path.exists(DEFAULT_DB_DIRECTORY):
     os.makedirs(DEFAULT_DB_DIRECTORY)
 if not os.path.exists(DEFAULT_STORAGE_DIRECTORY):
     os.makedirs(DEFAULT_STORAGE_DIRECTORY)
+if not os.path.exists(DEFAULT_LOG_DIRECTORY):
+    os.makedirs(DEFAULT_LOG_DIRECTORY)
 
 
 def resource_path(relative_path):

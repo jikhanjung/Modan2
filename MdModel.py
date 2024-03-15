@@ -23,8 +23,9 @@ LINE_SEPARATOR = "\n"
 PROPERTY_SEPARATOR = ","
 EDGE_SEPARATOR = "-"
 WIREFRAME_SEPARATOR = ","
+DATABASE_FILENAME = mu.PROGRAM_NAME + ".db"
 
-database_path = os.path.join(mu.DEFAULT_DB_DIRECTORY, 'Modan2.db')
+database_path = os.path.join(mu.DEFAULT_DB_DIRECTORY, DATABASE_FILENAME)
 
 gDatabase = SqliteDatabase(database_path,pragmas={'foreign_keys': 1})
 

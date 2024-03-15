@@ -11,6 +11,7 @@ from peewee import *
 from PIL.ExifTags import TAGS
 import shutil
 import copy
+from datetime import datetime
 
 from MdModel import *
 import MdUtils as mu
@@ -166,6 +167,17 @@ class ModanMainWindow(QMainWindow):
     def check_db(self):
         migrations_path = mu.resource_path("migrations")
         logger.info("migrations path: %s", migrations_path)
+        logger.info("database path: %s", database_path)
+        now = datetime.datetime.now()
+        date_str = now.strftime("%Y%m%d")
+
+        # backup database file to backup directory
+        backup_path = os.path.join( mu.DB_BACKUP_DIRECTORY, DATABASE_FILENAME + '.' + date_str )
+        if not os.path.exists(backup_path):
+            shutil.copy2(database_path, backup_path)
+            logger.info("backup database to %s", backup_path)
+        
+        #logger.info("database name: %s", mu.DEFAULT_DATABASE_NAME)
         #print("migrations path:", migrations_path)
         gDatabase.connect()
         router = Router(gDatabase, migrate_dir=migrations_path)

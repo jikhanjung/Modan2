@@ -18,8 +18,9 @@ import MdUtils as mu
 from peewee_migrate import Router
 
 from ModanDialogs import DatasetAnalysisDialog, ObjectDialog, ImportDatasetDialog, DatasetDialog, PreferencesDialog, \
-    MODE, ObjectViewer3D, ExportDatasetDialog, ObjectViewer2D, ProgressDialog
-
+    MODE, ObjectViewer3D, ExportDatasetDialog, ObjectViewer2D, ProgressDialog, NewAnalysisDialog
+from MdStatistics import PerformCVA, PerformPCA
+import json
 from MdLogger import setup_logger
 logger = setup_logger(mu.PROGRAM_NAME)
 
@@ -110,7 +111,7 @@ class ModanMainWindow(QMainWindow):
         
         self.selected_dataset = None
         self.selected_object = None
-        self.check_db()
+        self.prepare_database()
         self.reset_views()
         self.load_dataset()
 
@@ -164,7 +165,7 @@ class ModanMainWindow(QMainWindow):
         if self.m_app.remember_geometry is True:
             self.m_app.settings.setValue("WindowGeometry/MainWindow", self.geometry())
 
-    def check_db(self):
+    def prepare_database(self):
         migrations_path = mu.resource_path("migrations")
         logger.info("migrations path: %s", migrations_path)
         logger.info("database path: %s", database_path)
@@ -176,6 +177,14 @@ class ModanMainWindow(QMainWindow):
         if not os.path.exists(backup_path):
             shutil.copy2(database_path, backup_path)
             logger.info("backup database to %s", backup_path)
+            # read backup directory and delete old backups
+            backup_list = os.listdir(mu.DB_BACKUP_DIRECTORY)
+            # filter out non-backup files
+            backup_list = [f for f in backup_list if f.startswith(DATABASE_FILENAME)]
+            backup_list.sort()
+            if len(backup_list) > 10:
+                for i in range(len(backup_list) - 10):
+                    os.remove(os.path.join(mu.DB_BACKUP_DIRECTORY, backup_list[i]))                    
         
         #logger.info("database name: %s", mu.DEFAULT_DATABASE_NAME)
         #print("migrations path:", migrations_path)
@@ -216,7 +225,7 @@ class ModanMainWindow(QMainWindow):
         text = mu.PROGRAM_NAME + " v" + mu.PROGRAM_VERSION + "\n\n"
         text += "Morphometrics made easy\n\n"
         text += "This software is distributed under the terms of the MIT License.\n\n"
-        text += "© 2023 Jikhan Jung\n"
+        text += "© 2023-2024 Jikhan Jung\n"
 
         QMessageBox.about(self, "About", text)
 
@@ -237,22 +246,95 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             QMessageBox.warning(self, "Warning", "No dataset selected")
             return
         prev_lm_count = -1
+        if self.selected_dataset.object_list is None or len(self.selected_dataset.object_list) < 5:
+            error_message = "Error: number of objects is too small for analysis."
+            logger.error(error_message)
+            mu.show_error_message(error_message)
+            return
+
         for obj in self.selected_dataset.object_list:
             obj.unpack_landmark()
             lm_count = len(obj.landmark_list)
             #print("prev_lm_count:", prev_lm_count, "lm_count:", lm_count)
             if prev_lm_count != lm_count and prev_lm_count != -1:
                 # show messagebox and close the window
-                msg = QMessageBox()
-                msg.setIcon(QMessageBox.Critical)
-                msg.setText("Error: landmark count is not consistent")
-                msg.setWindowTitle("Error")
-                msg.exec_()
+                error_message = "Error: landmark count is not consistent."
+                logger.error(error_message)
+                mu.show_error_message(error_message)
                 return
             prev_lm_count = lm_count
         
-        self.analysis_dialog = DatasetAnalysisDialog(self,self.selected_dataset)
-        self.analysis_dialog.show()
+        if True:
+            self.analysis_dialog = NewAnalysisDialog(self,self.selected_dataset)
+            ret = self.analysis_dialog.exec_()
+            print("ret:", ret)
+            if ret == 0:
+
+                return
+            elif ret == 1:
+                superimposition_method = self.analysis_dialog.comboSuperimposition.currentText()
+                ordination_method = self.analysis_dialog.comboOrdination.currentText()
+                if ordination_method == "CVA":                
+                    group_by = self.analysis_dialog.comboGroupBy.currentIndex()
+                    #self.analysis_dialog.comboOrdination.currentText()
+                else:
+                    group_by = -1
+                self.run_analysis(superimposition_method, ordination_method, group_by, self.selected_dataset )
+                print("call run analysis", superimposition_method, ordination_method, group_by, self.selected_dataset)
+        else:
+            self.analysis_dialog = DatasetAnalysisDialog(self,self.selected_dataset)
+            self.analysis_dialog.show()
+
+    def run_analysis(self, superimposition_method, ordination_method, group_by, dataset):
+        print("run analysis", superimposition_method, ordination_method, dataset)
+        #print("pca button clicked")
+        # set wait cursor
+        
+        #QApplication.processEvents()
+
+        ds_ops = MdDatasetOps(dataset)
+        analysis_done = False
+        analysis_type = ordination_method
+
+        QApplication.setOverrideCursor(Qt.WaitCursor)
+        if not ds_ops.procrustes_superimposition():
+            error_message = "Procrustes superimposition failed"
+            logger.error(error_message)
+            mu.show_error_message(error_message)
+            return
+        #self.show_object_shape()
+        if analysis_type == "CVA":
+            analysis_result = PerformCVA(ds_ops, group_by)
+
+        elif analysis_type == "PCA":
+            analysis_result = PerformPCA(ds_ops)
+
+        new_coords = analysis_result.rotated_matrix.tolist()
+        for i, obj in enumerate(ds_ops.object_list):
+            obj.analysis_result = new_coords[i]
+
+        analysis = MdAnalysis()
+        analysis.dataset = dataset
+        analysis.analysis_name = "Analysis"
+        #analysis.analysis_type = analysis_type
+        analysis.superimposition_method = superimposition_method
+        analysis.analysis_method = ordination_method
+        analysis.dimension = dataset.dimension
+        analysis.wireframe = dataset.wireframe
+        analysis.baseline = dataset.baseline
+        analysis.polygons = dataset.polygons
+        analysis.propertyname_str = dataset.propertyname_str
+        new_coords = analysis_result.rotated_matrix.tolist()
+        analysis.analysis_result_json = json.dumps(new_coords)
+        analysis.save()
+
+
+        #print("result:",new_coords)
+        #self.show_analysis_result()
+
+        # end wait cursor
+        #self.analysis_done = True
+        QApplication.restoreOverrideCursor()
 
     def initUI(self):
         # add tableView and tableWidget to vertical layout
@@ -443,11 +525,11 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
     @pyqtSlot()
     def on_treeView_clicked(self,event):
-        print("clicked")
+        #print("clicked")
         event.accept()
         self.selected_dataset = self.get_selected_dataset()
         if self.selected_dataset is None:
-            print("no dataset selected")
+            #print("no dataset selected")
             self.actionNewObject.setEnabled(False)
             self.actionExport.setEnabled(False)
             self.actionAnalyze.setEnabled(False)
@@ -959,8 +1041,11 @@ if __name__ == "__main__":
 How to make an exe file
 
 pyinstaller --onefile --noconsole --add-data "icons/*.png;icons" --add-data "translations/*.qm;translations" --add-data "migrations/*;migrations" --icon="icons/Modan2_2.png" Modan2.py
-
 pyinstaller --onedir --noconsole --add-data "icons/*.png;icons" --add-data "translations/*.qm;translations" --add-data "migrations/*;migrations" --icon="icons/Modan2_2.png" --noconfirm Modan2.py
+
+for MacOS
+pyinstaller --onefile --noconsole --add-data "icons/*.png:icons" --add-data "translations/*.qm:translations" --add-data "migrations/*:migrations" --icon="icons/Modan2_2.png" Modan2.py
+pyinstaller --onedir --noconsole --add-data "icons/*.png:icons" --add-data "translations/*.qm:translations" --add-data "migrations/*:migrations" --icon="icons/Modan2_2.png" --noconfirm Modan2.py
 
 pylupdate5 Modan2.py -ts translations/Modan2_en.ts
 pylupdate5 Modan2.py -ts translations/Modan2_ko.ts

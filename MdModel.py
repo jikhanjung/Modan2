@@ -53,6 +53,9 @@ class MdDataset(Model):
     class Meta:
         database = gDatabase
 
+    def get_propertyname_list(self):
+        return self.unpack_propertyname_str(self.propertyname_str)
+
     def pack_propertyname_str(self, propertyname_list=None):
         if propertyname_list is None:
             propertyname_list = self.propertyname_list
@@ -1469,3 +1472,5 @@ class MdAnalysis(Model):
 
     created_at = DateTimeField(default=datetime.datetime.now)
     modified_at = DateTimeField(default=datetime.datetime.now)
+    class Meta:
+        database = gDatabase

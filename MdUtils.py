@@ -1,3 +1,4 @@
+from PyQt5.QtWidgets import QMessageBox
 import sys, os
 import copy
 
@@ -18,7 +19,7 @@ USER_PROFILE_DIRECTORY = os.path.expanduser('~')
 DEFAULT_DB_DIRECTORY = os.path.join( USER_PROFILE_DIRECTORY, COMPANY_NAME, PROGRAM_NAME )
 DEFAULT_STORAGE_DIRECTORY = os.path.join(DEFAULT_DB_DIRECTORY, "data/")
 DEFAULT_LOG_DIRECTORY = os.path.join(DEFAULT_DB_DIRECTORY, "logs/")
-DB_BACKUP_DIRECTORY = os.path.join(DEFAULT_DB_DIRECTORY, "backup/")
+DB_BACKUP_DIRECTORY = os.path.join(DEFAULT_DB_DIRECTORY, "backups/")
 
 if not os.path.exists(DEFAULT_DB_DIRECTORY):
     os.makedirs(DEFAULT_DB_DIRECTORY)
@@ -169,3 +170,13 @@ def process_3d_file(file_name):
         #print("ply_mesh faces:", ply_mesh.faces[0:5,:])
         ply_mesh.export( new_file_name, file_type='obj')
     return new_file_name
+
+def show_error_message(error_message):
+    #error_message = "Number of objects is too small for analysis."
+    # show messagebox and close the window
+    msg = QMessageBox()
+    msg.setIcon(QMessageBox.Critical)
+    msg.setText(error_message)
+    msg.setWindowTitle("Error")
+    msg.exec_()
+    return

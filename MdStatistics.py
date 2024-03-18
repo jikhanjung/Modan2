@@ -1,4 +1,7 @@
+import MdUtils as mu
 import numpy
+from MdLogger import setup_logger
+logger = setup_logger(__name__)
 
 class MdPrincipalComponent:
     def __init__(self):
@@ -215,3 +218,50 @@ class MdCanonicalVariate:
         self.rotated_matrix = numpy.dot(np_data, rotation_matrix)
         self.loading = rotation_matrix
         return
+
+
+def PerformCVA(dataset_ops, group_by):
+    cva = MdCanonicalVariate()
+
+    property_index = group_by
+    print("property_index:",property_index)
+    if property_index < 0:
+        #QMessageBox.information(self, "Information", "Please select a property.")
+        return
+    datamatrix = []
+    category_list = []
+    #obj = dataset_ops.object_list[0]
+    #print(obj, obj.property_list, property_index)
+    for obj in dataset_ops.object_list:
+        datum = []
+        for lm in obj.landmark_list:
+            datum.extend(lm)
+        datamatrix.append(datum)
+        category_list.append(obj.property_list[property_index])
+
+    cva.SetData(datamatrix)
+    cva.SetCategory(category_list)
+    cva.Analyze()
+
+    number_of_axes = min(cva.nObservation, cva.nVariable)
+    cva_done = True
+
+    return cva
+
+def PerformPCA(dataset_ops):
+
+    pca = MdPrincipalComponent()
+    datamatrix = []
+    for obj in dataset_ops.object_list:
+        datum = []
+        for lm in obj.landmark_list:
+            datum.extend( lm )
+        datamatrix.append(datum)
+
+    pca.SetData(datamatrix)
+    pca.Analyze()
+
+    number_of_axes = min(pca.nObservation, pca.nVariable)
+    pca_done = True
+
+    return pca

@@ -3307,6 +3307,136 @@ class ObjectDialog(QDialog):
         #self.image_label.setPixmap(self.pixmap)
         QDialog.resizeEvent(self, event)
 
+
+class NewAnalysisDialog(QDialog):
+    def __init__(self,parent,dataset):
+        super().__init__()
+        self.parent = parent
+        self.setGeometry(QRect(100, 100, 400, 300))
+        self.move(self.parent.pos()+QPoint(100,100))
+        #self.status_bar = QStatusBar()
+        self.dataset = dataset
+        self.name_edited = False
+        self.lblAnalysisName = QLabel("Analysis Name", self)
+        self.edtAnalysisName = QLineEdit(self)
+        self.edtAnalysisName.textChanged.connect(self.edtAnalysisName_changed)
+        self.lblSuperimposition = QLabel("Superimposition", self)
+        self.comboSuperimposition = QComboBox(self)
+        self.comboSuperimposition.addItem("Procrustes")
+        self.comboSuperimposition.addItem("Bookstein")
+        self.comboSuperimposition.addItem("Resistant Fit")
+        self.lblOrdination = QLabel("Ordination", self)
+        self.comboOrdination = QComboBox(self)
+        self.comboOrdination.addItem("PCA")
+        self.comboOrdination.addItem("CVA")
+        self.comboOrdination.currentIndexChanged.connect(self.comboOrdination_changed)
+        #self.comboOrdination.addItem("MDS")
+        self.lblGroupBy = QLabel("Group by", self)
+        self.comboGroupBy = QComboBox(self)
+        for property in dataset.get_propertyname_list():
+            self.comboGroupBy.addItem(property)
+        self.comboOrdination_changed()
+
+        self.btnOK = QPushButton("OK", self)
+        self.btnOK.setFixedWidth(100)
+        self.btnOK.setFixedHeight(30)
+        self.btnCancel = QPushButton("Cancel", self)
+        self.btnCancel.setFixedWidth(100)
+        self.btnCancel.setFixedHeight(30)
+        self.btnOK.clicked.connect(self.btnOK_clicked)
+        self.btnCancel.clicked.connect(self.btnCancel_clicked)
+
+        self.layout = QGridLayout()
+        self.setLayout(self.layout)
+        i = 0
+        self.layout.addWidget(self.lblAnalysisName, i, 0)
+        self.layout.addWidget(self.edtAnalysisName, i, 1)
+        i+= 1
+        self.layout.addWidget(self.lblSuperimposition, i, 0)
+        self.layout.addWidget(self.comboSuperimposition, i, 1)
+        i+= 1
+        self.layout.addWidget(self.lblOrdination, i, 0)
+        self.layout.addWidget(self.comboOrdination, i, 1)
+        i+= 1
+        self.layout.addWidget(self.lblGroupBy, i, 0)   
+        self.layout.addWidget(self.comboGroupBy, i, 1)
+
+        self.buttonLayout = QHBoxLayout()
+        self.buttonLayout.addWidget(self.btnOK)
+        self.buttonLayout.addWidget(self.btnCancel)
+        i+= 1
+        self.layout.addLayout(self.buttonLayout, i, 0, 1, 2)
+
+    def edtAnalysisName_changed(self):
+        self.name_edited = True
+
+    def comboOrdination_changed(self):
+        if self.comboOrdination.currentText() == "CVA":
+            self.comboGroupBy.setEnabled(True)
+            self.comboGroupBy.show()
+            self.lblGroupBy.show()
+        else:
+            self.comboGroupBy.setEnabled(False)
+            self.comboGroupBy.hide()
+            self.lblGroupBy.hide()
+        if self.name_edited is False:
+            analysis_name = self.comboOrdination.currentText()
+
+            analysis_name_list = [analysis.analysis_name for analysis in self.dataset.analyses]
+            if analysis_name in analysis_name_list:
+                analysis_name = self.get_unique_name(analysis_name, analysis_name_list)
+            self.edtAnalysisName.setText(analysis_name)
+
+    def btnOK_clicked(self):
+        #self.parent.set_object_calibration( self.pixel_number, float(self.edtLength.text()),self.comboUnit.currentText())
+        self.accept()
+    
+    def btnCancel_clicked(self):
+        self.close()
+
+    def get_unique_name(self, name, name_list):
+        if name not in name_list:
+            return name
+        else:
+            i = 1
+            # get last index of current name which is in the form of "name (i)" using regular expression
+            match = re.match(r"(.+)\s+\((\d+)\)",name)
+            if match:
+                name = match.group(1)
+                i = int(match.group(2))
+                i += 1
+            while True:
+                new_name = name + " ("+str(i)+")"
+                if new_name not in name_list:
+                    return new_name
+                i += 1        
+
+class AnalysisResultDialog(QDialog):
+    def __init__(self,parent):
+        super().__init__()
+        self.setWindowTitle("Modan2 - Dataset Analysis")
+        self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
+        self.parent = parent
+        self.remember_geometry = True
+        self.m_app = QApplication.instance()
+        self.default_color_list = mu.VIVID_COLOR_LIST[:]
+        self.color_list = self.default_color_list[:]
+        self.marker_list = mu.MARKER_LIST[:]
+        self.plot_size = "medium"
+        self.read_settings()
+        #self.setGeometry(QRect(100, 100, 1400, 800))
+        self.ds_ops = None
+        self.object_hash = {}
+        self.shape_list = []
+        self.shape_name_list = []
+
+        self.initialize_UI()
+        
+        self.main_hsplitter = QSplitter(Qt.Horizontal)
+    
+    def initialize_UI(self):
+        pass        
+
 class DatasetAnalysisDialog(QDialog):
     def __init__(self,parent,dataset):
         super().__init__()
@@ -4340,7 +4470,7 @@ class DatasetAnalysisDialog(QDialog):
             self.tableView1.selectionModel().select(item.index(),QItemSelectionModel.Rows | QItemSelectionModel.Select)
         self.selection_changed_off = False
         self.on_object_selection_changed([],[])
-            
+
         #for row in range(self.object_model.rowCount()):
         #    if int(self.object_model.item(row,0).text()) in selected_object_id_list:
         #        self.tableView.selectionModel().select(self.object_model.item(row,0).index(),QItemSelectionModel.Rows | QItemSelectionModel.Select)

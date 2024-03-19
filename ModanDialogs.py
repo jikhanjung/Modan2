@@ -3466,7 +3466,26 @@ class AnalysisInfoWidget(QWidget):
         self.plot_widget3 = FigureCanvas(Figure(figsize=(20, 16),dpi=100))
         self.fig3 = self.plot_widget3.figure
         self.ax3 = self.fig3.add_subplot(projection='3d')
-        self.toolbar3 = NavigationToolbar(self.plot_widget3, self)        
+        self.toolbar3 = NavigationToolbar(self.plot_widget3, self)
+
+        self.default_color_list = mu.VIVID_COLOR_LIST[:]
+        self.color_list = self.default_color_list[:]
+        self.marker_list = mu.MARKER_LIST[:]
+        self.plot_size = "medium"
+
+        self.btnSave = QPushButton("Save")
+        self.btnSave.clicked.connect(self.btnSave_clicked)
+        self.btnShowDetail = QPushButton("Show detail")
+        self.btnShowDetail.clicked.connect(self.btnShowDetail_clicked)
+        self.btnExplore = QPushButton("Explore")
+        self.btnExplore.clicked.connect(self.btnExplore_clicked)
+        self.button_layout = QHBoxLayout()
+        self.button_layout.addWidget(self.btnSave)
+        self.button_layout.addWidget(self.btnShowDetail)
+        self.button_layout.addWidget(self.btnExplore)
+        self.button_widget = QWidget()
+        self.button_widget.setLayout(self.button_layout)
+
 
         i = 0
         self.layout.addWidget(self.lblAnalysisName, i, 0)
@@ -3484,8 +3503,39 @@ class AnalysisInfoWidget(QWidget):
         self.layout.addWidget(self.toolbar3, i, 0, 1, 2)
         i += 1
         self.layout.addWidget(self.plot_widget3, i, 0, 1, 2)
+        self.layout.setRowStretch(i, 1)
+        #i += 1
+        #self.layout.addWidget(QLabel(""), i, 0, 1, 2)
         i += 1
-        self.layout.addWidget(QLabel(""), i, 0, 1, 2)
+        self.layout.addWidget(self.button_widget, i, 0, 1, 2)
+        #self.layout.addWidget(self.btnExplore, i, 1)
+
+    def btnShowDetail_clicked(self):
+        #self.detail_dialog = DatasetAnalysisDialog(self.parent)
+        self.analysis_dialog = DatasetAnalysisDialog(self,self.analysis.dataset)
+        self.analysis_dialog.show()
+
+
+    def btnSave_clicked(self):
+        pass
+
+    def btnExplore_clicked(self):
+        pass
+
+    def read_settings(self):
+        #self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
+        self.plot_size = self.m_app.settings.value("PlotSize", self.plot_size)
+        for i in range(len(self.color_list)):
+            self.color_list[i] = self.m_app.settings.value("DataPointColor/"+str(i), self.default_color_list[i])
+        for i in range(len(self.marker_list)):
+            self.marker_list[i] = self.m_app.settings.value("DataPointMarker/"+str(i), self.marker_list[i])
+
+        #if self.remember_geometry is True:
+        #    self.setGeometry(self.m_app.settings.value("WindowGeometry/DatasetAnalysisWindow", QRect(100, 100, 1400, 800)))
+        #else:
+        #    self.setGeometry(QRect(100, 100, 1400, 800))
+        #    self.move(self.parent.pos()+QPoint(50,50))
+
 
     def comboGroupBy_changed(self):
         self.show_analysis_result()
@@ -3536,9 +3586,9 @@ class AnalysisInfoWidget(QWidget):
         #propertyname_index = propertyname_list.index(self.analysis.group_by) if self.analysis.group_by in propertyname_list else -1
 
         symbol_candidate = ['o','s','^','x','+','d','v','<','>','p','h']
-        #symbol_candidate = self.marker_list[:]
+        symbol_candidate = self.marker_list[:]
         color_candidate = ['blue','green','black','cyan','magenta','yellow','gray','red']
-        #color_candidate = self.color_list[:]
+        color_candidate = self.color_list[:]
 
         propertyname = self.comboGroupBy.currentText()
 

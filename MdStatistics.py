@@ -224,7 +224,7 @@ def PerformCVA(dataset_ops, group_by):
     cva = MdCanonicalVariate()
 
     property_index = group_by
-    print("property_index:",property_index)
+    logger.info("Perform CVA group by property index %s",property_index)
     if property_index < 0:
         #QMessageBox.information(self, "Information", "Please select a property.")
         return

@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QMainWindow, QHeaderView, QApplication, QAbstractItemView, \
                             QMessageBox, QTreeView, QTableView, QSplitter, QAction, QMenu, \
-                            QStatusBar, QInputDialog, QToolBar
+                            QStatusBar, QInputDialog, QToolBar, QWidget
 from PyQt5.QtGui import QIcon, QStandardItemModel, QStandardItem, QKeySequence
 from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSettings, QSize, QTranslator
 
@@ -18,7 +18,7 @@ import MdUtils as mu
 from peewee_migrate import Router
 
 from ModanDialogs import DatasetAnalysisDialog, ObjectDialog, ImportDatasetDialog, DatasetDialog, PreferencesDialog, \
-    MODE, ObjectViewer3D, ExportDatasetDialog, ObjectViewer2D, ProgressDialog, NewAnalysisDialog
+    MODE, ObjectViewer3D, ExportDatasetDialog, ObjectViewer2D, ProgressDialog, NewAnalysisDialog, AnalysisInfoWidget
 from MdStatistics import PerformCVA, PerformPCA
 import json
 from MdLogger import setup_logger
@@ -267,7 +267,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         if True:
             self.analysis_dialog = NewAnalysisDialog(self,self.selected_dataset)
             ret = self.analysis_dialog.exec_()
-            print("ret:", ret)
+            logger.info( "new analysis dialog return value %s", ret)
             if ret == 0:
 
                 return
@@ -279,14 +279,18 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                     #self.analysis_dialog.comboOrdination.currentText()
                 else:
                     group_by = -1
-                self.run_analysis(superimposition_method, ordination_method, group_by, self.selected_dataset )
-                print("call run analysis", superimposition_method, ordination_method, group_by, self.selected_dataset)
+                analysis_name = self.analysis_dialog.edtAnalysisName.text()
+                self.run_analysis(superimposition_method, ordination_method, group_by, analysis_name, self.selected_dataset )
+                #logger.info("calling run analysis %s %s %s %s %s", superimposition_method, ordination_method, group_by, analysis_name, self.selected_dataset.dataset_name)
+                #logger.info("call run analysis", superimposition_method, ordination_method, group_by, self.selected_dataset)
+                self.reset_treeView()
+                self.load_dataset()
         else:
             self.analysis_dialog = DatasetAnalysisDialog(self,self.selected_dataset)
             self.analysis_dialog.show()
 
-    def run_analysis(self, superimposition_method, ordination_method, group_by, dataset):
-        print("run analysis", superimposition_method, ordination_method, dataset)
+    def run_analysis(self, superimposition_method, ordination_method, group_by, analysis_name, dataset):
+        logger.info("run analysis %s %s %s %s %s", superimposition_method, ordination_method, group_by, analysis_name, dataset.dataset_name)
         #print("pca button clicked")
         # set wait cursor
         
@@ -315,7 +319,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
         analysis = MdAnalysis()
         analysis.dataset = dataset
-        analysis.analysis_name = "Analysis"
+        analysis.analysis_name = analysis_name
         #analysis.analysis_type = analysis_type
         analysis.superimposition_method = superimposition_method
         analysis.analysis_method = ordination_method
@@ -326,8 +330,31 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         analysis.propertyname_str = dataset.propertyname_str
         new_coords = analysis_result.rotated_matrix.tolist()
         analysis.analysis_result_json = json.dumps(new_coords)
-        analysis.save()
+        rotation_matrix = analysis_result.rotation_matrix.tolist()
+        analysis.rotation_matrix_json = json.dumps(rotation_matrix)
 
+        object_info_list = []
+        raw_landmark_list = []
+        property_len = len(dataset.get_propertyname_list()) or 0
+        for obj in dataset.object_list:
+            raw_landmark_list.append( obj.get_landmark_list() )
+            object_info_list.append( { "id": obj.id, "name": obj.object_name, "property_list": obj.get_property_list()[:property_len] })
+        analysis.raw_landmark_json = json.dumps(raw_landmark_list)
+        analysis.object_info_json = json.dumps(object_info_list)
+
+        superimposed_landmark_list = []
+        for obj_ops in ds_ops.object_list:
+            superimposed_landmark_list.append( obj_ops.landmark_list )
+        analysis.superimposed_landmark_json = json.dumps(superimposed_landmark_list)
+        if group_by >= 0:
+            analysis.group_by = dataset.get_propertyname_list()[group_by]
+        
+        eigenvalues_list = []
+        for i, val in enumerate(analysis_result.raw_eigen_values):
+            val2 = analysis_result.eigen_value_percentages[i]
+            eigenvalues_list.append( [val, val2] )
+        analysis.eigenvalues_json = json.dumps(eigenvalues_list)
+        analysis.save()
 
         #print("result:",new_coords)
         #self.show_analysis_result()
@@ -356,6 +383,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.hsplitter.addWidget(self.treeView)
         self.hsplitter.addWidget(self.vsplitter)
         self.hsplitter.setSizes([300, 800])
+        self.analysis_view = AnalysisInfoWidget(self)
 
         self.setCentralWidget(self.hsplitter)
 
@@ -367,7 +395,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.tableView.setEditTriggers(QAbstractItemView.NoEditTriggers)
         
         self.treeView.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.treeView.customContextMenuRequested.connect(self.open_dataset_menu)
+        self.treeView.customContextMenuRequested.connect(self.open_treeview_menu)
         self.tableView.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tableView.customContextMenuRequested.connect(self.open_object_menu)
 
@@ -458,25 +486,54 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             self.reset_tableView()
             self.select_dataset(dataset)
 
-    def open_dataset_menu(self, position):
+    def open_treeview_menu(self, position):
         indexes = self.treeView.selectedIndexes()
         if len(indexes) > 0:
 
             level = 0
             index = indexes[0]
-            action_add_dataset = QAction("Add a child dataset")
+            action_add_dataset = QAction("Add child dataset")
             action_add_dataset.triggered.connect(self.on_action_new_dataset_triggered)
-            action_add_object = QAction("Add an object")
+            action_add_object = QAction("Add object")
             action_add_object.triggered.connect(self.on_action_new_object_triggered)
+            action_explore_data = QAction("Explore data")
+            action_explore_data.triggered.connect(self.on_action_explore_data)
+            action_delete_analysis = QAction("Delete analysis")
+            action_delete_analysis.triggered.connect(self.on_action_delete_analysis_triggered)
             action_refresh_tree = QAction("Reload")
             action_refresh_tree.triggered.connect(self.load_dataset)
 
+            # get item
+            item = self.dataset_model.itemFromIndex(index)
+            obj = item.data()
+
             menu = QMenu()
-            menu.addAction(action_add_dataset)
-            menu.addAction(action_add_object)
-            menu.addAction(action_refresh_tree)
+            if isinstance(obj, MdDataset):
+                self.selected_dataset = obj
+                menu.addAction(action_add_dataset)
+                menu.addAction(action_add_object)
+                menu.addAction(action_refresh_tree)
+            elif isinstance(obj, MdAnalysis):                
+                menu.addAction(action_explore_data)
+                menu.addAction(action_delete_analysis)
+                menu.addAction(action_refresh_tree)
             menu.exec_(self.treeView.viewport().mapToGlobal(position))
 
+    def on_action_delete_analysis_triggered(self):
+        ret = QMessageBox.warning(self, "Warning", "Are you sure to delete the selected analysis?", QMessageBox.Yes | QMessageBox.No)
+        if ret == QMessageBox.No:
+            return
+        selected_indexes = self.treeView.selectionModel().selectedRows()
+        if len(selected_indexes) == 0:
+            return
+        item = self.dataset_model.itemFromIndex(selected_indexes[0])
+        analysis = item.data()
+        analysis.delete_instance()
+        self.load_dataset()
+
+    def on_action_explore_data(self):
+        #print("data exploration")
+        pass
 
     @pyqtSlot()
     def on_action_import_dataset_triggered(self):
@@ -903,11 +960,22 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             item1.setData(rec)
             
             self.dataset_model.appendRow([item1,item2])#,item2,item3] )
+            if rec.analyses.count() > 0:
+                self.load_analysis(item1,rec)
             if rec.children.count() > 0:
                 self.load_subdataset(item1,item1.data())
         self.treeView.expandAll()
         self.treeView.hideColumn(1)
         #self.treeView.setIconSize(QSize(16,16))
+
+    def load_analysis(self, parent_item, dataset):
+        all_record = MdAnalysis.filter(dataset=dataset)
+        for rec in all_record:
+            item1 = QStandardItem(rec.analysis_name)
+            item1.setIcon(QIcon(mu.resource_path(ICON['analyze'])))
+            item2 = QStandardItem(str(rec.id))
+            item1.setData(rec)
+            parent_item.appendRow([item1,item2])
 
     def load_subdataset(self, parent_item, dataset):
         all_record = MdDataset.filter(parent=dataset)
@@ -921,6 +989,8 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             item2 = QStandardItem(str(rec.id))
             item1.setData(rec)
             parent_item.appendRow([item1,item2])#,item3] )
+            if rec.analyses.count() > 0:
+                self.load_analysis(item1,rec)
             if rec.children.count() > 0:
                 self.load_subdataset(item1,item1.data())
 
@@ -931,12 +1001,24 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         if indexes:
             self.object_model.clear()
             item1 =self.dataset_model.itemFromIndex(indexes[0])
-            ds = item1.data()
-            self.selected_dataset = ds
-            self.load_object()
-            self.actionAnalyze.setEnabled(True)
-            self.actionNewObject.setEnabled(True)
-            self.actionExport.setEnabled(True)
+            obj = item1.data()
+            if isinstance(obj, MdDataset):
+                self.selected_dataset = obj
+                self.load_object()
+                if self.hsplitter.widget(1) != self.vsplitter:
+                    self.hsplitter.replaceWidget(1,self.vsplitter)                
+                self.actionAnalyze.setEnabled(True)
+                self.actionNewObject.setEnabled(True)
+                self.actionExport.setEnabled(True)
+            elif isinstance(obj, MdAnalysis):
+                self.selected_analysis = obj
+                if self.hsplitter.widget(1) != self.analysis_view:
+                    self.hsplitter.replaceWidget(1,self.analysis_view)
+                self.analysis_view.set_analysis(self.selected_analysis)
+                self.analysis_view.show_analysis_result()
+                #self.actionAnalyze.setEnabled(False)
+                #self.actionNewObject.setEnabled(False)
+                #self.actionExport.setEnabled(False)
         else:
             self.actionAnalyze.setEnabled(False)
             self.actionNewObject.setEnabled(False)

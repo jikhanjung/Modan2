@@ -287,6 +287,9 @@ class MdObject(Model):
                 self.landmark_list.append([float(x) for x in lm.split(LANDMARK_SEPARATOR)])
         return self.landmark_list
 
+    def get_landmark_list(self):
+        return self.unpack_landmark()
+
     def pack_property(self, property_list=None):
         if property_list is None:
             property_list = self.property_list
@@ -298,6 +301,8 @@ class MdObject(Model):
             return []
         self.property_list = [x for x in self.property_str.split(PROPERTY_SEPARATOR)]
         return self.property_list
+    def get_property_list(self):
+        return self.unpack_property()
 
     def get_centroid_size(self, refresh=False):
 
@@ -1460,11 +1465,12 @@ class MdAnalysis(Model):
     propertyname_str = CharField(null=True)
     superimposition_method = CharField()
     analysis_method = CharField() # PCA or CVA
+    group_by = CharField(null=True)
 
-    object_info_json = CharField(null=True) # object name and object id
+    object_info_json = CharField(null=True) # object name, id, properties and centroid size
     raw_landmark_json = CharField(null=True)    # raw landmark info in list of list format
     superimposed_landmark_json = CharField(null=True) # superimposed landmark info in list of list format
-    analysis_result_json = CharField(null=True) # PCA or CVA result in list of list format, plus centroid size and properties of each object
+    analysis_result_json = CharField(null=True) # PCA or CVA result in list of list format
     rotation_matrix_json = CharField(null=True) # rotation matrix from PCA or CVA
     eigenvalues_json = CharField(null=True) # eigenvalues and percentages of variance
 

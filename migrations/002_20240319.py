@@ -1,4 +1,4 @@
-"""Peewee migrations -- 002_20240318.py.
+"""Peewee migrations -- 002_20240319.py.
 
 Some examples (model - class or model name)::
 
@@ -50,6 +50,7 @@ def migrate(migrator: Migrator, database: pw.Database, *, fake=False):
         propertyname_str = pw.CharField(max_length=255, null=True)
         superimposition_method = pw.CharField(max_length=255)
         analysis_method = pw.CharField(max_length=255)
+        group_by = pw.CharField(max_length=255, null=True)
         object_info_json = pw.CharField(max_length=255, null=True)
         raw_landmark_json = pw.CharField(max_length=255, null=True)
         superimposed_landmark_json = pw.CharField(max_length=255, null=True)

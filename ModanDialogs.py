@@ -17,7 +17,7 @@ from OpenGL import GLUT as glut
 from PyQt5.QtOpenGL import *
 
 import xlsxwriter
-
+import json
 import math, re, os, sys, shutil, copy, random, struct
 from pathlib import Path
 from PIL.ExifTags import TAGS
@@ -3320,12 +3320,12 @@ class NewAnalysisDialog(QDialog):
         self.lblAnalysisName = QLabel("Analysis Name", self)
         self.edtAnalysisName = QLineEdit(self)
         self.edtAnalysisName.textChanged.connect(self.edtAnalysisName_changed)
-        self.lblSuperimposition = QLabel("Superimposition", self)
+        self.lblSuperimposition = QLabel("Superimposition method", self)
         self.comboSuperimposition = QComboBox(self)
         self.comboSuperimposition.addItem("Procrustes")
         self.comboSuperimposition.addItem("Bookstein")
         self.comboSuperimposition.addItem("Resistant Fit")
-        self.lblOrdination = QLabel("Ordination", self)
+        self.lblOrdination = QLabel("Ordination method", self)
         self.comboOrdination = QComboBox(self)
         self.comboOrdination.addItem("PCA")
         self.comboOrdination.addItem("CVA")
@@ -3335,14 +3335,11 @@ class NewAnalysisDialog(QDialog):
         self.comboGroupBy = QComboBox(self)
         for property in dataset.get_propertyname_list():
             self.comboGroupBy.addItem(property)
+        self.ignore_change = False
         self.comboOrdination_changed()
 
         self.btnOK = QPushButton("OK", self)
-        self.btnOK.setFixedWidth(100)
-        self.btnOK.setFixedHeight(30)
         self.btnCancel = QPushButton("Cancel", self)
-        self.btnCancel.setFixedWidth(100)
-        self.btnCancel.setFixedHeight(30)
         self.btnOK.clicked.connect(self.btnOK_clicked)
         self.btnCancel.clicked.connect(self.btnCancel_clicked)
 
@@ -3364,11 +3361,17 @@ class NewAnalysisDialog(QDialog):
         self.buttonLayout = QHBoxLayout()
         self.buttonLayout.addWidget(self.btnOK)
         self.buttonLayout.addWidget(self.btnCancel)
+        i += 1
+        self.layout.addWidget(QLabel(""), i, 0, 1, 2)
         i+= 1
         self.layout.addLayout(self.buttonLayout, i, 0, 1, 2)
 
     def edtAnalysisName_changed(self):
-        self.name_edited = True
+        if self.ignore_change is True:
+            pass
+        else:
+            self.name_edited = True
+            print("name edited")
 
     def comboOrdination_changed(self):
         if self.comboOrdination.currentText() == "CVA":
@@ -3385,7 +3388,9 @@ class NewAnalysisDialog(QDialog):
             analysis_name_list = [analysis.analysis_name for analysis in self.dataset.analyses]
             if analysis_name in analysis_name_list:
                 analysis_name = self.get_unique_name(analysis_name, analysis_name_list)
+            self.ignore_change = True
             self.edtAnalysisName.setText(analysis_name)
+            self.ignore_change = False
 
     def btnOK_clicked(self):
         #self.parent.set_object_calibration( self.pixel_number, float(self.edtLength.text()),self.comboUnit.currentText())
@@ -3435,7 +3440,173 @@ class AnalysisResultDialog(QDialog):
         self.main_hsplitter = QSplitter(Qt.Horizontal)
     
     def initialize_UI(self):
-        pass        
+        pass
+
+class AnalysisInfoWidget(QWidget):
+    def __init__(self, parent):
+        super().__init__()
+        self.parent = parent
+        self.layout = QGridLayout()
+        self.setLayout(self.layout)
+        self.lblAnalysisName = QLabel("Analysis Name")
+        self.edtAnalysisName = QLineEdit()
+        self.lblSuperimposition = QLabel("Superimposition")
+        self.edtSuperimposition = QLineEdit()
+        self.edtSuperimposition.setEnabled(False)
+        self.lblOrdination = QLabel("Ordination")
+        self.edtOrdination = QLineEdit()
+        self.edtOrdination.setEnabled(False)
+        self.lblGroupBy = QLabel("Group by")
+        #self.edtGroupBy = QLineEdit()
+        #self.edtGroupBy.setEnabled(False)
+        self.comboGroupBy = QComboBox()
+        self.comboGroupBy.setEnabled(False)
+        self.comboGroupBy.currentIndexChanged.connect(self.comboGroupBy_changed)
+        #self.lblGroupBy.hide()
+        self.plot_widget3 = FigureCanvas(Figure(figsize=(20, 16),dpi=100))
+        self.fig3 = self.plot_widget3.figure
+        self.ax3 = self.fig3.add_subplot(projection='3d')
+        self.toolbar3 = NavigationToolbar(self.plot_widget3, self)        
+
+        i = 0
+        self.layout.addWidget(self.lblAnalysisName, i, 0)
+        self.layout.addWidget(self.edtAnalysisName, i, 1)
+        i += 1
+        self.layout.addWidget(self.lblSuperimposition, i, 0)
+        self.layout.addWidget(self.edtSuperimposition, i, 1)
+        i += 1
+        self.layout.addWidget(self.lblOrdination, i, 0)
+        self.layout.addWidget(self.edtOrdination, i, 1)
+        i += 1
+        self.layout.addWidget(self.lblGroupBy, i, 0)
+        self.layout.addWidget(self.comboGroupBy, i, 1)
+        i += 1
+        self.layout.addWidget(self.toolbar3, i, 0, 1, 2)
+        i += 1
+        self.layout.addWidget(self.plot_widget3, i, 0, 1, 2)
+        i += 1
+        self.layout.addWidget(QLabel(""), i, 0, 1, 2)
+
+    def comboGroupBy_changed(self):
+        self.show_analysis_result()
+
+    def set_analysis(self, analysis):
+        self.analysis = analysis
+        self.edtAnalysisName.setText(analysis.analysis_name)
+        self.edtSuperimposition.setText(analysis.superimposition_method)
+        self.edtOrdination.setText(analysis.analysis_method)
+        #self.edtGroupBy.setText(analysis.group_by)
+        self.comboGroupBy.clear()
+        for property in analysis.dataset.get_propertyname_list():
+            self.comboGroupBy.addItem(property)
+        
+        if analysis.analysis_method == 'PCA':
+            #self.lblGroupBy.hide()
+            self.comboGroupBy.setEnabled(True)
+        else:
+            #self.lblGroupBy.show()
+            self.comboGroupBy.setEnabled(False)
+        
+        if analysis.group_by in analysis.dataset.get_propertyname_list():
+            self.comboGroupBy.setCurrentText(analysis.group_by)
+        else:
+            self.comboGroupBy.setCurrentIndex(0)
+
+
+    def show_analysis_result(self):
+        #self.plot_widget.clear()
+        self.ax3.clear()
+
+        axis_prefix = self.analysis.analysis_method[:2]
+
+        # get axis1 and axis2 value from comboAxis1 and 2 index
+        depth_shade = False
+        show_legend = False
+        show_axis_label = True
+        axis1 = 0
+        axis2 = 1
+        axis3 = 2
+        axis1_title = axis_prefix + str(axis1+1)
+        axis2_title = axis_prefix + str(axis2+1)
+        axis3_title = axis_prefix + str(axis3+1)
+
+        object_info_list = json.loads(self.analysis.object_info_json)
+        analysis_result_list = json.loads(self.analysis.analysis_result_json)
+        propertyname_list = self.analysis.propertyname_str.split(",")
+        #propertyname_index = propertyname_list.index(self.analysis.group_by) if self.analysis.group_by in propertyname_list else -1
+
+        symbol_candidate = ['o','s','^','x','+','d','v','<','>','p','h']
+        #symbol_candidate = self.marker_list[:]
+        color_candidate = ['blue','green','black','cyan','magenta','yellow','gray','red']
+        #color_candidate = self.color_list[:]
+
+        propertyname = self.comboGroupBy.currentText()
+
+        self.propertyname_index = propertyname_list.index(propertyname) if propertyname in propertyname_list else -1
+        self.scatter_data = {}
+        self.scatter_result = {}
+        SCATTER_SMALL_SIZE = 30
+        SCATTER_MEDIUM_SIZE = 50
+        SCATTER_LARGE_SIZE = 60
+        scatter_size = SCATTER_MEDIUM_SIZE
+        #if self.plot_size.lower() == 'small':
+        #    scatter_size = SCATTER_SMALL_SIZE
+        #elif self.plot_size.lower() == 'medium':
+        #    scatter_size = SCATTER_MEDIUM_SIZE
+        #elif self.plot_size.lower() == 'large':
+        #    scatter_size = SCATTER_LARGE_SIZE
+        
+
+
+        key_list = []
+        key_list.append('__default__')
+        self.scatter_data['__default__'] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'hoverinfo':[], 'text':[], 'property':'', 'symbol':'o', 'color':color_candidate[0], 'size':scatter_size}
+
+        for idx, obj in enumerate(object_info_list):
+            key_name = '__default__'
+
+            if self.propertyname_index > -1 and self.propertyname_index < len(obj['property_list']):
+                key_name = obj['property_list'][self.propertyname_index]
+
+            if key_name not in self.scatter_data.keys():
+                self.scatter_data[key_name] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'property':key_name, 'symbol':'', 'color':'', 'size':scatter_size}
+
+            self.scatter_data[key_name]['x_val'].append(analysis_result_list[idx][axis1])
+            self.scatter_data[key_name]['y_val'].append(analysis_result_list[idx][axis2])
+            self.scatter_data[key_name]['z_val'].append(analysis_result_list[idx][axis3])
+            self.scatter_data[key_name]['data'].append(obj)
+            #group_hash[key_name]['text'].append(obj.object_name)
+            #group_hash[key_name]['hoverinfo'].append(obj.id)
+
+        # remove empty group
+        if len(self.scatter_data['__default__']['x_val']) == 0:
+            del self.scatter_data['__default__']
+
+        # assign color and symbol
+        sc_idx = 0
+        for key_name in self.scatter_data.keys():
+            if self.scatter_data[key_name]['color'] == '':
+                self.scatter_data[key_name]['color'] = color_candidate[sc_idx % len(color_candidate)]
+                self.scatter_data[key_name]['symbol'] = symbol_candidate[sc_idx % len(symbol_candidate)]
+                sc_idx += 1
+
+        if True:
+            self.ax3.clear()
+            for name in self.scatter_data.keys():
+                group = self.scatter_data[name]
+                #print("name", name, "len(group_hash[name]['x_val'])", len(group['x_val']), group['symbol'])
+                if len(self.scatter_data[name]['x_val']) > 0:
+                    self.scatter_result[name] = self.ax3.scatter(group['x_val'], group['y_val'], group['z_val'], s=group['size'], marker=group['symbol'], color=group['color'], data=group['data'],depthshade=depth_shade, picker=True, pickradius=5)
+
+            if True:
+                self.ax3.legend(self.scatter_result.values(), self.scatter_result.keys(), loc='upper right', bbox_to_anchor=(1.05, 1))
+            if True:
+                self.ax3.set_xlabel(axis1_title)
+                self.ax3.set_ylabel(axis2_title)
+                self.ax3.set_zlabel(axis3_title)
+            self.fig3.tight_layout()
+            self.fig3.canvas.draw()
+            self.fig3.canvas.flush_events()
 
 class DatasetAnalysisDialog(QDialog):
     def __init__(self,parent,dataset):

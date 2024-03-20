@@ -18,7 +18,7 @@ import MdUtils as mu
 from peewee_migrate import Router
 
 from ModanDialogs import DatasetAnalysisDialog, ObjectDialog, ImportDatasetDialog, DatasetDialog, PreferencesDialog, \
-    MODE, ObjectViewer3D, ExportDatasetDialog, ObjectViewer2D, ProgressDialog, NewAnalysisDialog, AnalysisInfoWidget
+    MODE, ObjectViewer3D, ExportDatasetDialog, ObjectViewer2D, ProgressDialog, NewAnalysisDialog, AnalysisInfoWidget, DataExplorationDialog
 from MdStatistics import PerformCVA, PerformPCA
 import json
 from MdLogger import setup_logger
@@ -338,7 +338,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         property_len = len(dataset.get_propertyname_list()) or 0
         for obj in dataset.object_list:
             raw_landmark_list.append( obj.get_landmark_list() )
-            object_info_list.append( { "id": obj.id, "name": obj.object_name, "property_list": obj.get_property_list()[:property_len] })
+            object_info_list.append( { "id": obj.id, "name": obj.object_name, "csize": obj.get_centroid_size(), "property_list": obj.get_property_list()[:property_len] })
         analysis.raw_landmark_json = json.dumps(raw_landmark_list)
         analysis.object_info_json = json.dumps(object_info_list)
 
@@ -497,7 +497,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             action_add_object = QAction("Add object")
             action_add_object.triggered.connect(self.on_action_new_object_triggered)
             action_explore_data = QAction("Explore data")
-            action_explore_data.triggered.connect(self.on_action_explore_data)
+            action_explore_data.triggered.connect(self.on_action_explore_data_triggered)
             action_delete_analysis = QAction("Delete analysis")
             action_delete_analysis.triggered.connect(self.on_action_delete_analysis_triggered)
             action_refresh_tree = QAction("Reload")
@@ -531,9 +531,12 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         analysis.delete_instance()
         self.load_dataset()
 
-    def on_action_explore_data(self):
+    def on_action_explore_data_triggered(self):
         #print("data exploration")
-        pass
+        self.exploration_dialog = DataExplorationDialog(self)
+        self.exploration_dialog.set_analysis(self.selected_analysis)
+        self.exploration_dialog.show()
+        #self.load_dataset()
 
     @pyqtSlot()
     def on_action_import_dataset_triggered(self):

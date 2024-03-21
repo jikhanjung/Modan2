@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import QTableWidgetItem, QHeaderView, QFileDialog, QCheckBo
                             QDialog, QLineEdit, QLabel, QPushButton, QAbstractItemView, QStatusBar, QMessageBox, \
                             QTableView, QSplitter, QRadioButton, QComboBox, QTextEdit, QSizePolicy, \
                             QTableWidget, QGridLayout, QAbstractButton, QButtonGroup, QGroupBox, \
-                            QTabWidget, QListWidget
+                            QTabWidget, QListWidget, QSpinBox
 from PyQt5.QtGui import QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem, QImage,\
                         QFont, QPainter, QBrush, QMouseEvent, QWheelEvent, QDoubleValidator
 from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSize, QPoint,\
@@ -3523,8 +3523,18 @@ class DataExplorationDialog(QDialog):
         self.comboAxis2.currentIndexChanged.connect(self.axis_changed)
         #self.comboAxis3.currentIndexChanged.connect(self.axis_changed)
 
+        self.lblDegree = QLabel("Degree")
+        self.sbxDegree = QSpinBox()
+        self.sbxDegree.setValue(2)
+        self.sbxDegree.textChanged.connect(self.axis_changed)
         self.btnPolyfit = QPushButton("Polyfit")
-        self.btnPolyfit.clicked.connect(self.polyfit_clicked)
+        self.btnPolyfit.clicked.connect(self.axis_changed)
+        self.fit_widget = QWidget()
+        self.fit_layout = QHBoxLayout()
+        self.fit_widget.setLayout(self.fit_layout)
+        self.fit_layout.addWidget(self.lblDegree)
+        self.fit_layout.addWidget(self.sbxDegree)
+        self.fit_layout.addWidget(self.btnPolyfit)
 
         i = 0
         self.layout.addWidget(self.lblAnalysisName, i, 0)
@@ -3545,20 +3555,37 @@ class DataExplorationDialog(QDialog):
         i += 1
         self.layout.addWidget(self.plot_widget2, i, 0, 1, 2)
         i += 1
-        self.layout.addWidget(self.btnPolyfit, i, 0, 1, 2)
+        self.layout.addWidget(self.fit_widget, i, 0, 1, 2)
 
-    def polyfit_clicked(self):
+    def calculate_fit(self):
         #self.scatter_data[key_name]['y_val']
         key_list = self.scatter_data.keys()
         self.curve_list = []
+        degree_text = self.sbxDegree.text()
+        if degree_text == "":
+            return
+
+        degree = int(degree_text)
         for key in key_list:
-            model = np.polyfit(self.scatter_data[key]['x_val'], self.scatter_data[key]['y_val'], 2)
+            x_vals = np.array(self.scatter_data[key]['x_val'])
+            y_vals = np.array(self.scatter_data[key]['y_val'])
+
+            model = np.polyfit( x_vals, y_vals, degree)
             #model_list.append(model)
-            #print(key, model)
+            r_squared = self.calculate_r_squared(model, x_vals, y_vals)
+            #print(key, model, r_squared)
             size_range = np.linspace(min(self.scatter_data[key]['x_val']), max(self.scatter_data[key]['x_val']), 100)
             curve = np.polyval(model, size_range)
-            self.curve_list.append( { 'key': key, 'model': model, 'size_range': size_range, 'curve': curve, 'color': self.scatter_data[key]['color'] } )
-        self.show_analysis_result()
+            self.curve_list.append( { 'key': key, 'model': model, 'size_range': size_range, 'curve': curve, 'r_squared': r_squared, 'color': self.scatter_data[key]['color'] } )
+        #self.show_analysis_result()
+
+    def calculate_r_squared(self, model, x_vals, y_vals):
+        y_mean = np.mean(y_vals)
+        ss_total = np.sum((y_vals - y_mean)**2)
+        ss_res = np.sum((y_vals - np.polyval(model, x_vals))**2)
+        r_squared = 1 - (ss_res/ss_total)
+        return r_squared
+    
 
     def set_growth_trajectory_mode(self):
         self.mode = MODE_GROWTH_TRAJECTORY
@@ -3571,10 +3598,14 @@ class DataExplorationDialog(QDialog):
 
     def axis_changed(self):
         #if self.ds_ops is not None and self.analysis_done is True:
+        self.prepare_scatter_data()
+        self.calculate_fit()
         self.show_analysis_result()
 
     def flip_axis_changed(self, int):
         #if self.ds_ops is not None:
+        self.prepare_scatter_data()
+        self.calculate_fit()
         self.show_analysis_result()
 
     def read_settings(self):
@@ -3592,6 +3623,8 @@ class DataExplorationDialog(QDialog):
             self.move(self.parent.pos()+QPoint(50,50))
 
     def comboGroupBy_changed(self):
+        self.prepare_scatter_data()
+        self.calculate_fit()
         self.show_analysis_result()
 
     def set_analysis(self, analysis):
@@ -3618,28 +3651,15 @@ class DataExplorationDialog(QDialog):
 
         self.set_growth_trajectory_mode()
 
-    def show_analysis_result(self):
-        #self.plot_widget.clear()
-        self.ax2.clear()
-        axis_prefix = self.analysis.analysis_method[:2]
-
-        # get axis1 and axis2 value from comboAxis1 and 2 index
-        depth_shade = False
-        show_legend = False
-        show_axis_label = True
-
-        axis1 = self.comboAxis1.currentIndex()        
+    def prepare_scatter_data(self):
+        axis1 = self.comboAxis1.currentIndex()
         axis2 = self.comboAxis2.currentIndex()
-        axis1_title = self.comboAxis1.currentText()
-        axis2_title = self.comboAxis2.currentText()
         flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
         flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
 
         object_info_list = json.loads(self.analysis.object_info_json)
         analysis_result_list = json.loads(self.analysis.analysis_result_json)
         propertyname_list = self.analysis.propertyname_str.split(",")
-        #propertyname_index = propertyname_list.index(self.analysis.group_by) if self.analysis.group_by in propertyname_list else -1
-
         symbol_candidate = ['o','s','^','x','+','d','v','<','>','p','h']
         symbol_candidate = self.marker_list[:]
         color_candidate = ['blue','green','black','cyan','magenta','yellow','gray','red']
@@ -3701,6 +3721,22 @@ class DataExplorationDialog(QDialog):
                 self.scatter_data[key_name]['symbol'] = symbol_candidate[sc_idx % len(symbol_candidate)]
                 sc_idx += 1
 
+    def show_analysis_result(self):
+        #self.plot_widget.clear()
+        self.ax2.clear()
+
+        # get axis1 and axis2 value from comboAxis1 and 2 index
+        #depth_shade = False
+        show_legend = False
+        show_axis_label = True
+
+        axis1_title = self.comboAxis1.currentText()
+        axis2_title = self.comboAxis2.currentText()
+
+        #propertyname_index = propertyname_list.index(self.analysis.group_by) if self.analysis.group_by in propertyname_list else -1
+
+
+
         if True:
             self.ax2.clear()
             for name in self.scatter_data.keys():
@@ -3715,6 +3751,20 @@ class DataExplorationDialog(QDialog):
             if self.curve_list is not None and len(self.curve_list) > 0:
                 for curve in self.curve_list:
                     self.ax2.plot(curve['size_range'], curve['curve'], label=curve['key'], color=curve['color'])
+                    degree = len(curve['model'])-1
+                    model_text = ""
+                    for i in range(degree+1):
+                        model_text += str(round(curve['model'][i]*1000)/1000) 
+                        if degree != i:
+                            model_text += "x^"+str(degree-i)
+                        if i < degree:
+                            model_text += " + "
+                    r_squared_text = "R^2: "+str(round(curve['r_squared']*1000)/1000)                    
+                       
+                    #self.ax2.annotate(str(curve['model'])+" "+str(curve['r_squared']), (curve['size_range'][50], curve['curve'][50]))
+                    self.ax2.annotate(model_text, (curve['size_range'][10], curve['curve'][10]))
+                    self.ax2.annotate(r_squared_text, (curve['size_range'][90], curve['curve'][90]))
+
                 #self.ax2.plot(size_range, group_a_curve, label='Group A')
             if show_legend:
                 values = []

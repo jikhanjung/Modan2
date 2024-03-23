@@ -791,7 +791,7 @@ class MdObjectOps:
             point3 = baseline[0]
         else:
             return
-
+        #print("baseline:",baseline)
 
         #print(self.landmark_list)
 

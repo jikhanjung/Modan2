@@ -741,6 +741,7 @@ class ObjectViewer3D(QGLWidget):
         self.picker_buffer = None
         self.gl_list = None
         self.temp_edge = []
+        self.object = None
 
         #self.no_drawing = False
         self.wireframe_from_idx = -1
@@ -1125,6 +1126,14 @@ class ObjectViewer3D(QGLWidget):
             self.align_object()
         self.updateGL()
         #print("data_mode:", self.data_mode)
+
+    def update_object(self, object):
+        return
+        self.object = object
+        self.landmark_list = object.landmark_list
+        self.edge_list = object.dataset.edge_list
+        self.calculate_resize()
+        self.updateGL()
 
     def align_object(self):
         if self.data_mode == OBJECT_MODE:
@@ -3719,9 +3728,9 @@ class DataExplorationDialog(QDialog):
         flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
         flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
 
-        object_info_list = json.loads(self.analysis.object_info_json)
-        analysis_result_list = json.loads(self.analysis.analysis_result_json)
-        propertyname_list = self.analysis.propertyname_str.split(",")
+        self.object_info_list = json.loads(self.analysis.object_info_json)
+        self.analysis_result_list = json.loads(self.analysis.analysis_result_json)
+        self.propertyname_list = self.analysis.propertyname_str.split(",")
         symbol_candidate = ['o','s','^','x','+','d','v','<','>','p','h']
         symbol_candidate = self.marker_list[:]
         color_candidate = ['blue','green','black','cyan','magenta','yellow','gray','red']
@@ -3731,7 +3740,7 @@ class DataExplorationDialog(QDialog):
 
         propertyname = self.comboGroupBy.currentText()
 
-        self.propertyname_index = propertyname_list.index(propertyname) if propertyname in propertyname_list else -1
+        self.propertyname_index = self.propertyname_list.index(propertyname) if propertyname in self.propertyname_list else -1
         self.scatter_data = {}
         self.scatter_result = {}
         SCATTER_SMALL_SIZE = 30
@@ -3751,7 +3760,7 @@ class DataExplorationDialog(QDialog):
         key_list.append('__default__')
         self.scatter_data['__default__'] = { 'x_val':[], 'y_val':[], 'data':[], 'hoverinfo':[], 'text':[], 'property':'', 'symbol':'o', 'color':color_candidate[0], 'size':scatter_size}
 
-        for idx, obj in enumerate(object_info_list):
+        for idx, obj in enumerate(self.object_info_list):
             key_name = '__default__'
 
             if self.propertyname_index > -1 and self.propertyname_index < len(obj['property_list']):
@@ -3761,11 +3770,11 @@ class DataExplorationDialog(QDialog):
                 self.scatter_data[key_name] = { 'x_val':[], 'y_val':[], 'data':[], 'property':key_name, 'symbol':'', 'color':'', 'size':scatter_size}
 
             if axis1 == 10:
-                #print("obj:", mdobject.id, "csize:", csize)
+                #print("obj:", obj)
                 self.scatter_data[key_name]['x_val'].append(obj['csize'])
             else:
-                self.scatter_data[key_name]['x_val'].append(flip_axis1 * analysis_result_list[idx][axis1])   
-            self.scatter_data[key_name]['y_val'].append(flip_axis2 * analysis_result_list[idx][axis2])
+                self.scatter_data[key_name]['x_val'].append(flip_axis1 * self.analysis_result_list[idx][axis1])   
+            self.scatter_data[key_name]['y_val'].append(flip_axis2 * self.analysis_result_list[idx][axis2])
             #self.scatter_data[key_name]['z_val'].append(analysis_result_list[idx][axis3])
             self.scatter_data[key_name]['data'].append(obj)
             #group_hash[key_name]['text'].append(obj.object_name)
@@ -3859,8 +3868,47 @@ class DataExplorationDialog(QDialog):
             self.fig2.canvas.mpl_connect('motion_notify_event', self.on_canvas_move)
             
     def on_canvas_move(self, evt):
-        print("on_canvas_move", evt.xdata, evt.ydata)
-        pass    
+        if self.cbxShape.isChecked() == False:
+            return
+        #print("on_canvas_move", evt.xdata, evt.ydata)
+        axis1 = self.comboAxis1.currentIndex()
+        axis2 = self.comboAxis2.currentIndex()
+        flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
+        flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
+        shape_to_visualize = np.zeros((1,len(self.analysis_result_list[0])))
+        if axis1 != 10:
+            shape_to_visualize[0][axis1] = flip_axis1 * evt.xdata
+        shape_to_visualize[0][axis2] = flip_axis2 * evt.ydata
+        #print("shape_to_visualize", axis1, axis2, shape_to_visualize[0] )
+        unrotated_shape = self.unrotate_shape(shape_to_visualize)
+        self.show_shape(unrotated_shape[0], 0)
+        #print("unrotated_shape", unrotated_shape)
+
+    def show_shape(self, shape, idx):
+        #print("show object")
+        obj = MdObject()
+        obj.dataset_id = self.analysis.dataset_id
+        obj.landmark_list = []
+        #print("shape:", shape, "len(shape)", len(shape))
+        for i in range(0,len(shape),3):
+            landmark = [shape[i], shape[i+1], shape[i+2]]
+            obj.landmark_list.append(landmark)
+            #print("landmark", landmark, "landmark_list", obj.landmark_list)
+        #print("landmark_list", obj.landmark_list)
+        #obj.landmark_list = shape.tolist()
+        #self.shape_view_list[idx].clear_object()
+        #print("cleared object view")
+        #self.shape_view_list[idx].landmark_list = copy.deepcopy(obj.landmark_list)
+        #print("landmark list copied")
+        #if self.shape_view_list[idx].object is None:
+        self.shape_view_list[idx].clear_object()
+            #self.shape_view_list[idx].object = obj
+        self.shape_view_list[idx].set_object(obj)
+        #print("set object", obj)
+        #self.shape_view_list[idx].read_only = True
+        #print("object_view:", self.object_view)
+        self.shape_view_list[idx].update()
+
     def on_canvas_button_press(self, evt):
         #print("button_press", evt)
         self.canvas_down_xy = (evt.x, evt.y)
@@ -3908,6 +3956,28 @@ class DataExplorationDialog(QDialog):
         #    if int(self.object_model.item(row,0).text()) in selected_object_id_list:
         #        self.tableView.selectionModel().select(self.object_model.item(row,0).index(),QItemSelectionModel.Rows | QItemSelectionModel.Select)
 
+    def unrotate_shape(self, shape):
+
+        rotation_matrix = json.loads(self.analysis.rotation_matrix_json)
+        inverted_matrix = np.linalg.inv(rotation_matrix)
+        #print("inverted_matrix", inverted_matrix)
+        
+        unrotated_shape = np.dot(shape, inverted_matrix)
+        #print("unrotated_shape shape", unrotated_shape)
+        all_shapes = np.array(json.loads(self.analysis.superimposed_landmark_json))
+        # get average of all_shapes
+        average_shape = np.mean(all_shapes, axis=0)
+        #average_shape = np.array(self.ds_ops.get_average_shape().landmark_list).reshape(1,-1)
+        #print("average_shape", average_shape)
+        #print("unrotated_shape", unrotated_shape.shape, unrotated_shape)
+        #print("after unrotate", unrotated_shape )
+
+        average_shape = average_shape.reshape(1,-1)
+        final_shape = average_shape + unrotated_shape
+        #print("final shape", final_shape.shape,final_shape)
+
+
+        return final_shape
 
 class AnalysisInfoWidget(QWidget):
     def __init__(self, parent):

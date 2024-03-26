@@ -877,33 +877,23 @@ class ObjectViewer3D(QGLWidget):
                 self.cursor_on_vertex = -1
                 self.set_mode(MODE['EDIT_LANDMARK'])
             else:
-                self.rotate_x += self.temp_rotate_x
-                self.rotate_y += self.temp_rotate_y
                 if self.data_mode == OBJECT_MODE and self.obj_ops is not None:
+                    #self.rotate_x += self.temp_rotate_x
+                    #self.rotate_y += self.temp_rotate_y
                     #print("x rotate:", self.rotate_x, "y rotate:", self.rotate_y)
                     #print( "test_obj vert 1 before rotation:", self.test_obj.vertices[0])
                     #self.obj_ops.rotate(math.radians(-1*self.rotate_x),math.radians(self.rotate_y))
-                    self.obj_ops.rotate_3d(math.radians(-1*self.rotate_x),'Y')
-                    self.obj_ops.rotate_3d(math.radians(self.rotate_y),'X')
-                    if self.threed_model is not None:
-                        #print("rotate_x:", self.rotate_x, "rotate_y:", self.rotate_y)
-                        #print("1:",datetime.datetime.now())
-                        if self.show_model == True:
-                            apply_rotation_to_vertex = True
-                        else:
-                            apply_rotation_to_vertex = False
-                        self.threed_model.rotate(math.radians(self.rotate_x),math.radians(self.rotate_y),apply_rotation_to_vertex)
-                        #print("2:",datetime.datetime.now())
-                        #self.threed_model.rotate_3d(math.radians(-1*self.rotate_x),'Y')
-                        #self.threed_model.rotate_3d(math.radians(self.rotate_y),'X')
-                        if self.show_model == True:
-                            self.threed_model.generate()
-                        #print("3:",datetime.datetime.now())
-                    #print( "test_obj vert 1 after rotation:", self.test_obj.vertices[0])
-                    self.rotate_x = 0
-                    self.rotate_y = 0
                     #self.obj
+                    if self.parent != None and self.parent.sync_rotation is not None:
+                        self.parent.sync_rotation()
+                    else:
+                        self.sync_rotation()
+                    #self.rotate_x = 0
+                    #self.rotate_y = 0
+                    #self.parent.sync_rotation(self.rotate_x, self.rotate_y)
                 elif self.data_mode == DATASET_MODE and self.ds_ops is not None:
+                    self.rotate_x += self.temp_rotate_x
+                    self.rotate_y += self.temp_rotate_y
                     #self.ds_ops.average_shape.rotate_3d(math.radians(-1*self.rotate_x),'Y')
                     #self.ds_ops.average_shape.rotate_3d(math.radians(self.rotate_y),'X')
                     for obj in self.ds_ops.object_list:
@@ -931,6 +921,34 @@ class ObjectViewer3D(QGLWidget):
         self.view_mode = VIEW_MODE
         self.updateGL()
         #self.parent.update_status()
+        
+    def sync_rotation(self):
+        #print("sync rotation", self.rotate_x, self.rotate_y, self.temp_rotate_x, self.temp_rotate_y)
+        self.rotate_x += self.temp_rotate_x
+        self.rotate_y += self.temp_rotate_y
+        self.temp_rotate_x = 0
+        self.temp_rotate_y = 0
+
+        self.obj_ops.rotate_3d(math.radians(-1*self.rotate_x),'Y')
+        self.obj_ops.rotate_3d(math.radians(self.rotate_y),'X')
+        if self.threed_model is not None:
+            #print("rotate_x:", self.rotate_x, "rotate_y:", self.rotate_y)
+            #print("1:",datetime.datetime.now())
+            if self.show_model == True:
+                apply_rotation_to_vertex = True
+            else:
+                apply_rotation_to_vertex = False
+            self.threed_model.rotate(math.radians(self.rotate_x),math.radians(self.rotate_y),apply_rotation_to_vertex)
+            #print("2:",datetime.datetime.now())
+            #self.threed_model.rotate_3d(math.radians(-1*self.rotate_x),'Y')
+            #self.threed_model.rotate_3d(math.radians(self.rotate_y),'X')
+            if self.show_model == True:
+                self.threed_model.generate()
+            #print("3:",datetime.datetime.now())
+        #print( "test_obj vert 1 after rotation:", self.test_obj.vertices[0])
+        self.rotate_x = 0
+        self.rotate_y = 0
+
 
     def mouseMoveEvent(self, event):
         #@print("mouse move event",event)
@@ -970,6 +988,8 @@ class ObjectViewer3D(QGLWidget):
             self.is_dragging = True
             self.temp_rotate_x = self.curr_x - self.down_x
             self.temp_rotate_y = self.curr_y - self.down_y
+            self.parent.sync_temp_rotation(self, self.temp_rotate_x, self.temp_rotate_y)
+
         elif event.buttons() == Qt.RightButton and self.view_mode == ZOOM_MODE:
             self.is_dragging = True
             self.temp_dolly = ( self.curr_y - self.down_y ) / 100.0
@@ -1089,6 +1109,8 @@ class ObjectViewer3D(QGLWidget):
 
     def set_object(self, object):
         #print("set_object 1",type(object))
+        # print current time
+        #print("1:",datetime.datetime.now())
         #object.unpack_landmark()
         self.landmark_list = copy.deepcopy(object.landmark_list)
         m_app = QApplication.instance()
@@ -1101,6 +1123,7 @@ class ObjectViewer3D(QGLWidget):
             #print("object is not MdObject")
         else:
             pass
+        #print("2:",datetime.datetime.now())
         #print("set_object 2",type(obj_ops))
         self.dataset = object.dataset
         #print("dataset", self.dataset)
@@ -1116,7 +1139,7 @@ class ObjectViewer3D(QGLWidget):
         self.edge_list = self.dataset.unpack_wireframe()
         #print("edge_list:", self.edge_list)
         #self.landmark_list = object.landmark_list
-
+        #print("3:",datetime.datetime.now())
         if object.threed_model.count() > 0:
             #print("object has 3d model", self, self.object, self.threed_model)
             #print("and no 3d model in view yet", self )
@@ -1125,10 +1148,12 @@ class ObjectViewer3D(QGLWidget):
             self.set_threed_model(filepath)
         else:
             self.threed_model = None
+        #print("4:",datetime.datetime.now())
         self.calculate_resize()
+        #print("5:",datetime.datetime.now())
         if self.dataset.baseline is not None:
             self.align_object()
-        self.updateGL()
+        #self.updateGL()
         #print("data_mode:", self.data_mode)
 
     def update_object(self, object):
@@ -1236,7 +1261,7 @@ class ObjectViewer3D(QGLWidget):
         #self.test_obj = OBJ('Estaingia_simulation_base_20221125.obj')
 
     def paintGL(self):
-        #print("paintGL")
+        #print("paintGL", datetime.datetime.now())
         if self.edit_mode == MODE['WIREFRAME'] or self.edit_mode == MODE['EDIT_LANDMARK']:
             self.draw_picker_buffer()
         gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, 0)
@@ -1654,7 +1679,7 @@ class ObjectViewer3D(QGLWidget):
             scale = self.get_scale_from_object(self.obj_ops)
             self.obj_ops.rescale(scale)
             #self.auto_rotate = True
-        self.updateGL()
+        #self.updateGL()
         return
 
     def rotate(self, rotationX_rad, rotationY_rad, vertices ):
@@ -3488,7 +3513,15 @@ class DataExplorationDialog(QDialog):
         self.shape_info_list = []
         self.vertical_line_xval = None
         self.vertical_line_style = "dashed"
-
+        self.axvline = None
+        self.temp_rotate_x = 0
+        self.temp_rotate_y = 0
+        self.rotation_matrix = np.array([
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, 1, 0],
+        [0, 0, 0, 1]
+        ])
         self.layout = QGridLayout()
         self.setLayout(self.layout)
         self.lblAnalysisName = QLabel("Analysis Name")
@@ -3740,6 +3773,50 @@ class DataExplorationDialog(QDialog):
             self.setGeometry(QRect(100, 100, 1400, 800))
             self.move(self.parent.pos()+QPoint(50,50))
 
+    def store_rotation(self,x_rad, y_rad):
+        rotationXMatrix = np.array([
+            [1, 0, 0, 0],
+            [0, np.cos(y_rad), -np.sin(y_rad), 0],
+            [0, np.sin(y_rad), np.cos(y_rad), 0],
+            [0, 0, 0, 1]
+        ])
+
+        rotationYMatrix = np.array([
+            [np.cos(x_rad), 0, np.sin(x_rad), 0],
+            [0, 1, 0, 0],
+            [-np.sin(x_rad), 0, np.cos(x_rad), 0],
+            [0, 0, 0, 1]
+        ])
+        #print(rotationXMatrix)
+        #print(rotationYMatrix)
+        new_rotation_matrix = np.dot(rotationXMatrix, rotationYMatrix)
+        self.rotation_matrix = np.dot(new_rotation_matrix, self.rotation_matrix)
+
+
+    def sync_rotation(self):
+        if len(self.shape_view_list) > 0:
+            temp_rotate_x = math.radians(self.shape_view_list[0].temp_rotate_x)
+            temp_rotate_y = math.radians(self.shape_view_list[0].temp_rotate_y)
+            #(math.radians(self.rotate_x),math.radians(self.rotate_y),apply_rotation_to_vertex)
+            self.store_rotation(math.radians(temp_rotate_x),math.radians(temp_rotate_y))
+
+        for sv in self.shape_view_list:
+            #self.temp_rotate_x = sv.temp_rotate_x
+            #self.temp_rotate_y = sv.temp_rotate_y
+            #sv.rotate_x = sv.temp_rotate_x
+            #sv.rotate_y = sv.temp_rotate_y
+            sv.sync_rotation()
+            sv.update()
+
+    def sync_temp_rotation(self, shape_view, temp_rotate_x, temp_rotate_y):
+        for sv in self.shape_view_list:
+            if sv != shape_view:
+                sv.temp_rotate_x = temp_rotate_x
+                sv.temp_rotate_y = temp_rotate_y
+                #sv.sync_rotation()
+                sv.update()
+        #self.object_view_3d.sync_rotation(rotation_x, rotation_y)
+
     def comboGroupBy_changed(self):
         for shape_view in self.shape_view_list:
             self.shape_view_layout.removeWidget(shape_view)
@@ -3913,6 +3990,7 @@ class DataExplorationDialog(QDialog):
                 sc_idx += 1
 
     def show_analysis_result(self):
+        #print("show analysis result", datetime.datetime.now())
         #self.plot_widget.clear()
         self.ax2.clear()
 
@@ -3986,8 +4064,8 @@ class DataExplorationDialog(QDialog):
                 self.ax2.set_xlabel(axis1_title)
                 self.ax2.set_ylabel(axis2_title)
 
-            if self.vertical_line_xval is not None:
-                self.ax2.axvline(x=self.vertical_line_xval, color='gray', linestyle=self.vertical_line_style)
+            #if self.vertical_line_xval is not None:
+                #self.ax2.axvline(x=self.vertical_line_xval, color='gray', linestyle=self.vertical_line_style)
             self.fig2.tight_layout()
             self.fig2.canvas.draw()
             self.fig2.canvas.flush_events()
@@ -4004,12 +4082,22 @@ class DataExplorationDialog(QDialog):
         if evt.button is None:
             self.vertical_line_xval = evt.xdata
             self.vertical_line_style = 'dashed'
+            if self.axvline is not None:
+                self.axvline.remove()
+            self.axvline = self.ax2.axvline(x=self.vertical_line_xval, color='gray', linestyle=self.vertical_line_style)
+            self.fig2.canvas.draw()
             #self.ax2.axvline(x=evt.xdata, color='gray', linestyle='dashed')
-            self.show_analysis_result()
+            #self.show_analysis_result()
         elif evt.button == 1:
             self.vertical_line_xval = evt.xdata
             self.vertical_line_style = 'solid'
-            self.show_analysis_result()
+            #print("2-0:",datetime.datetime.now())
+            #self.show_analysis_result()
+            if self.axvline is not None:
+                self.axvline.remove()
+            self.axvline = self.ax2.axvline(x=self.vertical_line_xval, color='gray', linestyle=self.vertical_line_style)
+            self.fig2.canvas.draw()
+            #print("2-1:",datetime.datetime.now())
             #self.ax2.axvline(x=evt.xdata, color='gray', linestyle='solid')
             #print("evt:", evt)
             #self.vertical_line_xval = evt.xdata
@@ -4020,8 +4108,11 @@ class DataExplorationDialog(QDialog):
             return
             #self.ax2.axvline(x=evt.xdata, color='gray', linestyle='dashed')
         if evt.button == 1:
+            #print("0-0:",datetime.datetime.now())
+
             for idx, shape_view in enumerate(self.shape_view_list):
-                shape_view.clear_object()
+                #print("0-1:",datetime.datetime.now())
+                #shape_view.clear_object()
                 axis1 = self.comboAxis1.currentIndex()
                 axis2 = self.comboAxis2.currentIndex()
                 flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
@@ -4041,12 +4132,13 @@ class DataExplorationDialog(QDialog):
                     shape_to_visualize[0][axis1] = x_value
 
                 shape_to_visualize[0][axis2] = flip_axis2 * y_value
+                #print("0-2:",datetime.datetime.now())
                 unrotated_shape = self.unrotate_shape(shape_to_visualize)
+                #print("0-3:",datetime.datetime.now())
                 self.show_shape(unrotated_shape[0], idx)
+                #print("0-4:",datetime.datetime.now())
                 #shape_view.set_object(unrotated_shape[0])
                 #shape_view.update()
-
-
         return
         #print("on_canvas_move", evt)
         axis1 = self.comboAxis1.currentIndex()
@@ -4071,8 +4163,17 @@ class DataExplorationDialog(QDialog):
         for i in range(0,len(shape),3):
             landmark = [shape[i], shape[i+1], shape[i+2]]
             obj.landmark_list.append(landmark)
-        self.shape_view_list[idx].clear_object()
+        #self.shape_view_list[idx].clear_object()
+        #temp_rotate_x = self.shape_view_list[idx].temp_rotate_x
+        #temp_rotate_y = self.shape_view_list[idx].temp_rotate_y
+            
         self.shape_view_list[idx].set_object(obj)
+
+        #self.shape_view_list[idx].temp_rotate_x = self.temp_rotate_x
+        #self.shape_view_list[idx].temp_rotate_y = self.temp_rotate_y
+        #print("idx:", idx, "temp_rotate_x", self.temp_rotate_x, "temp_rotate_y", self.temp_rotate_y)
+        #self.shape_view_list[idx].sync_rotation()
+
         self.shape_view_list[idx].update()
 
     def on_canvas_button_press(self, evt):
@@ -4080,7 +4181,12 @@ class DataExplorationDialog(QDialog):
         if evt.button == 1:
             self.vertical_line_xval = evt.xdata
             self.vertical_line_style = 'solid'
-            self.show_analysis_result()
+            #print("2-0:",datetime.datetime.now())
+            #self.show_analysis_result()
+            if self.axvline is not None:
+                self.axvline.remove()
+            self.axvline = self.ax2.axvline(x=self.vertical_line_xval, color='gray', linestyle=self.vertical_line_style)
+            self.fig2.canvas.draw()
 
         return
         self.canvas_down_xy = (evt.x, evt.y)
@@ -4112,7 +4218,7 @@ class DataExplorationDialog(QDialog):
                 for idx in evt.ind:
                     obj = self.scatter_data[key_name]['data'][idx]
                     #print("obj", obj)
-                    selected_object_id_list.append(obj.id)
+                    selected_object_id_list.append(obj['id'])
                     #self.ds_ops.select_object(obj.id)
 
         #print("selected_object_id_list", selected_object_id_list)

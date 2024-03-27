@@ -3554,6 +3554,8 @@ class DataExplorationDialog(QDialog):
         self.toolbar2 = NavigationToolbar(self.plot_widget2, self)
 
         # chart options
+        self.lblAxis1 = QLabel("Axis 1")
+        self.lblAxis2 = QLabel("Axis 2")
         self.comboAxis1 = QComboBox()
         self.comboAxis2 = QComboBox()
         self.cbxFlipAxis1 = QCheckBox()
@@ -3562,22 +3564,31 @@ class DataExplorationDialog(QDialog):
         self.cbxFlipAxis2 = QCheckBox()
         self.cbxFlipAxis2.setText("Flip")
         self.cbxFlipAxis2.setChecked(False)
-        self.gbAxis1 = QGroupBox()
-        self.gbAxis1.setTitle("Axis 1")
-        self.gbAxis1.setLayout(QHBoxLayout())
-        self.gbAxis1.layout().addWidget(self.comboAxis1)
-        self.gbAxis1.layout().addWidget(self.cbxFlipAxis1)
-        self.gbAxis2 = QGroupBox()
-        self.gbAxis2.setTitle("Axis 2")
-        self.gbAxis2.setLayout(QHBoxLayout())
-        self.gbAxis2.layout().addWidget(self.comboAxis2)
-        self.gbAxis2.layout().addWidget(self.cbxFlipAxis2)
+        #self.gbAxis1 = QGroupBox()
+        #self.gbAxis1.setTitle("Axis 1")
+        #self.gbAxis1.setLayout(QHBoxLayout())
+        #self.gbAxis1.layout().addWidget(self.comboAxis1)
+        #self.gbAxis1.layout().addWidget(self.cbxFlipAxis1)
+        #self.gbAxis2 = QGroupBox()
+        #self.gbAxis2.setTitle("Axis 2")
+        #self.gbAxis2.setLayout(QHBoxLayout())
+        #self.gbAxis2.layout().addWidget(self.comboAxis2)
+        #self.gbAxis2.layout().addWidget(self.cbxFlipAxis2)
+
         self.plot_control_widget = QWidget()
         #self.plot_layout = QVBoxLayout()
-        self.plot_control_layout1 = QHBoxLayout()
-        self.plot_control_layout1.addWidget(self.gbAxis1)
-        self.plot_control_layout1.addWidget(self.gbAxis2)
-        self.plot_control_widget.setLayout(self.plot_control_layout1)
+        self.plot_control_layout = QHBoxLayout()
+        self.plot_control_layout.addWidget(self.lblAxis1)
+        self.plot_control_layout.addWidget(self.comboAxis1)
+        self.plot_control_layout.addWidget(self.cbxFlipAxis1)
+        self.plot_control_layout.addWidget(self.lblAxis2)
+        self.plot_control_layout.addWidget(self.comboAxis2)
+        self.plot_control_layout.addWidget(self.cbxFlipAxis2)
+
+
+
+        
+        self.plot_control_widget.setLayout(self.plot_control_layout)
 
         self.cbxFlipAxis1.stateChanged.connect(self.flip_axis_changed)
         self.cbxFlipAxis2.stateChanged.connect(self.flip_axis_changed)
@@ -3603,7 +3614,7 @@ class DataExplorationDialog(QDialog):
         self.cbxAnnotation.setChecked(False)
         self.cbxShape = QCheckBox()
         self.cbxShape.setText("Show shapes")
-        self.cbxShape.setChecked(False)        
+        self.cbxShape.setChecked(True)        
         self.cbxShape.stateChanged.connect(self.cbxShape_state_changed)
         self.cbxAverage = QCheckBox()
         self.cbxAverage.setText("Show average")
@@ -3644,32 +3655,34 @@ class DataExplorationDialog(QDialog):
         self.visualization_layout.addWidget(self.plot_widget)
         self.visualization_layout.addWidget(self.view_widget)
         self.view_widget.hide()
+        self.cbxShape_state_changed()
 
 
 
         i = 0
         self.layout.addWidget(self.lblAnalysisName, i, 0)
         self.layout.addWidget(self.edtAnalysisName, i, 1)
-        i += 1
-        self.layout.addWidget(self.lblSuperimposition, i, 0)
-        self.layout.addWidget(self.edtSuperimposition, i, 1)
+        #i += 1
+        self.layout.addWidget(self.lblSuperimposition, i, 2)
+        self.layout.addWidget(self.edtSuperimposition, i, 3)
         i += 1
         self.layout.addWidget(self.lblOrdination, i, 0)
         self.layout.addWidget(self.edtOrdination, i, 1)
-        i += 1
-        self.layout.addWidget(self.lblGroupBy, i, 0)
-        self.layout.addWidget(self.comboGroupBy, i, 1)
+        #i += 1
+        self.layout.addWidget(self.lblGroupBy, i, 2)
+        self.layout.addWidget(self.comboGroupBy, i, 3)
         i += 1
         self.layout.addWidget(self.lblVisualizationMethod, i, 0)
-        self.layout.addWidget(self.comboVisualizationMethod, i, 1)
+        self.layout.addWidget(self.comboVisualizationMethod, i, 1 )
+        #i += 1#
+        self.layout.addWidget(self.plot_control_widget, i, 2, 1, 2)
         i += 1
-        self.layout.addWidget(self.plot_control_widget, i, 0, 1, 2)
-        i += 1
-        self.layout.addWidget(self.regression_widget, i, 0, 1, 2)
+        self.layout.addWidget(self.regression_widget, i, 0, 1, 4)
         #i += 1
         #self.layout.addWidget(self.toolbar2, i, 0, 1, 2)
         i += 1
-        self.layout.addWidget(self.visualization_widget, i, 0, 1, 2)
+        self.layout.addWidget(self.visualization_widget, i, 0, 1, 4)
+
 
     def cbxAverage_state_changed(self):
         self.update_chart()

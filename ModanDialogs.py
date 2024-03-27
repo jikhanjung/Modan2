@@ -884,7 +884,8 @@ class ObjectViewer3D(QGLWidget):
                     #print( "test_obj vert 1 before rotation:", self.test_obj.vertices[0])
                     #self.obj_ops.rotate(math.radians(-1*self.rotate_x),math.radians(self.rotate_y))
                     #self.obj
-                    if self.parent != None and self.parent.sync_rotation is not None:
+                    if self.parent != None and callable(getattr(self.parent, 'sync_rotation', None)):
+                    #if self.parent != None and self.parent.sync_rotation is not None:
                         self.parent.sync_rotation()
                     else:
                         self.sync_rotation()
@@ -988,7 +989,9 @@ class ObjectViewer3D(QGLWidget):
             self.is_dragging = True
             self.temp_rotate_x = self.curr_x - self.down_x
             self.temp_rotate_y = self.curr_y - self.down_y
-            self.parent.sync_temp_rotation(self, self.temp_rotate_x, self.temp_rotate_y)
+            if self.parent != None and callable(getattr(self.parent, 'sync_temp_rotation', None)):
+            #if self.parent != None and self.parent.sync_temp_rotation is not None:
+                self.parent.sync_temp_rotation(self, self.temp_rotate_x, self.temp_rotate_y)
 
         elif event.buttons() == Qt.RightButton and self.view_mode == ZOOM_MODE:
             self.is_dragging = True
@@ -4109,36 +4112,7 @@ class DataExplorationDialog(QDialog):
             #self.ax2.axvline(x=evt.xdata, color='gray', linestyle='dashed')
         if evt.button == 1:
             #print("0-0:",datetime.datetime.now())
-
-            for idx, shape_view in enumerate(self.shape_view_list):
-                #print("0-1:",datetime.datetime.now())
-                #shape_view.clear_object()
-                axis1 = self.comboAxis1.currentIndex()
-                axis2 = self.comboAxis2.currentIndex()
-                flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
-                flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
-                shape_to_visualize = np.zeros((1,len(self.analysis_result_list[0])))
-                #if axis1 == 10:
-                x_value = flip_axis1 * evt.xdata
-                #fit regression line
-                y_value = 0
-                curve = self.curve_list[idx]
-                if x_value >= min(curve['size_range2']) and x_value <= max(curve['size_range2']):
-                    y_value = np.polyval(curve['model'], x_value)
-                else:
-                    continue
-
-                if axis1 != 10:
-                    shape_to_visualize[0][axis1] = x_value
-
-                shape_to_visualize[0][axis2] = flip_axis2 * y_value
-                #print("0-2:",datetime.datetime.now())
-                unrotated_shape = self.unrotate_shape(shape_to_visualize)
-                #print("0-3:",datetime.datetime.now())
-                self.show_shape(unrotated_shape[0], idx)
-                #print("0-4:",datetime.datetime.now())
-                #shape_view.set_object(unrotated_shape[0])
-                #shape_view.update()
+            self.shape_regression(evt)
         return
         #print("on_canvas_move", evt)
         axis1 = self.comboAxis1.currentIndex()
@@ -4188,9 +4162,46 @@ class DataExplorationDialog(QDialog):
             self.axvline = self.ax2.axvline(x=self.vertical_line_xval, color='gray', linestyle=self.vertical_line_style)
             self.fig2.canvas.draw()
 
+            self.shape_regression(evt)
+
+
+
+
         return
         self.canvas_down_xy = (evt.x, evt.y)
         #self.tableView.selectionModel().clearSelection()
+
+    def shape_regression(self, evt):
+        #print("shape regression", evt.xdata)
+        for idx, shape_view in enumerate(self.shape_view_list):
+            #print("0-1:",datetime.datetime.now())
+            #shape_view.clear_object()
+            axis1 = self.comboAxis1.currentIndex()
+            axis2 = self.comboAxis2.currentIndex()
+            flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
+            flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
+            shape_to_visualize = np.zeros((1,len(self.analysis_result_list[0])))
+            #if axis1 == 10:
+            #fit regression line
+            y_value = 0
+            curve = self.curve_list[idx]
+            #print("0-2:",datetime.datetime.now(), evt.xdata, min(curve['size_range2']), max(curve['size_range2']))
+            if evt.xdata >= min(curve['size_range2']) and evt.xdata <= max(curve['size_range2']):
+                y_value = np.polyval(curve['model'], evt.xdata)
+            else:
+                continue
+            x_value = flip_axis1 * evt.xdata
+            #y_value = flip_axis2 * y_value
+
+
+            if axis1 != 10:
+                shape_to_visualize[0][axis1] = x_value
+
+            shape_to_visualize[0][axis2] = flip_axis2 * y_value
+            #print("0-3:",datetime.datetime.now())
+            unrotated_shape = self.unrotate_shape(shape_to_visualize)
+            #print("0-4:",datetime.datetime.now())
+            self.show_shape(unrotated_shape[0], idx)        
 
     def on_canvas_button_release(self, evt):
         if evt.button == 1:
@@ -4209,6 +4220,7 @@ class DataExplorationDialog(QDialog):
 
     def on_pick(self,evt):
         #print("onpick", evt)
+        return
         self.onpick_happened = True
         #print("evt", evt, evt.ind, evt.artist )
         selected_object_id_list = []

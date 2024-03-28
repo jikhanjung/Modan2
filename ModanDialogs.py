@@ -4174,12 +4174,7 @@ class DataExplorationDialog(QDialog):
                 self.axvline.remove()
             self.axvline = self.ax2.axvline(x=self.vertical_line_xval, color='gray', linestyle=self.vertical_line_style)
             self.fig2.canvas.draw()
-
             self.shape_regression(evt)
-
-
-
-
         return
         self.canvas_down_xy = (evt.x, evt.y)
         #self.tableView.selectionModel().clearSelection()

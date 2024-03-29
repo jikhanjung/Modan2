@@ -98,7 +98,7 @@ class ObjectViewer2D(QLabel):
     def __init__(self, widget):
         super(ObjectViewer2D, self).__init__(widget)
         logger.info("object viewer 2d init")
-        self.setMinimumSize(400,300)
+        self.setMinimumSize(300,200)
 
         self.landmark_size = 1
         self.landmark_color = "#0000FF"
@@ -121,6 +121,7 @@ class ObjectViewer2D(QLabel):
 
         self.show_index = True
         self.show_wireframe = True
+        self.show_polygon = True
         self.show_baseline = False  
         self.read_only = False
         self.show_model = False
@@ -687,7 +688,7 @@ class ObjectViewer3D(QGLWidget):
         #print("MyGLWidget init")
         QGLWidget.__init__(self,parent)
         self.parent = parent
-        self.setMinimumSize(400,300)
+        self.setMinimumSize(200,150)
 
         self.landmark_size = 1
         self.landmark_color = "#0000FF"
@@ -717,6 +718,7 @@ class ObjectViewer3D(QGLWidget):
         self.temp_rotate_y = 0
         self.show_index = False
         self.show_wireframe = True
+        self.show_polygon = True
         self.show_baseline = False
         self.show_average = True
         self.show_model = True
@@ -764,6 +766,7 @@ class ObjectViewer3D(QGLWidget):
         self.landmark_list = []
 
     def set_object_name (self, object_name):
+        #print("object name:", object_name)
         self.object_name = object_name
 
     def set_landmark_pref(self,lm_pref,wf_pref):
@@ -1140,6 +1143,7 @@ class ObjectViewer3D(QGLWidget):
         self.pan_x = self.pan_y = 0
         self.rotate_x = self.rotate_y = 0
         self.edge_list = self.dataset.unpack_wireframe()
+        self.polygon_list = self.dataset.unpack_polygons()
         #print("edge_list:", self.edge_list)
         #self.landmark_list = object.landmark_list
         #print("3:",datetime.datetime.now())
@@ -1268,7 +1272,32 @@ class ObjectViewer3D(QGLWidget):
         if self.edit_mode == MODE['WIREFRAME'] or self.edit_mode == MODE['EDIT_LANDMARK']:
             self.draw_picker_buffer()
         gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, 0)
+
+        gl.glPushMatrix() 
         self.draw_all()
+        gl.glPopMatrix() 
+        return
+        if self.object_name != "":
+            gl.glDisable(gl.GL_LIGHTING)        
+            gl.glRasterPos3f(-2,2,0)
+            font_size_list = [ glut.GLUT_BITMAP_HELVETICA_10, glut.GLUT_BITMAP_HELVETICA_12, glut.GLUT_BITMAP_HELVETICA_18]
+
+            for letter in list(self.object_name):
+                glut.glutBitmapCharacter(glut.GLUT_BITMAP_HELVETICA_18, ord(letter))
+            gl.glEnable(gl.GL_LIGHTING)
+
+        return
+        if self.object_name != "":
+            #print("object name in draw all:", self.object_name)
+
+            gl.glDisable(gl.GL_DEPTH_TEST)
+            p = QPainter(self)
+            p.setPen(QColor(255,255,255))
+            p.setFont(QFont("Arial", 12))
+            p.drawText(10, 10, self.object_name)
+            p.end()
+            gl.glEnable(gl.GL_DEPTH_TEST)
+        
 
     def draw_all(self):
         current_buffer = gl.glGetIntegerv(gl.GL_FRAMEBUFFER_BINDING)
@@ -1289,6 +1318,7 @@ class ObjectViewer3D(QGLWidget):
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
         gl.glLoadIdentity()
         gl.glEnable(gl.GL_POINT_SMOOTH)
+        #return
         if self.ds_ops is None and self.obj_ops is None:
             return
         
@@ -1303,14 +1333,9 @@ class ObjectViewer3D(QGLWidget):
         else:
             self.draw_dataset(self.ds_ops)
 
-        if self.object_name != "":
-            p = QPainter(self)
-            p.setPen(QColor(255,255,255))
-            p.setFont(QFont("Arial", 12))
-            p.drawText(10, 10, self.object_name)
-            #self.draw_text(self.object_name, 0, 0, 0)
-
         gl.glFlush()
+
+
 
     def draw_dataset(self, ds_ops):
         
@@ -1413,6 +1438,22 @@ class ObjectViewer3D(QGLWidget):
                         glut.glutBitmapCharacter(font_size_list[int(self.index_size)], ord(letter))
                     gl.glEnable(gl.GL_LIGHTING)
 
+            if self.show_polygon and len(self.polygon_list) > 0:
+                for i, polygon in enumerate(self.polygon_list):
+                    normal = self.calculate_normal(polygon)
+                    gl.glEnable(gl.GL_LIGHTING)
+                    pg_color = as_gl_color(self.wireframe_color)
+                    gl.glColor3f( *pg_color ) #*COLOR['WIREFRAME'])
+                    gl.glBegin(gl.GL_POLYGON)
+                    for lm_idx in polygon:
+                        #print("lm_idx:", lm_idx, "len landmark", len(object.landmark_list))
+                        if lm_idx <= len(object.landmark_list):
+                            lm = object.landmark_list[lm_idx-1]
+                            gl.glNormal3f(*normal)
+                            gl.glVertex3f(*lm)
+                    gl.glEnd()
+
+
         else:
             gl.glPointSize(5)
             gl.glDisable(gl.GL_LIGHTING)
@@ -1465,6 +1506,20 @@ class ObjectViewer3D(QGLWidget):
 
 
         #gl.glPopMatrix()
+    def calculate_normal(self, polygon):
+        #print("calculate normal")
+        #print("polygon:", polygon)
+        p1 = self.obj_ops.landmark_list[polygon[0]-1]
+        p2 = self.obj_ops.landmark_list[polygon[1]-1]
+        p3 = self.obj_ops.landmark_list[polygon[2]-1]
+        #print("p1:", p1, "p2:", p2, "p3:", p3)
+        v1 = np.array(p2) - np.array(p1)
+        v2 = np.array(p3) - np.array(p1)
+        #print("v1:", v1, "v2:", v2)
+        normal = -1.0 * np.cross(v1, v2)
+        #print("normal:", normal)
+        return normal
+    
 
     def create_picker_buffer(self):
         #print("create_picker_buffer")
@@ -1613,7 +1668,7 @@ class ObjectViewer3D(QGLWidget):
         return "", -1
 
     def draw(self):
-        gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
+        #gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
         for obj in self.objects:
             gl.glColor3ub(*self.object_to_color[obj.id])
             obj.draw()
@@ -1684,6 +1739,10 @@ class ObjectViewer3D(QGLWidget):
             #self.auto_rotate = True
         #self.updateGL()
         return
+
+    def apply_rotation(self, rotation_matrix):
+        #print("inside shape view apply rotation", rotation_matrix)
+        self.obj_ops.apply_rotation_matrix(rotation_matrix)
 
     def rotate(self, rotationX_rad, rotationY_rad, vertices ):
         #print(rotationX_rad, rotationY_rad)
@@ -2610,7 +2669,7 @@ class DatasetDialog(QDialog):
 
         self.edtWireframe = QTextEdit()
         self.edtBaseline = QLineEdit()
-        #self.edtPolygons = QTextEdit()
+        self.edtPolygons = QTextEdit()
         self.edtPropertyNameStr = QTextEdit()
 
         self.main_layout = QFormLayout()
@@ -2621,7 +2680,7 @@ class DatasetDialog(QDialog):
         self.main_layout.addRow("Dimension", dim_layout)
         self.main_layout.addRow("Wireframe", self.edtWireframe)
         self.main_layout.addRow("Baseline", self.edtBaseline)
-        #self.main_layout.addRow("Polygons", self.edtPolygons)
+        self.main_layout.addRow("Polygons", self.edtPolygons)
         self.main_layout.addRow("Property Names", self.edtPropertyNameStr)
 
 
@@ -2706,7 +2765,7 @@ class DatasetDialog(QDialog):
             self.rbtn3D.setEnabled(False)
         self.edtWireframe.setText(dataset.wireframe)
         self.edtBaseline.setText(dataset.baseline)
-        #self.edtPolygons.setText(dataset.polygons)
+        self.edtPolygons.setText(dataset.polygons)
         self.edtPropertyNameStr.setText(dataset.propertyname_str)
     
     def set_parent_dataset(self, parent_dataset):
@@ -2734,7 +2793,7 @@ class DatasetDialog(QDialog):
             self.dataset.dimension = 3
         self.dataset.wireframe = self.edtWireframe.toPlainText()
         self.dataset.baseline = self.edtBaseline.text()
-        #self.dataset.polygons = self.edtPolygons.toPlainText()
+        self.dataset.polygons = self.edtPolygons.toPlainText()
         self.dataset.propertyname_str = self.edtPropertyNameStr.toPlainText()
 
         #self.data
@@ -2868,6 +2927,9 @@ class ObjectDialog(QDialog):
         self.cbxShowWireframe = QCheckBox()
         self.cbxShowWireframe.setText("Wireframe")
         self.cbxShowWireframe.setChecked(True)
+        self.cbxShowPolygon = QCheckBox()
+        self.cbxShowPolygon.setText("Polygon")
+        self.cbxShowPolygon.setChecked(True)
         self.cbxShowBaseline = QCheckBox()
         self.cbxShowBaseline.setText("Baseline")
         self.cbxShowBaseline.setChecked(True)
@@ -2896,6 +2958,7 @@ class ObjectDialog(QDialog):
         self.right_middle_layout = QVBoxLayout()
         self.right_middle_layout.addWidget(self.cbxShowIndex)
         self.right_middle_layout.addWidget(self.cbxShowWireframe)
+        self.right_middle_layout.addWidget(self.cbxShowPolygon)
         self.right_middle_layout.addWidget(self.cbxShowBaseline)
         self.right_middle_layout.addWidget(self.cbxShowModel)
         self.right_middle_layout.addWidget(self.cbxAutoRotate)
@@ -2955,6 +3018,7 @@ class ObjectDialog(QDialog):
 
         self.cbxShowIndex.stateChanged.connect(self.show_index_state_changed)
         self.cbxShowWireframe.stateChanged.connect(self.show_wireframe_state_changed)
+        self.cbxShowPolygon.stateChanged.connect(self.show_polygon_state_changed)
         self.cbxShowBaseline.stateChanged.connect(self.show_baseline_state_changed)
         self.cbxAutoRotate.stateChanged.connect(self.auto_rotate_state_changed)
         self.cbxShowModel.stateChanged.connect(self.show_model_state_changed)
@@ -3045,6 +3109,10 @@ class ObjectDialog(QDialog):
 
     def show_wireframe_state_changed(self, int):
         self.object_view.show_wireframe = self.cbxShowWireframe.isChecked()
+        self.object_view.update()
+
+    def show_polygon_state_changed(self, int):
+        self.object_view.show_polygon = self.cbxShowPolygon.isChecked()
         self.object_view.update()
 
     def btnLandmark_clicked(self):
@@ -3652,10 +3720,22 @@ class DataExplorationDialog(QDialog):
         self.view_widget.setLayout(self.shape_view_layout)
         #self.empty_view = QLabel()
         #self.shape_view_layout.addWidget(self.empty_view)
-        self.visualization_layout.addWidget(self.plot_widget)
-        self.visualization_layout.addWidget(self.view_widget)
+        self.visualization_layout.addWidget(self.plot_widget,2)
+        self.visualization_layout.addWidget(self.view_widget,1)
         self.view_widget.hide()
         self.cbxShape_state_changed()
+
+        self.transparent_widget = QWidget()
+        self.transparent_widget.setAttribute(Qt.WA_TranslucentBackground, True)
+        self.transparent_widget.setStyleSheet("background-color: rgba(0, 0, 0, 0);")
+        self.tp_layout = QVBoxLayout()
+        self.transparent_widget.setLayout(self.tp_layout)
+        
+        self.transparent_gl_widget = ObjectViewer3D(self.transparent_widget)
+        self.tp_layout.addWidget(self.transparent_gl_widget)
+        self.transparent_widget.setParent(self.plot_widget2)
+
+        
 
 
 
@@ -3665,23 +3745,23 @@ class DataExplorationDialog(QDialog):
         #i += 1
         self.layout.addWidget(self.lblSuperimposition, i, 2)
         self.layout.addWidget(self.edtSuperimposition, i, 3)
-        i += 1
-        self.layout.addWidget(self.lblOrdination, i, 0)
-        self.layout.addWidget(self.edtOrdination, i, 1)
         #i += 1
-        self.layout.addWidget(self.lblGroupBy, i, 2)
-        self.layout.addWidget(self.comboGroupBy, i, 3)
+        self.layout.addWidget(self.lblOrdination, i, 4)
+        self.layout.addWidget(self.edtOrdination, i, 5)
         i += 1
-        self.layout.addWidget(self.lblVisualizationMethod, i, 0)
-        self.layout.addWidget(self.comboVisualizationMethod, i, 1 )
+        self.layout.addWidget(self.lblGroupBy, i, 0)
+        self.layout.addWidget(self.comboGroupBy, i, 1)
+        #i += 1
+        self.layout.addWidget(self.lblVisualizationMethod, i, 2)
+        self.layout.addWidget(self.comboVisualizationMethod, i, 3)
         #i += 1#
-        self.layout.addWidget(self.plot_control_widget, i, 2, 1, 2)
+        self.layout.addWidget(self.plot_control_widget, i, 4, 1, 2)
         i += 1
-        self.layout.addWidget(self.regression_widget, i, 0, 1, 4)
+        self.layout.addWidget(self.regression_widget, i, 0, 1, 6)
         #i += 1
         #self.layout.addWidget(self.toolbar2, i, 0, 1, 2)
         i += 1
-        self.layout.addWidget(self.visualization_widget, i, 0, 1, 4)
+        self.layout.addWidget(self.visualization_widget, i, 0, 1, 6)
 
 
     def cbxAverage_state_changed(self):
@@ -3790,6 +3870,7 @@ class DataExplorationDialog(QDialog):
             self.move(self.parent.pos()+QPoint(50,50))
 
     def store_rotation(self,x_rad, y_rad):
+        #print("store_rotation", x_rad, y_rad)
         rotationXMatrix = np.array([
             [1, 0, 0, 0],
             [0, np.cos(y_rad), -np.sin(y_rad), 0],
@@ -3805,8 +3886,11 @@ class DataExplorationDialog(QDialog):
         ])
         #print(rotationXMatrix)
         #print(rotationYMatrix)
+        #print("rotation matrix before\n",self.rotation_matrix)
         new_rotation_matrix = np.dot(rotationXMatrix, rotationYMatrix)
         self.rotation_matrix = np.dot(new_rotation_matrix, self.rotation_matrix)
+        #print("rotation matrix after\n",self.rotation_matrix)
+
 
 
     def sync_rotation(self):
@@ -3814,7 +3898,7 @@ class DataExplorationDialog(QDialog):
             temp_rotate_x = math.radians(self.shape_view_list[0].temp_rotate_x)
             temp_rotate_y = math.radians(self.shape_view_list[0].temp_rotate_y)
             #(math.radians(self.rotate_x),math.radians(self.rotate_y),apply_rotation_to_vertex)
-            self.store_rotation(math.radians(temp_rotate_x),math.radians(temp_rotate_y))
+            self.store_rotation(temp_rotate_x,temp_rotate_y)
 
         for sv in self.shape_view_list:
             #self.temp_rotate_x = sv.temp_rotate_x
@@ -3834,18 +3918,12 @@ class DataExplorationDialog(QDialog):
         #self.object_view_3d.sync_rotation(rotation_x, rotation_y)
 
     def comboGroupBy_changed(self):
-        for shape_view in self.shape_view_list:
-            self.shape_view_layout.removeWidget(shape_view)
-            shape_view.deleteLater()
-            #shape_view = None
-        #for shape_combo in self.shape_combo_list:
-            #self.shape_view_layout.removeWidget(shape_combo)
-            #shape_combo.deleteLater()
-            #shape_combo = None
         for shape_info in self.shape_info_list:
             self.shape_view_layout.removeWidget(shape_info)
             shape_info.deleteLater()
-            #shape_info = None
+        for shape_view in self.shape_view_list:
+            self.shape_view_layout.removeWidget(shape_view)
+            shape_view.deleteLater()
         self.shape_view_list = []
         self.shape_combo_list = []
         self.shape_info_list = []
@@ -3855,11 +3933,9 @@ class DataExplorationDialog(QDialog):
         for keyname in self.scatter_data.keys():
             #print(keyname)
             shape_view = ObjectViewer3D(self)
-            #shape_view.set_dataset(self.dataset)
             shape_combo = QComboBox()
             keyname = keyname if keyname != '__default__' else 'All'
             shape_label = QLabel(keyname)
-            #shape_view.set_object_name(keyname)
 
             shape_info_widget = QWidget()
             shape_info_layout = QHBoxLayout()
@@ -3876,8 +3952,10 @@ class DataExplorationDialog(QDialog):
             self.shape_combo_list.append(shape_combo)
             self.shape_info_list.append(shape_info_widget)
 
-            self.shape_view_layout.addWidget(shape_info_widget)
-            self.shape_view_layout.addWidget(shape_view)
+            self.shape_view_layout.addWidget(shape_info_widget,0)
+            self.shape_view_layout.addWidget(shape_view,1)
+
+            shape_view.set_object_name(keyname)
 
             shape_view.show()
         #self.prepare_scatter_data()
@@ -3886,7 +3964,10 @@ class DataExplorationDialog(QDialog):
 
     def shape_combo_changed(self, index, combo):
         #print("shape_combo_changed", index, combo)
-        pass
+        #shape_view_index = self.shape_combo_list.index(combo)
+        #shape_view = self.shape_view_list[shape_view_index]
+
+        return
 
 
     def set_analysis(self, analysis):
@@ -4153,8 +4234,14 @@ class DataExplorationDialog(QDialog):
         #self.shape_view_list[idx].clear_object()
         #temp_rotate_x = self.shape_view_list[idx].temp_rotate_x
         #temp_rotate_y = self.shape_view_list[idx].temp_rotate_y
+        if idx == 0:
+            self.transparent_gl_widget.set_object(obj)
+            self.transparent_gl_widget.update()
             
         self.shape_view_list[idx].set_object(obj)
+        #print("shape view apply rotation 1", idx, self.rotation_matrix)
+        self.shape_view_list[idx].apply_rotation(self.rotation_matrix)
+        #print("shape view apply rotation 2", idx)
 
         #self.shape_view_list[idx].temp_rotate_x = self.temp_rotate_x
         #self.shape_view_list[idx].temp_rotate_y = self.temp_rotate_y
@@ -4182,6 +4269,8 @@ class DataExplorationDialog(QDialog):
     def shape_regression(self, evt):
         #print("shape regression", evt.xdata)
         for idx, shape_view in enumerate(self.shape_view_list):
+            if self.shape_combo_list[idx].currentText() != "Follow regression line":
+                continue
             #print("0-1:",datetime.datetime.now())
             #shape_view.clear_object()
             axis1 = self.comboAxis1.currentIndex()

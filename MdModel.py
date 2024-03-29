@@ -151,6 +151,9 @@ class MdDataset(Model):
 
         return self.polygon_list
 
+    def get_polygon_list(self):
+        return self.unpack_polygons()
+
     def get_edge_list(self):
         return self.edge_list
 
@@ -614,6 +617,9 @@ class MdObjectOps:
         if self.landmark_str is not None and self.landmark_str != "":
             mdobject.unpack_landmark()
         self.landmark_list = copy.deepcopy(mdobject.landmark_list)
+        #if mdobject.polygons is not None and mdobject.polygons != "":
+        #    mdobject.unpack_polygons()
+        #self.polygon_list = copy.deepcopy(mdobject.polygon_list)
         #print("landmark list:", self.landmark_list)
         #for lm in mdobject.landmark_list:
         #    self.landmark_list.append(lm)
@@ -723,6 +729,7 @@ class MdObjectOps:
         self.rescale(( 1 / centroid_size ))
 
     def apply_rotation_matrix(self, rotation_matrix):
+        #print("obj_ops apply rotation", rotation_matrix)
         if len(self.landmark_list)>0:
             ones_column = np.ones((np.array(self.landmark_list).shape[0], 1))
             vertices_with_ones = np.hstack((self.landmark_list, ones_column))

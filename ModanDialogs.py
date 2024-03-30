@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QTableWidgetItem, QHeaderView, QFileDialog, QCheckBo
                             QTableWidget, QGridLayout, QAbstractButton, QButtonGroup, QGroupBox, \
                             QTabWidget, QListWidget, QSpinBox
 from PyQt5.QtGui import QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem, QImage,\
-                        QFont, QPainter, QBrush, QMouseEvent, QWheelEvent, QDoubleValidator
+                        QFont, QPainter, QBrush, QMouseEvent, QWheelEvent, QDoubleValidator, QIcon
 from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSize, QPoint,\
                          pyqtSlot, QItemSelectionModel, QTimer
 
@@ -26,6 +26,7 @@ import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvas as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
 
 from MdStatistics import MdPrincipalComponent, MdCanonicalVariate
 from MdModel import *
@@ -745,6 +746,7 @@ class ObjectViewer3D(QGLWidget):
         self.gl_list = None
         self.temp_edge = []
         self.object = None
+        self.polygon_list = []
 
         #self.no_drawing = False
         self.wireframe_from_idx = -1
@@ -917,11 +919,21 @@ class ObjectViewer3D(QGLWidget):
             else:
                 self.dolly += self.temp_dolly 
                 self.temp_dolly = 0
+                if self.parent != None and callable(getattr(self.parent, 'sync_zoom', None)):
+                    self.parent.sync_zoom(self, self.dolly)
+                if self.parent != None and callable(getattr(self.parent, 'sync_temp_zoom', None)):
+                    self.parent.sync_temp_zoom(self, self.temp_dolly)
+
         elif event.button() == Qt.MiddleButton:
             self.pan_x += self.temp_pan_x
             self.pan_y += self.temp_pan_y
             self.temp_pan_x = 0
             self.temp_pan_y = 0
+            if self.parent != None and callable(getattr(self.parent, 'sync_temp_pan', None)):
+                self.parent.sync_temp_pan(self, self.temp_pan_x, self.temp_pan_y)
+            if self.parent != None and callable(getattr(self.parent, 'sync_pan', None)):
+                self.parent.sync_pan(self, self.pan_x, self.pan_y)
+
         self.view_mode = VIEW_MODE
         self.updateGL()
         #self.parent.update_status()
@@ -952,7 +964,6 @@ class ObjectViewer3D(QGLWidget):
         #print( "test_obj vert 1 after rotation:", self.test_obj.vertices[0])
         self.rotate_x = 0
         self.rotate_y = 0
-
 
     def mouseMoveEvent(self, event):
         #@print("mouse move event",event)
@@ -999,10 +1010,15 @@ class ObjectViewer3D(QGLWidget):
         elif event.buttons() == Qt.RightButton and self.view_mode == ZOOM_MODE:
             self.is_dragging = True
             self.temp_dolly = ( self.curr_y - self.down_y ) / 100.0
+            if self.parent != None and callable(getattr(self.parent, 'sync_temp_zoom', None)):
+                self.parent.sync_temp_zoom(self, self.temp_dolly)
+
         elif event.buttons() == Qt.MiddleButton and self.view_mode == PAN_MODE:
             self.is_dragging = True
             self.temp_pan_x = self.curr_x - self.down_x
             self.temp_pan_y = self.curr_y - self.down_y
+            if self.parent != None and callable(getattr(self.parent, 'sync_temp_pan', None)):
+                self.parent.sync_temp_pan(self, self.temp_pan_x, self.temp_pan_y)
         elif self.edit_mode == MODE['EDIT_LANDMARK']:
             #print("edit 3d landmark mode")
             ## call unproject_mouse
@@ -1098,6 +1114,9 @@ class ObjectViewer3D(QGLWidget):
     def wheelEvent(self, event):
         #print("wheel event", event.angleDelta().y())
         self.dolly -= event.angleDelta().y() / 240.0
+        if self.parent != None and callable(getattr(self.parent, 'sync_zoom', None)):
+            self.parent.sync_zoom(self, self.dolly)
+
         self.updateGL()
 
     def set_ds_ops(self, ds_ops):
@@ -1117,6 +1136,7 @@ class ObjectViewer3D(QGLWidget):
         #print("set_object 1",type(object))
         # print current time
         #print("1:",datetime.datetime.now())
+        self.show()
         #object.unpack_landmark()
         self.landmark_list = copy.deepcopy(object.landmark_list)
         m_app = QApplication.instance()
@@ -1439,8 +1459,9 @@ class ObjectViewer3D(QGLWidget):
                     gl.glEnable(gl.GL_LIGHTING)
 
             if self.show_polygon and len(self.polygon_list) > 0:
+                normal_list = self.calculate_normal_list(self.polygon_list)
                 for i, polygon in enumerate(self.polygon_list):
-                    normal = self.calculate_normal(polygon)
+                    #normal = self.calculate_normal(polygon)
                     gl.glEnable(gl.GL_LIGHTING)
                     pg_color = as_gl_color(self.wireframe_color)
                     gl.glColor3f( *pg_color ) #*COLOR['WIREFRAME'])
@@ -1449,7 +1470,7 @@ class ObjectViewer3D(QGLWidget):
                         #print("lm_idx:", lm_idx, "len landmark", len(object.landmark_list))
                         if lm_idx <= len(object.landmark_list):
                             lm = object.landmark_list[lm_idx-1]
-                            gl.glNormal3f(*normal)
+                            gl.glNormal3f(*normal_list[lm_idx-1])
                             gl.glVertex3f(*lm)
                     gl.glEnd()
 
@@ -1519,7 +1540,40 @@ class ObjectViewer3D(QGLWidget):
         normal = -1.0 * np.cross(v1, v2)
         #print("normal:", normal)
         return normal
-    
+
+    def calculate_normal_list(self, polygon_list):
+        #print("calculate normal")
+        #print("polygon:", polygon)
+        normal_dict = {}
+        for polygon in polygon_list:
+            lm_idx_list = [i-1 for i in polygon]
+            landmark_list = [self.obj_ops.landmark_list[i] for i in lm_idx_list]
+            #p1 = self.obj_ops.landmark_list[polygon[0]-1]
+            #p2 = self.obj_ops.landmark_list[polygon[1]-1]
+            #p3 = self.obj_ops.landmark_list[polygon[2]-1]
+            #print("p1:", p1, "p2:", p2, "p3:", p3)
+            v1 = np.array(landmark_list[1]) - np.array(landmark_list[0])
+            v2 = np.array(landmark_list[2]) - np.array(landmark_list[0])
+            #v2 = np.array(p3) - np.array(p1)
+            #print("v1:", v1, "v2:", v2)
+            normal = -1.0 * np.cross(v1, v2)
+            for i in lm_idx_list:
+                if i in normal_dict:
+                    normal_dict[i]['normal'] += normal
+                    normal_dict[i]['count'] += 1
+                else:
+                    normal_dict[i] = { 'normal': normal, 'count': 1 }
+            #normal_dict = { }
+            #print("normal:", normal)
+        normal_list = []
+        for i in range(len(self.obj_ops.landmark_list)):
+            if i in normal_dict:
+                normal = normal_dict[i]['normal'] #/ normal_dict[i]['count']
+            else:
+                normal = np.array([0,0,0])
+            normal_list.append(normal)
+        return normal_list
+
 
     def create_picker_buffer(self):
         #print("create_picker_buffer")
@@ -3576,17 +3630,22 @@ class DataExplorationDialog(QDialog):
         self.plot_size = "medium"
         self.remember_geometry = True
         self.on_pick_happened = False
+        self.bgcolor = "#AAAAAA"
         self.read_settings()
 
         self.mode = MODE_GROWTH_TRAJECTORY 
         self.curve_list = []
         self.shape_view_list = []
-        self.shape_info_list = []
+        self.shape_label_list = []
+        self.shape_combo_list = []
         self.vertical_line_xval = None
         self.vertical_line_style = "dashed"
         self.axvline = None
         self.temp_rotate_x = 0
         self.temp_rotate_y = 0
+        self.shape_view_pan_x = 0
+        self.shape_view_pan_y = 0
+        self.shape_view_dolly = 0
         self.rotation_matrix = np.array([
         [1, 0, 0, 0],
         [0, 1, 0, 0],
@@ -3620,61 +3679,60 @@ class DataExplorationDialog(QDialog):
         self.fig2 = self.plot_widget2.figure
         self.ax2 = self.fig2.add_subplot()
         self.toolbar2 = NavigationToolbar(self.plot_widget2, self)
+        #self.plot_widget3 = FigureCanvas(Figure(figsize=(20, 16),dpi=100))
+        #self.fig3 = self.plot_widget3.figure
+        #self.ax3 = self.fig3.add_subplot(projection='3d')
+        #self.toolbar3 = NavigationToolbar(self.plot_widget3, self)        
 
         # chart options
         self.lblAxis1 = QLabel("Axis 1")
         self.lblAxis2 = QLabel("Axis 2")
+        self.lblAxis3 = QLabel("Axis 3")
         self.comboAxis1 = QComboBox()
         self.comboAxis2 = QComboBox()
+        self.comboAxis3 = QComboBox()
         self.cbxFlipAxis1 = QCheckBox()
         self.cbxFlipAxis1.setText("Flip")
         self.cbxFlipAxis1.setChecked(False)
         self.cbxFlipAxis2 = QCheckBox()
         self.cbxFlipAxis2.setText("Flip")
         self.cbxFlipAxis2.setChecked(False)
-        #self.gbAxis1 = QGroupBox()
-        #self.gbAxis1.setTitle("Axis 1")
-        #self.gbAxis1.setLayout(QHBoxLayout())
-        #self.gbAxis1.layout().addWidget(self.comboAxis1)
-        #self.gbAxis1.layout().addWidget(self.cbxFlipAxis1)
-        #self.gbAxis2 = QGroupBox()
-        #self.gbAxis2.setTitle("Axis 2")
-        #self.gbAxis2.setLayout(QHBoxLayout())
-        #self.gbAxis2.layout().addWidget(self.comboAxis2)
-        #self.gbAxis2.layout().addWidget(self.cbxFlipAxis2)
+        self.cbxFlipAxis3 = QCheckBox()
+        self.cbxFlipAxis3.setText("Flip")
+        self.cbxFlipAxis3.setChecked(False)
 
         self.plot_control_widget = QWidget()
-        #self.plot_layout = QVBoxLayout()
         self.plot_control_layout = QHBoxLayout()
+        self.plot_control_widget.setLayout(self.plot_control_layout)
         self.plot_control_layout.addWidget(self.lblAxis1)
         self.plot_control_layout.addWidget(self.comboAxis1)
         self.plot_control_layout.addWidget(self.cbxFlipAxis1)
         self.plot_control_layout.addWidget(self.lblAxis2)
         self.plot_control_layout.addWidget(self.comboAxis2)
         self.plot_control_layout.addWidget(self.cbxFlipAxis2)
-
-
-
-        
-        self.plot_control_widget.setLayout(self.plot_control_layout)
+        self.plot_control_layout.addWidget(self.lblAxis3)
+        self.plot_control_layout.addWidget(self.comboAxis3)
+        self.plot_control_layout.addWidget(self.cbxFlipAxis3)
 
         self.cbxFlipAxis1.stateChanged.connect(self.flip_axis_changed)
         self.cbxFlipAxis2.stateChanged.connect(self.flip_axis_changed)
+        self.cbxFlipAxis3.stateChanged.connect(self.flip_axis_changed)
+
         for i in range(1,11):
             self.comboAxis1.addItem("PC"+str(i))
             self.comboAxis2.addItem("PC"+str(i))
-            #self.comboAxis3.addItem("PC"+str(i))
+            self.comboAxis3.addItem("PC"+str(i))
         self.comboAxis1.addItem("CSize")
         self.comboAxis1.setCurrentIndex(0)
         self.comboAxis2.setCurrentIndex(1)
-        #self.comboAxis3.setCurrentIndex(2)
+        self.comboAxis3.setCurrentIndex(2)
         self.comboAxis1.currentIndexChanged.connect(self.axis_changed)
         self.comboAxis2.currentIndexChanged.connect(self.axis_changed)
-        #self.comboAxis3.currentIndexChanged.connect(self.axis_changed)
+        self.comboAxis3.currentIndexChanged.connect(self.axis_changed)
 
         self.cbxRegression = QCheckBox()
         self.cbxRegression.setText("Show regression")
-        self.cbxRegression.setChecked(False)
+        self.cbxRegression.setChecked(True)
         self.cbxRegression.stateChanged.connect(self.update_chart)
         self.cbxAnnotation = QCheckBox()
         self.cbxAnnotation.setText("Show annotation")
@@ -3690,7 +3748,7 @@ class DataExplorationDialog(QDialog):
         self.cbxAverage.stateChanged.connect(self.cbxAverage_state_changed)
         self.lblDegree = QLabel("Degree")
         self.sbxDegree = QSpinBox()
-        self.sbxDegree.setValue(2)
+        self.sbxDegree.setValue(1)
         self.sbxDegree.textChanged.connect(self.update_chart)
         #self.btnPolyfit = QPushButton("Polyfit")
         #self.btnPolyfit.clicked.connect(self.axis_changed)
@@ -3713,7 +3771,19 @@ class DataExplorationDialog(QDialog):
         self.plot_widget.setLayout(self.plot_layout)
         #self.plot_layout.addWidget(self.plot_control_widget)
         #self.plot_layout.addWidget(self.regression_widget)
-        self.plot_layout.addWidget(self.toolbar2)
+        self.plot_preference_button = QPushButton(QIcon(mu.resource_path('icons/M2Preferences_1.png')), "")
+        self.plot_preference_button.clicked.connect(self.show_plot_preference)
+
+        self.toolbar_widget = QWidget()
+        self.toolbar_layout = QHBoxLayout()
+        self.toolbar_widget.setLayout(self.toolbar_layout)
+
+        self.toolbar_layout.addWidget(self.toolbar2)
+        self.toolbar_layout.addWidget(self.plot_preference_button)
+
+
+        self.plot_layout.addWidget(self.toolbar_widget)
+        #self.plot_layout.addWidget(self.toolbar2)
         self.plot_layout.addWidget(self.plot_widget2)
         self.shape_view_layout = QVBoxLayout()
         self.view_widget = QWidget()
@@ -3725,19 +3795,24 @@ class DataExplorationDialog(QDialog):
         self.view_widget.hide()
         self.cbxShape_state_changed()
 
-        self.transparent_widget = QWidget()
-        self.transparent_widget.setAttribute(Qt.WA_TranslucentBackground, True)
-        self.transparent_widget.setStyleSheet("background-color: rgba(0, 0, 0, 0);")
-        self.tp_layout = QVBoxLayout()
-        self.transparent_widget.setLayout(self.tp_layout)
-        
-        self.transparent_gl_widget = ObjectViewer3D(self.transparent_widget)
-        self.tp_layout.addWidget(self.transparent_gl_widget)
-        self.transparent_widget.setParent(self.plot_widget2)
+        if False:
+            self.transparent_gl_widget = ObjectViewer3D(self.plot_widget)
+            self.transparent_gl_widget.setParent(self.plot_widget)
+            self.transparent_gl_widget.setGeometry(50,50,200,200)
+            self.transparent_gl_widget.raise_()
+            self.transparent_gl_widget.show()
+            self.transparent_gl_widget.update()
 
-        
-
-
+        #self.label = QLabel("Hello")
+        #self.label.setParent(self.plot_widget)
+        #self.label.setGeometry(100,100,50,50)
+        #self.label.raise_()
+        #self.plot_layout.addWidget(self.transparent_gl_widget)
+        #self.plot_widget2.hide()
+        #self.transparent_gl_widget.show()
+        #l = self.QVBoxLayout()
+        #self.plot_widget2.setLayout(
+        #    addWidget(self.transparent_gl_widget)
 
         i = 0
         self.layout.addWidget(self.lblAnalysisName, i, 0)
@@ -3762,7 +3837,14 @@ class DataExplorationDialog(QDialog):
         #self.layout.addWidget(self.toolbar2, i, 0, 1, 2)
         i += 1
         self.layout.addWidget(self.visualization_widget, i, 0, 1, 6)
+        #print("layout done")
+        #self.resizeEvent(None)
+    
+    def show_plot_preference(self):
+        pass
 
+    def showEvent(self, event):
+        self.resizeEvent(None)
 
     def cbxAverage_state_changed(self):
         self.update_chart()
@@ -3862,7 +3944,7 @@ class DataExplorationDialog(QDialog):
             self.color_list[i] = self.m_app.settings.value("DataPointColor/"+str(i), self.default_color_list[i])
         for i in range(len(self.marker_list)):
             self.marker_list[i] = self.m_app.settings.value("DataPointMarker/"+str(i), self.marker_list[i])
-
+        self.bgcolor = self.m_app.settings.value("BackgroundColor", self.bgcolor)
         if self.remember_geometry is True:
             self.setGeometry(self.m_app.settings.value("WindowGeometry/DataExplorationWindow", QRect(100, 100, 1400, 800)))
         else:
@@ -3908,6 +3990,44 @@ class DataExplorationDialog(QDialog):
             sv.sync_rotation()
             sv.update()
 
+
+    def sync_temp_pan(self, shape_view, temp_pan_x, temp_pan_y):
+        for sv in self.shape_view_list:
+            if sv != shape_view:
+                sv.temp_pan_x = temp_pan_x
+                sv.temp_pan_y = temp_pan_y
+                #sv.sync_zoom()
+                sv.update()
+
+    def sync_pan(self, shape_view, pan_x, pan_y):
+        if len(self.shape_view_list) > 0:
+            self.shape_view_pan_x = self.shape_view_list[0].pan_x
+            self.shape_view_pan_y = self.shape_view_list[0].pan_y
+        for sv in self.shape_view_list:
+            if sv != shape_view:
+                sv.pan_x = pan_x
+                sv.pan_y = pan_y
+                #sv.sync_zoom()
+                sv.update()
+
+
+    def sync_zoom(self, shape_view, dolly):
+        if len(self.shape_view_list) > 0:
+            self.shape_view_dolly = self.shape_view_list[0].dolly
+                        
+        for sv in self.shape_view_list:
+            if sv != shape_view:
+                sv.dolly = dolly
+                #sv.sync_zoom()
+                sv.update()
+
+    def sync_temp_zoom(self, shape_view, temp_dolly):
+        for sv in self.shape_view_list:
+            if sv != shape_view:
+                sv.temp_dolly = temp_dolly
+                #sv.sync_zoom()
+                sv.update()
+
     def sync_temp_rotation(self, shape_view, temp_rotate_x, temp_rotate_y):
         for sv in self.shape_view_list:
             if sv != shape_view:
@@ -3917,47 +4037,81 @@ class DataExplorationDialog(QDialog):
                 sv.update()
         #self.object_view_3d.sync_rotation(rotation_x, rotation_y)
 
+    def resizeEvent(self, event):
+        #print("resize")
+        #print("Window has been resized",self.image_label.width(), self.image_label.height())
+        #self.pixmap.scaled(self.image_label.width(), self.image_label.height(), Qt.KeepAspectRatio)
+        #self.edtObjectDesc.resize(self.edtObjectDesc.height(),300)
+        #self.image_label.setPixmap(self.pixmap)
+        for idx, shape_view in enumerate(self.shape_view_list):
+            #print("resize", idx, shape_view.width(), shape_view.height())
+            #shape_view = self.shape_view_list[idx]
+            half_width = int(shape_view.width()/2)
+            self.shape_combo_list[idx].setGeometry(half_width,0,half_width,20)
+            self.shape_label_list[idx].setGeometry(0,0,half_width,20)
+
+        QDialog.resizeEvent(self, event)
+
     def comboGroupBy_changed(self):
-        for shape_info in self.shape_info_list:
-            self.shape_view_layout.removeWidget(shape_info)
-            shape_info.deleteLater()
+        #print("comboGroupBy_changed")
+        for shape_label in self.shape_label_list:
+            #self.shape_label_layout.removeWidget(shape_label)
+            shape_label.deleteLater()
+        for shape_combo in self.shape_combo_list:
+            #self.shape_combo_layout.removeWidget(shape_combo)
+            shape_combo.deleteLater()
         for shape_view in self.shape_view_list:
             self.shape_view_layout.removeWidget(shape_view)
             shape_view.deleteLater()
         self.shape_view_list = []
         self.shape_combo_list = []
-        self.shape_info_list = []
+        self.shape_label_list = []
 
         self.update_chart()
 
         for keyname in self.scatter_data.keys():
             #print(keyname)
             shape_view = ObjectViewer3D(self)
-            shape_combo = QComboBox()
-            keyname = keyname if keyname != '__default__' else 'All'
-            shape_label = QLabel(keyname)
 
-            shape_info_widget = QWidget()
-            shape_info_layout = QHBoxLayout()
-            shape_info_widget.setLayout(shape_info_layout)
-            shape_info_layout.addWidget(shape_label)
-            shape_info_layout.addWidget(shape_combo)
+            shape_label = QLabel(keyname)
+            shape_label.setParent(shape_view)
+            #shape_label.setGeometry(0,0,150,20)
+            # set transparent, set font color white
+            #shape_label.setAttribute(Qt.WA_TranslucentBackground, True)
+            shape_label.setStyleSheet("background-color: "+self.bgcolor+"; color: white")
+            self.shape_label_list.append(shape_label)
+            if keyname == '__default__' :
+                shape_label.hide()
+
+
+            #shape_info_widget = QWidget()
+            #shape_info_layout = QHBoxLayout()
+            #shape_info_widget.setLayout(shape_info_layout)
+            #shape_info_layout.addWidget(shape_label)
+            #shape_info_layout.addWidget(shape_combo)
+            shape_combo = QComboBox()
             shape_combo.addItem("Follow regression line")
             shape_combo.addItem("Average shape")
             shape_combo.addItem("Pick shape")
+            shape_combo.setCurrentIndex(0)
+            shape_combo.setParent(shape_view)
+           
             #shape_combo.currentIndexChanged.connect(self.shape_combo_changed)
             shape_combo.currentIndexChanged.connect(lambda index, combo=shape_combo: self.shape_combo_changed(index, combo))
 
             self.shape_view_list.append(shape_view)
             self.shape_combo_list.append(shape_combo)
-            self.shape_info_list.append(shape_info_widget)
+            #self.shape_label_list.append(shape_label)
+            #self.shape_info_list.append(shape_info_widget)
 
-            self.shape_view_layout.addWidget(shape_info_widget,0)
-            self.shape_view_layout.addWidget(shape_view,1)
+            #self.shape_view_layout.addWidget(shape_info_widget,0)
+            self.shape_view_layout.addWidget(shape_view)
 
             shape_view.set_object_name(keyname)
 
             shape_view.show()
+        self.resizeEvent(None)
+            #shape_combo.setGeometry(150,0,150,20)
         #self.prepare_scatter_data()
         #self.calculate_fit()
         #self.show_analysis_result()
@@ -3977,7 +4131,7 @@ class DataExplorationDialog(QDialog):
         self.edtOrdination.setText(analysis.analysis_method)
         #self.edtGroupBy.setText(analysis.group_by)
         self.comboGroupBy.clear()
-        self.comboGroupBy.addItem("None")
+        self.comboGroupBy.addItem("Select property")
         for property in analysis.dataset.get_propertyname_list():
             self.comboGroupBy.addItem(property)
         
@@ -4130,19 +4284,30 @@ class DataExplorationDialog(QDialog):
                         self.ax2.plot(curve['size_range'], curve['curve'], label=curve['key'], color=curve['color'])                        
                         self.ax2.plot(curve['size_range2'], curve['curve2'], label=curve['key'], color=curve['color'], linestyle='dashed')
                         degree = len(curve['model'])-1
-                        model_text = ""
+                        model_text = "Y="
+                        #superscript_list = ["⁰","¹","²","³","⁴","⁵","⁶","⁷","⁸","⁹"]
                         for i in range(degree+1):
-                            model_text += str(round(curve['model'][i]*1000)/1000) 
+                            coeff = round(curve['model'][i]*1000)/1000
+                            if coeff == 0.0:
+                                continue
+                            model_text += str(coeff) 
+                            
                             if degree != i:
-                                model_text += "x^"+str(degree-i)
+                                model_text += "X"
+                                model_text += "^"+str(degree-i) if degree-i > 1 else ""
+                                #model_text += str(superscript_list[degree-i]) if degree-i > 1 else ""
                             if i < degree:
                                 model_text += " + "
-                        r_squared_text = "R^2: "+str(round(curve['r_squared']*1000)/1000)                    
+                        r_squared_text = "R^2="+str(round(curve['r_squared']*1000)/1000)                    
                         
                         #self.ax2.annotate(str(curve['model'])+" "+str(curve['r_squared']), (curve['size_range'][50], curve['curve'][50]))
                         if show_annotation:
-                            self.ax2.annotate(model_text, (curve['size_range'][10], curve['curve'][10]))
-                            self.ax2.annotate(r_squared_text, (curve['size_range'][90], curve['curve'][90]))
+                            #plt.rcParams['text.usetex'] = True
+                            annotation1 = self.ax2.annotate(rf"${model_text}$", (curve['size_range'][10], curve['curve'][10]))
+                            annotation2 =self.ax2.annotate(rf"${r_squared_text}$", (curve['size_range'][90], curve['curve'][90]))
+                            annotation1.set_bbox(dict(boxstyle="round", facecolor="white", edgecolor="none", alpha=0.7))
+                            annotation2.set_bbox(dict(boxstyle="round", facecolor="white", edgecolor="none", alpha=0.7))
+
 
                 #self.ax2.plot(size_range, group_a_curve, label='Group A')
                             
@@ -4234,13 +4399,17 @@ class DataExplorationDialog(QDialog):
         #self.shape_view_list[idx].clear_object()
         #temp_rotate_x = self.shape_view_list[idx].temp_rotate_x
         #temp_rotate_y = self.shape_view_list[idx].temp_rotate_y
-        if idx == 0:
-            self.transparent_gl_widget.set_object(obj)
-            self.transparent_gl_widget.update()
+        #if idx == 0:
+        #    self.transparent_gl_widget.set_object(obj)
+        #    self.transparent_gl_widget.raise_()
+        #    self.transparent_gl_widget.update()
             
         self.shape_view_list[idx].set_object(obj)
         #print("shape view apply rotation 1", idx, self.rotation_matrix)
         self.shape_view_list[idx].apply_rotation(self.rotation_matrix)
+        self.shape_view_list[idx].pan_x = self.shape_view_pan_x
+        self.shape_view_list[idx].pan_y = self.shape_view_pan_y
+        self.shape_view_list[idx].dolly = self.shape_view_dolly
         #print("shape view apply rotation 2", idx)
 
         #self.shape_view_list[idx].temp_rotate_x = self.temp_rotate_x
@@ -4704,7 +4873,7 @@ class DatasetAnalysisDialog(QDialog):
         self.btnSelectAll.setText("All")
         self.btnSelectAll.clicked.connect(self.select_all)
         self.btnSelectNone = QPushButton()
-        self.btnSelectNone.setText("None")
+        self.btnSelectNone.setText("Select property")
         self.btnSelectNone.clicked.connect(self.select_none)
         self.btnSelectInvert = QPushButton()
         self.btnSelectInvert.setText("Invert")

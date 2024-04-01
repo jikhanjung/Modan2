@@ -3984,6 +3984,7 @@ class DataExplorationDialog(QDialog):
     def comboVisualizationMethod_changed(self):
         new_mode = self.comboVisualizationMethod.currentIndex()
         self.set_mode(new_mode)
+        
 
     def cbxShape_state_changed(self):
         return
@@ -4050,6 +4051,7 @@ class DataExplorationDialog(QDialog):
             self.comboAxis3.setCurrentIndex(2)
         self.update_chart()
         self.prepare_shape_view()
+        self.resizeEvent(None)
  
     def prepare_shape_view(self):
         for shape_label in self.shape_label_list:
@@ -4072,13 +4074,14 @@ class DataExplorationDialog(QDialog):
         for idx, keyname in enumerate(keyname_list):
             shape_view = ObjectViewer3D(self)
 
-            shape_button = QPushButton(QIcon(mu.resource_path('icons/M2Landmark_2.png')), "")
-            # send idx to lambda function
-            shape_button.clicked.connect(lambda checked, idx=idx: self.shape_button_clicked(idx))
-            
-            shape_button.setParent(shape_view)
-            self.shape_button_list.append(shape_button)
-            shape_button.setAutoDefault(False)
+            if self.mode == MODE_CUSTOM:
+                shape_button = QPushButton(QIcon(mu.resource_path('icons/M2Landmark_2.png')), "")
+                # send idx to lambda function
+                shape_button.clicked.connect(lambda checked, idx=idx: self.shape_button_clicked(idx))
+                
+                shape_button.setParent(shape_view)
+                self.shape_button_list.append(shape_button)
+                shape_button.setAutoDefault(False)
 
             shape_label = QLabel(keyname)
             shape_label.setParent(shape_view)
@@ -4092,8 +4095,68 @@ class DataExplorationDialog(QDialog):
             shape_view.set_object_name(keyname)
             shape_view.show()  
         if self.mode == MODE_AVERAGE:
-            self.average_shape 
-            pass
+            self.show_average_shapes()
+            #pass
+
+    def show_average_shapes(self):
+        keyname_list = self.scatter_data.keys()
+        #print("show_average_shapes", keyname_list, self.average_shape)
+        for idx, keyname in enumerate(keyname_list):
+            #shape_view = ObjectViewer3D(self)
+            #for idx, shape_view in enumerate(self.shape_view_list):
+            axis1 = self.comboAxis1.currentIndex()
+            axis2 = self.comboAxis2.currentIndex()
+
+            x_average = self.average_shape[keyname]['x_val']
+            y_average = self.average_shape[keyname]['y_val']
+            flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
+            flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
+            x_value = flip_axis1 * x_average
+            y_value = flip_axis2 * y_average
+            shape_to_visualize = np.zeros((1,len(self.analysis_result_list[0])))
+
+            shape_to_visualize[0][axis1] = x_value
+            shape_to_visualize[0][axis2] = y_value
+            unrotated_shape = self.unrotate_shape(shape_to_visualize)            
+            self.show_shape(unrotated_shape[0], idx)        
+            
+            #shape_view.show()
+
+    def shape_regression(self, evt):
+        #print("shape regression", evt.xdata)
+        for idx, shape_view in enumerate(self.shape_view_list):
+            #print("0-1:",datetime.datetime.now())
+            #shape_view.clear_object()
+
+            
+            axis1 = self.comboAxis1.currentIndex()
+            axis2 = self.comboAxis2.currentIndex()
+            flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
+            flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
+            shape_to_visualize = np.zeros((1,len(self.analysis_result_list[0])))
+            #if axis1 == 10:
+            #fit regression line
+            y_value = 0
+            curve = self.curve_list[idx]
+            #print("0-2:",datetime.datetime.now(), evt.xdata, min(curve['size_range2']), max(curve['size_range2']))
+            if evt.xdata >= min(curve['size_range2']) and evt.xdata <= max(curve['size_range2']):
+                y_value = np.polyval(curve['model'], evt.xdata)
+            else:
+                continue
+            x_value = flip_axis1 * evt.xdata
+            #y_value = flip_axis2 * y_value
+
+
+            if axis1 != CENTROID_SIZE_INDEX:
+                shape_to_visualize[0][axis1] = x_value
+
+            shape_to_visualize[0][axis2] = flip_axis2 * y_value
+            #print("0-3:",datetime.datetime.now())
+            unrotated_shape = self.unrotate_shape(shape_to_visualize)
+            #print("0-4:",datetime.datetime.now())
+            self.show_shape(unrotated_shape[0], idx)        
+
+
 
     def shape_button_clicked(self, idx):
         #print("shape_button_clicked", idx)
@@ -4230,6 +4293,7 @@ class DataExplorationDialog(QDialog):
             half_width = int(width/2)
             #self.shape_combo_list[idx].setGeometry(half_width,0,half_width,20)
             self.shape_label_list[idx].setGeometry(0,0,half_width,20)
+        for idx, shape_button in enumerate(self.shape_button_list):
             button = self.shape_button_list[idx]
             button.setGeometry(width-32,0,32,32)
 
@@ -4478,15 +4542,21 @@ class DataExplorationDialog(QDialog):
 
     def on_canvas_move(self, evt):
         
+        if self.axvline is not None:
+            print("remove axvline",self.axvline)
+            self.axvline.remove()
+
         if evt.xdata is None or evt.ydata is None:
             return
+        
+        if self.mode == MODE_AVERAGE:
+            return
+
         #print(evt.button, evt.xdata, evt.ydata)
         if self.is_picking_shape == False:
             if evt.button is None:
                 self.vertical_line_xval = evt.xdata
                 self.vertical_line_style = 'dashed'
-                if self.axvline is not None:
-                    self.axvline.remove()
                 self.axvline = self.ax2.axvline(x=self.vertical_line_xval, color='gray', linestyle=self.vertical_line_style)
                 self.fig2.canvas.draw()
                 #self.ax2.axvline(x=evt.xdata, color='gray', linestyle='dashed')
@@ -4505,18 +4575,20 @@ class DataExplorationDialog(QDialog):
                 #print("evt:", evt)
                 #self.vertical_line_xval = evt.xdata
                 #self.ax2.axvline(x=evt.xdata, color='gray', linestyle='solid')
+                self.shape_regression(evt)
         else:
             if evt.button == 1:
-                pass
+                self.pick_shape(evt)
             
 
                 #self.update_chart()
         #if self.cbxShape.isChecked() == False:
         #    return
             #self.ax2.axvline(x=evt.xdata, color='gray', linestyle='dashed')
-        if evt.button == 1:
+        #if evt.button == 1:
+        #    self.shape_regression(evt)
             #print("0-0:",datetime.datetime.now())
-            self.shape_regression(evt)
+            
         return
         #print("on_canvas_move", evt)
         axis1 = self.comboAxis1.currentIndex()
@@ -4533,6 +4605,9 @@ class DataExplorationDialog(QDialog):
         #print("unrotated_shape", unrotated_shape)
 
     def on_canvas_button_release(self, evt):
+        if self.mode == MODE_AVERAGE:
+            return
+
         if evt.button == 1:
             if self.is_picking_shape:
                 # set cursor to crosshair
@@ -4587,21 +4662,47 @@ class DataExplorationDialog(QDialog):
 
     def on_canvas_button_press(self, evt):
         #print("button_press", evt)
-        if evt.button == 1:
-            self.vertical_line_xval = evt.xdata
-            self.vertical_line_style = 'solid'
-            #print("2-0:",datetime.datetime.now())
-            #self.show_analysis_result()
-            if self.axvline is not None:
-                self.axvline.remove()
-            if evt.xdata is not None:
-            #print("xdata", evt.xdata)
-                self.axvline = self.ax2.axvline(x=self.vertical_line_xval, color='gray', linestyle=self.vertical_line_style)
-                self.fig2.canvas.draw()
-                self.shape_regression(evt)
+
+        if self.mode == MODE_AVERAGE:
+            return
+
+        if self.is_picking_shape == False:
+            if evt.button == 1 :
+                self.vertical_line_xval = evt.xdata
+                self.vertical_line_style = 'solid'
+                #print("2-0:",datetime.datetime.now())
+                #self.show_analysis_result()
+                if self.axvline is not None:
+                    self.axvline.remove()
+                if evt.xdata is not None:
+                #print("xdata", evt.xdata)
+                    self.axvline = self.ax2.axvline(x=self.vertical_line_xval, color='gray', linestyle=self.vertical_line_style)
+                    self.fig2.canvas.draw()
+                    self.shape_regression(evt)
+        else:
+            if evt.button == 1 :
+                self.pick_shape(evt)
+
         return
         self.canvas_down_xy = (evt.x, evt.y)
         #self.tableView.selectionModel().clearSelection()
+
+    def pick_shape(self, evt):
+        if self.pick_idx == -1:
+            return
+        #print("pick_shape", evt.xdata, evt.ydata, self.pick_idx)
+        axis1 = self.comboAxis1.currentIndex()
+        axis2 = self.comboAxis2.currentIndex()
+        flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
+        flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
+        shape_to_visualize = np.zeros((1,len(self.analysis_result_list[0])))
+        x_value = flip_axis1 * evt.xdata
+        y_value = flip_axis2 * evt.ydata
+        shape_to_visualize[0][axis1] = x_value
+        shape_to_visualize[0][axis2] = y_value
+        unrotated_shape = self.unrotate_shape(shape_to_visualize)
+        #print("0-4:",datetime.datetime.now())
+        self.show_shape(unrotated_shape[0], self.pick_idx)
 
     def shape_regression(self, evt):
         #print("shape regression", evt.xdata)

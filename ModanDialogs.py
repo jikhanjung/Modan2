@@ -1326,6 +1326,8 @@ class ObjectViewer3D(QGLWidget):
         gl.glMatrixMode(gl.GL_PROJECTION)
         gl.glLoadIdentity()
         glu.gluPerspective(45.0, self.aspect, 0.1, 100.0)
+        light_position = [1.0, 1.0, 1.0, 0.0]  # x, y, z, w (w=0 for directional light)
+        gl.glLightfv(gl.GL_LIGHT0, gl.GL_POSITION, light_position)
         gl.glTranslatef(0, 0, -5.0 + self.dolly + self.temp_dolly)   # x, y, z 
         gl.glTranslatef((self.pan_x + self.temp_pan_x)/100.0, (self.pan_y + self.temp_pan_y)/-100.0, 0.0)
         gl.glRotatef(self.rotate_y + self.temp_rotate_y, 1.0, 0.0, 0.0)
@@ -1461,16 +1463,27 @@ class ObjectViewer3D(QGLWidget):
             if self.show_polygon and len(self.polygon_list) > 0:
                 normal_list = self.calculate_normal_list(self.polygon_list)
                 for i, polygon in enumerate(self.polygon_list):
-                    #normal = self.calculate_normal(polygon)
+                    normal = self.calculate_normal(polygon)
                     gl.glEnable(gl.GL_LIGHTING)
                     pg_color = as_gl_color(self.wireframe_color)
                     gl.glColor3f( *pg_color ) #*COLOR['WIREFRAME'])
+
+                    '''
+                    material_ambient = [0.5, 0.3, 0.3, 0.5]  # Adjust these values (0.0 to 1.0)
+                    material_diffuse = [0.8, 0.8, 0.8, 0.5]  # Adjust these values (0.0 to 1.0)
+                    material_specular = [0.5, 0.5, 0.5, 0.5]  # Adjust these values (0.0 to 1.0)
+                    gl.glMaterialfv(gl.GL_FRONT, gl.GL_AMBIENT, material_ambient)
+                    gl.glMaterialfv(gl.GL_FRONT, gl.GL_DIFFUSE, material_diffuse)
+                    gl.glMaterialfv(gl.GL_FRONT, gl.GL_SPECULAR, material_specular)
+                    '''
+
+                    gl.glNormal3f(*normal)
                     gl.glBegin(gl.GL_POLYGON)
                     for lm_idx in polygon:
                         #print("lm_idx:", lm_idx, "len landmark", len(object.landmark_list))
                         if lm_idx <= len(object.landmark_list):
                             lm = object.landmark_list[lm_idx-1]
-                            gl.glNormal3f(*normal_list[lm_idx-1])
+                            #gl.glNormal3f(*normal_list[lm_idx-1])
                             gl.glVertex3f(*lm)
                     gl.glEnd()
 
@@ -1538,8 +1551,26 @@ class ObjectViewer3D(QGLWidget):
         v2 = np.array(p3) - np.array(p1)
         #print("v1:", v1, "v2:", v2)
         normal = -1.0 * np.cross(v1, v2)
+        normal = normal / np.linalg.norm(normal)
         #print("normal:", normal)
         return normal
+
+    def calculate_face_normals(self, polygon_list):
+        # ... (Your existing normal calculation for each vertex)
+
+        face_normals = []
+        for polygon in polygon_list:
+            # Calculate the average normal of the polygon's vertices
+            face_normal = [0.0, 0.0, 0.0]
+            for lm_idx in polygon:
+                face_normal[0] += self.normal_list[lm_idx - 1][0]
+                face_normal[1] += self.normal_list[lm_idx - 1][1]
+                face_normal[2] += self.normal_list[lm_idx - 1][2]
+                # Normalize the face normal
+                length = math.sqrt(face_normal[0] * face_normal[0] + face_normal[1] * face_normal[1] + face_normal[2] * face_normal[2])
+                face_normals.append([f / length for f in face_normal])
+        return face_normals
+
 
     def calculate_normal_list(self, polygon_list):
         #print("calculate normal")
@@ -1568,7 +1599,7 @@ class ObjectViewer3D(QGLWidget):
         normal_list = []
         for i in range(len(self.obj_ops.landmark_list)):
             if i in normal_dict:
-                normal = normal_dict[i]['normal'] #/ normal_dict[i]['count']
+                normal = normal_dict[i]['normal'] / normal_dict[i]['count']
             else:
                 normal = np.array([0,0,0])
             normal_list.append(normal)
@@ -3657,7 +3688,7 @@ class DataExplorationDialog(QDialog):
         [0, 0, 1, 0],
         [0, 0, 0, 1]
         ])
-        self.layout = QGridLayout()
+        self.layout = QVBoxLayout()
         self.setLayout(self.layout)
         self.lblAnalysisName = QLabel("Analysis Name")
         self.edtAnalysisName = QLineEdit()
@@ -3693,12 +3724,18 @@ class DataExplorationDialog(QDialog):
         #self.fig2.canvas.mpl_connect('motion_notify_event', self.on_hover_enter)
         #self.fig2.canvas.mpl_connect('motion_notify_event', self.on_hover_leave)
 
-        #self.plot_widget3 = FigureCanvas(Figure(figsize=(20, 16),dpi=100))
-        #self.fig3 = self.plot_widget3.figure
-        #self.ax3 = self.fig3.add_subplot(projection='3d')
-        #self.toolbar3 = NavigationToolbar(self.plot_widget3, self)        
+        self.plot_widget3 = FigureCanvas(Figure(figsize=(20, 16),dpi=100))
+        self.fig3 = self.plot_widget3.figure
+        self.ax3 = self.fig3.add_subplot(projection='3d')
+        self.toolbar3 = NavigationToolbar(self.plot_widget3, self)        
 
         # chart options
+        self.rb2DChartDim = QRadioButton("2D")
+        self.rb3DChartDim = QRadioButton("3D")
+        self.rb2DChartDim.setChecked(True)
+        self.rb2DChartDim.toggled.connect(self.on_chart_dim_changed)
+        self.rb3DChartDim.toggled.connect(self.on_chart_dim_changed)
+
         self.lblAxis1 = QLabel("Axis 1")
         self.lblAxis2 = QLabel("Axis 2")
         self.lblAxis3 = QLabel("Axis 3")
@@ -3715,18 +3752,18 @@ class DataExplorationDialog(QDialog):
         self.cbxFlipAxis3.setText("Flip")
         self.cbxFlipAxis3.setChecked(False)
 
-        self.plot_control_widget = QWidget()
-        self.plot_control_layout = QHBoxLayout()
-        self.plot_control_widget.setLayout(self.plot_control_layout)
-        self.plot_control_layout.addWidget(self.lblAxis1)
-        self.plot_control_layout.addWidget(self.comboAxis1)
-        self.plot_control_layout.addWidget(self.cbxFlipAxis1)
-        self.plot_control_layout.addWidget(self.lblAxis2)
-        self.plot_control_layout.addWidget(self.comboAxis2)
-        self.plot_control_layout.addWidget(self.cbxFlipAxis2)
-        self.plot_control_layout.addWidget(self.lblAxis3)
-        self.plot_control_layout.addWidget(self.comboAxis3)
-        self.plot_control_layout.addWidget(self.cbxFlipAxis3)
+        self.axis_option_widget = QWidget()
+        self.axis_option_layout = QHBoxLayout()
+        self.axis_option_widget.setLayout(self.axis_option_layout)
+        self.axis_option_layout.addWidget(self.lblAxis1,0)
+        self.axis_option_layout.addWidget(self.comboAxis1,1)
+        self.axis_option_layout.addWidget(self.cbxFlipAxis1,0)
+        self.axis_option_layout.addWidget(self.lblAxis2,0)
+        self.axis_option_layout.addWidget(self.comboAxis2,1)
+        self.axis_option_layout.addWidget(self.cbxFlipAxis2,0)
+        self.axis_option_layout.addWidget(self.lblAxis3,0)
+        self.axis_option_layout.addWidget(self.comboAxis3,1)
+        self.axis_option_layout.addWidget(self.cbxFlipAxis3,0)
 
         self.cbxFlipAxis1.stateChanged.connect(self.flip_axis_changed)
         self.cbxFlipAxis2.stateChanged.connect(self.flip_axis_changed)
@@ -3752,10 +3789,20 @@ class DataExplorationDialog(QDialog):
         self.cbxAnnotation.setText("Show annotation")
         self.cbxAnnotation.stateChanged.connect(self.update_chart)
         self.cbxAnnotation.setChecked(False)
-        self.cbxShape = QCheckBox()
-        self.cbxShape.setText("Show shapes")
-        self.cbxShape.setChecked(True)        
-        self.cbxShape.stateChanged.connect(self.cbxShape_state_changed)
+        #self.cbxShape = QCheckBox()
+        #self.cbxShape.setText("Show shapes")
+        #self.cbxShape.setChecked(True)        
+        #self.cbxShape.stateChanged.connect(self.cbxShape_state_changed)
+
+        self.cbxDepthShade = QCheckBox()
+        self.cbxDepthShade.setText("Depth Shade")
+        self.cbxDepthShade.setChecked(False)
+        self.cbxDepthShade.toggled.connect(self.on_chart_dim_changed)
+        self.cbxLegend = QCheckBox()
+        self.cbxLegend.setText("Legend")
+        self.cbxLegend.setChecked(False)
+        self.cbxLegend.toggled.connect(self.on_chart_dim_changed)
+
         self.cbxAverage = QCheckBox()
         self.cbxAverage.setText("Show average")
         self.cbxAverage.setChecked(False)        
@@ -3766,18 +3813,23 @@ class DataExplorationDialog(QDialog):
         self.sbxDegree.textChanged.connect(self.update_chart)
         #self.btnPolyfit = QPushButton("Polyfit")
         #self.btnPolyfit.clicked.connect(self.axis_changed)
-        self.regression_widget = QWidget()
-        self.regression_layout = QHBoxLayout()
-        self.regression_widget.setLayout(self.regression_layout)
-        self.regression_layout.addWidget(self.cbxRegression,1)
-        self.regression_layout.addWidget(self.cbxAnnotation,1)
+        self.chart_option_widget = QWidget()
+        self.chart_option_layout = QHBoxLayout()
+        self.chart_option_widget.setLayout(self.chart_option_layout)
+        self.chart_option_layout.addWidget(self.rb2DChartDim,1)
+        self.chart_option_layout.addWidget(self.rb3DChartDim,1)
+
+        self.chart_option_layout.addWidget(self.cbxRegression,1)
+        self.chart_option_layout.addWidget(self.cbxAnnotation,1)
+        self.chart_option_layout.addWidget(self.cbxLegend,1)
+        self.chart_option_layout.addWidget(self.cbxDepthShade,1)
         #self.regression_layout.addWidget(self.cbxShape,1)
-        self.regression_layout.addWidget(self.cbxAverage,1)
-        self.regression_layout.addWidget(self.lblDegree,0)
-        self.regression_layout.addWidget(self.sbxDegree,1)
+        self.chart_option_layout.addWidget(self.cbxAverage,1)
+        self.chart_option_layout.addWidget(self.lblDegree,0)
+        self.chart_option_layout.addWidget(self.sbxDegree,1)
         #self.fit_layout.addWidget(self.btnPolyfit)
 
-        self.visualization_layout = QHBoxLayout()
+        self.visualization_layout = QGridLayout()
         self.visualization_widget = QWidget()
         self.visualization_widget.setLayout(self.visualization_layout)
         self.plot_layout = QVBoxLayout()
@@ -3786,6 +3838,8 @@ class DataExplorationDialog(QDialog):
         #self.plot_layout.addWidget(self.plot_control_widget)
         #self.plot_layout.addWidget(self.regression_widget)
         self.plot_preference_button = QPushButton(QIcon(mu.resource_path('icons/M2Preferences_1.png')), "")
+        self.plot_preference_button.setStyleSheet("border: none; padding: 0px;")
+        self.plot_preference_button.setIconSize(QSize(32, 32))
         self.plot_preference_button.clicked.connect(self.show_plot_preference)
         self.plot_preference_button.setAutoDefault(False)
 
@@ -3794,37 +3848,34 @@ class DataExplorationDialog(QDialog):
         self.toolbar_widget.setLayout(self.toolbar_layout)
 
         self.toolbar_layout.addWidget(self.toolbar2)
+        self.toolbar_layout.addWidget(self.toolbar3)
         self.toolbar_layout.addWidget(self.plot_preference_button)
 
 
-        self.plot_layout.addWidget(self.toolbar_widget)
-        self.plot_layout.addWidget(self.plot_control_widget)
-        self.plot_layout.addWidget(self.regression_widget)
+        #self.plot_layout.addWidget(self.toolbar_widget,0)
+        #self.plot_layout.addWidget(self.chart_option_widget,0)
+        #self.plot_layout.addWidget(self.axis_option_widget,0)
+        self.chart_option_widget.hide()
+        self.axis_option_widget.hide()
 
         #self.plot_layout.addWidget(self.toolbar2)
-        self.plot_layout.addWidget(self.plot_widget2)
+        #self.plot_layout.addWidget(self.plot_widget2,1)
+        #self.plot_layout.addWidget(self.plot_widget3,1)
         self.shape_view_layout = QVBoxLayout()
         self.view_widget = QWidget()
         self.view_widget.setLayout(self.shape_view_layout)
 
-        #self.comboShapeview = QComboBox()
-        #self.comboShapeview.addItem("Regression")
-        #self.comboShapeview.addItem("Average")
-        #self.comboShapeview.addItem("Custom")
-        #self.comboShapeview.setCurrentIndex(0)
-        #self.comboShapeview.currentIndexChanged.connect(self.comboShapeview_changed)
-        #self.shape_view_layout.addWidget(self.comboShapeview)
-        #self.comboShapeview.setParent(shape_view)
-        
-        #shape_combo.currentIndexChanged.connect(self.shape_combo_changed)
-        #shape_combo.currentIndexChanged.connect(lambda index, combo=shape_combo: self.shape_combo_changed(index, combo))
+        #self.visualization_layout.addWidget(self.plot_widget,2)
+        self.visualization_layout.addWidget(self.toolbar_widget,0,0)
+        self.visualization_layout.addWidget(self.chart_option_widget,1,0)
+        self.visualization_layout.addWidget(self.axis_option_widget,2,0)
+        self.visualization_layout.addWidget(self.plot_widget2,3,0)
+        self.visualization_layout.addWidget(self.plot_widget3,4,0)
+        self.visualization_layout.addWidget(self.view_widget,3,1,2,1)
+        self.visualization_layout.setColumnStretch(0,2)
+        self.visualization_layout.setColumnStretch(1,1)
 
-        #self.empty_view = QLabel()
-        #self.shape_view_layout.addWidget(self.empty_view)
-        self.visualization_layout.addWidget(self.plot_widget,2)
-        self.visualization_layout.addWidget(self.view_widget,1)
-        #self.view_widget.hide()
-        self.cbxShape_state_changed()
+        self.on_chart_dim_changed()
 
         if False:
             self.transparent_gl_widget = ObjectViewer3D(self.plot_widget)
@@ -3846,6 +3897,21 @@ class DataExplorationDialog(QDialog):
         #    addWidget(self.transparent_gl_widget)
 
         i = 0
+        self.row_widget1 = QWidget()
+        self.row_layout1 = QHBoxLayout()
+        self.row_widget1.setLayout(self.row_layout1)
+        self.row_layout1.addWidget(self.lblAnalysisName,1)
+        self.row_layout1.addWidget(self.edtAnalysisName,2)
+        self.row_layout1.addWidget(self.lblSuperimposition,1)
+        self.row_layout1.addWidget(self.edtSuperimposition,2)
+        self.row_layout1.addWidget(self.lblOrdination,1)
+        self.row_layout1.addWidget(self.edtOrdination,2)
+        self.row_layout1.addWidget(self.lblGroupBy,1)
+        self.row_layout1.addWidget(self.comboGroupBy,2)
+        self.row_layout1.addWidget(self.lblVisualizationMethod,1)
+        self.row_layout1.addWidget(self.comboVisualizationMethod,2)
+        self.layout.addWidget(self.row_widget1)
+        '''
         self.layout.addWidget(self.lblAnalysisName, i, 0)
         self.layout.addWidget(self.edtAnalysisName, i, 1)
         #i += 1
@@ -3854,29 +3920,59 @@ class DataExplorationDialog(QDialog):
         #i += 1
         self.layout.addWidget(self.lblOrdination, i, 4)
         self.layout.addWidget(self.edtOrdination, i, 5)
-        i += 1
-        self.layout.addWidget(self.lblGroupBy, i, 0)
-        self.layout.addWidget(self.comboGroupBy, i, 1)
         #i += 1
-        self.layout.addWidget(self.lblVisualizationMethod, i, 2)
-        self.layout.addWidget(self.comboVisualizationMethod, i, 3)
+        self.layout.addWidget(self.lblGroupBy, i, 6)
+        self.layout.addWidget(self.comboGroupBy, i, 7)
+        #i += 1
+        self.layout.addWidget(self.lblVisualizationMethod, i, 8)
+        self.layout.addWidget(self.comboVisualizationMethod, i, 9)
+        '''
         #i += 1#
         #i += 1
         #self.layout.addWidget(self.toolbar2, i, 0, 1, 2)
-        i += 1
-        self.layout.addWidget(self.visualization_widget, i, 0, 1, 6)
+        
+        self.layout.addWidget(self.visualization_widget)
         #print("layout done")
         #self.resizeEvent(None)
     
+    def on_chart_dim_changed(self):
+        if self.rb2DChartDim.isChecked():
+            self.toolbar3.hide()
+            self.toolbar2.show()
+            self.plot_widget3.hide()
+            self.plot_widget2.show()
+            self.toolbar2.show()
+            self.toolbar3.hide()
+            self.lblAxis3.hide()
+            self.comboAxis3.hide()
+            self.cbxFlipAxis3.hide()
+            self.comboAxis3.hide()
+            self.cbxFlipAxis3.hide()
+            self.cbxDepthShade.hide()
+        else:
+            self.toolbar3.show()
+            self.toolbar2.hide()
+            self.plot_widget2.hide()
+            self.plot_widget3.show()
+            self.toolbar2.hide()
+            self.toolbar3.show()
+            self.lblAxis3.show()
+            self.comboAxis3.show()
+            self.cbxFlipAxis3.show()
+            self.comboAxis3.show()
+            self.cbxFlipAxis3.show()
+            self.cbxDepthShade.show()        
+        pass
+
     def show_plot_preference(self):
-        if self.regression_widget.isVisible():
-            self.regression_widget.hide()
+        if self.chart_option_widget.isVisible():
+            self.chart_option_widget.hide()
         else:
-            self.regression_widget.show()
-        if self.plot_control_widget.isVisible():
-            self.plot_control_widget.hide()
+            self.chart_option_widget.show()
+        if self.axis_option_widget.isVisible():
+            self.axis_option_widget.hide()
         else:
-            self.plot_control_widget.show()
+            self.axis_option_widget.show()
         
 
     def showEvent(self, event):
@@ -3890,6 +3986,7 @@ class DataExplorationDialog(QDialog):
         self.set_mode(new_mode)
 
     def cbxShape_state_changed(self):
+        return
         if self.cbxShape.isChecked() == True:
             self.view_widget.show()
         else:
@@ -4414,8 +4511,8 @@ class DataExplorationDialog(QDialog):
             
 
                 #self.update_chart()
-        if self.cbxShape.isChecked() == False:
-            return
+        #if self.cbxShape.isChecked() == False:
+        #    return
             #self.ax2.axvline(x=evt.xdata, color='gray', linestyle='dashed')
         if evt.button == 1:
             #print("0-0:",datetime.datetime.now())

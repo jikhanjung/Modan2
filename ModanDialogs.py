@@ -3654,6 +3654,7 @@ class DataExplorationDialog(QDialog):
     def __init__(self, parent):
         super().__init__()
         self.parent = parent
+        self.setWindowTitle("Modan2 - Data Exploration")
         self.m_app = QApplication.instance()
         self.default_color_list = mu.VIVID_COLOR_LIST[:]        
         self.color_list = self.default_color_list[:]
@@ -3669,6 +3670,7 @@ class DataExplorationDialog(QDialog):
         self.curve_list = []
         self.shape_view_list = []
         self.shape_label_list = []
+        self.custom_shape_hash = {}
         self.shape_button_list = []
         #self.shape_combo_list = []
         self.vertical_line_xval = None
@@ -3692,10 +3694,10 @@ class DataExplorationDialog(QDialog):
         self.setLayout(self.layout)
         self.lblAnalysisName = QLabel("Analysis Name")
         self.edtAnalysisName = QLineEdit()
-        self.lblSuperimposition = QLabel("Superimposition method")
+        self.lblSuperimposition = QLabel("Superimposition")
         self.edtSuperimposition = QLineEdit()
         self.edtSuperimposition.setEnabled(False)
-        self.lblOrdination = QLabel("Ordination method")
+        self.lblOrdination = QLabel("Ordination")
         self.edtOrdination = QLineEdit()
         self.edtOrdination.setEnabled(False)
         self.lblGroupBy = QLabel("Group by")
@@ -3704,13 +3706,13 @@ class DataExplorationDialog(QDialog):
         self.comboGroupBy = QComboBox()
         self.comboGroupBy.setEnabled(False)
         self.comboGroupBy.currentIndexChanged.connect(self.comboGroupBy_changed)
-        self.lblVisualizationMethod = QLabel("Visualization method")
-        self.comboVisualizationMethod = QComboBox()
-        self.comboVisualizationMethod.addItem("Growth trajectory")
-        self.comboVisualizationMethod.addItem("Regression")
-        self.comboVisualizationMethod.addItem("Average")
-        self.comboVisualizationMethod.addItem("Custom")
-        self.comboVisualizationMethod.currentIndexChanged.connect(self.comboVisualizationMethod_changed)
+        self.lblVisualization = QLabel("Visualization")
+        self.comboVisualization = QComboBox()
+        self.comboVisualization.addItem("Growth trajectory")
+        self.comboVisualization.addItem("Regression")
+        self.comboVisualization.addItem("Average")
+        self.comboVisualization.addItem("Custom")
+        self.comboVisualization.currentIndexChanged.connect(self.comboVisualizationMethod_changed)
 
 
         self.plot_widget2 = FigureCanvas(Figure(figsize=(20, 16),dpi=100))
@@ -3782,11 +3784,11 @@ class DataExplorationDialog(QDialog):
         self.comboAxis3.currentIndexChanged.connect(self.axis_changed)
 
         self.cbxRegression = QCheckBox()
-        self.cbxRegression.setText("Show regression")
+        self.cbxRegression.setText("Regression line")
         self.cbxRegression.setChecked(True)
         self.cbxRegression.stateChanged.connect(self.update_chart)
         self.cbxAnnotation = QCheckBox()
-        self.cbxAnnotation.setText("Show annotation")
+        self.cbxAnnotation.setText("Annotation")
         self.cbxAnnotation.stateChanged.connect(self.update_chart)
         self.cbxAnnotation.setChecked(False)
         #self.cbxShape = QCheckBox()
@@ -3795,18 +3797,18 @@ class DataExplorationDialog(QDialog):
         #self.cbxShape.stateChanged.connect(self.cbxShape_state_changed)
 
         self.cbxDepthShade = QCheckBox()
-        self.cbxDepthShade.setText("Depth Shade")
+        self.cbxDepthShade.setText("Depth shade")
         self.cbxDepthShade.setChecked(False)
-        self.cbxDepthShade.toggled.connect(self.on_chart_dim_changed)
+        self.cbxDepthShade.toggled.connect(self.update_chart)
         self.cbxLegend = QCheckBox()
         self.cbxLegend.setText("Legend")
         self.cbxLegend.setChecked(False)
-        self.cbxLegend.toggled.connect(self.on_chart_dim_changed)
+        self.cbxLegend.toggled.connect(self.update_chart)
 
         self.cbxAverage = QCheckBox()
-        self.cbxAverage.setText("Show average")
+        self.cbxAverage.setText("Average")
         self.cbxAverage.setChecked(False)        
-        self.cbxAverage.stateChanged.connect(self.cbxAverage_state_changed)
+        self.cbxAverage.stateChanged.connect(self.update_chart)
         self.lblDegree = QLabel("Degree")
         self.sbxDegree = QSpinBox()
         self.sbxDegree.setValue(1)
@@ -3908,8 +3910,8 @@ class DataExplorationDialog(QDialog):
         self.row_layout1.addWidget(self.edtOrdination,2)
         self.row_layout1.addWidget(self.lblGroupBy,1)
         self.row_layout1.addWidget(self.comboGroupBy,2)
-        self.row_layout1.addWidget(self.lblVisualizationMethod,1)
-        self.row_layout1.addWidget(self.comboVisualizationMethod,2)
+        self.row_layout1.addWidget(self.lblVisualization,1)
+        self.row_layout1.addWidget(self.comboVisualization,2)
         self.layout.addWidget(self.row_widget1)
         '''
         self.layout.addWidget(self.lblAnalysisName, i, 0)
@@ -3978,14 +3980,10 @@ class DataExplorationDialog(QDialog):
     def showEvent(self, event):
         self.resizeEvent(None)
 
-    def cbxAverage_state_changed(self):
-        self.update_chart()
-
     def comboVisualizationMethod_changed(self):
-        new_mode = self.comboVisualizationMethod.currentIndex()
+        new_mode = self.comboVisualization.currentIndex()
         self.set_mode(new_mode)
         
-
     def cbxShape_state_changed(self):
         return
         if self.cbxShape.isChecked() == True:
@@ -4061,15 +4059,24 @@ class DataExplorationDialog(QDialog):
         for shape_view in self.shape_view_list:
             self.shape_view_layout.removeWidget(shape_view)
             shape_view.deleteLater()
+        for key in self.custom_shape_hash.keys():
+            self.custom_shape_hash[key]['coords'] = []
+            if self.custom_shape_hash[key]['point'] != None:
+                self.custom_shape_hash[key]['point'].remove()
+            self.custom_shape_hash[key]['point'] = None
+        #self.custom_shape_list = []
         self.shape_view_list = []
         self.shape_label_list = []
         self.shape_button_list = []
+        self.custom_shape_hash = {}
 
       
         if self.mode in [ MODE_GROWTH_TRAJECTORY, MODE_REGRESSION, MODE_AVERAGE]:
             keyname_list = self.scatter_data.keys()
         elif self.mode == MODE_CUSTOM:
             keyname_list = [ "A", "B"]
+            for idx, keyname in enumerate(keyname_list):
+                self.custom_shape_hash[idx] = {'name': keyname, 'coords': [], 'point': None, 'color': None}
 
         for idx, keyname in enumerate(keyname_list):
             shape_view = ObjectViewer3D(self)
@@ -4082,6 +4089,7 @@ class DataExplorationDialog(QDialog):
                 shape_button.setParent(shape_view)
                 self.shape_button_list.append(shape_button)
                 shape_button.setAutoDefault(False)
+
 
             shape_label = QLabel(keyname)
             shape_label.setParent(shape_view)
@@ -4448,7 +4456,7 @@ class DataExplorationDialog(QDialog):
         show_average_shape = self.cbxAverage.isChecked()
         show_regression = self.cbxRegression.isChecked()
         show_annotation = self.cbxAnnotation.isChecked()
-        show_legend = True
+        show_legend = self.cbxLegend.isChecked()
         show_axis_label = True
 
         axis1_title = self.comboAxis1.currentText()
@@ -4472,7 +4480,7 @@ class DataExplorationDialog(QDialog):
                         self.ax2.annotate(obj.object_name, (group['x_val'][idx], group['y_val'][idx]))
             
                 if show_average_shape:
-                    self.ax2.scatter(self.average_shape[name]['x_val'], self.average_shape[name]['y_val'], s=150, marker=group['symbol'], color=group['color'])
+                    self.ax2.scatter(self.average_shape[name]['x_val'], self.average_shape[name]['y_val'], s=group['size']*3, marker=group['symbol'], color=group['color'])
 
 
 
@@ -4543,17 +4551,15 @@ class DataExplorationDialog(QDialog):
     def on_canvas_move(self, evt):
         
         if self.axvline is not None:
-            print("remove axvline",self.axvline)
+            #print("remove axvline",self.axvline)
             self.axvline.remove()
+            self.axvline = None
 
-        if evt.xdata is None or evt.ydata is None:
-            return
-        
-        if self.mode == MODE_AVERAGE:
+        if evt.xdata is None or evt.ydata is None or self.mode == MODE_AVERAGE:
             return
 
         #print(evt.button, evt.xdata, evt.ydata)
-        if self.is_picking_shape == False:
+        if self.mode in [MODE_GROWTH_TRAJECTORY, MODE_REGRESSION]:
             if evt.button is None:
                 self.vertical_line_xval = evt.xdata
                 self.vertical_line_style = 'dashed'
@@ -4568,6 +4574,7 @@ class DataExplorationDialog(QDialog):
                 #self.show_analysis_result()
                 if self.axvline is not None:
                     self.axvline.remove()
+                    self.axvline = None
                 self.axvline = self.ax2.axvline(x=self.vertical_line_xval, color='gray', linestyle=self.vertical_line_style)
                 self.fig2.canvas.draw()
                 #print("2-1:",datetime.datetime.now())
@@ -4576,33 +4583,11 @@ class DataExplorationDialog(QDialog):
                 #self.vertical_line_xval = evt.xdata
                 #self.ax2.axvline(x=evt.xdata, color='gray', linestyle='solid')
                 self.shape_regression(evt)
-        else:
-            if evt.button == 1:
+        elif self.mode == MODE_CUSTOM:
+            if evt.button == 1 and self.is_picking_shape:
                 self.pick_shape(evt)
-            
-
-                #self.update_chart()
-        #if self.cbxShape.isChecked() == False:
-        #    return
-            #self.ax2.axvline(x=evt.xdata, color='gray', linestyle='dashed')
-        #if evt.button == 1:
-        #    self.shape_regression(evt)
-            #print("0-0:",datetime.datetime.now())
-            
+                self.fig2.canvas.draw()
         return
-        #print("on_canvas_move", evt)
-        axis1 = self.comboAxis1.currentIndex()
-        axis2 = self.comboAxis2.currentIndex()
-        flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
-        flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
-        shape_to_visualize = np.zeros((1,len(self.analysis_result_list[0])))
-        if axis1 != 10:
-            shape_to_visualize[0][axis1] = flip_axis1 * evt.xdata
-        shape_to_visualize[0][axis2] = flip_axis2 * evt.ydata
-        #print("shape_to_visualize", axis1, axis2, shape_to_visualize[0] )
-        unrotated_shape = self.unrotate_shape(shape_to_visualize)
-        self.show_shape(unrotated_shape[0], 0)
-        #print("unrotated_shape", unrotated_shape)
 
     def on_canvas_button_release(self, evt):
         if self.mode == MODE_AVERAGE:
@@ -4613,12 +4598,13 @@ class DataExplorationDialog(QDialog):
                 # set cursor to crosshair
                 self.plot_widget2.setCursor(QCursor(Qt.ArrowCursor))
                 self.is_picking_shape = False
-                self.pick_idx = -1                
+                self.pick_idx = -1
+                
             else:
             #if evt.xdata is not None:
                 self.vertical_line_xval = evt.xdata
                 self.vertical_line_style = 'dashed'
-            self.show_analysis_result()
+            #self.show_analysis_result()
         return
         #print("button_release", evt)
         if self.onpick_happened == True:
@@ -4666,7 +4652,7 @@ class DataExplorationDialog(QDialog):
         if self.mode == MODE_AVERAGE:
             return
 
-        if self.is_picking_shape == False:
+        if self.mode in [ MODE_GROWTH_TRAJECTORY, MODE_REGRESSION ]:
             if evt.button == 1 :
                 self.vertical_line_xval = evt.xdata
                 self.vertical_line_style = 'solid'
@@ -4674,14 +4660,16 @@ class DataExplorationDialog(QDialog):
                 #self.show_analysis_result()
                 if self.axvline is not None:
                     self.axvline.remove()
+                    self.axvline = None
                 if evt.xdata is not None:
                 #print("xdata", evt.xdata)
                     self.axvline = self.ax2.axvline(x=self.vertical_line_xval, color='gray', linestyle=self.vertical_line_style)
                     self.fig2.canvas.draw()
                     self.shape_regression(evt)
-        else:
-            if evt.button == 1 :
+        elif self.mode == MODE_CUSTOM:
+            if evt.button == 1 and self.is_picking_shape:
                 self.pick_shape(evt)
+                self.fig2.canvas.draw()
 
         return
         self.canvas_down_xy = (evt.x, evt.y)
@@ -4691,6 +4679,20 @@ class DataExplorationDialog(QDialog):
         if self.pick_idx == -1:
             return
         #print("pick_shape", evt.xdata, evt.ydata, self.pick_idx)
+        scatter_data_len = len(self.scatter_data.keys())
+        symbol_candidate = self.marker_list[scatter_data_len:scatter_data_len+2]
+        color_candidate = self.color_list[scatter_data_len:scatter_data_len+2]
+        #print("pick_shape", evt.xdata, evt.ydata, self.pick_idx, scatter_data_len, symbol_candidate, color_candidate)
+
+        if self.custom_shape_hash[self.pick_idx]['point'] is not None:
+            self.custom_shape_hash[self.pick_idx]['point'].remove()
+            self.custom_shape_hash[self.pick_idx]['point'] = None
+
+        self.custom_shape_hash[self.pick_idx]['coords'] = [evt.xdata, evt.ydata]
+        self.custom_shape_hash[self.pick_idx]['point'] = self.ax2.scatter([evt.xdata],[evt.ydata], s=150, marker=symbol_candidate[self.pick_idx], color=color_candidate[self.pick_idx] )
+        #print("point:", self.custom_shape_hash[self.pick_idx]['point'])
+        #self.ax2.scatter(self.average_shape[name]['x_val'], self.average_shape[name]['y_val'], s=150, marker=group['symbol'], color=group['color'])
+
         axis1 = self.comboAxis1.currentIndex()
         axis2 = self.comboAxis2.currentIndex()
         flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
@@ -4703,6 +4705,9 @@ class DataExplorationDialog(QDialog):
         unrotated_shape = self.unrotate_shape(shape_to_visualize)
         #print("0-4:",datetime.datetime.now())
         self.show_shape(unrotated_shape[0], self.pick_idx)
+
+        #self.axvline = self.ax2.axvline(x=self.vertical_line_xval, color='gray', linestyle=self.vertical_line_style)
+
 
     def shape_regression(self, evt):
         #print("shape regression", evt.xdata)

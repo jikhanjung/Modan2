@@ -938,6 +938,19 @@ class ObjectViewer3D(QGLWidget):
         self.updateGL()
         #self.parent.update_status()
         
+    def reset_pose(self):
+        self.temp_rotate_x = 0
+        self.temp_rotate_y = 0
+        self.rotate_x = 0
+        self.rotate_y = 0
+        self.pan_x = 0
+        self.pan_y = 0
+        self.dolly = 0
+        self.temp_dolly = 0
+        #if self.mode == OBJECT_MODE:
+        self.align_object()
+        
+
     def sync_rotation(self):
         #print("sync rotation", self.rotate_x, self.rotate_y, self.temp_rotate_x, self.temp_rotate_y)
         self.rotate_x += self.temp_rotate_x
@@ -3683,6 +3696,7 @@ class DataExplorationDialog(QDialog):
         self.shape_view_dolly = 0
         self.is_picking_shape = False
         self.pick_idx = -1
+        self.animation_counter = 0
         #self.shape_mode = MODE_REGRESSION
         self.rotation_matrix = np.array([
         [1, 0, 0, 0],
@@ -3867,12 +3881,24 @@ class DataExplorationDialog(QDialog):
         self.view_widget = QWidget()
         self.view_widget.setLayout(self.shape_view_layout)
 
+        self.shape_option_widget = QWidget()
+        self.shape_option_layout = QVBoxLayout()
+        self.shape_option_widget.setLayout(self.shape_option_layout)
+        self.btnResetPose = QPushButton("Reset Pose")
+        self.btnResetPose.clicked.connect(self.reset_shape_pose)
+        self.shape_option_layout.addWidget(self.btnResetPose)
+        self.btnAnimate = QPushButton("Animate")
+        self.btnAnimate.clicked.connect(self.animate_shape)
+        self.shape_option_layout.addWidget(self.btnAnimate)
+
+
         #self.visualization_layout.addWidget(self.plot_widget,2)
         self.visualization_layout.addWidget(self.toolbar_widget,0,0)
         self.visualization_layout.addWidget(self.chart_option_widget,1,0)
         self.visualization_layout.addWidget(self.axis_option_widget,2,0)
         self.visualization_layout.addWidget(self.plot_widget2,3,0)
         self.visualization_layout.addWidget(self.plot_widget3,4,0)
+        self.visualization_layout.addWidget(self.shape_option_widget,0,1)
         self.visualization_layout.addWidget(self.view_widget,3,1,2,1)
         self.visualization_layout.setColumnStretch(0,2)
         self.visualization_layout.setColumnStretch(1,1)
@@ -3936,7 +3962,79 @@ class DataExplorationDialog(QDialog):
         self.layout.addWidget(self.visualization_widget)
         #print("layout done")
         #self.resizeEvent(None)
-    
+
+    def chart_animation(self):
+        #print("chart_animation", self.animation_counter)
+        idx = 0
+        if self.animation_counter == 200:
+            idx = self.animation_counter
+            self.timer.stop()
+            return
+        elif self.animation_counter >= 100:
+            idx = 199 - self.animation_counter
+            #return
+        else:
+            idx = self.animation_counter
+
+        x = self.animation_x_range[idx]
+        y = self.animation_y_range[idx]
+        #print("chart_animation", x, y, self.animation_counter)
+        #self.animation_shape['point']
+        self.animation_shape['point'].set_offsets([x, y])
+        self.fig2.canvas.draw()
+        self.animation_counter += 1
+
+        ''' show shape '''
+        axis1 = self.comboAxis1.currentIndex()
+        axis2 = self.comboAxis2.currentIndex()
+        flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
+        flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
+        shape_to_visualize = np.zeros((1,len(self.analysis_result_list[0])))
+        x_value = flip_axis1 * x
+        y_value = flip_axis2 * y
+        shape_to_visualize[0][axis1] = x_value
+        shape_to_visualize[0][axis2] = y_value
+        unrotated_shape = self.unrotate_shape(shape_to_visualize)
+        
+        #print("0-4:",datetime.datetime.now())
+        self.show_shape(unrotated_shape[0], 0)
+
+
+    def animate_shape(self):
+        if self.mode == MODE_CUSTOM:
+
+            from_shape = self.custom_shape_hash[0]
+            to_shape = self.custom_shape_hash[1]
+            x_from, y_from = from_shape['coords']
+            x_to, y_to = to_shape['coords']
+            #print("animate_shape", x_from, y_from, x_to, y_to)
+
+            self.animation_x_range = np.linspace(x_from, x_to, 100)
+            self.animation_y_range = np.linspace(y_from, y_to, 100)
+            self.animation_shape = { 'coords': [x_from, y_from], 'point': None}
+            self.animation_counter = 0
+
+            self.animation_shape['point'] = self.ax2.scatter(x_from, y_from, s=100, c='red', marker='o')
+            self.fig2.canvas.draw()
+            self.animation_counter += 1
+
+            self.timer = QTimer()
+            self.timer.timeout.connect(self.chart_animation)
+            self.timer.start(5)
+
+
+    def reset_shape_pose(self):
+        #print("reset_shape_pose")
+        self.rotation_matrix = np.array([
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, 1, 0],
+        [0, 0, 0, 1]
+        ])
+        for shape_view in self.shape_view_list:
+            shape_view.reset_pose()
+            shape_view.updateGL()
+
     def on_chart_dim_changed(self):
         if self.rb2DChartDim.isChecked():
             self.toolbar3.hide()
@@ -4615,11 +4713,11 @@ class DataExplorationDialog(QDialog):
             self.tableView1.selectionModel().clearSelection()
 
     def show_shape(self, shape, idx):
-        #print("show object")
+        #print("show object", idx)
         obj = MdObject()
         obj.dataset_id = self.analysis.dataset_id
         obj.landmark_list = []
-        #print("shape:", shape, "len(shape)", len(shape))
+        #print("shape:", shape[:5], "len(shape)", len(shape))
         for i in range(0,len(shape),3):
             landmark = [shape[i], shape[i+1], shape[i+2]]
             obj.landmark_list.append(landmark)

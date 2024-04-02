@@ -1013,6 +1013,9 @@ class MdDatasetOps:
         
         self.baseline_point_list = dataset.baseline_point_list
         #print self
+    def reset_pose(self):
+        pass
+
     def set_reference_shape(self, shape):
         self.reference_shape = shape
 

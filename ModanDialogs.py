@@ -3881,15 +3881,16 @@ class DataExplorationDialog(QDialog):
         self.view_widget = QWidget()
         self.view_widget.setLayout(self.shape_view_layout)
 
-        self.shape_option_widget = QWidget()
-        self.shape_option_layout = QVBoxLayout()
-        self.shape_option_widget.setLayout(self.shape_option_layout)
         self.btnResetPose = QPushButton("Reset Pose")
         self.btnResetPose.clicked.connect(self.reset_shape_pose)
-        self.shape_option_layout.addWidget(self.btnResetPose)
         self.btnAnimate = QPushButton("Animate")
         self.btnAnimate.clicked.connect(self.animate_shape)
+
+        self.shape_option_widget = QWidget()
+        self.shape_option_layout = QHBoxLayout()
+        self.shape_option_widget.setLayout(self.shape_option_layout)
         self.shape_option_layout.addWidget(self.btnAnimate)
+        self.shape_option_layout.addWidget(self.btnResetPose)
 
 
         #self.visualization_layout.addWidget(self.plot_widget,2)
@@ -3968,7 +3969,10 @@ class DataExplorationDialog(QDialog):
         idx = 0
         if self.animation_counter == 200:
             idx = self.animation_counter
+            self.animation_shape['point'].remove()
+            self.animation_shape['point'] = None
             self.timer.stop()
+            self.fig2.canvas.draw()
             return
         elif self.animation_counter >= 100:
             idx = 199 - self.animation_counter
@@ -4174,7 +4178,7 @@ class DataExplorationDialog(QDialog):
         elif self.mode == MODE_CUSTOM:
             keyname_list = [ "A", "B"]
             for idx, keyname in enumerate(keyname_list):
-                self.custom_shape_hash[idx] = {'name': keyname, 'coords': [], 'point': None, 'color': None}
+                self.custom_shape_hash[idx] = {'name': keyname, 'coords': [], 'point': None, 'color': None, 'label': None}
 
         for idx, keyname in enumerate(keyname_list):
             shape_view = ObjectViewer3D(self)
@@ -4781,13 +4785,20 @@ class DataExplorationDialog(QDialog):
         symbol_candidate = self.marker_list[scatter_data_len:scatter_data_len+2]
         color_candidate = self.color_list[scatter_data_len:scatter_data_len+2]
         #print("pick_shape", evt.xdata, evt.ydata, self.pick_idx, scatter_data_len, symbol_candidate, color_candidate)
+        shape = self.custom_shape_hash[self.pick_idx]
 
-        if self.custom_shape_hash[self.pick_idx]['point'] is not None:
-            self.custom_shape_hash[self.pick_idx]['point'].remove()
-            self.custom_shape_hash[self.pick_idx]['point'] = None
+        if shape['point'] is not None:
+            shape['point'].remove()
+            shape['point'] = None
+        if shape['label'] is not None:
+            shape['label'].remove()
+            shape['label'] = None
 
-        self.custom_shape_hash[self.pick_idx]['coords'] = [evt.xdata, evt.ydata]
-        self.custom_shape_hash[self.pick_idx]['point'] = self.ax2.scatter([evt.xdata],[evt.ydata], s=150, marker=symbol_candidate[self.pick_idx], color=color_candidate[self.pick_idx] )
+        ''' need to improve speed by using offset, not creating new annotation every time '''
+        shape['coords'] = [evt.xdata, evt.ydata]
+        shape['point'] = self.ax2.scatter([evt.xdata],[evt.ydata], s=150, marker=symbol_candidate[self.pick_idx], color=color_candidate[self.pick_idx] )
+        #print("shape['name']", shape['name'])
+        shape['label'] = self.ax2.annotate(shape['name'], (evt.xdata, evt.ydata), xycoords='data',textcoords='offset pixels', xytext=(15,15), ha='center', fontsize=12, color='black')
         #print("point:", self.custom_shape_hash[self.pick_idx]['point'])
         #self.ax2.scatter(self.average_shape[name]['x_val'], self.average_shape[name]['y_val'], s=150, marker=group['symbol'], color=group['color'])
 

@@ -9,7 +9,7 @@ import tempfile
 
 COMPANY_NAME = "PaleoBytes"
 PROGRAM_NAME = "Modan2"
-PROGRAM_VERSION = "0.1.1"
+PROGRAM_VERSION = "0.1.2"
 
 DB_LOCATION = ""
 

@@ -3658,10 +3658,12 @@ class AnalysisResultDialog(QDialog):
     def initialize_UI(self):
         pass
 
-MODE_GROWTH_TRAJECTORY = 0
+MODE_EXPLORATION = 0
 MODE_REGRESSION = 1
-MODE_AVERAGE = 2
-MODE_CUSTOM = 3
+MODE_GROWTH_TRAJECTORY = 2
+MODE_AVERAGE = 3
+MODE_COMPARISON = 4
+
 CENTROID_SIZE_INDEX = 10
 class DataExplorationDialog(QDialog):
     def __init__(self, parent):
@@ -3678,8 +3680,8 @@ class DataExplorationDialog(QDialog):
         self.on_pick_happened = False
         self.bgcolor = "#AAAAAA"
         self.read_settings()
+        self.mode = MODE_EXPLORATION
 
-        self.mode = MODE_GROWTH_TRAJECTORY 
         self.curve_list = []
         self.shape_view_list = []
         self.shape_label_list = []
@@ -3722,12 +3724,13 @@ class DataExplorationDialog(QDialog):
         self.comboGroupBy.currentIndexChanged.connect(self.comboGroupBy_changed)
         self.lblVisualization = QLabel("Visualization")
         self.comboVisualization = QComboBox()
-        self.comboVisualization.addItem("Growth trajectory")
+        self.comboVisualization.addItem("Exploration")
         self.comboVisualization.addItem("Regression")
+        self.comboVisualization.addItem("Growth trajectory")
         self.comboVisualization.addItem("Average")
-        self.comboVisualization.addItem("Custom")
+        self.comboVisualization.addItem("Comparison")
+        self.comboVisualization.setCurrentIndex(0)
         self.comboVisualization.currentIndexChanged.connect(self.comboVisualizationMethod_changed)
-
 
         self.plot_widget2 = FigureCanvas(Figure(figsize=(20, 16),dpi=100))
         self.fig2 = self.plot_widget2.figure
@@ -3961,6 +3964,11 @@ class DataExplorationDialog(QDialog):
         #self.layout.addWidget(self.toolbar2, i, 0, 1, 2)
         
         self.layout.addWidget(self.visualization_widget)
+        
+        #self.comboVisualizationMethod_changed()
+
+        #self.set_mode( MODE_EXPLORE )
+
         #print("layout done")
         #self.resizeEvent(None)
 
@@ -4005,7 +4013,7 @@ class DataExplorationDialog(QDialog):
 
 
     def animate_shape(self):
-        if self.mode == MODE_CUSTOM:
+        if self.mode == MODE_COMPARISON:
 
             from_shape = self.custom_shape_hash[0]
             to_shape = self.custom_shape_hash[1]
@@ -4152,7 +4160,15 @@ class DataExplorationDialog(QDialog):
         self.update_chart()
         self.prepare_shape_view()
         self.resizeEvent(None)
- 
+        if mode == MODE_EXPLORATION:
+            self.pick_idx = 0
+            self.is_picking_shape = True
+            self.plot_widget2.setCursor(QCursor(Qt.CrossCursor))
+        else:
+            self.is_picking_shape = False
+            self.pick_idx = -1
+            self.plot_widget2.setCursor(QCursor(Qt.ArrowCursor))
+
     def prepare_shape_view(self):
         for shape_label in self.shape_label_list:
             shape_label.deleteLater()
@@ -4175,15 +4191,19 @@ class DataExplorationDialog(QDialog):
       
         if self.mode in [ MODE_GROWTH_TRAJECTORY, MODE_REGRESSION, MODE_AVERAGE]:
             keyname_list = self.scatter_data.keys()
-        elif self.mode == MODE_CUSTOM:
+        elif self.mode == MODE_COMPARISON:
             keyname_list = [ "A", "B"]
+            for idx, keyname in enumerate(keyname_list):
+                self.custom_shape_hash[idx] = {'name': keyname, 'coords': [], 'point': None, 'color': None, 'label': None}
+        elif self.mode == MODE_EXPLORATION:
+            keyname_list = [ ''  ]
             for idx, keyname in enumerate(keyname_list):
                 self.custom_shape_hash[idx] = {'name': keyname, 'coords': [], 'point': None, 'color': None, 'label': None}
 
         for idx, keyname in enumerate(keyname_list):
             shape_view = ObjectViewer3D(self)
 
-            if self.mode == MODE_CUSTOM:
+            if self.mode == MODE_COMPARISON:
                 shape_button = QPushButton(QIcon(mu.resource_path('icons/M2Landmark_2.png')), "")
                 # send idx to lambda function
                 shape_button.clicked.connect(lambda checked, idx=idx: self.shape_button_clicked(idx))
@@ -4449,7 +4469,7 @@ class DataExplorationDialog(QDialog):
         else:
             self.comboGroupBy.setCurrentIndex(0)
 
-        self.set_growth_trajectory_mode()
+        self.set_mode(MODE_EXPLORATION)
 
     def prepare_scatter_data(self):
         axis1 = self.comboAxis1.currentIndex()
@@ -4685,7 +4705,7 @@ class DataExplorationDialog(QDialog):
                 #self.vertical_line_xval = evt.xdata
                 #self.ax2.axvline(x=evt.xdata, color='gray', linestyle='solid')
                 self.shape_regression(evt)
-        elif self.mode == MODE_CUSTOM:
+        elif self.mode in [ MODE_COMPARISON, MODE_EXPLORATION ]:
             if evt.button == 1 and self.is_picking_shape:
                 self.pick_shape(evt)
                 self.fig2.canvas.draw()
@@ -4698,15 +4718,17 @@ class DataExplorationDialog(QDialog):
         if evt.button == 1:
             if self.is_picking_shape:
                 # set cursor to crosshair
-                self.plot_widget2.setCursor(QCursor(Qt.ArrowCursor))
-                self.is_picking_shape = False
-                self.pick_idx = -1
-                
+                if self.mode == MODE_COMPARISON:
+                    self.plot_widget2.setCursor(QCursor(Qt.ArrowCursor))
+                    self.is_picking_shape = False
+                    self.pick_idx = -1
+                elif self.mode == MODE_EXPLORATION:
+                    self.plot_widget2.setCursor(QCursor(Qt.CrossCursor))
+                    self.is_picking_shape = True
+                    self.pick_idx = 0
             else:
-            #if evt.xdata is not None:
                 self.vertical_line_xval = evt.xdata
                 self.vertical_line_style = 'dashed'
-            #self.show_analysis_result()
         return
         #print("button_release", evt)
         if self.onpick_happened == True:
@@ -4768,8 +4790,9 @@ class DataExplorationDialog(QDialog):
                     self.axvline = self.ax2.axvline(x=self.vertical_line_xval, color='gray', linestyle=self.vertical_line_style)
                     self.fig2.canvas.draw()
                     self.shape_regression(evt)
-        elif self.mode == MODE_CUSTOM:
+        elif self.mode in [ MODE_COMPARISON, MODE_EXPLORATION ]:
             if evt.button == 1 and self.is_picking_shape:
+                self.plot_widget2.setCursor(QCursor(Qt.CrossCursor))
                 self.pick_shape(evt)
                 self.fig2.canvas.draw()
 
@@ -4798,7 +4821,8 @@ class DataExplorationDialog(QDialog):
         shape['coords'] = [evt.xdata, evt.ydata]
         shape['point'] = self.ax2.scatter([evt.xdata],[evt.ydata], s=150, marker=symbol_candidate[self.pick_idx], color=color_candidate[self.pick_idx] )
         #print("shape['name']", shape['name'])
-        shape['label'] = self.ax2.annotate(shape['name'], (evt.xdata, evt.ydata), xycoords='data',textcoords='offset pixels', xytext=(15,15), ha='center', fontsize=12, color='black')
+        if shape['name'] != '':
+            shape['label'] = self.ax2.annotate(shape['name'], (evt.xdata, evt.ydata), xycoords='data',textcoords='offset pixels', xytext=(15,15), ha='center', fontsize=12, color='black')
         #print("point:", self.custom_shape_hash[self.pick_idx]['point'])
         #self.ax2.scatter(self.average_shape[name]['x_val'], self.average_shape[name]['y_val'], s=150, marker=group['symbol'], color=group['color'])
 

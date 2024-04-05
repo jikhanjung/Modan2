@@ -2561,7 +2561,7 @@ class Morphologika:
             objects[name] = []
             for point in self.raw_data['rawpoints'][begin:begin + count]:
                 #print point
-                coords = re.split('\s+', point)
+                coords = re.split('\s+', point)[:dimension]
                 objects[name].append(coords)
 
         self.landmark_data = objects

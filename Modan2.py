@@ -315,7 +315,25 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             analysis_result = PerformPCA(ds_ops)
 
         elif analysis_type == "MANOVA":
-            analysis_result = PerformManova(ds_ops, group_by)
+            analysis_result = PerformPCA(ds_ops)
+            eigenvalues_list = []
+            eigenvalues_cumulative_percentage = 0
+            print("raw eigenvalues:",analysis_result.raw_eigen_values)
+            print("eigenvalues:",analysis_result.eigen_value_percentages)
+            for i, val in enumerate(analysis_result.raw_eigen_values):
+                val2 = analysis_result.eigen_value_percentages[i]
+                eigenvalues_list.append( val )
+                eigenvalues_cumulative_percentage += val2
+                #print("eigenvalues:",eigenvalues_list)
+                if eigenvalues_cumulative_percentage > 0.9:
+                    break
+            effective_eigenvalues = len(eigenvalues_list)
+            print("eigen_value list",eigenvalues_list)
+            print("effective eigenvalues:",effective_eigenvalues)
+            new_coords = [ pc_score_list[:effective_eigenvalues] for pc_score_list in analysis_result.rotated_matrix.tolist() ] 
+            #analysis.eigenvalues_json = json.dumps(eigenvalues_list)
+
+            analysis_result = PerformManova(ds_ops, new_coords, group_by)
 
         if analysis_type != "MANOVA":
             new_coords = analysis_result.rotated_matrix.tolist()

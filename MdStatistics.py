@@ -311,7 +311,7 @@ class MdManova:
         self.results = model.mv_test()
         return
     
-def PerformManova(dataset_ops, group_by):
+def PerformManova(dataset_ops, new_coords, group_by):
     dimension = dataset_ops.dimension
     manova = MdManova()
 
@@ -320,23 +320,17 @@ def PerformManova(dataset_ops, group_by):
     if property_index < 0:
         #QMessageBox.information(self, "Information", "Please select a property.")
         return
-    datamatrix = []
+    datamatrix = new_coords
+    column_list = []
+    for pc_idx, pc_val in enumerate(new_coords[0]):
+        column_list.append("PC"+str(pc_idx+1))
+
     category_list = []
     group_by_name = dataset_ops.propertyname_list[property_index]
     #obj = dataset_ops.object_list[0]
     #print(obj, obj.property_list, property_index)
-    column_list = []
-    xyz = ["x", "y", "z"]
+    #xyz = ["x", "y", "z"]
     for idx, obj in enumerate(dataset_ops.object_list):
-        if idx == 0:
-            for lm_idx, lm in enumerate(obj.landmark_list[:5]):
-                for i in range(dimension):
-                    column_list.append(xyz[i]+str(lm_idx+1))
-
-        datum = []
-        for lm in obj.landmark_list[:5]:
-            datum.extend(lm[:dimension])
-        datamatrix.append(datum)
         category_list.append(obj.property_list[property_index])
 
     manova.SetData(datamatrix)

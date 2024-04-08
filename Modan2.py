@@ -19,7 +19,8 @@ from peewee_migrate import Router
 
 from ModanDialogs import DatasetAnalysisDialog, ObjectDialog, ImportDatasetDialog, DatasetDialog, PreferencesDialog, \
     MODE, ObjectViewer3D, ExportDatasetDialog, ObjectViewer2D, ProgressDialog, NewAnalysisDialog, AnalysisInfoWidget, DataExplorationDialog
-from MdStatistics import PerformCVA, PerformPCA
+from MdStatistics import PerformCVA, PerformPCA, PerformManova
+
 import json
 from MdLogger import setup_logger
 logger = setup_logger(mu.PROGRAM_NAME)
@@ -274,7 +275,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             elif ret == 1:
                 superimposition_method = self.analysis_dialog.comboSuperimposition.currentText()
                 ordination_method = self.analysis_dialog.comboOrdination.currentText()
-                if ordination_method == "CVA":                
+                if ordination_method in ["CVA", "MANOVA"]:
                     group_by = self.analysis_dialog.comboGroupBy.currentIndex()
                     #self.analysis_dialog.comboOrdination.currentText()
                 else:
@@ -289,8 +290,8 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             self.analysis_dialog = DatasetAnalysisDialog(self,self.selected_dataset)
             self.analysis_dialog.show()
 
-    def run_analysis(self, superimposition_method, ordination_method, group_by, analysis_name, dataset):
-        logger.info("run analysis %s %s %s %s %s", superimposition_method, ordination_method, group_by, analysis_name, dataset.dataset_name)
+    def run_analysis(self, superimposition_method, analysis_method, group_by, analysis_name, dataset):
+        logger.info("run analysis %s %s %s %s %s", superimposition_method, analysis_method, group_by, analysis_name, dataset.dataset_name)
         #print("pca button clicked")
         # set wait cursor
         
@@ -298,7 +299,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
         ds_ops = MdDatasetOps(dataset)
         analysis_done = False
-        analysis_type = ordination_method
+        analysis_type = analysis_method
 
         QApplication.setOverrideCursor(Qt.WaitCursor)
         if not ds_ops.procrustes_superimposition():
@@ -313,47 +314,59 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         elif analysis_type == "PCA":
             analysis_result = PerformPCA(ds_ops)
 
-        new_coords = analysis_result.rotated_matrix.tolist()
-        for i, obj in enumerate(ds_ops.object_list):
-            obj.analysis_result = new_coords[i]
+        elif analysis_type == "MANOVA":
+            analysis_result = PerformManova(ds_ops, group_by)
+
+        if analysis_type != "MANOVA":
+            new_coords = analysis_result.rotated_matrix.tolist()
+            for i, obj in enumerate(ds_ops.object_list):
+                obj.analysis_result = new_coords[i]
 
         analysis = MdAnalysis()
         analysis.dataset = dataset
         analysis.analysis_name = analysis_name
         #analysis.analysis_type = analysis_type
         analysis.superimposition_method = superimposition_method
-        analysis.analysis_method = ordination_method
+        analysis.analysis_method = analysis_method
         analysis.dimension = dataset.dimension
         analysis.wireframe = dataset.wireframe
         analysis.baseline = dataset.baseline
         analysis.polygons = dataset.polygons
         analysis.propertyname_str = dataset.propertyname_str
-        new_coords = analysis_result.rotated_matrix.tolist()
-        analysis.analysis_result_json = json.dumps(new_coords)
-        rotation_matrix = analysis_result.rotation_matrix.tolist()
-        analysis.rotation_matrix_json = json.dumps(rotation_matrix)
 
-        object_info_list = []
-        raw_landmark_list = []
-        property_len = len(dataset.get_propertyname_list()) or 0
-        for obj in dataset.object_list:
-            raw_landmark_list.append( obj.get_landmark_list() )
-            object_info_list.append( { "id": obj.id, "name": obj.object_name, "csize": obj.get_centroid_size(), "property_list": obj.get_property_list()[:property_len] })
-        analysis.raw_landmark_json = json.dumps(raw_landmark_list)
-        analysis.object_info_json = json.dumps(object_info_list)
+        group_by_name = dataset.propertyname_list[group_by]
 
-        superimposed_landmark_list = []
-        for obj_ops in ds_ops.object_list:
-            superimposed_landmark_list.append( obj_ops.landmark_list )
-        analysis.superimposed_landmark_json = json.dumps(superimposed_landmark_list)
-        if group_by >= 0:
-            analysis.group_by = dataset.get_propertyname_list()[group_by]
-        
-        eigenvalues_list = []
-        for i, val in enumerate(analysis_result.raw_eigen_values):
-            val2 = analysis_result.eigen_value_percentages[i]
-            eigenvalues_list.append( [val, val2] )
-        analysis.eigenvalues_json = json.dumps(eigenvalues_list)
+        if analysis_type == "MANOVA":
+            print("MANOVA result:",analysis_result.results)
+            print("group by:", group_by, group_by_name)
+            analysis.analysis_result_json = json.dumps(str(analysis_result.results[group_by_name]['stat']))
+        else:
+            new_coords = analysis_result.rotated_matrix.tolist()
+            analysis.analysis_result_json = json.dumps(new_coords)
+            rotation_matrix = analysis_result.rotation_matrix.tolist()
+            analysis.rotation_matrix_json = json.dumps(rotation_matrix)
+
+            object_info_list = []
+            raw_landmark_list = []
+            property_len = len(dataset.get_propertyname_list()) or 0
+            for obj in dataset.object_list:
+                raw_landmark_list.append( obj.get_landmark_list() )
+                object_info_list.append( { "id": obj.id, "name": obj.object_name, "csize": obj.get_centroid_size(), "property_list": obj.get_property_list()[:property_len] })
+            analysis.raw_landmark_json = json.dumps(raw_landmark_list)
+            analysis.object_info_json = json.dumps(object_info_list)
+
+            superimposed_landmark_list = []
+            for obj_ops in ds_ops.object_list:
+                superimposed_landmark_list.append( obj_ops.landmark_list )
+            analysis.superimposed_landmark_json = json.dumps(superimposed_landmark_list)
+            if group_by >= 0:
+                analysis.group_by = dataset.get_propertyname_list()[group_by]
+            
+            eigenvalues_list = []
+            for i, val in enumerate(analysis_result.raw_eigen_values):
+                val2 = analysis_result.eigen_value_percentages[i]
+                eigenvalues_list.append( [val, val2] )
+            analysis.eigenvalues_json = json.dumps(eigenvalues_list)
         analysis.save()
 
         #print("result:",new_coords)

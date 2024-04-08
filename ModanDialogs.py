@@ -3545,6 +3545,7 @@ class NewAnalysisDialog(QDialog):
         self.comboOrdination = QComboBox(self)
         self.comboOrdination.addItem("PCA")
         self.comboOrdination.addItem("CVA")
+        self.comboOrdination.addItem("MANOVA")
         self.comboOrdination.currentIndexChanged.connect(self.comboOrdination_changed)
         #self.comboOrdination.addItem("MDS")
         self.lblGroupBy = QLabel("Group by", self)
@@ -3590,7 +3591,7 @@ class NewAnalysisDialog(QDialog):
             print("name edited")
 
     def comboOrdination_changed(self):
-        if self.comboOrdination.currentText() == "CVA":
+        if self.comboOrdination.currentText() in ["CVA","MANOVA"]:
             self.comboGroupBy.setEnabled(True)
             self.comboGroupBy.show()
             self.lblGroupBy.show()
@@ -3670,6 +3671,7 @@ class DataExplorationDialog(QDialog):
         super().__init__()
         self.parent = parent
         self.setWindowTitle("Modan2 - Data Exploration")
+        self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
         self.m_app = QApplication.instance()
         self.default_color_list = mu.VIVID_COLOR_LIST[:]        
         self.color_list = self.default_color_list[:]
@@ -3802,7 +3804,7 @@ class DataExplorationDialog(QDialog):
 
         self.cbxRegression = QCheckBox()
         self.cbxRegression.setText("Regression line")
-        self.cbxRegression.setChecked(True)
+        self.cbxRegression.setChecked(False)
         self.cbxRegression.stateChanged.connect(self.update_chart)
         self.cbxAnnotation = QCheckBox()
         self.cbxAnnotation.setText("Annotation")
@@ -4150,13 +4152,19 @@ class DataExplorationDialog(QDialog):
             self.comboAxis2.setCurrentIndex(0)
             self.comboAxis3.setCurrentIndex(1)
         else:
-            if mode == MODE_AVERAGE:
-                self.cbxAverage.setChecked(True)
             #elif mode == MODE_CUSTOM:
-                
             self.comboAxis1.setCurrentIndex(0)
             self.comboAxis2.setCurrentIndex(1)
             self.comboAxis3.setCurrentIndex(2)
+
+        self.cbxRegression.setChecked(False)
+        if mode in [ MODE_REGRESSION, MODE_GROWTH_TRAJECTORY ]:
+            self.cbxRegression.setChecked(True)
+
+        self.cbxAverage.setChecked(False)            
+        if mode == MODE_AVERAGE:
+            self.cbxAverage.setChecked(True)
+
         self.update_chart()
         self.prepare_shape_view()
         self.resizeEvent(None)
@@ -4672,25 +4680,36 @@ class DataExplorationDialog(QDialog):
 
     def on_canvas_move(self, evt):
         
+        if evt.xdata is None or evt.ydata is None or self.mode == MODE_AVERAGE:
+            return
+
+        x_val = evt.xdata
+        y_val = evt.ydata
+        if x_val > self.data_range['x_max']:
+            x_val = self.data_range['x_max']
+        if x_val < self.data_range['x_min']:
+            x_val = self.data_range['x_min']
+        if y_val > self.data_range['y_max']:
+            y_val = self.data_range['y_max']
+        if y_val < self.data_range['y_min']:
+            y_val = self.data_range['y_min']
+
         if self.axvline is not None:
             #print("remove axvline",self.axvline)
             self.axvline.remove()
             self.axvline = None
 
-        if evt.xdata is None or evt.ydata is None or self.mode == MODE_AVERAGE:
-            return
-
         #print(evt.button, evt.xdata, evt.ydata)
         if self.mode in [MODE_GROWTH_TRAJECTORY, MODE_REGRESSION]:
             if evt.button is None:
-                self.vertical_line_xval = evt.xdata
+                self.vertical_line_xval = x_val
                 self.vertical_line_style = 'dashed'
                 self.axvline = self.ax2.axvline(x=self.vertical_line_xval, color='gray', linestyle=self.vertical_line_style)
                 self.fig2.canvas.draw()
                 #self.ax2.axvline(x=evt.xdata, color='gray', linestyle='dashed')
                 #self.show_analysis_result()
             elif evt.button == 1:
-                self.vertical_line_xval = evt.xdata
+                self.vertical_line_xval = x_val
                 self.vertical_line_style = 'solid'
                 #print("2-0:",datetime.datetime.now())
                 #self.show_analysis_result()
@@ -4707,7 +4726,7 @@ class DataExplorationDialog(QDialog):
                 self.shape_regression(evt)
         elif self.mode in [ MODE_COMPARISON, MODE_EXPLORATION ]:
             if evt.button == 1 and self.is_picking_shape:
-                self.pick_shape(evt)
+                self.pick_shape(x_val, y_val)
                 self.fig2.canvas.draw()
         return
 
@@ -4776,9 +4795,21 @@ class DataExplorationDialog(QDialog):
         if self.mode == MODE_AVERAGE:
             return
 
+        x_val = evt.xdata
+        y_val = evt.ydata
+        if x_val > self.data_range['x_max']:
+            x_val = self.data_range['x_max']
+        if x_val < self.data_range['x_min']:
+            x_val = self.data_range['x_min']
+        if y_val > self.data_range['y_max']:
+            y_val = self.data_range['y_max']
+        if y_val < self.data_range['y_min']:
+            y_val = self.data_range['y_min']
+
+
         if self.mode in [ MODE_GROWTH_TRAJECTORY, MODE_REGRESSION ]:
             if evt.button == 1 :
-                self.vertical_line_xval = evt.xdata
+                self.vertical_line_xval = x_val
                 self.vertical_line_style = 'solid'
                 #print("2-0:",datetime.datetime.now())
                 #self.show_analysis_result()
@@ -4793,14 +4824,14 @@ class DataExplorationDialog(QDialog):
         elif self.mode in [ MODE_COMPARISON, MODE_EXPLORATION ]:
             if evt.button == 1 and self.is_picking_shape:
                 self.plot_widget2.setCursor(QCursor(Qt.CrossCursor))
-                self.pick_shape(evt)
+                self.pick_shape(x_val, y_val)
                 self.fig2.canvas.draw()
 
         return
         self.canvas_down_xy = (evt.x, evt.y)
         #self.tableView.selectionModel().clearSelection()
 
-    def pick_shape(self, evt):
+    def pick_shape(self, x_val, y_val):
         if self.pick_idx == -1:
             return
         #print("pick_shape", evt.xdata, evt.ydata, self.pick_idx)
@@ -4818,11 +4849,11 @@ class DataExplorationDialog(QDialog):
             shape['label'] = None
 
         ''' need to improve speed by using offset, not creating new annotation every time '''
-        shape['coords'] = [evt.xdata, evt.ydata]
-        shape['point'] = self.ax2.scatter([evt.xdata],[evt.ydata], s=150, marker=symbol_candidate[self.pick_idx], color=color_candidate[self.pick_idx] )
+        shape['coords'] = [x_val, y_val]
+        shape['point'] = self.ax2.scatter([x_val],[y_val], s=150, marker=symbol_candidate[self.pick_idx], color=color_candidate[self.pick_idx] )
         #print("shape['name']", shape['name'])
         if shape['name'] != '':
-            shape['label'] = self.ax2.annotate(shape['name'], (evt.xdata, evt.ydata), xycoords='data',textcoords='offset pixels', xytext=(15,15), ha='center', fontsize=12, color='black')
+            shape['label'] = self.ax2.annotate(shape['name'], (x_val, y_val), xycoords='data',textcoords='offset pixels', xytext=(15,15), ha='center', fontsize=12, color='black')
         #print("point:", self.custom_shape_hash[self.pick_idx]['point'])
         #self.ax2.scatter(self.average_shape[name]['x_val'], self.average_shape[name]['y_val'], s=150, marker=group['symbol'], color=group['color'])
 
@@ -4831,10 +4862,12 @@ class DataExplorationDialog(QDialog):
         flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
         flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
         shape_to_visualize = np.zeros((1,len(self.analysis_result_list[0])))
-        x_value = flip_axis1 * evt.xdata
-        y_value = flip_axis2 * evt.ydata
-        shape_to_visualize[0][axis1] = x_value
-        shape_to_visualize[0][axis2] = y_value
+        x_value = flip_axis1 * x_val
+        y_value = flip_axis2 * y_val
+        if axis1 != CENTROID_SIZE_INDEX:
+            shape_to_visualize[0][axis1] = x_value
+        if axis2 != CENTROID_SIZE_INDEX:
+            shape_to_visualize[0][axis2] = y_value
         unrotated_shape = self.unrotate_shape(shape_to_visualize)
         #print("0-4:",datetime.datetime.now())
         self.show_shape(unrotated_shape[0], self.pick_idx)

@@ -284,6 +284,7 @@ class MdManova:
 
     def SetColumnList(self, column_list):
         self.column_list = column_list
+        print("column_list", column_list)
     
     def SetGroupby(self, group_by):
         self.group_by = group_by
@@ -299,6 +300,7 @@ class MdManova:
         print(formula)
         df = pd.DataFrame(self.data, columns=self.column_list)
         df[self.group_by] = self.category_list
+        print(self.group_by)
         print(df)
         print(df.columns)
         print(df[self.group_by])
@@ -306,13 +308,9 @@ class MdManova:
         # Define independent and dependent variables
         model = MANOVA.from_formula(formula, data=df)
         print(model.mv_test())
+        self.results = model.mv_test()
         return
     
-
-
-
-
-
 def PerformManova(dataset_ops, group_by):
     dimension = dataset_ops.dimension
     manova = MdManova()
@@ -324,19 +322,19 @@ def PerformManova(dataset_ops, group_by):
         return
     datamatrix = []
     category_list = []
-    group_by_name = dataset_ops.property_list[property_index]
+    group_by_name = dataset_ops.propertyname_list[property_index]
     #obj = dataset_ops.object_list[0]
     #print(obj, obj.property_list, property_index)
     column_list = []
     xyz = ["x", "y", "z"]
     for idx, obj in enumerate(dataset_ops.object_list):
         if idx == 0:
-            for lm in obj.landmark_list:
+            for lm_idx, lm in enumerate(obj.landmark_list[:5]):
                 for i in range(dimension):
-                    column_list.append(xyz[i]+str(idx+1))
+                    column_list.append(xyz[i]+str(lm_idx+1))
 
         datum = []
-        for lm in obj.landmark_list:
+        for lm in obj.landmark_list[:5]:
             datum.extend(lm[:dimension])
         datamatrix.append(datum)
         category_list.append(obj.property_list[property_index])
@@ -346,9 +344,6 @@ def PerformManova(dataset_ops, group_by):
     manova.SetColumnList(column_list)
     manova.SetGroupby(group_by_name)
     manova.Analyze()
-
-    number_of_axes = min(manova.nObservation, manova.nVariable)
-    cva_done = True
 
     return manova
 

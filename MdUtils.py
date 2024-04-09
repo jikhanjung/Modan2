@@ -180,3 +180,11 @@ def show_error_message(error_message):
     msg.setWindowTitle("Error")
     msg.exec_()
     return
+
+def is_numeric(value):
+    """Checks if a value is numeric (float)."""
+    try:
+        float(value)
+        return True
+    except ValueError:
+        return False

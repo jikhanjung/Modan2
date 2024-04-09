@@ -1467,6 +1467,7 @@ class MdDatasetOps:
 class MdAnalysis(Model):
     analysis_name = CharField()
     analysis_desc = CharField(null=True)
+    ''' dataset info '''
     dataset = ForeignKeyField(MdDataset, related_name='analyses', null=True)
     dimension = IntegerField(default=2)
     wireframe = CharField(null=True)
@@ -1474,17 +1475,30 @@ class MdAnalysis(Model):
     polygons = CharField(null=True)
     propertyname_str = CharField(null=True)
     superimposition_method = CharField()
-    analysis_method = CharField() # PCA or CVA
-    group_by = CharField(null=True)
+    #analysis_method = CharField() # PCA or CVA
 
+    ''' object info '''
     object_info_json = CharField(null=True) # object name, id, properties and centroid size
     raw_landmark_json = CharField(null=True)    # raw landmark info in list of list format
     superimposed_landmark_json = CharField(null=True) # superimposed landmark info in list of list format
-    analysis_result_json = CharField(null=True) # PCA or CVA result in list of list format
-    rotation_matrix_json = CharField(null=True) # rotation matrix from PCA or CVA
-    eigenvalues_json = CharField(null=True) # eigenvalues and percentages of variance
 
-    virtual_specimens_json = CharField(null=True) # list of virtual specimens
+    ''' PCA result '''
+    cva_group_by = CharField(null=True)
+    pca_analysis_result_json = CharField(null=True) # PCA result in list of list format
+    pca_rotation_matrix_json = CharField(null=True) # rotation matrix from PCA
+    pca_eigenvalues_json = CharField(null=True) # PCA eigenvalues and percentages of variance explained
+
+    ''' CVA result '''
+    cva_group_by = CharField(null=True)
+    cva_analysis_result_json = CharField(null=True) # CVA result in list of list format
+    cva_rotation_matrix_json = CharField(null=True) # rotation matrix from CVA
+    cva_eigenvalues_json = CharField(null=True) # CVA eigenvalues and percentages of variance explained
+
+    ''' MANOVA result'''
+    manova_group_by = CharField(null=True)
+    manova_analysis_result_json = CharField(null=True) # MANOVA results
+
+    #virtual_specimens_json = CharField(null=True) # list of virtual specimens
 
     created_at = DateTimeField(default=datetime.datetime.now)
     modified_at = DateTimeField(default=datetime.datetime.now)

@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import QTableWidgetItem, QHeaderView, QFileDialog, QCheckBo
                             QDialog, QLineEdit, QLabel, QPushButton, QAbstractItemView, QStatusBar, QMessageBox, \
                             QTableView, QSplitter, QRadioButton, QComboBox, QTextEdit, QSizePolicy, \
                             QTableWidget, QGridLayout, QAbstractButton, QButtonGroup, QGroupBox, \
-                            QTabWidget, QListWidget, QSpinBox
+                            QTabWidget, QListWidget, QSpinBox, QPlainTextEdit
 from PyQt5.QtGui import QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem, QImage,\
                         QFont, QPainter, QBrush, QMouseEvent, QWheelEvent, QDoubleValidator, QIcon, QCursor
 from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSize, QPoint,\
@@ -3529,6 +3529,7 @@ class NewAnalysisDialog(QDialog):
         super().__init__()
         self.parent = parent
         self.setGeometry(QRect(100, 100, 400, 300))
+        self.setWindowTitle("Modan2 - New Analysis")
         self.move(self.parent.pos()+QPoint(100,100))
         #self.status_bar = QStatusBar()
         self.dataset = dataset
@@ -3541,19 +3542,23 @@ class NewAnalysisDialog(QDialog):
         self.comboSuperimposition.addItem("Procrustes")
         self.comboSuperimposition.addItem("Bookstein")
         self.comboSuperimposition.addItem("Resistant Fit")
-        self.lblOrdination = QLabel("Ordination method", self)
-        self.comboOrdination = QComboBox(self)
-        self.comboOrdination.addItem("PCA")
-        self.comboOrdination.addItem("CVA")
-        self.comboOrdination.addItem("MANOVA")
-        self.comboOrdination.currentIndexChanged.connect(self.comboOrdination_changed)
+        #self.lblOrdination = QLabel("Ordination method", self)
+        #self.comboOrdination = QComboBox(self)
+        #self.comboOrdination.addItem("PCA")
+        #self.comboOrdination.addItem("CVA")
+        #self.comboOrdination.addItem("MANOVA")
+        #self.comboOrdination.currentIndexChanged.connect(self.comboOrdination_changed)
         #self.comboOrdination.addItem("MDS")
-        self.lblGroupBy = QLabel("Group by", self)
-        self.comboGroupBy = QComboBox(self)
+        self.lblCvaGroupBy = QLabel("CVA Group by", self)
+        self.comboCvaGroupBy = QComboBox(self)
+        self.lblManovaGroupBy = QLabel("MANOVA Group by", self)
+        self.comboManovaGroupBy = QComboBox(self)
         for property in dataset.get_propertyname_list():
-            self.comboGroupBy.addItem(property)
+            self.comboCvaGroupBy.addItem(property)
+            self.comboManovaGroupBy.addItem(property)
+
         self.ignore_change = False
-        self.comboOrdination_changed()
+        #self.comboOrdination_changed()
 
         self.btnOK = QPushButton("OK", self)
         self.btnCancel = QPushButton("Cancel", self)
@@ -3568,12 +3573,15 @@ class NewAnalysisDialog(QDialog):
         i+= 1
         self.layout.addWidget(self.lblSuperimposition, i, 0)
         self.layout.addWidget(self.comboSuperimposition, i, 1)
+        #i+= 1
+        #self.layout.addWidget(self.lblOrdination, i, 0)
+        #self.layout.addWidget(self.comboOrdination, i, 1)
         i+= 1
-        self.layout.addWidget(self.lblOrdination, i, 0)
-        self.layout.addWidget(self.comboOrdination, i, 1)
+        self.layout.addWidget(self.lblCvaGroupBy, i, 0)   
+        self.layout.addWidget(self.comboCvaGroupBy, i, 1)
         i+= 1
-        self.layout.addWidget(self.lblGroupBy, i, 0)   
-        self.layout.addWidget(self.comboGroupBy, i, 1)
+        self.layout.addWidget(self.lblManovaGroupBy, i, 0)   
+        self.layout.addWidget(self.comboManovaGroupBy, i, 1)
 
         self.buttonLayout = QHBoxLayout()
         self.buttonLayout.addWidget(self.btnOK)
@@ -3582,6 +3590,7 @@ class NewAnalysisDialog(QDialog):
         self.layout.addWidget(QLabel(""), i, 0, 1, 2)
         i+= 1
         self.layout.addLayout(self.buttonLayout, i, 0, 1, 2)
+        self.get_analysis_name()
 
     def edtAnalysisName_changed(self):
         if self.ignore_change is True:
@@ -3599,8 +3608,10 @@ class NewAnalysisDialog(QDialog):
             self.comboGroupBy.setEnabled(False)
             self.comboGroupBy.hide()
             self.lblGroupBy.hide()
+
+    def get_analysis_name(self):
         if self.name_edited is False:
-            analysis_name = self.comboOrdination.currentText()
+            analysis_name = "Analysis"
 
             analysis_name_list = [analysis.analysis_name for analysis in self.dataset.analyses]
             if analysis_name in analysis_name_list:
@@ -4454,26 +4465,27 @@ class DataExplorationDialog(QDialog):
         return
 
 
-    def set_analysis(self, analysis):
+    def set_analysis(self, analysis, analysis_method, group_by):
         self.analysis = analysis
+        self.analysis_method = analysis_method
         self.edtAnalysisName.setText(analysis.analysis_name)
         self.edtSuperimposition.setText(analysis.superimposition_method)
-        self.edtOrdination.setText(analysis.analysis_method)
+        self.edtOrdination.setText(self.analysis_method)
         #self.edtGroupBy.setText(analysis.group_by)
         self.comboGroupBy.clear()
         self.comboGroupBy.addItem("Select property")
         for property in analysis.dataset.get_propertyname_list():
             self.comboGroupBy.addItem(property)
         
-        if analysis.analysis_method == 'PCA':
+        if analysis_method == 'PCA':
             #self.lblGroupBy.hide()
             self.comboGroupBy.setEnabled(True)
         else:
             #self.lblGroupBy.show()
             self.comboGroupBy.setEnabled(False)
         
-        if analysis.group_by in analysis.dataset.get_propertyname_list():
-            self.comboGroupBy.setCurrentText(analysis.group_by)
+        if group_by in analysis.dataset.get_propertyname_list():
+            self.comboGroupBy.setCurrentText(group_by)
         else:
             self.comboGroupBy.setCurrentIndex(0)
 
@@ -4488,7 +4500,10 @@ class DataExplorationDialog(QDialog):
         flip_axis3 = -1.0 if self.cbxFlipAxis3.isChecked() == True else 1.0
 
         self.object_info_list = json.loads(self.analysis.object_info_json)
-        self.analysis_result_list = json.loads(self.analysis.analysis_result_json)
+        if self.analysis_method == 'PCA':
+            self.analysis_result_list = json.loads(self.analysis.pca_analysis_result_json)
+        elif self.analysis_method == 'CVA':
+            self.analysis_result_list = json.loads(self.analysis.cva_analysis_result_json)
         self.propertyname_list = self.analysis.propertyname_str.split(",")
         symbol_candidate = ['o','s','^','x','+','d','v','<','>','p','h']
         symbol_candidate = self.marker_list[:]
@@ -4942,8 +4957,11 @@ class DataExplorationDialog(QDialog):
         #        self.tableView.selectionModel().select(self.object_model.item(row,0).index(),QItemSelectionModel.Rows | QItemSelectionModel.Select)
 
     def unrotate_shape(self, shape):
-
-        rotation_matrix = json.loads(self.analysis.rotation_matrix_json)
+        if self.analysis_method == 'PCA':
+            rotation_matrix = json.loads(self.analysis.pca_rotation_matrix_json)
+        elif self.analysis_method == 'CVA':
+            rotation_matrix = json.loads(self.analysis.cva_rotation_matrix_json)
+        #rotation_matrix = json.loads(self.analysis.rotation_matrix_json)
         inverted_matrix = np.linalg.inv(rotation_matrix)
         #print("inverted_matrix", inverted_matrix)
         
@@ -4983,25 +5001,86 @@ class AnalysisInfoWidget(QWidget):
         self.lblSuperimposition = QLabel("Superimposition")
         self.edtSuperimposition = QLineEdit()
         self.edtSuperimposition.setEnabled(False)
-        self.lblOrdination = QLabel("Ordination")
-        self.edtOrdination = QLineEdit()
-        self.edtOrdination.setEnabled(False)
-        self.lblGroupBy = QLabel("Group by")
-        #self.edtGroupBy = QLineEdit()
-        #self.edtGroupBy.setEnabled(False)
-        self.comboGroupBy = QComboBox()
-        self.comboGroupBy.setEnabled(False)
-        self.comboGroupBy.currentIndexChanged.connect(self.comboGroupBy_changed)
-        #self.lblGroupBy.hide()
-        self.plot_widget3 = FigureCanvas(Figure(figsize=(20, 16),dpi=100))
-        self.fig3 = self.plot_widget3.figure
-        self.ax3 = self.fig3.add_subplot(projection='3d')
-        self.toolbar3 = NavigationToolbar(self.plot_widget3, self)
+        #self.lblOrdination = QLabel("Ordination")
+        #self.edtOrdination = QLineEdit()
+        #self.edtOrdination.setEnabled(False)
 
-        #self.default_color_list = mu.VIVID_COLOR_LIST[:]
-        #self.color_list = self.default_color_list[:]
-        #self.marker_list = mu.MARKER_LIST[:]
-        #self.plot_size = "medium"
+        self.PcaView = QWidget()
+        self.pca_layout = QGridLayout()
+        self.PcaView.setLayout(self.pca_layout)
+        self.CvaView = QWidget()
+        self.cva_layout = QGridLayout()
+        self.CvaView.setLayout(self.cva_layout)
+        self.ManovaView = QWidget()
+        self.manova_layout = QGridLayout()
+        self.ManovaView.setLayout(self.manova_layout)
+
+        self.analysis_tab = QTabWidget()
+        self.analysis_tab.addTab(self.PcaView, "PCA")
+        self.analysis_tab.addTab(self.CvaView, "CVA")
+        self.analysis_tab.addTab(self.ManovaView, "MANOVA")
+
+
+        ''' PCA 3D plot '''
+        self.lblPcaGroupBy = QLabel("Group by")
+        self.comboPcaGroupBy = QComboBox()
+        self.comboPcaGroupBy.setEnabled(False)
+        self.comboPcaGroupBy.currentIndexChanged.connect(self.comboPcaGroupBy_changed)
+        self.pca_plot_widget3 = FigureCanvas(Figure(figsize=(20, 16),dpi=100))
+        self.pca_fig3 = self.pca_plot_widget3.figure
+        self.pca_ax3 = self.pca_fig3.add_subplot(projection='3d')
+        self.pca_toolbar3 = NavigationToolbar(self.pca_plot_widget3, self)
+        i = 0
+        self.pca_layout.addWidget(self.lblPcaGroupBy, i, 0)
+        self.pca_layout.addWidget(self.comboPcaGroupBy, i, 1)
+        i += 1
+        self.pca_layout.addWidget(self.pca_toolbar3, i, 0, 1, 2)
+        i += 1
+        self.pca_layout.addWidget(self.pca_plot_widget3, i, 0, 1, 2)
+        self.pca_layout.setRowStretch(i, 1)
+
+        ''' CVA 3D plot '''
+        self.lblCvaGroupBy = QLabel("Group by")
+        self.comboCvaGroupBy = QComboBox()
+        self.comboCvaGroupBy.setEnabled(False)
+        self.comboCvaGroupBy.currentIndexChanged.connect(self.comboCvaGroupBy_changed)
+        self.cva_plot_widget3 = FigureCanvas(Figure(figsize=(20, 16),dpi=100))
+        self.cva_fig3 = self.cva_plot_widget3.figure
+        self.cva_ax3 = self.cva_fig3.add_subplot(projection='3d')
+        self.cva_toolbar3 = NavigationToolbar(self.cva_plot_widget3, self)
+        i = 0
+        self.cva_layout.addWidget(self.lblCvaGroupBy, i, 0)
+        self.cva_layout.addWidget(self.comboCvaGroupBy, i, 1)
+        i += 1
+        self.cva_layout.addWidget(self.cva_toolbar3, i, 0, 1, 2)
+        i += 1
+        self.cva_layout.addWidget(self.cva_plot_widget3, i, 0, 1, 2)
+        self.cva_layout.setRowStretch(i, 1)
+
+
+        ''' MANOVA info '''
+        self.lblManovaGroupBy = QLabel("Group by")
+        self.comboManovaGroupBy = QComboBox()
+        self.comboManovaGroupBy.setEnabled(False)
+        ''' manova output table '''
+        self.tabManovaResult = QTableWidget()        
+        '''        
+        self.edtAnalysisOutput = QPlainTextEdit("")
+        font = QFont("Courier", 10)  # You can also use "Monospace", "Consolas", etc.
+        font.setStyleHint(QFont.Monospace)  # Hint to use a monospace font
+        self.edtAnalysisOutput.setFont(font)        
+        self.edtAnalysisOutput.setReadOnly(True)
+        '''
+        self.comboManovaGroupBy.currentIndexChanged.connect(self.comboManovaGroupBy_changed)
+        i = 0
+        self.manova_layout.addWidget(self.lblManovaGroupBy, i, 0)
+        self.manova_layout.addWidget(self.comboManovaGroupBy, i, 1)
+        i += 1
+        self.manova_layout.addWidget(self.tabManovaResult, i, 0, 1, 2)
+        #i += 1
+        #self.
+
+
 
         self.btnSave = QPushButton("Save")
         self.btnSave.clicked.connect(self.btnSave_clicked)
@@ -5023,22 +5102,12 @@ class AnalysisInfoWidget(QWidget):
         i += 1
         self.layout.addWidget(self.lblSuperimposition, i, 0)
         self.layout.addWidget(self.edtSuperimposition, i, 1)
+
         i += 1
-        self.layout.addWidget(self.lblOrdination, i, 0)
-        self.layout.addWidget(self.edtOrdination, i, 1)
-        i += 1
-        self.layout.addWidget(self.lblGroupBy, i, 0)
-        self.layout.addWidget(self.comboGroupBy, i, 1)
-        i += 1
-        self.layout.addWidget(self.toolbar3, i, 0, 1, 2)
-        i += 1
-        self.layout.addWidget(self.plot_widget3, i, 0, 1, 2)
-        self.layout.setRowStretch(i, 1)
-        #i += 1
-        #self.layout.addWidget(QLabel(""), i, 0, 1, 2)
+        self.layout.addWidget(self.analysis_tab, i, 0, 1, 2)
+
         i += 1
         self.layout.addWidget(self.button_widget, i, 0, 1, 2)
-        #self.layout.addWidget(self.btnExplore, i, 1)
 
     def btnShowDetail_clicked(self):
         #self.detail_dialog = DatasetAnalysisDialog(self.parent)
@@ -5051,7 +5120,17 @@ class AnalysisInfoWidget(QWidget):
 
     def btnExplore_clicked(self):
         self.exploration_dialog = DataExplorationDialog(self)
-        self.exploration_dialog.set_analysis(self.analysis)
+        # get tab text
+        tab_text = self.analysis_tab.tabText(self.analysis_tab.currentIndex())
+        if tab_text == "PCA":
+            group_by = self.comboPcaGroupBy.currentText()
+        elif tab_text == "CVA":
+            group_by = self.comboCvaGroupBy.currentText()
+        elif tab_text == "MANOVA":
+            group_by = self.comboManovaGroupBy.currentText()
+
+        #group_by = self.comboCvaGroupBy
+        self.exploration_dialog.set_analysis(self.analysis, tab_text, group_by)
         self.exploration_dialog.show()
 
     def read_settings(self):
@@ -5069,70 +5148,132 @@ class AnalysisInfoWidget(QWidget):
         #    self.move(self.parent.pos()+QPoint(50,50))
 
 
-    def comboGroupBy_changed(self):
+    def comboPcaGroupBy_changed(self):
+        self.show_analysis_result()
+
+    def comboCvaGroupBy_changed(self):
+        self.show_analysis_result()
+
+    def comboManovaGroupBy_changed(self):
         self.show_analysis_result()
 
     def set_analysis(self, analysis):
         self.analysis = analysis
         self.edtAnalysisName.setText(analysis.analysis_name)
         self.edtSuperimposition.setText(analysis.superimposition_method)
-        self.edtOrdination.setText(analysis.analysis_method)
+        #self.edtOrdination.setText(analysis.analysis_method)
         #self.edtGroupBy.setText(analysis.group_by)
-        self.comboGroupBy.clear()
-        for property in analysis.dataset.get_propertyname_list():
-            self.comboGroupBy.addItem(property)
+        for combo in [ self.comboPcaGroupBy, self.comboCvaGroupBy, self.comboManovaGroupBy ]:
+            #self.set_group_by_combo(combo, analysis)
+            combo.clear()
+            for property in analysis.dataset.get_propertyname_list():
+                combo.addItem(property)
+
+        self.comboPcaGroupBy.setEnabled(True)
+        self.comboCvaGroupBy.setEnabled(False)
+        self.comboManovaGroupBy.setEnabled(False)
         
-        if analysis.analysis_method == 'PCA':
-            #self.lblGroupBy.hide()
-            self.comboGroupBy.setEnabled(True)
+        self.comboPcaGroupBy.setCurrentIndex(0)
+
+        if analysis.cva_group_by in analysis.dataset.get_propertyname_list():
+            self.comboCvaGroupBy.setCurrentText(analysis.cva_group_by)
         else:
-            #self.lblGroupBy.show()
-            self.comboGroupBy.setEnabled(False)
-        
-        if analysis.group_by in analysis.dataset.get_propertyname_list():
-            self.comboGroupBy.setCurrentText(analysis.group_by)
+            self.comboCvaGroupBy.setCurrentIndex(0)
+
+        if analysis.manova_group_by in analysis.dataset.get_propertyname_list():
+            self.comboManovaGroupBy.setCurrentText(analysis.manova_group_by)
         else:
-            self.comboGroupBy.setCurrentIndex(0)
+            self.comboManovaGroupBy.setCurrentIndex(0)
 
 
     def show_analysis_result(self):
         #self.plot_widget.clear()
-        self.ax3.clear()
+        if self.analysis.object_info_json:
+            object_info_list = json.loads(self.analysis.object_info_json)
+        else:
+            return
+        if self.analysis.pca_analysis_result_json:
+            pca_analysis_result_list = json.loads(self.analysis.pca_analysis_result_json)
+        else:
+            return
+        if self.analysis.cva_analysis_result_json:
+            cva_analysis_result_list = json.loads(self.analysis.cva_analysis_result_json)
+        else:
+            return
+        manova_result = json.loads(self.analysis.manova_analysis_result_json)
+        self.tabManovaResult.clear()
+        self.tabManovaResult.setRowCount(0)
+        #manova_result['columns'] = 
 
-        axis_prefix = self.analysis.analysis_method[:2]
+        for key in manova_result.keys():
+            #print( key, manova_result[key], self.tabManovaResult.rowCount())
+            if key == 'column_names':
+                self.tabManovaResult.setColumnCount(len(manova_result[key]))
+                self.tabManovaResult.setHorizontalHeaderLabels(manova_result[key])
+            else:
+                row = self.tabManovaResult.rowCount()
+                self.tabManovaResult.insertRow(row)
+                self.tabManovaResult.setItem(row, 0, QTableWidgetItem(key))
+                for idx, val in enumerate(manova_result[key]):
+                    item = QTableWidgetItem(str(val))
+                    self.tabManovaResult.setItem(row, idx+1, item)
+        #self.edtAnalysisOutput.setPlainText(str())
 
-        # get axis1 and axis2 value from comboAxis1 and 2 index
-        depth_shade = False
-        show_legend = False
-        show_axis_label = True
-        axis1 = 0
-        axis2 = 1
-        axis3 = 2
-        axis1_title = axis_prefix + str(axis1+1)
-        axis2_title = axis_prefix + str(axis2+1)
-        axis3_title = axis_prefix + str(axis3+1)
-
-        object_info_list = json.loads(self.analysis.object_info_json)
-        analysis_result_list = json.loads(self.analysis.analysis_result_json)
         propertyname_list = self.analysis.propertyname_str.split(",")
-        #propertyname_index = propertyname_list.index(self.analysis.group_by) if self.analysis.group_by in propertyname_list else -1
 
         symbol_candidate = ['o','s','^','x','+','d','v','<','>','p','h']
         symbol_candidate = self.marker_list[:]
         color_candidate = ['blue','green','black','cyan','magenta','yellow','gray','red']
         color_candidate = self.color_list[:]
-        #print("color list:", self.color_list, "marker list:", self.marker_list)
-        #print("color candidate:", color_candidate, "symbol candidate:", symbol_candidate)
 
-        propertyname = self.comboGroupBy.currentText()
-
-        self.propertyname_index = propertyname_list.index(propertyname) if propertyname in propertyname_list else -1
-        self.scatter_data = {}
-        self.scatter_result = {}
         SCATTER_SMALL_SIZE = 30
         SCATTER_MEDIUM_SIZE = 50
         SCATTER_LARGE_SIZE = 60
         scatter_size = SCATTER_MEDIUM_SIZE
+
+        self.pca_ax3.clear()
+        self.cva_ax3.clear()
+
+        axis_prefix_list = [ "PCA", "CVA" ]
+        combo_list = [ self.comboPcaGroupBy, self.comboCvaGroupBy ]
+        plot_widget_list = [ self.pca_plot_widget3, self.cva_plot_widget3 ]
+        fig_list = [ self.pca_fig3, self.cva_fig3 ]
+        ax_list = [ self.pca_ax3, self.cva_ax3 ]
+        propertyname_index_list = [ -1, -1 ]
+        self.pca_scatter_data = {}
+        self.cva_scatter_data = {}
+        scatter_data_list = [ self.pca_scatter_data, self.cva_scatter_data ]
+        self.pca_scatter_result = {}
+        self.cva_scatter_result = {}
+        scatter_result_list = [ self.pca_scatter_result, self.cva_scatter_result ]
+        analysis_result_list_list = [ pca_analysis_result_list, cva_analysis_result_list ]
+        #print("scatter data list", scatter_data_list)
+
+
+
+        for idx, axis_prefix in enumerate(axis_prefix_list):
+            #print("scatter data", scatter_data_list[idx])
+            # get axis1 and axis2 value from comboAxis1 and 2 index
+            depth_shade = False
+            show_legend = False
+            show_axis_label = True
+            axis1 = 0
+            axis2 = 1
+            axis3 = 2
+            axis1_title = axis_prefix + str(axis1+1)
+            axis2_title = axis_prefix + str(axis2+1)
+            axis3_title = axis_prefix + str(axis3+1)
+
+        #propertyname_index = propertyname_list.index(self.analysis.group_by) if self.analysis.group_by in propertyname_list else -1
+
+        #print("color list:", self.color_list, "marker list:", self.marker_list)
+        #print("color candidate:", color_candidate, "symbol candidate:", symbol_candidate)
+
+            propertyname = combo_list[idx].currentText()
+
+            propertyname_index_list[idx] = propertyname_list.index(propertyname) if propertyname in propertyname_list else -1
+            scatter_data_list[idx] = {}
+            scatter_result_list[idx] = {}
         #if self.plot_size.lower() == 'small':
         #    scatter_size = SCATTER_SMALL_SIZE
         #elif self.plot_size.lower() == 'medium':
@@ -5142,55 +5283,58 @@ class AnalysisInfoWidget(QWidget):
         
 
 
-        key_list = []
-        key_list.append('__default__')
-        self.scatter_data['__default__'] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'hoverinfo':[], 'text':[], 'property':'', 'symbol':'o', 'color':color_candidate[0], 'size':scatter_size}
+            key_list = []
+            key_list.append('__default__')
+            scatter_data_list[idx]['__default__'] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'hoverinfo':[], 'text':[], 'property':'', 'symbol':'o', 'color':color_candidate[0], 'size':scatter_size}
 
-        for idx, obj in enumerate(object_info_list):
-            key_name = '__default__'
+            #print("scatter data list 2", scatter_data_list)
+            for idx2, obj in enumerate(object_info_list):
+                key_name = '__default__'
 
-            if self.propertyname_index > -1 and self.propertyname_index < len(obj['property_list']):
-                key_name = obj['property_list'][self.propertyname_index]
+                ''' get propertyname '''
+                #if self.propertyname_index > -1 and self.propertyname_index < len(obj['property_list']):
+                #    key_name = obj['property_list'][self.propertyname_index]
 
-            if key_name not in self.scatter_data.keys():
-                self.scatter_data[key_name] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'property':key_name, 'symbol':'', 'color':'', 'size':scatter_size}
+                if key_name not in scatter_data_list[idx].keys():
+                    scatter_data_list[idx][key_name] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'property':key_name, 'symbol':'', 'color':'', 'size':scatter_size}
 
-            self.scatter_data[key_name]['x_val'].append(analysis_result_list[idx][axis1])
-            self.scatter_data[key_name]['y_val'].append(analysis_result_list[idx][axis2])
-            self.scatter_data[key_name]['z_val'].append(analysis_result_list[idx][axis3])
-            self.scatter_data[key_name]['data'].append(obj)
-            #group_hash[key_name]['text'].append(obj.object_name)
-            #group_hash[key_name]['hoverinfo'].append(obj.id)
+                scatter_data_list[idx][key_name]['x_val'].append(analysis_result_list_list[idx][idx2][axis1])
+                scatter_data_list[idx][key_name]['y_val'].append(analysis_result_list_list[idx][idx2][axis2])
+                scatter_data_list[idx][key_name]['z_val'].append(analysis_result_list_list[idx][idx2][axis3])
+                scatter_data_list[idx][key_name]['data'].append(obj)
+                #group_hash[key_name]['text'].append(obj.object_name)
+                #group_hash[key_name]['hoverinfo'].append(obj.id)
 
-        # remove empty group
-        if len(self.scatter_data['__default__']['x_val']) == 0:
-            del self.scatter_data['__default__']
+            # remove empty group
+            if len(scatter_data_list[idx]['__default__']['x_val']) == 0:
+                del scatter_data_list[idx]['__default__']
 
-        # assign color and symbol
-        sc_idx = 0
-        for key_name in self.scatter_data.keys():
-            if self.scatter_data[key_name]['color'] == '':
-                self.scatter_data[key_name]['color'] = color_candidate[sc_idx % len(color_candidate)]
-                self.scatter_data[key_name]['symbol'] = symbol_candidate[sc_idx % len(symbol_candidate)]
-                sc_idx += 1
-
-        if True:
-            self.ax3.clear()
-            for name in self.scatter_data.keys():
-                group = self.scatter_data[name]
-                #print("name", name, "len(group_hash[name]['x_val'])", len(group['x_val']), group['symbol'])
-                if len(self.scatter_data[name]['x_val']) > 0:
-                    self.scatter_result[name] = self.ax3.scatter(group['x_val'], group['y_val'], group['z_val'], s=group['size'], marker=group['symbol'], color=group['color'], data=group['data'],depthshade=depth_shade, picker=True, pickradius=5)
+            # assign color and symbol
+            sc_idx = 0
+            for key_name in scatter_data_list[idx].keys():
+                if scatter_data_list[idx][key_name]['color'] == '':
+                    scatter_data_list[idx][key_name]['color'] = color_candidate[sc_idx % len(color_candidate)]
+                    scatter_data_list[idx][key_name]['symbol'] = symbol_candidate[sc_idx % len(symbol_candidate)]
+                    sc_idx += 1
 
             if True:
-                self.ax3.legend(self.scatter_result.values(), self.scatter_result.keys(), loc='upper right', bbox_to_anchor=(1.05, 1))
-            if True:
-                self.ax3.set_xlabel(axis1_title)
-                self.ax3.set_ylabel(axis2_title)
-                self.ax3.set_zlabel(axis3_title)
-            self.fig3.tight_layout()
-            self.fig3.canvas.draw()
-            self.fig3.canvas.flush_events()
+                ax_list[idx].clear()
+                for name in scatter_data_list[idx].keys():
+                    group = scatter_data_list[idx][name]
+                    #print("name", name, "len(group_hash[name]['x_val'])", len(group['x_val']), group['symbol'])
+                    if len(scatter_data_list[idx][name]['x_val']) > 0:
+                        scatter_data_list[idx][name] = ax_list[idx].scatter(group['x_val'], group['y_val'], group['z_val'], s=group['size'], marker=group['symbol'], color=group['color'], data=group['data'],depthshade=depth_shade, picker=True, pickradius=5)
+
+                if True:
+                    ax_list[idx].legend(scatter_result_list[idx].values(), scatter_result_list[idx].keys(), loc='upper right', bbox_to_anchor=(1.05, 1))
+                if True:
+                    ax_list[idx].set_xlabel(axis1_title)
+                    ax_list[idx].set_ylabel(axis2_title)
+                    ax_list[idx].set_zlabel(axis3_title)
+                fig_list[idx].tight_layout()
+                fig_list[idx].canvas.draw()
+                fig_list[idx].canvas.flush_events()
+            
 
 class DatasetAnalysisDialog(QDialog):
     def __init__(self,parent,dataset):

@@ -16,6 +16,9 @@ from OpenGL import GLU as glu
 from OpenGL import GLUT as glut
 from PyQt5.QtOpenGL import *
 
+import tempfile
+import cv2
+import glob
 import xlsxwriter
 import json
 import math, re, os, sys, shutil, copy, random, struct
@@ -3901,11 +3904,25 @@ class DataExplorationDialog(QDialog):
         self.btnResetPose.clicked.connect(self.reset_shape_pose)
         self.btnAnimate = QPushButton("Animate")
         self.btnAnimate.clicked.connect(self.animate_shape)
+        self.cbxRecordAnimation = QCheckBox()
+        self.cbxRecordAnimation.setText("Record")
+        self.cbxRecordAnimation.setChecked(False)
+        self.cbxRecordAnimation.stateChanged.connect(self.record_animation_changed)
+        self.edtNumFrames = QLineEdit()
+        self.total_frame = 60
+        self.edtNumFrames.setText(str(self.total_frame))
+        self.edtNumFrames.setFixedWidth(40)
+        #self.edtNumFrames.setValidator(QIntValidator())        
+        self.record_animation = False
+        self.animation_frame_list = []
+
 
         self.shape_option_widget = QWidget()
         self.shape_option_layout = QHBoxLayout()
         self.shape_option_widget.setLayout(self.shape_option_layout)
         self.shape_option_layout.addWidget(self.btnAnimate)
+        self.shape_option_layout.addWidget(self.cbxRecordAnimation) 
+        self.shape_option_layout.addWidget(self.edtNumFrames)
         self.shape_option_layout.addWidget(self.btnResetPose)
 
 
@@ -3984,19 +4001,30 @@ class DataExplorationDialog(QDialog):
 
         #print("layout done")
         #self.resizeEvent(None)
+    def record_animation_changed(self):
+        self.record_animation = self.cbxRecordAnimation.isChecked()
+
 
     def chart_animation(self):
         #print("chart_animation", self.animation_counter)
         idx = 0
-        if self.animation_counter == 200:
+        if self.animation_counter == self.total_frame + 30:
             idx = self.animation_counter
             self.animation_shape['point'].remove()
             self.animation_shape['point'] = None
             self.timer.stop()
             self.fig2.canvas.draw()
+            # wait cursor
+            if self.record_animation == True:
+                self.create_video_from_frames()
+            QApplication.restoreOverrideCursor()
+            self.toolbar_widget.show()
+            self.shape_option_widget.show()
             return
-        elif self.animation_counter >= 100:
-            idx = 199 - self.animation_counter
+        elif self.animation_counter >= self.half_frame:
+            idx = self.total_frame - self.animation_counter - 2
+            if idx < 0:
+                idx=0
             #return
         else:
             idx = self.animation_counter
@@ -4024,9 +4052,64 @@ class DataExplorationDialog(QDialog):
         #print("0-4:",datetime.datetime.now())
         self.show_shape(unrotated_shape[0], 0)
 
+        if self.record_animation == True:
+            screen = QApplication.primaryScreen()
+            x, y, width, height = self.geometry().getRect()
+            #print("x,y,width,height", x, y, width, height)
+            pixmap = screen.grabWindow(self.winId(), 0, 0, width, height)
+            self.animation_frame_list.append(pixmap)
+            #print("frame added", len(self.animation_frame_list))
+
+
+        #print("chart_animation done")
+
+    def create_video_from_frames(self):
+        with tempfile.TemporaryDirectory() as temp_dir:        
+            for idx, frame in enumerate(self.animation_frame_list):
+                # padding 3 digits
+                filename = f"{temp_dir}/frame{idx:03}.png"
+                #print("saving frame", filename)
+                frame.save(filename)
+            # Specify the path to your image files
+            #image_folder = 'd:/'
+            #video_name = 'output_video.avi'
+
+            images = [img for img in sorted(glob.glob(f"{temp_dir}/frame*.png"))]
+            if len(images) == 0:
+                print("No frame found")
+                return
+            frame = cv2.imread(images[0])
+            height, width, layers = frame.shape
+
+            # Define the codec and create VideoWriter object
+            fourcc = cv2.VideoWriter_fourcc(*'DIVX')  # or use 'XVID'
+
+            # ask user for video directory
+            #options = QFileDialog.Options()
+            #options |= QFileDialog.DontUseNativeDialog
+            video_name, _ = QFileDialog.getSaveFileName(self, "Save video file", "", "Video Files (*.avi)")
+            if video_name == "":
+                return
+            #print("video_name", video_name)
+            
+            video = cv2.VideoWriter(video_name, fourcc, 20.0, (width, height))
+
+            for image in images:
+                video.write(cv2.imread(image))
+
+            cv2.destroyAllWindows()
+            video.release()            
+
+
 
     def animate_shape(self):
         if self.mode == MODE_COMPARISON:
+            QApplication.setOverrideCursor(Qt.WaitCursor)
+
+            self.toolbar_widget.hide()
+            self.shape_option_widget.hide()
+            self.total_frame = int(self.edtNumFrames.text())
+            self.half_frame = int(self.total_frame / 2)
 
             from_shape = self.custom_shape_hash[0]
             to_shape = self.custom_shape_hash[1]
@@ -4034,10 +4117,11 @@ class DataExplorationDialog(QDialog):
             x_to, y_to = to_shape['coords']
             #print("animate_shape", x_from, y_from, x_to, y_to)
 
-            self.animation_x_range = np.linspace(x_from, x_to, 100)
-            self.animation_y_range = np.linspace(y_from, y_to, 100)
+            self.animation_x_range = np.linspace(x_from, x_to, self.half_frame)
+            self.animation_y_range = np.linspace(y_from, y_to, self.half_frame)
             self.animation_shape = { 'coords': [x_from, y_from], 'point': None}
             self.animation_counter = 0
+            self.animation_frame_list = []
 
             self.animation_shape['point'] = self.ax2.scatter(x_from, y_from, s=100, c='red', marker='o')
             self.fig2.canvas.draw()
@@ -4045,7 +4129,7 @@ class DataExplorationDialog(QDialog):
 
             self.timer = QTimer()
             self.timer.timeout.connect(self.chart_animation)
-            self.timer.start(5)
+            self.timer.start(100)
 
 
     def reset_shape_pose(self):

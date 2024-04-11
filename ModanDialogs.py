@@ -3745,6 +3745,11 @@ class DataExplorationDialog(QDialog):
         self.comboVisualization.setCurrentIndex(0)
         self.comboVisualization.currentIndexChanged.connect(self.comboVisualizationMethod_changed)
 
+        plt.rcParams["font.family"] = "serif" 
+        plt.rcParams["font.serif"] = ["Times New Roman"] 
+        plt.rcParams['mathtext.fontset'] = 'stix' 
+        plt.rcParams['font.size'] = 14
+
         self.plot_widget2 = FigureCanvas(Figure(figsize=(20, 16),dpi=100))
         self.fig2 = self.plot_widget2.figure
         self.ax2 = self.fig2.add_subplot()
@@ -4654,9 +4659,8 @@ class DataExplorationDialog(QDialog):
                         
                         #self.ax2.annotate(str(curve['model'])+" "+str(curve['r_squared']), (curve['size_range'][50], curve['curve'][50]))
                         if show_annotation:
-                            #plt.rcParams['text.usetex'] = True
-                            annotation1 = self.ax2.annotate(rf"${model_text}$", (curve['size_range'][10], curve['curve'][10]))
-                            annotation2 =self.ax2.annotate(rf"${r_squared_text}$", (curve['size_range'][90], curve['curve'][90]))
+                            annotation1 = self.ax2.annotate(rf"${model_text}$", (curve['size_range'][10], curve['curve'][10]),fontname='Times New Roman')
+                            annotation2 =self.ax2.annotate(rf"${r_squared_text}$", (curve['size_range'][90], curve['curve'][90]),fontname='Times New Roman')
                             annotation1.set_bbox(dict(boxstyle="round", facecolor="white", edgecolor="none", alpha=0.7))
                             annotation2.set_bbox(dict(boxstyle="round", facecolor="white", edgecolor="none", alpha=0.7))
 
@@ -4812,6 +4816,8 @@ class DataExplorationDialog(QDialog):
 
         x_val = evt.xdata
         y_val = evt.ydata
+        if x_val is None or y_val is None:
+            return
         if x_val > self.data_range['x_max']:
             x_val = self.data_range['x_max']
         if x_val < self.data_range['x_min']:

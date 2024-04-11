@@ -311,8 +311,8 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
         eigenvalues_list = []
         eigenvalues_cumulative_percentage = 0
-        print("raw eigenvalues:",pca_analysis_result.raw_eigen_values)
-        print("eigenvalues:",pca_analysis_result.eigen_value_percentages)
+        #print("raw eigenvalues:",pca_analysis_result.raw_eigen_values)
+        #print("eigenvalues:",pca_analysis_result.eigen_value_percentages)
         for i, val in enumerate(pca_analysis_result.raw_eigen_values):
             val2 = pca_analysis_result.eigen_value_percentages[i]
             eigenvalues_list.append( val )
@@ -321,8 +321,8 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             if eigenvalues_cumulative_percentage > 0.9:
                 break
         effective_eigenvalues = len(eigenvalues_list)
-        print("eigen_value list",eigenvalues_list)
-        print("effective eigenvalues:",effective_eigenvalues)
+        #print("eigen_value list",eigenvalues_list)
+        #print("effective eigenvalues:",effective_eigenvalues)
         manova_datamatrix = [ pc_score_list[:effective_eigenvalues] for pc_score_list in pca_analysis_result.rotated_matrix.tolist() ] 
             #analysis.eigenvalues_json = json.dumps(eigenvalues_list)
 
@@ -351,8 +351,8 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         manova_group_by_name = dataset.propertyname_list[manova_group_by]
 
         ''' manova results'''
-        print("MANOVA result:",manova_analysis_result.results)
-        print("group by:", manova_group_by, manova_group_by_name)
+        #print("MANOVA result:",manova_analysis_result.results)
+        #print("group by:", manova_group_by, manova_group_by_name)
         stat_text = str(manova_analysis_result.results[manova_group_by_name]['stat'])
         column_names = ["", "Value", "Num DF", "Den DF", "F Value", "Pr > F"]
         lines = stat_text.strip().splitlines()
@@ -399,7 +399,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         analysis.pca_rotation_matrix_json = json.dumps(rotation_matrix)
 
         cva_new_coords = cva_analysis_result.rotated_matrix.tolist()
-        analysis.cva_analysis_result_json = json.dumps(pca_new_coords)
+        analysis.cva_analysis_result_json = json.dumps(cva_new_coords)
         rotation_matrix = cva_analysis_result.rotation_matrix.tolist()
         analysis.cva_rotation_matrix_json = json.dumps(rotation_matrix)
 

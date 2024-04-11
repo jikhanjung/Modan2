@@ -297,17 +297,17 @@ class MdManova:
                 formula += "+"
             formula += self.column_list[i]
         formula += "~" + self.group_by
-        print(formula)
+        #print(formula)
         df = pd.DataFrame(self.data, columns=self.column_list)
         df[self.group_by] = self.category_list
-        print(self.group_by)
-        print(df)
-        print(df.columns)
-        print(df[self.group_by])
-        print(df[self.column_list])
+        #print(self.group_by)
+        #print(df)
+        #print(df.columns)
+        #print(df[self.group_by])
+        #print(df[self.column_list])
         # Define independent and dependent variables
         model = MANOVA.from_formula(formula, data=df)
-        print(model.mv_test())
+        #print(model.mv_test())
         self.results = model.mv_test()
         return
     

@@ -4196,9 +4196,9 @@ class DataExplorationDialog(QDialog):
 
     def comboVisualizationMethod_changed(self):
         new_mode = self.comboVisualization.currentIndex()
-        print("before set_mode")
+        #print("before set_mode")
         self.set_mode(new_mode)
-        print("after set_mode")
+        #print("after set_mode")
         
     def cbxShape_state_changed(self):
         return

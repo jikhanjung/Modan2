@@ -3683,6 +3683,7 @@ CENTROID_SIZE_INDEX = 10
 class DataExplorationDialog(QDialog):
     def __init__(self, parent):
         super().__init__()
+        #print("DataExplorationDialog init")
         self.parent = parent
         self.setWindowTitle("Modan2 - Data Exploration")
         self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
@@ -3697,6 +3698,7 @@ class DataExplorationDialog(QDialog):
         self.bgcolor = "#AAAAAA"
         self.read_settings()
         self.mode = MODE_EXPLORATION
+        self.ignore_change = False
 
         self.curve_list = []
         self.shape_view_list = []
@@ -3756,6 +3758,8 @@ class DataExplorationDialog(QDialog):
         self.plot_widget2 = FigureCanvas(Figure(figsize=(20, 16),dpi=100))
         self.fig2 = self.plot_widget2.figure
         self.ax2 = self.fig2.add_subplot()
+        self.ax2.set_xlabel("X-axis Label")
+        self.ax2.set_ylabel("Y-axis Label")
         self.toolbar2 = NavigationToolbar(self.plot_widget2, self)
         #self.fig2.canvas.mpl_connect('pick_event',self.on_pick)
         self.fig2.canvas.mpl_connect('button_press_event', self.on_canvas_button_press)
@@ -3942,8 +3946,6 @@ class DataExplorationDialog(QDialog):
         self.visualization_layout.setColumnStretch(0,2)
         self.visualization_layout.setColumnStretch(1,1)
 
-        self.on_chart_dim_changed()
-
         if False:
             self.transparent_gl_widget = ObjectViewer3D(self.plot_widget)
             self.transparent_gl_widget.setParent(self.plot_widget)
@@ -3999,6 +4001,7 @@ class DataExplorationDialog(QDialog):
         #self.layout.addWidget(self.toolbar2, i, 0, 1, 2)
         
         self.layout.addWidget(self.visualization_widget)
+        self.on_chart_dim_changed()
         
         #self.comboVisualizationMethod_changed()
 
@@ -4176,7 +4179,6 @@ class DataExplorationDialog(QDialog):
             self.comboAxis3.show()
             self.cbxFlipAxis3.show()
             self.cbxDepthShade.show()        
-        pass
 
     def show_plot_preference(self):
         if self.chart_option_widget.isVisible():
@@ -4194,7 +4196,9 @@ class DataExplorationDialog(QDialog):
 
     def comboVisualizationMethod_changed(self):
         new_mode = self.comboVisualization.currentIndex()
+        print("before set_mode")
         self.set_mode(new_mode)
+        print("after set_mode")
         
     def cbxShape_state_changed(self):
         return
@@ -4246,7 +4250,9 @@ class DataExplorationDialog(QDialog):
         self.update_chart()
 
     def set_mode(self, mode):
+        #print("set mode", mode)
         self.mode = mode
+        self.ignore_change = True
         if mode == MODE_GROWTH_TRAJECTORY:
             self.comboAxis1.setCurrentIndex(CENTROID_SIZE_INDEX)
             self.comboAxis2.setCurrentIndex(0)
@@ -4256,18 +4262,21 @@ class DataExplorationDialog(QDialog):
             self.comboAxis1.setCurrentIndex(0)
             self.comboAxis2.setCurrentIndex(1)
             self.comboAxis3.setCurrentIndex(2)
-
+        #print("inside set_mode 1")
         self.cbxRegression.setChecked(False)
         if mode in [ MODE_REGRESSION, MODE_GROWTH_TRAJECTORY ]:
             self.cbxRegression.setChecked(True)
 
-        self.cbxAverage.setChecked(False)            
+        #print("inside set_mode 1.5")
+        self.cbxAverage.setChecked(False)
         if mode == MODE_AVERAGE:
             self.cbxAverage.setChecked(True)
+        self.ignore_change = False
+        #print("inside set_mode 2")
 
-        self.update_chart()
         self.prepare_shape_view()
         self.resizeEvent(None)
+        #print("inside set_mode 3")
         if mode == MODE_EXPLORATION:
             self.pick_idx = 0
             self.is_picking_shape = True
@@ -4276,6 +4285,8 @@ class DataExplorationDialog(QDialog):
             self.is_picking_shape = False
             self.pick_idx = -1
             self.plot_widget2.setCursor(QCursor(Qt.ArrowCursor))
+        #print("inside set_mode 4")
+        #self.update_chart()
 
     def prepare_shape_view(self):
         for shape_label in self.shape_label_list:
@@ -4412,7 +4423,8 @@ class DataExplorationDialog(QDialog):
 
     def axis_changed(self):
         #if self.ds_ops is not None and self.analysis_done is True:
-        self.update_chart()
+        pass
+        #self.update_chart()
 
     def flip_axis_changed(self, int):
         #if self.ds_ops is not None:
@@ -4538,6 +4550,8 @@ class DataExplorationDialog(QDialog):
         QDialog.resizeEvent(self, event)
 
     def comboGroupBy_changed(self):
+        if self.ignore_change == True:
+            return
         self.update_chart()
         self.prepare_shape_view()
         self.resizeEvent(None)
@@ -4555,16 +4569,19 @@ class DataExplorationDialog(QDialog):
 
 
     def set_analysis(self, analysis, analysis_method, group_by):
+        #print("set_analysis", analysis, analysis_method, group_by)
         self.analysis = analysis
         self.analysis_method = analysis_method
         self.edtAnalysisName.setText(analysis.analysis_name)
         self.edtSuperimposition.setText(analysis.superimposition_method)
         self.edtOrdination.setText(self.analysis_method)
         #self.edtGroupBy.setText(analysis.group_by)
+        self.ignore_change = True
         self.comboGroupBy.clear()
         self.comboGroupBy.addItem("Select property")
         for property in analysis.dataset.get_propertyname_list():
             self.comboGroupBy.addItem(property)
+        #print("done setting group by")
         
         if analysis_method == 'PCA':
             #self.lblGroupBy.hide()
@@ -4577,8 +4594,10 @@ class DataExplorationDialog(QDialog):
             self.comboGroupBy.setCurrentText(group_by)
         else:
             self.comboGroupBy.setCurrentIndex(0)
-
+        #print("going to set mode")
         self.set_mode(MODE_EXPLORATION)
+        self.ignore_change = False
+
 
     def prepare_scatter_data(self):
         axis1 = self.comboAxis1.currentIndex()
@@ -4696,6 +4715,8 @@ class DataExplorationDialog(QDialog):
         axis1_title = self.comboAxis1.currentText()
         axis2_title = self.comboAxis2.currentText()
         axis3_title = self.comboAxis3.currentText()
+        #print("show_analysis_result", axis1_title, axis2_title, axis3_title)
+        #print("self.width(), self.height()", self.width(), self.height())
 
         #propertyname_index = propertyname_list.index(self.analysis.group_by) if self.analysis.group_by in propertyname_list else -1
 
@@ -4750,7 +4771,7 @@ class DataExplorationDialog(QDialog):
 
 
                 #self.ax2.plot(size_range, group_a_curve, label='Group A')
-                            
+            #print("show_legend:", show_legend)
             if show_legend:
                 values = []
                 keys = []
@@ -4762,15 +4783,20 @@ class DataExplorationDialog(QDialog):
                         keys.append(key)
                         values.append(self.scatter_result[key])
                 self.ax2.legend(values, keys, loc='upper right', bbox_to_anchor=(1.05, 1))
+            #print("show axis label:", show_axis_label)
             if show_axis_label:
-                self.ax2.set_xlabel(axis1_title)
-                self.ax2.set_ylabel(axis2_title)
+                #print("show axis label true")
+                ret_x = self.ax2.set_xlabel(axis1_title)
+                #print("ret_x", ret_x)
+                
+                ret_y = self.ax2.set_ylabel(axis2_title)
+                #print("ret_y", ret_y)
 
             #if self.vertical_line_xval is not None:
                 #self.ax2.axvline(x=self.vertical_line_xval, color='gray', linestyle=self.vertical_line_style)
             self.fig2.tight_layout()
             self.fig2.canvas.draw()
-            #self.fig2.canvas.flush_events()
+            self.fig2.canvas.flush_events()
 
     def on_hover_enter(self,event):
         return
@@ -5121,10 +5147,9 @@ class AnalysisInfoWidget(QWidget):
         self.pca_ax3 = self.pca_fig3.add_subplot(projection='3d')
         self.pca_toolbar3 = NavigationToolbar(self.pca_plot_widget3, self)
         i = 0
-        self.pca_layout.addWidget(self.lblPcaGroupBy, i, 0)
-        self.pca_layout.addWidget(self.comboPcaGroupBy, i, 1)
-        i += 1
-        self.pca_layout.addWidget(self.pca_toolbar3, i, 0, 1, 2)
+        self.pca_layout.addWidget(self.pca_toolbar3, i, 0)
+        self.pca_layout.addWidget(self.lblPcaGroupBy, i, 1)
+        self.pca_layout.addWidget(self.comboPcaGroupBy, i, 2)
         i += 1
         self.pca_layout.addWidget(self.pca_plot_widget3, i, 0, 1, 2)
         self.pca_layout.setRowStretch(i, 1)
@@ -5139,12 +5164,12 @@ class AnalysisInfoWidget(QWidget):
         self.cva_ax3 = self.cva_fig3.add_subplot(projection='3d')
         self.cva_toolbar3 = NavigationToolbar(self.cva_plot_widget3, self)
         i = 0
-        self.cva_layout.addWidget(self.lblCvaGroupBy, i, 0)
-        self.cva_layout.addWidget(self.comboCvaGroupBy, i, 1)
+        #i += 1
+        self.cva_layout.addWidget(self.cva_toolbar3, i, 0)
+        self.cva_layout.addWidget(self.lblCvaGroupBy, i, 1)
+        self.cva_layout.addWidget(self.comboCvaGroupBy, i, 2)
         i += 1
-        self.cva_layout.addWidget(self.cva_toolbar3, i, 0, 1, 2)
-        i += 1
-        self.cva_layout.addWidget(self.cva_plot_widget3, i, 0, 1, 2)
+        self.cva_layout.addWidget(self.cva_plot_widget3, i, 0, 1, 3)
         self.cva_layout.setRowStretch(i, 1)
 
 
@@ -5174,9 +5199,9 @@ class AnalysisInfoWidget(QWidget):
 
         self.btnSave = QPushButton("Save")
         self.btnSave.clicked.connect(self.btnSave_clicked)
-        self.btnShowDetail = QPushButton("Show detail")
+        self.btnShowDetail = QPushButton("Analysis Details")
         self.btnShowDetail.clicked.connect(self.btnShowDetail_clicked)
-        self.btnExplore = QPushButton("Explore")
+        self.btnExplore = QPushButton("Data Exploration")
         self.btnExplore.clicked.connect(self.btnExplore_clicked)
         self.button_layout = QHBoxLayout()
         self.button_layout.addWidget(self.btnSave)
@@ -5209,6 +5234,7 @@ class AnalysisInfoWidget(QWidget):
         pass
 
     def btnExplore_clicked(self):
+        #print("btnExplore_clicked")
         self.exploration_dialog = DataExplorationDialog(self)
         # get tab text
         tab_text = self.analysis_tab.tabText(self.analysis_tab.currentIndex())
@@ -5220,8 +5246,10 @@ class AnalysisInfoWidget(QWidget):
             group_by = self.comboManovaGroupBy.currentText()
 
         #group_by = self.comboCvaGroupBy
+        #print("going to call set_analysis")
         self.exploration_dialog.set_analysis(self.analysis, tab_text, group_by)
         self.exploration_dialog.show()
+        self.exploration_dialog.update_chart()
 
     def read_settings(self):
         #self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
@@ -5324,7 +5352,7 @@ class AnalysisInfoWidget(QWidget):
         self.pca_ax3.clear()
         self.cva_ax3.clear()
 
-        axis_prefix_list = [ "PCA", "CVA" ]
+        axis_prefix_list = [ "PC", "CV" ]
         combo_list = [ self.comboPcaGroupBy, self.comboCvaGroupBy ]
         plot_widget_list = [ self.pca_plot_widget3, self.cva_plot_widget3 ]
         fig_list = [ self.pca_fig3, self.cva_fig3 ]
@@ -5382,8 +5410,8 @@ class AnalysisInfoWidget(QWidget):
                 key_name = '__default__'
 
                 ''' get propertyname '''
-                #if self.propertyname_index > -1 and self.propertyname_index < len(obj['property_list']):
-                #    key_name = obj['property_list'][self.propertyname_index]
+                if propertyname_index_list[idx] > -1 and propertyname_index_list[idx] < len(obj['property_list']):
+                    key_name = obj['property_list'][propertyname_index_list[idx]]
 
                 if key_name not in scatter_data_list[idx].keys():
                     scatter_data_list[idx][key_name] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'property':key_name, 'symbol':'', 'color':'', 'size':scatter_size}
@@ -5413,9 +5441,13 @@ class AnalysisInfoWidget(QWidget):
                     group = scatter_data_list[idx][name]
                     #print("name", name, "len(group_hash[name]['x_val'])", len(group['x_val']), group['symbol'])
                     if len(scatter_data_list[idx][name]['x_val']) > 0:
-                        scatter_data_list[idx][name] = ax_list[idx].scatter(group['x_val'], group['y_val'], group['z_val'], s=group['size'], marker=group['symbol'], color=group['color'], data=group['data'],depthshade=depth_shade, picker=True, pickradius=5)
+                        scatter_result_list[idx][name] = ax_list[idx].scatter(group['x_val'], group['y_val'], group['z_val'], s=group['size'], marker=group['symbol'], color=group['color'], data=group['data'],depthshade=depth_shade, picker=True, pickradius=5)
 
                 if True:
+
+                    if '__default__' in scatter_result_list[idx].keys():
+                        del scatter_result_list[idx]['__default__']
+
                     ax_list[idx].legend(scatter_result_list[idx].values(), scatter_result_list[idx].keys(), loc='upper right', bbox_to_anchor=(1.05, 1))
                 if True:
                     ax_list[idx].set_xlabel(axis1_title)

@@ -602,8 +602,9 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.load_dataset()
 
     def on_action_explore_data_triggered(self):
-        #print("data exploration")
+        print("data exploration")
         self.exploration_dialog = DataExplorationDialog(self)
+        print("about to set analysis")
         self.exploration_dialog.set_analysis(self.selected_analysis)
         self.exploration_dialog.show()
         #self.load_dataset()

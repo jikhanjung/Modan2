@@ -4423,8 +4423,10 @@ class DataExplorationDialog(QDialog):
 
     def axis_changed(self):
         #if self.ds_ops is not None and self.analysis_done is True:
-        pass
-        #self.update_chart()
+        if self.ignore_change:
+            return
+        
+        self.update_chart()
 
     def flip_axis_changed(self, int):
         #if self.ds_ops is not None:
@@ -4570,13 +4572,13 @@ class DataExplorationDialog(QDialog):
 
     def set_analysis(self, analysis, analysis_method, group_by):
         #print("set_analysis", analysis, analysis_method, group_by)
+        self.ignore_change = True
         self.analysis = analysis
         self.analysis_method = analysis_method
         self.edtAnalysisName.setText(analysis.analysis_name)
         self.edtSuperimposition.setText(analysis.superimposition_method)
         self.edtOrdination.setText(self.analysis_method)
         #self.edtGroupBy.setText(analysis.group_by)
-        self.ignore_change = True
         self.comboGroupBy.clear()
         self.comboGroupBy.addItem("Select property")
         for property in analysis.dataset.get_propertyname_list():
@@ -5117,6 +5119,7 @@ class AnalysisInfoWidget(QWidget):
         self.lblSuperimposition = QLabel("Superimposition")
         self.edtSuperimposition = QLineEdit()
         self.edtSuperimposition.setEnabled(False)
+        self.ignore_change = False
         #self.lblOrdination = QLabel("Ordination")
         #self.edtOrdination = QLineEdit()
         #self.edtOrdination.setEnabled(False)
@@ -5267,15 +5270,22 @@ class AnalysisInfoWidget(QWidget):
 
 
     def comboPcaGroupBy_changed(self):
+        if self.ignore_change:
+            return
         self.show_analysis_result()
 
     def comboCvaGroupBy_changed(self):
+        if self.ignore_change:
+            return
         self.show_analysis_result()
 
     def comboManovaGroupBy_changed(self):
+        if self.ignore_change:
+            return
         self.show_analysis_result()
 
-    def set_analysis(self, analysis):
+    def set_analysis(self, analysis):        
+        self.ignore_change = True
         self.analysis = analysis
         self.edtAnalysisName.setText(analysis.analysis_name)
         self.edtSuperimposition.setText(analysis.superimposition_method)
@@ -5302,9 +5312,12 @@ class AnalysisInfoWidget(QWidget):
             self.comboManovaGroupBy.setCurrentText(analysis.manova_group_by)
         else:
             self.comboManovaGroupBy.setCurrentIndex(0)
+        self.ignore_change = False
 
 
     def show_analysis_result(self):
+        # print time
+        print("show analysis result", datetime.datetime.now())
         #self.plot_widget.clear()
         if self.analysis.object_info_json:
             object_info_list = json.loads(self.analysis.object_info_json)

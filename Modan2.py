@@ -1089,6 +1089,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                     self.hsplitter.replaceWidget(1,self.analysis_view)
                 self.analysis_view.set_analysis(self.selected_analysis)
                 self.analysis_view.show_analysis_result()
+
                 #self.actionAnalyze.setEnabled(False)
                 #self.actionNewObject.setEnabled(False)
                 #self.actionExport.setEnabled(False)

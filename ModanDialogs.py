@@ -3918,7 +3918,8 @@ class DataExplorationDialog(QDialog):
         self.cbxRecordAnimation.setChecked(False)
         self.cbxRecordAnimation.stateChanged.connect(self.record_animation_changed)
         self.edtNumFrames = QLineEdit()
-        self.total_frame = 60
+        self.total_frame = 120
+        self.pause_frame = 0
         self.edtNumFrames.setText(str(self.total_frame))
         self.edtNumFrames.setFixedWidth(40)
         #self.edtNumFrames.setValidator(QIntValidator())        
@@ -4016,8 +4017,19 @@ class DataExplorationDialog(QDialog):
     def chart_animation(self):
         #print("chart_animation", self.animation_counter)
         idx = 0
-        if self.animation_counter == self.total_frame + 30:
-            idx = self.animation_counter
+        if self.animation_counter < self.pause_frame:
+            idx = 0
+        elif self.animation_counter >= self.pause_frame and self.animation_counter < self.half_frame + self.pause_frame:
+            # 0 -> half frame
+            idx = self.animation_counter - self.pause_frame
+        elif self.animation_counter >= self.half_frame + self.pause_frame and self.animation_counter < self.half_frame + 2 * self.pause_frame:
+            idx = self.half_frame - 1
+        elif self.animation_counter >= self.half_frame + 2 * self.pause_frame and self.animation_counter < self.total_frame + 2 * self.pause_frame:
+            # half_frame -> 0
+            idx = self.total_frame - self.animation_counter + 2 * self.pause_frame - 1
+        elif self.animation_counter >= self.total_frame + 2 * self.pause_frame and self.animation_counter < self.total_frame + 3 * self.pause_frame:
+            idx = 0
+        elif self.animation_counter == self.total_frame + 3 * self.pause_frame:
             self.animation_shape['point'].remove()
             self.animation_shape['point'] = None
             self.timer.stop()
@@ -4029,13 +4041,7 @@ class DataExplorationDialog(QDialog):
             self.toolbar_widget.show()
             self.shape_option_widget.show()
             return
-        elif self.animation_counter >= self.half_frame:
-            idx = self.total_frame - self.animation_counter - 2
-            if idx < 0:
-                idx=0
-            #return
-        else:
-            idx = self.animation_counter
+        #print("chart_animation", self.animation_counter, idx, self.pause_frame, self.half_frame, self.total_frame)
 
         x = self.animation_x_range[idx]
         y = self.animation_y_range[idx]
@@ -4113,6 +4119,10 @@ class DataExplorationDialog(QDialog):
     def animate_shape(self):
         if self.mode == MODE_COMPARISON:
             QApplication.setOverrideCursor(Qt.WaitCursor)
+            if self.record_animation == True:
+                self.pause_frame = 15
+            else:
+                self.pause_frame = 15
 
             self.toolbar_widget.hide()
             self.shape_option_widget.hide()
@@ -4133,7 +4143,6 @@ class DataExplorationDialog(QDialog):
 
             self.animation_shape['point'] = self.ax2.scatter(x_from, y_from, s=100, c='red', marker='o')
             self.fig2.canvas.draw()
-            self.animation_counter += 1
 
             self.timer = QTimer()
             self.timer.timeout.connect(self.chart_animation)
@@ -5317,7 +5326,7 @@ class AnalysisInfoWidget(QWidget):
 
     def show_analysis_result(self):
         # print time
-        print("show analysis result", datetime.datetime.now())
+        #print("show analysis result", datetime.datetime.now())
         #self.plot_widget.clear()
         if self.analysis.object_info_json:
             object_info_list = json.loads(self.analysis.object_info_json)

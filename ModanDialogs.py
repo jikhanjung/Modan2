@@ -157,6 +157,12 @@ class ObjectViewer2D(QLabel):
         self.setMouseTracking(True)
         self.set_mode(MODE['EDIT_LANDMARK'])
 
+    def apply_rotation(self, angle):
+        return
+
+    def set_object_name(self, name):
+        self.object_name = name
+
     def align_object(self):
         return
 
@@ -581,7 +587,7 @@ class ObjectViewer2D(QLabel):
         return
 
     def calculate_resize(self):
-        #print("objectviewer calculate resize", self, self.object, self.object.landmark_list, self.landmark_list)
+        #print("objectviewer calculate resize", self, self.object, self.landmark_list)
         if self.orig_pixmap is not None:
             self.orig_width = self.orig_pixmap.width()
             self.orig_height = self.orig_pixmap.height()
@@ -625,7 +631,7 @@ class ObjectViewer2D(QLabel):
         QLabel.resizeEvent(self, event)
 
     def set_object(self, object):
-        #print("set object", object, object.pixels_per_mm)
+        #print("set object", object)
         m_app = QApplication.instance()
         self.object = object
         dataset = object.dataset
@@ -2109,7 +2115,7 @@ class DatasetOpsViewer(QLabel):
         return int(y*self.scale + self.pan_y)
 
 class X1Y1:
-    def __init__(self, filename, datasetname):
+    def __init__(self, filename, datasetname, invertY = False):
         #
         self.dirname = os.path.dirname(filename) 
         self.filename = filename
@@ -2125,6 +2131,7 @@ class X1Y1:
         self.object_comment = {}
         self.landmark_data = {}
         self.object_images = {}
+        self.invertY = invertY
         self.read()
 
     def isNumber(self,s):
@@ -2157,6 +2164,9 @@ class X1Y1:
             object_image_path = ''
             object_comment_1 = ''
             object_comment_2 = ''
+            y_flip = 1.0
+            if self.invertY:
+                y_flip = -1.0
 
             header = lines[0].strip().split("\t")
             xyz_header_list = header[1:]
@@ -2165,7 +2175,7 @@ class X1Y1:
             else:
                 self.dimension = 3
             lendmark_count = int(len(xyz_header_list) / self.dimension)
-            print("dimension", self.dimension)
+            #print("dimension", self.dimension)
             
 
             lines = lines[1:]
@@ -2187,7 +2197,7 @@ class X1Y1:
                 if len(landmark_list) > 0:
                     if self.dimension == 2:
                         for idx in range(0, len(landmark_list), 2):
-                            data.append([float(landmark_list[idx]), float(landmark_list[idx+1])])
+                            data.append([float(landmark_list[idx]), y_flip * float(landmark_list[idx+1])])
                     elif self.dimension == 3:
                         for idx in range(0, len(landmark_list), 3):
                             data.append([float(landmark_list[idx]), float(landmark_list[idx+1]), float(landmark_list[idx+2])])
@@ -2205,7 +2215,7 @@ class X1Y1:
 
 
 class TPS:
-    def __init__(self, filename, datasetname):
+    def __init__(self, filename, datasetname, invertY = False):
         #
         self.dirname = os.path.dirname(filename) 
         self.filename = filename
@@ -2220,6 +2230,7 @@ class TPS:
         self.property_list_list = []
         self.object_comment = {}
         self.landmark_data = {}
+        self.invertY = invertY
         self.read()
 
     def isNumber(self,s):
@@ -2344,6 +2355,11 @@ class TPS:
             else:
                 self.dimension = 2
             
+            if self.dimension == 2 and self.invertY:
+                for key in objects.keys():
+                    for idx in range(len(objects[key])):
+                        objects[key][idx][1] = -1 * objects[key][idx][1]
+            
             #print ("dimension:", self.dimension)
             #print("object_count:", object_count)
             #print("landmark_count:", landmark_count)
@@ -2362,7 +2378,7 @@ class TPS:
             return dataset
 
 class NTS:
-    def __init__(self, filename, datasetname):
+    def __init__(self, filename, datasetname, invertY = False):
         self.filename = filename
         self.datasetname = datasetname
         self.dimension = 0
@@ -2376,6 +2392,7 @@ class NTS:
         self.object_comment = {}
         self.landmark_data = {}
         self.object_images = {}
+        self.invertY = invertY
         self.read()
 
     def isNumber(self,s):
@@ -2491,10 +2508,15 @@ class NTS:
             self.object_name_list = object_name_list
             self.description = comments
 
+            if self.dimension == 2 and self.invertY == True:
+                for key in objects.keys():
+                    for idx in range(len(objects[key])):
+                        objects[key][idx][1] = -1 * objects[key][idx][1]
+
             return dataset
 
 class Morphologika:
-    def __init__(self, filename, datasetname):
+    def __init__(self, filename, datasetname, invertY = False):
         self.filename = filename
         self.datasetname = datasetname
         self.dimension = 0
@@ -2508,6 +2530,7 @@ class Morphologika:
         self.object_comment = {}
         self.landmark_data = {}
         self.object_images = {}
+        self.invertY = invertY
         self.read()
 
     def read(self):
@@ -2573,6 +2596,13 @@ class Morphologika:
         self.polygon_list = []
         self.propertyname_list = []
         self.property_list_list = []
+
+        #print("objects:",objects)
+        if self.dimension == 2 and self.invertY == True:
+            for key in objects.keys():
+                for idx in range(len(objects[key])):
+                    objects[key][idx][1] = -1.0 * float(objects[key][idx][1])
+        #print("objects:",objects)
 
         if 'labels' in self.raw_data.keys():
             for line in self.raw_data['labels']:
@@ -3040,9 +3070,9 @@ class ObjectDialog(QDialog):
         self.cbxAutoRotate.setChecked(False)
         self.cbxShowModel = QCheckBox()
         self.cbxShowModel.setText("3D Model")
-        self.cbxShowModel.setChecked(True)
+        self.cbxShowModel.setChecked(False)
         self.btnAddFile = QPushButton()
-        self.btnAddFile.setText("Open File")
+        self.btnAddFile.setText("Load Image")
         self.btnAddFile.clicked.connect(self.btnAddFile_clicked)
 
         #self.btnFBO = QPushButton()
@@ -3124,6 +3154,8 @@ class ObjectDialog(QDialog):
         self.cbxAutoRotate.stateChanged.connect(self.auto_rotate_state_changed)
         self.cbxShowModel.stateChanged.connect(self.show_model_state_changed)
 
+        #self.show_index_state_changed()
+
     def read_settings(self):
         self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
         if self.remember_geometry is True:
@@ -3193,7 +3225,7 @@ class ObjectDialog(QDialog):
     #def btnFBO_clicked(self):
     #    self.object_view_3d.show_picker_buffer()
 
-    def show_index_state_changed(self, int):
+    def show_index_state_changed(self):
         self.object_view.show_index = self.cbxShowIndex.isChecked()
         self.object_view.update()
 
@@ -3330,6 +3362,10 @@ class ObjectDialog(QDialog):
             #print("set_object 3d 2")
             self.btnCalibration.setDisabled(True)
             self.cbxAutoRotate.show()
+            self.cbxShowModel.show()
+            self.cbxShowPolygon.show()
+            #self.cbxShowModel.setEnabled(True)
+            self.btnAddFile.setText("Load 3D Model")
             #print("set_object 3d 3")
             if object is not None:
                 #print("object dialog self.landmark_list in set object 3d", self.landmark_list)
@@ -3339,13 +3375,22 @@ class ObjectDialog(QDialog):
                 self.object_view.calculate_resize()
                 if object.threed_model is not None and len(object.threed_model) > 0:
                     self.enable_landmark_edit()
+                    #self.cbxShowModel.show()
+                    self.cbxShowModel.setEnabled(True)
+                    self.cbxShowModel.setChecked(True)
                 else:
                     self.disable_landmark_edit()
+                    self.cbxShowModel.setEnabled(False)
                 #self.object_view.landmark_list = self.landmark_list
         else:
             #print("set_object 2d")
             self.object_view = self.object_view_2d
             self.cbxAutoRotate.hide()
+            self.cbxShowModel.hide()
+            self.cbxShowPolygon.hide()
+            #self.cbxShowModel.setEnabled(True)
+            self.btnAddFile.setText("Load Image")
+
             if object is not None:
                 if object.image is not None and len(object.image) > 0:
                     img = object.image[0]
@@ -3374,6 +3419,7 @@ class ObjectDialog(QDialog):
 
             #self.object_view_3d.landmark_list = self.landmark_list
         #self.set_dataset(object.dataset)
+        self.show_index_state_changed()
         self.object_view.align_object()
         self.show_landmarks()
 
@@ -4329,7 +4375,10 @@ class DataExplorationDialog(QDialog):
                 self.custom_shape_hash[idx] = {'name': keyname, 'coords': [], 'point': None, 'color': None, 'label': None}
 
         for idx, keyname in enumerate(keyname_list):
-            shape_view = ObjectViewer3D(self)
+            if self.analysis.dimension == 2:
+                shape_view = ObjectViewer2D(self)
+            else:
+                shape_view = ObjectViewer3D(self)
 
             if self.mode == MODE_COMPARISON:
                 shape_button = QPushButton(QIcon(mu.resource_path('icons/M2Landmark_2.png')), "")
@@ -4900,12 +4949,17 @@ class DataExplorationDialog(QDialog):
     def show_shape(self, shape, idx):
         #print("show object", idx)
         obj = MdObject()
+        #print("object:", obj)
         obj.dataset_id = self.analysis.dataset_id
         obj.landmark_list = []
-        #print("shape:", shape[:5], "len(shape)", len(shape))
-        for i in range(0,len(shape),3):
-            landmark = [shape[i], shape[i+1], shape[i+2]]
+        #print("object:", obj)
+        for i in range(0,len(shape),self.analysis.dimension):
+            landmark = shape[i:i+self.analysis.dimension] #[shape[i], shape[i+1]]
+            #if self.analys.dimension == 3:
+            #    landmark.append(shape[i+2])
             obj.landmark_list.append(landmark)
+        obj.pack_landmark()
+        #print("shape:", shape[:5], "len(shape)", len(shape), "obj",obj, obj.landmark_list)
         #self.shape_view_list[idx].clear_object()
         #temp_rotate_x = self.shape_view_list[idx].temp_rotate_x
         #temp_rotate_y = self.shape_view_list[idx].temp_rotate_y
@@ -4917,16 +4971,17 @@ class DataExplorationDialog(QDialog):
         self.shape_view_list[idx].set_object(obj)
         #print("shape view apply rotation 1", idx, self.rotation_matrix)
         self.shape_view_list[idx].apply_rotation(self.rotation_matrix)
-        self.shape_view_list[idx].pan_x = self.shape_view_pan_x
-        self.shape_view_list[idx].pan_y = self.shape_view_pan_y
-        self.shape_view_list[idx].dolly = self.shape_view_dolly
+        if self.analysis.dimension == 3:
+            self.shape_view_list[idx].pan_x = self.shape_view_pan_x
+            self.shape_view_list[idx].pan_y = self.shape_view_pan_y
+            self.shape_view_list[idx].dolly = self.shape_view_dolly
         #print("shape view apply rotation 2", idx)
 
         #self.shape_view_list[idx].temp_rotate_x = self.temp_rotate_x
         #self.shape_view_list[idx].temp_rotate_y = self.temp_rotate_y
         #print("idx:", idx, "temp_rotate_x", self.temp_rotate_x, "temp_rotate_y", self.temp_rotate_y)
         #self.shape_view_list[idx].sync_rotation()
-
+        
         self.shape_view_list[idx].update()
 
     def on_canvas_button_press(self, evt):
@@ -5978,6 +6033,16 @@ class DatasetAnalysisDialog(QDialog):
         else:
             self.cbxAutoRotate.hide()
 
+        self.show_index_state_changed()
+        self.show_wireframe_state_changed()
+        self.show_baseline_state_changed()
+        self.show_average_state_changed()
+        self.auto_rotate_state_changed
+        #self.cbxShowIndex.stateChanged.connect(self.show_index_state_changed)
+        #self.cbxShowWireframe.stateChanged.connect(self.show_wireframe_state_changed)
+        #self.cbxShowBaseline.stateChanged.connect(self.show_baseline_state_changed)
+        #self.cbxShowAverage.stateChanged.connect(self.show_average_state_changed)
+        #self.cbxAutoRotate.stateChanged.connect(self.auto_rotate_state_changed)
         return True
 
     def propertyname_changed(self):
@@ -6093,7 +6158,7 @@ class DatasetAnalysisDialog(QDialog):
 
         #print("on_btnSaveResults_clicked")
         
-    def show_index_state_changed(self, int):
+    def show_index_state_changed(self):
         if self.cbxShowIndex.isChecked():
             self.lblShape.show_index = True
             #print("show index CHECKED!")
@@ -6102,7 +6167,7 @@ class DatasetAnalysisDialog(QDialog):
             #print("show index UNCHECKED!")
         self.lblShape.update()
 
-    def show_average_state_changed(self, int):
+    def show_average_state_changed(self):
         if self.cbxShowAverage.isChecked():
             self.lblShape.show_average = True
             #print("show index CHECKED!")
@@ -6111,7 +6176,7 @@ class DatasetAnalysisDialog(QDialog):
             #print("show index UNCHECKED!")
         self.lblShape.update()
 
-    def auto_rotate_state_changed(self, int):
+    def auto_rotate_state_changed(self):
         #print("auto_rotate_state_changed", self.cbxAutoRotate.isChecked())
         if self.cbxAutoRotate.isChecked():
             self.lblShape.auto_rotate = True
@@ -6121,7 +6186,7 @@ class DatasetAnalysisDialog(QDialog):
             #print("auto rotate UNCHECKED!")
         self.lblShape.update()
 
-    def show_wireframe_state_changed(self, int):
+    def show_wireframe_state_changed(self):
         if self.cbxShowWireframe.isChecked():
             self.lblShape.show_wireframe = True
             #print("show index CHECKED!")
@@ -6130,7 +6195,7 @@ class DatasetAnalysisDialog(QDialog):
             #print("show index UNCHECKED!")
         self.lblShape.update()
 
-    def show_baseline_state_changed(self, int):
+    def show_baseline_state_changed(self):
         if self.cbxShowBaseline.isChecked():
             self.lblShape.show_baseline = True
             #print("show index CHECKED!")
@@ -7014,6 +7079,15 @@ class ImportDatasetDialog(QDialog):
         self.gbxFileType.setMinimumHeight(50)
         #self.gbxFileType.setTitle("File Type")
 
+        self.rb2D = QRadioButton("2D")
+        self.rb3D = QRadioButton("3D")
+        self.gbxDimension = QGroupBox()
+        self.gbxDimension.setLayout(QHBoxLayout())
+        self.gbxDimension.layout().addWidget(self.rb2D)
+        self.gbxDimension.layout().addWidget(self.rb3D)
+
+        self.cbxInvertY = QCheckBox("Inverted")
+
         # add dataset name edit
         self.edtDatasetName = QLineEdit()
         self.edtDatasetName.setText("")
@@ -7050,6 +7124,8 @@ class ImportDatasetDialog(QDialog):
         self.main_layout.addRow("File Type", self.gbxFileType)
         self.main_layout.addRow("Dataset Name", self.edtDatasetName)
         self.main_layout.addRow("Object Count", self.edtObjectCount)
+        self.main_layout.addRow("Y coordinate", self.cbxInvertY)
+        self.main_layout.addRow("Dimension", self.gbxDimension)
         self.main_layout.addRow("Progress", self.prgImport)
         self.main_layout.addRow("", self.btnImport)
 
@@ -7084,16 +7160,20 @@ class ImportDatasetDialog(QDialog):
                 self.rbnTPS.setChecked(True)
                 self.edtObjectCount.setText("")
                 self.file_type_changed()
+                import_data = TPS(filename, self.edtDatasetName.text(), self.cbxInvertY.isChecked())
             elif self.file_ext.lower() == ".nts":
                 self.rbnNTS.setChecked(True)
                 self.edtObjectCount.setText("")
                 self.file_type_changed()
+                import_data = NTS(filename, self.edtDatasetName.text(), self.cbxInvertY.isChecked())
             elif self.file_ext.lower() == ".x1y1":
                 self.rbnX1Y1.setChecked(True)
                 self.file_type_changed()
+                import_data = X1Y1(filename, self.edtDatasetName.text(), self.cbxInvertY.isChecked())
             elif self.file_ext.lower() == ".txt":
                 self.rbnMorphologika.setChecked(True)
                 self.file_type_changed()
+                import_data = Morphologika(filename, self.edtDatasetName.text(), self.cbxInvertY.isChecked())
             else:
                 self.rbnTPS.setChecked(False)
                 self.rbnNTS.setChecked(False)
@@ -7106,6 +7186,13 @@ class ImportDatasetDialog(QDialog):
                 self.edtFilename.setText("")
                 QMessageBox.warning(self, "Warning", "File type not supported.")
                 return
+            if len(import_data.object_name_list) > 0:
+                self.edtObjectCount.setText(str(import_data.nobjects))
+                if import_data.dimension == 2:
+                    self.rb2D.setChecked(True)
+                else:
+                    self.rb3D.setChecked(True)                    
+            
             #else:
     
     def file_type_changed(self):
@@ -7117,15 +7204,16 @@ class ImportDatasetDialog(QDialog):
         filetype = self.chkFileType.checkedButton().text()
         datasetname = self.edtDatasetName.text()
         objectcount = self.edtObjectCount.text()
+        invertY = self.cbxInvertY.isChecked()
         import_data = None
         if filetype == "TPS":
-            import_data = TPS(filename, datasetname)
+            import_data = TPS(filename, datasetname, invertY)
         elif filetype == "NTS":
-            import_data = NTS(filename, datasetname)
+            import_data = NTS(filename, datasetname, invertY)
         elif filetype == "X1Y1":
-            import_data = X1Y1(filename, datasetname)
+            import_data = X1Y1(filename, datasetname, invertY)
         elif filetype == "Morphologika":
-            import_data = Morphologika(filename, datasetname)
+            import_data = Morphologika(filename, datasetname, invertY)
 
         if import_data is None:
             return

@@ -215,7 +215,7 @@ class MdObject(Model):
         return new_object
 
     def __str__(self):
-        return self.object_name
+        return self.object_name or ''
     def __repr__(self):
         return self.object_name
     
@@ -277,7 +277,7 @@ class MdObject(Model):
 
     def pack_landmark(self):
         # error check
-        self.landmark_str = LINE_SEPARATOR.join([LANDMARK_SEPARATOR.join([str(x) for x in lm[:lm.dim]]) for lm in self.landmark_list])
+        self.landmark_str = LINE_SEPARATOR.join([LANDMARK_SEPARATOR.join([str(x) for x in lm[:self.dataset.dimension]]) for lm in self.landmark_list])
 
     def unpack_landmark(self):
         self.landmark_list = []
@@ -287,9 +287,16 @@ class MdObject(Model):
         lm_list = self.landmark_str.split(LINE_SEPARATOR)
         for lm in lm_list:
             if lm != "":
-                self.landmark_list.append([float(x) for x in lm.split(LANDMARK_SEPARATOR)])
+                #self.landmark_list.append([float(x) for x in lm.split(LANDMARK_SEPARATOR)])
+                #self.landmark_list.append([float(x) if x.replace('.', '', 1).isdigit() else 0.0 for x in lm.split(LANDMARK_SEPARATOR)])
+                self.landmark_list.append([float(x) if self.is_float(x) else None for x in lm.split(LANDMARK_SEPARATOR)])
         return self.landmark_list
-
+    def is_float(self, s):
+        try:
+            float(s)
+            return True
+        except ValueError:
+            return False
     def get_landmark_list(self):
         return self.unpack_landmark()
 
@@ -1026,18 +1033,18 @@ class MdDatasetOps:
 
         mo = self.object_list[object_index]
         nlandmarks = len(mo.landmark_list)
-        target_shape = np.zeros((nlandmarks, 3))
-        reference_shape = np.zeros((nlandmarks, 3))
+        target_shape = np.zeros((nlandmarks, self.dimension))
+        reference_shape = np.zeros((nlandmarks, self.dimension))
 
         i = 0
         for lm in ( mo.landmark_list ):
-            for j in range(len(lm)):
+            for j in range(self.dimension):
                 target_shape[i,j] = lm[j]
             i += 1
 
         i = 0
         for lm in self.reference_shape.landmark_list:
-            for j in range(len(lm)):
+            for j in range(self.dimension):
                 reference_shape[i,j] = lm[j]
             i += 1
 
@@ -1054,8 +1061,9 @@ class MdDatasetOps:
         i = 0
         new_landmark_list = []
         for i in range( len(mo.landmark_list) ):
-            lm = [0,0,0]
-            for j in range(3):
+            lm = [0] * self.dimension
+            #lm = [0,0,0]
+            for j in range(self.dimension):
                 lm[j] = rotated_shape[i,j]
             new_landmark_list.append(lm)
             #lm = [ rotated_shape[i, 0], rotated_shape[i, 1], rotated_shape[i, 2] ]
@@ -1095,11 +1103,14 @@ class MdDatasetOps:
                     sum_z.append(0)
                 sum_x[i] += lm[0]
                 sum_y[i] += lm[1]
-                if len( lm ) == 3:
+                if self.dimension == 3:
                     sum_z[i] += lm[2]
                 i += 1
         for i in range(len(sum_x)):
-            lm = [ float(sum_x[i]) / object_count, float(sum_y[i]) / object_count, float(sum_z[i]) / object_count ]
+            if self.dimension == 2:
+                lm = [ float(sum_x[i]) / object_count, float(sum_y[i]) / object_count ]
+            else:
+                lm = [ float(sum_x[i]) / object_count, float(sum_y[i]) / object_count, float(sum_z[i]) / object_count ]
             average_shape.landmark_list.append(lm)
         if self.id:
             average_shape.dataset_id = self.id
@@ -1164,7 +1175,8 @@ class MdDatasetOps:
         for i in range(len(shape1.landmark_list)):
             sum_coord += ( shape1.landmark_list[i][0] - shape2.landmark_list[i][0]) ** 2
             sum_coord += ( shape1.landmark_list[i][1] - shape2.landmark_list[i][1]) ** 2
-            sum_coord += ( shape1.landmark_list[i][2] - shape2.landmark_list[i][2]) ** 2
+            if self.dimension == 3:
+                sum_coord += ( shape1.landmark_list[i][2] - shape2.landmark_list[i][2]) ** 2
         #shape1.print_landmarks("shape1")
         #shape2.print_landmarks("shape2")
         sum_coord = math.sqrt(sum_coord)

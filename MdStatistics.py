@@ -223,12 +223,12 @@ class MdCanonicalVariate:
         return
 
 
-def PerformCVA(dataset_ops, group_by):
+def PerformCVA(dataset_ops, classifier_index):
     cva = MdCanonicalVariate()
 
-    property_index = group_by
-    logger.info("Perform CVA group by property index %s",property_index)
-    if property_index < 0:
+    #property_index = group_by
+    logger.info("Perform CVA group by classifier index %s",classifier_index)
+    if classifier_index < 0:
         #QMessageBox.information(self, "Information", "Please select a property.")
         return
     datamatrix = []
@@ -240,7 +240,7 @@ def PerformCVA(dataset_ops, group_by):
         for lm in obj.landmark_list:
             datum.extend(lm)
         datamatrix.append(datum)
-        category_list.append(obj.property_list[property_index])
+        category_list.append(obj.property_list[classifier_index])
 
     cva.SetData(datamatrix)
     cva.SetCategory(category_list)
@@ -311,13 +311,13 @@ class MdManova:
         self.results = model.mv_test()
         return
     
-def PerformManova(dataset_ops, new_coords, group_by):
+def PerformManova(dataset_ops, new_coords, classifier_index):
     dimension = dataset_ops.dimension
     manova = MdManova()
 
-    property_index = group_by
-    logger.info("Perform Manova group by property index %s",property_index)
-    if property_index < 0:
+    #property_index = group_by
+    logger.info("Perform Manova group by property index %s",classifier_index)
+    if classifier_index < 0:
         #QMessageBox.information(self, "Information", "Please select a property.")
         return
     datamatrix = new_coords
@@ -326,12 +326,12 @@ def PerformManova(dataset_ops, new_coords, group_by):
         column_list.append("PC"+str(pc_idx+1))
 
     category_list = []
-    group_by_name = dataset_ops.propertyname_list[property_index]
+    group_by_name = dataset_ops.propertyname_list[classifier_index]
     #obj = dataset_ops.object_list[0]
     #print(obj, obj.property_list, property_index)
     #xyz = ["x", "y", "z"]
     for idx, obj in enumerate(dataset_ops.object_list):
-        category_list.append(obj.property_list[property_index])
+        category_list.append(obj.property_list[classifier_index])
 
     manova.SetData(datamatrix)
     manova.SetCategory(category_list)

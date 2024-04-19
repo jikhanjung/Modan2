@@ -21,6 +21,8 @@ from ModanDialogs import DatasetAnalysisDialog, ObjectDialog, ImportDatasetDialo
     MODE, ObjectViewer3D, ExportDatasetDialog, ObjectViewer2D, ProgressDialog, NewAnalysisDialog, AnalysisInfoWidget, DataExplorationDialog
 from MdStatistics import PerformCVA, PerformPCA, PerformManova
 
+import matplotlib.pyplot as plt
+
 import json
 from MdLogger import setup_logger
 logger = setup_logger(mu.PROGRAM_NAME)
@@ -158,13 +160,33 @@ class ModanMainWindow(QMainWindow):
         if self.m_app.remember_geometry is True:
             #print('loading geometry', self.remember_geometry)
             self.setGeometry(self.m_app.settings.value("WindowGeometry/MainWindow", QRect(100, 100, 1400, 800)))
+            is_maximized = mu.value_to_bool(self.m_app.settings.value("IsMaximized/MainWindow", False))
+            if is_maximized == True:
+                #print("maximized true")
+                self.showMaximized()
+            else:
+                #print("maximized false")
+                self.showNormal()
+                #pass
         else:
             self.setGeometry(QRect(100, 100, 1400, 800))
+
+        plt.rcParams["font.family"] = "serif" 
+        plt.rcParams["font.serif"] = ["Times New Roman"] 
+        plt.rcParams['mathtext.fontset'] = 'stix' 
+        plt.rcParams['font.size'] = 12
+
 
     def write_settings(self):
         self.m_app.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
         if self.m_app.remember_geometry is True:
-            self.m_app.settings.setValue("WindowGeometry/MainWindow", self.geometry())
+            #print("maximized:", self.isMaximized(), "geometry:", self.geometry())
+            if self.isMaximized():
+                self.m_app.settings.setValue("IsMaximized/MainWindow", True)
+            else:
+                self.m_app.settings.setValue("IsMaximized/MainWindow", False)
+                self.m_app.settings.setValue("WindowGeometry/MainWindow", self.geometry())
+                #print("save maximized false")
 
     def prepare_database(self):
         migrations_path = mu.resource_path("migrations")
@@ -1188,6 +1210,7 @@ if __name__ == "__main__":
 
     #프로그램 화면을 보여주는 코드
     myWindow.show()
+    #myWindow.activateWindow()
 
     #프로그램을 이벤트루프로 진입시키는(프로그램을 작동시키는) 코드
     app.exec_()

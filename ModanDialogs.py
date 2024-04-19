@@ -3742,9 +3742,6 @@ class DataExplorationDialog(QDialog):
         self.remember_geometry = True
         self.on_pick_happened = False
         self.bgcolor = "#AAAAAA"
-        self.read_settings()
-        self.mode = MODE_EXPLORATION
-        self.ignore_change = False
 
         self.curve_list = []
         self.shape_view_list = []
@@ -3770,6 +3767,11 @@ class DataExplorationDialog(QDialog):
         [0, 0, 1, 0],
         [0, 0, 0, 1]
         ])
+
+        self.read_settings()
+        self.mode = MODE_EXPLORATION
+        self.ignore_change = False
+
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
         self.lblAnalysisName = QLabel("Analysis Name")
@@ -3795,11 +3797,6 @@ class DataExplorationDialog(QDialog):
         self.comboVisualization.addItem("Comparison")
         self.comboVisualization.setCurrentIndex(0)
         self.comboVisualization.currentIndexChanged.connect(self.comboVisualizationMethod_changed)
-
-        plt.rcParams["font.family"] = "serif" 
-        plt.rcParams["font.serif"] = ["Times New Roman"] 
-        plt.rcParams['mathtext.fontset'] = 'stix' 
-        plt.rcParams['font.size'] = 14
 
         self.plot_widget2 = FigureCanvas(Figure(figsize=(20, 16),dpi=100))
         self.fig2 = self.plot_widget2.figure
@@ -4208,6 +4205,7 @@ class DataExplorationDialog(QDialog):
             shape_view.updateGL()
 
     def on_chart_dim_changed(self):
+        #print("on chart dim changed")
         if self.rb2DChartDim.isChecked():
             self.toolbar3.hide()
             self.toolbar2.show()
@@ -4247,6 +4245,7 @@ class DataExplorationDialog(QDialog):
         
 
     def showEvent(self, event):
+        #print("show event")
         self.resizeEvent(None)
 
     def comboVisualizationMethod_changed(self):
@@ -4498,11 +4497,44 @@ class DataExplorationDialog(QDialog):
         for i in range(len(self.marker_list)):
             self.marker_list[i] = self.m_app.settings.value("DataPointMarker/"+str(i), self.marker_list[i])
         self.bgcolor = self.m_app.settings.value("BackgroundColor", self.bgcolor)
-        if self.remember_geometry is True:
-            self.setGeometry(self.m_app.settings.value("WindowGeometry/DataExplorationWindow", QRect(100, 100, 1400, 800)))
+        if self.m_app.remember_geometry is True:
+            #print('loading geometry', self.remember_geometry)
+            
+            is_maximized = mu.value_to_bool(self.m_app.settings.value("IsMaximized/DataExplorationWindow", False))
+            if is_maximized == True:
+                #print("maximized true. restoring maximized state")
+                #self.showMaximized()
+                self.setWindowState(Qt.WindowMaximized)
+            else:
+                self.setGeometry(self.m_app.settings.value("WindowGeometry/DataExplorationWindow", QRect(100, 100, 1400, 800)))
+                #self.setGeometry(self.m_app.settings.value("WindowGeometry/DataExplorationWindow", QRect(100, 100, 1400, 800)))
+                #print("maximized false")
+                #self.showNormal()
+                #pass
         else:
             self.setGeometry(QRect(100, 100, 1400, 800))
             self.move(self.parent.pos()+QPoint(50,50))
+
+    def write_settings(self):
+        self.m_app.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
+        if self.m_app.remember_geometry is True:
+            #print("maximized:", self.isMaximized(), "geometry:", self.geometry())
+            
+            if self.isMaximized():
+                self.m_app.settings.setValue("IsMaximized/DataExplorationWindow", True)
+            else:
+                self.m_app.settings.setValue("IsMaximized/DataExplorationWindow", False)
+                self.m_app.settings.setValue("WindowGeometry/DataExplorationWindow", self.geometry())
+                #self.m_app.settings.setValue("WindowGeometry/DataExplorationWindow", self.geometry())
+                #print("save maximized false")
+
+    def closeEvent(self, event):
+        self.write_settings()
+        #if self.analysis_dialog is not None:
+        #    self.analysis_dialog.close()
+        event.accept()
+
+
 
     def store_rotation(self,x_rad, y_rad):
         #print("store_rotation", x_rad, y_rad)
@@ -4591,7 +4623,7 @@ class DataExplorationDialog(QDialog):
         #self.object_view_3d.sync_rotation(rotation_x, rotation_y)
 
     def resizeEvent(self, event):
-        #print("resize")
+        #print("resize", self.geometry())
         #print("Window has been resized",self.image_label.width(), self.image_label.height())
         #self.pixmap.scaled(self.image_label.width(), self.image_label.height(), Qt.KeepAspectRatio)
         #self.edtObjectDesc.resize(self.edtObjectDesc.height(),300)
@@ -5303,6 +5335,7 @@ class AnalysisInfoWidget(QWidget):
     def btnExplore_clicked(self):
         #print("btnExplore_clicked")
         self.exploration_dialog = DataExplorationDialog(self)
+        #print("exploration dialog created")
         # get tab text
         tab_text = self.analysis_tab.tabText(self.analysis_tab.currentIndex())
         if tab_text == "PCA":
@@ -5315,8 +5348,11 @@ class AnalysisInfoWidget(QWidget):
         #group_by = self.comboCvaGroupBy
         #print("going to call set_analysis")
         self.exploration_dialog.set_analysis(self.analysis, tab_text, group_by)
+        #print("going to update chart")
+        #print("going to show")
         self.exploration_dialog.show()
         self.exploration_dialog.update_chart()
+        #self.exploration_dialog.activateWindow()
 
     def read_settings(self):
         #self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))

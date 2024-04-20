@@ -2326,7 +2326,7 @@ class TPS:
                         object_comment_2 = dataline.group(2)
                     elif dataline.group(1).lower() == "id":
                         #print("id:", dataline.group(2))
-                        #object_id = dataline.group(2)
+                        object_id = dataline.group(2)
                         pass
 
             #print("aa")
@@ -7181,53 +7181,57 @@ class ImportDatasetDialog(QDialog):
         self.write_settings()
         event.accept()
 
+    def open_file2(self, filename):
+        self.edtFilename.setText(filename)
+        self.btnImport.setEnabled(True)
+        self.edtDatasetName.setText(Path(filename).stem)
+        self.edtObjectCount.setText("")
+        self.prgImport.setValue(0)
+        # get file extension
+        self.file_ext = Path(filename).suffix
+        # if extension is tps, set file type to tps
+        if self.file_ext.lower() == ".tps":
+            self.rbnTPS.setChecked(True)
+            self.edtObjectCount.setText("")
+            self.file_type_changed()
+            import_data = TPS(filename, self.edtDatasetName.text(), self.cbxInvertY.isChecked())
+        elif self.file_ext.lower() == ".nts":
+            self.rbnNTS.setChecked(True)
+            self.edtObjectCount.setText("")
+            self.file_type_changed()
+            import_data = NTS(filename, self.edtDatasetName.text(), self.cbxInvertY.isChecked())
+        elif self.file_ext.lower() == ".x1y1":
+            self.rbnX1Y1.setChecked(True)
+            self.file_type_changed()
+            import_data = X1Y1(filename, self.edtDatasetName.text(), self.cbxInvertY.isChecked())
+        elif self.file_ext.lower() == ".txt":
+            self.rbnMorphologika.setChecked(True)
+            self.file_type_changed()
+            import_data = Morphologika(filename, self.edtDatasetName.text(), self.cbxInvertY.isChecked())
+        else:
+            self.rbnTPS.setChecked(False)
+            self.rbnNTS.setChecked(False)
+            self.rbnX1Y1.setChecked(False)
+            self.rbnMorphologika.setChecked(False)
+            self.btnImport.setEnabled(False)
+            self.edtObjectCount.setText("")
+            self.prgImport.setValue(0)
+            self.edtDatasetName.setText("")
+            self.edtFilename.setText("")
+            QMessageBox.warning(self, "Warning", "File type not supported.")
+            return
+        if len(import_data.object_name_list) > 0:
+            self.edtObjectCount.setText(str(import_data.nobjects))
+            if import_data.dimension == 2:
+                self.rb2D.setChecked(True)
+            else:
+                self.rb3D.setChecked(True)              
+
     def open_file(self):
         filename, _ = QFileDialog.getOpenFileName(self, "Open File", mu.USER_PROFILE_DIRECTORY, "All Files (*.*)")
         if filename:
-            self.edtFilename.setText(filename)
-            self.btnImport.setEnabled(True)
-            self.edtDatasetName.setText(Path(filename).stem)
-            self.edtObjectCount.setText("")
-            self.prgImport.setValue(0)
-            # get file extension
-            self.file_ext = Path(filename).suffix
-            # if extension is tps, set file type to tps
-            if self.file_ext.lower() == ".tps":
-                self.rbnTPS.setChecked(True)
-                self.edtObjectCount.setText("")
-                self.file_type_changed()
-                import_data = TPS(filename, self.edtDatasetName.text(), self.cbxInvertY.isChecked())
-            elif self.file_ext.lower() == ".nts":
-                self.rbnNTS.setChecked(True)
-                self.edtObjectCount.setText("")
-                self.file_type_changed()
-                import_data = NTS(filename, self.edtDatasetName.text(), self.cbxInvertY.isChecked())
-            elif self.file_ext.lower() == ".x1y1":
-                self.rbnX1Y1.setChecked(True)
-                self.file_type_changed()
-                import_data = X1Y1(filename, self.edtDatasetName.text(), self.cbxInvertY.isChecked())
-            elif self.file_ext.lower() == ".txt":
-                self.rbnMorphologika.setChecked(True)
-                self.file_type_changed()
-                import_data = Morphologika(filename, self.edtDatasetName.text(), self.cbxInvertY.isChecked())
-            else:
-                self.rbnTPS.setChecked(False)
-                self.rbnNTS.setChecked(False)
-                self.rbnX1Y1.setChecked(False)
-                self.rbnMorphologika.setChecked(False)
-                self.btnImport.setEnabled(False)
-                self.edtObjectCount.setText("")
-                self.prgImport.setValue(0)
-                self.edtDatasetName.setText("")
-                self.edtFilename.setText("")
-                QMessageBox.warning(self, "Warning", "File type not supported.")
-                return
-            if len(import_data.object_name_list) > 0:
-                self.edtObjectCount.setText(str(import_data.nobjects))
-                if import_data.dimension == 2:
-                    self.rb2D.setChecked(True)
-                else:
-                    self.rb3D.setChecked(True)                    
+            self.open_file2(filename)
+      
             
             #else:
     

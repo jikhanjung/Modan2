@@ -777,6 +777,13 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.treeView.setAcceptDrops(True)
         self.treeView.setDropIndicatorShown(True)
         self.treeView.dropEvent = self.dropEvent
+        self.treeView.dragEnterEvent = self.treeView_drag_enter_event
+        self.treeView.dragMoveEvent = self.treeView_drag_move_event
+
+    def treeView_drag_enter_event(self, event):
+        event.accept()
+    def treeView_drag_move_event(self, event):
+        event.accept()
 
     # accept drop event
     def dropEvent(self, event):
@@ -857,6 +864,20 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 self.load_dataset()
                 self.reset_tableView()
                 self.select_dataset(source_dataset)
+        elif event.mimeData().hasUrls():
+            #print("file drop")
+            file_path = event.mimeData().text()
+            #file_path = re.sub('file:///', '', file_path)
+            file_path = mu.process_dropped_file_name(file_path)
+            #print("file path:", file_path)
+            self.import_dialog = ImportDatasetDialog(self)
+            self.import_dialog.setModal(True)
+            self.import_dialog.setWindowModality(Qt.ApplicationModal)
+            self.import_dialog.open_file2(file_path)
+            self.import_dialog.exec_()
+            self.load_dataset()
+
+
 
     def get_selected_object_list(self):
         selected_indexes = self.tableView.selectionModel().selectedRows()

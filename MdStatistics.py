@@ -284,7 +284,7 @@ class MdManova:
 
     def SetColumnList(self, column_list):
         self.column_list = column_list
-        print("column_list", column_list)
+        #print("column_list", column_list)
     
     def SetGroupby(self, group_by):
         self.group_by = group_by

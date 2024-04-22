@@ -601,6 +601,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 menu.addAction(action_add_dataset)
                 menu.addAction(action_add_object)
                 menu.addAction(action_add_analysis)
+                menu.addAction(self.actionExport)
                 menu.addAction(action_refresh_tree)
             elif isinstance(obj, MdAnalysis):                
                 #menu.addAction(action_explore_data)

@@ -1,10 +1,10 @@
-#define AppVersion "0.1.0"
+#define AppVersion "0.1.2"
 #define CurrentDate GetDateTimeString('yyyy-mm-dd', '-', ':')
 
 [Setup]
 AppName=Modan2
 AppVersion={#AppVersion}
-DefaultDirName={commonpf}\Modan2
+DefaultDirName={commonpf}\PaleoBytes\Modan2
 OutputDir=Output
 
 OutputBaseFilename=Modan2_v{#AppVersion}_Installer
@@ -17,7 +17,7 @@ Source: "..\dist\Modan2\Modan2.exe"; DestDir: "{app}"
 Source: "..\dist\Modan2\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs
 
 ; Example datasets
-Source: "..\ExampleDataset\*"; DestDir: "{%userprofile}\Modan2"; Flags: recursesubdirs createallsubdirs
+Source: "..\ExampleDataset\*"; DestDir: "{%userprofile}\PaleoBytes\Modan2"; Flags: recursesubdirs createallsubdirs
 
 
 [Run]
@@ -27,11 +27,11 @@ Filename: "{app}\Modan2.exe"; Flags: postinstall shellexec
 function InitializeSetup(): Boolean;
 begin
   // Create a specific Start Menu group
-  if not DirExists(ExpandConstant('{userprograms}\Modan2')) then
-    CreateDir(ExpandConstant('{userprograms}\Modan2'));
+  if not DirExists(ExpandConstant('{userprograms}\PaleoBytes')) then
+    CreateDir(ExpandConstant('{userprograms}\PaleoBytes'));
   
   Result := True;
 end;
 
 [Icons]
-Name: "{userprograms}\Modan2\Modan2"; Filename: "{app}\Modan2.exe"
+Name: "{userprograms}\PaleoBytes\Modan2"; Filename: "{app}\Modan2.exe"

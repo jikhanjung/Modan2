@@ -17,7 +17,7 @@ Source: "..\dist\Modan2\Modan2.exe"; DestDir: "{app}"
 Source: "..\dist\Modan2\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs
 
 ; Example datasets
-Source: "..\ExampleDataset\*"; DestDir: "{%userprofile}\PaleoBytes\Modan2"; Flags: recursesubdirs createallsubdirs
+Source: "..\ExampleDataset\*"; DestDir: "{%userprofile}\PaleoBytes\Modan2\ExampleDataset"; Flags: recursesubdirs createallsubdirs
 
 
 [Run]

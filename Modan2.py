@@ -755,8 +755,19 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.dlg.set_dataset(self.selected_dataset)
         #print("object dialog set dataset")
         self.dlg.set_object( self.selected_object )
+        self.dlg.set_tableview(self.tableView)
         #print("object dialog set object")
-        self.dlg.exec_()
+        ret = self.dlg.exec_()
+        if ret == 0:
+            return
+        elif ret == 1:
+            if self.dlg.object_deleted:
+                dataset = self.selected_dataset
+                self.load_dataset()
+                self.reset_tableView()
+                self.select_dataset(dataset)
+                self.load_object()
+            return
         dataset = self.selected_dataset
         self.reset_treeView()
         self.load_dataset()

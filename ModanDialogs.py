@@ -359,6 +359,7 @@ class ObjectViewer2D(QLabel):
                 if self.selected_landmark_index >= 0:
                     self.object_dialog.delete_landmark(self.selected_landmark_index)
                     self.selected_landmark_index = -1
+                    self.set_mode(MODE['EDIT_LANDMARK'])
             else:
                 self.pan_mode = MODE['PAN']
                 self.mouse_down_x = me.x()
@@ -2718,9 +2719,13 @@ class CalibrationDialog(QDialog):
         super().__init__()
         self.setWindowTitle("Calibration")
         self.parent = parent
+        self.last_calibration_unit = "mm"
         #print(self.parent.pos())
         self.setGeometry(QRect(100, 100, 320, 180))
         self.move(self.parent.pos()+QPoint(100,100))
+        self.m_app = QApplication.instance()
+        self.read_settings()
+
         self.status_bar = QStatusBar()
         self.lblText1 = QLabel("Calibration", self)
         self.lblText2 = QLabel("Calibration", self)
@@ -2735,6 +2740,7 @@ class CalibrationDialog(QDialog):
         self.comboUnit.addItem("mm")
         self.comboUnit.addItem("cm")
         self.comboUnit.addItem("m")
+        # set combUnit to last calibration unit
         self.comboUnit.setFixedWidth(100)
         self.comboUnit.setFixedHeight(30)
         self.comboUnit.setCurrentText("mm")
@@ -2756,19 +2762,38 @@ class CalibrationDialog(QDialog):
         self.vbox.addWidget(self.lblText2)
         self.vbox.addLayout(self.hbox)
         self.setLayout(self.vbox)
+        #print("last_calibration_unit:", self.last_calibration_unit)
+        self.comboUnit.setCurrentText(self.last_calibration_unit)
+
         if dist is not None:
             self.set_pixel_number(dist)
+
+    def read_settings(self):
+        #print("read settings")
+        self.last_calibration_unit = self.m_app.settings.value("Calibration/Unit", self.last_calibration_unit)
+        #print("last_calibration_unit:", self.last_calibration_unit)
+    
+    def write_settings(self):
+        #print("write settings")
+        self.m_app.settings.setValue("Calibration/Unit", self.last_calibration_unit)
+        #print("last_calibration_unit:", self.last_calibration_unit)
+
 
     def set_pixel_number(self, pixel_number):
         self.pixel_number = pixel_number
         # show number of pixel in calibration text 
-        self.lblText1.setText("Enter the unit length in metric scale.")
-        self.lblText2.setText("%d pixels are equivalent to:" % self.pixel_number)
+        self.lblText1.setText("Enter the unit length in metric scale.") 
+        self.lblText2.setText(f"{self.pixel_number:.2f} pixels are equivalent to:")
+        # select all text in edtLength
+        self.edtLength.selectAll()
         
     def btnOK_clicked(self):
         #self.parent.calibration_length = float(self.edtLength.text())
-        #self.parent.calibration_unit = self.cbxUnit.currentText()
+        #self.parent.calibration_unit = self.cbxUnit.currentText()        
         self.parent.set_object_calibration( self.pixel_number, float(self.edtLength.text()),self.comboUnit.currentText())
+        self.last_calibration_unit = self.comboUnit.currentText()
+        #print("last_calibration_unit:", self.last_calibration_unit)
+        self.write_settings()
         self.close()
     
     def btnCancel_clicked(self):
@@ -3122,6 +3147,13 @@ class ObjectDialog(QDialog):
         self.hsplitter.setStretchFactor(1, 1)
         self.hsplitter.setStretchFactor(2, 0)
 
+        self.btnPrevious = QPushButton()
+        self.btnPrevious.setText("Previous")
+        self.btnPrevious.clicked.connect(self.Previous)
+        self.btnNext = QPushButton()
+        self.btnNext.setText("Next")
+        self.btnNext.clicked.connect(self.Next)
+
         self.btnOkay = QPushButton()
         self.btnOkay.setText("Save")
         self.btnOkay.clicked.connect(self.Okay)
@@ -3132,9 +3164,11 @@ class ObjectDialog(QDialog):
         self.btnCancel.setText("Cancel")
         self.btnCancel.clicked.connect(self.Cancel)
         btn_layout = QHBoxLayout()
+        btn_layout.addWidget(self.btnPrevious)
         btn_layout.addWidget(self.btnOkay)
         btn_layout.addWidget(self.btnDelete)
         btn_layout.addWidget(self.btnCancel)
+        btn_layout.addWidget(self.btnNext)
 
         self.status_bar.setMaximumHeight(20)
         #self.main_layout.addLayout(self.sub_layout)
@@ -3153,6 +3187,7 @@ class ObjectDialog(QDialog):
         self.cbxShowBaseline.stateChanged.connect(self.show_baseline_state_changed)
         self.cbxAutoRotate.stateChanged.connect(self.auto_rotate_state_changed)
         self.cbxShowModel.stateChanged.connect(self.show_model_state_changed)
+        self.object_deleted = False
 
         #self.show_index_state_changed()
 
@@ -3547,6 +3582,9 @@ class ObjectDialog(QDialog):
                 landmark_str += "\n"
         return landmark_str
 
+    def set_tableview(self, tableview):
+        self.tableView = tableview
+
     def Delete(self):
         ret = QMessageBox.question(self, "", "Are you sure to delete this object?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if ret == QMessageBox.Yes:
@@ -3556,10 +3594,114 @@ class ObjectDialog(QDialog):
                     os.remove(image_path)
             self.object.delete_instance()
         #self.delete_dataset()
+        self.object_deleted = True
         self.accept()
+
+    def get_selected_object_list(self):
+        selected_indexes = self.tableView.selectionModel().selectedRows()
+        if len(selected_indexes) == 0:
+            return None
+
+        new_index_list = []
+        model = selected_indexes[0].model()
+        if hasattr(model, 'mapToSource'):
+            for index in selected_indexes:
+                new_index = model.mapToSource(index)
+                new_index_list.append(new_index)
+            selected_indexes = new_index_list
+        
+        selected_object_list = []
+        for index in selected_indexes:
+            item = self.object_model.itemFromIndex(index)
+            object_id = item.text()
+            object_id = int(object_id)
+            object = MdObject.get_by_id(object_id)
+            selected_object_list.append(object)
+
+        return selected_object_list
+
+
+    def Previous(self):
+        # get all items from tableView
+        model = self.tableView.model()
+        object_id_list = []
+        proxy_index_list = []
+        for row in range(model.rowCount()):
+            proxy_index = self.tableView.model().index(row, 0)
+            proxy_index_list.append(proxy_index)
+            index = self.tableView.model().mapToSource(proxy_index)
+            item = model.sourceModel().itemFromIndex(index)
+            #item = model.item(row, 0)
+            object_id = int(item.text())
+            object_id_list.append(object_id)
+
+        new_index = -1
+        if object_id_list.index(self.object.id) > 0:
+            new_index = object_id_list.index(self.object.id) - 1
+            new_object_id = object_id_list[new_index]
+            new_object = MdObject.get_by_id(new_object_id)
+
+        if new_index >= 0:
+            # enable or disable prev and next button 
+            if new_index == 0:
+                self.btnPrevious.setEnabled(False)
+            else:
+                self.btnPrevious.setEnabled(True)
+            if new_index == len(object_id_list)-1:
+                self.btnNext.setEnabled(False)
+            else:
+                self.btnNext.setEnabled(True)
+                
+            self.save_object()
+            self.set_object(new_object)
+            # select new object in tableView
+            new_proxy_index = proxy_index_list[new_index]
+            #new_index = self.object_model.indexFromId(new_object_id)
+            self.tableView.selectRow(new_proxy_index.row())
+            
+            #self.accept()
+
+    def Next(self):
+        # get all items from tableView
+        model = self.tableView.model()
+        object_id_list = []
+        proxy_index_list = []
+        for row in range(model.rowCount()):
+            proxy_index = self.tableView.model().index(row, 0)
+            proxy_index_list.append(proxy_index)
+            index = self.tableView.model().mapToSource(proxy_index)
+            item = model.sourceModel().itemFromIndex(index)
+            #item = model.item(row, 0)
+            object_id = int(item.text())
+            object_id_list.append(object_id)
+
+        new_index = -1
+        if object_id_list.index(self.object.id) < len(object_id_list)-1:
+            new_index = object_id_list.index(self.object.id) + 1
+            new_object_id = object_id_list[new_index]
+            new_object = MdObject.get_by_id(new_object_id)
+
+        if new_index >= 0:
+            # enable or disable prev and next button 
+            if new_index == 0:
+                self.btnPrevious.setEnabled(False)
+            else:
+                self.btnPrevious.setEnabled(True)
+            if new_index == len(object_id_list)-1:
+                self.btnNext.setEnabled(False)
+            else:
+                self.btnNext.setEnabled(True)
+            
+            self.save_object()    
+            self.set_object(new_object)            
+            new_proxy_index = proxy_index_list[new_index]
+            #new_index = self.object_model.indexFromId(new_object_id)
+            self.tableView.selectRow(new_proxy_index.row())
+            #self.accept()
 
     def Okay(self):
         self.save_object()
+        self.object_deleted = False
         self.accept()
 
     def Cancel(self):

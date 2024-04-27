@@ -967,6 +967,8 @@ class ObjectViewer3D(QGLWidget):
         self.rotate_y += self.temp_rotate_y
         self.temp_rotate_x = 0
         self.temp_rotate_y = 0
+        if self.obj_ops is None:
+            return
 
         self.obj_ops.rotate_3d(math.radians(-1*self.rotate_x),'Y')
         self.obj_ops.rotate_3d(math.radians(self.rotate_y),'X')
@@ -1217,6 +1219,8 @@ class ObjectViewer3D(QGLWidget):
     def align_object(self):
         if self.data_mode == OBJECT_MODE:
             #print("baseline",self.ds_ops.baseline_point_list)
+            if self.obj_ops is None:
+                return
             self.obj_ops.align(self.ds_ops.baseline_point_list)
             #self.calculate_resize()
             #self.updateGL()
@@ -3866,6 +3870,7 @@ MODE_REGRESSION = 1
 MODE_GROWTH_TRAJECTORY = 2
 MODE_AVERAGE = 3
 MODE_COMPARISON = 4
+MODE_COMPARISON2 = 5
 
 CENTROID_SIZE_INDEX = 10
 class DataExplorationDialog(QDialog):
@@ -3937,6 +3942,7 @@ class DataExplorationDialog(QDialog):
         self.comboVisualization.addItem("Growth trajectory")
         self.comboVisualization.addItem("Average")
         self.comboVisualization.addItem("Comparison")
+        self.comboVisualization.addItem("Comparison2")
         self.comboVisualization.setCurrentIndex(0)
         self.comboVisualization.currentIndexChanged.connect(self.comboVisualizationMethod_changed)
 
@@ -4058,6 +4064,7 @@ class DataExplorationDialog(QDialog):
         self.chart_option_layout.addWidget(self.sbxDegree,1)
         #self.fit_layout.addWidget(self.btnPolyfit)
 
+
         self.visualization_layout = QGridLayout()
         self.visualization_widget = QWidget()
         self.visualization_widget.setLayout(self.visualization_layout)
@@ -4088,8 +4095,13 @@ class DataExplorationDialog(QDialog):
         self.axis_option_widget.hide()
 
         #self.plot_layout.addWidget(self.toolbar2)
-        #self.plot_layout.addWidget(self.plot_widget2,1)
-        #self.plot_layout.addWidget(self.plot_widget3,1)
+        self.plot_layout.addWidget(self.toolbar_widget)
+        self.plot_layout.addWidget(self.chart_option_widget)
+        self.plot_layout.addWidget(self.axis_option_widget)
+
+        self.plot_layout.addWidget(self.plot_widget2)
+        self.plot_layout.addWidget(self.plot_widget3)
+
         self.shape_view_layout = QVBoxLayout()
         self.view_widget = QWidget()
         self.view_widget.setLayout(self.shape_view_layout)
@@ -4111,26 +4123,44 @@ class DataExplorationDialog(QDialog):
         self.record_animation = False
         self.animation_frame_list = []
 
+        self.animate_option_widget = QWidget()
+        self.animate_option_layout = QHBoxLayout()
+        self.animate_option_widget.setLayout(self.animate_option_layout)
+        self.animate_option_layout.addWidget(self.btnAnimate)
+        self.animate_option_layout.addWidget(self.cbxRecordAnimation)
+        self.animate_option_layout.addWidget(self.edtNumFrames)
+
+        self.shape_preference_button = QPushButton(QIcon(mu.resource_path('icons/M2Preferences_1.png')), "")
+        self.shape_preference_button.setStyleSheet("border: none; padding: 0px;")
+        self.shape_preference_button.setIconSize(QSize(32, 32))
+        self.shape_preference_button.clicked.connect(self.shape_preference_button_clicked)
+        self.shape_preference_button.setAutoDefault(False)
 
         self.shape_option_widget = QWidget()
         self.shape_option_layout = QHBoxLayout()
         self.shape_option_widget.setLayout(self.shape_option_layout)
-        self.shape_option_layout.addWidget(self.btnAnimate)
-        self.shape_option_layout.addWidget(self.cbxRecordAnimation) 
-        self.shape_option_layout.addWidget(self.edtNumFrames)
-        self.shape_option_layout.addWidget(self.btnResetPose)
+        self.shape_option_layout.addWidget(self.animate_option_widget,1)
+        self.shape_option_layout.addWidget(self.btnResetPose,1)
+        self.shape_option_layout.addWidget(self.shape_preference_button,0)
+        self.shape_view_layout.addWidget(self.shape_option_widget,0)
 
+
+        self.visualization_splitter = QSplitter(Qt.Horizontal)
+        self.visualization_splitter.addWidget(self.plot_widget)
+        self.visualization_splitter.addWidget(self.view_widget)
+        self.visualization_splitter.setSizes([800, 300])
+        self.visualization_splitter.splitterMoved.connect(self.on_splitter_moved)
 
         #self.visualization_layout.addWidget(self.plot_widget,2)
-        self.visualization_layout.addWidget(self.toolbar_widget,0,0)
-        self.visualization_layout.addWidget(self.chart_option_widget,1,0)
-        self.visualization_layout.addWidget(self.axis_option_widget,2,0)
-        self.visualization_layout.addWidget(self.plot_widget2,3,0)
-        self.visualization_layout.addWidget(self.plot_widget3,4,0)
-        self.visualization_layout.addWidget(self.shape_option_widget,0,1)
-        self.visualization_layout.addWidget(self.view_widget,3,1,2,1)
-        self.visualization_layout.setColumnStretch(0,2)
-        self.visualization_layout.setColumnStretch(1,1)
+        #self.visualization_layout.addWidget(self.toolbar_widget,0,0)
+        #self.visualization_layout.addWidget(self.chart_option_widget,1,0)
+        #self.visualization_layout.addWidget(self.axis_option_widget,2,0)
+        #self.visualization_layout.addWidget(self.plot_widget,3,0)
+        #self.visualization_layout.addWidget(self.plot_widget3,4,0)
+        #self.visualization_layout.addWidget(self.shape_option_widget,0,1)
+        #self.visualization_layout.addWidget(self.visualization_splitter,3,0,1,2)
+        #self.visualization_layout.setColumnStretch(0,2)
+        #self.visualization_layout.setColumnStretch(1,1)
 
         if False:
             self.transparent_gl_widget = ObjectViewer3D(self.plot_widget)
@@ -4186,7 +4216,7 @@ class DataExplorationDialog(QDialog):
         #i += 1
         #self.layout.addWidget(self.toolbar2, i, 0, 1, 2)
         
-        self.layout.addWidget(self.visualization_widget)
+        self.layout.addWidget(self.visualization_splitter)
         self.on_chart_dim_changed()
         
         #self.comboVisualizationMethod_changed()
@@ -4195,6 +4225,10 @@ class DataExplorationDialog(QDialog):
 
         #print("layout done")
         #self.resizeEvent(None)
+
+    def shape_preference_button_clicked(self):
+        pass
+
     def record_animation_changed(self):
         self.record_animation = self.cbxRecordAnimation.isChecked()
 
@@ -4385,6 +4419,8 @@ class DataExplorationDialog(QDialog):
         else:
             self.axis_option_widget.show()
         
+    def on_splitter_moved(self):
+        self.resizeEvent(None)
 
     def showEvent(self, event):
         #print("show event")
@@ -4448,6 +4484,7 @@ class DataExplorationDialog(QDialog):
     def set_mode(self, mode):
         #print("set mode", mode)
         self.mode = mode
+
         self.ignore_change = True
         if mode == MODE_GROWTH_TRAJECTORY:
             self.comboAxis1.setCurrentIndex(CENTROID_SIZE_INDEX)
@@ -4468,10 +4505,15 @@ class DataExplorationDialog(QDialog):
         if mode == MODE_AVERAGE:
             self.cbxAverage.setChecked(True)
         self.ignore_change = False
-        #print("inside set_mode 2")
+
+        if mode in [MODE_COMPARISON,MODE_COMPARISON2]:
+            self.animate_option_widget.show()
+        else:
+            self.animate_option_widget.hide()
 
         self.prepare_shape_view()
         self.resizeEvent(None)
+
         #print("inside set_mode 3")
         if mode == MODE_EXPLORATION:
             self.pick_idx = 0
@@ -4481,8 +4523,6 @@ class DataExplorationDialog(QDialog):
             self.is_picking_shape = False
             self.pick_idx = -1
             self.plot_widget2.setCursor(QCursor(Qt.ArrowCursor))
-        #print("inside set_mode 4")
-        #self.update_chart()
 
     def prepare_shape_view(self):
         for shape_label in self.shape_label_list:
@@ -4510,6 +4550,10 @@ class DataExplorationDialog(QDialog):
             keyname_list = [ "A", "B"]
             for idx, keyname in enumerate(keyname_list):
                 self.custom_shape_hash[idx] = {'name': keyname, 'coords': [], 'point': None, 'color': None, 'label': None}
+        elif self.mode == MODE_COMPARISON2:
+            keyname_list = [ "A", "B" ]
+            for idx, keyname in enumerate(keyname_list):
+                self.custom_shape_hash[idx] = {'name': keyname, 'coords': [], 'point': None, 'color': None, 'label': None}
         elif self.mode == MODE_EXPLORATION:
             keyname_list = [ ''  ]
             for idx, keyname in enumerate(keyname_list):
@@ -4520,8 +4564,9 @@ class DataExplorationDialog(QDialog):
                 shape_view = ObjectViewer2D(self)
             else:
                 shape_view = ObjectViewer3D(self)
+            self.shape_view_list.append(shape_view)
 
-            if self.mode == MODE_COMPARISON:
+            if self.mode in [MODE_COMPARISON, MODE_COMPARISON2]:
                 shape_button = QPushButton(QIcon(mu.resource_path('icons/M2Landmark_2.png')), "")
                 # send idx to lambda function
                 shape_button.clicked.connect(lambda checked, idx=idx: self.shape_button_clicked(idx))
@@ -4538,13 +4583,24 @@ class DataExplorationDialog(QDialog):
             if keyname == '__default__' :
                 shape_label.hide()
 
-            self.shape_view_list.append(shape_view)
-            self.shape_view_layout.addWidget(shape_view)
+            self.shape_view_layout.addWidget(shape_view,1)
             shape_view.set_object_name(keyname)
             shape_view.show()  
         if self.mode == MODE_AVERAGE:
             self.show_average_shapes()
             #pass
+        if self.mode == MODE_COMPARISON2:
+            #print("prepare_shape_view", self.custom_shape_hash, self.shape_label_list, self.shape_view_list, self.shape_button_list)
+            self.shape_label_list[1].setParent(self.shape_view_list[0])
+            self.shape_button_list[1].setParent(self.shape_view_list[0])
+            self.shape_label_list[1].show()
+            self.shape_button_list[1].show()
+            #self.shape_label_list[1].raise_()
+            #self.shape_button_list[1].raise_()
+
+
+            #print("parent:", self.shape_label_list[0].parent(), self.shape_label_list[1].parent(), self.shape_button_list[0].parent(), self.shape_button_list[1].parent())
+            self.shape_view_list[1].hide()
 
     def show_average_shapes(self):
         keyname_list = self.scatter_data.keys()
@@ -4776,10 +4832,24 @@ class DataExplorationDialog(QDialog):
             width = int(shape_view.width())
             half_width = int(width/2)
             #self.shape_combo_list[idx].setGeometry(half_width,0,half_width,20)
-            self.shape_label_list[idx].setGeometry(0,0,half_width,20)
+            y_pos=0
+            #if self.mode == MODE_COMPARISON2:
+            y_pos = (idx)*32
+                #ret = self.shape_label_list[idx].setParent(self.shape_view_list[0])
+                #print("set parent", ret)
+            #y_pos=0
+            #print("resize", idx, y_pos, shape_view.width(), shape_view.height(), self.shape_label_list[idx].parent())
+            self.shape_label_list[idx].setGeometry(32,y_pos,half_width-32,20)
         for idx, shape_button in enumerate(self.shape_button_list):
             button = self.shape_button_list[idx]
-            button.setGeometry(width-32,0,32,32)
+            y_pos=0
+            #if self.mode == MODE_COMPARISON2:
+            y_pos = (idx)*32
+                #ret = button.setParent(self.shape_view_list[0])
+                #print("set parent", idx, ret)
+            #y_pos=0
+            #print("resize", idx, y_pos, shape_button.width(), shape_button.height(), button.parent())
+            button.setGeometry(0,y_pos,32,32)
 
         QDialog.resizeEvent(self, event)
 
@@ -5087,7 +5157,7 @@ class DataExplorationDialog(QDialog):
                 #self.vertical_line_xval = evt.xdata
                 #self.ax2.axvline(x=evt.xdata, color='gray', linestyle='solid')
                 self.shape_regression(evt)
-        elif self.mode in [ MODE_COMPARISON, MODE_EXPLORATION ]:
+        elif self.mode in [ MODE_COMPARISON, MODE_EXPLORATION, MODE_COMPARISON2 ]:
             if evt.button == 1 and self.is_picking_shape:
                 self.pick_shape(x_val, y_val)
                 self.fig2.canvas.draw()
@@ -5141,22 +5211,19 @@ class DataExplorationDialog(QDialog):
         #    self.transparent_gl_widget.set_object(obj)
         #    self.transparent_gl_widget.raise_()
         #    self.transparent_gl_widget.update()
-            
-        self.shape_view_list[idx].set_object(obj)
-        #print("shape view apply rotation 1", idx, self.rotation_matrix)
-        self.shape_view_list[idx].apply_rotation(self.rotation_matrix)
-        if self.analysis.dimension == 3:
-            self.shape_view_list[idx].pan_x = self.shape_view_pan_x
-            self.shape_view_list[idx].pan_y = self.shape_view_pan_y
-            self.shape_view_list[idx].dolly = self.shape_view_dolly
-        #print("shape view apply rotation 2", idx)
 
-        #self.shape_view_list[idx].temp_rotate_x = self.temp_rotate_x
-        #self.shape_view_list[idx].temp_rotate_y = self.temp_rotate_y
-        #print("idx:", idx, "temp_rotate_x", self.temp_rotate_x, "temp_rotate_y", self.temp_rotate_y)
-        #self.shape_view_list[idx].sync_rotation()
-        
-        self.shape_view_list[idx].update()
+        shape_view = self.shape_view_list[idx]
+
+        if self.mode == MODE_COMPARISON2:
+            shape_view = self.shape_view_list[0]
+            
+        shape_view.set_object(obj)
+        shape_view.apply_rotation(self.rotation_matrix)
+        if self.analysis.dimension == 3:
+            shape_view.pan_x = self.shape_view_pan_x
+            shape_view.pan_y = self.shape_view_pan_y
+            shape_view.dolly = self.shape_view_dolly
+        shape_view.update()
 
     def on_canvas_button_press(self, evt):
         #print("button_press", evt)
@@ -5192,7 +5259,7 @@ class DataExplorationDialog(QDialog):
                     self.axvline = self.ax2.axvline(x=self.vertical_line_xval, color='gray', linestyle=self.vertical_line_style)
                     self.fig2.canvas.draw()
                     self.shape_regression(evt)
-        elif self.mode in [ MODE_COMPARISON, MODE_EXPLORATION ]:
+        elif self.mode in [ MODE_COMPARISON, MODE_EXPLORATION, MODE_COMPARISON2 ]:
             if evt.button == 1 and self.is_picking_shape:
                 self.plot_widget2.setCursor(QCursor(Qt.CrossCursor))
                 self.pick_shape(x_val, y_val)

@@ -947,48 +947,6 @@ class ObjectViewer3D(QGLWidget):
         self.view_mode = VIEW_MODE
         self.updateGL()
         #self.parent.update_status()
-        
-    def reset_pose(self):
-        self.temp_rotate_x = 0
-        self.temp_rotate_y = 0
-        self.rotate_x = 0
-        self.rotate_y = 0
-        self.pan_x = 0
-        self.pan_y = 0
-        self.dolly = 0
-        self.temp_dolly = 0
-        #if self.mode == OBJECT_MODE:
-        self.align_object()
-        
-
-    def sync_rotation(self):
-        #print("sync rotation", self.rotate_x, self.rotate_y, self.temp_rotate_x, self.temp_rotate_y)
-        self.rotate_x += self.temp_rotate_x
-        self.rotate_y += self.temp_rotate_y
-        self.temp_rotate_x = 0
-        self.temp_rotate_y = 0
-        if self.obj_ops is None:
-            return
-
-        self.obj_ops.rotate_3d(math.radians(-1*self.rotate_x),'Y')
-        self.obj_ops.rotate_3d(math.radians(self.rotate_y),'X')
-        if self.threed_model is not None:
-            #print("rotate_x:", self.rotate_x, "rotate_y:", self.rotate_y)
-            #print("1:",datetime.datetime.now())
-            if self.show_model == True:
-                apply_rotation_to_vertex = True
-            else:
-                apply_rotation_to_vertex = False
-            self.threed_model.rotate(math.radians(self.rotate_x),math.radians(self.rotate_y),apply_rotation_to_vertex)
-            #print("2:",datetime.datetime.now())
-            #self.threed_model.rotate_3d(math.radians(-1*self.rotate_x),'Y')
-            #self.threed_model.rotate_3d(math.radians(self.rotate_y),'X')
-            if self.show_model == True:
-                self.threed_model.generate()
-            #print("3:",datetime.datetime.now())
-        #print( "test_obj vert 1 after rotation:", self.test_obj.vertices[0])
-        self.rotate_x = 0
-        self.rotate_y = 0
 
     def mouseMoveEvent(self, event):
         #@print("mouse move event",event)
@@ -1101,6 +1059,14 @@ class ObjectViewer3D(QGLWidget):
 
         self.updateGL()
 
+    def wheelEvent(self, event):
+        #print("wheel event", event.angleDelta().y())
+        self.dolly -= event.angleDelta().y() / 240.0
+        if self.parent != None and callable(getattr(self.parent, 'sync_zoom', None)):
+            self.parent.sync_zoom(self, self.dolly)
+
+        self.updateGL()
+
     def add_wire(self, wire_start_index, wire_end_index):
         if wire_start_index == wire_end_index:
             return
@@ -1136,14 +1102,6 @@ class ObjectViewer3D(QGLWidget):
         dataset.save()
         self.initialize_colors()        
 
-    def wheelEvent(self, event):
-        #print("wheel event", event.angleDelta().y())
-        self.dolly -= event.angleDelta().y() / 240.0
-        if self.parent != None and callable(getattr(self.parent, 'sync_zoom', None)):
-            self.parent.sync_zoom(self, self.dolly)
-
-        self.updateGL()
-
     def set_ds_ops(self, ds_ops):
         #print("set_ds_ops")
         self.ds_ops = ds_ops
@@ -1157,8 +1115,8 @@ class ObjectViewer3D(QGLWidget):
             #obj.translate(-average_shape.get_centroid())
         self.edge_list = ds_ops.edge_list
 
-    def set_object(self, object):
-        #print("set_object 1",type(object))
+    def set_object(self, object, idx=-1):
+        print("set_object 1",type(object),idx)
         # print current time
         #print("1:",datetime.datetime.now())
         self.show()
@@ -1283,6 +1241,15 @@ class ObjectViewer3D(QGLWidget):
             self.fullpath = file_path
         self.updateGL()
 
+    def initializeGL(self):
+        #print("initializeGL")
+        self.initialize_frame_buffer()
+        self.picker_buffer = self.create_picker_buffer()
+        self.initialize_frame_buffer(self.picker_buffer)
+        self.initialized = True
+        if self.initialized == True and self.threed_model is not None and self.threed_model.generated == False:
+            self.threed_model.generate()
+
     def initialize_frame_buffer(self, frame_buffer_id=0):
         #print("initialize_frame_buffer")
         gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, frame_buffer_id)
@@ -1303,17 +1270,6 @@ class ObjectViewer3D(QGLWidget):
         glut.glutInit(sys.argv)
         gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, 0)
 
-    def initializeGL(self):
-        #print("initializeGL")
-        self.initialize_frame_buffer()
-        self.picker_buffer = self.create_picker_buffer()
-        self.initialize_frame_buffer(self.picker_buffer)
-        self.initialized = True
-        if self.initialized == True and self.threed_model is not None and self.threed_model.generated == False:
-            self.threed_model.generate()
-
-        #self.test_obj = OBJ('Estaingia_simulation_base_20221125.obj')
-
     def paintGL(self):
         #print("paintGL", datetime.datetime.now())
         if self.edit_mode == MODE['WIREFRAME'] or self.edit_mode == MODE['EDIT_LANDMARK']:
@@ -1322,34 +1278,12 @@ class ObjectViewer3D(QGLWidget):
 
         gl.glPushMatrix() 
         self.draw_all()
-        gl.glPopMatrix() 
+        gl.glPopMatrix()
         return
-        if self.object_name != "":
-            gl.glDisable(gl.GL_LIGHTING)        
-            gl.glRasterPos3f(-2,2,0)
-            font_size_list = [ glut.GLUT_BITMAP_HELVETICA_10, glut.GLUT_BITMAP_HELVETICA_12, glut.GLUT_BITMAP_HELVETICA_18]
-
-            for letter in list(self.object_name):
-                glut.glutBitmapCharacter(glut.GLUT_BITMAP_HELVETICA_18, ord(letter))
-            gl.glEnable(gl.GL_LIGHTING)
-
-        return
-        if self.object_name != "":
-            #print("object name in draw all:", self.object_name)
-
-            gl.glDisable(gl.GL_DEPTH_TEST)
-            p = QPainter(self)
-            p.setPen(QColor(255,255,255))
-            p.setFont(QFont("Arial", 12))
-            p.drawText(10, 10, self.object_name)
-            p.end()
-            gl.glEnable(gl.GL_DEPTH_TEST)
-        
 
     def draw_all(self):
         current_buffer = gl.glGetIntegerv(gl.GL_FRAMEBUFFER_BINDING)
         #print("draw all", object, self, current_buffer )
-            
         gl.glMatrixMode(gl.GL_PROJECTION)
         gl.glLoadIdentity()
         glu.gluPerspective(45.0, self.aspect, 0.1, 100.0)
@@ -1372,7 +1306,6 @@ class ObjectViewer3D(QGLWidget):
             return
         
         # pan, rotate, dolly
-
         if self.data_mode == OBJECT_MODE:
             #print("normal shape", COLOR['NORMAL_SHAPE'])
             object_color = as_gl_color(self.landmark_color) #COLOR['NORMAL_SHAPE']
@@ -1384,10 +1317,7 @@ class ObjectViewer3D(QGLWidget):
 
         gl.glFlush()
 
-
-
     def draw_dataset(self, ds_ops):
-        
         for obj in ds_ops.object_list:
             if obj.id in ds_ops.selected_object_id_list:
                 object_color = COLOR['SELECTED_SHAPE']
@@ -1513,8 +1443,6 @@ class ObjectViewer3D(QGLWidget):
                             #gl.glNormal3f(*normal_list[lm_idx-1])
                             gl.glVertex3f(*lm)
                     gl.glEnd()
-
-
         else:
             gl.glPointSize(5)
             gl.glDisable(gl.GL_LIGHTING)
@@ -1555,21 +1483,9 @@ class ObjectViewer3D(QGLWidget):
                 gl.glPopMatrix()
 
             return
-            if len(self.threed_model.landmark_list ) > 0:
-                print("printing landmark:", self.threed_model.landmark_list, COLOR['NORMAL_SHAPE'])
-                for idx in self.threed_model.landmark_list:
-                    lm = self.threed_model.vertices[idx]
-                    gl.glPushMatrix()
-                    gl.glTranslate(*lm)
-                    gl.glColor3f( *COLOR['NORMAL_SHAPE'] )
-                    glut.glutSolidSphere(0.03, 10, 10)
-                    gl.glPopMatrix()
 
-
-        #gl.glPopMatrix()
     def calculate_normal(self, polygon):
         #print("calculate normal")
-        #print("polygon:", polygon)
         p1 = self.obj_ops.landmark_list[polygon[0]-1]
         p2 = self.obj_ops.landmark_list[polygon[1]-1]
         p3 = self.obj_ops.landmark_list[polygon[2]-1]
@@ -1584,7 +1500,6 @@ class ObjectViewer3D(QGLWidget):
 
     def calculate_face_normals(self, polygon_list):
         # ... (Your existing normal calculation for each vertex)
-
         face_normals = []
         for polygon in polygon_list:
             # Calculate the average normal of the polygon's vertices
@@ -1598,7 +1513,6 @@ class ObjectViewer3D(QGLWidget):
                 face_normals.append([f / length for f in face_normal])
         return face_normals
 
-
     def calculate_normal_list(self, polygon_list):
         #print("calculate normal")
         #print("polygon:", polygon)
@@ -1606,14 +1520,8 @@ class ObjectViewer3D(QGLWidget):
         for polygon in polygon_list:
             lm_idx_list = [i-1 for i in polygon]
             landmark_list = [self.obj_ops.landmark_list[i] for i in lm_idx_list]
-            #p1 = self.obj_ops.landmark_list[polygon[0]-1]
-            #p2 = self.obj_ops.landmark_list[polygon[1]-1]
-            #p3 = self.obj_ops.landmark_list[polygon[2]-1]
-            #print("p1:", p1, "p2:", p2, "p3:", p3)
             v1 = np.array(landmark_list[1]) - np.array(landmark_list[0])
             v2 = np.array(landmark_list[2]) - np.array(landmark_list[0])
-            #v2 = np.array(p3) - np.array(p1)
-            #print("v1:", v1, "v2:", v2)
             normal = -1.0 * np.cross(v1, v2)
             for i in lm_idx_list:
                 if i in normal_dict:
@@ -1621,8 +1529,6 @@ class ObjectViewer3D(QGLWidget):
                     normal_dict[i]['count'] += 1
                 else:
                     normal_dict[i] = { 'normal': normal, 'count': 1 }
-            #normal_dict = { }
-            #print("normal:", normal)
         normal_list = []
         for i in range(len(self.obj_ops.landmark_list)):
             if i in normal_dict:
@@ -1632,12 +1538,9 @@ class ObjectViewer3D(QGLWidget):
             normal_list.append(normal)
         return normal_list
 
-
     def create_picker_buffer(self):
         #print("create_picker_buffer")
-        # Create a new framebuffer
         picker_buffer = gl.glGenFramebuffers(1)
-        #print("picker_buffer:", self.picker_buffer)
         gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, picker_buffer)
 
         # Create a texture to hold the color buffer
@@ -1670,7 +1573,6 @@ class ObjectViewer3D(QGLWidget):
         gl.glViewport(0, 0, self.width(), self.height())
 
         # Render your scene...
-        #self.
         self.draw_all()
 
         # Don't forget to unbind the framebuffer when you're done to revert back to the default framebuffer
@@ -1683,10 +1585,6 @@ class ObjectViewer3D(QGLWidget):
         gl.glDeleteFramebuffers([self.picker_buffer])
         self.picker_buffer = None
         #gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, 0)
-
-    def closeEvent(self, event):
-        #print("closeEvent")
-        self.delete_picker_buffer()
 
     def resizeGL(self, width, height):
         #print("resizeGL")
@@ -1722,29 +1620,23 @@ class ObjectViewer3D(QGLWidget):
             gl.glMatrixMode(gl.GL_MODELVIEW)
             gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, 0)
 
+    def closeEvent(self, event):
+        #print("closeEvent")
+        self.delete_picker_buffer()
+
     def timeout(self):
-        #print("timeout, auto_rotate:", self.auto_rotate)
         if self.auto_rotate == False:
-            #print "no rotate"
             return
         if self.is_dragging:
-            #print "dragging"
             return
-
         self.rotate_x += 0.5
         self.updateGL()
 
     def clear_object(self):
-        #print("clear object 3d")
         self.obj_ops = None
         self.object = None
         self.landmark_list = []
-        #print("current buffer:", gl.glGetIntegerv(gl.GL_FRAMEBUFFER_BINDING))
-        #gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
-        #gl.glFlush()
-        #print("updateGL")
         self.updateGL()
-        #self.data_mode = DATASET_MODE
 
     def hit_background_test(self, x, y):
         pixels = gl.glReadPixels(x, self.height()-y, 1, 1, gl.GL_RGB, gl.GL_UNSIGNED_BYTE)
@@ -1757,8 +1649,6 @@ class ObjectViewer3D(QGLWidget):
             return True
         else:
             return False
-        #print("hit test", x, y, rgb_tuple)
-
 
     def hit_test(self, x, y):
         gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, self.picker_buffer)
@@ -1778,12 +1668,6 @@ class ObjectViewer3D(QGLWidget):
             edge_idx = self.color_to_edge_idx[rgb_tuple]
             return "Edge", int(edge_idx)
         return "", -1
-
-    def draw(self):
-        #gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
-        for obj in self.objects:
-            gl.glColor3ub(*self.object_to_color[obj.id])
-            obj.draw()
 
     def initialize_colors(self):
         #if self.obj_ops is None:
@@ -1821,26 +1705,12 @@ class ObjectViewer3D(QGLWidget):
             self.obj_ops.landmark_list.append([float(x),float(y),float(z)])
 
     def calculate_resize(self):
-        #print("obj_ops:", self.obj_ops)
-        #if len(self.landmark_list) == 0:
-        #    return
         if self.threed_model is not None:
-            #print("calculate resize, has threed_model")
             if self.initialized == True and self.threed_model.generated == False:
                 self.threed_model.generate()
-            #if len(self.landmark_list) > 0:
-            #    print("are they the same?", self.landmark_list is self.obj_ops.landmark_list)
-            #    print("calculate resize: self 1:", id(self.landmark_list), self.landmark_list[0] )
-            #print("calculate resize: obj_ops 1:", id(self.obj_ops.landmark_list), self.obj_ops.landmark_list[0])
-            #print("model center:", self.threed_model.center_x, self.threed_model.center_y, self.threed_model.center_z)
             self.obj_ops.move(-1 * self.threed_model.center_x, -1 * self.threed_model.center_y, -1 * self.threed_model.center_z)
-            #if len(self.landmark_list) > 0:
-            #    print("calculate resize: self 2:", id(self.landmark_list), self.landmark_list[0] )
-            #print("calculate resize: obj_ops 2:", id(self.obj_ops.landmark_list), self.obj_ops.landmark_list[0])
             self.obj_ops.rescale(self.threed_model.scale)
             self.obj_ops.apply_rotation_matrix(self.threed_model.rotation_matrix)
-            #print("calculate resize: obj_ops 3:", id(self.obj_ops.landmark_list), self.obj_ops.landmark_list[0])
-            #pass
         else:
             self.obj_ops.landmark_list = copy.deepcopy(self.landmark_list)
             self.obj_ops.move_to_center()
@@ -1848,43 +1718,7 @@ class ObjectViewer3D(QGLWidget):
             self.obj_ops.rescale_to_unitsize()
             scale = self.get_scale_from_object(self.obj_ops)
             self.obj_ops.rescale(scale)
-            #self.auto_rotate = True
-        #self.updateGL()
         return
-
-    def apply_rotation(self, rotation_matrix):
-        #print("inside shape view apply rotation", rotation_matrix)
-        self.obj_ops.apply_rotation_matrix(rotation_matrix)
-
-    def rotate(self, rotationX_rad, rotationY_rad, vertices ):
-        #print(rotationX_rad, rotationY_rad)
-        rotationXMatrix = np.array([
-            [1, 0, 0, 0],
-            [0, np.cos(rotationY_rad), -np.sin(rotationY_rad), 0],
-            [0, np.sin(rotationY_rad), np.cos(rotationY_rad), 0],
-            [0, 0, 0, 1]
-        ])
-
-        rotationYMatrix = np.array([
-            [np.cos(rotationX_rad), 0, np.sin(rotationX_rad), 0],
-            [0, 1, 0, 0],
-            [-np.sin(rotationX_rad), 0, np.cos(rotationX_rad), 0],
-            [0, 0, 0, 1]
-        ])
-        #print(rotationXMatrix)
-        #print(rotationYMatrix)
-        new_rotation_matrix = np.dot(rotationXMatrix, rotationYMatrix)
-        self.rotation_matrix = np.dot(new_rotation_matrix, self.rotation_matrix)
-
-        # Create a column of 1's with the same number of rows as vertices
-        ones_column = np.ones((np.array(vertices).shape[0], 1))
-
-        # Use numpy.hstack() to concatenate the vertices with the ones column
-        vertices_with_ones = np.hstack(( vertices, ones_column))
-        new_vertices_with_ones = np.dot(vertices_with_ones, self.rotation_matrix.T)
-        new_vertices = new_vertices_with_ones[:, 0:3]
-
-        return new_vertices
 
     def unproject_mouse(self, x, y):
         # Get the view and projection matrices from your OpenGL code
@@ -2000,6 +1834,79 @@ class ObjectViewer3D(QGLWidget):
         distance = np.linalg.norm(point_vector - projection * ray_direction)
 
         return distance
+
+    def apply_rotation(self, rotation_matrix):
+        self.obj_ops.apply_rotation_matrix(rotation_matrix)
+
+    def rotate(self, rotationX_rad, rotationY_rad, vertices ):
+        rotationXMatrix = np.array([
+            [1, 0, 0, 0],
+            [0, np.cos(rotationY_rad), -np.sin(rotationY_rad), 0],
+            [0, np.sin(rotationY_rad), np.cos(rotationY_rad), 0],
+            [0, 0, 0, 1]
+        ])
+
+        rotationYMatrix = np.array([
+            [np.cos(rotationX_rad), 0, np.sin(rotationX_rad), 0],
+            [0, 1, 0, 0],
+            [-np.sin(rotationX_rad), 0, np.cos(rotationX_rad), 0],
+            [0, 0, 0, 1]
+        ])
+        new_rotation_matrix = np.dot(rotationXMatrix, rotationYMatrix)
+        self.rotation_matrix = np.dot(new_rotation_matrix, self.rotation_matrix)
+
+        # Create a column of 1's with the same number of rows as vertices
+        ones_column = np.ones((np.array(vertices).shape[0], 1))
+
+        # Use numpy.hstack() to concatenate the vertices with the ones column
+        vertices_with_ones = np.hstack(( vertices, ones_column))
+        new_vertices_with_ones = np.dot(vertices_with_ones, self.rotation_matrix.T)
+        new_vertices = new_vertices_with_ones[:, 0:3]
+
+        return new_vertices
+
+    def reset_pose(self):
+        self.temp_rotate_x = 0
+        self.temp_rotate_y = 0
+        self.rotate_x = 0
+        self.rotate_y = 0
+        self.pan_x = 0
+        self.pan_y = 0
+        self.dolly = 0
+        self.temp_dolly = 0
+        #if self.mode == OBJECT_MODE:
+        self.align_object()
+        
+
+    def sync_rotation(self):
+        #print("sync rotation", self.rotate_x, self.rotate_y, self.temp_rotate_x, self.temp_rotate_y)
+        self.rotate_x += self.temp_rotate_x
+        self.rotate_y += self.temp_rotate_y
+        self.temp_rotate_x = 0
+        self.temp_rotate_y = 0
+        if self.obj_ops is None:
+            return
+
+        self.obj_ops.rotate_3d(math.radians(-1*self.rotate_x),'Y')
+        self.obj_ops.rotate_3d(math.radians(self.rotate_y),'X')
+        if self.threed_model is not None:
+            #print("rotate_x:", self.rotate_x, "rotate_y:", self.rotate_y)
+            #print("1:",datetime.datetime.now())
+            if self.show_model == True:
+                apply_rotation_to_vertex = True
+            else:
+                apply_rotation_to_vertex = False
+            self.threed_model.rotate(math.radians(self.rotate_x),math.radians(self.rotate_y),apply_rotation_to_vertex)
+            #print("2:",datetime.datetime.now())
+            #self.threed_model.rotate_3d(math.radians(-1*self.rotate_x),'Y')
+            #self.threed_model.rotate_3d(math.radians(self.rotate_y),'X')
+            if self.show_model == True:
+                self.threed_model.generate()
+            #print("3:",datetime.datetime.now())
+        #print( "test_obj vert 1 after rotation:", self.test_obj.vertices[0])
+        self.rotate_x = 0
+        self.rotate_y = 0
+
 
 class DatasetOpsViewer(QLabel):
     #clicked = pyqtSignal()
@@ -3888,7 +3795,7 @@ class DataExplorationDialog(QDialog):
         self.plot_size = "medium"
         self.remember_geometry = True
         self.on_pick_happened = False
-        self.bgcolor = "#AAAAAA"
+        self.bgcolor = "#AAAAAA"        
 
         self.curve_list = []
         self.shape_view_list = []
@@ -5191,33 +5098,22 @@ class DataExplorationDialog(QDialog):
             self.tableView1.selectionModel().clearSelection()
 
     def show_shape(self, shape, idx):
-        #print("show object", idx)
         obj = MdObject()
-        #print("object:", obj)
         obj.dataset_id = self.analysis.dataset_id
         obj.landmark_list = []
-        #print("object:", obj)
         for i in range(0,len(shape),self.analysis.dimension):
-            landmark = shape[i:i+self.analysis.dimension] #[shape[i], shape[i+1]]
-            #if self.analys.dimension == 3:
-            #    landmark.append(shape[i+2])
+            landmark = shape[i:i+self.analysis.dimension]
             obj.landmark_list.append(landmark)
         obj.pack_landmark()
-        #print("shape:", shape[:5], "len(shape)", len(shape), "obj",obj, obj.landmark_list)
-        #self.shape_view_list[idx].clear_object()
-        #temp_rotate_x = self.shape_view_list[idx].temp_rotate_x
-        #temp_rotate_y = self.shape_view_list[idx].temp_rotate_y
-        #if idx == 0:
-        #    self.transparent_gl_widget.set_object(obj)
-        #    self.transparent_gl_widget.raise_()
-        #    self.transparent_gl_widget.update()
 
         shape_view = self.shape_view_list[idx]
 
         if self.mode == MODE_COMPARISON2:
             shape_view = self.shape_view_list[0]
-            
-        shape_view.set_object(obj)
+            shape_view.set_object(obj, idx)
+            print("object:", obj, "idx:", idx)  
+        else:
+            shape_view.set_object(obj)
         shape_view.apply_rotation(self.rotation_matrix)
         if self.analysis.dimension == 3:
             shape_view.pan_x = self.shape_view_pan_x

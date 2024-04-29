@@ -155,7 +155,7 @@ class MdDataset(Model):
         return self.unpack_polygons()
 
     def get_edge_list(self):
-        return self.edge_list
+        return self.unpack_wireframe()
 
     def pack_baseline(self, baseline_point_list=None):
         if baseline_point_list is None and len(self.baseline_point_list) > 0:
@@ -636,6 +636,8 @@ class MdObjectOps:
         self.property_list = copy.deepcopy(mdobject.property_list)
 
         self.centroid_size = -1
+        self.polygon_color = None
+        self.edge_color = None
 
     def get_centroid_coord(self):
         c = [0, 0, 0]
@@ -1069,6 +1071,15 @@ class MdDatasetOps:
             #lm = [ rotated_shape[i, 0], rotated_shape[i, 1], rotated_shape[i, 2] ]
             #i += 1
         mo.landmark_list = new_landmark_list
+
+    def apply_rotation_matrix(self, rotation_matrix):
+        #print("obj_ops apply rotation", rotation_matrix)
+        for mo in self.object_list:
+            if len(mo.landmark_list)>0:
+                ones_column = np.ones((np.array(mo.landmark_list).shape[0], 1))
+                vertices_with_ones = np.hstack((mo.landmark_list, ones_column))
+                new_vertices = np.dot(vertices_with_ones, rotation_matrix.T)
+                mo.landmark_list = new_vertices[:, 0:3].tolist()
 
     def rotation_matrix(self, ref, target):
         #assert( ref[0] == 3 )

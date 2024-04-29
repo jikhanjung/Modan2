@@ -95,6 +95,7 @@ def as_qt_color(color):
     return QColor( *[ int(x*255) for x in color ] )
 
 def as_gl_color(color):
+    #print("as_gl_color", color)
     qcolor = QColor(color)
     return qcolor.redF(), qcolor.greenF(), qcolor.blueF()
 
@@ -717,6 +718,7 @@ class ObjectViewer3D(QGLWidget):
         self.setMouseTracking(True)
         self.object_dialog = None
         self.ds_ops = None
+        self.ds_ops_comp = None
         self.obj_ops = None
         self.scale = 1.0
         self.pan_x = 0
@@ -757,6 +759,7 @@ class ObjectViewer3D(QGLWidget):
         self.temp_edge = []
         self.object = None
         self.polygon_list = []
+        self.comparison_data = {}
 
         #self.no_drawing = False
         self.wireframe_from_idx = -1
@@ -1111,12 +1114,75 @@ class ObjectViewer3D(QGLWidget):
         scale = self.get_scale_from_object(average_shape)
         average_shape.rescale(scale)
         for obj in self.ds_ops.object_list:
+            #print("rescale object", obj)
             obj.rescale(scale)
             #obj.translate(-average_shape.get_centroid())
         self.edge_list = ds_ops.edge_list
 
+    def set_source_shape_color(self, color):
+        self.source_shape_color = color
+
+    def set_target_shape_color(self, color):
+        self.target_shape_color = color
+
+    def set_source_shape(self, object):
+        self.comparison_data['source_shape'] = object
+        self.generate_reference_shape()
+    
+    def set_target_shape(self, object):
+        self.comparison_data['target_shape'] = object
+        self.generate_reference_shape()
+    
+    def set_intermediate_shape(self, object):
+        self.comparison_data['intermediate_shape'] = object
+
+    def generate_reference_shape(self):
+        #if 'source_shape' not in self.comparison_data or 'target_shape' not in self.comparison_data:
+        #    return
+        shape_list = []
+        ds = MdDataset()
+        ds.dimension = self.dataset.dimension
+        ds.baseline = self.dataset.baseline
+        ds.edge_list = self.dataset.edge_list
+        ds.polygon_list = self.dataset.polygon_list
+        ds_ops = MdDatasetOps(ds)
+        if 'source_shape' in self.comparison_data:
+            shape_list.append(self.comparison_data['source_shape'])
+            source = self.comparison_data['source_shape']
+            source_ops = MdObjectOps(source)
+            source_ops.polygon_color = self.source_shape_color
+            source_ops.edge_color = self.source_shape_color
+            ds_ops.object_list.append(source_ops)
+        if 'target_shape' in self.comparison_data:
+            shape_list.append(self.comparison_data['target_shape'])
+            target = self.comparison_data['target_shape']
+            target_ops = MdObjectOps(target)
+            target_ops.polygon_color = self.target_shape_color
+            target_ops.edge_color = self.target_shape_color
+            ds_ops.object_list.append(target_ops)
+        #ds.add_object(source)
+        #ds.add_object(target)
+        #ds_ops = MdDatasetOps(ds)
+        #print("ds_ops 1:", ds_ops, ds_ops.object_list)
+        ret = ds_ops.procrustes_superimposition()
+        if ret == False:
+            print("procrustes failed")
+            return
+        self.comparison_data['ds_ops'] = ds_ops
+        self.comparison_data['average_shape'] = ds_ops.get_average_shape()
+        #print("obj_list 1", len(ds_ops.object_list))
+        #for obj_ops in ds_ops.object_list:
+        #    print("obj_ops:", obj_ops, obj_ops.landmark_list)
+        self.set_ds_ops(ds_ops)
+        #print("ds_ops 2:", self.ds_ops)
+        #print("obj_list 2", len(self.ds_ops.object_list))
+        #for obj_ops in self.ds_ops.object_list:
+        #    print("obj_ops:", obj_ops, obj_ops.landmark_list)
+        
+        self.data_mode = DATASET_MODE
+
     def set_object(self, object, idx=-1):
-        print("set_object 1",type(object),idx)
+        #print("set_object 1",type(object),idx)
         # print current time
         #print("1:",datetime.datetime.now())
         self.show()
@@ -1307,83 +1373,124 @@ class ObjectViewer3D(QGLWidget):
         
         # pan, rotate, dolly
         if self.data_mode == OBJECT_MODE:
-            #print("normal shape", COLOR['NORMAL_SHAPE'])
+            print("normal shape", COLOR['NORMAL_SHAPE'])
             object_color = as_gl_color(self.landmark_color) #COLOR['NORMAL_SHAPE']
-            #print("object_color:", object_color)
+            print("object_color:", object_color)
 
             self.draw_object(self.obj_ops,color=object_color)
         else:
+            #print("draw all dataset mode")
             self.draw_dataset(self.ds_ops)
 
         gl.glFlush()
 
     def draw_dataset(self, ds_ops):
-        for obj in ds_ops.object_list:
+        for idx, obj in enumerate(ds_ops.object_list):
+            #print("draw object", obj)
             if obj.id in ds_ops.selected_object_id_list:
                 object_color = COLOR['SELECTED_SHAPE']
             else:
                 #print("normal shape", COLOR['NORMAL_SHAPE'])
                 object_color = as_gl_color(self.landmark_color) #COLOR['NORMAL_SHAPE']
                 #print("object_color:", object_color)
-            self.draw_object(obj, landmark_as_sphere=False, color=object_color)
+            edge_color=self.wireframe_color
+            if obj.edge_color is not None:
+                edge_color = obj.edge_color
+            polygon_color=self.wireframe_color
+            if obj.polygon_color is not None:
+                polygon_color = obj.polygon_color
+
+            self.draw_object(obj, landmark_as_sphere=False, color=object_color, edge_color=edge_color,polygon_color=polygon_color)
         if self.show_average:
             object_color = COLOR['AVERAGE_SHAPE']
             self.draw_object(ds_ops.get_average_shape(), landmark_as_sphere=True, color=object_color)
 
-    def draw_object(self,object,landmark_as_sphere=True,color=COLOR['NORMAL_SHAPE']):
+    def draw_object(self,object,landmark_as_sphere=True,color=COLOR['NORMAL_SHAPE'],edge_color=COLOR['NORMAL_SHAPE'],polygon_color=COLOR['NORMAL_SHAPE']):
         if object is None:
             return
         current_buffer = gl.glGetIntegerv(gl.GL_FRAMEBUFFER_BINDING)
         #print("draw object", object, self, current_buffer )
-        if landmark_as_sphere:
 
-            if self.show_wireframe and len(self.temp_edge) == 2:
-                wf_color = as_gl_color(self.wireframe_color)
-                gl.glColor3f( *wf_color ) #*COLOR['WIREFRAME'])
-                gl.glLineWidth(int(self.wireframe_thickness)+1)
+        if self.show_wireframe and len(self.temp_edge) == 2:
+            wf_color = as_gl_color(self.wireframe_color)
+            gl.glColor3f( *wf_color ) #*COLOR['WIREFRAME'])
+            gl.glLineWidth(int(self.wireframe_thickness)+1)
+            gl.glBegin(gl.GL_LINE_STRIP)
+            for v in self.temp_edge:
+                gl.glVertex3f(*v)
+            gl.glEnd()
+
+        if self.show_wireframe and len(self.edge_list) > 0:
+            #print("draw wireframe",self.edge_list)
+            for i, edge in enumerate(self.edge_list):
+                if current_buffer == self.picker_buffer and self.object_dialog is not None:
+                    gl.glDisable(gl.GL_LIGHTING)
+                    #print("color:",*self.lm_idx_to_color[i])
+                    key = "edge_"+str(i)
+                    #print("i:",i,"key:",key, "color:",self.lm_idx_to_color[key], "current_buffer:",current_buffer, "picker_buffer:",self.picker_buffer)
+                    color = self.edge_idx_to_color[key]
+                    #print(self.lm_idx_to_color, i, current_buffer)
+                    gl.glColor3f( *[ c * 1.0 / 255 for c in color] )
+                    line_width = 3*(int(self.wireframe_thickness)+1)
+                    #print("buffer line width:", line_width)
+                    gl.glLineWidth(line_width)
+                else:
+
+                    if i == self.selected_edge_index:
+                        gl.glColor3f( *COLOR['SELECTED_EDGE'] )
+                    else:
+                    #gl.glDisable(gl.GL_LIGHTING)
+                        #print("wireframe color:", self.wireframe_color)
+                        wf_color = as_gl_color(self.wireframe_color)
+                        #print("color:", wf_color)
+                        gl.glColor3f( *wf_color ) #*COLOR['WIREFRAME'])
+                    line_width = 1*(int(self.wireframe_thickness)+1)
+                    #print("line width:", line_width)
+                    gl.glLineWidth(line_width)                        
                 gl.glBegin(gl.GL_LINE_STRIP)
-                for v in self.temp_edge:
-                    gl.glVertex3f(*v)
+                #print(self.down_x, self.down_y, self.curr_x, self.curr_y)
+                for lm_idx in edge:
+                    if lm_idx < len(object.landmark_list):
+                        lm = object.landmark_list[lm_idx]
+                        gl.glVertex3f(*lm)
+                gl.glEnd()
+                if current_buffer == self.picker_buffer and self.object_dialog is not None:
+                    gl.glEnable(gl.GL_LIGHTING)
+
+
+        if self.show_polygon and len(self.polygon_list) > 0:
+            normal_list = self.calculate_normal_list(object,self.polygon_list)
+            for i, polygon in enumerate(self.polygon_list):
+                normal = self.calculate_normal(object,polygon)
+                gl.glEnable(gl.GL_LIGHTING)
+                if isinstance(polygon_color,QColor):
+                    pg_color = as_gl_color(polygon_color)
+                elif len(polygon_color) == 3:
+                    pg_color = polygon_color
+                else:
+                    pg_color = as_gl_color(polygon_color)
+                gl.glColor3f( *pg_color ) #*COLOR['WIREFRAME'])
+
+                '''
+                material_ambient = [0.5, 0.3, 0.3, 0.5]  # Adjust these values (0.0 to 1.0)
+                material_diffuse = [0.8, 0.8, 0.8, 0.5]  # Adjust these values (0.0 to 1.0)
+                material_specular = [0.5, 0.5, 0.5, 0.5]  # Adjust these values (0.0 to 1.0)
+                gl.glMaterialfv(gl.GL_FRONT, gl.GL_AMBIENT, material_ambient)
+                gl.glMaterialfv(gl.GL_FRONT, gl.GL_DIFFUSE, material_diffuse)
+                gl.glMaterialfv(gl.GL_FRONT, gl.GL_SPECULAR, material_specular)
+                '''
+
+                gl.glNormal3f(*normal)
+                gl.glBegin(gl.GL_POLYGON)
+                for lm_idx in polygon:
+                    #print("lm_idx:", lm_idx, "len landmark", len(object.landmark_list))
+                    if lm_idx <= len(object.landmark_list):
+                        lm = object.landmark_list[lm_idx-1]
+                        #gl.glNormal3f(*normal_list[lm_idx-1])
+                        gl.glVertex3f(*lm)
                 gl.glEnd()
 
-            if self.show_wireframe and len(self.edge_list) > 0:
-                #print("draw wireframe",self.edge_list)
-                for i, edge in enumerate(self.edge_list):
-                    if current_buffer == self.picker_buffer and self.object_dialog is not None:
-                        gl.glDisable(gl.GL_LIGHTING)
-                        #print("color:",*self.lm_idx_to_color[i])
-                        key = "edge_"+str(i)
-                        #print("i:",i,"key:",key, "color:",self.lm_idx_to_color[key], "current_buffer:",current_buffer, "picker_buffer:",self.picker_buffer)
-                        color = self.edge_idx_to_color[key]
-                        #print(self.lm_idx_to_color, i, current_buffer)
-                        gl.glColor3f( *[ c * 1.0 / 255 for c in color] )
-                        line_width = 3*(int(self.wireframe_thickness)+1)
-                        #print("buffer line width:", line_width)
-                        gl.glLineWidth(line_width)
-                    else:
-
-                        if i == self.selected_edge_index:
-                            gl.glColor3f( *COLOR['SELECTED_EDGE'] )
-                        else:
-                        #gl.glDisable(gl.GL_LIGHTING)
-                            #print("wireframe color:", self.wireframe_color)
-                            wf_color = as_gl_color(self.wireframe_color)
-                            #print("color:", wf_color)
-                            gl.glColor3f( *wf_color ) #*COLOR['WIREFRAME'])
-                        line_width = 1*(int(self.wireframe_thickness)+1)
-                        #print("line width:", line_width)
-                        gl.glLineWidth(line_width)                        
-                    gl.glBegin(gl.GL_LINE_STRIP)
-                    #print(self.down_x, self.down_y, self.curr_x, self.curr_y)
-                    for lm_idx in edge:
-                        if lm_idx < len(object.landmark_list):
-                            lm = object.landmark_list[lm_idx]
-                            gl.glVertex3f(*lm)
-                    gl.glEnd()
-                    if current_buffer == self.picker_buffer and self.object_dialog is not None:
-                        gl.glEnable(gl.GL_LIGHTING)
-
-
+        if landmark_as_sphere:
             lm_count = len(object.landmark_list)
             for i, lm in enumerate(object.landmark_list):
                 gl.glPushMatrix()
@@ -1417,33 +1524,8 @@ class ObjectViewer3D(QGLWidget):
                         glut.glutBitmapCharacter(font_size_list[int(self.index_size)], ord(letter))
                     gl.glEnable(gl.GL_LIGHTING)
 
-            if self.show_polygon and len(self.polygon_list) > 0:
-                normal_list = self.calculate_normal_list(self.polygon_list)
-                for i, polygon in enumerate(self.polygon_list):
-                    normal = self.calculate_normal(polygon)
-                    gl.glEnable(gl.GL_LIGHTING)
-                    pg_color = as_gl_color(self.wireframe_color)
-                    gl.glColor3f( *pg_color ) #*COLOR['WIREFRAME'])
-
-                    '''
-                    material_ambient = [0.5, 0.3, 0.3, 0.5]  # Adjust these values (0.0 to 1.0)
-                    material_diffuse = [0.8, 0.8, 0.8, 0.5]  # Adjust these values (0.0 to 1.0)
-                    material_specular = [0.5, 0.5, 0.5, 0.5]  # Adjust these values (0.0 to 1.0)
-                    gl.glMaterialfv(gl.GL_FRONT, gl.GL_AMBIENT, material_ambient)
-                    gl.glMaterialfv(gl.GL_FRONT, gl.GL_DIFFUSE, material_diffuse)
-                    gl.glMaterialfv(gl.GL_FRONT, gl.GL_SPECULAR, material_specular)
-                    '''
-
-                    gl.glNormal3f(*normal)
-                    gl.glBegin(gl.GL_POLYGON)
-                    for lm_idx in polygon:
-                        #print("lm_idx:", lm_idx, "len landmark", len(object.landmark_list))
-                        if lm_idx <= len(object.landmark_list):
-                            lm = object.landmark_list[lm_idx-1]
-                            #gl.glNormal3f(*normal_list[lm_idx-1])
-                            gl.glVertex3f(*lm)
-                    gl.glEnd()
         else:
+            
             gl.glPointSize(5)
             gl.glDisable(gl.GL_LIGHTING)
             gl.glColor3f( *color )
@@ -1484,11 +1566,11 @@ class ObjectViewer3D(QGLWidget):
 
             return
 
-    def calculate_normal(self, polygon):
+    def calculate_normal(self, obj_ops, polygon):
         #print("calculate normal")
-        p1 = self.obj_ops.landmark_list[polygon[0]-1]
-        p2 = self.obj_ops.landmark_list[polygon[1]-1]
-        p3 = self.obj_ops.landmark_list[polygon[2]-1]
+        p1 = obj_ops.landmark_list[polygon[0]-1]
+        p2 = obj_ops.landmark_list[polygon[1]-1]
+        p3 = obj_ops.landmark_list[polygon[2]-1]
         #print("p1:", p1, "p2:", p2, "p3:", p3)
         v1 = np.array(p2) - np.array(p1)
         v2 = np.array(p3) - np.array(p1)
@@ -1513,13 +1595,13 @@ class ObjectViewer3D(QGLWidget):
                 face_normals.append([f / length for f in face_normal])
         return face_normals
 
-    def calculate_normal_list(self, polygon_list):
+    def calculate_normal_list(self, obj_ops, polygon_list):
         #print("calculate normal")
         #print("polygon:", polygon)
         normal_dict = {}
         for polygon in polygon_list:
             lm_idx_list = [i-1 for i in polygon]
-            landmark_list = [self.obj_ops.landmark_list[i] for i in lm_idx_list]
+            landmark_list = [obj_ops.landmark_list[i] for i in lm_idx_list]
             v1 = np.array(landmark_list[1]) - np.array(landmark_list[0])
             v2 = np.array(landmark_list[2]) - np.array(landmark_list[0])
             normal = -1.0 * np.cross(v1, v2)
@@ -1530,7 +1612,7 @@ class ObjectViewer3D(QGLWidget):
                 else:
                     normal_dict[i] = { 'normal': normal, 'count': 1 }
         normal_list = []
-        for i in range(len(self.obj_ops.landmark_list)):
+        for i in range(len(obj_ops.landmark_list)):
             if i in normal_dict:
                 normal = normal_dict[i]['normal'] / normal_dict[i]['count']
             else:
@@ -1836,7 +1918,10 @@ class ObjectViewer3D(QGLWidget):
         return distance
 
     def apply_rotation(self, rotation_matrix):
-        self.obj_ops.apply_rotation_matrix(rotation_matrix)
+        if self.data_mode == OBJECT_MODE:
+            self.obj_ops.apply_rotation_matrix(rotation_matrix)
+        elif self.data_mode == DATASET_MODE:
+            self.ds_ops.apply_rotation_matrix(rotation_matrix)
 
     def rotate(self, rotationX_rad, rotationY_rad, vertices ):
         rotationXMatrix = np.array([
@@ -4497,17 +4582,13 @@ class DataExplorationDialog(QDialog):
             self.show_average_shapes()
             #pass
         if self.mode == MODE_COMPARISON2:
-            #print("prepare_shape_view", self.custom_shape_hash, self.shape_label_list, self.shape_view_list, self.shape_button_list)
             self.shape_label_list[1].setParent(self.shape_view_list[0])
             self.shape_button_list[1].setParent(self.shape_view_list[0])
             self.shape_label_list[1].show()
             self.shape_button_list[1].show()
-            #self.shape_label_list[1].raise_()
-            #self.shape_button_list[1].raise_()
-
-
-            #print("parent:", self.shape_label_list[0].parent(), self.shape_label_list[1].parent(), self.shape_button_list[0].parent(), self.shape_button_list[1].parent())
             self.shape_view_list[1].hide()
+            self.shape_view_list[0].set_source_shape_color(QColor(255,0,0))
+            self.shape_view_list[0].set_target_shape_color(QColor(0,0,255))
 
     def show_average_shapes(self):
         keyname_list = self.scatter_data.keys()
@@ -5099,21 +5180,41 @@ class DataExplorationDialog(QDialog):
 
     def show_shape(self, shape, idx):
         obj = MdObject()
-        obj.dataset_id = self.analysis.dataset_id
+        obj.dataset = self.analysis.dataset
+        #print("ds 1:", obj.dataset)
+        #ds = MdDataset()
+        #print("ds id", self.analysis.dataset_id)
+        ds = MdDataset.get(MdDataset.id==self.analysis.dataset_id)
+        #print("ds 2:", ds)
+        obj.dataset = ds
+        #print("dataset:", obj.dataset, obj.dataset_id, obj.dataset.polygon_list, obj.dataset.edge_list)
         obj.landmark_list = []
         for i in range(0,len(shape),self.analysis.dimension):
             landmark = shape[i:i+self.analysis.dimension]
             obj.landmark_list.append(landmark)
         obj.pack_landmark()
+        obj.unpack_landmark()
 
         shape_view = self.shape_view_list[idx]
 
+        
         if self.mode == MODE_COMPARISON2:
             shape_view = self.shape_view_list[0]
-            shape_view.set_object(obj, idx)
-            print("object:", obj, "idx:", idx)  
+            shape_view.show_average = False
+            shape_view.show_polygon = True
+            shape_view.show_wireframe = True
+            shape_view.dataset = obj.dataset
+            shape_view.polygon_list = obj.dataset.get_polygon_list()
+            shape_view.edge_list = obj.dataset.get_edge_list()
+            #print("edge_list", obj.dataset.edge_list, "polygon_list:", obj.dataset.polygon_list, "show average:", shape_view.show_average, "show polygon:", shape_view.show_polygon, "show wireframe:", shape_view.show_wireframe)
+
+            if idx == 0:
+                shape_view.set_source_shape(obj)
+            elif idx == 1:
+                shape_view.set_target_shape(obj)            
         else:
             shape_view.set_object(obj)
+
         shape_view.apply_rotation(self.rotation_matrix)
         if self.analysis.dimension == 3:
             shape_view.pan_x = self.shape_view_pan_x

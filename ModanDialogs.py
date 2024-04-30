@@ -700,7 +700,7 @@ class ObjectViewer3D(QGLWidget):
         #print("MyGLWidget init")
         QGLWidget.__init__(self,parent)
         self.parent = parent
-        self.setMinimumSize(200,150)
+        self.setMinimumSize(120,90)
 
         self.landmark_size = 1
         self.landmark_color = "#0000FF"
@@ -1373,9 +1373,9 @@ class ObjectViewer3D(QGLWidget):
         
         # pan, rotate, dolly
         if self.data_mode == OBJECT_MODE:
-            print("normal shape", COLOR['NORMAL_SHAPE'])
+            #print("normal shape", COLOR['NORMAL_SHAPE'])
             object_color = as_gl_color(self.landmark_color) #COLOR['NORMAL_SHAPE']
-            print("object_color:", object_color)
+            #print("object_color:", object_color)
 
             self.draw_object(self.obj_ops,color=object_color)
         else:
@@ -3863,6 +3863,7 @@ MODE_GROWTH_TRAJECTORY = 2
 MODE_AVERAGE = 3
 MODE_COMPARISON = 4
 MODE_COMPARISON2 = 5
+#MODE_GRID = 6
 
 CENTROID_SIZE_INDEX = 10
 class DataExplorationDialog(QDialog):
@@ -3886,6 +3887,7 @@ class DataExplorationDialog(QDialog):
         self.shape_view_list = []
         self.shape_label_list = []
         self.custom_shape_hash = {}
+        self.shape_grid = {}
         self.shape_button_list = []
         #self.shape_combo_list = []
         self.vertical_line_xval = None
@@ -3935,6 +3937,7 @@ class DataExplorationDialog(QDialog):
         self.comboVisualization.addItem("Average")
         self.comboVisualization.addItem("Comparison")
         self.comboVisualization.addItem("Comparison2")
+        #self.comboVisualization.addItem("Grid")
         self.comboVisualization.setCurrentIndex(0)
         self.comboVisualization.currentIndexChanged.connect(self.comboVisualizationMethod_changed)
 
@@ -4034,6 +4037,10 @@ class DataExplorationDialog(QDialog):
         self.cbxAverage.setText("Average")
         self.cbxAverage.setChecked(False)        
         self.cbxAverage.stateChanged.connect(self.update_chart)
+        self.cbxShapeGrid = QCheckBox()
+        self.cbxShapeGrid.setText("Shape grid")
+        self.cbxShapeGrid.setChecked(False)
+        self.cbxShapeGrid.stateChanged.connect(self.update_chart)
         self.lblDegree = QLabel("Degree")
         self.sbxDegree = QSpinBox()
         self.sbxDegree.setValue(1)
@@ -4050,6 +4057,7 @@ class DataExplorationDialog(QDialog):
         self.chart_option_layout.addWidget(self.cbxAnnotation,1)
         self.chart_option_layout.addWidget(self.cbxLegend,1)
         self.chart_option_layout.addWidget(self.cbxDepthShade,1)
+        self.chart_option_layout.addWidget(self.cbxShapeGrid,1)
         #self.regression_layout.addWidget(self.cbxShape,1)
         self.chart_option_layout.addWidget(self.cbxAverage,1)
         self.chart_option_layout.addWidget(self.lblDegree,0)
@@ -4529,11 +4537,16 @@ class DataExplorationDialog(QDialog):
             if self.custom_shape_hash[key]['point'] != None:
                 self.custom_shape_hash[key]['point'].remove()
             self.custom_shape_hash[key]['point'] = None
+            if self.custom_shape_hash[key]['label'] != None:
+                self.custom_shape_hash[key]['label'].remove()
+            self.custom_shape_hash[key]['label'] = None
+
         #self.custom_shape_list = []
         self.shape_view_list = []
         self.shape_label_list = []
         self.shape_button_list = []
         self.custom_shape_hash = {}
+        self.grid_view_list = []
 
       
         if self.mode in [ MODE_GROWTH_TRAJECTORY, MODE_REGRESSION, MODE_AVERAGE]:
@@ -4892,6 +4905,8 @@ class DataExplorationDialog(QDialog):
 
 
     def prepare_scatter_data(self):
+        show_shape_grid = self.cbxShapeGrid.isChecked()
+
         axis1 = self.comboAxis1.currentIndex()
         axis2 = self.comboAxis2.currentIndex()
         axis3 = self.comboAxis3.currentIndex()
@@ -4918,6 +4933,7 @@ class DataExplorationDialog(QDialog):
         self.scatter_data = {}
         self.scatter_result = {}
         self.average_shape = {}
+        #self.shape_grid = {}
         self.data_range = { 'x_min':99999, 'x_max':-99999, 'y_min':99999, 'y_max':-99999, 'z_min':99999, 'z_max':-99999}
         SCATTER_SMALL_SIZE = 30
         SCATTER_MEDIUM_SIZE = 50
@@ -4930,7 +4946,13 @@ class DataExplorationDialog(QDialog):
         #elif self.plot_size.lower() == 'large':
         #    scatter_size = SCATTER_LARGE_SIZE
         
-
+        #print("removing shape grid")
+        for key_name in self.shape_grid.keys():
+            #print("removing shape grid", key_name)
+            if self.shape_grid[key_name]['view'] is not None:
+                self.shape_grid[key_name]['view'].hide()
+                self.shape_grid[key_name]['view'].deleteLater()
+                self.shape_grid[key_name]['view'] = None
 
         key_list = []
         key_list.append('__default__')
@@ -4965,9 +4987,18 @@ class DataExplorationDialog(QDialog):
             self.data_range['z_min'] = min(self.data_range['z_min'], self.scatter_data[key_name]['z_val'][-1])
         
         #self.data_range['x_min'] = min(self.scatter_data['__default__']['x_val'])
-        
+       
+        if show_shape_grid:
+            self.data_range['x_avg'] = 0
+            self.data_range['y_avg'] = 0
+            x_key_list = [ 'x_min', 'x_avg', 'x_max']
+            y_key_list = [ 'y_min', 'y_avg', 'y_max']
+            for x_key in x_key_list:
+                for y_key in y_key_list:
+                    key_name = x_key+"_"+y_key
+                    self.shape_grid[key_name] = { 'x_val': self.data_range[x_key], 'y_val': self.data_range[y_key], 'view': ObjectViewer3D(self.plot_widget2) }
 
-        
+
         # remove empty group
         if len(self.scatter_data['__default__']['x_val']) == 0:
             del self.scatter_data['__default__']
@@ -5007,12 +5038,6 @@ class DataExplorationDialog(QDialog):
         axis1_title = self.comboAxis1.currentText()
         axis2_title = self.comboAxis2.currentText()
         axis3_title = self.comboAxis3.currentText()
-        #print("show_analysis_result", axis1_title, axis2_title, axis3_title)
-        #print("self.width(), self.height()", self.width(), self.height())
-
-        #propertyname_index = propertyname_list.index(self.analysis.group_by) if self.analysis.group_by in propertyname_list else -1
-
-
 
         if True:
             self.ax2.clear()
@@ -5089,6 +5114,25 @@ class DataExplorationDialog(QDialog):
             self.fig2.tight_layout()
             self.fig2.canvas.draw()
             self.fig2.canvas.flush_events()
+
+            ''' overlay shapes '''
+            # shape grid
+            show_shape_grid = self.cbxShapeGrid.isChecked()
+            if show_shape_grid:
+                for keyname in self.shape_grid.keys():
+                    shape = self.raw_chart_coords_to_shape(self.shape_grid[keyname]['x_val'], self.shape_grid[keyname]['y_val'])
+                    obj = self.shape_to_object(shape)
+                    transform = self.ax2.transData
+                    display_coords = transform.transform((self.shape_grid[keyname]['x_val'], self.shape_grid[keyname]['y_val']))
+                    x_pixel, y_pixel = display_coords
+                    # Invert y-axis 
+                    fig_height = self.fig2.canvas.height()
+                    y_pixel = fig_height - y_pixel
+                    #print("keyname", keyname, "x_pixel", x_pixel, "y_pixel", y_pixel)
+                    view = self.shape_grid[keyname]['view']
+                    view.show()
+                    view.set_object(obj)
+                    view.setGeometry(int(x_pixel)-60, int(y_pixel)-45, 120, 90)
 
     def on_hover_enter(self,event):
         return
@@ -5178,7 +5222,7 @@ class DataExplorationDialog(QDialog):
         if self.canvas_down_xy == self.canvas_up_xy:
             self.tableView1.selectionModel().clearSelection()
 
-    def show_shape(self, shape, idx):
+    def shape_to_object(self, shape):
         obj = MdObject()
         obj.dataset = self.analysis.dataset
         #print("ds 1:", obj.dataset)
@@ -5194,6 +5238,10 @@ class DataExplorationDialog(QDialog):
             obj.landmark_list.append(landmark)
         obj.pack_landmark()
         obj.unpack_landmark()
+        return obj
+
+    def show_shape(self, shape, idx):
+        obj = self.shape_to_object(shape)
 
         shape_view = self.shape_view_list[idx]
 
@@ -5309,39 +5357,41 @@ class DataExplorationDialog(QDialog):
 
         #self.axvline = self.ax2.axvline(x=self.vertical_line_xval, color='gray', linestyle=self.vertical_line_style)
 
+    def raw_chart_coords_to_shape(self, x_val, y_val):
+        axis1 = self.comboAxis1.currentIndex()
+        axis2 = self.comboAxis2.currentIndex()
+        flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
+        flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
+
+        x_value = flip_axis1 * x_val
+        y_value = flip_axis2 * y_val
+
+        shape_to_visualize = np.zeros((1,len(self.analysis_result_list[0])))
+        if axis1 != CENTROID_SIZE_INDEX:
+            shape_to_visualize[0][axis1] = x_value
+        shape_to_visualize[0][axis2] = y_value
+        unrotated_shape = self.unrotate_shape(shape_to_visualize)
+
+        return unrotated_shape[0]
 
     def shape_regression(self, evt):
         #print("shape regression", evt.xdata)
         for idx, shape_view in enumerate(self.shape_view_list):
-            #print("0-1:",datetime.datetime.now())
-            #shape_view.clear_object()
             axis1 = self.comboAxis1.currentIndex()
             axis2 = self.comboAxis2.currentIndex()
             flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
             flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
-            shape_to_visualize = np.zeros((1,len(self.analysis_result_list[0])))
-            #if axis1 == 10:
-            #fit regression line
+
+            x_value = evt.xdata
             y_value = 0
+
+            # regress curve
             curve = self.curve_list[idx]
-            #print("0-2:",datetime.datetime.now(), evt.xdata, min(curve['size_range2']), max(curve['size_range2']))
-            if evt.xdata >= min(curve['size_range2']) and evt.xdata <= max(curve['size_range2']):
-                y_value = np.polyval(curve['model'], evt.xdata)
-            else:
-                continue
-            x_value = flip_axis1 * evt.xdata
-            #y_value = flip_axis2 * y_value
+            if x_value >= min(curve['size_range2']) and x_value <= max(curve['size_range2']):
+                y_value = np.polyval(curve['model'], x_value)
 
-
-            if axis1 != CENTROID_SIZE_INDEX:
-                shape_to_visualize[0][axis1] = x_value
-
-            shape_to_visualize[0][axis2] = flip_axis2 * y_value
-            #print("0-3:",datetime.datetime.now())
-            unrotated_shape = self.unrotate_shape(shape_to_visualize)
-            #print("0-4:",datetime.datetime.now())
-            self.show_shape(unrotated_shape[0], idx)        
-
+            shape = self.raw_chart_coords_to_shape(x_value, y_value)
+            self.show_shape(shape, idx)
 
     def on_pick(self,evt):
         #print("onpick", evt)

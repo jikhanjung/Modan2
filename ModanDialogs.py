@@ -695,13 +695,51 @@ class ObjectViewer2D(QLabel):
         dataset.save()
         self.repaint()
 
+class TransparentGLWidget(QGLWidget):
+    def __init__(self, parent=None):
+        fmt = QGLFormat()
+        fmt.setAlpha(True)  # Ensure the format includes an alpha channel
+        super(TransparentGLWidget, self).__init__(fmt, parent)
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowTransparentForInput | Qt.Tool)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        self.setAttribute(Qt.WA_NoSystemBackground, True)
+
+    def initializeGL(self):
+        gl.glEnable(gl.GL_BLEND)
+        gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)
+        gl.glClearColor(0.0, 0.0, 0.0, 0.0)  # Clear the background with transparent alpha
+
+    def paintGL(self):
+        gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
+        # Example: Draw a semi-transparent red triangle
+        gl.glColor4f(1.0, 0.0, 0.0, 0.5)
+        gl.glBegin(gl.GL_TRIANGLES)
+        gl.glVertex3f(-0.5, -0.5, 0)
+        gl.glVertex3f(0.5, -0.5, 0)
+        gl.glVertex3f(0.0, 0.5, 0)
+        gl.glEnd()
+
+    def resizeGL(self, width, height):
+        gl.glViewport(0, 0, width, height)
+
 class ObjectViewer3D(QGLWidget):
-    def __init__(self, parent):
+    def __init__(self, parent=None, transparent=False):
         #print("MyGLWidget init")
-        QGLWidget.__init__(self,parent)
+        #QGLWidget.__init__(self,parent)
+        if transparent:
+            fmt = QGLFormat()
+            fmt.setAlpha(True)  # Ensure the format includes an alpha channel
+            super(ObjectViewer3D, self).__init__(fmt, parent)
+            self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowTransparentForInput | Qt.Tool)
+            self.setAttribute(Qt.WA_TranslucentBackground)
+            self.setAttribute(Qt.WA_NoSystemBackground, True)
+            #self.transparent = True
+        else:
+            QGLWidget.__init__(self,parent)
+            #self.transpare
+        self.transparent = transparent
         self.parent = parent
         self.setMinimumSize(120,90)
-
         self.landmark_size = 1
         self.landmark_color = "#0000FF"
         self.wireframe_thickness = 1
@@ -1348,6 +1386,7 @@ class ObjectViewer3D(QGLWidget):
         return
 
     def draw_all(self):
+        #self.setAttribute(Qt.WA_TranslucentBackground)
         current_buffer = gl.glGetIntegerv(gl.GL_FRAMEBUFFER_BINDING)
         #print("draw all", object, self, current_buffer )
         gl.glMatrixMode(gl.GL_PROJECTION)
@@ -1363,10 +1402,18 @@ class ObjectViewer3D(QGLWidget):
 
         gl.glMatrixMode(gl.GL_MODELVIEW)
         bg_color = as_gl_color(self.bgcolor)
-        gl.glClearColor(*bg_color, 1)
+        
+        gl.glEnable(gl.GL_BLEND)
+        gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)  # Standard alpha blending
+        #gl.glClearColor(0.0, 0.0, 0.0, 0.0)
+        if self.transparent:
+            gl.glClearColor(*bg_color, 0.0)
+        else:
+            gl.glClearColor(*bg_color, 1.0)
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
         gl.glLoadIdentity()
         gl.glEnable(gl.GL_POINT_SMOOTH)
+        #gl.glDisable(gl.GL_DEPTH_TEST)
         #return
         if self.ds_ops is None and self.obj_ops is None:
             return
@@ -1381,7 +1428,8 @@ class ObjectViewer3D(QGLWidget):
         else:
             #print("draw all dataset mode")
             self.draw_dataset(self.ds_ops)
-
+        #gl.glEnable(gl.GL_DEPTH_TEST)
+        gl.glDisable(gl.GL_BLEND)
         gl.glFlush()
 
     def draw_dataset(self, ds_ops):
@@ -1469,7 +1517,7 @@ class ObjectViewer3D(QGLWidget):
                     pg_color = polygon_color
                 else:
                     pg_color = as_gl_color(polygon_color)
-                gl.glColor3f( *pg_color ) #*COLOR['WIREFRAME'])
+                gl.glColor4f( *pg_color, 0.5 ) #*COLOR['WIREFRAME'])
 
                 '''
                 material_ambient = [0.5, 0.3, 0.3, 0.5]  # Adjust these values (0.0 to 1.0)
@@ -1704,7 +1752,8 @@ class ObjectViewer3D(QGLWidget):
 
     def closeEvent(self, event):
         #print("closeEvent")
-        self.delete_picker_buffer()
+        #self.delete_picker_buffer()
+        pass
 
     def timeout(self):
         if self.auto_rotate == False:
@@ -3873,6 +3922,10 @@ class DataExplorationDialog(QDialog):
         self.parent = parent
         self.setWindowTitle("Modan2 - Data Exploration")
         self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
+        #self.setWindowFlags(Qt.FramelessWindowHint)  # Removes window decoration
+        #self.setAttribute(Qt.WA_TranslucentBackground)  # Enables transparency
+        #self.setAttribute(Qt.WA_NoSystemBackground, True)  # Avoids system background paint
+
         self.m_app = QApplication.instance()
         self.default_color_list = mu.VIVID_COLOR_LIST[:]        
         self.color_list = self.default_color_list[:]
@@ -3951,6 +4004,7 @@ class DataExplorationDialog(QDialog):
         self.fig2.canvas.mpl_connect('button_press_event', self.on_canvas_button_press)
         self.fig2.canvas.mpl_connect('button_release_event', self.on_canvas_button_release)
         self.fig2.canvas.mpl_connect('motion_notify_event', self.on_canvas_move)
+        self.fig2.canvas.mpl_connect('resize_event', self.resizeEvent)
         #self.fig2.canvas.mpl_connect('motion_notify_event', self.on_hover_enter)
         #self.fig2.canvas.mpl_connect('motion_notify_event', self.on_hover_leave)
 
@@ -4038,7 +4092,7 @@ class DataExplorationDialog(QDialog):
         self.cbxAverage.setChecked(False)        
         self.cbxAverage.stateChanged.connect(self.update_chart)
         self.cbxShapeGrid = QCheckBox()
-        self.cbxShapeGrid.setText("Shape grid")
+        self.cbxShapeGrid.setText("Deformation")
         self.cbxShapeGrid.setChecked(False)
         self.cbxShapeGrid.stateChanged.connect(self.update_chart)
         self.lblDegree = QLabel("Degree")
@@ -4379,6 +4433,11 @@ class DataExplorationDialog(QDialog):
         for shape_view in self.shape_view_list:
             shape_view.reset_pose()
             shape_view.updateGL()
+        for key in self.shape_grid.keys():
+            view = self.shape_grid[key]['view']
+            if view:
+                view.reset_pose()
+                view.update()
 
     def on_chart_dim_changed(self):
         #print("on chart dim changed")
@@ -4729,6 +4788,11 @@ class DataExplorationDialog(QDialog):
 
     def closeEvent(self, event):
         self.write_settings()
+        #for shape_view in self.shape_view_list:
+        #    shape_view.close()
+        for key in self.shape_grid.keys():
+            if self.shape_grid[key]['view']:
+                self.shape_grid[key]['view'].close()
         #if self.analysis_dialog is not None:
         #    self.analysis_dialog.close()
         event.accept()
@@ -4765,6 +4829,10 @@ class DataExplorationDialog(QDialog):
             temp_rotate_y = math.radians(self.shape_view_list[0].temp_rotate_y)
             #(math.radians(self.rotate_x),math.radians(self.rotate_y),apply_rotation_to_vertex)
             self.store_rotation(temp_rotate_x,temp_rotate_y)
+        for key in self.shape_grid.keys():
+            if self.shape_grid[key]['view']:
+                self.shape_grid[key]['view'].sync_rotation()
+                self.shape_grid[key]['view'].update()
 
         for sv in self.shape_view_list:
             #self.temp_rotate_x = sv.temp_rotate_x
@@ -4782,6 +4850,8 @@ class DataExplorationDialog(QDialog):
                 sv.temp_pan_y = temp_pan_y
                 #sv.sync_zoom()
                 sv.update()
+
+
 
     def sync_pan(self, shape_view, pan_x, pan_y):
         if len(self.shape_view_list) > 0:
@@ -4804,6 +4874,10 @@ class DataExplorationDialog(QDialog):
                 sv.dolly = dolly
                 #sv.sync_zoom()
                 sv.update()
+        for key in self.shape_grid.keys():
+            if self.shape_grid[key]['view']:
+                self.shape_grid[key]['view'].dolly = dolly
+                self.shape_grid[key]['view'].update()
 
     def sync_temp_zoom(self, shape_view, temp_dolly):
         for sv in self.shape_view_list:
@@ -4811,6 +4885,10 @@ class DataExplorationDialog(QDialog):
                 sv.temp_dolly = temp_dolly
                 #sv.sync_zoom()
                 sv.update()
+        for key in self.shape_grid.keys():
+            if self.shape_grid[key]['view']:
+                self.shape_grid[key]['view'].temp_dolly = temp_dolly
+                self.shape_grid[key]['view'].update()
 
     def sync_temp_rotation(self, shape_view, temp_rotate_x, temp_rotate_y):
         for sv in self.shape_view_list:
@@ -4819,7 +4897,16 @@ class DataExplorationDialog(QDialog):
                 sv.temp_rotate_y = temp_rotate_y
                 #sv.sync_rotation()
                 sv.update()
+        for key in self.shape_grid.keys():
+            view = self.shape_grid[key]['view']
+            if view:
+                view.temp_rotate_x = temp_rotate_x
+                view.temp_rotate_y = temp_rotate_y
+                view.update()
+
         #self.object_view_3d.sync_rotation(rotation_x, rotation_y)
+    def moveEvent(self, event):
+        self.reposition_shape_grid()
 
     def resizeEvent(self, event):
         #print("resize", self.geometry())
@@ -4851,8 +4938,8 @@ class DataExplorationDialog(QDialog):
             #y_pos=0
             #print("resize", idx, y_pos, shape_button.width(), shape_button.height(), button.parent())
             button.setGeometry(0,y_pos,32,32)
-
-        QDialog.resizeEvent(self, event)
+        self.reposition_shape_grid()
+        #QDialog.resizeEvent(self, event)
 
     def comboGroupBy_changed(self):
         if self.ignore_change == True:
@@ -4987,7 +5074,7 @@ class DataExplorationDialog(QDialog):
             self.data_range['z_min'] = min(self.data_range['z_min'], self.scatter_data[key_name]['z_val'][-1])
         
         #self.data_range['x_min'] = min(self.scatter_data['__default__']['x_val'])
-       
+
         if show_shape_grid:
             self.data_range['x_avg'] = 0
             self.data_range['y_avg'] = 0
@@ -4996,7 +5083,7 @@ class DataExplorationDialog(QDialog):
             for x_key in x_key_list:
                 for y_key in y_key_list:
                     key_name = x_key+"_"+y_key
-                    self.shape_grid[key_name] = { 'x_val': self.data_range[x_key], 'y_val': self.data_range[y_key], 'view': ObjectViewer3D(self.plot_widget2) }
+                    self.shape_grid[key_name] = { 'x_val': self.data_range[x_key], 'y_val': self.data_range[y_key], 'view': ObjectViewer3D(parent=None,transparent=True) }
 
 
         # remove empty group
@@ -5118,21 +5205,36 @@ class DataExplorationDialog(QDialog):
             ''' overlay shapes '''
             # shape grid
             show_shape_grid = self.cbxShapeGrid.isChecked()
+            # get widget position
+            #print("fig_pos", fig_pos)
             if show_shape_grid:
                 for keyname in self.shape_grid.keys():
                     shape = self.raw_chart_coords_to_shape(self.shape_grid[keyname]['x_val'], self.shape_grid[keyname]['y_val'])
                     obj = self.shape_to_object(shape)
-                    transform = self.ax2.transData
-                    display_coords = transform.transform((self.shape_grid[keyname]['x_val'], self.shape_grid[keyname]['y_val']))
-                    x_pixel, y_pixel = display_coords
-                    # Invert y-axis 
-                    fig_height = self.fig2.canvas.height()
-                    y_pixel = fig_height - y_pixel
-                    #print("keyname", keyname, "x_pixel", x_pixel, "y_pixel", y_pixel)
                     view = self.shape_grid[keyname]['view']
                     view.show()
                     view.set_object(obj)
-                    view.setGeometry(int(x_pixel)-60, int(y_pixel)-45, 120, 90)
+                self.reposition_shape_grid()
+
+    def reposition_shape_grid(self):
+        pos_x = self.fig2.canvas.mapToGlobal(QPoint(0, 0)).x()
+        pos_y = self.fig2.canvas.mapToGlobal(QPoint(0, 0)).y()
+        for keyname in self.shape_grid.keys():
+            view = self.shape_grid[keyname]['view']
+            if view:
+                transform = self.ax2.transData
+                display_coords = transform.transform((self.shape_grid[keyname]['x_val'], self.shape_grid[keyname]['y_val']))
+                x_pixel, y_pixel = display_coords 
+                fig_height = self.fig2.canvas.height()
+                x_pixel = int( x_pixel + pos_x )
+                y_pixel = int( fig_height - y_pixel + pos_y )
+                self.shape_grid[keyname]['x_pos'] = x_pixel
+                self.shape_grid[keyname]['y_pos'] = y_pixel
+                w, h = view.width(), view.height()
+                w, h = 120, 90
+
+                view.setGeometry(self.shape_grid[keyname]['x_pos']-int(w/2), self.shape_grid[keyname]['y_pos']-int(h/2), w, h)
+
 
     def on_hover_enter(self,event):
         return

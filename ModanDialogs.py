@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import QTableWidgetItem, QHeaderView, QFileDialog, QCheckBo
 from PyQt5.QtGui import QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem, QImage,\
                         QFont, QPainter, QBrush, QMouseEvent, QWheelEvent, QDoubleValidator, QIcon, QCursor
 from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSize, QPoint,\
-                         pyqtSlot, QItemSelectionModel, QTimer
+                         pyqtSlot, QItemSelectionModel, QTimer, QEvent
 
 from OBJFileLoader import OBJ
 
@@ -1407,7 +1407,7 @@ class ObjectViewer3D(QGLWidget):
         gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)  # Standard alpha blending
         #gl.glClearColor(0.0, 0.0, 0.0, 0.0)
         if self.transparent:
-            gl.glClearColor(*bg_color, 0.0)
+            gl.glClearColor(0.0,0.0,0.0, 0.0)
         else:
             gl.glClearColor(*bg_color, 1.0)
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
@@ -3917,6 +3917,7 @@ MODE_COMPARISON2 = 5
 CENTROID_SIZE_INDEX = 10
 class DataExplorationDialog(QDialog):
     def __init__(self, parent):
+        self.initialized = False
         super().__init__()
         #print("DataExplorationDialog init")
         self.parent = parent
@@ -3926,7 +3927,10 @@ class DataExplorationDialog(QDialog):
         #self.setAttribute(Qt.WA_TranslucentBackground)  # Enables transparency
         #self.setAttribute(Qt.WA_NoSystemBackground, True)  # Avoids system background paint
 
+        #self.windowActivated.connect(self.handle_window_focus)
+
         self.m_app = QApplication.instance()
+        self.fig2 = None
         self.default_color_list = mu.VIVID_COLOR_LIST[:]        
         self.color_list = self.default_color_list[:]
         #print("color_list", self.color_list)        
@@ -4272,6 +4276,7 @@ class DataExplorationDialog(QDialog):
         
         self.layout.addWidget(self.visualization_splitter)
         self.on_chart_dim_changed()
+        self.initialized = True
         
         #self.comboVisualizationMethod_changed()
 
@@ -4279,6 +4284,19 @@ class DataExplorationDialog(QDialog):
 
         #print("layout done")
         #self.resizeEvent(None)
+    def event(self, event):
+        if event.type() in [ QEvent.WindowActivate, QEvent.WindowStateChange] and self.initialized == True:
+            #print("Window has been activated")
+            self.handle_window_focus()
+        return super().event(event)
+    
+    def handle_window_focus(self):
+        #print("handle_window_focus")
+        if self.cbxShapeGrid.isChecked() == True:
+            for key in self.shape_grid:
+                if self.shape_grid[key]['view'] is not None:
+                    self.shape_grid[key]['view'].raise_()
+                    self.shape_grid[key]['view'].update()
 
     def shape_preference_button_clicked(self):
         pass
@@ -5217,6 +5235,10 @@ class DataExplorationDialog(QDialog):
                 self.reposition_shape_grid()
 
     def reposition_shape_grid(self):
+        #check if self has fig2
+        if self.fig2 is None:
+            return
+
         pos_x = self.fig2.canvas.mapToGlobal(QPoint(0, 0)).x()
         pos_y = self.fig2.canvas.mapToGlobal(QPoint(0, 0)).y()
         for keyname in self.shape_grid.keys():

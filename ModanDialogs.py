@@ -15,6 +15,8 @@ import OpenGL.GL as gl
 from OpenGL import GLU as glu
 from OpenGL import GLUT as glut
 from PyQt5.QtOpenGL import *
+from scipy.spatial import ConvexHull
+from scipy import stats
 
 import tempfile
 import cv2
@@ -30,6 +32,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvas as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
+import matplotlib
 
 from MdStatistics import MdPrincipalComponent, MdCanonicalVariate
 from MdModel import *
@@ -4099,6 +4102,14 @@ class DataExplorationDialog(QDialog):
         self.cbxShapeGrid.setText("Deformation")
         self.cbxShapeGrid.setChecked(False)
         self.cbxShapeGrid.stateChanged.connect(self.update_chart)
+        self.cbxConvexHull = QCheckBox()
+        self.cbxConvexHull.setText("ConvexHull")
+        self.cbxConvexHull.setChecked(False)
+        self.cbxConvexHull.stateChanged.connect(self.update_chart)
+        self.cbxConfidenceEllipse = QCheckBox()
+        self.cbxConfidenceEllipse.setText("Ellipse")
+        self.cbxConfidenceEllipse.setChecked(False)
+        self.cbxConfidenceEllipse.stateChanged.connect(self.update_chart)
         self.lblDegree = QLabel("Degree")
         self.sbxDegree = QSpinBox()
         self.sbxDegree.setValue(1)
@@ -4116,6 +4127,8 @@ class DataExplorationDialog(QDialog):
         self.chart_option_layout.addWidget(self.cbxLegend,1)
         self.chart_option_layout.addWidget(self.cbxDepthShade,1)
         self.chart_option_layout.addWidget(self.cbxShapeGrid,1)
+        self.chart_option_layout.addWidget(self.cbxConvexHull,1)
+        self.chart_option_layout.addWidget(self.cbxConfidenceEllipse,1)
         #self.regression_layout.addWidget(self.cbxShape,1)
         self.chart_option_layout.addWidget(self.cbxAverage,1)
         self.chart_option_layout.addWidget(self.lblDegree,0)
@@ -5011,6 +5024,8 @@ class DataExplorationDialog(QDialog):
 
     def prepare_scatter_data(self):
         show_shape_grid = self.cbxShapeGrid.isChecked()
+        show_convex_hull = self.cbxConvexHull.isChecked()
+        show_confidence_ellipse = self.cbxConfidenceEllipse.isChecked()
 
         axis1 = self.comboAxis1.currentIndex()
         axis2 = self.comboAxis2.currentIndex()
@@ -5103,7 +5118,6 @@ class DataExplorationDialog(QDialog):
                     key_name = x_key+"_"+y_key
                     self.shape_grid[key_name] = { 'x_val': self.data_range[x_key], 'y_val': self.data_range[y_key], 'view': ObjectViewer3D(parent=None,transparent=True) }
 
-
         # remove empty group
         if len(self.scatter_data['__default__']['x_val']) == 0:
             del self.scatter_data['__default__']
@@ -5115,6 +5129,23 @@ class DataExplorationDialog(QDialog):
             self.average_shape[key_name]['z_val'] = np.mean(self.scatter_data[key_name]['z_val'])
             #group_hash[key_name]['text'].append(obj.object_name)
             #group_hash[key_name]['hoverinfo'].append(obj.id)
+
+        if show_convex_hull:
+            for key_name in self.scatter_data.keys():
+                if len(self.scatter_data[key_name]['x_val']) > 0:
+                    self.scatter_data[key_name]['points'] = np.array([self.scatter_data[key_name]['x_val'], self.scatter_data[key_name]['y_val']]).T
+                    hull = ConvexHull(self.scatter_data[key_name]['points'])
+                    self.scatter_data[key_name]['hull'] = hull
+
+        if show_confidence_ellipse:
+            for key_name in self.scatter_data.keys():
+                if len(self.scatter_data[key_name]['x_val']) > 0:
+                    covariance = np.cov([self.scatter_data[key_name]['x_val'], self.scatter_data[key_name]['y_val']])
+                    confidence_level = 0.90  # For 95% confidence ellipse
+                    alpha = 1 - confidence_level
+                    n_std = stats.chi2.ppf(1 - alpha, df=2)  # Degrees of freedom = 2 for 2D ellipse
+                    width, height, angle = mu.get_ellipse_params(covariance, n_std) 
+                    self.scatter_data[key_name]['ellipse'] = (width, height, angle)
 
         if len(self.scatter_data.keys()) == 0:
             return
@@ -5138,6 +5169,8 @@ class DataExplorationDialog(QDialog):
         show_regression = self.cbxRegression.isChecked()
         show_annotation = self.cbxAnnotation.isChecked()
         show_legend = self.cbxLegend.isChecked()
+        show_convex_hull = self.cbxConvexHull.isChecked()
+        show_confidence_ellipse = self.cbxConfidenceEllipse.isChecked()
         show_axis_label = True
 
         axis1_title = self.comboAxis1.currentText()
@@ -5216,6 +5249,28 @@ class DataExplorationDialog(QDialog):
 
             #if self.vertical_line_xval is not None:
                 #self.ax2.axvline(x=self.vertical_line_xval, color='gray', linestyle=self.vertical_line_style)
+
+            if show_convex_hull:
+                #print("showing convex hull")
+                for key_name in self.scatter_data.keys():
+                    if 'hull' in self.scatter_data[key_name].keys():
+                        hull = self.scatter_data[key_name]['hull']
+                        for simplex in hull.simplices:
+                            self.ax2.plot(self.scatter_data[key_name]['points'][simplex, 0], self.scatter_data[key_name]['points'][simplex, 1], color=self.scatter_data[key_name]['color'])
+
+                        hull_vertices_x = self.scatter_data[key_name]['points'][hull.vertices, 0]
+                        hull_vertices_y = self.scatter_data[key_name]['points'][hull.vertices, 1]
+                        hull_vertices_x = np.append(hull_vertices_x, hull_vertices_x[0])
+                        hull_vertices_y = np.append(hull_vertices_y, hull_vertices_y[0])
+                        self.ax2.fill(hull_vertices_x, hull_vertices_y, color=self.scatter_data[key_name]['color'], alpha=0.5)
+
+            if show_confidence_ellipse:
+                for key_name in self.scatter_data.keys():
+                    if 'ellipse' in self.scatter_data[key_name].keys():
+                        width, height, angle = self.scatter_data[key_name]['ellipse']
+                        ellipse = matplotlib.patches.Ellipse(xy=(self.average_shape[key_name]['x_val'], self.average_shape[key_name]['y_val']), width=width, height=height, angle=angle, color=self.scatter_data[key_name]['color'], lw=2, alpha=0.3,fill=True)
+                        self.ax2.add_patch(ellipse) 
+
             self.fig2.tight_layout()
             self.fig2.canvas.draw()
             self.fig2.canvas.flush_events()

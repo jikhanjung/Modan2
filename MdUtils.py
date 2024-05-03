@@ -188,3 +188,14 @@ def is_numeric(value):
         return True
     except ValueError:
         return False
+
+def get_ellipse_params(covariance, n_std):
+    eigenvalues, eigenvectors = np.linalg.eig(covariance)
+    order = eigenvalues.argsort()[::-1]
+    eigenvalues, eigenvectors = eigenvalues[order], eigenvectors[:, order]
+    vx, vy = eigenvectors[:, 0][0], eigenvectors[:, 0][1]
+    theta = np.arctan2(vy, vx)
+
+    width, height = 1 * n_std * np.sqrt(eigenvalues)
+    angle = np.degrees(theta)
+    return width, height, angle

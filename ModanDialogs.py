@@ -5303,12 +5303,17 @@ class DataExplorationDialog(QDialog):
                 display_coords = transform.transform((self.shape_grid[keyname]['x_val'], self.shape_grid[keyname]['y_val']))
                 x_pixel, y_pixel = display_coords 
                 fig_height = self.fig2.canvas.height()
+                fig_width = self.fig2.canvas.width()
+                view_height = int( fig_height / 5 )
+                view_width = int( fig_width / 5 )
                 x_pixel = int( x_pixel + pos_x )
                 y_pixel = int( fig_height - y_pixel + pos_y )
                 self.shape_grid[keyname]['x_pos'] = x_pixel
                 self.shape_grid[keyname]['y_pos'] = y_pixel
                 w, h = view.width(), view.height()
                 w, h = 120, 90
+                w = max(w, view_width)
+                h = max(h, view_height)
 
                 view.setGeometry(self.shape_grid[keyname]['x_pos']-int(w/2), self.shape_grid[keyname]['y_pos']-int(h/2), w, h)
 

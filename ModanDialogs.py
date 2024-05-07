@@ -5316,12 +5316,18 @@ class DataExplorationDialog(QDialog):
 
         pos_x = self.fig2.canvas.mapToGlobal(QPoint(0, 0)).x()
         pos_y = self.fig2.canvas.mapToGlobal(QPoint(0, 0)).y()
+        #print("pos_x", pos_x, "pos_y", pos_y)
         for keyname in self.shape_grid.keys():
             view = self.shape_grid[keyname]['view']
             if view:
+                #print("keyname", keyname, "x_val", self.shape_grid[keyname]['x_val'], "y_val", self.shape_grid[keyname]['y_val'])
                 transform = self.ax2.transData
-                display_coords = transform.transform((self.shape_grid[keyname]['x_val'], self.shape_grid[keyname]['y_val']))
+                display_coords =    transform.transform((self.shape_grid[keyname]['x_val'], self.shape_grid[keyname]['y_val']))
                 x_pixel, y_pixel = display_coords 
+                if sys.platform == 'darwin':
+                    x_pixel = x_pixel / 2
+                    y_pixel = y_pixel / 2
+                #print("display_coords", display_coords, "x_pixel", x_pixel, "y_pixel", y_pixel)
                 fig_height = self.fig2.canvas.height()
                 fig_width = self.fig2.canvas.width()
                 view_height = int( fig_height / 5 )
@@ -5331,9 +5337,11 @@ class DataExplorationDialog(QDialog):
                 self.shape_grid[keyname]['x_pos'] = x_pixel
                 self.shape_grid[keyname]['y_pos'] = y_pixel
                 w, h = view.width(), view.height()
+                #print("view size", w, h, "view pos", x_pixel, y_pixel, "fig_size", fig_width, fig_height)
                 w, h = 120, 90
                 w = max(w, view_width)
                 h = max(h, view_height)
+                #print("view size 2  ", w, h, "view pos", x_pixel, y_pixel, "fig_size", fig_width, fig_height)
 
                 view.setGeometry(self.shape_grid[keyname]['x_pos']-int(w/2), self.shape_grid[keyname]['y_pos']-int(h/2), w, h)
 

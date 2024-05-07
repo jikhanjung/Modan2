@@ -952,6 +952,12 @@ class ObjectViewer3D(QGLWidget):
                     #self.rotate_y = 0
                     #self.parent.sync_rotation(self.rotate_x, self.rotate_y)
                 elif self.data_mode == DATASET_MODE and self.ds_ops is not None:
+                    if self.parent != None and callable(getattr(self.parent, 'sync_rotation', None)):
+                    #if self.parent != None and self.parent.sync_rotation is not None:
+                        self.parent.sync_rotation()
+                    else:
+                        self.sync_rotation()
+                    '''
                     self.rotate_x += self.temp_rotate_x
                     self.rotate_y += self.temp_rotate_y
                     #self.ds_ops.average_shape.rotate_3d(math.radians(-1*self.rotate_x),'Y')
@@ -961,6 +967,7 @@ class ObjectViewer3D(QGLWidget):
                         obj.rotate_3d(math.radians(self.rotate_y),'X')
                     self.rotate_x = 0
                     self.rotate_y = 0
+                    '''
                 self.temp_rotate_x = 0
                 self.temp_rotate_y = 0
         elif event.button() == Qt.RightButton:
@@ -2021,26 +2028,38 @@ class ObjectViewer3D(QGLWidget):
         self.rotate_y += self.temp_rotate_y
         self.temp_rotate_x = 0
         self.temp_rotate_y = 0
-        if self.obj_ops is None:
-            return
 
-        self.obj_ops.rotate_3d(math.radians(-1*self.rotate_x),'Y')
-        self.obj_ops.rotate_3d(math.radians(self.rotate_y),'X')
-        if self.threed_model is not None:
-            #print("rotate_x:", self.rotate_x, "rotate_y:", self.rotate_y)
-            #print("1:",datetime.datetime.now())
-            if self.show_model == True:
-                apply_rotation_to_vertex = True
-            else:
-                apply_rotation_to_vertex = False
-            self.threed_model.rotate(math.radians(self.rotate_x),math.radians(self.rotate_y),apply_rotation_to_vertex)
-            #print("2:",datetime.datetime.now())
-            #self.threed_model.rotate_3d(math.radians(-1*self.rotate_x),'Y')
-            #self.threed_model.rotate_3d(math.radians(self.rotate_y),'X')
-            if self.show_model == True:
-                self.threed_model.generate()
-            #print("3:",datetime.datetime.now())
-        #print( "test_obj vert 1 after rotation:", self.test_obj.vertices[0])
+        if self.data_mode == OBJECT_MODE:
+            if self.obj_ops is None:
+                return
+
+            self.obj_ops.rotate_3d(math.radians(-1*self.rotate_x),'Y')
+            self.obj_ops.rotate_3d(math.radians(self.rotate_y),'X')
+            if self.threed_model is not None:
+                #print("rotate_x:", self.rotate_x, "rotate_y:", self.rotate_y)
+                #print("1:",datetime.datetime.now())
+                if self.show_model == True:
+                    apply_rotation_to_vertex = True
+                else:
+                    apply_rotation_to_vertex = False
+                self.threed_model.rotate(math.radians(self.rotate_x),math.radians(self.rotate_y),apply_rotation_to_vertex)
+                #print("2:",datetime.datetime.now())
+                #self.threed_model.rotate_3d(math.radians(-1*self.rotate_x),'Y')
+                #self.threed_model.rotate_3d(math.radians(self.rotate_y),'X')
+                if self.show_model == True:
+                    self.threed_model.generate()
+                #print("3:",datetime.datetime.now())
+            #print( "test_obj vert 1 after rotation:", self.test_obj.vertices[0])
+        elif self.data_mode == DATASET_MODE:
+            if self.ds_ops is None:
+                return
+            for obj in self.ds_ops.object_list:
+                obj.rotate_3d(math.radians(-1*self.rotate_x),'Y')
+                obj.rotate_3d(math.radians(self.rotate_y),'X')
+
+            #self.ds_ops.rotate_3d(math.radians(-1*self.rotate_x),'Y')
+            #self.ds_ops.rotate_3d(math.radians(self.rotate_y),'X')
+
         self.rotate_x = 0
         self.rotate_y = 0
 
@@ -5287,6 +5306,7 @@ class DataExplorationDialog(QDialog):
                     view = self.shape_grid[keyname]['view']
                     view.show()
                     view.set_object(obj)
+                    view.apply_rotation(self.rotation_matrix)
                 self.reposition_shape_grid()
 
     def reposition_shape_grid(self):

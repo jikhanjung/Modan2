@@ -776,6 +776,8 @@ class ObjectViewer3D(QGLWidget):
         self.show_baseline = False
         self.show_average = True
         self.show_model = True
+        self.show_arrow = True
+
         self.curr_x = 0
         self.curr_y = 0
         self.down_x = 0
@@ -1296,6 +1298,10 @@ class ObjectViewer3D(QGLWidget):
             self.obj_ops.align(self.ds_ops.baseline_point_list)
             #self.calculate_resize()
             #self.updateGL()
+        elif self.data_mode == DATASET_MODE:
+            for obj_ops in self.ds_ops.object_list:
+                obj_ops.align(self.ds_ops.baseline_point_list)
+
         #elif self.data_mode == DATASET_MODE:
         #    self.ds_ops.align()
         #    self.calculate_resize()
@@ -1459,9 +1465,82 @@ class ObjectViewer3D(QGLWidget):
                 polygon_color = obj.polygon_color
 
             self.draw_object(obj, landmark_as_sphere=False, color=object_color, edge_color=edge_color,polygon_color=polygon_color)
+
         if self.show_average:
             object_color = COLOR['AVERAGE_SHAPE']
             self.draw_object(ds_ops.get_average_shape(), landmark_as_sphere=True, color=object_color)
+
+        if self.show_arrow:
+            self.draw_arrow(0, 1)
+
+    def draw_arrow(self, start_idx, end_idx):
+        if self.data_mode == OBJECT_MODE:
+            return
+        if self.ds_ops is None:
+            return
+        if start_idx >= len(self.ds_ops.object_list) or end_idx >= len(self.ds_ops.object_list):
+            return
+        start_obj = self.ds_ops.object_list[start_idx]
+        end_obj = self.ds_ops.object_list[end_idx]
+        for i in range(len(start_obj.landmark_list)):
+            start_lm = start_obj.landmark_list[i]
+            end_lm = end_obj.landmark_list[i]
+
+
+            direction = [end_lm[0] - start_lm[0], end_lm[1] - start_lm[1], end_lm[2] - start_lm[2]]
+            length = math.sqrt(sum(x**2 for x in direction))  # More concise length calculation
+            direction = [x/length for x in direction]
+
+            # Rotation axis using cross product
+            up_direction = [0, 0, 1]  # Cone should point upwards along Z
+            axis = np.cross(direction, up_direction)
+
+            # Calculate angle
+            angle = math.degrees(math.acos(np.dot(direction, up_direction))) * -1
+            #if i == 0:
+            #    print("direction:", direction, "up_direction:", up_direction, "axis:", axis)
+            #    print("angle:", angle, "start_lm:", start_lm, "end_lm:", end_lm)
+
+            
+            # draw rod instead of GL_LINES
+            gl.glColor3f(1.0, 0.0, 0.0)
+            gl.glPushMatrix()
+            gl.glTranslatef(*((np.array(start_lm)+np.array(end_lm))/2))
+            gl.glTranslatef(*[x*-0.015 for x in direction])
+            #gl.glTranslatef(*[x*0.5 for x in direction])
+            gl.glRotatef(angle, *axis)  # Align with direction first
+            gl.glScalef(0.005, 0.005, length-0.03)
+            glut.glutSolidCube(1)
+            gl.glPopMatrix()
+
+                
+            #gl.glColor3f(1.0, 0.0, 0.0)
+            #gl.glBegin(gl.GL_LINES)
+            #gl.glVertex3f(*start_lm)
+            #gl.glVertex3f(*end_lm)
+            #gl.glEnd()
+            if True:
+                # draw arrow head
+                gl.glPushMatrix()
+                # cone should be pointing at the end_lm
+                # calculate the axis of rotation
+                gl.glTranslatef(*end_lm)
+                # translate toward start_lm by 0.2 along the direction
+                gl.glTranslatef(*[x*-0.03 for x in direction])
+
+                
+                gl.glRotatef(angle, *axis)  # Align with direction first
+                #gl.glScalef(0.1, 0.1, 0.2)
+                glut.glutSolidCone(0.02, 0.03, 10, 10)
+
+                #gl.glRotatef(90, 0, 1, 0)
+                #gl.glRotatef(90, 1, 0, 0)
+                gl.glPopMatrix()
+
+
+
+        
+        
 
     def draw_object(self,object,landmark_as_sphere=True,color=COLOR['NORMAL_SHAPE'],edge_color=COLOR['NORMAL_SHAPE'],polygon_color=COLOR['NORMAL_SHAPE']):
         if object is None:

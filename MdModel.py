@@ -638,6 +638,11 @@ class MdObjectOps:
         self.centroid_size = -1
         self.polygon_color = None
         self.edge_color = None
+        self.visible = True
+        self.show_landmark = True
+        self.show_polygon = True
+        self.show_wireframe = True
+        self.opacity = 1.0
 
     def get_centroid_coord(self):
         c = [0, 0, 0]
@@ -1010,10 +1015,12 @@ class MdDatasetOps:
         for mo in dataset.object_list:
             #self.object_list.append(mo.copy())
             self.object_list.append(MdObjectOps(mo))
-        if dataset.wireframe != '':
+        
+        if dataset.wireframe is not None and dataset.wireframe != '':
             dataset.unpack_wireframe()
         if dataset.edge_list is not None and len(dataset.edge_list) > 0:
             self.edge_list = dataset.edge_list[:]
+        #print("edge list in MdDatasetOps.__init__:", dataset.wireframe, dataset.edge_list, self.edge_list)
         self.propertyname_list = dataset.propertyname_list
         if dataset.polygons != '':
             dataset.unpack_polygons()

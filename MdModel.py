@@ -638,6 +638,7 @@ class MdObjectOps:
         self.centroid_size = -1
         self.polygon_color = None
         self.edge_color = None
+        self.landmark_color = None
         self.visible = True
         self.show_landmark = True
         self.show_polygon = True

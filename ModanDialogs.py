@@ -1180,6 +1180,28 @@ class ObjectViewer3D(QGLWidget):
         #print("edge_list:", self.ds_ops.edge_list)
         self.edge_list = ds_ops.edge_list
 
+    def set_shape_properties(self, object_properties):
+        if self.obj_ops is not None :
+            obj = self.obj_ops
+            if 'visible' in object_properties:
+                obj.visible = object_properties['visible']
+            if 'show_landmark' in object_properties:
+                obj.show_landmark = object_properties['show_landmark']
+            if 'show_wireframe' in object_properties:
+                obj.show_wireframe = object_properties['show_wireframe']
+            if 'show_polygon' in object_properties:
+                obj.show_polygon = object_properties['show_polygon']
+            if 'opacity' in object_properties:
+                obj.opacity = object_properties['opacity']
+            if 'polygon_color' in object_properties:
+                obj.polygon_color = object_properties['polygon_color']
+            if 'edge_color' in object_properties:
+                obj.edge_color = object_properties['edge_color']
+            if 'landmark_color' in object_properties:
+                obj.landmark_color = object_properties['landmark_color']
+            print("set shape properties", obj.visible, obj.show_landmark, obj.show_wireframe, obj.show_polygon, obj.opacity, obj.polygon_color, obj.edge_color, obj.landmark_color)
+
+
     def set_source_shape_properties(self, object_properties):
         if self.ds_ops is not None and len(self.ds_ops.object_list) > 0:
             obj = self.ds_ops.object_list[0]
@@ -1629,7 +1651,7 @@ class ObjectViewer3D(QGLWidget):
                         else:
                             wf_color = as_gl_color(self.wireframe_color)
                         #wf_color = as_gl_color(self.wireframe_color)
-                        #print("color:", wf_color)
+                        #print("edge color:", wf_color, object.edge_color)
                         gl.glColor3f( *wf_color ) #*COLOR['WIREFRAME'])
                     line_width = 1*(int(self.wireframe_thickness)+1)
                     #print("line width:", line_width)
@@ -4076,6 +4098,7 @@ class ShapePreference(QWidget):
         self.edge_color = "red"
         self.landmark_color = "red"
         self.polygon_color = "red"
+        self.name = ""
 
         self.layout = QHBoxLayout()
         self.setLayout(self.layout)
@@ -4134,6 +4157,15 @@ class ShapePreference(QWidget):
         self.cbxShowPolygon.stateChanged.connect(self.cbxShowPolygon_stateChanged)
         self.edtTitle.textChanged.connect(self.edtTitle_textChanged)
         self.sliderTransparency.valueChanged.connect(self.sliderTransparency_valueChanged)
+
+    def hide_title(self):
+        self.lblTitle.hide()
+
+    def hide_name(self):
+        self.edtTitle.hide()
+    
+    def hide_cbxShow(self):
+        self.cbxShow.hide()
 
     def on_btnLMColor_clicked(self,event):
         dialog = QColorDialog()
@@ -4257,6 +4289,7 @@ class DataExplorationDialog(QDialog):
         self.shape_preference_list = []
         self.custom_shape_hash = {}
         self.shape_grid = {}
+        self.shape_grid_pref_dict = {}
         self.shape_button_list = []
         #self.shape_combo_list = []
         self.vertical_line_xval = None
@@ -4353,19 +4386,6 @@ class DataExplorationDialog(QDialog):
         self.cbxFlipAxis3.setText("Flip")
         self.cbxFlipAxis3.setChecked(False)
 
-        self.axis_option_widget = QWidget()
-        self.axis_option_layout = QHBoxLayout()
-        self.axis_option_widget.setLayout(self.axis_option_layout)
-        self.axis_option_layout.addWidget(self.lblAxis1,0)
-        self.axis_option_layout.addWidget(self.comboAxis1,1)
-        self.axis_option_layout.addWidget(self.cbxFlipAxis1,0)
-        self.axis_option_layout.addWidget(self.lblAxis2,0)
-        self.axis_option_layout.addWidget(self.comboAxis2,1)
-        self.axis_option_layout.addWidget(self.cbxFlipAxis2,0)
-        self.axis_option_layout.addWidget(self.lblAxis3,0)
-        self.axis_option_layout.addWidget(self.comboAxis3,1)
-        self.axis_option_layout.addWidget(self.cbxFlipAxis3,0)
-
         self.cbxFlipAxis1.stateChanged.connect(self.flip_axis_changed)
         self.cbxFlipAxis2.stateChanged.connect(self.flip_axis_changed)
         self.cbxFlipAxis3.stateChanged.connect(self.flip_axis_changed)
@@ -4383,7 +4403,7 @@ class DataExplorationDialog(QDialog):
         self.comboAxis3.currentIndexChanged.connect(self.axis_changed)
 
         self.cbxRegression = QCheckBox()
-        self.cbxRegression.setText("Regression line")
+        self.cbxRegression.setText("Regression")
         self.cbxRegression.setChecked(False)
         self.cbxRegression.stateChanged.connect(self.update_chart)
         self.cbxAnnotation = QCheckBox()
@@ -4408,10 +4428,6 @@ class DataExplorationDialog(QDialog):
         self.cbxAverage.setText("Average")
         self.cbxAverage.setChecked(False)        
         self.cbxAverage.stateChanged.connect(self.update_chart)
-        self.cbxShapeGrid = QCheckBox()
-        self.cbxShapeGrid.setText("Deformation")
-        self.cbxShapeGrid.setChecked(False)
-        self.cbxShapeGrid.stateChanged.connect(self.update_chart)
         self.cbxConvexHull = QCheckBox()
         self.cbxConvexHull.setText("ConvexHull")
         self.cbxConvexHull.setChecked(False)
@@ -4424,25 +4440,48 @@ class DataExplorationDialog(QDialog):
         self.sbxDegree = QSpinBox()
         self.sbxDegree.setValue(1)
         self.sbxDegree.textChanged.connect(self.update_chart)
-        #self.btnPolyfit = QPushButton("Polyfit")
-        #self.btnPolyfit.clicked.connect(self.axis_changed)
+        self.cbxShapeGrid = QCheckBox()
+        self.cbxShapeGrid.setText("Shape grid")
+        self.cbxShapeGrid.setChecked(False)
+        self.cbxShapeGrid.stateChanged.connect(self.update_chart)
+        self.sgpWidget = ShapePreference(self)
+        self.sgpWidget.set_title("")
+        self.sgpWidget.hide_name()
+        self.sgpWidget.hide_title()
+        self.sgpWidget.hide_cbxShow()
+        #self.ShapeGridPreference.hide()
+        self.sgpWidget.shape_preference_changed.connect(self.shape_grid_preference_changed)
+
+        self.axis_option_widget = QWidget()
+        self.axis_option_layout = QHBoxLayout()
+        self.axis_option_widget.setLayout(self.axis_option_layout)
+        self.axis_option_layout.addWidget(self.rb2DChartDim,1)
+        self.axis_option_layout.addWidget(self.rb3DChartDim,1)
+        self.axis_option_layout.addWidget(self.lblAxis1,0)
+        self.axis_option_layout.addWidget(self.comboAxis1,1)
+        self.axis_option_layout.addWidget(self.cbxFlipAxis1,0)
+        self.axis_option_layout.addWidget(self.lblAxis2,0)
+        self.axis_option_layout.addWidget(self.comboAxis2,1)
+        self.axis_option_layout.addWidget(self.cbxFlipAxis2,0)
+        self.axis_option_layout.addWidget(self.lblAxis3,0)
+        self.axis_option_layout.addWidget(self.comboAxis3,1)
+        self.axis_option_layout.addWidget(self.cbxFlipAxis3,0)
+        self.axis_option_layout.addWidget(self.cbxRegression,1)
+        self.axis_option_layout.addWidget(self.lblDegree,0)
+        self.axis_option_layout.addWidget(self.sbxDegree,1)
+        self.axis_option_layout.addWidget(self.cbxAnnotation,1)
+
         self.chart_option_widget = QWidget()
         self.chart_option_layout = QHBoxLayout()
         self.chart_option_widget.setLayout(self.chart_option_layout)
-        self.chart_option_layout.addWidget(self.rb2DChartDim,1)
-        self.chart_option_layout.addWidget(self.rb3DChartDim,1)
-
-        self.chart_option_layout.addWidget(self.cbxRegression,1)
-        self.chart_option_layout.addWidget(self.lblDegree,0)
-        self.chart_option_layout.addWidget(self.sbxDegree,1)
-        self.chart_option_layout.addWidget(self.cbxAnnotation,1)
         self.chart_option_layout.addWidget(self.cbxLegend,1)
         self.chart_option_layout.addWidget(self.cbxDepthShade,1)
+        self.chart_option_layout.addWidget(self.cbxAverage,1)
         self.chart_option_layout.addWidget(self.cbxConvexHull,1)
         self.chart_option_layout.addWidget(self.cbxConfidenceEllipse,1)
         #self.regression_layout.addWidget(self.cbxShape,1)
-        self.chart_option_layout.addWidget(self.cbxAverage,1)
         self.chart_option_layout.addWidget(self.cbxShapeGrid,1)
+        self.chart_option_layout.addWidget(self.sgpWidget,4)
         #self.fit_layout.addWidget(self.btnPolyfit)
 
 
@@ -4477,8 +4516,8 @@ class DataExplorationDialog(QDialog):
 
         #self.plot_layout.addWidget(self.toolbar2)
         self.plot_layout.addWidget(self.toolbar_widget)
-        self.plot_layout.addWidget(self.chart_option_widget)
         self.plot_layout.addWidget(self.axis_option_widget)
+        self.plot_layout.addWidget(self.chart_option_widget)
 
         self.plot_layout.addWidget(self.plot_widget2)
         self.plot_layout.addWidget(self.plot_widget3)
@@ -4612,6 +4651,15 @@ class DataExplorationDialog(QDialog):
 
         #print("layout done")
         #self.resizeEvent(None)
+
+    def shape_grid_preference_changed(self, pref):
+        self.shape_grid_pref_dict = pref
+        if self.cbxShapeGrid.isChecked() == True:
+            for key in self.shape_grid:
+                if self.shape_grid[key]['view'] is not None:
+                    self.shape_grid[key]['view'].set_shape_properties(self.shape_grid_pref_dict)
+                    self.shape_grid[key]['view'].update()
+
     def event(self, event):
         if event.type() in [ QEvent.WindowActivate, QEvent.WindowStateChange] and self.initialized == True:
             #print("Window has been activated")
@@ -5646,10 +5694,12 @@ class DataExplorationDialog(QDialog):
                 for keyname in self.shape_grid.keys():
                     shape = self.raw_chart_coords_to_shape(self.shape_grid[keyname]['x_val'], self.shape_grid[keyname]['y_val'])
                     obj = self.shape_to_object(shape)
+                    
                     view = self.shape_grid[keyname]['view']
                     view.show()
                     view.set_object(obj)
                     view.apply_rotation(self.rotation_matrix)
+                    view.set_shape_properties(self.shape_grid_pref_dict)
                 self.reposition_shape_grid()
 
     def reposition_shape_grid(self):
@@ -5673,8 +5723,8 @@ class DataExplorationDialog(QDialog):
                 #print("display_coords", display_coords, "x_pixel", x_pixel, "y_pixel", y_pixel)
                 fig_height = self.fig2.canvas.height()
                 fig_width = self.fig2.canvas.width()
-                view_height = int( fig_height / 5 )
-                view_width = int( fig_width / 5 )
+                view_height = int( fig_height / 4 )
+                view_width = int( fig_width / 4 )
                 x_pixel = int( x_pixel + pos_x )
                 y_pixel = int( fig_height - y_pixel + pos_y )
                 self.shape_grid[keyname]['x_pos'] = x_pixel

@@ -5,7 +5,8 @@ from PyQt5.QtWidgets import QTableWidgetItem, QHeaderView, QFileDialog, QCheckBo
                             QTableWidget, QGridLayout, QAbstractButton, QButtonGroup, QGroupBox, \
                             QTabWidget, QListWidget, QSpinBox, QPlainTextEdit, QSlider
 from PyQt5.QtGui import QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem, QImage,\
-                        QFont, QPainter, QBrush, QMouseEvent, QWheelEvent, QDoubleValidator, QIcon, QCursor
+                        QFont, QPainter, QBrush, QMouseEvent, QWheelEvent, QDoubleValidator, QIcon, QCursor,\
+                        QFontMetrics
 from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSize, QPoint,\
                          pyqtSlot, pyqtSignal, QItemSelectionModel, QTimer, QEvent
 
@@ -760,9 +761,12 @@ class ObjectViewer3D(QGLWidget):
         self.index_size = 1
         self.index_color = "#FFFFFF"
         self.bgcolor = "#AAAAAA"
+        self.arrow_color = "#FF0000"
         self.m_app = QApplication.instance()        
         self.read_settings()
         self.object_name = ""
+        self.source_preference = None
+        self.target_preference = None
         #print("wireframe color:", self.wireframe_color)
 
         self.setAcceptDrops(True)
@@ -1180,53 +1184,56 @@ class ObjectViewer3D(QGLWidget):
         #print("edge_list:", self.ds_ops.edge_list)
         self.edge_list = ds_ops.edge_list
 
-    def set_shape_properties(self, object_properties):
+    def set_shape_preference(self, object_preference):
+        self.shape_preference = object_preference
         if self.obj_ops is not None :
             obj = self.obj_ops
-            if 'visible' in object_properties:
-                obj.visible = object_properties['visible']
-            if 'show_landmark' in object_properties:
-                obj.show_landmark = object_properties['show_landmark']
-            if 'show_wireframe' in object_properties:
-                obj.show_wireframe = object_properties['show_wireframe']
-            if 'show_polygon' in object_properties:
-                obj.show_polygon = object_properties['show_polygon']
-            if 'opacity' in object_properties:
-                obj.opacity = object_properties['opacity']
-            if 'polygon_color' in object_properties:
-                obj.polygon_color = object_properties['polygon_color']
-            if 'edge_color' in object_properties:
-                obj.edge_color = object_properties['edge_color']
-            if 'landmark_color' in object_properties:
-                obj.landmark_color = object_properties['landmark_color']
-            print("set shape properties", obj.visible, obj.show_landmark, obj.show_wireframe, obj.show_polygon, obj.opacity, obj.polygon_color, obj.edge_color, obj.landmark_color)
+            if 'visible' in object_preference:
+                obj.visible = object_preference['visible']
+            if 'show_landmark' in object_preference:
+                obj.show_landmark = object_preference['show_landmark']
+            if 'show_wireframe' in object_preference:
+                obj.show_wireframe = object_preference['show_wireframe']
+            if 'show_polygon' in object_preference:
+                obj.show_polygon = object_preference['show_polygon']
+            if 'opacity' in object_preference:
+                obj.opacity = object_preference['opacity']
+            if 'polygon_color' in object_preference:
+                obj.polygon_color = object_preference['polygon_color']
+            if 'edge_color' in object_preference:
+                obj.edge_color = object_preference['edge_color']
+            if 'landmark_color' in object_preference:
+                obj.landmark_color = object_preference['landmark_color']
+            #print("set shape properties", obj.visible, obj.show_landmark, obj.show_wireframe, obj.show_polygon, obj.opacity, obj.polygon_color, obj.edge_color, obj.landmark_color)
 
 
-    def set_source_shape_properties(self, object_properties):
+    def set_source_shape_preference(self, pref):
+        self.source_preference = pref
         if self.ds_ops is not None and len(self.ds_ops.object_list) > 0:
             obj = self.ds_ops.object_list[0]
-            obj.visible = object_properties['visible']
-            obj.show_landmark = object_properties['show_landmark']
-            obj.show_wireframe = object_properties['show_wireframe']
-            obj.show_polygon = object_properties['show_polygon']
-            obj.opacity = object_properties['opacity']
-            obj.polygon_color = object_properties['polygon_color']
-            obj.edge_color = object_properties['edge_color']
-            obj.landmark_color = object_properties['landmark_color']
-            print("set source shape properties", obj.visible, obj.show_landmark, obj.show_wireframe, obj.show_polygon, obj.opacity, obj.polygon_color, obj.edge_color, obj.landmark_color)
+            obj.visible = pref['visible']
+            obj.show_landmark = pref['show_landmark']
+            obj.show_wireframe = pref['show_wireframe']
+            obj.show_polygon = pref['show_polygon']
+            obj.opacity = pref['opacity']
+            obj.polygon_color = pref['polygon_color']
+            obj.edge_color = pref['edge_color']
+            obj.landmark_color = pref['landmark_color']
+            #print("set source shape properties", obj.visible, obj.show_landmark, obj.show_wireframe, obj.show_polygon, obj.opacity, obj.polygon_color, obj.edge_color, obj.landmark_color)
 
     
-    def set_target_shape_properties(self, object_properties):
+    def set_target_shape_preference(self, pref):
+        self.target_preference = pref
         if self.ds_ops is not None and len(self.ds_ops.object_list) > 1:
             obj = self.ds_ops.object_list[1]
-            obj.visible = object_properties['visible']
-            obj.show_landmark = object_properties['show_landmark']
-            obj.show_wireframe = object_properties['show_wireframe']
-            obj.show_polygon = object_properties['show_polygon']
-            obj.opacity = object_properties['opacity']
-            obj.polygon_color = object_properties['polygon_color']
-            obj.edge_color = object_properties['edge_color']
-            obj.landmark_color = object_properties['landmark_color']
+            obj.visible = pref['visible']
+            obj.show_landmark = pref['show_landmark']
+            obj.show_wireframe = pref['show_wireframe']
+            obj.show_polygon = pref['show_polygon']
+            obj.opacity = pref['opacity']
+            obj.polygon_color = pref['polygon_color']
+            obj.edge_color = pref['edge_color']
+            obj.landmark_color = pref['landmark_color']
 
     def set_source_shape_color(self, color):
         self.source_shape_color = color
@@ -1261,16 +1268,20 @@ class ObjectViewer3D(QGLWidget):
             shape_list.append(self.comparison_data['source_shape'])
             source = self.comparison_data['source_shape']
             source_ops = MdObjectOps(source)
-            source_ops.polygon_color = self.source_shape_color
-            source_ops.edge_color = self.source_shape_color
+            #source_ops.polygon_color = self.source_shape_color
+            #source_ops.edge_color = self.source_shape_color
             ds_ops.object_list.append(source_ops)
         if 'target_shape' in self.comparison_data:
             shape_list.append(self.comparison_data['target_shape'])
             target = self.comparison_data['target_shape']
             target_ops = MdObjectOps(target)
-            target_ops.polygon_color = self.target_shape_color
-            target_ops.edge_color = self.target_shape_color
+            #target_ops.polygon_color = self.target_shape_color
+            #target_ops.edge_color = self.target_shape_color
             ds_ops.object_list.append(target_ops)
+        if self.source_preference is not None:
+            self.set_source_shape_preference(self.source_preference)
+        if self.target_preference is not None:
+            self.set_target_shape_preference(self.target_preference)
         #ds.add_object(source)
         #ds.add_object(target)
         #ds_ops = MdDatasetOps(ds)
@@ -1470,7 +1481,9 @@ class ObjectViewer3D(QGLWidget):
         gl.glLoadIdentity()
         glu.gluPerspective(45.0, self.aspect, 0.1, 100.0)
         light_position = [1.0, 1.0, 1.0, 0.0]  # x, y, z, w (w=0 for directional light)
+        diffuse_intensity = (1.0, 1.0, 1.0, 1.0)
         gl.glLightfv(gl.GL_LIGHT0, gl.GL_POSITION, light_position)
+        gl.glLightfv(gl.GL_LIGHT0, gl.GL_DIFFUSE, diffuse_intensity) 
         gl.glTranslatef(0, 0, -5.0 + self.dolly + self.temp_dolly)   # x, y, z 
         gl.glTranslatef((self.pan_x + self.temp_pan_x)/100.0, (self.pan_y + self.temp_pan_y)/-100.0, 0.0)
         gl.glRotatef(self.rotate_y + self.temp_rotate_y, 1.0, 0.0, 0.0)
@@ -1510,6 +1523,9 @@ class ObjectViewer3D(QGLWidget):
         gl.glFlush()
 
     def draw_dataset(self, ds_ops):
+        if self.show_arrow:
+            self.draw_arrow(0, 1)
+
         for idx, obj in enumerate(ds_ops.object_list):
             if obj.visible == False:
                 continue
@@ -1533,8 +1549,6 @@ class ObjectViewer3D(QGLWidget):
             object_color = COLOR['AVERAGE_SHAPE']
             self.draw_object(ds_ops.get_average_shape(), landmark_as_sphere=True, color=object_color)
 
-        if self.show_arrow:
-            self.draw_arrow(0, 1)
 
     def draw_arrow(self, start_idx, end_idx):
         if self.data_mode == OBJECT_MODE:
@@ -1566,7 +1580,8 @@ class ObjectViewer3D(QGLWidget):
 
             
             # draw rod instead of GL_LINES
-            gl.glColor3f(1.0, 0.0, 0.0)
+            arrow_color = as_gl_color(self.arrow_color)
+            gl.glColor3f(*arrow_color)
             gl.glPushMatrix()
             gl.glTranslatef(*((np.array(start_lm)+np.array(end_lm))/2))
             gl.glTranslatef(*[x*-0.015 for x in direction])
@@ -1600,11 +1615,6 @@ class ObjectViewer3D(QGLWidget):
                 #gl.glRotatef(90, 1, 0, 0)
                 gl.glPopMatrix()
 
-
-
-        
-        
-
     def draw_object(self,object,landmark_as_sphere=True,color=COLOR['NORMAL_SHAPE'],edge_color=COLOR['NORMAL_SHAPE'],polygon_color=COLOR['NORMAL_SHAPE']):
         if object is None:
             return
@@ -1623,12 +1633,13 @@ class ObjectViewer3D(QGLWidget):
                 gl.glVertex3f(*v)
             gl.glEnd()
 
-        #print("self.show_wireframe", self.show_wireframe, "len(self.edge_list)", len(self.edge_list), "object.show_wireframe", object.show_wireframe)
         if self.show_wireframe and len(self.edge_list) > 0 and object.show_wireframe:
             
             #print("draw wireframe",self.edge_list)
             for i, edge in enumerate(self.edge_list):
+                #print("edge:", edge)
                 if current_buffer == self.picker_buffer and self.object_dialog is not None:
+                    #print("picker buffer")
                     gl.glDisable(gl.GL_LIGHTING)
                     #print("color:",*self.lm_idx_to_color[i])
                     key = "edge_"+str(i)
@@ -1640,23 +1651,30 @@ class ObjectViewer3D(QGLWidget):
                     #print("buffer line width:", line_width)
                     gl.glLineWidth(line_width)
                 else:
-
+                    #print("no picker buffer",)
                     if i == self.selected_edge_index:
+                        #print("selected edge",)
                         gl.glColor3f( *COLOR['SELECTED_EDGE'] )
                     else:
+                        #print("no selected edge",)
                     #gl.glDisable(gl.GL_LIGHTING)
                         #print("wireframe color:", self.wireframe_color)
                         if object.edge_color:
+                            #print("edge color exist", object.edge_color,)
                             wf_color = as_gl_color(object.edge_color)
                         else:
+                            #print("no edge color exist", self.wireframe_color,)
                             wf_color = as_gl_color(self.wireframe_color)
                         #wf_color = as_gl_color(self.wireframe_color)
-                        #print("edge color:", wf_color, object.edge_color)
                         gl.glColor3f( *wf_color ) #*COLOR['WIREFRAME'])
                     line_width = 1*(int(self.wireframe_thickness)+1)
+                    #print("edge color:", wf_color, object.edge_color, COLOR['SELECTED_EDGE'])
                     #print("line width:", line_width)
                     gl.glLineWidth(line_width)                        
                 gl.glBegin(gl.GL_LINE_STRIP)
+                #print(self.object_name, i, edge, "self.show_wireframe", self.show_wireframe, "len(self.edge_list)", len(self.edge_list), "object.show_wireframe", object.show_wireframe, 
+                #      "object.edge_color", object.edge_color, "self.wireframe_color", self.wireframe_color, "wf_color", wf_color)
+
                 #print(self.down_x, self.down_y, self.curr_x, self.curr_y)
                 for lm_idx in edge:
                     if lm_idx < len(object.landmark_list):
@@ -4211,10 +4229,24 @@ class ShapePreference(QWidget):
                 'landmark_color': self.landmark_color, 'edge_color': self.edge_color, 'polygon_color': self.polygon_color}
         self.shape_preference_changed.emit(pref)
 
+    def get_preference(self):
+        pref = {'name': self.name, 'index': self.index, 'visible': self.visible,
+                'show_landmark': self.show_landmark, 'show_wireframe': self.show_wireframe, 'show_polygon': self.show_polygon, 'opacity': self.opacity,
+                'landmark_color': self.landmark_color, 'edge_color': self.edge_color, 'polygon_color': self.polygon_color}
+        return pref
+
     def set_color(self, color):
         self.btnLMColor.setStyleSheet("background-color: " + color)
+        self.landmark_color = color
         self.btnEdgeColor.setStyleSheet("background-color: " + color)
+        self.edge_color = color
         self.btnFaceColor.setStyleSheet("background-color: " + color)
+        self.polygon_color = color
+
+    def set_opacity(self, opacity):
+        self.opacity = opacity
+        self.transparency = 1 - opacity
+        self.sliderTransparency.setValue(int(self.transparency * 100))
 
     def set_title(self, title):
         self.lblTitle.setText(title)        
@@ -4304,6 +4336,8 @@ class DataExplorationDialog(QDialog):
         self.is_picking_shape = False
         self.pick_idx = -1
         self.animation_counter = 0
+        self.show_arrow = True
+        self.arrow_color = "red"
         #self.shape_mode = MODE_REGRESSION
         self.rotation_matrix = np.array([
         [1, 0, 0, 0],
@@ -4449,6 +4483,18 @@ class DataExplorationDialog(QDialog):
         self.sgpWidget.hide_name()
         self.sgpWidget.hide_title()
         self.sgpWidget.hide_cbxShow()
+        self.cbxArrow = QCheckBox("Show arrow")
+        self.cbxArrow.setChecked(True)
+        self.cbxArrow.stateChanged.connect(self.arrow_preference_changed)
+        self.btnArrowColor = QPushButton("Arrow color")
+        self.btnArrowColor.setMinimumSize(20,20)
+        self.btnArrowColor.setStyleSheet("background-color: yellow")
+        self.btnArrowColor.setToolTip("yellow")
+        self.btnArrowColor.setCursor(Qt.PointingHandCursor)
+        #self.btnLMColor.mousePressEvent = lambda event, type='LM': self.on_btnColor_clicked(event, 'LM')
+        self.btnArrowColor.clicked.connect(self.on_btnArrowColor_clicked)
+        #self.
+
         #self.ShapeGridPreference.hide()
         self.sgpWidget.shape_preference_changed.connect(self.shape_grid_preference_changed)
 
@@ -4570,6 +4616,13 @@ class DataExplorationDialog(QDialog):
         self.shape_preference_widget.hide()
         self.shape_view_layout.addWidget(self.shape_preference_widget,0)
 
+        self.arrow_widget = QWidget()
+        self.arrow_layout = QHBoxLayout()
+        self.arrow_widget.setLayout(self.arrow_layout)
+        self.arrow_layout.addWidget(self.cbxArrow)
+        self.arrow_layout.addWidget(self.btnArrowColor)
+        self.shape_view_layout.addWidget(self.arrow_widget,0)
+
         self.visualization_splitter = QSplitter(Qt.Horizontal)
         self.visualization_splitter.addWidget(self.plot_widget)
         self.visualization_splitter.addWidget(self.view_widget)
@@ -4652,12 +4705,22 @@ class DataExplorationDialog(QDialog):
         #print("layout done")
         #self.resizeEvent(None)
 
+    def on_btnArrowColor_clicked(self,event):
+        dialog = QColorDialog()
+        color = dialog.getColor(initial=QColor(self.btnArrowColor.toolTip()))
+        if color is not None:
+            self.btnArrowColor.setStyleSheet("background-color: " + color.name())
+            self.btnArrowColor.setToolTip(color.name())
+            self.arrow_color = color.name()
+            #self.m_app.landmark_pref[dim]['color'] = color.name()        
+        self.arrow_preference_changed()
+
     def shape_grid_preference_changed(self, pref):
         self.shape_grid_pref_dict = pref
         if self.cbxShapeGrid.isChecked() == True:
             for key in self.shape_grid:
                 if self.shape_grid[key]['view'] is not None:
-                    self.shape_grid[key]['view'].set_shape_properties(self.shape_grid_pref_dict)
+                    self.shape_grid[key]['view'].set_shape_preference(self.shape_grid_pref_dict)
                     self.shape_grid[key]['view'].update()
 
     def event(self, event):
@@ -4678,8 +4741,10 @@ class DataExplorationDialog(QDialog):
         #print("shape preference button clicked")
         if self.shape_preference_widget.isVisible():
             self.shape_preference_widget.hide()
+            self.arrow_widget.hide()
         else:
             self.shape_preference_widget.show()
+            self.arrow_widget.show()
             #self.chart_option_widget.hide()
 
     def record_animation_changed(self):
@@ -5001,6 +5066,7 @@ class DataExplorationDialog(QDialog):
             if self.custom_shape_hash[key]['label'] != None:
                 self.custom_shape_hash[key]['label'].remove()
             self.custom_shape_hash[key]['label'] = None
+        self.arrow_widget.hide()
 
         #self.custom_shape_list = []
         self.shape_view_list = []
@@ -5046,9 +5112,11 @@ class DataExplorationDialog(QDialog):
                 if idx == 0:
                     shape_preference.set_title("Source shape")
                     shape_preference.set_color("red")
+                    shape_preference.set_opacity(1.0)
                 else:
                     shape_preference.set_title("Target shape")
                     shape_preference.set_color("blue")
+                    shape_preference.set_opacity(0.5)
                 shape_preference.set_name(keyname)
                 shape_preference.set_index(idx)
                 # connect shape_preference signal to self.shape_preference_changed
@@ -5056,10 +5124,20 @@ class DataExplorationDialog(QDialog):
 
                 self.shape_preference_list.append(shape_preference)
                 self.shape_preference_layout.addWidget(shape_preference)
+            else:
+                shape_preference = ShapePreference(self)
+                shape_preference.hide_title()
+                shape_preference.set_name(keyname)
+                shape_preference.set_index(idx)
+                self.shape_preference_list.append(shape_preference)
+                self.shape_preference_layout.addWidget(shape_preference)
+                shape_preference.shape_preference_changed.connect(self.shape_preference_changed)
+
 
             shape_label = QLabel(keyname)
             shape_label.setParent(shape_view)
             shape_label.setStyleSheet("background-color: "+self.bgcolor+"; color: white")
+
             self.shape_label_list.append(shape_label)
             if keyname == '__default__' :
                 shape_label.hide()
@@ -5071,6 +5149,7 @@ class DataExplorationDialog(QDialog):
             self.show_average_shapes()
             #pass
         if self.mode == MODE_COMPARISON2:
+            #self.arrow_widget.hi()
             self.shape_label_list[1].setParent(self.shape_view_list[0])
             self.shape_button_list[1].setParent(self.shape_view_list[0])
             self.shape_label_list[1].show()
@@ -5080,22 +5159,45 @@ class DataExplorationDialog(QDialog):
             self.shape_view_list[0].set_target_shape_color(QColor(0,0,255))
             self.shape_view_list[0].show_arrow = True
 
+    def arrow_preference_changed(self):
+        self.shape_view_list[0].show_arrow = self.cbxArrow.isChecked()
+        self.shape_view_list[0].arrow_color = self.arrow_color
+        self.shape_view_list[0].update()
+
     def shape_preference_changed(self, pref_dict):
         #print("shape_preference_changed", pref_dict)
         idx = pref_dict['index']
         name = pref_dict['name']
         #color = pref_dict['color']
         #self.custom_shape_hash[idx]['color'] = color
-        self.custom_shape_hash[idx]['name'] = name
-        self.shape_label_list[idx].setText(name)
+        shape_label = self.shape_label_list[idx]
+        shape_label.setText(name)
+        #label = QLabel("Your sample text")
+        font_metrics = QFontMetrics(shape_label.font())
+        text_rect = font_metrics.boundingRect(shape_label.text())
+
+        width = text_rect.width() + 10  # Add some padding for visual comfort
+        height = shape_label.height()
+        x, y = shape_label.pos().x(), shape_label.pos().y()  # Get current position
+        shape_label.setGeometry(x, y, width, height) 
+
+        #shape_label.adjustSize()
+
+        #rendered_width = text_rect.width()
+        #print("Rendered width:", rendered_width)        
 
         if self.mode == MODE_COMPARISON2:
+            self.custom_shape_hash[idx]['name'] = name
             shape_view = self.shape_view_list[0]
             idx = pref_dict['index']
             if idx == 0:
-                shape_view.set_source_shape_properties(pref_dict)
+                shape_view.set_source_shape_preference(pref_dict)
             else:
-                shape_view.set_target_shape_properties(pref_dict)
+                shape_view.set_target_shape_preference(pref_dict)
+            shape_view.update()
+        else:
+            shape_view = self.shape_view_list[idx]
+            shape_view.set_shape_preference(pref_dict)
             shape_view.update()
 
         #self.custom_shape_hash[idx]['point'].set_color(color)
@@ -5350,37 +5452,32 @@ class DataExplorationDialog(QDialog):
         self.reposition_shape_grid()
 
     def resizeEvent(self, event):
-        #print("resize", self.geometry())
-        #print("Window has been resized",self.image_label.width(), self.image_label.height())
-        #self.pixmap.scaled(self.image_label.width(), self.image_label.height(), Qt.KeepAspectRatio)
-        #self.edtObjectDesc.resize(self.edtObjectDesc.height(),300)
-        #self.image_label.setPixmap(self.pixmap)
         for idx, shape_view in enumerate(self.shape_view_list):
-            #print("resize", idx, shape_view.width(), shape_view.height())
-            #shape_view = self.shape_view_list[idx]
             width = int(shape_view.width())
             half_width = int(width/2)
-            #self.shape_combo_list[idx].setGeometry(half_width,0,half_width,20)
             y_pos=0
-            #if self.mode == MODE_COMPARISON2:
-            y_pos = (idx)*32
-                #ret = self.shape_label_list[idx].setParent(self.shape_view_list[0])
-                #print("set parent", ret)
-            #y_pos=0
-            #print("resize", idx, y_pos, shape_view.width(), shape_view.height(), self.shape_label_list[idx].parent())
-            self.shape_label_list[idx].setGeometry(32,y_pos,half_width-32,20)
-        for idx, shape_button in enumerate(self.shape_button_list):
-            button = self.shape_button_list[idx]
+            x_pos = 0
+            if self.mode == MODE_COMPARISON2:
+                y_pos = (idx)*32
+                x_pos = 32
+            #else:
+            shape_label = self.shape_label_list[idx]
+            font_metrics = QFontMetrics(shape_label.font())
+            text_rect = font_metrics.boundingRect(shape_label.text())
+
+            width = text_rect.width() + 10  # Add some padding for visual comfort
+            height = shape_label.height()
+            #x, y = shape_label.pos().x(), shape_label.pos().y()  # Get current position
+            #shape_label.setGeometry(x, y, width, height) 
+
+            self.shape_label_list[idx].setGeometry(x_pos,y_pos,width,height)
+        for idx, button in enumerate(self.shape_button_list):
+            #button = self.shape_button_list[idx]
             y_pos=0
-            #if self.mode == MODE_COMPARISON2:
-            y_pos = (idx)*32
-                #ret = button.setParent(self.shape_view_list[0])
-                #print("set parent", idx, ret)
-            #y_pos=0
-            #print("resize", idx, y_pos, shape_button.width(), shape_button.height(), button.parent())
+            if self.mode == MODE_COMPARISON2:
+                y_pos = (idx)*32
             button.setGeometry(0,y_pos,32,32)
         self.reposition_shape_grid()
-        #QDialog.resizeEvent(self, event)
 
     def comboGroupBy_changed(self):
         if self.ignore_change == True:
@@ -5527,6 +5624,7 @@ class DataExplorationDialog(QDialog):
                 for y_key in y_key_list:
                     key_name = x_key+"_"+y_key
                     self.shape_grid[key_name] = { 'x_val': self.data_range[x_key], 'y_val': self.data_range[y_key], 'view': ObjectViewer3D(parent=None,transparent=True) }
+                    self.shape_grid[key_name]['view'].set_object_name(key_name)
 
         # remove empty group
         if len(self.scatter_data['__default__']['x_val']) == 0:
@@ -5699,7 +5797,7 @@ class DataExplorationDialog(QDialog):
                     view.show()
                     view.set_object(obj)
                     view.apply_rotation(self.rotation_matrix)
-                    view.set_shape_properties(self.shape_grid_pref_dict)
+                    view.set_shape_preference(self.sgpWidget.get_preference())
                 self.reposition_shape_grid()
 
     def reposition_shape_grid(self):
@@ -5863,10 +5961,13 @@ class DataExplorationDialog(QDialog):
 
             if idx == 0:
                 shape_view.set_source_shape(obj)
+                shape_view.set_source_shape_preference(self.shape_preference_list[idx].get_preference())
             elif idx == 1:
-                shape_view.set_target_shape(obj)            
+                shape_view.set_target_shape(obj)
+                shape_view.set_target_shape_preference(self.shape_preference_list[idx].get_preference())
         else:
             shape_view.set_object(obj)
+            shape_view.set_shape_preference(self.shape_preference_list[idx].get_preference())
 
         shape_view.apply_rotation(self.rotation_matrix)
         if self.analysis.dimension == 3:

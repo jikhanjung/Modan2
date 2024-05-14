@@ -761,7 +761,7 @@ class ObjectViewer3D(QGLWidget):
         self.index_size = 1
         self.index_color = "#FFFFFF"
         self.bgcolor = "#AAAAAA"
-        self.arrow_color = "#FF0000"
+        self.arrow_color = "#FFFF00"
         self.m_app = QApplication.instance()        
         self.read_settings()
         self.object_name = ""
@@ -1243,11 +1243,11 @@ class ObjectViewer3D(QGLWidget):
 
     def set_source_shape(self, object):
         self.comparison_data['source_shape'] = object
-        self.generate_reference_shape()
+        #self.generate_reference_shape()
     
     def set_target_shape(self, object):
         self.comparison_data['target_shape'] = object
-        self.generate_reference_shape()
+        #self.generate_reference_shape()
     
     def set_intermediate_shape(self, object):
         self.comparison_data['intermediate_shape'] = object
@@ -1264,6 +1264,8 @@ class ObjectViewer3D(QGLWidget):
         ds.edge_list = self.dataset.edge_list
         ds.polygon_list = self.dataset.polygon_list
         ds_ops = MdDatasetOps(ds)
+        #print("preferences:", self.source_preference, self.target_preference)
+
         if 'source_shape' in self.comparison_data:
             shape_list.append(self.comparison_data['source_shape'])
             source = self.comparison_data['source_shape']
@@ -1278,10 +1280,8 @@ class ObjectViewer3D(QGLWidget):
             #target_ops.polygon_color = self.target_shape_color
             #target_ops.edge_color = self.target_shape_color
             ds_ops.object_list.append(target_ops)
-        if self.source_preference is not None:
-            self.set_source_shape_preference(self.source_preference)
-        if self.target_preference is not None:
-            self.set_target_shape_preference(self.target_preference)
+
+
         #ds.add_object(source)
         #ds.add_object(target)
         #ds_ops = MdDatasetOps(ds)
@@ -1302,6 +1302,12 @@ class ObjectViewer3D(QGLWidget):
         #    print("obj_ops:", obj_ops, obj_ops.landmark_list)
         
         self.data_mode = DATASET_MODE
+        if self.source_preference is not None:
+            self.set_source_shape_preference(self.source_preference)
+            #print("source preference", self.source_preference)
+        if self.target_preference is not None:
+            self.set_target_shape_preference(self.target_preference)
+            #print("target preference", self.target_preference)
 
     def set_object(self, object, idx=-1):
         #print("set_object 1",type(object),idx)
@@ -1511,7 +1517,10 @@ class ObjectViewer3D(QGLWidget):
         # pan, rotate, dolly
         if self.data_mode == OBJECT_MODE:
             #print("normal shape", COLOR['NORMAL_SHAPE'])
-            object_color = as_gl_color(self.landmark_color) #COLOR['NORMAL_SHAPE']
+            if self.obj_ops.landmark_color is not None:
+                object_color = as_gl_color(self.obj_ops.landmark_color)
+            else:
+                object_color = as_gl_color(self.landmark_color) #COLOR['NORMAL_SHAPE']
             #print("object_color:", object_color)
 
             self.draw_object(self.obj_ops,color=object_color)
@@ -1534,7 +1543,10 @@ class ObjectViewer3D(QGLWidget):
                 object_color = COLOR['SELECTED_SHAPE']
             else:
                 #print("normal shape", COLOR['NORMAL_SHAPE'])
-                object_color = as_gl_color(self.landmark_color) #COLOR['NORMAL_SHAPE']
+                if obj.landmark_color is not None:
+                    object_color = as_gl_color(obj.landmark_color)
+                else:
+                    object_color = as_gl_color(self.landmark_color) #COLOR['NORMAL_SHAPE']
                 #print("object_color:", object_color)
             edge_color=self.wireframe_color
             if obj.edge_color is not None:
@@ -4109,7 +4121,7 @@ class ShapePreference(QWidget):
         self.show_landmark = True
         self.show_wireframe = True
         self.show_polygon = True
-        self.transparency = 0.5
+        self.transparency = 0
         self.opacity = 1 - self.transparency
         self.ignore_change = False
         self.index = -1
@@ -4133,7 +4145,7 @@ class ShapePreference(QWidget):
         self.sliderTransparency = QSlider(Qt.Horizontal)
         self.sliderTransparency.setMinimum(0)
         self.sliderTransparency.setMaximum(100)
-        self.sliderTransparency.setValue(50)
+        self.sliderTransparency.setValue(0)
 
         self.btnLMColor = QPushButton("LM")
         self.btnLMColor.setMinimumSize(20,20)
@@ -4483,6 +4495,8 @@ class DataExplorationDialog(QDialog):
         self.sgpWidget.hide_name()
         self.sgpWidget.hide_title()
         self.sgpWidget.hide_cbxShow()
+        self.sgpWidget.set_color("gray")
+        self.sgpWidget.set_opacity(0.5)
         self.cbxArrow = QCheckBox("Show arrow")
         self.cbxArrow.setChecked(True)
         self.cbxArrow.stateChanged.connect(self.arrow_preference_changed)
@@ -4544,6 +4558,9 @@ class DataExplorationDialog(QDialog):
         self.plot_preference_button.setIconSize(QSize(32, 32))
         self.plot_preference_button.clicked.connect(self.show_plot_preference)
         self.plot_preference_button.setAutoDefault(False)
+        self.btn_save_plot = QPushButton("Save")
+        self.btn_save_plot.clicked.connect(self.save_plot)
+
 
         self.toolbar_widget = QWidget()
         self.toolbar_layout = QHBoxLayout()
@@ -4551,6 +4568,7 @@ class DataExplorationDialog(QDialog):
 
         self.toolbar_layout.addWidget(self.toolbar2)
         self.toolbar_layout.addWidget(self.toolbar3)
+        self.toolbar_layout.addWidget(self.btn_save_plot)
         self.toolbar_layout.addWidget(self.plot_preference_button)
 
 
@@ -4705,6 +4723,93 @@ class DataExplorationDialog(QDialog):
         #print("layout done")
         #self.resizeEvent(None)
 
+    def save_plot(self):
+        dialog = QFileDialog()
+        dialog.setFileMode(QFileDialog.AnyFile)
+        dialog.setAcceptMode(QFileDialog.AcceptSave)
+        dialog.setNameFilter("PNG (*.png);;JPG (*.jpg);;PDF (*.pdf);;SVG (*.svg);;All files (*.*)")
+        dialog.setDefaultSuffix("png")
+        #dialog.setDirectory(self.m_app.last_opened_dir)
+        if dialog.exec_():
+            filename = dialog.selectedFiles()[0]
+            #self.m_app.last_opened_dir = dialog.directory().absolutePath()
+            if filename:
+                if self.cbxShapeGrid.isChecked() == True:
+                    self.save_composite_plot(filename)
+                else:
+                    self.fig2.savefig(filename)
+
+    def save_composite_plot(self, filename):
+    #def export_composite_image(chart_widget, shape_widgets, filename, format="PNG"):
+        # 1. Create the combined canvas (QPixmap)
+        canvas_width = self.plot_widget2.width()
+        canvas_height = self.plot_widget2.height()
+        #chart_aspect_ratio = canvas_width / canvas_height
+        #target_width = 2048
+        #canvas_width = target_width
+        #size_ratio = target_width / canvas_width
+        #canvas_height = int(target_width / chart_aspect_ratio)  # Maintain aspect ratio
+        canvas = QPixmap(canvas_width, canvas_height)
+
+        #canvas = QPixmap(canvas_width, canvas_height)
+        #fig = self.plot_widget2.figure  # Assuming your chart widget has a 'figure' attribute
+        #fig.set_size_inches(canvas_width / fig.dpi, canvas_height / fig.dpi)
+        #chart_widget.render(painter)        
+
+        # 2. Initialize QPainter for drawing on the canvas
+        painter = QPainter(canvas)
+
+        # 3. Draw the Matplotlib chart onto the canvas
+        self.plot_widget2.render(painter)
+
+        # 4. Overlay the shape images
+        for keyname in self.shape_grid.keys():
+            view = self.shape_grid[keyname]['view']
+            if view:
+                #print("keyname", keyname, "x_val", self.shape_grid[keyname]['x_val'], "y_val", self.shape_grid[keyname]['y_val'])
+                transform = self.ax2.transData
+                display_coords =    transform.transform((self.shape_grid[keyname]['x_val'], self.shape_grid[keyname]['y_val']))
+                x_pixel, y_pixel = display_coords   
+                if sys.platform == 'darwin':
+                    x_pixel = x_pixel / 2
+                    y_pixel = y_pixel / 2
+                #print("display_coords", display_coords, "x_pixel", x_pixel, "y_pixel", y_pixel)
+                fig_height = self.fig2.canvas.height()
+                fig_width = self.fig2.canvas.width()
+                view_height = int( fig_height / 4 )
+                view_width = int( fig_width / 4 )
+                x_pos = int( x_pixel )
+                y_pos = int( fig_height - y_pixel )
+                w, h = view.width(), view.height()
+                w, h = 120, 90
+                w = max(w, view_width)
+                h = max(h, view_height)
+                #print("view size", w, h, "view pos", x_pixel, y_pixel, "fig_size", fig_width, fig_height, "view pos 2", x_pos, y_pos)
+                '''
+                self.shape_grid[keyname]['x_pos'] = x_pixel
+                self.shape_grid[keyname]['y_pos'] = y_pixel
+                #print("view size 2  ", w, h, "view pos", x_pixel, y_pixel, "fig_size", fig_width, fig_height)
+
+                view.setGeometry(self.shape_grid[keyname]['x_pos']-int(w/2), self.shape_grid[keyname]['y_pos']-int(h/2), w, h)
+                '''
+
+
+            #for shape_widget, (x, y) in zip(shape_widgets, pca_coordinates):
+                # Convert PCA coordinates to pixel positions on the canvas
+                #x_pixel, y_pixel = map_coordinates_to_pixels(x, y, canvas_width, canvas_height)
+
+                # Draw the shape image onto the canvas
+                view.updateGL()
+                buffer = QPixmap(view.grabFrameBuffer(True))
+                #print(buffer)
+                painter.drawPixmap(x_pos-int(w/2), y_pos-int(h/2), buffer)
+
+        # 5. End painting
+        painter.end()
+
+        # 6. Save the composite image
+        canvas.save(filename, "PNG")        
+
     def on_btnArrowColor_clicked(self,event):
         dialog = QColorDialog()
         color = dialog.getColor(initial=QColor(self.btnArrowColor.toolTip()))
@@ -4744,7 +4849,8 @@ class DataExplorationDialog(QDialog):
             self.arrow_widget.hide()
         else:
             self.shape_preference_widget.show()
-            self.arrow_widget.show()
+            if self.mode == MODE_COMPARISON2:
+                self.arrow_widget.show()
             #self.chart_option_widget.hide()
 
     def record_animation_changed(self):
@@ -5035,6 +5141,11 @@ class DataExplorationDialog(QDialog):
         else:
             self.animate_option_widget.hide()
 
+        if mode == MODE_COMPARISON2:
+            self.arrow_widget.show()
+        else:
+            self.arrow_widget.hide()
+
         self.prepare_shape_view()
         self.resizeEvent(None)
 
@@ -5119,6 +5230,7 @@ class DataExplorationDialog(QDialog):
                     shape_preference.set_opacity(0.5)
                 shape_preference.set_name(keyname)
                 shape_preference.set_index(idx)
+                #shape_preference.set_color(self.color_list[idx])
                 # connect shape_preference signal to self.shape_preference_changed
                 shape_preference.shape_preference_changed.connect(self.shape_preference_changed)
 
@@ -5127,8 +5239,12 @@ class DataExplorationDialog(QDialog):
             else:
                 shape_preference = ShapePreference(self)
                 shape_preference.hide_title()
+                shape_preference.hide_name()
+                shape_preference.hide_cbxShow()
                 shape_preference.set_name(keyname)
                 shape_preference.set_index(idx)
+                
+                shape_preference.set_color(self.color_list[idx])
                 self.shape_preference_list.append(shape_preference)
                 self.shape_preference_layout.addWidget(shape_preference)
                 shape_preference.shape_preference_changed.connect(self.shape_preference_changed)
@@ -5155,8 +5271,8 @@ class DataExplorationDialog(QDialog):
             self.shape_label_list[1].show()
             self.shape_button_list[1].show()
             self.shape_view_list[1].hide()
-            self.shape_view_list[0].set_source_shape_color(QColor(255,0,0))
-            self.shape_view_list[0].set_target_shape_color(QColor(0,0,255))
+            #self.shape_view_list[0].set_source_shape_color(QColor(255,0,0))
+            #self.shape_view_list[0].set_target_shape_color(QColor(0,0,255))
             self.shape_view_list[0].show_arrow = True
 
     def arrow_preference_changed(self):
@@ -5459,6 +5575,8 @@ class DataExplorationDialog(QDialog):
             x_pos = 0
             if self.mode == MODE_COMPARISON2:
                 y_pos = (idx)*32
+                x_pos = 32
+            if self.mode == MODE_COMPARISON:
                 x_pos = 32
             #else:
             shape_label = self.shape_label_list[idx]
@@ -5961,9 +6079,11 @@ class DataExplorationDialog(QDialog):
 
             if idx == 0:
                 shape_view.set_source_shape(obj)
+                shape_view.generate_reference_shape()
                 shape_view.set_source_shape_preference(self.shape_preference_list[idx].get_preference())
             elif idx == 1:
                 shape_view.set_target_shape(obj)
+                shape_view.generate_reference_shape()
                 shape_view.set_target_shape_preference(self.shape_preference_list[idx].get_preference())
         else:
             shape_view.set_object(obj)

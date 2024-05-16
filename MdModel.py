@@ -203,6 +203,9 @@ class MdObject(Model):
     property_list = []
     centroid_size = -1
 
+    class Meta:
+        database = gDatabase
+
     def copy_object(self, new_dataset):
         new_object = MdObject()
         new_object.object_name = self.object_name
@@ -270,10 +273,6 @@ class MdObject(Model):
             if os.path.exists(target_path):
                 os.remove(target_path)
             os.rename(source_path, target_path)
-
-
-    class Meta:
-        database = gDatabase
 
     def pack_landmark(self):
         # error check
@@ -355,6 +354,8 @@ class MdObject(Model):
         #print centroid_size
         centroid_size = math.sqrt(centroid_size)
         self.centroid_size = centroid_size
+        if self.pixels_per_mm is not None:
+            centroid_size = centroid_size / self.pixels_per_mm
         #centroid_size = float( int(  * 100 ) ) / 100
         return centroid_size
 
@@ -617,6 +618,7 @@ class MdObjectOps:
         self.id = mdobject.id
         self.object_name = mdobject.object_name
         self.object_desc = mdobject.object_desc
+        self.pixel_per_mm = mdobject.pixels_per_mm
         #self.dataset_id = mdobject.dataset
         #self.scale = mdobject.scale
         self.landmark_str = mdobject.landmark_str
@@ -644,6 +646,20 @@ class MdObjectOps:
         self.show_polygon = True
         self.show_wireframe = True
         self.opacity = 1.0
+        if self.pixel_per_mm is None:
+            self.pixel_per_mm = 1.0
+        self.scale_applied = False
+        #self.apply_scale()
+    
+    def apply_scale(self):
+        if self.pixel_per_mm is not None:
+            for lm in self.landmark_list:
+                lm[0] = lm[0] / self.pixel_per_mm
+                lm[1] = lm[1] / self.pixel_per_mm
+                if len(lm) == 3:
+                    lm[2] = lm[2] / self.pixel_per_mm
+        self.scale_applied = True
+
 
     def get_centroid_coord(self):
         c = [0, 0, 0]
@@ -813,60 +829,88 @@ class MdObjectOps:
             point3 = baseline[0]
         else:
             return
-        #print("baseline:",baseline)
+        print("baseline:",baseline)
 
-        #print(self.landmark_list)
+        print(self.landmark_list)
 
         #print(self.landmark_list[point2 - 1], self.landmark_list[point1 - 1])
 
         curr_vector1 = np.array(self.landmark_list[point2 - 1]) - np.array(self.landmark_list[point1 - 1])
-        to_vector1 = np.array([1, 0, 0])
+
+        if len(curr_vector1) == 2:
+            to_vector1 = np.array([1, 0])
+        else:        
+            to_vector1 = np.array([1, 0, 0])
+
+
         #print("curr_vector1:", curr_vector1)
         #print("to_vector1:", to_vector1)
         v1_norm = curr_vector1 / np.linalg.norm(curr_vector1)
         to_norm = to_vector1 / np.linalg.norm(to_vector1)
 
 
+
         if np.allclose(v1_norm, to_norm):
+            if len(curr_vector1) == 2:
+                return
             # do nothing
             pass
         else:
+            if len(curr_vector1) == 2:
+                print("2D rotation", curr_vector1, to_vector1)
+                #print
+                cos_theta = np.dot(curr_vector1, to_vector1) / (np.linalg.norm(curr_vector1) * np.linalg.norm(to_vector1))
+                sin_theta = np.sqrt(1 - cos_theta ** 2)
 
-            # calculate cosine and sine of rotation angle
-            cos_theta = np.dot(curr_vector1, to_vector1) / (np.linalg.norm(curr_vector1) * np.linalg.norm(to_vector1))
-            sin_theta = np.sqrt(1 - cos_theta ** 2)
+                rotation_matrix = [ [ cos_theta, -1 * sin_theta], [sin_theta, cos_theta] ]
+                # apply rotation matrix to landmarks
+                print("landmarks before rotation", self.landmark_list)
+                print("rotation matrix", rotation_matrix)
+                for i, lm in enumerate(self.landmark_list):
+                    coords = [0,0]
+                    for j in range(len(lm)):
+                        coords[j] = lm[j]
+                    x_rotated = coords[0] * rotation_matrix[0][0] + coords[1] * rotation_matrix[1][0]
+                    y_rotated = coords[0] * rotation_matrix[0][1] + coords[1] * rotation_matrix[1][1]
+                    self.landmark_list[i] = [ x_rotated, y_rotated ]
+                print("landmarks after rotation", self.landmark_list)
+                return
+            else:
+                # calculate cosine and sine of rotation angle
+                cos_theta = np.dot(curr_vector1, to_vector1) / (np.linalg.norm(curr_vector1) * np.linalg.norm(to_vector1))
+                sin_theta = np.sqrt(1 - cos_theta ** 2)
 
-            #calculate rotation axis
-            rotation_axis = np.cross(curr_vector1, to_vector1)
-            rotation_axis = rotation_axis / np.linalg.norm(rotation_axis)
+                #calculate rotation axis
+                rotation_axis = np.cross(curr_vector1, to_vector1)
+                rotation_axis = rotation_axis / np.linalg.norm(rotation_axis)
 
-            # calculate rotation matrix to align vector1 to x-axis - Rodrigues' rotation formula
-            # https://en.wikipedia.org/wiki/Rodrigues%27_rotation_formula
-            r_mx = [[1, 0, 0,0], [0, 1, 0,0], [0, 0, 1,0],[0,0,0,1]]
-            r_mx[0][0] = cos_theta + rotation_axis[0] * rotation_axis[0] * (1 - cos_theta)
-            r_mx[0][1] = rotation_axis[0] * rotation_axis[1] * (1 - cos_theta) - rotation_axis[2] * sin_theta
-            r_mx[0][2] = rotation_axis[0] * rotation_axis[2] * (1 - cos_theta) + rotation_axis[1] * sin_theta
-            r_mx[1][0] = rotation_axis[1] * rotation_axis[0] * (1 - cos_theta) + rotation_axis[2] * sin_theta
-            r_mx[1][1] = cos_theta + rotation_axis[1] * rotation_axis[1] * (1 - cos_theta)
-            r_mx[1][2] = rotation_axis[1] * rotation_axis[2] * (1 - cos_theta) - rotation_axis[0] * sin_theta
-            r_mx[2][0] = rotation_axis[2] * rotation_axis[0] * (1 - cos_theta) - rotation_axis[1] * sin_theta
-            r_mx[2][1] = rotation_axis[2] * rotation_axis[1] * (1 - cos_theta) + rotation_axis[0] * sin_theta
-            r_mx[2][2] = cos_theta + rotation_axis[2] * rotation_axis[2] * (1 - cos_theta)
+                # calculate rotation matrix to align vector1 to x-axis - Rodrigues' rotation formula
+                # https://en.wikipedia.org/wiki/Rodrigues%27_rotation_formula
+                r_mx = [[1, 0, 0,0], [0, 1, 0,0], [0, 0, 1,0],[0,0,0,1]]
+                r_mx[0][0] = cos_theta + rotation_axis[0] * rotation_axis[0] * (1 - cos_theta)
+                r_mx[0][1] = rotation_axis[0] * rotation_axis[1] * (1 - cos_theta) - rotation_axis[2] * sin_theta
+                r_mx[0][2] = rotation_axis[0] * rotation_axis[2] * (1 - cos_theta) + rotation_axis[1] * sin_theta
+                r_mx[1][0] = rotation_axis[1] * rotation_axis[0] * (1 - cos_theta) + rotation_axis[2] * sin_theta
+                r_mx[1][1] = cos_theta + rotation_axis[1] * rotation_axis[1] * (1 - cos_theta)
+                r_mx[1][2] = rotation_axis[1] * rotation_axis[2] * (1 - cos_theta) - rotation_axis[0] * sin_theta
+                r_mx[2][0] = rotation_axis[2] * rotation_axis[0] * (1 - cos_theta) - rotation_axis[1] * sin_theta
+                r_mx[2][1] = rotation_axis[2] * rotation_axis[1] * (1 - cos_theta) + rotation_axis[0] * sin_theta
+                r_mx[2][2] = cos_theta + rotation_axis[2] * rotation_axis[2] * (1 - cos_theta)
 
-            #r_mx = [[1, 0, 0,0], [0, 1, 0,0], [0, 0, 1,0],[0,0,0,1]]
-            #r_mx[1][1] = cos_theta
-            #r_mx[1][2] = sin_theta
-            #r_mx[2][1] = -1 * sin_theta
-            #r_mx[2][2] = cos_theta
+                #r_mx = [[1, 0, 0,0], [0, 1, 0,0], [0, 0, 1,0],[0,0,0,1]]
+                #r_mx[1][1] = cos_theta
+                #r_mx[1][2] = sin_theta
+                #r_mx[2][1] = -1 * sin_theta
+                #r_mx[2][2] = cos_theta
 
-            #print("rotation matrix:", r_mx)
+                #print("rotation matrix:", r_mx)
 
-            # apply rotation matrix to all landmarks
-            self.apply_rotation_matrix(np.array(r_mx))
+                # apply rotation matrix to all landmarks
+                self.apply_rotation_matrix(np.array(r_mx))
 
-            curr_vector1 = np.array(self.landmark_list[point2 - 1]) - np.array(self.landmark_list[point1 - 1])
-            #print("curr_vector1 after rotation:", curr_vector1)
-            #print(self.landmark_list[point2 - 1], self.landmark_list[point1 - 1])
+                curr_vector1 = np.array(self.landmark_list[point2 - 1]) - np.array(self.landmark_list[point1 - 1])
+                #print("curr_vector1 after rotation:", curr_vector1)
+                #print(self.landmark_list[point2 - 1], self.landmark_list[point1 - 1])
 
         mid_point12 = np.array(self.landmark_list[point1 - 1]) + curr_vector1 / 2
         curr_vector2 = np.array(self.landmark_list[point3 - 1]) - np.array(mid_point12)

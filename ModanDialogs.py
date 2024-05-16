@@ -114,8 +114,15 @@ def as_gl_color(color):
     return qcolor.redF(), qcolor.greenF(), qcolor.blueF()
 
 class ObjectViewer2D(QLabel):
-    def __init__(self, widget):
-        super(ObjectViewer2D, self).__init__(widget)
+    def __init__(self, parent=None, transparent=False):
+        if transparent:
+            super(ObjectViewer2D, self).__init__(parent)
+            self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowTransparentForInput | Qt.Tool)
+            self.setAttribute(Qt.WA_TranslucentBackground)
+            self.setAttribute(Qt.WA_NoSystemBackground, True)
+        else:
+            super(ObjectViewer2D, self).__init__(parent)
+        self.transparent = transparent
         logger.info("object viewer 2d init")
         self.setMinimumSize(300,200)
 
@@ -137,6 +144,7 @@ class ObjectViewer2D(QLabel):
         self.fullpath = None
         self.pan_mode = MODE['NONE']
         self.edit_mode = MODE['NONE']
+        self.data_mode = OBJECT_MODE
 
         self.show_index = True
         self.show_wireframe = True
@@ -172,6 +180,9 @@ class ObjectViewer2D(QLabel):
         self.setMouseTracking(True)
         self.set_mode(MODE['EDIT_LANDMARK'])
 
+    def set_shape_preference(self, pref):
+        return
+
     def apply_rotation(self, angle):
         return
 
@@ -179,7 +190,17 @@ class ObjectViewer2D(QLabel):
         self.object_name = name
 
     def align_object(self):
-        return
+        print("2d align object")
+        if self.data_mode == OBJECT_MODE:
+            print("baseline",self.dataset.baseline_point_list)
+            if self.obj_ops is None:
+                return
+            self.obj_ops.align(self.dataset.baseline_point_list)
+            #self.calculate_resize()
+            #self.updateGL()
+        elif self.data_mode == DATASET_MODE:
+            for obj_ops in self.ds_ops.object_list:
+                obj_ops.align(self.ds_ops.baseline_point_list)
 
     def set_landmark_pref(self,lm_pref,wf_pref,bgcolor):
         self.landmark_size = lm_pref['size']
@@ -474,7 +495,8 @@ class ObjectViewer2D(QLabel):
         # fill background with dark gray
 
         painter = QPainter(self)
-        painter.fillRect(self.rect(), QBrush(QColor(self.bgcolor)))#as_qt_color(COLOR['BACKGROUND'])))
+        if self.transparent == False:
+            painter.fillRect(self.rect(), QBrush(QColor(self.bgcolor)))#as_qt_color(COLOR['BACKGROUND'])))
         if self.object is None:
             return
         if self.curr_pixmap is not None:
@@ -647,10 +669,12 @@ class ObjectViewer2D(QLabel):
         QLabel.resizeEvent(self, event)
 
     def set_object(self, object):
+
         #print("set object", object)
         m_app = QApplication.instance()
         self.object = object
-        dataset = object.dataset
+        self.dataset = object.dataset
+        #self.dataset = object.dataset
 
         if self.object.pixels_per_mm is not None and self.object.pixels_per_mm > 0:
             self.pixels_per_mm = self.object.pixels_per_mm
@@ -664,9 +688,30 @@ class ObjectViewer2D(QLabel):
 
         object.unpack_landmark()
         object.dataset.unpack_wireframe()
+
+        if isinstance(object, MdObject):
+            self.object = object
+            obj_ops = MdObjectOps(object)
+        elif object is None:
+            self.object = MdObject()
+            obj_ops = MdObjectOps(self.object)
+
+        self.ds_ops = MdDatasetOps(self.dataset)
+
+        self.obj_ops = obj_ops
+        #self.landmark_list = object.landmark_
+        self.data_mode = OBJECT_MODE
+        self.pan_x = self.pan_y = 0
+        self.rotate_x = self.rotate_y = 0
+        self.edge_list = self.dataset.unpack_wireframe()
+
+
         self.landmark_list = object.landmark_list
         self.edge_list = object.dataset.edge_list
         self.calculate_resize()
+        if self.dataset.baseline is not None:
+            self.dataset.unpack_baseline()
+            self.align_object()
 
     def set_image(self,file_path):
         self.fullpath = file_path
@@ -1355,6 +1400,7 @@ class ObjectViewer3D(QGLWidget):
         #print("4:",datetime.datetime.now())
         self.calculate_resize()
         #print("5:",datetime.datetime.now())
+
         if self.dataset.baseline is not None:
             self.align_object()
         #self.updateGL()
@@ -1391,15 +1437,17 @@ class ObjectViewer3D(QGLWidget):
         centroid_size = obj_ops.get_centroid_size()
         min_x, max_x = min( [ lm[0] for lm in obj_ops.landmark_list] ), max( [ lm[0] for lm in obj_ops.landmark_list] )
         min_y, max_y = min( [ lm[1] for lm in obj_ops.landmark_list] ), max( [ lm[1] for lm in obj_ops.landmark_list] )
-        min_z, max_z = min( [ lm[2] for lm in obj_ops.landmark_list] ), max( [ lm[2] for lm in obj_ops.landmark_list] )
-        #obj_ops.rescale(5)
         width = max_x - min_x
         if width == 0:
             width = 1
         height = max_y - min_y
         if height == 0:
             height = 1
-        depth = max_z - min_z
+
+        if len(obj_ops.landmark_list[0])>2:
+            min_z, max_z = min( [ lm[2] for lm in obj_ops.landmark_list] ), max( [ lm[2] for lm in obj_ops.landmark_list] )
+            #obj_ops.rescale(5)
+            depth = max_z - min_z
         _3D_SCREEN_WIDTH = 5
         _3D_SCREEN_HEIGHT = 5
         scale = min( _3D_SCREEN_WIDTH / width, _3D_SCREEN_HEIGHT / height )
@@ -4365,20 +4413,26 @@ class DataExplorationDialog(QDialog):
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
         self.lblAnalysisName = QLabel("Analysis Name")
+        # label text align right
+        self.lblAnalysisName.setAlignment(Qt.AlignVCenter|Qt.AlignRight)
         self.edtAnalysisName = QLineEdit()
         self.lblSuperimposition = QLabel("Superimposition")
+        self.lblSuperimposition.setAlignment(Qt.AlignVCenter|Qt.AlignRight)
         self.edtSuperimposition = QLineEdit()
         self.edtSuperimposition.setEnabled(False)
         self.lblOrdination = QLabel("Ordination")
+        self.lblOrdination.setAlignment(Qt.AlignVCenter|Qt.AlignRight)
         self.edtOrdination = QLineEdit()
         self.edtOrdination.setEnabled(False)
         self.lblGroupBy = QLabel("Group by")
+        self.lblGroupBy.setAlignment(Qt.AlignVCenter|Qt.AlignRight)
         #self.edtGroupBy = QLineEdit()
         #self.edtGroupBy.setEnabled(False)
         self.comboGroupBy = QComboBox()
         self.comboGroupBy.setEnabled(False)
         self.comboGroupBy.currentIndexChanged.connect(self.comboGroupBy_changed)
         self.lblVisualization = QLabel("Visualization")
+        self.lblVisualization.setAlignment(Qt.AlignVCenter|Qt.AlignRight)
         self.comboVisualization = QComboBox()
         self.comboVisualization.addItem("Exploration")
         self.comboVisualization.addItem("Regression")
@@ -4412,6 +4466,7 @@ class DataExplorationDialog(QDialog):
         # chart options
         self.rb2DChartDim = QRadioButton("2D")
         self.rb3DChartDim = QRadioButton("3D")
+        self.rb3DChartDim.setEnabled(False)
         self.rb2DChartDim.setChecked(True)
         self.rb2DChartDim.toggled.connect(self.on_chart_dim_changed)
         self.rb3DChartDim.toggled.connect(self.on_chart_dim_changed)
@@ -4489,14 +4544,15 @@ class DataExplorationDialog(QDialog):
         self.cbxShapeGrid = QCheckBox()
         self.cbxShapeGrid.setText("Shape grid")
         self.cbxShapeGrid.setChecked(False)
-        self.cbxShapeGrid.stateChanged.connect(self.update_chart)
+        self.cbxShapeGrid.stateChanged.connect(self.cbxShapeGrid_state_changed)
         self.sgpWidget = ShapePreference(self)
         self.sgpWidget.set_title("")
         self.sgpWidget.hide_name()
         self.sgpWidget.hide_title()
         self.sgpWidget.hide_cbxShow()
         self.sgpWidget.set_color("gray")
-        self.sgpWidget.set_opacity(0.5)
+        self.sgpWidget.set_opacity(0.8)
+        self.sgpWidget.hide()
         self.cbxArrow = QCheckBox("Show arrow")
         self.cbxArrow.setChecked(True)
         self.cbxArrow.stateChanged.connect(self.arrow_preference_changed)
@@ -4714,6 +4770,7 @@ class DataExplorationDialog(QDialog):
         
         self.layout.addWidget(self.visualization_splitter)
         self.on_chart_dim_changed()
+        #self.cbxShapeGrid_state_changed()
         self.initialized = True
         
         #self.comboVisualizationMethod_changed()
@@ -4722,6 +4779,16 @@ class DataExplorationDialog(QDialog):
 
         #print("layout done")
         #self.resizeEvent(None)
+
+    def cbxShapeGrid_state_changed(self):
+        #print("cbxShape_state_changed")
+        if self.cbxShapeGrid.isChecked() == True:
+            self.sgpWidget.show()
+            self.update_chart()
+        else:
+            self.sgpWidget.hide()
+            self.update_chart()
+
 
     def save_plot(self):
         dialog = QFileDialog()
@@ -5062,12 +5129,6 @@ class DataExplorationDialog(QDialog):
         self.set_mode(new_mode)
         #print("after set_mode")
         
-    def cbxShape_state_changed(self):
-        return
-        if self.cbxShape.isChecked() == True:
-            self.view_widget.show()
-        else:
-            self.view_widget.hide()
 
     def calculate_fit(self):
         #self.scatter_data[key_name]['y_val']
@@ -5741,7 +5802,11 @@ class DataExplorationDialog(QDialog):
             for x_key in x_key_list:
                 for y_key in y_key_list:
                     key_name = x_key+"_"+y_key
-                    self.shape_grid[key_name] = { 'x_val': self.data_range[x_key], 'y_val': self.data_range[y_key], 'view': ObjectViewer3D(parent=None,transparent=True) }
+                    self.shape_grid[key_name] = { 'x_val': self.data_range[x_key], 'y_val': self.data_range[y_key]}
+                    if self.analysis.dataset.dimension == 3:
+                        self.shape_grid[key_name]['view'] = ObjectViewer3D(parent=None,transparent=True)
+                    else:
+                        self.shape_grid[key_name]['view'] = ObjectViewer2D(parent=None,transparent=True)
                     self.shape_grid[key_name]['view'].set_object_name(key_name)
 
         # remove empty group

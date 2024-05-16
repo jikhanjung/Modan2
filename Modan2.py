@@ -316,6 +316,12 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         #QApplication.processEvents()
 
         ds_ops = MdDatasetOps(dataset)
+        #if dataset.dimension == 2:
+        #    for obj in dataset.object_list:
+        #        if
+        #        obj.apply_scale()
+        #for obj_ops in ds_ops.object_list:
+        #    if 
         analysis_done = False
         #analysis_type = analysis_method
 

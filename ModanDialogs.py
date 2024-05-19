@@ -123,9 +123,11 @@ class ObjectViewer2D(QLabel):
         else:
             super(ObjectViewer2D, self).__init__(parent)
         self.transparent = transparent
+        self.parent = parent
         logger.info("object viewer 2d init")
         self.setMinimumSize(300,200)
 
+        self.debug = True
         self.landmark_size = 1
         self.landmark_color = "#0000FF"
         self.wireframe_thickness = 1
@@ -190,9 +192,9 @@ class ObjectViewer2D(QLabel):
         self.object_name = name
 
     def align_object(self):
-        print("2d align object")
+        #print("2d align object")
         if self.data_mode == OBJECT_MODE:
-            print("baseline",self.dataset.baseline_point_list)
+            #print("baseline",self.dataset.baseline_point_list)
             if self.obj_ops is None:
                 return
             self.obj_ops.align(self.dataset.baseline_point_list)
@@ -449,20 +451,32 @@ class ObjectViewer2D(QLabel):
             return
         if self.scale > 1:
             scale_delta *= math.floor(self.scale)
-        
-        prev_scale = self.scale
-        self.scale += scale_delta
-        self.scale = round(self.scale * 10) / 10
-        scale_proportion = self.scale / prev_scale
-        if self.orig_pixmap is not None:
-            self.curr_pixmap = self.orig_pixmap.scaled(int(self.orig_pixmap.width() * self.scale / self.image_canvas_ratio), int(self.orig_pixmap.height() * self.scale / self.image_canvas_ratio))
 
+        prev_scale = self.scale
+        new_scale = self.scale + scale_delta
+        scale_proportion = self.scale / prev_scale
+        
+        self.set_scale(new_scale)
+        
         self.pan_x = int( we.pos().x() - (we.pos().x() - self.pan_x) * scale_proportion )
         self.pan_y = int( we.pos().y() - (we.pos().y() - self.pan_y) * scale_proportion )
 
-        self.repaint()
-
         QLabel.wheelEvent(self, event)
+
+    def set_scale(self, scale):
+        #prev_scale = self.scale
+        #print("set scale", scale, self.parent, self.parent.sync_zoom)
+        self.scale = scale
+        self.scale = round(self.scale * 10) / 10
+        
+        if self.orig_pixmap is not None:
+            self.curr_pixmap = self.orig_pixmap.scaled(int(self.orig_pixmap.width() * self.scale / self.image_canvas_ratio), int(self.orig_pixmap.height() * self.scale / self.image_canvas_ratio))
+
+        if self.parent != None and callable(getattr(self.parent, 'sync_zoom', None)):
+            print("sync zoom", self, self.parent, self.scale)
+            self.parent.sync_zoom(self, self.scale)
+
+        self.repaint()
 
     def dragEnterEvent(self, event):
         if self.object_dialog is None:
@@ -620,6 +634,12 @@ class ObjectViewer2D(QLabel):
             painter.setPen(QPen(Qt.black, 1))
             painter.setFont(QFont('Helvetica', 10))
             painter.drawText(x + int(math.floor(float(bar_width) / 2.0 + 0.5)) - len(length_text) * 4, y - 5, length_text)
+        
+        if self.debug:
+            painter.setPen(QPen(Qt.black, 1))
+            painter.setFont(QFont('Helvetica', 10))
+            painter.drawText( 10, 20, f"Scale: {self.scale} image_to_canvas_ratio: {self.image_canvas_ratio}, pan: {self.pan_x}, {self.pan_y}" )
+
 
     def update_landmark_list(self):
         return
@@ -5586,17 +5606,31 @@ class DataExplorationDialog(QDialog):
 
 
     def sync_zoom(self, shape_view, dolly):
+        print("sync_zoom", shape_view, dolly)
+        is_2D = False
+        if isinstance(shape_view, ObjectViewer2D):
+            is_2D = True
+            
         if len(self.shape_view_list) > 0:
-            self.shape_view_dolly = self.shape_view_list[0].dolly
+            if is_2D:
+                self.shape_view_dolly = self.shape_view_list[0].scale                
+            else:
+                self.shape_view_dolly = self.shape_view_list[0].dolly
                         
         for sv in self.shape_view_list:
             if sv != shape_view:
-                sv.dolly = dolly
+                if is_2D:
+                    sv.set_scale(dolly)
+                else:
+                    sv.dolly = dolly
                 #sv.sync_zoom()
                 sv.update()
         for key in self.shape_grid.keys():
             if self.shape_grid[key]['view']:
-                self.shape_grid[key]['view'].dolly = dolly
+                if is_2D:
+                    self.shape_grid[key]['view'].set_scale(dolly)
+                else:
+                    self.shape_grid[key]['view'].dolly = dolly
                 self.shape_grid[key]['view'].update()
 
     def sync_temp_zoom(self, shape_view, temp_dolly):
@@ -5807,6 +5841,7 @@ class DataExplorationDialog(QDialog):
                         self.shape_grid[key_name]['view'] = ObjectViewer3D(parent=None,transparent=True)
                     else:
                         self.shape_grid[key_name]['view'] = ObjectViewer2D(parent=None,transparent=True)
+                        self.shape_grid[key_name]['view'].show_index = False
                     self.shape_grid[key_name]['view'].set_object_name(key_name)
 
         # remove empty group

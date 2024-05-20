@@ -217,6 +217,11 @@ class MdObject(Model):
         #new_object.save()
         return new_object
 
+    def get_name(self):
+        if self.object_name is None or self.object_name == '':
+            return str(self.id)
+        return self.object_name
+
     def __str__(self):
         return self.object_name or ''
     def __repr__(self):

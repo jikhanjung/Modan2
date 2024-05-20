@@ -2850,6 +2850,7 @@ class NTS:
 
 class Morphologika:
     def __init__(self, filename, datasetname, invertY = False):
+        self.dirname = os.path.dirname(filename) 
         self.filename = filename
         self.datasetname = datasetname
         self.dimension = 0
@@ -2926,6 +2927,7 @@ class Morphologika:
         self.landmark_data = objects
 
         self.edge_list = []
+        self.image_list = []
         self.polygon_list = []
         self.propertyname_list = []
         self.property_list_list = []
@@ -2959,6 +2961,11 @@ class Morphologika:
                 poly = [int(v) for v in re.split('\s+', line)]
                 poly.sort()
                 self.polygon_list.append(poly)
+
+        if 'images' in self.raw_data.keys():
+            for idx, line in enumerate(self.raw_data['images']):
+                object_name = self.object_name_list[idx]
+                self.object_images[object_name] = line
 
         self.edge_list.sort()
         self.polygon_list.sort()
@@ -8230,6 +8237,7 @@ class ExportDatasetDialog(QDialog):
                 label_values = "[labels]" + NEWLINE + "\t".join(self.dataset.propertyname_list) + NEWLINE
                 label_values += "[labelvalues]" + NEWLINE
                 rawpoint_values = "[rawpoints]" + NEWLINE
+                image_values = "[images]" + NEWLINE
                 name_values = "[names]" + NEWLINE
                 for mo in self.ds_ops.object_list:
                     label_values += '\t'.join(mo.property_list).strip() + NEWLINE
@@ -8253,7 +8261,21 @@ class ExportDatasetDialog(QDialog):
                     for polygon in self.dataset.polygon_list:
                         #print edge
                         result_str += '\t'.join([str(v) for v in polygon]) + NEWLINE
+                for obj_ops in self.ds_ops.object_list:
+                    obj = MdObject.get_by_id(obj_ops.id)
+                    if obj.has_image():
+                        img = obj.get_image()
+                        image_values += obj.get_name() + "." + img.get_file_path().split(".")[-1] + NEWLINE
+                        old_filepath = img.get_file_path()
+                        # get filepath from filename
+                        new_image_path = os.path.join(os.path.dirname(filename), obj.get_name() + "." + img.get_file_path().split(".")[-1])
+                        shutil.copyfile(old_filepath, new_image_path)
 
+                    else:
+                        image_values = "" + NEWLINE
+
+                result_str += image_values
+                print("filename:", filename)
                 # open text file
                 with open(filename, 'w') as f:
                     f.write(result_str)

@@ -143,6 +143,7 @@ class ObjectViewer2D(QLabel):
         self.orig_pixmap = None
         self.curr_pixmap = None
         self.scale = 1.0
+        self.prev_scale = 1.0
         self.fullpath = None
         self.pan_mode = MODE['NONE']
         self.edit_mode = MODE['NONE']
@@ -449,34 +450,44 @@ class ObjectViewer2D(QLabel):
             scale_delta = -0.1
         if self.scale <= 0.8 and scale_delta < 0:
             return
-        if self.scale > 1:
-            scale_delta *= math.floor(self.scale)
 
-        prev_scale = self.scale
-        new_scale = self.scale + scale_delta
-        scale_proportion = self.scale / prev_scale
-        
-        self.set_scale(new_scale)
-        
-        self.pan_x = int( we.pos().x() - (we.pos().x() - self.pan_x) * scale_proportion )
-        self.pan_y = int( we.pos().y() - (we.pos().y() - self.pan_y) * scale_proportion )
+        self.prev_scale = self.scale
+        #new_scale = self.scale + scale_delta
+        #scale_proportion = new_scale / prev_scale       
+        self.adjust_scale(scale_delta)
+        #new_scale = self.scale + scale_delta
+        scale_proportion = self.scale / self.prev_scale
+        #print("1 pan_x, pan_y", self.pan_x, self.pan_y, "we.pos().x(), we.pos().y()", we.pos().x(), we.pos().y(), "scale_prop", scale_proportion, "scale", self.scale, "prev_scale", self.prev_scale, "scale_delta", scale_delta)       
+
+        self.pan_x = round( we.pos().x() - (we.pos().x() - self.pan_x) * scale_proportion )
+        self.pan_y = round( we.pos().y() - (we.pos().y() - self.pan_y) * scale_proportion )
+        #print("2 pan_x, pan_y", self.pan_x, self.pan_y, "we.pos().x(), we.pos().y()", we.pos().x(), we.pos().y(), "scale_prop", scale_proportion, "scale", self.scale, "prev_scale", self.prev_scale, "scale_delta", scale_delta)       
 
         QLabel.wheelEvent(self, event)
+        self.repaint()
 
-    def set_scale(self, scale):
+    def adjust_scale(self, scale_delta):
+        #prev_scale = self.scale
         #prev_scale = self.scale
         #print("set scale", scale, self.parent, self.parent.sync_zoom)
-        self.scale = scale
+
+        if self.parent != None and callable(getattr(self.parent, 'sync_zoom', None)):
+            #print("sync zoom", self, self.parent, self.scale)
+            self.parent.sync_zoom(self, scale_delta)
+
+        if self.scale > 1:
+            scale_delta *= math.floor(self.scale)
+        self.scale += scale_delta
         self.scale = round(self.scale * 10) / 10
-        
+
         if self.orig_pixmap is not None:
             self.curr_pixmap = self.orig_pixmap.scaled(int(self.orig_pixmap.width() * self.scale / self.image_canvas_ratio), int(self.orig_pixmap.height() * self.scale / self.image_canvas_ratio))
 
-        if self.parent != None and callable(getattr(self.parent, 'sync_zoom', None)):
-            print("sync zoom", self, self.parent, self.scale)
-            self.parent.sync_zoom(self, self.scale)
 
         self.repaint()
+
+    def reset_pose(self):
+        return
 
     def dragEnterEvent(self, event):
         if self.object_dialog is None:
@@ -638,7 +649,7 @@ class ObjectViewer2D(QLabel):
         if self.debug:
             painter.setPen(QPen(Qt.black, 1))
             painter.setFont(QFont('Helvetica', 10))
-            painter.drawText( 10, 20, f"Scale: {self.scale} image_to_canvas_ratio: {self.image_canvas_ratio}, pan: {self.pan_x}, {self.pan_y}" )
+            painter.drawText( 10, 20, f"Scale: {self.scale} prev_scale: {self.prev_scale} image_to_canvas_ratio: {self.image_canvas_ratio}, pan: {self.pan_x}, {self.pan_y}" )
 
 
     def update_landmark_list(self):
@@ -5605,32 +5616,33 @@ class DataExplorationDialog(QDialog):
                 sv.update()
 
 
-    def sync_zoom(self, shape_view, dolly):
-        print("sync_zoom", shape_view, dolly)
+    def sync_zoom(self, shape_view, zoom_factor):
+        #print("sync_zoom", shape_view, zoom_factor)
         is_2D = False
         if isinstance(shape_view, ObjectViewer2D):
             is_2D = True
             
         if len(self.shape_view_list) > 0:
             if is_2D:
-                self.shape_view_dolly = self.shape_view_list[0].scale                
+                pass
+                #self.shape_view_dolly = self.shape_view_list[0].scale                
             else:
                 self.shape_view_dolly = self.shape_view_list[0].dolly
                         
         for sv in self.shape_view_list:
             if sv != shape_view:
                 if is_2D:
-                    sv.set_scale(dolly)
+                    sv.adjust_scale(zoom_factor)
                 else:
-                    sv.dolly = dolly
+                    sv.dolly = zoom_factor
                 #sv.sync_zoom()
                 sv.update()
         for key in self.shape_grid.keys():
             if self.shape_grid[key]['view']:
                 if is_2D:
-                    self.shape_grid[key]['view'].set_scale(dolly)
+                    self.shape_grid[key]['view'].adjust_scale(zoom_factor)
                 else:
-                    self.shape_grid[key]['view'].dolly = dolly
+                    self.shape_grid[key]['view'].dolly = zoom_factor
                 self.shape_grid[key]['view'].update()
 
     def sync_temp_zoom(self, shape_view, temp_dolly):

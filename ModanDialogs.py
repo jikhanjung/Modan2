@@ -127,7 +127,7 @@ class ObjectViewer2D(QLabel):
         logger.info("object viewer 2d init")
         self.setMinimumSize(300,200)
 
-        self.debug = True
+        self.debug = False
         self.landmark_size = 1
         self.landmark_color = "#0000FF"
         self.wireframe_thickness = 1
@@ -443,18 +443,18 @@ class ObjectViewer2D(QLabel):
         #if self.orig_pixmap is None:
         #    return
         we = QWheelEvent(event)
-        scale_delta = 0
+        scale_delta_ratio = 0
         if we.angleDelta().y() > 0:
-            scale_delta = 0.1
+            scale_delta_ratio = 0.1
         else:
-            scale_delta = -0.1
-        if self.scale <= 0.8 and scale_delta < 0:
+            scale_delta_ratio = -0.1
+        if self.scale <= 0.8 and scale_delta_ratio < 0:
             return
 
         self.prev_scale = self.scale
         #new_scale = self.scale + scale_delta
         #scale_proportion = new_scale / prev_scale       
-        self.adjust_scale(scale_delta)
+        self.adjust_scale(scale_delta_ratio)
         #new_scale = self.scale + scale_delta
         scale_proportion = self.scale / self.prev_scale
         #print("1 pan_x, pan_y", self.pan_x, self.pan_y, "we.pos().x(), we.pos().y()", we.pos().x(), we.pos().y(), "scale_prop", scale_proportion, "scale", self.scale, "prev_scale", self.prev_scale, "scale_delta", scale_delta)       
@@ -466,17 +466,20 @@ class ObjectViewer2D(QLabel):
         QLabel.wheelEvent(self, event)
         self.repaint()
 
-    def adjust_scale(self, scale_delta):
+    def adjust_scale(self, scale_delta_ratio):
         #prev_scale = self.scale
         #prev_scale = self.scale
         #print("set scale", scale, self.parent, self.parent.sync_zoom)
 
         if self.parent != None and callable(getattr(self.parent, 'sync_zoom', None)):
             #print("sync zoom", self, self.parent, self.scale)
-            self.parent.sync_zoom(self, scale_delta)
+            self.parent.sync_zoom(self, scale_delta_ratio)
 
         if self.scale > 1:
-            scale_delta *= math.floor(self.scale)
+            scale_delta = math.floor(self.scale) * scale_delta_ratio
+        else:
+            scale_delta = scale_delta_ratio
+
         self.scale += scale_delta
         self.scale = round(self.scale * 10) / 10
 
@@ -487,7 +490,7 @@ class ObjectViewer2D(QLabel):
         self.repaint()
 
     def reset_pose(self):
-        return
+        self.calculate_resize()
 
     def dragEnterEvent(self, event):
         if self.object_dialog is None:
@@ -4897,8 +4900,11 @@ class DataExplorationDialog(QDialog):
                 #x_pixel, y_pixel = map_coordinates_to_pixels(x, y, canvas_width, canvas_height)
 
                 # Draw the shape image onto the canvas
-                view.updateGL()
-                buffer = QPixmap(view.grabFrameBuffer(True))
+                view.update()
+                if isinstance(view,ObjectViewer3D):
+                    buffer = QPixmap(view.grabFrameBuffer(True))
+                else:
+                    buffer = QPixmap(view.grab())
                 #print(buffer)
                 painter.drawPixmap(x_pos-int(w/2), y_pos-int(h/2), buffer)
 
@@ -5100,7 +5106,7 @@ class DataExplorationDialog(QDialog):
         ])
         for shape_view in self.shape_view_list:
             shape_view.reset_pose()
-            shape_view.updateGL()
+            shape_view.update()
             
         for key in self.shape_grid.keys():
             view = self.shape_grid[key]['view']

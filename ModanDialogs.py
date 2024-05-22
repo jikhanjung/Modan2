@@ -2859,6 +2859,7 @@ class Morphologika:
         self.landmark_str_list = []
         self.edge_list = []
         self.polygon_list = []
+        self.ppmm_list = []
         self.propertyname_list = []
         self.property_list_list = []
         self.object_comment = {}
@@ -2966,6 +2967,11 @@ class Morphologika:
             for idx, line in enumerate(self.raw_data['images']):
                 object_name = self.object_name_list[idx]
                 self.object_images[object_name] = line
+
+        if 'pixelspermm' in self.raw_data.keys():
+            for idx, line in enumerate(self.raw_data['pixelspermm']):
+                #object_name = self.object_name_list[idx]
+                self.ppmm_list.append(line)
 
         self.edge_list.sort()
         self.polygon_list.sort()
@@ -8238,6 +8244,7 @@ class ExportDatasetDialog(QDialog):
                 label_values += "[labelvalues]" + NEWLINE
                 rawpoint_values = "[rawpoints]" + NEWLINE
                 image_values = "[images]" + NEWLINE
+                ppmm_values = "[pixelspermm]" + NEWLINE
                 name_values = "[names]" + NEWLINE
                 for mo in self.ds_ops.object_list:
                     label_values += '\t'.join(mo.property_list).strip() + NEWLINE
@@ -8273,9 +8280,14 @@ class ExportDatasetDialog(QDialog):
 
                     else:
                         image_values = "" + NEWLINE
+                    if obj.pixels_per_mm is not None and obj.pixels_per_mm > 0:
+                        ppmm_values += str(obj.pixels_per_mm) + NEWLINE
+                    else:
+                        ppmm_values = "" + NEWLINE
 
                 result_str += image_values
-                print("filename:", filename)
+                result_str += ppmm_values
+                #print("filename:", filename)
                 # open text file
                 with open(filename, 'w') as f:
                     f.write(result_str)
@@ -8504,6 +8516,12 @@ class ImportDatasetDialog(QDialog):
         for i in range(import_data.nobjects):
             object = MdObject()
             object.object_name = import_data.object_name_list[i]
+            # see if import_data.ppmm_list exist
+            if hasattr(import_data, 'ppmm_list'):
+                if mu.is_numeric(import_data.ppmm_list[i]):
+                    object.pixels_per_mm = float(import_data.ppmm_list[i])
+                else:
+                    object.pixels_per_mm = None
             #print("object:", object.object_name)
             object.dataset = dataset
             object.landmark_str = ""
@@ -8521,6 +8539,7 @@ class ImportDatasetDialog(QDialog):
                 object.pack_property()
             if object.object_name in import_data.object_comment.keys():
                 object.object_desc = import_data.object_comment[import_data.object_name_list[i]]
+            
 
             object.save()
             if object.object_name in import_data.object_images.keys():

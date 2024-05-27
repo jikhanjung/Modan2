@@ -183,7 +183,26 @@ class ObjectViewer2D(QLabel):
         self.setMouseTracking(True)
         self.set_mode(MODE['EDIT_LANDMARK'])
 
-    def set_shape_preference(self, pref):
+    def set_shape_preference(self, object_preference):
+        self.shape_preference = object_preference
+        if self.obj_ops is not None :
+            obj = self.obj_ops
+            if 'visible' in object_preference:
+                obj.visible = object_preference['visible']
+            if 'show_landmark' in object_preference:
+                obj.show_landmark = object_preference['show_landmark']
+            if 'show_wireframe' in object_preference:
+                obj.show_wireframe = object_preference['show_wireframe']
+            if 'show_polygon' in object_preference:
+                obj.show_polygon = object_preference['show_polygon']
+            if 'opacity' in object_preference:
+                obj.opacity = object_preference['opacity']
+            if 'polygon_color' in object_preference:
+                obj.polygon_color = object_preference['polygon_color']
+            if 'edge_color' in object_preference:
+                obj.edge_color = object_preference['edge_color']
+            if 'landmark_color' in object_preference:
+                obj.landmark_color = object_preference['landmark_color']
         return
 
     def apply_rotation(self, angle):
@@ -466,12 +485,12 @@ class ObjectViewer2D(QLabel):
         QLabel.wheelEvent(self, event)
         self.repaint()
 
-    def adjust_scale(self, scale_delta_ratio):
+    def adjust_scale(self, scale_delta_ratio, recurse = True):
         #prev_scale = self.scale
         #prev_scale = self.scale
         #print("set scale", scale, self.parent, self.parent.sync_zoom)
 
-        if self.parent != None and callable(getattr(self.parent, 'sync_zoom', None)):
+        if self.parent != None and callable(getattr(self.parent, 'sync_zoom', None)) and recurse == True:
             #print("sync zoom", self, self.parent, self.scale)
             self.parent.sync_zoom(self, scale_delta_ratio)
 
@@ -534,7 +553,12 @@ class ObjectViewer2D(QLabel):
             #print("pan_x", self.pan_x, "pan_y", self.pan_y, "temp_pan_x", self.temp_pan_x, "temp_pan_y", self.temp_pan_y)
 
         if self.show_wireframe == True:
-            color = QColor(self.wireframe_color)
+
+            if self.obj_ops.edge_color:
+                #print("edge color", self.obj_ops.edge_color)
+                color = QColor(self.obj_ops.edge_color)
+            else:
+                color = QColor(self.wireframe_color)
             #print("color:", color, "size", self.landmark_size, "radius", radius)
             painter.setPen(QPen(color, int(self.wireframe_thickness)+1))
             painter.setBrush(QBrush(color))                
@@ -586,7 +610,11 @@ class ObjectViewer2D(QLabel):
                 #painter.setPen(QPen(as_qt_color(COLOR['NORMAL_SHAPE']), 2))
                 #painter.setBrush(QBrush(as_qt_color(COLOR['NORMAL_SHAPE'])))
                 #print("landmark_color", self.landmark_color)
-                color = QColor(self.landmark_color)
+                if self.obj_ops.landmark_color:
+                    #print("edge color", self.obj_ops.edge_color)
+                    color = QColor(self.obj_ops.landmark_color)
+                else:
+                    color = QColor(self.landmark_color)
                 #print("color:", color, "size", self.landmark_size, "radius", radius)
                 painter.setPen(QPen(color, 2))
                 painter.setBrush(QBrush(color))                
@@ -696,7 +724,7 @@ class ObjectViewer2D(QLabel):
             self.pan_x = int( -min_x * self.scale + (self.width() - width * self.scale) / 2.0 )
             self.pan_y = int( -min_y * self.scale + (self.height() - height * self.scale) / 2.0 )
             #print("scale:", self.scale, "pan_x:", self.pan_x, "pan_y:", self.pan_y, "image_canvas_ratio:", self.image_canvas_ratio)
-        self.repaint()
+        #self.repaint()
 
     def resizeEvent(self, event):
         self.calculate_resize()
@@ -4661,8 +4689,8 @@ class DataExplorationDialog(QDialog):
         self.plot_preference_button.setIconSize(QSize(32, 32))
         self.plot_preference_button.clicked.connect(self.show_plot_preference)
         self.plot_preference_button.setAutoDefault(False)
-        self.btn_save_plot = QPushButton("Save")
-        self.btn_save_plot.clicked.connect(self.save_plot)
+        self.btn_save_plot = QPushButton("Export")
+        self.btn_save_plot.clicked.connect(self.export_chart)
 
 
         self.toolbar_widget = QWidget()
@@ -4837,7 +4865,7 @@ class DataExplorationDialog(QDialog):
             self.update_chart()
 
 
-    def save_plot(self):
+    def export_chart(self):
         dialog = QFileDialog()
         dialog.setFileMode(QFileDialog.AnyFile)
         dialog.setAcceptMode(QFileDialog.AcceptSave)
@@ -5316,6 +5344,7 @@ class DataExplorationDialog(QDialog):
         for idx, keyname in enumerate(keyname_list):
             if self.analysis.dimension == 2:
                 shape_view = ObjectViewer2D(self)
+                shape_view.show_index = False
             else:
                 shape_view = ObjectViewer3D(self)
             self.shape_view_list.append(shape_view)
@@ -5651,7 +5680,7 @@ class DataExplorationDialog(QDialog):
         for sv in self.shape_view_list:
             if sv != shape_view:
                 if is_2D:
-                    sv.adjust_scale(zoom_factor)
+                    sv.adjust_scale(zoom_factor, recurse=False)
                 else:
                     sv.dolly = zoom_factor
                 #sv.sync_zoom()

@@ -411,7 +411,9 @@ class ObjectViewer2D(QLabel):
                     self.wire_start_index = -1
                     self.wire_hover_index = -1
                 elif self.selected_edge_index >= 0:
+                    #print("before delete edge",self.selected_edge_index, self.edge_list)
                     self.delete_edge(self.selected_edge_index)                    
+                    #print("after delete edge",self.selected_edge_index, self.edge_list)
                     self.selected_edge_index = -1
             elif self.edit_mode == MODE['READY_MOVE_LANDMARK']:
                 if self.selected_landmark_index >= 0:
@@ -456,6 +458,7 @@ class ObjectViewer2D(QLabel):
             self.calibration_from_img_x = -1
             self.calibration_from_img_y = -1
 
+        self.repaint()
         return super().mouseReleaseEvent(ev)    
 
     def wheelEvent(self, event):
@@ -533,13 +536,14 @@ class ObjectViewer2D(QLabel):
         self.calculate_resize()
         if self.object_dialog is not None:
             self.object_dialog.set_object_name(Path(file_path).stem)
-            self.object_dialog.btnLandmark_clicked()
+            self.object_dialog.btnLandmark_clicked()    
             self.object_dialog.btnLandmark.setDown(True)
             self.object_dialog.btnLandmark.setEnabled(True)
 
 
     def paintEvent(self, event):
         # fill background with dark gray
+        #print("paint event edge", self.edge_list)
 
         painter = QPainter(self)
         if self.transparent == False:
@@ -807,14 +811,14 @@ class ObjectViewer2D(QLabel):
         dataset.edge_list.append([wire_start_index, wire_end_index])
         dataset.pack_wireframe()
         dataset.save()
-        self.repaint()
+        #self.repaint()
         
     def delete_edge(self, edge_index):
         dataset = self.object.dataset
         dataset.edge_list.pop(edge_index)
         dataset.pack_wireframe()
         dataset.save()
-        self.repaint()
+        #self.repaint()
 
 class TransparentGLWidget(QGLWidget):
     def __init__(self, parent=None):
@@ -7757,6 +7761,7 @@ class DatasetAnalysisDialog(QDialog):
             column_header_list.append(axis_label[i%dimension] + str(int(i/dimension)+1))
         #column_header_list.append("CSize")
 
+        '''
         self.shapes_data.setHorizontalHeaderLabels(column_header_list)
         if self.rb2DChartDim.isChecked():
             dim = 2
@@ -7811,6 +7816,7 @@ class DatasetAnalysisDialog(QDialog):
             self.shapes_data.setItem(i, 0, QTableWidgetItem(row_header_list[i]))
             for j, val in enumerate(shape):
                 self.shapes_data.setItem(i, j+1, QTableWidgetItem(str(int(val*10000)/10000.0)))
+        '''
 
 
     def on_canvas_button_press(self, evt):

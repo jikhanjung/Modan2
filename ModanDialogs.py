@@ -65,7 +65,8 @@ MODE_COMPARISON2 = 5
 
 BASE_LANDMARK_RADIUS = 2
 DISTANCE_THRESHOLD = BASE_LANDMARK_RADIUS * 3
-CENTROID_SIZE_INDEX = 10
+CENTROID_SIZE_VALUE = 99
+CENTROID_SIZE_TEXT = "CSize"
 
 # glview modes
 OBJECT_MODE = 1
@@ -5250,7 +5251,8 @@ class DataExplorationDialog(QDialog):
         #self.comboGroupBy.hide()
         #self.lblGroupBy.hide()
         #self.show_analysis_result()
-        self.comboAxis1.setCurrentIndex(CENTROID_SIZE_INDEX)
+        
+        self.comboAxis1.setCurrentText(CENTROID_SIZE_TEXT)
         self.comboAxis2.setCurrentIndex(0)
         self.update_chart()
 
@@ -5260,12 +5262,12 @@ class DataExplorationDialog(QDialog):
 
         self.ignore_change = True
         if mode == MODE_GROWTH_TRAJECTORY:
-            self.comboAxis1.setCurrentIndex(CENTROID_SIZE_INDEX)
+            self.comboAxis1.setCurrentText(CENTROID_SIZE_TEXT)
             self.comboAxis2.setCurrentIndex(0)
             self.comboAxis3.setCurrentIndex(1)
         else:
             #elif mode == MODE_CUSTOM:
-            self.comboAxis1.setCurrentIndex(0)
+            self.comboAxis1.setCurrentIndex(1)
             self.comboAxis2.setCurrentIndex(1)
             self.comboAxis3.setCurrentIndex(2)
         #print("inside set_mode 1")
@@ -5471,8 +5473,8 @@ class DataExplorationDialog(QDialog):
         for idx, keyname in enumerate(keyname_list):
             #shape_view = ObjectViewer3D(self)
             #for idx, shape_view in enumerate(self.shape_view_list):
-            axis1 = self.comboAxis1.currentIndex()
-            axis2 = self.comboAxis2.currentIndex()
+            axis1 = self.comboAxis1.currentData()
+            axis2 = self.comboAxis2.currentData()
 
             x_average = self.average_shape[keyname]['x_val']
             y_average = self.average_shape[keyname]['y_val']
@@ -5496,8 +5498,8 @@ class DataExplorationDialog(QDialog):
             #shape_view.clear_object()
 
             
-            axis1 = self.comboAxis1.currentIndex()
-            axis2 = self.comboAxis2.currentIndex()
+            axis1 = self.comboAxis1.currentData()
+            axis2 = self.comboAxis2.currentData()
             flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
             flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
             shape_to_visualize = np.zeros((1,len(self.analysis_result_list[0])))
@@ -5514,7 +5516,7 @@ class DataExplorationDialog(QDialog):
             #y_value = flip_axis2 * y_value
 
 
-            if axis1 != CENTROID_SIZE_INDEX:
+            if axis1 != CENTROID_SIZE_VALUE:
                 shape_to_visualize[0][axis1] = x_value
 
             shape_to_visualize[0][axis2] = flip_axis2 * y_value
@@ -5802,6 +5804,22 @@ class DataExplorationDialog(QDialog):
         else:
             self.comboGroupBy.setCurrentIndex(0)
         #print("going to set mode")
+
+        obj = self.analysis.dataset.object_list[0]
+        lm_list = obj.get_landmark_list()
+        dim = self.analysis.dataset.dimension
+        analysis_dim = len(lm_list)*dim
+
+        self.comboAxis1.clear()
+        self.comboAxis2.clear()
+        self.comboAxis3.clear()
+
+        self.comboAxis1.addItem(CENTROID_SIZE_TEXT,CENTROID_SIZE_VALUE)
+        for i in range(analysis_dim):
+            self.comboAxis1.addItem("PC"+str(i+1),i)
+            self.comboAxis2.addItem("PC"+str(i+1),i)
+            self.comboAxis3.addItem("PC"+str(i+1),i)
+
         self.set_mode(MODE_EXPLORATION)
         self.ignore_change = False
 
@@ -5811,9 +5829,9 @@ class DataExplorationDialog(QDialog):
         show_convex_hull = self.cbxConvexHull.isChecked()
         show_confidence_ellipse = self.cbxConfidenceEllipse.isChecked()
 
-        axis1 = self.comboAxis1.currentIndex()
-        axis2 = self.comboAxis2.currentIndex()
-        axis3 = self.comboAxis3.currentIndex()
+        axis1 = self.comboAxis1.currentData()
+        axis2 = self.comboAxis2.currentData()
+        axis3 = self.comboAxis3.currentData()
         flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
         flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
         flip_axis3 = -1.0 if self.cbxFlipAxis3.isChecked() == True else 1.0
@@ -5873,7 +5891,7 @@ class DataExplorationDialog(QDialog):
                 self.scatter_data[key_name] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'property':key_name, 'symbol':'', 'color':'', 'size':scatter_size}
                 self.average_shape[key_name] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'property':key_name, 'symbol':'', 'color':'', 'size':scatter_size}
 
-            if axis1 == CENTROID_SIZE_INDEX:
+            if axis1 == CENTROID_SIZE_VALUE:
                 #print("obj:", obj)
                 self.scatter_data[key_name]['x_val'].append(obj['csize'])
             else:
@@ -6337,9 +6355,9 @@ class DataExplorationDialog(QDialog):
         shape_to_visualize = np.zeros((1,len(self.analysis_result_list[0])))
         x_value = flip_axis1 * x_val
         y_value = flip_axis2 * y_val
-        if axis1 != CENTROID_SIZE_INDEX:
+        if axis1 != CENTROID_SIZE_VALUE:
             shape_to_visualize[0][axis1] = x_value
-        if axis2 != CENTROID_SIZE_INDEX:
+        if axis2 != CENTROID_SIZE_VALUE:
             shape_to_visualize[0][axis2] = y_value
         unrotated_shape = self.unrotate_shape(shape_to_visualize)
         #print("0-4:",datetime.datetime.now())
@@ -6357,7 +6375,7 @@ class DataExplorationDialog(QDialog):
         y_value = flip_axis2 * y_val
 
         shape_to_visualize = np.zeros((1,len(self.analysis_result_list[0])))
-        if axis1 != CENTROID_SIZE_INDEX:
+        if axis1 != CENTROID_SIZE_VALUE:
             shape_to_visualize[0][axis1] = x_value
         shape_to_visualize[0][axis2] = y_value
         unrotated_shape = self.unrotate_shape(shape_to_visualize)
@@ -8552,7 +8570,7 @@ class ImportDatasetDialog(QDialog):
             object = MdObject()
             object.object_name = import_data.object_name_list[i]
             # see if import_data.ppmm_list exist
-            if hasattr(import_data, 'ppmm_list'):
+            if hasattr(import_data, 'ppmm_list') and len(import_data.ppmm_list) > 0:
                 if mu.is_numeric(import_data.ppmm_list[i]):
                     object.pixels_per_mm = float(import_data.ppmm_list[i])
                 else:

@@ -197,7 +197,7 @@ class ModanMainWindow(QMainWindow):
 
         # backup database file to backup directory
         backup_path = os.path.join( mu.DB_BACKUP_DIRECTORY, DATABASE_FILENAME + '.' + date_str )
-        if not os.path.exists(backup_path):
+        if not os.path.exists(backup_path) and os.path.exists(database_path):
             shutil.copy2(database_path, backup_path)
             logger.info("backup database to %s", backup_path)
             # read backup directory and delete old backups

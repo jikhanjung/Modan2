@@ -64,7 +64,7 @@ class MdPrincipalComponent:
         self.rotated_matrix = numpy.dot(np_data, v)
         self.rotation_matrix = v
         self.loading = v
-        return
+        return True
 
 
 class MdCanonicalVariate:
@@ -188,7 +188,11 @@ class MdCanonicalVariate:
         w = numpy.matrix(within_cov)
         b = numpy.matrix(between_cov)
 
-        wi = w.getI()
+        try:
+            wi = w.getI()
+        except numpy.linalg.linalg.LinAlgError as e:
+            #print "Singular matrix: ", e
+            return False
         #print "wi", wi
         x = numpy.dot(wi, b)
 
@@ -220,7 +224,7 @@ class MdCanonicalVariate:
         self.rotation_matrix = rotation_matrix
         self.rotated_matrix = numpy.dot(np_data, rotation_matrix)
         self.loading = rotation_matrix
-        return
+        return True
 
 
 def PerformCVA(dataset_ops, classifier_index):
@@ -244,7 +248,9 @@ def PerformCVA(dataset_ops, classifier_index):
 
     cva.SetData(datamatrix)
     cva.SetCategory(category_list)
-    cva.Analyze()
+    analysis_return = cva.Analyze()
+    if analysis_return == False:
+        return None
 
     number_of_axes = min(cva.nObservation, cva.nVariable)
     cva_done = True
@@ -262,7 +268,9 @@ def PerformPCA(dataset_ops):
         datamatrix.append(datum)
 
     pca.SetData(datamatrix)
-    pca.Analyze()
+    analysis_result = pca.Analyze()
+    if analysis_result == False:
+        return None
 
     number_of_axes = min(pca.nObservation, pca.nVariable)
     pca_done = True

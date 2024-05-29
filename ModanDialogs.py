@@ -1632,7 +1632,7 @@ class ObjectViewer3D(QGLWidget):
         # pan, rotate, dolly
         if self.data_mode == OBJECT_MODE:
             #print("normal shape", COLOR['NORMAL_SHAPE'])
-            if self.obj_ops.landmark_color is not None:
+            if self.obj_ops and hasattr(self.obj_ops, 'landmark_color') and self.obj_ops.landmark_color is not None:
                 object_color = as_gl_color(self.obj_ops.landmark_color)
             else:
                 object_color = as_gl_color(self.landmark_color) #COLOR['NORMAL_SHAPE']

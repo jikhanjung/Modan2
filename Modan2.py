@@ -332,8 +332,19 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             mu.show_error_message(error_message)
             return
         #self.show_object_shape()
+
         cva_analysis_result = PerformCVA(ds_ops, cva_group_by)
+        if cva_analysis_result is None:
+            error_message = "CVA analysis failed"
+            logger.error(error_message)
+            mu.show_error_message(error_message)
+            return
         pca_analysis_result = PerformPCA(ds_ops)
+        if pca_analysis_result is None:
+            error_message = "PCA analysis failed"
+            logger.error(error_message)
+            mu.show_error_message(error_message)
+            return
 
         manova_analysis_result = PerformPCA(ds_ops)
 

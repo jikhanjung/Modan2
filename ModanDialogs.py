@@ -4122,9 +4122,13 @@ class NewAnalysisDialog(QDialog):
         self.comboCvaGroupBy = QComboBox(self)
         self.lblManovaGroupBy = QLabel("MANOVA Group by", self)
         self.comboManovaGroupBy = QComboBox(self)
-        for property in dataset.get_propertyname_list():
-            self.comboCvaGroupBy.addItem(property)
-            self.comboManovaGroupBy.addItem(property)
+
+        valid_property_index_list = self.dataset.get_valid_property_index_list()
+        propertyname_list = self.dataset.get_propertyname_list()
+        for idx in valid_property_index_list:
+            property = propertyname_list[idx]
+            self.comboCvaGroupBy.addItem(property, idx)
+            self.comboManovaGroupBy.addItem(property, idx)
 
         self.ignore_change = False
         #self.comboOrdination_changed()
@@ -4546,6 +4550,9 @@ class DataExplorationDialog(QDialog):
         # chart options
         self.rb2DChartDim = QRadioButton("2D")
         self.rb3DChartDim = QRadioButton("3D")
+        self.grpRadioButton1 = QButtonGroup()
+        self.grpRadioButton1.addButton(self.rb2DChartDim)
+        self.grpRadioButton1.addButton(self.rb3DChartDim)
         self.rb3DChartDim.setEnabled(False)
         self.rb2DChartDim.setChecked(True)
         self.rb2DChartDim.toggled.connect(self.on_chart_dim_changed)
@@ -4587,6 +4594,15 @@ class DataExplorationDialog(QDialog):
         self.cbxRegression.setText("Regression")
         self.cbxRegression.setChecked(False)
         self.cbxRegression.stateChanged.connect(self.update_chart)
+        self.comboRegressionBy = QComboBox()
+        self.comboRegressionBy.addItem("By group")
+        self.comboRegressionBy.addItem("All")
+        self.comboRegressionBy.setCurrentIndex(0)
+        self.comboRegressionBy.currentIndexChanged.connect(self.update_chart)
+        self.cbxExtrapolate = QCheckBox("Extrapolate")
+        self.cbxExtrapolate.setChecked(True)
+        self.cbxExtrapolate.stateChanged.connect(self.update_chart)
+
         self.cbxAnnotation = QCheckBox()
         self.cbxAnnotation.setText("Annotation")
         self.cbxAnnotation.stateChanged.connect(self.update_chart)
@@ -4663,6 +4679,8 @@ class DataExplorationDialog(QDialog):
         self.axis_option_layout.addWidget(self.comboAxis3,1)
         self.axis_option_layout.addWidget(self.cbxFlipAxis3,0)
         self.axis_option_layout.addWidget(self.cbxRegression,1)
+        self.axis_option_layout.addWidget(self.comboRegressionBy,1)
+        self.axis_option_layout.addWidget(self.cbxExtrapolate,1)
         self.axis_option_layout.addWidget(self.lblDegree,0)
         self.axis_option_layout.addWidget(self.sbxDegree,1)
         self.axis_option_layout.addWidget(self.cbxAnnotation,1)
@@ -5212,39 +5230,6 @@ class DataExplorationDialog(QDialog):
         self.set_mode(new_mode)
         #print("after set_mode")
         
-
-    def calculate_fit(self):
-        #self.scatter_data[key_name]['y_val']
-        key_list = self.scatter_data.keys()
-        self.curve_list = []
-        #data_range = self.data_range
-        degree_text = self.sbxDegree.text()
-        if degree_text == "":
-            return
-
-        degree = int(degree_text)
-        for key in key_list:
-            x_vals = np.array(self.scatter_data[key]['x_val'])
-            y_vals = np.array(self.scatter_data[key]['y_val'])
-
-            model = np.polyfit( x_vals, y_vals, degree)
-            #model_list.append(model)
-            r_squared = self.calculate_r_squared(model, x_vals, y_vals)
-            #print(key, model, r_squared)
-            size_range = np.linspace(min(self.scatter_data[key]['x_val']), max(self.scatter_data[key]['x_val']), 100)
-            size_range2 = np.linspace(self.data_range['x_min'], self.data_range['x_max'], 100)
-            curve = np.polyval(model, size_range)
-            curve2 = np.polyval(model, size_range2)
-            self.curve_list.append( { 'key': key, 'model': model, 'size_range': size_range, 'size_range2': size_range2, 'curve': curve, 'curve2': curve2, 'r_squared': r_squared, 'color': self.scatter_data[key]['color'] } )
-        #self.show_analysis_result()
-
-    def calculate_r_squared(self, model, x_vals, y_vals):
-        y_mean = np.mean(y_vals)
-        ss_total = np.sum((y_vals - y_mean)**2)
-        ss_res = np.sum((y_vals - np.polyval(model, x_vals))**2)
-        r_squared = 1 - (ss_res/ss_total)
-        return r_squared    
-
     def set_growth_trajectory_mode(self):
         self.mode = MODE_GROWTH_TRAJECTORY
         #self.comboGroupBy.setEnabled(False)
@@ -5788,10 +5773,13 @@ class DataExplorationDialog(QDialog):
         #self.edtGroupBy.setText(analysis.group_by)
         self.comboGroupBy.clear()
         self.comboGroupBy.addItem("Select property")
-        for property in analysis.dataset.get_propertyname_list():
-            self.comboGroupBy.addItem(property)
-        #print("done setting group by")
-        
+
+        valid_property_index_list = analysis.dataset.get_valid_property_index_list()
+        propertyname_list = analysis.dataset.get_propertyname_list()
+        for idx in valid_property_index_list:
+            property = propertyname_list[idx]
+            self.comboGroupBy.addItem(property, idx)
+
         if analysis_method == 'PCA':
             #self.lblGroupBy.hide()
             self.comboGroupBy.setEnabled(True)
@@ -5828,6 +5816,11 @@ class DataExplorationDialog(QDialog):
         show_shape_grid = self.cbxShapeGrid.isChecked()
         show_convex_hull = self.cbxConvexHull.isChecked()
         show_confidence_ellipse = self.cbxConfidenceEllipse.isChecked()
+        regression_by = self.comboRegressionBy.currentText()
+        show_regression = self.cbxRegression.isChecked()
+
+        #regression_by_group = self.rbByGroup.isChecked()
+        #regression_all_at_once = self.rbAllAtOnce.isChecked()
 
         axis1 = self.comboAxis1.currentData()
         axis2 = self.comboAxis2.currentData()
@@ -5855,8 +5848,9 @@ class DataExplorationDialog(QDialog):
         self.scatter_data = {}
         self.scatter_result = {}
         self.average_shape = {}
+        self.all_scatter_data = { 'x_val':[], 'y_val':[], 'z_val':[] }
         #self.shape_grid = {}
-        self.data_range = { 'x_min':99999, 'x_max':-99999, 'y_min':99999, 'y_max':-99999, 'z_min':99999, 'z_max':-99999}
+        self.data_range = { 'x_min':99999, 'x_max':-99999, 'y_min':99999, 'y_max':-99999, 'z_min':99999, 'z_max':-99999, 'x_sum': 0, 'y_sum': 0, 'z_sum': 0, 'x_avg': 0, 'y_avg': 0, 'z_avg': 0}
         SCATTER_SMALL_SIZE = 30
         SCATTER_MEDIUM_SIZE = 50
         SCATTER_LARGE_SIZE = 60
@@ -5894,25 +5888,32 @@ class DataExplorationDialog(QDialog):
             if axis1 == CENTROID_SIZE_VALUE:
                 #print("obj:", obj)
                 self.scatter_data[key_name]['x_val'].append(obj['csize'])
+                self.all_scatter_data['x_val'].append(obj['csize'])
             else:
                 self.scatter_data[key_name]['x_val'].append(flip_axis1 * self.analysis_result_list[idx][axis1])   
+                self.all_scatter_data['x_val'].append(flip_axis1 * self.analysis_result_list[idx][axis1])
             self.scatter_data[key_name]['y_val'].append(flip_axis2 * self.analysis_result_list[idx][axis2])
+            self.all_scatter_data['y_val'].append(flip_axis2 * self.analysis_result_list[idx][axis2])
             self.scatter_data[key_name]['z_val'].append(flip_axis3 * self.analysis_result_list[idx][axis3])
+            self.all_scatter_data['z_val'].append(flip_axis3 * self.analysis_result_list[idx][axis3])
             #self.scatter_data[key_name]['z_val'].append(analysis_result_list[idx][axis3])
             self.scatter_data[key_name]['data'].append(obj)
             #self.scatter_data[key_name]['hoverinfo'].append(obj['object_name'])
             self.data_range['x_max'] = max(self.data_range['x_max'], self.scatter_data[key_name]['x_val'][-1])
             self.data_range['x_min'] = min(self.data_range['x_min'], self.scatter_data[key_name]['x_val'][-1])
+            self.data_range['x_sum'] += self.scatter_data[key_name]['x_val'][-1]
             self.data_range['y_max'] = max(self.data_range['y_max'], self.scatter_data[key_name]['y_val'][-1])
             self.data_range['y_min'] = min(self.data_range['y_min'], self.scatter_data[key_name]['y_val'][-1])
+            self.data_range['y_sum'] += self.scatter_data[key_name]['y_val'][-1]
             self.data_range['z_max'] = max(self.data_range['z_max'], self.scatter_data[key_name]['z_val'][-1])
             self.data_range['z_min'] = min(self.data_range['z_min'], self.scatter_data[key_name]['z_val'][-1])
+            self.data_range['z_sum'] += self.scatter_data[key_name]['z_val'][-1]
         
         #self.data_range['x_min'] = min(self.scatter_data['__default__']['x_val'])
 
         if show_shape_grid:
-            self.data_range['x_avg'] = 0
-            self.data_range['y_avg'] = 0
+            self.data_range['x_avg'] = self.data_range['x_sum'] / len(self.object_info_list)
+            self.data_range['y_avg'] = self.data_range['y_sum'] / len(self.object_info_list)
             x_key_list = [ 'x_min', 'x_avg', 'x_max']
             y_key_list = [ 'y_min', 'y_avg', 'y_max']
             for x_key in x_key_list:
@@ -5966,6 +5967,53 @@ class DataExplorationDialog(QDialog):
                 self.scatter_data[key_name]['symbol'] = symbol_candidate[sc_idx % len(symbol_candidate)]
                 sc_idx += 1
 
+    def calculate_fit(self):
+        #self.scatter_data[key_name]['y_val']
+        show_regression = self.cbxRegression.isChecked()
+        if show_regression == False:
+            return
+        regression_by = self.comboRegressionBy.currentText()
+
+        key_list = self.scatter_data.keys()
+        self.curve_list = []
+        #data_range = self.data_range
+        degree_text = self.sbxDegree.text()
+        if degree_text == "":
+            return
+
+        degree = int(degree_text)
+        if regression_by == "By group":
+            for key in key_list:
+                x_vals = np.array(self.scatter_data[key]['x_val'])
+                y_vals = np.array(self.scatter_data[key]['y_val'])
+
+                model = np.polyfit( x_vals, y_vals, degree)
+                #model_list.append(model)
+                r_squared = self.calculate_r_squared(model, x_vals, y_vals)
+                #print(key, model, r_squared)
+                size_range = np.linspace(min(self.scatter_data[key]['x_val']), max(self.scatter_data[key]['x_val']), 100)
+                size_range2 = np.linspace(self.data_range['x_min'], self.data_range['x_max'], 100)
+                curve = np.polyval(model, size_range)
+                curve2 = np.polyval(model, size_range2)
+                self.curve_list.append( { 'key': key, 'model': model, 'size_range': size_range, 'size_range2': size_range2, 'curve': curve, 'curve2': curve2, 'r_squared': r_squared, 'color': self.scatter_data[key]['color'] } )
+        else:
+            x_vals = np.array(self.all_scatter_data['x_val'])
+            y_vals = np.array(self.all_scatter_data['y_val'])
+            model = np.polyfit( x_vals, y_vals, degree)
+            r_squared = self.calculate_r_squared(model, x_vals, y_vals)
+            size_range = np.linspace(min(self.all_scatter_data['x_val']), max(self.all_scatter_data['x_val']), 100)
+            size_range2 = np.linspace(self.data_range['x_min'], self.data_range['x_max'], 100)
+            curve = np.polyval(model, size_range)
+            curve2 = np.polyval(model, size_range2)
+            self.curve_list.append( { 'key': "All", 'model': model, 'size_range': size_range, 'size_range2': size_range2, 'curve': curve, 'curve2': curve2, 'r_squared': r_squared, 'color': 'black' } )
+
+    def calculate_r_squared(self, model, x_vals, y_vals):
+        y_mean = np.mean(y_vals)
+        ss_total = np.sum((y_vals - y_mean)**2)
+        ss_res = np.sum((y_vals - np.polyval(model, x_vals))**2)
+        r_squared = 1 - (ss_res/ss_total)
+        return r_squared    
+
     def show_analysis_result(self):
         #print("show analysis result", datetime.datetime.now())
         #self.plot_widget.clear()
@@ -5980,6 +6028,7 @@ class DataExplorationDialog(QDialog):
         show_convex_hull = self.cbxConvexHull.isChecked()
         show_confidence_ellipse = self.cbxConfidenceEllipse.isChecked()
         show_axis_label = True
+        show_extraplolate = self.cbxExtrapolate.isChecked()
 
         axis1_title = self.comboAxis1.currentText()
         axis2_title = self.comboAxis2.currentText()
@@ -6006,8 +6055,9 @@ class DataExplorationDialog(QDialog):
             if show_regression:
                 if self.curve_list is not None and len(self.curve_list) > 0:
                     for curve in self.curve_list:
-                        self.ax2.plot(curve['size_range'], curve['curve'], label=curve['key'], color=curve['color'])                        
-                        self.ax2.plot(curve['size_range2'], curve['curve2'], label=curve['key'], color=curve['color'], linestyle='dashed')
+                        self.ax2.plot(curve['size_range'], curve['curve'], label=curve['key'], color=curve['color']) 
+                        if show_extraplolate:                       
+                            self.ax2.plot(curve['size_range2'], curve['curve2'], label=curve['key'], color=curve['color'], linestyle='dashed')
                         degree = len(curve['model'])-1
                         model_text = "Y="
                         #superscript_list = ["⁰","¹","²","³","⁴","⁵","⁶","⁷","⁸","⁹"]
@@ -6658,8 +6708,13 @@ class AnalysisInfoWidget(QWidget):
         for combo in [ self.comboPcaGroupBy, self.comboCvaGroupBy, self.comboManovaGroupBy ]:
             #self.set_group_by_combo(combo, analysis)
             combo.clear()
-            for property in analysis.dataset.get_propertyname_list():
-                combo.addItem(property)
+
+            valid_property_index_list = analysis.dataset.get_valid_property_index_list()
+            propertyname_list = analysis.dataset.get_propertyname_list()
+            for idx in valid_property_index_list:
+                property = propertyname_list[idx]
+                combo.addItem(property, idx)
+                #self.comboManovaGroupBy.addItem(property, idx)
 
         self.comboPcaGroupBy.setEnabled(True)
         self.comboCvaGroupBy.setEnabled(False)

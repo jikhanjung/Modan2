@@ -296,8 +296,8 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 return
             elif ret == 1:
                 superimposition_method = self.analysis_dialog.comboSuperimposition.currentText()
-                cva_group_by = self.analysis_dialog.comboCvaGroupBy.currentIndex()
-                manova_group_by = self.analysis_dialog.comboManovaGroupBy.currentIndex()
+                cva_group_by = self.analysis_dialog.comboCvaGroupBy.currentData()
+                manova_group_by = self.analysis_dialog.comboManovaGroupBy.currentData()
                 analysis_name = self.analysis_dialog.edtAnalysisName.text()
                 self.run_analysis(superimposition_method, cva_group_by, manova_group_by, analysis_name, self.selected_dataset )
                 #logger.info("calling run analysis %s %s %s %s %s", superimposition_method, ordination_method, group_by, analysis_name, self.selected_dataset.dataset_name)
@@ -495,7 +495,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         #self.treeView.clicked.connect(self.on_treeView_clicked)
         self.treeView.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.tableView.doubleClicked.connect(self.on_tableView_doubleClicked)
-        self.tableView.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        #self.tableView.setEditTriggers(QAbstractItemView.NoEditTriggers)
         
         self.treeView.setContextMenuPolicy(Qt.CustomContextMenu)
         self.treeView.customContextMenuRequested.connect(self.open_treeview_menu)
@@ -505,7 +505,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     def open_object_menu(self, position):
         indexes = self.tableView.selectedIndexes()
         selected_object_list = self.get_selected_object_list()
-        if len(selected_object_list) > 0:
+        if selected_object_list is not None and len(selected_object_list) > 0:
             level = 0
             index = indexes[0]
             action_edit_object = QAction("Edit")
@@ -766,6 +766,9 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
     @pyqtSlot()
     def on_tableView_doubleClicked(self):
+        if self.selected_object is None:
+            print("no object selected")
+            return
         self.dlg = ObjectDialog(self)
         #print("object dialog created")
         self.dlg.setModal(True)
@@ -909,7 +912,9 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 
     def get_selected_object_list(self):
-        selected_indexes = self.tableView.selectionModel().selectedRows()
+        #print("get selected object")
+        selected_indexes = self.tableView.selectionModel().selectedIndexes()
+        #print("selected indexes:", selected_indexes)
         if len(selected_indexes) == 0:
             return None
 
@@ -920,14 +925,15 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 new_index = model.mapToSource(index)
                 new_index_list.append(new_index)
             selected_indexes = new_index_list
-        
+
         selected_object_list = []
         for index in selected_indexes:
-            item = self.object_model.itemFromIndex(index)
+            item = self.object_model.itemFromIndex(self.object_model.index(index.row(), 0)) 
             object_id = item.text()
             object_id = int(object_id)
             object = MdObject.get_by_id(object_id)
-            selected_object_list.append(object)
+            if object is not None and object not in selected_object_list:
+                selected_object_list.append(object)
 
         return selected_object_list
 
@@ -962,7 +968,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         header.setSectionResizeMode(1, QHeaderView.Stretch)
         self.tableView.verticalHeader().setDefaultSectionSize(20)
         self.tableView.verticalHeader().setVisible(False)
-        self.tableView.setSelectionBehavior(QTableView.SelectRows)
+        #self.tableView.setSelectionBehavior(QTableView.SelectRows)
         self.object_selection_model = self.tableView.selectionModel()
         self.object_selection_model.selectionChanged.connect(self.on_object_selection_changed)
 

@@ -254,6 +254,20 @@ class MdObject(Model):
         img.add_file(file_name)
         return img
 
+    def update_image(self, file_name):
+        #print("update image:", file_name)
+        img = self.get_image()
+        if img is None:
+            img = MdImage()
+            #img.object = self
+        else:
+            img.delete_instance()
+            img = MdImage()
+        img.object = self
+        img2 = img.add_file(file_name)
+        #print("update image:", img, img2)
+        return img
+
     def add_threed_model(self, file_name):
         model = MdThreeDModel()
         model.object = self
@@ -433,11 +447,14 @@ class MdImage(Model):
         return new_image
 
     def add_file(self, file_name):
+        #print("add file:", file_name)
         self.load_file_info(file_name)
         new_filepath = self.get_file_path()
         if not os.path.exists(os.path.dirname(new_filepath)):
             os.makedirs(os.path.dirname(new_filepath))
-        shutil.copyfile(file_name, new_filepath)
+        #print("new file:", new_filepath)
+        ret = shutil.copyfile(file_name, new_filepath)
+        #print("ret:", ret)
         return self
 
     def get_file_path(self, base_path =  mu.DEFAULT_STORAGE_DIRECTORY ):
@@ -1563,7 +1580,7 @@ class MdAnalysis(Model):
     analysis_name = CharField()
     analysis_desc = CharField(null=True)
     ''' dataset info '''
-    dataset = ForeignKeyField(MdDataset, related_name='analyses', null=True)
+    dataset = ForeignKeyField(MdDataset, related_name='analyses', null=True,on_delete="CASCADE")
     dimension = IntegerField(default=2)
     wireframe = CharField(null=True)
     baseline = CharField(null=True)

@@ -146,6 +146,7 @@ class ObjectViewer2D(QLabel):
         self.scale = 1.0
         self.prev_scale = 1.0
         self.fullpath = None
+        self.image_changed = False
         self.pan_mode = MODE['NONE']
         self.edit_mode = MODE['NONE']
         self.data_mode = OBJECT_MODE
@@ -781,6 +782,11 @@ class ObjectViewer2D(QLabel):
             self.align_object()
 
     def set_image(self,file_path):
+        #print("1 set image", file_path, "old path", self.fullpath, "image changed", self.image_changed)
+        if self.fullpath is not None:
+            self.image_changed = True
+        #print("2 set image", file_path, "old path", self.fullpath, "image changed", self.image_changed)
+        
         self.fullpath = file_path
         self.curr_pixmap = self.orig_pixmap = QPixmap(file_path)
         self.setPixmap(self.curr_pixmap)
@@ -3806,11 +3812,12 @@ class ObjectDialog(QDialog):
 
             if object is not None:
                 if object.image is not None and len(object.image) > 0:
-                    img = object.image[0]
-                    image_path = img.get_file_path(self.m_app.storage_directory)
-                    #check if image_path exists
-                    if os.path.exists(image_path):
-                        self.object_view.set_image(image_path)
+                    #img = object.image[0]
+                    #image_path = img.get_file_path(self.m_app.storage_directory)
+                    ##check if image_path exists
+                    #if os.path.exists(image_path):
+                    #    self.object_view.set_image(image_path)
+                    #    self.object_view.image_changed = False
                     self.btnCalibration.setEnabled(True)
                     self.enable_landmark_edit()
                 else:
@@ -3928,6 +3935,7 @@ class ObjectDialog(QDialog):
         
 
     def save_object(self):
+        #print("save object")
 
         if self.object is None:
             self.object = MdObject()
@@ -3941,9 +3949,16 @@ class ObjectDialog(QDialog):
             self.object.property_str = ",".join([ edt.text() for edt in self.edtPropertyList ])
 
         self.object.save()
-        if self.object_view_2d.fullpath is not None and not self.object.has_image():
-            img = self.object.add_image(self.object_view_2d.fullpath)
-            img.save()
+        #print("object_view_2d.fullpath in save_object:", self.object_view_2d.fullpath, "has image", self.object.has_image(), "image changed", self.object_view_2d.image_changed)
+        if self.object_view_2d.fullpath is not None:
+            if not self.object.has_image():
+                img = self.object.add_image(self.object_view_2d.fullpath)
+                img.save()
+            elif self.object_view_2d.image_changed is True:
+                img = self.object.update_image(self.object_view_2d.fullpath)
+                img.save()
+            #print("img:", img)
+            
         elif self.object_view_3d.fullpath is not None and not self.object.has_threed_model():
             mdl = self.object.add_threed_model(self.object_view_3d.fullpath)
             mdl.save()
@@ -5997,6 +6012,10 @@ class DataExplorationDialog(QDialog):
                 curve2 = np.polyval(model, size_range2)
                 self.curve_list.append( { 'key': key, 'model': model, 'size_range': size_range, 'size_range2': size_range2, 'curve': curve, 'curve2': curve2, 'r_squared': r_squared, 'color': self.scatter_data[key]['color'] } )
         else:
+            color_candidate = ['blue','green','black','cyan','magenta','yellow','gray','red']
+            color_candidate = self.color_list[:]
+            color = color_candidate[len(self.scatter_data.keys())]
+
             x_vals = np.array(self.all_scatter_data['x_val'])
             y_vals = np.array(self.all_scatter_data['y_val'])
             model = np.polyfit( x_vals, y_vals, degree)
@@ -6005,7 +6024,7 @@ class DataExplorationDialog(QDialog):
             size_range2 = np.linspace(self.data_range['x_min'], self.data_range['x_max'], 100)
             curve = np.polyval(model, size_range)
             curve2 = np.polyval(model, size_range2)
-            self.curve_list.append( { 'key': "All", 'model': model, 'size_range': size_range, 'size_range2': size_range2, 'curve': curve, 'curve2': curve2, 'r_squared': r_squared, 'color': 'black' } )
+            self.curve_list.append( { 'key': "All", 'model': model, 'size_range': size_range, 'size_range2': size_range2, 'curve': curve, 'curve2': curve2, 'r_squared': r_squared, 'color': color } )
 
     def calculate_r_squared(self, model, x_vals, y_vals):
         y_mean = np.mean(y_vals)

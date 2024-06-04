@@ -4613,7 +4613,7 @@ class DataExplorationDialog(QDialog):
         self.comboRegressionBy.addItem("By group")
         self.comboRegressionBy.addItem("All")
         self.comboRegressionBy.setCurrentIndex(0)
-        self.comboRegressionBy.currentIndexChanged.connect(self.update_chart)
+        self.comboRegressionBy.currentIndexChanged.connect(self.comboRegressionBy_changed)
         self.cbxExtrapolate = QCheckBox("Extrapolate")
         self.cbxExtrapolate.setChecked(True)
         self.cbxExtrapolate.stateChanged.connect(self.update_chart)
@@ -4892,6 +4892,19 @@ class DataExplorationDialog(QDialog):
 
         #print("layout done")
         #self.resizeEvent(None)
+
+    def comboRegressionBy_changed(self):
+        if self.comboRegressionBy.currentText() == "By group":
+            for shape_view in self.shape_view_list:
+                shape_view.show()
+        else:
+            for idx, shape_view in enumerate(self.shape_view_list):
+                if idx == 0:
+                    shape_view.show()
+                else:
+                    shape_view.hide()
+            
+        self.update_chart()
 
     def cbxShapeGrid_state_changed(self):
         #print("cbxShape_state_changed")
@@ -5539,6 +5552,7 @@ class DataExplorationDialog(QDialog):
         #if self.ds_ops is not None and self.analysis_done is True:
         self.prepare_scatter_data()
         self.calculate_fit()
+        #print("update chart", self.curve_list)
         self.show_analysis_result()
 
     def axis_changed(self):
@@ -6452,23 +6466,66 @@ class DataExplorationDialog(QDialog):
         return unrotated_shape[0]
 
     def shape_regression(self, evt):
-        #print("shape regression", evt.xdata)
-        for idx, shape_view in enumerate(self.shape_view_list):
+        #self.scatter_data[key_name]['y_val']
+        #show_regression = self.cbxRegression.isChecked()
+        #if show_regression == False:
+        #    return
+        regression_by = self.comboRegressionBy.currentText()
+
+        #key_list = self.scatter_data.keys()
+        #self.curve_list = []
+        #data_range = self.data_range
+        #degree_text = self.sbxDegree.text()
+        #if degree_text == "":
+        #    return
+
+        #degree = int(degree_text)
+        if regression_by == "By group":
+
+            #print("shape regression", evt.xdata)
+            for idx, shape_view in enumerate(self.shape_view_list):
+                axis1 = self.comboAxis1.currentIndex()
+                axis2 = self.comboAxis2.currentIndex()
+                flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
+                flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
+
+                x_value = evt.xdata
+                if x_value > self.data_range['x_max']:
+                    x_value = self.data_range['x_max']
+                if x_value < self.data_range['x_min']:
+                    x_value = self.data_range['x_min']
+                y_value = 0
+
+                # regress curve
+                curve = self.curve_list[idx]
+                if x_value >= min(curve['size_range2']) and x_value <= max(curve['size_range2']):
+                    y_value = np.polyval(curve['model'], x_value)
+
+                shape = self.raw_chart_coords_to_shape(x_value, y_value)
+                self.show_shape(shape, idx)
+        else:
             axis1 = self.comboAxis1.currentIndex()
             axis2 = self.comboAxis2.currentIndex()
             flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
             flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
 
             x_value = evt.xdata
+            if x_value > self.data_range['x_max']:
+                x_value = self.data_range['x_max']
+            if x_value < self.data_range['x_min']:
+                x_value = self.data_range['x_min']
             y_value = 0
 
             # regress curve
+            idx = 0
+            #print("curve_list", self.curve_list)
             curve = self.curve_list[idx]
             if x_value >= min(curve['size_range2']) and x_value <= max(curve['size_range2']):
                 y_value = np.polyval(curve['model'], x_value)
 
             shape = self.raw_chart_coords_to_shape(x_value, y_value)
             self.show_shape(shape, idx)
+
 
     def on_pick(self,evt):
         #print("onpick", evt)

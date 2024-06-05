@@ -244,7 +244,10 @@ def PerformCVA(dataset_ops, classifier_index):
         for lm in obj.landmark_list:
             datum.extend(lm)
         datamatrix.append(datum)
-        category_list.append(obj.property_list[classifier_index])
+        if classifier_index >= 0 and classifier_index < len(obj.property_list):
+            category_list.append(obj.property_list[classifier_index])
+        else:
+            category_list.append("Unknown")
 
     cva.SetData(datamatrix)
     cva.SetCategory(category_list)
@@ -339,7 +342,10 @@ def PerformManova(dataset_ops, new_coords, classifier_index):
     #print(obj, obj.property_list, property_index)
     #xyz = ["x", "y", "z"]
     for idx, obj in enumerate(dataset_ops.object_list):
-        category_list.append(obj.property_list[classifier_index])
+        if classifier_index >= 0 and classifier_index < len(obj.property_list):
+            category_list.append(obj.property_list[classifier_index])
+        else:
+            category_list.append("Unknown")
 
     manova.SetData(datamatrix)
     manova.SetCategory(category_list)

@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import QTableWidgetItem, QHeaderView, QFileDialog, QCheckBo
                             QDialog, QLineEdit, QLabel, QPushButton, QAbstractItemView, QStatusBar, QMessageBox, \
                             QTableView, QSplitter, QRadioButton, QComboBox, QTextEdit, QSizePolicy, \
                             QTableWidget, QGridLayout, QAbstractButton, QButtonGroup, QGroupBox, \
-                            QTabWidget, QListWidget, QSpinBox, QPlainTextEdit, QSlider
+                            QTabWidget, QListWidget, QSpinBox, QPlainTextEdit, QSlider, QScrollArea
 from PyQt5.QtGui import QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem, QImage,\
                         QFont, QPainter, QBrush, QMouseEvent, QWheelEvent, QDoubleValidator, QIcon, QCursor,\
                         QFontMetrics
@@ -3817,7 +3817,6 @@ class ObjectDialog(QDialog):
                     ##check if image_path exists
                     #if os.path.exists(image_path):
                     #    self.object_view.set_image(image_path)
-                    #    self.object_view.image_changed = False
                     self.btnCalibration.setEnabled(True)
                     self.enable_landmark_edit()
                 else:
@@ -3826,6 +3825,7 @@ class ObjectDialog(QDialog):
                 #elif len(self.landmark_list) > 0:
                 #print("objectdialog self.landmark_list in set object 2d", self.landmark_list)
                 self.object_view.set_object(object)
+                self.object_view.image_changed = False
                 self.object_view.landmark_list = self.landmark_list
                 self.object_view.update_landmark_list()
                 self.object_view.calculate_resize()
@@ -4610,10 +4610,16 @@ class DataExplorationDialog(QDialog):
         self.cbxRegression.setChecked(False)
         self.cbxRegression.stateChanged.connect(self.update_chart)
         self.comboRegressionBy = QComboBox()
-        self.comboRegressionBy.addItem("By group")
         self.comboRegressionBy.addItem("All")
-        self.comboRegressionBy.setCurrentIndex(0)
+        self.comboRegressionBy.addItem("By group")
+        self.comboRegressionBy.addItem("Select group")
+        self.comboRegressionBy.setCurrentIndex(1)
         self.comboRegressionBy.currentIndexChanged.connect(self.comboRegressionBy_changed)
+        self.comboSelectGroup = QComboBox()        
+        self.comboSelectGroup.currentIndexChanged.connect(self.comboSelectGroup_changed)
+        self.comboSelectGroup.hide()
+        model = self.comboSelectGroup.model()
+        model.itemChanged.connect(self.comboSelectGroup_itemChanged)
         self.cbxExtrapolate = QCheckBox("Extrapolate")
         self.cbxExtrapolate.setChecked(True)
         self.cbxExtrapolate.stateChanged.connect(self.update_chart)
@@ -4695,6 +4701,7 @@ class DataExplorationDialog(QDialog):
         self.axis_option_layout.addWidget(self.cbxFlipAxis3,0)
         self.axis_option_layout.addWidget(self.cbxRegression,1)
         self.axis_option_layout.addWidget(self.comboRegressionBy,1)
+        self.axis_option_layout.addWidget(self.comboSelectGroup,1)
         self.axis_option_layout.addWidget(self.cbxExtrapolate,1)
         self.axis_option_layout.addWidget(self.lblDegree,0)
         self.axis_option_layout.addWidget(self.sbxDegree,1)
@@ -4755,9 +4762,10 @@ class DataExplorationDialog(QDialog):
         self.plot_layout.addWidget(self.plot_widget2)
         self.plot_layout.addWidget(self.plot_widget3)
 
-        self.shape_view_layout = QVBoxLayout()
+        self.view_layout = QVBoxLayout()
         self.view_widget = QWidget()
-        self.view_widget.setLayout(self.shape_view_layout)
+        self.view_widget.setLayout(self.view_layout)
+        self.shape_view_layout = QVBoxLayout()
 
         self.btnResetPose = QPushButton("Reset Pose")
         self.btnResetPose.clicked.connect(self.reset_shape_pose)
@@ -4795,20 +4803,27 @@ class DataExplorationDialog(QDialog):
         self.shape_option_layout.addWidget(self.animate_option_widget,1)
         self.shape_option_layout.addWidget(self.btnResetPose,1)
         self.shape_option_layout.addWidget(self.shape_preference_button,0)
-        self.shape_view_layout.addWidget(self.shape_option_widget,0)
+        self.view_layout.addWidget(self.shape_option_widget,0)
 
         self.shape_preference_widget = QWidget()
         self.shape_preference_layout = QVBoxLayout()
         self.shape_preference_widget.setLayout(self.shape_preference_layout)
         self.shape_preference_widget.hide()
-        self.shape_view_layout.addWidget(self.shape_preference_widget,0)
+        self.view_layout.addWidget(self.shape_preference_widget,0)
 
         self.arrow_widget = QWidget()
         self.arrow_layout = QHBoxLayout()
         self.arrow_widget.setLayout(self.arrow_layout)
         self.arrow_layout.addWidget(self.cbxArrow)
         self.arrow_layout.addWidget(self.btnArrowColor)
-        self.shape_view_layout.addWidget(self.arrow_widget,0)
+        self.view_layout.addWidget(self.arrow_widget,0)
+
+        self.shape_view_widget = QWidget()
+        self.shape_view_widget.setLayout(self.shape_view_layout)
+        self.shape_view_scroll_area = QScrollArea()
+        self.shape_view_scroll_area.setWidgetResizable(True)
+        self.shape_view_scroll_area.setWidget(self.shape_view_widget)
+        self.view_layout.addWidget(self.shape_view_scroll_area)
 
         self.visualization_splitter = QSplitter(Qt.Horizontal)
         self.visualization_splitter.addWidget(self.plot_widget)
@@ -4893,16 +4908,32 @@ class DataExplorationDialog(QDialog):
         #print("layout done")
         #self.resizeEvent(None)
 
+    def comboSelectGroup_changed(self):
+        #print("comboSelectGroup_changed")
+        #self.update_chart()
+        return
+    
+    def comboSelectGroup_itemChanged(self, item):
+        #print("comboSelectGroup_itemChanged", self.ignore_change)
+        if self.ignore_change == True:
+            return
+
+        self.update_chart()
+
     def comboRegressionBy_changed(self):
-        if self.comboRegressionBy.currentText() == "By group":
+        self.comboSelectGroup.hide()
+        if self.comboRegressionBy.currentText() == "By group":            
             for shape_view in self.shape_view_list:
                 shape_view.show()
         else:
+            if self.comboRegressionBy.currentText() == "Select group":
+                self.comboSelectGroup.show()
             for idx, shape_view in enumerate(self.shape_view_list):
                 if idx == 0:
                     shape_view.show()
                 else:
                     shape_view.hide()
+        
             
         self.update_chart()
 
@@ -5772,9 +5803,31 @@ class DataExplorationDialog(QDialog):
             button.setGeometry(0,y_pos,32,32)
         self.reposition_shape_grid()
 
+    def load_comboSelectgroup(self):
+        #print("load_comboSelectgroup", self.ignore_change)
+        #if self.comboRegressionBy.
+        propertyname_index = self.comboGroupBy.currentData()        
+        self.comboSelectGroup.clear()
+        unique_groupname_list = []
+        for idx, obj in enumerate(self.object_info_list):
+            if propertyname_index > -1 and propertyname_index < len(obj['property_list']):
+                key_name = obj['property_list'][self.propertyname_index]
+                if key_name not in unique_groupname_list:
+                    unique_groupname_list.append(key_name)
+                    self.comboSelectGroup.addItem(key_name)
+        model = self.comboSelectGroup.model()
+        # Make all items checkable
+        for i in range(model.rowCount()):
+            item = model.item(i)
+            item.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
+            item.setCheckState(Qt.Checked)  # Initially unchecked                
+
+
     def comboGroupBy_changed(self):
+
         if self.ignore_change == True:
             return
+        self.load_comboSelectgroup()            
         self.update_chart()
         self.prepare_shape_view()
         self.resizeEvent(None)
@@ -5792,8 +5845,8 @@ class DataExplorationDialog(QDialog):
 
 
     def set_analysis(self, analysis, analysis_method, group_by):
-        #print("set_analysis", analysis, analysis_method, group_by)
         self.ignore_change = True
+        #print("set_analysis", analysis, analysis_method, group_by, self.ignore_change)
         self.analysis = analysis
         self.analysis_method = analysis_method
         self.edtAnalysisName.setText(analysis.analysis_name)
@@ -5801,7 +5854,7 @@ class DataExplorationDialog(QDialog):
         self.edtOrdination.setText(self.analysis_method)
         #self.edtGroupBy.setText(analysis.group_by)
         self.comboGroupBy.clear()
-        self.comboGroupBy.addItem("Select property")
+        self.comboGroupBy.addItem("Select property", -1)
 
         valid_property_index_list = analysis.dataset.get_valid_property_index_list()
         propertyname_list = analysis.dataset.get_propertyname_list()
@@ -5809,6 +5862,7 @@ class DataExplorationDialog(QDialog):
             property = propertyname_list[idx]
             self.comboGroupBy.addItem(property, idx)
 
+        #print("set_analysis 2", analysis, analysis_method, group_by, self.ignore_change)
         if analysis_method == 'PCA':
             #self.lblGroupBy.hide()
             self.comboGroupBy.setEnabled(True)
@@ -5826,6 +5880,7 @@ class DataExplorationDialog(QDialog):
         lm_list = obj.get_landmark_list()
         dim = self.analysis.dataset.dimension
         analysis_dim = len(lm_list)*dim
+        #print("set_analysis 3", analysis, analysis_method, group_by, self.ignore_change)
 
         self.comboAxis1.clear()
         self.comboAxis2.clear()
@@ -5836,7 +5891,22 @@ class DataExplorationDialog(QDialog):
             self.comboAxis1.addItem("PC"+str(i+1),i)
             self.comboAxis2.addItem("PC"+str(i+1),i)
             self.comboAxis3.addItem("PC"+str(i+1),i)
+        #print("set_analysis 4", analysis, analysis_method, group_by, self.ignore_change)
 
+        #print("set_analysis 5", analysis, analysis_method, group_by, self.ignore_change)
+        self.object_info_list = json.loads(self.analysis.object_info_json)
+        if self.analysis_method == 'PCA':
+            self.analysis_result_list = json.loads(self.analysis.pca_analysis_result_json)
+        elif self.analysis_method == 'CVA':
+            self.analysis_result_list = json.loads(self.analysis.cva_analysis_result_json)
+
+        #print("set_analysis 6", analysis, analysis_method, group_by, self.ignore_change)
+
+        propertyname = self.comboGroupBy.currentText()
+        self.propertyname_list = self.analysis.propertyname_str.split(",")
+        self.propertyname_index = self.propertyname_list.index(propertyname) if propertyname in self.propertyname_list else -1
+        #print("set analysis load_comboselect", self.ignore_change)
+        self.load_comboSelectgroup()
         self.set_mode(MODE_EXPLORATION)
         self.ignore_change = False
 
@@ -5848,6 +5918,13 @@ class DataExplorationDialog(QDialog):
         regression_by = self.comboRegressionBy.currentText()
         show_regression = self.cbxRegression.isChecked()
 
+        select_group_list = []
+        for i in range(self.comboSelectGroup.count()):
+            item = self.comboSelectGroup.model().item(i)
+            if item.checkState() == Qt.Checked:
+                select_group_list.append(item.text())
+        #print("select_group_list", select_group_list)
+
         #regression_by_group = self.rbByGroup.isChecked()
         #regression_all_at_once = self.rbAllAtOnce.isChecked()
 
@@ -5858,11 +5935,6 @@ class DataExplorationDialog(QDialog):
         flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
         flip_axis3 = -1.0 if self.cbxFlipAxis3.isChecked() == True else 1.0
 
-        self.object_info_list = json.loads(self.analysis.object_info_json)
-        if self.analysis_method == 'PCA':
-            self.analysis_result_list = json.loads(self.analysis.pca_analysis_result_json)
-        elif self.analysis_method == 'CVA':
-            self.analysis_result_list = json.loads(self.analysis.cva_analysis_result_json)
         self.propertyname_list = self.analysis.propertyname_str.split(",")
         symbol_candidate = ['o','s','^','x','+','d','v','<','>','p','h']
         symbol_candidate = self.marker_list[:]
@@ -5877,7 +5949,7 @@ class DataExplorationDialog(QDialog):
         self.scatter_data = {}
         self.scatter_result = {}
         self.average_shape = {}
-        self.all_scatter_data = { 'x_val':[], 'y_val':[], 'z_val':[] }
+        self.regression_data = { 'x_val':[], 'y_val':[], 'z_val':[] }
         #self.shape_grid = {}
         self.data_range = { 'x_min':99999, 'x_max':-99999, 'y_min':99999, 'y_max':-99999, 'z_min':99999, 'z_max':-99999, 'x_sum': 0, 'y_sum': 0, 'z_sum': 0, 'x_avg': 0, 'y_avg': 0, 'z_avg': 0}
         SCATTER_SMALL_SIZE = 30
@@ -5917,14 +5989,18 @@ class DataExplorationDialog(QDialog):
             if axis1 == CENTROID_SIZE_VALUE:
                 #print("obj:", obj)
                 self.scatter_data[key_name]['x_val'].append(obj['csize'])
-                self.all_scatter_data['x_val'].append(obj['csize'])
+                if regression_by == 'All' or ( regression_by == 'Select group' and key_name in select_group_list ):
+                    self.regression_data['x_val'].append(obj['csize'])
             else:
                 self.scatter_data[key_name]['x_val'].append(flip_axis1 * self.analysis_result_list[idx][axis1])   
-                self.all_scatter_data['x_val'].append(flip_axis1 * self.analysis_result_list[idx][axis1])
+                if regression_by == 'All' or ( regression_by == 'Select group' and key_name in select_group_list ):
+                    self.regression_data['x_val'].append(flip_axis1 * self.analysis_result_list[idx][axis1])
             self.scatter_data[key_name]['y_val'].append(flip_axis2 * self.analysis_result_list[idx][axis2])
-            self.all_scatter_data['y_val'].append(flip_axis2 * self.analysis_result_list[idx][axis2])
+            if regression_by == 'All' or ( regression_by == 'Select group' and key_name in select_group_list ):
+                self.regression_data['y_val'].append(flip_axis2 * self.analysis_result_list[idx][axis2])
             self.scatter_data[key_name]['z_val'].append(flip_axis3 * self.analysis_result_list[idx][axis3])
-            self.all_scatter_data['z_val'].append(flip_axis3 * self.analysis_result_list[idx][axis3])
+            if regression_by == 'All' or ( regression_by == 'Select group' and key_name in select_group_list ):
+                self.regression_data['z_val'].append(flip_axis3 * self.analysis_result_list[idx][axis3])
             #self.scatter_data[key_name]['z_val'].append(analysis_result_list[idx][axis3])
             self.scatter_data[key_name]['data'].append(obj)
             #self.scatter_data[key_name]['hoverinfo'].append(obj['object_name'])
@@ -5977,7 +6053,7 @@ class DataExplorationDialog(QDialog):
 
         if show_confidence_ellipse:
             for key_name in self.scatter_data.keys():
-                if len(self.scatter_data[key_name]['x_val']) > 0:
+                if len(self.scatter_data[key_name]['x_val']) > 1:
                     covariance = np.cov([self.scatter_data[key_name]['x_val'], self.scatter_data[key_name]['y_val']])
                     confidence_level = 0.90  # For 95% confidence ellipse
                     alpha = 1 - confidence_level
@@ -6016,25 +6092,28 @@ class DataExplorationDialog(QDialog):
                 x_vals = np.array(self.scatter_data[key]['x_val'])
                 y_vals = np.array(self.scatter_data[key]['y_val'])
 
-                model = np.polyfit( x_vals, y_vals, degree)
-                #model_list.append(model)
-                r_squared = self.calculate_r_squared(model, x_vals, y_vals)
-                #print(key, model, r_squared)
-                size_range = np.linspace(min(self.scatter_data[key]['x_val']), max(self.scatter_data[key]['x_val']), 100)
-                size_range2 = np.linspace(self.data_range['x_min'], self.data_range['x_max'], 100)
-                curve = np.polyval(model, size_range)
-                curve2 = np.polyval(model, size_range2)
-                self.curve_list.append( { 'key': key, 'model': model, 'size_range': size_range, 'size_range2': size_range2, 'curve': curve, 'curve2': curve2, 'r_squared': r_squared, 'color': self.scatter_data[key]['color'] } )
+                if len(x_vals) < 2:
+                    self.curve_list.append( None )
+                else:
+                    model = np.polyfit( x_vals, y_vals, degree)
+                    #model_list.append(model)
+                    r_squared = self.calculate_r_squared(model, x_vals, y_vals)
+                    #print(key, model, r_squared)
+                    size_range = np.linspace(min(self.scatter_data[key]['x_val']), max(self.scatter_data[key]['x_val']), 100)
+                    size_range2 = np.linspace(self.data_range['x_min'], self.data_range['x_max'], 100)
+                    curve = np.polyval(model, size_range)
+                    curve2 = np.polyval(model, size_range2)
+                    self.curve_list.append( { 'key': key, 'model': model, 'size_range': size_range, 'size_range2': size_range2, 'curve': curve, 'curve2': curve2, 'r_squared': r_squared, 'color': self.scatter_data[key]['color'] } )
         else:
             color_candidate = ['blue','green','black','cyan','magenta','yellow','gray','red']
             color_candidate = self.color_list[:]
             color = color_candidate[len(self.scatter_data.keys())]
 
-            x_vals = np.array(self.all_scatter_data['x_val'])
-            y_vals = np.array(self.all_scatter_data['y_val'])
+            x_vals = np.array(self.regression_data['x_val'])
+            y_vals = np.array(self.regression_data['y_val'])
             model = np.polyfit( x_vals, y_vals, degree)
             r_squared = self.calculate_r_squared(model, x_vals, y_vals)
-            size_range = np.linspace(min(self.all_scatter_data['x_val']), max(self.all_scatter_data['x_val']), 100)
+            size_range = np.linspace(min(self.regression_data['x_val']), max(self.regression_data['x_val']), 100)
             size_range2 = np.linspace(self.data_range['x_min'], self.data_range['x_max'], 100)
             curve = np.polyval(model, size_range)
             curve2 = np.polyval(model, size_range2)
@@ -6088,6 +6167,8 @@ class DataExplorationDialog(QDialog):
             if show_regression:
                 if self.curve_list is not None and len(self.curve_list) > 0:
                     for curve in self.curve_list:
+                        if curve is None:
+                            continue
                         self.ax2.plot(curve['size_range'], curve['curve'], label=curve['key'], color=curve['color']) 
                         if show_extraplolate:                       
                             self.ax2.plot(curve['size_range2'], curve['curve2'], label=curve['key'], color=curve['color'], linestyle='dashed')
@@ -6498,6 +6579,8 @@ class DataExplorationDialog(QDialog):
 
                 # regress curve
                 curve = self.curve_list[idx]
+                if curve is None:
+                    continue
                 if x_value >= min(curve['size_range2']) and x_value <= max(curve['size_range2']):
                     y_value = np.polyval(curve['model'], x_value)
 
@@ -6509,18 +6592,30 @@ class DataExplorationDialog(QDialog):
             flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
             flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
 
-            x_value = evt.xdata
-            if x_value > self.data_range['x_max']:
-                x_value = self.data_range['x_max']
-            if x_value < self.data_range['x_min']:
-                x_value = self.data_range['x_min']
-            y_value = 0
-
             # regress curve
             idx = 0
             #print("curve_list", self.curve_list)
             curve = self.curve_list[idx]
-            if x_value >= min(curve['size_range2']) and x_value <= max(curve['size_range2']):
+            if curve is None:
+                return
+
+            x_value = evt.xdata
+            show_extrapolate = self.cbxExtrapolate.isChecked()
+            if show_extrapolate:
+                if x_value > self.data_range['x_max']:
+                    x_value = self.data_range['x_max']
+                if x_value < self.data_range['x_min']:
+                    x_value = self.data_range['x_min']
+            else:
+                if x_value > max(curve['size_range']):
+                    x_value = max(curve['size_range'])
+                if x_value < min(curve['size_range']):
+                    x_value = min(curve['size_range'])
+                
+            y_value = 0
+
+
+            if curve is not None:
                 y_value = np.polyval(curve['model'], x_value)
 
             shape = self.raw_chart_coords_to_shape(x_value, y_value)

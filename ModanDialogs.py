@@ -6085,7 +6085,7 @@ class DataExplorationDialog(QDialog):
         degree_text = self.sbxDegree.text()
         if degree_text == "":
             return
-
+        
         degree = int(degree_text)
         if regression_by == "By group":
             for key in key_list:
@@ -6111,13 +6111,16 @@ class DataExplorationDialog(QDialog):
 
             x_vals = np.array(self.regression_data['x_val'])
             y_vals = np.array(self.regression_data['y_val'])
-            model = np.polyfit( x_vals, y_vals, degree)
-            r_squared = self.calculate_r_squared(model, x_vals, y_vals)
-            size_range = np.linspace(min(self.regression_data['x_val']), max(self.regression_data['x_val']), 100)
-            size_range2 = np.linspace(self.data_range['x_min'], self.data_range['x_max'], 100)
-            curve = np.polyval(model, size_range)
-            curve2 = np.polyval(model, size_range2)
-            self.curve_list.append( { 'key': "All", 'model': model, 'size_range': size_range, 'size_range2': size_range2, 'curve': curve, 'curve2': curve2, 'r_squared': r_squared, 'color': color } )
+            if len(x_vals) < 2:
+                self.curve_list.append( None )
+            else:
+                model = np.polyfit( x_vals, y_vals, degree)
+                r_squared = self.calculate_r_squared(model, x_vals, y_vals)
+                size_range = np.linspace(min(self.regression_data['x_val']), max(self.regression_data['x_val']), 100)
+                size_range2 = np.linspace(self.data_range['x_min'], self.data_range['x_max'], 100)
+                curve = np.polyval(model, size_range)
+                curve2 = np.polyval(model, size_range2)
+                self.curve_list.append( { 'key': "All", 'model': model, 'size_range': size_range, 'size_range2': size_range2, 'curve': curve, 'curve2': curve2, 'r_squared': r_squared, 'color': color } )
 
     def calculate_r_squared(self, model, x_vals, y_vals):
         y_mean = np.mean(y_vals)

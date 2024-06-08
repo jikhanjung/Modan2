@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QMessageBox
 import sys, os
 import copy
+from PyQt5.QtGui import QColor
 
 import numpy as np
 #from stl import mesh
@@ -89,6 +90,15 @@ PASTEL_COLOR_LIST = [
 ]
 
 MARKER_LIST = ['o','s','^','x','+','d','v','<','>','p','h']
+
+
+def as_qt_color(color):
+    return QColor( *[ int(x*255) for x in color ] )
+
+def as_gl_color(color):
+    #print("as_gl_color", color)
+    qcolor = QColor(color)
+    return qcolor.redF(), qcolor.greenF(), qcolor.blueF()
 
 def resource_path(relative_path):
     try:

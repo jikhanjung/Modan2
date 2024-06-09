@@ -7,8 +7,9 @@ from PyQt5.QtWidgets import QTableWidgetItem, QHeaderView, QFileDialog, QCheckBo
 from PyQt5.QtGui import QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem, QImage,\
                         QFont, QPainter, QBrush, QMouseEvent, QWheelEvent, QDoubleValidator, QIcon, QCursor,\
                         QFontMetrics
-from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSize, QPoint,\
-                         pyqtSlot, pyqtSignal, QItemSelectionModel, QTimer, QEvent
+from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSize, QPoint, QAbstractTableModel, \
+                         pyqtSlot, pyqtSignal, QItemSelectionModel, QTimer, QEvent, QModelIndex
+
 from matplotlib.backends.backend_qt5agg import FigureCanvas as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
@@ -3075,4 +3076,187 @@ class Morphologika:
         self.edge_list.sort()
         self.polygon_list.sort()
         return
-    
+
+class MdTableView(QTableView):
+
+    def keyPressEvent(self, event):
+        if event.key() in [Qt.Key_Return, Qt.Key_Enter]:
+            if not self.isPersistentEditorOpen(self.currentIndex()):
+                self.edit(self.currentIndex())
+        else:
+            super().keyPressEvent(event)
+
+    def isPersistentEditorOpen(self, index):
+        return self.indexWidget(index) is not None
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        header = self.horizontalHeader()
+        total_width = self.viewport().width()
+        column_count = self.model().columnCount()
+
+        # Define your desired column widths
+        default_width = 100
+        fixed_widths = {
+            0: 50,   # First column 100 pixels
+            1: 300,   # Third column 150 pixels
+        }
+
+        # Calculate remaining width for flexible columns
+        remaining_width = total_width - sum(fixed_widths.values())
+        flexible_columns = column_count - len(fixed_widths)
+        flexible_width = remaining_width // flexible_columns if flexible_columns > 0 else 0
+
+        for i in range(column_count):
+            if i in fixed_widths:
+                header.resizeSection(i, fixed_widths[i])
+            else:
+                header.resizeSection(i, flexible_width)
+
+class MdTableModel(QAbstractTableModel):
+    def __init__(self, data=None):
+        super().__init__()
+        self._data = data or []  # Initialize with provided data or an empty list
+        self._vheader_data = []
+        self._hheader_data = []
+        # ... rest of the existing code
+        self._uneditable_columns = [0,1,2,3]
+
+    def set_columns_uneditable(self, columns):
+        self._uneditable_columns = columns
+
+    def rowCount(self, parent=QModelIndex()):
+        return len(self._data)
+
+    def columnCount(self, parent=QModelIndex()):
+        return len(self._data[0]) if self._data else 0
+
+    def data(self, index, role=Qt.DisplayRole):
+        if not index.isValid():
+            return None
+        d = self._data[index.row()][index.column()]
+        if role == Qt.DisplayRole or role == Qt.EditRole:
+            if isinstance(d, str):
+                return d #self._data[index.row()][index.column()]
+            elif isinstance(d, list):
+                return " ".join(d)
+            elif isinstance(d, dict) and 'value' in d:
+                return d['value']
+        if role == Qt.BackgroundRole:
+            # if d is str or list, return default color
+            if isinstance(d, (str, list)):
+                return None
+            elif isinstance(d, dict) and d.get('changed', False):
+                return QColor('yellow')
+        if role == Qt.ToolTipRole:
+            # Check if this is the cell you want a tooltip for
+            #if index.row() == 1 and index.column() == 2:
+            return "Tooltip for cell ({}, {})".format(index.row(), index.column())
+            #if isinstance(d, )#and self._data[index.row()][index.column()].get('changed', False):
+            #return QColor('yellow')  # Highlight changed cells
+        if role == Qt.TextAlignmentRole:
+            return Qt.AlignCenter | Qt.AlignVCenter
+        return None
+
+    def setData(self, index, value, role=Qt.EditRole):
+        if not index.isValid() or role != Qt.EditRole:
+            return False
+        if index.row() >= len(self._data) or index.column() >= len(self._data[0]):
+            return False
+
+        self._data[index.row()][index.column()] = {'value': value, 'changed': True}
+        self.dataChanged.emit(index, index, [role, Qt.BackgroundRole])
+        return True
+
+    #def flags(self, index):
+    #    if not index.isValid():
+    #        return Qt.NoItemFlags
+    #    return super().flags(index) | Qt.ItemIsEditable
+
+
+    def flags(self, index):
+        if not index.isValid():
+            return Qt.NoItemFlags
+        #print("index.column():", index.column(), self._uneditable_columns)
+        # Disable editing for specific columns
+        if index.column() in self._uneditable_columns:
+            return Qt.ItemIsEnabled | Qt.ItemIsSelectable
+        else:
+            return super().flags(index) | Qt.ItemIsEditable     
+
+    def resetColors(self):
+        for row in range(self.rowCount()):
+            for column in range(self.columnCount()):
+                d = self._data[row][column]
+                if isinstance(d, dict) and d.get('changed', False):
+                    d['changed'] = False
+                #if self._data[row][column].get('changed', False):
+                #    self._data[row][column]['changed'] = False
+        self.dataChanged.emit(self.index(0, 0), self.index(self.rowCount() - 1, self.columnCount() - 1), [Qt.BackgroundRole])
+
+    def load_data(self, data):
+        self.beginResetModel()
+        self._data = data        
+        self.endResetModel()
+
+    def headerData(self, section, orientation, role=Qt.DisplayRole):
+        if role == Qt.DisplayRole:
+            if orientation == Qt.Horizontal:
+                # Return the header text for the given horizontal section
+                return "{}".format(self._hheader_data[section])
+            elif orientation == Qt.Vertical:
+                # Return the header text for the given vertical section
+                if len( self._vheader_data ) == 0:
+                    return "{}".format(section+1)
+                else:
+                    return "{}".format(self._vheader_data[section])
+        if role == Qt.ToolTipRole and orientation == Qt.Vertical:
+            # Customize tooltip text based on section (row index)
+            return ""
+            #return f"{self._vheader_data[section]}"
+        #return None
+
+    #def headerData(self, section, orientation, role=Qt.DisplayRole):
+
+    def setVerticalHeader(self, header_data):
+        self._vheader_data = header_data
+
+    def setHorizontalHeader(self, header_data):
+        self._hheader_data = header_data
+
+    def sort(self, column, order):
+        self.layoutAboutToBeChanged.emit()
+        self._data = sorted(self._data, key=lambda x: x[column]['value'], reverse=(order == Qt.DescendingOrder))
+        self.layoutChanged.emit()
+
+    def clear(self):
+        self.layoutAboutToBeChanged.emit()
+        self._data = []  # Empty the underlying data
+        self.layoutChanged.emit()
+
+    def appendRows(self, rows):
+        self.layoutAboutToBeChanged.emit()  # Signal that the model is about to change
+        self.beginInsertRows(QModelIndex(), self.rowCount(), self.rowCount() + len(rows) - 1)
+        for row_data in rows:
+            row = [{"value": col_data, "changed": False} for col_data in row_data]
+            self._data.append(row)
+        #print("data", self._data)
+        self.endInsertRows()  # Signal that the rows have been inserted
+        self.layoutChanged.emit()  # Signal that the model has changed
+
+    def save_object_info(self):
+        for row in self._data:
+            #print(row)
+            id = row[0]['value']
+            obj = MdObject.get_by_id(id)
+            ds = obj.dataset
+            propertyname_list = ds.get_propertyname_list()
+            property_list = []
+            for idx, col in enumerate(row):
+                if idx > 3:
+                    #print("idx:", idx, "col:", col['value'])
+                    property_list.append(col['value'])
+            obj.property_list = property_list
+            obj.pack_property()
+            obj.save()
+        

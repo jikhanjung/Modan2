@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QMainWindow, QHeaderView, QApplication, QAbstractItemView, \
                             QMessageBox, QTreeView, QTableView, QSplitter, QAction, QMenu, \
-                            QStatusBar, QInputDialog, QToolBar, QWidget, QPlainTextEdit
+                            QStatusBar, QInputDialog, QToolBar, QWidget, QPlainTextEdit, QVBoxLayout, QHBoxLayout, \
+                            QPushButton
 from PyQt5.QtGui import QIcon, QStandardItemModel, QStandardItem, QKeySequence
 from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSettings, QSize, QTranslator
 
@@ -19,6 +20,7 @@ from peewee_migrate import Router
 
 from ModanDialogs import DatasetAnalysisDialog, ObjectDialog, ImportDatasetDialog, DatasetDialog, PreferencesDialog, \
     MODE, ObjectViewer3D, ExportDatasetDialog, ObjectViewer2D, ProgressDialog, NewAnalysisDialog, AnalysisInfoWidget, DataExplorationDialog
+from ModanComponents import MdTableModel, MdTableView
 from MdStatistics import PerformCVA, PerformPCA, PerformManova
 
 import matplotlib.pyplot as plt
@@ -47,7 +49,7 @@ class ModanMainWindow(QMainWindow):
         self.setWindowIcon(QIcon(mu.resource_path('icons/Modan2_2.png')))
         self.setWindowTitle("{} v{}".format(self.tr("Modan2"), mu.PROGRAM_VERSION))
 
-        self.tableView = QTableView()
+        self.tableView = MdTableView()
         self.treeView = QTreeView()
 
         self.toolbar = QToolBar("Main Toolbar")
@@ -475,10 +477,35 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.object_view = self.object_view_2d
         self.object_view_3d.hide()
 
+        self.tableview_widget = QWidget()
+        self.tableview_layout = QVBoxLayout()
+        self.object_button_widget = QWidget()
+        self.object_button_layout = QHBoxLayout()
+        self.object_button_widget.setLayout(self.object_button_layout)
+
+        self.btnSaveObjectInfo = QPushButton("Save Info")
+        self.btnEditObject = QPushButton("Edit Object")
+        self.btnAddObject = QPushButton("Add Object")
+        self.btnAddProperty = QPushButton("Add Property")
+        self.object_button_layout.addWidget(self.btnSaveObjectInfo)
+        self.object_button_layout.addWidget(self.btnEditObject)
+        self.object_button_layout.addWidget(self.btnAddObject)
+        self.object_button_layout.addWidget(self.btnAddProperty)
+
+        self.tableview_layout.addWidget(self.tableView)
+        self.tableview_layout.addWidget(self.object_button_widget)
+        self.tableview_widget.setLayout(self.tableview_layout)
+        self.btnSaveObjectInfo.clicked.connect(self.on_btnSaveObjectInfo_clicked)
+        self.btnAddObject.clicked.connect(self.on_action_new_object_triggered)
+        self.btnEditObject.clicked.connect(self.on_tableView_doubleClicked)
+        self.btnAddProperty.clicked.connect(self.on_action_new_property_triggered)
+
+
+
         self.hsplitter = QSplitter(Qt.Horizontal)
         self.vsplitter = QSplitter(Qt.Vertical)
 
-        self.vsplitter.addWidget(self.tableView)
+        self.vsplitter.addWidget(self.tableview_widget)
         self.vsplitter.addWidget(self.object_view_2d)
         self.vsplitter.addWidget(self.object_view_3d)
 
@@ -501,6 +528,25 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.treeView.customContextMenuRequested.connect(self.open_treeview_menu)
         self.tableView.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tableView.customContextMenuRequested.connect(self.open_object_menu)
+
+    def on_action_new_property_triggered(self):
+        if self.selected_dataset is None:
+            return
+        text, ok = QInputDialog.getText(self, 'Input Dialog', 'Enter new property name', text="")
+        if ok:
+            self.selected_dataset.add_propertyname(text)
+            ds = self.selected_dataset
+            self.load_dataset()
+            # select current dataset
+            self.select_dataset(ds)
+            self.load_object()
+
+    def on_btnSaveObjectInfo_clicked(self):
+        # save object info
+        # get object info from tableview
+        self.object_model.save_object_info()
+        self.object_model.resetColors()
+        #indexes = self.tableView.selectedIndexes()
 
     def open_object_menu(self, position):
         indexes = self.tableView.selectedIndexes()
@@ -928,8 +974,11 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
         selected_object_list = []
         for index in selected_indexes:
-            item = self.object_model.itemFromIndex(self.object_model.index(index.row(), 0)) 
-            object_id = item.text()
+            #print("index:", index.row())
+
+            # Directly access data using MdTableModel's internal structure
+            object_id = self.object_model._data[index.row()][0]["value"]
+
             object_id = int(object_id)
             object = MdObject.get_by_id(object_id)
             if object is not None and object not in selected_object_list:
@@ -938,7 +987,10 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         return selected_object_list
 
     def reset_tableView(self):
-        self.object_model = QStandardItemModel()
+        #print("reset tableview")
+        #self.object_model = QStandardItemModel()
+        self.object_model = MdTableModel()
+        #print("mdtablemodel set")
         header_labels = ["ID", "Name", "Count", "CSize"]
         if self.selected_dataset is not None:
             self.selected_dataset.unpack_propertyname_str()
@@ -955,22 +1007,35 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 #self.vsplitter.addWidget(self.object_view_3d)
                 self.object_view_2d.hide()
                 self.object_view_3d.show()
-        self.object_model.setColumnCount(len(header_labels))
-        self.object_model.setHorizontalHeaderLabels( header_labels )
+        #self.object_model.setColumnCount(len(header_labels))
+        #self.object_model.setHorizontalHeaderLabels( header_labels )
+        #print("horizontal header:", header_labels)
+        self.object_model.setHorizontalHeader( header_labels )
         self.proxy_model = QSortFilterProxyModel()
         self.proxy_model.setSourceModel(self.object_model)
+        #print("-1")
         self.tableView.setModel(self.proxy_model)
-        self.tableView.setColumnWidth(0, 50)
-        self.tableView.setColumnWidth(1, 200)
-        self.tableView.setColumnWidth(2, 50)
-        self.tableView.setColumnWidth(3, 50)
+        #self.tableView.setColumnWidth(0, 50)
+        #self.tableView.setColumnWidth(1, 200)
+        #self.tableView.setColumnWidth(2, 50)
+        #self.tableView.setColumnWidth(3, 50)
+        
+        #print("0")
         header = self.tableView.horizontalHeader()    
-        header.setSectionResizeMode(1, QHeaderView.Stretch)
-        self.tableView.verticalHeader().setDefaultSectionSize(20)
-        self.tableView.verticalHeader().setVisible(False)
+        #print("0.2")
+        header.resizeSection(1,200)
+        header.setDefaultSectionSize(15)
+        #header.setSectionResizeMode(1,QHeaderView.ResizeToContents)
+        #header.setSectionResizeMode(1, QHeaderView.Stretch)
+        #header.setSectionResizeMode(1, QHeaderView.Stretch)
+        #print("0.3")
+        #self.tableView.verticalHeader().setDefaultSectionSize(20)
+        #print("0.5")
+        #self.tableView.verticalHeader().setVisible(False)
         #self.tableView.setSelectionBehavior(QTableView.SelectRows)
         self.object_selection_model = self.tableView.selectionModel()
         self.object_selection_model.selectionChanged.connect(self.on_object_selection_changed)
+        #print("1")
 
         self.tableView.setDragEnabled(True)
         self.tableView.setAcceptDrops(True)
@@ -979,11 +1044,15 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.tableView.dropEvent = self.tableView_drop_event
         self.tableView.dragEnterEvent = self.tableView_drag_enter_event
         self.tableView.dragMoveEvent = self.tableView_drag_move_event
+        #print("2")
 
         self.tableView.setSortingEnabled(True)
         self.tableView.sortByColumn(0, Qt.AscendingOrder)
-        self.object_model.setSortRole(Qt.UserRole)
+        #print("3")
+        #self.object_model.setSortRole(Qt.UserRole)
+        #print("4")
         self.clear_object_view()
+        #print("5")
 
     def tableView_drop_event(self, event):
         if self.selected_dataset is None:
@@ -1185,6 +1254,8 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             return
 
         for obj in self.selected_dataset.object_list:
+            row_data = [ obj.id, obj.object_name, obj.count_landmarks(), obj.get_centroid_size()]
+            '''
             item1 = QStandardItem()
             item1.setData(obj.id,Qt.DisplayRole)
             item2 = QStandardItem(obj.object_name)
@@ -1202,18 +1273,24 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             item4.setData(csize_str,Qt.DisplayRole)
 
             item_list = [item1,item2,item3,item4]
+            '''
             if len(self.selected_dataset.propertyname_list) > 0:
                 property_list = obj.unpack_property()
 
                 for idx,prop in enumerate(self.selected_dataset.propertyname_list):
-                    item = QStandardItem()
+                    
+                    #item = QStandardItem()
                     if idx < len(property_list):
-                        item.setData(property_list[idx],Qt.DisplayRole)
+                        #item.setData(property_list[idx],Qt.DisplayRole)
+                        item = property_list[idx]
                     else:
-                        item.setData('',Qt.DisplayRole)
-                    item_list.append(item)
+                        #item.setData('',Qt.DisplayRole)
+                        item = ''
+                    #row_data.append(item)
+                    
+                    row_data.append(item)
 
-            self.object_model.appendRow(item_list)
+            self.object_model.appendRows([row_data])
 
     def on_object_selection_changed(self, selected, deselected):
         selected_object_list = self.get_selected_object_list()

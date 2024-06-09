@@ -1233,9 +1233,9 @@ class ObjectDialog(QDialog):
             proxy_index = self.tableView.model().index(row, 0)
             proxy_index_list.append(proxy_index)
             index = self.tableView.model().mapToSource(proxy_index)
-            item = model.sourceModel().itemFromIndex(index)
-            #item = model.item(row, 0)
-            object_id = int(item.text())
+
+            object_id = self.parent.object_model._data[index.row()][0]["value"]
+            object_id = int(object_id)
             object_id_list.append(object_id)
 
         new_index = -1
@@ -1273,9 +1273,9 @@ class ObjectDialog(QDialog):
             proxy_index = self.tableView.model().index(row, 0)
             proxy_index_list.append(proxy_index)
             index = self.tableView.model().mapToSource(proxy_index)
-            item = model.sourceModel().itemFromIndex(index)
-            #item = model.item(row, 0)
-            object_id = int(item.text())
+
+            object_id = self.parent.object_model._data[index.row()][0]["value"]
+            object_id = int(object_id)
             object_id_list.append(object_id)
 
         new_index = -1

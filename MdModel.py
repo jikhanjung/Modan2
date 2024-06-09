@@ -206,6 +206,11 @@ class MdDataset(Model):
         obj.dataset=self
         return obj
 
+    def add_propertyname(self, propertyname):
+        self.propertyname_list.append(propertyname)
+        self.pack_propertyname_str()
+        self.save()
+        return propertyname
 
 class MdObject(Model):
     object_name = CharField()

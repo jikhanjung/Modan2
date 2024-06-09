@@ -224,6 +224,7 @@ class MdObject(Model):
     landmark_list = []
     property_list = []
     centroid_size = -1
+    sequence = IntegerField(null=True)
 
     class Meta:
         database = gDatabase

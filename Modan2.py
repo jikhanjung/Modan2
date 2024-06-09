@@ -991,7 +991,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         #self.object_model = QStandardItemModel()
         self.object_model = MdTableModel()
         #print("mdtablemodel set")
-        header_labels = ["ID", "Name", "Count", "CSize"]
+        header_labels = ["ID", "Seq.", "Name", "Count", "CSize"]
         if self.selected_dataset is not None:
             self.selected_dataset.unpack_propertyname_str()
             if self.selected_dataset.propertyname_list is not None and len( self.selected_dataset.propertyname_list ) > 0:
@@ -1047,7 +1047,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         #print("2")
 
         self.tableView.setSortingEnabled(True)
-        self.tableView.sortByColumn(0, Qt.AscendingOrder)
+        self.tableView.sortByColumn(1, Qt.AscendingOrder)
         #print("3")
         #self.object_model.setSortRole(Qt.UserRole)
         #print("4")
@@ -1253,8 +1253,11 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         if self.selected_dataset is None:
             return
 
-        for obj in self.selected_dataset.object_list:
-            row_data = [ obj.id, obj.object_name, obj.count_landmarks(), obj.get_centroid_size()]
+        for idx, obj in enumerate(self.selected_dataset.object_list):
+            seq = obj.sequence
+            if seq is None:
+                seq = idx + 1
+            row_data = [ obj.id, seq, obj.object_name, obj.count_landmarks(), obj.get_centroid_size()]
             '''
             item1 = QStandardItem()
             item1.setData(obj.id,Qt.DisplayRole)

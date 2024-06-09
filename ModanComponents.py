@@ -3079,6 +3079,10 @@ class Morphologika:
 
 class MdTableView(QTableView):
 
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.verticalHeader().hide()         
+
     def keyPressEvent(self, event):
         if event.key() in [Qt.Key_Return, Qt.Key_Enter]:
             if not self.isPersistentEditorOpen(self.currentIndex()):
@@ -3094,24 +3098,47 @@ class MdTableView(QTableView):
         header = self.horizontalHeader()
         total_width = self.viewport().width()
         column_count = self.model().columnCount()
+        self.setColumnHidden(0, True)
 
         # Define your desired column widths
-        default_width = 100
+        default_width = 60
         fixed_widths = {
             0: 50,   # First column 100 pixels
-            1: 300,   # Third column 150 pixels
+            1: 50,   # First column 100 pixels
+            2: 300,   # Third column 150 pixels
         }
 
         # Calculate remaining width for flexible columns
         remaining_width = total_width - sum(fixed_widths.values())
         flexible_columns = column_count - len(fixed_widths)
         flexible_width = remaining_width // flexible_columns if flexible_columns > 0 else 0
+        if flexible_width < default_width:
+            flexible_width = default_width
 
         for i in range(column_count):
             if i in fixed_widths:
                 header.resizeSection(i, fixed_widths[i])
             else:
                 header.resizeSection(i, flexible_width)
+
+        # Calculate maximum content width for each column
+        content_widths = [0] * column_count
+        for row in range(self.model().rowCount()):
+            for col in range(column_count):
+                index = self.model().index(row, col)
+                text = str(self.model().data(index, Qt.DisplayRole))
+                text_width = self.fontMetrics().horizontalAdvance(text)
+                content_widths[col] = max(content_widths[col], text_width)
+                #print("content_widths:", text, content_widths)
+
+        # Adjust column widths based on content and fixed widths
+        for i in range(column_count):
+            if i in fixed_widths:
+                header.resizeSection(i, fixed_widths[i])
+            else:
+                # Ensure a minimum width for flexible columns
+                width = max(flexible_width, content_widths[i] + 20)  # Add some padding
+                header.resizeSection(i, width)
 
 class MdTableModel(QAbstractTableModel):
     def __init__(self, data=None):
@@ -3120,7 +3147,7 @@ class MdTableModel(QAbstractTableModel):
         self._vheader_data = []
         self._hheader_data = []
         # ... rest of the existing code
-        self._uneditable_columns = [0,1,2,3]
+        self._uneditable_columns = [0,2,3,4]
 
     def set_columns_uneditable(self, columns):
         self._uneditable_columns = columns
@@ -3164,7 +3191,12 @@ class MdTableModel(QAbstractTableModel):
         if index.row() >= len(self._data) or index.column() >= len(self._data[0]):
             return False
 
-        self._data[index.row()][index.column()] = {'value': value, 'changed': True}
+        try:
+            new_value = float(value)
+        except ValueError:  # If it's not a number, keep it as a string
+            new_value = value
+
+        self._data[index.row()][index.column()] = {'value': new_value, 'changed': True}
         self.dataChanged.emit(index, index, [role, Qt.BackgroundRole])
         return True
 
@@ -3204,6 +3236,7 @@ class MdTableModel(QAbstractTableModel):
             if orientation == Qt.Horizontal:
                 # Return the header text for the given horizontal section
                 return "{}".format(self._hheader_data[section])
+                #return ""
             elif orientation == Qt.Vertical:
                 # Return the header text for the given vertical section
                 if len( self._vheader_data ) == 0:
@@ -3223,10 +3256,27 @@ class MdTableModel(QAbstractTableModel):
 
     def setHorizontalHeader(self, header_data):
         self._hheader_data = header_data
+        #print("header_data:", header_data)
 
     def sort(self, column, order):
         self.layoutAboutToBeChanged.emit()
         self._data = sorted(self._data, key=lambda x: x[column]['value'], reverse=(order == Qt.DescendingOrder))
+        self.layoutChanged.emit()
+
+    def sort(self, column, order):
+        self.layoutAboutToBeChanged.emit()
+        try:  # Attempt to sort numerically
+            self._data = sorted(
+                self._data,
+                key=lambda x: float(x[column]['value']), 
+                reverse=(order == Qt.DescendingOrder)
+            )
+        except ValueError:  # Fallback to lexicographical sorting if not numeric
+            self._data = sorted(
+                self._data,
+                key=lambda x: x[column]['value'],
+                reverse=(order == Qt.DescendingOrder)
+            )
         self.layoutChanged.emit()
 
     def clear(self):
@@ -3253,9 +3303,11 @@ class MdTableModel(QAbstractTableModel):
             propertyname_list = ds.get_propertyname_list()
             property_list = []
             for idx, col in enumerate(row):
-                if idx > 3:
+                if idx > max(self._uneditable_columns):
                     #print("idx:", idx, "col:", col['value'])
                     property_list.append(col['value'])
+                elif idx == 1:
+                    obj.sequence = col['value']
             obj.property_list = property_list
             obj.pack_property()
             obj.save()

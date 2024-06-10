@@ -3,9 +3,9 @@ from PyQt5.QtWidgets import QTableWidgetItem, QHeaderView, QFileDialog, QCheckBo
                             QDialog, QLineEdit, QLabel, QPushButton, QAbstractItemView, QStatusBar, QMessageBox, \
                             QTableView, QSplitter, QRadioButton, QComboBox, QTextEdit, QSizePolicy, \
                             QTableWidget, QGridLayout, QAbstractButton, QButtonGroup, QGroupBox, \
-                            QTabWidget, QListWidget, QSpinBox, QPlainTextEdit, QSlider, QScrollArea
+                            QTabWidget, QListWidget, QSpinBox, QPlainTextEdit, QSlider, QScrollArea, QStyledItemDelegate
 from PyQt5.QtGui import QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem, QImage,\
-                        QFont, QPainter, QBrush, QMouseEvent, QWheelEvent, QDoubleValidator, QIcon, QCursor,\
+                        QFont, QPainter, QBrush, QMouseEvent, QWheelEvent, QIntValidator, QIcon, QCursor,\
                         QFontMetrics
 from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSize, QPoint, QAbstractTableModel, \
                          pyqtSlot, pyqtSignal, QItemSelectionModel, QTimer, QEvent, QModelIndex
@@ -3077,17 +3077,44 @@ class Morphologika:
         self.polygon_list.sort()
         return
 
+class MdSequenceDelegate(QStyledItemDelegate):
+    def createEditor(self, parent, option, index):
+        if index.column() == 1:  # Check if it's the sequence column
+            editor = QLineEdit(parent)
+            editor.setValidator(QIntValidator())
+            #editor.setMinimum(1)  # Set minimum value (adjust as needed)#
+            return editor
+        else:
+            return super().createEditor(parent, option, index)
+        
 class MdTableView(QTableView):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.verticalHeader().hide()         
+        self.verticalHeader().hide()
+        self.sort_later = False
+        #self.model().dataChanged.connect(self.defer_sort)
+
+    def defer_sort(self, topLeft, bottomRight, roles):
+        # Only defer if the sequence column was edited
+        if topLeft.column() == 1: 
+            self.sort_later = True        
 
     def keyPressEvent(self, event):
         if event.key() in [Qt.Key_Return, Qt.Key_Enter]:
+            #print("key return or enter")
             if not self.isPersistentEditorOpen(self.currentIndex()):
                 self.edit(self.currentIndex())
+        elif event.key() in [Qt.Key_Up, Qt.Key_Down]:
+            #print("key up, key down")
+            # Handle up/down arrow keys directly (e.g., move selection)
+            current_index = self.currentIndex()
+            new_row = current_index.row() + (-1 if event.key() == Qt.Key_Up else 1)
+            new_index = self.model().index(new_row, current_index.column())
+            if new_index.isValid():
+                self.setCurrentIndex(new_index)
         else:
+            #print("key press not return not up not down")
             super().keyPressEvent(event)
 
     def isPersistentEditorOpen(self, index):
@@ -3186,6 +3213,15 @@ class MdTableModel(QAbstractTableModel):
         return None
 
     def setData(self, index, value, role=Qt.EditRole):
+        old_data = self._data[index.row()][index.column()]
+        if isinstance(old_data, dict) and old_data.get('value', None):
+            #print("dict old value:", old_data)
+            old_data = old_data['value']
+        #print("old_data:", old_data, type(old_data),"value:", value,type(value))
+        if str(value) == str(old_data):
+            #print("no change in value")
+            return False
+
         if not index.isValid() or role != Qt.EditRole:
             return False
         if index.row() >= len(self._data) or index.column() >= len(self._data[0]):
@@ -3195,6 +3231,7 @@ class MdTableModel(QAbstractTableModel):
             new_value = float(value)
         except ValueError:  # If it's not a number, keep it as a string
             new_value = value
+        
 
         self._data[index.row()][index.column()] = {'value': new_value, 'changed': True}
         self.dataChanged.emit(index, index, [role, Qt.BackgroundRole])

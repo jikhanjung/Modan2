@@ -664,6 +664,7 @@ class MdObjectOps:
         self.object_name = mdobject.object_name
         self.object_desc = mdobject.object_desc
         self.pixel_per_mm = mdobject.pixels_per_mm
+        self.sequence = mdobject.sequence
         #self.dataset_id = mdobject.dataset
         #self.scale = mdobject.scale
         self.landmark_str = mdobject.landmark_str
@@ -1102,8 +1103,10 @@ class MdDatasetOps:
         self.object_list = []
         self.selected_object_id_list = []
         self.edge_list = []
-        for mo in dataset.object_list:
+        object_list = dataset.object_list.order_by(MdObject.sequence)
+        for mo in object_list:
             #self.object_list.append(mo.copy())
+            #print(mo.id, mo.sequence)
             self.object_list.append(MdObjectOps(mo))
         
         if dataset.wireframe is not None and dataset.wireframe != '':

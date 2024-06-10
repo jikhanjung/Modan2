@@ -20,7 +20,7 @@ from peewee_migrate import Router
 
 from ModanDialogs import DatasetAnalysisDialog, ObjectDialog, ImportDatasetDialog, DatasetDialog, PreferencesDialog, \
     MODE, ObjectViewer3D, ExportDatasetDialog, ObjectViewer2D, ProgressDialog, NewAnalysisDialog, AnalysisInfoWidget, DataExplorationDialog
-from ModanComponents import MdTableModel, MdTableView
+from ModanComponents import MdTableModel, MdTableView, MdSequenceDelegate
 from MdStatistics import PerformCVA, PerformPCA, PerformManova
 
 import matplotlib.pyplot as plt
@@ -50,6 +50,7 @@ class ModanMainWindow(QMainWindow):
         self.setWindowTitle("{} v{}".format(self.tr("Modan2"), mu.PROGRAM_VERSION))
 
         self.tableView = MdTableView()
+        self.tableView.setItemDelegateForColumn(1, MdSequenceDelegate())
         self.treeView = QTreeView()
 
         self.toolbar = QToolBar("Main Toolbar")
@@ -422,9 +423,10 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         object_info_list = []
         raw_landmark_list = []
         property_len = len(dataset.get_propertyname_list()) or 0
-        for obj in dataset.object_list:
+        object_list = dataset.object_list.order_by(MdObject.sequence)
+        for obj in object_list:
             raw_landmark_list.append( obj.get_landmark_list() )
-            object_info_list.append( { "id": obj.id, "name": obj.object_name, "csize": obj.get_centroid_size(), "property_list": obj.get_property_list()[:property_len] })
+            object_info_list.append( { "id": obj.id, "name": obj.object_name, "sequence": obj.sequence, "csize": obj.get_centroid_size(), "property_list": obj.get_property_list()[:property_len] })
         analysis.raw_landmark_json = json.dumps(raw_landmark_list)
         analysis.object_info_json = json.dumps(object_info_list)
 
@@ -1014,7 +1016,8 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.proxy_model = QSortFilterProxyModel()
         self.proxy_model.setSourceModel(self.object_model)
         #print("-1")
-        self.tableView.setModel(self.proxy_model)
+        self.tableView.setModel(self.proxy_model)        
+
         #self.tableView.setColumnWidth(0, 50)
         #self.tableView.setColumnWidth(1, 200)
         #self.tableView.setColumnWidth(2, 50)
@@ -1252,6 +1255,8 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.clear_object_view()
         if self.selected_dataset is None:
             return
+
+        object_list = self.selected_dataset.object_list.order_by(MdObject.sequence,MdObject.id)
 
         for idx, obj in enumerate(self.selected_dataset.object_list):
             seq = obj.sequence

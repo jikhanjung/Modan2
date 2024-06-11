@@ -3228,10 +3228,15 @@ class MdTableModel(QAbstractTableModel):
             return False
 
         try:
-            new_value = float(value)
-        except ValueError:  # If it's not a number, keep it as a string
-            new_value = value
-        
+            # First, try to convert to int (most restrictive)
+            new_value = int(value) 
+        except ValueError:
+            try:
+                # If not int, try to convert to float
+                new_value = float(value)
+            except ValueError:
+                # If not float, keep it as a string
+                new_value = str(value)
 
         self._data[index.row()][index.column()] = {'value': new_value, 'changed': True}
         self.dataChanged.emit(index, index, [role, Qt.BackgroundRole])
@@ -3297,11 +3302,6 @@ class MdTableModel(QAbstractTableModel):
 
     def sort(self, column, order):
         self.layoutAboutToBeChanged.emit()
-        self._data = sorted(self._data, key=lambda x: x[column]['value'], reverse=(order == Qt.DescendingOrder))
-        self.layoutChanged.emit()
-
-    def sort(self, column, order):
-        self.layoutAboutToBeChanged.emit()
         try:  # Attempt to sort numerically
             self._data = sorted(
                 self._data,
@@ -3342,7 +3342,7 @@ class MdTableModel(QAbstractTableModel):
             for idx, col in enumerate(row):
                 if idx > max(self._uneditable_columns):
                     #print("idx:", idx, "col:", col['value'])
-                    property_list.append(col['value'])
+                    property_list.append(str(col['value']))
                 elif idx == 1:
                     obj.sequence = col['value']
             obj.property_list = property_list

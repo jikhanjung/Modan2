@@ -5,3 +5,4 @@ dist/
 data/
 test*.py
 Output/
+*.spec

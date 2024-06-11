@@ -30,7 +30,7 @@ Modan2 provides a holistic solution for geometric morphometrics, enabling:
    - Dedicated GPU recommended for 3D features
 
 2. **Download and Install:**
-   - Get the latest Modan2 installer from our [official website](https://your-website-link-here).
+   - Get the latest Modan2 installer from our release section.
    - Follow the on-screen instructions.
 
 ## Getting Started

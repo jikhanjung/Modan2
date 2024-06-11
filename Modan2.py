@@ -550,15 +550,24 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.object_model.resetColors()
         #indexes = self.tableView.selectedIndexes()
 
+    def get_selected_cells(self):
+        indexes = self.tableView.selectedIndexes()
+        if len(indexes) == 0:
+            return []
+        selected_cells = []
+        for index in indexes:
+            selected_cells.append((index.row(), index.column()))
+        return selected_cells
+
     def open_object_menu(self, position):
         indexes = self.tableView.selectedIndexes()
         selected_object_list = self.get_selected_object_list()
         if selected_object_list is not None and len(selected_object_list) > 0:
             level = 0
             index = indexes[0]
-            action_edit_object = QAction("Edit")
+            action_edit_object = QAction("Edit Object")
             action_edit_object.triggered.connect(self.on_tableView_doubleClicked)
-            action_delete_object = QAction("Delete")
+            action_delete_object = QAction("Delete Object")
             action_delete_object.triggered.connect(self.on_action_delete_object_triggered)
             action_refresh_table = QAction("Reload")
             action_refresh_table.triggered.connect(self.load_object)

@@ -376,6 +376,8 @@ class ObjectViewer2D(QLabel):
             #if self.object_dialog is None:
             #    return
             if self.edit_mode == MODE['EDIT_LANDMARK']:
+                if self.orig_pixmap is None:
+                    return
                 img_x = self._2imgx(self.mouse_curr_x)
                 img_y = self._2imgy(self.mouse_curr_y)
                 if img_x < 0 or img_x > self.orig_pixmap.width() or img_y < 0 or img_y > self.orig_pixmap.height():

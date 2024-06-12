@@ -2,11 +2,11 @@ from PyQt5.QtWidgets import QTableWidgetItem, QHeaderView, QFileDialog, QCheckBo
                             QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QProgressBar, QApplication, \
                             QDialog, QLineEdit, QLabel, QPushButton, QAbstractItemView, QStatusBar, QMessageBox, \
                             QTableView, QSplitter, QRadioButton, QComboBox, QTextEdit, QSizePolicy, \
-                            QTableWidget, QGridLayout, QAbstractButton, QButtonGroup, QGroupBox, \
-                            QTabWidget, QListWidget, QSpinBox, QPlainTextEdit, QSlider, QScrollArea, QStyledItemDelegate
+                            QTableWidget, QGridLayout, QAbstractButton, QButtonGroup, QGroupBox, QInputDialog,\
+                            QTabWidget, QListWidget, QSpinBox, QPlainTextEdit, QSlider, QScrollArea, QStyledItemDelegate, QAction, QShortcut, QMenu
 from PyQt5.QtGui import QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem, QImage,\
                         QFont, QPainter, QBrush, QMouseEvent, QWheelEvent, QIntValidator, QIcon, QCursor,\
-                        QFontMetrics
+                        QFontMetrics, QKeySequence
 from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSize, QPoint, QAbstractTableModel, \
                          pyqtSlot, pyqtSignal, QItemSelectionModel, QTimer, QEvent, QModelIndex
 
@@ -3096,6 +3096,126 @@ class MdTableView(QTableView):
         self.verticalHeader().hide()
         self.sort_later = False
         #self.model().dataChanged.connect(self.defer_sort)
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.show_context_menu)
+
+        self.copy_action = QAction("Copy\tCtrl+C", self)
+        self.copy_action.triggered.connect(self.copy_selected_data)
+        copy_shortcut = QShortcut(QKeySequence.Copy, self)
+        copy_shortcut.activated.connect(self.copy_action.trigger)  # Connect to the action
+        self.paste_action = QAction("Paste\tCtrl+V", self)
+        self.paste_action.triggered.connect(self.paste_data)
+        paste_shortcut = QShortcut(QKeySequence.Paste, self)
+        paste_shortcut.activated.connect(self.paste_action.trigger)
+        self.fill_sequence_action = QAction("Fill sequence", self)
+        self.fill_sequence_action.triggered.connect(self.fill_sequence)
+        self.fill_action = QAction("Fill value", self) 
+        self.fill_action.triggered.connect(self.fill_value)
+
+    def show_context_menu(self, pos):
+        #print("context menu event")
+        index = self.indexAt(pos)  # Get the index of the clicked cell
+        column = index.column()  # Get the column index
+
+        menu = QMenu(self)
+        menu.addAction(self.copy_action)
+        menu.addAction(self.paste_action)
+
+        if column == 1:  # Example: Special actions for column 1 (sequence)
+            menu.addAction(self.fill_sequence_action)
+        menu.addAction(self.fill_action)
+        menu.exec_(self.mapToGlobal(pos)) 
+
+    def fill_value(self):
+        #print("fill value")
+        selected_indices = self.selectionModel().selectedIndexes()
+        if len(selected_indices) == 0:
+            return
+        #selected_indices.sort(key=lambda x: (x.row(), x.column()))
+        # make sure all the cells are in the column 1
+        # get column number of all the cells
+        # get the first cell
+        first_index = selected_indices[0]
+        value = self.model().data(first_index, Qt.DisplayRole)
+        # get user input
+        value, ok = QInputDialog.getText(self, "Fill Values", "Enter value", text=value)
+        if not ok:
+            return
+        # fill the values
+        for index in selected_indices:
+            self.model().setData(index, value, Qt.EditRole)
+
+    def fill_sequence(self):
+        selected_cells = self.selectionModel().selectedIndexes()
+        if len(selected_cells) == 0:
+            return
+        selected_cells.sort(key=lambda x: (x.row(), x.column()))
+        # make sure all the cells are in the column 1
+        # get column number of all the cells
+        column_numbers = [cell.column() for cell in selected_cells]
+        if len(set(column_numbers)) > 1 or column_numbers[0] != 1:
+            return
+        
+        # get the first cell
+        first_cell = selected_cells[0]
+        first_row = first_cell.row()
+        column_0_index = self.model().index(first_row, 0)
+        object_id = self.model().data(column_0_index, Qt.DisplayRole)
+        sequence = self.model().data(first_cell, Qt.DisplayRole)
+        try:
+            sequence = int(sequence)
+        except:
+            sequence = 1
+        # get user input
+        sequence, ok = QInputDialog.getInt(self, "Fill Sequence", "Enter starting sequence number", sequence)
+        if not ok:
+            return
+        # get increment
+        increment, ok = QInputDialog.getInt(self, "Fill Sequence", "Enter increment", 1)
+        if not ok:
+            return
+        # fill the sequence
+        for cell in selected_cells:
+            row = cell.row()
+            index = self.model().index(row, 1)
+            self.model().setData(index, sequence, Qt.EditRole)
+            sequence += increment
+
+    def paste_data(self):
+        current_index = self.currentIndex()
+        if not current_index.isValid():
+            return
+        text = QApplication.clipboard().text()
+        #print("text:", text)
+        rows = text.split("\n")
+        #print("rows:", rows)
+        for row, row_text in enumerate(rows):
+            #print("row_text:", row_text)
+            columns = row_text.split("\t")
+            for col, text in enumerate(columns):
+                index = self.model().index(current_index.row() + row, current_index.column() + col)
+                self.model().setData(index, text, Qt.EditRole)
+
+
+    def copy_selected_data(self):
+        #print("copy selected data")
+        selected_indexes = self.selectionModel().selectedIndexes()
+        #print("selected_indexes:", selected_indexes)
+        if selected_indexes:
+            
+            all_data = []
+            data_row = []
+            prev_index = None
+            for index in selected_indexes:
+                #print("index:", index)
+                if prev_index is not None and index.row() != prev_index.row():
+                    all_data.append("\t".join(data_row))
+                    data_row = []
+                data_row.append(str(self.model().data(index, Qt.DisplayRole)))
+                prev_index = index
+            all_data.append("\t".join(data_row))
+            text = "\n".join(all_data)  # Tab-separated for multiple cells
+            QApplication.clipboard().setText(text)
 
     def defer_sort(self, topLeft, bottomRight, roles):
         # Only defer if the sequence column was edited
@@ -3115,9 +3235,23 @@ class MdTableView(QTableView):
             new_index = self.model().index(new_row, current_index.column())
             if new_index.isValid():
                 self.setCurrentIndex(new_index)
+        elif event.key() == Qt.Key_Delete:  # Check if Delete key is pressed
+            self.clear_selected_cells()
         else:
             #print("key press not return not up not down")
             super().keyPressEvent(event)
+
+
+    def clear_selected_cells(self):
+        indexes = self.selectionModel().selectedIndexes()
+        if indexes:
+            for index in indexes:
+                # get source model 
+                
+                #source_index = self.model().mapToSource(index)
+                source_model = self.model().sourceModel()
+                if index.column() not in source_model._uneditable_columns:
+                    self.model().setData(index, "", Qt.EditRole)  # Set data to empty string
 
     def isPersistentEditorOpen(self, index):
         return self.indexWidget(index) is not None
@@ -3200,6 +3334,8 @@ class MdTableModel(QAbstractTableModel):
                 return d['value']
         if role == Qt.BackgroundRole:
             # if d is str or list, return default color
+            if index.column() in self._uneditable_columns:
+                return QColor(240, 240, 240)            
             if isinstance(d, (str, list)):
                 return None
             elif isinstance(d, dict) and d.get('changed', False):

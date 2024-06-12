@@ -528,8 +528,8 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         
         self.treeView.setContextMenuPolicy(Qt.CustomContextMenu)
         self.treeView.customContextMenuRequested.connect(self.open_treeview_menu)
-        self.tableView.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.tableView.customContextMenuRequested.connect(self.open_object_menu)
+        #self.tableView.setContextMenuPolicy(Qt.CustomContextMenu)
+        #self.tableView.customContextMenuRequested.connect(self.open_object_menu)
 
     def on_action_new_property_triggered(self):
         if self.selected_dataset is None:
@@ -555,11 +555,71 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         if len(indexes) == 0:
             return []
         selected_cells = []
+        model = self.tableView.model()
+        new_index_list = []
+        if hasattr(model, 'mapToSource'):
+            for index in indexes:
+                new_index = model.mapToSource(index)
+                new_index_list.append(new_index)
+            indexes = new_index_list
+
         for index in indexes:
             selected_cells.append((index.row(), index.column()))
+        #print("selected cells:", selected_cells)
         return selected_cells
 
+    def on_action_fill_sequence_triggered(self):
+        selected_cells = self.get_selected_cells()
+        if len(selected_cells) == 0:
+            return
+        # check if all the cells are column 1 using map or something
+        column_list = list(map(lambda x: x[1], selected_cells))
+        if len(set(column_list)) == 1 and column_list[0] == 1:
+
+            # get the first cell
+            first_row = selected_cells[0][0]
+            # object id is first row's column 0 value
+            object_id = self.object_model._data[first_row][0]['value']
+            first_object = MdObject.get_by_id(object_id)
+            #first_object = self.object_model.object_list[first_row]
+            first_sequence = first_object.sequence
+
+            # get input from user for starting sequence and increment in one dialog
+            text, ok = QInputDialog.getText(self, 'Input Dialog', 'Enter starting sequence number', text=str(first_sequence))
+            if ok:
+                try:
+                    first_sequence = int(text)
+                except:
+                    return
+            text, ok = QInputDialog.getText(self, 'Input Dialog', 'Enter increment', text="1")
+            if ok:
+                try:
+                    increment = int(text)
+                except:
+                    return
+            
+            for i, cell in enumerate(selected_cells):
+                row, column = cell
+                object_id = self.object_model._data[row][0]['value']
+                object = MdObject.get_by_id(object_id)
+                object.sequence = first_sequence + i * increment
+                object.save()
+            self.load_object()
+
     def open_object_menu(self, position):
+        selected_cells = self.get_selected_cells()
+        if len(selected_cells) == 0:
+            return
+        # check if all the cells are column 1 using map or something
+        column_list = list(map(lambda x: x[1], selected_cells))
+        if len(set(column_list)) == 1 and column_list[0] == 1:
+            action_fill_sequence = QAction("Fill sequence")
+            action_fill_sequence.triggered.connect(self.on_action_fill_sequence_triggered)
+            menu = QMenu()
+            menu.addAction(action_fill_sequence)
+            menu.exec_(self.tableView.viewport().mapToGlobal(position))
+        
+
         indexes = self.tableView.selectedIndexes()
         selected_object_list = self.get_selected_object_list()
         if selected_object_list is not None and len(selected_object_list) > 0:

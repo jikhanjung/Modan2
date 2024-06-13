@@ -480,6 +480,7 @@ class ObjectViewer2D(QLabel):
 
         QLabel.wheelEvent(self, event)
         self.repaint()
+        event.accept()
 
     def adjust_scale(self, scale_delta_ratio, recurse = True):
         #prev_scale = self.scale
@@ -1215,6 +1216,7 @@ class ObjectViewer3D(QGLWidget):
             self.parent.sync_zoom(self, self.dolly)
 
         self.updateGL()
+        event.accept()
 
     def add_wire(self, wire_start_index, wire_end_index):
         if wire_start_index == wire_end_index:

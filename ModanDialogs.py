@@ -3113,13 +3113,15 @@ class DataExplorationDialog(QDialog):
         
         degree = int(degree_text)
         if regression_by == "By group":
-            for key in key_list:
+            for idx, key in enumerate(key_list):
                 x_vals = np.array(self.scatter_data[key]['x_val'])
                 y_vals = np.array(self.scatter_data[key]['y_val'])
 
                 if len(x_vals) < 2:
                     self.curve_list.append( None )
+                    #self.shape_view_list[idx].hide()
                 else:
+                    #self.shape_view_list[idx].show()
                     model = np.polyfit( x_vals, y_vals, degree)
                     #model_list.append(model)
                     r_squared = self.calculate_r_squared(model, x_vals, y_vals)
@@ -3138,7 +3140,9 @@ class DataExplorationDialog(QDialog):
             y_vals = np.array(self.regression_data['y_val'])
             if len(x_vals) < 2:
                 self.curve_list.append( None )
+                #self.shape_view_list[idx].hide()
             else:
+                #self.shape_view_list[idx].show()
                 model = np.polyfit( x_vals, y_vals, degree)
                 r_squared = self.calculate_r_squared(model, x_vals, y_vals)
                 size_range = np.linspace(min(self.regression_data['x_val']), max(self.regression_data['x_val']), 100)

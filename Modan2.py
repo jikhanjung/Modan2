@@ -19,8 +19,8 @@ import MdUtils as mu
 from peewee_migrate import Router
 
 from ModanDialogs import DatasetAnalysisDialog, ObjectDialog, ImportDatasetDialog, DatasetDialog, PreferencesDialog, \
-    MODE, ObjectViewer3D, ExportDatasetDialog, ObjectViewer2D, ProgressDialog, NewAnalysisDialog, AnalysisInfoWidget, DataExplorationDialog
-from ModanComponents import MdTableModel, MdTableView, MdSequenceDelegate
+    MODE, ObjectViewer3D, ExportDatasetDialog, ObjectViewer2D, ProgressDialog, NewAnalysisDialog, DataExplorationDialog
+from ModanComponents import MdTableModel, MdTableView, MdSequenceDelegate, AnalysisInfoWidget
 from MdStatistics import PerformCVA, PerformPCA, PerformManova
 
 import matplotlib.pyplot as plt
@@ -516,7 +516,27 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.hsplitter.addWidget(self.treeView)
         self.hsplitter.addWidget(self.vsplitter)
         self.hsplitter.setSizes([300, 800])
-        self.analysis_view = AnalysisInfoWidget(self)
+        self.analysis_view = QWidget()
+        self.analysis_view_layout = QVBoxLayout()
+        self.analysis_view.setLayout(self.analysis_view_layout)
+        self.analysis_info_widget = AnalysisInfoWidget(self)
+        self.analysis_view_layout.addWidget(self.analysis_info_widget)
+
+        self.btnSaveAnalysis = QPushButton("Save")
+        self.btnSaveAnalysis.clicked.connect(self.btnSaveAnalysis_clicked)
+        self.btnAnalysisDetail = QPushButton("Analysis Details")
+        self.btnAnalysisDetail.clicked.connect(self.btnAnalysisDetail_clicked)
+        self.btnDataExploration = QPushButton("Data Exploration")
+        self.btnDataExploration.clicked.connect(self.btnDataExploration_clicked)
+        self.analysis_button_layout = QHBoxLayout()
+        self.analysis_button_layout.addWidget(self.btnSaveAnalysis)
+        self.analysis_button_layout.addWidget(self.btnAnalysisDetail)
+        self.analysis_button_layout.addWidget(self.btnDataExploration)
+        self.analysis_button_widget = QWidget()
+        self.analysis_button_widget.setLayout(self.analysis_button_layout)
+        self.analysis_view_layout.addWidget(self.analysis_button_widget)
+
+
 
         self.setCentralWidget(self.hsplitter)
 
@@ -526,6 +546,38 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
         self.tableView.doubleClicked.connect(self.on_tableView_doubleClicked)
         self.treeView.customContextMenuRequested.connect(self.open_treeview_menu)
+
+
+    def btnAnalysisDetail_clicked(self):
+        #self.detail_dialog = DatasetAnalysisDialog(self.parent)
+        self.analysis_dialog = DatasetAnalysisDialog(self,self.analysis_info_widget.analysis.dataset)
+        self.analysis_dialog.show()
+
+
+    def btnSaveAnalysis_clicked(self):
+        pass
+
+    def btnDataExploration_clicked(self):
+        #print("btnExplore_clicked")
+        self.exploration_dialog = DataExplorationDialog(self)
+        #print("exploration dialog created")
+        # get tab text
+        tab_text = self.analysis_info_widget.analysis_tab.tabText(self.analysis_info_widget.analysis_tab.currentIndex())
+        if tab_text == "PCA":
+            group_by = self.analysis_info_widget.comboPcaGroupBy.currentText()
+        elif tab_text == "CVA":
+            group_by = self.analysis_info_widget.comboCvaGroupBy.currentText()
+        elif tab_text == "MANOVA":
+            group_by = self.analysis_info_widget.comboManovaGroupBy.currentText()
+
+        #group_by = self.comboCvaGroupBy
+        #print("going to call set_analysis")
+        self.exploration_dialog.set_analysis(self.analysis_info_widget.analysis, tab_text, group_by)
+        #print("going to update chart")
+        #print("going to show")
+        self.exploration_dialog.show()
+        self.exploration_dialog.update_chart()
+        #self.exploration_dialog.activateWindow()
 
     def on_action_new_property_triggered(self):
         if self.selected_dataset is None:
@@ -726,6 +778,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.dlg.set_dataset(self.selected_dataset)
         object = MdObject()
         object.dataset = self.selected_dataset
+        object.sequence = self.selected_dataset.object_list.count() + 1
         self.dlg.set_object(object)
         ret = self.dlg.exec_()
         if ret == 0:
@@ -1185,8 +1238,8 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 self.selected_analysis = obj
                 if self.hsplitter.widget(1) != self.analysis_view:
                     self.hsplitter.replaceWidget(1,self.analysis_view)
-                self.analysis_view.set_analysis(self.selected_analysis)
-                self.analysis_view.show_analysis_result()
+                self.analysis_info_widget.set_analysis(self.selected_analysis)
+                self.analysis_info_widget.show_analysis_result()
 
                 #self.actionAnalyze.setEnabled(False)
                 #self.actionNewObject.setEnabled(False)

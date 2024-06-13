@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import QMainWindow, QHeaderView, QApplication, QAbstractIte
                             QStatusBar, QInputDialog, QToolBar, QWidget, QPlainTextEdit, QVBoxLayout, QHBoxLayout, \
                             QPushButton
 from PyQt5.QtGui import QIcon, QStandardItemModel, QStandardItem, QKeySequence
-from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSettings, QSize, QTranslator
+from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSettings, QSize, QTranslator, QItemSelectionModel
 
 from PyQt5.QtCore import pyqtSlot
 import re,os,sys
@@ -124,6 +124,7 @@ class ModanMainWindow(QMainWindow):
         self.statusBar = QStatusBar()
         self.setStatusBar(self.statusBar)
         self.analysis_dialog = None
+        self.data_changed = False
 
         # read preferences and set window size, toolbar icon size, etc.
         self.remember_geometry = True
@@ -520,16 +521,11 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.setCentralWidget(self.hsplitter)
 
         self.treeView.doubleClicked.connect(self.on_treeView_doubleClicked)
-        #self.treeView.mousePressEvent = self.on_treeView_clicked
-        #self.treeView.clicked.connect(self.on_treeView_clicked)
         self.treeView.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.tableView.doubleClicked.connect(self.on_tableView_doubleClicked)
-        #self.tableView.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        
         self.treeView.setContextMenuPolicy(Qt.CustomContextMenu)
+
+        self.tableView.doubleClicked.connect(self.on_tableView_doubleClicked)
         self.treeView.customContextMenuRequested.connect(self.open_treeview_menu)
-        #self.tableView.setContextMenuPolicy(Qt.CustomContextMenu)
-        #self.tableView.customContextMenuRequested.connect(self.open_object_menu)
 
     def on_action_new_property_triggered(self):
         if self.selected_dataset is None:
@@ -549,146 +545,6 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.object_model.save_object_info()
         self.object_model.resetColors()
         #indexes = self.tableView.selectedIndexes()
-
-    def get_selected_cells(self):
-        indexes = self.tableView.selectedIndexes()
-        if len(indexes) == 0:
-            return []
-        selected_cells = []
-        model = self.tableView.model()
-        new_index_list = []
-        if hasattr(model, 'mapToSource'):
-            for index in indexes:
-                new_index = model.mapToSource(index)
-                new_index_list.append(new_index)
-            indexes = new_index_list
-
-        for index in indexes:
-            selected_cells.append((index.row(), index.column()))
-        #print("selected cells:", selected_cells)
-        return selected_cells
-
-    def on_action_fill_sequence_triggered(self):
-        selected_cells = self.get_selected_cells()
-        if len(selected_cells) == 0:
-            return
-        # check if all the cells are column 1 using map or something
-        column_list = list(map(lambda x: x[1], selected_cells))
-        if len(set(column_list)) == 1 and column_list[0] == 1:
-
-            # get the first cell
-            first_row = selected_cells[0][0]
-            # object id is first row's column 0 value
-            object_id = self.object_model._data[first_row][0]['value']
-            first_object = MdObject.get_by_id(object_id)
-            #first_object = self.object_model.object_list[first_row]
-            first_sequence = first_object.sequence
-
-            # get input from user for starting sequence and increment in one dialog
-            text, ok = QInputDialog.getText(self, 'Input Dialog', 'Enter starting sequence number', text=str(first_sequence))
-            if ok:
-                try:
-                    first_sequence = int(text)
-                except:
-                    return
-            text, ok = QInputDialog.getText(self, 'Input Dialog', 'Enter increment', text="1")
-            if ok:
-                try:
-                    increment = int(text)
-                except:
-                    return
-            
-            for i, cell in enumerate(selected_cells):
-                row, column = cell
-                object_id = self.object_model._data[row][0]['value']
-                object = MdObject.get_by_id(object_id)
-                object.sequence = first_sequence + i * increment
-                object.save()
-            self.load_object()
-
-    def open_object_menu(self, position):
-        selected_cells = self.get_selected_cells()
-        if len(selected_cells) == 0:
-            return
-        # check if all the cells are column 1 using map or something
-        column_list = list(map(lambda x: x[1], selected_cells))
-        if len(set(column_list)) == 1 and column_list[0] == 1:
-            action_fill_sequence = QAction("Fill sequence")
-            action_fill_sequence.triggered.connect(self.on_action_fill_sequence_triggered)
-            menu = QMenu()
-            menu.addAction(action_fill_sequence)
-            menu.exec_(self.tableView.viewport().mapToGlobal(position))
-        
-
-        indexes = self.tableView.selectedIndexes()
-        selected_object_list = self.get_selected_object_list()
-        if selected_object_list is not None and len(selected_object_list) > 0:
-            level = 0
-            index = indexes[0]
-            action_edit_object = QAction("Edit Object")
-            action_edit_object.triggered.connect(self.on_tableView_doubleClicked)
-            action_delete_object = QAction("Delete Object")
-            action_delete_object.triggered.connect(self.on_action_delete_object_triggered)
-            action_refresh_table = QAction("Reload")
-            action_refresh_table.triggered.connect(self.load_object)
-            action_edit_property_list = []
-            if self.selected_dataset is not None and len(self.selected_dataset.propertyname_list)>0:
-                
-                for index, propertyname in enumerate(self.selected_dataset.propertyname_list):
-                    action_edit_property_list.append(QAction("- Edit " + propertyname))
-                    action_edit_property_list[-1].triggered.connect(lambda checked,index=index: self.on_edit_property(index))
-
-            menu = QMenu()
-            if len(selected_object_list) == 1:
-                menu.addAction(action_edit_object)
-            menu.addAction(action_delete_object)
-            menu.addAction(action_refresh_table)
-            if len(action_edit_property_list) > 0:
-                menu.addSeparator()
-                for action in action_edit_property_list:
-                    menu.addAction(action)
-
-            menu.exec_(self.tableView.viewport().mapToGlobal(position))
-
-    def on_edit_property(self,idx):
-        object_list = self.get_selected_object_list()
-        if len(object_list) == 0:
-            return
-
-        for obj in object_list:
-            obj.unpack_property()
-
-        propertyname = self.selected_dataset.propertyname_list[idx]
-        text, ok = QInputDialog.getText(self, 'Input Dialog', 'Enter new value for ' + propertyname, text="")
-
-        if ok:
-            total_count = len(object_list)
-            current_count = 0
-            self.progress_dialog = ProgressDialog(self)
-            self.progress_dialog.setModal(True)
-            label_text = "Updating {} values...".format(propertyname)
-            self.progress_dialog.lbl_text.setText(label_text)
-            self.progress_dialog.pb_progress.setValue(0)
-            self.progress_dialog.show()
-
-            for object in object_list:
-                current_count += 1
-                self.progress_dialog.pb_progress.setValue(int((current_count/float(total_count))*100))
-                self.progress_dialog.update()
-                QApplication.processEvents()
-                #if self.progress_dialog.stop_progress:
-                #    break
-
-                object.unpack_property()
-                if len(object.property_list) < idx+1:
-                    while len(object.property_list) < idx+1:
-                        object.property_list.append("")
-
-                object.property_list[idx] = text
-                object.pack_property()
-                object.save()
-            self.load_object()
-            self.progress_dialog.close()
 
     @pyqtSlot()
     def on_action_delete_object_triggered(self):
@@ -1057,10 +913,19 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
         return selected_object_list
 
+    def on_object_data_changed(self):
+        self.data_changed = True
+        self.btnSaveObjectInfo.setEnabled(True)
+
     def reset_tableView(self):
         #print("reset tableview")
         #self.object_model = QStandardItemModel()
+        self.btnSaveObjectInfo.setEnabled(False)
+        self.btnAddObject.setEnabled(False)
+        self.btnAddProperty.setEnabled(False)
+        self.btnEditObject.setEnabled(False)
         self.object_model = MdTableModel()
+        self.object_model.dataChangedCustomSignal.connect(self.on_object_data_changed)
         #print("mdtablemodel set")
         header_labels = ["ID", "Seq.", "Name", "Count", "CSize"]
         if self.selected_dataset is not None:
@@ -1287,6 +1152,20 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 self.load_subdataset(item1,item1.data())
 
     def on_dataset_selection_changed(self, selected, deselected):
+        if self.data_changed:
+            ret = QMessageBox.warning(self, "Warning", "Data has been changed. Do you want to save?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
+            if ret == QMessageBox.Yes:
+                self.on_btnSaveObjectInfo_clicked()
+            elif ret == QMessageBox.Cancel:
+                # cancel selection change by selecting deselected
+                self.treeView.selectionModel().selectionChanged.disconnect(self.on_dataset_selection_changed)
+                self.treeView.selectionModel().clearSelection()
+                self.treeView.selectionModel().select(deselected, QItemSelectionModel.Select)
+                self.treeView.selectionModel().selectionChanged.connect(self.on_dataset_selection_changed)
+                return
+            else:
+                self.data_changed = False
+            
         #print("dataset selection changed")
         indexes = selected.indexes()
         #print(indexes)
@@ -1324,6 +1203,11 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.clear_object_view()
         if self.selected_dataset is None:
             return
+
+        self.btnEditObject.setEnabled(False)
+        self.btnAddProperty.setEnabled(True)
+        self.btnAddObject.setEnabled(True)
+        self.btnSaveObjectInfo.setEnabled(False)
 
         object_list = self.selected_dataset.object_list.order_by(MdObject.sequence,MdObject.id)
 
@@ -1370,15 +1254,17 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             self.object_model.appendRows([row_data])
 
     def on_object_selection_changed(self, selected, deselected):
+        #print("object selection changed 1")
         selected_object_list = self.get_selected_object_list()
         if selected_object_list is None or len(selected_object_list) != 1:
+            self.btnEditObject.setEnabled(False)
             return
+        #print("object selection changed 2")
 
+        self.btnEditObject.setEnabled(True)
         object_id = selected_object_list[0].id
-        #print("selected object id:", object_id)
         self.selected_object = MdObject.get_by_id(object_id)
         self.selected_object.unpack_landmark()
-        #print("selected object:", self.selected_object)
         self.show_object(self.selected_object)
 
     def show_object(self, obj):

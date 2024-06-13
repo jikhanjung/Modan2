@@ -1350,6 +1350,7 @@ class NewAnalysisDialog(QDialog):
 
         valid_property_index_list = self.dataset.get_valid_property_index_list()
         propertyname_list = self.dataset.get_propertyname_list()
+        #print("valid_property_index_list", valid_property_index_list, propertyname_list)
         for idx in valid_property_index_list:
             property = propertyname_list[idx]
             self.comboCvaGroupBy.addItem(property, idx)

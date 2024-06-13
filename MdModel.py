@@ -65,8 +65,12 @@ class MdDataset(Model):
                 property_list = obj.get_property_list()
                 if idx < len(property_list) and property_list[idx] not in unique_property_list:
                     unique_property_list.append(property_list[idx])
-            if len(unique_property_list) < 0.7 * object_count:
+            #print("unique_property_list:", unique_property_list, len(unique_property_list))
+            if len(unique_property_list) <= 10 or len(unique_property_list) < 0.5 * object_count:
                 valid_property_index_list.append(idx)
+        #print("valid_property_index_list:", valid_property_index_list)
+        if len(valid_property_index_list) == 0:
+            valid_property_index_list = [x for x in range(len(propertyname_list))]
         return valid_property_index_list
 
 

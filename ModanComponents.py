@@ -3088,7 +3088,7 @@ class MdSequenceDelegate(QStyledItemDelegate):
             return editor
         else:
             return super().createEditor(parent, option, index)
-        
+
 class MdTableView(QTableView):
 
     def __init__(self, parent=None):
@@ -3136,7 +3136,7 @@ class MdTableView(QTableView):
         # get column number of all the cells
         # get the first cell
         first_index = selected_indices[0]
-        value = self.model().data(first_index, Qt.DisplayRole)
+        value = str(self.model().data(first_index, Qt.DisplayRole))
         # get user input
         value, ok = QInputDialog.getText(self, "Fill Values", "Enter value", text=value)
         if not ok:
@@ -3304,6 +3304,7 @@ class MdTableView(QTableView):
                 header.resizeSection(i, width)
 
 class MdTableModel(QAbstractTableModel):
+    dataChangedCustomSignal = pyqtSignal()
     def __init__(self, data=None):
         super().__init__()
         self._data = data or []  # Initialize with provided data or an empty list
@@ -3378,6 +3379,7 @@ class MdTableModel(QAbstractTableModel):
 
         self._data[index.row()][index.column()] = {'value': new_value, 'changed': True}
         self.dataChanged.emit(index, index, [role, Qt.BackgroundRole])
+        self.dataChangedCustomSignal.emit()
         return True
 
     #def flags(self, index):
@@ -3486,4 +3488,5 @@ class MdTableModel(QAbstractTableModel):
             obj.property_list = property_list
             obj.pack_property()
             obj.save()
+        self.data_changed = False
         

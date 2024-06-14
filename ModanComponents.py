@@ -3086,6 +3086,9 @@ class MdTableView(QTableView):
         self.fill_sequence_action.triggered.connect(self.fill_sequence)
         self.fill_action = QAction("Fill value", self) 
         self.fill_action.triggered.connect(self.fill_value)
+        self.clear_cells_action = QAction("Clear", self)
+        self.clear_cells_action.triggered.connect(self.clear_selected_cells)
+
 
     def show_context_menu(self, pos):
         #print("context menu event")
@@ -3099,6 +3102,7 @@ class MdTableView(QTableView):
         if column == 1:  # Example: Special actions for column 1 (sequence)
             menu.addAction(self.fill_sequence_action)
         menu.addAction(self.fill_action)
+        menu.addAction(self.clear_cells_action)
         menu.exec_(self.mapToGlobal(pos)) 
 
     def fill_value(self):

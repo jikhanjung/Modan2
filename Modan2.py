@@ -596,6 +596,8 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         # get object info from tableview
         self.object_model.save_object_info()
         self.object_model.resetColors()
+        self.data_changed = False
+        self.btnSaveObjectInfo.setEnabled(False)
         #indexes = self.tableView.selectedIndexes()
 
     @pyqtSlot()

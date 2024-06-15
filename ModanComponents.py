@@ -3,7 +3,8 @@ from PyQt5.QtWidgets import QTableWidgetItem, QHeaderView, QFileDialog, QCheckBo
                             QDialog, QLineEdit, QLabel, QPushButton, QAbstractItemView, QStatusBar, QMessageBox, \
                             QTableView, QSplitter, QRadioButton, QComboBox, QTextEdit, QSizePolicy, \
                             QTableWidget, QGridLayout, QAbstractButton, QButtonGroup, QGroupBox, QInputDialog,\
-                            QTabWidget, QListWidget, QSpinBox, QPlainTextEdit, QSlider, QScrollArea, QStyledItemDelegate, QAction, QShortcut, QMenu
+                            QTabWidget, QListWidget, QSpinBox, QPlainTextEdit, QSlider, QScrollArea, QStyledItemDelegate, \
+                            QAction, QShortcut, QMenu
 from PyQt5.QtGui import QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem, QImage,\
                         QFont, QPainter, QBrush, QMouseEvent, QWheelEvent, QIntValidator, QIcon, QCursor,\
                         QFontMetrics, QKeySequence
@@ -2684,9 +2685,9 @@ class TPS:
                     continue
 
                 # regular expression that finds the line "LM=xx comment", ignore case
-                headerline = re.search('^\s*LM\s*=\s*(\d+)\s*(.*)', line, re.IGNORECASE)
+                headerline = re.search(r'^\s*LM\s*=\s*(\d+)\s*(.*)', line, re.IGNORECASE)
 
-                #headerline = re.search('^\s*[LM]+\s*=\s*(\d+)\s*(.*)', line)
+                #headerline = re.search(r'^\s*[LM]+\s*=\s*(\d+)\s*(.*)', line)
                 if headerline is not None:
                     #print("headerline:", headerline.group(1), headerline.group(2))
                     if currently_in_data_section == True:
@@ -2716,11 +2717,11 @@ class TPS:
                         currently_in_data_section = True
                         landmark_count, object_comment_1 = int(headerline.group(1)), headerline.group(2).strip()
                 else:
-                    dataline = re.search('^\s*(\w+)\s*=(.+)', line)
+                    dataline = re.search(r'^\s*(\w+)\s*=(.+)', line)
                     #print(line)
                     if dataline is None:
                         #print("actual data:", line)
-                        point = [ float(x) for x in re.split('\s+', line)]
+                        point = [ float(x) for x in re.split(r'\s+', line)]
                         if len(point) > 2 and self.isNumber(point[2]):
                             threed += 1
                         else:
@@ -2851,7 +2852,7 @@ class NTS:
                     comments += line
                     continue
                 #                          1    2     3   4    5     6    7   8    9    10   11   12   13    14
-                headerline = re.search('^(\d+)(\s+)(\d+)(\w*)(\s+)(\d+)(\w*)(\s+)(\d+)(\s+)(\d*)(\s*)(\w+)=(\d+)(.*)', line)
+                headerline = re.search(r'^(\d+)(\s+)(\d+)(\w*)(\s+)(\d+)(\w*)(\s+)(\d+)(\s+)(\d*)(\s*)(\w+)=(\d+)(.*)', line)
                 if headerline is not None:
                     matrix_type = headerline.group(1)
                     total_object_count = int(headerline.group(3))
@@ -2876,17 +2877,17 @@ class NTS:
                     continue
 
                 if headerline_processed == True and row_names_exist_in_separate_line == True and row_names_read == False:
-                    row_names_list = re.split('\s+', line)
+                    row_names_list = re.split(r'\s+', line)
                     row_names_read = True
                     continue
 
                 if headerline_processed == True and column_names_exist == True and column_names_read == False:
-                    column_names_list = re.split('\s+', line)
+                    column_names_list = re.split(r'\s+', line)
                     column_names_read = True
                     continue
 
                 if headerline_processed == True:
-                    data_list = re.split('\s+', line)
+                    data_list = re.split(r'\s+', line)
                     if row_names_exist_at_row_beginning == True:
                         row_name = data_list.pop(0)
                     elif row_names_exist_at_row_ending == True:
@@ -2965,7 +2966,7 @@ class Morphologika:
                 '''comment'''
                 continue
             elif line[0] == '[':
-                dsl = re.search('(\w+)', line).group(0).lower()
+                dsl = re.search(r'(\w+)', line).group(0).lower()
                 raw_data[dsl] = []
                 continue
             else:
@@ -2999,7 +3000,7 @@ class Morphologika:
             objects[name] = []
             for point in self.raw_data['rawpoints'][begin:begin + count]:
                 #print point
-                coords = re.split('\s+', point)[:dimension]
+                coords = re.split(r'\s+', point)[:dimension]
                 objects[name].append(coords)
 
         self.landmark_data = objects
@@ -3019,24 +3020,24 @@ class Morphologika:
 
         if 'labels' in self.raw_data.keys():
             for line in self.raw_data['labels']:
-                labels = re.split('\s+', line)
+                labels = re.split(r'\s+', line)
                 for label in labels:
                     self.propertyname_list.append( label )
                     
         if 'labelvalues' in self.raw_data.keys():
             for line in self.raw_data['labelvalues']:
-                property_list = re.split('\s+', line)
+                property_list = re.split(r'\s+', line)
                 self.property_list_list.append(property_list)
 
         if 'wireframe' in self.raw_data.keys():
             for line in self.raw_data['wireframe']:
-                edge = [int(v) for v in re.split('\s+', line)]
+                edge = [int(v) for v in re.split(r'\s+', line)]
                 edge.sort()
                 self.edge_list.append(edge)
 
         if 'polygons' in self.raw_data.keys():
             for line in self.raw_data['polygons']:
-                poly = [int(v) for v in re.split('\s+', line)]
+                poly = [int(v) for v in re.split(r'\s+', line)]
                 poly.sort()
                 self.polygon_list.append(poly)
 

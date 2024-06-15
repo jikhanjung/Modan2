@@ -3,10 +3,10 @@ from PyQt5.QtWidgets import QTableWidgetItem, QHeaderView, QFileDialog, QCheckBo
                             QDialog, QLineEdit, QLabel, QPushButton, QAbstractItemView, QStatusBar, QMessageBox, \
                             QTableView, QSplitter, QRadioButton, QComboBox, QTextEdit, QSizePolicy, \
                             QTableWidget, QGridLayout, QAbstractButton, QButtonGroup, QGroupBox, \
-                            QTabWidget, QListWidget, QSpinBox, QPlainTextEdit, QSlider, QScrollArea
+                            QTabWidget, QListWidget, QSpinBox, QPlainTextEdit, QSlider, QScrollArea, QShortcut
 from PyQt5.QtGui import QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem, QImage,\
                         QFont, QPainter, QBrush, QMouseEvent, QWheelEvent, QDoubleValidator, QIcon, QCursor,\
-                        QFontMetrics, QIntValidator
+                        QFontMetrics, QIntValidator, QKeySequence
 from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSize, QPoint,\
                          pyqtSlot, pyqtSignal, QItemSelectionModel, QTimer, QEvent
 
@@ -405,6 +405,8 @@ class DatasetDialog(QDialog):
         self.m_app = QApplication.instance()
         self.read_settings()
         #self.move(self.parent.pos()+QPoint(100,100))
+        close_shortcut = QShortcut(QKeySequence("Ctrl+W"), self)
+        close_shortcut.activated.connect(self.close) 
 
         self.cbxParent = QComboBox()
         self.edtDatasetName = QLineEdit()
@@ -575,6 +577,8 @@ class ObjectDialog(QDialog):
         self.m_app = QApplication.instance()
         self.read_settings()
         #self.move(self.parent.pos()+QPoint(50,50))
+        close_shortcut = QShortcut(QKeySequence("Ctrl+W"), self)
+        close_shortcut.activated.connect(self.close) 
 
         self.status_bar = QStatusBar()
         self.landmark_list = []
@@ -1487,6 +1491,8 @@ class DataExplorationDialog(QDialog):
         #self.setAttribute(Qt.WA_NoSystemBackground, True)  # Avoids system background paint
 
         #self.windowActivated.connect(self.handle_window_focus)
+        close_shortcut = QShortcut(QKeySequence("Ctrl+W"), self)
+        close_shortcut.activated.connect(self.close) 
 
         self.m_app = QApplication.instance()
         self.fig2 = None

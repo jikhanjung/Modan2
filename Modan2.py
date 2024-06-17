@@ -258,7 +258,7 @@ class ModanMainWindow(QMainWindow):
 
         license_text = """
 Modan2
-Copyright 2023 Jikhan Jung
+Copyright 2023-2024 Jikhan Jung
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
@@ -1370,7 +1370,7 @@ if __name__ == "__main__":
 ''' 
 How to make an exe file
 
-pyinstaller --name "Modan2_v0.1.3_20240611.exe" --onefile --noconsole --add-data "icons/*.png;icons" --add-data "translations/*.qm;translations" --add-data "migrations/*;migrations" --icon="icons/Modan2_2.png" Modan2.py
+pyinstaller --name "Modan2_v0.1.3_20240617.exe" --onefile --noconsole --add-data "icons/*.png;icons" --add-data "translations/*.qm;translations" --add-data "migrations/*;migrations" --icon="icons/Modan2_2.png" Modan2.py
 pyinstaller --onedir --noconsole --add-data "icons/*.png;icons" --add-data "translations/*.qm;translations" --add-data "migrations/*;migrations" --icon="icons/Modan2_2.png" --noconfirm Modan2.py
 #--upx-dir=/path/to/upx
 

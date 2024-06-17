@@ -1,6 +1,9 @@
 # -*- mode: python ; coding: utf-8 -*-
 
 
+block_cipher = None
+
+
 a = Analysis(
     ['Modan2.py'],
     pathex=[],
@@ -11,10 +14,12 @@ a = Analysis(
     hooksconfig={},
     runtime_hooks=[],
     excludes=[],
+    win_no_prefer_redirects=False,
+    win_private_assemblies=False,
+    cipher=block_cipher,
     noarchive=False,
-    optimize=0,
 )
-pyz = PYZ(a.pure)
+pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
 exe = EXE(
     pyz,
@@ -32,20 +37,15 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['icons/Modan2_2.png'],
+    icon=['icons\\Modan2_2.png'],
 )
 coll = COLLECT(
     exe,
     a.binaries,
+    a.zipfiles,
     a.datas,
     strip=False,
     upx=True,
     upx_exclude=[],
     name='Modan2',
-)
-app = BUNDLE(
-    coll,
-    name='Modan2.app',
-    icon='icons/Modan2_2.png',
-    bundle_identifier=None,
 )

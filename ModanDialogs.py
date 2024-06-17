@@ -2218,18 +2218,17 @@ class DataExplorationDialog(QDialog):
 
 
     def animate_shape(self):
-        if self.mode == MODE_COMPARISON:
-            QApplication.setOverrideCursor(Qt.WaitCursor)
-            if self.record_animation == True:
-                self.pause_frame = 15
-            else:
-                self.pause_frame = 15
+        if self.mode not in [ MODE_COMPARISON, MODE_GROWTH_TRAJECTORY ] or self.comboRegressionBy.currentText() == "By group":
+            return
 
-            self.toolbar_widget.hide()
-            self.shape_option_widget.hide()
-            self.total_frame = int(self.edtNumFrames.text())
-            self.half_frame = int(self.total_frame / 2)
+        QApplication.setOverrideCursor(Qt.WaitCursor)
+        self.pause_frame = 15
+        self.toolbar_widget.hide()
+        self.shape_option_widget.hide()
+        self.total_frame = int(self.edtNumFrames.text())
+        self.half_frame = int(self.total_frame / 2)
 
+        if self.mode in [MODE_COMPARISON]:
             from_shape = self.custom_shape_hash[0]
             to_shape = self.custom_shape_hash[1]
             x_from, y_from = from_shape['coords']
@@ -2239,15 +2238,36 @@ class DataExplorationDialog(QDialog):
             self.animation_x_range = np.linspace(x_from, x_to, self.half_frame)
             self.animation_y_range = np.linspace(y_from, y_to, self.half_frame)
             self.animation_shape = { 'coords': [x_from, y_from], 'point': None}
-            self.animation_counter = 0
-            self.animation_frame_list = []
 
-            self.animation_shape['point'] = self.ax2.scatter(x_from, y_from, s=100, c='red', marker='o')
-            self.fig2.canvas.draw()
 
-            self.timer = QTimer()
-            self.timer.timeout.connect(self.chart_animation)
-            self.timer.start(100)
+        elif self.mode in [MODE_GROWTH_TRAJECTORY]:
+            x_from = min(self.regression_data['x_val'])
+            x_to = max(self.regression_data['x_val'])
+
+            self.animation_x_range = np.linspace(x_from, x_to, self.half_frame)
+            self.animation_y_range = np.zeros(self.half_frame)
+            show_extrapolate = self.cbxExtrapolate.isChecked()
+            curve = self.curve_list[0]
+            #print("curve", curve)
+            model = curve['model']
+            #if show_extrapolate:
+            #    model = curve['curve2']
+            #else:
+            #    model = curve['curve']
+            #print("model", model)
+            for idx, x in enumerate(self.animation_x_range):
+                self.animation_y_range[idx] = np.polyval(model, x)
+            y_from = self.animation_y_range[0]
+            self.animation_shape = { 'coords': [x_from, y_from], 'point': None}
+
+        self.animation_counter = 0
+        self.animation_frame_list = []
+        self.animation_shape['point'] = self.ax2.scatter(x_from, y_from, s=100, c='red', marker='o')
+        self.fig2.canvas.draw()
+
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.chart_animation)
+        self.timer.start(100)
 
 
     def reset_shape_pose(self):
@@ -2356,7 +2376,7 @@ class DataExplorationDialog(QDialog):
             self.cbxAverage.setChecked(True)
         self.ignore_change = False
 
-        if mode in [MODE_COMPARISON,MODE_COMPARISON2]:
+        if mode in [MODE_COMPARISON,MODE_COMPARISON2, MODE_GROWTH_TRAJECTORY, MODE_REGRESSION]:
             self.animate_option_widget.show()
         else:
             self.animate_option_widget.hide()
@@ -3208,7 +3228,7 @@ class DataExplorationDialog(QDialog):
                         if curve is None:
                             continue
                         self.ax2.plot(curve['size_range'], curve['curve'], label=curve['key'], color=curve['color']) 
-                        if show_extraplolate:                       
+                        if show_extraplolate:
                             self.ax2.plot(curve['size_range2'], curve['curve2'], label=curve['key'], color=curve['color'], linestyle='dashed')
                         degree = len(curve['model'])-1
                         model_text = "Y="
@@ -3355,14 +3375,25 @@ class DataExplorationDialog(QDialog):
 
         x_val = evt.xdata
         y_val = evt.ydata
-        if x_val > self.data_range['x_max']:
-            x_val = self.data_range['x_max']
-        if x_val < self.data_range['x_min']:
-            x_val = self.data_range['x_min']
-        if y_val > self.data_range['y_max']:
-            y_val = self.data_range['y_max']
-        if y_val < self.data_range['y_min']:
-            y_val = self.data_range['y_min']
+        if self.comboRegressionBy.currentText() == "By group" :
+            if x_val > self.data_range['x_max']:
+                x_val = self.data_range['x_max']
+            if x_val < self.data_range['x_min']:
+                x_val = self.data_range['x_min']
+            if y_val > self.data_range['y_max']:
+                y_val = self.data_range['y_max']
+            if y_val < self.data_range['y_min']:
+                y_val = self.data_range['y_min']
+        else:
+            if x_val > max(self.regression_data['x_val']):
+                x_val = max(self.regression_data['x_val'])
+            if x_val < min(self.regression_data['x_val']):
+                x_val = min(self.regression_data['x_val'])
+            if y_val > max(self.regression_data['y_val']):
+                y_val = max(self.regression_data['y_val'])
+            if y_val < min(self.regression_data['y_val']):
+                y_val = min(self.regression_data['y_val'])
+
 
         if self.axvline is not None:
             #print("remove axvline",self.axvline)

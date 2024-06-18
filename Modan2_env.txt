@@ -1,0 +1,20 @@
+pyqt5
+peewee
+Pillow
+numpy==1.26
+trimesh
+peewee-migrate
+pyopengl
+matplotlib
+scipy
+opencv-python
+xlsxwriter
+pandas
+statsmodels
+pyopengl-accelerate
+
+conda create -n Modan2 python pip
+pip install pyqt5 peewee Pillow trimesh peewee-migrate
+pip install numpy==1.26 matplotlib scipy opencv-python xlsxwriter pandas statsmodels
+pip install PyOpenGL-3.1.7-cp312-cp312-win_amd64.whl
+pip install PyOpenGL_accelerate-3.1.7-cp312-cp312-win_amd64.whl

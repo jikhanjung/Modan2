@@ -879,11 +879,9 @@ class MdObjectOps:
             point3 = baseline[0]
         else:
             return
-        #print("baseline:",baseline)
-
-        #print(self.landmark_list)
-
-        #print(self.landmark_list[point2 - 1], self.landmark_list[point1 - 1])
+        print("baseline:",baseline)
+        print(self.landmark_list)
+        print(self.landmark_list[point2 - 1], self.landmark_list[point1 - 1])
 
         curr_vector1 = np.array(self.landmark_list[point2 - 1]) - np.array(self.landmark_list[point1 - 1])
 
@@ -893,8 +891,8 @@ class MdObjectOps:
             to_vector1 = np.array([1, 0, 0])
 
 
-        #print("curr_vector1:", curr_vector1)
-        #print("to_vector1:", to_vector1)
+        print("curr_vector1:", curr_vector1)
+        print("to_vector1:", to_vector1)
         v1_norm = curr_vector1 / np.linalg.norm(curr_vector1)
         to_norm = to_vector1 / np.linalg.norm(to_vector1)
 
@@ -907,23 +905,45 @@ class MdObjectOps:
             pass
         else:
             if len(curr_vector1) == 2:
-                #print("2D rotation", curr_vector1, to_vector1)
-                #print
-                cos_theta = np.dot(curr_vector1, to_vector1) / (np.linalg.norm(curr_vector1) * np.linalg.norm(to_vector1))
+                print("2D rotation", curr_vector1, to_vector1)
+
+                curr_vector1 = curr_vector1 / np.linalg.norm(curr_vector1)
+                to_vector1 = to_vector1 / np.linalg.norm(to_vector1)
+
+                cos_theta = np.dot(curr_vector1, to_vector1)
                 sin_theta = np.sqrt(1 - cos_theta ** 2)
 
-                rotation_matrix = [ [ cos_theta, -1 * sin_theta], [sin_theta, cos_theta] ]
+                #print
+                #cos_theta = np.dot(curr_vector1, to_vector1) / (np.linalg.norm(curr_vector1) * np.linalg.norm(to_vector1))
+                #sin_theta = np.sqrt(1 - cos_theta ** 2)
+                print("cos_theta:", cos_theta, "sin_theta:", sin_theta)
+                # calculate theta
+                theta = math.acos(cos_theta)
+                if sin_theta < 0:
+                    theta = -1 * theta
+                print("theta:", theta)
+
+                rotation_matrix = np.array([[cos_theta, -1 * sin_theta], [sin_theta, cos_theta]])
+
+                #rotation_matrix = [ [ cos_theta, -1 * sin_theta], [sin_theta, cos_theta] ]
                 # apply rotation matrix to landmarks
-                #print("landmarks before rotation", self.landmark_list)
-                #print("rotation matrix", rotation_matrix)
+                print("landmarks before rotation", self.landmark_list)
+                print("rotation matrix", rotation_matrix)
+
+                rotated_landmarks = []
                 for i, lm in enumerate(self.landmark_list):
-                    coords = [0,0]
-                    for j in range(len(lm)):
-                        coords[j] = lm[j]
-                    x_rotated = coords[0] * rotation_matrix[0][0] + coords[1] * rotation_matrix[1][0]
-                    y_rotated = coords[0] * rotation_matrix[0][1] + coords[1] * rotation_matrix[1][1]
-                    self.landmark_list[i] = [ x_rotated, y_rotated ]
-                #print("landmarks after rotation", self.landmark_list)
+                    coords = np.array(lm)
+                    rotated_coords = np.dot(rotation_matrix, coords)
+                    rotated_landmarks.append(rotated_coords.tolist())
+                    
+                    #coords = [0,0]
+                    #for j in range(len(lm)):
+                    #    coords[j] = lm[j]
+                    #x_rotated = coords[0] * rotation_matrix[0][0] + coords[1] * rotation_matrix[1][0]
+                    #y_rotated = coords[0] * rotation_matrix[0][1] + coords[1] * rotation_matrix[1][1]
+                    #self.landmark_list[i] = [ x_rotated, y_rotated ]
+                self.landmark_list = rotated_landmarks
+                print("landmarks after rotation", self.landmark_list)
                 return
             else:
                 # calculate cosine and sine of rotation angle

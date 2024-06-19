@@ -204,12 +204,16 @@ class ObjectViewer2D(QLabel):
         self.object_name = name
 
     def align_object(self):
-        #print("2d align object")
+        print("2d align object")
+        if self.orig_pixmap is not None:
+            print("has image")
+            return
         if self.data_mode == OBJECT_MODE:
             #print("baseline",self.dataset.baseline_point_list)
             if self.obj_ops is None:
                 return
             self.obj_ops.align(self.dataset.baseline_point_list)
+            self.landmark_list = self.obj_ops.landmark_list
             #self.calculate_resize()
             #self.updateGL()
         elif self.data_mode == DATASET_MODE:

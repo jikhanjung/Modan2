@@ -295,12 +295,9 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             valid_property_index_list = self.selected_dataset.get_valid_property_index_list()                
             if len(valid_property_index_list) == 0:
                 # alert no valid property
-                msg = QMessageBox()
-                msg.setIcon(QMessageBox.Warning)
-                msg.setText("No adequate property needed for the analysis found in dataset")
-                msg.setWindowTitle("Modan2")
-                msg.setStandardButtons(QMessageBox.Ok)
-                msg.exec_()
+                error_message = "Error: No adequate property needed for the analysis found in dataset."
+                logger.error(error_message)
+                mu.show_error_message(error_message)
                 return
 
             self.analysis_dialog = NewAnalysisDialog(self,self.selected_dataset)

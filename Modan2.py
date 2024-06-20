@@ -292,11 +292,17 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             prev_lm_count = lm_count
         
         if True:
-            valid_property_index_list = self.selected_dataset.get_valid_property_index_list()                
+            valid_property_index_list = self.selected_dataset.get_valid_property_index_list()
             if len(valid_property_index_list) == 0:
                 # alert no valid property
-                error_message = "Error: No adequate property needed for the analysis found in dataset."
+                variable_names = ', '.join(self.selected_dataset.get_propertyname_list())
+
+                error_message = f"Error: No categorical (grouping) variables found in the dataset. \n\n"
                 logger.error(error_message)
+                error_message += f"All variables seem to be continuous measurements. The dataset contains the following variables: [{variable_names}]. "
+                error_message += f"Please ensure that your dataset includes at least one categorical variable for grouping. "
+                error_message += f"If you believe a variable should be considered categorical, check its data and format."
+                #error_message = "Error: No grouping variable found in the dataset."
                 mu.show_error_message(error_message)
                 return
 
@@ -494,14 +500,14 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.object_button_layout = QHBoxLayout()
         self.object_button_widget.setLayout(self.object_button_layout)
 
-        self.btnSaveObjectInfo = QPushButton("Save Info")
+        self.btnSaveObjectInfo = QPushButton("Save Changes")
         self.btnEditObject = QPushButton("Edit Object")
         self.btnAddObject = QPushButton("Add Object")
-        self.btnAddProperty = QPushButton("Add Property")
-        self.object_button_layout.addWidget(self.btnSaveObjectInfo)
-        self.object_button_layout.addWidget(self.btnEditObject)
+        self.btnAddProperty = QPushButton("Add Variable")
         self.object_button_layout.addWidget(self.btnAddObject)
+        self.object_button_layout.addWidget(self.btnEditObject)
         self.object_button_layout.addWidget(self.btnAddProperty)
+        self.object_button_layout.addWidget(self.btnSaveObjectInfo)
 
         self.tableview_layout.addWidget(self.tableView)
         self.tableview_layout.addWidget(self.object_button_widget)

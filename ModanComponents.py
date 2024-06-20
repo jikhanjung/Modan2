@@ -204,9 +204,9 @@ class ObjectViewer2D(QLabel):
         self.object_name = name
 
     def align_object(self):
-        print("2d align object")
+        #print("2d align object")
         if self.orig_pixmap is not None:
-            print("has image")
+            #print("has image")
             return
         if self.data_mode == OBJECT_MODE:
             #print("baseline",self.dataset.baseline_point_list)
@@ -287,11 +287,13 @@ class ObjectViewer2D(QLabel):
 
         landmark_list = self.landmark_list
         for index, wire in enumerate(self.edge_list):
-            if wire[0] >= len(self.landmark_list) or wire[1] >= len(self.landmark_list):
+            from_lm_idx = wire[0]-1
+            to_lm_idx = wire[1]-1
+            if from_lm_idx >= len(self.landmark_list) or to_lm_idx >= len(self.landmark_list):
                 continue
 
-            wire_start = [self._2canx(float(self.landmark_list[wire[0]][0])),self._2cany(float(self.landmark_list[wire[0]][1]))]
-            wire_end = [self._2canx(float(self.landmark_list[wire[1]][0])),self._2cany(float(self.landmark_list[wire[1]][1]))]
+            wire_start = [self._2canx(float(self.landmark_list[from_lm_idx][0])),self._2cany(float(self.landmark_list[from_lm_idx][1]))]
+            wire_end = [self._2canx(float(self.landmark_list[to_lm_idx][0])),self._2cany(float(self.landmark_list[to_lm_idx][1]))]
             dist = self.get_distance_to_line(curr_pos, wire_start, wire_end)
             if dist < threshold and dist > 0:
                 return index
@@ -569,20 +571,25 @@ class ObjectViewer2D(QLabel):
             #painter.setBrush(QBrush(mu.as_qt_color(COLOR['WIREFRAME'])))
 
             for wire in self.edge_list:
-                if wire[0] >= len(self.landmark_list) or wire[1] >= len(self.landmark_list):
+                from_lm_idx = wire[0]-1
+                to_lm_idx = wire[1]-1
+                if from_lm_idx >= len(self.landmark_list) or to_lm_idx >= len(self.landmark_list):
                     continue
-                [ from_x, from_y ] = self.landmark_list[wire[0]]
-                [ to_x, to_y ] = self.landmark_list[wire[1]]
+                [ from_x, from_y ] = self.landmark_list[from_lm_idx]
+                [ to_x, to_y ] = self.landmark_list[to_lm_idx]
                 painter.drawLine(int(self._2canx(from_x)), int(self._2cany(from_y)), int(self._2canx(to_x)), int(self._2cany(to_y)))
                 #painter.drawLine(self.landmark_list[wire[0]][0], self.landmark_list[wire[0]][1], self.landmark_list[wire[1]][0], self.landmark_list[wire[1]][1])
             if self.selected_edge_index >= 0:
                 edge = self.edge_list[self.selected_edge_index]
+                from_lm_idx = edge[0]-1
+                to_lm_idx = edge[1]-1
+                #print("selected edge", self.selected_edge_index, edge, from_lm_idx, to_lm_idx)
                 painter.setPen(QPen(mu.as_qt_color(COLOR['SELECTED_EDGE']), 2))
-                if edge[0] >= len(self.landmark_list) or edge[1] >= len(self.landmark_list):
+                if from_lm_idx >= len(self.landmark_list) or to_lm_idx >= len(self.landmark_list):
                     pass
                 else:
-                    [ from_x, from_y ] = self.landmark_list[edge[0]]
-                    [ to_x, to_y ] = self.landmark_list[edge[1]]
+                    [ from_x, from_y ] = self.landmark_list[from_lm_idx]
+                    [ to_x, to_y ] = self.landmark_list[to_lm_idx]
                     painter.drawLine(int(self._2canx(from_x)), int(self._2cany(from_y)), int(self._2canx(to_x)), int(self._2cany(to_y)))
 
         radius = BASE_LANDMARK_RADIUS * (int(self.landmark_size) + 1) 
@@ -804,6 +811,7 @@ class ObjectViewer2D(QLabel):
         self.update()
 
     def add_edge(self,wire_start_index, wire_end_index):
+        print("add edge", wire_start_index, wire_end_index)
         if wire_start_index == wire_end_index:
             return
         if wire_start_index > wire_end_index:
@@ -812,7 +820,9 @@ class ObjectViewer2D(QLabel):
         for wire in dataset.edge_list:
             if wire[0] == wire_start_index and wire[1] == wire_end_index:
                 return
-        dataset.edge_list.append([wire_start_index, wire_end_index])
+        print("add edge 1", wire_start_index, wire_end_index, dataset.edge_list)
+        dataset.edge_list.append([wire_start_index+1, wire_end_index+1])
+        print("add edge 2", wire_start_index, wire_end_index, dataset.edge_list)
         dataset.pack_wireframe()
         dataset.save()
         #self.repaint()
@@ -1234,11 +1244,12 @@ class ObjectViewer3D(QGLWidget):
         for wire in dataset.edge_list:
             if wire[0] == wire_start_index and wire[1] == wire_end_index:
                 return
-        dataset.edge_list.append([wire_start_index, wire_end_index])
-        #print("wireframe", dataset.edge_list)
+        #print("wireframe 0", dataset.edge_list)
+        dataset.edge_list.append([wire_start_index+1, wire_end_index+1])
+        #print("wireframe 1", dataset.edge_list)
         dataset.pack_wireframe()
         self.edge_list = dataset.edge_list
-        #print("wireframe", dataset.wireframe)
+        #print("wireframe 2", dataset.wireframe)
         dataset.save()
         self.initialize_colors()        
 
@@ -1781,8 +1792,8 @@ class ObjectViewer3D(QGLWidget):
 
                 #print(self.down_x, self.down_y, self.curr_x, self.curr_y)
                 for lm_idx in edge:
-                    if lm_idx < len(object.landmark_list):
-                        lm = object.landmark_list[lm_idx]
+                    if lm_idx <= len(object.landmark_list):
+                        lm = object.landmark_list[lm_idx-1]
                         gl.glVertex3f(*lm)
                 gl.glEnd()
                 if current_buffer == self.picker_buffer and self.object_dialog is not None:

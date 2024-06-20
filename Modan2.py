@@ -292,6 +292,17 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             prev_lm_count = lm_count
         
         if True:
+            valid_property_index_list = self.selected_dataset.get_valid_property_index_list()                
+            if len(valid_property_index_list) == 0:
+                # alert no valid property
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Warning)
+                msg.setText("No adequate property needed for the analysis found in dataset")
+                msg.setWindowTitle("Modan2")
+                msg.setStandardButtons(QMessageBox.Ok)
+                msg.exec_()
+                return
+
             self.analysis_dialog = NewAnalysisDialog(self,self.selected_dataset)
             ret = self.analysis_dialog.exec_()
             logger.info( "new analysis dialog return value %s", ret)
@@ -1270,6 +1281,8 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             seq = obj.sequence
             if seq is None:
                 seq = idx + 1
+                obj.sequence = seq
+                obj.save()
             row_data = [ obj.id, seq, obj.object_name, obj.count_landmarks(), obj.get_centroid_size()]
             '''
             item1 = QStandardItem()

@@ -64,7 +64,7 @@ MODE_COMPARISON2 = 5
 
 BASE_LANDMARK_RADIUS = 2
 DISTANCE_THRESHOLD = BASE_LANDMARK_RADIUS * 3
-CENTROID_SIZE_VALUE = 99
+CENTROID_SIZE_VALUE = 9999
 CENTROID_SIZE_TEXT = "CSize"
 
 # glview modes
@@ -979,7 +979,7 @@ class ObjectDialog(QDialog):
         if object is not None:
             self.object = object
             self.edtObjectName.setText(object.object_name)
-            self.edtSequence.setText(str(object.sequence))
+            self.edtSequence.setText(str(object.sequence or 1))
             self.edtObjectDesc.setText(object.object_desc)
             #self.edtLandmarkStr.setText(object.landmark_str)
             object.unpack_landmark()
@@ -2153,14 +2153,15 @@ class DataExplorationDialog(QDialog):
         self.animation_counter += 1
 
         ''' show shape '''
-        axis1 = self.comboAxis1.currentIndex()
-        axis2 = self.comboAxis2.currentIndex()
+        axis1 = self.comboAxis1.currentData()
+        axis2 = self.comboAxis2.currentData()
         flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
         flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
         shape_to_visualize = np.zeros((1,len(self.analysis_result_list[0])))
         x_value = flip_axis1 * x
         y_value = flip_axis2 * y
-        shape_to_visualize[0][axis1] = x_value
+        if axis1 != CENTROID_SIZE_VALUE:
+            shape_to_visualize[0][axis1] = x_value
         shape_to_visualize[0][axis2] = y_value
         unrotated_shape = self.unrotate_shape(shape_to_visualize)
         
@@ -2579,7 +2580,8 @@ class DataExplorationDialog(QDialog):
             y_value = flip_axis2 * y_average
             shape_to_visualize = np.zeros((1,len(self.analysis_result_list[0])))
 
-            shape_to_visualize[0][axis1] = x_value
+            if axis1 != CENTROID_SIZE_VALUE:
+                shape_to_visualize[0][axis1] = x_value
             shape_to_visualize[0][axis2] = y_value
             unrotated_shape = self.unrotate_shape(shape_to_visualize)            
             self.show_shape(unrotated_shape[0], idx)        
@@ -3560,8 +3562,15 @@ class DataExplorationDialog(QDialog):
             return
         #print("pick_shape", evt.xdata, evt.ydata, self.pick_idx)
         scatter_data_len = len(self.scatter_data.keys())
-        symbol_candidate = self.marker_list[scatter_data_len:scatter_data_len+2]
-        color_candidate = self.color_list[scatter_data_len:scatter_data_len+2]
+        marker_list = self.marker_list
+        while scatter_data_len+2 > len(marker_list):
+            marker_list += self.marker_list
+        #print("scatter_data_len", scatter_data_len, self.marker_list, marker_list)
+        symbol_candidate = marker_list[scatter_data_len:scatter_data_len+2]
+        color_list = self.color_list
+        while scatter_data_len+2 > len(color_list):
+            color_list += self.color_list
+        color_candidate = color_list[scatter_data_len:scatter_data_len+2]
         #print("pick_shape", evt.xdata, evt.ydata, self.pick_idx, scatter_data_len, symbol_candidate, color_candidate)
         shape = self.custom_shape_hash[self.pick_idx]
 
@@ -3573,6 +3582,7 @@ class DataExplorationDialog(QDialog):
             shape['label'] = None
 
         ''' need to improve speed by using offset, not creating new annotation every time '''
+        #print("shape['name']", shape['name'], x_val, y_val, self.pick_idx, symbol_candidate, color_candidate)
         shape['coords'] = [x_val, y_val]
         shape['point'] = self.ax2.scatter([x_val],[y_val], s=150, marker=symbol_candidate[self.pick_idx], color=color_candidate[self.pick_idx] )
         #print("shape['name']", shape['name'])
@@ -3581,8 +3591,8 @@ class DataExplorationDialog(QDialog):
         #print("point:", self.custom_shape_hash[self.pick_idx]['point'])
         #self.ax2.scatter(self.average_shape[name]['x_val'], self.average_shape[name]['y_val'], s=150, marker=group['symbol'], color=group['color'])
 
-        axis1 = self.comboAxis1.currentIndex()
-        axis2 = self.comboAxis2.currentIndex()
+        axis1 = self.comboAxis1.currentData()
+        axis2 = self.comboAxis2.currentData()
         flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
         flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
         shape_to_visualize = np.zeros((1,len(self.analysis_result_list[0])))
@@ -3599,8 +3609,8 @@ class DataExplorationDialog(QDialog):
         #self.axvline = self.ax2.axvline(x=self.vertical_line_xval, color='gray', linestyle=self.vertical_line_style)
 
     def raw_chart_coords_to_shape(self, x_val, y_val):
-        axis1 = self.comboAxis1.currentIndex()
-        axis2 = self.comboAxis2.currentIndex()
+        axis1 = self.comboAxis1.currentData()
+        axis2 = self.comboAxis2.currentData()
         flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
         flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
 
@@ -3634,8 +3644,8 @@ class DataExplorationDialog(QDialog):
 
             #print("shape regression", evt.xdata)
             for idx, shape_view in enumerate(self.shape_view_list):
-                axis1 = self.comboAxis1.currentIndex()
-                axis2 = self.comboAxis2.currentIndex()
+                axis1 = self.comboAxis1.currentData()
+                axis2 = self.comboAxis2.currentData()
                 flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
                 flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
 
@@ -3656,8 +3666,8 @@ class DataExplorationDialog(QDialog):
                 shape = self.raw_chart_coords_to_shape(x_value, y_value)
                 self.show_shape(shape, idx)
         else:
-            axis1 = self.comboAxis1.currentIndex()
-            axis2 = self.comboAxis2.currentIndex()
+            axis1 = self.comboAxis1.currentData()
+            axis2 = self.comboAxis2.currentData()
             flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
             flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
 

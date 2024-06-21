@@ -20,7 +20,7 @@ logger = setup_logger(__name__)
 
 LANDMARK_SEPARATOR = "\t"
 LINE_SEPARATOR = "\n"
-PROPERTY_SEPARATOR = ","
+VARIABLE_SEPARATOR = ","
 EDGE_SEPARATOR = "-"
 WIREFRAME_SEPARATOR = ","
 DATABASE_FILENAME = mu.PROGRAM_NAME + ".db"
@@ -48,51 +48,51 @@ class MdDataset(Model):
     baseline_point_list = []
     edge_list = []
     polygon_list = []
-    propertyname_list = []
+    variablename_list = []
 
     class Meta:
         database = gDatabase
 
-    def get_valid_property_index_list(self):
-        propertyname_list = self.get_propertyname_list()
+    def get_grouping_variable_index_list(self):
+        variablename_list = self.get_variablename_list()
         object_count = len(self.object_list)
         valid_property_index_list = []
         #print("object count:", object_count, "propertyname_list:", propertyname_list)
-        for idx, propertyname in enumerate(propertyname_list):
+        for idx, variablename in enumerate(variablename_list):
             #print("propertyname:", propertyname, idx)
-            unique_property_list = []
+            unique_variable_list = []
             for obj in self.object_list:
-                property_list = obj.get_property_list()
-                if idx < len(property_list) and property_list[idx] not in unique_property_list:
-                    unique_property_list.append(property_list[idx])
-            #print("unique_property_list:", unique_property_list, len(unique_property_list))
-            if len(unique_property_list) <= 10 or len(unique_property_list) < 0.5 * object_count:
+                variable_list = obj.get_variable_list()
+                if idx < len(variable_list) and variable_list[idx] not in unique_variable_list:
+                    unique_variable_list.append(variable_list[idx])
+            #print("unique_variable_list:", unique_variable_list, len(unique_variable_list))
+            if len(unique_variable_list) <= 10 or len(unique_variable_list) < 0.5 * object_count:
                 valid_property_index_list.append(idx)
         #print("valid_property_index_list:", valid_property_index_list)
         if len(valid_property_index_list) == 0:
-            valid_property_index_list = [x for x in range(len(propertyname_list))]
+            valid_property_index_list = [x for x in range(len(variablename_list))]
         return valid_property_index_list
 
 
-    def get_propertyname_list(self):
-        return self.unpack_propertyname_str(self.propertyname_str)
+    def get_variablename_list(self):
+        return self.unpack_variablename_str(self.propertyname_str)
 
-    def pack_propertyname_str(self, propertyname_list=None):
-        if propertyname_list is None:
-            propertyname_list = self.propertyname_list
-        self.propertyname_str = PROPERTY_SEPARATOR.join(propertyname_list)
+    def pack_variablename_str(self, variablename_list=None):
+        if variablename_list is None:
+            variablename_list = self.variablename_list
+        self.propertyname_str = VARIABLE_SEPARATOR.join(variablename_list)
         return self.propertyname_str
 
-    def unpack_propertyname_str(self, propertyname_str=''):
+    def unpack_variablename_str(self, propertyname_str=''):
         if propertyname_str == '' and self.propertyname_str != '':
             propertyname_str = self.propertyname_str
 
-        self.propertyname_list = []
+        self.variablename_list = []
         if propertyname_str is None or propertyname_str == '':
             return []
 
-        self.propertyname_list = [x for x in propertyname_str.split(PROPERTY_SEPARATOR)]
-        return self.propertyname_list
+        self.variablename_list = [x for x in propertyname_str.split(VARIABLE_SEPARATOR)]
+        return self.variablename_list
 
     def pack_wireframe(self, edge_list=None):
         if edge_list is None:
@@ -211,8 +211,8 @@ class MdDataset(Model):
         return obj
 
     def add_propertyname(self, propertyname):
-        self.propertyname_list.append(propertyname)
-        self.pack_propertyname_str()
+        self.variablename_list.append(propertyname)
+        self.pack_variablename_str()
         self.save()
         return propertyname
 
@@ -226,7 +226,7 @@ class MdObject(Model):
     modified_at = DateTimeField(default=datetime.datetime.now)
     property_str = CharField(null=True)
     landmark_list = []
-    property_list = []
+    variable_list = []
     centroid_size = -1
     sequence = IntegerField(null=True)
 
@@ -345,19 +345,19 @@ class MdObject(Model):
     def get_landmark_list(self):
         return self.unpack_landmark()
 
-    def pack_property(self, property_list=None):
-        if property_list is None:
-            property_list = self.property_list
-        self.property_str = PROPERTY_SEPARATOR.join(property_list)
+    def pack_variable(self, variable_list=None):
+        if variable_list is None:
+            variable_list = self.variable_list
+        self.property_str = VARIABLE_SEPARATOR.join(variable_list)
 
-    def unpack_property(self):
-        self.property_list = []
+    def unpack_variable(self):
+        self.variable_list = []
         if self.property_str is None or self.property_str == '':
             return []
-        self.property_list = [x for x in self.property_str.split(PROPERTY_SEPARATOR)]
-        return self.property_list
-    def get_property_list(self):
-        return self.unpack_property()
+        self.variable_list = [x for x in self.property_str.split(VARIABLE_SEPARATOR)]
+        return self.variable_list
+    def get_variable_list(self):
+        return self.unpack_variable()
 
     def get_centroid_size(self, refresh=False):
 
@@ -682,10 +682,10 @@ class MdObjectOps:
         #print("landmark list:", self.landmark_list)
         #for lm in mdobject.landmark_list:
         #    self.landmark_list.append(lm)
-        self.property_list = []
+        self.variable_list = []
         if self.property_str is not None and self.property_str != "":
-            mdobject.unpack_property()
-        self.property_list = copy.deepcopy(mdobject.property_list)
+            mdobject.unpack_variable()
+        self.variable_list = copy.deepcopy(mdobject.variable_list)
 
         self.centroid_size = -1
         self.polygon_color = None
@@ -1138,7 +1138,7 @@ class MdDatasetOps:
         if dataset.edge_list is not None and len(dataset.edge_list) > 0:
             self.edge_list = dataset.edge_list[:]
         #print("edge list in MdDatasetOps.__init__:", dataset.wireframe, dataset.edge_list, self.edge_list)
-        self.propertyname_list = dataset.propertyname_list
+        self.variablename_list = dataset.variablename_list
         if dataset.polygons != '':
             dataset.unpack_polygons()
         if dataset.baseline != '':

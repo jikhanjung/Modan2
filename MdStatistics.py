@@ -244,8 +244,8 @@ def PerformCVA(dataset_ops, classifier_index):
         for lm in obj.landmark_list:
             datum.extend(lm)
         datamatrix.append(datum)
-        if classifier_index >= 0 and classifier_index < len(obj.property_list):
-            category_list.append(obj.property_list[classifier_index])
+        if classifier_index >= 0 and classifier_index < len(obj.variable_list):
+            category_list.append(obj.variable_list[classifier_index])
         else:
             category_list.append("Unknown")
 
@@ -337,13 +337,13 @@ def PerformManova(dataset_ops, new_coords, classifier_index):
         column_list.append("PC"+str(pc_idx+1))
 
     category_list = []
-    group_by_name = dataset_ops.propertyname_list[classifier_index]
+    group_by_name = dataset_ops.variablename_list[classifier_index]
     #obj = dataset_ops.object_list[0]
     #print(obj, obj.property_list, property_index)
     #xyz = ["x", "y", "z"]
     for idx, obj in enumerate(dataset_ops.object_list):
-        if classifier_index >= 0 and classifier_index < len(obj.property_list):
-            category_list.append(obj.property_list[classifier_index])
+        if classifier_index >= 0 and classifier_index < len(obj.variable_list):
+            category_list.append(obj.variable_list[classifier_index])
         else:
             category_list.append("Unknown")
 

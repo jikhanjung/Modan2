@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QTableWidgetItem, QHeaderView, QFileDialog, QCheckBo
                             QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QProgressBar, QApplication, \
                             QDialog, QLineEdit, QLabel, QPushButton, QAbstractItemView, QStatusBar, QMessageBox, \
                             QTableView, QSplitter, QRadioButton, QComboBox, QTextEdit, QSizePolicy, \
-                            QTableWidget, QGridLayout, QAbstractButton, QButtonGroup, QGroupBox, \
+                            QTableWidget, QGridLayout, QAbstractButton, QButtonGroup, QGroupBox, QListWidgetItem,\
                             QTabWidget, QListWidget, QSpinBox, QPlainTextEdit, QSlider, QScrollArea, QShortcut
 from PyQt5.QtGui import QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem, QImage,\
                         QFont, QPainter, QBrush, QMouseEvent, QWheelEvent, QDoubleValidator, QIcon, QCursor,\
@@ -422,7 +422,32 @@ class DatasetDialog(QDialog):
         self.edtWireframe = QTextEdit()
         self.edtBaseline = QLineEdit()
         self.edtPolygons = QTextEdit()
-        self.edtPropertyNameStr = QTextEdit()
+        self.edtVariableNameStr = QTextEdit()
+        self.lstVariableName = QListWidget()
+        self.lstVariableName.setEditTriggers(QListWidget.DoubleClicked|QListWidget.EditKeyPressed|QListWidget.SelectedClicked)
+        self.btnAddVariable = QPushButton("Add Variable")
+        self.btnDeleteVariable = QPushButton("Delete Variable")
+        self.btnMoveUp = QPushButton("Move Up")
+        self.btnMoveDown = QPushButton("Move Down")
+        self.variable_widget = QWidget()
+        self.variable_layout = QVBoxLayout()
+        self.variable_widget.setLayout(self.variable_layout)
+
+        self.btnAddVariable.clicked.connect(self.addVariable)
+        self.btnDeleteVariable.clicked.connect(self.deleteVariable)
+        self.btnMoveUp.clicked.connect(self.moveUp)
+        self.btnMoveDown.clicked.connect(self.moveDown)
+
+        self.variable_button_widget = QWidget()
+        self.variable_button_layout = QHBoxLayout()
+        self.variable_button_widget.setLayout(self.variable_button_layout)
+        self.variable_button_layout.addWidget(self.btnAddVariable)
+        self.variable_button_layout.addWidget(self.btnDeleteVariable)
+        self.variable_button_layout.addWidget(self.btnMoveUp)
+        self.variable_button_layout.addWidget(self.btnMoveDown)
+
+        self.variable_layout.addWidget(self.lstVariableName)
+        self.variable_layout.addWidget(self.variable_button_widget)
 
         self.main_layout = QFormLayout()
         self.setLayout(self.main_layout)
@@ -433,8 +458,7 @@ class DatasetDialog(QDialog):
         self.main_layout.addRow("Wireframe", self.edtWireframe)
         self.main_layout.addRow("Baseline", self.edtBaseline)
         self.main_layout.addRow("Polygons", self.edtPolygons)
-        self.main_layout.addRow("Property Names", self.edtPropertyNameStr)
-
+        self.main_layout.addRow("Variable Names", self.variable_widget)
 
         self.btnOkay = QPushButton()
         self.btnOkay.setText("Save")
@@ -454,13 +478,38 @@ class DatasetDialog(QDialog):
         btn_layout.addWidget(self.btnCancel)
         self.main_layout.addRow(btn_layout)
 
-
         self.dataset = None
         self.load_parent_dataset()
 
         #self.edtDataFolder.setText(str(self.data_folder.resolve()))
         #self.edtServerAddress.setText(self.server_address)
         #self.edtServerPort.setText(self.server_port)
+
+    def addVariable(self):
+        item = QListWidgetItem("New Variable")
+        item.setFlags(item.flags() | Qt.ItemIsEditable)
+        item.setData(Qt.UserRole, -1)
+        self.lstVariableName.addItem(item)
+        #print("new variable")
+        self.lstVariableName.editItem(item)
+    
+    def deleteVariable(self):
+        for item in self.lstVariableName.selectedItems():
+            self.lstVariableName.takeItem(self.lstVariableName.row(item))
+    
+    def moveUp(self):
+        row = self.lstVariableName.currentRow()
+        if row > 0:
+            item = self.lstVariableName.takeItem(row)
+            self.lstVariableName.insertItem(row-1, item)
+            self.lstVariableName.setCurrentItem(item)
+
+    def moveDown(self):
+        row = self.lstVariableName.currentRow()
+        if row < self.lstVariableName.count() - 1:
+            item = self.lstVariableName.takeItem(row)
+            self.lstVariableName.insertItem(row+1, item)
+            self.lstVariableName.setCurrentItem(item)
 
     def read_settings(self):
         self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
@@ -518,7 +567,13 @@ class DatasetDialog(QDialog):
         self.edtWireframe.setText(dataset.wireframe)
         self.edtBaseline.setText(dataset.baseline)
         self.edtPolygons.setText(dataset.polygons)
-        self.edtPropertyNameStr.setText(dataset.propertyname_str)
+        variable_name_list = dataset.get_variablename_list()
+        for idx, variable_name in enumerate(variable_name_list):
+            item = QListWidgetItem(variable_name)
+            item.setFlags(item.flags() | Qt.ItemIsEditable)
+            item.setData(Qt.UserRole, idx)
+            self.lstVariableName.addItem(item)
+        #self.edtVariableNameStr.setText(dataset.propertyname_str)
     
     def set_parent_dataset(self, parent_dataset):
         #print("parent:", parent_dataset_id, "dataset:", self.dataset)
@@ -546,7 +601,31 @@ class DatasetDialog(QDialog):
         self.dataset.wireframe = self.edtWireframe.toPlainText()
         self.dataset.baseline = self.edtBaseline.text()
         self.dataset.polygons = self.edtPolygons.toPlainText()
-        self.dataset.propertyname_str = self.edtPropertyNameStr.toPlainText()
+        self.dataset.propertyname_str = self.edtVariableNameStr.toPlainText()
+        variablename_list = []
+        before_index_list = []
+        after_index_list = []
+        for idx in range(self.lstVariableName.count()):
+            item = self.lstVariableName.item(idx)
+            original_index = item.data(Qt.UserRole)
+            variablename_list.append(item.text())
+            before_index_list.append(original_index)
+            after_index_list.append(idx)
+        #print("before_index_list:", before_index_list)
+        #print("after_index_list:", after_index_list)
+
+        self.dataset.propertyname_str = ",".join(variablename_list)
+        for obj in self.dataset.object_list:
+            variable_list = obj.get_variable_list()
+            new_variable_list = []
+            for before_index in before_index_list:
+                if before_index == -1:
+                    new_variable_list.append("")
+                else:
+                    new_variable_list.append(variable_list[before_index])
+            obj.pack_variable(new_variable_list)
+            obj.save()
+
 
         #self.data
         #print(self.dataset.dataset_desc, self.dataset.dataset_name)
@@ -965,10 +1044,10 @@ class ObjectDialog(QDialog):
             input_width = 60
         if self.dataset.propertyname_str is not None and self.dataset.propertyname_str != "":
             self.edtPropertyList = []
-            self.dataset.unpack_propertyname_str()
-            for propertyname in self.dataset.propertyname_list:
+            self.dataset.unpack_variablename_str()
+            for variablename in self.dataset.variablename_list:
                 self.edtPropertyList.append( QLineEdit() )
-                self.form_layout.addRow(propertyname, self.edtPropertyList[-1])
+                self.form_layout.addRow(variablename, self.edtPropertyList[-1])
         #self.inputX.setFixedWidth(input_width)
         #self.inputY.setFixedWidth(input_width)
         #self.inputZ.setFixedWidth(input_width)
@@ -1048,12 +1127,12 @@ class ObjectDialog(QDialog):
                 self.object_view.update_landmark_list()
                 self.object_view.calculate_resize()
 
-        if len(self.dataset.propertyname_list) >0:
-            self.object.unpack_property()
-            self.dataset.unpack_propertyname_str()
-            for idx, propertyname in enumerate(self.dataset.propertyname_list):
-                if idx < len(object.property_list):
-                    self.edtPropertyList[idx].setText(object.property_list[idx])
+        if len(self.dataset.variablename_list) >0:
+            self.object.unpack_variable()
+            self.dataset.unpack_variablename_str()
+            for idx, propertyname in enumerate(self.dataset.variablename_list):
+                if idx < len(object.variable_list):
+                    self.edtPropertyList[idx].setText(object.variable_list[idx])
 
             #self.object_view_3d.landmark_list = self.landmark_list
         #self.set_dataset(object.dataset)
@@ -1357,11 +1436,11 @@ class NewAnalysisDialog(QDialog):
         self.lblManovaGroupBy = QLabel("MANOVA grouping variable", self)
         self.comboManovaGroupBy = QComboBox(self)
 
-        valid_property_index_list = self.dataset.get_valid_property_index_list()
-        propertyname_list = self.dataset.get_propertyname_list()
-        #print("valid_property_index_list", valid_property_index_list, propertyname_list)
+        valid_property_index_list = self.dataset.get_grouping_variable_index_list()
+        variablename_list = self.dataset.get_variablename_list()
+        #print("valid_property_index_list", valid_property_index_list, variablename_list)
         for idx in valid_property_index_list:
-            property = propertyname_list[idx]
+            property = variablename_list[idx]
             self.comboCvaGroupBy.addItem(property, idx)
             self.comboManovaGroupBy.addItem(property, idx)
 
@@ -2863,8 +2942,8 @@ class DataExplorationDialog(QDialog):
         self.comboSelectGroup.clear()
         unique_groupname_list = []
         for idx, obj in enumerate(self.object_info_list):
-            if propertyname_index > -1 and propertyname_index < len(obj['property_list']):
-                key_name = obj['property_list'][self.propertyname_index]
+            if propertyname_index > -1 and propertyname_index < len(obj['variable_list']):
+                key_name = obj['variable_list'][self.propertyname_index]
                 if key_name not in unique_groupname_list:
                     unique_groupname_list.append(key_name)
                     self.comboSelectGroup.addItem(key_name)
@@ -2909,10 +2988,10 @@ class DataExplorationDialog(QDialog):
         self.comboGroupBy.clear()
         self.comboGroupBy.addItem("Select property", -1)
 
-        valid_property_index_list = analysis.dataset.get_valid_property_index_list()
-        propertyname_list = analysis.dataset.get_propertyname_list()
+        valid_property_index_list = analysis.dataset.get_grouping_variable_index_list()
+        variablename_list = analysis.dataset.get_variablename_list()
         for idx in valid_property_index_list:
-            property = propertyname_list[idx]
+            property = variablename_list[idx]
             self.comboGroupBy.addItem(property, idx)
 
         #print("set_analysis 2", analysis, analysis_method, group_by, self.ignore_change)
@@ -2923,7 +3002,7 @@ class DataExplorationDialog(QDialog):
             #self.lblGroupBy.show()
             self.comboGroupBy.setEnabled(False)
         
-        if group_by in analysis.dataset.get_propertyname_list():
+        if group_by in analysis.dataset.get_variablename_list():
             self.comboGroupBy.setCurrentText(group_by)
         else:
             self.comboGroupBy.setCurrentIndex(0)
@@ -2956,8 +3035,8 @@ class DataExplorationDialog(QDialog):
         #print("set_analysis 6", analysis, analysis_method, group_by, self.ignore_change)
 
         propertyname = self.comboGroupBy.currentText()
-        self.propertyname_list = self.analysis.propertyname_str.split(",")
-        self.propertyname_index = self.propertyname_list.index(propertyname) if propertyname in self.propertyname_list else -1
+        self.variablename_list = self.analysis.propertyname_str.split(",")
+        self.propertyname_index = self.variablename_list.index(propertyname) if propertyname in self.variablename_list else -1
         #print("set analysis load_comboselect", self.ignore_change)
         self.load_comboSelectgroup()
         self.set_mode(MODE_EXPLORATION)
@@ -2988,7 +3067,7 @@ class DataExplorationDialog(QDialog):
         flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
         flip_axis3 = -1.0 if self.cbxFlipAxis3.isChecked() == True else 1.0
 
-        self.propertyname_list = self.analysis.propertyname_str.split(",")
+        self.variablename_list = self.analysis.propertyname_str.split(",")
         symbol_candidate = ['o','s','^','x','+','d','v','<','>','p','h']
         symbol_candidate = self.marker_list[:]
         color_candidate = ['blue','green','black','cyan','magenta','yellow','gray','red']
@@ -2998,7 +3077,7 @@ class DataExplorationDialog(QDialog):
 
         propertyname = self.comboGroupBy.currentText()
 
-        self.propertyname_index = self.propertyname_list.index(propertyname) if propertyname in self.propertyname_list else -1
+        self.propertyname_index = self.variablename_list.index(propertyname) if propertyname in self.variablename_list else -1
         self.scatter_data = {}
         self.scatter_result = {}
         self.average_shape = {}
@@ -3032,8 +3111,8 @@ class DataExplorationDialog(QDialog):
         for idx, obj in enumerate(self.object_info_list):
             key_name = '__default__'
 
-            if self.propertyname_index > -1 and self.propertyname_index < len(obj['property_list']):
-                key_name = obj['property_list'][self.propertyname_index]
+            if self.propertyname_index > -1 and self.propertyname_index < len(obj['variable_list']):
+                key_name = obj['variable_list'][self.propertyname_index]
 
             if key_name not in self.scatter_data.keys():
                 self.scatter_data[key_name] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'property':key_name, 'symbol':'', 'color':'', 'size':scatter_size}
@@ -4233,7 +4312,7 @@ class DatasetAnalysisDialog(QDialog):
         for obj in dataset.object_list:
             obj.unpack_landmark()
             obj.unpack_property()
-            #print("property:", obj.property_list)
+            #print("property:", obj.variable_list)
             lm_count = len(obj.landmark_list)
             #print("prev_lm_count:", prev_lm_count, "lm_count:", lm_count)
             if prev_lm_count != lm_count and prev_lm_count != -1:
@@ -4249,8 +4328,8 @@ class DatasetAnalysisDialog(QDialog):
 
         self.comboPropertyName.clear()
         self.comboPropertyName.addItem("Select Property")
-        if len(self.dataset.propertyname_list) > 0:
-            for propertyname in self.dataset.propertyname_list:
+        if len(self.dataset.variablename_list) > 0:
+            for propertyname in self.dataset.variablename_list:
                 self.comboPropertyName.addItem(propertyname)
                 #self.comboAxis2.addItem(propertyname)
         self.comboPropertyName.setCurrentIndex(0)
@@ -4322,8 +4401,8 @@ class DatasetAnalysisDialog(QDialog):
             doc = xlsxwriter.Workbook(filename)
             
             # PCA result
-            property_count = len(self.ds_ops.propertyname_list)
-            header = [ "object_name", * self.ds_ops.propertyname_list ]
+            property_count = len(self.ds_ops.variablename_list)
+            header = [ "object_name", * self.ds_ops.variablename_list ]
             header.extend( [self.analysis_type[:2]+str(i+1) for i in range(len(self.analysis_result.rotated_matrix.tolist()[0]))] )
             header.extend("CSize")
             worksheet = doc.add_worksheet("Result coordinates")
@@ -4337,10 +4416,10 @@ class DatasetAnalysisDialog(QDialog):
             new_coords = self.analysis_result.rotated_matrix.tolist()
             for i, obj in enumerate(self.ds_ops.object_list):
                 worksheet.write(i+1, 0, obj.object_name )
-                #print(obj.property_list)
+                #print(obj.variable_list)
                 for j in range(property_count):
-                #for j, property in enumerate(obj.property_list):
-                    worksheet.write(i+1, j+1, obj.property_list[j] )
+                #for j, property in enumerate(obj.variable_list):
+                    worksheet.write(i+1, j+1, obj.variable_list[j] )
 
                 for k, val in enumerate(new_coords[i]):
                     worksheet.write(i+1, k+property_count+1, val )
@@ -4366,7 +4445,7 @@ class DatasetAnalysisDialog(QDialog):
 
 
             # PCA result
-            #header = [ "object_name", *self.ds_ops.propertyname_list ]
+            #header = [ "object_name", *self.ds_ops.variablename_list ]
             #header.extend( [self.analysis_type[:2]+str(i+1) for i in range(len(self.analysis_result.rotated_matrix.tolist()[0]))] )
             worksheet = doc.add_worksheet("Shapes")
             row_index = 0
@@ -4528,8 +4607,8 @@ class DatasetAnalysisDialog(QDialog):
 
             if obj.id in self.selected_object_id_list:
                 key_name = '__selected__'
-            elif self.propertyname_index > -1 and self.propertyname_index < len(obj.property_list):
-                key_name = obj.property_list[self.propertyname_index]
+            elif self.propertyname_index > -1 and self.propertyname_index < len(obj.variable_list):
+                key_name = obj.variable_list[self.propertyname_index]
 
             if key_name not in self.scatter_data.keys():
                 self.scatter_data[key_name] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'property':key_name, 'symbol':'', 'color':'', 'size':scatter_size}
@@ -4852,13 +4931,13 @@ class DatasetAnalysisDialog(QDialog):
         datamatrix = []
         category_list = []
         #obj = dataset_ops.object_list[0]
-        #print(obj, obj.property_list, property_index)
+        #print(obj, obj.variable_list, property_index)
         for obj in dataset_ops.object_list:
             datum = []
             for lm in obj.landmark_list:
                 datum.extend(lm)
             datamatrix.append(datum)
-            category_list.append(obj.property_list[property_index])
+            category_list.append(obj.variable_list[property_index])
 
         cva.SetData(datamatrix)
         cva.SetCategory(category_list)
@@ -4901,7 +4980,7 @@ class DatasetAnalysisDialog(QDialog):
         self.propertyname_index = self.comboPropertyName.currentIndex() -1
         self.propertyname = self.comboPropertyName.currentText()
 
-        self.property_list = []
+        self.variable_list = []
         for obj in self.dataset.object_list:
             item0 = QStandardItem()
             item0.setCheckable(True)
@@ -4914,18 +4993,18 @@ class DatasetAnalysisDialog(QDialog):
             self.object_hash[obj.id] = item1
             if self.propertyname_index >= 0:
                 obj.unpack_property()
-                #print(obj.property_list)
-                item3 = QStandardItem(obj.property_list[self.propertyname_index])
-                if obj.property_list[self.propertyname_index] not in self.property_list:
-                    self.property_list.append(obj.property_list[self.propertyname_index])
+                #print(obj.variable_list)
+                item3 = QStandardItem(obj.variable_list[self.propertyname_index])
+                if obj.variable_list[self.propertyname_index] not in self.variable_list:
+                    self.variable_list.append(obj.variable_list[self.propertyname_index])
                     p_item0 = QStandardItem()
                     p_item0.setCheckable(True)
                     p_item0.setCheckState(Qt.Checked)
                     p_item1 = QStandardItem()
                     p_item1.setCheckable(True)
                     p_item1.setCheckState(Qt.Checked)
-                    self.property_model.appendRow([p_item0,p_item1,QStandardItem(obj.property_list[self.propertyname_index])])
-                #self.property_list.append(obj.property_list[self.propertyname_index])
+                    self.property_model.appendRow([p_item0,p_item1,QStandardItem(obj.variable_list[self.propertyname_index])])
+                #self.variable_list.append(obj.variable_list[self.propertyname_index])
                 self.object_model.appendRow([item0,item1,item2,item3] )
             else:
                 self.object_model.appendRow([item0,item1,item2] )
@@ -5220,14 +5299,14 @@ class ExportDatasetDialog(QDialog):
                 result_str += "[individuals]" + NEWLINE + str(len(self.ds_ops.object_list)) + NEWLINE
                 result_str += "[landmarks]" + NEWLINE + str(len(self.ds_ops.object_list[0].landmark_list)) + NEWLINE
                 result_str += "[dimensions]" + NEWLINE + str(self.ds_ops.dimension) + NEWLINE
-                label_values = "[labels]" + NEWLINE + "\t".join(self.dataset.propertyname_list) + NEWLINE
+                label_values = "[labels]" + NEWLINE + "\t".join(self.dataset.variablename_list) + NEWLINE
                 label_values += "[labelvalues]" + NEWLINE
                 rawpoint_values = "[rawpoints]" + NEWLINE
                 image_values = "[images]" + NEWLINE
                 ppmm_values = "[pixelspermm]" + NEWLINE
                 name_values = "[names]" + NEWLINE
                 for mo in self.ds_ops.object_list:
-                    label_values += '\t'.join(mo.property_list).strip() + NEWLINE
+                    label_values += '\t'.join(mo.variable_list).strip() + NEWLINE
                     name_values += mo.object_name + NEWLINE
                     #print mo.objname
                     rawpoint_values += "'#" + mo.object_name + NEWLINE
@@ -5484,9 +5563,9 @@ class ImportDatasetDialog(QDialog):
         dataset = MdDataset()
         dataset.dataset_name = datasetname
         dataset.dimension = import_data.dimension
-        if len(import_data.propertyname_list) > 0:
-            dataset.propertyname_list = import_data.propertyname_list
-            dataset.pack_propertyname_str()
+        if len(import_data.variablename_list) > 0:
+            dataset.variablename_list = import_data.variablename_list
+            dataset.pack_variablename_str()
         if len(import_data.edge_list) > 0:
             dataset.edge_list = import_data.edge_list
             dataset.wireframe = dataset.pack_wireframe()
@@ -5514,9 +5593,9 @@ class ImportDatasetDialog(QDialog):
             for landmark in import_data.landmark_data[object.object_name]:
                 landmark_list.append("\t".join([ str(x) for x in landmark]))
             object.landmark_str = "\n".join(landmark_list)
-            if len(import_data.propertyname_list) > 0:
-                object.property_list = import_data.property_list_list[i]
-                object.pack_property()
+            if len(import_data.variablename_list) > 0:
+                object.variable_list = import_data.property_list_list[i]
+                object.pack_variable()
             if object.object_name in import_data.object_comment.keys():
                 object.object_desc = import_data.object_comment[import_data.object_name_list[i]]
             

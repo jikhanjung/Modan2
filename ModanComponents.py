@@ -2552,7 +2552,7 @@ class X1Y1:
         self.landmark_str_list = []
         self.edge_list = []
         self.polygon_list = []
-        self.propertyname_list = []
+        self.variablename_list = []
         self.property_list_list = []
         self.object_comment = {}
         self.landmark_data = {}
@@ -2652,7 +2652,7 @@ class TPS:
         self.landmark_str_list = []
         self.edge_list = []
         self.polygon_list = []
-        self.propertyname_list = []
+        self.variablename_list = []
         self.property_list_list = []
         self.object_comment = {}
         self.landmark_data = {}
@@ -2813,7 +2813,7 @@ class NTS:
         self.landmark_str_list = []
         self.edge_list = []
         self.polygon_list = []
-        self.propertyname_list = []
+        self.variablename_list = []
         self.property_list_list = []
         self.object_comment = {}
         self.landmark_data = {}
@@ -2953,7 +2953,7 @@ class Morphologika:
         self.edge_list = []
         self.polygon_list = []
         self.ppmm_list = []
-        self.propertyname_list = []
+        self.variablename_list = []
         self.property_list_list = []
         self.object_comment = {}
         self.landmark_data = {}
@@ -3023,7 +3023,7 @@ class Morphologika:
         self.edge_list = []
         self.image_list = []
         self.polygon_list = []
-        self.propertyname_list = []
+        self.variablename_list = []
         self.property_list_list = []
 
         #print("objects:",objects)
@@ -3037,7 +3037,7 @@ class Morphologika:
             for line in self.raw_data['labels']:
                 labels = re.split(r'\s+', line)
                 for label in labels:
-                    self.propertyname_list.append( label )
+                    self.variablename_list.append( label )
                     
         if 'labelvalues' in self.raw_data.keys():
             for line in self.raw_data['labelvalues']:
@@ -3472,7 +3472,7 @@ class MdTableModel(QAbstractTableModel):
             id = row[0]['value']
             obj = MdObject.get_by_id(id)
             ds = obj.dataset
-            propertyname_list = ds.get_propertyname_list()
+            variablename_list = ds.get_variablename_list()
             property_list = []
             for idx, col in enumerate(row):
                 if idx > max(self._uneditable_columns):
@@ -3480,8 +3480,8 @@ class MdTableModel(QAbstractTableModel):
                     property_list.append(str(col['value']))
                 elif idx == 1:
                     obj.sequence = col['value']
-            obj.property_list = property_list
-            obj.pack_property()
+            obj.variable_list = property_list
+            obj.pack_variable()
             obj.save()
         self.data_changed = False
         
@@ -3526,7 +3526,7 @@ class AnalysisInfoWidget(QWidget):
 
 
         ''' PCA 3D plot '''
-        self.lblPcaGroupBy = QLabel("Group by")
+        self.lblPcaGroupBy = QLabel("Grouping variable")
         self.comboPcaGroupBy = QComboBox()
         self.comboPcaGroupBy.setEnabled(False)
         self.comboPcaGroupBy.currentIndexChanged.connect(self.comboPcaGroupBy_changed)
@@ -3543,7 +3543,7 @@ class AnalysisInfoWidget(QWidget):
         self.pca_layout.setRowStretch(i, 1)
 
         ''' CVA 3D plot '''
-        self.lblCvaGroupBy = QLabel("Group by")
+        self.lblCvaGroupBy = QLabel("Grouping variable")
         self.comboCvaGroupBy = QComboBox()
         self.comboCvaGroupBy.setEnabled(False)
         self.comboCvaGroupBy.currentIndexChanged.connect(self.comboCvaGroupBy_changed)
@@ -3562,7 +3562,7 @@ class AnalysisInfoWidget(QWidget):
 
 
         ''' MANOVA info '''
-        self.lblManovaGroupBy = QLabel("Group by")
+        self.lblManovaGroupBy = QLabel("Grouping variable")
         self.comboManovaGroupBy = QComboBox()
         self.comboManovaGroupBy.setEnabled(False)
         ''' manova output table '''
@@ -3634,10 +3634,10 @@ class AnalysisInfoWidget(QWidget):
             #self.set_group_by_combo(combo, analysis)
             combo.clear()
 
-            valid_property_index_list = analysis.dataset.get_valid_property_index_list()
-            propertyname_list = analysis.dataset.get_propertyname_list()
+            valid_property_index_list = analysis.dataset.get_grouping_variable_index_list()
+            variablename_list = analysis.dataset.get_variablename_list()
             for idx in valid_property_index_list:
-                property = propertyname_list[idx]
+                property = variablename_list[idx]
                 combo.addItem(property, idx)
                 #self.comboManovaGroupBy.addItem(property, idx)
 
@@ -3647,12 +3647,12 @@ class AnalysisInfoWidget(QWidget):
         
         self.comboPcaGroupBy.setCurrentIndex(0)
 
-        if analysis.cva_group_by in analysis.dataset.get_propertyname_list():
+        if analysis.cva_group_by in analysis.dataset.get_variablename_list():
             self.comboCvaGroupBy.setCurrentText(analysis.cva_group_by)
         else:
             self.comboCvaGroupBy.setCurrentIndex(0)
 
-        if analysis.manova_group_by in analysis.dataset.get_propertyname_list():
+        if analysis.manova_group_by in analysis.dataset.get_variablename_list():
             self.comboManovaGroupBy.setCurrentText(analysis.manova_group_by)
         else:
             self.comboManovaGroupBy.setCurrentIndex(0)
@@ -3694,7 +3694,7 @@ class AnalysisInfoWidget(QWidget):
                     self.tabManovaResult.setItem(row, idx+1, item)
         #self.edtAnalysisOutput.setPlainText(str())
 
-        propertyname_list = self.analysis.propertyname_str.split(",")
+        variablename_list = self.analysis.propertyname_str.split(",")
 
         symbol_candidate = ['o','s','^','x','+','d','v','<','>','p','h']
         symbol_candidate = self.marker_list[:]
@@ -3739,14 +3739,14 @@ class AnalysisInfoWidget(QWidget):
             axis2_title = axis_prefix + str(axis2+1)
             axis3_title = axis_prefix + str(axis3+1)
 
-        #propertyname_index = propertyname_list.index(self.analysis.group_by) if self.analysis.group_by in propertyname_list else -1
+        #propertyname_index = variablename_list.index(self.analysis.group_by) if self.analysis.group_by in variablename_list else -1
 
         #print("color list:", self.color_list, "marker list:", self.marker_list)
         #print("color candidate:", color_candidate, "symbol candidate:", symbol_candidate)
 
             propertyname = combo_list[idx].currentText()
 
-            propertyname_index_list[idx] = propertyname_list.index(propertyname) if propertyname in propertyname_list else -1
+            propertyname_index_list[idx] = variablename_list.index(propertyname) if propertyname in variablename_list else -1
             scatter_data_list[idx] = {}
             scatter_result_list[idx] = {}
         #if self.plot_size.lower() == 'small':
@@ -3767,8 +3767,8 @@ class AnalysisInfoWidget(QWidget):
                 key_name = '__default__'
 
                 ''' get propertyname '''
-                if propertyname_index_list[idx] > -1 and propertyname_index_list[idx] < len(obj['property_list']):
-                    key_name = obj['property_list'][propertyname_index_list[idx]]
+                if propertyname_index_list[idx] > -1 and propertyname_index_list[idx] < len(obj['variable_list']):
+                    key_name = obj['variable_list'][propertyname_index_list[idx]]
 
                 if key_name not in scatter_data_list[idx].keys():
                     scatter_data_list[idx][key_name] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'property':key_name, 'symbol':'', 'color':'', 'size':scatter_size}

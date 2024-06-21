@@ -292,10 +292,10 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             prev_lm_count = lm_count
         
         if True:
-            valid_property_index_list = self.selected_dataset.get_valid_property_index_list()
-            if len(valid_property_index_list) == 0:
+            grouping_variable_index_list = self.selected_dataset.get_grouping_variable_index_list()
+            if len(grouping_variable_index_list) == 0:
                 # alert no valid property
-                variable_names = ', '.join(self.selected_dataset.get_propertyname_list())
+                variable_names = ', '.join(self.selected_dataset.get_variablename_list())
 
                 error_message = f"Error: No categorical (grouping) variables found in the dataset. \n\n"
                 logger.error(error_message)
@@ -404,8 +404,8 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         analysis.polygons = dataset.polygons
         analysis.propertyname_str = dataset.propertyname_str
 
-        cva_group_by_name = dataset.propertyname_list[cva_group_by]
-        manova_group_by_name = dataset.propertyname_list[manova_group_by]
+        cva_group_by_name = dataset.variablename_list[cva_group_by]
+        manova_group_by_name = dataset.variablename_list[manova_group_by]
 
         ''' manova results'''
         #print("MANOVA result:",manova_analysis_result.results)
@@ -437,11 +437,11 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
         object_info_list = []
         raw_landmark_list = []
-        property_len = len(dataset.get_propertyname_list()) or 0
+        property_len = len(dataset.get_variablename_list()) or 0
         object_list = dataset.object_list.order_by(MdObject.sequence)
         for obj in object_list:
             raw_landmark_list.append( obj.get_landmark_list() )
-            object_info_list.append( { "id": obj.id, "name": obj.object_name, "sequence": obj.sequence, "csize": obj.get_centroid_size(), "property_list": obj.get_property_list()[:property_len] })
+            object_info_list.append( { "id": obj.id, "name": obj.object_name, "sequence": obj.sequence, "csize": obj.get_centroid_size(), "variable_list": obj.get_variable_list()[:property_len] })
         analysis.raw_landmark_json = json.dumps(raw_landmark_list)
         analysis.object_info_json = json.dumps(object_info_list)
 
@@ -461,8 +461,8 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         rotation_matrix = cva_analysis_result.rotation_matrix.tolist()
         analysis.cva_rotation_matrix_json = json.dumps(rotation_matrix)
 
-        analysis.cva_group_by = dataset.get_propertyname_list()[cva_group_by]
-        analysis.manova_group_by = dataset.get_propertyname_list()[manova_group_by]
+        analysis.cva_group_by = dataset.get_variablename_list()[cva_group_by]
+        analysis.manova_group_by = dataset.get_variablename_list()[manova_group_by]
             
         eigenvalues_list = []
         for i, val in enumerate(pca_analysis_result.raw_eigen_values):
@@ -998,9 +998,9 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         #print("mdtablemodel set")
         header_labels = ["ID", "Seq.", "Name", "Count", "CSize"]
         if self.selected_dataset is not None:
-            self.selected_dataset.unpack_propertyname_str()
-            if self.selected_dataset.propertyname_list is not None and len( self.selected_dataset.propertyname_list ) > 0:
-                header_labels.extend( self.selected_dataset.propertyname_list )
+            self.selected_dataset.unpack_variablename_str()
+            if self.selected_dataset.variablename_list is not None and len( self.selected_dataset.variablename_list ) > 0:
+                header_labels.extend( self.selected_dataset.variablename_list )
             if self.selected_dataset.dimension == 2:
                 self.object_view = self.object_view_2d
                 self.object_view_2d.show()
@@ -1306,15 +1306,15 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
             item_list = [item1,item2,item3,item4]
             '''
-            if len(self.selected_dataset.propertyname_list) > 0:
-                property_list = obj.unpack_property()
+            if len(self.selected_dataset.variablename_list) > 0:
+                variable_list = obj.unpack_variable()
 
-                for idx,prop in enumerate(self.selected_dataset.propertyname_list):
+                for idx,prop in enumerate(self.selected_dataset.variablename_list):
                     
                     #item = QStandardItem()
-                    if idx < len(property_list):
-                        #item.setData(property_list[idx],Qt.DisplayRole)
-                        item = property_list[idx]
+                    if idx < len(variable_list):
+                        #item.setData(variable_list[idx],Qt.DisplayRole)
+                        item = variable_list[idx]
                     else:
                         #item.setData('',Qt.DisplayRole)
                         item = ''

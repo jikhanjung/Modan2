@@ -3034,6 +3034,9 @@ class DataExplorationDialog(QDialog):
 
         #print("set_analysis 5", analysis, analysis_method, group_by, self.ignore_change)
         self.object_info_list = json.loads(self.analysis.object_info_json)
+        for obj in self.object_info_list:
+            if 'property_list' in obj.keys():
+                obj['variable_list'] = obj['property_list']
         if self.analysis_method == 'PCA':
             self.analysis_result_list = json.loads(self.analysis.pca_analysis_result_json)
         elif self.analysis_method == 'CVA':

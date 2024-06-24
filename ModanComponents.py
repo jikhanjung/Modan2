@@ -3665,6 +3665,9 @@ class AnalysisInfoWidget(QWidget):
         #self.plot_widget.clear()
         if self.analysis.object_info_json:
             object_info_list = json.loads(self.analysis.object_info_json)
+            for obj in object_info_list:
+                if 'property_list' in obj.keys():
+                    obj['variable_list'] = obj['property_list']
         else:
             return
         if self.analysis.pca_analysis_result_json:

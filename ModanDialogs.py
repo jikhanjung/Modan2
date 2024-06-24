@@ -2942,11 +2942,18 @@ class DataExplorationDialog(QDialog):
         self.comboSelectGroup.clear()
         unique_groupname_list = []
         for idx, obj in enumerate(self.object_info_list):
-            if propertyname_index > -1 and propertyname_index < len(obj['variable_list']):
-                key_name = obj['variable_list'][self.propertyname_index]
-                if key_name not in unique_groupname_list:
-                    unique_groupname_list.append(key_name)
-                    self.comboSelectGroup.addItem(key_name)
+            if 'variable_list' in obj.keys():
+                if propertyname_index > -1 and propertyname_index < len(obj['variable_list']):
+                    key_name = obj['variable_list'][self.propertyname_index]
+                    if key_name not in unique_groupname_list:
+                        unique_groupname_list.append(key_name)
+                        self.comboSelectGroup.addItem(key_name)
+            else:
+                if propertyname_index > -1 and propertyname_index < len(obj['property_list']):
+                    key_name = obj['property_list'][self.propertyname_index]
+                    if key_name not in unique_groupname_list:
+                        unique_groupname_list.append(key_name)
+                        self.comboSelectGroup.addItem(key_name)
         model = self.comboSelectGroup.model()
         # Make all items checkable
         for i in range(model.rowCount()):
@@ -3111,8 +3118,12 @@ class DataExplorationDialog(QDialog):
         for idx, obj in enumerate(self.object_info_list):
             key_name = '__default__'
 
-            if self.propertyname_index > -1 and self.propertyname_index < len(obj['variable_list']):
-                key_name = obj['variable_list'][self.propertyname_index]
+            if 'variable_list' in obj.keys():  
+                if self.propertyname_index > -1 and self.propertyname_index < len(obj['variable_list']):
+                    key_name = obj['variable_list'][self.propertyname_index]
+            else:
+                if self.propertyname_index > -1 and self.propertyname_index < len(obj['property_list']):
+                    key_name = obj['property_list'][self.propertyname_index]
 
             if key_name not in self.scatter_data.keys():
                 self.scatter_data[key_name] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'property':key_name, 'symbol':'', 'color':'', 'size':scatter_size}
@@ -4311,7 +4322,7 @@ class DatasetAnalysisDialog(QDialog):
         prev_lm_count = -1
         for obj in dataset.object_list:
             obj.unpack_landmark()
-            obj.unpack_property()
+            obj.unpack_variable()
             #print("property:", obj.variable_list)
             lm_count = len(obj.landmark_list)
             #print("prev_lm_count:", prev_lm_count, "lm_count:", lm_count)
@@ -4992,7 +5003,7 @@ class DatasetAnalysisDialog(QDialog):
             item2 = QStandardItem(obj.object_name)
             self.object_hash[obj.id] = item1
             if self.propertyname_index >= 0:
-                obj.unpack_property()
+                obj.unpack_variable()
                 #print(obj.variable_list)
                 item3 = QStandardItem(obj.variable_list[self.propertyname_index])
                 if obj.variable_list[self.propertyname_index] not in self.variable_list:

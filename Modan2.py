@@ -61,27 +61,27 @@ class ModanMainWindow(QMainWindow):
         self.actionNewDataset = QAction(QIcon(mu.resource_path(ICON['new_dataset'])), self.tr("New Dataset\tCtrl+N"), self)
         self.actionNewDataset.triggered.connect(self.on_action_new_dataset_triggered)
         self.actionNewDataset.setShortcut(QKeySequence("Ctrl+N"))
-        self.actionNewObject = QAction(QIcon(mu.resource_path(ICON['new_object'])), "New Object\tCtrl+Shift+N", self)
+        self.actionNewObject = QAction(QIcon(mu.resource_path(ICON['new_object'])), self.tr("New Object\tCtrl+Shift+N"), self)
         self.actionNewObject.triggered.connect(self.on_action_new_object_triggered)
         self.actionNewObject.setShortcut(QKeySequence("Ctrl+Shift+N"))
         #self.actionNewObject.setEnabled(False)
-        self.actionImport = QAction(QIcon(mu.resource_path(ICON['import'])), "Import\tCtrl+I", self)
+        self.actionImport = QAction(QIcon(mu.resource_path(ICON['import'])), self.tr("Import\tCtrl+I"), self)
         self.actionImport.triggered.connect(self.on_action_import_dataset_triggered)
         self.actionImport.setShortcut(QKeySequence("Ctrl+I"))
-        self.actionExport = QAction(QIcon(mu.resource_path(ICON['export'])), "Export\tCtrl+E", self)
+        self.actionExport = QAction(QIcon(mu.resource_path(ICON['export'])), self.tr("Export\tCtrl+E"), self)
         self.actionExport.triggered.connect(self.on_action_export_dataset_triggered)
         self.actionExport.setShortcut(QKeySequence("Ctrl+E"))
         #self.actionExport.setEnabled(False)
-        self.actionAnalyze = QAction(QIcon(mu.resource_path(ICON['analyze'])), "Analyze\tCtrl+G", self)
+        self.actionAnalyze = QAction(QIcon(mu.resource_path(ICON['analyze'])), self.tr("Analyze\tCtrl+G"), self)
         self.actionAnalyze.triggered.connect(self.on_action_analyze_dataset_triggered)
         self.actionAnalyze.setShortcut(QKeySequence("Ctrl+G"))
         #self.actionAnalyze.setEnabled(False)
-        self.actionPreferences = QAction(QIcon(mu.resource_path(ICON['preferences'])), "Preferences", self)
+        self.actionPreferences = QAction(QIcon(mu.resource_path(ICON['preferences'])), self.tr("Preferences"), self)
         self.actionPreferences.triggered.connect(self.on_action_edit_preferences_triggered)
-        self.actionExit = QAction(QIcon(mu.resource_path(ICON['exit'])), "Exit\tCtrl+W", self)
+        self.actionExit = QAction(QIcon(mu.resource_path(ICON['exit'])), self.tr("Exit\tCtrl+W"), self)
         self.actionExit.triggered.connect(self.on_action_exit_triggered)
         self.actionExit.setShortcut(QKeySequence("Ctrl+W"))
-        self.actionAbout = QAction(QIcon(mu.resource_path(ICON['about'])), "About\tF1", self)
+        self.actionAbout = QAction(QIcon(mu.resource_path(ICON['about'])), self.tr("About\tF1"), self)
         self.actionAbout.triggered.connect(self.on_action_about_triggered)
         self.actionAbout.setShortcut(QKeySequence("F1"))
         self.toolbar.addAction(self.actionNewDataset)
@@ -94,11 +94,11 @@ class ModanMainWindow(QMainWindow):
         self.addToolBar(self.toolbar)
 
         self.main_menu = self.menuBar()
-        self.file_menu = self.main_menu.addMenu("File")
+        self.file_menu = self.main_menu.addMenu(self.tr("File"))
         self.file_menu.addAction(self.actionExit)
-        self.edit_menu = self.main_menu.addMenu("Edit")
+        self.edit_menu = self.main_menu.addMenu(self.tr("Edit"))
         self.edit_menu.addAction(self.actionPreferences)
-        self.data_menu = self.main_menu.addMenu("Data")
+        self.data_menu = self.main_menu.addMenu(self.tr("Data"))
         self.data_menu.addAction(self.actionNewDataset)
         self.data_menu.addAction(self.actionNewObject)
         self.data_menu.addSeparator()
@@ -106,7 +106,7 @@ class ModanMainWindow(QMainWindow):
         self.data_menu.addSeparator()
         self.data_menu.addAction(self.actionImport)
         self.data_menu.addAction(self.actionExport)
-        self.help_menu = self.main_menu.addMenu("Help")
+        self.help_menu = self.main_menu.addMenu(self.tr("Help"))
         self.help_menu.addAction(self.actionAbout)
 
         self.m_app = QApplication.instance()
@@ -270,11 +270,11 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     @pyqtSlot()
     def on_action_analyze_dataset_triggered(self):
         if self.selected_dataset is None:
-            QMessageBox.warning(self, "Warning", "No dataset selected")
+            QMessageBox.warning(self, self.tr("Warning"), self.tr("No dataset selected"))
             return
         prev_lm_count = -1
         if self.selected_dataset.object_list is None or len(self.selected_dataset.object_list) < 5:
-            error_message = "Error: number of objects is too small for analysis."
+            error_message = self.tr("Error: number of objects is too small for analysis.")
             logger.error(error_message)
             mu.show_error_message(error_message)
             return
@@ -285,7 +285,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             #print("prev_lm_count:", prev_lm_count, "lm_count:", lm_count)
             if prev_lm_count != lm_count and prev_lm_count != -1:
                 # show messagebox and close the window
-                error_message = "Error: landmark count is not consistent."
+                error_message = self.tr("Error: landmark count is not consistent.")
                 logger.error(error_message)
                 mu.show_error_message(error_message)
                 return
@@ -345,7 +345,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
         QApplication.setOverrideCursor(Qt.WaitCursor)
         if not ds_ops.procrustes_superimposition():
-            error_message = "Procrustes superimposition failed"
+            error_message = self.tr("Procrustes superimposition failed")
             logger.error(error_message)
             mu.show_error_message(error_message)
             return
@@ -353,13 +353,13 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
         cva_analysis_result = PerformCVA(ds_ops, cva_group_by)
         if cva_analysis_result is None:
-            error_message = "CVA analysis failed"
+            error_message = self.tr("CVA analysis failed")
             logger.error(error_message)
             mu.show_error_message(error_message)
             return
         pca_analysis_result = PerformPCA(ds_ops)
         if pca_analysis_result is None:
-            error_message = "PCA analysis failed"
+            error_message = self.tr("PCA analysis failed")
             logger.error(error_message)
             mu.show_error_message(error_message)
             return

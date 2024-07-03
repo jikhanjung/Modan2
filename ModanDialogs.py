@@ -6077,6 +6077,7 @@ class PreferencesDialog(QDialog):
         self.m_app.index_pref['3D']['size'] = self.m_app.settings.value("IndexSize/3D", self.m_app.index_pref['3D']['size'])
         self.m_app.index_pref['3D']['color'] = self.m_app.settings.value("IndexColor/3D", self.m_app.index_pref['3D']['color'])
         self.m_app.bgcolor = self.m_app.settings.value("BackgroundColor", self.m_app.bgcolor)
+        self.m_app.language = self.m_app.settings.value("Language", "en")
 
         if self.m_app.remember_geometry is True:
             self.setGeometry(self.m_app.settings.value("WindowGeometry/PreferencesDialog", QRect(100, 100, 600, 400)))
@@ -6111,6 +6112,7 @@ class PreferencesDialog(QDialog):
         self.m_app.settings.setValue("IndexColor/2D", self.m_app.index_pref['2D']['color'])
         self.m_app.settings.setValue("IndexSize/3D", self.m_app.index_pref['3D']['size'])
         self.m_app.settings.setValue("IndexColor/3D", self.m_app.index_pref['3D']['color'])
+        self.m_app.settings.setValue("Language", self.m_app.language)
 
     def closeEvent(self, event):
         self.write_settings()

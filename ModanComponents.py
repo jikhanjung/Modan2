@@ -3770,8 +3770,13 @@ class AnalysisInfoWidget(QWidget):
                 key_name = '__default__'
 
                 ''' get propertyname '''
-                if propertyname_index_list[idx] > -1 and propertyname_index_list[idx] < len(obj['variable_list']):
-                    key_name = obj['variable_list'][propertyname_index_list[idx]]
+                if 'variable_list' in obj.keys():
+                    if propertyname_index_list[idx] > -1 and propertyname_index_list[idx] < len(obj['variable_list']):
+                        key_name = obj['variable_list'][propertyname_index_list[idx]]
+                else:
+                    if propertyname_index_list[idx] > -1 and propertyname_index_list[idx] < len(obj['property_list']):
+                        key_name = obj['property_list'][propertyname_index_list[idx]]
+
 
                 if key_name not in scatter_data_list[idx].keys():
                     scatter_data_list[idx][key_name] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'property':key_name, 'symbol':'', 'color':'', 'size':scatter_size}

@@ -500,10 +500,10 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.object_button_layout = QHBoxLayout()
         self.object_button_widget.setLayout(self.object_button_layout)
 
-        self.btnSaveObjectInfo = QPushButton("Save Changes")
-        self.btnEditObject = QPushButton("Edit Object")
-        self.btnAddObject = QPushButton("Add Object")
-        self.btnAddProperty = QPushButton("Add Variable")
+        self.btnSaveObjectInfo = QPushButton(self.tr("Save Changes"))
+        self.btnEditObject = QPushButton(self.tr("Edit Object"))
+        self.btnAddObject = QPushButton(self.tr("Add Object"))
+        self.btnAddProperty = QPushButton(self.tr("Add Variable"))
         self.object_button_layout.addWidget(self.btnAddObject)
         self.object_button_layout.addWidget(self.btnEditObject)
         self.object_button_layout.addWidget(self.btnAddProperty)
@@ -536,11 +536,11 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.analysis_info_widget = AnalysisInfoWidget(self)
         self.analysis_view_layout.addWidget(self.analysis_info_widget)
 
-        self.btnSaveAnalysis = QPushButton("Save")
+        self.btnSaveAnalysis = QPushButton(self.tr("Save"))
         self.btnSaveAnalysis.clicked.connect(self.btnSaveAnalysis_clicked)
-        self.btnAnalysisDetail = QPushButton("Analysis Details")
+        self.btnAnalysisDetail = QPushButton(self.tr("Analysis Details"))
         self.btnAnalysisDetail.clicked.connect(self.btnAnalysisDetail_clicked)
-        self.btnDataExploration = QPushButton("Data Exploration")
+        self.btnDataExploration = QPushButton(self.tr("Data Exploration"))
         self.btnDataExploration.clicked.connect(self.btnDataExploration_clicked)
         self.analysis_button_layout = QHBoxLayout()
         self.analysis_button_layout.addWidget(self.btnSaveAnalysis)
@@ -596,9 +596,9 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     def on_action_new_property_triggered(self):
         if self.selected_dataset is None:
             return
-        text, ok = QInputDialog.getText(self, 'Input Dialog', 'Enter new property name', text="")
+        text, ok = QInputDialog.getText(self, 'Input Dialog', self.tr('Enter new variable name'), text="")
         if ok:
-            self.selected_dataset.add_propertyname(text)
+            self.selected_dataset.add_variablename(text)
             ds = self.selected_dataset
             self.load_dataset()
             # select current dataset
@@ -616,7 +616,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
     @pyqtSlot()
     def on_action_delete_object_triggered(self):
-        ret = QMessageBox.warning(self, "Warning", "Are you sure to delete the selected object?", QMessageBox.Yes | QMessageBox.No)
+        ret = QMessageBox.warning(self, self.tr("Warning"), self.tr("Are you sure to delete the selected object?"), QMessageBox.Yes | QMessageBox.No)
         if ret == QMessageBox.No:
             return
         
@@ -636,17 +636,17 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
             level = 0
             index = indexes[0]
-            action_add_dataset = QAction("Add child dataset")
+            action_add_dataset = QAction(self.tr("Add child dataset"))
             action_add_dataset.triggered.connect(self.on_action_new_dataset_triggered)
-            action_add_object = QAction("Add object")
+            action_add_object = QAction(self.tr("Add object"))
             action_add_object.triggered.connect(self.on_action_new_object_triggered)
-            action_add_analysis = QAction("Add analysis")
+            action_add_analysis = QAction(self.tr("Add analysis"))
             action_add_analysis.triggered.connect(self.on_action_analyze_dataset_triggered)
-            action_explore_data = QAction("Explore data")
+            action_explore_data = QAction(self.tr("Explore data"))
             action_explore_data.triggered.connect(self.on_action_explore_data_triggered)
-            action_delete_analysis = QAction("Delete analysis")
+            action_delete_analysis = QAction(self.tr("Delete analysis"))
             action_delete_analysis.triggered.connect(self.on_action_delete_analysis_triggered)
-            action_refresh_tree = QAction("Reload")
+            action_refresh_tree = QAction(self.tr("Reload"))
             action_refresh_tree.triggered.connect(self.load_dataset)
 
             # get item
@@ -671,7 +671,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 
     def on_action_delete_analysis_triggered(self):
-        ret = QMessageBox.warning(self, "Warning", "Are you sure to delete the selected analysis?", QMessageBox.Yes | QMessageBox.No)
+        ret = QMessageBox.warning(self, self.tr("Warning"), self.tr("Are you sure to delete the selected analysis?"), QMessageBox.Yes | QMessageBox.No)
         if ret == QMessageBox.No:
             return
         selected_indexes = self.treeView.selectionModel().selectedRows()
@@ -683,9 +683,9 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.load_dataset()
 
     def on_action_explore_data_triggered(self):
-        print("data exploration")
+        #print("data exploration")
         self.exploration_dialog = DataExplorationDialog(self)
-        print("about to set analysis")
+        #print("about to set analysis")
         self.exploration_dialog.set_analysis(self.selected_analysis)
         self.exploration_dialog.show()
         #self.load_dataset()
@@ -930,7 +930,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                             new_model.save()
                             
                 else:
-                    QMessageBox.warning(self, "Warning", "Dimension mismatch")
+                    QMessageBox.warning(self, self.tr("Warning"), self.tr("Dimension mismatch"))
                     break
             self.progress_dialog.close()
 
@@ -1073,9 +1073,9 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.progress_dialog = ProgressDialog(self)
         self.progress_dialog.setModal(True)
         if self.selected_dataset.dimension == 3:
-            label_text = "Importing 3d model files..."
+            label_text = self.tr("Importing 3d model files...")
         else:
-            label_text = "Importing image files..."
+            label_text = self.tr("Importing image files...")
         self.progress_dialog.lbl_text.setText(label_text)
         self.progress_dialog.pb_progress.setValue(0)
         self.progress_dialog.show()
@@ -1091,7 +1091,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             ext = file_name.split('.')[-1].lower()
             if ext in mu.IMAGE_EXTENSION_LIST:
                 if self.selected_dataset.dimension != 2:
-                    QMessageBox.warning(self, "Warning", "Dimension mismatch.")
+                    QMessageBox.warning(self, self.tr("Warning"), self.tr("Dimension mismatch."))
                     break
                 obj = self.selected_dataset.add_object(object_name=Path(file_name).stem)
                 obj.save()
@@ -1100,7 +1100,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
             elif ext in mu.MODEL_EXTENSION_LIST:
                 if self.selected_dataset.dimension != 3:
-                    QMessageBox.warning(self, "Warning", "Dimension mismatch.")
+                    QMessageBox.warning(self, self.tr("Warning"), self.tr("Dimension mismatch."))
                     break
                 obj = self.selected_dataset.add_object(object_name=Path(file_name).stem)
                 obj.save()
@@ -1108,10 +1108,10 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 mdl.save()
 
             elif os.path.isdir(file_name):
-                self.statusBar.showMessage("Cannot process directory...",2000)
+                self.statusBar.showMessage(self.tr("Cannot process directory..."),2000)
 
             else:
-                self.statusBar.showMessage("Nothing to import.",2000)
+                self.statusBar.showMessage(self.tr("Nothing to import."),2000)
 
             self.load_object()
 
@@ -1222,7 +1222,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
     def on_dataset_selection_changed(self, selected, deselected):
         if self.data_changed:
-            ret = QMessageBox.warning(self, "Warning", "Data has been changed. Do you want to save?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
+            ret = QMessageBox.warning(self, self.tr("Warning"), self.tr("Data has been changed. Do you want to save?"), QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
             if ret == QMessageBox.Yes:
                 self.on_btnSaveObjectInfo_clicked()
             elif ret == QMessageBox.Cancel:
@@ -1394,9 +1394,9 @@ for MacOS
 pyinstaller --onefile --noconsole --add-data "icons/*.png:icons" --add-data "translations/*.qm:translations" --add-data "migrations/*:migrations" --icon="icons/Modan2_2.png" Modan2.py
 pyinstaller --onedir --noconsole --add-data "icons/*.png:icons" --add-data "translations/*.qm:translations" --add-data "migrations/*:migrations" --icon="icons/Modan2_2.png" --noconfirm Modan2.py
 
-pylupdate5 Modan2.py -ts translations/Modan2_en.ts
-pylupdate5 Modan2.py -ts translations/Modan2_ko.ts
-pylupdate5 Modan2.py -ts translations/Modan2_ja.ts
+pylupdate5 Modan2.py ModanComponents.py ModanDialogs.py -ts translations/Modan2_en.ts
+pylupdate5 Modan2.py ModanComponents.py ModanDialogs.py -ts translations/Modan2_ko.ts
+pylupdate5 Modan2.py ModanComponents.py ModanDialogs.py -ts translations/Modan2_ja.ts
 
 linguist
 

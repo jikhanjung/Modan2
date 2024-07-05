@@ -210,7 +210,7 @@ class MdDataset(Model):
         obj.dataset=self
         return obj
 
-    def add_propertyname(self, propertyname):
+    def add_variablename(self, propertyname):
         self.variablename_list.append(propertyname)
         self.pack_variablename_str()
         self.save()

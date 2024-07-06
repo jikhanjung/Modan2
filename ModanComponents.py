@@ -255,19 +255,19 @@ class ObjectViewer2D(QLabel):
         if self.edit_mode == MODE['EDIT_LANDMARK']:
             self.setCursor(Qt.CrossCursor)
             #QApplication.setOverrideCursor(Qt.CrossCursor)
-            self.show_message("Click on image to add landmark")
+            self.show_message(self.tr("Click on image to add landmark"))
         elif self.edit_mode == MODE['READY_MOVE_LANDMARK']:
             self.setCursor(Qt.SizeAllCursor)
             #QApplication.setOverrideCursor(Qt.SizeAllCursor)
-            self.show_message("Click on landmark to move")
+            self.show_message(self.tr("Click on landmark to move"))
         elif self.edit_mode == MODE['MOVE_LANDMARK']:
             #QApplication.setOverrideCursor(Qt.SizeAllCursor)
             self.setCursor(Qt.SizeAllCursor)
-            self.show_message("Move landmark")
+            self.show_message(self.tr("Move landmark"))
         elif self.edit_mode == MODE['CALIBRATION']:
             #QApplication.setOverrideCursor(Qt.CrossCursor)
             self.setCursor(Qt.CrossCursor)
-            self.show_message("Click on image to add landmark")
+            self.show_message(self.tr("Click on image to calibrate"))
         else:
             self.setCursor(Qt.ArrowCursor)
             #QApplication.setOverrideCursor(Qt.ArrowCursor)
@@ -756,7 +756,7 @@ class ObjectViewer2D(QLabel):
                 self.set_image(image_path)
             else:
                 self.clear_object()
-                print("Image file not found:", image_path)
+                #print("Image file not found:", image_path)
 
         object.unpack_landmark()
         object.dataset.unpack_wireframe()
@@ -811,7 +811,7 @@ class ObjectViewer2D(QLabel):
         self.update()
 
     def add_edge(self,wire_start_index, wire_end_index):
-        print("add edge", wire_start_index, wire_end_index)
+        #print("add edge", wire_start_index, wire_end_index)
         if wire_start_index == wire_end_index:
             return
         if wire_start_index > wire_end_index:
@@ -820,9 +820,9 @@ class ObjectViewer2D(QLabel):
         for wire in dataset.edge_list:
             if wire[0] == wire_start_index and wire[1] == wire_end_index:
                 return
-        print("add edge 1", wire_start_index, wire_end_index, dataset.edge_list)
+        #print("add edge 1", wire_start_index, wire_end_index, dataset.edge_list)
         dataset.edge_list.append([wire_start_index+1, wire_end_index+1])
-        print("add edge 2", wire_start_index, wire_end_index, dataset.edge_list)
+        #print("add edge 2", wire_start_index, wire_end_index, dataset.edge_list)
         dataset.pack_wireframe()
         dataset.save()
         #self.repaint()

@@ -397,7 +397,7 @@ class DatasetDialog(QDialog):
     # NewDatasetDialog shows new dataset dialog.
     def __init__(self,parent):
         super().__init__()
-        self.setWindowTitle("Modan2 - Dataset Information")
+        self.setWindowTitle(self.tr("Modan2 - Dataset Information"))
         self.parent = parent
         #print(self.parent.pos())
         #self.setGeometry(QRect(100, 100, 600, 400))
@@ -425,10 +425,10 @@ class DatasetDialog(QDialog):
         self.edtVariableNameStr = QTextEdit()
         self.lstVariableName = QListWidget()
         self.lstVariableName.setEditTriggers(QListWidget.DoubleClicked|QListWidget.EditKeyPressed|QListWidget.SelectedClicked)
-        self.btnAddVariable = QPushButton("Add Variable")
-        self.btnDeleteVariable = QPushButton("Delete Variable")
-        self.btnMoveUp = QPushButton("Move Up")
-        self.btnMoveDown = QPushButton("Move Down")
+        self.btnAddVariable = QPushButton(self.tr("Add Variable"))
+        self.btnDeleteVariable = QPushButton(self.tr("Delete Variable"))
+        self.btnMoveUp = QPushButton(self.tr("Move Up"))
+        self.btnMoveDown = QPushButton(self.tr("Move Down"))
         self.variable_widget = QWidget()
         self.variable_layout = QVBoxLayout()
         self.variable_widget.setLayout(self.variable_layout)
@@ -451,25 +451,33 @@ class DatasetDialog(QDialog):
 
         self.main_layout = QFormLayout()
         self.setLayout(self.main_layout)
-        self.main_layout.addRow("Parent", self.cbxParent)
-        self.main_layout.addRow("Dataset Name", self.edtDatasetName)
-        self.main_layout.addRow("Description", self.edtDatasetDesc)
-        self.main_layout.addRow("Dimension", dim_layout)
-        self.main_layout.addRow("Wireframe", self.edtWireframe)
-        self.main_layout.addRow("Baseline", self.edtBaseline)
-        self.main_layout.addRow("Polygons", self.edtPolygons)
-        self.main_layout.addRow("Variable Names", self.variable_widget)
+        self.lblParent = QLabel(self.tr("Parent"))
+        self.lblDatasetName = QLabel(self.tr("Dataset Name"))
+        self.lblDatasetDesc = QLabel(self.tr("Description"))
+        self.lblDimension = QLabel(self.tr("Dimension"))
+        self.lblWireframe = QLabel(self.tr("Wireframe"))
+        self.lblBaseline = QLabel(self.tr("Baseline"))
+        self.lblPolygons = QLabel(self.tr("Polygons"))
+        self.lblVariableNameStr = QLabel(self.tr("Variable Names"))
+        self.main_layout.addRow(self.lblParent, self.cbxParent)
+        self.main_layout.addRow(self.lblDatasetName, self.edtDatasetName)
+        self.main_layout.addRow(self.lblDatasetDesc, self.edtDatasetDesc)
+        self.main_layout.addRow(self.lblDimension, dim_layout)
+        self.main_layout.addRow(self.lblWireframe, self.edtWireframe)
+        self.main_layout.addRow(self.lblBaseline, self.edtBaseline)
+        self.main_layout.addRow(self.lblPolygons, self.edtPolygons)
+        self.main_layout.addRow(self.lblVariableNameStr, self.variable_widget)
 
         self.btnOkay = QPushButton()
-        self.btnOkay.setText("Save")
+        self.btnOkay.setText(self.tr("Save"))
         self.btnOkay.clicked.connect(self.Okay)
 
         self.btnDelete = QPushButton()
-        self.btnDelete.setText("Delete")
+        self.btnDelete.setText(self.tr("Delete"))
         self.btnDelete.clicked.connect(self.Delete)
 
         self.btnCancel = QPushButton()
-        self.btnCancel.setText("Cancel")
+        self.btnCancel.setText(self.tr("Cancel"))
         self.btnCancel.clicked.connect(self.Cancel)
 
         btn_layout = QHBoxLayout()
@@ -486,7 +494,7 @@ class DatasetDialog(QDialog):
         #self.edtServerPort.setText(self.server_port)
 
     def addVariable(self):
-        item = QListWidgetItem("New Variable")
+        item = QListWidgetItem(self.tr("New Variable"))
         item.setFlags(item.flags() | Qt.ItemIsEditable)
         item.setData(Qt.UserRole, -1)
         self.lstVariableName.addItem(item)
@@ -633,7 +641,7 @@ class DatasetDialog(QDialog):
         self.accept()
 
     def Delete(self):
-        ret = QMessageBox.question(self, "", "Are you sure to delete this dataset?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        ret = QMessageBox.question(self, "", self.tr("Are you sure to delete this dataset?"), QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         #print("ret:", ret)
         if ret == QMessageBox.Yes:
             self.dataset.delete_instance()
@@ -649,7 +657,7 @@ class ObjectDialog(QDialog):
     # NewDatasetDialog shows new dataset dialog.
     def __init__(self,parent):
         super().__init__()
-        self.setWindowTitle("Modan2 - Object Information")
+        self.setWindowTitle(self.tr("Modan2 - Object Information"))
         self.parent = parent
         #print(self.parent.pos())
         self.remember_geometry = True
@@ -684,7 +692,7 @@ class ObjectDialog(QDialog):
         self.inputLayout.setContentsMargins(0,0,0,0)
         self.inputLayout.setSpacing(0)
         self.btnAddInput = QPushButton()
-        self.btnAddInput.setText("Add")
+        self.btnAddInput.setText(self.tr("Add"))
         self.inputLayout.addWidget(self.btnAddInput)
         self.inputX.returnPressed.connect(self.input_coords_process)
         self.inputY.returnPressed.connect(self.input_coords_process)
@@ -722,11 +730,16 @@ class ObjectDialog(QDialog):
         self.object_view_2d.setPixmap(self.pixmap)
 
         self.form_layout = QFormLayout()
-        self.form_layout.addRow("Dataset Name", self.lblDataset)
-        self.form_layout.addRow("Object Name", self.edtObjectName)
-        self.form_layout.addRow("Sequence", self.edtSequence)
-        self.form_layout.addRow("Object Desc", self.edtObjectDesc)
-        self.form_layout.addRow("Landmarks", self.edtLandmarkStr)
+        self.lblDatasetName = QLabel(self.tr("Dataset Name"))
+        self.lblObjectName = QLabel(self.tr("Object Name"))
+        self.lblSequence = QLabel(self.tr("Sequence"))
+        self.lblObjectDesc = QLabel(self.tr("Description"))
+        self.lblLandmarkStr = QLabel(self.tr("Landmarks"))
+        self.form_layout.addRow(self.lblDatasetName, self.lblDataset)
+        self.form_layout.addRow(self.lblObjectName, self.edtObjectName)
+        self.form_layout.addRow(self.lblSequence, self.edtSequence)
+        self.form_layout.addRow(self.lblObjectDesc, self.edtObjectDesc)
+        self.form_layout.addRow(self.lblLandmarkStr, self.edtLandmarkStr)
         self.form_layout.addRow("", self.inputCoords)
 
         self.btnGroup = QButtonGroup() 
@@ -758,26 +771,26 @@ class ObjectDialog(QDialog):
         self.btn_layout2.addWidget(self.btnCalibration,1,0)
 
         self.cbxShowIndex = QCheckBox()
-        self.cbxShowIndex.setText("Index")
+        self.cbxShowIndex.setText(self.tr("Index"))
         self.cbxShowIndex.setChecked(True)
         self.cbxShowWireframe = QCheckBox()
-        self.cbxShowWireframe.setText("Wireframe")
+        self.cbxShowWireframe.setText(self.tr("Wireframe"))
         self.cbxShowWireframe.setChecked(True)
         self.cbxShowPolygon = QCheckBox()
-        self.cbxShowPolygon.setText("Polygon")
+        self.cbxShowPolygon.setText(self.tr("Polygon"))
         self.cbxShowPolygon.setChecked(True)
         self.cbxShowBaseline = QCheckBox()
-        self.cbxShowBaseline.setText("Baseline")
+        self.cbxShowBaseline.setText(self.tr("Baseline"))
         self.cbxShowBaseline.setChecked(True)
         self.cbxShowBaseline.hide()
         self.cbxAutoRotate = QCheckBox()
-        self.cbxAutoRotate.setText("Rotate")
+        self.cbxAutoRotate.setText(self.tr("Rotate"))
         self.cbxAutoRotate.setChecked(False)
         self.cbxShowModel = QCheckBox()
-        self.cbxShowModel.setText("3D Model")
+        self.cbxShowModel.setText(self.tr("3D Model"))
         self.cbxShowModel.setChecked(False)
         self.btnAddFile = QPushButton()
-        self.btnAddFile.setText("Load Image")
+        self.btnAddFile.setText(self.tr("Load Image"))
         self.btnAddFile.clicked.connect(self.btnAddFile_clicked)
 
         #self.btnFBO = QPushButton()
@@ -828,20 +841,20 @@ class ObjectDialog(QDialog):
         self.hsplitter.setStretchFactor(2, 0)
 
         self.btnPrevious = QPushButton()
-        self.btnPrevious.setText("Previous")
+        self.btnPrevious.setText(self.tr("Previous"))
         self.btnPrevious.clicked.connect(self.Previous)
         self.btnNext = QPushButton()
-        self.btnNext.setText("Next")
+        self.btnNext.setText(self.tr("Next"))
         self.btnNext.clicked.connect(self.Next)
 
         self.btnOkay = QPushButton()
-        self.btnOkay.setText("Save")
+        self.btnOkay.setText(self.tr("Save"))
         self.btnOkay.clicked.connect(self.Okay)
         self.btnDelete = QPushButton()
-        self.btnDelete.setText("Delete")
+        self.btnDelete.setText(self.tr("Delete"))
         self.btnDelete.clicked.connect(self.Delete)
         self.btnCancel = QPushButton()
-        self.btnCancel.setText("Cancel")
+        self.btnCancel.setText(self.tr("Cancel"))
         self.btnCancel.clicked.connect(self.Cancel)
         btn_layout = QHBoxLayout()
         btn_layout.addWidget(self.btnPrevious)
@@ -897,7 +910,7 @@ class ObjectDialog(QDialog):
 
         if self.dataset.dimension == 2:
             extension = " ".join([ "*."+x for x in mu.IMAGE_EXTENSION_LIST])
-            file_path, _ = QFileDialog.getOpenFileName(self, "Open File", mu.USER_PROFILE_DIRECTORY, "Image Files ("+extension+")")
+            file_path, _ = QFileDialog.getOpenFileName(self, self.tr("Open File"), mu.USER_PROFILE_DIRECTORY, "Image Files ("+extension+")")
             if file_path == "":
                 return
             self.object_view.set_image(file_path)
@@ -907,7 +920,7 @@ class ObjectDialog(QDialog):
 
 
         else:
-            file_path, _ = QFileDialog.getOpenFileName(self, "Open File", mu.USER_PROFILE_DIRECTORY, "3D Files (*.obj *.stl *.ply)")
+            file_path, _ = QFileDialog.getOpenFileName(self, self.tr("Open File"), mu.USER_PROFILE_DIRECTORY, "3D Files (*.obj *.stl *.ply)")
             if file_path == "":
                 return
             #print("file_path 1:", file_path)
@@ -1081,7 +1094,7 @@ class ObjectDialog(QDialog):
             self.cbxShowModel.show()
             self.cbxShowPolygon.show()
             #self.cbxShowModel.setEnabled(True)
-            self.btnAddFile.setText("Load 3D Model")
+            self.btnAddFile.setText(self.tr("Load 3D Model"))
             #print("set_object 3d 3")
             if object is not None:
                 #print("object dialog self.landmark_list in set object 3d", self.landmark_list)
@@ -1105,7 +1118,7 @@ class ObjectDialog(QDialog):
             self.cbxShowModel.hide()
             self.cbxShowPolygon.hide()
             #self.cbxShowModel.setEnabled(True)
-            self.btnAddFile.setText("Load Image")
+            self.btnAddFile.setText(self.tr("Load Image"))
 
             if object is not None:
                 if object.image is not None and len(object.image) > 0:
@@ -1277,7 +1290,7 @@ class ObjectDialog(QDialog):
         self.tableView = tableview
 
     def Delete(self):
-        ret = QMessageBox.question(self, "", "Are you sure to delete this object?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        ret = QMessageBox.question(self, "", self.tr("Are you sure to delete this object?"), QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if ret == QMessageBox.Yes:
             if self.object.image.count() > 0:
                 image_path = self.object.image[0].get_file_path(self.m_app.storage_directory)
@@ -1411,19 +1424,19 @@ class NewAnalysisDialog(QDialog):
         super().__init__()
         self.parent = parent
         self.setGeometry(QRect(100, 100, 400, 300))
-        self.setWindowTitle("Modan2 - New Analysis")
+        self.setWindowTitle(self.tr("Modan2 - New Analysis"))
         self.move(self.parent.pos()+QPoint(100,100))
         #self.status_bar = QStatusBar()
         self.dataset = dataset
         self.name_edited = False
-        self.lblAnalysisName = QLabel("Analysis Name", self)
+        self.lblAnalysisName = QLabel(self.tr("Analysis Name"), self)
         self.edtAnalysisName = QLineEdit(self)
         self.edtAnalysisName.textChanged.connect(self.edtAnalysisName_changed)
-        self.lblSuperimposition = QLabel("Superimposition method", self)
+        self.lblSuperimposition = QLabel(self.tr("Superimposition method"), self)
         self.comboSuperimposition = QComboBox(self)
-        self.comboSuperimposition.addItem("Procrustes")
-        self.comboSuperimposition.addItem("Bookstein")
-        self.comboSuperimposition.addItem("Resistant Fit")
+        self.comboSuperimposition.addItem(self.tr("Procrustes"))
+        self.comboSuperimposition.addItem(self.tr("Bookstein"))
+        self.comboSuperimposition.addItem(self.tr("Resistant Fit"))
         #self.lblOrdination = QLabel("Ordination method", self)
         #self.comboOrdination = QComboBox(self)
         #self.comboOrdination.addItem("PCA")
@@ -1431,9 +1444,9 @@ class NewAnalysisDialog(QDialog):
         #self.comboOrdination.addItem("MANOVA")
         #self.comboOrdination.currentIndexChanged.connect(self.comboOrdination_changed)
         #self.comboOrdination.addItem("MDS")
-        self.lblCvaGroupBy = QLabel("CVA grouping variable", self)
+        self.lblCvaGroupBy = QLabel(self.tr("CVA grouping variable"), self)
         self.comboCvaGroupBy = QComboBox(self)
-        self.lblManovaGroupBy = QLabel("MANOVA grouping variable", self)
+        self.lblManovaGroupBy = QLabel(self.tr("MANOVA grouping variable"), self)
         self.comboManovaGroupBy = QComboBox(self)
 
         valid_property_index_list = self.dataset.get_grouping_variable_index_list()
@@ -1447,8 +1460,8 @@ class NewAnalysisDialog(QDialog):
         self.ignore_change = False
         #self.comboOrdination_changed()
 
-        self.btnOK = QPushButton("OK", self)
-        self.btnCancel = QPushButton("Cancel", self)
+        self.btnOK = QPushButton(self.tr("OK"), self)
+        self.btnCancel = QPushButton(self.tr("Cancel"), self)
         self.btnOK.clicked.connect(self.btnOK_clicked)
         self.btnCancel.clicked.connect(self.btnCancel_clicked)
 
@@ -1484,7 +1497,7 @@ class NewAnalysisDialog(QDialog):
             pass
         else:
             self.name_edited = True
-            print("name edited")
+            #print("name edited")
 
     def comboOrdination_changed(self):
         if self.comboOrdination.currentText() in ["CVA","MANOVA"]:
@@ -1534,7 +1547,7 @@ class NewAnalysisDialog(QDialog):
 class AnalysisResultDialog(QDialog):
     def __init__(self,parent):
         super().__init__()
-        self.setWindowTitle("Modan2 - Dataset Analysis")
+        self.setWindowTitle(self.tr("Modan2 - Dataset Analysis"))
         self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
         self.parent = parent
         self.remember_geometry = True
@@ -1563,7 +1576,7 @@ class DataExplorationDialog(QDialog):
         super().__init__()
         #print("DataExplorationDialog init")
         self.parent = parent
-        self.setWindowTitle("Modan2 - Data Exploration")
+        self.setWindowTitle(self.tr("Modan2 - Data Exploration"))
         self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
         #self.setWindowFlags(Qt.FramelessWindowHint)  # Removes window decoration
         #self.setAttribute(Qt.WA_TranslucentBackground)  # Enables transparency
@@ -1621,26 +1634,26 @@ class DataExplorationDialog(QDialog):
 
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
-        self.lblAnalysisName = QLabel("Analysis Name")
+        self.lblAnalysisName = QLabel(self.tr("Analysis Name"))
         # label text align right
         self.lblAnalysisName.setAlignment(Qt.AlignVCenter|Qt.AlignRight)
         self.edtAnalysisName = QLineEdit()
-        self.lblSuperimposition = QLabel("Superimposition")
+        self.lblSuperimposition = QLabel(self.tr("Superimposition"))
         self.lblSuperimposition.setAlignment(Qt.AlignVCenter|Qt.AlignRight)
         self.edtSuperimposition = QLineEdit()
         self.edtSuperimposition.setEnabled(False)
-        self.lblOrdination = QLabel("Ordination")
+        self.lblOrdination = QLabel(self.tr("Ordination"))
         self.lblOrdination.setAlignment(Qt.AlignVCenter|Qt.AlignRight)
         self.edtOrdination = QLineEdit()
         self.edtOrdination.setEnabled(False)
-        self.lblGroupBy = QLabel("Grouping variable")
+        self.lblGroupBy = QLabel(self.tr("Grouping variable"))
         self.lblGroupBy.setAlignment(Qt.AlignVCenter|Qt.AlignRight)
         #self.edtGroupBy = QLineEdit()
         #self.edtGroupBy.setEnabled(False)
         self.comboGroupBy = QComboBox()
         self.comboGroupBy.setEnabled(False)
         self.comboGroupBy.currentIndexChanged.connect(self.comboGroupBy_changed)
-        self.lblVisualization = QLabel("Visualization")
+        self.lblVisualization = QLabel(self.tr("Visualization"))
         self.lblVisualization.setAlignment(Qt.AlignVCenter|Qt.AlignRight)
         self.comboVisualization = QComboBox()
         self.comboVisualization.addItem("Exploration")
@@ -1735,7 +1748,7 @@ class DataExplorationDialog(QDialog):
         self.cbxExtrapolate.stateChanged.connect(self.update_chart)
 
         self.cbxAnnotation = QCheckBox()
-        self.cbxAnnotation.setText("Annotation")
+        self.cbxAnnotation.setText(self.tr("Annotation"))
         self.cbxAnnotation.stateChanged.connect(self.update_chart)
         self.cbxAnnotation.setChecked(False)
         #self.cbxShape = QCheckBox()
@@ -1744,32 +1757,32 @@ class DataExplorationDialog(QDialog):
         #self.cbxShape.stateChanged.connect(self.cbxShape_state_changed)
 
         self.cbxDepthShade = QCheckBox()
-        self.cbxDepthShade.setText("Depth shade")
+        self.cbxDepthShade.setText(self.tr("Depth shade"))
         self.cbxDepthShade.setChecked(False)
         self.cbxDepthShade.toggled.connect(self.update_chart)
         self.cbxLegend = QCheckBox()
-        self.cbxLegend.setText("Legend")
+        self.cbxLegend.setText(self.tr("Legend"))
         self.cbxLegend.setChecked(False)
         self.cbxLegend.toggled.connect(self.update_chart)
 
         self.cbxAverage = QCheckBox()
-        self.cbxAverage.setText("Average")
+        self.cbxAverage.setText(self.tr("Average"))
         self.cbxAverage.setChecked(False)        
         self.cbxAverage.stateChanged.connect(self.update_chart)
         self.cbxConvexHull = QCheckBox()
-        self.cbxConvexHull.setText("ConvexHull")
+        self.cbxConvexHull.setText(self.tr("ConvexHull"))
         self.cbxConvexHull.setChecked(False)
         self.cbxConvexHull.stateChanged.connect(self.update_chart)
         self.cbxConfidenceEllipse = QCheckBox()
-        self.cbxConfidenceEllipse.setText("Ellipse")
+        self.cbxConfidenceEllipse.setText(self.tr("Ellipse"))
         self.cbxConfidenceEllipse.setChecked(False)
         self.cbxConfidenceEllipse.stateChanged.connect(self.update_chart)
-        self.lblDegree = QLabel("Degree")
+        self.lblDegree = QLabel(self.tr("Degree"))
         self.sbxDegree = QSpinBox()
         self.sbxDegree.setValue(1)
         self.sbxDegree.textChanged.connect(self.update_chart)
         self.cbxShapeGrid = QCheckBox()
-        self.cbxShapeGrid.setText("Shape grid")
+        self.cbxShapeGrid.setText(self.tr("Shape grid"))
         self.cbxShapeGrid.setChecked(False)
         self.cbxShapeGrid.stateChanged.connect(self.cbxShapeGrid_state_changed)
         self.sgpWidget = ShapePreference(self)
@@ -1780,10 +1793,10 @@ class DataExplorationDialog(QDialog):
         self.sgpWidget.set_color("gray")
         self.sgpWidget.set_opacity(0.8)
         self.sgpWidget.hide()
-        self.cbxArrow = QCheckBox("Show arrow")
+        self.cbxArrow = QCheckBox(self.tr("Show arrow"))
         self.cbxArrow.setChecked(True)
         self.cbxArrow.stateChanged.connect(self.arrow_preference_changed)
-        self.btnArrowColor = QPushButton("Arrow color")
+        self.btnArrowColor = QPushButton(self.tr("Arrow color"))
         self.btnArrowColor.setMinimumSize(20,20)
         self.btnArrowColor.setStyleSheet("background-color: yellow")
         self.btnArrowColor.setToolTip("yellow")
@@ -3858,7 +3871,7 @@ class DataExplorationDialog(QDialog):
 class DatasetAnalysisDialog(QDialog):
     def __init__(self,parent,dataset):
         super().__init__()
-        self.setWindowTitle("Modan2 - Dataset Analysis")
+        self.setWindowTitle(self.tr("Modan2 - Dataset Analysis"))
         self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
         self.parent = parent
         self.remember_geometry = True
@@ -3895,19 +3908,19 @@ class DatasetAnalysisDialog(QDialog):
 
         # checkboxes
         self.cbxShowIndex = QCheckBox()
-        self.cbxShowIndex.setText("Index")
+        self.cbxShowIndex.setText(self.tr("Index"))
         self.cbxShowIndex.setChecked(True)
         self.cbxShowWireframe = QCheckBox()
-        self.cbxShowWireframe.setText("Wireframe")
+        self.cbxShowWireframe.setText(self.tr("Wireframe"))
         self.cbxShowWireframe.setChecked(False)
         self.cbxShowBaseline = QCheckBox()
-        self.cbxShowBaseline.setText("Baseline")
+        self.cbxShowBaseline.setText(self.tr("Baseline"))
         self.cbxShowBaseline.setChecked(False)
         self.cbxShowAverage = QCheckBox()
-        self.cbxShowAverage.setText("Average")
+        self.cbxShowAverage.setText(self.tr("Average"))
         self.cbxShowAverage.setChecked(True)
         self.cbxAutoRotate = QCheckBox()
-        self.cbxAutoRotate.setText("Rotate")
+        self.cbxAutoRotate.setText(self.tr("Rotate"))
         self.cbxAutoRotate.setChecked(False)
 
         self.cbxShowIndex.stateChanged.connect(self.show_index_state_changed)
@@ -3948,8 +3961,8 @@ class DatasetAnalysisDialog(QDialog):
         self.tableView2.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.tableView2.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
-        self.table_tab.addTab(self.tableView1, "Objects")
-        self.table_tab.addTab(self.tableView2, "Groups")
+        self.table_tab.addTab(self.tableView1, self.tr("Objects"))
+        self.table_tab.addTab(self.tableView2, self.tr("Groups"))
         self.table_tab.setTabVisible(1, False)
         self.table_layout.addWidget(self.table_tab)
 
@@ -3957,13 +3970,13 @@ class DatasetAnalysisDialog(QDialog):
         self.table_control_layout = QHBoxLayout()
         self.table_control_widget.setLayout(self.table_control_layout)
         self.btnSelectAll = QPushButton()
-        self.btnSelectAll.setText("All")
+        self.btnSelectAll.setText(self.tr("All"))
         self.btnSelectAll.clicked.connect(self.select_all)
         self.btnSelectNone = QPushButton()
-        self.btnSelectNone.setText("Select property")
+        self.btnSelectNone.setText(self.tr("None"))
         self.btnSelectNone.clicked.connect(self.select_none)
         self.btnSelectInvert = QPushButton()
-        self.btnSelectInvert.setText("Invert")
+        self.btnSelectInvert.setText(self.tr("Invert"))
         self.btnSelectInvert.clicked.connect(self.select_invert)
         self.table_control_layout.addWidget(self.btnSelectAll)
         self.table_control_layout.addWidget(self.btnSelectNone)
@@ -4035,19 +4048,19 @@ class DatasetAnalysisDialog(QDialog):
         self.rb2DChartDim.toggled.connect(self.on_chart_dim_changed)
         self.rb3DChartDim.toggled.connect(self.on_chart_dim_changed)
         self.cbxDepthShade = QCheckBox()
-        self.cbxDepthShade.setText("Depth Shade")
+        self.cbxDepthShade.setText(self.tr("Depth Shade"))
         self.cbxDepthShade.setChecked(False)
         self.cbxDepthShade.toggled.connect(self.on_chart_dim_changed)
         self.cbxLegend = QCheckBox()
-        self.cbxLegend.setText("Legend")
+        self.cbxLegend.setText(self.tr("Legend"))
         self.cbxLegend.setChecked(False)
         self.cbxLegend.toggled.connect(self.on_chart_dim_changed)
         self.cbxAxisLabel = QCheckBox()
-        self.cbxAxisLabel.setText("Axis")
+        self.cbxAxisLabel.setText(self.tr("Axis"))
         self.cbxAxisLabel.setChecked(True)
         self.cbxAxisLabel.toggled.connect(self.on_chart_dim_changed)
         self.gbChartDim = QGroupBox()
-        self.gbChartDim.setTitle("Chart")
+        self.gbChartDim.setTitle(self.tr("Chart"))
         self.gbChartDim.setLayout(QHBoxLayout())
         self.gbChartDim.layout().addWidget(self.rb2DChartDim)
         self.gbChartDim.layout().addWidget(self.rb3DChartDim)
@@ -4055,7 +4068,7 @@ class DatasetAnalysisDialog(QDialog):
         self.gbChartDim.layout().addWidget(self.cbxLegend)
         self.gbChartDim.layout().addWidget(self.cbxAxisLabel)
         self.gbGroupBy = QGroupBox()
-        self.gbGroupBy.setTitle("Grouping variable")
+        self.gbGroupBy.setTitle(self.tr("Grouping variable"))
         self.gbGroupBy.setLayout(QHBoxLayout())
         self.comboPropertyName = QComboBox()
         self.comboPropertyName.setCurrentIndex(-1)
@@ -4065,7 +4078,7 @@ class DatasetAnalysisDialog(QDialog):
         self.plot_control_layout2.addWidget(self.gbChartDim)
         self.plot_control_layout2.addWidget(self.gbGroupBy)
 
-        self.btnChartOptions = QPushButton("Chart Options")
+        self.btnChartOptions = QPushButton(self.tr("Chart Options"))
         self.btnChartOptions.clicked.connect(self.chart_options_clicked)
 
         self.plot_view = QWidget()
@@ -4086,10 +4099,10 @@ class DatasetAnalysisDialog(QDialog):
         self.shapes_data = QTableWidget()
         self.shapes_data.setColumnCount(10)
 
-        self.plot_tab.addTab(self.plot_data, "Result table")
-        self.plot_tab.addTab(self.rotation_matrix_data, "Rotation matrix")
-        self.plot_tab.addTab(self.eigenvalue_data, "Eigenvalues")
-        self.plot_tab.addTab(self.shapes_data, "Shapes")
+        self.plot_tab.addTab(self.plot_data, self.tr("Result table"))
+        self.plot_tab.addTab(self.rotation_matrix_data, self.tr("Rotation matrix"))
+        self.plot_tab.addTab(self.eigenvalue_data, self.tr("Eigenvalues"))
+        self.plot_tab.addTab(self.shapes_data, self.tr("Shapes"))
 
 
         self.plot_layout.addWidget(self.plot_tab)
@@ -4139,10 +4152,10 @@ class DatasetAnalysisDialog(QDialog):
         self.rbProcrustes.setChecked(True)
         self.rbBookstein.setEnabled(False)
         self.rbResistantFit.setEnabled(False)
-        self.btnSuperimpose = QPushButton("Superimpose")
+        self.btnSuperimpose = QPushButton(self.tr("Superimpose"))
         self.btnSuperimpose.clicked.connect(self.on_btnSuperimpose_clicked)
         self.gbSuperimposition = QGroupBox()
-        self.gbSuperimposition.setTitle("Superimposition")
+        self.gbSuperimposition.setTitle(self.tr("Superimposition"))
         self.gbSuperimposition.setLayout(QHBoxLayout())
         self.gbSuperimposition.layout().addWidget(self.rbProcrustes)
         self.gbSuperimposition.layout().addWidget(self.rbBookstein)
@@ -4164,13 +4177,13 @@ class DatasetAnalysisDialog(QDialog):
         self.gbAnalysis.layout().addWidget(self.rbPCA)
         self.gbAnalysis.layout().addWidget(self.rbCVA)
         self.gbAnalysis.setMaximumHeight(rbbox_height)
-        self.btnAnalyze = QPushButton("Perform Analysis")
+        self.btnAnalyze = QPushButton(self.tr("Perform Analysis"))
         self.btnAnalyze.clicked.connect(self.on_btn_analysis_clicked)
         self.middle_bottom_layout.addWidget(self.gbAnalysis)
         self.middle_bottom_layout.addWidget(self.btnAnalyze)
 
         self.empty_widget = QWidget()
-        self.btnSaveResults = QPushButton("Save Results")
+        self.btnSaveResults = QPushButton(self.tr("Save Results"))
         self.btnSaveResults.clicked.connect(self.on_btnSaveResults_clicked)
         self.rb1_layout = QVBoxLayout()
         self.rb1_layout.addWidget(self.empty_widget)
@@ -4333,7 +4346,7 @@ class DatasetAnalysisDialog(QDialog):
                 # show messagebox and close the window
                 msg = QMessageBox()
                 msg.setIcon(QMessageBox.Critical)
-                msg.setText("Error: landmark count is not consistent")
+                msg.setText(self.tr("Error: landmark count is not consistent"))
                 msg.setWindowTitle("Error")
                 msg.exec_()
                 self.close()
@@ -4409,7 +4422,7 @@ class DatasetAnalysisDialog(QDialog):
         filename_candidate = '{}_analysis_{}.xlsx'.format(self.ds_ops.dataset_name, date_str)
         filepath = os.path.join(mu.USER_PROFILE_DIRECTORY, filename_candidate)
         #print("filepath:", filepath)
-        filename, _ = QFileDialog.getSaveFileName(self, "Save File As", filepath, "Excel format (*.xlsx)")
+        filename, _ = QFileDialog.getSaveFileName(self, self.tr("Save File As"), filepath, "Excel format (*.xlsx)")
         if filename:
             #print("filename:", filename)
             doc = xlsxwriter.Workbook(filename)

@@ -7,9 +7,9 @@ from PyQt5.QtWidgets import QTableWidgetItem, QHeaderView, QFileDialog, QCheckBo
                             QAction, QShortcut, QMenu
 from PyQt5.QtGui import QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem, QImage,\
                         QFont, QPainter, QBrush, QMouseEvent, QWheelEvent, QIntValidator, QIcon, QCursor,\
-                        QFontMetrics, QKeySequence
+                        QFontMetrics, QKeySequence, QDrag
 from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSize, QPoint, QAbstractTableModel, \
-                         pyqtSlot, pyqtSignal, QItemSelectionModel, QTimer, QEvent, QModelIndex
+                         pyqtSlot, pyqtSignal, QItemSelectionModel, QTimer, QEvent, QModelIndex, QObject
 
 from matplotlib.backends.backend_qt5agg import FigureCanvas as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
@@ -451,12 +451,14 @@ class ObjectViewer2D(QLabel):
                 self.wire_hover_index = -1
                 self.wire_end_index = -1
         elif self.edit_mode == MODE['CALIBRATION']:
+            print("calibrate 1", self.edit_mode, MODE['CALIBRATION'], self.calibration_from_img_x, self.calibration_from_img_y)
             diff_x = self._2imgx(self.mouse_curr_x) - self.calibration_from_img_x
             diff_y = self._2imgy(self.mouse_curr_y) - self.calibration_from_img_y
             dist = math.sqrt(diff_x * diff_x + diff_y * diff_y)
             self.object_dialog.calibrate(dist)
             self.calibration_from_img_x = -1
             self.calibration_from_img_y = -1
+            print("calibrate 2", self.edit_mode, MODE['CALIBRATION'], self.calibration_from_img_x, self.calibration_from_img_y)
 
         self.repaint()
         return super().mouseReleaseEvent(ev)    
@@ -3080,6 +3082,70 @@ class MdSequenceDelegate(QStyledItemDelegate):
         else:
             return super().createEditor(parent, option, index)
 
+class MdDrag(QDrag):
+    #shiftStateChanged = Signal(bool)
+    def __init__(self, parent):
+        super().__init__(parent)
+        print("md drag init")
+        self.shift_pressed = False
+        self.copy_cursor = QPixmap(QCursor(Qt.DragCopyCursor).pixmap())
+        self.move_cursor = QPixmap(QCursor(Qt.DragMoveCursor).pixmap())
+
+    def updateCursor(self, event):
+        self.shift_pressed = bool(event.modifiers() & Qt.ShiftModifier)
+        if self.shift_pressed:
+            self.setDragCursor(self.copy_cursor, Qt.CopyAction)
+        else:
+            self.setDragCursor(self.move_cursor, Qt.MoveAction)
+
+    def dragEnterEvent(self, event):
+        print("md drag dragEnterEvent")
+        self.updateCursor(event)
+        super().dragEnterEvent(event)
+
+    def dragMoveEvent(self, event):
+        print("drag move event", event.pos())
+        self.updateCursor(event)
+        super().dragMoveEvent(event)
+
+class DragEventFilter(QObject):
+    def __init__(self, drag_object):
+        super().__init__()
+        self.drag_object = drag_object
+
+    def eventFilter(self, obj, event):
+        if event.type() in [QEvent.KeyPress, QEvent.KeyRelease]:
+            modifiers = QApplication.keyboardModifiers()
+            if modifiers & Qt.ControlModifier:
+                self.drag_object.setDragCursor(self.drag_object.copy_cursor.pixmap(), Qt.CopyAction)
+                print("Set Copy Cursor")
+            else:
+                self.drag_object.setDragCursor(self.drag_object.move_cursor.pixmap(), Qt.MoveAction)
+                print("Set Move Cursor")
+        return False
+
+class CustomDrag(QDrag):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.copy_cursor = QCursor(Qt.DragCopyCursor)
+        self.move_cursor = QCursor(Qt.DragMoveCursor)
+
+    def exec_(self, supportedActions, defaultAction=Qt.IgnoreAction):
+        event_filter = DragEventFilter(self)
+        QApplication.instance().installEventFilter(event_filter)
+        
+        # Set initial cursor
+        modifiers = QApplication.keyboardModifiers()
+        if modifiers & Qt.ControlModifier:
+            self.setDragCursor(self.copy_cursor.pixmap(), Qt.CopyAction)
+        else:
+            self.setDragCursor(self.move_cursor.pixmap(), Qt.MoveAction)
+        
+        result = super().exec_(supportedActions, defaultAction)
+        
+        QApplication.instance().removeEventFilter(event_filter)
+        return result
+
 class MdTableView(QTableView):
 
     def __init__(self, parent=None):
@@ -3105,6 +3171,100 @@ class MdTableView(QTableView):
         self.clear_cells_action = QAction("Clear", self)
         self.clear_cells_action.triggered.connect(self.clear_selected_cells)
 
+        #self.setAcceptDrops(True)
+        #self.setDropIndicatorShown(True)
+        self.setDragDropMode(QAbstractItemView.DragDrop)
+        #self.setSelectionBehavior(QAbstractItemView.SelectRows)
+
+        self.selection_mode = "Cells"
+
+
+        self.drag_start_position = None
+        self.is_dragging = False
+
+    def set_cells_selection_mode(self):
+        self.selection_mode = "Cells"
+        self.setDragEnabled(False)
+        self.setSelectionBehavior(QAbstractItemView.SelectItems)
+
+    def set_rows_selection_mode(self):
+        self.selection_mode = "Rows"
+        self.setDragEnabled(True)
+        self.setSelectionBehavior(QAbstractItemView.SelectRows)
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.drag_start_position = event.pos()
+            index = self.indexAt(event.pos())
+            self.was_cell_selected = index in self.selectionModel().selectedIndexes()
+
+            # If in row selection mode, start dragging if clicking on a selected row
+            if self.selection_mode == "Rows" and self.was_cell_selected:
+                self.startDrag()
+        super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event):
+        #print("mouse move event", event.pos(), self.is_dragging )
+        if self.is_dragging:
+
+            if event.modifiers() & Qt.ShiftModifier:
+                QApplication.setOverrideCursor(Qt.DragCopyCursor)  # Copy cursor
+            else:
+                QApplication.setOverrideCursor(Qt.ClosedHandCursor)  # Move cursor (or Qt.SizeAllCursor)
+
+
+        if self.selection_mode != "Rows":
+            super().mouseMoveEvent(event)
+            return
+        
+        if not (event.buttons() & Qt.LeftButton):
+            return
+
+        if self.selection_mode == "Rows" and not self.was_cell_selected:
+            self.drag_start_position = event.pos()
+            super().mouseMoveEvent(event)
+            return
+
+        if (event.pos() - self.drag_start_position).manhattanLength() < QApplication.startDragDistance():
+            return
+
+        table_rect = self.viewport().rect()
+        if not table_rect.contains(event.pos()):
+            print("outside table, start drag")
+            self.is_dragging = True
+            self.startDrag()
+        else:
+            super().mouseMoveEvent(event)
+
+    def startDrag(self):
+        indexes = self.selectionModel().selectedRows()
+        if not indexes:
+            return
+
+        mimeData = self.model().mimeData(indexes)
+        if not mimeData:
+            return
+
+        drag = CustomDrag(self)
+        drag.setMimeData(mimeData)
+        
+
+        # Set initial cursor based on current Shift key state
+        initial_action = Qt.CopyAction if QApplication.keyboardModifiers() & Qt.ShiftModifier else Qt.MoveAction
+        
+        dropAction = drag.exec_(Qt.CopyAction | Qt.MoveAction)
+        
+        self.is_dragging = False
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            if self.is_dragging:
+                # Select the row if a drag operation was started
+                row = self.rowAt(event.pos().y())
+                self.selectionModel().select(self.model().index(row, 0), QItemSelectionModel.Select | QItemSelectionModel.Rows)
+                self.is_dragging = False
+            else:
+                super().mouseReleaseEvent(event)
 
     def show_context_menu(self, pos):
         #print("context menu event")

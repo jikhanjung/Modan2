@@ -1001,9 +1001,13 @@ class ObjectDialog(QDialog):
         self.btnWireframe.setChecked(False)
 
     def calibrate(self, dist):
+        print("calibrate 1-1", self.object_view.edit_mode, MODE['CALIBRATION'])
         self.calibrate_dlg = CalibrationDialog(self, dist)
+        print("calibrate 1-2", self.object_view.edit_mode, MODE['CALIBRATION'])
         self.calibrate_dlg.setModal(True)
+        print("calibrate 1-3", self.object_view.edit_mode, MODE['CALIBRATION'])
         self.calibrate_dlg.exec_()
+        print("calibrate 1-4", self.object_view.edit_mode, MODE['CALIBRATION'])
 
     def btnWireframe_clicked(self):
         #self.edit_mode = MODE_ADD_LANDMARK
@@ -1129,11 +1133,15 @@ class ObjectDialog(QDialog):
                     #    self.object_view.set_image(image_path)
                     self.btnCalibration.setEnabled(True)
                     self.enable_landmark_edit()
+                    if object.pixels_per_mm is None:
+                        self.btnCalibration_clicked()
+                        #self.btnCalibration.setDisabled(False)
                 else:
                     self.btnCalibration.setDisabled(True)
                     self.disable_landmark_edit()
                 #elif len(self.landmark_list) > 0:
                 #print("objectdialog self.landmark_list in set object 2d", self.landmark_list)
+                self.object_view.clear_object()
                 self.object_view.set_object(object)
                 self.object_view.image_changed = False
                 self.object_view.landmark_list = self.landmark_list

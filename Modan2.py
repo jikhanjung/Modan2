@@ -1,9 +1,9 @@
 from PyQt5.QtWidgets import QMainWindow, QHeaderView, QApplication, QAbstractItemView, \
                             QMessageBox, QTreeView, QTableView, QSplitter, QAction, QMenu, \
                             QStatusBar, QInputDialog, QToolBar, QWidget, QPlainTextEdit, QVBoxLayout, QHBoxLayout, \
-                            QPushButton
-from PyQt5.QtGui import QIcon, QStandardItemModel, QStandardItem, QKeySequence
-from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSettings, QSize, QTranslator, QItemSelectionModel
+                            QPushButton, QRadioButton, QLabel
+from PyQt5.QtGui import QIcon, QStandardItemModel, QStandardItem, QKeySequence, QCursor
+from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSettings, QSize, QTranslator, QItemSelectionModel, QObject, QEvent
 
 from PyQt5.QtCore import pyqtSlot
 import re,os,sys
@@ -500,10 +500,25 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.object_button_layout = QHBoxLayout()
         self.object_button_widget.setLayout(self.object_button_layout)
 
+        self.lblSelect = QLabel(self.tr("Select"))
+        self.rbSelectCells = QRadioButton(self.tr("Cells"))
+        self.rbSelectCells.setChecked(True)
+        self.rbSelectCells.clicked.connect(self.on_rbSelectCells_clicked)
+        self.rbSelectRows = QRadioButton(self.tr("Rows"))
+        self.rbSelectRows.clicked.connect(self.on_rbSelectRows_clicked)
+        self.select_layout = QHBoxLayout()
+        self.select_widget = QWidget()
+        self.select_widget.setLayout(self.select_layout)
+        self.select_layout.addWidget(self.lblSelect)
+        self.select_layout.addWidget(self.rbSelectCells)
+        self.select_layout.addWidget(self.rbSelectRows)
+
+
         self.btnSaveObjectInfo = QPushButton(self.tr("Save Changes"))
         self.btnEditObject = QPushButton(self.tr("Edit Object"))
         self.btnAddObject = QPushButton(self.tr("Add Object"))
         self.btnAddProperty = QPushButton(self.tr("Add Variable"))
+        self.object_button_layout.addWidget(self.select_widget)
         self.object_button_layout.addWidget(self.btnAddObject)
         self.object_button_layout.addWidget(self.btnEditObject)
         self.object_button_layout.addWidget(self.btnAddProperty)
@@ -561,7 +576,12 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.tableView.doubleClicked.connect(self.on_tableView_doubleClicked)
         self.treeView.customContextMenuRequested.connect(self.open_treeview_menu)
 
-
+    def on_rbSelectCells_clicked(self):
+        self.tableView.set_cells_selection_mode()
+        
+    def on_rbSelectRows_clicked(self):
+        self.tableView.set_rows_selection_mode()
+        
     def btnAnalysisDetail_clicked(self):
         #self.detail_dialog = DatasetAnalysisDialog(self.parent)
         self.analysis_dialog = DatasetAnalysisDialog(self,self.analysis_info_widget.analysis.dataset)
@@ -852,15 +872,80 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.treeView.setDropIndicatorShown(True)
         self.treeView.dropEvent = self.dropEvent
         self.treeView.dragEnterEvent = self.treeView_drag_enter_event
+        self.treeView.dragLeaveEvent = self.treeView_drag_leave_event
         self.treeView.dragMoveEvent = self.treeView_drag_move_event
 
+    #def treeView_drag_enter_event(self, event):
+    #    event.accept()
     def treeView_drag_enter_event(self, event):
         event.accept()
-    def treeView_drag_move_event(self, event):
+        if QApplication.keyboardModifiers() & Qt.ControlModifier:
+            QApplication.setOverrideCursor(Qt.DragCopyCursor)
+        else:
+            QApplication.setOverrideCursor(Qt.DragMoveCursor)
+
+    def treeView_drag_leave_event(self, event):
         event.accept()
 
+    def treeView_drag_move_event(self, event):
+        print("treeview drag move event")
+        event.accept()
+        target_index = self.treeView.indexAt(event.pos())
+        target_item = self.dataset_model.itemFromIndex(target_index)
+        if not target_item:
+            return
+        target_dataset = target_item.data()
+        print("target_dataset", target_dataset)
+        return
+
+    def treeView_drag_move_event(self, event):
+        print("treeview drag move event")
+        event.accept()
+        target_index = self.treeView.indexAt(event.pos())
+        target_item = self.dataset_model.itemFromIndex(target_index)
+        if not target_item:
+            return
+        target_dataset = target_item.data()
+        print("target_dataset", target_dataset)
+
+        # Update cursor based on modifier keys
+        if QApplication.keyboardModifiers() & Qt.ControlModifier:
+            print("drag copy")
+            QApplication.changeOverrideCursor(Qt.DragCopyCursor)
+        else:
+            print("drag move")
+            QApplication.changeOverrideCursor(Qt.DragMoveCursor)
+        return
+
+
+        print("treeview drag move event")
+        event.accept()
+        #if event.source() == self.treeView:
+        target_index=self.treeView.indexAt(event.pos())
+        target_item = self.dataset_model.itemFromIndex(target_index)
+        if not target_item:
+            return
+        target_dataset = target_item.data()
+        print("target_dataset",target_dataset)
+        if QApplication.keyboardModifiers() & Qt.ControlModifier:
+            print("control pressed")
+            QApplication.restoreOverrideCursor() 
+            QApplication.setOverrideCursor(Qt.DragCopyCursor)
+        else:
+            print("control not pressed")
+            QApplication.restoreOverrideCursor() 
+            QApplication.setOverrideCursor(Qt.DragMoveCursor)
+        #QApplication.processEvents()
+        
+
+    def updateCursor(self, shift_pressed):
+        if shift_pressed:
+            QApplication.setOverrideCursor(Qt.DragCopyCursor)
+        else:
+            QApplication.setOverrideCursor(Qt.ClosedHandCursor)
     # accept drop event
     def dropEvent(self, event):
+        print("drop event of main window")
         if event.source() == self.treeView:
             target_index=self.treeView.indexAt(event.pos())
             target_item = self.dataset_model.itemFromIndex(target_index)
@@ -876,6 +961,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             self.reset_tableView()
 
         elif event.source() == self.tableView:
+            #print("drop from tableview")
             shift_clicked = False
             modifiers = QApplication.keyboardModifiers()
             if modifiers == Qt.ShiftModifier:
@@ -1061,11 +1147,17 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         #print("5")
 
     def tableView_drop_event(self, event):
+        print("tabelview drop event", event.mimeData().text())
         if self.selected_dataset is None:
+            return
+        
+        if event.mimeData().text() == "":
             return
         file_name_list = event.mimeData().text().strip().split("\n")
         if len(file_name_list) == 0:
             return
+
+        print("file name list: [", file_name_list, "]")
 
         QApplication.setOverrideCursor(Qt.WaitCursor)
         total_count = len(file_name_list)
@@ -1147,6 +1239,29 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 
     def tableView_drag_move_event(self, event):
+        self.copy_cursor = QCursor(Qt.DragCopyCursor)
+        self.move_cursor = QCursor(Qt.DragMoveCursor)
+        #print("table view drag move event")
+        #print("drag move", event.mimeData().text())
+
+        # Check if Shift is pressed
+        modifiers = QApplication.queryKeyboardModifiers()
+        if bool(modifiers & Qt.ShiftModifier):
+            print("copy cursor")
+            #QApplication.restoreOverrideCursor()
+            #QApplication.setOverrideCursor(Qt.CrossCursor) 
+            #QApplication.changeOverrideCursor(self.copy_cursor)
+        else:
+            print("move cursor")
+            #QApplication.restoreOverrideCursor()
+            #QApplication.setOverrideCursor(Qt.ClosedHandCursor) 
+            #QApplication.changeOverrideCursor(self.move_cursor)
+
+        event.accept()
+
+    def _tableView_drag_move_event(self, event):
+        print("table view drag move event")
+        print("drag move",event.mimeData().text())
         event.accept()
         return
         print("drag move",event.mimeData().text())

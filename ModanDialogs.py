@@ -2319,7 +2319,7 @@ class DataExplorationDialog(QDialog):
 
 
     def animate_shape(self):
-        if self.mode not in [ MODE_COMPARISON, MODE_GROWTH_TRAJECTORY ] or self.comboRegressionBy.currentText() == "By group":
+        if self.mode not in [ MODE_COMPARISON, MODE_GROWTH_TRAJECTORY ]:# or self.comboRegressionBy.currentText() == "By group":
             return
 
         QApplication.setOverrideCursor(Qt.WaitCursor)

@@ -1639,9 +1639,13 @@ class DataExplorationDialog(QDialog):
         self.read_settings()
         self.mode = MODE_EXPLORATION
         self.ignore_change = False
+        self.init_UI()
+
+    def init_UI(self):
 
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
+
         self.lblAnalysisName = QLabel(self.tr("Analysis Name"))
         # label text align right
         self.lblAnalysisName.setAlignment(Qt.AlignVCenter|Qt.AlignRight)
@@ -1674,6 +1678,22 @@ class DataExplorationDialog(QDialog):
         self.comboVisualization.setCurrentIndex(0)
         self.comboVisualization.currentIndexChanged.connect(self.comboVisualizationMethod_changed)
 
+        self.title_row_widget = QWidget()
+        self.title_row_layout = QHBoxLayout()
+        self.title_row_widget.setLayout(self.title_row_layout)
+        self.title_row_layout.addWidget(self.lblAnalysisName,1)
+        self.title_row_layout.addWidget(self.edtAnalysisName,2)
+        self.title_row_layout.addWidget(self.lblSuperimposition,1)
+        self.title_row_layout.addWidget(self.edtSuperimposition,2)
+        self.title_row_layout.addWidget(self.lblOrdination,1)
+        self.title_row_layout.addWidget(self.edtOrdination,2)
+        self.title_row_layout.addWidget(self.lblGroupBy,1)
+        self.title_row_layout.addWidget(self.comboGroupBy,2)
+        self.title_row_layout.addWidget(self.lblVisualization,1)
+        self.title_row_layout.addWidget(self.comboVisualization,2)
+        self.layout.addWidget(self.title_row_widget)
+
+
         self.plot_widget2 = FigureCanvas(Figure(figsize=(20, 16),dpi=100))
         self.fig2 = self.plot_widget2.figure
         self.ax2 = self.fig2.add_subplot()
@@ -1693,6 +1713,14 @@ class DataExplorationDialog(QDialog):
         self.ax3 = self.fig3.add_subplot(projection='3d')
         self.toolbar3 = NavigationToolbar(self.plot_widget3, self)        
 
+        self.plot_setting_widget = QWidget()
+        self.plot_setting_layout = QVBoxLayout()
+        self.plot_setting_widget.setLayout(self.plot_setting_layout)
+
+        self.axis_option_widget = QWidget()
+        self.axis_option_layout = QHBoxLayout()
+        self.axis_option_widget.setLayout(self.axis_option_layout)
+
         # chart options
         self.rb2DChartDim = QRadioButton("2D")
         self.rb3DChartDim = QRadioButton("3D")
@@ -1703,6 +1731,12 @@ class DataExplorationDialog(QDialog):
         self.rb2DChartDim.setChecked(True)
         self.rb2DChartDim.toggled.connect(self.on_chart_dim_changed)
         self.rb3DChartDim.toggled.connect(self.on_chart_dim_changed)
+        self.gbChartDim = QGroupBox()
+        self.gbChartDim.setTitle(self.tr("Chart dimension"))
+        self.gbChartDim.setLayout(QHBoxLayout())
+        self.gbChartDim.layout().addWidget(self.rb2DChartDim)
+        self.gbChartDim.layout().addWidget(self.rb3DChartDim)
+        self.axis_option_layout.addWidget(self.gbChartDim)
 
         self.lblAxis1 = QLabel("Axis 1")
         self.lblAxis2 = QLabel("Axis 2")
@@ -1736,33 +1770,29 @@ class DataExplorationDialog(QDialog):
         self.comboAxis2.currentIndexChanged.connect(self.axis_changed)
         self.comboAxis3.currentIndexChanged.connect(self.axis_changed)
 
-        self.cbxRegression = QCheckBox()
-        self.cbxRegression.setText("Regression")
-        self.cbxRegression.setChecked(False)
-        self.cbxRegression.stateChanged.connect(self.update_chart)
-        self.comboRegressionBy = QComboBox()
-        self.comboRegressionBy.addItem("All")
-        self.comboRegressionBy.addItem("By group")
-        self.comboRegressionBy.addItem("Select group")
-        self.comboRegressionBy.setCurrentIndex(1)
-        self.comboRegressionBy.currentIndexChanged.connect(self.comboRegressionBy_changed)
-        self.comboSelectGroup = QComboBox()        
-        self.comboSelectGroup.currentIndexChanged.connect(self.comboSelectGroup_changed)
-        self.comboSelectGroup.hide()
-        model = self.comboSelectGroup.model()
-        model.itemChanged.connect(self.comboSelectGroup_itemChanged)
-        self.cbxExtrapolate = QCheckBox("Extrapolate")
-        self.cbxExtrapolate.setChecked(True)
-        self.cbxExtrapolate.stateChanged.connect(self.update_chart)
+        self.gbAxis= QGroupBox()
+        self.gbAxis.setTitle(self.tr("Axes settings"))
+        self.gbAxis.setLayout(QHBoxLayout())
+        self.gbAxis.layout().addWidget(self.lblAxis1,0)
+        self.gbAxis.layout().addWidget(self.comboAxis1,1)
+        self.gbAxis.layout().addWidget(self.cbxFlipAxis1,0)
+        self.gbAxis.layout().addWidget(self.lblAxis2,0)
+        self.gbAxis.layout().addWidget(self.comboAxis2,1)
+        self.gbAxis.layout().addWidget(self.cbxFlipAxis2,0)
+        self.gbAxis.layout().addWidget(self.lblAxis3,0)
+        self.gbAxis.layout().addWidget(self.comboAxis3,1)
+        self.gbAxis.layout().addWidget(self.cbxFlipAxis3,0)
+        self.axis_option_layout.addWidget(self.gbAxis)
+        
+        self.plot_setting_layout.addWidget(self.axis_option_widget)
 
-        self.cbxAnnotation = QCheckBox()
-        self.cbxAnnotation.setText(self.tr("Annotation"))
-        self.cbxAnnotation.stateChanged.connect(self.update_chart)
-        self.cbxAnnotation.setChecked(False)
-        #self.cbxShape = QCheckBox()
-        #self.cbxShape.setText("Show shapes")
-        #self.cbxShape.setChecked(True)        
-        #self.cbxShape.stateChanged.connect(self.cbxShape_state_changed)
+        self.overlay_setting_widget = QWidget()
+        self.overlay_setting_layout = QHBoxLayout()
+        self.overlay_setting_widget.setLayout(self.overlay_setting_layout)
+
+        self.gbOverlay = QGroupBox()
+        self.gbOverlay.setTitle(self.tr("Overlay settings"))
+        self.gbOverlay.setLayout(QHBoxLayout())
 
         self.cbxDepthShade = QCheckBox()
         self.cbxDepthShade.setText(self.tr("Depth shade"))
@@ -1785,10 +1815,6 @@ class DataExplorationDialog(QDialog):
         self.cbxConfidenceEllipse.setText(self.tr("Ellipse"))
         self.cbxConfidenceEllipse.setChecked(False)
         self.cbxConfidenceEllipse.stateChanged.connect(self.update_chart)
-        self.lblDegree = QLabel(self.tr("Degree"))
-        self.sbxDegree = QSpinBox()
-        self.sbxDegree.setValue(1)
-        self.sbxDegree.textChanged.connect(self.update_chart)
         self.cbxShapeGrid = QCheckBox()
         self.cbxShapeGrid.setText(self.tr("Shape grid"))
         self.cbxShapeGrid.setChecked(False)
@@ -1816,41 +1842,84 @@ class DataExplorationDialog(QDialog):
         #self.ShapeGridPreference.hide()
         self.sgpWidget.shape_preference_changed.connect(self.shape_grid_preference_changed)
 
-        self.axis_option_widget = QWidget()
-        self.axis_option_layout = QHBoxLayout()
-        self.axis_option_widget.setLayout(self.axis_option_layout)
-        self.axis_option_layout.addWidget(self.rb2DChartDim,1)
-        self.axis_option_layout.addWidget(self.rb3DChartDim,1)
-        self.axis_option_layout.addWidget(self.lblAxis1,0)
-        self.axis_option_layout.addWidget(self.comboAxis1,1)
-        self.axis_option_layout.addWidget(self.cbxFlipAxis1,0)
-        self.axis_option_layout.addWidget(self.lblAxis2,0)
-        self.axis_option_layout.addWidget(self.comboAxis2,1)
-        self.axis_option_layout.addWidget(self.cbxFlipAxis2,0)
-        self.axis_option_layout.addWidget(self.lblAxis3,0)
-        self.axis_option_layout.addWidget(self.comboAxis3,1)
-        self.axis_option_layout.addWidget(self.cbxFlipAxis3,0)
-        self.axis_option_layout.addWidget(self.cbxRegression,1)
-        self.axis_option_layout.addWidget(self.comboRegressionBy,1)
-        self.axis_option_layout.addWidget(self.comboSelectGroup,1)
-        self.axis_option_layout.addWidget(self.cbxExtrapolate,1)
-        self.axis_option_layout.addWidget(self.lblDegree,0)
-        self.axis_option_layout.addWidget(self.sbxDegree,1)
-        self.axis_option_layout.addWidget(self.cbxAnnotation,1)
 
-        self.chart_option_widget = QWidget()
-        self.chart_option_layout = QHBoxLayout()
-        self.chart_option_widget.setLayout(self.chart_option_layout)
-        self.chart_option_layout.addWidget(self.cbxLegend,1)
-        self.chart_option_layout.addWidget(self.cbxDepthShade,1)
-        self.chart_option_layout.addWidget(self.cbxAverage,1)
-        self.chart_option_layout.addWidget(self.cbxConvexHull,1)
-        self.chart_option_layout.addWidget(self.cbxConfidenceEllipse,1)
-        #self.regression_layout.addWidget(self.cbxShape,1)
-        self.chart_option_layout.addWidget(self.cbxShapeGrid,1)
-        self.chart_option_layout.addWidget(self.sgpWidget,4)
+        self.gbOverlay.layout().addWidget(self.cbxLegend,1)
+        self.gbOverlay.layout().addWidget(self.cbxDepthShade,1)
+        self.gbOverlay.layout().addWidget(self.cbxAverage,1)
+        self.gbOverlay.layout().addWidget(self.cbxConvexHull,1)
+        self.gbOverlay.layout().addWidget(self.cbxConfidenceEllipse,1)
+        self.gbOverlay.layout().addWidget(self.cbxShapeGrid,1)
+        self.gbOverlay.layout().addWidget(self.sgpWidget,2)
+        #self.overlay_setting_layout.addWidget(self.cbxLegend,1)
+        #self.overlay_setting_layout.addWidget(self.cbxDepthShade,1)
+        #self.overlay_setting_layout.addWidget(self.cbxAverage,1)
+        #self.overlay_setting_layout.addWidget(self.cbxConvexHull,1)
+        #self.overlay_setting_layout.addWidget(self.cbxConfidenceEllipse,1)
+        #self.overlay_setting_layout.addWidget(self.cbxShapeGrid,1)
+        #self.overlay_setting_layout.addWidget(self.sgpWidget,4)
+        self.overlay_setting_layout.addWidget(self.gbOverlay)
+
+        self.plot_setting_layout.addWidget(self.gbOverlay)
         #self.fit_layout.addWidget(self.btnPolyfit)
 
+        self.regression_setting_widget = QWidget()
+        self.regression_setting_layout = QHBoxLayout()
+        self.regression_setting_widget.setLayout(self.regression_setting_layout)
+
+        self.gbRegression = QGroupBox()
+        self.gbRegression.setTitle(self.tr("Regression settings"))
+        self.gbRegression.setLayout(QHBoxLayout())
+
+        ''' regression related controls '''
+        self.cbxRegression = QCheckBox()
+        self.cbxRegression.setText("Regression")
+        self.cbxRegression.setChecked(False)
+        self.cbxRegression.stateChanged.connect(self.update_chart)
+        self.comboRegressionBy = QComboBox()
+        self.comboRegressionBy.addItem("All")
+        self.comboRegressionBy.addItem("By group")
+        self.comboRegressionBy.addItem("Select group")
+        self.comboRegressionBy.setCurrentIndex(1)
+        self.comboRegressionBy.currentIndexChanged.connect(self.comboRegressionBy_changed)
+        self.comboSelectGroup = QComboBox()        
+        self.comboSelectGroup.currentIndexChanged.connect(self.comboSelectGroup_changed)
+        self.comboSelectGroup.hide()
+        model = self.comboSelectGroup.model()
+        model.itemChanged.connect(self.comboSelectGroup_itemChanged)
+        self.cbxExtrapolate = QCheckBox("Extrapolate")
+        self.cbxExtrapolate.setChecked(True)
+        self.cbxExtrapolate.stateChanged.connect(self.update_chart)
+        self.lblDegree = QLabel(self.tr("Degree"))
+        self.sbxDegree = QSpinBox()
+        self.sbxDegree.setValue(1)
+        self.sbxDegree.textChanged.connect(self.update_chart)
+        self.cbxAnnotation = QCheckBox()
+        self.cbxAnnotation.setText(self.tr("Annotation"))
+        self.cbxAnnotation.stateChanged.connect(self.update_chart)
+        self.cbxAnnotation.setChecked(False)
+
+        self.gbRegression.layout().addWidget(self.cbxRegression)
+        self.gbRegression.layout().addWidget(self.comboRegressionBy)
+        self.gbRegression.layout().addWidget(self.comboSelectGroup)
+        self.gbRegression.layout().addWidget(self.cbxExtrapolate)
+        self.gbRegression.layout().addWidget(self.lblDegree)
+        self.gbRegression.layout().addWidget(self.sbxDegree)
+        self.gbRegression.layout().addWidget(self.cbxAnnotation)
+        self.plot_setting_layout.addWidget(self.gbRegression)
+
+        #self.regression_setting_layout.addWidget(self.cbxRegression,1)
+        #self.regression_setting_layout.addWidget(self.comboRegressionBy,1)
+        #self.regression_setting_layout.addWidget(self.comboSelectGroup,1)
+        #self.regression_setting_layout.addWidget(self.cbxExtrapolate,1)
+        #self.regression_setting_layout.addWidget(self.lblDegree,1)
+        #self.regression_setting_layout.addWidget(self.sbxDegree,1)
+        #self.regression_setting_layout.addWidget(self.cbxAnnotation,1)
+
+        #self.plot_setting_layout.addWidget(self.regression_setting_widget)
+        #self.cbxShape = QCheckBox()
+        #self.cbxShape.setText("Show shapes")
+        #self.cbxShape.setChecked(True)        
+        #self.cbxShape.stateChanged.connect(self.cbxShape_state_changed)
 
         self.visualization_layout = QGridLayout()
         self.visualization_widget = QWidget()
@@ -1879,16 +1948,14 @@ class DataExplorationDialog(QDialog):
         self.toolbar_layout.addWidget(self.plot_preference_button)
 
 
-        #self.plot_layout.addWidget(self.toolbar_widget,0)
-        #self.plot_layout.addWidget(self.chart_option_widget,0)
-        #self.plot_layout.addWidget(self.axis_option_widget,0)
-        self.chart_option_widget.hide()
-        self.axis_option_widget.hide()
+        #self.overlay_widget.hide()
+        #self.axis_option_widget.hide()
+        self.plot_setting_widget.hide()
 
         #self.plot_layout.addWidget(self.toolbar2)
         self.plot_layout.addWidget(self.toolbar_widget)
-        self.plot_layout.addWidget(self.axis_option_widget)
-        self.plot_layout.addWidget(self.chart_option_widget)
+        self.plot_layout.addWidget(self.plot_setting_widget)
+        #self.plot_layout.addWidget(self.overlay_widget)
 
         self.plot_layout.addWidget(self.plot_widget2)
         self.plot_layout.addWidget(self.plot_widget3)
@@ -1992,41 +2059,6 @@ class DataExplorationDialog(QDialog):
         #self.plot_widget2.setLayout(
         #    addWidget(self.transparent_gl_widget)
 
-        i = 0
-        self.row_widget1 = QWidget()
-        self.row_layout1 = QHBoxLayout()
-        self.row_widget1.setLayout(self.row_layout1)
-        self.row_layout1.addWidget(self.lblAnalysisName,1)
-        self.row_layout1.addWidget(self.edtAnalysisName,2)
-        self.row_layout1.addWidget(self.lblSuperimposition,1)
-        self.row_layout1.addWidget(self.edtSuperimposition,2)
-        self.row_layout1.addWidget(self.lblOrdination,1)
-        self.row_layout1.addWidget(self.edtOrdination,2)
-        self.row_layout1.addWidget(self.lblGroupBy,1)
-        self.row_layout1.addWidget(self.comboGroupBy,2)
-        self.row_layout1.addWidget(self.lblVisualization,1)
-        self.row_layout1.addWidget(self.comboVisualization,2)
-        self.layout.addWidget(self.row_widget1)
-        '''
-        self.layout.addWidget(self.lblAnalysisName, i, 0)
-        self.layout.addWidget(self.edtAnalysisName, i, 1)
-        #i += 1
-        self.layout.addWidget(self.lblSuperimposition, i, 2)
-        self.layout.addWidget(self.edtSuperimposition, i, 3)
-        #i += 1
-        self.layout.addWidget(self.lblOrdination, i, 4)
-        self.layout.addWidget(self.edtOrdination, i, 5)
-        #i += 1
-        self.layout.addWidget(self.lblGroupBy, i, 6)
-        self.layout.addWidget(self.comboGroupBy, i, 7)
-        #i += 1
-        self.layout.addWidget(self.lblVisualizationMethod, i, 8)
-        self.layout.addWidget(self.comboVisualizationMethod, i, 9)
-        '''
-        #i += 1#
-        #i += 1
-        #self.layout.addWidget(self.toolbar2, i, 0, 1, 2)
-        
         self.layout.addWidget(self.visualization_splitter)
         self.on_chart_dim_changed()
         #self.cbxShapeGrid_state_changed()
@@ -2419,14 +2451,10 @@ class DataExplorationDialog(QDialog):
             self.cbxDepthShade.show()        
 
     def show_plot_preference(self):
-        if self.chart_option_widget.isVisible():
-            self.chart_option_widget.hide()
+        if self.plot_setting_widget.isVisible():
+            self.plot_setting_widget.hide()
         else:
-            self.chart_option_widget.show()
-        if self.axis_option_widget.isVisible():
-            self.axis_option_widget.hide()
-        else:
-            self.axis_option_widget.show()
+            self.plot_setting_widget.show()
         
     def on_splitter_moved(self):
         self.resizeEvent(None)
@@ -3417,7 +3445,7 @@ class DataExplorationDialog(QDialog):
                         ellipse = matplotlib.patches.Ellipse(xy=(self.average_shape[key_name]['x_val'], self.average_shape[key_name]['y_val']), width=width, height=height, angle=angle, color=self.scatter_data[key_name]['color'], lw=2, alpha=0.3,fill=True)
                         self.ax2.add_patch(ellipse) 
 
-            self.fig2.tight_layout()
+            #self.fig2.tight_layout()
             self.fig2.canvas.draw()
             self.fig2.canvas.flush_events()
 

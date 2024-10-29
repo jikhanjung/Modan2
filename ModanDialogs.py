@@ -1628,6 +1628,7 @@ class DataExplorationDialog(QDialog):
         self.animation_counter = 0
         self.show_arrow = True
         self.arrow_color = "red"
+        self.object_info_list = []
         #self.shape_mode = MODE_REGRESSION
         self.rotation_matrix = np.array([
         [1, 0, 0, 0],
@@ -1804,15 +1805,15 @@ class DataExplorationDialog(QDialog):
         self.cbxLegend.toggled.connect(self.update_chart)
 
         self.cbxAverage = QCheckBox()
-        self.cbxAverage.setText(self.tr("Average"))
+        self.cbxAverage.setText(self.tr("Group average"))
         self.cbxAverage.setChecked(False)        
         self.cbxAverage.stateChanged.connect(self.update_chart)
         self.cbxConvexHull = QCheckBox()
-        self.cbxConvexHull.setText(self.tr("ConvexHull"))
+        self.cbxConvexHull.setText(self.tr("Convex hull"))
         self.cbxConvexHull.setChecked(False)
         self.cbxConvexHull.stateChanged.connect(self.update_chart)
         self.cbxConfidenceEllipse = QCheckBox()
-        self.cbxConfidenceEllipse.setText(self.tr("Ellipse"))
+        self.cbxConfidenceEllipse.setText(self.tr("Confidence ellipse"))
         self.cbxConfidenceEllipse.setChecked(False)
         self.cbxConfidenceEllipse.stateChanged.connect(self.update_chart)
         self.cbxShapeGrid = QCheckBox()
@@ -1835,11 +1836,7 @@ class DataExplorationDialog(QDialog):
         self.btnArrowColor.setStyleSheet("background-color: yellow")
         self.btnArrowColor.setToolTip("yellow")
         self.btnArrowColor.setCursor(Qt.PointingHandCursor)
-        #self.btnLMColor.mousePressEvent = lambda event, type='LM': self.on_btnColor_clicked(event, 'LM')
         self.btnArrowColor.clicked.connect(self.on_btnArrowColor_clicked)
-        #self.
-
-        #self.ShapeGridPreference.hide()
         self.sgpWidget.shape_preference_changed.connect(self.shape_grid_preference_changed)
 
 
@@ -1850,31 +1847,17 @@ class DataExplorationDialog(QDialog):
         self.gbOverlay.layout().addWidget(self.cbxConfidenceEllipse,1)
         self.gbOverlay.layout().addWidget(self.cbxShapeGrid,1)
         self.gbOverlay.layout().addWidget(self.sgpWidget,2)
-        #self.overlay_setting_layout.addWidget(self.cbxLegend,1)
-        #self.overlay_setting_layout.addWidget(self.cbxDepthShade,1)
-        #self.overlay_setting_layout.addWidget(self.cbxAverage,1)
-        #self.overlay_setting_layout.addWidget(self.cbxConvexHull,1)
-        #self.overlay_setting_layout.addWidget(self.cbxConfidenceEllipse,1)
-        #self.overlay_setting_layout.addWidget(self.cbxShapeGrid,1)
-        #self.overlay_setting_layout.addWidget(self.sgpWidget,4)
-        self.overlay_setting_layout.addWidget(self.gbOverlay)
-
         self.plot_setting_layout.addWidget(self.gbOverlay)
-        #self.fit_layout.addWidget(self.btnPolyfit)
-
-        self.regression_setting_widget = QWidget()
-        self.regression_setting_layout = QHBoxLayout()
-        self.regression_setting_widget.setLayout(self.regression_setting_layout)
-
-        self.gbRegression = QGroupBox()
-        self.gbRegression.setTitle(self.tr("Regression settings"))
-        self.gbRegression.setLayout(QHBoxLayout())
 
         ''' regression related controls '''
         self.cbxRegression = QCheckBox()
-        self.cbxRegression.setText("Regression")
+        self.cbxRegression.setText("Show regression")
         self.cbxRegression.setChecked(False)
         self.cbxRegression.stateChanged.connect(self.update_chart)
+        self.lblRegressionBasedon = QLabel(self.tr("based on"))
+        self.comboRegressionBasedOn = QComboBox()
+        self.comboRegressionBasedOn.currentIndexChanged.connect(self.comboRegressionBasedOn_changed)
+
         self.comboRegressionBy = QComboBox()
         self.comboRegressionBy.addItem("All")
         self.comboRegressionBy.addItem("By group")
@@ -1898,28 +1881,21 @@ class DataExplorationDialog(QDialog):
         self.cbxAnnotation.stateChanged.connect(self.update_chart)
         self.cbxAnnotation.setChecked(False)
 
-        self.gbRegression.layout().addWidget(self.cbxRegression)
-        self.gbRegression.layout().addWidget(self.comboRegressionBy)
-        self.gbRegression.layout().addWidget(self.comboSelectGroup)
-        self.gbRegression.layout().addWidget(self.cbxExtrapolate)
-        self.gbRegression.layout().addWidget(self.lblDegree)
-        self.gbRegression.layout().addWidget(self.sbxDegree)
-        self.gbRegression.layout().addWidget(self.cbxAnnotation)
+        self.gbRegression = QGroupBox()
+        self.gbRegression.setTitle(self.tr("Regression settings"))
+        self.gbRegression.setLayout(QHBoxLayout())
+
+        self.gbRegression.layout().addWidget(self.cbxRegression, 1)
+        self.gbRegression.layout().addWidget(self.lblRegressionBasedon, 0)
+        self.gbRegression.layout().addWidget(self.comboRegressionBasedOn, 1)
+        #self.gbRegression.layout().addWidget(self.comboRegressionBy, 1)
+        self.gbRegression.layout().addWidget(self.comboSelectGroup, 1)
+        self.gbRegression.layout().addWidget(self.cbxExtrapolate, 1)
+        self.gbRegression.layout().addWidget(self.lblDegree, 0)
+        self.gbRegression.layout().addWidget(self.sbxDegree, 1)
+        self.gbRegression.layout().addWidget(self.cbxAnnotation, 1)
         self.plot_setting_layout.addWidget(self.gbRegression)
 
-        #self.regression_setting_layout.addWidget(self.cbxRegression,1)
-        #self.regression_setting_layout.addWidget(self.comboRegressionBy,1)
-        #self.regression_setting_layout.addWidget(self.comboSelectGroup,1)
-        #self.regression_setting_layout.addWidget(self.cbxExtrapolate,1)
-        #self.regression_setting_layout.addWidget(self.lblDegree,1)
-        #self.regression_setting_layout.addWidget(self.sbxDegree,1)
-        #self.regression_setting_layout.addWidget(self.cbxAnnotation,1)
-
-        #self.plot_setting_layout.addWidget(self.regression_setting_widget)
-        #self.cbxShape = QCheckBox()
-        #self.cbxShape.setText("Show shapes")
-        #self.cbxShape.setChecked(True)        
-        #self.cbxShape.stateChanged.connect(self.cbxShape_state_changed)
 
         self.visualization_layout = QGridLayout()
         self.visualization_widget = QWidget()
@@ -2099,6 +2075,13 @@ class DataExplorationDialog(QDialog):
         
             
         self.update_chart()
+
+    def comboRegressionBasedOn_changed(self):
+        if len(self.object_info_list) == 0:
+            return  
+        self.update_chart()
+        #pass
+        #self.update_chart()
 
     def cbxShapeGrid_state_changed(self):
         #print("cbxShape_state_changed")
@@ -2993,13 +2976,13 @@ class DataExplorationDialog(QDialog):
         for idx, obj in enumerate(self.object_info_list):
             if 'variable_list' in obj.keys():
                 if propertyname_index > -1 and propertyname_index < len(obj['variable_list']):
-                    key_name = obj['variable_list'][self.propertyname_index]
+                    key_name = obj['variable_list'][self.scatter_variable_index]
                     if key_name not in unique_groupname_list:
                         unique_groupname_list.append(key_name)
                         self.comboSelectGroup.addItem(key_name)
             else:
                 if propertyname_index > -1 and propertyname_index < len(obj['property_list']):
-                    key_name = obj['property_list'][self.propertyname_index]
+                    key_name = obj['property_list'][self.scatter_variable_index]
                     if key_name not in unique_groupname_list:
                         unique_groupname_list.append(key_name)
                         self.comboSelectGroup.addItem(key_name)
@@ -3043,25 +3026,32 @@ class DataExplorationDialog(QDialog):
         #self.edtGroupBy.setText(analysis.group_by)
         self.comboGroupBy.clear()
         self.comboGroupBy.addItem("Select property", -1)
+        self.comboRegressionBasedOn.clear()
+        self.comboRegressionBasedOn.addItem("Select property", -1)
 
         valid_property_index_list = analysis.dataset.get_grouping_variable_index_list()
         variablename_list = analysis.dataset.get_variablename_list()
         for idx in valid_property_index_list:
             property = variablename_list[idx]
             self.comboGroupBy.addItem(property, idx)
+            self.comboRegressionBasedOn.addItem(property, idx)
 
         #print("set_analysis 2", analysis, analysis_method, group_by, self.ignore_change)
         if analysis_method == 'PCA':
             #self.lblGroupBy.hide()
             self.comboGroupBy.setEnabled(True)
+            self.comboRegressionBasedOn.setEnabled(True)
         else:
             #self.lblGroupBy.show()
             self.comboGroupBy.setEnabled(False)
+            self.comboRegressionBasedOn.setEnabled(False)
         
         if group_by in analysis.dataset.get_variablename_list():
             self.comboGroupBy.setCurrentText(group_by)
+            self.comboRegressionBasedOn.setCurrentText(group_by)
         else:
             self.comboGroupBy.setCurrentIndex(0)
+            self.comboRegressionBasedOn.setCurrentIndex(0)
         #print("going to set mode")
 
         obj = self.analysis.dataset.object_list[0]
@@ -3093,9 +3083,12 @@ class DataExplorationDialog(QDialog):
 
         #print("set_analysis 6", analysis, analysis_method, group_by, self.ignore_change)
 
-        propertyname = self.comboGroupBy.currentText()
+        scatter_variable_name = self.comboGroupBy.currentText()
+        regression_variable_name = self.comboRegressionBasedOn.currentText()
         self.variablename_list = self.analysis.propertyname_str.split(",")
-        self.propertyname_index = self.variablename_list.index(propertyname) if propertyname in self.variablename_list else -1
+        self.scatter_variable_index = self.variablename_list.index(scatter_variable_name) if scatter_variable_name in self.variablename_list else -1
+        self.regression_variable_index = self.variablename_list.index(regression_variable_name) if regression_variable_name in self.variablename_list else -1
+        #self.scatter_variable_index = self.variablename_list.index(propertyname) if propertyname in self.variablename_list else -1
         #print("set analysis load_comboselect", self.ignore_change)
         self.load_comboSelectgroup()
         self.set_mode(MODE_EXPLORATION)
@@ -3106,7 +3099,9 @@ class DataExplorationDialog(QDialog):
         show_shape_grid = self.cbxShapeGrid.isChecked()
         show_convex_hull = self.cbxConvexHull.isChecked()
         show_confidence_ellipse = self.cbxConfidenceEllipse.isChecked()
-        regression_by = self.comboRegressionBy.currentText()
+        regression_based_on = self.comboRegressionBasedOn.currentText()
+        #regression_by = self.comboRegressionBy.currentText()
+        regression_by = "By group"
         show_regression = self.cbxRegression.isChecked()
 
         select_group_list = []
@@ -3134,13 +3129,16 @@ class DataExplorationDialog(QDialog):
         #print("color list:", self.color_list, "marker list:", self.marker_list)
         #print("color candidate:", color_candidate, "symbol candidate:", symbol_candidate)
 
-        propertyname = self.comboGroupBy.currentText()
+        scatter_variable_name = self.comboGroupBy.currentText()
+        regression_variable_name = self.comboRegressionBasedOn.currentText()
 
-        self.propertyname_index = self.variablename_list.index(propertyname) if propertyname in self.variablename_list else -1
+        self.scatter_variable_index = self.variablename_list.index(scatter_variable_name) if scatter_variable_name in self.variablename_list else -1
+        self.regression_variable_index = self.variablename_list.index(regression_variable_name) if regression_variable_name in self.variablename_list else -1
         self.scatter_data = {}
         self.scatter_result = {}
         self.average_shape = {}
-        self.regression_data = { 'x_val':[], 'y_val':[], 'z_val':[] }
+        self.regression_data = {}
+        #self.regression_data = { 'x_val':[], 'y_val':[], 'z_val':[] }
         #self.shape_grid = {}
         self.data_range = { 'x_min':99999, 'x_max':-99999, 'y_min':99999, 'y_max':-99999, 'z_min':99999, 'z_max':-99999, 'x_sum': 0, 'y_sum': 0, 'z_sum': 0, 'x_avg': 0, 'y_avg': 0, 'z_avg': 0}
         SCATTER_SMALL_SIZE = 30
@@ -3155,62 +3153,74 @@ class DataExplorationDialog(QDialog):
         #    scatter_size = SCATTER_LARGE_SIZE
         
         #print("removing shape grid")
-        for key_name in self.shape_grid.keys():
+        for scatter_key_name in self.shape_grid.keys():
             #print("removing shape grid", key_name)
-            if self.shape_grid[key_name]['view'] is not None:
-                self.shape_grid[key_name]['view'].hide()
-                self.shape_grid[key_name]['view'].deleteLater()
-                self.shape_grid[key_name]['view'] = None
+            if self.shape_grid[scatter_key_name]['view'] is not None:
+                self.shape_grid[scatter_key_name]['view'].hide()
+                self.shape_grid[scatter_key_name]['view'].deleteLater()
+                self.shape_grid[scatter_key_name]['view'] = None
 
         key_list = []
         key_list.append('__default__')
         self.scatter_data['__default__'] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'hoverinfo':[], 'text':[], 'property':'', 'symbol':'o', 'color':color_candidate[0], 'size':scatter_size}
         self.average_shape['__default__'] = { 'x_val':0, 'y_val':0, 'z_val':0, 'data':[], 'hoverinfo':[], 'text':[], 'property':'', 'symbol':'o', 'color':color_candidate[0], 'size':scatter_size}
+        self.regression_data['__default__'] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'hoverinfo':[], 'text':[], 'property':'', 'symbol':'o', 'color':color_candidate[0], 'size':scatter_size}
+        #regression_key_name = ''
+        #scatter_key_name = ''
 
         for idx, obj in enumerate(self.object_info_list):
-            key_name = '__default__'
+            scatter_key_name = '__default__'
+            regression_key_name = '__default__'
 
             if 'variable_list' in obj.keys():  
-                if self.propertyname_index > -1 and self.propertyname_index < len(obj['variable_list']):
-                    key_name = obj['variable_list'][self.propertyname_index]
+                if self.scatter_variable_index > -1 and self.scatter_variable_index < len(obj['variable_list']):
+                    scatter_key_name = obj['variable_list'][self.scatter_variable_index]
+                if self.regression_variable_index > -1 and self.regression_variable_index < len(obj['variable_list']):
+                    regression_key_name = obj['variable_list'][self.regression_variable_index]
             else:
-                if self.propertyname_index > -1 and self.propertyname_index < len(obj['property_list']):
-                    key_name = obj['property_list'][self.propertyname_index]
+                if self.scatter_variable_index > -1 and self.scatter_variable_index < len(obj['property_list']):
+                    scatter_key_name = obj['property_list'][self.scatter_variable_index]
 
-            if key_name not in self.scatter_data.keys():
-                self.scatter_data[key_name] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'property':key_name, 'symbol':'', 'color':'', 'size':scatter_size}
-                self.average_shape[key_name] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'property':key_name, 'symbol':'', 'color':'', 'size':scatter_size}
+            if scatter_key_name not in self.scatter_data.keys():
+                self.scatter_data[scatter_key_name] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'property':scatter_key_name, 'symbol':'', 'color':'', 'size':scatter_size}
+                self.average_shape[scatter_key_name] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'property':scatter_key_name, 'symbol':'', 'color':'', 'size':scatter_size}
+            
+            if regression_key_name not in self.regression_data.keys():
+                self.regression_data[regression_key_name] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'property':regression_key_name, 'symbol':'', 'color':'', 'size':scatter_size}
 
             if axis1 == CENTROID_SIZE_VALUE:
                 #print("obj:", obj)
-                self.scatter_data[key_name]['x_val'].append(obj['csize'])
-                if regression_by == 'All' or ( regression_by == 'Select group' and key_name in select_group_list ):
-                    self.regression_data['x_val'].append(obj['csize'])
+                self.scatter_data[scatter_key_name]['x_val'].append(obj['csize'])
+                self.regression_data[regression_key_name]['x_val'].append(obj['csize'])
+                #if regression_by == 'All' or ( regression_by == 'Select group' and scatter_key_name in select_group_list ):
+                #    self.regression_data['x_val'].append(obj['csize'])
             else:
-                self.scatter_data[key_name]['x_val'].append(flip_axis1 * self.analysis_result_list[idx][axis1])   
-                if regression_by == 'All' or ( regression_by == 'Select group' and key_name in select_group_list ):
-                    self.regression_data['x_val'].append(flip_axis1 * self.analysis_result_list[idx][axis1])
-            self.scatter_data[key_name]['y_val'].append(flip_axis2 * self.analysis_result_list[idx][axis2])
-            if regression_by == 'All' or ( regression_by == 'Select group' and key_name in select_group_list ):
-                self.regression_data['y_val'].append(flip_axis2 * self.analysis_result_list[idx][axis2])
-            self.scatter_data[key_name]['z_val'].append(flip_axis3 * self.analysis_result_list[idx][axis3])
-            if regression_by == 'All' or ( regression_by == 'Select group' and key_name in select_group_list ):
-                self.regression_data['z_val'].append(flip_axis3 * self.analysis_result_list[idx][axis3])
-            #self.scatter_data[key_name]['z_val'].append(analysis_result_list[idx][axis3])
-            self.scatter_data[key_name]['data'].append(obj)
-            #self.scatter_data[key_name]['hoverinfo'].append(obj['object_name'])
-            self.data_range['x_max'] = max(self.data_range['x_max'], self.scatter_data[key_name]['x_val'][-1])
-            self.data_range['x_min'] = min(self.data_range['x_min'], self.scatter_data[key_name]['x_val'][-1])
-            self.data_range['x_sum'] += self.scatter_data[key_name]['x_val'][-1]
-            self.data_range['y_max'] = max(self.data_range['y_max'], self.scatter_data[key_name]['y_val'][-1])
-            self.data_range['y_min'] = min(self.data_range['y_min'], self.scatter_data[key_name]['y_val'][-1])
-            self.data_range['y_sum'] += self.scatter_data[key_name]['y_val'][-1]
-            self.data_range['z_max'] = max(self.data_range['z_max'], self.scatter_data[key_name]['z_val'][-1])
-            self.data_range['z_min'] = min(self.data_range['z_min'], self.scatter_data[key_name]['z_val'][-1])
-            self.data_range['z_sum'] += self.scatter_data[key_name]['z_val'][-1]
-        
-        #self.data_range['x_min'] = min(self.scatter_data['__default__']['x_val'])
+                self.scatter_data[scatter_key_name]['x_val'].append(flip_axis1 * self.analysis_result_list[idx][axis1])
+                self.regression_data[regression_key_name]['x_val'].append(flip_axis1 * self.analysis_result_list[idx][axis1])
+                #if regression_by == 'All' or ( regression_by == 'Select group' and scatter_key_name in select_group_list ):
+                #    self.regression_data['x_val'].append(flip_axis1 * self.analysis_result_list[idx][axis1])
+            self.scatter_data[scatter_key_name]['y_val'].append(flip_axis2 * self.analysis_result_list[idx][axis2])
+            self.regression_data[regression_key_name]['y_val'].append(flip_axis2 * self.analysis_result_list[idx][axis2])
+            #if regression_by == 'All' or ( regression_by == 'Select group' and scatter_key_name in select_group_list ):
+            #    self.regression_data['y_val'].append(flip_axis2 * self.analysis_result_list[idx][axis2])
+            self.scatter_data[scatter_key_name]['z_val'].append(flip_axis3 * self.analysis_result_list[idx][axis3])
+            self.regression_data[regression_key_name]['z_val'].append(flip_axis3 * self.analysis_result_list[idx][axis3])
+            #if regression_by == 'All' or ( regression_by == 'Select group' and scatter_key_name in select_group_list ):
+            #    self.regression_data['z_val'].append(flip_axis3 * self.analysis_result_list[idx][axis3])
 
+            self.scatter_data[scatter_key_name]['data'].append(obj)
+            self.regression_data[regression_key_name]['data'].append(obj)
+
+            self.data_range['x_max'] = max(self.data_range['x_max'], self.scatter_data[scatter_key_name]['x_val'][-1])
+            self.data_range['x_min'] = min(self.data_range['x_min'], self.scatter_data[scatter_key_name]['x_val'][-1])
+            self.data_range['x_sum'] += self.scatter_data[scatter_key_name]['x_val'][-1]
+            self.data_range['y_max'] = max(self.data_range['y_max'], self.scatter_data[scatter_key_name]['y_val'][-1])
+            self.data_range['y_min'] = min(self.data_range['y_min'], self.scatter_data[scatter_key_name]['y_val'][-1])
+            self.data_range['y_sum'] += self.scatter_data[scatter_key_name]['y_val'][-1]
+            self.data_range['z_max'] = max(self.data_range['z_max'], self.scatter_data[scatter_key_name]['z_val'][-1])
+            self.data_range['z_min'] = min(self.data_range['z_min'], self.scatter_data[scatter_key_name]['z_val'][-1])
+            self.data_range['z_sum'] += self.scatter_data[scatter_key_name]['z_val'][-1]
+        
         if show_shape_grid:
             self.data_range['x_avg'] = self.data_range['x_sum'] / len(self.object_info_list)
             self.data_range['y_avg'] = self.data_range['y_sum'] / len(self.object_info_list)
@@ -3218,63 +3228,72 @@ class DataExplorationDialog(QDialog):
             y_key_list = [ 'y_min', 'y_avg', 'y_max']
             for x_key in x_key_list:
                 for y_key in y_key_list:
-                    key_name = x_key+"_"+y_key
-                    self.shape_grid[key_name] = { 'x_val': self.data_range[x_key], 'y_val': self.data_range[y_key]}
+                    scatter_key_name = x_key+"_"+y_key
+                    self.shape_grid[scatter_key_name] = { 'x_val': self.data_range[x_key], 'y_val': self.data_range[y_key]}
                     if self.analysis.dataset.dimension == 3:
-                        self.shape_grid[key_name]['view'] = ObjectViewer3D(parent=None,transparent=True)
+                        self.shape_grid[scatter_key_name]['view'] = ObjectViewer3D(parent=None,transparent=True)
                     else:
-                        self.shape_grid[key_name]['view'] = ObjectViewer2D(parent=None,transparent=True)
-                        self.shape_grid[key_name]['view'].show_index = False
-                    self.shape_grid[key_name]['view'].set_object_name(key_name)
+                        self.shape_grid[scatter_key_name]['view'] = ObjectViewer2D(parent=None,transparent=True)
+                        self.shape_grid[scatter_key_name]['view'].show_index = False
+                    self.shape_grid[scatter_key_name]['view'].set_object_name(scatter_key_name)
 
         # remove empty group
         if len(self.scatter_data['__default__']['x_val']) == 0:
             del self.scatter_data['__default__']
             del self.average_shape['__default__']
+            del self.regression_data['__default__']
 
-        for key_name in self.scatter_data.keys():
-            self.average_shape[key_name]['x_val'] = np.mean(self.scatter_data[key_name]['x_val'])
-            self.average_shape[key_name]['y_val'] = np.mean(self.scatter_data[key_name]['y_val'])
-            self.average_shape[key_name]['z_val'] = np.mean(self.scatter_data[key_name]['z_val'])
+        for scatter_key_name in self.scatter_data.keys():
+            self.average_shape[scatter_key_name]['x_val'] = np.mean(self.scatter_data[scatter_key_name]['x_val'])
+            self.average_shape[scatter_key_name]['y_val'] = np.mean(self.scatter_data[scatter_key_name]['y_val'])
+            self.average_shape[scatter_key_name]['z_val'] = np.mean(self.scatter_data[scatter_key_name]['z_val'])
             #group_hash[key_name]['text'].append(obj.object_name)
             #group_hash[key_name]['hoverinfo'].append(obj.id)
 
         if show_convex_hull:
-            for key_name in self.scatter_data.keys():
-                if len(self.scatter_data[key_name]['x_val']) > 0:
-                    self.scatter_data[key_name]['points'] = np.array([self.scatter_data[key_name]['x_val'], self.scatter_data[key_name]['y_val']]).T
-                    hull = ConvexHull(self.scatter_data[key_name]['points'])
-                    self.scatter_data[key_name]['hull'] = hull
+            for scatter_key_name in self.scatter_data.keys():
+                if len(self.scatter_data[scatter_key_name]['x_val']) > 0:
+                    self.scatter_data[scatter_key_name]['points'] = np.array([self.scatter_data[scatter_key_name]['x_val'], self.scatter_data[scatter_key_name]['y_val']]).T
+                    hull = ConvexHull(self.scatter_data[scatter_key_name]['points'])
+                    self.scatter_data[scatter_key_name]['hull'] = hull
 
         if show_confidence_ellipse:
-            for key_name in self.scatter_data.keys():
-                if len(self.scatter_data[key_name]['x_val']) > 1:
-                    covariance = np.cov([self.scatter_data[key_name]['x_val'], self.scatter_data[key_name]['y_val']])
+            for scatter_key_name in self.scatter_data.keys():
+                if len(self.scatter_data[scatter_key_name]['x_val']) > 1:
+                    covariance = np.cov([self.scatter_data[scatter_key_name]['x_val'], self.scatter_data[scatter_key_name]['y_val']])
                     confidence_level = 0.90  # For 95% confidence ellipse
                     alpha = 1 - confidence_level
                     n_std = stats.chi2.ppf(1 - alpha, df=2)  # Degrees of freedom = 2 for 2D ellipse
                     width, height, angle = mu.get_ellipse_params(covariance, n_std) 
-                    self.scatter_data[key_name]['ellipse'] = (width, height, angle)
+                    self.scatter_data[scatter_key_name]['ellipse'] = (width, height, angle)
 
         if len(self.scatter_data.keys()) == 0:
             return
 
         # assign color and symbol
-        sc_idx = 0
-        for key_name in self.scatter_data.keys():
-            if self.scatter_data[key_name]['color'] == '':
-                self.scatter_data[key_name]['color'] = color_candidate[sc_idx % len(color_candidate)]
-                self.scatter_data[key_name]['symbol'] = symbol_candidate[sc_idx % len(symbol_candidate)]
-                sc_idx += 1
+        #sc_idx = 0
+        for sc_idx, scatter_key_name in enumerate(self.scatter_data.keys()):
+            if self.scatter_data[scatter_key_name]['color'] == '':
+                self.scatter_data[scatter_key_name]['color'] = color_candidate[sc_idx % len(color_candidate)]
+                self.scatter_data[scatter_key_name]['symbol'] = symbol_candidate[sc_idx % len(symbol_candidate)]
+                #sc_idx += 1
+
+        #rg_idx = 0
+        for rg_idx, regression_key_name in enumerate(self.regression_data.keys()):
+            if self.regression_data[regression_key_name]['color'] == '':
+                self.regression_data[regression_key_name]['color'] = color_candidate[rg_idx % len(color_candidate)]
+                self.regression_data[regression_key_name]['symbol'] = symbol_candidate[rg_idx % len(symbol_candidate)]
+                #sc_idx += 1
 
     def calculate_fit(self):
         #self.scatter_data[key_name]['y_val']
         show_regression = self.cbxRegression.isChecked()
         if show_regression == False:
             return
-        regression_by = self.comboRegressionBy.currentText()
+        regression_by = "By group" #self.comboRegressionBy.currentText()
 
-        key_list = self.scatter_data.keys()
+        key_list = self.regression_data.keys()
+        #print("key list:", key_list)
         self.curve_list = []
         #data_range = self.data_range
         degree_text = self.sbxDegree.text()
@@ -3284,8 +3303,8 @@ class DataExplorationDialog(QDialog):
         degree = int(degree_text)
         if regression_by == "By group":
             for idx, key in enumerate(key_list):
-                x_vals = np.array(self.scatter_data[key]['x_val'])
-                y_vals = np.array(self.scatter_data[key]['y_val'])
+                x_vals = np.array(self.regression_data[key]['x_val'])
+                y_vals = np.array(self.regression_data[key]['y_val'])
 
                 if len(x_vals) < 2:
                     self.curve_list.append( None )
@@ -3296,11 +3315,11 @@ class DataExplorationDialog(QDialog):
                     #model_list.append(model)
                     r_squared = self.calculate_r_squared(model, x_vals, y_vals)
                     #print(key, model, r_squared)
-                    size_range = np.linspace(min(self.scatter_data[key]['x_val']), max(self.scatter_data[key]['x_val']), 100)
+                    size_range = np.linspace(min(self.regression_data[key]['x_val']), max(self.regression_data[key]['x_val']), 100)
                     size_range2 = np.linspace(self.data_range['x_min'], self.data_range['x_max'], 100)
                     curve = np.polyval(model, size_range)
                     curve2 = np.polyval(model, size_range2)
-                    self.curve_list.append( { 'key': key, 'model': model, 'size_range': size_range, 'size_range2': size_range2, 'curve': curve, 'curve2': curve2, 'r_squared': r_squared, 'color': self.scatter_data[key]['color'] } )
+                    self.curve_list.append( { 'key': key, 'model': model, 'size_range': size_range, 'size_range2': size_range2, 'curve': curve, 'curve2': curve2, 'r_squared': r_squared, 'color': self.regression_data[key]['color'] } )
         else:
             color_candidate = ['blue','green','black','cyan','magenta','yellow','gray','red']
             color_candidate = self.color_list[:]

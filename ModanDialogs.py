@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import QTableWidgetItem, QHeaderView, QFileDialog, QCheckBo
                             QDialog, QLineEdit, QLabel, QPushButton, QAbstractItemView, QStatusBar, QMessageBox, \
                             QTableView, QSplitter, QRadioButton, QComboBox, QTextEdit, QSizePolicy, \
                             QTableWidget, QGridLayout, QAbstractButton, QButtonGroup, QGroupBox, QListWidgetItem,\
-                            QTabWidget, QListWidget, QSpinBox, QPlainTextEdit, QSlider, QScrollArea, QShortcut
+                            QTabWidget, QListWidget, QSpinBox, QPlainTextEdit, QSlider, QScrollArea, QShortcut, QSpacerItem
 from PyQt5.QtGui import QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem, QImage,\
                         QFont, QPainter, QBrush, QMouseEvent, QWheelEvent, QDoubleValidator, QIcon, QCursor,\
                         QFontMetrics, QIntValidator, QKeySequence
@@ -56,10 +56,10 @@ MODE['VIEW'] = 7
 
 MODE_EXPLORATION = 0
 MODE_REGRESSION = 1
-MODE_GROWTH_TRAJECTORY = 2
-MODE_AVERAGE = 3
-MODE_COMPARISON = 4
-MODE_COMPARISON2 = 5
+#MODE_GROWTH_TRAJECTORY = 2
+MODE_AVERAGE = 2
+MODE_COMPARISON = 3
+MODE_COMPARISON2 = 4
 #MODE_GRID = 6
 
 BASE_LANDMARK_RADIUS = 2
@@ -1647,28 +1647,25 @@ class DataExplorationDialog(QDialog):
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
 
-        self.lblAnalysisName = QLabel(self.tr("Analysis Name"))
-        # label text align right
+        self.lblAnalysisName = QLabel(self.tr("Analysis ame"))
         self.lblAnalysisName.setAlignment(Qt.AlignVCenter|Qt.AlignRight)
         self.edtAnalysisName = QLineEdit()
-        self.lblSuperimposition = QLabel(self.tr("Superimposition"))
+        self.lblSuperimposition = QLabel(self.tr("Superimposition method"))
         self.lblSuperimposition.setAlignment(Qt.AlignVCenter|Qt.AlignRight)
         self.edtSuperimposition = QLineEdit()
         self.edtSuperimposition.setEnabled(False)
-        self.lblOrdination = QLabel(self.tr("Ordination"))
+        self.lblOrdination = QLabel(self.tr("Ordination method"))
         self.lblOrdination.setAlignment(Qt.AlignVCenter|Qt.AlignRight)
         self.edtOrdination = QLineEdit()
         self.edtOrdination.setEnabled(False)
-        self.lblVisualization = QLabel(self.tr("Visualization"))
+        self.lblVisualization = QLabel(self.tr("Shape view"))
         self.lblVisualization.setAlignment(Qt.AlignVCenter|Qt.AlignRight)
         self.comboVisualization = QComboBox()
         self.comboVisualization.addItem("Exploration")
         self.comboVisualization.addItem("Regression")
-        self.comboVisualization.addItem("Growth trajectory")
         self.comboVisualization.addItem("Average")
         self.comboVisualization.addItem("Comparison")
-        self.comboVisualization.addItem("Comparison2")
-        #self.comboVisualization.addItem("Grid")
+        self.comboVisualization.addItem("Comparison (overlap)")
         self.comboVisualization.setCurrentIndex(0)
         self.comboVisualization.currentIndexChanged.connect(self.comboVisualizationMethod_changed)
 
@@ -1683,8 +1680,8 @@ class DataExplorationDialog(QDialog):
         self.title_row_layout.addWidget(self.edtOrdination,2)
         #self.title_row_layout.addWidget(self.lblGroupBy,1)
         #self.title_row_layout.addWidget(self.comboGroupBy,2)
-        self.title_row_layout.addWidget(self.lblVisualization,1)
-        self.title_row_layout.addWidget(self.comboVisualization,2)
+        #self.title_row_layout.addWidget(self.lblVisualization,1)
+        #self.title_row_layout.addWidget(self.comboVisualization,2)
         self.layout.addWidget(self.title_row_widget)
 
 
@@ -1710,22 +1707,28 @@ class DataExplorationDialog(QDialog):
         self.plot_setting_widget = QWidget()
         self.plot_setting_layout = QVBoxLayout()
         self.plot_setting_widget.setLayout(self.plot_setting_layout)
+        self.plot_setting_widget.hide()
 
         self.axis_option_widget = QWidget()
         self.axis_option_layout = QHBoxLayout()
         self.axis_option_widget.setLayout(self.axis_option_layout)
 
         # basic chart options
-        self.gbChartBasics = QGroupBox()
-        self.gbChartBasics.setTitle(self.tr("Basic settings"))
+        self.gbChartBasics = QWidget()
+        #self.gbChartBasics.setTitle(self.tr("Basic settings"))
         self.gbChartBasics.setLayout(QHBoxLayout())
+        
+        spacer1 = QWidget()
+        spacer1.setMinimumWidth(20)
+        spacer2 = QWidget()
+        spacer2.setMinimumWidth(20)
 
         self.lblGroupBy = QLabel(self.tr("Grouping variable"))
         self.lblGroupBy.setAlignment(Qt.AlignVCenter|Qt.AlignRight)
         self.comboGroupBy = QComboBox()
         self.comboGroupBy.setEnabled(False)
         self.comboGroupBy.currentIndexChanged.connect(self.comboGroupBy_changed)
-        self.lblChartDim = QLabel(self.tr("Chart dimension"))
+        self.lblChartDim = QLabel(self.tr("Chart dimension:"))
         self.rb2DChartDim = QRadioButton("2D")
         self.rb3DChartDim = QRadioButton("3D")
         self.grpRadioButton1 = QButtonGroup()
@@ -1735,12 +1738,19 @@ class DataExplorationDialog(QDialog):
         self.rb2DChartDim.setChecked(True)
         self.rb2DChartDim.toggled.connect(self.on_chart_dim_changed)
         self.rb3DChartDim.toggled.connect(self.on_chart_dim_changed)
+        self.cbxLegend = QCheckBox()
+        self.cbxLegend.setText(self.tr("Show legend"))
+        self.cbxLegend.setChecked(True)
+        self.cbxLegend.toggled.connect(self.update_chart)
         self.gbChartBasics.layout().addWidget(self.lblGroupBy)
         self.gbChartBasics.layout().addWidget(self.comboGroupBy)
-        self.gbChartBasics.layout().addWidget(self.lblChartDim)
-        self.gbChartBasics.layout().addWidget(self.rb2DChartDim)
-        self.gbChartBasics.layout().addWidget(self.rb3DChartDim)
-        self.axis_option_layout.addWidget(self.gbChartBasics)
+        self.gbChartBasics.layout().addWidget(spacer1)
+        #self.gbChartBasics.layout().addWidget(self.lblChartDim)
+        #self.gbChartBasics.layout().addWidget(self.rb2DChartDim)
+        #self.gbChartBasics.layout().addWidget(self.rb3DChartDim)
+        self.gbChartBasics.layout().addWidget(self.cbxLegend)
+        self.gbChartBasics.layout().addWidget(spacer2)
+        #self.axis_option_layout.addWidget(self.gbChartBasics)
 
         self.lblAxis1 = QLabel("Axis 1")
         self.lblAxis2 = QLabel("Axis 2")
@@ -1786,9 +1796,10 @@ class DataExplorationDialog(QDialog):
         self.gbChartBasics.layout().addWidget(self.lblAxis3,0)
         self.gbChartBasics.layout().addWidget(self.comboAxis3,1)
         self.gbChartBasics.layout().addWidget(self.cbxFlipAxis3,0)
+
         #self.axis_option_layout.addWidget(self.gbAxis)
         
-        self.plot_setting_layout.addWidget(self.gbChartBasics)
+        #self.plot_setting_layout.addWidget(self.gbChartBasics)
 
         self.overlay_setting_widget = QWidget()
         self.overlay_setting_layout = QHBoxLayout()
@@ -1802,10 +1813,6 @@ class DataExplorationDialog(QDialog):
         self.cbxDepthShade.setText(self.tr("Depth shade"))
         self.cbxDepthShade.setChecked(False)
         self.cbxDepthShade.toggled.connect(self.update_chart)
-        self.cbxLegend = QCheckBox()
-        self.cbxLegend.setText(self.tr("Legend"))
-        self.cbxLegend.setChecked(False)
-        self.cbxLegend.toggled.connect(self.update_chart)
 
         self.cbxAverage = QCheckBox()
         self.cbxAverage.setText(self.tr("Group average"))
@@ -1843,7 +1850,6 @@ class DataExplorationDialog(QDialog):
         self.sgpWidget.shape_preference_changed.connect(self.shape_grid_preference_changed)
 
 
-        self.gbOverlay.layout().addWidget(self.cbxLegend,1)
         self.gbOverlay.layout().addWidget(self.cbxDepthShade,1)
         self.gbOverlay.layout().addWidget(self.cbxAverage,1)
         self.gbOverlay.layout().addWidget(self.cbxConvexHull,1)
@@ -1913,29 +1919,21 @@ class DataExplorationDialog(QDialog):
         self.plot_preference_button.setIconSize(QSize(32, 32))
         self.plot_preference_button.clicked.connect(self.show_plot_preference)
         self.plot_preference_button.setAutoDefault(False)
-        self.btn_save_plot = QPushButton("Export")
+        self.btn_save_plot = QPushButton("Export Chart")
         self.btn_save_plot.clicked.connect(self.export_chart)
 
 
         self.toolbar_widget = QWidget()
         self.toolbar_layout = QHBoxLayout()
         self.toolbar_widget.setLayout(self.toolbar_layout)
-
         self.toolbar_layout.addWidget(self.toolbar2)
         self.toolbar_layout.addWidget(self.toolbar3)
+        self.toolbar_layout.addWidget(self.gbChartBasics)
         self.toolbar_layout.addWidget(self.btn_save_plot)
         self.toolbar_layout.addWidget(self.plot_preference_button)
 
-
-        #self.overlay_widget.hide()
-        #self.axis_option_widget.hide()
-        self.plot_setting_widget.hide()
-
-        #self.plot_layout.addWidget(self.toolbar2)
         self.plot_layout.addWidget(self.toolbar_widget)
         self.plot_layout.addWidget(self.plot_setting_widget)
-        #self.plot_layout.addWidget(self.overlay_widget)
-
         self.plot_layout.addWidget(self.plot_widget2)
         self.plot_layout.addWidget(self.plot_widget3)
 
@@ -1957,7 +1955,6 @@ class DataExplorationDialog(QDialog):
         self.pause_frame = 0
         self.edtNumFrames.setText(str(self.total_frame))
         self.edtNumFrames.setFixedWidth(40)
-        #self.edtNumFrames.setValidator(QIntValidator())        
         self.record_animation = False
         self.animation_frame_list = []
 
@@ -1977,8 +1974,11 @@ class DataExplorationDialog(QDialog):
         self.shape_option_widget = QWidget()
         self.shape_option_layout = QHBoxLayout()
         self.shape_option_widget.setLayout(self.shape_option_layout)
+        self.shape_option_layout.addWidget(self.lblVisualization,0)
+        self.shape_option_layout.addWidget(self.comboVisualization,1)
+
         self.shape_option_layout.addWidget(self.animate_option_widget,1)
-        self.shape_option_layout.addWidget(self.btnResetPose,1)
+        self.shape_option_layout.addWidget(self.btnResetPose,0)
         self.shape_option_layout.addWidget(self.shape_preference_button,0)
         self.view_layout.addWidget(self.shape_option_widget,0)
 
@@ -2008,47 +2008,9 @@ class DataExplorationDialog(QDialog):
         self.visualization_splitter.setSizes([800, 300])
         self.visualization_splitter.splitterMoved.connect(self.on_splitter_moved)
 
-        #self.visualization_layout.addWidget(self.plot_widget,2)
-        #self.visualization_layout.addWidget(self.toolbar_widget,0,0)
-        #self.visualization_layout.addWidget(self.chart_option_widget,1,0)
-        #self.visualization_layout.addWidget(self.axis_option_widget,2,0)
-        #self.visualization_layout.addWidget(self.plot_widget,3,0)
-        #self.visualization_layout.addWidget(self.plot_widget3,4,0)
-        #self.visualization_layout.addWidget(self.shape_option_widget,0,1)
-        #self.visualization_layout.addWidget(self.visualization_splitter,3,0,1,2)
-        #self.visualization_layout.setColumnStretch(0,2)
-        #self.visualization_layout.setColumnStretch(1,1)
-
-        if False:
-            self.transparent_gl_widget = ObjectViewer3D(self.plot_widget)
-            self.transparent_gl_widget.setParent(self.plot_widget)
-            self.transparent_gl_widget.setGeometry(50,50,200,200)
-            self.transparent_gl_widget.raise_()
-            self.transparent_gl_widget.show()
-            self.transparent_gl_widget.update()
-
-        #self.label = QLabel("Hello")
-        #self.label.setParent(self.plot_widget)
-        #self.label.setGeometry(100,100,50,50)
-        #self.label.raise_()
-        #self.plot_layout.addWidget(self.transparent_gl_widget)
-        #self.plot_widget2.hide()
-        #self.transparent_gl_widget.show()
-        #l = self.QVBoxLayout()
-        #self.plot_widget2.setLayout(
-        #    addWidget(self.transparent_gl_widget)
-
         self.layout.addWidget(self.visualization_splitter)
         self.on_chart_dim_changed()
-        #self.cbxShapeGrid_state_changed()
         self.initialized = True
-        
-        #self.comboVisualizationMethod_changed()
-
-        #self.set_mode( MODE_EXPLORE )
-
-        #print("layout done")
-        #self.resizeEvent(None)
 
     def comboSelectGroup_changed(self):
         #print("comboSelectGroup_changed")
@@ -2337,7 +2299,7 @@ class DataExplorationDialog(QDialog):
 
 
     def animate_shape(self):
-        if self.mode not in [ MODE_COMPARISON, MODE_GROWTH_TRAJECTORY ]:# or self.comboRegressionBy.currentText() == "By group":
+        if self.mode not in [ MODE_COMPARISON, ]:# or self.comboRegressionBy.currentText() == "By group":
             return
 
         QApplication.setOverrideCursor(Qt.WaitCursor)
@@ -2359,7 +2321,7 @@ class DataExplorationDialog(QDialog):
             self.animation_shape = { 'coords': [x_from, y_from], 'point': None}
 
 
-        elif self.mode in [MODE_GROWTH_TRAJECTORY]:
+        elif self.mode in []:
             x_from = min(self.regression_data['x_val'])
             x_to = max(self.regression_data['x_val'])
 
@@ -2456,7 +2418,7 @@ class DataExplorationDialog(QDialog):
         #print("after set_mode")
         
     def set_growth_trajectory_mode(self):
-        self.mode = MODE_GROWTH_TRAJECTORY
+        #self.mode = MODE_GROWTH_TRAJECTORY
         #self.comboGroupBy.setEnabled(False)
         #self.comboGroupBy.hide()
         #self.lblGroupBy.hide()
@@ -2471,7 +2433,7 @@ class DataExplorationDialog(QDialog):
         self.mode = mode
 
         self.ignore_change = True
-        if mode == MODE_GROWTH_TRAJECTORY:
+        if False: #mode == MODE_GROWTH_TRAJECTORY:
             self.comboAxis1.setCurrentText(CENTROID_SIZE_TEXT)
             self.comboAxis2.setCurrentIndex(0)
             self.comboAxis3.setCurrentIndex(1)
@@ -2482,7 +2444,7 @@ class DataExplorationDialog(QDialog):
             self.comboAxis3.setCurrentIndex(2)
         #print("inside set_mode 1")
         self.cbxRegression.setChecked(False)
-        if mode in [ MODE_REGRESSION, MODE_GROWTH_TRAJECTORY ]:
+        if mode in [ MODE_REGRESSION ]:
             self.cbxRegression.setChecked(True)
 
         #print("inside set_mode 1.5")
@@ -2491,7 +2453,7 @@ class DataExplorationDialog(QDialog):
             self.cbxAverage.setChecked(True)
         self.ignore_change = False
 
-        if mode in [MODE_COMPARISON,MODE_COMPARISON2, MODE_GROWTH_TRAJECTORY, MODE_REGRESSION]:
+        if mode in [MODE_COMPARISON, MODE_REGRESSION]:
             self.animate_option_widget.show()
         else:
             self.animate_option_widget.hide()
@@ -2542,7 +2504,7 @@ class DataExplorationDialog(QDialog):
         self.custom_shape_hash = {}
         self.grid_view_list = []
       
-        if self.mode in [ MODE_GROWTH_TRAJECTORY, MODE_REGRESSION, MODE_AVERAGE]:
+        if self.mode in [ MODE_REGRESSION, MODE_AVERAGE]:
             keyname_list = self.scatter_data.keys()
         elif self.mode == MODE_COMPARISON:
             keyname_list = [ "A", "B"]
@@ -3255,7 +3217,7 @@ class DataExplorationDialog(QDialog):
 
         if show_convex_hull:
             for scatter_key_name in self.scatter_data.keys():
-                if len(self.scatter_data[scatter_key_name]['x_val']) > 0:
+                if len(self.scatter_data[scatter_key_name]['x_val']) > 1:
                     self.scatter_data[scatter_key_name]['points'] = np.array([self.scatter_data[scatter_key_name]['x_val'], self.scatter_data[scatter_key_name]['y_val']]).T
                     hull = ConvexHull(self.scatter_data[scatter_key_name]['points'])
                     self.scatter_data[scatter_key_name]['hull'] = hull
@@ -3567,7 +3529,7 @@ class DataExplorationDialog(QDialog):
             self.axvline = None
 
         #print(evt.button, evt.xdata, evt.ydata)
-        if self.mode in [MODE_GROWTH_TRAJECTORY, MODE_REGRESSION]:
+        if self.mode in [ MODE_REGRESSION]:
             if evt.button is None:
                 self.vertical_line_xval = x_val
                 self.vertical_line_style = 'dashed'
@@ -3697,7 +3659,7 @@ class DataExplorationDialog(QDialog):
             y_val = self.data_range['y_min']
 
 
-        if self.mode in [ MODE_GROWTH_TRAJECTORY, MODE_REGRESSION ]:
+        if self.mode in [ MODE_REGRESSION ]:
             if evt.button == 1 :
                 self.vertical_line_xval = x_val
                 self.vertical_line_style = 'solid'

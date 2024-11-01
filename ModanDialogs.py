@@ -1437,7 +1437,7 @@ class NewAnalysisDialog(QDialog):
         #self.status_bar = QStatusBar()
         self.dataset = dataset
         self.name_edited = False
-        self.lblAnalysisName = QLabel(self.tr("Analysis Name"), self)
+        self.lblAnalysisName = QLabel(self.tr("Analysis name"), self)
         self.edtAnalysisName = QLineEdit(self)
         self.edtAnalysisName.textChanged.connect(self.edtAnalysisName_changed)
         self.lblSuperimposition = QLabel(self.tr("Superimposition method"), self)
@@ -1647,9 +1647,10 @@ class DataExplorationDialog(QDialog):
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
 
-        self.lblAnalysisName = QLabel(self.tr("Analysis ame"))
+        self.lblAnalysisName = QLabel(self.tr("Analysis name"))
         self.lblAnalysisName.setAlignment(Qt.AlignVCenter|Qt.AlignRight)
         self.edtAnalysisName = QLineEdit()
+        self.edtAnalysisName.setEnabled(False)
         self.lblSuperimposition = QLabel(self.tr("Superimposition method"))
         self.lblSuperimposition.setAlignment(Qt.AlignVCenter|Qt.AlignRight)
         self.edtSuperimposition = QLineEdit()
@@ -5959,6 +5960,10 @@ class PreferencesDialog(QDialog):
         self.comboLang.addItem(self.tr("English"))
         self.comboLang.addItem(self.tr("Korean"))
         self.comboLang.currentIndexChanged.connect(self.comboLangIndexChanged)
+        if self.m_app.language == "en":
+            self.comboLang.setCurrentIndex(0)
+        elif self.m_app.language == "ko":
+            self.comboLang.setCurrentIndex(1)
         self.lang_layout.addWidget(self.comboLang)
         self.lang_widget = QWidget()
         self.lang_widget.setLayout(self.lang_layout)
@@ -6133,6 +6138,7 @@ class PreferencesDialog(QDialog):
         self.m_app.index_pref['3D']['color'] = self.m_app.settings.value("IndexColor/3D", self.m_app.index_pref['3D']['color'])
         self.m_app.bgcolor = self.m_app.settings.value("BackgroundColor", self.m_app.bgcolor)
         self.m_app.language = self.m_app.settings.value("Language", "en")
+        print("read language:", self.m_app.language)
 
         if self.m_app.remember_geometry is True:
             self.setGeometry(self.m_app.settings.value("WindowGeometry/PreferencesDialog", QRect(100, 100, 600, 400)))
@@ -6168,6 +6174,7 @@ class PreferencesDialog(QDialog):
         self.m_app.settings.setValue("IndexSize/3D", self.m_app.index_pref['3D']['size'])
         self.m_app.settings.setValue("IndexColor/3D", self.m_app.index_pref['3D']['color'])
         self.m_app.settings.setValue("Language", self.m_app.language)
+        print("write language:", self.m_app.language)
 
     def closeEvent(self, event):
         self.write_settings()

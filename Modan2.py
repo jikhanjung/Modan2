@@ -175,6 +175,9 @@ class ModanMainWindow(QMainWindow):
         else:
             self.setGeometry(QRect(100, 100, 1400, 800))
 
+        self.m_app.language = self.m_app.settings.value("Language", "en")
+        self.update_language(self.m_app.language)
+
         plt.rcParams["font.family"] = "serif" 
         plt.rcParams["font.serif"] = ["Times New Roman"] 
         plt.rcParams['mathtext.fontset'] = 'stix' 
@@ -191,6 +194,57 @@ class ModanMainWindow(QMainWindow):
                 self.m_app.settings.setValue("IsMaximized/MainWindow", False)
                 self.m_app.settings.setValue("WindowGeometry/MainWindow", self.geometry())
                 #print("save maximized false")
+        self.m_app.settings.setValue("language", self.m_app.language)
+
+    def update_language(self, language):
+        #print("main update language:", language)
+        #translators = self.m_app.findChildren(QTranslator)
+        #for translator in translators:
+        #    print("Translator:", translator)
+        
+        if self.m_app.translator is not None:
+            self.m_app.removeTranslator(self.m_app.translator)
+            #print("removed translator")
+            self.m_app.translator = None
+        else:
+            pass
+            #print("no translator")
+
+        translator = QTranslator()
+        translator_path = mu.resource_path("translations/Modan2_{}.qm".format(language))
+        #print("translator_path:", translator_path)
+        if os.path.exists(translator_path):
+            #print("Loading new translator:", translator_path)
+            #pass
+            translator.load(translator_path)
+            #translator.load('PTMGenerator2_{}.qm'.format(language))
+            self.m_app.installTranslator(translator)
+            self.m_app.translator = translator
+        else:
+            pass
+            #print("Translator not found:", translator_path)
+
+        self.setWindowTitle("{} v{}".format(self.tr(mu.PROGRAM_NAME), mu.PROGRAM_VERSION))
+
+        return
+        file_text = self.tr("File")
+        #print("file_text:", file_text)
+        self.file_menu.setTitle(file_text)
+        self.edit_menu.setTitle(self.tr("Edit"))
+        self.help_menu.setTitle(self.tr("Help"))
+        self.actionOpenDirectory.setText(self.tr("Open Directory"))
+        self.actionPreferences.setText(self.tr("Preferences"))
+        self.actionAbout.setText(self.tr("About"))
+        #self.lblDirectory.setText(self.tr("Directory"))
+        self.image_model.setHorizontalHeaderLabels([self.tr('Filename')])
+        self.lblDirectory.setText(self.tr("Directory"))
+        self.btnOpenDirectory.setText(self.tr("Open Directory"))
+        self.btnTestShot.setText(self.tr("Test Shot"))        
+        self.btnTakeAllPictures.setText(self.tr("Take All Pictures"))
+        self.btnRetakePicture.setText(self.tr("Retake Picture"))
+        self.btnPauseContinue.setText(self.tr("Pause/Continue"))
+        self.btnStop.setText(self.tr("Stop"))
+        self.btnGeneratePTM.setText(self.tr("Generate PTM"))
 
     def prepare_database(self):
         migrations_path = mu.resource_path("migrations")
@@ -242,7 +296,8 @@ class ModanMainWindow(QMainWindow):
         self.preferences_dialog = PreferencesDialog(self)
         #self.preferences_dialog.setWindowModality(Qt.ApplicationModal)
         self.preferences_dialog.show()
-    
+        self.read_settings()
+
     @pyqtSlot()
     def on_action_exit_triggered(self):
         self.close()
@@ -1483,6 +1538,7 @@ if __name__ == "__main__":
     app.language = app.settings.value("language", "en")
     translator.load(mu.resource_path("translations/Modan2_{}.qm".format(app.language)))
     app.installTranslator(translator)
+    app.translator = translator
 
     #app.settings = 
     #app.preferences = QSettings("Modan", "Modan2")

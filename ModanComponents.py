@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QTableWidgetItem, QHeaderView, QFileDialog, QCheckBo
 from PyQt5.QtGui import QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem, QImage,\
                         QFont, QPainter, QBrush, QMouseEvent, QWheelEvent, QIntValidator, QIcon, QCursor,\
                         QFontMetrics, QKeySequence, QDrag
-from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSize, QPoint, QAbstractTableModel, \
+from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSize, QPoint, QAbstractTableModel, QTranslator, \
                          pyqtSlot, pyqtSignal, QItemSelectionModel, QTimer, QEvent, QModelIndex, QObject
 
 from matplotlib.backends.backend_qt5agg import FigureCanvas as FigureCanvas
@@ -207,6 +207,8 @@ class ObjectViewer2D(QLabel):
         #print("2d align object")
         if self.orig_pixmap is not None:
             #print("has image")
+            return
+        if len(self.landmark_list) == 0:
             return
         if self.data_mode == OBJECT_MODE:
             #print("baseline",self.dataset.baseline_point_list)
@@ -3655,7 +3657,6 @@ class AnalysisInfoWidget(QWidget):
         #print("color_list", self.color_list)        
         self.marker_list = mu.MARKER_LIST[:]
         self.plot_size = "medium"
-        self.read_settings()
         #print("color_list", self.color_list)        
         self.layout = QGridLayout()
         self.setLayout(self.layout)
@@ -3752,6 +3753,7 @@ class AnalysisInfoWidget(QWidget):
 
         i += 1
         self.layout.addWidget(self.analysis_tab, i, 0, 1, 2)
+        self.read_settings()
 
     def read_settings(self):
         #self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
@@ -3760,12 +3762,24 @@ class AnalysisInfoWidget(QWidget):
             self.color_list[i] = self.m_app.settings.value("DataPointColor/"+str(i), self.default_color_list[i])
         for i in range(len(self.marker_list)):
             self.marker_list[i] = self.m_app.settings.value("DataPointMarker/"+str(i), self.marker_list[i])
-
+        self.update_language(self.m_app.settings.value("Language", "en"))
         #if self.remember_geometry is True:
         #    self.setGeometry(self.m_app.settings.value("WindowGeometry/DatasetAnalysisWindow", QRect(100, 100, 1400, 800)))
         #else:
         #    self.setGeometry(QRect(100, 100, 1400, 800))
         #    self.move(self.parent.pos()+QPoint(50,50))
+
+    def update_language(self, language):
+        if self.m_app.translator is not None:
+            self.m_app.removeTranslator(self.m_app.translator)
+            self.m_app.translator = None
+
+        translator = QTranslator()
+        translator_path = mu.resource_path("translations/Modan2_{}.qm".format(language))
+        if os.path.exists(translator_path):
+            translator.load(translator_path)
+            self.m_app.installTranslator(translator)
+            self.m_app.translator = translator
 
 
     def comboPcaGroupBy_changed(self):

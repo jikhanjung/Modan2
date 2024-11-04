@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import QTableWidgetItem, QHeaderView, QFileDialog, QCheckBo
 from PyQt5.QtGui import QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem, QImage,\
                         QFont, QPainter, QBrush, QMouseEvent, QWheelEvent, QDoubleValidator, QIcon, QCursor,\
                         QFontMetrics, QIntValidator, QKeySequence
-from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSize, QPoint,\
+from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSize, QPoint, QTranslator, \
                          pyqtSlot, pyqtSignal, QItemSelectionModel, QTimer, QEvent
 
 from OBJFileLoader import OBJ
@@ -5724,7 +5724,7 @@ class PreferencesDialog(QDialog):
         #print("landmark_pref:", self.landmark_pref)
         #print("wireframe_pref:", self.wireframe_pref)
 
-        self.read_settings()
+        
         self.setWindowTitle("Preferences")
         #self.lbl_main_view.setMinimumSize(400, 300)
         #print("landmark_pref:", self.landmark_pref)
@@ -5959,11 +5959,11 @@ class PreferencesDialog(QDialog):
         self.comboLang = QComboBox()
         self.comboLang.addItem(self.tr("English"))
         self.comboLang.addItem(self.tr("Korean"))
-        self.comboLang.currentIndexChanged.connect(self.comboLangIndexChanged)
         if self.m_app.language == "en":
             self.comboLang.setCurrentIndex(0)
         elif self.m_app.language == "ko":
             self.comboLang.setCurrentIndex(1)
+        self.comboLang.currentIndexChanged.connect(self.comboLangIndexChanged)
         self.lang_layout.addWidget(self.comboLang)
         self.lang_widget = QWidget()
         self.lang_widget.setLayout(self.lang_layout)
@@ -6009,6 +6009,7 @@ class PreferencesDialog(QDialog):
             self.m_app.language = "en"
         elif index == 1:
             self.m_app.language = "ko"
+        self.update_language(self.m_app.language)
 
 
     def on_comboMarker_currentIndexChanged(self, event, index):
@@ -6138,7 +6139,8 @@ class PreferencesDialog(QDialog):
         self.m_app.index_pref['3D']['color'] = self.m_app.settings.value("IndexColor/3D", self.m_app.index_pref['3D']['color'])
         self.m_app.bgcolor = self.m_app.settings.value("BackgroundColor", self.m_app.bgcolor)
         self.m_app.language = self.m_app.settings.value("Language", "en")
-        print("read language:", self.m_app.language)
+        #print("read language:", self.m_app.language)
+        self.update_language(self.m_app.language)
 
         if self.m_app.remember_geometry is True:
             self.setGeometry(self.m_app.settings.value("WindowGeometry/PreferencesDialog", QRect(100, 100, 600, 400)))
@@ -6174,7 +6176,44 @@ class PreferencesDialog(QDialog):
         self.m_app.settings.setValue("IndexSize/3D", self.m_app.index_pref['3D']['size'])
         self.m_app.settings.setValue("IndexColor/3D", self.m_app.index_pref['3D']['color'])
         self.m_app.settings.setValue("Language", self.m_app.language)
-        print("write language:", self.m_app.language)
+        #print("write language:", self.m_app.language)
+
+    def update_language(self, language):
+        """
+        Update the language of the application.
+
+        Args:
+            language (str): The language to be set.
+
+        Returns:
+            None
+        """
+        if self.m_app.translator is not None:
+            self.m_app.removeTranslator(self.m_app.translator)
+            #print("removed translator")
+            self.m_app.translator = None
+        else:
+            pass
+        translator = QTranslator()
+        translator_path = mu.resource_path("translations/Modan2_{}.qm".format(language))
+        if os.path.exists(translator_path):
+            translator.load(translator_path)
+            self.m_app.installTranslator(translator)
+            self.m_app.translator = translator
+        else:
+            pass
+
+        self.lblGeometry.setText(self.tr("Remember Geometry"))
+        self.lblToolbarIconSize.setText(self.tr("Toolbar Icon Size"))
+        self.lblPlotSize.setText(self.tr("Data point size"))
+        self.lblPlotColors.setText(self.tr("Data point colors"))
+        self.lblPlotMarkers.setText(self.tr("Data point markers"))
+        self.lblLandmark.setText(self.tr("Landmark"))
+        self.lblWireframe.setText(self.tr("Wireframe"))
+        self.lblIndex.setText(self.tr("Index"))
+        self.lblBgcolor.setText(self.tr("Background Color"))
+        self.lblLang.setText(self.tr("Language"))
+
 
     def closeEvent(self, event):
         self.write_settings()

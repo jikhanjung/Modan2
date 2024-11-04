@@ -46,6 +46,7 @@ ICON['dataset_3d'] = mu.resource_path('icons/M2Dataset3D_4.png')
 class ModanMainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.init_done = False
         self.setWindowIcon(QIcon(mu.resource_path('icons/Modan2_2.png')))
         self.setWindowTitle("{} v{}".format(self.tr("Modan2"), mu.PROGRAM_VERSION))
 
@@ -111,8 +112,8 @@ class ModanMainWindow(QMainWindow):
 
         self.m_app = QApplication.instance()
         self.m_app.toolbar_icon_size = "Small"
-        self.read_settings()
 
+        self.read_settings()
         self.initUI()
         
         self.selected_dataset = None
@@ -130,6 +131,8 @@ class ModanMainWindow(QMainWindow):
         self.remember_geometry = True
 
         self.set_toolbar_icon_size(self.m_app.toolbar_icon_size)
+        self.init_done = True
+
 
     def update_settings(self):
         #print("update settings bgcolor",self.preferences_dialog.bgcolor)
@@ -176,7 +179,8 @@ class ModanMainWindow(QMainWindow):
             self.setGeometry(QRect(100, 100, 1400, 800))
 
         self.m_app.language = self.m_app.settings.value("Language", "en")
-        self.update_language(self.m_app.language)
+        if self.init_done:
+            self.update_language(self.m_app.language)
 
         plt.rcParams["font.family"] = "serif" 
         plt.rcParams["font.serif"] = ["Times New Roman"] 
@@ -197,54 +201,36 @@ class ModanMainWindow(QMainWindow):
         self.m_app.settings.setValue("language", self.m_app.language)
 
     def update_language(self, language):
-        #print("main update language:", language)
-        #translators = self.m_app.findChildren(QTranslator)
-        #for translator in translators:
-        #    print("Translator:", translator)
-        
         if self.m_app.translator is not None:
             self.m_app.removeTranslator(self.m_app.translator)
-            #print("removed translator")
             self.m_app.translator = None
-        else:
-            pass
-            #print("no translator")
 
         translator = QTranslator()
         translator_path = mu.resource_path("translations/Modan2_{}.qm".format(language))
-        #print("translator_path:", translator_path)
         if os.path.exists(translator_path):
-            #print("Loading new translator:", translator_path)
-            #pass
             translator.load(translator_path)
-            #translator.load('PTMGenerator2_{}.qm'.format(language))
             self.m_app.installTranslator(translator)
             self.m_app.translator = translator
-        else:
-            pass
-            #print("Translator not found:", translator_path)
 
         self.setWindowTitle("{} v{}".format(self.tr(mu.PROGRAM_NAME), mu.PROGRAM_VERSION))
 
-        return
-        file_text = self.tr("File")
-        #print("file_text:", file_text)
-        self.file_menu.setTitle(file_text)
+        self.file_menu.setTitle(self.tr("File"))
         self.edit_menu.setTitle(self.tr("Edit"))
+        self.data_menu.setTitle(self.tr("Data"))
         self.help_menu.setTitle(self.tr("Help"))
-        self.actionOpenDirectory.setText(self.tr("Open Directory"))
-        self.actionPreferences.setText(self.tr("Preferences"))
-        self.actionAbout.setText(self.tr("About"))
-        #self.lblDirectory.setText(self.tr("Directory"))
-        self.image_model.setHorizontalHeaderLabels([self.tr('Filename')])
-        self.lblDirectory.setText(self.tr("Directory"))
-        self.btnOpenDirectory.setText(self.tr("Open Directory"))
-        self.btnTestShot.setText(self.tr("Test Shot"))        
-        self.btnTakeAllPictures.setText(self.tr("Take All Pictures"))
-        self.btnRetakePicture.setText(self.tr("Retake Picture"))
-        self.btnPauseContinue.setText(self.tr("Pause/Continue"))
-        self.btnStop.setText(self.tr("Stop"))
-        self.btnGeneratePTM.setText(self.tr("Generate PTM"))
+        self.btnSaveObjectInfo.setText(self.tr("Save Changes"))
+        self.btnEditObject.setText(self.tr("Edit Object"))
+        self.btnAddObject.setText(self.tr("Add Object"))
+        self.btnAddProperty.setText(self.tr("Add Variable"))
+        self.btnSaveAnalysis.setText(self.tr("Save"))
+        self.btnAnalysisDetail.setText(self.tr("Analysis Details"))
+        self.btnDataExploration.setText(self.tr("Data Exploration"))
+        self.lblSelect.setText(self.tr("Select"))
+        self.rbSelectCells.setText(self.tr("Cells"))
+        self.rbSelectRows.setText(self.tr("Rows"))
+        self.analysis_info_widget.update_language(language)
+
+        return
 
     def prepare_database(self):
         migrations_path = mu.resource_path("migrations")
@@ -295,7 +281,7 @@ class ModanMainWindow(QMainWindow):
         #print("edit preferences")
         self.preferences_dialog = PreferencesDialog(self)
         #self.preferences_dialog.setWindowModality(Qt.ApplicationModal)
-        self.preferences_dialog.show()
+        self.preferences_dialog.exec()
         self.read_settings()
 
     @pyqtSlot()

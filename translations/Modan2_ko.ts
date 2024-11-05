@@ -2,6 +2,24 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="ko">
 <context>
+    <name>AnalysisInfoWidget</name>
+    <message>
+        <location filename="../ModanComponents.py" line="3227"/>
+        <source>Analysis Name</source>
+        <translation>분석 제목</translation>
+    </message>
+    <message>
+        <location filename="../ModanComponents.py" line="3228"/>
+        <source>Superimposition</source>
+        <translation>중첩정렬</translation>
+    </message>
+    <message>
+        <location filename="../ModanComponents.py" line="3229"/>
+        <source>Grouping variable</source>
+        <translation>그룹 변수</translation>
+    </message>
+</context>
+<context>
     <name>AnalysisResultDialog</name>
     <message>
         <location filename="../ModanDialogs.py" line="1558"/>
@@ -391,187 +409,187 @@
         <translation>도움말	F1</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="217"/>
+        <location filename="../Modan2.py" line="210"/>
         <source>File</source>
         <translation>파일</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="218"/>
+        <location filename="../Modan2.py" line="211"/>
         <source>Edit</source>
         <translation>편집</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="219"/>
+        <location filename="../Modan2.py" line="212"/>
         <source>Data</source>
         <translation>데이터</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="220"/>
+        <location filename="../Modan2.py" line="213"/>
         <source>Help</source>
         <translation>도움말</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1381"/>
+        <location filename="../Modan2.py" line="1374"/>
         <source>Warning</source>
         <translation>경고</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="314"/>
+        <location filename="../Modan2.py" line="307"/>
         <source>No dataset selected</source>
         <translation>데이터셋이 선택되지 않았습니다</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="318"/>
+        <location filename="../Modan2.py" line="311"/>
         <source>Error: number of objects is too small for analysis.</source>
         <translation>오류: 분석 대상 개체의 수가 너무 적습니다.</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="329"/>
+        <location filename="../Modan2.py" line="322"/>
         <source>Error: landmark count is not consistent.</source>
         <translation>오류: 랜드마크 수가 일정하지 않습니다.</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="389"/>
+        <location filename="../Modan2.py" line="382"/>
         <source>Procrustes superimposition failed</source>
         <translation>프로크루스테스 중첩에 실패했습니다</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="397"/>
+        <location filename="../Modan2.py" line="390"/>
         <source>CVA analysis failed</source>
         <translation>CVA 분석에 실패했습니다</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="403"/>
+        <location filename="../Modan2.py" line="396"/>
         <source>PCA analysis failed</source>
         <translation>주성분분석에 실패했습니다</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="558"/>
+        <location filename="../Modan2.py" line="551"/>
         <source>Save Changes</source>
         <translation>변경사항 저장</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="559"/>
+        <location filename="../Modan2.py" line="552"/>
         <source>Edit Object</source>
         <translation>개체 편집</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="560"/>
+        <location filename="../Modan2.py" line="553"/>
         <source>Add Object</source>
         <translation>개체 추가</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="561"/>
+        <location filename="../Modan2.py" line="554"/>
         <source>Add Variable</source>
         <translation>변수 추가</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="595"/>
+        <location filename="../Modan2.py" line="588"/>
         <source>Save</source>
         <translation>저장</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="597"/>
+        <location filename="../Modan2.py" line="590"/>
         <source>Analysis Details</source>
         <translation>분석 세부사항</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="599"/>
+        <location filename="../Modan2.py" line="592"/>
         <source>Data Exploration</source>
         <translation>데이터 탐색</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="660"/>
+        <location filename="../Modan2.py" line="653"/>
         <source>Enter new variable name</source>
         <translation>새 변수 이름을 입력하세요</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="680"/>
+        <location filename="../Modan2.py" line="673"/>
         <source>Are you sure to delete the selected object?</source>
         <translation>선택한 개체들을 삭제하시겠습니까?</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="700"/>
+        <location filename="../Modan2.py" line="693"/>
         <source>Add child dataset</source>
         <translation>하위 데이터셋 추가</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="702"/>
+        <location filename="../Modan2.py" line="695"/>
         <source>Add object</source>
         <translation>개체 추가</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="704"/>
+        <location filename="../Modan2.py" line="697"/>
         <source>Add analysis</source>
         <translation>새 분석</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="706"/>
+        <location filename="../Modan2.py" line="699"/>
         <source>Explore data</source>
         <translation>데이터 탐색</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="708"/>
+        <location filename="../Modan2.py" line="701"/>
         <source>Delete analysis</source>
         <translation>분석결과 삭제</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="710"/>
+        <location filename="../Modan2.py" line="703"/>
         <source>Reload</source>
         <translation>새로고침</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="735"/>
+        <location filename="../Modan2.py" line="728"/>
         <source>Are you sure to delete the selected analysis?</source>
         <translation>선택한 분석결과를 삭제하시겠습니까?</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1060"/>
+        <location filename="../Modan2.py" line="1053"/>
         <source>Dimension mismatch</source>
         <translation>차원 불일치</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1209"/>
+        <location filename="../Modan2.py" line="1202"/>
         <source>Importing 3d model files...</source>
         <translation>3D 모델 파일 불러오는 중...</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1211"/>
+        <location filename="../Modan2.py" line="1204"/>
         <source>Importing image files...</source>
         <translation>이미지 파일 불러오는 중...</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1236"/>
+        <location filename="../Modan2.py" line="1229"/>
         <source>Dimension mismatch.</source>
         <translation>차원 불일치</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1244"/>
+        <location filename="../Modan2.py" line="1237"/>
         <source>Cannot process directory...</source>
         <translation>디렉토리에서 데이터를 불러올 수 없습니다.</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1247"/>
+        <location filename="../Modan2.py" line="1240"/>
         <source>Nothing to import.</source>
         <translation>불러올 데이터가 없습니다.</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1381"/>
+        <location filename="../Modan2.py" line="1374"/>
         <source>Data has been changed. Do you want to save?</source>
         <translation>데이터가 수정되었습니다. 저장하시겠습니까?</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="544"/>
+        <location filename="../Modan2.py" line="537"/>
         <source>Select</source>
         <translation>선택</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="545"/>
+        <location filename="../Modan2.py" line="538"/>
         <source>Cells</source>
         <translation>셀 단위</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="548"/>
+        <location filename="../Modan2.py" line="541"/>
         <source>Rows</source>
         <translation>행 단위</translation>
     </message>
@@ -765,22 +783,22 @@
 <context>
     <name>ObjectViewer2D</name>
     <message>
-        <location filename="../ModanComponents.py" line="258"/>
+        <location filename="../ModanComponents.py" line="253"/>
         <source>Click on image to add landmark</source>
         <translation>클릭하여 랜드마크를 추가하세요</translation>
     </message>
     <message>
-        <location filename="../ModanComponents.py" line="262"/>
+        <location filename="../ModanComponents.py" line="256"/>
         <source>Click on landmark to move</source>
         <translation>랜드마크를 클릭하여 이동할 수 있습니다.</translation>
     </message>
     <message>
-        <location filename="../ModanComponents.py" line="266"/>
+        <location filename="../ModanComponents.py" line="259"/>
         <source>Move landmark</source>
         <translation>랜드마크 이동</translation>
     </message>
     <message>
-        <location filename="../ModanComponents.py" line="270"/>
+        <location filename="../ModanComponents.py" line="262"/>
         <source>Click on image to calibrate</source>
         <translation>이미지를 클릭하여 캘리브레이션을 진행합니다.</translation>
     </message>

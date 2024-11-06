@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QMainWindow, QHeaderView, QApplication, QAbstractItemView, \
-                            QMessageBox, QTreeView, QTableView, QSplitter, QAction, QMenu, \
+                            QMessageBox, QTreeView, QTableView, QSplitter, QAction, QActionGroup, QMenu, \
                             QStatusBar, QInputDialog, QToolBar, QWidget, QPlainTextEdit, QVBoxLayout, QHBoxLayout, \
                             QPushButton, QRadioButton, QLabel, QDockWidget
 from PyQt5.QtGui import QIcon, QStandardItemModel, QStandardItem, QKeySequence, QCursor
@@ -67,13 +67,21 @@ class ModanMainWindow(QMainWindow):
 
         self.actionCellSelection = QAction(QIcon(mu.resource_path(ICON['cell_selection'])), self.tr("Cell selection"), self)
         self.actionCellSelection.triggered.connect(self.on_action_cell_selection_triggered)
+        self.actionCellSelection.setCheckable(True)
+        self.actionCellSelection.setChecked(True)
         self.actionRowSelection = QAction(QIcon(mu.resource_path(ICON['row_selection'])), self.tr("Row selection"), self)
         self.actionRowSelection.triggered.connect(self.on_action_row_selection_triggered)
+        self.actionRowSelection.setCheckable(True)
         self.actionAddVariable = QAction(QIcon(mu.resource_path(ICON['add_variable'])), self.tr("Add variable"), self)
         self.actionAddVariable.triggered.connect(self.on_action_add_variable_triggered)
         self.actionSaveChanges = QAction(QIcon(mu.resource_path(ICON['save_changes'])), self.tr("Save changes\tCtrl+S"), self)
         self.actionSaveChanges.triggered.connect(self.on_btnSaveChanges_clicked)
         self.actionSaveChanges.setShortcut(QKeySequence("Ctrl+S"))
+
+        self.selection_mode_group = QActionGroup(self)
+        self.selection_mode_group.setExclusive(True)
+        self.selection_mode_group.addAction(self.actionCellSelection)
+        self.selection_mode_group.addAction(self.actionRowSelection)
 
         self.actionNewObject = QAction(QIcon(mu.resource_path(ICON['new_object'])), self.tr("New Object\tCtrl+Shift+N"), self)
         self.actionNewObject.triggered.connect(self.on_action_new_object_triggered)
@@ -112,6 +120,22 @@ class ModanMainWindow(QMainWindow):
         self.toolbar.addAction(self.actionPreferences)
         self.toolbar.addAction(self.actionAbout)
         self.addToolBar(self.toolbar)
+        # Or use stylesheets for the toolbar
+        self.toolbar.setStyleSheet("""
+            QToolButton {
+                border: 1px solid transparent;
+                padding: 4px;
+            }
+            QToolButton:checked {
+                background-color: #e0e0e0;
+                border: 1px solid #c0c0c0;
+                border-radius: 2px;
+            }
+            QToolButton:hover {
+                border: 1px solid #c0c0c0;
+                border-radius: 2px;
+            }
+        """)
 
         self.main_menu = self.menuBar()
         self.file_menu = self.main_menu.addMenu(self.tr("File"))
@@ -649,10 +673,12 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.treeView.customContextMenuRequested.connect(self.open_treeview_menu)
 
     def on_action_cell_selection_triggered(self):
-        self.tableView.set_cells_selection_mode()
+        if self.actionCellSelection.isChecked():
+            self.tableView.set_cells_selection_mode()
 
     def on_action_row_selection_triggered(self):
-        self.tableView.set_rows_selection_mode()
+        if self.actionRowSelection.isChecked():
+            self.tableView.set_rows_selection_mode()
 
     #def on_rbSelectCells_clicked(self):
     #    self.tableView.set_cells_selection_mode()

@@ -59,7 +59,7 @@ class ModanMainWindow(QMainWindow):
         self.tableView.setItemDelegateForColumn(1, MdSequenceDelegate())
         self.treeView = QTreeView()
 
-        self.toolbar = QToolBar("Main Toolbar")
+        self.toolbar = QToolBar(self.tr("Main Toolbar"))
         self.toolbar.setIconSize(QSize(32,32))
         self.actionNewDataset = QAction(QIcon(mu.resource_path(ICON['new_dataset'])), self.tr("New Dataset\tCtrl+N"), self)
         self.actionNewDataset.triggered.connect(self.on_action_new_dataset_triggered)

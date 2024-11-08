@@ -1662,13 +1662,13 @@ class DataExplorationDialog(QDialog):
         self.lblVisualization = QLabel(self.tr("Shape view"))
         self.lblVisualization.setAlignment(Qt.AlignVCenter|Qt.AlignRight)
         self.comboVisualization = QComboBox()
-        self.comboVisualization.addItem("Exploration")
-        self.comboVisualization.addItem("Regression")
-        self.comboVisualization.addItem("Average")
-        self.comboVisualization.addItem("Comparison")
-        self.comboVisualization.addItem("Comparison (overlap)")
-        self.comboVisualization.setCurrentIndex(0)
+        self.comboVisualization.addItem(self.tr("Exploration"),MODE_EXPLORATION)
+        self.comboVisualization.addItem(self.tr("Regression"),MODE_REGRESSION)
+        self.comboVisualization.addItem(self.tr("Average"),MODE_AVERAGE)
+        self.comboVisualization.addItem(self.tr("Comparison"),MODE_COMPARISON)
+        self.comboVisualization.addItem(self.tr("Comparison (overlap)"),MODE_COMPARISON2)
         self.comboVisualization.currentIndexChanged.connect(self.comboVisualizationMethod_changed)
+        self.comboVisualization.setCurrentIndex(0)
 
         self.title_row_widget = QWidget()
         self.title_row_layout = QHBoxLayout()
@@ -1760,13 +1760,13 @@ class DataExplorationDialog(QDialog):
         self.comboAxis2 = QComboBox()
         self.comboAxis3 = QComboBox()
         self.cbxFlipAxis1 = QCheckBox()
-        self.cbxFlipAxis1.setText("Flip")
+        self.cbxFlipAxis1.setText(self.tr("Flip"))
         self.cbxFlipAxis1.setChecked(False)
         self.cbxFlipAxis2 = QCheckBox()
-        self.cbxFlipAxis2.setText("Flip")
+        self.cbxFlipAxis2.setText(self.tr("Flip"))
         self.cbxFlipAxis2.setChecked(False)
         self.cbxFlipAxis3 = QCheckBox()
-        self.cbxFlipAxis3.setText("Flip")
+        self.cbxFlipAxis3.setText(self.tr("Flip"))
         self.cbxFlipAxis3.setChecked(False)
 
         self.cbxFlipAxis1.stateChanged.connect(self.flip_axis_changed)
@@ -1861,7 +1861,7 @@ class DataExplorationDialog(QDialog):
 
         ''' regression related controls '''
         self.cbxRegression = QCheckBox()
-        self.cbxRegression.setText("Show regression")
+        self.cbxRegression.setText(self.tr("Show regression"))
         self.cbxRegression.setChecked(False)
         self.cbxRegression.stateChanged.connect(self.update_chart)
         self.lblRegressionBasedon = QLabel(self.tr("Group by"))
@@ -1879,7 +1879,7 @@ class DataExplorationDialog(QDialog):
         self.comboSelectGroup.hide()
         model = self.comboSelectGroup.model()
         model.itemChanged.connect(self.comboSelectGroup_itemChanged)
-        self.cbxExtrapolate = QCheckBox("Extrapolate")
+        self.cbxExtrapolate = QCheckBox(self.tr("Extrapolate"))
         self.cbxExtrapolate.setChecked(True)
         self.cbxExtrapolate.stateChanged.connect(self.update_chart)
         self.lblDegree = QLabel(self.tr("Degree"))
@@ -1920,7 +1920,7 @@ class DataExplorationDialog(QDialog):
         self.plot_preference_button.setIconSize(QSize(32, 32))
         self.plot_preference_button.clicked.connect(self.show_plot_preference)
         self.plot_preference_button.setAutoDefault(False)
-        self.btn_save_plot = QPushButton("Export Chart")
+        self.btn_save_plot = QPushButton(self.tr("Export Chart"))
         self.btn_save_plot.clicked.connect(self.export_chart)
 
 
@@ -1943,12 +1943,12 @@ class DataExplorationDialog(QDialog):
         self.view_widget.setLayout(self.view_layout)
         self.shape_view_layout = QVBoxLayout()
 
-        self.btnResetPose = QPushButton("Reset Pose")
+        self.btnResetPose = QPushButton(self.tr("Reset Pose"))
         self.btnResetPose.clicked.connect(self.reset_shape_pose)
-        self.btnAnimate = QPushButton("Animate")
+        self.btnAnimate = QPushButton(self.tr("Animate"))
         self.btnAnimate.clicked.connect(self.animate_shape)
         self.cbxRecordAnimation = QCheckBox()
-        self.cbxRecordAnimation.setText("Record")
+        self.cbxRecordAnimation.setText(self.tr("Record"))
         self.cbxRecordAnimation.setChecked(False)
         self.cbxRecordAnimation.stateChanged.connect(self.record_animation_changed)
         self.edtNumFrames = QLineEdit()
@@ -2540,11 +2540,11 @@ class DataExplorationDialog(QDialog):
                 #print("shape_preference", idx)
                 shape_preference = ShapePreference(self)
                 if idx == 0:
-                    shape_preference.set_title("Source shape")
+                    shape_preference.set_title(self.tr("Source shape"))
                     shape_preference.set_color("red")
                     shape_preference.set_opacity(1.0)
                 else:
-                    shape_preference.set_title("Target shape")
+                    shape_preference.set_title(self.tr("Target shape"))
                     shape_preference.set_color("blue")
                     shape_preference.set_opacity(0.5)
                 shape_preference.set_name(keyname)
@@ -3391,12 +3391,28 @@ class DataExplorationDialog(QDialog):
                 keys = []
                 for key in self.scatter_result.keys():
                     #print("key", key)
-                    if key[0] == '_':
+                    if key[0] == '_' or key == '':
                         continue
                     else:
                         keys.append(key)
                         values.append(self.scatter_result[key])
-                self.ax2.legend(values, keys, loc='upper right', bbox_to_anchor=(1.05, 1))
+                scatter_legend = self.ax2.legend(values, keys, loc='upper right', bbox_to_anchor=(1.05, 1))
+                self.ax2.add_artist(scatter_legend)
+                bbox = scatter_legend.get_window_extent()
+                # Convert to axis coordinates
+                bbox_axis = bbox.transformed(self.ax2.transAxes.inverted())
+                # Calculate the height of first legend in axis coordinates
+                scatter_legend_height = bbox_axis.height
+
+                if show_regression and self.regression_variable_index != self.scatter_variable_index:
+                    values = []
+                    keys = []
+                    for curve in self.curve_list:
+                        keys.append( curve['key'] )
+                        values.append( curve )
+                    regression_legend = self.ax2.legend(values,keys, loc='lower right', bbox_to_anchor=(1.05, 0))
+                    self.ax2.add_artist(regression_legend)
+
             #print("show axis label:", show_axis_label)
             if show_axis_label:
                 #print("show axis label true")
@@ -5147,35 +5163,35 @@ class DatasetAnalysisDialog(QDialog):
 class ExportDatasetDialog(QDialog):
     def __init__(self,parent):
         super().__init__()
-        self.setWindowTitle("Modan2 - Export")
+        self.setWindowTitle(self.tr("Modan2 - Export"))
         self.parent = parent
         #print(self.parent.pos())
         self.remember_geometry = True
         self.m_app = QApplication.instance()
         self.read_settings()
 
-        self.lblDatasetName = QLabel("Dataset Name")
+        self.lblDatasetName = QLabel(self.tr("Dataset Name"))
         self.lblDatasetName.setMaximumHeight(20)
         self.edtDatasetName = QLineEdit()
         self.edtDatasetName.setMaximumHeight(20)
-        self.lblObjectList = QLabel("Object List")
-        self.lblExportList = QLabel("Export List")
+        self.lblObjectList = QLabel(self.tr("Object List"))
+        self.lblExportList = QLabel(self.tr("Export List"))
         self.lblObjectList.setMaximumHeight(20)
         self.lblExportList.setMaximumHeight(20)
         self.lstObjectList = QListWidget()
         self.lstExportList = QListWidget()
         self.lstObjectList.setMinimumHeight(400)
         self.lstExportList.setMinimumHeight(400)
-        self.btnExport = QPushButton("Export")
+        self.btnExport = QPushButton(self.tr("Export"))
         self.btnExport.clicked.connect(self.export_dataset)
-        self.btnCancel = QPushButton("Cancel")
+        self.btnCancel = QPushButton(self.tr("Cancel"))
         self.btnCancel.clicked.connect(self.close)
         self.btnMoveRight = QPushButton(">")
         self.btnMoveRight.clicked.connect(self.move_right)
         self.btnMoveLeft = QPushButton("<")
         self.btnMoveLeft.clicked.connect(self.move_left)
 
-        self.lblExport = QLabel("Export Format")
+        self.lblExport = QLabel(self.tr("Export Format"))
         self.rbTPS = QRadioButton("TPS")
         self.rbTPS.setChecked(True)
         self.rbTPS.clicked.connect(self.on_rbTPS_clicked)
@@ -5193,20 +5209,20 @@ class ExportDatasetDialog(QDialog):
         #self.rbMorphologika.setEnabled(False)
         #self.rbMorphologika.setChecked(False)
 
-        self.lblSuperimposition = QLabel("Superimposition")
-        self.rbProcrustes = QRadioButton("Procrustes")
+        self.lblSuperimposition = QLabel(self.tr("Superimposition"))
+        self.rbProcrustes = QRadioButton(self.tr("Procrustes"))
         self.rbProcrustes.clicked.connect(self.on_rbProcrustes_clicked)
         self.rbProcrustes.setEnabled(True)
         self.rbProcrustes.setChecked(True)
-        self.rbBookstein = QRadioButton("Bookstein")
+        self.rbBookstein = QRadioButton(self.tr("Bookstein"))
         self.rbBookstein.clicked.connect(self.on_rbBookstein_clicked)
         self.rbBookstein.setEnabled(False)
         self.rbBookstein.setChecked(False)
-        self.rbRFTRA = QRadioButton("RFTRA")
+        self.rbRFTRA = QRadioButton(self.tr("Resistant fit"))
         self.rbRFTRA.clicked.connect(self.on_rbRFTRA_clicked)
         self.rbRFTRA.setEnabled(False)
         self.rbRFTRA.setChecked(False)
-        self.rbNone = QRadioButton("None")
+        self.rbNone = QRadioButton(self.tr("None"))
         self.rbNone.clicked.connect(self.on_rbNone_clicked)
         self.rbNone.setEnabled(True)
         self.rbNone.setChecked(False)
@@ -5404,7 +5420,7 @@ class ImportDatasetDialog(QDialog):
     # NewDatasetDialog shows new dataset dialog.
     def __init__(self,parent):
         super().__init__()
-        self.setWindowTitle("Modan2 - Import")
+        self.setWindowTitle(self.tr("Modan2 - Import"))
         self.parent = parent
         #print(self.parent.pos())
         self.remember_geometry = True
@@ -5416,12 +5432,12 @@ class ImportDatasetDialog(QDialog):
         # add file open dialog
         self.filename_layout = QHBoxLayout()
         self.filename_widget = QWidget()
-        self.btnOpenFile = QPushButton("Open File")
+        self.btnOpenFile = QPushButton(self.tr("Open File"))
         self.btnOpenFile.clicked.connect(self.open_file)
         self.edtFilename = QLineEdit()
         self.edtFilename.setReadOnly(True)
         self.edtFilename.setText("")
-        self.edtFilename.setPlaceholderText("Select a file to import")
+        self.edtFilename.setPlaceholderText(self.tr("Select a file to import"))
         self.edtFilename.setMinimumWidth(400)
         self.edtFilename.setMaximumWidth(400)
         self.edtFilename.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
@@ -5463,12 +5479,12 @@ class ImportDatasetDialog(QDialog):
         self.gbxDimension.layout().addWidget(self.rb2D)
         self.gbxDimension.layout().addWidget(self.rb3D)
 
-        self.cbxInvertY = QCheckBox("Inverted")
+        self.cbxInvertY = QCheckBox(self.tr("Inverted"))
 
         # add dataset name edit
         self.edtDatasetName = QLineEdit()
         self.edtDatasetName.setText("")
-        self.edtDatasetName.setPlaceholderText("Dataset Name")
+        self.edtDatasetName.setPlaceholderText(self.tr("Dataset Name"))
         self.edtDatasetName.setMinimumWidth(400)
         self.edtDatasetName.setMaximumWidth(400)
         self.edtDatasetName.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
@@ -5477,12 +5493,12 @@ class ImportDatasetDialog(QDialog):
         self.edtObjectCount = QLineEdit()
         self.edtObjectCount.setReadOnly(True)
         self.edtObjectCount.setText("")
-        self.edtObjectCount.setPlaceholderText("Object Count")
+        self.edtObjectCount.setPlaceholderText(self.tr("Object Count"))
         self.edtObjectCount.setMinimumWidth(100)
         self.edtObjectCount.setMaximumWidth(100)
         self.edtObjectCount.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
-        self.btnImport = QPushButton("Excute Import")
+        self.btnImport = QPushButton(self.tr("Excute Import"))
         self.btnImport.clicked.connect(self.import_file)
         self.btnImport.setEnabled(False)
 
@@ -5496,14 +5512,14 @@ class ImportDatasetDialog(QDialog):
         # add layout
         self.main_layout = QFormLayout()
         self.setLayout(self.main_layout)
-        self.main_layout.addRow("File", self.filename_widget)
+        self.main_layout.addRow(self.tr("File"), self.filename_widget)
         #self.main_layout.addRow("File Type", self.cbxFileType)
-        self.main_layout.addRow("File Type", self.gbxFileType)
-        self.main_layout.addRow("Dataset Name", self.edtDatasetName)
-        self.main_layout.addRow("Object Count", self.edtObjectCount)
-        self.main_layout.addRow("Y coordinate", self.cbxInvertY)
-        self.main_layout.addRow("Dimension", self.gbxDimension)
-        self.main_layout.addRow("Progress", self.prgImport)
+        self.main_layout.addRow(self.tr("File Type"), self.gbxFileType)
+        self.main_layout.addRow(self.tr("Dataset Name"), self.edtDatasetName)
+        self.main_layout.addRow(self.tr("Object Count"), self.edtObjectCount)
+        self.main_layout.addRow(self.tr("Y coordinate"), self.cbxInvertY)
+        self.main_layout.addRow(self.tr("Dimension"), self.gbxDimension)
+        self.main_layout.addRow(self.tr("Progress"), self.prgImport)
         self.main_layout.addRow("", self.btnImport)
 
     def read_settings(self):
@@ -5559,7 +5575,7 @@ class ImportDatasetDialog(QDialog):
             self.prgImport.setValue(0)
             self.edtDatasetName.setText("")
             self.edtFilename.setText("")
-            QMessageBox.warning(self, "Warning", "File type not supported.")
+            QMessageBox.warning(self, self.tr("Warning"), self.tr("File type not supported."))
             return
         if len(import_data.object_name_list) > 0:
             self.edtObjectCount.setText(str(import_data.nobjects))
@@ -5601,7 +5617,7 @@ class ImportDatasetDialog(QDialog):
 
         self.btnImport.setEnabled(False)
         self.prgImport.setValue(0)
-        self.prgImport.setFormat("Importing...")
+        self.prgImport.setFormat(self.tr("Importing..."))
         self.prgImport.update()
         self.prgImport.repaint()
 
@@ -5675,7 +5691,7 @@ class ImportDatasetDialog(QDialog):
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Information)
 
-        msg.setText("Finished importing a " + filetype + " file.")
+        msg.setText(self.tr("Finished importing a {} file.".format(filetype)))
         msg.setStandardButtons(QMessageBox.Ok)
             
         retval = msg.exec_()
@@ -5686,7 +5702,7 @@ class ImportDatasetDialog(QDialog):
 
     def update_progress(self, value):
         self.prgImport.setValue(value)
-        self.prgImport.setFormat("Importing...{}%".format(value))
+        self.prgImport.setFormat(self.tr("Importing...{}%".format(value)))
         self.prgImport.update()
         self.prgImport.repaint()
         QApplication.processEvents()
@@ -5730,10 +5746,10 @@ class PreferencesDialog(QDialog):
         #print("landmark_pref:", self.landmark_pref)
         #print("wireframe_pref:", self.wireframe_pref)
 
-        self.rbRememberGeometryYes = QRadioButton("Yes")
+        self.rbRememberGeometryYes = QRadioButton(self.tr("Yes"))
         self.rbRememberGeometryYes.setChecked(self.m_app.remember_geometry)
         self.rbRememberGeometryYes.clicked.connect(self.on_rbRememberGeometryYes_clicked)
-        self.rbRememberGeometryNo = QRadioButton("No")
+        self.rbRememberGeometryNo = QRadioButton(self.tr("No"))
         self.rbRememberGeometryNo.setChecked(not self.m_app.remember_geometry)
         self.rbRememberGeometryNo.clicked.connect(self.on_rbRememberGeometryNo_clicked)
 
@@ -5744,13 +5760,13 @@ class PreferencesDialog(QDialog):
 
         
         self.toolbar_icon_large = True if self.m_app.toolbar_icon_size.lower() == "large" else False
-        self.rbToolbarIconLarge = QRadioButton("Large")
+        self.rbToolbarIconLarge = QRadioButton(self.tr("Large"))
         self.rbToolbarIconLarge.setChecked(self.toolbar_icon_large)
         self.rbToolbarIconLarge.clicked.connect(self.on_rbToolbarIconLarge_clicked)
-        self.rbToolbarIconSmall = QRadioButton("Small")
+        self.rbToolbarIconSmall = QRadioButton(self.tr("Small"))
         self.rbToolbarIconSmall.setChecked(self.toolbar_icon_small)
         self.rbToolbarIconSmall.clicked.connect(self.on_rbToolbarIconSmall_clicked)
-        self.rbToolbarIconMedium = QRadioButton("Medium")
+        self.rbToolbarIconMedium = QRadioButton(self.tr("Medium"))
         self.rbToolbarIconMedium.setChecked(self.toolbar_icon_medium)
         self.rbToolbarIconMedium.clicked.connect(self.on_rbToolbarIconMedium_clicked)
 
@@ -5758,7 +5774,7 @@ class PreferencesDialog(QDialog):
         self.gb2DLandmarkPref.setLayout(QHBoxLayout())
         self.gb2DLandmarkPref.setTitle("2D")
         self.combo2DLandmarkSize = QComboBox()
-        self.combo2DLandmarkSize.addItems(["Small","Medium","Large"])
+        self.combo2DLandmarkSize.addItems([self.tr("Small"),self.tr("Medium"),self.tr("Large")])
         self.combo2DLandmarkSize.setCurrentIndex(int(self.m_app.landmark_pref['2D']['size']))
         self.lbl2DLandmarkColor = QPushButton()
         self.lbl2DLandmarkColor.setMinimumSize(20,20)
@@ -5773,9 +5789,9 @@ class PreferencesDialog(QDialog):
 
         self.gb3DLandmarkPref = QGroupBox()
         self.gb3DLandmarkPref.setLayout(QHBoxLayout())
-        self.gb3DLandmarkPref.setTitle("3D")
+        self.gb3DLandmarkPref.setTitle(self.tr("3D"))
         self.combo3DLandmarkSize = QComboBox()
-        self.combo3DLandmarkSize.addItems(["Small","Medium","Large"])
+        self.combo3DLandmarkSize.addItems([self.tr("Small"),self.tr("Medium"),self.tr("Large")])
         self.combo3DLandmarkSize.setCurrentIndex(int(self.m_app.landmark_pref['3D']['size']))
         self.lbl3DLandmarkColor = QPushButton()
         self.lbl3DLandmarkColor.setMinimumSize(20,20)
@@ -5796,9 +5812,9 @@ class PreferencesDialog(QDialog):
 
         self.gb2DWireframePref = QGroupBox()
         self.gb2DWireframePref.setLayout(QHBoxLayout())
-        self.gb2DWireframePref.setTitle("2D")
+        self.gb2DWireframePref.setTitle(self.tr("2D"))
         self.combo2DWireframeThickness = QComboBox()
-        self.combo2DWireframeThickness.addItems(["Thin","Medium","Thick"])
+        self.combo2DWireframeThickness.addItems([self.tr("Thin"),self.tr("Medium"),self.tr("Thick")])
         self.combo2DWireframeThickness.setCurrentIndex(int(self.m_app.wireframe_pref['2D']['thickness']))
         self.lbl2DWireframeColor = QPushButton()
         self.lbl2DWireframeColor.setMinimumSize(20,20)
@@ -5813,9 +5829,9 @@ class PreferencesDialog(QDialog):
 
         self.gb3DWireframePref = QGroupBox()
         self.gb3DWireframePref.setLayout(QHBoxLayout())
-        self.gb3DWireframePref.setTitle("3D")
+        self.gb3DWireframePref.setTitle(self.tr("3D"))
         self.combo3DWireframeThickness = QComboBox()
-        self.combo3DWireframeThickness.addItems(["Thin","Medium","Thick"])
+        self.combo3DWireframeThickness.addItems([self.tr("Thin"),self.tr("Medium"),self.tr("Thick")])
         self.combo3DWireframeThickness.setCurrentIndex(int(self.m_app.wireframe_pref['3D']['thickness']))
         self.lbl3DWireframeColor = QPushButton()
         self.lbl3DWireframeColor.setMinimumSize(20,20)
@@ -5836,9 +5852,9 @@ class PreferencesDialog(QDialog):
 
         self.gb2DIndexPref = QGroupBox()
         self.gb2DIndexPref.setLayout(QHBoxLayout())
-        self.gb2DIndexPref.setTitle("2D")
+        self.gb2DIndexPref.setTitle(self.tr("2D"))
         self.combo2DIndexSize = QComboBox()
-        self.combo2DIndexSize.addItems(["Small","Medium","Large"])
+        self.combo2DIndexSize.addItems([self.tr("Small"),self.tr("Medium"),self.tr("Large")])
         self.combo2DIndexSize.setCurrentIndex(int(self.m_app.index_pref['2D']['size']))
         self.lbl2DIndexColor = QPushButton()
         self.lbl2DIndexColor.setMinimumSize(20,20)
@@ -5853,9 +5869,9 @@ class PreferencesDialog(QDialog):
 
         self.gb3DIndexPref = QGroupBox()
         self.gb3DIndexPref.setLayout(QHBoxLayout())
-        self.gb3DIndexPref.setTitle("3D")
+        self.gb3DIndexPref.setTitle(self.tr("3D"))
         self.combo3DIndexSize = QComboBox()
-        self.combo3DIndexSize.addItems(["Small","Medium","Large"])
+        self.combo3DIndexSize.addItems([self.tr("Small"),self.tr("Medium"),self.tr("Large")])
         self.combo3DIndexSize.setCurrentIndex(int(self.m_app.index_pref['3D']['size']))
         self.lbl3DIndexColor = QPushButton()
         self.lbl3DIndexColor.setMinimumSize(20,20)
@@ -5894,13 +5910,13 @@ class PreferencesDialog(QDialog):
         self.gbPlotMarkers.setLayout(QHBoxLayout())
         #symbol_candidate = ['o','s','^','x','+','d','v','<','>','p','h']
 
-        self.rbPlotLarge = QRadioButton("Large")
+        self.rbPlotLarge = QRadioButton(self.tr("Large"))
         self.rbPlotLarge.setChecked(self.m_app.plot_size.lower() == "large")
         self.rbPlotLarge.clicked.connect(self.on_rbPlotLarge_clicked)
-        self.rbPlotSmall = QRadioButton("Small")
+        self.rbPlotSmall = QRadioButton(self.tr("Small"))
         self.rbPlotSmall.setChecked(self.m_app.plot_size.lower() == "small")
         self.rbPlotSmall.clicked.connect(self.on_rbPlotSmall_clicked)
-        self.rbPlotMedium = QRadioButton("Medium")
+        self.rbPlotMedium = QRadioButton(self.tr("Medium"))
         self.rbPlotMedium.setChecked(self.m_app.plot_size.lower() == "medium")
         self.rbPlotMedium.clicked.connect(self.on_rbPlotMedium_clicked)
 
@@ -5926,12 +5942,12 @@ class PreferencesDialog(QDialog):
         self.gbPlotMarkers.layout().addWidget(self.btnResetMarkers)
 
         self.btnResetVivid = QPushButton()
-        self.btnResetVivid.setText("Vivid")
+        self.btnResetVivid.setText(self.tr("Vivid"))
         self.btnResetVivid.clicked.connect(self.on_btnResetVivid_clicked)
         self.btnResetVivid.setMinimumSize(60,20)
         self.btnResetVivid.setMaximumSize(100,20)
         self.btnResetPastel = QPushButton()
-        self.btnResetPastel.setText("Pastel")
+        self.btnResetPastel.setText(self.tr("Pastel"))
         self.btnResetPastel.clicked.connect(self.on_btnResetPastel_clicked)
         self.btnResetPastel.setMinimumSize(60,20)
         self.btnResetPastel.setMaximumSize(100,20)
@@ -6009,7 +6025,23 @@ class PreferencesDialog(QDialog):
             self.m_app.language = "en"
         elif index == 1:
             self.m_app.language = "ko"
-        self.update_language(self.m_app.language)
+
+        if self.m_app.translator is not None:
+            self.m_app.removeTranslator(self.m_app.translator)
+            #print("removed translator")
+            self.m_app.translator = None
+        else:
+            pass
+        translator = QTranslator()
+        translator_path = mu.resource_path("translations/Modan2_{}.qm".format(self.m_app.language))
+        if os.path.exists(translator_path):
+            translator.load(translator_path)
+            self.m_app.installTranslator(translator)
+            self.m_app.translator = translator
+        else:
+            pass
+
+        self.update_language()
 
 
     def on_comboMarker_currentIndexChanged(self, event, index):
@@ -6140,7 +6172,7 @@ class PreferencesDialog(QDialog):
         self.m_app.bgcolor = self.m_app.settings.value("BackgroundColor", self.m_app.bgcolor)
         self.m_app.language = self.m_app.settings.value("Language", "en")
         #print("read language:", self.m_app.language)
-        self.update_language(self.m_app.language)
+        self.update_language()
 
         if self.m_app.remember_geometry is True:
             self.setGeometry(self.m_app.settings.value("WindowGeometry/PreferencesDialog", QRect(100, 100, 600, 400)))
@@ -6178,7 +6210,7 @@ class PreferencesDialog(QDialog):
         self.m_app.settings.setValue("Language", self.m_app.language)
         #print("write language:", self.m_app.language)
 
-    def update_language(self, language):
+    def update_language(self):
         """
         Update the language of the application.
 
@@ -6188,20 +6220,6 @@ class PreferencesDialog(QDialog):
         Returns:
             None
         """
-        if self.m_app.translator is not None:
-            self.m_app.removeTranslator(self.m_app.translator)
-            #print("removed translator")
-            self.m_app.translator = None
-        else:
-            pass
-        translator = QTranslator()
-        translator_path = mu.resource_path("translations/Modan2_{}.qm".format(language))
-        if os.path.exists(translator_path):
-            translator.load(translator_path)
-            self.m_app.installTranslator(translator)
-            self.m_app.translator = translator
-        else:
-            pass
 
         self.lblGeometry.setText(self.tr("Remember Geometry"))
         self.lblToolbarIconSize.setText(self.tr("Toolbar Icon Size"))
@@ -6214,6 +6232,31 @@ class PreferencesDialog(QDialog):
         self.lblBgcolor.setText(self.tr("Background Color"))
         self.lblLang.setText(self.tr("Language"))
 
+        self.rbRememberGeometryYes.setText(self.tr("Yes"))
+        self.rbRememberGeometryNo.setText(self.tr("No"))
+        self.rbToolbarIconLarge.setText(self.tr("Large"))
+        self.rbToolbarIconSmall.setText(self.tr("Small"))
+        self.rbToolbarIconMedium.setText(self.tr("Medium"))
+        self.rbPlotLarge.setText(self.tr("Large"))
+        self.rbPlotSmall.setText(self.tr("Small"))
+        self.rbPlotMedium.setText(self.tr("Medium"))
+        self.btnResetMarkers.setText(self.tr("Reset"))
+        self.btnResetVivid.setText(self.tr("Vivid"))
+        self.btnResetPastel.setText(self.tr("Pastel"))
+        self.btnOkay.setText(self.tr("Okay"))
+        self.btnCancel.setText(self.tr("Cancel"))
+
+        item_list = [ (self.tr("Small"), "Small" ), (self.tr("Medium"), "Medium"), (self.tr("Large"), "Large")]
+        for item in item_list:
+            self.combo2DLandmarkSize.addItem(item[0], item[1])
+            self.combo3DLandmarkSize.addItem(item[0], item[1])
+            self.combo2DIndexSize.addItem(item[0], item[1])
+            self.combo3DIndexSize.addItem(item[0], item[1])
+
+        item_list = [ (self.tr("Thin"), "Thin" ), (self.tr("Medium"), "Medium"), (self.tr("Thick"), "Thick")]
+        for item in item_list:
+            self.combo2DWireframeThickness.addItem(item[0], item[1])
+            self.combo3DWireframeThickness.addItem(item[0], item[1])
 
     def closeEvent(self, event):
         self.write_settings()

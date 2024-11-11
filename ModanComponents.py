@@ -421,6 +421,7 @@ class ObjectViewer2D(QLabel):
             self.selected_landmark_index = -1
         elif self.edit_mode == MODE['WIREFRAME']:
             if self.wire_start_index >= 0 and self.wire_hover_index >= 0:
+                #print("wire start:", self.wire_start_index, "wire hover:", self.wire_hover_index)
                 self.add_edge(self.wire_start_index, self.wire_hover_index)
                 self.wire_start_index = -1
                 self.wire_hover_index = -1
@@ -739,15 +740,18 @@ class ObjectViewer2D(QLabel):
         self.update()
 
     def add_edge(self,wire_start_index, wire_end_index):
+        #print("add edge")
         if wire_start_index == wire_end_index:
             return
         if wire_start_index > wire_end_index:
             wire_start_index, wire_end_index = wire_end_index, wire_start_index
         dataset = self.object.dataset
+        #print("edge list 1:", dataset.edge_list)
         for wire in dataset.edge_list:
-            if wire[0] == wire_start_index and wire[1] == wire_end_index:
+            if wire[0] == wire_start_index+1 and wire[1] == wire_end_index+1:
                 return
         dataset.edge_list.append([wire_start_index+1, wire_end_index+1])
+        #print("edge list 2:", dataset.edge_list)
         dataset.pack_wireframe()
         dataset.save()
         

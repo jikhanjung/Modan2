@@ -832,6 +832,10 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.dlg = DatasetDialog(self)
         self.dlg.setModal(True)
         if self.selected_dataset:
+            #print("wireframe 1:", self.selected_dataset.wireframe)
+            self.selected_dataset = self.selected_dataset.get_by_id(self.selected_dataset.id)
+            #self.selected_dataset.unpack_wirefra
+            #print("wireframe 2:", self.selected_dataset.wireframe)
             self.dlg.set_parent_dataset( self.selected_dataset )
         else:
             self.dlg.set_parent_dataset( None )
@@ -871,6 +875,12 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     def on_treeView_doubleClicked(self):
         self.dlg = DatasetDialog(self)
         self.dlg.setModal(True)
+
+        #print("wireframe 1:", self.selected_dataset.wireframe)
+        self.selected_dataset = self.selected_dataset.get_by_id(self.selected_dataset.id)
+        #print("wireframe 2:", self.selected_dataset.wireframe)
+        self.selected_dataset.unpack_wireframe()
+
         self.dlg.set_dataset( self.selected_dataset )
         ret = self.dlg.exec_()
         if ret == 0:
@@ -880,6 +890,8 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 self.load_dataset()
                 self.reset_tableView()
             else:
+                #self.dlg.set_parent_dataset( self.selected_dataset )
+
                 dataset = self.selected_dataset
                 self.reset_treeView()
                 self.load_dataset()

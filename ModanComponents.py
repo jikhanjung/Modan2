@@ -9,7 +9,7 @@ from PyQt5.QtGui import QColor, QPainter, QPen, QPixmap, QStandardItemModel, QSt
                         QFont, QPainter, QBrush, QMouseEvent, QWheelEvent, QIntValidator, QIcon, QCursor,\
                         QFontMetrics, QKeySequence, QDrag
 from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSize, QPoint, QAbstractTableModel, QTranslator, \
-                         pyqtSlot, pyqtSignal, QItemSelectionModel, QTimer, QEvent, QModelIndex, QObject
+                         pyqtSlot, pyqtSignal, QItemSelectionModel, QTimer, QEvent, QModelIndex, QObject, QPointF
 
 from matplotlib.backends.backend_qt5agg import FigureCanvas as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 from OBJFileLoader import OBJ
 from MdModel import *
-
+from scipy.spatial.distance import cdist
 import OpenGL.GL as gl
 from OpenGL import GLU as glu
 from OpenGL import GLUT as glut
@@ -174,6 +174,102 @@ class ObjectViewer2D(QLabel):
         self.setAcceptDrops(True)
         self.setMouseTracking(True)
         self.set_mode(MODE['EDIT_LANDMARK'])
+        self.comparison_data = {}
+        self.source_preference = None
+        self.target_preference = None
+        self.ds_ops = None
+
+    def set_source_shape_preference(self, pref):
+        self.source_preference = pref
+        if self.ds_ops is not None and len(self.ds_ops.object_list) > 0:
+            obj = self.ds_ops.object_list[0]
+            obj.visible = pref['visible']
+            obj.show_landmark = pref['show_landmark']
+            obj.show_wireframe = pref['show_wireframe']
+            obj.show_polygon = pref['show_polygon']
+            obj.opacity = pref['opacity']
+            obj.polygon_color = pref['polygon_color']
+            obj.edge_color = pref['edge_color']
+            obj.landmark_color = pref['landmark_color']
+    
+    def set_target_shape_preference(self, pref):
+        self.target_preference = pref
+        if self.ds_ops is not None and len(self.ds_ops.object_list) > 1:
+            obj = self.ds_ops.object_list[1]
+            obj.visible = pref['visible']
+            obj.show_landmark = pref['show_landmark']
+            obj.show_wireframe = pref['show_wireframe']
+            obj.show_polygon = pref['show_polygon']
+            obj.opacity = pref['opacity']
+            obj.polygon_color = pref['polygon_color']
+            obj.edge_color = pref['edge_color']
+            obj.landmark_color = pref['landmark_color']
+
+    def set_source_shape_color(self, color):
+        self.source_shape_color = color
+
+    def set_target_shape_color(self, color):
+        self.target_shape_color = color
+
+    def set_source_shape(self, object):
+        self.comparison_data['source_shape'] = object
+
+    def set_target_shape(self, object):
+        self.comparison_data['target_shape'] = object
+
+    def set_intermediate_shape(self, object):
+        self.comparison_data['intermediate_shape'] = object
+
+    def generate_reference_shape(self):
+        shape_list = []
+        ds = MdDataset()
+        ds.dimension = self.dataset.dimension
+        ds.baseline = self.dataset.baseline
+        ds.wireframe = self.dataset.wireframe
+        ds.edge_list = self.dataset.edge_list
+        ds.polygon_list = self.dataset.polygon_list
+        ds_ops = MdDatasetOps(ds)
+
+        if 'source_shape' in self.comparison_data:
+            shape_list.append(self.comparison_data['source_shape'])
+            source = self.comparison_data['source_shape']
+            source_ops = MdObjectOps(source)
+            ds_ops.object_list.append(source_ops)
+        if 'target_shape' in self.comparison_data:
+            shape_list.append(self.comparison_data['target_shape'])
+            target = self.comparison_data['target_shape']
+            target_ops = MdObjectOps(target)
+            ds_ops.object_list.append(target_ops)
+
+        ret = ds_ops.procrustes_superimposition()
+        if ret == False:
+            print("procrustes failed")
+            return
+        self.comparison_data['ds_ops'] = ds_ops
+        self.comparison_data['average_shape'] = ds_ops.get_average_shape()
+        self.set_ds_ops(ds_ops)
+        
+        self.data_mode = DATASET_MODE
+        if self.source_preference is not None:
+            self.set_source_shape_preference(self.source_preference)
+        if self.target_preference is not None:
+            self.set_target_shape_preference(self.target_preference)
+            
+        self.update_tps_grid()
+
+    def set_ds_ops(self, ds_ops):
+        self.ds_ops = ds_ops
+        self.data_mode = DATASET_MODE
+        average_shape = self.ds_ops.get_average_shape()
+        self.landmark_list = average_shape.landmark_list
+        #self.set_object(average_shape)
+        self.calculate_resize()
+        self.align_object()
+        #scale = self.get_scale_from_object(average_shape)
+        #average_shape.rescale(scale)
+        #for obj in self.ds_ops.object_list:
+        #    obj.rescale(scale)
+        self.edge_list = ds_ops.edge_list
 
     def set_shape_preference(self, object_preference):
         self.shape_preference = object_preference
@@ -502,18 +598,145 @@ class ObjectViewer2D(QLabel):
             self.object_dialog.btnLandmark.setDown(True)
             self.object_dialog.btnLandmark.setEnabled(True)
 
+    def draw_dataset(self, painter):
+        ds_ops = self.ds_ops
+        print("draw dataset", ds_ops, ds_ops.object_list)
+        if self.show_arrow and len(ds_ops.object_list) > 1:
+            self.draw_arrow(painter, 0, 1)
+
+        for idx, obj in enumerate(ds_ops.object_list):
+            print("draw object", obj, obj.landmark_list)
+            if obj.visible == False:
+                continue
+            if obj.id in ds_ops.selected_object_id_list:
+                object_color = COLOR['SELECTED_SHAPE']
+            else:
+                if obj.landmark_color is not None:
+                    object_color = mu.as_gl_color(obj.landmark_color)
+                else:
+                    object_color = mu.as_gl_color(self.landmark_color) #COLOR['NORMAL_SHAPE']
+            edge_color=self.wireframe_color
+            if obj.edge_color is not None:
+                edge_color = obj.edge_color
+            polygon_color=self.wireframe_color
+            if obj.polygon_color is not None:
+                polygon_color = obj.polygon_color
+
+            self.draw_object(painter, obj, landmark_as_sphere=False, color=object_color, edge_color=edge_color,polygon_color=polygon_color)
+
+        if self.show_average:
+            object_color = COLOR['AVERAGE_SHAPE']
+            self.draw_object(ds_ops.get_average_shape(), landmark_as_sphere=True, color=object_color)
+
+    def draw_dataset(self, painter):
+        ds_ops = self.ds_ops
+        
+        # Generate TPS grid if not already generated
+        if not hasattr(self, 'grid_lines_transformed'):
+            self.generate_tps_grid()
+        
+        # Draw TPS grid
+        if hasattr(self, 'grid_lines_transformed'):
+            pen = QPen(QColor(235, 235, 235, 70))  # Light blue, semi-transparent
+            pen.setWidth(2)
+            painter.setPen(pen)
+            
+            # Draw transformed grid lines
+            for direction, line in self.grid_lines_transformed:
+                points = [QPointF(self._2canx(p[0]), self._2cany(p[1])) for p in line]
+                for i in range(len(points) - 1):
+                    painter.drawLine(points[i], points[i + 1])
+        
+        # Draw shapes
+        if self.show_arrow and len(ds_ops.object_list) > 1:
+            self.draw_arrow(painter, 0, 1)
+
+        for idx, obj in enumerate(ds_ops.object_list):
+            if obj.visible == False:
+                continue
+            if obj.id in ds_ops.selected_object_id_list:
+                object_color = COLOR['SELECTED_SHAPE']
+            else:
+                if obj.landmark_color is not None:
+                    object_color = mu.as_gl_color(obj.landmark_color)
+                else:
+                    object_color = mu.as_gl_color(self.landmark_color)
+            edge_color = self.wireframe_color
+            if obj.edge_color is not None:
+                edge_color = obj.edge_color
+            polygon_color = self.wireframe_color
+            if obj.polygon_color is not None:
+                polygon_color = obj.polygon_color
+
+            self.draw_object(painter, obj, landmark_as_sphere=False, 
+                            color=object_color, edge_color=edge_color,
+                            polygon_color=polygon_color)
+
+        if self.show_average:
+            object_color = COLOR['AVERAGE_SHAPE']
+            self.draw_object(ds_ops.get_average_shape(), landmark_as_sphere=True, 
+                            color=object_color)
+
+
+    def draw_arrow(self, painter, start_idx, end_idx):
+        from_obj = self.ds_ops.object_list[start_idx]
+        to_obj = self.ds_ops.object_list[end_idx]
+        for idx, from_lm in enumerate(from_obj.landmark_list):
+            to_lm = to_obj.landmark_list[idx]
+            from_x = from_lm[0]
+            from_y = from_lm[1]
+            to_x = to_lm[0]
+            to_y = to_lm[1]
+            self.draw_line( painter, from_x, from_y, to_x, to_y, COLOR['RED'])
+    
+    def draw_object(self, painter, obj, landmark_as_sphere=False, color=COLOR['NORMAL_SHAPE'], edge_color=COLOR['WIREFRAME'], polygon_color=COLOR['WIREFRAME']):
+        if obj.show_landmark:
+            for idx, landmark in enumerate(obj.landmark_list):
+                self.draw_landmark(painter, landmark[0], landmark[1], color)
+        if obj.show_wireframe:
+            for edge in self.ds_ops.edge_list:
+                from_lm_idx = edge[0]-1
+                to_lm_idx = edge[1]-1
+                if from_lm_idx >= len(obj.landmark_list) or to_lm_idx >= len(obj.landmark_list):
+                    continue
+                from_lm = obj.landmark_list[from_lm_idx]
+                to_lm = obj.landmark_list[to_lm_idx]
+                self.draw_line(painter, from_lm[0], from_lm[1], to_lm[0], to_lm[1], edge_color)
+        return
+        if obj.show_polygon:
+            for polygon in obj.polygon_list:
+                polygon_points = []
+                for idx in polygon:
+                    if idx >= len(obj.landmark_list):
+                        continue
+                    landmark = obj.landmark_list[idx]
+                    polygon_points.append(landmark)
+                self.draw_polygon(polygon_points, polygon_color)
+       
+    def draw_line(self, painter, from_x, from_y, to_x, to_y, color):
+        #print("color:", color)
+        painter.setPen(QPen(mu.as_qt_color(color), 2))
+        painter.drawLine(int(self._2canx(from_x)), int(self._2cany(from_y)), int(self._2canx(to_x)), int(self._2cany(to_y)))
+
+    def draw_landmark(self, painter, x, y, color):
+        radius = BASE_LANDMARK_RADIUS * (int(self.landmark_size) + 1) 
+        painter.setPen(QPen(mu.as_qt_color(color), 2))
+        painter.setBrush(QBrush(mu.as_qt_color(color)))
+        painter.drawEllipse(int(self._2canx(x)-radius), int(self._2cany(y))-radius, radius*2, radius*2)
 
     def paintEvent(self, event):
         painter = QPainter(self)
         if self.transparent == False:
             painter.fillRect(self.rect(), QBrush(QColor(self.bgcolor)))
         if self.object is None:
+            #print("no object")
+            if self.ds_ops is not None:
+                self.draw_dataset(painter)
             return
         if self.curr_pixmap is not None:
             painter.drawPixmap(self.pan_x+self.temp_pan_x, self.pan_y+self.temp_pan_y,self.curr_pixmap)
 
         if self.show_wireframe == True:
-
             if self.obj_ops.edge_color:
                 color = QColor(self.obj_ops.edge_color)
             else:
@@ -760,6 +983,121 @@ class ObjectViewer2D(QLabel):
         dataset.edge_list.pop(edge_index)
         dataset.pack_wireframe()
         dataset.save()
+
+    def generate_tps_grid(self):
+        """Generate TPS grid for visualization"""
+        if self.ds_ops is None or len(self.ds_ops.object_list) < 2:
+            return
+        
+        # Get source and target points
+        source_obj = self.ds_ops.object_list[0]
+        target_obj = self.ds_ops.object_list[1]
+        
+        source_points = np.array(source_obj.landmark_list)
+        target_points = np.array(target_obj.landmark_list)
+        
+        # Add boundary points around the shape
+        def create_boundary_points(points, n_points=24):
+            # Calculate shape bounds
+            center = np.mean(points, axis=0)
+            points_centered = points - center
+            
+            # Calculate radius based on shape size
+            max_dist = np.max(np.sqrt(np.sum(points_centered**2, axis=1)))
+            radius = max_dist * 1.2  # Make boundary slightly larger than shape
+            
+            # Generate boundary points in a circle
+            angles = np.linspace(0, 2*np.pi, n_points, endpoint=False)
+            boundary = np.column_stack((
+                center[0] + radius * np.cos(angles),
+                center[1] + radius * np.sin(angles)
+            ))
+            return boundary
+        
+        # Add boundary points
+        boundary_source = create_boundary_points(source_points)
+        boundary_target = create_boundary_points(target_points)
+        
+        # Combine with landmark points
+        self.source_with_boundary = np.vstack([source_points, boundary_source])
+        self.target_with_boundary = np.vstack([target_points, boundary_target])
+        
+        # Create rectangular grid that encloses the shape
+        padding = 0.1
+        x_min = np.min(source_points[:, 0]) - padding
+        x_max = np.max(source_points[:, 0]) + padding
+        y_min = np.min(source_points[:, 1]) - padding
+        y_max = np.max(source_points[:, 1]) + padding
+        
+        # Generate grid points
+        n_grid = 20  # Number of grid lines
+        x = np.linspace(x_min, x_max, n_grid)
+        y = np.linspace(y_min, y_max, n_grid)
+        
+        # Create vertical and horizontal lines
+        self.grid_lines_orig = []
+        
+        # Vertical lines
+        for i in range(n_grid):
+            line_points = np.array([(x[i], y_) for y_ in y])
+            self.grid_lines_orig.append(('v', line_points))
+        
+        # Horizontal lines
+        for i in range(n_grid):
+            line_points = np.array([(x_, y[i]) for x_ in x])
+            self.grid_lines_orig.append(('h', line_points))
+        
+        # Calculate TPS parameters
+        self.tps_weights, self.tps_affine = self.calculate_tps_params(
+            self.source_with_boundary, 
+            self.target_with_boundary
+        )
+        
+        # Transform grid lines
+        self.grid_lines_transformed = []
+        for direction, line in self.grid_lines_orig:
+            transformed_line = np.array([
+                self.transform_point(p, self.source_with_boundary, self.tps_weights, self.tps_affine)
+                for p in line
+            ])
+            self.grid_lines_transformed.append((direction, transformed_line))
+
+    def calculate_tps_params(self, control_points, target_points):
+        """Calculate TPS transformation parameters"""
+        def U(r):
+            return (r**2) * np.log(r + np.finfo(float).eps)
+        
+        n = control_points.shape[0]
+        K = cdist(control_points, control_points)
+        K = U(K)
+        P = np.hstack([np.ones((n, 1)), control_points])
+        L = np.vstack([
+            np.hstack([K, P]),
+            np.hstack([P.T, np.zeros((3, 3))])
+        ])
+        Y = np.vstack([target_points, np.zeros((3, 2))])
+        params = np.linalg.solve(L, Y)
+        return params[:-3], params[-3:]
+
+    def transform_point(self, point, control_points, weights, affine):
+        """Transform a single point using TPS"""
+        def U(r):
+            return (r**2) * np.log(r + np.finfo(float).eps)
+        
+        k = cdist(point.reshape(1, -1), control_points)
+        k = U(k)
+        wx = weights[:, 0]
+        wy = weights[:, 1]
+        px = np.sum(k * wx) + affine[0, 0] + affine[1, 0] * point[0] + affine[2, 0] * point[1]
+        py = np.sum(k * wy) + affine[0, 1] + affine[1, 1] * point[0] + affine[2, 1] * point[1]
+        return np.array([px, py])
+
+    def update_tps_grid(self):
+        """Update TPS grid after shape changes"""
+        if hasattr(self, 'grid_lines_transformed'):
+            delattr(self, 'grid_lines_transformed')
+        self.generate_tps_grid()
+        self.update()
 
 class ObjectViewer3D(QGLWidget):
     def __init__(self, parent=None, transparent=False):

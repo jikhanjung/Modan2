@@ -45,7 +45,7 @@ ICON['dataset_2d'] = mu.resource_path('icons/M2Dataset2D_3.png')
 ICON['dataset_3d'] = mu.resource_path('icons/M2Dataset3D_4.png')
 ICON['row_selection'] = mu.resource_path('icons/row_selection.png')
 ICON['cell_selection'] = mu.resource_path('icons/cell_selection.png')
-ICON['add_variable'] = mu.resource_path('icons/AddVariable.png')
+ICON['add_variable'] = mu.resource_path('icons/add_variable.png')
 ICON['save_changes'] = mu.resource_path('icons/SaveChanges.png')
 
 class ModanMainWindow(QMainWindow):

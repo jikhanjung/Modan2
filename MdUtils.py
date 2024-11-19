@@ -93,6 +93,11 @@ MARKER_LIST = ['o','s','^','x','+','d','v','<','>','p','h']
 
 
 def as_qt_color(color):
+    if isinstance(color, QColor):
+        return color
+    if isinstance(color, str):
+        return QColor(color)
+    
     return QColor( *[ int(x*255) for x in color ] )
 
 def as_gl_color(color):

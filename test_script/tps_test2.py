@@ -8,24 +8,24 @@ from PyQt5.QtGui import QPainter, QColor, QPen
 from PyQt5.QtGui import QPainter, QColor, QPen, QPolygonF
 from math import atan2, cos, sin, pi
 
+
 class TPSVisualizerWidget(QLabel):
     def __init__(self, source_points, target_points, parent=None):
         super().__init__(parent)
-        # Store only the fish points initially
         self.source_fish = source_points
         self.target_fish = target_points
         self.show_source = False
+        self.show_target = True
         self.show_arrows = False
+        self.show_grid = True  # Add this line
         self.n_grid_lines = 20
-        self.n_fish_points = len(source_points)  # Now this is the actual number of fish points
+        self.n_fish_points = len(source_points)
         
-        # Calculate transformed points and grid
         self.setup_transformation()
         
-        # Set fixed size for the widget
         self.setMinimumSize(600, 400)
         self.setStyleSheet("background-color: white;")
-        
+
     def setup_transformation(self):
         """Calculate TPS transformation parameters and prepare grid"""
         # First perform Procrustes alignment on fish points only
@@ -210,22 +210,25 @@ class TPSVisualizerWidget(QLabel):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
         
-        # Draw grid lines
+        # Draw grid lines only if show_grid is True
         pen = QPen(QColor(0, 0, 255, 40))  # Light blue
-        pen.setWidth(1)
-        painter.setPen(pen)
-        
-        # Draw vertical grid lines
-        for line in self.transformed_vert_lines:
-            points = self.map_to_screen(line)
-            for i in range(len(points) - 1):
-                painter.drawLine(points[i], points[i + 1])
-        
-        # Draw horizontal grid lines
-        for line in self.transformed_horz_lines:
-            points = self.map_to_screen(line)
-            for i in range(len(points) - 1):
-                painter.drawLine(points[i], points[i + 1])
+        if self.show_grid:
+            #pen = QPen(QColor(0, 0, 255, 40))  # Light blue
+            pen.setWidth(1)
+            painter.setPen(pen)
+            
+            # Draw vertical grid lines
+            for line in self.transformed_vert_lines:
+                points = self.map_to_screen(line)
+                for i in range(len(points) - 1):
+                    painter.drawLine(points[i], points[i + 1])
+            
+            # Draw horizontal grid lines
+            for line in self.transformed_horz_lines:
+                points = self.map_to_screen(line)
+                for i in range(len(points) - 1):
+                    painter.drawLine(points[i], points[i + 1])
+
         
         # Draw arrows if enabled
         if self.show_arrows:
@@ -249,22 +252,33 @@ class TPSVisualizerWidget(QLabel):
             for point in source_screen_points:
                 painter.drawPoint(point)
         
-        # Draw target points
-        pen.setColor(QColor(0, 255, 0))  # Green
-        pen.setWidth(8)
-        painter.setPen(pen)
-        target_screen_points = self.map_to_screen(self.aligned_target[:self.n_fish_points])
-        for point in target_screen_points:
-            painter.drawPoint(point)
+        if self.show_target:
+            # Draw target points
+            pen.setColor(QColor(0, 255, 0))  # Green
+            pen.setWidth(8)
+            painter.setPen(pen)
+            target_screen_points = self.map_to_screen(self.aligned_target[:self.n_fish_points])
+            for point in target_screen_points:
+                painter.drawPoint(point)
 
     def toggle_source_points(self, state):
         """Toggle visibility of source points"""
         self.show_source = state
         self.update()
 
+    def toggle_target_points(self, state):
+        """Toggle visibility of source points"""
+        self.show_target = state
+        self.update()
+
     def toggle_arrows(self, state):
         """Toggle visibility of arrows"""
         self.show_arrows = state
+        self.update()
+
+    def toggle_grid(self, state):
+        """Toggle visibility of the TPS grid"""
+        self.show_grid = state
         self.update()
 
 class MainWindow(QMainWindow):
@@ -279,30 +293,53 @@ class MainWindow(QMainWindow):
         # Create and add TPS visualizer
         source, target = create_fish_shapes()
         self.visualizer = TPSVisualizerWidget(source, target)
-        layout.addWidget(self.visualizer)
+        layout.addWidget(self.visualizer,1)
         
         # Create checkbox container
         checkbox_widget = QWidget()
         checkbox_layout = QHBoxLayout()
+
+        # Add checkbox for source points visibility
+        same_checkbox = QCheckBox("Same shape")
+        same_checkbox.stateChanged.connect(self.toggle_same_shape)
+        checkbox_layout.addWidget(same_checkbox)
+
+        # Add checkbox for grid visibility
+        grid_checkbox = QCheckBox("Show grid")
+        grid_checkbox.setChecked(True)  # Grid visible by default
+        grid_checkbox.stateChanged.connect(self.visualizer.toggle_grid)
+        checkbox_layout.addWidget(grid_checkbox)
         
         # Add checkbox for source points visibility
         source_checkbox = QCheckBox("Show source points")
         source_checkbox.stateChanged.connect(self.visualizer.toggle_source_points)
         checkbox_layout.addWidget(source_checkbox)
-        
+
+        # Add checkbox for target points visibility
+        target_checkbox = QCheckBox("Show target points")
+        target_checkbox.stateChanged.connect(self.visualizer.toggle_target_points)
+        checkbox_layout.addWidget(target_checkbox)
+
         # Add checkbox for arrows visibility
         arrows_checkbox = QCheckBox("Show arrows")
         arrows_checkbox.stateChanged.connect(self.visualizer.toggle_arrows)
         checkbox_layout.addWidget(arrows_checkbox)
         
         checkbox_widget.setLayout(checkbox_layout)
-        layout.addWidget(checkbox_widget)
+        layout.addWidget(checkbox_widget, 0)
         
         main_widget.setLayout(layout)
         self.setCentralWidget(main_widget)
 
+    def toggle_same_shape(self, state):
+        """Toggle between same shape and different shape"""
+        source, target = create_fish_shapes(same_shape=(state == Qt.Checked))
+        self.visualizer.source_fish = source
+        self.visualizer.target_fish = target
+        self.visualizer.setup_transformation()
+        self.visualizer.update()
 
-def create_fish_shapes():
+def create_fish_shapes( same_shape=False):
     """Create source and target fish shapes"""
     # Source points (normal fish)
     fish_source = np.array([
@@ -322,41 +359,41 @@ def create_fish_shapes():
         [0.85, -0.1],   # Lower tail
     ])
 
-    fish_target = np.array([
-        [-0.05, 0.0],    # Nose
-        [0.95, 0.0],     # Tail tip
-        [0.3, 0.25],     # Top of head
-        [0.3, -0.25],    # Bottom of head
-        [0.68, 0.12],    # Top of tail
-        [0.68, -0.12],   # Bottom of tail
-        [0.4, 0.02],     # Middle body
-        [0.5, 0.15],     # Top fin
-        [0.5, -0.08],    # Bottom fin
-        [0.2, 0.05],     # Eye position
-        [0.15, 0.18],    # Upper head
-        [0.15, -0.18],   # Lower head
-        [0.8, 0.08],     # Upper tail
-        [0.8, -0.08],    # Lower tail
-    ])
-
-    '''
-    # Target points with deformation (or same as source for testing)
-    fish_target = np.array([
-        [0.0, 0.0],     # Nose
-        [1.0, 0.0],     # Tail tip
-        [0.3, 0.2],     # Top of head
-        [0.3, -0.2],    # Bottom of head
-        [0.7, 0.15],    # Top of tail
-        [0.7, -0.15],   # Bottom of tail
-        [0.4, 0.0],     # Middle body
-        [0.5, 0.1],     # Top fin
-        [0.5, -0.1],    # Bottom fin
-        [0.2, 0.0],     # Eye position
-        [0.15, 0.15],   # Upper head
-        [0.15, -0.15],  # Lower head
-        [0.85, 0.1],    # Upper tail
-        [0.85, -0.1],   # Lower tail
-    ])'''
+    if same_shape == False:
+        fish_target = np.array([
+            [-0.05, 0.0],    # Nose
+            [0.95, 0.0],     # Tail tip
+            [0.3, 0.25],     # Top of head
+            [0.3, -0.25],    # Bottom of head
+            [0.68, 0.12],    # Top of tail
+            [0.68, -0.12],   # Bottom of tail
+            [0.4, 0.02],     # Middle body
+            [0.5, 0.15],     # Top fin
+            [0.5, -0.08],    # Bottom fin
+            [0.2, 0.05],     # Eye position
+            [0.15, 0.18],    # Upper head
+            [0.15, -0.18],   # Lower head
+            [0.8, 0.08],     # Upper tail
+            [0.8, -0.08],    # Lower tail
+        ])
+    else:
+        # Target points with deformation (or same as source for testing)
+        fish_target = np.array([
+            [0.0, 0.0],     # Nose
+            [1.0, 0.0],     # Tail tip
+            [0.3, 0.2],     # Top of head
+            [0.3, -0.2],    # Bottom of head
+            [0.7, 0.15],    # Top of tail
+            [0.7, -0.15],   # Bottom of tail
+            [0.4, 0.0],     # Middle body
+            [0.5, 0.1],     # Top fin
+            [0.5, -0.1],    # Bottom fin
+            [0.2, 0.0],     # Eye position
+            [0.15, 0.15],   # Upper head
+            [0.15, -0.15],  # Lower head
+            [0.85, 0.1],    # Upper tail
+            [0.85, -0.1],   # Lower tail
+        ])
 
     # Apply some transformation to target (optional, for testing)
     # angle = np.pi / 12

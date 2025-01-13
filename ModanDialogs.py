@@ -3408,8 +3408,10 @@ class DataExplorationDialog(QDialog):
                     values = []
                     keys = []
                     for curve in self.curve_list:
-                        keys.append( curve['key'] )
-                        values.append( curve )
+                        #print("curve", curve)
+                        if curve:
+                            keys.append( curve['key'] )
+                            values.append( curve )
                     regression_legend = self.ax2.legend(values,keys, loc='lower right', bbox_to_anchor=(1.05, 0))
                     self.ax2.add_artist(regression_legend)
 

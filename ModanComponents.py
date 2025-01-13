@@ -147,6 +147,8 @@ class ObjectViewer2D(QLabel):
         self.show_baseline = False  
         self.read_only = False
         self.show_model = False
+        self.show_arrow = False
+        self.show_average = False
 
         self.pan_x = 0
         self.pan_y = 0

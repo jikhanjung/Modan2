@@ -1482,11 +1482,10 @@ if __name__ == "__main__":
     #프로그램을 이벤트루프로 진입시키는(프로그램을 작동시키는) 코드
     app.exec_()
 
-
 ''' 
 How to make an exe file
 
-pyinstaller --name "Modan2_v0.1.3_20250113.exe" --onefile --noconsole --add-data "icons/*.png;icons" --add-data "translations/*.qm;translations" --add-data "migrations/*;migrations" --icon="icons/Modan2_2.png" Modan2.py
+pyinstaller --name "Modan2_v0.1.3_20250120.exe" --onefile --noconsole --add-data "icons/*.png;icons" --add-data "translations/*.qm;translations" --add-data "migrations/*;migrations" --icon="icons/Modan2_2.png" Modan2.py
 pyinstaller --onedir --noconsole --add-data "icons/*.png;icons" --add-data "translations/*.qm;translations" --add-data "migrations/*;migrations" --icon="icons/Modan2_2.png" --noconfirm Modan2.py
 #--upx-dir=/path/to/upx
 
@@ -1499,6 +1498,4 @@ pylupdate5 Modan2.py ModanComponents.py ModanDialogs.py -ts translations/Modan2_
 pylupdate5 Modan2.py ModanComponents.py ModanDialogs.py -ts translations/Modan2_ja.ts
 
 linguist
-
-
 '''

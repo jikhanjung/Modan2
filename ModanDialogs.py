@@ -597,11 +597,14 @@ class DatasetDialog(QDialog):
             #self.rbtn3D.setEnabled(False)
 
     def Okay(self):
+        logger.info("Dataset dialog Okay button pressed")
+
         if self.dataset is None:
             self.dataset = MdDataset()
         self.dataset.parent_id = self.cbxParent.currentData()
         self.dataset.dataset_name = self.edtDatasetName.text()
         self.dataset.dataset_desc = self.edtDatasetDesc.text()
+        logger.info("Dataset name: %s, Dataset desc: %s", self.dataset.dataset_name, self.dataset.dataset_desc)
         if self.rbtn2D.isChecked():
             self.dataset.dimension = 2
         elif self.rbtn3D.isChecked():
@@ -609,7 +612,9 @@ class DatasetDialog(QDialog):
         self.dataset.wireframe = self.edtWireframe.toPlainText()
         self.dataset.baseline = self.edtBaseline.text()
         self.dataset.polygons = self.edtPolygons.toPlainText()
+        logger.info("Wireframe: %s, Baseline: %s, Polygons: %s", self.dataset.wireframe, self.dataset.baseline, self.dataset.polygons)
         self.dataset.propertyname_str = self.edtVariableNameStr.toPlainText()
+        logger.info("variable names 1: %s", self.dataset.propertyname_str)
         variablename_list = []
         before_index_list = []
         after_index_list = []
@@ -623,6 +628,7 @@ class DatasetDialog(QDialog):
         #print("after_index_list:", after_index_list)
 
         self.dataset.propertyname_str = ",".join(variablename_list)
+        logger.info("variable names 2: %s", self.dataset.propertyname_str)
         for obj in self.dataset.object_list:
             variable_list = obj.get_variable_list()
             new_variable_list = []
@@ -637,7 +643,9 @@ class DatasetDialog(QDialog):
 
         #self.data
         #print(self.dataset.dataset_desc, self.dataset.dataset_name)
+        logger.info("about to save")
         self.dataset.save()
+        logger.info("saved")
         self.accept()
 
     def Delete(self):

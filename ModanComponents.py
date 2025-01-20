@@ -951,11 +951,13 @@ class ObjectViewer2D(QLabel):
         self.setPixmap(self.curr_pixmap)
 
     def clear_object(self):
+        #print("object view clear object")
         self.landmark_list = []
         self.edge_list = []
         self.orig_pixmap = None
         self.curr_pixmap = None
         self.object = None
+        self.ds_ops = None
         self.pan_x = 0
         self.pan_y = 0
         self.temp_pan_x = 0

@@ -595,7 +595,7 @@ class DatasetDialog(QDialog):
                 self.rbtn3D.setChecked(True)
             #self.rbtn2D.setEnabled(False)
             #self.rbtn3D.setEnabled(False)
-
+    '''
     def Okay(self):
         logger.info("Dataset dialog Okay button pressed")
 
@@ -647,7 +647,115 @@ class DatasetDialog(QDialog):
         self.dataset.save()
         logger.info("saved")
         self.accept()
+    '''
+    def Okay(self):
+        try:
+            logger.info("Dataset dialog Okay button pressed")
 
+            try:
+                if self.dataset is None:
+                    self.dataset = MdDataset()
+            except Exception as e:
+                logger.error("Failed to create dataset: %s", str(e))
+                raise
+
+            try:
+                self.dataset.parent_id = self.cbxParent.currentData()
+                self.dataset.dataset_name = self.edtDatasetName.text()
+                self.dataset.dataset_desc = self.edtDatasetDesc.text()
+                logger.info("Dataset name: %s, Dataset desc: %s", 
+                        self.dataset.dataset_name, 
+                        self.dataset.dataset_desc)
+            except AttributeError as e:
+                logger.error("Failed to set basic dataset properties: %s", str(e))
+                raise
+
+            try:
+                if self.rbtn2D.isChecked():
+                    self.dataset.dimension = 2
+                elif self.rbtn3D.isChecked():
+                    self.dataset.dimension = 3
+                    
+                self.dataset.wireframe = self.edtWireframe.toPlainText()
+                self.dataset.baseline = self.edtBaseline.text()
+                self.dataset.polygons = self.edtPolygons.toPlainText()
+                logger.info("Wireframe: %s, Baseline: %s, Polygons: %s", 
+                        self.dataset.wireframe, 
+                        self.dataset.baseline, 
+                        self.dataset.polygons)
+            except AttributeError as e:
+                logger.error("Failed to set geometric properties: %s", str(e))
+                raise
+
+            try:
+                self.dataset.propertyname_str = self.edtVariableNameStr.toPlainText()
+                logger.info("variable names 1: %s", self.dataset.propertyname_str)
+                
+                variablename_list = []
+                before_index_list = []
+                after_index_list = []
+                
+                for idx in range(self.lstVariableName.count()):
+                    try:
+                        item = self.lstVariableName.item(idx)
+                        if item is None:
+                            raise ValueError(f"No item found at index {idx}")
+                        
+                        original_index = item.data(Qt.UserRole)
+                        variablename_list.append(item.text())
+                        before_index_list.append(original_index)
+                        after_index_list.append(idx)
+                    except Exception as e:
+                        logger.error("Error processing variable at index %d: %s", idx, str(e))
+                        raise
+
+                self.dataset.propertyname_str = ",".join(variablename_list)
+                logger.info("variable names 2: %s", self.dataset.propertyname_str)
+                
+            except Exception as e:
+                logger.error("Failed to process variable names: %s", str(e))
+                raise
+
+            try:
+                for obj in self.dataset.object_list:
+                    try:
+                        variable_list = obj.get_variable_list()
+                        new_variable_list = []
+                        
+                        for before_index in before_index_list:
+                            if before_index == -1:
+                                new_variable_list.append("")
+                            else:
+                                new_variable_list.append(variable_list[before_index])
+                                
+                        obj.pack_variable(new_variable_list)
+                        obj.save()
+                    except Exception as e:
+                        logger.error("Failed to process object: %s", str(e))
+                        raise
+                        
+            except Exception as e:
+                logger.error("Failed to process object list: %s", str(e))
+                raise
+
+            try:
+                logger.info("about to save")
+                self.dataset.save()
+                logger.info("saved")
+                self.accept()
+            except Exception as e:
+                logger.error("Failed to save dataset: %s", str(e))
+                raise
+                
+        except Exception as e:
+            logger.error("Operation failed: %s", str(e))
+            # You might want to show an error dialog to the user here
+            QMessageBox.critical(
+                self,
+                "Error",
+                f"Failed to save dataset: {str(e)}"
+            )
+            return
     def Delete(self):
         ret = QMessageBox.question(self, "", self.tr("Are you sure to delete this dataset?"), QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         #print("ret:", ret)

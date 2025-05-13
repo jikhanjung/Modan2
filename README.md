@@ -67,5 +67,4 @@ Modan2 provides a holistic solution for geometric morphometrics, enabling:
 - **Scatterplot Visualization:** Customize colors and symbols for data points.
 
 ## License
-
-This project is licensed under the [MIT License](link-to-license).
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

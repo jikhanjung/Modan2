@@ -1,5 +1,8 @@
 name: Build
 
+permissions:
+  contents: write  # Release 생성을 위해 필요
+
 on:
   push:
     branches: [ "main" ]  # main 브랜치 푸시 시 실행

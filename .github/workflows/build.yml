@@ -191,20 +191,18 @@ jobs:
         tag_name: v0.1.4-build.${{ github.run_number }}
         name: Modan2 v0.1.4 Build ${{ github.run_number }}
         body: |
-          🚀 **Automated Cross-Platform Build**
+          🚀 **Modan2 Windows Installer**
           
           Built from commit: ${{ github.sha }}
           Build number: ${{ github.run_number }}
           
-          **Platforms:**
-          - ✅ Windows (with installer)
-          - ✅ macOS 
-          - ✅ Linux
+          **Installation:**
+          1. Download the installer (.exe file)
+          2. Run as administrator 
+          3. Follow the installation wizard
           
-          **Download:**
-          - **Windows**: Use the installer (.exe) for easy installation
-          - **macOS/Linux**: Extract and run the executable from dist folder
-        files: release-files/**/*
+          **Note:** For other platforms (macOS/Linux), download artifacts from the Actions tab.
+        files: release-files/modan2-windows/InnoSetup/Output/*.exe
         draft: false
         prerelease: true
       env:

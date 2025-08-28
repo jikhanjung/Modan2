@@ -32,6 +32,8 @@ jobs:
     - name: Build Windows executable
       run: |
         python build.py
+      env:
+        BUILD_NUMBER: ${{ github.run_number }}
     
     - name: Download and Install Inno Setup
       shell: pwsh
@@ -89,6 +91,8 @@ jobs:
         # Set Qt5 paths for PyInstaller
         export PATH=/usr/local/opt/qt5/bin:$PATH
         python build.py
+      env:
+        BUILD_NUMBER: ${{ github.run_number }}
     
     - name: Create macOS app bundle
       run: |
@@ -149,6 +153,8 @@ jobs:
     - name: Build Linux executable
       run: |
         python build.py
+      env:
+        BUILD_NUMBER: ${{ github.run_number }}
     
     - name: Create Linux AppImage (if tools available)
       run: |
@@ -207,8 +213,9 @@ jobs:
           - **macOS**: Extract and run the application
         files: |
           release-files/modan2-windows/InnoSetup/Output/*.exe
-          release-files/modan2-linux/dist/Modan2_v*
-          release-files/modan2-macos/dist/Modan2_v*
+          release-files/modan2-windows/dist/*_build*.exe
+          release-files/modan2-linux/dist/*_build*_linux
+          release-files/modan2-macos/dist/*_build*_macos
         draft: false
         prerelease: true
       env:

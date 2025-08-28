@@ -43,6 +43,7 @@ def get_platform_separator():
 # --- Configuration ---
 NAME = mu.PROGRAM_NAME
 VERSION = mu.PROGRAM_VERSION
+BUILD_NUMBER = os.environ.get('BUILD_NUMBER', 'local')
 #DATE = "20240708"
 today = date.today()
 DATE = today.strftime("%Y%m%d")
@@ -56,8 +57,17 @@ ICON = "icons/Modan2_2.png"
 exe_extension = get_platform_executable_extension()
 data_separator = get_platform_separator()
 
+# Add platform suffix to filename
+platform_suffix = ""
+if platform.system() == "Linux":
+    platform_suffix = "_linux"
+elif platform.system() == "Darwin":  # macOS
+    platform_suffix = "_macos"
+elif platform.system() == "Windows":
+    platform_suffix = ""  # Windows already has .exe extension
+
 onefile_args = [
-    f"--name={NAME}_v{VERSION}_{DATE}{exe_extension}",
+    f"--name={NAME}_v{VERSION}_build{BUILD_NUMBER}{platform_suffix}{exe_extension}",
     "--onefile",
     "--noconsole",
     f"--add-data=icons/*.png{data_separator}icons",

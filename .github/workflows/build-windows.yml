@@ -35,14 +35,11 @@ jobs:
         run: |
           python -m PyInstaller --onedir --noconsole --add-data "icons/*.png;icons" --add-data "translations/*.qm;translations" --add-data "migrations/*;migrations" --icon="icons/Modan2_2.png" Modan2.py
 
-      # 5. Inno Setup 설치 (Marketplace Action 사용)
-      - name: Set up Inno Setup
-        uses: Minishlink/actions-innosetup@v1.2.0
-
-      # 6. Inno Setup 컴파일러 실행
-      - name: Compile Inno Setup installer
-        run: |
-          iscc.exe "InnoSetup/Modan2.iss"
+      # 5. Inno Setup 설치 및 컴파일
+      - name: Build Inno Setup installer
+        uses: crazy-max/ghaction-innosetup@v3
+        with:
+          script: InnoSetup/Modan2.iss
 
       # 7. 최종 설치 파일을 artifact로 업로드 (와일드카드 사용)
       - name: Upload Windows Installer

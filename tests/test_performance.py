@@ -61,7 +61,7 @@ class TestMdModelPerformance:
     
     # Use the existing test database fixture from conftest.py
     
-    def test_bulk_dataset_creation_performance(self, test_db_setup):
+    def test_bulk_dataset_creation_performance(self, test_database):
         """Test performance of creating many datasets."""
         start_time = time.time()
         dataset_count = 100
@@ -85,7 +85,7 @@ class TestMdModelPerformance:
         # Should complete reasonably quickly
         assert execution_time < 5.0  # Should complete in less than 5 seconds
     
-    def test_bulk_object_creation_performance(self, test_db_setup):
+    def test_bulk_object_creation_performance(self, test_database):
         """Test performance of creating many objects."""
         # Create a parent dataset
         dataset = mm.MdDataset.create(dataset_name="Performance Parent")
@@ -112,7 +112,7 @@ class TestMdModelPerformance:
         # Should complete reasonably quickly
         assert execution_time < 10.0  # Should complete in less than 10 seconds
     
-    def test_large_landmark_processing_performance(self, test_db_setup):
+    def test_large_landmark_processing_performance(self, test_database):
         """Test performance of processing large landmark datasets."""
         dataset = mm.MdDataset.create(dataset_name="Large Landmark Dataset", dimension=2)
         obj = mm.MdObject.create(object_name="Large Landmark Object", dataset=dataset)

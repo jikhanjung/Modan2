@@ -19,21 +19,39 @@ jobs:
       with:
         python-version: '3.12'
     
-    - name: Install dependencies
+    - name: Install Windows dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        pip install -r requirements_win.txt
         pip install pyinstaller
     
-    - name: Build with PyInstaller
+    - name: Build Windows executable
       run: |
         python build.py
+    
+    - name: Download and Install Inno Setup
+      shell: pwsh
+      run: |
+        $inno_url = "https://files.jrsoftware.org/is/6/innosetup-6.2.2.exe"
+        $inno_installer = "innosetup-installer.exe"
+        Invoke-WebRequest -Uri $inno_url -OutFile $inno_installer
+        Start-Process -FilePath $inno_installer -ArgumentList "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART" -Wait
+
+    - name: Create Windows installer
+      shell: pwsh
+      run: |
+        $inno_path = "C:\Program Files (x86)\Inno Setup 6"
+        $env:PATH = "$inno_path;$env:PATH"
+        iscc.exe "InnoSetup/Modan2.iss"
+      continue-on-error: true
     
     - name: Upload Windows artifact
       uses: actions/upload-artifact@v4
       with:
         name: modan2-windows
-        path: dist/
+        path: |
+          dist/
+          InnoSetup/Output/Modan2_v*_Installer.exe
     
   build-macos:
     runs-on: macos-latest
@@ -47,21 +65,36 @@ jobs:
       with:
         python-version: '3.12'
     
-    - name: Install system dependencies
+    - name: Install macOS system dependencies
       run: |
         brew install qt5
+        # Set Qt5 environment variables
+        echo "export PATH=/usr/local/opt/qt5/bin:$PATH" >> ~/.bash_profile
+        echo "export LDFLAGS=-L/usr/local/opt/qt5/lib" >> ~/.bash_profile
+        echo "export CPPFLAGS=-I/usr/local/opt/qt5/include" >> ~/.bash_profile
     
-    - name: Install dependencies
+    - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pyinstaller
     
-    - name: Build with PyInstaller
+    - name: Build macOS application
       run: |
+        # Set Qt5 paths for PyInstaller
+        export PATH=/usr/local/opt/qt5/bin:$PATH
         python build.py
     
-    - name: Upload macOS artifact
+    - name: Create macOS app bundle
+      run: |
+        # If build.py creates an app bundle, we're good
+        # Otherwise, create a simple .app structure
+        if [ ! -d "dist/Modan2.app" ]; then
+          mkdir -p "dist/Modan2.app/Contents/MacOS"
+          cp -r dist/* "dist/Modan2.app/Contents/MacOS/" 2>/dev/null || true
+        fi
+    
+    - name: Upload macOS artifact  
       uses: actions/upload-artifact@v4
       with:
         name: modan2-macos
@@ -79,7 +112,7 @@ jobs:
       with:
         python-version: '3.12'
     
-    - name: Install system dependencies
+    - name: Install Linux system dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y \
@@ -99,20 +132,36 @@ jobs:
           libqt5widgets5 \
           libglut-dev \
           libglut3.12 \
-          python3-opengl
+          python3-opengl \
+          fuse
     
-    - name: Install dependencies
+    - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pyinstaller
     
-    - name: Build with PyInstaller
+    - name: Build Linux executable
       run: |
         python build.py
+    
+    - name: Create Linux AppImage (if tools available)
+      run: |
+        # Check if AppImage build tools are available
+        if [ -f "build_linux/makeself.sh" ]; then
+          echo "Building Linux installer..."
+          cd build_linux
+          ./makeself.sh || echo "Linux installer build failed, continuing..."
+          cd ..
+        else
+          echo "Linux installer tools not found, skipping..."
+        fi
+      continue-on-error: true
     
     - name: Upload Linux artifact
       uses: actions/upload-artifact@v4
       with:
         name: modan2-linux
-        path: dist/
+        path: |
+          dist/
+          build_linux/*.run

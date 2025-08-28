@@ -1,5 +1,7 @@
 import subprocess
 import os
+import sys
+import platform
 from datetime import date
 import MdUtils as mu
 
@@ -10,6 +12,10 @@ def run_pyinstaller(args):
 
 def run_inno_setup(iss_file, version):
     """Runs Inno Setup Compiler with the specified ISS file and version."""
+    if platform.system() != "Windows":
+        print("Inno Setup is Windows-only, skipping...")
+        return
+        
     with open(iss_file, 'r') as f:
         content = f.read()
         content = content.replace("#define AppVersion \"0.1.3\"", f"#define AppVersion \"{version}\"")
@@ -17,7 +23,22 @@ def run_inno_setup(iss_file, version):
         f.write(content)
 
     inno_setup_cmd = [r"C:\Program Files (x86)\Inno Setup 6\ISCC.exe", iss_file]
-    subprocess.run(inno_setup_cmd, check=True)
+    try:
+        subprocess.run(inno_setup_cmd, check=True)
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        print("Inno Setup not found or failed, skipping installer creation...")
+
+def get_platform_executable_extension():
+    """Get the appropriate executable extension for the current platform."""
+    if platform.system() == "Windows":
+        return ".exe"
+    return ""
+
+def get_platform_separator():
+    """Get the appropriate path separator for PyInstaller add-data."""
+    if platform.system() == "Windows":
+        return ";"
+    return ":"
 
 # --- Configuration ---
 NAME = mu.PROGRAM_NAME
@@ -32,13 +53,16 @@ ICON = "icons/Modan2_2.png"
 # --- End Configuration ---
 
 # 1. Run PyInstaller (One-File Executable)
+exe_extension = get_platform_executable_extension()
+data_separator = get_platform_separator()
+
 onefile_args = [
-    f"--name={NAME}_v{VERSION}_{DATE}.exe",
+    f"--name={NAME}_v{VERSION}_{DATE}{exe_extension}",
     "--onefile",
     "--noconsole",
-    "--add-data=icons/*.png;icons",
-    "--add-data=translations/*.qm;translations",
-    "--add-data=migrations/*;migrations",
+    f"--add-data=icons/*.png{data_separator}icons",
+    f"--add-data=translations/*.qm{data_separator}translations",
+    f"--add-data=migrations/*{data_separator}migrations",
     f"--icon={ICON}",
     "Modan2.py",
 ]
@@ -48,9 +72,9 @@ run_pyinstaller(onefile_args)
 onedir_args = [
     "--onedir",
     "--noconsole",
-    "--add-data=icons/*.png;icons",
-    "--add-data=translations/*.qm;translations",
-    "--add-data=migrations/*;migrations",
+    f"--add-data=icons/*.png{data_separator}icons",
+    f"--add-data=translations/*.qm{data_separator}translations",
+    f"--add-data=migrations/*{data_separator}migrations",
     f"--icon={ICON}",
     "--noconfirm",
     "Modan2.py",

@@ -4,8 +4,6 @@ peewee
 pillow
 numpy<2.0.0
 trimesh
-PyOpenGL-3.1.7-cp312-cp312-win_amd64.whl
-PyOpenGL_accelerate-3.1.7-cp312-cp312-win_amd64.whl
 matplotlib
 scipy
 opencv-python
@@ -13,3 +11,7 @@ xlsxwriter
 pandas
 peewee-migrate
 statsmodels
+pyopengl
+pyopengl-accelerate
+# sudo apt-get update && sudo apt-get install -y libxcb-xinerama0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1   libxcb-randr0 libxcb-render-util0 libxcb-xfixes0 libxcb-shape0 libxcb-cursor0 qt5-qmake qtbase5-dev libqt5gui5   libqt5core5a libqt5widgets5 python3-pyqt5
+# sudo apt-get install -y libglut-dev libglut3.12 python3-opengl

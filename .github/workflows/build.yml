@@ -2,8 +2,9 @@ name: Build
 
 on:
   push:
+    branches: [ "main" ]  # main 브랜치 푸시 시 실행
     tags:
-      - 'v*.*.*'  # 태그 푸시 시에만 실행 (예: v1.2.3)
+      - 'v*.*.*'  # 태그 푸시 시에도 실행 (예: v1.2.3)
   workflow_dispatch:  # 수동 실행 가능
 
 jobs:
@@ -52,6 +53,15 @@ jobs:
         path: |
           dist/
           InnoSetup/Output/Modan2_v*_Installer.exe
+    
+    - name: Create build tag
+      if: github.ref == 'refs/heads/main'
+      run: |
+        BUILD_TAG="v0.1.4-build.${{ github.run_number }}"
+        echo "Creating build tag: $BUILD_TAG"
+        git tag $BUILD_TAG
+        git push origin $BUILD_TAG || echo "Tag push failed, continuing..."
+      continue-on-error: true
     
   build-macos:
     runs-on: macos-latest

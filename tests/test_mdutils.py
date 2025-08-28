@@ -21,7 +21,7 @@ class TestConstants:
         """Test that program constants are properly defined."""
         assert mu.COMPANY_NAME == "PaleoBytes"
         assert mu.PROGRAM_NAME == "Modan2"
-        assert mu.PROGRAM_VERSION == "0.1.3"
+        assert mu.PROGRAM_VERSION == "0.1.4"
         
         # Version should be in x.y.z format
         version_parts = mu.PROGRAM_VERSION.split('.')

@@ -18,7 +18,7 @@ def run_inno_setup(iss_file, version):
         
     with open(iss_file, 'r') as f:
         content = f.read()
-        content = content.replace("#define AppVersion \"0.1.3\"", f"#define AppVersion \"{version}\"")
+        content = content.replace("#define AppVersion \"0.1.4\"", f"#define AppVersion \"{version}\"")
     with open(iss_file, 'w') as f:
         f.write(content)
 

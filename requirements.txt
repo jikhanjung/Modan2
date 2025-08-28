@@ -11,3 +11,5 @@ scipy
 opencv-python
 xlsxwriter
 pandas
+peewee-migrate
+statsmodels

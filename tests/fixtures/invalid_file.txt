@@ -1,0 +1,3 @@
+This is not a valid 3D model file.
+It should cause an error when processed by 3D file loaders.
+Just plain text content for error handling testing.

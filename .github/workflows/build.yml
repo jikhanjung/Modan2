@@ -54,14 +54,6 @@ jobs:
           dist/
           InnoSetup/Output/Modan2_v*_Installer.exe
     
-    - name: Create build tag
-      if: github.ref == 'refs/heads/main'
-      run: |
-        BUILD_TAG="v0.1.4-build.${{ github.run_number }}"
-        echo "Creating build tag: $BUILD_TAG"
-        git tag $BUILD_TAG
-        git push origin $BUILD_TAG || echo "Tag push failed, continuing..."
-      continue-on-error: true
     
   build-macos:
     runs-on: macos-latest
@@ -175,3 +167,42 @@ jobs:
         path: |
           dist/
           build_linux/*.run
+
+  create-release:
+    needs: [build-windows, build-macos, build-linux]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: release-files/
+    
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: v0.1.4-build.${{ github.run_number }}
+        name: Modan2 v0.1.4 Build ${{ github.run_number }}
+        body: |
+          🚀 **Automated Cross-Platform Build**
+          
+          Built from commit: ${{ github.sha }}
+          Build number: ${{ github.run_number }}
+          
+          **Platforms:**
+          - ✅ Windows (with installer)
+          - ✅ macOS 
+          - ✅ Linux
+          
+          **Download:**
+          - **Windows**: Use the installer (.exe) for easy installation
+          - **macOS/Linux**: Extract and run the executable from dist folder
+        files: release-files/**/*
+        draft: false
+        prerelease: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

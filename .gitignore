@@ -3,7 +3,14 @@ Modan2.db
 build/
 dist/
 data/
-test*.py
+# test*.py  # Commented out to include test files in version control
 Output/
 *.spec
 translations/desktop.ini
+# Linux installer build files
+/build_linux/
+
+# PyInstaller artifacts
+/build/
+/dist/
+*.spec

@@ -35,11 +35,21 @@ jobs:
         run: |
           python -m PyInstaller --onedir --noconsole --add-data "icons/*.png;icons" --add-data "translations/*.qm;translations" --add-data "migrations/*;migrations" --icon="icons/Modan2_2.png" Modan2.py
 
-      # 5. Inno Setup 설치 및 컴파일
-      - name: Build Inno Setup installer
-        uses: crazy-max/ghaction-innosetup@v3
-        with:
-          script: InnoSetup/Modan2.iss
+      # 5. Inno Setup 수동 설치 및 컴파일
+      - name: Download and Install Inno Setup
+        shell: pwsh
+        run: |
+          $inno_url = "https://files.jrsoftware.org/is/6/innosetup-6.2.2.exe"
+          $inno_installer = "innosetup-installer.exe"
+          Invoke-WebRequest -Uri $inno_url -OutFile $inno_installer
+          Start-Process -FilePath $inno_installer -ArgumentList "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART" -Wait
+
+      - name: Compile Inno Setup installer
+        shell: pwsh
+        run: |
+          $inno_path = "C:\Program Files (x86)\Inno Setup 6"
+          $env:PATH = "$inno_path;$env:PATH"
+          iscc.exe "InnoSetup/Modan2.iss"
 
       # 7. 최종 설치 파일을 artifact로 업로드 (와일드카드 사용)
       - name: Upload Windows Installer

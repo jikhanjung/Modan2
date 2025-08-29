@@ -215,6 +215,10 @@ class MdDataset(Model):
         self.pack_variablename_str()
         self.save()
         return propertyname
+    
+    def refresh(self):
+        """Refresh dataset from database"""
+        return self.get_by_id(self.id)
 
 class MdObject(Model):
     object_name = CharField()
@@ -661,6 +665,10 @@ class MdThreeDModel(Model):
         afile.close()
         md5hash = hasher.hexdigest()
         return md5hash, image_data
+    
+    def refresh(self):
+        """Refresh object from database"""
+        return self.get_by_id(self.id)
 
 class MdObjectOps:
     def __init__(self,mdobject):

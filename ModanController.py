@@ -899,7 +899,7 @@ class ModanController(QObject):
         if not self.current_dataset:
             return False, "No dataset selected"
         
-        objects_with_landmarks = list(self.current_dataset.objects.where(
+        objects_with_landmarks = list(self.current_dataset.object_list.where(
             MdModel.MdObject.landmarks.is_null(False)
         ))
         

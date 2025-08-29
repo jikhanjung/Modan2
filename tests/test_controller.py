@@ -362,6 +362,7 @@ class TestAnalysisOperations:
             dataset=controller_with_data.current_dataset,
             analysis_name="Test_Analysis",
             analysis_type="PCA",
+            superimposition_method="procrustes",
             parameters={},
             results={}
         )
@@ -458,6 +459,7 @@ class TestStateManagement:
             dataset=controller.current_dataset,
             analysis_name="State_Test_Analysis",
             analysis_type="PCA",
+            superimposition_method="procrustes",
             parameters={},
             results={}
         )

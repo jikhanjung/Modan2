@@ -5,7 +5,7 @@ from pathlib import Path
 from PyQt5.QtCore import Qt, QMimeData, QUrl, QPoint
 from PyQt5.QtGui import QDragEnterEvent, QDropEvent
 from PyQt5.QtTest import QTest
-from PyQt5.QtWidgets import QTreeWidgetItem, QDialog
+from PyQt5.QtWidgets import QTreeWidgetItem, QDialog, QMessageBox
 from unittest.mock import Mock, MagicMock, patch
 import sys
 import os
@@ -67,12 +67,12 @@ ID=specimen_002
             dataset = datasets[-1]
             assert dataset.dataset_name == "2D Workflow Test"
         
-        # Step 2: Select the dataset in tree
+        # Step 2: Select the dataset in treeView
         item = QTreeWidgetItem()
         item.setText(0, dataset.dataset_name)
         item.setData(0, Qt.UserRole, dataset)
-        main_window.tree.addTopLevelItem(item)
-        main_window.tree.setCurrentItem(item)
+        main_window.treeView.addTopLevelItem(item)
+        main_window.treeView.setCurrentItem(item)
         main_window.on_selection_changed()
         
         assert main_window.m_dataset == dataset
@@ -196,7 +196,7 @@ f 5 6 7 8
             with patch('PyQt5.QtWidgets.QFileDialog.getOpenFileName') as mock_dialog:
                 mock_dialog.return_value = (obj_path, '3D Files (*.obj)')
                 
-                with patch.object(main_window, 'import_3d_file') as mock_import:
+                with patch.object(main_window, 'on_action_import_dataset_triggered') as mock_import:
                     mock_import.return_value = True
                     
                     main_window.on_action_import_3d()
@@ -237,7 +237,7 @@ f 5 6 7 8
             with patch('PyQt5.QtWidgets.QFileDialog.getSaveFileName') as mock_dialog:
                 mock_dialog.return_value = (csv_path, 'CSV Files (*.csv)')
                 
-                with patch.object(main_window, 'export_to_csv') as mock_export:
+                with patch.object(main_window, 'on_action_export_dataset_triggered') as mock_export:
                     mock_export.return_value = True
                     
                     main_window.on_action_export()
@@ -321,23 +321,23 @@ f 5 6 7 8
             )
             datasets.append(ds)
             
-            # Add to tree
+            # Add to treeView
             item = QTreeWidgetItem()
             item.setText(0, ds.dataset_name)
             item.setData(0, Qt.UserRole, ds)
-            main_window.tree.addTopLevelItem(item)
+            main_window.treeView.addTopLevelItem(item)
         
         # Switch between datasets
         for i, ds in enumerate(datasets):
-            item = main_window.tree.topLevelItem(i)
-            main_window.tree.setCurrentItem(item)
+            item = main_window.treeView.topLevelItem(i)
+            main_window.treeView.setCurrentItem(item)
             main_window.on_selection_changed()
             
             assert main_window.m_dataset == ds
             
             # Verify UI updates for dataset dimension
             if ds.dimension == 2:
-                assert main_window.viewer_2d.isEnabled()
+                assert main_window.object_view_2d.isEnabled()
             else:
                 assert main_window.viewer_3d.isEnabled()
     
@@ -368,14 +368,14 @@ f 5 6 7 8
 class TestIntegrationScenarios:
     """Test integration scenarios between components."""
     
-    def test_dataset_tree_table_sync(self, qtbot, main_window, mock_database):
-        """Test synchronization between tree and table views."""
+    def test_dataset_treeView_table_sync(self, qtbot, main_window, mock_database):
+        """Test synchronization between treeView and table views."""
         import MdModel
         
         # Create dataset with objects
         dataset = MdModel.MdDataset.create(
             dataset_name="Sync Test",
-            dataset_desc="Testing tree-table sync",
+            dataset_desc="Testing treeView-table sync",
             dimension=2,
             landmark_count=5
         )
@@ -389,14 +389,14 @@ class TestIntegrationScenarios:
             )
             objects.append(obj)
         
-        # Add dataset to tree
+        # Add dataset to treeView
         dataset_item = QTreeWidgetItem()
         dataset_item.setText(0, dataset.dataset_name)
         dataset_item.setData(0, Qt.UserRole, dataset)
-        main_window.tree.addTopLevelItem(dataset_item)
+        main_window.treeView.addTopLevelItem(dataset_item)
         
         # Select dataset
-        main_window.tree.setCurrentItem(dataset_item)
+        main_window.treeView.setCurrentItem(dataset_item)
         main_window.on_selection_changed()
         
         # Verify table is populated
@@ -426,7 +426,7 @@ class TestIntegrationScenarios:
         main_window.m_object = obj
         
         # Trigger viewer update
-        with patch.object(main_window.viewer_2d, 'show_object') as mock_show:
+        with patch.object(main_window.object_view_2d, 'show_object') as mock_show:
             main_window.on_object_selected()
             
             # Verify viewer was updated

@@ -47,3 +47,147 @@ def qt_app():
         app = QApplication([])
     yield app
     # Don't quit the app here as it might be reused
+
+
+@pytest.fixture(scope='session')
+def qapp():
+    """Global Qt Application fixture for pytest-qt."""
+    from PyQt5.QtWidgets import QApplication
+    app = QApplication.instance()
+    if app is None:
+        app = QApplication([])
+    yield app
+
+
+@pytest.fixture
+def temp_db(tmp_path):
+    """Temporary database for testing."""
+    db_path = tmp_path / "test_modan.db"
+    return str(db_path)
+
+
+@pytest.fixture
+def mock_database(monkeypatch, temp_db):
+    """Mock database operations."""
+    import MdModel
+    from peewee import SqliteDatabase
+    
+    # Create test database
+    test_db = SqliteDatabase(temp_db, pragmas={'foreign_keys': 1})
+    
+    # Store original database
+    original_db = MdModel.gDatabase
+    
+    # Set test database
+    monkeypatch.setattr(MdModel, 'gDatabase', test_db)
+    
+    # Update all model classes to use test database
+    models = [MdModel.MdDataset, MdModel.MdObject, MdModel.MdImage, 
+              MdModel.MdThreeDModel, MdModel.MdAnalysis]
+    for model in models:
+        model._meta.database = test_db
+    
+    # Create tables
+    test_db.connect()
+    test_db.create_tables(models, safe=True)
+    
+    yield temp_db
+    
+    # Cleanup
+    test_db.close()
+    
+    # Restore original database
+    monkeypatch.setattr(MdModel, 'gDatabase', original_db)
+    for model in models:
+        model._meta.database = original_db
+
+
+@pytest.fixture
+def main_window(qtbot, mock_database):
+    """Main window fixture with mocked database."""
+    from Modan2 import ModanMainWindow
+    
+    # Create test config
+    test_config = {
+        "language": "en",
+        "ui": {
+            "toolbar_icon_size": "Medium",
+            "remember_geometry": False,
+            "window_geometry": [100, 100, 1400, 800],
+            "is_maximized": False
+        }
+    }
+    
+    # Create window with config
+    window = ModanMainWindow(test_config)
+    qtbot.addWidget(window)
+    
+    # Show window
+    window.show()
+    qtbot.waitForWindowShown(window)
+    
+    yield window
+    
+    # Cleanup
+    window.close()
+
+
+@pytest.fixture
+def sample_dataset(mock_database):
+    """Create a sample dataset for testing."""
+    import MdModel
+    
+    dataset = MdModel.MdDataset.create(
+        dataset_name="Test Dataset",
+        dataset_desc="Dataset for testing",
+        dimension=2,
+        landmark_count=10,
+        object_name="Test Object",
+        object_desc="Test Description"
+    )
+    
+    return dataset
+
+
+@pytest.fixture
+def sample_tps_file(tmp_path, sample_tps_data):
+    """Create a temporary TPS file."""
+    tps_path = tmp_path / "test.tps"
+    tps_path.write_text(sample_tps_data)
+    return str(tps_path)
+
+
+@pytest.fixture
+def sample_nts_file(tmp_path, sample_nts_data):
+    """Create a temporary NTS file."""
+    nts_path = tmp_path / "test.nts"
+    nts_path.write_text(sample_nts_data)
+    return str(nts_path)
+
+
+@pytest.fixture
+def controller(mock_database):
+    """Create a ModanController instance for testing."""
+    from ModanController import ModanController
+    return ModanController()
+
+
+@pytest.fixture  
+def controller_with_data(controller, sample_dataset):
+    """Controller with sample dataset loaded."""
+    import MdModel
+    
+    # Add objects with landmarks to the dataset
+    for i in range(5):  # Create 5 objects for analysis
+        obj = MdModel.MdObject.create(
+            dataset=sample_dataset,
+            object_name=f"Object_{i+1}",
+            sequence=i+1
+        )
+        # Add sample landmark data (5 landmarks with x,y coordinates)
+        landmark_str = "\n".join([f"{i+j}.0\t{i+j+1}.0" for j in range(5)])
+        obj.landmark_str = landmark_str
+        obj.save()
+    
+    controller.set_current_dataset(sample_dataset)
+    return controller

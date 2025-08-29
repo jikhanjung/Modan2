@@ -1651,3 +1651,33 @@ class MdAnalysis(Model):
     modified_at = DateTimeField(default=datetime.datetime.now)
     class Meta:
         database = gDatabase
+
+
+def prepare_database():
+    """Prepare the database by running migrations and backups"""
+    from peewee_migrate import Router
+    
+    migrations_path = mu.resource_path("migrations")
+    logger.info("migrations path: %s", migrations_path)
+    logger.info("database path: %s", database_path)
+    now = datetime.datetime.now()
+    date_str = now.strftime("%Y%m%d")
+
+    # backup database file to backup directory
+    backup_path = os.path.join(mu.DB_BACKUP_DIRECTORY, DATABASE_FILENAME + '.' + date_str)
+    if not os.path.exists(backup_path) and os.path.exists(database_path):
+        shutil.copy2(database_path, backup_path)
+        logger.info("backup database to %s", backup_path)
+        # read backup directory and delete old backups
+        backup_list = os.listdir(mu.DB_BACKUP_DIRECTORY)
+        # filter out non-backup files
+        backup_list = [f for f in backup_list if f.startswith(DATABASE_FILENAME)]
+        backup_list.sort()
+        if len(backup_list) > 10:
+            for i in range(len(backup_list) - 10):
+                os.remove(os.path.join(mu.DB_BACKUP_DIRECTORY, backup_list[i]))
+
+    gDatabase.connect()
+    router = Router(gDatabase, migrate_dir=migrations_path)
+    # Auto-discover and run migrations
+    router.run()

@@ -355,3 +355,293 @@ def PerformManova(dataset_ops, new_coords, classifier_index):
 
     return manova
 
+
+# ========== Modern Analysis Functions for Controller ==========
+
+def do_pca_analysis(landmarks_data, n_components=None):
+    """Perform PCA analysis on landmark data.
+    
+    Args:
+        landmarks_data: List of landmark arrays
+        n_components: Number of components (None for auto)
+        
+    Returns:
+        Dictionary with PCA results
+    """
+    try:
+        import numpy as np
+        from sklearn.decomposition import PCA
+        from sklearn.preprocessing import StandardScaler
+        
+        # Flatten landmark data
+        flattened_data = []
+        for landmarks in landmarks_data:
+            flat_coords = []
+            for landmark in landmarks:
+                flat_coords.extend(landmark[:2])  # Use X, Y coordinates
+            flattened_data.append(flat_coords)
+        
+        # Convert to numpy array
+        data_matrix = np.array(flattened_data)
+        
+        # Standardize data
+        scaler = StandardScaler()
+        data_scaled = scaler.fit_transform(data_matrix)
+        
+        # Perform PCA
+        if n_components is None:
+            n_components = min(data_matrix.shape[0] - 1, data_matrix.shape[1])
+        
+        pca = PCA(n_components=n_components)
+        scores = pca.fit_transform(data_scaled)
+        
+        # Calculate cumulative variance
+        cumulative_variance = np.cumsum(pca.explained_variance_ratio_)
+        
+        # Calculate mean shape
+        mean_coords = np.mean(data_matrix, axis=0)
+        mean_shape = []
+        for i in range(0, len(mean_coords), 2):
+            mean_shape.append([mean_coords[i], mean_coords[i+1]])
+        
+        return {
+            'n_components': n_components,
+            'eigenvalues': pca.explained_variance_.tolist(),
+            'eigenvectors': pca.components_.tolist(),
+            'scores': scores.tolist(),
+            'explained_variance_ratio': pca.explained_variance_ratio_.tolist(),
+            'cumulative_variance_ratio': cumulative_variance.tolist(),
+            'mean_shape': mean_shape,
+            'scaler_mean': scaler.mean_.tolist(),
+            'scaler_scale': scaler.scale_.tolist()
+        }
+        
+    except Exception as e:
+        raise ValueError(f"PCA analysis failed: {str(e)}")
+
+
+def do_cva_analysis(landmarks_data, groups):
+    """Perform CVA (Canonical Variate Analysis) on landmark data.
+    
+    Args:
+        landmarks_data: List of landmark arrays
+        groups: List of group labels for each specimen
+        
+    Returns:
+        Dictionary with CVA results
+    """
+    try:
+        import numpy as np
+        from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+        from sklearn.preprocessing import StandardScaler
+        from sklearn.metrics import accuracy_score
+        
+        # Flatten landmark data
+        flattened_data = []
+        for landmarks in landmarks_data:
+            flat_coords = []
+            for landmark in landmarks:
+                flat_coords.extend(landmark[:2])
+            flattened_data.append(flat_coords)
+        
+        data_matrix = np.array(flattened_data)
+        group_array = np.array(groups)
+        
+        # Standardize data
+        scaler = StandardScaler()
+        data_scaled = scaler.fit_transform(data_matrix)
+        
+        # Perform LDA (equivalent to CVA)
+        lda = LinearDiscriminantAnalysis()
+        cv_scores = lda.fit_transform(data_scaled, group_array)
+        
+        # Predict classifications
+        predictions = lda.predict(data_scaled)
+        accuracy = accuracy_score(group_array, predictions) * 100
+        
+        # Calculate group centroids
+        unique_groups = np.unique(group_array)
+        centroids = []
+        for group in unique_groups:
+            group_mask = group_array == group
+            group_centroid = np.mean(cv_scores[group_mask], axis=0)
+            centroids.append(group_centroid.tolist())
+        
+        return {
+            'canonical_variables': cv_scores.tolist(),
+            'eigenvalues': lda.explained_variance_ratio_.tolist(),
+            'group_centroids': centroids,
+            'classification': predictions.tolist(),
+            'accuracy': accuracy,
+            'groups': unique_groups.tolist(),
+            'n_components': cv_scores.shape[1]
+        }
+        
+    except Exception as e:
+        raise ValueError(f"CVA analysis failed: {str(e)}")
+
+
+def do_manova_analysis(landmarks_data, groups):
+    """Perform MANOVA analysis on landmark data.
+    
+    Args:
+        landmarks_data: List of landmark arrays
+        groups: List of group labels for each specimen
+        
+    Returns:
+        Dictionary with MANOVA results
+    """
+    try:
+        import numpy as np
+        from scipy import stats
+        
+        # Flatten landmark data
+        flattened_data = []
+        for landmarks in landmarks_data:
+            flat_coords = []
+            for landmark in landmarks:
+                flat_coords.extend(landmark[:2])
+            flattened_data.append(flat_coords)
+        
+        data_matrix = np.array(flattened_data)
+        group_array = np.array(groups)
+        
+        unique_groups = np.unique(group_array)
+        n_groups = len(unique_groups)
+        n_vars = data_matrix.shape[1]
+        n_obs = data_matrix.shape[0]
+        
+        # Calculate group means
+        group_means = []
+        group_sizes = []
+        
+        for group in unique_groups:
+            group_data = data_matrix[group_array == group]
+            group_means.append(np.mean(group_data, axis=0))
+            group_sizes.append(len(group_data))
+        
+        group_means = np.array(group_means)
+        
+        # Overall mean
+        overall_mean = np.mean(data_matrix, axis=0)
+        
+        # Between-group sum of squares (H)
+        H = np.zeros((n_vars, n_vars))
+        for i, (group, size) in enumerate(zip(unique_groups, group_sizes)):
+            diff = group_means[i] - overall_mean
+            H += size * np.outer(diff, diff)
+        
+        # Within-group sum of squares (E)
+        E = np.zeros((n_vars, n_vars))
+        for group in unique_groups:
+            group_data = data_matrix[group_array == group]
+            group_mean = np.mean(group_data, axis=0)
+            
+            for row in group_data:
+                diff = row - group_mean
+                E += np.outer(diff, diff)
+        
+        # Calculate test statistics
+        try:
+            # Wilks' Lambda
+            det_E = np.linalg.det(E)
+            det_H_E = np.linalg.det(H + E)
+            
+            if det_H_E != 0:
+                wilks_lambda = det_E / det_H_E
+            else:
+                wilks_lambda = 0.0
+            
+            # Approximate F-statistic
+            df_num = (n_groups - 1) * n_vars
+            df_den = n_obs - n_groups - n_vars + 1
+            
+            if df_den > 0 and wilks_lambda > 0:
+                f_stat = ((1 - wilks_lambda) / wilks_lambda) * (df_den / df_num)
+                p_value = stats.f.sf(f_stat, df_num, df_den)
+            else:
+                f_stat = 0.0
+                p_value = 1.0
+            
+        except np.linalg.LinAlgError:
+            wilks_lambda = 0.0
+            f_stat = 0.0
+            p_value = 1.0
+        
+        return {
+            'wilks_lambda': wilks_lambda,
+            'f_statistic': f_stat,
+            'p_value': p_value,
+            'df': [df_num, df_den],
+            'effect_size': 1 - wilks_lambda,
+            'group_means': group_means.tolist(),
+            'overall_mean': overall_mean.tolist(),
+            'n_groups': n_groups,
+            'group_sizes': group_sizes
+        }
+        
+    except Exception as e:
+        raise ValueError(f"MANOVA analysis failed: {str(e)}")
+
+
+def do_procrustes_analysis(landmarks_data, scaling=True, reflection=True):
+    """Perform Procrustes analysis on landmark data.
+    
+    Args:
+        landmarks_data: List of landmark arrays
+        scaling: Allow scaling transformation
+        reflection: Allow reflection transformation
+        
+    Returns:
+        Dictionary with Procrustes results
+    """
+    try:
+        import numpy as np
+        from scipy.spatial.distance import procrustes
+        
+        if len(landmarks_data) < 2:
+            raise ValueError("At least 2 specimens required for Procrustes analysis")
+        
+        # Convert to numpy arrays
+        shapes = [np.array(landmarks) for landmarks in landmarks_data]
+        
+        # Use first shape as reference
+        reference = shapes[0]
+        aligned_shapes = [reference.copy()]
+        
+        # Align all other shapes to reference
+        for i in range(1, len(shapes)):
+            try:
+                # Procrustes alignment
+                aligned, ref_aligned, disparity = procrustes(reference, shapes[i])
+                aligned_shapes.append(aligned)
+                
+            except Exception as e:
+                # If procrustes fails, use original shape
+                aligned_shapes.append(shapes[i])
+        
+        # Calculate mean shape (consensus configuration)
+        mean_shape = np.mean(aligned_shapes, axis=0)
+        
+        # Calculate centroid sizes
+        centroid_sizes = []
+        for shape in shapes:
+            centroid = np.mean(shape, axis=0)
+            distances = np.sqrt(np.sum((shape - centroid)**2, axis=1))
+            centroid_size = np.sqrt(np.sum(distances**2))
+            centroid_sizes.append(centroid_size)
+        
+        return {
+            'aligned_shapes': [shape.tolist() for shape in aligned_shapes],
+            'mean_shape': mean_shape.tolist(),
+            'centroid_sizes': centroid_sizes,
+            'consensus_configuration': mean_shape.tolist(),
+            'scaling_enabled': scaling,
+            'reflection_enabled': reflection,
+            'n_specimens': len(landmarks_data),
+            'n_landmarks': len(landmarks_data[0]) if landmarks_data else 0
+        }
+        
+    except Exception as e:
+        raise ValueError(f"Procrustes analysis failed: {str(e)}")
+

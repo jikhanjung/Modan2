@@ -214,3 +214,249 @@ def get_ellipse_params(covariance, n_std):
     width, height = 1 * n_std * np.sqrt(eigenvalues)
     angle = np.degrees(theta)
     return width, height, angle
+
+
+def read_landmark_file(file_path):
+    """Read landmarks from TPS/NTS file.
+    
+    Args:
+        file_path: Path to landmark file
+        
+    Returns:
+        List of (specimen_name, landmarks) tuples
+    """
+    file_ext = os.path.splitext(file_path)[1].lower()
+    
+    if file_ext == '.tps':
+        return read_tps_file(file_path)
+    elif file_ext == '.nts':
+        return read_nts_file(file_path)
+    elif file_ext == '.txt':
+        # Try to detect format
+        with open(file_path, 'r') as f:
+            first_line = f.readline().strip()
+            if first_line.startswith('LM='):
+                return read_tps_file(file_path)
+            elif 'DIM=' in first_line:
+                return read_nts_file(file_path)
+    
+    raise ValueError(f"Unsupported landmark file format: {file_ext}")
+
+
+def read_tps_file(file_path):
+    """Read TPS format landmark file.
+    
+    Args:
+        file_path: Path to TPS file
+        
+    Returns:
+        List of (specimen_name, landmarks) tuples
+    """
+    specimens = []
+    current_landmarks = []
+    current_name = ""
+    
+    with open(file_path, 'r') as f:
+        for line in f:
+            line = line.strip()
+            
+            if line.startswith('LM='):
+                # Start new specimen
+                if current_landmarks and current_name:
+                    specimens.append((current_name, current_landmarks))
+                
+                landmark_count = int(line.split('=')[1])
+                current_landmarks = []
+                current_name = ""
+                
+            elif line.startswith('ID='):
+                current_name = line.split('=')[1].strip()
+                
+            elif line and not line.startswith(('IMAGE=', 'SCALE=')):
+                # Landmark coordinates
+                try:
+                    coords = [float(x) for x in line.split()]
+                    if len(coords) >= 2:
+                        current_landmarks.append(coords[:2])  # Use only X, Y
+                except ValueError:
+                    continue
+    
+    # Add last specimen
+    if current_landmarks and current_name:
+        specimens.append((current_name, current_landmarks))
+    elif current_landmarks:
+        specimens.append((f"specimen_{len(specimens)+1}", current_landmarks))
+    
+    return specimens
+
+
+def read_nts_file(file_path):
+    """Read NTS format landmark file.
+    
+    Args:
+        file_path: Path to NTS file
+        
+    Returns:
+        List of (specimen_name, landmarks) tuples
+    """
+    specimens = []
+    
+    with open(file_path, 'r') as f:
+        lines = f.readlines()
+    
+    i = 0
+    while i < len(lines):
+        line = lines[i].strip()
+        
+        # NTS header: n_specimens n_landmarks n_dimensions unknown DIM=dimension
+        if 'DIM=' in line:
+            parts = line.split()
+            n_specimens = int(parts[0])
+            n_landmarks = int(parts[1])
+            n_dimensions = int(parts[2])
+            
+            for spec_idx in range(n_specimens):
+                i += 1
+                if i >= len(lines):
+                    break
+                
+                # Specimen name
+                specimen_name = lines[i].strip()
+                landmarks = []
+                
+                # Read landmarks
+                for lm_idx in range(n_landmarks):
+                    i += 1
+                    if i >= len(lines):
+                        break
+                    
+                    coords = [float(x) for x in lines[i].split()]
+                    landmarks.append(coords[:2])  # Use only X, Y
+                
+                specimens.append((specimen_name, landmarks))
+        
+        i += 1
+    
+    return specimens
+
+
+def export_dataset_to_csv(dataset, file_path, include_metadata=True):
+    """Export dataset to CSV file.
+    
+    Args:
+        dataset: MdDataset instance
+        file_path: Output CSV file path
+        include_metadata: Include dataset metadata
+        
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        import pandas as pd
+        
+        # Collect data
+        data_rows = []
+        for obj in dataset.objects:
+            if obj.landmarks:
+                row = {'object_name': obj.object_name}
+                
+                # Add landmark coordinates
+                for i, landmark in enumerate(obj.landmarks):
+                    row[f'x{i+1}'] = landmark[0]
+                    row[f'y{i+1}'] = landmark[1]
+                    if len(landmark) > 2:
+                        row[f'z{i+1}'] = landmark[2]
+                
+                data_rows.append(row)
+        
+        if not data_rows:
+            return False
+        
+        # Create DataFrame
+        df = pd.DataFrame(data_rows)
+        
+        # Save to CSV
+        df.to_csv(file_path, index=False)
+        
+        # Add metadata if requested
+        if include_metadata:
+            with open(file_path, 'r') as f:
+                content = f.read()
+            
+            metadata = f"# Dataset: {dataset.dataset_name}\n"
+            metadata += f"# Description: {dataset.dataset_desc}\n"
+            metadata += f"# Dimension: {dataset.dimension}D\n"
+            metadata += f"# Landmarks: {dataset.landmark_count}\n"
+            metadata += f"# Objects: {len(data_rows)}\n"
+            metadata += f"# Exported: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+            
+            with open(file_path, 'w') as f:
+                f.write(metadata + content)
+        
+        return True
+        
+    except Exception as e:
+        show_error_message(f"Failed to export CSV: {e}")
+        return False
+
+
+def export_dataset_to_excel(dataset, file_path, include_metadata=True):
+    """Export dataset to Excel file.
+    
+    Args:
+        dataset: MdDataset instance
+        file_path: Output Excel file path
+        include_metadata: Include dataset metadata
+        
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        import pandas as pd
+        
+        # Collect data
+        data_rows = []
+        for obj in dataset.objects:
+            if obj.landmarks:
+                row = {'object_name': obj.object_name}
+                
+                # Add landmark coordinates
+                for i, landmark in enumerate(obj.landmarks):
+                    row[f'x{i+1}'] = landmark[0]
+                    row[f'y{i+1}'] = landmark[1]
+                    if len(landmark) > 2:
+                        row[f'z{i+1}'] = landmark[2]
+                
+                data_rows.append(row)
+        
+        if not data_rows:
+            return False
+        
+        # Create DataFrame
+        df = pd.DataFrame(data_rows)
+        
+        # Create Excel writer
+        with pd.ExcelWriter(file_path, engine='xlsxwriter') as writer:
+            # Write data
+            df.to_excel(writer, sheet_name='Landmarks', index=False)
+            
+            # Add metadata sheet if requested
+            if include_metadata:
+                metadata_df = pd.DataFrame({
+                    'Property': ['Dataset Name', 'Description', 'Dimension', 'Landmarks', 'Objects', 'Exported'],
+                    'Value': [
+                        dataset.dataset_name,
+                        dataset.dataset_desc,
+                        f"{dataset.dimension}D",
+                        dataset.landmark_count,
+                        len(data_rows),
+                        datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    ]
+                })
+                metadata_df.to_excel(writer, sheet_name='Metadata', index=False)
+        
+        return True
+        
+    except Exception as e:
+        show_error_message(f"Failed to export Excel: {e}")
+        return False

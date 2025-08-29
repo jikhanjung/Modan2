@@ -1,0 +1,397 @@
+2025-08-29 18:28:14,572 - __main__ - INFO - Starting Modan2 application...
+2025-08-29 18:28:15,327 - MdAppSetup - INFO - Initializing Modan2 application...
+2025-08-29 18:28:15,327 - MdAppSetup - ERROR - Failed to initialize application: module 'MdModel' has no attribute 'prepare_database'
+2025-08-29 18:28:15,327 - __main__ - ERROR - Application failed to start: module 'MdModel' has no attribute 'prepare_database'
+Traceback (most recent call last):
+  File "/home/jikhanjung/projects/Modan2/main.py", line 117, in main
+    setup.initialize()
+  File "/home/jikhanjung/projects/Modan2/MdAppSetup.py", line 54, in initialize
+    self._prepare_database()
+  File "/home/jikhanjung/projects/Modan2/MdAppSetup.py", line 82, in _prepare_database
+    MdModel.prepare_database()
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'MdModel' has no attribute 'prepare_database'
+2025-08-29 18:29:23,891 - __main__ - INFO - Starting Modan2 application...
+2025-08-29 18:29:24,659 - MdAppSetup - INFO - Initializing Modan2 application...
+2025-08-29 18:29:24,689 - MdModel - INFO - migrations path: /home/jikhanjung/projects/Modan2/migrations
+2025-08-29 18:29:24,689 - MdModel - INFO - database path: /home/jikhanjung/PaleoBytes/Modan2/Modan2.db
+2025-08-29 18:29:24,690 - peewee_migrate.logs - INFO - Starting migrations
+2025-08-29 18:29:24,692 - peewee_migrate.logs - INFO - There is nothing to migrate
+2025-08-29 18:29:24,712 - peewee_migrate.logs - WARNING - No changes found.
+2025-08-29 18:29:24,712 - MdAppSetup - WARNING - Migration module not found, skipping migrations
+2025-08-29 18:29:24,712 - MdAppSetup - INFO - Application initialized successfully
+2025-08-29 18:29:25,777 - __main__ - ERROR - Application failed to start: name 'Tuple' is not defined
+Traceback (most recent call last):
+  File "/home/jikhanjung/projects/Modan2/main.py", line 120, in main
+    from Modan2 import ModanMainWindow
+  File "/home/jikhanjung/projects/Modan2/Modan2.py", line 27, in <module>
+    from ModanWidgets import DatasetTreeWidget, ObjectTableWidget, LandmarkViewer2D
+  File "/home/jikhanjung/projects/Modan2/ModanWidgets.py", line 497, in <module>
+    class LandmarkViewer2D(QWidget):
+  File "/home/jikhanjung/projects/Modan2/ModanWidgets.py", line 547, in LandmarkViewer2D
+    def set_wireframe(self, wireframe_data: List[Tuple[int, int]]):
+                                                 ^^^^^
+NameError: name 'Tuple' is not defined
+2025-08-29 18:30:00,102 - __main__ - INFO - Starting Modan2 application...
+2025-08-29 18:30:01,105 - MdAppSetup - INFO - Initializing Modan2 application...
+2025-08-29 18:30:01,139 - MdModel - INFO - migrations path: /home/jikhanjung/projects/Modan2/migrations
+2025-08-29 18:30:01,139 - MdModel - INFO - database path: /home/jikhanjung/PaleoBytes/Modan2/Modan2.db
+2025-08-29 18:30:01,140 - peewee_migrate.logs - INFO - Starting migrations
+2025-08-29 18:30:01,143 - peewee_migrate.logs - INFO - There is nothing to migrate
+2025-08-29 18:30:01,151 - peewee_migrate.logs - WARNING - No changes found.
+2025-08-29 18:30:01,152 - MdAppSetup - WARNING - Migration module not found, skipping migrations
+2025-08-29 18:30:01,152 - MdAppSetup - INFO - Application initialized successfully
+2025-08-29 18:30:02,156 - __main__ - ERROR - Application failed to start: ModanMainWindow.__init__() takes 1 positional argument but 2 were given
+Traceback (most recent call last):
+  File "/home/jikhanjung/projects/Modan2/main.py", line 121, in main
+    window = ModanMainWindow(setup.get_config())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: ModanMainWindow.__init__() takes 1 positional argument but 2 were given
+2025-08-29 18:31:02,475 - __main__ - INFO - Starting Modan2 application...
+2025-08-29 18:31:02,476 - __main__ - DEBUG - Command line arguments: {'debug': True, 'db': None, 'config': None, 'lang': 'en', 'no_splash': False}
+2025-08-29 18:31:02,705 - trimesh - DEBUG - falling back to hashlib hashing: `pip install xxhash`for 50x faster cache checks
+2025-08-29 18:31:03,231 - MdAppSetup - INFO - Initializing Modan2 application...
+2025-08-29 18:31:03,231 - MdAppSetup - DEBUG - Preparing database at: /home/jikhanjung/.modan2/modan2.db
+2025-08-29 18:31:03,258 - MdModel - INFO - migrations path: /home/jikhanjung/projects/Modan2/migrations
+2025-08-29 18:31:03,258 - MdModel - INFO - database path: /home/jikhanjung/PaleoBytes/Modan2/Modan2.db
+2025-08-29 18:31:03,258 - peewee_migrate.logs - INFO - Starting migrations
+2025-08-29 18:31:03,258 - peewee - DEBUG - ('CREATE TABLE IF NOT EXISTS "migratehistory" ("id" INTEGER NOT NULL PRIMARY KEY, "name" VARCHAR(255) NOT NULL, "migrated_at" DATETIME NOT NULL)', [])
+2025-08-29 18:31:03,259 - peewee - DEBUG - ('SELECT "t1"."id", "t1"."name", "t1"."migrated_at" FROM "migratehistory" AS "t1" ORDER BY "t1"."id"', [])
+2025-08-29 18:31:03,261 - peewee_migrate.logs - INFO - There is nothing to migrate
+2025-08-29 18:31:03,261 - peewee - DEBUG - ('SELECT name FROM "main".sqlite_master WHERE type=? ORDER BY name', ('table',))
+2025-08-29 18:31:03,262 - peewee - DEBUG - ('CREATE TABLE IF NOT EXISTS "migratehistory" ("id" INTEGER NOT NULL PRIMARY KEY, "name" VARCHAR(255) NOT NULL, "migrated_at" DATETIME NOT NULL)', [])
+2025-08-29 18:31:03,262 - peewee - DEBUG - ('SELECT "t1"."id", "t1"."name", "t1"."migrated_at" FROM "migratehistory" AS "t1" ORDER BY "t1"."id"', [])
+2025-08-29 18:31:03,262 - peewee - DEBUG - ('SELECT "t1"."id", "t1"."name", "t1"."migrated_at" FROM "migratehistory" AS "t1" ORDER BY "t1"."id"', [])
+2025-08-29 18:31:03,269 - peewee_migrate.logs - WARNING - No changes found.
+2025-08-29 18:31:03,269 - MdAppSetup - WARNING - Migration module not found, skipping migrations
+2025-08-29 18:31:03,269 - MdAppSetup - DEBUG - Loading settings from: /home/jikhanjung/.modan2/config.json
+2025-08-29 18:31:03,269 - MdAppSetup - DEBUG - Settings loaded successfully
+2025-08-29 18:31:03,269 - MdAppSetup - DEBUG - Applied theme: default
+2025-08-29 18:31:03,269 - MdAppSetup - INFO - Application initialized successfully
+2025-08-29 18:31:03,749 - OpenGL.platform.ctypesloader - DEBUG - Loaded libEGL.so => libEGL.so <CDLL 'libEGL.so', handle 3b0e21e0 at 0x79dd97d28c50>
+2025-08-29 18:31:03,749 - OpenGL.acceleratesupport - DEBUG - OpenGL_accelerate module loaded
+2025-08-29 18:31:03,754 - OpenGL.arrays.arraydatatype - DEBUG - Using accelerated ArrayDatatype
+2025-08-29 18:31:03,757 - OpenGL.platform.ctypesloader - DEBUG - Loaded libOpenGL.so => libOpenGL.so <CDLL 'libOpenGL.so', handle 3b059530 at 0x79dd97ae15e0>
+2025-08-29 18:31:03,829 - OpenGL.platform.ctypesloader - DEBUG - Loaded libglut.so => libglut.so <CDLL 'libglut.so', handle 3b556dc0 at 0x79dd978570e0>
+2025-08-29 18:31:03,881 - matplotlib - DEBUG - matplotlib data path: /home/jikhanjung/venv/Modan2/lib/python3.12/site-packages/matplotlib/mpl-data
+2025-08-29 18:31:03,886 - matplotlib - DEBUG - CONFIGDIR=/home/jikhanjung/.config/matplotlib
+2025-08-29 18:31:03,887 - matplotlib - DEBUG - interactive is False
+2025-08-29 18:31:03,887 - matplotlib - DEBUG - platform is linux
+2025-08-29 18:31:03,908 - matplotlib - DEBUG - CACHEDIR=/home/jikhanjung/.cache/matplotlib
+2025-08-29 18:31:03,909 - matplotlib.font_manager - DEBUG - Using fontManager instance from /home/jikhanjung/.cache/matplotlib/fontlist-v390.json
+2025-08-29 18:31:04,165 - OpenGL.platform.ctypesloader - DEBUG - Loaded libGLU.so => libGLU.so <CDLL 'libGLU.so', handle 3bc53660 at 0x79dd968764b0>
+2025-08-29 18:31:04,216 - __main__ - ERROR - Application failed to start: 'modan2'
+Traceback (most recent call last):
+  File "/home/jikhanjung/projects/Modan2/main.py", line 121, in main
+    window = ModanMainWindow(setup.get_config())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jikhanjung/projects/Modan2/Modan2.py", line 43, in __init__
+    self.setWindowIcon(QIcon(ICON_CONSTANTS['modan2']))
+                             ~~~~~~~~~~~~~~^^^^^^^^^^
+KeyError: 'modan2'
+2025-08-29 18:31:33,937 - __main__ - INFO - Starting Modan2 application...
+2025-08-29 18:31:33,937 - __main__ - DEBUG - Command line arguments: {'debug': True, 'db': None, 'config': None, 'lang': 'en', 'no_splash': False}
+2025-08-29 18:31:34,164 - trimesh - DEBUG - falling back to hashlib hashing: `pip install xxhash`for 50x faster cache checks
+2025-08-29 18:31:34,673 - MdAppSetup - INFO - Initializing Modan2 application...
+2025-08-29 18:31:34,673 - MdAppSetup - DEBUG - Preparing database at: /home/jikhanjung/.modan2/modan2.db
+2025-08-29 18:31:34,696 - MdModel - INFO - migrations path: /home/jikhanjung/projects/Modan2/migrations
+2025-08-29 18:31:34,696 - MdModel - INFO - database path: /home/jikhanjung/PaleoBytes/Modan2/Modan2.db
+2025-08-29 18:31:34,696 - peewee_migrate.logs - INFO - Starting migrations
+2025-08-29 18:31:34,697 - peewee - DEBUG - ('CREATE TABLE IF NOT EXISTS "migratehistory" ("id" INTEGER NOT NULL PRIMARY KEY, "name" VARCHAR(255) NOT NULL, "migrated_at" DATETIME NOT NULL)', [])
+2025-08-29 18:31:34,697 - peewee - DEBUG - ('SELECT "t1"."id", "t1"."name", "t1"."migrated_at" FROM "migratehistory" AS "t1" ORDER BY "t1"."id"', [])
+2025-08-29 18:31:34,698 - peewee_migrate.logs - INFO - There is nothing to migrate
+2025-08-29 18:31:34,699 - peewee - DEBUG - ('SELECT name FROM "main".sqlite_master WHERE type=? ORDER BY name', ('table',))
+2025-08-29 18:31:34,699 - peewee - DEBUG - ('CREATE TABLE IF NOT EXISTS "migratehistory" ("id" INTEGER NOT NULL PRIMARY KEY, "name" VARCHAR(255) NOT NULL, "migrated_at" DATETIME NOT NULL)', [])
+2025-08-29 18:31:34,699 - peewee - DEBUG - ('SELECT "t1"."id", "t1"."name", "t1"."migrated_at" FROM "migratehistory" AS "t1" ORDER BY "t1"."id"', [])
+2025-08-29 18:31:34,700 - peewee - DEBUG - ('SELECT "t1"."id", "t1"."name", "t1"."migrated_at" FROM "migratehistory" AS "t1" ORDER BY "t1"."id"', [])
+2025-08-29 18:31:34,706 - peewee_migrate.logs - WARNING - No changes found.
+2025-08-29 18:31:34,707 - MdAppSetup - WARNING - Migration module not found, skipping migrations
+2025-08-29 18:31:34,707 - MdAppSetup - DEBUG - Loading settings from: /home/jikhanjung/.modan2/config.json
+2025-08-29 18:31:34,707 - MdAppSetup - DEBUG - Settings loaded successfully
+2025-08-29 18:31:34,707 - MdAppSetup - DEBUG - Applied theme: default
+2025-08-29 18:31:34,707 - MdAppSetup - INFO - Application initialized successfully
+2025-08-29 18:31:35,110 - OpenGL.platform.ctypesloader - DEBUG - Loaded libEGL.so => libEGL.so <CDLL 'libEGL.so', handle 2a23a890 at 0x7f9050d80b60>
+2025-08-29 18:31:35,111 - OpenGL.acceleratesupport - DEBUG - OpenGL_accelerate module loaded
+2025-08-29 18:31:35,115 - OpenGL.arrays.arraydatatype - DEBUG - Using accelerated ArrayDatatype
+2025-08-29 18:31:35,118 - OpenGL.platform.ctypesloader - DEBUG - Loaded libOpenGL.so => libOpenGL.so <CDLL 'libOpenGL.so', handle 2a1ae8c0 at 0x7f9050e011c0>
+2025-08-29 18:31:35,184 - OpenGL.platform.ctypesloader - DEBUG - Loaded libglut.so => libglut.so <CDLL 'libglut.so', handle 2a6b0180 at 0x7f90508a2ff0>
+2025-08-29 18:31:35,230 - matplotlib - DEBUG - matplotlib data path: /home/jikhanjung/venv/Modan2/lib/python3.12/site-packages/matplotlib/mpl-data
+2025-08-29 18:31:35,233 - matplotlib - DEBUG - CONFIGDIR=/home/jikhanjung/.config/matplotlib
+2025-08-29 18:31:35,234 - matplotlib - DEBUG - interactive is False
+2025-08-29 18:31:35,234 - matplotlib - DEBUG - platform is linux
+2025-08-29 18:31:35,250 - matplotlib - DEBUG - CACHEDIR=/home/jikhanjung/.cache/matplotlib
+2025-08-29 18:31:35,251 - matplotlib.font_manager - DEBUG - Using fontManager instance from /home/jikhanjung/.cache/matplotlib/fontlist-v390.json
+2025-08-29 18:31:35,481 - OpenGL.platform.ctypesloader - DEBUG - Loaded libGLU.so => libGLU.so <CDLL 'libGLU.so', handle 2adbbbb0 at 0x7f904f880dd0>
+2025-08-29 18:31:35,554 - __main__ - ERROR - Application failed to start: 'analyze'
+Traceback (most recent call last):
+  File "/home/jikhanjung/projects/Modan2/main.py", line 121, in main
+    window = ModanMainWindow(setup.get_config())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jikhanjung/projects/Modan2/Modan2.py", line 95, in __init__
+    self.actionAnalyze = QAction(QIcon(ICON_CONSTANTS['analyze']), self.tr("Analyze\tCtrl+G"), self)
+                                       ~~~~~~~~~~~~~~^^^^^^^^^^^
+KeyError: 'analyze'
+2025-08-29 18:32:08,969 - __main__ - INFO - Starting Modan2 application...
+2025-08-29 18:32:09,675 - MdAppSetup - INFO - Initializing Modan2 application...
+2025-08-29 18:32:09,698 - MdModel - INFO - migrations path: /home/jikhanjung/projects/Modan2/migrations
+2025-08-29 18:32:09,698 - MdModel - INFO - database path: /home/jikhanjung/PaleoBytes/Modan2/Modan2.db
+2025-08-29 18:32:09,698 - peewee_migrate.logs - INFO - Starting migrations
+2025-08-29 18:32:09,700 - peewee_migrate.logs - INFO - There is nothing to migrate
+2025-08-29 18:32:09,709 - peewee_migrate.logs - WARNING - No changes found.
+2025-08-29 18:32:09,709 - MdAppSetup - WARNING - Migration module not found, skipping migrations
+2025-08-29 18:32:09,710 - MdAppSetup - INFO - Application initialized successfully
+2025-08-29 18:32:10,531 - __main__ - ERROR - Application failed to start: 'QApplication' object has no attribute 'settings'
+Traceback (most recent call last):
+  File "/home/jikhanjung/projects/Modan2/main.py", line 121, in main
+    window = ModanMainWindow(setup.get_config())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jikhanjung/projects/Modan2/Modan2.py", line 156, in __init__
+    self.read_settings()
+  File "/home/jikhanjung/projects/Modan2/Modan2.py", line 258, in read_settings
+    self.m_app.toolbar_icon_size = self.m_app.settings.value("ToolbarIconSize", "Medium")
+                                   ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'QApplication' object has no attribute 'settings'
+2025-08-29 18:33:02,268 - __main__ - INFO - Starting Modan2 application...
+2025-08-29 18:33:02,980 - MdAppSetup - INFO - Initializing Modan2 application...
+2025-08-29 18:33:03,003 - MdModel - INFO - migrations path: /home/jikhanjung/projects/Modan2/migrations
+2025-08-29 18:33:03,003 - MdModel - INFO - database path: /home/jikhanjung/PaleoBytes/Modan2/Modan2.db
+2025-08-29 18:33:03,004 - peewee_migrate.logs - INFO - Starting migrations
+2025-08-29 18:33:03,006 - peewee_migrate.logs - INFO - There is nothing to migrate
+2025-08-29 18:33:03,013 - peewee_migrate.logs - WARNING - No changes found.
+2025-08-29 18:33:03,013 - MdAppSetup - WARNING - Migration module not found, skipping migrations
+2025-08-29 18:33:03,013 - MdAppSetup - INFO - Application initialized successfully
+2025-08-29 18:33:03,915 - ModanComponents - INFO - object viewer 2d init
+2025-08-29 18:33:03,915 - __main__ - ERROR - Application failed to start: 'QApplication' object has no attribute 'settings'
+Traceback (most recent call last):
+  File "/home/jikhanjung/projects/Modan2/main.py", line 121, in main
+    window = ModanMainWindow(setup.get_config())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jikhanjung/projects/Modan2/Modan2.py", line 157, in __init__
+    self.initUI()
+  File "/home/jikhanjung/projects/Modan2/Modan2.py", line 415, in initUI
+    self.object_view_2d = ObjectViewer2D(self)
+                          ^^^^^^^^^^^^^^^^^^^^
+  File "/home/jikhanjung/projects/Modan2/ModanComponents.py", line 130, in __init__
+    self.read_settings()
+  File "/home/jikhanjung/projects/Modan2/ModanComponents.py", line 326, in read_settings
+    self.landmark_size = self.m_app.settings.value("LandmarkSize/2D", self.landmark_size)
+                         ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'QApplication' object has no attribute 'settings'
+2025-08-29 18:33:37,961 - __main__ - INFO - Starting Modan2 application...
+2025-08-29 18:33:38,641 - MdAppSetup - INFO - Initializing Modan2 application...
+2025-08-29 18:33:38,663 - MdModel - INFO - migrations path: /home/jikhanjung/projects/Modan2/migrations
+2025-08-29 18:33:38,663 - MdModel - INFO - database path: /home/jikhanjung/PaleoBytes/Modan2/Modan2.db
+2025-08-29 18:33:38,663 - peewee_migrate.logs - INFO - Starting migrations
+2025-08-29 18:33:38,665 - peewee_migrate.logs - INFO - There is nothing to migrate
+2025-08-29 18:33:38,672 - peewee_migrate.logs - WARNING - No changes found.
+2025-08-29 18:33:38,672 - MdAppSetup - WARNING - Migration module not found, skipping migrations
+2025-08-29 18:33:38,672 - MdAppSetup - INFO - Application initialized successfully
+2025-08-29 18:33:39,521 - ModanComponents - INFO - object viewer 2d init
+2025-08-29 18:33:39,596 - __main__ - ERROR - Application failed to start: QTreeWidget.setModel() is a private method
+Traceback (most recent call last):
+  File "/home/jikhanjung/projects/Modan2/main.py", line 121, in main
+    window = ModanMainWindow(setup.get_config())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jikhanjung/projects/Modan2/Modan2.py", line 161, in __init__
+    self.reset_views()
+  File "/home/jikhanjung/projects/Modan2/Modan2.py", line 1199, in reset_views
+    self.reset_treeView()
+  File "/home/jikhanjung/projects/Modan2/Modan2.py", line 853, in reset_treeView
+    self.treeView.setModel(self.dataset_model)
+TypeError: QTreeWidget.setModel() is a private method
+2025-08-29 18:34:18,712 - __main__ - INFO - Starting Modan2 application...
+2025-08-29 18:34:19,407 - MdAppSetup - INFO - Initializing Modan2 application...
+2025-08-29 18:34:19,428 - MdModel - INFO - migrations path: /home/jikhanjung/projects/Modan2/migrations
+2025-08-29 18:34:19,428 - MdModel - INFO - database path: /home/jikhanjung/PaleoBytes/Modan2/Modan2.db
+2025-08-29 18:34:19,428 - peewee_migrate.logs - INFO - Starting migrations
+2025-08-29 18:34:19,430 - peewee_migrate.logs - INFO - There is nothing to migrate
+2025-08-29 18:34:19,437 - peewee_migrate.logs - WARNING - No changes found.
+2025-08-29 18:34:19,437 - MdAppSetup - WARNING - Migration module not found, skipping migrations
+2025-08-29 18:34:19,438 - MdAppSetup - INFO - Application initialized successfully
+2025-08-29 18:34:20,312 - ModanComponents - INFO - object viewer 2d init
+2025-08-29 18:34:22,473 - __main__ - INFO - Application started successfully
+2025-08-29 18:34:49,076 - __main__ - INFO - Starting Modan2 application...
+2025-08-29 18:34:49,826 - MdAppSetup - INFO - Initializing Modan2 application...
+2025-08-29 18:34:49,848 - MdModel - INFO - migrations path: /home/jikhanjung/projects/Modan2/migrations
+2025-08-29 18:34:49,848 - MdModel - INFO - database path: /home/jikhanjung/PaleoBytes/Modan2/Modan2.db
+2025-08-29 18:34:49,849 - peewee_migrate.logs - INFO - Starting migrations
+2025-08-29 18:34:49,851 - peewee_migrate.logs - INFO - There is nothing to migrate
+2025-08-29 18:34:49,859 - peewee_migrate.logs - WARNING - No changes found.
+2025-08-29 18:34:49,859 - MdAppSetup - WARNING - Migration module not found, skipping migrations
+2025-08-29 18:34:49,859 - MdAppSetup - INFO - Application initialized successfully
+2025-08-29 18:34:50,765 - ModanComponents - INFO - object viewer 2d init
+2025-08-29 18:34:50,841 - __main__ - INFO - Application started successfully
+2025-08-29 19:08:11,607 - __main__ - INFO - Starting Modan2 application...
+2025-08-29 19:08:12,256 - MdAppSetup - INFO - Initializing Modan2 application...
+2025-08-29 19:08:12,276 - MdModel - INFO - migrations path: /home/jikhanjung/projects/Modan2/migrations
+2025-08-29 19:08:12,277 - MdModel - INFO - database path: /home/jikhanjung/PaleoBytes/Modan2/Modan2.db
+2025-08-29 19:08:12,277 - peewee_migrate.logs - INFO - Starting migrations
+2025-08-29 19:08:12,279 - peewee_migrate.logs - INFO - There is nothing to migrate
+2025-08-29 19:08:12,285 - peewee_migrate.logs - WARNING - No changes found.
+2025-08-29 19:08:12,285 - MdAppSetup - WARNING - Migration module not found, skipping migrations
+2025-08-29 19:08:12,286 - MdAppSetup - INFO - Application initialized successfully
+2025-08-29 19:08:13,114 - ModanComponents - INFO - object viewer 2d init
+2025-08-29 19:08:15,275 - __main__ - INFO - Application started successfully
+2025-08-29 19:08:27,932 - ModanDialogs - INFO - Dataset dialog Okay button pressed
+2025-08-29 19:08:27,932 - ModanDialogs - INFO - Dataset name: test, Dataset desc: 
+2025-08-29 19:08:27,932 - ModanDialogs - INFO - Wireframe: , Baseline: , Polygons: 
+2025-08-29 19:08:27,932 - ModanDialogs - INFO - variable names 1: 
+2025-08-29 19:08:27,932 - ModanDialogs - INFO - variable names 2: 
+2025-08-29 19:08:27,933 - ModanDialogs - INFO - about to save
+2025-08-29 19:08:27,945 - ModanDialogs - INFO - saved
+2025-08-29 19:12:42,754 - __main__ - INFO - Starting Modan2 application...
+2025-08-29 19:12:43,352 - MdAppSetup - INFO - Initializing Modan2 application...
+2025-08-29 19:12:43,370 - MdModel - INFO - migrations path: /home/jikhanjung/projects/Modan2/migrations
+2025-08-29 19:12:43,370 - MdModel - INFO - database path: /home/jikhanjung/PaleoBytes/Modan2/Modan2.db
+2025-08-29 19:12:43,371 - peewee_migrate.logs - INFO - Starting migrations
+2025-08-29 19:12:43,372 - peewee_migrate.logs - INFO - There is nothing to migrate
+2025-08-29 19:12:43,379 - peewee_migrate.logs - WARNING - No changes found.
+2025-08-29 19:12:43,379 - MdAppSetup - WARNING - Migration module not found, skipping migrations
+2025-08-29 19:12:43,379 - MdAppSetup - INFO - Application initialized successfully
+2025-08-29 19:12:43,384 - __main__ - ERROR - Application failed to start: unmatched ')' (Modan2.py, line 1206)
+Traceback (most recent call last):
+  File "/home/jikhanjung/projects/Modan2/main.py", line 120, in main
+    from Modan2 import ModanMainWindow
+  File "/home/jikhanjung/projects/Modan2/Modan2.py", line 1206
+    item1.setIcon(QIcon(ICON_CONSTANTS['dataset_2d'])))
+                                                      ^
+SyntaxError: unmatched ')'
+2025-08-29 19:13:38,018 - __main__ - INFO - Starting Modan2 application...
+2025-08-29 19:13:38,704 - MdAppSetup - INFO - Initializing Modan2 application...
+2025-08-29 19:13:38,725 - MdModel - INFO - migrations path: /home/jikhanjung/projects/Modan2/migrations
+2025-08-29 19:13:38,725 - MdModel - INFO - database path: /home/jikhanjung/PaleoBytes/Modan2/Modan2.db
+2025-08-29 19:13:38,725 - peewee_migrate.logs - INFO - Starting migrations
+2025-08-29 19:13:38,727 - peewee_migrate.logs - INFO - There is nothing to migrate
+2025-08-29 19:13:38,734 - peewee_migrate.logs - WARNING - No changes found.
+2025-08-29 19:13:38,734 - MdAppSetup - WARNING - Migration module not found, skipping migrations
+2025-08-29 19:13:38,735 - MdAppSetup - INFO - Application initialized successfully
+2025-08-29 19:13:38,748 - __main__ - ERROR - Application failed to start: invalid syntax. Perhaps you forgot a comma? (Modan2.py, line 1141)
+Traceback (most recent call last):
+  File "/home/jikhanjung/projects/Modan2/main.py", line 120, in main
+    from Modan2 import ModanMainWindow
+  File "/home/jikhanjung/projects/Modan2/Modan2.py", line 1141
+    print("possible action:", int(event.possibleActions())
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SyntaxError: invalid syntax. Perhaps you forgot a comma?
+2025-08-29 19:15:21,841 - __main__ - INFO - Starting Modan2 application...
+2025-08-29 19:15:22,458 - MdAppSetup - INFO - Initializing Modan2 application...
+2025-08-29 19:15:22,479 - MdModel - INFO - migrations path: /home/jikhanjung/projects/Modan2/migrations
+2025-08-29 19:15:22,479 - MdModel - INFO - database path: /home/jikhanjung/PaleoBytes/Modan2/Modan2.db
+2025-08-29 19:15:22,479 - peewee_migrate.logs - INFO - Starting migrations
+2025-08-29 19:15:22,481 - peewee_migrate.logs - INFO - There is nothing to migrate
+2025-08-29 19:15:22,488 - peewee_migrate.logs - WARNING - No changes found.
+2025-08-29 19:15:22,488 - MdAppSetup - WARNING - Migration module not found, skipping migrations
+2025-08-29 19:15:22,488 - MdAppSetup - INFO - Application initialized successfully
+2025-08-29 19:15:23,307 - ModanComponents - INFO - object viewer 2d init
+2025-08-29 19:15:25,480 - __main__ - INFO - Application started successfully
+2025-08-29 19:15:32,653 - ModanDialogs - INFO - Dataset dialog Okay button pressed
+2025-08-29 19:15:32,653 - ModanDialogs - INFO - Dataset name: test2, Dataset desc: 
+2025-08-29 19:15:32,653 - ModanDialogs - INFO - Wireframe: , Baseline: , Polygons: 
+2025-08-29 19:15:32,653 - ModanDialogs - INFO - variable names 1: 
+2025-08-29 19:15:32,654 - ModanDialogs - INFO - variable names 2: 
+2025-08-29 19:15:32,654 - ModanDialogs - INFO - about to save
+2025-08-29 19:15:32,664 - ModanDialogs - INFO - saved
+2025-08-29 19:15:47,663 - ModanDialogs - INFO - Dataset dialog Okay button pressed
+2025-08-29 19:15:47,664 - ModanDialogs - INFO - Dataset name: test3, Dataset desc: 
+2025-08-29 19:15:47,664 - ModanDialogs - INFO - Wireframe: , Baseline: , Polygons: 
+2025-08-29 19:15:47,664 - ModanDialogs - INFO - variable names 1: 
+2025-08-29 19:15:47,664 - ModanDialogs - INFO - variable names 2: 
+2025-08-29 19:15:47,665 - ModanDialogs - INFO - about to save
+2025-08-29 19:15:47,675 - ModanDialogs - INFO - saved
+2025-08-29 19:17:52,092 - __main__ - INFO - Application exited with code: 0
+2025-08-29 19:17:55,404 - __main__ - INFO - Starting Modan2 application...
+2025-08-29 19:17:56,105 - MdAppSetup - INFO - Initializing Modan2 application...
+2025-08-29 19:17:56,126 - MdModel - INFO - migrations path: /home/jikhanjung/projects/Modan2/migrations
+2025-08-29 19:17:56,126 - MdModel - INFO - database path: /home/jikhanjung/PaleoBytes/Modan2/Modan2.db
+2025-08-29 19:17:56,126 - peewee_migrate.logs - INFO - Starting migrations
+2025-08-29 19:17:56,128 - peewee_migrate.logs - INFO - There is nothing to migrate
+2025-08-29 19:17:56,136 - peewee_migrate.logs - WARNING - No changes found.
+2025-08-29 19:17:56,136 - MdAppSetup - WARNING - Migration module not found, skipping migrations
+2025-08-29 19:17:56,136 - MdAppSetup - INFO - Application initialized successfully
+2025-08-29 19:17:56,958 - ModanComponents - INFO - object viewer 2d init
+2025-08-29 19:17:59,121 - __main__ - INFO - Application started successfully
+2025-08-29 19:18:14,940 - ModanComponents - INFO - object viewer 2d init
+2025-08-29 19:20:59,304 - __main__ - INFO - Starting Modan2 application...
+2025-08-29 19:20:59,992 - MdAppSetup - INFO - Initializing Modan2 application...
+2025-08-29 19:21:00,015 - MdModel - INFO - migrations path: /home/jikhanjung/projects/Modan2/migrations
+2025-08-29 19:21:00,015 - MdModel - INFO - database path: /home/jikhanjung/PaleoBytes/Modan2/Modan2.db
+2025-08-29 19:21:00,015 - peewee_migrate.logs - INFO - Starting migrations
+2025-08-29 19:21:00,017 - peewee_migrate.logs - INFO - There is nothing to migrate
+2025-08-29 19:21:00,024 - peewee_migrate.logs - WARNING - No changes found.
+2025-08-29 19:21:00,025 - MdAppSetup - WARNING - Migration module not found, skipping migrations
+2025-08-29 19:21:00,025 - MdAppSetup - INFO - Application initialized successfully
+2025-08-29 19:21:00,828 - ModanComponents - INFO - object viewer 2d init
+2025-08-29 19:21:02,985 - __main__ - INFO - Application started successfully
+2025-08-29 19:21:06,285 - ModanController - INFO - Created new object: Object_1
+2025-08-29 19:21:06,303 - ModanComponents - INFO - object viewer 2d init
+2025-08-29 19:22:38,413 - __main__ - INFO - Application exited with code: 0
+2025-08-29 19:22:41,866 - __main__ - INFO - Starting Modan2 application...
+2025-08-29 19:22:42,575 - MdAppSetup - INFO - Initializing Modan2 application...
+2025-08-29 19:22:42,598 - MdModel - INFO - migrations path: /home/jikhanjung/projects/Modan2/migrations
+2025-08-29 19:22:42,598 - MdModel - INFO - database path: /home/jikhanjung/PaleoBytes/Modan2/Modan2.db
+2025-08-29 19:22:42,599 - peewee_migrate.logs - INFO - Starting migrations
+2025-08-29 19:22:42,600 - peewee_migrate.logs - INFO - There is nothing to migrate
+2025-08-29 19:22:42,607 - peewee_migrate.logs - WARNING - No changes found.
+2025-08-29 19:22:42,607 - MdAppSetup - WARNING - Migration module not found, skipping migrations
+2025-08-29 19:22:42,607 - MdAppSetup - INFO - Application initialized successfully
+2025-08-29 19:22:43,421 - ModanComponents - INFO - object viewer 2d init
+2025-08-29 19:22:45,580 - __main__ - INFO - Application started successfully
+2025-08-29 19:22:53,383 - ModanController - INFO - Created new object: Object_2
+2025-08-29 19:22:53,401 - ModanComponents - INFO - object viewer 2d init
+2025-08-29 19:23:42,362 - __main__ - INFO - Application exited with code: 0
+2025-08-29 19:24:05,210 - __main__ - INFO - Starting Modan2 application...
+2025-08-29 19:24:05,919 - MdAppSetup - INFO - Initializing Modan2 application...
+2025-08-29 19:24:05,939 - MdModel - INFO - migrations path: /home/jikhanjung/projects/Modan2/migrations
+2025-08-29 19:24:05,939 - MdModel - INFO - database path: /home/jikhanjung/PaleoBytes/Modan2/Modan2.db
+2025-08-29 19:24:05,940 - peewee_migrate.logs - INFO - Starting migrations
+2025-08-29 19:24:05,941 - peewee_migrate.logs - INFO - There is nothing to migrate
+2025-08-29 19:24:05,948 - peewee_migrate.logs - WARNING - No changes found.
+2025-08-29 19:24:05,949 - MdAppSetup - WARNING - Migration module not found, skipping migrations
+2025-08-29 19:24:05,949 - MdAppSetup - INFO - Application initialized successfully
+2025-08-29 19:24:06,821 - ModanComponents - INFO - object viewer 2d init
+2025-08-29 19:24:08,989 - __main__ - INFO - Application started successfully
+2025-08-29 19:24:11,321 - ModanController - INFO - Created new object: Object_3
+2025-08-29 19:24:11,339 - ModanComponents - INFO - object viewer 2d init
+2025-08-29 19:25:31,146 - __main__ - INFO - Application exited with code: 0
+2025-08-29 19:25:34,671 - __main__ - INFO - Starting Modan2 application...
+2025-08-29 19:25:35,384 - MdAppSetup - INFO - Initializing Modan2 application...
+2025-08-29 19:25:35,405 - MdModel - INFO - migrations path: /home/jikhanjung/projects/Modan2/migrations
+2025-08-29 19:25:35,405 - MdModel - INFO - database path: /home/jikhanjung/PaleoBytes/Modan2/Modan2.db
+2025-08-29 19:25:35,405 - peewee_migrate.logs - INFO - Starting migrations
+2025-08-29 19:25:35,407 - peewee_migrate.logs - INFO - There is nothing to migrate
+2025-08-29 19:25:35,414 - peewee_migrate.logs - WARNING - No changes found.
+2025-08-29 19:25:35,415 - MdAppSetup - WARNING - Migration module not found, skipping migrations
+2025-08-29 19:25:35,415 - MdAppSetup - INFO - Application initialized successfully
+2025-08-29 19:25:36,292 - ModanComponents - INFO - object viewer 2d init
+2025-08-29 19:25:38,488 - __main__ - INFO - Application started successfully
+2025-08-29 19:25:40,462 - ModanController - INFO - Created new object: Object_4
+2025-08-29 19:25:40,483 - ModanComponents - INFO - object viewer 2d init
+2025-08-29 19:26:01,136 - __main__ - INFO - Application exited with code: 0
+2025-08-29 19:26:52,958 - __main__ - INFO - Starting Modan2 application...
+2025-08-29 19:26:53,657 - MdAppSetup - INFO - Initializing Modan2 application...
+2025-08-29 19:26:53,677 - MdModel - INFO - migrations path: /home/jikhanjung/projects/Modan2/migrations
+2025-08-29 19:26:53,677 - MdModel - INFO - database path: /home/jikhanjung/PaleoBytes/Modan2/Modan2.db
+2025-08-29 19:26:53,678 - peewee_migrate.logs - INFO - Starting migrations
+2025-08-29 19:26:53,680 - peewee_migrate.logs - INFO - There is nothing to migrate
+2025-08-29 19:26:53,687 - peewee_migrate.logs - WARNING - No changes found.
+2025-08-29 19:26:53,687 - MdAppSetup - WARNING - Migration module not found, skipping migrations
+2025-08-29 19:26:53,687 - MdAppSetup - INFO - Application initialized successfully
+2025-08-29 19:26:54,500 - ModanComponents - INFO - object viewer 2d init
+2025-08-29 19:26:56,660 - __main__ - INFO - Application started successfully
+2025-08-29 19:26:59,214 - ModanController - INFO - Created new object: Object_5
+2025-08-29 19:26:59,234 - ModanComponents - INFO - object viewer 2d init
+2025-08-29 19:27:53,800 - __main__ - INFO - Starting Modan2 application...
+2025-08-29 19:27:54,481 - MdAppSetup - INFO - Initializing Modan2 application...
+2025-08-29 19:27:54,503 - MdModel - INFO - migrations path: /home/jikhanjung/projects/Modan2/migrations
+2025-08-29 19:27:54,504 - MdModel - INFO - database path: /home/jikhanjung/PaleoBytes/Modan2/Modan2.db
+2025-08-29 19:27:54,504 - peewee_migrate.logs - INFO - Starting migrations
+2025-08-29 19:27:54,506 - peewee_migrate.logs - INFO - There is nothing to migrate
+2025-08-29 19:27:54,512 - peewee_migrate.logs - WARNING - No changes found.
+2025-08-29 19:27:54,512 - MdAppSetup - WARNING - Migration module not found, skipping migrations
+2025-08-29 19:27:54,513 - MdAppSetup - INFO - Application initialized successfully
+2025-08-29 19:27:55,339 - ModanComponents - INFO - object viewer 2d init
+2025-08-29 19:27:57,497 - __main__ - INFO - Application started successfully
+2025-08-29 19:27:58,971 - ModanController - INFO - Created new object: Object_6
+2025-08-29 19:27:58,991 - ModanComponents - INFO - object viewer 2d init
+2025-08-29 19:28:45,018 - ModanComponents - INFO - object viewer 2d init
+2025-08-29 19:29:08,985 - __main__ - INFO - Application exited with code: 0

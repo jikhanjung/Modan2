@@ -16,15 +16,11 @@ from datetime import datetime
 
 from MdModel import *
 import MdUtils as mu
-from ModanController import ModanController
-from MdConstants import ICONS as ICON_CONSTANTS
-from MdHelpers import show_error, show_warning, show_info, confirm_action
 from peewee_migrate import Router
 
 from ModanDialogs import DatasetAnalysisDialog, ObjectDialog, ImportDatasetDialog, DatasetDialog, PreferencesDialog, \
     MODE, ObjectViewer3D, ExportDatasetDialog, ObjectViewer2D, ProgressDialog, NewAnalysisDialog, DataExplorationDialog
 from ModanComponents import MdTableModel, MdTableView, MdSequenceDelegate, AnalysisInfoWidget
-from ModanWidgets import DatasetTreeWidget, ObjectTableWidget, LandmarkViewer2D
 from MdStatistics import PerformCVA, PerformPCA, PerformManova
 
 import matplotlib.pyplot as plt
@@ -34,40 +30,51 @@ from MdLogger import setup_logger
 logger = setup_logger(mu.PROGRAM_NAME)
 
 
+ICON = {}
+ICON['new_dataset'] = mu.resource_path('icons/M2NewDataset_1.png')
+ICON['new_object'] = mu.resource_path('icons/M2NewObject_2.png')
+ICON['edit_object'] = mu.resource_path('icons/EditObject.png')
+ICON['import'] = mu.resource_path('icons/M2Import_1.png')
+ICON['export'] = mu.resource_path('icons/M2Export_1.png')
+ICON['analyze'] = mu.resource_path('icons/M2Analysis_1.png')
+ICON['preferences'] = mu.resource_path('icons/M2Preferences_1.png')
+ICON['about'] = mu.resource_path('icons/M2About_1.png')
+ICON['exit'] = mu.resource_path('icons/exit.png')
+ICON['Modan2'] = mu.resource_path('icons/Modan2_2.png')
+ICON['dataset_2d'] = mu.resource_path('icons/M2Dataset2D_3.png')
+ICON['dataset_3d'] = mu.resource_path('icons/M2Dataset3D_4.png')
+ICON['row_selection'] = mu.resource_path('icons/row_selection.png')
+ICON['cell_selection'] = mu.resource_path('icons/cell_selection.png')
+ICON['add_variable'] = mu.resource_path('icons/add_variable.png')
+ICON['save_changes'] = mu.resource_path('icons/SaveChanges.png')
 
 class ModanMainWindow(QMainWindow):
-    def __init__(self, config=None):
+    def __init__(self):
         super().__init__()
-        self.config = config
         self.init_done = False
-        self.setWindowIcon(QIcon(ICON_CONSTANTS['app_icon_alt']))
+        self.setWindowIcon(QIcon(mu.resource_path('icons/Modan2_2.png')))
         self.setWindowTitle("{} v{}".format(self.tr("Modan2"), mu.PROGRAM_VERSION))
-        
-        # Initialize controller
-        self.controller = ModanController()
-        self.setup_controller_connections()
 
-        # Initialize widgets (temporary compatibility)
         self.tableView = MdTableView()
         self.tableView.setItemDelegateForColumn(1, MdSequenceDelegate())
         self.treeView = QTreeView()
 
         self.toolbar = QToolBar(self.tr("Main Toolbar"))
         self.toolbar.setIconSize(QSize(32,32))
-        self.actionNewDataset = QAction(QIcon(ICON_CONSTANTS['new_dataset']), self.tr("New Dataset\tCtrl+N"), self)
+        self.actionNewDataset = QAction(QIcon(mu.resource_path(ICON['new_dataset'])), self.tr("New Dataset\tCtrl+N"), self)
         self.actionNewDataset.triggered.connect(self.on_action_new_dataset_triggered)
         self.actionNewDataset.setShortcut(QKeySequence("Ctrl+N"))
 
-        self.actionCellSelection = QAction(QIcon(ICON_CONSTANTS['cell_selection']), self.tr("Cell selection"), self)
+        self.actionCellSelection = QAction(QIcon(mu.resource_path(ICON['cell_selection'])), self.tr("Cell selection"), self)
         self.actionCellSelection.triggered.connect(self.on_action_cell_selection_triggered)
         self.actionCellSelection.setCheckable(True)
         self.actionCellSelection.setChecked(True)
-        self.actionRowSelection = QAction(QIcon(ICON_CONSTANTS['row_selection']), self.tr("Row selection"), self)
+        self.actionRowSelection = QAction(QIcon(mu.resource_path(ICON['row_selection'])), self.tr("Row selection"), self)
         self.actionRowSelection.triggered.connect(self.on_action_row_selection_triggered)
         self.actionRowSelection.setCheckable(True)
-        self.actionAddVariable = QAction(QIcon(ICON_CONSTANTS['add_variable']), self.tr("Add variable"), self)
+        self.actionAddVariable = QAction(QIcon(mu.resource_path(ICON['add_variable'])), self.tr("Add variable"), self)
         self.actionAddVariable.triggered.connect(self.on_action_add_variable_triggered)
-        self.actionSaveChanges = QAction(QIcon(ICON_CONSTANTS['save_changes']), self.tr("Save changes\tCtrl+S"), self)
+        self.actionSaveChanges = QAction(QIcon(mu.resource_path(ICON['save_changes'])), self.tr("Save changes\tCtrl+S"), self)
         self.actionSaveChanges.triggered.connect(self.on_btnSaveChanges_clicked)
         self.actionSaveChanges.setShortcut(QKeySequence("Ctrl+S"))
 
@@ -76,27 +83,27 @@ class ModanMainWindow(QMainWindow):
         self.selection_mode_group.addAction(self.actionCellSelection)
         self.selection_mode_group.addAction(self.actionRowSelection)
 
-        self.actionNewObject = QAction(QIcon(ICON_CONSTANTS['new_object']), self.tr("New Object\tCtrl+Shift+N"), self)
+        self.actionNewObject = QAction(QIcon(mu.resource_path(ICON['new_object'])), self.tr("New Object\tCtrl+Shift+N"), self)
         self.actionNewObject.triggered.connect(self.on_action_new_object_triggered)
         self.actionNewObject.setShortcut(QKeySequence("Ctrl+Shift+N"))
-        self.actionEditObject = QAction(QIcon(ICON_CONSTANTS['edit_object']), self.tr("Edit Object\tCtrl+Shift+O"), self)
+        self.actionEditObject = QAction(QIcon(mu.resource_path(ICON['edit_object'])), self.tr("Edit Object\tCtrl+Shift+O"), self)
         self.actionEditObject.triggered.connect(self.on_tableView_doubleClicked)
         self.actionEditObject.setShortcut(QKeySequence("Ctrl+Shift+O"))
-        self.actionImport = QAction(QIcon(ICON_CONSTANTS['import']), self.tr("Import\tCtrl+I"), self)
+        self.actionImport = QAction(QIcon(mu.resource_path(ICON['import'])), self.tr("Import\tCtrl+I"), self)
         self.actionImport.triggered.connect(self.on_action_import_dataset_triggered)
         self.actionImport.setShortcut(QKeySequence("Ctrl+I"))
-        self.actionExport = QAction(QIcon(ICON_CONSTANTS['export']), self.tr("Export\tCtrl+E"), self)
+        self.actionExport = QAction(QIcon(mu.resource_path(ICON['export'])), self.tr("Export\tCtrl+E"), self)
         self.actionExport.triggered.connect(self.on_action_export_dataset_triggered)
         self.actionExport.setShortcut(QKeySequence("Ctrl+E"))
-        self.actionAnalyze = QAction(QIcon(ICON_CONSTANTS['analysis']), self.tr("Analyze\tCtrl+G"), self)
+        self.actionAnalyze = QAction(QIcon(mu.resource_path(ICON['analyze'])), self.tr("Analyze\tCtrl+G"), self)
         self.actionAnalyze.triggered.connect(self.on_action_analyze_dataset_triggered)
         self.actionAnalyze.setShortcut(QKeySequence("Ctrl+G"))
-        self.actionPreferences = QAction(QIcon(ICON_CONSTANTS['preferences']), self.tr("Preferences"), self)
+        self.actionPreferences = QAction(QIcon(mu.resource_path(ICON['preferences'])), self.tr("Preferences"), self)
         self.actionPreferences.triggered.connect(self.on_action_edit_preferences_triggered)
-        self.actionExit = QAction(QIcon(), self.tr("Exit\tCtrl+W"), self)
+        self.actionExit = QAction(QIcon(mu.resource_path(ICON['exit'])), self.tr("Exit\tCtrl+W"), self)
         self.actionExit.triggered.connect(self.on_action_exit_triggered)
         self.actionExit.setShortcut(QKeySequence("Ctrl+W"))
-        self.actionAbout = QAction(QIcon(ICON_CONSTANTS['about']), self.tr("About\tF1"), self)
+        self.actionAbout = QAction(QIcon(mu.resource_path(ICON['about'])), self.tr("About\tF1"), self)
         self.actionAbout.triggered.connect(self.on_action_about_triggered)
         self.actionAbout.setShortcut(QKeySequence("F1"))
 
@@ -154,6 +161,7 @@ class ModanMainWindow(QMainWindow):
         
         self.selected_dataset = None
         self.selected_object = None
+        self.prepare_database()
         self.reset_views()
         self.load_dataset()
 
@@ -165,66 +173,6 @@ class ModanMainWindow(QMainWindow):
 
         self.set_toolbar_icon_size(self.m_app.toolbar_icon_size)
         self.init_done = True
-
-    def setup_controller_connections(self):
-        """Setup signal connections with the controller"""
-        # Connect controller signals to UI updates
-        self.controller.dataset_created.connect(self.on_dataset_created)
-        self.controller.dataset_updated.connect(self.on_dataset_updated)
-        self.controller.object_added.connect(self.on_object_added)
-        self.controller.object_updated.connect(self.on_object_updated)
-        self.controller.analysis_completed.connect(self.on_analysis_completed)
-        self.controller.error_occurred.connect(self.on_controller_error)
-
-    def on_dataset_created(self, dataset):
-        """Handle dataset creation from controller"""
-        self.load_dataset()
-        show_info(self, "Dataset created successfully")
-
-    def on_dataset_updated(self, dataset):
-        """Handle dataset update from controller"""
-        self.load_dataset()
-
-    def on_object_added(self, obj):
-        """Handle object addition from controller"""
-        self.load_dataset()
-
-    def on_object_updated(self, obj):
-        """Handle object update from controller"""
-        self.load_dataset()
-
-    def on_analysis_completed(self, analysis):
-        """Handle analysis completion from controller"""
-        self.load_dataset()
-        show_info(self, "Analysis completed successfully")
-
-    def on_controller_error(self, error_msg):
-        """Handle controller errors"""
-        show_error(self, error_msg)
-
-    def on_dataset_selected_from_tree(self, dataset):
-        """Handle dataset selection from tree widget"""
-        self.selected_dataset = dataset
-        if dataset is None:
-            self.actionNewObject.setEnabled(False)
-            self.actionExport.setEnabled(False)
-            self.actionAnalyze.setEnabled(False)
-        else:
-            self.actionNewObject.setEnabled(True)
-            self.actionExport.setEnabled(True)
-            self.actionAnalyze.setEnabled(True)
-            self.load_object()
-
-    def on_analysis_selected_from_tree(self, analysis):
-        """Handle analysis selection from tree widget"""
-        # Handle analysis selection if needed
-        pass
-
-    def on_object_selected_from_table(self, obj):
-        """Handle object selection from table widget"""
-        self.selected_object = obj
-        if obj:
-            self.show_object(obj)
 
     def update_settings(self):
         size = self.m_app.toolbar_icon_size
@@ -250,66 +198,22 @@ class ModanMainWindow(QMainWindow):
         pass
 
     def read_settings(self):
-        """Read settings from config object"""
-        if self.config is None:
-            return
-            
-        self.m_app = QApplication.instance()
         self.m_app.storage_directory = os.path.abspath(mu.DEFAULT_STORAGE_DIRECTORY)
-        self.m_app.toolbar_icon_size = self.config.get("ui", {}).get("toolbar_icon_size", "Medium")
-        
-        # Create a simple settings wrapper for compatibility
-        if not hasattr(self.m_app, 'settings'):
-            class SettingsWrapper:
-                def __init__(self, config):
-                    self.config = config
-                def value(self, key, default_value):
-                    # Simple key mapping for existing settings
-                    key_map = {
-                        "ToolbarIconSize": ("ui", "toolbar_icon_size"),
-                        "WindowGeometry/RememberGeometry": ("ui", "remember_geometry"), 
-                        "WindowGeometry/MainWindow": ("ui", "window_geometry"),
-                        "IsMaximized/MainWindow": ("ui", "is_maximized"),
-                        "Language": ("language",),
-                        "LandmarkSize/2D": ("ui", "landmark_size_2d"),
-                        "LandmarkColor/2D": ("ui", "landmark_color_2d"),
-                        "WireframeThickness/2D": ("ui", "wireframe_thickness_2d"),
-                        "WireframeColor/2D": ("ui", "wireframe_color_2d"),
-                        "IndexSize/2D": ("ui", "index_size_2d"),
-                        "IndexColor/2D": ("ui", "index_color_2d"),
-                        "BackgroundColor": ("ui", "background_color"),
-                        "LandmarkSize/3D": ("ui", "landmark_size_3d"),
-                        "LandmarkColor/3D": ("ui", "landmark_color_3d"),
-                        "WireframeThickness/3D": ("ui", "wireframe_thickness_3d"),
-                        "WireframeColor/3D": ("ui", "wireframe_color_3d"),
-                        "IndexSize/3D": ("ui", "index_size_3d"),
-                        "IndexColor/3D": ("ui", "index_color_3d"),
-                        "PlotSize": ("ui", "plot_size"),
-                    }
-                    if key in key_map:
-                        keys = key_map[key]
-                        value = self.config
-                        for k in keys:
-                            value = value.get(k, {}) if isinstance(value, dict) else default_value
-                        return value if value != {} else default_value
-                    return default_value
-                    
-            self.m_app.settings = SettingsWrapper(self.config)
+        self.m_app.toolbar_icon_size = self.m_app.settings.value("ToolbarIconSize", "Medium")
 
         if not self.init_done:
-            self.m_app.remember_geometry = self.config.get("ui", {}).get("remember_geometry", True)
-            if self.m_app.remember_geometry:
-                geometry = self.config.get("ui", {}).get("window_geometry", [100, 100, 1400, 800])
-                self.setGeometry(QRect(*geometry))
-                is_maximized = self.config.get("ui", {}).get("is_maximized", False)
-                if is_maximized:
+            self.m_app.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
+            if self.m_app.remember_geometry is True:
+                self.setGeometry(self.m_app.settings.value("WindowGeometry/MainWindow", QRect(100, 100, 1400, 800)))
+                is_maximized = mu.value_to_bool(self.m_app.settings.value("IsMaximized/MainWindow", False))
+                if is_maximized == True:
                     self.showMaximized()
                 else:
                     self.showNormal()
             else:
                 self.setGeometry(QRect(100, 100, 1400, 800))
 
-        self.m_app.language = self.config.get("language", "en")
+        self.m_app.language = self.m_app.settings.value("Language", "en")
         if self.init_done:
             self.update_language()
 
@@ -319,23 +223,14 @@ class ModanMainWindow(QMainWindow):
         plt.rcParams['font.size'] = 12
 
     def write_settings(self):
-        """Write settings to config object"""
-        if self.config is None:
-            return
-            
-        if not hasattr(self.m_app, 'remember_geometry'):
-            return
-            
-        if self.m_app.remember_geometry:
+        self.m_app.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
+        if self.m_app.remember_geometry is True:
             if self.isMaximized():
-                self.config.setdefault("ui", {})["is_maximized"] = True
+                self.m_app.settings.setValue("IsMaximized/MainWindow", True)
             else:
-                self.config.setdefault("ui", {})["is_maximized"] = False
-                geometry = self.geometry()
-                self.config.setdefault("ui", {})["window_geometry"] = [geometry.x(), geometry.y(), geometry.width(), geometry.height()]
-        
-        if hasattr(self.m_app, 'language'):
-            self.config["language"] = self.m_app.language
+                self.m_app.settings.setValue("IsMaximized/MainWindow", False)
+                self.m_app.settings.setValue("WindowGeometry/MainWindow", self.geometry())
+        self.m_app.settings.setValue("language", self.m_app.language)
 
     def update_language(self):
         if False:
@@ -370,6 +265,43 @@ class ModanMainWindow(QMainWindow):
 
         return
 
+    def prepare_database(self):
+        migrations_path = mu.resource_path("migrations")
+        logger.info("migrations path: %s", migrations_path)
+        logger.info("database path: %s", database_path)
+        now = datetime.datetime.now()
+        date_str = now.strftime("%Y%m%d")
+
+        # backup database file to backup directory
+        backup_path = os.path.join( mu.DB_BACKUP_DIRECTORY, DATABASE_FILENAME + '.' + date_str )
+        if not os.path.exists(backup_path) and os.path.exists(database_path):
+            shutil.copy2(database_path, backup_path)
+            logger.info("backup database to %s", backup_path)
+            # read backup directory and delete old backups
+            backup_list = os.listdir(mu.DB_BACKUP_DIRECTORY)
+            # filter out non-backup files
+            backup_list = [f for f in backup_list if f.startswith(DATABASE_FILENAME)]
+            backup_list.sort()
+            if len(backup_list) > 10:
+                for i in range(len(backup_list) - 10):
+                    os.remove(os.path.join(mu.DB_BACKUP_DIRECTORY, backup_list[i]))                    
+        
+        #logger.info("database name: %s", mu.DEFAULT_DATABASE_NAME)
+        #print("migrations path:", migrations_path)
+        gDatabase.connect()
+        router = Router(gDatabase, migrate_dir=migrations_path)
+
+        # Auto-discover and run migrations
+        router.run()        
+        return
+
+        gDatabase.connect()
+        tables = gDatabase.get_tables()
+        if tables:
+            return
+            print(tables)
+        else:
+            gDatabase.create_tables([MdDataset, MdObject, MdImage, MdThreeDModel,])
 
     def closeEvent(self, event):
         self.write_settings()
@@ -411,37 +343,221 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
     @pyqtSlot()
     def on_action_analyze_dataset_triggered(self):
-        """Handle analyze dataset action using controller"""
         if self.selected_dataset is None:
-            show_warning(self, "No dataset selected")
+            QMessageBox.warning(self, self.tr("Warning"), self.tr("No dataset selected"))
             return
+        prev_lm_count = -1
+        if self.selected_dataset.object_list is None or len(self.selected_dataset.object_list) < 5:
+            error_message = self.tr("Error: number of objects is too small for analysis.")
+            logger.error(error_message)
+            mu.show_error_message(error_message)
+            return
+
+        for obj in self.selected_dataset.object_list:
+            obj.unpack_landmark()
+            lm_count = len(obj.landmark_list)
+            #print("prev_lm_count:", prev_lm_count, "lm_count:", lm_count)
+            if prev_lm_count != lm_count and prev_lm_count != -1:
+                # show messagebox and close the window
+                error_message = self.tr("Error: landmark count is not consistent.")
+                logger.error(error_message)
+                mu.show_error_message(error_message)
+                return
+            prev_lm_count = lm_count
         
-        try:
-            # Validate dataset using controller
-            if not self.controller.validate_dataset_for_analysis(self.selected_dataset):
-                return  # Controller will show appropriate error messages
-            
-            self.analysis_dialog = NewAnalysisDialog(self, self.selected_dataset)
+        if True:
+            grouping_variable_index_list = self.selected_dataset.get_grouping_variable_index_list()
+            if len(grouping_variable_index_list) == 0:
+                # alert no valid property
+                variable_names = ', '.join(self.selected_dataset.get_variablename_list())
+
+                error_message = f"Error: No categorical (grouping) variables found in the dataset. \n\n"
+                logger.error(error_message)
+                error_message += f"All variables seem to be continuous measurements. The dataset contains the following variables: [{variable_names}]. "
+                error_message += f"Please ensure that your dataset includes at least one categorical variable for grouping. "
+                error_message += f"If you believe a variable should be considered categorical, check its data and format."
+                #error_message = "Error: No grouping variable found in the dataset."
+                mu.show_error_message(error_message)
+                return
+
+            self.analysis_dialog = NewAnalysisDialog(self,self.selected_dataset)
             ret = self.analysis_dialog.exec_()
-            logger.info("new analysis dialog return value %s", ret)
-            
-            if ret == 1:
+            logger.info( "new analysis dialog return value %s", ret)
+            if ret == 0:
+
+                return
+            elif ret == 1:
                 superimposition_method = self.analysis_dialog.comboSuperimposition.currentText()
                 cva_group_by = self.analysis_dialog.comboCvaGroupBy.currentData()
                 manova_group_by = self.analysis_dialog.comboManovaGroupBy.currentData()
                 analysis_name = self.analysis_dialog.edtAnalysisName.text()
-                
-                # Use controller for analysis
-                self.controller.run_analysis(
-                    dataset=self.selected_dataset,
-                    analysis_name=analysis_name,
-                    superimposition_method=superimposition_method,
-                    cva_group_by=cva_group_by,
-                    manova_group_by=manova_group_by
-                )
-        except Exception as e:
-            show_error(self, f"Error running analysis: {str(e)}")
+                self.run_analysis(superimposition_method, cva_group_by, manova_group_by, analysis_name, self.selected_dataset )
+                #logger.info("calling run analysis %s %s %s %s %s", superimposition_method, ordination_method, group_by, analysis_name, self.selected_dataset.dataset_name)
+                #logger.info("call run analysis", superimposition_method, ordination_method, group_by, self.selected_dataset)
+                self.reset_treeView()
+                self.load_dataset()
+        else:
+            self.analysis_dialog = DatasetAnalysisDialog(self,self.selected_dataset)
+            self.analysis_dialog.show()
 
+    def run_analysis(self, superimposition_method, cva_group_by, manova_group_by, analysis_name, dataset):
+        logger.info("run analysis %s %s %s %s %s", superimposition_method, cva_group_by, manova_group_by, analysis_name, dataset.dataset_name)
+        #print("pca button clicked")
+        # set wait cursor
+        
+        #QApplication.processEvents()
+
+        ds_ops = MdDatasetOps(dataset)
+        #if dataset.dimension == 2:
+        #    for obj in dataset.object_list:
+        #        if
+        #        obj.apply_scale()
+        #for obj_ops in ds_ops.object_list:
+        #    if 
+        analysis_done = False
+        #analysis_type = analysis_method
+
+        QApplication.setOverrideCursor(Qt.WaitCursor)
+        if not ds_ops.procrustes_superimposition():
+            error_message = self.tr("Procrustes superimposition failed")
+            logger.error(error_message)
+            mu.show_error_message(error_message)
+            return
+        #self.show_object_shape()
+
+        cva_analysis_result = PerformCVA(ds_ops, cva_group_by)
+        if cva_analysis_result is None:
+            error_message = self.tr("CVA analysis failed")
+            logger.error(error_message)
+            mu.show_error_message(error_message)
+            return
+        pca_analysis_result = PerformPCA(ds_ops)
+        if pca_analysis_result is None:
+            error_message = self.tr("PCA analysis failed")
+            logger.error(error_message)
+            mu.show_error_message(error_message)
+            return
+
+        manova_analysis_result = PerformPCA(ds_ops)
+
+        eigenvalues_list = []
+        eigenvalues_cumulative_percentage = 0
+        #print("raw eigenvalues:",pca_analysis_result.raw_eigen_values)
+        #print("eigenvalues:",pca_analysis_result.eigen_value_percentages)
+        for i, val in enumerate(pca_analysis_result.raw_eigen_values):
+            val2 = pca_analysis_result.eigen_value_percentages[i]
+            eigenvalues_list.append( val )
+            eigenvalues_cumulative_percentage += val2
+            #print("eigenvalues:",eigenvalues_list)
+            if eigenvalues_cumulative_percentage > 0.9:
+                break
+        effective_eigenvalues = len(eigenvalues_list)
+        #print("eigen_value list",eigenvalues_list)
+        #print("effective eigenvalues:",effective_eigenvalues)
+        manova_datamatrix = [ pc_score_list[:effective_eigenvalues] for pc_score_list in pca_analysis_result.rotated_matrix.tolist() ] 
+            #analysis.eigenvalues_json = json.dumps(eigenvalues_list)
+
+        manova_analysis_result = PerformManova(ds_ops, manova_datamatrix, manova_group_by)
+
+        pca_new_coords = pca_analysis_result.rotated_matrix.tolist()
+        for i, obj in enumerate(ds_ops.object_list):
+            obj.analysis_result = pca_new_coords[i]
+
+        cva_new_coords = pca_analysis_result.rotated_matrix.tolist()
+        for i, obj in enumerate(ds_ops.object_list):
+            obj.analysis_result = cva_new_coords[i]
+
+        analysis = MdAnalysis()
+        analysis.dataset = dataset
+        analysis.analysis_name = analysis_name
+        #analysis.analysis_type = analysis_type
+        analysis.superimposition_method = superimposition_method
+        analysis.dimension = dataset.dimension
+        analysis.wireframe = dataset.wireframe
+        analysis.baseline = dataset.baseline
+        analysis.polygons = dataset.polygons
+        analysis.propertyname_str = dataset.propertyname_str
+
+        cva_group_by_name = dataset.variablename_list[cva_group_by]
+        manova_group_by_name = dataset.variablename_list[manova_group_by]
+
+        ''' manova results'''
+        #print("MANOVA result:",manova_analysis_result.results)
+        #print("group by:", manova_group_by, manova_group_by_name)
+        stat_text = str(manova_analysis_result.results[manova_group_by_name]['stat'])
+        column_names = ["", "Value", "Num DF", "Den DF", "F Value", "Pr > F"]
+        lines = stat_text.strip().splitlines()
+
+        # Remove empty lines
+        lines = [line for line in lines if line.strip()]
+        stat_dict = {}
+        for line in lines[1:]:
+            data = line.split()
+            stat_name = ""  # Initialize stat_name as an empty string
+            stat_values = []
+            for entry in data:
+                if mu.is_numeric(entry):  # Check if entry is numeric
+                    stat_values.append(float(entry))
+                else:
+                    stat_name += entry + " "  # Append entry with whitespace
+            stat_name = stat_name.strip()  # Remove trailing whitespace from stat_name
+            stat_dict[stat_name] = stat_values
+            #print(column_names, stat_values)
+            #for idx, colname in enumerate(column_names):
+            #    stat_dict[stat_name][colname] = stat_values[idx]
+            #    analysis.manova_analysis_result_json = json.dumps()
+        stat_dict['column_names'] = column_names
+        analysis.manova_analysis_result_json = json.dumps(stat_dict)
+
+        object_info_list = []
+        raw_landmark_list = []
+        property_len = len(dataset.get_variablename_list()) or 0
+        object_list = dataset.object_list.order_by(MdObject.sequence)
+        for obj in object_list:
+            raw_landmark_list.append( obj.get_landmark_list() )
+            object_info_list.append( { "id": obj.id, "name": obj.object_name, "sequence": obj.sequence, "csize": obj.get_centroid_size(), "variable_list": obj.get_variable_list()[:property_len] })
+        analysis.raw_landmark_json = json.dumps(raw_landmark_list)
+        analysis.object_info_json = json.dumps(object_info_list)
+
+        superimposed_landmark_list = []
+        for obj_ops in ds_ops.object_list:
+            superimposed_landmark_list.append( obj_ops.landmark_list )
+        analysis.superimposed_landmark_json = json.dumps(superimposed_landmark_list)
+
+
+        pca_new_coords = pca_analysis_result.rotated_matrix.tolist()
+        analysis.pca_analysis_result_json = json.dumps(pca_new_coords)
+        rotation_matrix = pca_analysis_result.rotation_matrix.tolist()
+        analysis.pca_rotation_matrix_json = json.dumps(rotation_matrix)
+
+        cva_new_coords = cva_analysis_result.rotated_matrix.tolist()
+        analysis.cva_analysis_result_json = json.dumps(cva_new_coords)
+        rotation_matrix = cva_analysis_result.rotation_matrix.tolist()
+        analysis.cva_rotation_matrix_json = json.dumps(rotation_matrix)
+
+        analysis.cva_group_by = dataset.get_variablename_list()[cva_group_by]
+        analysis.manova_group_by = dataset.get_variablename_list()[manova_group_by]
+            
+        eigenvalues_list = []
+        for i, val in enumerate(pca_analysis_result.raw_eigen_values):
+            val2 = pca_analysis_result.eigen_value_percentages[i]
+            eigenvalues_list.append( [val, val2] )
+        analysis.pca_eigenvalues_json = json.dumps(eigenvalues_list)
+
+        eigenvalues_list = []
+        for i, val in enumerate(cva_analysis_result.raw_eigen_values):
+            val2 = cva_analysis_result.eigen_value_percentages[i]
+            eigenvalues_list.append( [val, val2] )
+        analysis.cva_eigenvalues_json = json.dumps(eigenvalues_list)
+
+        analysis.save()
+
+        #print("result:",new_coords)
+        #self.show_analysis_result()
+
+        # end wait cursor
+        #self.analysis_done = True
+        QApplication.restoreOverrideCursor()
 
     def initUI(self):
         # add tableView and tableWidget to vertical layout
@@ -694,40 +810,37 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
     @pyqtSlot()
     def on_action_import_dataset_triggered(self):
-        """Handle import dataset action using controller"""
         self.dlg = ImportDatasetDialog(self)
         self.dlg.setModal(True)
         self.dlg.setWindowModality(Qt.ApplicationModal)
         self.dlg.exec_()
-        # Controller signals will handle UI updates automatically        
+        self.load_dataset()        
 
     @pyqtSlot()
     def on_action_export_dataset_triggered(self):
-        """Handle export dataset action using controller"""
         if self.selected_dataset is None:
             return
-        try:
-            self.dlg = ExportDatasetDialog(self)
-            self.dlg.setModal(True)
-            self.dlg.set_dataset(self.selected_dataset)
-            self.dlg.setWindowModality(Qt.ApplicationModal)
-            self.dlg.exec_()
-        except Exception as e:
-            show_error(self, f"Error exporting dataset: {str(e)}")
+        self.dlg = ExportDatasetDialog(self)
+        self.dlg.setModal(True)
+        self.dlg.set_dataset(self.selected_dataset)
+        self.dlg.setWindowModality(Qt.ApplicationModal)
+        self.dlg.exec_()
 
     @pyqtSlot()
     def on_action_new_dataset_triggered(self):
-        """Handle new dataset action using controller"""
+        # open new dataset dialog
         self.dlg = DatasetDialog(self)
         self.dlg.setModal(True)
         if self.selected_dataset:
+            #print("wireframe 1:", self.selected_dataset.wireframe)
             self.selected_dataset = self.selected_dataset.get_by_id(self.selected_dataset.id)
-            self.dlg.set_parent_dataset(self.selected_dataset)
+            #self.selected_dataset.unpack_wirefra
+            #print("wireframe 2:", self.selected_dataset.wireframe)
+            self.dlg.set_parent_dataset( self.selected_dataset )
         else:
-            self.dlg.set_parent_dataset(None)
+            self.dlg.set_parent_dataset( None )
 
         ret = self.dlg.exec_()
-        # Controller signals will handle the UI updates automatically
         self.load_dataset()
         self.reset_tableView()
 
@@ -800,35 +913,23 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
     @pyqtSlot()
     def on_action_new_object_triggered(self):
-        """Handle new object action using controller"""
-        print(f"DEBUG: selected_dataset = {self.selected_dataset}")
         if not self.selected_dataset:
             return
-        try:
-            # Convert ID to dataset object if needed
-            if isinstance(self.selected_dataset, int):
-                dataset = MdDataset.get_by_id(self.selected_dataset)
-            else:
-                dataset = self.selected_dataset
-                
-            print(f"DEBUG: dataset object = {dataset}")
-            
-            # Ensure controller knows about selected dataset
-            self.controller.set_current_dataset(dataset)
-            new_object = self.controller.create_object()
-            if new_object is None:
-                return  # Error already handled by controller
-            print(f"DEBUG: new_object = {new_object}")
-            
-            self.dlg = ObjectDialog(self)
-            self.dlg.set_dataset(dataset)
-            self.dlg.set_object(new_object)
-            ret = self.dlg.exec_()
-            if ret != 0:
-                # Object was saved in dialog, UI will update via signals
-                pass
-        except Exception as e:
-            show_error(self, f"Error creating new object: {str(e)}")
+        self.dlg = ObjectDialog(self)
+        self.dlg.set_dataset(self.selected_dataset)
+        object = MdObject()
+        object.dataset = self.selected_dataset
+        object.sequence = self.selected_dataset.object_list.count() + 1
+        self.dlg.set_object(object)
+        ret = self.dlg.exec_()
+        if ret == 0:
+            return
+
+        dataset = self.selected_dataset
+        self.load_dataset()
+        self.reset_tableView()
+        self.select_dataset(dataset)
+        self.load_object()
 
     @pyqtSlot()
     def on_tableView_doubleClicked(self):
@@ -1218,9 +1319,9 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             rec.unpack_wireframe()
             item1 = QStandardItem(rec.dataset_name + " (" + str(rec.object_list.count()) + ")")
             if rec.dimension == 2:
-                item1.setIcon(QIcon(ICON_CONSTANTS['dataset_2d']))
+                item1.setIcon(QIcon(mu.resource_path(ICON['dataset_2d'])))
             else:
-                item1.setIcon(QIcon(ICON_CONSTANTS['dataset_3d']))
+                item1.setIcon(QIcon(mu.resource_path(ICON['dataset_3d'])))
             item2 = QStandardItem(str(rec.id))
             item1.setData(rec)
             
@@ -1236,7 +1337,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         all_record = MdAnalysis.filter(dataset=dataset)
         for rec in all_record:
             item1 = QStandardItem(rec.analysis_name)
-            item1.setIcon(QIcon(ICON_CONSTANTS['analysis']))
+            item1.setIcon(QIcon(mu.resource_path(ICON['analyze'])))
             item2 = QStandardItem(str(rec.id))
             item1.setData(rec)
             parent_item.appendRow([item1,item2])
@@ -1247,9 +1348,9 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             rec.unpack_wireframe()
             item1 = QStandardItem(rec.dataset_name + " (" + str(rec.object_list.count()) + ")")
             if rec.dimension == 2:
-                item1.setIcon(QIcon(ICON_CONSTANTS['dataset_2d'])) 
+                item1.setIcon(QIcon(mu.resource_path(ICON['dataset_2d']))) 
             else:
-                item1.setIcon(QIcon(ICON_CONSTANTS['dataset_3d']))
+                item1.setIcon(QIcon(mu.resource_path(ICON['dataset_3d'])))
             item2 = QStandardItem(str(rec.id))
             item1.setData(rec)
             parent_item.appendRow([item1,item2])#,item3] )
@@ -1351,6 +1452,35 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     def clear_object_view(self):
         self.object_view.clear_object()
 
+if __name__ == "__main__":
+    #QApplication : 프로그램을 실행시켜주는 클래스
+    #with open('log.txt', 'w') as f:
+    #    f.write("hello\n")
+    #    # current directory
+    #    f.write("current directory 1:" + os.getcwd() + "\n")
+    #    f.write("current directory 2:" + os.path.abspath(".") + "\n")
+    app = QApplication(sys.argv)
+    app.setWindowIcon(QIcon(mu.resource_path('icons/Modan2_2.png')))
+    app.settings = QSettings(QSettings.IniFormat, QSettings.UserScope,mu.COMPANY_NAME, mu.PROGRAM_NAME)
+
+    translator = QTranslator()
+    app.language = app.settings.value("language", "en")
+    translator.load(mu.resource_path("translations/Modan2_{}.qm".format(app.language)))
+    app.installTranslator(translator)
+    app.translator = translator
+
+    #app.settings = 
+    #app.preferences = QSettings("Modan", "Modan2")
+
+    #WindowClass의 인스턴스 생성
+    myWindow = ModanMainWindow()
+
+    #프로그램 화면을 보여주는 코드
+    myWindow.show()
+    #myWindow.activateWindow()
+
+    #프로그램을 이벤트루프로 진입시키는(프로그램을 작동시키는) 코드
+    app.exec_()
 
 ''' 
 How to make an exe file

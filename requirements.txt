@@ -10,6 +10,7 @@ opencv-python-headless
 xlsxwriter
 pandas
 peewee-migrate
+scikit-learn
 statsmodels
 pyopengl
 pyopengl-accelerate

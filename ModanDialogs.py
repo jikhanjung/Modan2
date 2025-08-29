@@ -530,7 +530,10 @@ class DatasetDialog(QDialog):
 
     def write_settings(self):
         if self.remember_geometry is True:
-            self.m_app.settings.setValue("WindowGeometry/DatasetDialog", self.geometry())
+            self.m_app.settings.set("ui.window_geometry.DatasetDialog", [
+                self.geometry().x(), self.geometry().y(),
+                self.geometry().width(), self.geometry().height()
+            ])
 
     def closeEvent(self, event):
         self.write_settings()
@@ -1010,7 +1013,10 @@ class ObjectDialog(QDialog):
 
     def write_settings(self):
         if self.remember_geometry is True:
-            self.m_app.settings.setValue("WindowGeometry/ObjectDialog", self.geometry())
+            self.m_app.settings.set("ui.window_geometry.ObjectDialog", [
+                self.geometry().x(), self.geometry().y(),
+                self.geometry().width(), self.geometry().height()
+            ])
 
     def closeEvent(self, event):
         self.write_settings()
@@ -1144,6 +1150,10 @@ class ObjectDialog(QDialog):
 
     def set_dataset(self, dataset):
         #print("object dialog set_dataset", dataset.dataset_name)
+        if dataset is None:
+            self.dataset = None
+            self.lblDataset.setText("No dataset selected")
+            return
         self.dataset = dataset
         self.lblDataset.setText(dataset.dataset_name)
 
@@ -2878,7 +2888,10 @@ class DataExplorationDialog(QDialog):
                 self.m_app.settings.setValue("IsMaximized/DataExplorationWindow", True)
             else:
                 self.m_app.settings.setValue("IsMaximized/DataExplorationWindow", False)
-                self.m_app.settings.setValue("WindowGeometry/DataExplorationWindow", self.geometry())
+                self.m_app.settings.set("ui.window_geometry.DataExplorationWindow", [
+                    self.geometry().x(), self.geometry().y(),
+                    self.geometry().width(), self.geometry().height()
+                ])
                 #self.m_app.settings.setValue("WindowGeometry/DataExplorationWindow", self.geometry())
                 #print("save maximized false")
 
@@ -4416,7 +4429,10 @@ class DatasetAnalysisDialog(QDialog):
 
     def write_settings(self):
         if self.remember_geometry is True:
-            self.m_app.settings.setValue("WindowGeometry/DatasetAnalysisWindow", self.geometry())
+            self.m_app.settings.set("ui.window_geometry.DatasetAnalysisWindow", [
+                self.geometry().x(), self.geometry().y(),
+                self.geometry().width(), self.geometry().height()
+            ])
 
     def closeEvent(self, event):
         self.write_settings()
@@ -5401,7 +5417,10 @@ class ExportDatasetDialog(QDialog):
 
     def write_settings(self):
         if self.remember_geometry is True:
-            self.m_app.settings.setValue("WindowGeometry/ExportDialog", self.geometry())
+            self.m_app.settings.set("ui.window_geometry.ExportDialog", [
+                self.geometry().x(), self.geometry().y(),
+                self.geometry().width(), self.geometry().height()
+            ])
 
     def closeEvent(self, event):
         self.write_settings()
@@ -5650,7 +5669,10 @@ class ImportDatasetDialog(QDialog):
 
     def write_settings(self):
         if self.remember_geometry is True:
-            self.m_app.settings.setValue("WindowGeometry/ImportDialog", self.geometry())
+            self.m_app.settings.set("ui.window_geometry.ImportDialog", [
+                self.geometry().x(), self.geometry().y(),
+                self.geometry().width(), self.geometry().height()
+            ])
 
     def closeEvent(self, event):
         self.write_settings()
@@ -6301,7 +6323,7 @@ class PreferencesDialog(QDialog):
     def write_settings(self):
         self.m_app.settings.setValue("ToolbarIconSize", self.m_app.toolbar_icon_size)
         self.m_app.settings.setValue("PlotSize", self.m_app.plot_size)
-        self.m_app.settings.setValue("WindowGeometry/RememberGeometry", self.m_app.remember_geometry)
+        self.m_app.settings.set("ui.remember_geometry", self.m_app.remember_geometry)
         #print(self.color_list)
         for i in range(len(self.m_app.marker_list)):
             self.m_app.settings.setValue("DataPointMarker/"+str(i), self.m_app.marker_list[i])
@@ -6310,7 +6332,10 @@ class PreferencesDialog(QDialog):
             self.m_app.settings.setValue("DataPointColor/"+str(i), self.m_app.color_list[i])
 
         if self.m_app.remember_geometry is True:
-            self.m_app.settings.setValue("WindowGeometry/PreferencesDialog", self.geometry())
+            self.m_app.settings.set("ui.window_geometry.PreferencesDialog", [
+                self.geometry().x(), self.geometry().y(),
+                self.geometry().width(), self.geometry().height()
+            ])
 
         self.m_app.settings.setValue("LandmarkSize/2D", self.m_app.landmark_pref['2D']['size'])
         self.m_app.settings.setValue("LandmarkColor/2D", self.m_app.landmark_pref['2D']['color'])

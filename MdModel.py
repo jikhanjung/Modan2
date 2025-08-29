@@ -434,6 +434,10 @@ class MdObject(Model):
         if lm_dim == 3:
             c[2] = sum_of_z / lm_count
         return c
+    
+    def refresh(self):
+        """Refresh object from database"""
+        return self.get_by_id(self.id)
 
 class MdImage(Model):
     original_path = CharField(null=True)
@@ -665,10 +669,6 @@ class MdThreeDModel(Model):
         afile.close()
         md5hash = hasher.hexdigest()
         return md5hash, image_data
-    
-    def refresh(self):
-        """Refresh object from database"""
-        return self.get_by_id(self.id)
 
 class MdObjectOps:
     def __init__(self,mdobject):

@@ -2,11 +2,11 @@ pyqt5
 pyqt5-sip
 peewee
 pillow
-numpy<2.0.0
+numpy>=2.0.0
 trimesh
 matplotlib
 scipy
-opencv-python
+opencv-python-headless
 xlsxwriter
 pandas
 peewee-migrate

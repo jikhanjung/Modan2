@@ -900,7 +900,8 @@ class ModanController(QObject):
             return False, "No dataset selected"
         
         objects_with_landmarks = list(self.current_dataset.object_list.where(
-            MdModel.MdObject.landmarks.is_null(False)
+            (MdModel.MdObject.landmark_str.is_null(False)) & 
+            (MdModel.MdObject.landmark_str != "")
         ))
         
         min_objects = {
@@ -919,7 +920,8 @@ class ModanController(QObject):
         if objects_with_landmarks:
             expected_count = self.current_dataset.landmark_count
             for obj in objects_with_landmarks:
-                if len(obj.landmarks) != expected_count:
+                obj.unpack_landmark()
+                if len(obj.landmark_list) != expected_count:
                     return False, f"Inconsistent landmark count in object '{obj.object_name}'"
         
         return True, "Dataset is valid for analysis"

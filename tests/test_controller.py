@@ -348,6 +348,7 @@ class TestAnalysisOperations:
         """Test dataset validation for analysis."""
         # Test PCA validation
         is_valid, message = controller_with_data.validate_dataset_for_analysis("PCA")
+        print(f"DEBUG: PCA validation result: {is_valid}, message: {message}")
         assert is_valid
         
         # Test CVA validation with insufficient objects

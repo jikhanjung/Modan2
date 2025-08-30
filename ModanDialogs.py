@@ -10,6 +10,8 @@ from PyQt5.QtGui import QColor, QPainter, QPen, QPixmap, QStandardItemModel, QSt
 from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSize, QPoint, QTranslator, \
                          pyqtSlot, pyqtSignal, QItemSelectionModel, QTimer, QEvent
 
+import logging
+
 from OBJFileLoader import OBJ
 
 from ModanComponents import ObjectViewer2D, ObjectViewer3D, ShapePreference, \
@@ -530,10 +532,7 @@ class DatasetDialog(QDialog):
 
     def write_settings(self):
         if self.remember_geometry is True:
-            self.m_app.settings.set("ui.window_geometry.DatasetDialog", [
-                self.geometry().x(), self.geometry().y(),
-                self.geometry().width(), self.geometry().height()
-            ])
+            self.m_app.settings.setValue("WindowGeometry/DatasetDialog", self.geometry())
 
     def closeEvent(self, event):
         self.write_settings()
@@ -1013,10 +1012,7 @@ class ObjectDialog(QDialog):
 
     def write_settings(self):
         if self.remember_geometry is True:
-            self.m_app.settings.set("ui.window_geometry.ObjectDialog", [
-                self.geometry().x(), self.geometry().y(),
-                self.geometry().width(), self.geometry().height()
-            ])
+            self.m_app.settings.setValue("WindowGeometry/ObjectDialog", self.geometry())
 
     def closeEvent(self, event):
         self.write_settings()
@@ -1123,13 +1119,14 @@ class ObjectDialog(QDialog):
         self.btnWireframe.setChecked(False)
 
     def calibrate(self, dist):
-        print("calibrate 1-1", self.object_view.edit_mode, MODE['CALIBRATION'])
+        logger = logging.getLogger(__name__)
+        logger.debug(f"calibrate start - edit_mode: {self.object_view.edit_mode}, CALIBRATION: {MODE['CALIBRATION']}")
         self.calibrate_dlg = CalibrationDialog(self, dist)
-        print("calibrate 1-2", self.object_view.edit_mode, MODE['CALIBRATION'])
+        logger.debug(f"calibrate dialog created - edit_mode: {self.object_view.edit_mode}")
         self.calibrate_dlg.setModal(True)
-        print("calibrate 1-3", self.object_view.edit_mode, MODE['CALIBRATION'])
+        logger.debug(f"calibrate before exec - edit_mode: {self.object_view.edit_mode}")
         self.calibrate_dlg.exec_()
-        print("calibrate 1-4", self.object_view.edit_mode, MODE['CALIBRATION'])
+        logger.debug(f"calibrate after exec - edit_mode: {self.object_view.edit_mode}")
 
     def btnWireframe_clicked(self):
         #self.edit_mode = MODE_ADD_LANDMARK
@@ -1206,12 +1203,19 @@ class ObjectDialog(QDialog):
             #self.edtLandmarkStr.setText(object.landmark_str)
             object.unpack_landmark()
             self.landmark_list = copy.deepcopy(object.landmark_list)
-            self.edge_list = object.dataset.unpack_wireframe()
+            # Use object's dataset if self.dataset is None
+            dataset_to_use = self.dataset if self.dataset is not None else object.dataset
+            if dataset_to_use is not None:
+                self.edge_list = dataset_to_use.unpack_wireframe()
+            else:
+                self.edge_list = []
             #for lm in self.landmark_list:
             #    self.show_landmark(*lm)
             #self.show_landmarks()
 
-        if self.dataset.dimension == 3:
+        # Use object's dataset if self.dataset is None
+        dataset_to_use = self.dataset if self.dataset is not None else (object.dataset if object is not None else None)
+        if dataset_to_use is not None and dataset_to_use.dimension == 3:
             #print("set_object 3d 1")
             self.object_view = self.object_view_3d
             self.object_view.auto_rotate = False
@@ -2399,7 +2403,8 @@ class DataExplorationDialog(QDialog):
 
             images = [img for img in sorted(glob.glob(f"{temp_dir}/frame*.png"))]
             if len(images) == 0:
-                print("No frame found")
+                logger = logging.getLogger(__name__)
+                logger.warning("No frame found")
                 return
             frame = cv2.imread(images[0])
             height, width, layers = frame.shape
@@ -2888,11 +2893,7 @@ class DataExplorationDialog(QDialog):
                 self.m_app.settings.setValue("IsMaximized/DataExplorationWindow", True)
             else:
                 self.m_app.settings.setValue("IsMaximized/DataExplorationWindow", False)
-                self.m_app.settings.set("ui.window_geometry.DataExplorationWindow", [
-                    self.geometry().x(), self.geometry().y(),
-                    self.geometry().width(), self.geometry().height()
-                ])
-                #self.m_app.settings.setValue("WindowGeometry/DataExplorationWindow", self.geometry())
+                self.m_app.settings.setValue("WindowGeometry/DataExplorationWindow", self.geometry())
                 #print("save maximized false")
 
     def closeEvent(self, event):
@@ -3103,7 +3104,8 @@ class DataExplorationDialog(QDialog):
         #self.show_analysis_result()
 
     def comboShapeview_changed(self):
-        print("shape_combo_changed")
+        logger = logging.getLogger(__name__)
+        logger.debug("shape_combo_changed")
         #shape_view_index = self.shape_combo_list.index(combo)
         #shape_view = self.shape_view_list[shape_view_index]
 
@@ -4429,10 +4431,7 @@ class DatasetAnalysisDialog(QDialog):
 
     def write_settings(self):
         if self.remember_geometry is True:
-            self.m_app.settings.set("ui.window_geometry.DatasetAnalysisWindow", [
-                self.geometry().x(), self.geometry().y(),
-                self.geometry().width(), self.geometry().height()
-            ])
+            self.m_app.settings.setValue("WindowGeometry/DatasetAnalysisWindow", self.geometry())
 
     def closeEvent(self, event):
         self.write_settings()
@@ -4575,7 +4574,8 @@ class DatasetAnalysisDialog(QDialog):
             self.show_analysis_result()
 
     def on_btnSuperimpose_clicked(self):
-        print("on_btnSuperimpose_clicked")
+        logger = logging.getLogger(__name__)
+        logger.debug("on_btnSuperimpose_clicked")
 
     def on_btnAnalyze_clicked(self):
         #print("on_btnAnalyze_clicked")
@@ -4729,12 +4729,14 @@ class DatasetAnalysisDialog(QDialog):
             self.analysis_type = "PCA"
 
         if not self.ds_ops.procrustes_superimposition():
-            print("procrustes superimposition failed")
+            logger = logging.getLogger(__name__)
+            logger.error("procrustes superimposition failed")
             return
         self.show_object_shape()
 
         if self.dataset.object_list is None or len(self.dataset.object_list) < 5:
-            print("too small number of objects for PCA analysis")            
+            logger = logging.getLogger(__name__)
+            logger.warning("too small number of objects for PCA analysis")            
             return
 
         if self.analysis_type == "CVA":
@@ -5417,10 +5419,7 @@ class ExportDatasetDialog(QDialog):
 
     def write_settings(self):
         if self.remember_geometry is True:
-            self.m_app.settings.set("ui.window_geometry.ExportDialog", [
-                self.geometry().x(), self.geometry().y(),
-                self.geometry().width(), self.geometry().height()
-            ])
+            self.m_app.settings.setValue("WindowGeometry/ExportDialog", self.geometry())
 
     def closeEvent(self, event):
         self.write_settings()
@@ -5669,10 +5668,7 @@ class ImportDatasetDialog(QDialog):
 
     def write_settings(self):
         if self.remember_geometry is True:
-            self.m_app.settings.set("ui.window_geometry.ImportDialog", [
-                self.geometry().x(), self.geometry().y(),
-                self.geometry().width(), self.geometry().height()
-            ])
+            self.m_app.settings.setValue("WindowGeometry/ImportDialog", self.geometry())
 
     def closeEvent(self, event):
         self.write_settings()
@@ -5811,7 +5807,8 @@ class ImportDatasetDialog(QDialog):
                 if not os.path.exists(file_name):
                     file_name = os.path.join(import_data.dirname, file_name)
                 if not os.path.exists(file_name):
-                    print("file not found:", file_name)
+                    logger = logging.getLogger(__name__)
+                    logger.error(f"file not found: {file_name}")
                 else:
                     new_image = MdImage()
                     new_image.object = object
@@ -6323,7 +6320,7 @@ class PreferencesDialog(QDialog):
     def write_settings(self):
         self.m_app.settings.setValue("ToolbarIconSize", self.m_app.toolbar_icon_size)
         self.m_app.settings.setValue("PlotSize", self.m_app.plot_size)
-        self.m_app.settings.set("ui.remember_geometry", self.m_app.remember_geometry)
+        self.m_app.settings.setValue("WindowGeometry/RememberGeometry", self.m_app.remember_geometry)
         #print(self.color_list)
         for i in range(len(self.m_app.marker_list)):
             self.m_app.settings.setValue("DataPointMarker/"+str(i), self.m_app.marker_list[i])
@@ -6332,10 +6329,7 @@ class PreferencesDialog(QDialog):
             self.m_app.settings.setValue("DataPointColor/"+str(i), self.m_app.color_list[i])
 
         if self.m_app.remember_geometry is True:
-            self.m_app.settings.set("ui.window_geometry.PreferencesDialog", [
-                self.geometry().x(), self.geometry().y(),
-                self.geometry().width(), self.geometry().height()
-            ])
+            self.m_app.settings.setValue("WindowGeometry/PreferencesDialog", self.geometry())
 
         self.m_app.settings.setValue("LandmarkSize/2D", self.m_app.landmark_pref['2D']['size'])
         self.m_app.settings.setValue("LandmarkColor/2D", self.m_app.landmark_pref['2D']['color'])

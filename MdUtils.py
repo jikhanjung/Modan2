@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QMessageBox
 import sys, os
 import copy
+import logging
 from PyQt5.QtGui import QColor
 
 import numpy as np
@@ -156,7 +157,8 @@ def process_3d_file(file_name):
         # and make a new array of faces
 
         if False and len(tri_mesh.vertices.shape) == 3:
-            print("tri_mesh.vertices.shape:", tri_mesh.vertices.shape)
+            logger = logging.getLogger(__name__)
+            logger.debug(f"tri_mesh.vertices.shape: {tri_mesh.vertices.shape}")
             tri_mesh.faces = []
             vertices = []
             faces = []
@@ -177,13 +179,28 @@ def process_3d_file(file_name):
         #print("stl_mesh vertices:", tri_mesh.vertices[0:5,:])
         #print("stl_mesh faces:", tri_mesh.faces[0:5,:])
         
-        tri_mesh.export( new_file_name, file_type='obj')
+        try:
+            tri_mesh.export( new_file_name, file_type='obj')
+        except Exception as e:
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to export STL mesh to {new_file_name}: {e}")
+            raise ValueError(f"Cannot export to OBJ file {new_file_name}: {e}")
     elif file_extension == 'ply':
-        ply_mesh = trimesh.load(file_name)
+        try:
+            ply_mesh = trimesh.load(file_name)
+        except Exception as e:
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to load PLY mesh from {file_name}: {e}")
+            raise ValueError(f"Cannot load PLY file {file_name}: {e}")
         #print("ply_mesh shape:", ply_mesh.vertices.shape)
         #print("ply_mesh vertices:", ply_mesh.vertices[0:5,:])
         #print("ply_mesh faces:", ply_mesh.faces[0:5,:])
-        ply_mesh.export( new_file_name, file_type='obj')
+        try:
+            ply_mesh.export( new_file_name, file_type='obj')
+        except Exception as e:
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to export PLY mesh to {new_file_name}: {e}")
+            raise ValueError(f"Cannot export to OBJ file {new_file_name}: {e}")
     return new_file_name
 
 def show_error_message(error_message):
@@ -233,12 +250,21 @@ def read_landmark_file(file_path):
         return read_nts_file(file_path)
     elif file_ext == '.txt':
         # Try to detect format
-        with open(file_path, 'r') as f:
-            first_line = f.readline().strip()
-            if first_line.startswith('LM='):
-                return read_tps_file(file_path)
-            elif 'DIM=' in first_line:
-                return read_nts_file(file_path)
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                first_line = f.readline().strip()
+                if first_line.startswith('LM='):
+                    return read_tps_file(file_path)
+                elif 'DIM=' in first_line:
+                    return read_nts_file(file_path)
+        except (FileNotFoundError, PermissionError) as e:
+            logger = logging.getLogger(__name__)
+            logger.error(f"Cannot read landmark file {file_path}: {e}")
+            raise
+        except UnicodeDecodeError as e:
+            logger = logging.getLogger(__name__)
+            logger.error(f"Encoding error reading {file_path}: {e}")
+            raise ValueError(f"Cannot decode file {file_path}. Please check file encoding.")
     
     raise ValueError(f"Unsupported landmark file format: {file_ext}")
 
@@ -256,36 +282,60 @@ def read_tps_file(file_path):
     current_landmarks = []
     current_name = ""
     
-    with open(file_path, 'r') as f:
-        for line in f:
-            line = line.strip()
-            
-            if line.startswith('LM='):
-                # Start new specimen
-                if current_landmarks and current_name:
-                    specimens.append((current_name, current_landmarks))
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
                 
-                landmark_count = int(line.split('=')[1])
-                current_landmarks = []
-                current_name = ""
-                
-            elif line.startswith('ID='):
-                current_name = line.split('=')[1].strip()
-                
-            elif line and not line.startswith(('IMAGE=', 'SCALE=')):
-                # Landmark coordinates
-                try:
-                    coords = [float(x) for x in line.split()]
-                    if len(coords) >= 2:
-                        current_landmarks.append(coords[:2])  # Use only X, Y
-                except ValueError:
-                    continue
-    
-    # Add last specimen
-    if current_landmarks and current_name:
-        specimens.append((current_name, current_landmarks))
-    elif current_landmarks:
-        specimens.append((f"specimen_{len(specimens)+1}", current_landmarks))
+                if line.startswith('LM='):
+                    # Start new specimen
+                    if current_landmarks and current_name:
+                        specimens.append((current_name, current_landmarks))
+                    
+                    try:
+                        landmark_count = int(line.split('=')[1])
+                    except (ValueError, IndexError) as e:
+                        logger = logging.getLogger(__name__)
+                        logger.error(f"Invalid LM line in {file_path}: {line}")
+                        raise ValueError(f"Malformed TPS file: invalid LM line '{line}'")
+                    current_landmarks = []
+                    current_name = ""
+                    
+                elif line.startswith('ID='):
+                    try:
+                        current_name = line.split('=')[1].strip()
+                    except IndexError:
+                        logger = logging.getLogger(__name__)
+                        logger.warning(f"Invalid ID line in {file_path}: {line}")
+                        current_name = "Unknown"
+                    
+                elif line and not line.startswith(('IMAGE=', 'SCALE=')):
+                    # Landmark coordinates
+                    try:
+                        coords = [float(x) for x in line.split()]
+                        if len(coords) >= 2:
+                            current_landmarks.append(coords[:2])  # Use only X, Y
+                    except ValueError:
+                        continue
+        
+        # Add last specimen
+        if current_landmarks and current_name:
+            specimens.append((current_name, current_landmarks))
+        elif current_landmarks:
+            specimens.append((f"specimen_{len(specimens)+1}", current_landmarks))
+        
+    except (FileNotFoundError, PermissionError) as e:
+        logger = logging.getLogger(__name__)
+        logger.error(f"Cannot read TPS file {file_path}: {e}")
+        raise
+    except UnicodeDecodeError as e:
+        logger = logging.getLogger(__name__)
+        logger.error(f"Encoding error reading TPS file {file_path}: {e}")
+        raise ValueError(f"Cannot decode TPS file {file_path}. Please check file encoding.")
+    except Exception as e:
+        logger = logging.getLogger(__name__)
+        logger.error(f"Unexpected error reading TPS file {file_path}: {e}")
+        raise ValueError(f"Failed to read TPS file {file_path}: {e}")
     
     return specimens
 
@@ -301,41 +351,65 @@ def read_nts_file(file_path):
     """
     specimens = []
     
-    with open(file_path, 'r') as f:
-        lines = f.readlines()
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+    except (FileNotFoundError, PermissionError) as e:
+        logger = logging.getLogger(__name__)
+        logger.error(f"Cannot read NTS file {file_path}: {e}")
+        raise
+    except UnicodeDecodeError as e:
+        logger = logging.getLogger(__name__)
+        logger.error(f"Encoding error reading NTS file {file_path}: {e}")
+        raise ValueError(f"Cannot decode NTS file {file_path}. Please check file encoding.")
     
-    i = 0
-    while i < len(lines):
-        line = lines[i].strip()
-        
-        # NTS header: n_specimens n_landmarks n_dimensions unknown DIM=dimension
-        if 'DIM=' in line:
-            parts = line.split()
-            n_specimens = int(parts[0])
-            n_landmarks = int(parts[1])
-            n_dimensions = int(parts[2])
+    try:
+        i = 0
+        while i < len(lines):
+            line = lines[i].strip()
             
-            for spec_idx in range(n_specimens):
-                i += 1
-                if i >= len(lines):
-                    break
-                
-                # Specimen name
-                specimen_name = lines[i].strip()
-                landmarks = []
-                
-                # Read landmarks
-                for lm_idx in range(n_landmarks):
+            # NTS header: n_specimens n_landmarks n_dimensions unknown DIM=dimension
+            if 'DIM=' in line:
+                parts = line.split()
+                try:
+                    n_specimens = int(parts[0])
+                    n_landmarks = int(parts[1])
+                    n_dimensions = int(parts[2])
+                except (ValueError, IndexError) as e:
+                    logger = logging.getLogger(__name__)
+                    logger.error(f"Invalid NTS header in {file_path}: {line}")
+                    raise ValueError(f"Malformed NTS file: invalid header '{line}'")
+            
+                for spec_idx in range(n_specimens):
                     i += 1
                     if i >= len(lines):
                         break
                     
-                    coords = [float(x) for x in lines[i].split()]
-                    landmarks.append(coords[:2])  # Use only X, Y
-                
-                specimens.append((specimen_name, landmarks))
-        
-        i += 1
+                    # Specimen name
+                    specimen_name = lines[i].strip()
+                    landmarks = []
+                    
+                    # Read landmarks
+                    for lm_idx in range(n_landmarks):
+                        i += 1
+                        if i >= len(lines):
+                            break
+                        
+                        try:
+                            coords = [float(x) for x in lines[i].split()]
+                            landmarks.append(coords[:2])  # Use only X, Y
+                        except (ValueError, IndexError):
+                            # Skip invalid coordinate lines
+                            continue
+                    
+                    specimens.append((specimen_name, landmarks))
+            
+            i += 1
+    
+    except Exception as e:
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error parsing NTS file {file_path}: {e}")
+        raise ValueError(f"Failed to parse NTS file {file_path}: {e}")
     
     return specimens
 

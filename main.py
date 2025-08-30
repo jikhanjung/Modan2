@@ -122,20 +122,25 @@ def main():
         
         # Show splash screen if not disabled
         if not args.no_splash:
-            from PyQt5.QtWidgets import QSplashScreen
-            from PyQt5.QtGui import QPixmap
+            from MdSplashScreen import create_splash_screen
             
-            splash_path = Path(__file__).parent / "icons" / "Modan2.png"
-            if splash_path.exists():
-                splash_pix = QPixmap(str(splash_path))
-                splash = QSplashScreen(splash_pix, Qt.WindowStaysOnTopHint)
-                splash.show()
-                app.processEvents()
-                
-                # Show splash for 2 seconds
-                import time
-                time.sleep(2)
-                splash.close()
+            # Try to use background image if available
+            splash_bg_path = Path(__file__).parent / "icons" / "Modan2.png"
+            background_path = str(splash_bg_path) if splash_bg_path.exists() else None
+            
+            splash = create_splash_screen(background_path)
+            splash.setProgress("Initializing application...")
+            splash.showWithTimer(3000)  # Show for 3 seconds
+            
+            # Simulate loading steps with progress updates
+            import time
+            time.sleep(0.5)
+            splash.setProgress("Loading configuration...")
+            time.sleep(0.5)
+            splash.setProgress("Setting up database...")
+            time.sleep(0.5)
+            splash.setProgress("Ready!")
+            time.sleep(0.5)
         
         window.show()
         

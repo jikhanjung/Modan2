@@ -17,18 +17,19 @@ def get_timestamp():
     return now.strftime("%Y%m%d")
 migrations_path = mu.resource_path('migrations')
 #migrations_path = "migrations"
-print("migrations_path: ", migrations_path)
-print("database path: ", database_path)
+logger = logging.getLogger(__name__)
+logger.info(f"migrations_path: {migrations_path}")
+logger.info(f"database path: {database_path}")
 gDatabase.connect()
 tables = gDatabase.get_tables()
 
-print("tables: ", tables)
+logger.info(f"tables: {tables}")
 router = Router(gDatabase, migrate_dir=migrations_path)
-print("router: ", router)
+logger.debug(f"router: {router}")
 # set migration_name to YYYYMMDD_HHMMSS
 migration_name = get_timestamp()
-print("migration_name: ", migration_name)
+logger.info(f"migration_name: {migration_name}")
 ret = router.create(auto=[MdDataset,MdObject,MdImage,MdThreeDModel,MdAnalysis], name=migration_name)
-print("ret: ", ret)
+logger.info(f"migration result: {ret}")
 
 

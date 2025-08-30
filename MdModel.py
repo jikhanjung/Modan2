@@ -402,10 +402,25 @@ class MdObject(Model):
         #              - sum_of_y * sum_of_y / lm_count \
         #              - sum_of_z * sum_of_z / lm_count
         #print centroid_size
-        centroid_size = math.sqrt(centroid_size)
+        try:
+            if centroid_size < 0:
+                logger = logging.getLogger(__name__)
+                logger.warning(f"Negative centroid size value: {centroid_size}")
+                centroid_size = 0
+            centroid_size = math.sqrt(centroid_size)
+        except (ValueError, OverflowError) as e:
+            logger = logging.getLogger(__name__)
+            logger.error(f"Math error calculating centroid size: {e}")
+            centroid_size = 0
+            
         self.centroid_size = centroid_size
-        if self.pixels_per_mm is not None:
-            centroid_size = centroid_size / self.pixels_per_mm
+        if self.pixels_per_mm is not None and self.pixels_per_mm != 0:
+            try:
+                centroid_size = centroid_size / self.pixels_per_mm
+            except ZeroDivisionError:
+                logger = logging.getLogger(__name__)
+                logger.error("Division by zero: pixels_per_mm is 0")
+                centroid_size = 0
         #centroid_size = float( int(  * 100 ) ) / 100
         return centroid_size
 
@@ -468,13 +483,32 @@ class MdImage(Model):
 
     def add_file(self, file_name):
         #print("add file:", file_name)
-        self.load_file_info(file_name)
-        new_filepath = self.get_file_path()
-        if not os.path.exists(os.path.dirname(new_filepath)):
-            os.makedirs(os.path.dirname(new_filepath))
-        #print("new file:", new_filepath)
-        ret = shutil.copyfile(file_name, new_filepath)
-        #print("ret:", ret)
+        try:
+            self.load_file_info(file_name)
+            new_filepath = self.get_file_path()
+            
+            # Create directory if it doesn't exist
+            try:
+                if not os.path.exists(os.path.dirname(new_filepath)):
+                    os.makedirs(os.path.dirname(new_filepath))
+            except OSError as e:
+                logger = logging.getLogger(__name__)
+                logger.error(f"Failed to create directory for {new_filepath}: {e}")
+                raise ValueError(f"Cannot create directory for file storage: {e}")
+            
+            # Copy file
+            try:
+                ret = shutil.copyfile(file_name, new_filepath)
+            except (OSError, shutil.Error) as e:
+                logger = logging.getLogger(__name__)
+                logger.error(f"Failed to copy file from {file_name} to {new_filepath}: {e}")
+                raise ValueError(f"Cannot copy file: {e}")
+                
+        except Exception as e:
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to add file {file_name}: {e}")
+            raise
+            
         return self
 
     def get_file_path(self, base_path =  mu.DEFAULT_STORAGE_DIRECTORY ):
@@ -520,23 +554,42 @@ class MdImage(Model):
         self.file_created = file_info['ctime']
         self.file_modified = file_info['mtime']
 
-    def get_md5hash_info(self,filepath):
-        afile = open(filepath, 'rb')
-        hasher = hashlib.md5()
-        image_data = afile.read()
-        hasher.update(image_data)
-        afile.close()
-        md5hash = hasher.hexdigest()
-        return md5hash, image_data
+    def get_md5hash_info(self, filepath):
+        try:
+            hasher = hashlib.md5()
+            with open(filepath, 'rb') as afile:
+                image_data = afile.read()
+                hasher.update(image_data)
+            md5hash = hasher.hexdigest()
+            return md5hash, image_data
+        except (FileNotFoundError, PermissionError, OSError) as e:
+            logger = logging.getLogger(__name__)
+            logger.error(f"Cannot read file for MD5 hash {filepath}: {e}")
+            raise
+        except Exception as e:
+            logger = logging.getLogger(__name__)
+            logger.error(f"Unexpected error calculating MD5 for {filepath}: {e}")
+            raise ValueError(f"Cannot calculate MD5 hash for {filepath}: {e}")
 
     def get_exif_info(self, fullpath, image_data=None):
         image_info = {'date':'','time':'','latitude':'','longitude':'','map_datum':''}
         img = None
-        if image_data:
-            #img = Image.open()
-            img = Image.open(io.BytesIO(image_data))
-        else:
-            img = Image.open(fullpath)
+        
+        try:
+            if image_data:
+                #img = Image.open()
+                img = Image.open(io.BytesIO(image_data))
+            else:
+                img = Image.open(fullpath)
+        except (FileNotFoundError, PermissionError) as e:
+            logger = logging.getLogger(__name__)
+            logger.error(f"Cannot open image file {fullpath}: {e}")
+            raise
+        except Exception as e:
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Cannot process image {fullpath}: {e}")
+            # Return empty info if image cannot be processed
+            return {'datetime': '', 'latitude': '', 'longitude': '', 'map_datum': ''}
         ret = {}
         #print(filename)
         try:
@@ -661,14 +714,22 @@ class MdThreeDModel(Model):
         self.file_created = file_info['ctime']
         self.file_modified = file_info['mtime']
 
-    def get_md5hash_info(self,filepath):
-        afile = open(filepath, 'rb')
-        hasher = hashlib.md5()
-        image_data = afile.read()
-        hasher.update(image_data)
-        afile.close()
-        md5hash = hasher.hexdigest()
-        return md5hash, image_data
+    def get_md5hash_info(self, filepath):
+        try:
+            hasher = hashlib.md5()
+            with open(filepath, 'rb') as afile:
+                image_data = afile.read()
+                hasher.update(image_data)
+            md5hash = hasher.hexdigest()
+            return md5hash, image_data
+        except (FileNotFoundError, PermissionError, OSError) as e:
+            logger = logging.getLogger(__name__)
+            logger.error(f"Cannot read file for MD5 hash {filepath}: {e}")
+            raise
+        except Exception as e:
+            logger = logging.getLogger(__name__)
+            logger.error(f"Unexpected error calculating MD5 for {filepath}: {e}")
+            raise ValueError(f"Cannot calculate MD5 hash for {filepath}: {e}")
 
 class MdObjectOps:
     def __init__(self,mdobject):

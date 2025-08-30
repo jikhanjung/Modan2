@@ -48,7 +48,7 @@ ICONS = {
     'app_icon': str(ICONS_DIR / 'Modan2.png'),
     'app_icon_alt': str(ICONS_DIR / 'Modan2_2.png'),
     'edit_object': str(ICONS_DIR / 'EditObject.png'),
-    'add_variable': str(ICONS_DIR / 'AddVariable.png'),
+    'add_variable': str(ICONS_DIR / 'add_variable.png'),
     'save_changes': str(ICONS_DIR / 'SaveChanges.png'),
     
     # Selection types

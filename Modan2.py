@@ -7,6 +7,7 @@ from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSettings, QSize, QTr
 
 from PyQt5.QtCore import pyqtSlot
 import re,os,sys
+import logging
 from pathlib import Path
 from peewee import *
 from PIL.ExifTags import TAGS
@@ -258,55 +259,214 @@ class ModanMainWindow(QMainWindow):
         self.m_app.storage_directory = os.path.abspath(mu.DEFAULT_STORAGE_DIRECTORY)
         self.m_app.toolbar_icon_size = self.config.get("ui", {}).get("toolbar_icon_size", "Medium")
         
-        # Create a simple settings wrapper for compatibility
+        # Create a complete settings wrapper for compatibility
         if not hasattr(self.m_app, 'settings'):
             class SettingsWrapper:
-                def __init__(self, config):
+                def __init__(self, config, parent):
                     self.config = config
-                def value(self, key, default_value):
-                    # Simple key mapping for existing settings
-                    key_map = {
+                    self.parent = parent  # ModanMainWindow instance for save_config
+                    # Complete key mapping for all settings
+                    self.key_map = {
+                        # Window geometry
+                        "WindowGeometry/RememberGeometry": ("ui", "remember_geometry"),
+                        "WindowGeometry/MainWindow": ("ui", "window_geometry", "main_window"),
+                        "WindowGeometry/ObjectDialog": ("ui", "window_geometry", "object_dialog"),
+                        "WindowGeometry/DatasetDialog": ("ui", "window_geometry", "dataset_dialog"),
+                        "WindowGeometry/DataExplorationWindow": ("ui", "window_geometry", "data_exploration_window"),
+                        "WindowGeometry/DatasetAnalysisWindow": ("ui", "window_geometry", "dataset_analysis_window"),
+                        "WindowGeometry/ExportDialog": ("ui", "window_geometry", "export_dialog"),
+                        "WindowGeometry/ImportDialog": ("ui", "window_geometry", "import_dialog"),
+                        "WindowGeometry/PreferencesDialog": ("ui", "window_geometry", "preferences_dialog"),
+                        
+                        # Maximized state
+                        "IsMaximized/MainWindow": ("ui", "is_maximized", "main_window"),
+                        "IsMaximized/DataExplorationWindow": ("ui", "is_maximized", "data_exploration_window"),
+                        
+                        # Calibration
+                        "Calibration/Unit": ("calibration", "unit"),
+                        
+                        # UI settings
                         "ToolbarIconSize": ("ui", "toolbar_icon_size"),
-                        "WindowGeometry/RememberGeometry": ("ui", "remember_geometry"), 
-                        "WindowGeometry/MainWindow": ("ui", "window_geometry"),
-                        "IsMaximized/MainWindow": ("ui", "is_maximized"),
+                        "PlotSize": ("ui", "plot_size"),
+                        "BackgroundColor": ("ui", "background_color"),
                         "Language": ("language",),
+                        
+                        # 2D settings
                         "LandmarkSize/2D": ("ui", "landmark_size_2d"),
                         "LandmarkColor/2D": ("ui", "landmark_color_2d"),
                         "WireframeThickness/2D": ("ui", "wireframe_thickness_2d"),
                         "WireframeColor/2D": ("ui", "wireframe_color_2d"),
                         "IndexSize/2D": ("ui", "index_size_2d"),
                         "IndexColor/2D": ("ui", "index_color_2d"),
-                        "BackgroundColor": ("ui", "background_color"),
+                        
+                        # 3D settings
                         "LandmarkSize/3D": ("ui", "landmark_size_3d"),
                         "LandmarkColor/3D": ("ui", "landmark_color_3d"),
                         "WireframeThickness/3D": ("ui", "wireframe_thickness_3d"),
                         "WireframeColor/3D": ("ui", "wireframe_color_3d"),
                         "IndexSize/3D": ("ui", "index_size_3d"),
                         "IndexColor/3D": ("ui", "index_color_3d"),
-                        "PlotSize": ("ui", "plot_size"),
                     }
-                    if key in key_map:
-                        keys = key_map[key]
+                    
+                    # Data point colors and markers (dynamic)
+                    for i in range(10):
+                        self.key_map[f"DataPointColor/{i}"] = ("ui", "data_point_colors", str(i))
+                        self.key_map[f"DataPointMarker/{i}"] = ("ui", "data_point_markers", str(i))
+                
+                def _get_nested_value(self, keys, default_value):
+                    """Get a value from nested dictionary."""
+                    try:
                         value = self.config
                         for k in keys:
-                            value = value.get(k, {}) if isinstance(value, dict) else default_value
+                            if isinstance(value, dict):
+                                value = value.get(k, {})
+                            else:
+                                return default_value
                         return value if value != {} else default_value
-                    return default_value
+                    except (KeyError, TypeError, AttributeError):
+                        return default_value
+                
+                def _set_nested_value(self, keys, value):
+                    """Set a value in nested dictionary."""
+                    if not keys:
+                        return
                     
-            self.m_app.settings = SettingsWrapper(self.config)
+                    # Ensure all parent dictionaries exist
+                    current = self.config
+                    for key in keys[:-1]:
+                        if key not in current:
+                            current[key] = {}
+                        elif not isinstance(current[key], dict):
+                            current[key] = {}
+                        current = current[key]
+                    
+                    # Set the final value
+                    current[keys[-1]] = value
+                
+                def value(self, key, default_value):
+                    """Get a setting value (QSettings compatible)."""
+                    if key in self.key_map:
+                        value = self._get_nested_value(self.key_map[key], default_value)
+                        # Handle WindowGeometry keys that should return QRect
+                        if key.startswith("WindowGeometry/") and key != "WindowGeometry/RememberGeometry":
+                            if isinstance(value, list) and len(value) == 4:
+                                from PyQt5.QtCore import QRect
+                                return QRect(*value)
+                            elif hasattr(default_value, 'x'):  # default_value is QRect
+                                return default_value
+                        return value
+                    return default_value
+                
+                def setValue(self, key, value):
+                    """Set a setting value (QSettings compatible)."""
+                    # Convert QRect to list for JSON serialization
+                    if hasattr(value, 'x'):  # QRect or similar
+                        value = [value.x(), value.y(), value.width(), value.height()]
+                    
+                    if key in self.key_map:
+                        self._set_nested_value(self.key_map[key], value)
+                        # Auto-save after each change
+                        self.save()
+                
+                def save(self):
+                    """Save settings to file."""
+                    try:
+                        import json
+                        from pathlib import Path
+                        config_path = Path.home() / '.modan2' / 'config.json'
+                        config_path.parent.mkdir(parents=True, exist_ok=True)
+                        with open(config_path, 'w', encoding='utf-8') as f:
+                            json.dump(self.config, f, indent=2, ensure_ascii=False)
+                    except Exception as e:
+                        logger.error(f"Failed to save config: {e}")
+                
+                def sync(self):
+                    """Force save settings to file (alias for save)."""
+                    self.save()
+            
+            self.m_app.settings = SettingsWrapper(self.config, self)
 
         if not self.init_done:
             self.m_app.remember_geometry = self.config.get("ui", {}).get("remember_geometry", True)
+            logger = logging.getLogger(__name__)
+            logger.debug(f"READ_SETTINGS - Remember geometry: {self.m_app.remember_geometry}")
+            
             if self.m_app.remember_geometry:
-                geometry = self.config.get("ui", {}).get("window_geometry", [100, 100, 1400, 800])
+                geometry_data = self.config.get("ui", {}).get("window_geometry", {})
+                logger.debug(f"READ_SETTINGS - Raw geometry data: {geometry_data}")
+                
+                # Handle both old list format and new dictionary format
+                if isinstance(geometry_data, dict):
+                    geometry = geometry_data.get("main_window", [100, 100, 1400, 800])
+                elif isinstance(geometry_data, list):
+                    geometry = geometry_data
+                else:
+                    geometry = [100, 100, 1400, 800]
+                
+                logger.debug(f"READ_SETTINGS - Parsed geometry: {geometry}")
+                
+                # Ensure all values are integers
+                geometry = [int(x) if isinstance(x, (int, float, str)) and str(x).isdigit() else x for x in geometry]
+                
+                # Get multi-monitor info for debugging
+                from PyQt5.QtWidgets import QDesktopWidget
+                desktop = QDesktopWidget()
+                primary_screen = desktop.primaryScreen()
+                primary_rect = desktop.screenGeometry(primary_screen)
+                
+                logger.debug(f"READ_SETTINGS - Using saved geometry: x={geometry[0]}, y={geometry[1]}, w={geometry[2]}, h={geometry[3]}")
+                logger.debug(f"READ_SETTINGS - Primary monitor size: {primary_rect.width()}x{primary_rect.height()}")
+                logger.debug(f"READ_SETTINGS - Number of screens: {desktop.screenCount()}")
+                
+                # Show all screen geometries for debugging
+                for i in range(desktop.screenCount()):
+                    screen_geom = desktop.screenGeometry(i)
+                    logger.debug(f"READ_SETTINGS - Screen {i}: {screen_geom.width()}x{screen_geom.height()} at ({screen_geom.x()}, {screen_geom.y()})")
+                
+                # Set geometry with window manager hints
+                from PyQt5.QtCore import Qt
+                
+                # Store desired position for later enforcement
+                self._desired_geometry = QRect(*geometry)
+                
+                # Set window flags to control positioning behavior
+                current_flags = self.windowFlags()
+                # Don't let window manager auto-position the window
+                self.setWindowFlags(current_flags & ~Qt.WindowContextHelpButtonHint)
+                
+                # Set geometry
                 self.setGeometry(QRect(*geometry))
-                is_maximized = self.config.get("ui", {}).get("is_maximized", False)
+                logger.debug(f"SET_GEOMETRY - Requested: {geometry}, After setGeometry(): {[self.geometry().x(), self.geometry().y(), self.geometry().width(), self.geometry().height()]}")
+                
+                # Schedule position verification after window is fully shown
+                from PyQt5.QtCore import QTimer
+                def verify_position():
+                    actual = self.geometry()
+                    if abs(actual.x() - geometry[0]) > 10 or abs(actual.y() - geometry[1]) > 10:
+                        logger.debug(f"POSITION_DRIFT - Expected: ({geometry[0]}, {geometry[1]}), Got: ({actual.x()}, {actual.y()}), Correcting...")
+                        self.move(geometry[0], geometry[1])
+                        # Final check
+                        final = self.geometry()
+                        logger.debug(f"POSITION_FINAL - After move(): ({final.x()}, {final.y()})")
+                
+                QTimer.singleShot(100, verify_position)  # Check sooner
+                
+                is_maximized_data = self.config.get("ui", {}).get("is_maximized", False)
+                # Handle both boolean and dict format
+                if isinstance(is_maximized_data, dict):
+                    is_maximized = is_maximized_data.get("main_window", False)
+                else:
+                    is_maximized = is_maximized_data
+                
+                logger.debug(f"READ_SETTINGS - Is maximized setting: {is_maximized}")
+                
                 if is_maximized:
+                    logger.debug("READ_SETTINGS - Showing maximized window")
                     self.showMaximized()
                 else:
-                    self.showNormal()
+                    logger.debug("READ_SETTINGS - Showing normal window")
             else:
+                logger.debug("READ_SETTINGS - Remember geometry disabled, using default")
                 self.setGeometry(QRect(100, 100, 1400, 800))
 
         self.m_app.language = self.config.get("language", "en")
@@ -319,23 +479,32 @@ class ModanMainWindow(QMainWindow):
         plt.rcParams['font.size'] = 12
 
     def write_settings(self):
-        """Write settings to config object"""
-        if self.config is None:
+        """Write settings using SettingsWrapper for proper JSON storage"""
+        if not hasattr(self.m_app, 'settings') or not hasattr(self.m_app, 'remember_geometry'):
             return
             
-        if not hasattr(self.m_app, 'remember_geometry'):
-            return
-            
-        if self.m_app.remember_geometry:
-            if self.isMaximized():
-                self.config.setdefault("ui", {})["is_maximized"] = True
-            else:
-                self.config.setdefault("ui", {})["is_maximized"] = False
-                geometry = self.geometry()
-                self.config.setdefault("ui", {})["window_geometry"] = [geometry.x(), geometry.y(), geometry.width(), geometry.height()]
+        # Save remember geometry setting
+        self.m_app.settings.setValue("WindowGeometry/RememberGeometry", self.m_app.remember_geometry)
         
+        if self.m_app.remember_geometry:
+            logger = logging.getLogger(__name__)
+            current_geometry = self.geometry()
+            logger.debug(f"WRITE_SETTINGS - Current window geometry: x={current_geometry.x()}, y={current_geometry.y()}, w={current_geometry.width()}, h={current_geometry.height()}")
+            logger.debug(f"WRITE_SETTINGS - Is maximized: {self.isMaximized()}")
+            
+            # Save maximized state
+            if self.isMaximized():
+                self.m_app.settings.setValue("IsMaximized/MainWindow", True)
+                logger.debug("WRITE_SETTINGS - Saved maximized state: True")
+            else:
+                self.m_app.settings.setValue("IsMaximized/MainWindow", False)
+                # Save window geometry
+                self.m_app.settings.setValue("WindowGeometry/MainWindow", current_geometry)
+                logger.debug(f"WRITE_SETTINGS - Saved geometry: [{current_geometry.x()}, {current_geometry.y()}, {current_geometry.width()}, {current_geometry.height()}]")
+        
+        # Save language setting
         if hasattr(self.m_app, 'language'):
-            self.config["language"] = self.m_app.language
+            self.m_app.settings.setValue("Language", self.m_app.language)
 
     def update_language(self):
         if False:
@@ -721,8 +890,18 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.dlg = DatasetDialog(self)
         self.dlg.setModal(True)
         if self.selected_dataset:
-            self.selected_dataset = self.selected_dataset.get_by_id(self.selected_dataset.id)
-            self.dlg.set_parent_dataset(self.selected_dataset)
+            try:
+                self.selected_dataset = self.selected_dataset.get_by_id(self.selected_dataset.id)
+                self.dlg.set_parent_dataset(self.selected_dataset)
+            except DoesNotExist:
+                logger = logging.getLogger(__name__)
+                logger.error(f"Selected dataset {self.selected_dataset.id} no longer exists")
+                self.selected_dataset = None
+                self.dlg.set_parent_dataset(None)
+            except Exception as e:
+                logger = logging.getLogger(__name__)
+                logger.error(f"Error accessing selected dataset: {e}")
+                self.dlg.set_parent_dataset(None)
         else:
             self.dlg.set_parent_dataset(None)
 
@@ -801,24 +980,29 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     @pyqtSlot()
     def on_action_new_object_triggered(self):
         """Handle new object action using controller"""
-        print(f"DEBUG: selected_dataset = {self.selected_dataset}")
+        logger = logging.getLogger(__name__)
+        logger.debug(f"selected_dataset = {self.selected_dataset}")
         if not self.selected_dataset:
             return
         try:
             # Convert ID to dataset object if needed
             if isinstance(self.selected_dataset, int):
-                dataset = MdDataset.get_by_id(self.selected_dataset)
+                try:
+                    dataset = MdDataset.get_by_id(self.selected_dataset)
+                except DoesNotExist:
+                    logger.error(f"Dataset {self.selected_dataset} no longer exists")
+                    return
             else:
                 dataset = self.selected_dataset
                 
-            print(f"DEBUG: dataset object = {dataset}")
+            logger.debug(f"dataset object = {dataset}")
             
             # Ensure controller knows about selected dataset
             self.controller.set_current_dataset(dataset)
             new_object = self.controller.create_object()
             if new_object is None:
                 return  # Error already handled by controller
-            print(f"DEBUG: new_object = {new_object}")
+            logger.debug(f"new_object = {new_object}")
             
             self.dlg = ObjectDialog(self)
             self.dlg.set_dataset(dataset)
@@ -833,7 +1017,8 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     @pyqtSlot()
     def on_tableView_doubleClicked(self):
         if self.selected_object is None:
-            print("no object selected")
+            logger = logging.getLogger(__name__)
+            logger.warning("no object selected")
             return
         self.dlg = ObjectDialog(self)
         self.dlg.setModal(True)
@@ -1071,7 +1256,8 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.clear_object_view()
 
     def tableView_drop_event(self, event):
-        print("tabelview drop event", event.mimeData().text())
+        logger = logging.getLogger(__name__)
+        logger.debug(f"tableview drop event: {event.mimeData().text()}")
         if self.selected_dataset is None:
             return
         
@@ -1081,7 +1267,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         if len(file_name_list) == 0:
             return
 
-        print("file name list: [", file_name_list, "]")
+        logger.debug(f"file name list: {file_name_list}")
 
         QApplication.setOverrideCursor(Qt.WaitCursor)
         total_count = len(file_name_list)
@@ -1143,18 +1329,19 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     def tableView_drag_enter_event(self, event):
         event.accept()
         return
-        print("drag enter",event.mimeData().text())
+        logger = logging.getLogger(__name__)
+        logger.debug(f"drag enter: {event.mimeData().text()}")
         file_name_list = event.mimeData().text().strip().split("\n")
-        print("file name list:", file_name_list)
+        logger.debug(f"file name list: {file_name_list}")
         ext = file_name_list[0].split('.')[-1].lower()
-        print("ext:", ext)
+        logger.debug(f"ext: {ext}")
         if ext in ['png', 'jpg', 'jpeg','bmp','gif','tif','tiff']:
-            print("image file")
-            print("source:", event.source())
-            print("proposed action:", event.proposedAction())
-            print("drop action:", event.dropAction())
-            print("possible action:", int(event.possibleActions()))
-            print("kinds of drop actions:", Qt.CopyAction, Qt.MoveAction, Qt.LinkAction, Qt.ActionMask, Qt.TargetMoveAction)
+            logger.debug("image file")
+            logger.debug(f"source: {event.source()}")
+            logger.debug(f"proposed action: {event.proposedAction()}")
+            logger.debug(f"drop action: {event.dropAction()}")
+            logger.debug(f"possible action: {int(event.possibleActions())}")
+            logger.debug(f"kinds of drop actions: {Qt.CopyAction}, {Qt.MoveAction}, {Qt.LinkAction}, {Qt.ActionMask}, {Qt.TargetMoveAction}")
             #event.acceptProposedAction()
             event.setDropAction(Qt.CopyAction)
             event.accept()
@@ -1171,12 +1358,14 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         # Check if Shift is pressed
         modifiers = QApplication.queryKeyboardModifiers()
         if bool(modifiers & Qt.ShiftModifier):
-            print("copy cursor")
+            logger = logging.getLogger(__name__)
+            logger.debug("copy cursor")
             #QApplication.restoreOverrideCursor()
             #QApplication.setOverrideCursor(Qt.CrossCursor) 
             #QApplication.changeOverrideCursor(self.copy_cursor)
         else:
-            print("move cursor")
+            logger = logging.getLogger(__name__)
+            logger.debug("move cursor")
             #QApplication.restoreOverrideCursor()
             #QApplication.setOverrideCursor(Qt.ClosedHandCursor) 
             #QApplication.changeOverrideCursor(self.move_cursor)
@@ -1184,21 +1373,22 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         event.accept()
 
     def _tableView_drag_move_event(self, event):
-        print("table view drag move event")
-        print("drag move",event.mimeData().text())
+        logger = logging.getLogger(__name__)
+        logger.debug("table view drag move event")
+        logger.debug(f"drag move: {event.mimeData().text()}")
         event.accept()
         return
-        print("drag move",event.mimeData().text())
+        logger.debug(f"drag move: {event.mimeData().text()}")
         file_name_list = event.mimeData().text().strip().split("\n")
-        print("file name list:", file_name_list)
+        logger.debug(f"file name list: {file_name_list}")
         ext = file_name_list[0].split('.')[-1].lower()
-        print("ext:", ext)
+        logger.debug(f"ext: {ext}")
         if ext in ['png', 'jpg', 'jpeg','bmp','gif','tif','tiff']:
-            print("image file")
-            print("source:", event.source())
-            print("proposed action:", event.proposedAction())
-            print("drop action:", event.dropAction())
-            print("possible action:", int(event.possibleActions()))
+            logger.debug("image file")
+            logger.debug(f"source: {event.source()}")
+            logger.debug(f"proposed action: {event.proposedAction()}")
+            logger.debug(f"drop action: {event.dropAction()}")
+            logger.debug(f"possible action: {int(event.possibleActions())}")
             print("kinds of drop actions:", Qt.CopyAction, Qt.MoveAction, Qt.LinkAction, Qt.ActionMask, Qt.TargetMoveAction)
             #event.acceptProposedAction()
             event.setDropAction(Qt.CopyAction)

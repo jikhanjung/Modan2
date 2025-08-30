@@ -11,6 +11,8 @@ from PyQt5.QtGui import QColor, QPainter, QPen, QPixmap, QStandardItemModel, QSt
 from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSize, QPoint, QAbstractTableModel, QTranslator, \
                          pyqtSlot, pyqtSignal, QItemSelectionModel, QTimer, QEvent, QModelIndex, QObject, QPointF
 
+import logging
+
 from matplotlib.backends.backend_qt5agg import FigureCanvas as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
@@ -245,7 +247,8 @@ class ObjectViewer2D(QLabel):
 
         ret = ds_ops.procrustes_superimposition()
         if ret == False:
-            print("procrustes failed")
+            logger = logging.getLogger(__name__)
+            logger.error("procrustes failed")
             return
         self.comparison_data['ds_ops'] = ds_ops
         self.comparison_data['average_shape'] = ds_ops.get_average_shape()
@@ -602,12 +605,13 @@ class ObjectViewer2D(QLabel):
 
     def draw_dataset(self, painter):
         ds_ops = self.ds_ops
-        print("draw dataset", ds_ops, ds_ops.object_list)
+        logger = logging.getLogger(__name__)
+        logger.debug(f"draw dataset: {ds_ops}, objects: {ds_ops.object_list}")
         if self.show_arrow and len(ds_ops.object_list) > 1:
             self.draw_arrow(painter, 0, 1)
 
         for idx, obj in enumerate(ds_ops.object_list):
-            print("draw object", obj, obj.landmark_list)
+            logger.debug(f"draw object: {obj}, landmarks: {obj.landmark_list}")
             if obj.visible == False:
                 continue
             if obj.id in ds_ops.selected_object_id_list:
@@ -1559,7 +1563,8 @@ class ObjectViewer3D(QGLWidget):
 
         ret = ds_ops.procrustes_superimposition()
         if ret == False:
-            print("procrustes failed")
+            logger = logging.getLogger(__name__)
+            logger.error("procrustes failed")
             return
         self.comparison_data['ds_ops'] = ds_ops
         self.comparison_data['average_shape'] = ds_ops.get_average_shape()
@@ -2959,7 +2964,8 @@ class MdDrag(QDrag):
     #shiftStateChanged = Signal(bool)
     def __init__(self, parent):
         super().__init__(parent)
-        print("md drag init")
+        logger = logging.getLogger(__name__)
+        logger.debug("md drag init")
         self.shift_pressed = False
         self.copy_cursor = QPixmap(QCursor(Qt.DragCopyCursor).pixmap())
         self.move_cursor = QPixmap(QCursor(Qt.DragMoveCursor).pixmap())
@@ -2972,12 +2978,14 @@ class MdDrag(QDrag):
             self.setDragCursor(self.move_cursor, Qt.MoveAction)
 
     def dragEnterEvent(self, event):
-        print("md drag dragEnterEvent")
+        logger = logging.getLogger(__name__)
+        logger.debug("md drag dragEnterEvent")
         self.updateCursor(event)
         super().dragEnterEvent(event)
 
     def dragMoveEvent(self, event):
-        print("drag move event", event.pos())
+        logger = logging.getLogger(__name__)
+        logger.debug(f"drag move event: {event.pos()}")
         self.updateCursor(event)
         super().dragMoveEvent(event)
 
@@ -2991,10 +2999,10 @@ class DragEventFilter(QObject):
             modifiers = QApplication.keyboardModifiers()
             if modifiers & Qt.ControlModifier:
                 self.drag_object.setDragCursor(self.drag_object.copy_cursor.pixmap(), Qt.CopyAction)
-                print("Set Copy Cursor")
+                logger.debug("Set Copy Cursor")
             else:
                 self.drag_object.setDragCursor(self.drag_object.move_cursor.pixmap(), Qt.MoveAction)
-                print("Set Move Cursor")
+                logger.debug("Set Move Cursor")
         return False
 
 class CustomDrag(QDrag):
@@ -3092,7 +3100,8 @@ class MdTableView(QTableView):
 
         table_rect = self.viewport().rect()
         if not table_rect.contains(event.pos()):
-            print("outside table, start drag")
+            logger = logging.getLogger(__name__)
+            logger.debug("outside table, start drag")
             self.is_dragging = True
             self.startDrag()
         else:

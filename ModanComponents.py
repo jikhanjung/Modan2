@@ -3046,6 +3046,8 @@ class MdTableView(QTableView):
         paste_shortcut.activated.connect(self.paste_action.trigger)
         self.fill_sequence_action = QAction(self.tr("Fill sequence"), self)
         self.fill_sequence_action.triggered.connect(self.fill_sequence)
+        logger = logging.getLogger(__name__)
+        logger.debug("Fill sequence action created and connected")
         self.fill_action = QAction(self.tr("Fill value"), self) 
         self.fill_action.triggered.connect(self.fill_value)
         self.clear_cells_action = QAction(self.tr("Clear"), self)
@@ -3072,7 +3074,7 @@ class MdTableView(QTableView):
             self.was_cell_selected = index in self.selectionModel().selectedIndexes()
 
             if self.selection_mode == "Rows" and self.was_cell_selected:
-                self.startDrag()
+                self.startDrag(Qt.CopyAction)
         super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
@@ -3107,7 +3109,7 @@ class MdTableView(QTableView):
         else:
             super().mouseMoveEvent(event)
 
-    def startDrag(self):
+    def startDrag(self, supportedActions=Qt.CopyAction):
         indexes = self.selectionModel().selectedRows()
         if not indexes:
             return
@@ -3133,17 +3135,74 @@ class MdTableView(QTableView):
                 super().mouseReleaseEvent(event)
 
     def show_context_menu(self, pos):
+        logger = logging.getLogger(__name__)
         index = self.indexAt(pos)  # Get the index of the clicked cell
         column = index.column()  # Get the column index
+        
+        # Get column header text
+        column_header = ""
+        if self.model() and column >= 0:
+            column_header = self.model().headerData(column, Qt.Horizontal, Qt.DisplayRole)
+            if column_header is None:
+                column_header = ""
+        
+        logger.debug(f"Context menu requested at pos: {pos}, index: {index}, column: {column}, header: '{column_header}'")
+        
+        selected_indices = self.selectionModel().selectedIndexes()
+        logger.debug(f"Selected indices: {len(selected_indices)} items")
+        
+        # Check if this is a read-only column (name, count, csize)
+        readonly_columns = ['name', 'count', 'csize']
+        column_header_lower = str(column_header).lower().strip()
+        is_readonly_column = column_header_lower in readonly_columns
+        
+        logger.debug(f"Column '{column_header}' (normalized: '{column_header_lower}') is read-only: {is_readonly_column}")
 
         menu = QMenu(self)
         menu.addAction(self.copy_action)
-        menu.addAction(self.paste_action)
+        
+        # Only add paste and other actions if not a read-only column
+        if not is_readonly_column:
+            menu.addAction(self.paste_action)
 
-        #if column == 1:  # Example: Special actions for column 1 (sequence)
-        menu.addAction(self.fill_sequence_action)
-        menu.addAction(self.fill_action)
-        menu.addAction(self.clear_cells_action)
+        # For read-only columns, only show copy
+        if not is_readonly_column:
+            # Only show Fill Sequence if all selected cells are in column 1 (sequence column)
+            show_fill_sequence = False
+            if selected_indices:
+                # Check if all selected cells are in column 1
+                selected_columns = set(idx.column() for idx in selected_indices)
+                if len(selected_columns) == 1 and 1 in selected_columns:
+                    show_fill_sequence = True
+                    logger.debug(f"All {len(selected_indices)} selected cells are in sequence column (column 1)")
+                else:
+                    logger.debug(f"Selected cells span multiple columns {selected_columns} or not in sequence column")
+            elif column == 1:
+                # No selection, but clicked on sequence column
+                show_fill_sequence = True
+                logger.debug("Clicked on sequence column, enabling Fill sequence")
+            
+            if show_fill_sequence:
+                menu.addAction(self.fill_sequence_action)
+                logger.debug("Added Fill sequence action")
+            else:
+                logger.debug("Fill sequence not available (only works when sequence column cells are selected)")
+                
+            menu.addAction(self.fill_action)
+            menu.addAction(self.clear_cells_action)
+        else:
+            logger.debug(f"Read-only column '{column_header}': only showing copy action")
+        
+        actions_list = ["Copy"]
+        if not is_readonly_column:
+            actions_list.append("Paste")
+            if 'show_fill_sequence' in locals() and show_fill_sequence:
+                actions_list.append("Fill sequence")
+            actions_list.extend(["Fill value", "Clear"])
+        
+        logger.debug(f"Context menu showing with actions: {', '.join(actions_list)}")
+        logger.info(f"Context menu for column '{column_header}' ({'read-only' if is_readonly_column else 'editable'}): {', '.join(actions_list)}")
+        
         menu.exec_(self.mapToGlobal(pos)) 
 
     def fill_value(self):
@@ -3163,14 +3222,27 @@ class MdTableView(QTableView):
             self.model().setData(index, value, Qt.EditRole)
 
     def fill_sequence(self):
+        logger = logging.getLogger(__name__)
+        logger.info("Fill sequence action triggered")
+        
         selected_cells = self.selectionModel().selectedIndexes()
+        logger.debug(f"Selected cells: {len(selected_cells)}")
+        
         if len(selected_cells) == 0:
+            logger.warning("No cells selected for fill sequence")
             return
         selected_cells.sort(key=lambda x: (x.row(), x.column()))
         # make sure all the cells are in the column 1
         # get column number of all the cells
         column_numbers = [cell.column() for cell in selected_cells]
-        if len(set(column_numbers)) > 1 or column_numbers[0] != 1:
+        logger.debug(f"Column numbers: {column_numbers}")
+        
+        if len(set(column_numbers)) > 1:
+            logger.warning("Multiple columns selected, fill sequence only works on single column")
+            return
+        
+        if column_numbers[0] != 1:
+            logger.warning(f"Fill sequence only works on column 1 (sequence column), selected column: {column_numbers[0]}")
             return
         
         # get the first cell
@@ -3184,19 +3256,35 @@ class MdTableView(QTableView):
         except:
             sequence = 1
         # get user input
+        logger.debug(f"Showing input dialog for starting sequence, current value: {sequence}")
         sequence, ok = QInputDialog.getInt(self, "Fill Sequence", "Enter starting sequence number", sequence)
         if not ok:
+            logger.info("User cancelled starting sequence input")
             return
+            
+        logger.debug(f"User entered starting sequence: {sequence}")
         # get increment
         increment, ok = QInputDialog.getInt(self, "Fill Sequence", "Enter increment", 1)
         if not ok:
+            logger.info("User cancelled increment input")
             return
+            
+        logger.debug(f"User entered increment: {increment}")
         # fill the sequence
-        for cell in selected_cells:
+        logger.info(f"Filling sequence for {len(selected_cells)} cells, starting at {sequence} with increment {increment}")
+        
+        for i, cell in enumerate(selected_cells):
             row = cell.row()
             index = self.model().index(row, 1)
-            self.model().setData(index, sequence, Qt.EditRole)
+            logger.debug(f"Setting row {row}, column 1 to value {sequence}")
+            
+            result = self.model().setData(index, sequence, Qt.EditRole)
+            if not result:
+                logger.error(f"Failed to set data at row {row}, column 1")
+            
             sequence += increment
+            
+        logger.info("Fill sequence completed successfully")
 
     def paste_data(self):
         current_index = self.currentIndex()

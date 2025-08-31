@@ -39,8 +39,12 @@ def run_pyinstaller(args):
                 actual_name = arg.split("=", 1)[1]
                 break
         
+        # For onedir, the main executable is in a subdirectory and might need .exe extension
         if "--onedir" in args:
-            exe_path = Path(f"dist/{actual_name}/{actual_name}")
+            # For onedir mode, check if we need to add .exe extension
+            base_exe_name = "Modan2"  # onedir always uses the script name as exe name
+            exe_extension = get_platform_executable_extension()
+            exe_path = Path(f"dist/{actual_name}/{base_exe_name}{exe_extension}")
         else:
             exe_path = Path(f"dist/{actual_name}")
             

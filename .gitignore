@@ -14,3 +14,4 @@ translations/desktop.ini
 /build/
 /dist/
 *.spec
+logs/

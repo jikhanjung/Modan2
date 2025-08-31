@@ -32,11 +32,17 @@ def run_pyinstaller(args):
         print("PyInstaller completed successfully")
         
         # Check if the executable was created
-        exe_extension = get_platform_executable_extension()
+        # Extract the actual name from PyInstaller args
+        actual_name = "Modan2"  # default
+        for i, arg in enumerate(args):
+            if arg.startswith("--name="):
+                actual_name = arg.split("=", 1)[1]
+                break
+        
         if "--onedir" in args:
-            exe_path = Path(f"dist/Modan2/Modan2{exe_extension}")
+            exe_path = Path(f"dist/{actual_name}/{actual_name}")
         else:
-            exe_path = Path(f"dist/Modan2{exe_extension}")
+            exe_path = Path(f"dist/{actual_name}")
             
         if not exe_path.exists():
             # List actual files in dist directory for debugging

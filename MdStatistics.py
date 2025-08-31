@@ -372,17 +372,26 @@ def do_pca_analysis(landmarks_data, n_components=None):
         import numpy as np
         from sklearn.decomposition import PCA
         from sklearn.preprocessing import StandardScaler
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        logger.info(f"PCA Analysis starting with {len(landmarks_data)} specimens")
+        if landmarks_data:
+            logger.info(f"First specimen has {len(landmarks_data[0])} landmarks")
+            if landmarks_data[0]:
+                logger.info(f"Each landmark has {len(landmarks_data[0][0])} dimensions")
         
         # Flatten landmark data
         flattened_data = []
         for landmarks in landmarks_data:
             flat_coords = []
             for landmark in landmarks:
-                flat_coords.extend(landmark[:2])  # Use X, Y coordinates
+                flat_coords.extend(landmark)  # Use all coordinates (X, Y, Z for 3D)
             flattened_data.append(flat_coords)
         
         # Convert to numpy array
         data_matrix = np.array(flattened_data)
+        logger.info(f"Data matrix shape after flattening: {data_matrix.shape}")
         
         # Standardize data
         scaler = StandardScaler()
@@ -401,13 +410,30 @@ def do_pca_analysis(landmarks_data, n_components=None):
         # Calculate mean shape
         mean_coords = np.mean(data_matrix, axis=0)
         mean_shape = []
-        for i in range(0, len(mean_coords), 2):
-            mean_shape.append([mean_coords[i], mean_coords[i+1]])
+        # Determine dimension from first landmark
+        dim = len(landmarks_data[0][0]) if landmarks_data and landmarks_data[0] else 2
+        for i in range(0, len(mean_coords), dim):
+            if dim == 2:
+                mean_shape.append([mean_coords[i], mean_coords[i+1]])
+            elif dim == 3:
+                mean_shape.append([mean_coords[i], mean_coords[i+1], mean_coords[i+2]])
+        
+        # Create full rotation matrix (for compatibility with original code)
+        # This is the transformation matrix from original space to PCA space
+        rotation_matrix = pca.components_.T  # Transpose to get (n_features x n_components)
+        # Pad with identity for unused dimensions if needed
+        n_features = data_matrix.shape[1]
+        full_rotation_matrix = np.eye(n_features)
+        full_rotation_matrix[:, :rotation_matrix.shape[1]] = rotation_matrix
+        
+        logger.info(f"Full rotation matrix shape: {full_rotation_matrix.shape}")
+        logger.info(f"PCA scores shape: {scores.shape}")
         
         return {
             'n_components': n_components,
             'eigenvalues': pca.explained_variance_.tolist(),
             'eigenvectors': pca.components_.tolist(),
+            'rotation_matrix': full_rotation_matrix.tolist(),  # Add full rotation matrix
             'scores': scores.tolist(),
             'explained_variance_ratio': pca.explained_variance_ratio_.tolist(),
             'cumulative_variance_ratio': cumulative_variance.tolist(),
@@ -543,37 +569,116 @@ def do_manova_analysis(landmarks_data, groups):
         
         # Calculate test statistics
         try:
-            # Wilks' Lambda
+            # Calculate eigenvalues for test statistics
+            E_inv = np.linalg.pinv(E)  # Use pseudo-inverse for stability
+            H_E_inv = np.dot(H, E_inv)
+            eigenvalues = np.real(np.linalg.eigvals(H_E_inv))
+            eigenvalues = eigenvalues[eigenvalues > 1e-10]  # Filter small eigenvalues
+            
+            # 1. Wilks' Lambda
             det_E = np.linalg.det(E)
             det_H_E = np.linalg.det(H + E)
             
             if det_H_E != 0:
                 wilks_lambda = det_E / det_H_E
             else:
-                wilks_lambda = 0.0
+                wilks_lambda = np.prod(1.0 / (1.0 + eigenvalues)) if len(eigenvalues) > 0 else 0.0
             
-            # Approximate F-statistic
-            df_num = (n_groups - 1) * n_vars
+            # 2. Pillai's Trace
+            pillais_trace = np.sum(eigenvalues / (1.0 + eigenvalues)) if len(eigenvalues) > 0 else 0.0
+            
+            # 3. Hotelling-Lawley Trace
+            hotellings_trace = np.sum(eigenvalues) if len(eigenvalues) > 0 else 0.0
+            
+            # 4. Roy's Greatest Root
+            roys_greatest_root = np.max(eigenvalues) if len(eigenvalues) > 0 else 0.0
+            
+            # Calculate degrees of freedom
+            df_hypothesis = n_groups - 1  # hypothesis degrees of freedom
+            df_error = n_obs - n_groups   # error degrees of freedom 
+            
+            # F-statistics and p-values for each test
+            s = min(df_hypothesis, n_vars)
+            m = abs(df_hypothesis - n_vars - 1) / 2
+            n = (df_error - n_vars - 1) / 2
+            
+            # Approximate F-statistics for all tests
+            df_num = df_hypothesis * n_vars
             df_den = n_obs - n_groups - n_vars + 1
             
+            # 1. Wilks' Lambda F-test
             if df_den > 0 and wilks_lambda > 0:
-                f_stat = ((1 - wilks_lambda) / wilks_lambda) * (df_den / df_num)
-                p_value = stats.f.sf(f_stat, df_num, df_den)
+                wilks_f = ((1 - wilks_lambda) / wilks_lambda) * (df_den / df_num)
+                wilks_p = stats.f.sf(wilks_f, df_num, df_den)
             else:
-                f_stat = 0.0
-                p_value = 1.0
+                wilks_f = 0.0
+                wilks_p = 1.0
+            
+            # 2. Pillai's Trace F-test
+            if df_den > 0 and pillais_trace > 0:
+                pillai_f = (pillais_trace / (s - pillais_trace)) * ((df_den - s + 1) / s)
+                pillai_p = stats.f.sf(pillai_f, s, df_den - s + 1)
+            else:
+                pillai_f = 0.0
+                pillai_p = 1.0
+                
+            # 3. Hotelling-Lawley Trace F-test  
+            if df_den > 0 and hotellings_trace > 0:
+                hotelling_f = (hotellings_trace / s) * ((df_den - s + 1) / 1)
+                hotelling_p = stats.f.sf(hotelling_f, s, df_den - s + 1)
+            else:
+                hotelling_f = 0.0
+                hotelling_p = 1.0
+                
+            # 4. Roy's Greatest Root F-test
+            if df_den > 0 and roys_greatest_root > 0:
+                roy_f = roys_greatest_root * (df_den / s)
+                roy_p = stats.f.sf(roy_f, s, df_den)
+            else:
+                roy_f = 0.0
+                roy_p = 1.0
             
         except np.linalg.LinAlgError:
-            wilks_lambda = 0.0
-            f_stat = 0.0
-            p_value = 1.0
+            wilks_lambda = pillais_trace = hotellings_trace = roys_greatest_root = 0.0
+            wilks_f = pillai_f = hotelling_f = roy_f = 0.0
+            wilks_p = pillai_p = hotelling_p = roy_p = 1.0
+            df_num = df_den = 0
         
         return {
-            'wilks_lambda': wilks_lambda,
-            'f_statistic': f_stat,
-            'p_value': p_value,
-            'df': [df_num, df_den],
-            'effect_size': 1 - wilks_lambda,
+            'test_statistics': [
+                {
+                    'name': "Wilks' Lambda",
+                    'value': wilks_lambda,
+                    'f_statistic': wilks_f,
+                    'p_value': wilks_p,
+                    'df_num': df_num,
+                    'df_den': df_den
+                },
+                {
+                    'name': "Pillai's Trace", 
+                    'value': pillais_trace,
+                    'f_statistic': pillai_f,
+                    'p_value': pillai_p,
+                    'df_num': s,
+                    'df_den': df_den - s + 1
+                },
+                {
+                    'name': "Hotelling-Lawley Trace",
+                    'value': hotellings_trace, 
+                    'f_statistic': hotelling_f,
+                    'p_value': hotelling_p,
+                    'df_num': s,
+                    'df_den': df_den - s + 1
+                },
+                {
+                    'name': "Roy's Greatest Root",
+                    'value': roys_greatest_root,
+                    'f_statistic': roy_f, 
+                    'p_value': roy_p,
+                    'df_num': s,
+                    'df_den': df_den
+                }
+            ],
             'group_means': group_means.tolist(),
             'overall_mean': overall_mean.tolist(),
             'n_groups': n_groups,

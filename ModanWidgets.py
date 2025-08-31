@@ -61,7 +61,7 @@ class DatasetTreeWidget(QTreeWidget):
         """
         item = QTreeWidgetItem(self)
         item.setText(0, dataset.dataset_name)
-        item.setText(1, str(dataset.object_count))
+        item.setText(1, str(dataset.object_list.count()))
         item.setText(2, f"{dataset.dimension}D")
         item.setText(3, dataset.created_at.strftime("%Y-%m-%d"))
         item.setData(0, Qt.UserRole, dataset)
@@ -74,8 +74,10 @@ class DatasetTreeWidget(QTreeWidget):
             item.setIcon(0, QIcon(str(icon_path)))
         
         # Set tooltip
+        first_obj = dataset.object_list.first()
+        landmark_count = len(first_obj.landmark_list) if first_obj and first_obj.landmark_list else 0
         tooltip = f"Dataset: {dataset.dataset_name}\\nDimension: {dataset.dimension}D\\n" \
-                 f"Landmarks: {dataset.landmark_count}\\nObjects: {dataset.object_count}"
+                 f"Landmarks: {landmark_count}\\nObjects: {dataset.object_list.count()}"
         item.setToolTip(0, tooltip)
         
         # Add analyses as children
@@ -95,7 +97,7 @@ class DatasetTreeWidget(QTreeWidget):
             Created tree item
         """
         item = QTreeWidgetItem(parent_item)
-        item.setText(0, f"{analysis.analysis_type} Analysis")
+        item.setText(0, analysis.analysis_name)
         item.setText(1, "-")
         item.setText(2, "Analysis")
         item.setText(3, analysis.created_at.strftime("%Y-%m-%d %H:%M"))
@@ -108,7 +110,7 @@ class DatasetTreeWidget(QTreeWidget):
             item.setIcon(0, QIcon(str(icon_path)))
         
         # Set tooltip
-        tooltip = f"Analysis: {analysis.analysis_type}\\nCreated: {analysis.created_at}"
+        tooltip = f"Analysis: {analysis.analysis_name}\\nCreated: {analysis.created_at}"
         item.setToolTip(0, tooltip)
         
         return item
@@ -139,7 +141,7 @@ class DatasetTreeWidget(QTreeWidget):
             
             if item_dataset and item_dataset.id == dataset.id:
                 # Update object count
-                item.setText(1, str(dataset.object_count))
+                item.setText(1, str(dataset.object_list.count()))
                 
                 # Refresh analyses
                 item.takeChildren()
@@ -155,9 +157,13 @@ class DatasetTreeWidget(QTreeWidget):
             data = item.data(0, Qt.UserRole)
             item_type = item.data(0, Qt.UserRole + 1)
             
+            self.logger.info(f"Selection changed: item_type={item_type}, data={data}")
+            
             if item_type == 'dataset' and isinstance(data, MdModel.MdDataset):
+                self.logger.info(f"Emitting dataset_selected signal for: {data.dataset_name}")
                 self.dataset_selected.emit(data)
             elif item_type == 'analysis' and isinstance(data, MdModel.MdAnalysis):
+                self.logger.info(f"Emitting analysis_selected signal for: {data.analysis_name}")
                 self.analysis_selected.emit(data)
     
     def _show_context_menu(self, position: QPoint):

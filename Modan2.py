@@ -29,6 +29,11 @@ from ModanWidgets import DatasetTreeWidget, ObjectTableWidget, LandmarkViewer2D
 from MdStatistics import PerformCVA, PerformPCA, PerformManova
 
 import matplotlib.pyplot as plt
+import matplotlib
+# Configure matplotlib to avoid font warnings
+matplotlib.rcParams['font.family'] = ['DejaVu Sans', 'sans-serif']
+matplotlib.rcParams['font.serif'] = ['DejaVu Serif', 'serif']
+matplotlib.rcParams['font.sans-serif'] = ['DejaVu Sans', 'Arial', 'sans-serif']
 
 import json
 from MdLogger import setup_logger
@@ -46,12 +51,14 @@ class ModanMainWindow(QMainWindow):
         
         # Initialize controller
         self.controller = ModanController()
-        self.setup_controller_connections()
 
         # Initialize widgets (temporary compatibility)
         self.tableView = MdTableView()
         self.tableView.setItemDelegateForColumn(1, MdSequenceDelegate())
         self.treeView = QTreeView()
+        
+        # Setup connections after widgets are created
+        self.setup_controller_connections()
 
         self.toolbar = QToolBar(self.tr("Main Toolbar"))
         self.toolbar.setIconSize(QSize(32,32))
@@ -166,6 +173,10 @@ class ModanMainWindow(QMainWindow):
 
         self.set_toolbar_icon_size(self.m_app.toolbar_icon_size)
         self.init_done = True
+    
+    def set_splash(self, splash):
+        """Set splash screen reference for progress updates"""
+        self.splash = splash
 
     def setup_controller_connections(self):
         """Setup signal connections with the controller"""
@@ -218,8 +229,29 @@ class ModanMainWindow(QMainWindow):
 
     def on_analysis_selected_from_tree(self, analysis):
         """Handle analysis selection from tree widget"""
-        # Handle analysis selection if needed
-        pass
+        logger.info(f"on_analysis_selected_from_tree called with: {analysis}")
+        self.selected_analysis = analysis
+        if analysis:
+            logger.info(f"Analysis selected: {analysis.analysis_name}")
+            
+            # Switch to analysis view on right panel
+            if hasattr(self, 'hsplitter') and hasattr(self, 'analysis_view'):
+                logger.info(f"Switching to analysis view. Current widget: {self.hsplitter.widget(1)}")
+                if self.hsplitter.widget(1) != self.analysis_view:
+                    self.hsplitter.replaceWidget(1, self.analysis_view)
+                    logger.info("Switched to analysis view")
+            
+            # Update analysis info widget
+            if hasattr(self, 'analysis_info_widget') and self.analysis_info_widget:
+                logger.info("Setting analysis on analysis_info_widget")
+                self.analysis_info_widget.set_analysis(analysis)
+                self.analysis_info_widget.show_analysis_result()
+                logger.info("Analysis info widget updated")
+            else:
+                logger.warning("analysis_info_widget not found or None")
+        else:
+            self.selected_analysis = None
+            logger.info("Analysis selection cleared")
 
     def on_object_selected_from_table(self, obj):
         """Handle object selection from table widget"""
@@ -1414,13 +1446,14 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             item2 = QStandardItem(str(rec.id))
             item1.setData(rec)
             
-            self.dataset_model.appendRow([item1,item2])#,item2,item3] )
+            self.dataset_model.appendRow([item1,item2])
             if rec.analyses.count() > 0:
                 self.load_analysis(item1,rec)
             if rec.children.count() > 0:
                 self.load_subdataset(item1,item1.data())
         self.treeView.expandAll()
         self.treeView.hideColumn(1)
+
 
     def load_analysis(self, parent_item, dataset):
         all_record = MdAnalysis.filter(dataset=dataset)

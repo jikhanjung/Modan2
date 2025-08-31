@@ -70,8 +70,9 @@ def setup_logging(debug: bool = False):
         ]
     )
     
-    # Reduce noise from Qt
+    # Reduce noise from Qt and matplotlib
     logging.getLogger('PyQt5').setLevel(logging.WARNING)
+    logging.getLogger('matplotlib.font_manager').setLevel(logging.ERROR)
 
 
 def main():
@@ -123,6 +124,7 @@ def main():
         # Show splash screen if not disabled
         if not args.no_splash:
             from MdSplashScreen import create_splash_screen
+            from PyQt5.QtWidgets import QApplication
             
             # Try to use background image if available
             splash_bg_path = Path(__file__).parent / "icons" / "Modan2.png"
@@ -132,21 +134,19 @@ def main():
             splash.setProgress("Initializing application...")
             splash.showWithTimer(3000)  # Show for 3 seconds
             
-            # Simulate loading steps with progress updates
-            import time
-            time.sleep(0.5)
+            # Quick progress updates without blocking
             splash.setProgress("Loading configuration...")
-            time.sleep(0.5)
-            splash.setProgress("Setting up database...")
-            time.sleep(0.5)
+            QApplication.processEvents()
+            splash.setProgress("Setting up database...")  
+            QApplication.processEvents()
             splash.setProgress("Ready!")
-            time.sleep(0.5)
+            QApplication.processEvents()
         
         window.show()
         
         # Apply command line configuration
         if args.debug:
-            window.statusBar().showMessage("Debug mode enabled")
+            window.statusBar.showMessage("Debug mode enabled")
         
         logger.info("Application started successfully")
         

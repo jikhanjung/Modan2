@@ -9,9 +9,15 @@ import numpy as np
 import trimesh
 import tempfile
 
+# Import version from centralized version file
+try:
+    from version import __version__ as PROGRAM_VERSION
+except ImportError:
+    # Fallback for compatibility
+    PROGRAM_VERSION = "0.1.4"
+
 COMPANY_NAME = "PaleoBytes"
 PROGRAM_NAME = "Modan2"
-PROGRAM_VERSION = "0.1.4"
 
 DB_LOCATION = ""
 

@@ -2,7 +2,26 @@ import subprocess
 import os
 import sys
 import platform
+import re
+import tempfile
+import shutil
 from datetime import date
+from pathlib import Path
+
+# Import version from centralized version file
+try:
+    from version import __version__ as VERSION
+except ImportError:
+    # Fallback: extract from version.py file
+    def get_version_from_file():
+        with open("version.py", "r") as f:
+            content = f.read()
+            match = re.search(r'__version__ = "(.*?)"', content)
+            if match:
+                return match.group(1)
+        raise RuntimeError("Unable to find version string")
+    VERSION = get_version_from_file()
+
 import MdUtils as mu
 
 def run_pyinstaller(args):
@@ -10,23 +29,46 @@ def run_pyinstaller(args):
     pyinstaller_cmd = ["pyinstaller"] + args
     subprocess.run(pyinstaller_cmd, check=True)
 
+def prepare_inno_setup_template(template_path, version):
+    """Prepare Inno Setup script from template with version replacement."""
+    temp_dir = Path(tempfile.mkdtemp())
+    temp_iss = temp_dir / "Modan2_build.iss"
+    
+    # Read template or original file
+    template_file = Path(template_path)
+    if template_file.with_suffix('.iss.template').exists():
+        # Use template if it exists
+        template_file = template_file.with_suffix('.iss.template')
+    
+    content = template_file.read_text()
+    
+    # Replace version placeholder or hardcoded version
+    content = re.sub(r'#define AppVersion ".*?"', f'#define AppVersion "{version}"', content)
+    content = content.replace('{{VERSION}}', version)  # Also support template syntax
+    
+    # Write temporary ISS file
+    temp_iss.write_text(content)
+    return temp_iss
+
 def run_inno_setup(iss_file, version):
     """Runs Inno Setup Compiler with the specified ISS file and version."""
     if platform.system() != "Windows":
         print("Inno Setup is Windows-only, skipping...")
         return
-        
-    with open(iss_file, 'r') as f:
-        content = f.read()
-        content = content.replace("#define AppVersion \"0.1.4\"", f"#define AppVersion \"{version}\"")
-    with open(iss_file, 'w') as f:
-        f.write(content)
-
-    inno_setup_cmd = [r"C:\Program Files (x86)\Inno Setup 6\ISCC.exe", iss_file]
+    
+    # Prepare ISS file from template
+    temp_iss = prepare_inno_setup_template(iss_file, version)
+    
+    inno_setup_cmd = [r"C:\Program Files (x86)\Inno Setup 6\ISCC.exe", str(temp_iss)]
     try:
         subprocess.run(inno_setup_cmd, check=True)
+        print(f"✅ Installer created with version {version}")
     except (subprocess.CalledProcessError, FileNotFoundError):
         print("Inno Setup not found or failed, skipping installer creation...")
+    finally:
+        # Cleanup temp directory
+        if temp_iss.parent.exists():
+            shutil.rmtree(temp_iss.parent)
 
 def get_platform_executable_extension():
     """Get the appropriate executable extension for the current platform."""
@@ -42,12 +84,14 @@ def get_platform_separator():
 
 # --- Configuration ---
 NAME = mu.PROGRAM_NAME
-VERSION = mu.PROGRAM_VERSION
+# Use centralized version
 BUILD_NUMBER = os.environ.get('BUILD_NUMBER', 'local')
-#DATE = "20240708"
 today = date.today()
 DATE = today.strftime("%Y%m%d")
-#print(DATE) # Output: YYYY-MM-DD (e.g., 2024-07-08)
+
+print(f"Building {NAME} version {VERSION}")
+print(f"Build number: {BUILD_NUMBER}")
+print(f"Build date: {DATE}")
 
 OUTPUT_DIR = "dist"
 ICON = "icons/Modan2_2.png"
@@ -93,4 +137,6 @@ run_pyinstaller(onedir_args)
 
 # 3. Run Inno Setup Compiler (Optional)
 iss_file = "InnoSetup/Modan2.iss"
-run_inno_setup(iss_file, mu.PROGRAM_VERSION)
+run_inno_setup(iss_file, VERSION)
+
+print(f"\n✅ Build completed for version {VERSION}")

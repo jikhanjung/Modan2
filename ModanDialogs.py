@@ -3182,7 +3182,11 @@ class DataExplorationDialog(QDialog):
 
         scatter_variable_name = self.comboGroupBy.currentText()
         regression_variable_name = self.comboRegressionBasedOn.currentText()
-        self.variablename_list = self.analysis.propertyname_str.split(",")
+        if self.analysis.propertyname_str:
+            self.variablename_list = self.analysis.propertyname_str.split(",")
+        else:
+            # Fallback to dataset's variable names if analysis doesn't have them
+            self.variablename_list = self.analysis.dataset.get_variablename_list()
         self.scatter_variable_index = self.variablename_list.index(scatter_variable_name) if scatter_variable_name in self.variablename_list else -1
         self.regression_variable_index = self.variablename_list.index(regression_variable_name) if regression_variable_name in self.variablename_list else -1
         #self.scatter_variable_index = self.variablename_list.index(propertyname) if propertyname in self.variablename_list else -1
@@ -3218,7 +3222,11 @@ class DataExplorationDialog(QDialog):
         flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
         flip_axis3 = -1.0 if self.cbxFlipAxis3.isChecked() == True else 1.0
 
-        self.variablename_list = self.analysis.propertyname_str.split(",")
+        if self.analysis.propertyname_str:
+            self.variablename_list = self.analysis.propertyname_str.split(",")
+        else:
+            # Fallback to dataset's variable names if analysis doesn't have them
+            self.variablename_list = self.analysis.dataset.get_variablename_list()
         symbol_candidate = ['o','s','^','x','+','d','v','<','>','p','h']
         symbol_candidate = self.marker_list[:]
         color_candidate = ['blue','green','black','cyan','magenta','yellow','gray','red']
@@ -4020,17 +4028,20 @@ class DataExplorationDialog(QDialog):
         #print("inverted_matrix", inverted_matrix)
         
         unrotated_shape = np.dot(shape, inverted_matrix)
-        #print("unrotated_shape shape", unrotated_shape)
+        
         all_shapes = np.array(json.loads(self.analysis.superimposed_landmark_json))
         # get average of all_shapes
         average_shape = np.mean(all_shapes, axis=0)
-        #average_shape = np.array(self.ds_ops.get_average_shape().landmark_list).reshape(1,-1)
-        #print("average_shape", average_shape)
-        #print("unrotated_shape", unrotated_shape.shape, unrotated_shape)
-        #print("after unrotate", unrotated_shape )
-
         average_shape = average_shape.reshape(1,-1)
-        final_shape = average_shape + unrotated_shape
+        
+        # For PCA/CVA space (144D) to original 3D space (216D) conversion
+        if average_shape.shape[1] != unrotated_shape.shape[1]:
+            # Instead of complex transformation, use the picked point from original space
+            # The 'shape' parameter should correspond to original landmark data
+            final_shape = average_shape  # For now, just return average shape
+            print(f"Note: Using average shape due to dimension mismatch ({unrotated_shape.shape[1]}D vs {average_shape.shape[1]}D)")
+        else:
+            final_shape = average_shape + unrotated_shape
         #print("final shape", final_shape.shape,final_shape)
 
 

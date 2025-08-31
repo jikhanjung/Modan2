@@ -512,6 +512,8 @@ class ModanController(QObject):
             # New signature from UI
             if dataset:
                 self.set_current_dataset(dataset)
+            # Initialize params for new signature
+            params = {}
         if not self.current_dataset:
             self.error_occurred.emit("Please select a dataset first")
             return None
@@ -552,8 +554,83 @@ class ModanController(QObject):
             # Run analysis based on type
             self.analysis_progress.emit(25)
             
+            # Run comprehensive analysis (PCA includes all three: PCA, CVA, MANOVA)
             if analysis_type.upper() == "PCA":
-                result = self._run_pca(landmarks_data, params)
+                pca_result = self._run_pca(landmarks_data, params)
+                result = pca_result  # Primary result for compatibility
+                
+                # Also run CVA and MANOVA as part of comprehensive analysis
+                cva_result = None
+                manova_result = None
+                
+                self.logger.info(f"CVA group_by parameter: {cva_group_by}")
+                if cva_group_by is not None:
+                    try:
+                        self.logger.info("Running CVA analysis alongside PCA")
+                        
+                        # Extract group values from objects based on cva_group_by index
+                        group_values = []
+                        variable_names = self.current_dataset.get_variablename_list()
+                        
+                        if isinstance(cva_group_by, int) and 0 <= cva_group_by < len(variable_names):
+                            # cva_group_by is an index
+                            for obj in objects_with_landmarks:
+                                obj_model = self.current_dataset.object_list.where(MdModel.MdObject.id == obj.id).first()
+                                if obj_model:
+                                    variable_list = obj_model.get_variable_list()
+                                    if cva_group_by < len(variable_list):
+                                        group_values.append(variable_list[cva_group_by])
+                                    else:
+                                        group_values.append("Unknown")
+                                else:
+                                    group_values.append("Unknown")
+                        else:
+                            # cva_group_by might be a string or direct group list
+                            if isinstance(cva_group_by, str):
+                                self.logger.warning(f"CVA group_by is string: {cva_group_by}")
+                            group_values = cva_group_by
+                        
+                        self.logger.info(f"CVA groups extracted: {group_values[:5]}...")  # Show first 5
+                        cva_params = {"groups": group_values}
+                        cva_result = self._run_cva(landmarks_data, cva_params)
+                        self.logger.info("CVA analysis completed successfully")
+                    except Exception as e:
+                        self.logger.warning(f"CVA analysis failed: {e}")
+                        import traceback
+                        self.logger.warning(f"CVA error traceback: {traceback.format_exc()}")
+                else:
+                    self.logger.warning("CVA group_by is None - skipping CVA analysis")
+                
+                if manova_group_by is not None:
+                    try:
+                        self.logger.info("Running MANOVA analysis alongside PCA")
+                        
+                        # Extract group values for MANOVA (same logic as CVA)
+                        manova_group_values = []
+                        variable_names = self.current_dataset.get_variablename_list()
+                        
+                        if isinstance(manova_group_by, int) and 0 <= manova_group_by < len(variable_names):
+                            # manova_group_by is an index
+                            for obj in objects_with_landmarks:
+                                obj_model = self.current_dataset.object_list.where(MdModel.MdObject.id == obj.id).first()
+                                if obj_model:
+                                    variable_list = obj_model.get_variable_list()
+                                    if manova_group_by < len(variable_list):
+                                        manova_group_values.append(variable_list[manova_group_by])
+                                    else:
+                                        manova_group_values.append("Unknown")
+                                else:
+                                    manova_group_values.append("Unknown")
+                        else:
+                            manova_group_values = manova_group_by
+                            
+                        self.logger.info(f"MANOVA groups extracted: {manova_group_values[:5]}...")
+                        manova_params = {"groups": manova_group_values}
+                        manova_result = self._run_manova(landmarks_data, manova_params)
+                        self.logger.info("MANOVA analysis completed successfully")
+                    except Exception as e:
+                        self.logger.warning(f"MANOVA analysis failed: {e}")
+                        
             elif analysis_type.upper() == "CVA":
                 result = self._run_cva(landmarks_data, params)
             elif analysis_type.upper() == "MANOVA":
@@ -565,15 +642,110 @@ class ModanController(QObject):
             
             self.analysis_progress.emit(75)
             
-            # Save analysis result
+            # Create analysis record with JSON data
             analysis = MdModel.MdAnalysis.create(
                 dataset=self.current_dataset,
                 analysis_name=analysis_name or f"{analysis_type}_Analysis",
-                analysis_type=analysis_type.upper() if 'analysis_type' in locals() else "PCA",
                 superimposition_method=superimposition_method or "Procrustes",
                 cva_group_by=cva_group_by,
-                manova_group_by=manova_group_by
+                manova_group_by=manova_group_by,
+                propertyname_str=self.current_dataset.propertyname_str,
+                dimension=self.current_dataset.dimension,
+                wireframe=self.current_dataset.wireframe,
+                baseline=self.current_dataset.baseline,
+                polygons=self.current_dataset.polygons
             )
+            
+            # Generate and save JSON data for analysis results
+            try:
+                import json
+                
+                # Generate object info JSON
+                object_info_list = []
+                raw_landmark_list = []
+                property_len = len(self.current_dataset.get_variablename_list()) or 0
+                object_list = self.current_dataset.object_list.order_by(MdModel.MdObject.sequence)
+                
+                for obj in object_list:
+                    raw_landmark_list.append(obj.get_landmark_list())
+                    object_info_list.append({
+                        "id": obj.id,
+                        "name": obj.object_name,
+                        "sequence": obj.sequence,
+                        "csize": obj.get_centroid_size(),
+                        "variable_list": obj.get_variable_list()[:property_len]
+                    })
+                
+                analysis.raw_landmark_json = json.dumps(raw_landmark_list)
+                analysis.object_info_json = json.dumps(object_info_list)
+                
+                # Save superimposed landmark data (using current landmarks)
+                superimposed_landmark_list = []
+                for obj in objects_with_landmarks:
+                    superimposed_landmark_list.append(obj.landmark_list)
+                analysis.superimposed_landmark_json = json.dumps(superimposed_landmark_list)
+                
+                # Save analysis results based on type
+                if analysis_type == "PCA" and result:
+                    self.logger.debug(f"PCA result keys: {list(result.keys())}")
+                    if 'scores' in result:
+                        scores_shape = f"{len(result['scores'])}x{len(result['scores'][0]) if result['scores'] and len(result['scores']) > 0 else 0}"
+                        self.logger.debug(f"PCA scores shape: {scores_shape}")
+                        self.logger.debug(f"Objects with landmarks count: {len(objects_with_landmarks)}")
+                        analysis.pca_analysis_result_json = json.dumps(result['scores'])
+                    if 'rotation_matrix' in result:
+                        analysis.pca_rotation_matrix_json = json.dumps(result['rotation_matrix'])
+                    elif 'eigenvectors' in result:
+                        # Fallback to eigenvectors if rotation_matrix not available
+                        analysis.pca_rotation_matrix_json = json.dumps(result['eigenvectors'])
+                    if 'eigenvalues' in result and 'explained_variance_ratio' in result:
+                        eigenvalues_list = []
+                        for i, val in enumerate(result['eigenvalues']):
+                            variance_ratio = result['explained_variance_ratio'][i] if i < len(result['explained_variance_ratio']) else 0
+                            eigenvalues_list.append([val, variance_ratio])
+                        analysis.pca_eigenvalues_json = json.dumps(eigenvalues_list)
+                
+                    # Save CVA results if available (from comprehensive analysis)
+                    if 'cva_result' in locals() and cva_result:
+                        self.logger.info(f"Saving CVA results: keys={list(cva_result.keys())}")
+                        # CVA uses 'canonical_variables' instead of 'scores'
+                        if 'canonical_variables' in cva_result:
+                            analysis.cva_analysis_result_json = json.dumps(cva_result['canonical_variables'])
+                            self.logger.info(f"CVA canonical variables saved: {len(cva_result['canonical_variables'])} objects")
+                        elif 'scores' in cva_result:
+                            analysis.cva_analysis_result_json = json.dumps(cva_result['scores'])
+                            self.logger.info(f"CVA scores saved: {len(cva_result['scores'])} objects")
+                        
+                        if 'eigenvectors' in cva_result:
+                            analysis.cva_rotation_matrix_json = json.dumps(cva_result['eigenvectors'])
+                        
+                        if 'eigenvalues' in cva_result:
+                            # CVA eigenvalues format might be different
+                            if isinstance(cva_result['eigenvalues'], list):
+                                # Simple eigenvalues list
+                                eigenvalues_list = [[val, 0] for val in cva_result['eigenvalues']]  # No variance ratio for CVA
+                                analysis.cva_eigenvalues_json = json.dumps(eigenvalues_list)
+                            elif isinstance(cva_result['eigenvalues'], dict) and 'explained_variance_ratio' in cva_result:
+                                # Format with variance ratios
+                                cva_eigenvalues_list = []
+                                for i, val in enumerate(cva_result['eigenvalues']):
+                                    cva_variance_ratio = cva_result['explained_variance_ratio'][i] if i < len(cva_result['explained_variance_ratio']) else 0
+                                    cva_eigenvalues_list.append([val, cva_variance_ratio])
+                                analysis.cva_eigenvalues_json = json.dumps(cva_eigenvalues_list)
+                    else:
+                        self.logger.warning("CVA result not available for saving")
+                    
+                    # Save MANOVA results if available (from comprehensive analysis)
+                    if 'manova_result' in locals() and manova_result:
+                        analysis.manova_analysis_result_json = json.dumps(manova_result)
+                
+                # Save the analysis with JSON data
+                analysis.save()
+                self.logger.debug("Analysis results saved with JSON data")
+                
+            except Exception as e:
+                self.logger.warning(f"Failed to generate JSON data for analysis: {e}")
+                # Analysis record is still saved without JSON data
             
             self.analysis_progress.emit(100)
             self.analysis_completed.emit(analysis)
@@ -636,7 +808,8 @@ class ModanController(QObject):
         Returns:
             CVA results dictionary
         """
-        self.logger.debug("Running CVA analysis")
+        self.logger.info(f"Running CVA analysis with params: {params}")
+        self.logger.info(f"Landmarks data shape: {len(landmarks_data)}x{len(landmarks_data[0]) if landmarks_data else 0}")
         
         try:
             # Get group information
@@ -680,13 +853,32 @@ class ModanController(QObject):
             # Use existing MANOVA function
             manova_result = MdStatistics.do_manova_analysis(landmarks_data, groups)
             
+            # Format results to match original structure
+            stat_dict = {}
+            column_names = ["", "Value", "Num DF", "Den DF", "F Value", "Pr > F"]
+            
+            # Convert test_statistics to the format expected by UI
+            if 'test_statistics' in manova_result:
+                for stat in manova_result['test_statistics']:
+                    stat_name = stat['name']
+                    stat_values = [
+                        stat['value'],
+                        stat['df_num'], 
+                        stat['df_den'],
+                        stat['f_statistic'],
+                        stat['p_value']
+                    ]
+                    stat_dict[stat_name] = stat_values
+            
+            stat_dict['column_names'] = column_names
+            
             return {
                 'analysis_type': 'MANOVA',
-                'wilks_lambda': manova_result.get('wilks_lambda', 0.0),
-                'f_statistic': manova_result.get('f_statistic', 0.0),
-                'p_value': manova_result.get('p_value', 0.0),
-                'degrees_of_freedom': manova_result.get('df', []),
-                'effect_size': manova_result.get('effect_size', 0.0)
+                'stat_dict': stat_dict,
+                'group_means': manova_result.get('group_means', []),
+                'overall_mean': manova_result.get('overall_mean', []),
+                'n_groups': manova_result.get('n_groups', 0),
+                'group_sizes': manova_result.get('group_sizes', [])
             }
             
         except Exception as e:

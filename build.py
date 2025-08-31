@@ -32,12 +32,23 @@ def run_pyinstaller(args):
         print("PyInstaller completed successfully")
         
         # Check if the executable was created
+        exe_extension = get_platform_executable_extension()
         if "--onedir" in args:
-            exe_path = Path("dist/Modan2/Modan2.exe")
+            exe_path = Path(f"dist/Modan2/Modan2{exe_extension}")
         else:
-            exe_path = Path("dist/Modan2.exe")
+            exe_path = Path(f"dist/Modan2{exe_extension}")
             
         if not exe_path.exists():
+            # List actual files in dist directory for debugging
+            dist_path = Path("dist")
+            if dist_path.exists():
+                print(f"Contents of dist directory:")
+                for item in dist_path.iterdir():
+                    print(f"  {item}")
+                if (dist_path / "Modan2").exists():
+                    print(f"Contents of dist/Modan2 directory:")
+                    for item in (dist_path / "Modan2").iterdir():
+                        print(f"  {item}")
             raise FileNotFoundError(f"Expected executable not found: {exe_path}")
         else:
             print(f"Executable created: {exe_path}")

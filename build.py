@@ -27,7 +27,28 @@ import MdUtils as mu
 def run_pyinstaller(args):
     """Runs PyInstaller with the specified arguments."""
     pyinstaller_cmd = ["pyinstaller"] + args
-    subprocess.run(pyinstaller_cmd, check=True)
+    try:
+        result = subprocess.run(pyinstaller_cmd, check=True, capture_output=True, text=True)
+        print("PyInstaller completed successfully")
+        
+        # Check if the executable was created
+        if "--onedir" in args:
+            exe_path = Path("dist/Modan2/Modan2.exe")
+        else:
+            exe_path = Path("dist/Modan2.exe")
+            
+        if not exe_path.exists():
+            raise FileNotFoundError(f"Expected executable not found: {exe_path}")
+        else:
+            print(f"Executable created: {exe_path}")
+            
+    except subprocess.CalledProcessError as e:
+        print(f"PyInstaller failed with exit code {e.returncode}")
+        if e.stdout:
+            print(f"STDOUT: {e.stdout}")
+        if e.stderr:
+            print(f"STDERR: {e.stderr}")
+        raise
 
 def prepare_inno_setup_template(template_path, version):
     """Prepare Inno Setup script from template with version replacement."""
@@ -61,10 +82,17 @@ def run_inno_setup(iss_file, version):
     
     inno_setup_cmd = [r"C:\Program Files (x86)\Inno Setup 6\ISCC.exe", str(temp_iss)]
     try:
-        subprocess.run(inno_setup_cmd, check=True)
-        print(f"✅ Installer created with version {version}")
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        print("Inno Setup not found or failed, skipping installer creation...")
+        result = subprocess.run(inno_setup_cmd, check=True, capture_output=True, text=True)
+        print(f"Installer created with version {version}")
+    except subprocess.CalledProcessError as e:
+        print(f"Inno Setup failed with exit code {e.returncode}")
+        if e.stdout:
+            print(f"STDOUT: {e.stdout}")
+        if e.stderr:
+            print(f"STDERR: {e.stderr}")
+        print("Skipping installer creation...")
+    except FileNotFoundError:
+        print("Inno Setup not found, skipping installer creation...")
     finally:
         # Cleanup temp directory
         if temp_iss.parent.exists():
@@ -139,4 +167,4 @@ run_pyinstaller(onedir_args)
 iss_file = "InnoSetup/Modan2.iss"
 run_inno_setup(iss_file, VERSION)
 
-print(f"\n✅ Build completed for version {VERSION}")
+print(f"\nBuild completed for version {VERSION}")

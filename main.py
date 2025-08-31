@@ -66,7 +66,7 @@ def setup_logging(debug: bool = False):
         format=format_str,
         handlers=[
             logging.StreamHandler(sys.stdout),
-            logging.FileHandler('modan2.log', encoding='utf-8')
+            logging.FileHandler('logs/modan2.log', encoding='utf-8')
         ]
     )
     

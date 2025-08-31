@@ -34,6 +34,7 @@ Modan2/
 ├── MdStatistics.py       # Statistical analysis (PCA, CVA, MANOVA)
 ├── build.py              # PyInstaller build script
 ├── migrate.py            # Database migration tool
+├── logs/                 # Application log files
 ├── config/               # Configuration files
 │   ├── pytest.ini       # Pytest configuration
 │   └── requirements-dev.txt # Development dependencies

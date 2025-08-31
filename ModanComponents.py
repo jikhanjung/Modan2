@@ -3588,6 +3588,7 @@ class AnalysisInfoWidget(QWidget):
         self.analysis_tab.addTab(self.PcaView, "PCA")
         self.analysis_tab.addTab(self.CvaView, "CVA")
         self.analysis_tab.addTab(self.ManovaView, "MANOVA")
+        self.analysis_tab.currentChanged.connect(self.on_tab_changed)
 
         ''' PCA 3D plot '''
         self.lblPcaGroupBy = QLabel(self.tr("Grouping variable"))
@@ -3670,6 +3671,17 @@ class AnalysisInfoWidget(QWidget):
         self.lblAnalysisName.setText(self.tr("Analysis Name"))
         self.lblSuperimposition.setText(self.tr("Superimposition"))
         self.lblPcaGroupBy.setText(self.tr("Grouping variable"))
+    
+    def on_tab_changed(self, index):
+        """Handle tab change event - enable buttons only for PCA tab"""
+        # Enable Analysis Detail and Data Exploration buttons only for PCA tab (index 0)
+        is_pca_tab = (index == 0)
+        
+        # Access parent's buttons (ModanMainWindow)
+        if hasattr(self.parent, 'btnAnalysisDetail'):
+            self.parent.btnAnalysisDetail.setEnabled(is_pca_tab)
+        if hasattr(self.parent, 'btnDataExploration'):
+            self.parent.btnDataExploration.setEnabled(is_pca_tab)
 
     def comboPcaGroupBy_changed(self):
         if self.ignore_change:
@@ -3716,6 +3728,12 @@ class AnalysisInfoWidget(QWidget):
         else:
             self.comboManovaGroupBy.setCurrentIndex(0)
         self.ignore_change = False
+        
+        # Set tab to PCA by default
+        self.analysis_tab.setCurrentIndex(0)
+        
+        # Set initial button state - enable only for PCA tab
+        self.on_tab_changed(0)
 
 
     def show_analysis_result(self):

@@ -539,7 +539,7 @@ LOGGING = {
             'class': 'logging.FileHandler',
             'level': 'DEBUG',
             'formatter': 'detailed',
-            'filename': 'modan2.log',
+            'filename': 'logs/modan2.log',
             'encoding': 'utf-8',
             'mode': 'a'
         }

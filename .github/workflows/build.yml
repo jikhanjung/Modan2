@@ -219,10 +219,9 @@ jobs:
           - **Linux**: Make executable with `chmod +x` and run
           - **macOS**: Extract and run the application
         files: |
-          release-files/modan2-windows/InnoSetup/Output/*.exe
-          release-files/modan2-windows/dist/Modan2_v*_build[0-9]*.exe
-          release-files/modan2-linux/dist/*_build*_linux
-          release-files/modan2-macos/dist/*_build*_macos
+          release-files/modan2-windows/InnoSetup/Output/*_Installer.exe
+          release-files/modan2-linux/dist/Modan2_v*_build*_linux
+          release-files/modan2-macos/dist/Modan2_v*_build*_macos
         draft: false
         prerelease: true
       env:

@@ -166,25 +166,25 @@ elif platform.system() == "Windows":
 onefile_args = [
     f"--name={NAME}_v{VERSION}_build{BUILD_NUMBER}{platform_suffix}{exe_extension}",
     "--onefile",
-    "--noconsole",
+    "--console",  # Enable console output for debugging
     f"--add-data=icons/*.png{data_separator}icons",
     f"--add-data=translations/*.qm{data_separator}translations",
     f"--add-data=migrations/*{data_separator}migrations",
     f"--icon={ICON}",
-    "Modan2.py",
+    "main.py",  # Use main.py instead of Modan2.py for better error handling
 ]
 run_pyinstaller(onefile_args)
 
 # 2. Run PyInstaller (One-Directory Bundle)
 onedir_args = [
     "--onedir",
-    "--noconsole",
+    "--console",  # Enable console output for debugging
     f"--add-data=icons/*.png{data_separator}icons",
     f"--add-data=translations/*.qm{data_separator}translations",
     f"--add-data=migrations/*{data_separator}migrations",
     f"--icon={ICON}",
     "--noconfirm",
-    "Modan2.py",
+    "main.py",  # Use main.py instead of Modan2.py for better error handling
 ]
 run_pyinstaller(onedir_args)
 

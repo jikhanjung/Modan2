@@ -221,7 +221,7 @@ jobs:
         files: |
           release-files/modan2-windows/InnoSetup/Output/*_Installer.exe
           release-files/modan2-linux/dist/Modan2_v*_build*_linux
-          release-files/modan2-macos/dist/Modan2_v*_build*_macos
+          release-files/modan2-macos/dist/Modan2_v*_macos
         draft: false
         prerelease: true
       env:

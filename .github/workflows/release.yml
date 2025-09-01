@@ -52,6 +52,8 @@ jobs:
           pip install -r requirements.txt
           pip install pyinstaller
           python build.py
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
       - uses: actions/upload-artifact@v4
         with:
           name: modan2-windows

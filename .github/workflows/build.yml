@@ -198,6 +198,17 @@ jobs:
       with:
         path: release-files/
     
+    - name: Create Windows installer zip
+      run: |
+        cd release-files/modan2-windows/InnoSetup/Output/
+        for file in *_Installer.exe; do
+          if [ -f "$file" ]; then
+            zip_name="${file%.exe}.zip"
+            zip "$zip_name" "$file"
+            echo "Created $zip_name from $file"
+          fi
+        done
+    
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
@@ -210,16 +221,16 @@ jobs:
           Build number: ${{ github.run_number }}
           
           **Downloads:**
-          - 🪟 **Windows Installer**: `Modan2_v${{ steps.get_version.outputs.VERSION }}_build${{ github.run_number }}_Installer.exe` - Run the installer
+          - 🪟 **Windows Installer**: `Modan2_v${{ steps.get_version.outputs.VERSION }}_build${{ github.run_number }}_Installer.zip` - Extract and run the installer
           - 🐧 **Linux**: `Modan2_v${{ steps.get_version.outputs.VERSION }}_build${{ github.run_number }}_linux` - Executable binary
           - 🍎 **macOS**: `Modan2_v${{ steps.get_version.outputs.VERSION }}_build${{ github.run_number }}_macos` - Application bundle
           
           **Installation:**
-          - **Windows**: Run the installer as administrator
+          - **Windows**: Extract the zip file and run the installer as administrator
           - **Linux**: Make executable with `chmod +x` and run
           - **macOS**: Extract and run the application
         files: |
-          release-files/modan2-windows/InnoSetup/Output/*_Installer.exe
+          release-files/modan2-windows/InnoSetup/Output/*_Installer.zip
           release-files/modan2-linux/dist/Modan2_v*_build*_linux
           release-files/modan2-macos/Modan2_v*_macos
         draft: false

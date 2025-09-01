@@ -1,0 +1,263 @@
+"""
+Core Dataset and Object functionality tests.
+
+This module contains tests for basic dataset and object creation, management,
+and their relationships. These are the foundational tests that other test 
+modules depend on.
+"""
+
+import pytest
+import tempfile
+from pathlib import Path
+from unittest.mock import Mock, patch
+from PyQt5.QtWidgets import QApplication, QWidget
+from PyQt5.QtCore import QPoint
+from PyQt5.QtTest import QTest
+import MdModel
+from ModanDialogs import DatasetDialog, ObjectDialog
+
+class TestDatasetCore:
+    """Test core dataset creation and management functionality."""
+    
+    def test_dataset_dialog_creation(self, qtbot):
+        """Test that DatasetDialog can be created and displays correctly."""
+        mock_parent = Mock()
+        mock_parent.pos.return_value = QPoint(100, 100)
+        
+        dialog = DatasetDialog(parent=mock_parent)
+        qtbot.addWidget(dialog)
+        
+        assert dialog is not None
+        assert dialog.windowTitle() == "Modan2 - Dataset"
+        assert hasattr(dialog, 'edtDatasetName')
+        assert hasattr(dialog, 'rbtn2D')
+        assert hasattr(dialog, 'rbtn3D')
+
+    def test_dataset_creation_2d(self, qtbot):
+        """Test creating a 2D dataset through the dialog."""
+        mock_parent = Mock()
+        mock_parent.pos.return_value = QPoint(100, 100)
+        
+        dialog = DatasetDialog(parent=mock_parent)
+        qtbot.addWidget(dialog)
+        
+        # Set up the dialog for 2D dataset
+        dialog.edtDatasetName.setText("Test2D")
+        dialog.rbtn2D.setChecked(True)
+        
+        # Get initial count
+        initial_count = MdModel.MdDataset.select().count()
+        
+        # Simulate clicking Save - this should create the dataset
+        dialog.btnOkay.click()
+        
+        # Verify dataset was created
+        final_count = MdModel.MdDataset.select().count()
+        assert final_count == initial_count + 1
+        
+        # Get the created dataset
+        created_dataset = MdModel.MdDataset.select().order_by(MdModel.MdDataset.id.desc()).first()
+        assert created_dataset.dataset_name == "Test2D"
+        assert created_dataset.dimension == 2
+        
+        return created_dataset
+
+    def test_dataset_creation_3d(self, qtbot):
+        """Test creating a 3D dataset through the dialog."""
+        mock_parent = Mock()
+        mock_parent.pos.return_value = QPoint(100, 100)
+        
+        dialog = DatasetDialog(parent=mock_parent)
+        qtbot.addWidget(dialog)
+        
+        # Set up the dialog for 3D dataset
+        dialog.edtDatasetName.setText("Test3D")
+        dialog.rbtn3D.setChecked(True)
+        
+        # Get initial count
+        initial_count = MdModel.MdDataset.select().count()
+        
+        # Click Save to create dataset
+        dialog.btnOkay.click()
+        
+        # Verify dataset was created
+        final_count = MdModel.MdDataset.select().count()
+        assert final_count == initial_count + 1
+        
+        # Get the created dataset
+        created_dataset = MdModel.MdDataset.select().order_by(MdModel.MdDataset.id.desc()).first()
+        assert created_dataset.dataset_name == "Test3D"
+        assert created_dataset.dimension == 3
+        
+        return created_dataset
+
+    def test_dataset_validation(self, qtbot):
+        """Test dataset name validation."""
+        mock_parent = Mock()
+        mock_parent.pos.return_value = QPoint(100, 100)
+        
+        dialog = DatasetDialog(parent=mock_parent)
+        qtbot.addWidget(dialog)
+        
+        # Test empty name validation
+        dialog.edtDatasetName.setText("")
+        dialog.rbtn2D.setChecked(True)
+        
+        initial_count = MdModel.MdDataset.select().count()
+        
+        # Try to save - should not create dataset with empty name
+        dialog.btnOkay.click()
+        
+        # Should not create dataset with empty name
+        final_count = MdModel.MdDataset.select().count()
+        assert final_count == initial_count
+
+
+class TestObjectCore:
+    """Test core object creation and management functionality."""
+    
+    @pytest.fixture
+    def sample_dataset(self, qtbot):
+        """Create a sample dataset for object tests."""
+        mock_parent = Mock()
+        mock_parent.pos.return_value = QPoint(100, 100)
+        
+        dialog = DatasetDialog(parent=mock_parent)
+        qtbot.addWidget(dialog)
+        
+        dialog.edtDatasetName.setText("SampleDataset")
+        dialog.rbtn2D.setChecked(True)
+        dialog.save_dataset()
+        
+        return MdModel.MdDataset.select().order_by(MdModel.MdDataset.id.desc()).first()
+
+    def test_object_dialog_creation(self, qtbot, sample_dataset):
+        """Test that ObjectDialog can be created and displays correctly."""
+        mock_parent = Mock()
+        mock_parent.pos.return_value = QPoint(100, 100)
+        
+        dialog = ObjectDialog(parent=mock_parent, dataset=sample_dataset)
+        qtbot.addWidget(dialog)
+        
+        assert dialog is not None
+        assert dialog.windowTitle() == "Modan2 - Object"
+        assert hasattr(dialog, 'edtObjectName')
+        assert dialog.dataset == sample_dataset
+
+    def test_object_creation(self, qtbot, sample_dataset):
+        """Test creating an object through the dialog."""
+        mock_parent = Mock()
+        mock_parent.pos.return_value = QPoint(100, 100)
+        
+        dialog = ObjectDialog(parent=mock_parent, dataset=sample_dataset)
+        qtbot.addWidget(dialog)
+        
+        # Set up the dialog
+        dialog.edtObjectName.setText("TestObject")
+        
+        # Get initial count
+        initial_count = sample_dataset.object_list.count()
+        
+        # Manually call save_object to test the logic
+        dialog.save_object()
+        
+        # Verify object was created
+        final_count = sample_dataset.object_list.count()
+        assert final_count == initial_count + 1
+        
+        # Get the created object
+        created_object = sample_dataset.object_list.order_by(MdModel.MdObject.id.desc()).first()
+        assert created_object.object_name == "TestObject"
+        assert created_object.dataset == sample_dataset
+        
+        return created_object
+
+    def test_object_validation(self, qtbot, sample_dataset):
+        """Test object name validation."""
+        mock_parent = Mock()
+        mock_parent.pos.return_value = QPoint(100, 100)
+        
+        dialog = ObjectDialog(parent=mock_parent, dataset=sample_dataset)
+        qtbot.addWidget(dialog)
+        
+        # Test empty name validation
+        dialog.edtObjectName.setText("")
+        
+        initial_count = sample_dataset.object_list.count()
+        dialog.save_object()
+        
+        # Should not create object with empty name
+        final_count = sample_dataset.object_list.count()
+        assert final_count == initial_count
+
+
+class TestDatasetObjectIntegration:
+    """Test integration between datasets and objects."""
+    
+    def test_dataset_object_relationship(self, qtbot):
+        """Test the relationship between datasets and objects."""
+        # Create dataset
+        mock_parent = Mock()
+        mock_parent.pos.return_value = QPoint(100, 100)
+        
+        dataset_dialog = DatasetDialog(parent=mock_parent)
+        qtbot.addWidget(dataset_dialog)
+        
+        dataset_dialog.edtDatasetName.setText("IntegrationTest")
+        dataset_dialog.rbtn2D.setChecked(True)
+        dataset_dialog.save_dataset()
+        
+        dataset = MdModel.MdDataset.select().order_by(MdModel.MdDataset.id.desc()).first()
+        
+        # Create multiple objects in the dataset
+        for i in range(3):
+            object_dialog = ObjectDialog(parent=mock_parent, dataset=dataset)
+            qtbot.addWidget(object_dialog)
+            
+            object_dialog.edtObjectName.setText(f"Object{i+1}")
+            object_dialog.save_object()
+        
+        # Verify relationships
+        assert dataset.object_list.count() == 3
+        
+        objects = list(dataset.object_list)
+        for i, obj in enumerate(objects):
+            assert obj.object_name == f"Object{i+1}"
+            assert obj.dataset == dataset
+
+    def test_multiple_datasets_with_objects(self, qtbot):
+        """Test creating multiple datasets each with their own objects."""
+        mock_parent = Mock()
+        mock_parent.pos.return_value = QPoint(100, 100)
+        
+        datasets = []
+        
+        # Create 2 datasets
+        for i in range(2):
+            dataset_dialog = DatasetDialog(parent=mock_parent)
+            qtbot.addWidget(dataset_dialog)
+            
+            dataset_dialog.edtDatasetName.setText(f"Dataset{i+1}")
+            dataset_dialog.rbtn2D.setChecked(True)
+            dataset_dialog.save_dataset()
+            
+            dataset = MdModel.MdDataset.select().order_by(MdModel.MdDataset.id.desc()).first()
+            datasets.append(dataset)
+            
+            # Add objects to each dataset
+            for j in range(2):
+                object_dialog = ObjectDialog(parent=mock_parent, dataset=dataset)
+                qtbot.addWidget(object_dialog)
+                
+                object_dialog.edtObjectName.setText(f"Obj{j+1}")
+                object_dialog.save_object()
+        
+        # Verify each dataset has its own objects
+        for i, dataset in enumerate(datasets):
+            assert dataset.object_list.count() == 2
+            assert dataset.dataset_name == f"Dataset{i+1}"
+            
+            objects = list(dataset.object_list)
+            for j, obj in enumerate(objects):
+                assert obj.object_name == f"Obj{j+1}"
+                assert obj.dataset == dataset

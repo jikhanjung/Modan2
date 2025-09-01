@@ -42,9 +42,34 @@ specimen_001
 def qt_app():
     """Create a QApplication for Qt tests."""
     from PyQt5.QtWidgets import QApplication
+    from unittest.mock import Mock
+    
     app = QApplication.instance()
     if app is None:
         app = QApplication([])
+    
+    # Setup mock settings for all tests
+    if not hasattr(app, 'settings'):
+        from PyQt5.QtCore import QRect
+        
+        def mock_settings_value(key, default=None):
+            if "Geometry" in key:
+                return QRect(100, 100, 600, 400)
+            if "RememberGeometry" in key:
+                return True
+            if "LandmarkSize" in key:
+                return 10
+            if "width_scale" in key:
+                return 1.0
+            if "dataset_mode" in key:
+                return 0
+            return default if default is not None else True
+        
+        app.settings = Mock()
+        app.settings.value = Mock(side_effect=mock_settings_value)
+        app.settings.setValue = Mock()
+        app.settings.sync = Mock()
+    
     yield app
     # Don't quit the app here as it might be reused
 
@@ -53,9 +78,34 @@ def qt_app():
 def qapp():
     """Global Qt Application fixture for pytest-qt."""
     from PyQt5.QtWidgets import QApplication
+    from unittest.mock import Mock
+    
     app = QApplication.instance()
     if app is None:
         app = QApplication([])
+    
+    # Setup mock settings for all tests
+    if not hasattr(app, 'settings'):
+        from PyQt5.QtCore import QRect
+        
+        def mock_settings_value(key, default=None):
+            if "Geometry" in key:
+                return QRect(100, 100, 600, 400)
+            if "RememberGeometry" in key:
+                return True
+            if "LandmarkSize" in key:
+                return 10
+            if "width_scale" in key:
+                return 1.0
+            if "dataset_mode" in key:
+                return 0
+            return default if default is not None else True
+        
+        app.settings = Mock()
+        app.settings.value = Mock(side_effect=mock_settings_value)
+        app.settings.setValue = Mock()
+        app.settings.sync = Mock()
+    
     yield app
 
 

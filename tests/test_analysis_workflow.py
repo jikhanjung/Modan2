@@ -199,7 +199,7 @@ class TestMainWindowAnalysis:
                 qtbot.addWidget(import_dialog)
                 
                 # Import small sample
-                file_path = "/home/jikhanjung/projects/Modan2/tests/sample_data/small_sample.tps"
+                file_path = "tests/sample_data/small_sample.tps"
                 import_dialog.open_file2(file_path)
                 import_dialog.import_file()
                 
@@ -342,7 +342,7 @@ class TestCompleteWorkflows:
                 import_dialog = ImportDatasetDialog(parent=mock_parent)
                 qtbot.addWidget(import_dialog)
                 
-                file_path = "/home/jikhanjung/projects/Modan2/tests/sample_data/small_sample.tps"
+                file_path = "tests/sample_data/small_sample.tps"
                 import_dialog.open_file2(file_path)
                 import_dialog.import_file()
                 
@@ -477,7 +477,7 @@ class TestCompleteWorkflows:
                 import_dialog = ImportDatasetDialog(parent=mock_parent)
                 qtbot.addWidget(import_dialog)
                 
-                file_path = "/home/jikhanjung/projects/Modan2/Morphometrics dataset/Thylacine2020_NeuroGM.txt"
+                file_path = "tests/sample_data/Thylacine2020_NeuroGM.txt"
                 import_dialog.open_file2(file_path)
                 import_dialog.import_file()
                 

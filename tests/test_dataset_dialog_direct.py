@@ -78,6 +78,11 @@ def object_dialog_with_dataset(qtbot):
 class TestDatasetDialogDirect:
     """Test Dataset Dialog with direct UI manipulation (no mocks for exec_)."""
     
+    @pytest.fixture(autouse=True)
+    def setup_database(self, mock_database):
+        """Automatically setup database for all tests in this class."""
+        pass
+    
     def test_dataset_dialog_creation(self, dataset_dialog):
         """Test that dataset dialog can be created and shows proper UI elements."""
         dialog = dataset_dialog
@@ -287,6 +292,11 @@ class TestDatasetDialogDirect:
 class TestDatasetObjectIntegration:
     """Test integrated workflow: Dataset creation + Object creation."""
     
+    @pytest.fixture(autouse=True)
+    def setup_database(self, mock_database):
+        """Automatically setup database for all tests in this class."""
+        pass
+    
     def test_dataset_to_object_workflow(self, dataset_dialog):
         """Test complete workflow from Dataset creation to Object creation."""
         import MdModel
@@ -448,6 +458,11 @@ class TestDatasetObjectIntegration:
 class TestDatasetDialogEdgeCases:
     """Test edge cases and error conditions."""
     
+    @pytest.fixture(autouse=True)
+    def setup_database(self, mock_database):
+        """Automatically setup database for all tests in this class."""
+        pass
+    
     def test_special_characters_in_name(self, dataset_dialog):
         """Test dataset name with special characters."""
         dialog = dataset_dialog
@@ -460,6 +475,11 @@ class TestDatasetDialogEdgeCases:
 
 class TestObjectDialogDirect:
     """Test Object Dialog with direct UI manipulation."""
+    
+    @pytest.fixture(autouse=True)
+    def setup_database(self, mock_database):
+        """Automatically setup database for all tests in this class."""
+        pass
     
     def test_object_dialog_creation(self, object_dialog_with_dataset):
         """Test that object dialog can be created and shows proper UI elements."""
@@ -645,6 +665,11 @@ class TestObjectDialogDirect:
 
 class TestDatasetObjectDialogIntegration:
     """Test complete integration: Dataset Dialog → Object Dialog workflow."""
+    
+    @pytest.fixture(autouse=True)
+    def setup_database(self, mock_database):
+        """Automatically setup database for all tests in this class."""
+        pass
     
     def test_complete_dataset_object_dialog_workflow(self, dataset_dialog, qtbot):
         """Test complete workflow: Create dataset via dialog, then create object via dialog."""

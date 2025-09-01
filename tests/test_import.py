@@ -118,7 +118,7 @@ class TestImportDatasetDialog:
             qtbot.addWidget(dialog)
             
             # Test TPS file detection
-            tps_file = "/home/jikhanjung/projects/Modan2/tests/sample_data/small_sample.tps"
+            tps_file = "tests/sample_data/small_sample.tps"
             dialog.open_file2(tps_file)
             
             assert dialog.rbnTPS.isChecked()
@@ -136,7 +136,7 @@ class TestTpsImport:
     
     def test_tps_parsing_only(self, qtbot):
         """Test TPS file parsing without UI interaction."""
-        tps_file = "/home/jikhanjung/projects/Modan2/tests/sample_data/small_sample.tps"
+        tps_file = "tests/sample_data/small_sample.tps"
         
         # Test TPS parsing directly
         tps_parser = TPS(tps_file, "test_dataset", False)
@@ -178,7 +178,7 @@ class TestTpsImport:
             qtbot.addWidget(dialog)
             
             # Load file and configure UI
-            file_path = "/home/jikhanjung/projects/Modan2/tests/sample_data/small_sample.tps"
+            file_path = "tests/sample_data/small_sample.tps"
             dialog.open_file2(file_path)
             
             # Verify UI configuration
@@ -292,7 +292,7 @@ class TestImportWithMessageBoxHandling:
                 qtbot.addWidget(dialog)
                 
                 # Load and import file
-                file_path = "/home/jikhanjung/projects/Modan2/tests/sample_data/small_sample.tps"
+                file_path = "tests/sample_data/small_sample.tps"
                 dialog.open_file2(file_path)
                 dialog.import_file()
                 
@@ -341,7 +341,7 @@ class TestImportWithMessageBoxHandling:
                 qtbot.addWidget(dialog)
                 
                 # Load and import Thylacine file
-                file_path = "/home/jikhanjung/projects/Modan2/Morphometrics dataset/Thylacine2020_NeuroGM.txt"
+                file_path = "tests/sample_data/Thylacine2020_NeuroGM.txt"
                 dialog.open_file2(file_path)  # Auto-detects as Morphologika
                 dialog.import_file()
                 
@@ -433,7 +433,7 @@ class TestImportEdgeCases:
             qtbot.addWidget(dialog)
             
             # Load file but clear dataset name
-            file_path = "/home/jikhanjung/projects/Modan2/tests/sample_data/small_sample.tps"
+            file_path = "tests/sample_data/small_sample.tps"
             dialog.open_file2(file_path)
             dialog.edtDatasetName.setText("")  # Clear name
             

@@ -463,10 +463,14 @@ def export_dataset_to_csv(dataset, file_path, include_metadata=True):
             with open(file_path, 'r') as f:
                 content = f.read()
             
+            # Get landmark count from first object
+            first_obj = dataset.object_list.first() if dataset.object_list.count() > 0 else None
+            landmark_count = first_obj.count_landmarks() if first_obj else 0
+            
             metadata = f"# Dataset: {dataset.dataset_name}\n"
             metadata += f"# Description: {dataset.dataset_desc}\n"
             metadata += f"# Dimension: {dataset.dimension}D\n"
-            metadata += f"# Landmarks: {dataset.landmark_count}\n"
+            metadata += f"# Landmarks: {landmark_count}\n"
             metadata += f"# Objects: {len(data_rows)}\n"
             metadata += f"# Exported: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
             
@@ -522,13 +526,17 @@ def export_dataset_to_excel(dataset, file_path, include_metadata=True):
             
             # Add metadata sheet if requested
             if include_metadata:
+                # Get landmark count from first object
+                first_obj = dataset.object_list.first() if dataset.object_list.count() > 0 else None
+                landmark_count = first_obj.count_landmarks() if first_obj else 0
+                
                 metadata_df = pd.DataFrame({
                     'Property': ['Dataset Name', 'Description', 'Dimension', 'Landmarks', 'Objects', 'Exported'],
                     'Value': [
                         dataset.dataset_name,
                         dataset.dataset_desc,
                         f"{dataset.dimension}D",
-                        dataset.landmark_count,
+                        landmark_count,
                         len(data_rows),
                         datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     ]

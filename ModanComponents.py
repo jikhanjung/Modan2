@@ -1678,6 +1678,7 @@ class ObjectViewer3D(QGLWidget):
             self.fullpath = file_path
         self.updateGL()
 
+
     def initializeGL(self):
         self.initialize_frame_buffer()
         self.picker_buffer = self.create_picker_buffer()
@@ -1687,6 +1688,12 @@ class ObjectViewer3D(QGLWidget):
             self.threed_model.generate()
 
     def initialize_frame_buffer(self, frame_buffer_id=0):
+        # GLU 쿼드릭 초기화 (GLUT 대신)
+        if not hasattr(self, 'glu_quadric'):
+            self.glu_quadric = glu.gluNewQuadric()
+            glu.gluQuadricNormals(self.glu_quadric, glu.GLU_SMOOTH)  # 조명용 노멀
+            logger.debug("GLU quadric initialized for sphere rendering")
+        
         gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, frame_buffer_id)
         gl.glClearDepth(1.0)
         gl.glDepthFunc(gl.GL_LESS)
@@ -1696,13 +1703,27 @@ class ObjectViewer3D(QGLWidget):
 
         gl.glEnable(gl.GL_LIGHTING)
         gl.glEnable(gl.GL_LIGHT0)
+        
+        # Set up lighting parameters
+        light_position = [1.0, 1.0, 1.0, 0.0]  # Directional light
+        light_ambient = [0.2, 0.2, 0.2, 1.0]   # Ambient light
+        light_diffuse = [0.8, 0.8, 0.8, 1.0]   # Diffuse light
+        light_specular = [1.0, 1.0, 1.0, 1.0]  # Specular light
+        
+        gl.glLightfv(gl.GL_LIGHT0, gl.GL_POSITION, light_position)
+        gl.glLightfv(gl.GL_LIGHT0, gl.GL_AMBIENT, light_ambient)
+        gl.glLightfv(gl.GL_LIGHT0, gl.GL_DIFFUSE, light_diffuse)
+        gl.glLightfv(gl.GL_LIGHT0, gl.GL_SPECULAR, light_specular)
+        
+        # Set material properties for better lighting
+        gl.glEnable(gl.GL_COLOR_MATERIAL)
+        gl.glColorMaterial(gl.GL_FRONT_AND_BACK, gl.GL_AMBIENT_AND_DIFFUSE)
 
         gl.glMatrixMode(gl.GL_PROJECTION)
         gl.glLoadIdentity()
         aspect_ratio = self.width() / self.height()
         glu.gluPerspective(45.0,aspect_ratio,0.1, 100.0) # 시야각, 종횡비, 근거리 클리핑, 원거리 클리핑
         gl.glMatrixMode(gl.GL_MODELVIEW)
-        glut.glutInit(sys.argv)
         gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, 0)
 
     def paintGL(self):
@@ -1710,20 +1731,34 @@ class ObjectViewer3D(QGLWidget):
             self.draw_picker_buffer()
         gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, 0)
 
+        # Clear landmark positions for this frame
+        if hasattr(self, 'landmark_screen_positions'):
+            self.landmark_screen_positions.clear()
+        
         gl.glPushMatrix() 
         self.draw_all()
         gl.glPopMatrix()
         return
+
 
     def draw_all(self):
         current_buffer = gl.glGetIntegerv(gl.GL_FRAMEBUFFER_BINDING)
         gl.glMatrixMode(gl.GL_PROJECTION)
         gl.glLoadIdentity()
         glu.gluPerspective(45.0, self.aspect, 0.1, 100.0)
-        light_position = [1.0, 1.0, 1.0, 0.0]  # x, y, z, w (w=0 for directional light)
-        diffuse_intensity = (1.0, 1.0, 1.0, 1.0)
-        gl.glLightfv(gl.GL_LIGHT0, gl.GL_POSITION, light_position)
-        gl.glLightfv(gl.GL_LIGHT0, gl.GL_DIFFUSE, diffuse_intensity) 
+        
+        # Ensure lighting is properly set up for each frame
+        if current_buffer == 0:  # Only for main render buffer, not picker buffer
+            gl.glEnable(gl.GL_LIGHTING)
+            gl.glEnable(gl.GL_LIGHT0)
+            
+            light_position = [1.0, 1.0, 1.0, 0.0]  # Directional light
+            light_ambient = [0.2, 0.2, 0.2, 1.0]   # Ambient light
+            light_diffuse = [0.8, 0.8, 0.8, 1.0]   # Diffuse light
+            
+            gl.glLightfv(gl.GL_LIGHT0, gl.GL_POSITION, light_position)
+            gl.glLightfv(gl.GL_LIGHT0, gl.GL_AMBIENT, light_ambient)
+            gl.glLightfv(gl.GL_LIGHT0, gl.GL_DIFFUSE, light_diffuse) 
         gl.glTranslatef(0, 0, -5.0 + self.dolly + self.temp_dolly)   # x, y, z 
         gl.glTranslatef((self.pan_x + self.temp_pan_x)/100.0, (self.pan_y + self.temp_pan_y)/-100.0, 0.0)
         gl.glRotatef(self.rotate_y + self.temp_rotate_y, 1.0, 0.0, 0.0)
@@ -1910,20 +1945,28 @@ class ObjectViewer3D(QGLWidget):
                     key = "lm_"+str(i)
                     color = self.lm_idx_to_color[key]
                     gl.glColor3f( *[ c * 1.0 / 255 for c in color] )
-                glut.glutSolidSphere(0.02 * ( int(self.landmark_size) + 1 ), 10, 10)
+                # Use GLU sphere (stable, fast, lighting-compatible)
+                radius = 0.02 * ( int(self.landmark_size) + 1 )
+                try:
+                    if hasattr(self, 'glu_quadric'):
+                        glu.gluSphere(self.glu_quadric, radius, 12, 12)
+                    else:
+                        logger.warning("GLU quadric not initialized, using point fallback")
+                        raise Exception("GLU quadric not available")
+                except Exception as e:
+                    logger.debug(f"GLU sphere rendering failed: {e}")
+                    # Fallback: draw a simple point
+                    gl.glPointSize(float(self.landmark_size) * 3 + 3)
+                    gl.glBegin(gl.GL_POINTS)
+                    gl.glVertex3f(0, 0, 0)
+                    gl.glEnd()
                 if current_buffer == self.picker_buffer and self.object_dialog is not None:
                     gl.glEnable(gl.GL_LIGHTING)
                 gl.glPopMatrix()
 
                 if self.show_index:
-                    gl.glDisable(gl.GL_LIGHTING)
-                    index_color = mu.as_gl_color(self.index_color)
-                    gl.glColor3f( *index_color )
-                    gl.glRasterPos3f(lm[0] + 0.05, lm[1] + 0.05, lm[2])
-                    font_size_list = [ glut.GLUT_BITMAP_HELVETICA_10, glut.GLUT_BITMAP_HELVETICA_12, glut.GLUT_BITMAP_HELVETICA_18]
-                    for letter in list(str(i+1)):
-                        glut.glutBitmapCharacter(font_size_list[int(self.index_size)], ord(letter))
-                    gl.glEnable(gl.GL_LIGHTING)
+                    # TODO: Add landmark index display (text or other visual indicator)
+                    pass
 
         elif object.show_landmark:
             

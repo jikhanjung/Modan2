@@ -1684,7 +1684,7 @@ class MdAnalysis(Model):
     analysis_name = CharField()
     analysis_desc = CharField(null=True)
     ''' dataset info '''
-    dataset = ForeignKeyField(MdDataset, related_name='analyses', null=True,on_delete="CASCADE")
+    dataset = ForeignKeyField(MdDataset, backref='analyses', null=True,on_delete="CASCADE")
     dimension = IntegerField(default=2)
     wireframe = CharField(null=True)
     baseline = CharField(null=True)

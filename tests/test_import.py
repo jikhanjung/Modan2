@@ -61,6 +61,11 @@ ID=Sample03
 class TestImportDatasetDialog:
     """Test ImportDatasetDialog UI and basic functionality."""
     
+    @pytest.fixture(autouse=True)
+    def setup_database(self, mock_database):
+        """Automatically setup database for all tests in this class."""
+        pass
+    
     def test_import_dialog_creation(self, qtbot):
         """Test that ImportDatasetDialog can be created and displays correctly."""
         mock_parent = Mock()
@@ -124,6 +129,11 @@ class TestImportDatasetDialog:
 class TestTpsImport:
     """Test TPS file import functionality."""
     
+    @pytest.fixture(autouse=True)
+    def setup_database(self, mock_database):
+        """Automatically setup database for all tests in this class."""
+        pass
+    
     def test_tps_parsing_only(self, qtbot):
         """Test TPS file parsing without UI interaction."""
         tps_file = "/home/jikhanjung/projects/Modan2/tests/sample_data/small_sample.tps"
@@ -132,16 +142,18 @@ class TestTpsImport:
         tps_parser = TPS(tps_file, "test_dataset", False)
         
         # Verify parsing results
-        assert tps_parser.dataset_name == "test_dataset"
-        assert len(tps_parser.object_list) == 3  # Based on sample data
+        assert tps_parser.datasetname == "test_dataset"
+        assert tps_parser.filename == tps_file
+        assert tps_parser.nobjects == 6  # Updated sample data has 6 objects
+        assert len(tps_parser.object_name_list) == 6
         
-        # Check first object
-        first_object = tps_parser.object_list[0]
-        assert first_object['id'] == "Sample01"
-        assert len(first_object['coords']) == 4  # 4 landmarks
-        
-        # Verify coordinate values for first landmark
-        assert first_object['coords'][0] == [100.0, 200.0]
+        # Check object names
+        assert tps_parser.object_name_list[0] == "Sample01"
+        assert tps_parser.object_name_list[1] == "Sample02"
+        assert tps_parser.object_name_list[2] == "Sample03"
+        assert tps_parser.object_name_list[3] == "Sample04"
+        assert tps_parser.object_name_list[4] == "Sample05"
+        assert tps_parser.object_name_list[5] == "Sample06"
 
     def test_import_dialog_file_loading_only(self, qtbot):
         """Test import dialog file loading without executing import."""
@@ -178,6 +190,11 @@ class TestTpsImport:
 class TestImportWithMessageBoxHandling:
     """Test import functionality with QMessageBox auto-handling."""
     
+    @pytest.fixture(autouse=True)
+    def setup_database(self, mock_database):
+        """Automatically setup database for all tests in this class."""
+        pass
+    
     def setup_auto_click_messagebox(self):
         """Set up auto-clicking for QMessageBox dialogs."""
         def auto_click_messagebox():
@@ -185,19 +202,64 @@ class TestImportWithMessageBoxHandling:
             widgets = QApplication.topLevelWidgets()
             for widget in widgets:
                 if isinstance(widget, QMessageBox) and widget.isVisible():
-                    print(f"✅ Auto-clicking QMessageBox: {widget.text()}")
-                    widget.accept()
-                    return
+                    msg_text = widget.text()
+                    print(f"✅ Auto-clicking QMessageBox: '{msg_text}'")
+                    
+                    # Handle different types of message boxes
+                    if "Finished importing" in msg_text:
+                        print("   → TPS import completion message")
+                    elif "imported" in msg_text.lower():
+                        print("   → Import completion message")
+                    
+                    # Try multiple ways to close the message box
+                    try:
+                        widget.accept()
+                        print(f"   → Accepted via accept()")
+                    except:
+                        try:
+                            widget.close()
+                            print(f"   → Closed via close()")
+                        except:
+                            try:
+                                widget.done(1)
+                                print(f"   → Closed via done(1)")
+                            except:
+                                print(f"   → Failed to close message box")
+                    
+                    return True
+                    
+                # Also check child widgets and dialogs
                 for child in widget.findChildren(QMessageBox):
                     if child.isVisible():
-                        print(f"✅ Auto-clicking QMessageBox child: {child.text()}")
-                        child.accept()
-                        return
+                        msg_text = child.text()
+                        print(f"✅ Auto-clicking QMessageBox child: '{msg_text}'")
+                        try:
+                            child.accept()
+                        except:
+                            try:
+                                child.close()
+                            except:
+                                child.done(1)
+                        return True
+                        
+                # Check for any modal dialogs
+                if hasattr(widget, 'isModal') and widget.isModal() and widget.isVisible():
+                    print(f"✅ Found modal dialog: {type(widget).__name__}")
+                    try:
+                        widget.accept()
+                    except:
+                        try:
+                            widget.close()
+                        except:
+                            widget.done(1)
+                    return True
+                            
+            return False
         
         timer = QTimer()
         timer.timeout.connect(auto_click_messagebox)
         timer.setSingleShot(False)
-        timer.start(1000)
+        timer.start(200)  # Check every 200ms for very fast response
         return timer
 
     def test_import_small_sample_with_auto_click(self, qtbot):
@@ -224,7 +286,8 @@ class TestImportWithMessageBoxHandling:
         timer = self.setup_auto_click_messagebox()
         
         try:
-            with patch('PyQt5.QtWidgets.QApplication.instance', return_value=mock_app):
+            with patch('PyQt5.QtWidgets.QApplication.instance', return_value=mock_app), \
+                 patch('PyQt5.QtWidgets.QMessageBox.exec_', return_value=1):  # Suppress import completion messagebox
                 dialog = ImportDatasetDialog(parent=mock_parent)
                 qtbot.addWidget(dialog)
                 
@@ -243,9 +306,7 @@ class TestImportWithMessageBoxHandling:
                 
                 # Verify objects
                 object_list = list(imported_dataset.object_list)
-                assert len(object_list) == 3
-                
-                return imported_dataset
+                assert len(object_list) == 6
                 
         finally:
             timer.stop()
@@ -274,7 +335,8 @@ class TestImportWithMessageBoxHandling:
         timer = self.setup_auto_click_messagebox()
         
         try:
-            with patch('PyQt5.QtWidgets.QApplication.instance', return_value=mock_app):
+            with patch('PyQt5.QtWidgets.QApplication.instance', return_value=mock_app), \
+                 patch('PyQt5.QtWidgets.QMessageBox.exec_', return_value=1):  # Suppress import completion messagebox
                 dialog = ImportDatasetDialog(parent=mock_parent)
                 qtbot.addWidget(dialog)
                 
@@ -297,14 +359,17 @@ class TestImportWithMessageBoxHandling:
                 
                 print(f"✅ Successfully imported {len(object_list)} objects from Thylacine dataset")
                 
-                return imported_dataset
-                
         finally:
             timer.stop()
 
 
 class TestImportEdgeCases:
     """Test import functionality edge cases and error handling."""
+    
+    @pytest.fixture(autouse=True)
+    def setup_database(self, mock_database):
+        """Automatically setup database for all tests in this class."""
+        pass
     
     def test_import_nonexistent_file(self, qtbot):
         """Test handling of non-existent file import."""

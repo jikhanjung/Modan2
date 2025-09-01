@@ -1079,8 +1079,25 @@ class ModanController(QObject):
             self.logger.error(f"Failed to get dataset summary: {e}")
             return {}
     
-    def validate_dataset_for_analysis(self, analysis_type: str) -> Tuple[bool, str]:
-        """Validate that current dataset is suitable for analysis.
+    def validate_dataset_for_analysis(self, dataset_or_analysis_type):
+        """Validate that dataset is suitable for analysis.
+        
+        Args:
+            dataset_or_analysis_type: Either a MdDataset object or analysis type string
+            
+        Returns:
+            bool: True if dataset is valid for analysis, False otherwise
+        """
+        # Handle different parameter types for backward compatibility
+        if isinstance(dataset_or_analysis_type, str):
+            # Called with analysis_type string - use current_dataset
+            return self._validate_dataset_for_analysis_type(dataset_or_analysis_type)
+        else:
+            # Called with dataset object - validate for general analysis
+            return self._validate_dataset_for_general_analysis(dataset_or_analysis_type)
+    
+    def _validate_dataset_for_analysis_type(self, analysis_type: str) -> Tuple[bool, str]:
+        """Validate that current dataset is suitable for specific analysis type.
         
         Args:
             analysis_type: Type of analysis to validate for
@@ -1117,6 +1134,50 @@ class ModanController(QObject):
                     return False, f"Inconsistent landmark count in object '{obj.object_name}'"
         
         return True, "Dataset is valid for analysis"
+    
+    def _validate_dataset_for_general_analysis(self, dataset) -> bool:
+        """Validate that dataset is suitable for general analysis.
+        
+        Args:
+            dataset: MdDataset object to validate
+            
+        Returns:
+            bool: True if dataset is valid for analysis, False otherwise
+        """
+        from MdHelpers import show_warning
+        
+        if dataset is None:
+            show_warning(None, "No dataset selected")
+            return False
+        
+        # Check if dataset has objects with landmarks
+        objects_with_landmarks = list(dataset.object_list.where(
+            (MdModel.MdObject.landmark_str.is_null(False)) & 
+            (MdModel.MdObject.landmark_str != "")
+        ))
+        
+        if len(objects_with_landmarks) < 5:
+            show_warning(None, f"Dataset '{dataset.dataset_name}' has too few objects with landmarks ({len(objects_with_landmarks)}). At least 5 objects required for analysis.")
+            return False
+        
+        # Check for grouping variables (required for CVA/MANOVA)
+        grouping_vars = dataset.get_grouping_variable_index_list()
+        has_grouping_vars = len(grouping_vars) > 0 and dataset.propertyname_str
+        
+        if not has_grouping_vars:
+            show_warning(None, f"Dataset '{dataset.dataset_name}' has no grouping variables.\n\nCVA and MANOVA analyses require grouping variables.\nOnly PCA analysis will be available.\n\nTo add grouping variables, import data with grouping information\nor use the object property editor.")
+            return False
+        
+        # Check landmark consistency
+        if objects_with_landmarks:
+            expected_count = dataset.landmark_count
+            for obj in objects_with_landmarks:
+                obj.unpack_landmark()
+                if len(obj.landmark_list) != expected_count:
+                    show_warning(None, f"Inconsistent landmark count in object '{obj.object_name}'. Expected {expected_count}, found {len(obj.landmark_list)}.")
+                    return False
+        
+        return True
     
     def is_processing(self) -> bool:
         """Check if controller is currently processing."""

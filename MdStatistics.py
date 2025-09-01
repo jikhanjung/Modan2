@@ -35,7 +35,7 @@ class MdPrincipalComponent:
                 self.data[i][j] -= avrs[j]
 
         ''' covariance matrix '''
-        np_data = numpy.matrix(self.data)
+        np_data = numpy.array(self.data)
         self.covariance_matrix = numpy.dot(numpy.transpose(np_data), np_data) / self.nObservation
 
         v, s, w = numpy.linalg.svd(self.covariance_matrix)
@@ -185,12 +185,12 @@ class MdCanonicalVariate:
                 q_ += 1
             p_ += 1
 
-        w = numpy.matrix(within_cov)
-        b = numpy.matrix(between_cov)
+        w = numpy.array(within_cov)
+        b = numpy.array(between_cov)
 
         try:
-            wi = w.getI()
-        except numpy.linalg.linalg.LinAlgError as e:
+            wi = numpy.linalg.inv(w)
+        except numpy.linalg.LinAlgError as e:
             #print "Singular matrix: ", e
             return False
         #print "wi", wi

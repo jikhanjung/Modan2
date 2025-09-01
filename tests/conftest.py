@@ -116,6 +116,29 @@ def temp_db(tmp_path):
     return str(db_path)
 
 
+@pytest.fixture(autouse=True)
+def suppress_message_boxes(monkeypatch):
+    """Automatically suppress all QMessageBox dialogs during tests."""
+    from unittest.mock import Mock
+    
+    # Mock all QMessageBox methods that could show dialogs
+    mock_msgbox = Mock()
+    mock_msgbox.exec_ = Mock(return_value=1)  # Always return OK/Accept
+    mock_msgbox.exec = Mock(return_value=1)   # Qt6 style
+    mock_msgbox.information = Mock(return_value=1)
+    mock_msgbox.warning = Mock(return_value=1) 
+    mock_msgbox.critical = Mock(return_value=1)
+    mock_msgbox.question = Mock(return_value=1)
+    
+    # Patch the QMessageBox class
+    monkeypatch.setattr('PyQt5.QtWidgets.QMessageBox.exec_', lambda self: 1)
+    monkeypatch.setattr('PyQt5.QtWidgets.QMessageBox.exec', lambda self: 1)
+    monkeypatch.setattr('PyQt5.QtWidgets.QMessageBox.information', lambda *args, **kwargs: 1)
+    monkeypatch.setattr('PyQt5.QtWidgets.QMessageBox.warning', lambda *args, **kwargs: 1)
+    monkeypatch.setattr('PyQt5.QtWidgets.QMessageBox.critical', lambda *args, **kwargs: 1)
+    monkeypatch.setattr('PyQt5.QtWidgets.QMessageBox.question', lambda *args, **kwargs: 1)
+
+
 @pytest.fixture
 def mock_database(monkeypatch, temp_db):
     """Mock database operations."""
@@ -174,7 +197,8 @@ def main_window(qtbot, mock_database):
     
     # Show window
     window.show()
-    qtbot.waitForWindowShown(window)
+    with qtbot.waitExposed(window):
+        pass
     
     yield window
     

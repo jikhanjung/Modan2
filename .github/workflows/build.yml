@@ -186,6 +186,13 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
     
+    - name: Extract version from version.py
+      id: get_version
+      run: |
+        VERSION=$(python -c "exec(open('version.py').read()); print(__version__)")
+        echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+        echo "Extracted version: $VERSION"
+    
     - name: Download all artifacts
       uses: actions/download-artifact@v4
       with:
@@ -194,8 +201,8 @@ jobs:
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
-        tag_name: v0.1.4-build.${{ github.run_number }}
-        name: Modan2 v0.1.4 Build ${{ github.run_number }}
+        tag_name: v${{ steps.get_version.outputs.VERSION }}-build.${{ github.run_number }}
+        name: Modan2 v${{ steps.get_version.outputs.VERSION }} Build ${{ github.run_number }}
         body: |
           🚀 **Modan2 Cross-Platform Release**
           
@@ -203,10 +210,10 @@ jobs:
           Build number: ${{ github.run_number }}
           
           **Downloads:**
-          - 🪟 **Windows Installer**: `Modan2_v0.1.4_build${{ github.run_number }}_Installer.exe` - Run the installer
-          - 🪟 **Windows Executable**: `Modan2_v0.1.4_build${{ github.run_number }}.exe` - Standalone executable  
-          - 🐧 **Linux**: `Modan2_v0.1.4_build${{ github.run_number }}_linux` - Executable binary
-          - 🍎 **macOS**: `Modan2_v0.1.4_build${{ github.run_number }}_macos` - Application bundle
+          - 🪟 **Windows Installer**: `Modan2_v${{ steps.get_version.outputs.VERSION }}_build${{ github.run_number }}_Installer.exe` - Run the installer
+          - 🪟 **Windows Executable**: `Modan2_v${{ steps.get_version.outputs.VERSION }}_build${{ github.run_number }}.exe` - Standalone executable  
+          - 🐧 **Linux**: `Modan2_v${{ steps.get_version.outputs.VERSION }}_build${{ github.run_number }}_linux` - Executable binary
+          - 🍎 **macOS**: `Modan2_v${{ steps.get_version.outputs.VERSION }}_build${{ github.run_number }}_macos` - Application bundle
           
           **Installation:**
           - **Windows**: Run the installer as administrator

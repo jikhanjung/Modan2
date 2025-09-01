@@ -1,5 +1,7 @@
 #define AppVersion "0.1.4"
-#define BuildNumber GetEnv('BUILD_NUMBER')
+#ifndef BuildNumber
+  #define BuildNumber "local"
+#endif
 
 [Setup]
 AppName=Modan2

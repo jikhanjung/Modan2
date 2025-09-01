@@ -92,8 +92,8 @@ def prepare_inno_setup_template(template_path, version):
     temp_iss.write_text(content)
     return temp_iss
 
-def run_inno_setup(iss_file, version):
-    """Runs Inno Setup Compiler with the specified ISS file and version."""
+def run_inno_setup(iss_file, version, build_number):
+    """Runs Inno Setup Compiler with the specified ISS file, version, and build number."""
     if platform.system() != "Windows":
         print("Inno Setup is Windows-only, skipping...")
         return
@@ -101,7 +101,11 @@ def run_inno_setup(iss_file, version):
     # Prepare ISS file from template
     temp_iss = prepare_inno_setup_template(iss_file, version)
     
-    inno_setup_cmd = [r"C:\Program Files (x86)\Inno Setup 6\ISCC.exe", str(temp_iss)]
+    inno_setup_cmd = [
+        r"C:\Program Files (x86)\Inno Setup 6\ISCC.exe", 
+        f"/DBuildNumber={build_number}",
+        str(temp_iss)
+    ]
     try:
         result = subprocess.run(inno_setup_cmd, check=True, capture_output=True, text=True)
         print(f"Installer created with version {version}")
@@ -186,6 +190,6 @@ run_pyinstaller(onedir_args)
 
 # 3. Run Inno Setup Compiler (Optional)
 iss_file = "InnoSetup/Modan2.iss"
-run_inno_setup(iss_file, VERSION)
+run_inno_setup(iss_file, VERSION, BUILD_NUMBER)
 
 print(f"\nBuild completed for version {VERSION}")

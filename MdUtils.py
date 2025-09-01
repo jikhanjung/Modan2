@@ -29,14 +29,30 @@ DEFAULT_STORAGE_DIRECTORY = os.path.join(DEFAULT_DB_DIRECTORY, "data/")
 DEFAULT_LOG_DIRECTORY = os.path.join(DEFAULT_DB_DIRECTORY, "logs/")
 DB_BACKUP_DIRECTORY = os.path.join(DEFAULT_DB_DIRECTORY, "backups/")
 
-if not os.path.exists(DEFAULT_DB_DIRECTORY):
-    os.makedirs(DEFAULT_DB_DIRECTORY)
-if not os.path.exists(DEFAULT_STORAGE_DIRECTORY):
-    os.makedirs(DEFAULT_STORAGE_DIRECTORY)
-if not os.path.exists(DEFAULT_LOG_DIRECTORY):
-    os.makedirs(DEFAULT_LOG_DIRECTORY)
-if not os.path.exists(DB_BACKUP_DIRECTORY):
-    os.makedirs(DB_BACKUP_DIRECTORY)
+def ensure_directories():
+    """Safely create necessary directories with error handling."""
+    directories = [
+        DEFAULT_DB_DIRECTORY,
+        DEFAULT_STORAGE_DIRECTORY, 
+        DEFAULT_LOG_DIRECTORY,
+        DB_BACKUP_DIRECTORY
+    ]
+    
+    for directory in directories:
+        try:
+            if not os.path.exists(directory):
+                os.makedirs(directory, exist_ok=True)
+        except (OSError, PermissionError) as e:
+            # If directory creation fails, try to use temp directory
+            print(f"Warning: Could not create directory {directory}: {e}")
+            # Don't fail completely, let the application try to continue
+
+# Try to create directories on import, but don't fail if it doesn't work
+try:
+    ensure_directories()
+except Exception as e:
+    print(f"Warning: Directory initialization failed: {e}")
+    pass
 
 
 def resource_path(relative_path):

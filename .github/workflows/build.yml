@@ -203,9 +203,10 @@ jobs:
           Build number: ${{ github.run_number }}
           
           **Downloads:**
-          - 🪟 **Windows**: `Modan2_v*_Installer.exe` - Run the installer
-          - 🐧 **Linux**: `Modan2_v*_linux` - Executable binary
-          - 🍎 **macOS**: `Modan2_v*_macos` - Application bundle
+          - 🪟 **Windows Installer**: `Modan2_v0.1.4_build${{ github.run_number }}_Installer.exe` - Run the installer
+          - 🪟 **Windows Executable**: `Modan2_v0.1.4_build${{ github.run_number }}.exe` - Standalone executable  
+          - 🐧 **Linux**: `Modan2_v0.1.4_build${{ github.run_number }}_linux` - Executable binary
+          - 🍎 **macOS**: `Modan2_v0.1.4_build${{ github.run_number }}_macos` - Application bundle
           
           **Installation:**
           - **Windows**: Run the installer as administrator

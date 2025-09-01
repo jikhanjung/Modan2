@@ -23,7 +23,7 @@ from MdModel import *
 from scipy.spatial.distance import cdist
 import OpenGL.GL as gl
 from OpenGL import GLU as glu
-from OpenGL import GLUT as glut
+# Removed GLUT import to prevent Windows compatibility issues
 from PyQt5.QtOpenGL import *
 from scipy.spatial import ConvexHull
 from scipy import stats
@@ -1740,6 +1740,40 @@ class ObjectViewer3D(QGLWidget):
         gl.glPopMatrix()
         return
 
+    def draw_wireframe_cube(self):
+        """Draw a simple wireframe cube to replace GLUT cube."""
+        gl.glBegin(gl.GL_LINES)
+        # Bottom face
+        gl.glVertex3f(-0.5, -0.5, -0.5); gl.glVertex3f(0.5, -0.5, -0.5)
+        gl.glVertex3f(0.5, -0.5, -0.5); gl.glVertex3f(0.5, -0.5, 0.5)
+        gl.glVertex3f(0.5, -0.5, 0.5); gl.glVertex3f(-0.5, -0.5, 0.5)
+        gl.glVertex3f(-0.5, -0.5, 0.5); gl.glVertex3f(-0.5, -0.5, -0.5)
+        # Top face
+        gl.glVertex3f(-0.5, 0.5, -0.5); gl.glVertex3f(0.5, 0.5, -0.5)
+        gl.glVertex3f(0.5, 0.5, -0.5); gl.glVertex3f(0.5, 0.5, 0.5)
+        gl.glVertex3f(0.5, 0.5, 0.5); gl.glVertex3f(-0.5, 0.5, 0.5)
+        gl.glVertex3f(-0.5, 0.5, 0.5); gl.glVertex3f(-0.5, 0.5, -0.5)
+        # Vertical edges
+        gl.glVertex3f(-0.5, -0.5, -0.5); gl.glVertex3f(-0.5, 0.5, -0.5)
+        gl.glVertex3f(0.5, -0.5, -0.5); gl.glVertex3f(0.5, 0.5, -0.5)
+        gl.glVertex3f(0.5, -0.5, 0.5); gl.glVertex3f(0.5, 0.5, 0.5)
+        gl.glVertex3f(-0.5, -0.5, 0.5); gl.glVertex3f(-0.5, 0.5, 0.5)
+        gl.glEnd()
+
+    def draw_simple_cone(self):
+        """Draw a simple cone shape to replace GLUT cone."""
+        gl.glBegin(gl.GL_TRIANGLES)
+        # Simple triangle-based cone
+        for i in range(8):
+            angle1 = i * 2 * 3.14159 / 8
+            angle2 = (i + 1) * 2 * 3.14159 / 8
+            x1, y1 = 0.5 * np.cos(angle1), 0.5 * np.sin(angle1)
+            x2, y2 = 0.5 * np.cos(angle2), 0.5 * np.sin(angle2)
+            # Side face
+            gl.glVertex3f(0, 0, 1)    # Tip
+            gl.glVertex3f(x1, y1, 0)  # Base edge 1
+            gl.glVertex3f(x2, y2, 0)  # Base edge 2
+        gl.glEnd()
 
     def draw_all(self):
         current_buffer = gl.glGetIntegerv(gl.GL_FRAMEBUFFER_BINDING)
@@ -1851,7 +1885,8 @@ class ObjectViewer3D(QGLWidget):
             gl.glTranslatef(*[x*-0.015 for x in direction])
             gl.glRotatef(angle, *axis)
             gl.glScalef(0.005, 0.005, length-0.03)
-            glut.glutSolidCube(1)
+            # Replace GLUT cube with simple wireframe
+            self.draw_wireframe_cube()
             gl.glPopMatrix()
 
             if True:
@@ -1859,7 +1894,8 @@ class ObjectViewer3D(QGLWidget):
                 gl.glTranslatef(*end_lm)
                 gl.glTranslatef(*[x*-0.03 for x in direction])
                 gl.glRotatef(angle, *axis)
-                glut.glutSolidCone(0.02, 0.03, 10, 10)
+                # Replace GLUT cone with simple triangle
+                self.draw_simple_cone()
                 gl.glPopMatrix()
 
     def draw_object(self,object,landmark_as_sphere=True,color=COLOR['NORMAL_SHAPE'],edge_color=COLOR['NORMAL_SHAPE'],polygon_color=COLOR['NORMAL_SHAPE']):
@@ -1988,7 +2024,15 @@ class ObjectViewer3D(QGLWidget):
                 gl.glPushMatrix()
                 gl.glTranslate(*lm)
                 gl.glColor3f( *COLOR['SELECTED_LANDMARK'] )
-                glut.glutSolidSphere(0.03, 10, 10)
+                # Use GLU sphere instead of GLUT
+                if hasattr(self, 'glu_quadric'):
+                    glu.gluSphere(self.glu_quadric, 0.03, 10, 10)
+                else:
+                    # Fallback: draw a point
+                    gl.glPointSize(8)
+                    gl.glBegin(gl.GL_POINTS)
+                    gl.glVertex3f(0, 0, 0)
+                    gl.glEnd()
                 gl.glPopMatrix()
             return
 

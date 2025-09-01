@@ -48,7 +48,7 @@ jobs:
       run: |
         $inno_path = "C:\Program Files (x86)\Inno Setup 6"
         $env:PATH = "$inno_path;$env:PATH"
-        iscc.exe "InnoSetup/Modan2.iss"
+        iscc.exe "/DBuildNumber=${{ github.run_number }}" "InnoSetup/Modan2.iss"
       continue-on-error: true
     
     - name: Upload Windows artifact

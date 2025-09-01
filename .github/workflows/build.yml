@@ -198,6 +198,20 @@ jobs:
       with:
         path: release-files/
     
+    - name: Debug - List downloaded files
+      run: |
+        echo "=== Contents of release-files directory ==="
+        find release-files/ -type f -name "*" | head -20
+        echo ""
+        echo "=== Specifically looking for macOS files ==="
+        find release-files/modan2-macos/ -type f -name "*macos*" || echo "No macOS files found"
+        echo ""
+        echo "=== Contents of modan2-macos directory ==="
+        ls -la release-files/modan2-macos/ || echo "Directory not found"
+        echo ""
+        echo "=== Contents of modan2-macos/dist directory ==="
+        ls -la release-files/modan2-macos/dist/ || echo "dist directory not found"
+    
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:

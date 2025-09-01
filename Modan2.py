@@ -1,3 +1,17 @@
+import sys
+import os
+import re
+
+# Fix for Anaconda Python sys.version parsing issue with pandas/platform module
+# This must be done before importing any module that uses platform.python_implementation()
+if hasattr(sys, 'version') and '| packaged by Anaconda' in sys.version:
+    # Remove the Anaconda-specific part from sys.version
+    original_version = sys.version
+    parts = sys.version.split('|')
+    if len(parts) >= 3:
+        # Keep only the first part (version) and last part (compiler info)
+        sys.version = parts[0].strip() + ' ' + parts[-1].strip()
+
 from PyQt5.QtWidgets import QMainWindow, QHeaderView, QApplication, QAbstractItemView, \
                             QMessageBox, QTreeView, QTableView, QSplitter, QAction, QActionGroup, QMenu, \
                             QStatusBar, QInputDialog, QToolBar, QWidget, QPlainTextEdit, QVBoxLayout, QHBoxLayout, \
@@ -6,7 +20,6 @@ from PyQt5.QtGui import QIcon, QStandardItemModel, QStandardItem, QKeySequence, 
 from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSettings, QSize, QTranslator, QItemSelectionModel, QObject, QEvent
 
 from PyQt5.QtCore import pyqtSlot
-import re,os,sys
 import logging
 from pathlib import Path
 from peewee import *

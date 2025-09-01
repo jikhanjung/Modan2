@@ -1,5 +1,5 @@
 #define AppVersion "{{VERSION}}"
-#define CurrentDate GetDateTimeString('yyyymmdd', '-', ':')
+#define BuildNumber GetEnv('BUILD_NUMBER')
 
 [Setup]
 AppName=Modan2
@@ -7,7 +7,7 @@ AppVersion={#AppVersion}
 DefaultDirName={commonpf}\PaleoBytes\Modan2
 OutputDir=Output
 
-OutputBaseFilename=Modan2_v{#AppVersion}_{#CurrentDate}_Installer
+OutputBaseFilename=Modan2_v{#AppVersion}_build{#BuildNumber}_Installer
 
 [Files]
 ; Include main executable

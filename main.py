@@ -15,12 +15,11 @@ if getattr(sys, 'frozen', False):  # Only in PyInstaller builds
     os.environ.setdefault("QT_DEBUG_PLUGINS", "0")  # Set to "1" for debugging
     os.environ.setdefault("QT_FATAL_WARNINGS", "0")  # Set to "1" for debugging
     
-    # Allow OpenGL fallback in deployment - prefer ANGLE for Windows stability
+    # Allow OpenGL fallback in deployment
     if "QT_OPENGL" not in os.environ:
-        if sys.platform == 'win32':
-            os.environ["QT_OPENGL"] = "angle"  # ANGLE (DirectX) is more stable on Windows
-        else:
-            os.environ["QT_OPENGL"] = "software"  # Software fallback for other platforms
+        # Try desktop OpenGL first, it works better with QOpenGLWidget
+        # Users can override with QT_OPENGL environment variable if needed
+        os.environ["QT_OPENGL"] = "desktop"
 else:
     # Development: don't force any backend, let Qt choose
     # This allows testing different backends with environment variables

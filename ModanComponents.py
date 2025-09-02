@@ -1211,9 +1211,10 @@ class ObjectViewer3D(QOpenGLWidget):
         self.timer = QTimer(self)
         self.timer.setInterval(50)
         self.timer.timeout.connect(self.timeout)
-        logger.info("ObjectViewer3D: Starting timer...")
-        self.timer.start()
-        logger.info("ObjectViewer3D: Timer started successfully")
+        logger.info("ObjectViewer3D: Timer created (will start when visible)")
+        # Don't start timer immediately - wait until widget is shown
+        # self.timer.start()
+        logger.info("ObjectViewer3D: Timer setup complete")
         
         logger.info("ObjectViewer3D: Setting up rendering variables...")
         self.frustum_args = {'width': 1.0, 'height': 1.0, 'znear': 0.1, 'zfar': 1000.0}
@@ -1252,6 +1253,25 @@ class ObjectViewer3D(QOpenGLWidget):
         self.comparison_data = {}
         
         logger.info("=== ObjectViewer3D.__init__ completed successfully ===")
+    
+    def showEvent(self, event):
+        """Override showEvent to handle first-time show initialization."""
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info("=== ObjectViewer3D.showEvent() called ===")
+        
+        super().showEvent(event)
+        
+        # Start timer when first shown
+        if not self.timer.isActive():
+            logger.info("showEvent: Starting timer on first show")
+            self.timer.start()
+        
+        # Trigger initial paint
+        logger.info("showEvent: Triggering initial update")
+        self.update()
+        
+        logger.info("=== ObjectViewer3D.showEvent() completed ===")
     
     def show(self):
         """Override show() to add logging for debugging."""
@@ -1656,8 +1676,13 @@ class ObjectViewer3D(QOpenGLWidget):
 
     def set_object(self, object, idx=-1):
         self.show()
-        # Ensure OpenGL context is current for QOpenGLWidget
-        self.makeCurrent()
+        # Force widget to be visible and process events to ensure GL context creation
+        QApplication.processEvents()
+        
+        # Only make current if context is valid
+        if self.isValid():
+            self.makeCurrent()
+        
         self.landmark_list = copy.deepcopy(object.landmark_list)
         m_app = QApplication.instance()
         if isinstance(object, MdObject):
@@ -1707,7 +1732,8 @@ class ObjectViewer3D(QOpenGLWidget):
                 obj_ops.align(self.ds_ops.baseline_point_list)
         
         # Release OpenGL context and trigger repaint for QOpenGLWidget
-        self.doneCurrent()
+        if self.isValid():
+            self.doneCurrent()
         self.update()
 
     def get_scale_from_object(self, obj_ops):

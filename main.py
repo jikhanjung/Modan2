@@ -257,22 +257,35 @@ def main():
             app.processEvents()
         
         # Create main window
+        logger.info("Creating main window...")
         from Modan2 import ModanMainWindow
         window = ModanMainWindow(setup.get_config())
+        logger.info("Main window created successfully")
         
         if splash:
             splash.setProgress("Initializing interface...")
             app.processEvents()
         
         # Show main window
-        window.show()
+        logger.info("Showing main window...")
+        try:
+            window.show()
+            logger.info("Main window shown successfully")
+        except Exception as e:
+            logger.error(f"Failed to show main window: {e}")
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
+            raise
         
         if splash:
+            logger.info("Updating splash screen to Ready...")
             splash.setProgress("Ready!")
             app.processEvents()
+            logger.info("Scheduling splash screen close...")
             # Close splash after a short delay
             from PyQt5.QtCore import QTimer
             QTimer.singleShot(1000, splash.close)
+            logger.info("Splash screen close scheduled")
         
         # Apply command line configuration
         if args.debug:

@@ -170,13 +170,26 @@ class ModanMainWindow(QMainWindow):
         self.m_app = QApplication.instance()
         self.m_app.toolbar_icon_size = "Small"
 
+        logger.info("Reading settings...")
         self.read_settings()
+        logger.info("Settings read successfully")
+        
+        logger.info("Starting initUI()...")
         self.initUI()
+        logger.info("initUI() completed, continuing initialization...")
         
         self.selected_dataset = None
         self.selected_object = None
+        
+        logger.info("Resetting views...")
         self.reset_views()
+        logger.info("Views reset successfully")
+        
+        logger.info("Loading dataset...")
         self.load_dataset()
+        logger.info("Dataset loaded successfully")
+        
+        logger.info("ModanMainWindow.__init__() completed successfully")
 
         self.statusBar = QStatusBar()
         self.setStatusBar(self.statusBar)

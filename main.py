@@ -15,12 +15,16 @@ if getattr(sys, 'frozen', False):  # Only in PyInstaller builds
     os.environ.setdefault("QT_DEBUG_PLUGINS", "0")  # Set to "1" for debugging
     os.environ.setdefault("QT_FATAL_WARNINGS", "0")  # Set to "1" for debugging
     
-    # Allow OpenGL fallback in deployment - prefer software rendering for stability
+    # Allow OpenGL fallback in deployment - prefer ANGLE for Windows stability
     if "QT_OPENGL" not in os.environ:
-        os.environ["QT_OPENGL"] = "software"  # Use software rendering as fallback
+        if sys.platform == 'win32':
+            os.environ["QT_OPENGL"] = "angle"  # ANGLE (DirectX) is more stable on Windows
+        else:
+            os.environ["QT_OPENGL"] = "software"  # Software fallback for other platforms
 else:
-    # Development: prefer desktop OpenGL for performance
-    os.environ.setdefault("QT_OPENGL", "desktop")
+    # Development: don't force any backend, let Qt choose
+    # This allows testing different backends with environment variables
+    pass
     # Ensure Qt finds plugins in bundled app
     if hasattr(sys, '_MEIPASS'):
         plugin_path = os.path.join(sys._MEIPASS, "PyQt5", "Qt", "plugins")
@@ -184,13 +188,18 @@ def main():
             raise
         
         # OpenGL Compatibility 프로파일 설정 (QApplication 생성 전)
-        logger.info("Configuring OpenGL surface format...")
+        # This must be done before QApplication creation for QOpenGLWidget
+        logger.info("Configuring OpenGL surface format for QOpenGLWidget...")
         try:
             fmt = QSurfaceFormat()
-            fmt.setVersion(2, 1)  # 안정성을 위해 2.1 사용
-            fmt.setProfile(QSurfaceFormat.CompatibilityProfile)
+            fmt.setVersion(2, 1)  # 안정성을 위해 2.1 사용 (GLU/immediate mode compatible)
+            fmt.setProfile(QSurfaceFormat.CompatibilityProfile)  # For GLU and fixed-function
+            fmt.setDepthBufferSize(24)  # Proper depth buffer
+            fmt.setStencilBufferSize(8)  # Stencil buffer for advanced rendering
+            fmt.setSamples(4)  # MSAA for smoother edges
+            fmt.setSwapBehavior(QSurfaceFormat.DoubleBuffer)  # Double buffering
             QSurfaceFormat.setDefaultFormat(fmt)
-            logger.info("OpenGL surface format configured (2.1 Compatibility)")
+            logger.info("OpenGL surface format configured (2.1 Compatibility with enhanced buffers)")
         except Exception as e:
             logger.error(f"Failed to configure OpenGL surface format: {e}")
             raise

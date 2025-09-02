@@ -24,7 +24,9 @@ from scipy.spatial.distance import cdist
 import OpenGL.GL as gl
 from OpenGL import GLU as glu
 # Removed GLUT import to prevent Windows compatibility issues
-from PyQt5.QtOpenGL import *
+# Migrate from QGLWidget to QOpenGLWidget for better stability
+from PyQt5.QtWidgets import QOpenGLWidget
+from PyQt5.QtGui import QSurfaceFormat, QOpenGLContext
 from scipy.spatial import ConvexHull
 from scipy import stats
 
@@ -1107,7 +1109,7 @@ class ObjectViewer2D(QLabel):
         self.generate_tps_grid()
         self.update()
 
-class ObjectViewer3D(QGLWidget):
+class ObjectViewer3D(QOpenGLWidget):
     def __init__(self, parent=None, transparent=False):
         import logging
         logger = logging.getLogger(__name__)
@@ -1116,30 +1118,19 @@ class ObjectViewer3D(QGLWidget):
         logger.info(f"ObjectViewer3D init params - parent: {type(parent) if parent else None}, transparent: {transparent}")
         
         try:
+            logger.info("ObjectViewer3D: Using QOpenGLWidget (modern OpenGL)")
+            super(ObjectViewer3D, self).__init__(parent)
+            logger.info("ObjectViewer3D: QOpenGLWidget constructor complete")
+            
             if transparent:
-                logger.info("ObjectViewer3D: Using transparent mode")
-                logger.info("ObjectViewer3D: Creating QGLFormat...")
-                fmt = QGLFormat()
-                logger.info("ObjectViewer3D: Setting alpha channel...")
-                fmt.setAlpha(True)  # Ensure the format includes an alpha channel
-                logger.info("ObjectViewer3D: Calling super().__init__ with format...")
-                super(ObjectViewer3D, self).__init__(fmt, parent)
-                logger.info("ObjectViewer3D: QGLWidget constructor complete (transparent mode)")
-                
-                logger.info("ObjectViewer3D: Setting window flags...")
+                logger.info("ObjectViewer3D: Setting transparent mode attributes...")
                 self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowTransparentForInput | Qt.Tool)
-                logger.info("ObjectViewer3D: Setting attributes...")
                 self.setAttribute(Qt.WA_TranslucentBackground)
                 self.setAttribute(Qt.WA_NoSystemBackground, True)
                 logger.info("ObjectViewer3D: Transparent mode setup complete")
-            else:
-                logger.info("ObjectViewer3D: Using standard mode")
-                logger.info("ObjectViewer3D: Calling QGLWidget.__init__...")
-                QGLWidget.__init__(self,parent)
-                logger.info("ObjectViever3D: QGLWidget constructor complete (standard mode)")
                 
         except Exception as e:
-            logger.error(f"ObjectViewer3D: QGLWidget construction FAILED: {e}")
+            logger.error(f"ObjectViewer3D: QOpenGLWidget construction FAILED: {e}")
             import traceback
             logger.error("ObjectViewer3D constructor traceback:")
             for line in traceback.format_exc().splitlines():
@@ -1426,7 +1417,7 @@ class ObjectViewer3D(QGLWidget):
                 self.parent.sync_pan(self, self.pan_x, self.pan_y)
 
         self.view_mode = VIEW_MODE
-        self.updateGL()
+        self.update()
 
     def mouseMoveEvent(self, event):
         self.curr_x = event.x()
@@ -1514,14 +1505,14 @@ class ObjectViewer3D(QGLWidget):
                     else:
                         self.cursor_on_vertex = -1
 
-        self.updateGL()
+        self.update()
 
     def wheelEvent(self, event):
         self.dolly -= event.angleDelta().y() / 240.0
         if self.parent != None and callable(getattr(self.parent, 'sync_zoom', None)):
             self.parent.sync_zoom(self, self.dolly)
 
-        self.updateGL()
+        self.update()
         event.accept()
 
     def add_wire(self, wire_start_index, wire_end_index):
@@ -1702,7 +1693,7 @@ class ObjectViewer3D(QGLWidget):
         self.landmark_list = object.landmark_list
         self.edge_list = object.dataset.edge_list
         self.calculate_resize()
-        self.updateGL()
+        self.update()
 
     def align_object(self):
         if self.data_mode == OBJECT_MODE:
@@ -1763,7 +1754,7 @@ class ObjectViewer3D(QGLWidget):
         if file_path.split('.')[-1].lower() == 'obj':
             self.threed_model = OBJ(file_path)
             self.fullpath = file_path
-        self.updateGL()
+        self.update()
 
 
     def initializeGL(self):
@@ -1811,7 +1802,8 @@ class ObjectViewer3D(QGLWidget):
             glu.gluQuadricNormals(self.glu_quadric, glu.GLU_SMOOTH)  # 조명용 노멀
             logger.debug("GLU quadric initialized for sphere rendering")
         
-        gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, frame_buffer_id)
+        # QOpenGLWidget manages its own framebuffer internally
+        # No need to bind framebuffer explicitly
         gl.glClearDepth(1.0)
         gl.glDepthFunc(gl.GL_LESS)
         gl.glEnable(gl.GL_DEPTH_TEST)
@@ -1864,9 +1856,18 @@ class ObjectViewer3D(QGLWidget):
                 logger.info("paintGL: Picker buffer drawn successfully")
             
             logger.info("paintGL: Binding main framebuffer...")
-            gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, 0)
-            logger.info("paintGL: Main framebuffer bound")
+            # QOpenGLWidget uses its own FBO, use defaultFramebufferObject()
+            default_fbo = self.defaultFramebufferObject()
+            gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, default_fbo)
+            logger.info(f"paintGL: Main framebuffer bound (FBO: {default_fbo})")
 
+            # Set viewport to match widget size
+            gl.glViewport(0, 0, self.width(), self.height())
+            
+            # Clear the buffer with background color
+            gl.glClearColor(0.7, 0.7, 0.7, 1.0)  # Light gray background
+            gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
+            
             # Clear landmark positions for this frame
             if hasattr(self, 'landmark_screen_positions'):
                 self.landmark_screen_positions.clear()
@@ -2355,13 +2356,13 @@ class ObjectViewer3D(QGLWidget):
         if self.is_dragging:
             return
         self.rotate_x += 0.5
-        self.updateGL()
+        self.update()
 
     def clear_object(self):
         self.obj_ops = None
         self.object = None
         self.landmark_list = []
-        self.updateGL()
+        self.update()
 
     def hit_background_test(self, x, y):
         pixels = gl.glReadPixels(x, self.height()-y, 1, 1, gl.GL_RGB, gl.GL_UNSIGNED_BYTE)

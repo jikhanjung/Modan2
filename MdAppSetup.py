@@ -73,13 +73,43 @@ class ApplicationSetup:
     
     def _prepare_database(self):
         """Initialize database and run migrations."""
-        self.logger.debug(f"Preparing database at: {self.db_path}")
+        self.logger.info(f"Preparing database at: {self.db_path}")
+        
+        # Check database file status
+        import os
+        if os.path.exists(self.db_path):
+            file_size = os.path.getsize(self.db_path)
+            self.logger.info(f"Database file exists, size: {file_size} bytes")
+            # Check if readable
+            if os.access(self.db_path, os.R_OK):
+                self.logger.info("Database file is readable")
+            else:
+                self.logger.warning("Database file exists but not readable")
+            # Check if writable
+            if os.access(self.db_path, os.W_OK):
+                self.logger.info("Database file is writable")
+            else:
+                self.logger.warning("Database file exists but not writable")
+        else:
+            self.logger.info("Database file does not exist, will be created")
+            # Check if directory exists and is writable
+            db_dir = os.path.dirname(self.db_path)
+            if os.path.exists(db_dir):
+                if os.access(db_dir, os.W_OK):
+                    self.logger.info(f"Database directory is writable: {db_dir}")
+                else:
+                    self.logger.error(f"Database directory not writable: {db_dir}")
+            else:
+                self.logger.warning(f"Database directory does not exist: {db_dir}")
         
         # Set database path in model
         MdModel.DATABASE_PATH = self.db_path
+        self.logger.info(f"Database path set in model: {MdModel.DATABASE_PATH}")
         
         # Initialize database
+        self.logger.info("Calling MdModel.prepare_database()...")
         MdModel.prepare_database()
+        self.logger.info("MdModel.prepare_database() completed")
         
         # Run migrations if needed
         try:

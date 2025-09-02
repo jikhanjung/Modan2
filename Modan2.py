@@ -663,11 +663,31 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     def initUI(self):
         # add tableView and tableWidget to vertical layout
         #self.object_view_2d = LandmarkEditor(self)
-        self.object_view_2d = ObjectViewer2D(self)
-        self.object_view_2d.set_mode(MODE['VIEW'])
-        self.object_view_3d = ObjectViewer3D(self)
+        try:
+            logger.info("Creating ObjectViewer2D instance...")
+            self.object_view_2d = ObjectViewer2D(self)
+            logger.info("ObjectViewer2D created successfully")
+            self.object_view_2d.set_mode(MODE['VIEW'])
+            logger.info("ObjectViewer2D mode set to VIEW")
+        except Exception as e:
+            logger.error(f"Failed to create ObjectViewer2D: {e}")
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
+            raise
+        
+        try:
+            logger.info("Creating ObjectViewer3D instance...")
+            self.object_view_3d = ObjectViewer3D(self)
+            logger.info("ObjectViewer3D created successfully")
+            self.object_view_3d.hide()
+            logger.info("ObjectViewer3D hidden")
+        except Exception as e:
+            logger.error(f"Failed to create ObjectViewer3D: {e}")
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
+            raise
+            
         self.object_view = self.object_view_2d
-        self.object_view_3d.hide()
 
         dockable_object_view = False
 

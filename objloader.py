@@ -3,7 +3,7 @@
 import os
 #import pygame
 from OpenGL.GL import *
-from OpenGL import GLUT as glut
+# Removed GLUT import to prevent Windows compatibility issues
 import math
 import numpy as np
 

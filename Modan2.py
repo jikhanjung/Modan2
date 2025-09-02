@@ -1511,12 +1511,28 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.reset_tableView()
     
     def load_dataset(self):
+        logger.info("Starting load_dataset()...")
+        logger.info("Clearing dataset model...")
         self.dataset_model.clear()
         self.selected_dataset = None
+        
+        logger.info("Querying datasets from database...")
         all_record = MdDataset.filter(parent=None)
-        for rec in all_record:
+        record_count = len(list(all_record))
+        logger.info(f"Found {record_count} datasets to load")
+        
+        all_record = MdDataset.filter(parent=None)  # Re-query since we consumed the iterator
+        for i, rec in enumerate(all_record):
+            logger.info(f"Processing dataset {i+1}/{record_count}: {rec.dataset_name}")
+            
+            logger.info(f"Unpacking wireframe for dataset: {rec.dataset_name}")
             rec.unpack_wireframe()
-            item1 = QStandardItem(rec.dataset_name + " (" + str(rec.object_list.count()) + ")")
+            logger.info(f"Wireframe unpacked successfully for: {rec.dataset_name}")
+            
+            object_count = rec.object_list.count()
+            item1 = QStandardItem(rec.dataset_name + " (" + str(object_count) + ")")
+            logger.info(f"Dataset {rec.dataset_name} has {object_count} objects")
+            
             if rec.dimension == 2:
                 item1.setIcon(QIcon(ICON_CONSTANTS['dataset_2d']))
             else:
@@ -1525,12 +1541,22 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             item1.setData(rec)
             
             self.dataset_model.appendRow([item1,item2])
-            if rec.analyses.count() > 0:
+            
+            analysis_count = rec.analyses.count()
+            if analysis_count > 0:
+                logger.info(f"Loading {analysis_count} analyses for dataset: {rec.dataset_name}")
                 self.load_analysis(item1,rec)
-            if rec.children.count() > 0:
+                
+            children_count = rec.children.count()
+            if children_count > 0:
+                logger.info(f"Loading {children_count} subdatasets for: {rec.dataset_name}")
                 self.load_subdataset(item1,item1.data())
+                
+        logger.info("Expanding tree view...")
         self.treeView.expandAll()
+        logger.info("Hiding tree view column 1...")
         self.treeView.hideColumn(1)
+        logger.info("load_dataset() completed successfully")
 
 
     def load_analysis(self, parent_item, dataset):

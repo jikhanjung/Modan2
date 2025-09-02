@@ -271,18 +271,31 @@ def main():
         
         # Create main window
         logger.info("Creating main window...")
-        from Modan2 import ModanMainWindow
-        window = ModanMainWindow(setup.get_config())
-        logger.info("Main window created successfully")
+        try:
+            from Modan2 import ModanMainWindow
+            logger.info("ModanMainWindow class imported successfully")
+            window = ModanMainWindow(setup.get_config())
+            logger.info("Main window created successfully")
+        except Exception as e:
+            logger.error(f"Failed to create main window: {e}")
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
+            raise
         
         if splash:
+            logger.info("Setting splash screen to 'Initializing interface...'")
             splash.setProgress("Initializing interface...")
             app.processEvents()
+            logger.info("Splash screen updated successfully")
         
         # Show main window
-        logger.info("Showing main window...")
+        logger.info("About to show main window...")
         try:
+            logger.info("Calling window.show()...")
             window.show()
+            logger.info("window.show() completed")
+            logger.info("Processing Qt events after window.show()...")
+            app.processEvents()  # Process any pending events
             logger.info("Main window shown successfully")
         except Exception as e:
             logger.error(f"Failed to show main window: {e}")
@@ -292,24 +305,42 @@ def main():
         
         if splash:
             logger.info("Updating splash screen to Ready...")
-            splash.setProgress("Ready!")
-            app.processEvents()
-            logger.info("Scheduling splash screen close...")
-            # Close splash after a short delay
-            from PyQt5.QtCore import QTimer
-            QTimer.singleShot(1000, splash.close)
-            logger.info("Splash screen close scheduled")
+            try:
+                splash.setProgress("Ready!")
+                app.processEvents()
+                logger.info("Splash screen updated to Ready")
+                
+                logger.info("Scheduling splash screen close...")
+                from PyQt5.QtCore import QTimer
+                QTimer.singleShot(1000, splash.close)
+                logger.info("Splash screen close scheduled")
+            except Exception as e:
+                logger.error(f"Error updating splash screen: {e}")
+                # Continue even if splash screen fails
         
         # Apply command line configuration
-        if args.debug:
-            window.statusBar.showMessage("Debug mode enabled")
+        logger.info("Applying command line configuration...")
+        try:
+            if args.debug:
+                window.statusBar.showMessage("Debug mode enabled")
+            logger.info("Command line configuration applied")
+        except Exception as e:
+            logger.error(f"Error applying command line configuration: {e}")
         
-        logger.info("Application started successfully")
+        logger.info("Application startup completed successfully")
+        logger.info("Starting Qt event loop...")
         
         # Run application
-        exit_code = app.exec_()
+        try:
+            exit_code = app.exec_()
+            logger.info(f"Qt event loop exited with code: {exit_code}")
+        except Exception as e:
+            logger.error(f"Qt event loop crashed: {e}")
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
+            return 1
         
-        logger.info(f"Application exited with code: {exit_code}")
+        logger.info(f"Application exited normally with code: {exit_code}")
         return exit_code
         
     except Exception as e:

@@ -1242,6 +1242,34 @@ class ObjectViewer3D(QGLWidget):
         logger.info("=== ObjectViewer3D.__init__ completed successfully ===")
         self.polygon_list = []
         self.comparison_data = {}
+    
+    def show(self):
+        """Override show() to add logging for debugging."""
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info("=== ObjectViewer3D.show() called ===")
+        
+        try:
+            logger.info(f"show: Widget size before show: {self.width()}x{self.height()}")
+            logger.info(f"show: Widget visibility before show: {self.isVisible()}")
+            
+            logger.info("show: Calling parent show()...")
+            super().show()
+            logger.info("show: Parent show() completed")
+            
+            logger.info(f"show: Widget size after show: {self.width()}x{self.height()}")
+            logger.info(f"show: Widget visibility after show: {self.isVisible()}")
+            logger.info("=== ObjectViewer3D.show() completed successfully ===")
+            
+        except Exception as e:
+            logger.error(f"=== ObjectViewer3D.show() CRASHED ===")
+            logger.error(f"Exception type: {type(e).__name__}")
+            logger.error(f"Exception message: {str(e)}")
+            import traceback
+            logger.error("show() traceback:")
+            for line in traceback.format_exc().splitlines():
+                logger.error(f"  {line}")
+            raise
 
         #self.no_drawing = False
         self.wireframe_from_idx = -1
@@ -1739,12 +1767,42 @@ class ObjectViewer3D(QGLWidget):
 
 
     def initializeGL(self):
-        self.initialize_frame_buffer()
-        self.picker_buffer = self.create_picker_buffer()
-        self.initialize_frame_buffer(self.picker_buffer)
-        self.initialized = True
-        if self.initialized == True and self.threed_model is not None and self.threed_model.generated == False:
-            self.threed_model.generate()
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info("=== initializeGL() called ===")
+        
+        try:
+            logger.info("initializeGL: Initializing main frame buffer...")
+            self.initialize_frame_buffer()
+            logger.info("initializeGL: Main frame buffer initialized")
+            
+            logger.info("initializeGL: Creating picker buffer...")
+            self.picker_buffer = self.create_picker_buffer()
+            logger.info(f"initializeGL: Picker buffer created: {self.picker_buffer}")
+            
+            logger.info("initializeGL: Initializing picker frame buffer...")
+            self.initialize_frame_buffer(self.picker_buffer)
+            logger.info("initializeGL: Picker frame buffer initialized")
+            
+            self.initialized = True
+            logger.info("initializeGL: Marked as initialized")
+            
+            if self.initialized == True and self.threed_model is not None and self.threed_model.generated == False:
+                logger.info("initializeGL: Generating 3D model...")
+                self.threed_model.generate()
+                logger.info("initializeGL: 3D model generated")
+            
+            logger.info("=== initializeGL() completed successfully ===")
+            
+        except Exception as e:
+            logger.error(f"=== initializeGL() CRASHED ===")
+            logger.error(f"Exception type: {type(e).__name__}")
+            logger.error(f"Exception message: {str(e)}")
+            import traceback
+            logger.error("initializeGL traceback:")
+            for line in traceback.format_exc().splitlines():
+                logger.error(f"  {line}")
+            raise
 
     def initialize_frame_buffer(self, frame_buffer_id=0):
         # GLU 쿼드릭 초기화 (GLUT 대신)
@@ -1789,22 +1847,48 @@ class ObjectViewer3D(QGLWidget):
         gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, 0)
 
     def paintGL(self):
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"=== paintGL() called - size: {self.width()}x{self.height()} ===")
+        
         # Guard against early paint events when widget has no valid size
         if self.width() <= 0 or self.height() <= 0:
+            logger.info("paintGL: Skipping render due to invalid widget size")
             return  # Skip rendering for invalid/hidden widget sizes
             
-        if self.edit_mode == MODE['WIREFRAME'] or self.edit_mode == MODE['EDIT_LANDMARK']:
-            self.draw_picker_buffer()
-        gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, 0)
+        try:
+            logger.info("paintGL: Checking edit mode for picker buffer...")
+            if self.edit_mode == MODE['WIREFRAME'] or self.edit_mode == MODE['EDIT_LANDMARK']:
+                logger.info("paintGL: Drawing picker buffer...")
+                self.draw_picker_buffer()
+                logger.info("paintGL: Picker buffer drawn successfully")
+            
+            logger.info("paintGL: Binding main framebuffer...")
+            gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, 0)
+            logger.info("paintGL: Main framebuffer bound")
 
-        # Clear landmark positions for this frame
-        if hasattr(self, 'landmark_screen_positions'):
-            self.landmark_screen_positions.clear()
-        
-        gl.glPushMatrix() 
-        self.draw_all()
-        gl.glPopMatrix()
-        return
+            # Clear landmark positions for this frame
+            if hasattr(self, 'landmark_screen_positions'):
+                self.landmark_screen_positions.clear()
+            
+            logger.info("paintGL: Starting main rendering...")
+            gl.glPushMatrix()
+            logger.info("paintGL: Calling draw_all()...")
+            self.draw_all()
+            logger.info("paintGL: draw_all() completed successfully")
+            gl.glPopMatrix()
+            logger.info("=== paintGL() completed successfully ===")
+            return
+            
+        except Exception as e:
+            logger.error(f"=== paintGL() CRASHED ===")
+            logger.error(f"Exception type: {type(e).__name__}")
+            logger.error(f"Exception message: {str(e)}")
+            import traceback
+            logger.error("paintGL traceback:")
+            for line in traceback.format_exc().splitlines():
+                logger.error(f"  {line}")
+            raise
 
     def draw_wireframe_cube(self):
         """Draw a simple wireframe cube to replace GLUT cube."""
@@ -2203,14 +2287,42 @@ class ObjectViewer3D(QGLWidget):
         self.picker_buffer = None
 
     def resizeGL(self, width, height):
-        # Protect against zero height to prevent division by zero
-        height = max(1, height)
-        gl.glViewport(0, 0, width, height)
-        gl.glMatrixMode(gl.GL_PROJECTION)
-        gl.glLoadIdentity()
-        self.aspect = width / float(height)
-        glu.gluPerspective(45.0, self.aspect, 0.1, 100.0)
-        gl.glMatrixMode(gl.GL_MODELVIEW)
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"=== resizeGL() called - size: {width}x{height} ===")
+        
+        try:
+            logger.info(f"resizeGL: Original height: {height}")
+            # Protect against zero height to prevent division by zero
+            height = max(1, height)
+            logger.info(f"resizeGL: Protected height: {height}")
+            
+            logger.info("resizeGL: Setting viewport...")
+            gl.glViewport(0, 0, width, height)
+            logger.info("resizeGL: Viewport set successfully")
+            
+            logger.info("resizeGL: Setting up projection matrix...")
+            gl.glMatrixMode(gl.GL_PROJECTION)
+            gl.glLoadIdentity()
+            self.aspect = width / float(height)
+            logger.info(f"resizeGL: Calculated aspect ratio: {self.aspect}")
+            
+            logger.info("resizeGL: Setting perspective...")
+            glu.gluPerspective(45.0, self.aspect, 0.1, 100.0)
+            logger.info("resizeGL: Perspective set successfully")
+            
+            gl.glMatrixMode(gl.GL_MODELVIEW)
+            logger.info("resizeGL: Switched to modelview matrix")
+            
+        except Exception as e:
+            logger.error(f"=== resizeGL() CRASHED ===")
+            logger.error(f"Exception type: {type(e).__name__}")
+            logger.error(f"Exception message: {str(e)}")
+            import traceback
+            logger.error("resizeGL traceback:")
+            for line in traceback.format_exc().splitlines():
+                logger.error(f"  {line}")
+            raise
 
         if self.picker_buffer is not None and self.edit_mode == WIREFRAME_MODE:
             # Resize the renderbuffer

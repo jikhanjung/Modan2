@@ -1109,18 +1109,49 @@ class ObjectViewer2D(QLabel):
 
 class ObjectViewer3D(QGLWidget):
     def __init__(self, parent=None, transparent=False):
-        if transparent:
-            fmt = QGLFormat()
-            fmt.setAlpha(True)  # Ensure the format includes an alpha channel
-            super(ObjectViewer3D, self).__init__(fmt, parent)
-            self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowTransparentForInput | Qt.Tool)
-            self.setAttribute(Qt.WA_TranslucentBackground)
-            self.setAttribute(Qt.WA_NoSystemBackground, True)
-        else:
-            QGLWidget.__init__(self,parent)
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info("=== ObjectViewer3D.__init__ started ===")
+        
+        logger.info(f"ObjectViewer3D init params - parent: {type(parent) if parent else None}, transparent: {transparent}")
+        
+        try:
+            if transparent:
+                logger.info("ObjectViewer3D: Using transparent mode")
+                logger.info("ObjectViewer3D: Creating QGLFormat...")
+                fmt = QGLFormat()
+                logger.info("ObjectViewer3D: Setting alpha channel...")
+                fmt.setAlpha(True)  # Ensure the format includes an alpha channel
+                logger.info("ObjectViewer3D: Calling super().__init__ with format...")
+                super(ObjectViewer3D, self).__init__(fmt, parent)
+                logger.info("ObjectViewer3D: QGLWidget constructor complete (transparent mode)")
+                
+                logger.info("ObjectViewer3D: Setting window flags...")
+                self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowTransparentForInput | Qt.Tool)
+                logger.info("ObjectViewer3D: Setting attributes...")
+                self.setAttribute(Qt.WA_TranslucentBackground)
+                self.setAttribute(Qt.WA_NoSystemBackground, True)
+                logger.info("ObjectViewer3D: Transparent mode setup complete")
+            else:
+                logger.info("ObjectViewer3D: Using standard mode")
+                logger.info("ObjectViewer3D: Calling QGLWidget.__init__...")
+                QGLWidget.__init__(self,parent)
+                logger.info("ObjectViever3D: QGLWidget constructor complete (standard mode)")
+                
+        except Exception as e:
+            logger.error(f"ObjectViewer3D: QGLWidget construction FAILED: {e}")
+            import traceback
+            logger.error("ObjectViewer3D constructor traceback:")
+            for line in traceback.format_exc().splitlines():
+                logger.error(f"  {line}")
+            raise
+        logger.info("ObjectViewer3D: Setting up member variables...")
         self.transparent = transparent
         self.parent = parent
+        
+        logger.info("ObjectViewer3D: Setting minimum size...")
         self.setMinimumSize(120,90)
+        logger.info("ObjectViewer3D: Setting default colors and sizes...")
         self.landmark_size = 1
         self.landmark_color = "#0000FF"
         self.wireframe_thickness = 1
@@ -1129,18 +1160,30 @@ class ObjectViewer3D(QGLWidget):
         self.index_color = "#FFFFFF"
         self.bgcolor = "#AAAAAA"
         self.arrow_color = "#FFFF00"
-        self.m_app = QApplication.instance()        
+        
+        logger.info("ObjectViewer3D: Getting QApplication instance...")
+        self.m_app = QApplication.instance()
+        logger.info(f"ObjectViewer3D: QApplication instance: {self.m_app}")
+        
+        logger.info("ObjectViewer3D: Reading settings...")
         self.read_settings()
+        logger.info("ObjectViewer3D: Settings read complete")
+        logger.info("ObjectViewer3D: Setting object properties...")
         self.object_name = ""
         self.source_preference = None
         self.target_preference = None
 
+        logger.info("ObjectViewer3D: Configuring widget behavior...")
         self.setAcceptDrops(True)
         self.setMouseTracking(True)
+        logger.info("ObjectViewer3D: Widget behavior configured")
+        logger.info("ObjectViewer3D: Initializing state variables...")
         self.object_dialog = None
         self.ds_ops = None
         self.ds_ops_comp = None
         self.obj_ops = None
+        
+        logger.info("ObjectViewer3D: Setting up transformation variables...")
         self.scale = 1.0
         self.pan_x = 0
         self.pan_y = 0
@@ -1150,6 +1193,8 @@ class ObjectViewer3D(QGLWidget):
         self.rotate_y = 0
         self.temp_rotate_x = 0
         self.temp_rotate_y = 0
+        
+        logger.info("ObjectViewer3D: Setting display flags...")
         self.show_index = False
         self.show_wireframe = True
         self.show_polygon = True
@@ -1158,6 +1203,7 @@ class ObjectViewer3D(QGLWidget):
         self.show_model = True
         self.show_arrow = False
 
+        logger.info("ObjectViewer3D: Setting up interaction variables...")
         self.curr_x = 0
         self.curr_y = 0
         self.down_x = 0
@@ -1169,18 +1215,27 @@ class ObjectViewer3D(QGLWidget):
         self.edit_mode = MODE['NONE']
         self.auto_rotate = False
         self.is_dragging = False
-        #self.setMinimumSize(400,400)
+        
+        logger.info("ObjectViewer3D: Setting up timer...")
         self.timer = QTimer(self)
         self.timer.setInterval(50)
         self.timer.timeout.connect(self.timeout)
+        logger.info("ObjectViewer3D: Starting timer...")
         self.timer.start()
+        logger.info("ObjectViewer3D: Timer started successfully")
+        
+        logger.info("ObjectViewer3D: Setting up rendering variables...")
         self.frustum_args = {'width': 1.0, 'height': 1.0, 'znear': 0.1, 'zfar': 1000.0}
         self.color_to_lm_idx = {}
         self.lm_idx_to_color = {}
+        
+        logger.info("ObjectViewer3D: Finalizing initialization...")
         self.picker_buffer = None
         self.gl_list = None
         self.temp_edge = []
         self.object = None
+        
+        logger.info("=== ObjectViewer3D.__init__ completed successfully ===")
         self.polygon_list = []
         self.comparison_data = {}
 

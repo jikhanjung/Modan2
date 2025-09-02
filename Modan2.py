@@ -208,34 +208,65 @@ class ModanMainWindow(QMainWindow):
         """Get ObjectViewer3D instance, creating it lazily if needed."""
         if self.object_view_3d is None:
             logger = logging.getLogger(__name__)
+            
             try:
-                logger.info("Creating ObjectViewer3D instance (lazy loading)...")
+                logger.info("=== Starting ObjectViewer3D creation (lazy loading) ===")
+                
+                # Step 1: Import check
+                logger.info("Step 1: Importing ObjectViewer3D class...")
                 from ModanComponents import ObjectViewer3D
+                logger.info("Step 1 COMPLETE: ObjectViewer3D class imported successfully")
+                
+                # Step 2: Check OpenGL environment
+                logger.info("Step 2: Checking OpenGL environment...")
+                import os
+                logger.info(f"QT_OPENGL environment: {os.environ.get('QT_OPENGL', 'not set')}")
+                logger.info(f"QT_OPENGL_BACKEND environment: {os.environ.get('QT_OPENGL_BACKEND', 'not set')}")
+                logger.info("Step 2 COMPLETE: Environment checked")
+                
+                # Step 3: Constructor call
+                logger.info("Step 3: Calling ObjectViewer3D constructor...")
+                logger.info(f"Parent object: {type(self)}")
                 self.object_view_3d = ObjectViewer3D(self)
-                self.object_view_3d.hide()  # Start hidden
+                logger.info("Step 3 COMPLETE: ObjectViewer3D constructor finished")
                 
-                # Read settings for the newly created 3D viewer
+                # Step 4: Initial state setup
+                logger.info("Step 4: Setting initial state (hide)...")
+                self.object_view_3d.hide()
+                logger.info("Step 4 COMPLETE: ObjectViewer3D hidden")
+                
+                # Step 5: Settings
+                logger.info("Step 5: Loading settings...")
                 self.object_view_3d.read_settings()
-                logger.info("ObjectViewer3D settings loaded")
+                logger.info("Step 5 COMPLETE: ObjectViewer3D settings loaded")
                 
-                # Add to appropriate layout 
+                # Step 6: Layout integration
+                logger.info("Step 6: Adding to layout...")
                 if hasattr(self, 'viewer_container') and hasattr(self.viewer_container, 'layout'):
-                    # Add to dockable viewer container
+                    logger.info("Step 6a: Adding to dockable viewer container...")
                     self.viewer_container.layout().addWidget(self.object_view_3d)
-                    logger.info("ObjectViewer3D added to dock container layout")
+                    logger.info("Step 6a COMPLETE: Added to dock container layout")
                 elif hasattr(self, 'vsplitter'):
-                    # Add to main vsplitter
+                    logger.info("Step 6b: Adding to main vsplitter...")
                     self.vsplitter.addWidget(self.object_view_3d)
-                    logger.info("ObjectViewer3D added to vsplitter layout")
+                    logger.info("Step 6b COMPLETE: Added to vsplitter layout")
+                else:
+                    logger.info("Step 6: No layout container found, skipping layout addition")
                 
-                logger.info("ObjectViewer3D created successfully (lazy loading)")
+                logger.info("=== ObjectViewer3D creation SUCCESSFUL ===")
+                
             except Exception as e:
-                logger.error(f"Failed to create ObjectViewer3D: {e}")
+                logger.error(f"=== ObjectViewer3D creation FAILED ===")
+                logger.error(f"Exception type: {type(e).__name__}")
+                logger.error(f"Exception message: {str(e)}")
                 import traceback
-                logger.error(f"Traceback: {traceback.format_exc()}")
-                # Create a dummy placeholder to prevent repeated failures
-                self.object_view_3d = None
-                raise
+                logger.error("Full traceback:")
+                for line in traceback.format_exc().splitlines():
+                    logger.error(f"  {line}")
+                
+                logger.warning("Falling back to 2D viewer for 3D datasets")
+                # Fallback to 2D viewer to prevent complete failure
+                return self.object_view_2d
         return self.object_view_3d
 
     def setup_controller_connections(self):
@@ -1373,6 +1404,13 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             else:
                 # Create 3D viewer lazily when needed
                 self.object_view = self.get_object_view_3d()
+                
+                # Check if 3D viewer was actually created or fell back to 2D
+                import sys
+                if getattr(sys, 'frozen', False) and self.object_view == self.object_view_2d:
+                    # Show warning message to user that 3D is not available
+                    self.statusBar.showMessage("3D viewer not available in this build - displaying in 2D mode", 5000)
+                
                 self.object_view_2d.hide()
                 self.object_view.show()
         self.object_model.setHorizontalHeader( header_labels )

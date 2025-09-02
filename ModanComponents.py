@@ -1239,9 +1239,28 @@ class ObjectViewer3D(QGLWidget):
         self.aspect = 1.0  # Safe default aspect ratio
         logger.info("ObjectViewer3D: Set default aspect ratio to 1.0")
         
-        logger.info("=== ObjectViewer3D.__init__ completed successfully ===")
+        logger.info("ObjectViewer3D: Setting up final variables...")
+        self.wireframe_from_idx = -1
+        self.wireframe_to_idx = -1
+        self.selected_landmark_idx = -1
+        self.selected_edge_index = -1
+        self.no_hit_count = 0
+        self.threed_model = None
+        self.cursor_on_vertex = -1
+        self.rotation_matrix = np.array([
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, 1, 0],
+        [0, 0, 0, 1]
+        ])
+        self.initialized = False
+        self.fullpath = None
+        self.edge_list = []
+        self.landmark_list = []
         self.polygon_list = []
         self.comparison_data = {}
+        
+        logger.info("=== ObjectViewer3D.__init__ completed successfully ===")
     
     def show(self):
         """Override show() to add logging for debugging."""
@@ -1270,25 +1289,6 @@ class ObjectViewer3D(QGLWidget):
             for line in traceback.format_exc().splitlines():
                 logger.error(f"  {line}")
             raise
-
-        #self.no_drawing = False
-        self.wireframe_from_idx = -1
-        self.wireframe_to_idx = -1
-        self.selected_landmark_idx = -1
-        self.selected_edge_index = -1
-        self.no_hit_count = 0
-        self.threed_model = None
-        self.cursor_on_vertex = -1
-        self.rotation_matrix = np.array([
-        [1, 0, 0, 0],
-        [0, 1, 0, 0],
-        [0, 0, 1, 0],
-        [0, 0, 0, 1]
-        ])
-        self.initialized = False
-        self.fullpath = None
-        self.edge_list = []
-        self.landmark_list = []
 
     def set_object_name (self, object_name):
         self.object_name = object_name

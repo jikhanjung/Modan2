@@ -8,6 +8,8 @@ AppName=Modan2
 AppVersion={#AppVersion}
 DefaultDirName={commonpf}\PaleoBytes\Modan2
 OutputDir=Output
+; Require admin rights to ensure proper installation
+PrivilegesRequired=admin
 
 OutputBaseFilename=Modan2_v{#AppVersion}_build{#BuildNumber}_Installer
 

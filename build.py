@@ -62,6 +62,31 @@ def run_pyinstaller(args):
             raise FileNotFoundError(f"Expected executable not found: {exe_path}")
         else:
             print(f"Executable created: {exe_path}")
+        
+        # Check for critical Qt files in the build output
+        if "--onedir" in args:
+            base_dir = Path(f"dist/{actual_name}")
+            qt_plugin_paths = [
+                base_dir / "PyQt5" / "Qt" / "plugins" / "platforms",
+                base_dir / "PyQt5" / "Qt" / "plugins" / "imageformats",
+                base_dir / "PyQt5" / "Qt" / "plugins" / "styles"
+            ]
+            
+            for plugin_path in qt_plugin_paths:
+                if plugin_path.exists():
+                    plugin_count = len(list(plugin_path.glob("*.dll")))
+                    print(f"✓ Found {plugin_count} plugins in {plugin_path}")
+                else:
+                    print(f"⚠ Missing plugin directory: {plugin_path}")
+            
+            # Check for critical OpenGL DLLs
+            opengl_dlls = ["d3dcompiler_47.dll", "libEGL.dll", "libGLESv2.dll", "opengl32sw.dll"]
+            for dll in opengl_dlls:
+                dll_path = base_dir / dll
+                if dll_path.exists():
+                    print(f"✓ Found OpenGL DLL: {dll}")
+                else:
+                    print(f"⚠ Missing OpenGL DLL: {dll}")
             
     except subprocess.CalledProcessError as e:
         print(f"PyInstaller failed with exit code {e.returncode}")
@@ -201,6 +226,14 @@ onedir_args = [
     f"--add-data=build_info.json{data_separator}.",
     f"--icon={ICON}",
     "--noconfirm",
+    # Critical Qt plugins and OpenGL DLL inclusion for Windows stability
+    "--collect-all=PyQt5",
+    "--collect-binaries=PyQt5",
+    "--collect-data=PyQt5",
+    "--hidden-import=PyQt5.QtCore",
+    "--hidden-import=PyQt5.QtGui", 
+    "--hidden-import=PyQt5.QtWidgets",
+    "--hidden-import=PyQt5.QtOpenGL",
     "main.py",  # Use main.py instead of Modan2.py for better error handling
 ]
 run_pyinstaller(onedir_args)

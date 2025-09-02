@@ -12,6 +12,19 @@ from pathlib import Path
 # Desktop OpenGL 강제 (ANGLE 방지) - QApplication 생성 전 필수
 os.environ["QT_OPENGL"] = "desktop"
 
+# Additional Qt debugging and stability settings for deployment builds
+if getattr(sys, 'frozen', False):  # Only in PyInstaller builds
+    # Enable Qt plugin debugging in deployed builds
+    os.environ.setdefault("QT_DEBUG_PLUGINS", "0")  # Set to "1" for debugging
+    os.environ.setdefault("QT_FATAL_WARNINGS", "0")  # Set to "1" for debugging
+    # Fallback to software rendering if hardware fails
+    os.environ.setdefault("QT_OPENGL_BACKEND", "desktop")
+    # Ensure Qt finds plugins in bundled app
+    if hasattr(sys, '_MEIPASS'):
+        plugin_path = os.path.join(sys._MEIPASS, "PyQt5", "Qt", "plugins")
+        if os.path.exists(plugin_path):
+            os.environ["QT_PLUGIN_PATH"] = plugin_path
+
 def parse_arguments():
     """Parse command line arguments."""
     from MdUtils import DEFAULT_DB_DIRECTORY

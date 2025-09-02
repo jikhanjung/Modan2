@@ -250,45 +250,157 @@ onefile_args = [
 run_pyinstaller(onefile_args)
 
 # 2. Run PyInstaller (One-Directory Bundle)
-onedir_args = [
-    "--name=Modan2",  # Set executable name to Modan2.exe
-    "--onedir",
-    "--noconsole",
-    f"--add-data=icons/*.png{data_separator}icons",
-    f"--add-data=translations/*.qm{data_separator}translations",
-    f"--add-data=migrations/*{data_separator}migrations",
-    f"--add-data=build_info.json{data_separator}.",
-    f"--icon={ICON}",
-    "--noconfirm",
-    "--hidden-import=PyQt5.QtCore",
-    "--hidden-import=PyQt5.QtGui", 
-    "--hidden-import=PyQt5.QtWidgets",
-    "--hidden-import=PyQt5.QtOpenGL",
-    "main.py",  # Use main.py instead of Modan2.py for better error handling
-]
+# Check if spec file exists and use it for more precise control
+spec_file = Path("Modan2.spec")
+if spec_file.exists() and platform.system() == "Windows":
+    print("Using Modan2.spec file for Windows build...")
+    onedir_args = [
+        "--noconfirm",
+        "--clean",
+        str(spec_file)
+    ]
+else:
+    # Fallback to command-line arguments
+    onedir_args = [
+        "--name=Modan2",  # Set executable name to Modan2.exe
+        "--onedir",
+        "--noconsole",
+        f"--add-data=icons/*.png{data_separator}icons",
+        f"--add-data=translations/*.qm{data_separator}translations",
+        f"--add-data=migrations/*{data_separator}migrations",
+        f"--add-data=build_info.json{data_separator}.",
+        f"--icon={ICON}",
+        "--noconfirm",
+        "--hidden-import=PyQt5.QtCore",
+        "--hidden-import=PyQt5.QtGui", 
+        "--hidden-import=PyQt5.QtWidgets",
+        "--hidden-import=PyQt5.QtOpenGL",
+        "main.py",  # Use main.py instead of Modan2.py for better error handling
+    ]
+    
+    # Platform-specific PyQt5 collection (Windows needs more aggressive collection)
+    if platform.system() == "Windows":
+        onedir_args.extend([
+            # Critical Qt plugins and OpenGL DLL inclusion for Windows stability
+            "--collect-all=PyQt5",
+            "--collect-binaries=PyQt5",
+            "--collect-data=PyQt5",
+            # Explicitly include OpenGL support libraries
+            "--hidden-import=OpenGL",
+            "--hidden-import=OpenGL.GL",
+            "--hidden-import=OpenGL.GLU",
+            # Ensure PyQt5 plugins are included
+            "--copy-metadata=PyQt5",
+            # Include numpy and other scientific libs
+            "--hidden-import=numpy",
+            "--hidden-import=scipy",
+            "--hidden-import=pandas",
+            "--hidden-import=cv2",
+        ])
+    elif platform.system() == "Darwin":  # macOS
+        onedir_args.extend([
+            # More selective collection for macOS to avoid framework conflicts
+            "--collect-binaries=PyQt5.QtCore",
+            "--collect-binaries=PyQt5.QtGui", 
+            "--collect-binaries=PyQt5.QtWidgets",
+            "--collect-binaries=PyQt5.QtOpenGL",
+        ])
+    else:  # Linux
+        onedir_args.extend([
+            # Moderate collection for Linux
+            "--collect-binaries=PyQt5",
+        ])
 
-# Platform-specific PyQt5 collection (Windows needs more aggressive collection)
-if platform.system() == "Windows":
-    onedir_args.extend([
-        # Critical Qt plugins and OpenGL DLL inclusion for Windows stability
-        "--collect-all=PyQt5",
-        "--collect-binaries=PyQt5",
-        "--collect-data=PyQt5",
-    ])
-elif platform.system() == "Darwin":  # macOS
-    onedir_args.extend([
-        # More selective collection for macOS to avoid framework conflicts
-        "--collect-binaries=PyQt5.QtCore",
-        "--collect-binaries=PyQt5.QtGui", 
-        "--collect-binaries=PyQt5.QtWidgets",
-        "--collect-binaries=PyQt5.QtOpenGL",
-    ])
-else:  # Linux
-    onedir_args.extend([
-        # Moderate collection for Linux
-        "--collect-binaries=PyQt5",
-    ])
 run_pyinstaller(onedir_args)
+
+# Verify critical DLLs are included (Windows only)
+if platform.system() == "Windows":
+    print("\n=== Verifying Critical DLLs ===")
+    from pathlib import Path
+    
+    dist_dir = Path("dist/Modan2")
+    
+    # Check for Qt platform plugins
+    qt_plugins = {
+        "platforms/qwindows.dll": "Qt Windows platform plugin",
+        "platforms/qminimal.dll": "Qt minimal platform plugin",
+        "platforms/qoffscreen.dll": "Qt offscreen platform plugin",
+        "styles/qwindowsvistastyle.dll": "Qt Windows Vista style",
+        "imageformats/qico.dll": "Qt ICO image format",
+        "imageformats/qjpeg.dll": "Qt JPEG image format",
+        "imageformats/qpng.dll": "Qt PNG image format",
+    }
+    
+    # Check PyQt5/Qt/plugins directory
+    qt_plugin_base = dist_dir / "PyQt5" / "Qt" / "plugins"
+    if qt_plugin_base.exists():
+        print(f"[OK] Qt plugins directory found: {qt_plugin_base}")
+        for plugin_path, description in qt_plugins.items():
+            full_path = qt_plugin_base / plugin_path
+            if full_path.exists():
+                print(f"  [OK] {description}: {plugin_path}")
+            else:
+                print(f"  [MISSING] {description}: {plugin_path}")
+    else:
+        # Alternative location
+        qt_plugin_base = dist_dir / "PyQt5" / "Qt5" / "plugins"
+        if qt_plugin_base.exists():
+            print(f"[OK] Qt plugins directory found (Qt5): {qt_plugin_base}")
+        else:
+            print(f"[WARNING] Qt plugins directory not found at expected locations")
+    
+    # Check for OpenGL DLLs
+    opengl_dlls = {
+        "opengl32sw.dll": "Software OpenGL renderer",
+        "d3dcompiler_47.dll": "Direct3D compiler",
+        "libEGL.dll": "EGL library",
+        "libGLESv2.dll": "OpenGL ES 2.0 library",
+    }
+    
+    print("\n=== OpenGL DLL Status ===")
+    for dll_name, description in opengl_dlls.items():
+        # Check in main dist directory
+        dll_path = dist_dir / dll_name
+        if dll_path.exists():
+            print(f"[OK] {description}: {dll_name}")
+        else:
+            # Check in PyQt5 directory
+            alt_path = dist_dir / "PyQt5" / "Qt" / "bin" / dll_name
+            if alt_path.exists():
+                print(f"[OK] {description}: PyQt5/Qt/bin/{dll_name}")
+            else:
+                print(f"[WARNING] {description} not found: {dll_name}")
+    
+    # Check for VC++ runtime DLLs
+    vcruntime_dlls = [
+        "vcruntime140.dll",
+        "vcruntime140_1.dll",
+        "msvcp140.dll",
+        "api-ms-win-crt-runtime-l1-1-0.dll",
+    ]
+    
+    print("\n=== VC++ Runtime DLL Status ===")
+    for dll_name in vcruntime_dlls:
+        dll_path = dist_dir / dll_name
+        if dll_path.exists():
+            print(f"[OK] {dll_name}")
+        else:
+            print(f"[INFO] {dll_name} not included (may use system version)")
+    
+    # Check for database support
+    print("\n=== Database Support ===")
+    sqlite_dll = dist_dir / "sqlite3.dll"
+    if sqlite_dll.exists():
+        print(f"[OK] SQLite3 DLL found")
+    else:
+        # Check alternative location
+        sqlite_dll = dist_dir / "_sqlite3.pyd"
+        if sqlite_dll.exists():
+            print(f"[OK] SQLite3 Python extension found")
+        else:
+            print(f"[WARNING] SQLite3 support files not found")
+    
+    print("\n=== Build Verification Complete ===")
 
 # 3. Run Inno Setup Compiler (Optional)
 iss_file = "InnoSetup/Modan2.iss"

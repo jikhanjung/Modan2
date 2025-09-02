@@ -687,9 +687,13 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             logger.error(f"Traceback: {traceback.format_exc()}")
             raise
             
+        logger.info("Setting object_view reference...")
         self.object_view = self.object_view_2d
+        logger.info("Object view reference set")
 
+        logger.info("Checking dockable_object_view setting...")
         dockable_object_view = False
+        logger.info(f"dockable_object_view = {dockable_object_view}")
 
         if dockable_object_view :
             # Create dock widget for the viewer
@@ -712,11 +716,13 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             # Add dock widget to main window
             self.addDockWidget(Qt.RightDockWidgetArea, self.viewer_dock)
 
+        logger.info("Creating table view widgets...")
         self.tableview_widget = QWidget()
         self.tableview_layout = QVBoxLayout()
         self.object_button_widget = QWidget()
         self.object_button_layout = QHBoxLayout()
         self.object_button_widget.setLayout(self.object_button_layout)
+        logger.info("Table view widgets created")
 
         #self.lblSelect = QLabel(self.tr("Select"))
         #self.rbSelectCells = QRadioButton(self.tr("Cells"))
@@ -732,40 +738,59 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         #self.select_layout.addWidget(self.rbSelectRows)
 
 
+        logger.info("Creating button widgets...")
         self.btnSaveChanges = QPushButton(self.tr("Save Changes"))
         self.btnEditObject = QPushButton(self.tr("Edit Object"))
         self.btnAddObject = QPushButton(self.tr("Add Object"))
         self.btnAddProperty = QPushButton(self.tr("Add Variable"))
+        logger.info("Button widgets created")
+        
+        logger.info("Adding buttons to layout...")
         #self.object_button_layout.addWidget(self.select_widget)
         self.object_button_layout.addWidget(self.btnAddObject)
         self.object_button_layout.addWidget(self.btnEditObject)
         self.object_button_layout.addWidget(self.btnAddProperty)
         self.object_button_layout.addWidget(self.btnSaveChanges)
+        logger.info("Buttons added to layout")
 
+        logger.info("Setting up table view layout...")
         self.tableview_layout.addWidget(self.tableView)
         #self.tableview_layout.addWidget(self.object_button_widget)
         self.tableview_widget.setLayout(self.tableview_layout)
+        logger.info("Table view layout set up")
+        
+        logger.info("Connecting button signals...")
         self.btnSaveChanges.clicked.connect(self.on_btnSaveChanges_clicked)
         self.btnAddObject.clicked.connect(self.on_action_new_object_triggered)
         self.btnEditObject.clicked.connect(self.on_tableView_doubleClicked)
         self.btnAddProperty.clicked.connect(self.on_action_add_variable_triggered)
+        logger.info("Button signals connected")
 
+        logger.info("Creating splitters...")
         self.hsplitter = QSplitter(Qt.Horizontal)
         self.vsplitter = QSplitter(Qt.Vertical)
+        logger.info("Splitters created")
 
+        logger.info("Adding widgets to vsplitter...")
         self.vsplitter.addWidget(self.tableview_widget)
         if not dockable_object_view:
             self.vsplitter.addWidget(self.object_view_2d)
             self.vsplitter.addWidget(self.object_view_3d)
+        logger.info("Widgets added to vsplitter")
 
+        logger.info("Adding widgets to hsplitter...")
         #self.treeView = MyTreeView()
         self.hsplitter.addWidget(self.treeView)
         self.hsplitter.addWidget(self.vsplitter)
         self.hsplitter.setSizes([300, 800])
+        logger.info("Widgets added to hsplitter")
+        
+        logger.info("Creating analysis view...")
         self.analysis_view = QWidget()
         self.analysis_view_layout = QVBoxLayout()
         self.analysis_view.setLayout(self.analysis_view_layout)
         self.analysis_info_widget = AnalysisInfoWidget(self)
+        logger.info("Analysis view created")
         self.analysis_view_layout.addWidget(self.analysis_info_widget)
 
         self.btnSaveAnalysis = QPushButton(self.tr("Save"))
@@ -782,16 +807,20 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.analysis_button_widget.setLayout(self.analysis_button_layout)
         self.analysis_view_layout.addWidget(self.analysis_button_widget)
 
-
-
+        logger.info("Setting central widget...")
         self.setCentralWidget(self.hsplitter)
+        logger.info("Central widget set")
 
+        logger.info("Connecting final signals...")
         self.treeView.doubleClicked.connect(self.on_treeView_doubleClicked)
         self.treeView.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.treeView.setContextMenuPolicy(Qt.CustomContextMenu)
 
         self.tableView.doubleClicked.connect(self.on_tableView_doubleClicked)
         self.treeView.customContextMenuRequested.connect(self.open_treeview_menu)
+        logger.info("Final signals connected")
+        
+        logger.info("initUI() completed successfully")
 
     def on_action_cell_selection_triggered(self):
         if self.actionCellSelection.isChecked():

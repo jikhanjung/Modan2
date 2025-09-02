@@ -15,3 +15,6 @@ translations/desktop.ini
 /dist/
 *.spec
 logs/
+
+# Build info file (generated during build)
+build_info.json

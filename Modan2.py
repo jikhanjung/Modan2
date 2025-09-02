@@ -605,10 +605,13 @@ class ModanMainWindow(QMainWindow):
 
     @pyqtSlot() 
     def on_action_about_triggered(self):
-        text = mu.PROGRAM_NAME + " v" + mu.PROGRAM_VERSION + "\n\n"
+        # Show version with build number
+        version_text = f"v{mu.PROGRAM_VERSION} (Build {mu.PROGRAM_BUILD_NUMBER})"
+        
+        text = mu.PROGRAM_NAME + " " + version_text + "\n\n"
         text += "Morphometrics made easy\n\n"
         text += "This software is distributed under the terms of the MIT License.\n\n"
-        text += "© 2023-2024 Jikhan Jung\n"
+        text += mu.PROGRAM_COPYRIGHT + "\n"
 
         QMessageBox.about(self, "About", text)
 

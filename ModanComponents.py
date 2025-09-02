@@ -1186,7 +1186,7 @@ class ObjectViewer3D(QOpenGLWidget):
         self.temp_rotate_y = 0
         
         logger.info("ObjectViewer3D: Setting display flags...")
-        self.show_index = False
+        self.show_index = True  # Enable landmark index display
         self.show_wireframe = True
         self.show_polygon = True
         self.show_baseline = False
@@ -1921,9 +1921,8 @@ class ObjectViewer3D(QOpenGLWidget):
             gl.glClearColor(0.7, 0.7, 0.7, 1.0)  # Light gray background
             gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
             
-            # Clear landmark positions for this frame
-            if hasattr(self, 'landmark_screen_positions'):
-                self.landmark_screen_positions.clear()
+            # Initialize landmark screen positions for this frame
+            self.landmark_screen_positions = []
             
             logger.info("paintGL: Starting main rendering...")
             gl.glPushMatrix()
@@ -1931,6 +1930,13 @@ class ObjectViewer3D(QOpenGLWidget):
             self.draw_all()
             logger.info("paintGL: draw_all() completed successfully")
             gl.glPopMatrix()
+            
+            # Draw landmark indices with QPainter overlay
+            if self.show_index and len(self.landmark_screen_positions) > 0:
+                logger.info("paintGL: Drawing landmark indices with QPainter...")
+                self.draw_landmark_indices_overlay()
+                logger.info("paintGL: Landmark indices drawn")
+            
             logger.info("=== paintGL() completed successfully ===")
             return
             
@@ -1944,6 +1950,36 @@ class ObjectViewer3D(QOpenGLWidget):
                 logger.error(f"  {line}")
             raise
 
+    def draw_landmark_indices_overlay(self):
+        """Draw landmark indices using QPainter overlay for better text quality."""
+        from PyQt5.QtGui import QPainter, QFont, QColor, QPen
+        from PyQt5.QtCore import QPoint
+        
+        painter = QPainter(self)
+        try:
+            # Enable text antialiasing for better quality
+            painter.setRenderHint(QPainter.TextAntialiasing)
+            
+            # Set up font - use a clear, readable font
+            font = QFont("Arial", 10, QFont.Bold)
+            painter.setFont(font)
+            
+            # Set text color - white with black outline for visibility
+            for x, y, index in self.landmark_screen_positions:
+                # Draw black outline first (poor man's text outline)
+                painter.setPen(QPen(QColor(0, 0, 0), 3))
+                for dx in [-1, 0, 1]:
+                    for dy in [-1, 0, 1]:
+                        if dx != 0 or dy != 0:
+                            painter.drawText(QPoint(int(x + dx + 5), int(y + dy - 5)), str(index))
+                
+                # Draw white text on top
+                painter.setPen(QPen(QColor(255, 255, 255), 1))
+                painter.drawText(QPoint(int(x + 5), int(y - 5)), str(index))
+                
+        finally:
+            painter.end()
+    
     def draw_wireframe_cube(self):
         """Draw a simple wireframe cube to replace GLUT cube."""
         gl.glBegin(gl.GL_LINES)
@@ -2216,8 +2252,20 @@ class ObjectViewer3D(QOpenGLWidget):
                 gl.glPopMatrix()
 
                 if self.show_index:
-                    # TODO: Add landmark index display (text or other visual indicator)
-                    pass
+                    # Store landmark position for QPainter overlay
+                    # Get current modelview and projection matrices
+                    modelview = gl.glGetDoublev(gl.GL_MODELVIEW_MATRIX)
+                    projection = gl.glGetDoublev(gl.GL_PROJECTION_MATRIX)
+                    viewport = gl.glGetIntegerv(gl.GL_VIEWPORT)
+                    
+                    # Project 3D landmark to 2D screen coordinates
+                    try:
+                        x, y, z = glu.gluProject(lm[0], lm[1], lm[2], modelview, projection, viewport)
+                        if 0 <= x <= viewport[2] and 0 <= y <= viewport[3]:  # Check if on screen
+                            # Store position with index (1-based for display)
+                            self.landmark_screen_positions.append((x, viewport[3] - y, i + 1))  # Flip Y for Qt coordinates
+                    except:
+                        pass  # Skip if projection fails
 
         elif object.show_landmark:
             

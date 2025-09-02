@@ -1235,6 +1235,10 @@ class ObjectViewer3D(QGLWidget):
         self.temp_edge = []
         self.object = None
         
+        # Initialize aspect ratio with safe default value to prevent paintGL crashes
+        self.aspect = 1.0  # Safe default aspect ratio
+        logger.info("ObjectViewer3D: Set default aspect ratio to 1.0")
+        
         logger.info("=== ObjectViewer3D.__init__ completed successfully ===")
         self.polygon_list = []
         self.comparison_data = {}
@@ -1776,12 +1780,19 @@ class ObjectViewer3D(QGLWidget):
 
         gl.glMatrixMode(gl.GL_PROJECTION)
         gl.glLoadIdentity()
-        aspect_ratio = self.width() / self.height()
-        glu.gluPerspective(45.0,aspect_ratio,0.1, 100.0) # 시야각, 종횡비, 근거리 클리핑, 원거리 클리핑
+        # Calculate and store aspect ratio with zero-height protection
+        h = max(1, self.height())
+        w = max(1, self.width())
+        self.aspect = w / float(h)  # Update self.aspect for draw_all() usage
+        glu.gluPerspective(45.0, self.aspect, 0.1, 100.0) # 시야각, 종횡비, 근거리 클리핑, 원거리 클리핑
         gl.glMatrixMode(gl.GL_MODELVIEW)
         gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, 0)
 
     def paintGL(self):
+        # Guard against early paint events when widget has no valid size
+        if self.width() <= 0 or self.height() <= 0:
+            return  # Skip rendering for invalid/hidden widget sizes
+            
         if self.edit_mode == MODE['WIREFRAME'] or self.edit_mode == MODE['EDIT_LANDMARK']:
             self.draw_picker_buffer()
         gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, 0)
@@ -1831,10 +1842,21 @@ class ObjectViewer3D(QGLWidget):
         gl.glEnd()
 
     def draw_all(self):
+        # Safety check for aspect ratio - prevent crashes on early paint events
+        aspect = getattr(self, "aspect", None)
+        if not aspect or aspect <= 0:
+            # Widget hasn't been properly laid out/resized yet - calculate safe fallback
+            w = max(1, self.width())
+            h = max(1, self.height())
+            aspect = w / float(h)
+            self.aspect = aspect  # Update for next time
+        else:
+            aspect = self.aspect
+            
         current_buffer = gl.glGetIntegerv(gl.GL_FRAMEBUFFER_BINDING)
         gl.glMatrixMode(gl.GL_PROJECTION)
         gl.glLoadIdentity()
-        glu.gluPerspective(45.0, self.aspect, 0.1, 100.0)
+        glu.gluPerspective(45.0, aspect, 0.1, 100.0)
         
         # Ensure lighting is properly set up for each frame
         if current_buffer == 0:  # Only for main render buffer, not picker buffer
@@ -2181,6 +2203,8 @@ class ObjectViewer3D(QGLWidget):
         self.picker_buffer = None
 
     def resizeGL(self, width, height):
+        # Protect against zero height to prevent division by zero
+        height = max(1, height)
         gl.glViewport(0, 0, width, height)
         gl.glMatrixMode(gl.GL_PROJECTION)
         gl.glLoadIdentity()

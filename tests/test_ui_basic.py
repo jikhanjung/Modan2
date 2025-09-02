@@ -77,10 +77,19 @@ class TestMainWindow:
         assert hasattr(main_window, 'object_view_3d')
         
         viewer_2d = main_window.object_view_2d
+        # Note: object_view_3d uses lazy loading, so may be None initially
         viewer_3d = main_window.object_view_3d
         
         assert viewer_2d is not None
-        assert viewer_3d is not None
+        # For 3D viewer: either None (lazy loading) or valid widget
+        if viewer_3d is not None:
+            # If created, should be a valid widget
+            assert hasattr(viewer_3d, 'show')
+        
+        # Test lazy loading by accessing 3D viewer
+        lazy_viewer_3d = main_window.get_object_view_3d()
+        assert lazy_viewer_3d is not None
+        assert hasattr(lazy_viewer_3d, 'show')
     
     def test_status_bar_exists(self, main_window):
         """Test that status bar exists."""

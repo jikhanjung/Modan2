@@ -9,16 +9,18 @@ import argparse
 import logging
 from pathlib import Path
 
-# Desktop OpenGL 강제 (ANGLE 방지) - QApplication 생성 전 필수
-os.environ["QT_OPENGL"] = "desktop"
-
-# Additional Qt debugging and stability settings for deployment builds
+# OpenGL backend configuration - allow fallbacks in deployment builds
 if getattr(sys, 'frozen', False):  # Only in PyInstaller builds
     # Enable Qt plugin debugging in deployed builds
     os.environ.setdefault("QT_DEBUG_PLUGINS", "0")  # Set to "1" for debugging
     os.environ.setdefault("QT_FATAL_WARNINGS", "0")  # Set to "1" for debugging
-    # Fallback to software rendering if hardware fails
-    os.environ.setdefault("QT_OPENGL_BACKEND", "desktop")
+    
+    # Allow OpenGL fallback in deployment - prefer software rendering for stability
+    if "QT_OPENGL" not in os.environ:
+        os.environ["QT_OPENGL"] = "software"  # Use software rendering as fallback
+else:
+    # Development: prefer desktop OpenGL for performance
+    os.environ.setdefault("QT_OPENGL", "desktop")
     # Ensure Qt finds plugins in bundled app
     if hasattr(sys, '_MEIPASS'):
         plugin_path = os.path.join(sys._MEIPASS, "PyQt5", "Qt", "plugins")
@@ -260,14 +262,12 @@ def main():
             raise
         
         if splash:
-            splash.setProgress("Loading configuration...")
-            app.processEvents()
+            splash.setProgress("Loading configuration...", process_events=False)
         
         setup.initialize()
         
         if splash:
-            splash.setProgress("Setting up database...")
-            app.processEvents()
+            splash.setProgress("Setting up database...", process_events=False)
         
         # Create main window
         logger.info("Creating main window...")
@@ -291,9 +291,9 @@ def main():
         if splash:
             logger.info("Setting splash screen to 'Initializing interface...'")
             try:
-                splash.setProgress("Initializing interface...")
-                app.processEvents()
-                logger.info("Splash screen updated successfully")
+                # Reduce event processing during critical window initialization
+                splash.setProgress("Initializing interface...", process_events=False)
+                logger.info("Splash screen updated (no event processing)")
             except Exception as e:
                 logger.error(f"Failed to update splash screen: {e}")
                 # Continue without splash screen updates
@@ -317,9 +317,9 @@ def main():
             # Post-show checks
             logger.info(f"Window visible after show(): {window.isVisible()}")
             
-            logger.info("Processing Qt events after window.show()...")
-            app.processEvents()  # Process any pending events
-            logger.info("Qt events processed")
+            logger.info("Processing Qt events after window.show() (single batch)...")
+            app.processEvents()  # Single event processing after window is shown
+            logger.info("Qt events processed (single batch)")
             
             logger.info("Main window shown successfully")
         except Exception as e:

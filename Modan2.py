@@ -204,6 +204,40 @@ class ModanMainWindow(QMainWindow):
         """Set splash screen reference for progress updates"""
         self.splash = splash
 
+    def get_object_view_3d(self):
+        """Get ObjectViewer3D instance, creating it lazily if needed."""
+        if self.object_view_3d is None:
+            logger = logging.getLogger(__name__)
+            try:
+                logger.info("Creating ObjectViewer3D instance (lazy loading)...")
+                from ModanComponents import ObjectViewer3D
+                self.object_view_3d = ObjectViewer3D(self)
+                self.object_view_3d.hide()  # Start hidden
+                
+                # Read settings for the newly created 3D viewer
+                self.object_view_3d.read_settings()
+                logger.info("ObjectViewer3D settings loaded")
+                
+                # Add to appropriate layout 
+                if hasattr(self, 'viewer_container') and hasattr(self.viewer_container, 'layout'):
+                    # Add to dockable viewer container
+                    self.viewer_container.layout().addWidget(self.object_view_3d)
+                    logger.info("ObjectViewer3D added to dock container layout")
+                elif hasattr(self, 'vsplitter'):
+                    # Add to main vsplitter
+                    self.vsplitter.addWidget(self.object_view_3d)
+                    logger.info("ObjectViewer3D added to vsplitter layout")
+                
+                logger.info("ObjectViewer3D created successfully (lazy loading)")
+            except Exception as e:
+                logger.error(f"Failed to create ObjectViewer3D: {e}")
+                import traceback
+                logger.error(f"Traceback: {traceback.format_exc()}")
+                # Create a dummy placeholder to prevent repeated failures
+                self.object_view_3d = None
+                raise
+        return self.object_view_3d
+
     def setup_controller_connections(self):
         """Setup signal connections with the controller"""
         # Connect controller signals to UI updates
@@ -289,7 +323,7 @@ class ModanMainWindow(QMainWindow):
         size = self.m_app.toolbar_icon_size
         self.set_toolbar_icon_size(size)
         self.object_view_2d.read_settings()
-        self.object_view_3d.read_settings()
+        # 3D viewer settings will be read when it's created (lazy loading)
 
     def set_toolbar_icon_size(self, size):
         if size.lower() == 'small':
@@ -688,17 +722,10 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             logger.error(f"Traceback: {traceback.format_exc()}")
             raise
         
-        try:
-            logger.info("Creating ObjectViewer3D instance...")
-            self.object_view_3d = ObjectViewer3D(self)
-            logger.info("ObjectViewer3D created successfully")
-            self.object_view_3d.hide()
-            logger.info("ObjectViewer3D hidden")
-        except Exception as e:
-            logger.error(f"Failed to create ObjectViewer3D: {e}")
-            import traceback
-            logger.error(f"Traceback: {traceback.format_exc()}")
-            raise
+        # Initialize 3D viewer as None - will be created on first use (lazy loading)
+        logger.info("Setting ObjectViewer3D to lazy loading mode...")
+        self.object_view_3d = None
+        logger.info("ObjectViewer3D set to lazy loading (will create when needed)")
             
         logger.info("Setting object_view reference...")
         self.object_view = self.object_view_2d
@@ -720,7 +747,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             self.viewer_container = QWidget()
             viewer_layout = QVBoxLayout(self.viewer_container)
             viewer_layout.addWidget(self.object_view_2d)
-            viewer_layout.addWidget(self.object_view_3d)
+            # 3D viewer will be added to dock layout when first accessed
             viewer_layout.setContentsMargins(0, 0, 0, 0)
 
             # Set the container as the dock widget's content
@@ -788,7 +815,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.vsplitter.addWidget(self.tableview_widget)
         if not dockable_object_view:
             self.vsplitter.addWidget(self.object_view_2d)
-            self.vsplitter.addWidget(self.object_view_3d)
+            # 3D viewer will be added to layout when first accessed
         logger.info("Widgets added to vsplitter")
 
         logger.info("Adding widgets to hsplitter...")
@@ -1340,11 +1367,14 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             if self.selected_dataset.dimension == 2:
                 self.object_view = self.object_view_2d
                 self.object_view_2d.show()
-                self.object_view_3d.hide()
+                # Hide 3D viewer if it exists
+                if self.object_view_3d is not None:
+                    self.object_view_3d.hide()
             else:
-                self.object_view = self.object_view_3d
+                # Create 3D viewer lazily when needed
+                self.object_view = self.get_object_view_3d()
                 self.object_view_2d.hide()
-                self.object_view_3d.show()
+                self.object_view.show()
         self.object_model.setHorizontalHeader( header_labels )
         self.proxy_model = QSortFilterProxyModel()
         self.proxy_model.setSourceModel(self.object_model)

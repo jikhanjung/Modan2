@@ -125,18 +125,20 @@ class ModanSplashScreen(QSplashScreen):
         # Auto close after duration
         QTimer.singleShot(duration_ms, self.close)
     
-    def setProgress(self, message):
+    def setProgress(self, message, process_events=True):
         """Update progress message.
         
         Args:
             message: Progress message to display
+            process_events: Whether to process Qt events (default: True)
         """
         self.showMessage(
             message, 
             Qt.AlignLeft | Qt.AlignBottom, 
             QColor("#bdc3c7")
         )
-        QApplication.processEvents()
+        if process_events:
+            QApplication.processEvents()
 
 
 def create_splash_screen(image_path=None):

@@ -276,7 +276,7 @@ def main():
         setup.initialize()
         
         if splash:
-            splash.setProgress("Setting up database...", process_events=False)
+            splash.setProgress("Setting up database...", process_events=True)
         
         # Create main window
         logger.info("Creating main window...")
@@ -300,9 +300,9 @@ def main():
         if splash:
             logger.info("Setting splash screen to 'Initializing interface...'")
             try:
-                # Reduce event processing during critical window initialization
-                splash.setProgress("Initializing interface...", process_events=False)
-                logger.info("Splash screen updated (no event processing)")
+                # Allow event processing to keep splash screen updated
+                splash.setProgress("Initializing interface...", process_events=True)
+                logger.info("Splash screen updated (with event processing)")
             except Exception as e:
                 logger.error(f"Failed to update splash screen: {e}")
                 # Continue without splash screen updates

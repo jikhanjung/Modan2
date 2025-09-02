@@ -1656,6 +1656,8 @@ class ObjectViewer3D(QOpenGLWidget):
 
     def set_object(self, object, idx=-1):
         self.show()
+        # Ensure OpenGL context is current for QOpenGLWidget
+        self.makeCurrent()
         self.landmark_list = copy.deepcopy(object.landmark_list)
         m_app = QApplication.instance()
         if isinstance(object, MdObject):
@@ -1703,6 +1705,10 @@ class ObjectViewer3D(QOpenGLWidget):
         elif self.data_mode == DATASET_MODE:
             for obj_ops in self.ds_ops.object_list:
                 obj_ops.align(self.ds_ops.baseline_point_list)
+        
+        # Release OpenGL context and trigger repaint for QOpenGLWidget
+        self.doneCurrent()
+        self.update()
 
     def get_scale_from_object(self, obj_ops):
         if len(obj_ops.landmark_list) == 0:
@@ -2351,6 +2357,7 @@ class ObjectViewer3D(QOpenGLWidget):
         pass
 
     def timeout(self):
+        # Only update if auto-rotate is enabled to prevent unnecessary repaints
         if self.auto_rotate == False:
             return
         if self.is_dragging:

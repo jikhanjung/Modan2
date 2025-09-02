@@ -8,7 +8,7 @@ import logging
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-database_path = os.path.join(mu.DEFAULT_DB_DIRECTORY, 'PhyloForester.db')
+database_path = os.path.join(mu.DEFAULT_DB_DIRECTORY, 'modan2.db')
 gDatabase = SqliteDatabase(database_path,pragmas={'foreign_keys': 1})
 
 def get_timestamp():

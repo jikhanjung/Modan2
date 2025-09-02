@@ -276,6 +276,12 @@ def main():
             logger.info("ModanMainWindow class imported successfully")
             window = ModanMainWindow(setup.get_config())
             logger.info("Main window created successfully")
+            
+            # Check window state immediately after creation
+            logger.info(f"Window visibility: {window.isVisible()}")
+            logger.info(f"Window size: {window.size()}")
+            logger.info(f"Window position: {window.pos()}")
+            
         except Exception as e:
             logger.error(f"Failed to create main window: {e}")
             import traceback
@@ -284,18 +290,37 @@ def main():
         
         if splash:
             logger.info("Setting splash screen to 'Initializing interface...'")
-            splash.setProgress("Initializing interface...")
-            app.processEvents()
-            logger.info("Splash screen updated successfully")
+            try:
+                splash.setProgress("Initializing interface...")
+                app.processEvents()
+                logger.info("Splash screen updated successfully")
+            except Exception as e:
+                logger.error(f"Failed to update splash screen: {e}")
+                # Continue without splash screen updates
         
         # Show main window
         logger.info("About to show main window...")
         try:
+            # Pre-show checks
+            logger.info("Checking window validity before show()...")
+            if window is None:
+                logger.error("Window is None!")
+                raise RuntimeError("Window object is None")
+            
+            logger.info(f"Window object type: {type(window)}")
+            logger.info(f"Window is widget: {window.isWidgetType()}")
+            
             logger.info("Calling window.show()...")
             window.show()
             logger.info("window.show() completed")
+            
+            # Post-show checks
+            logger.info(f"Window visible after show(): {window.isVisible()}")
+            
             logger.info("Processing Qt events after window.show()...")
             app.processEvents()  # Process any pending events
+            logger.info("Qt events processed")
+            
             logger.info("Main window shown successfully")
         except Exception as e:
             logger.error(f"Failed to show main window: {e}")

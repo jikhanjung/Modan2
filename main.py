@@ -17,9 +17,10 @@ if getattr(sys, 'frozen', False):  # Only in PyInstaller builds
     
     # Allow OpenGL fallback in deployment
     if "QT_OPENGL" not in os.environ:
-        # Try desktop OpenGL first, it works better with QOpenGLWidget
-        # Users can override with QT_OPENGL environment variable if needed
-        os.environ["QT_OPENGL"] = "desktop"
+        # Use ANGLE for better compatibility across different systems
+        # ANGLE provides DirectX-based OpenGL ES implementation on Windows
+        # Users can override with QT_OPENGL environment variable if needed (desktop/software/angle)
+        os.environ["QT_OPENGL"] = "angle"
 else:
     # Development: don't force any backend, let Qt choose
     # This allows testing different backends with environment variables

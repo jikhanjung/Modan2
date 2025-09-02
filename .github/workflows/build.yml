@@ -29,6 +29,11 @@ jobs:
         pip install -r requirements.txt
         pip install pyinstaller
     
+    - name: Run OpenGL smoke test
+      run: |
+        python test_opengl_smoke.py
+      continue-on-error: true
+    
     - name: Build Windows executable
       run: |
         python build.py
@@ -85,6 +90,11 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pyinstaller
+    
+    - name: Run OpenGL smoke test
+      run: |
+        python test_opengl_smoke.py
+      continue-on-error: true
     
     - name: Build macOS application
       run: |
@@ -149,6 +159,11 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pyinstaller
+    
+    - name: Run OpenGL smoke test
+      run: |
+        python test_opengl_smoke.py
+      continue-on-error: true
     
     - name: Build Linux executable
       run: |

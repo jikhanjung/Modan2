@@ -1795,6 +1795,27 @@ class ObjectViewer3D(QOpenGLWidget):
         logger.info("=== initializeGL() called ===")
         
         try:
+            # Log OpenGL info (only once)
+            from PyQt5.QtGui import QOpenGLContext
+            v  = gl.glGetString(gl.GL_VERSION)    or b""
+            vr = gl.glGetString(gl.GL_RENDERER)   or b""
+            vd = gl.glGetString(gl.GL_VENDOR)     or b""
+            fmt = QOpenGLContext.currentContext().format() if QOpenGLContext.currentContext() else None
+            
+            if fmt:
+                logger.info(
+                    "OpenGL init | VER=%s | RENDERER=%s | VENDOR=%s | fmt=%s.%s %s depth=%d stencil=%d samples=%d",
+                    v.decode(errors="ignore"), vr.decode(errors="ignore"), vd.decode(errors="ignore"),
+                    fmt.majorVersion(), fmt.minorVersion(),
+                    "Core" if fmt.profile()==fmt.CoreProfile else "Compat",
+                    fmt.depthBufferSize(), fmt.stencilBufferSize(), fmt.samples()
+                )
+            else:
+                logger.info(
+                    "OpenGL init | VER=%s | RENDERER=%s | VENDOR=%s | No format info available",
+                    v.decode(errors="ignore"), vr.decode(errors="ignore"), vd.decode(errors="ignore")
+                )
+            
             logger.info("initializeGL: Initializing main frame buffer...")
             self.initialize_frame_buffer()
             logger.info("initializeGL: Main frame buffer initialized")
@@ -2325,10 +2346,11 @@ class ObjectViewer3D(QOpenGLWidget):
         logger.info(f"=== resizeGL() called - size: {width}x{height} ===")
         
         try:
-            logger.info(f"resizeGL: Original height: {height}")
-            # Protect against zero height to prevent division by zero
+            logger.info(f"resizeGL: Original dimensions: {width}x{height}")
+            # Protect against zero width/height to prevent division by zero
+            width = max(1, width)
             height = max(1, height)
-            logger.info(f"resizeGL: Protected height: {height}")
+            logger.info(f"resizeGL: Protected dimensions: {width}x{height}")
             
             logger.info("resizeGL: Setting viewport...")
             gl.glViewport(0, 0, width, height)

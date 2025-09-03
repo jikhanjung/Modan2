@@ -11,8 +11,8 @@ import pytest
 import tempfile
 from pathlib import Path
 from unittest.mock import Mock, patch
-from PyQt5.QtWidgets import QApplication, QMessageBox
-from PyQt5.QtCore import QTimer, QPoint
+from PyQt6.QtWidgets import QApplication, QMessageBox
+from PyQt6.QtCore import QTimer, QPoint
 import MdModel
 from ModanDialogs import ImportDatasetDialog
 from ModanComponents import TPS
@@ -84,7 +84,7 @@ class TestImportDatasetDialog:
         mock_app = Mock()
         mock_app.settings = mock_settings
         
-        with patch('PyQt5.QtWidgets.QApplication.instance', return_value=mock_app):
+        with patch('PyQt6.QtWidgets.QApplication.instance', return_value=mock_app):
             dialog = ImportDatasetDialog(parent=mock_parent)
             qtbot.addWidget(dialog)
             
@@ -113,7 +113,7 @@ class TestImportDatasetDialog:
         mock_app = Mock()
         mock_app.settings = mock_settings
         
-        with patch('PyQt5.QtWidgets.QApplication.instance', return_value=mock_app):
+        with patch('PyQt6.QtWidgets.QApplication.instance', return_value=mock_app):
             dialog = ImportDatasetDialog(parent=mock_parent)
             qtbot.addWidget(dialog)
             
@@ -173,7 +173,7 @@ class TestTpsImport:
         mock_app = Mock()
         mock_app.settings = mock_settings
         
-        with patch('PyQt5.QtWidgets.QApplication.instance', return_value=mock_app):
+        with patch('PyQt6.QtWidgets.QApplication.instance', return_value=mock_app):
             dialog = ImportDatasetDialog(parent=mock_parent)
             qtbot.addWidget(dialog)
             
@@ -286,8 +286,8 @@ class TestImportWithMessageBoxHandling:
         timer = self.setup_auto_click_messagebox()
         
         try:
-            with patch('PyQt5.QtWidgets.QApplication.instance', return_value=mock_app), \
-                 patch('PyQt5.QtWidgets.QMessageBox.exec_', return_value=1):  # Suppress import completion messagebox
+            with patch('PyQt6.QtWidgets.QApplication.instance', return_value=mock_app), \
+                 patch('PyQt6.QtWidgets.QMessageBox.exec_', return_value=1):  # Suppress import completion messagebox
                 dialog = ImportDatasetDialog(parent=mock_parent)
                 qtbot.addWidget(dialog)
                 
@@ -335,8 +335,8 @@ class TestImportWithMessageBoxHandling:
         timer = self.setup_auto_click_messagebox()
         
         try:
-            with patch('PyQt5.QtWidgets.QApplication.instance', return_value=mock_app), \
-                 patch('PyQt5.QtWidgets.QMessageBox.exec_', return_value=1):  # Suppress import completion messagebox
+            with patch('PyQt6.QtWidgets.QApplication.instance', return_value=mock_app), \
+                 patch('PyQt6.QtWidgets.QMessageBox.exec_', return_value=1):  # Suppress import completion messagebox
                 dialog = ImportDatasetDialog(parent=mock_parent)
                 qtbot.addWidget(dialog)
                 
@@ -389,7 +389,7 @@ class TestImportEdgeCases:
         mock_app = Mock()
         mock_app.settings = mock_settings
         
-        with patch('PyQt5.QtWidgets.QApplication.instance', return_value=mock_app):
+        with patch('PyQt6.QtWidgets.QApplication.instance', return_value=mock_app):
             dialog = ImportDatasetDialog(parent=mock_parent)
             qtbot.addWidget(dialog)
             
@@ -428,7 +428,7 @@ class TestImportEdgeCases:
         mock_app = Mock()
         mock_app.settings = mock_settings
         
-        with patch('PyQt5.QtWidgets.QApplication.instance', return_value=mock_app):
+        with patch('PyQt6.QtWidgets.QApplication.instance', return_value=mock_app):
             dialog = ImportDatasetDialog(parent=mock_parent)
             qtbot.addWidget(dialog)
             

@@ -5,9 +5,9 @@ Test context menu functionality
 
 import sys
 import logging
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget
-from PyQt5.QtCore import Qt, QPoint
-from PyQt5.QtGui import QStandardItemModel, QStandardItem
+from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget
+from PyQt6.QtCore import Qt, QPoint
+from PyQt6.QtGui import QStandardItemModel, QStandardItem
 
 # Setup logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -53,7 +53,7 @@ class ContextMenuTest(QMainWindow):
         print("Right-click on the table to show context menu")
         
         # Test programmatic context menu
-        from PyQt5.QtWidgets import QPushButton
+        from PyQt6.QtWidgets import QPushButton
         test_btn = QPushButton("Test Context Menu Programmatically")
         test_btn.clicked.connect(self.test_context_menu)
         layout.addWidget(test_btn)
@@ -77,7 +77,7 @@ def main():
     window = ContextMenuTest()
     window.show()
     
-    return app.exec_()
+    return app.exec()
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -20,7 +20,7 @@ def get_version():
 # Dependencies are automatically detected, but it might need fine tuning.
 build_exe_options = {
     "excludes": ["tkinter", "unittest"],
-    "zip_include_packages": ["encodings", "PyQt5"],
+    "zip_include_packages": ["encodings", "PyQt6"],
 }
 
 # base="Win32GUI" should be used only for Windows GUI app

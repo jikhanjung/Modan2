@@ -70,9 +70,9 @@ def run_pyinstaller(args):
             
             if platform.system() == "Windows":
                 qt_plugin_paths = [
-                    base_dir / "PyQt5" / "Qt" / "plugins" / "platforms",
-                    base_dir / "PyQt5" / "Qt" / "plugins" / "imageformats",
-                    base_dir / "PyQt5" / "Qt" / "plugins" / "styles"
+                    base_dir / "PyQt6" / "Qt" / "plugins" / "platforms",
+                    base_dir / "PyQt6" / "Qt" / "plugins" / "imageformats",
+                    base_dir / "PyQt6" / "Qt" / "plugins" / "styles"
                 ]
                 
                 for plugin_path in qt_plugin_paths:
@@ -92,10 +92,10 @@ def run_pyinstaller(args):
                         print(f"[WARN] Missing OpenGL DLL: {dll}")
                         
             elif platform.system() == "Darwin":  # macOS
-                # Check for PyQt5 frameworks/dylibs
+                # Check for PyQt6 frameworks/dylibs
                 qt_lib_paths = [
-                    base_dir / "_internal" / "PyQt5",
-                    base_dir / "PyQt5"
+                    base_dir / "_internal" / "PyQt6",
+                    base_dir / "PyQt6"
                 ]
                 
                 for qt_path in qt_lib_paths:
@@ -105,13 +105,13 @@ def run_pyinstaller(args):
                         print(f"[OK] Found {dylib_count} dylibs and {so_count} shared objects in {qt_path}")
                         break
                 else:
-                    print(f"[WARN] Missing PyQt5 libraries in macOS bundle")
+                    print(f"[WARN] Missing PyQt6 libraries in macOS bundle")
                     
             else:  # Linux  
-                # Check for PyQt5 shared libraries
+                # Check for PyQt6 shared libraries
                 qt_lib_paths = [
-                    base_dir / "_internal" / "PyQt5",
-                    base_dir / "PyQt5"
+                    base_dir / "_internal" / "PyQt6",
+                    base_dir / "PyQt6"
                 ]
                 
                 for qt_path in qt_lib_paths:
@@ -120,7 +120,7 @@ def run_pyinstaller(args):
                         print(f"[OK] Found {so_count} shared objects in {qt_path}")
                         break
                 else:
-                    print(f"[WARN] Missing PyQt5 libraries in Linux bundle")
+                    print(f"[WARN] Missing PyQt6 libraries in Linux bundle")
             
     except subprocess.CalledProcessError as e:
         print(f"PyInstaller failed with exit code {e.returncode}")
@@ -271,26 +271,26 @@ else:
         f"--add-data=build_info.json{data_separator}.",
         f"--icon={ICON}",
         "--noconfirm",
-        "--hidden-import=PyQt5.QtCore",
-        "--hidden-import=PyQt5.QtGui", 
-        "--hidden-import=PyQt5.QtWidgets",
-        "--hidden-import=PyQt5.QtOpenGL",
+        "--hidden-import=PyQt6.QtCore",
+        "--hidden-import=PyQt6.QtGui", 
+        "--hidden-import=PyQt6.QtWidgets",
+        "--hidden-import=PyQt6.QtOpenGL",
         "main.py",  # Use main.py instead of Modan2.py for better error handling
     ]
     
-    # Platform-specific PyQt5 collection (Windows needs more aggressive collection)
+    # Platform-specific PyQt6 collection (Windows needs more aggressive collection)
     if platform.system() == "Windows":
         onedir_args.extend([
             # Critical Qt plugins and OpenGL DLL inclusion for Windows stability
-            "--collect-all=PyQt5",
-            "--collect-binaries=PyQt5",
-            "--collect-data=PyQt5",
+            "--collect-all=PyQt6",
+            "--collect-binaries=PyQt6",
+            "--collect-data=PyQt6",
             # Explicitly include OpenGL support libraries
             "--hidden-import=OpenGL",
             "--hidden-import=OpenGL.GL",
             "--hidden-import=OpenGL.GLU",
-            # Ensure PyQt5 plugins are included
-            "--copy-metadata=PyQt5",
+            # Ensure PyQt6 plugins are included
+            "--copy-metadata=PyQt6",
             # Include numpy and other scientific libs
             "--hidden-import=numpy",
             "--hidden-import=scipy",
@@ -300,15 +300,15 @@ else:
     elif platform.system() == "Darwin":  # macOS
         onedir_args.extend([
             # More selective collection for macOS to avoid framework conflicts
-            "--collect-binaries=PyQt5.QtCore",
-            "--collect-binaries=PyQt5.QtGui", 
-            "--collect-binaries=PyQt5.QtWidgets",
-            "--collect-binaries=PyQt5.QtOpenGL",
+            "--collect-binaries=PyQt6.QtCore",
+            "--collect-binaries=PyQt6.QtGui", 
+            "--collect-binaries=PyQt6.QtWidgets",
+            "--collect-binaries=PyQt6.QtOpenGL",
         ])
     else:  # Linux
         onedir_args.extend([
             # Moderate collection for Linux
-            "--collect-binaries=PyQt5",
+            "--collect-binaries=PyQt6",
         ])
 
 run_pyinstaller(onedir_args)
@@ -331,8 +331,8 @@ if platform.system() == "Windows":
         "imageformats/qpng.dll": "Qt PNG image format",
     }
     
-    # Check PyQt5/Qt/plugins directory
-    qt_plugin_base = dist_dir / "PyQt5" / "Qt" / "plugins"
+    # Check PyQt6/Qt/plugins directory
+    qt_plugin_base = dist_dir / "PyQt6" / "Qt" / "plugins"
     if qt_plugin_base.exists():
         print(f"[OK] Qt plugins directory found: {qt_plugin_base}")
         for plugin_path, description in qt_plugins.items():
@@ -343,7 +343,7 @@ if platform.system() == "Windows":
                 print(f"  [MISSING] {description}: {plugin_path}")
     else:
         # Alternative location
-        qt_plugin_base = dist_dir / "PyQt5" / "Qt5" / "plugins"
+        qt_plugin_base = dist_dir / "PyQt6" / "Qt5" / "plugins"
         if qt_plugin_base.exists():
             print(f"[OK] Qt plugins directory found (Qt5): {qt_plugin_base}")
         else:
@@ -364,10 +364,10 @@ if platform.system() == "Windows":
         if dll_path.exists():
             print(f"[OK] {description}: {dll_name}")
         else:
-            # Check in PyQt5 directory
-            alt_path = dist_dir / "PyQt5" / "Qt" / "bin" / dll_name
+            # Check in PyQt6 directory
+            alt_path = dist_dir / "PyQt6" / "Qt" / "bin" / dll_name
             if alt_path.exists():
-                print(f"[OK] {description}: PyQt5/Qt/bin/{dll_name}")
+                print(f"[OK] {description}: PyQt6/Qt/bin/{dll_name}")
             else:
                 print(f"[WARNING] {description} not found: {dll_name}")
     

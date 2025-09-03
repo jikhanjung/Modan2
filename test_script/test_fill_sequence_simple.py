@@ -5,9 +5,9 @@ Simple test for fill_sequence functionality with logging
 
 import sys
 import logging
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPushButton
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QStandardItemModel, QStandardItem
+from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPushButton
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QStandardItemModel, QStandardItem
 
 # Setup logging first
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -45,7 +45,7 @@ class SimpleTestWindow(QMainWindow):
         layout.addWidget(self.table)
         
         # Add instruction label
-        from PyQt5.QtWidgets import QLabel
+        from PyQt6.QtWidgets import QLabel
         instruction = QLabel("""
         Instructions:
         1. Select multiple cells in the 'Sequence' column (column 2)
@@ -94,7 +94,7 @@ def main():
     window = SimpleTestWindow()
     window.show()
     
-    return app.exec_()
+    return app.exec()
 
 if __name__ == "__main__":
     sys.exit(main())

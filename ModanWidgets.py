@@ -5,9 +5,9 @@ Reusable UI components separated from the main window.
 import logging
 from typing import List, Optional, Dict, Any, Tuple
 from pathlib import Path
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
 
 import MdModel
 
@@ -31,7 +31,7 @@ class DatasetTreeWidget(QTreeWidget):
     def _setup_ui(self):
         """Setup tree widget UI."""
         self.setHeaderLabels(['Name', 'Objects', 'Type', 'Created'])
-        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.setSelectionMode(QAbstractItemView.SingleSelection)
         self.setAlternatingRowColors(True)
         self.setRootIsDecorated(True)
@@ -64,8 +64,8 @@ class DatasetTreeWidget(QTreeWidget):
         item.setText(1, str(dataset.object_list.count()))
         item.setText(2, f"{dataset.dimension}D")
         item.setText(3, dataset.created_at.strftime("%Y-%m-%d"))
-        item.setData(0, Qt.UserRole, dataset)
-        item.setData(0, Qt.UserRole + 1, 'dataset')  # Type indicator
+        item.setData(0, Qt.ItemDataRole.UserRole, dataset)
+        item.setData(0, Qt.ItemDataRole.UserRole + 1, 'dataset')  # Type indicator
         
         # Set icon
         icon_name = 'M2Dataset2D_3.png' if dataset.dimension == 2 else 'M2Dataset3D_4.png'
@@ -101,8 +101,8 @@ class DatasetTreeWidget(QTreeWidget):
         item.setText(1, "-")
         item.setText(2, "Analysis")
         item.setText(3, analysis.created_at.strftime("%Y-%m-%d %H:%M"))
-        item.setData(0, Qt.UserRole, analysis)
-        item.setData(0, Qt.UserRole + 1, 'analysis')  # Type indicator
+        item.setData(0, Qt.ItemDataRole.UserRole, analysis)
+        item.setData(0, Qt.ItemDataRole.UserRole + 1, 'analysis')  # Type indicator
         
         # Set icon
         icon_path = Path(__file__).parent / 'icons' / 'M2Analysis_1.png'
@@ -123,7 +123,7 @@ class DatasetTreeWidget(QTreeWidget):
         """
         for i in range(self.topLevelItemCount()):
             item = self.topLevelItem(i)
-            dataset = item.data(0, Qt.UserRole)
+            dataset = item.data(0, Qt.ItemDataRole.UserRole)
             
             if dataset and dataset.id == dataset_id:
                 self.takeTopLevelItem(i)
@@ -137,7 +137,7 @@ class DatasetTreeWidget(QTreeWidget):
         """
         for i in range(self.topLevelItemCount()):
             item = self.topLevelItem(i)
-            item_dataset = item.data(0, Qt.UserRole)
+            item_dataset = item.data(0, Qt.ItemDataRole.UserRole)
             
             if item_dataset and item_dataset.id == dataset.id:
                 # Update object count
@@ -154,8 +154,8 @@ class DatasetTreeWidget(QTreeWidget):
         items = self.selectedItems()
         if items:
             item = items[0]
-            data = item.data(0, Qt.UserRole)
-            item_type = item.data(0, Qt.UserRole + 1)
+            data = item.data(0, Qt.ItemDataRole.UserRole)
+            item_type = item.data(0, Qt.ItemDataRole.UserRole + 1)
             
             self.logger.info(f"Selection changed: item_type={item_type}, data={data}")
             
@@ -176,8 +176,8 @@ class DatasetTreeWidget(QTreeWidget):
         if not item:
             return
         
-        data = item.data(0, Qt.UserRole)
-        item_type = item.data(0, Qt.UserRole + 1)
+        data = item.data(0, Qt.ItemDataRole.UserRole)
+        item_type = item.data(0, Qt.ItemDataRole.UserRole + 1)
         
         if item_type == 'dataset':
             self.dataset_context_menu.emit(data, self.mapToGlobal(position))
@@ -191,8 +191,8 @@ class DatasetTreeWidget(QTreeWidget):
             item: Clicked item
             column: Clicked column
         """
-        data = item.data(0, Qt.UserRole)
-        item_type = item.data(0, Qt.UserRole + 1)
+        data = item.data(0, Qt.ItemDataRole.UserRole)
+        item_type = item.data(0, Qt.ItemDataRole.UserRole + 1)
         
         if item_type == 'analysis':
             # Double-click on analysis shows results
@@ -218,10 +218,10 @@ class ObjectTableWidget(QTableWidget):
     def _setup_ui(self):
         """Setup table widget UI."""
         self.setAlternatingRowColors(True)
-        self.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.setSortingEnabled(True)
-        self.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.setGridStyle(Qt.SolidLine)
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.setGridStyle(Qt.PenStyle.SolidLine)
         
         # Column setup
         self.setColumnCount(6)
@@ -240,8 +240,8 @@ class ObjectTableWidget(QTableWidget):
     def _setup_drag_drop(self):
         """Setup drag and drop functionality."""
         self.setAcceptDrops(True)
-        self.setDragDropMode(QAbstractItemView.DropOnly)
-        self.setDefaultDropAction(Qt.CopyAction)
+        self.setDragDropMode(QAbstractItemView.DragDropMode.DropOnly)
+        self.setDefaultDropAction(Qt.DropAction.CopyAction)
     
     def _setup_connections(self):
         """Setup signal connections."""
@@ -260,7 +260,7 @@ class ObjectTableWidget(QTableWidget):
         
         # Name
         name_item = QTableWidgetItem(obj.object_name)
-        name_item.setData(Qt.UserRole, obj)
+        name_item.setData(Qt.ItemDataRole.UserRole, obj)
         self.setItem(row, 0, name_item)
         
         # Type
@@ -271,24 +271,24 @@ class ObjectTableWidget(QTableWidget):
         # Landmarks
         landmark_count = len(obj.landmarks) if obj.landmarks else 0
         landmarks_item = QTableWidgetItem(str(landmark_count))
-        landmarks_item.setTextAlignment(Qt.AlignCenter)
+        landmarks_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setItem(row, 2, landmarks_item)
         
         # Size
         size_text = self._get_object_size(obj)
         size_item = QTableWidgetItem(size_text)
-        size_item.setTextAlignment(Qt.AlignRight)
+        size_item.setTextAlignment(Qt.AlignmentFlag.AlignRight)
         self.setItem(row, 3, size_item)
         
         # Modified time
         modified_item = QTableWidgetItem(obj.modified_at.strftime("%Y-%m-%d %H:%M"))
-        modified_item.setTextAlignment(Qt.AlignCenter)
+        modified_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setItem(row, 4, modified_item)
         
         # Status
         status_text = self._get_object_status(obj)
         status_item = QTableWidgetItem(status_text)
-        status_item.setTextAlignment(Qt.AlignCenter)
+        status_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setItem(row, 5, status_item)
         
         # Set row colors based on status
@@ -376,7 +376,7 @@ class ObjectTableWidget(QTableWidget):
         """
         for row in range(self.rowCount()):
             item = self.item(row, 0)
-            if item and item.data(Qt.UserRole) == obj:
+            if item and item.data(Qt.ItemDataRole.UserRole) == obj:
                 # Update all columns
                 item.setText(obj.object_name)
                 self.item(row, 1).setText(self._get_object_type(obj))
@@ -397,7 +397,7 @@ class ObjectTableWidget(QTableWidget):
         """
         for row in range(self.rowCount()):
             item = self.item(row, 0)
-            obj = item.data(Qt.UserRole) if item else None
+            obj = item.data(Qt.ItemDataRole.UserRole) if item else None
             
             if obj and obj.id == object_id:
                 self.removeRow(row)
@@ -417,7 +417,7 @@ class ObjectTableWidget(QTableWidget):
         if current_row >= 0:
             item = self.item(current_row, 0)
             if item:
-                return item.data(Qt.UserRole)
+                return item.data(Qt.ItemDataRole.UserRole)
         return None
     
     def _on_selection_changed(self):
@@ -434,7 +434,7 @@ class ObjectTableWidget(QTableWidget):
         """
         item = self.itemAt(position)
         if item:
-            obj = item.data(Qt.UserRole)
+            obj = item.data(Qt.ItemDataRole.UserRole)
             if obj:
                 self.object_context_menu.emit(obj, self.mapToGlobal(position))
     
@@ -448,7 +448,7 @@ class ObjectTableWidget(QTableWidget):
         if column == 0:  # Name column
             item = self.item(row, 0)
             if item:
-                obj = item.data(Qt.UserRole)
+                obj = item.data(Qt.ItemDataRole.UserRole)
                 if obj:
                     self.object_selected.emit(obj)
     
@@ -572,7 +572,7 @@ class LandmarkViewer2D(QWidget):
             painter.setPen(QColor(128, 128, 128))
             painter.drawText(
                 self.rect(), 
-                Qt.AlignCenter, 
+                Qt.AlignmentFlag.AlignCenter, 
                 "No landmarks to display\\nDrop files here to import"
             )
             return
@@ -670,11 +670,11 @@ class LandmarkViewer2D(QWidget):
             
             # Draw number slightly offset from point
             text_rect = QRectF(pt.x() + 5, pt.y() - 15, 20, 15)
-            painter.drawText(text_rect, Qt.AlignCenter, str(i + 1))
+            painter.drawText(text_rect, Qt.AlignmentFlag.AlignCenter, str(i + 1))
     
     def mousePressEvent(self, event):
         """Handle mouse press."""
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
             # Find closest landmark
             pos = event.pos()
             closest_idx = self._find_closest_landmark(pos)
@@ -738,7 +738,7 @@ class LandmarkViewer2D(QWidget):
             row = selected_items[0].row()
             item = self.item(row, 0)
             if item:
-                obj = item.data(Qt.UserRole)
+                obj = item.data(Qt.ItemDataRole.UserRole)
                 if obj:
                     self.object_selected.emit(obj)
     
@@ -750,7 +750,7 @@ class LandmarkViewer2D(QWidget):
         """
         item = self.itemAt(position)
         if item:
-            obj = item.data(Qt.UserRole)
+            obj = item.data(Qt.ItemDataRole.UserRole)
             if obj:
                 self.object_context_menu.emit(obj, self.mapToGlobal(position))
 
@@ -917,7 +917,7 @@ class AnalysisResultWidget(QWidget):
             
             for j, score in enumerate(score_row):
                 item = QTableWidgetItem(f"{score:.4f}")
-                item.setTextAlignment(Qt.AlignRight)
+                item.setTextAlignment(Qt.AlignmentFlag.AlignRight)
                 self.data_table.setItem(i, j + 1, item)
     
     def _populate_cva_table(self, results: Dict[str, Any]):
@@ -945,7 +945,7 @@ class AnalysisResultWidget(QWidget):
             
             for j, cv_value in enumerate(cv_row):
                 item = QTableWidgetItem(f"{cv_value:.4f}")
-                item.setTextAlignment(Qt.AlignRight)
+                item.setTextAlignment(Qt.AlignmentFlag.AlignRight)
                 self.data_table.setItem(i, j + 1, item)
     
     def _update_visualization(self):
@@ -1005,4 +1005,4 @@ class ProgressIndicator(QWidget):
         # Text
         if self.text:
             painter.setPen(QColor(0, 0, 0))
-            painter.drawText(self.rect(), Qt.AlignCenter, self.text)
+            painter.drawText(self.rect(), Qt.AlignmentFlag.AlignCenter, self.text)

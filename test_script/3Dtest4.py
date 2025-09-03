@@ -1,9 +1,9 @@
 import sys
 from OpenGL.GL import *
 from OpenGL.GLU import *
-from PyQt5 import QtGui
-from PyQt5.QtOpenGL import *
-from PyQt5 import QtCore, QtWidgets, QtOpenGL
+from PyQt6 import QtGui
+from PyQt6.QtOpenGL import *
+from PyQt6 import QtCore, QtWidgets, QtOpenGL
 
 
 class Ui_MainWindow(QtWidgets.QWidget):
@@ -60,4 +60,4 @@ if __name__ == '__main__':
     Form = QtWidgets.QMainWindow()
     ui = Ui_MainWindow(Form)    
     ui.show()    
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

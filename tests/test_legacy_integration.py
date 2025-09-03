@@ -9,9 +9,9 @@ These tests are kept for historical compatibility and edge case coverage.
 import pytest
 import sys
 import os
-from PyQt5.QtCore import Qt, QRect, QPoint
-from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QMessageBox, QApplication
-from PyQt5.QtTest import QTest
+from PyQt6.QtCore import Qt, QRect, QPoint
+from PyQt6.QtWidgets import QDialog, QDialogButtonBox, QMessageBox, QApplication
+from PyQt6.QtTest import QTest
 from unittest.mock import patch, Mock
 
 # Add parent directory to path for imports
@@ -39,7 +39,7 @@ def dataset_dialog(qtbot):
     mock_parent.pos.return_value = Mock()
     mock_parent.pos.return_value.__add__ = Mock(return_value=Mock())
     
-    with patch('PyQt5.QtWidgets.QApplication.instance', return_value=mock_app):
+    with patch('PyQt6.QtWidgets.QApplication.instance', return_value=mock_app):
         dialog = DatasetDialog(parent=mock_parent)
         qtbot.addWidget(dialog)
         yield dialog
@@ -67,7 +67,7 @@ class TestDatasetDialogEdgeCases:
         mock_parent.pos.return_value = Mock()
         mock_parent.pos.return_value.__add__ = Mock(return_value=QPoint(200, 200))
         
-        with patch('PyQt5.QtWidgets.QApplication.instance', return_value=mock_app):
+        with patch('PyQt6.QtWidgets.QApplication.instance', return_value=mock_app):
             dialog = DatasetDialog(parent=mock_parent)
             qtbot.addWidget(dialog)
             
@@ -87,7 +87,7 @@ class TestDatasetDialogEdgeCases:
         mock_parent = Mock()
         mock_parent.pos.side_effect = Exception("Parent error")
         
-        with patch('PyQt5.QtWidgets.QApplication.instance', return_value=mock_app):
+        with patch('PyQt6.QtWidgets.QApplication.instance', return_value=mock_app):
             # Should handle parent errors gracefully
             dialog = DatasetDialog(parent=mock_parent)
             qtbot.addWidget(dialog)
@@ -180,7 +180,7 @@ class TestImportEdgeCasesLegacy:
         mock_app = Mock()
         mock_app.settings = mock_settings
         
-        with patch('PyQt5.QtWidgets.QApplication.instance', return_value=mock_app):
+        with patch('PyQt6.QtWidgets.QApplication.instance', return_value=mock_app):
             dialog = ImportDatasetDialog(parent=mock_parent)
             qtbot.addWidget(dialog)
             
@@ -212,7 +212,7 @@ class TestImportEdgeCasesLegacy:
         mock_app = Mock()
         mock_app.settings = mock_settings
         
-        with patch('PyQt5.QtWidgets.QApplication.instance', return_value=mock_app):
+        with patch('PyQt6.QtWidgets.QApplication.instance', return_value=mock_app):
             dialog = ImportDatasetDialog(parent=mock_parent)
             qtbot.addWidget(dialog)
             

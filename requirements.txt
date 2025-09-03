@@ -1,5 +1,5 @@
-pyqt5
-pyqt5-sip
+pyqt6
+pyqt6-sip
 peewee
 pillow
 numpy>=2.0.0

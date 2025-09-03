@@ -5,9 +5,9 @@ Test context menu conditional fill sequence functionality
 
 import sys
 import logging
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPushButton, QLabel
-from PyQt5.QtCore import Qt, QPoint
-from PyQt5.QtGui import QStandardItemModel, QStandardItem
+from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPushButton, QLabel
+from PyQt6.QtCore import Qt, QPoint
+from PyQt6.QtGui import QStandardItemModel, QStandardItem
 
 # Setup logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -168,7 +168,7 @@ def main():
     window = ConditionalContextMenuTest()
     window.show()
     
-    return app.exec_()
+    return app.exec()
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -1,14 +1,14 @@
-from PyQt5.QtWidgets import QTableWidgetItem, QHeaderView, QFileDialog, QCheckBox, QColorDialog, \
+from PyQt6.QtWidgets import QTableWidgetItem, QHeaderView, QFileDialog, QCheckBox, QColorDialog, \
                             QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QProgressBar, QApplication, \
                             QDialog, QLineEdit, QLabel, QPushButton, QAbstractItemView, QStatusBar, QMessageBox, \
                             QTableView, QSplitter, QRadioButton, QComboBox, QTextEdit, QSizePolicy, \
                             QTableWidget, QGridLayout, QAbstractButton, QButtonGroup, QGroupBox, QInputDialog,\
                             QTabWidget, QListWidget, QSpinBox, QPlainTextEdit, QSlider, QScrollArea, QStyledItemDelegate, \
-                            QAction, QShortcut, QMenu
-from PyQt5.QtGui import QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem, QImage,\
+                            QMenu
+from PyQt6.QtGui import QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem, QImage, QAction,\
                         QFont, QPainter, QBrush, QMouseEvent, QWheelEvent, QIntValidator, QIcon, QCursor,\
-                        QFontMetrics, QKeySequence, QDrag
-from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSize, QPoint, QAbstractTableModel, QTranslator, \
+                        QFontMetrics, QKeySequence, QDrag, QShortcut
+from PyQt6.QtCore import Qt, QRect, QSortFilterProxyModel, QSize, QPoint, QAbstractTableModel, QTranslator, \
                          pyqtSlot, pyqtSignal, QItemSelectionModel, QTimer, QEvent, QModelIndex, QObject, QPointF
 
 import logging
@@ -25,8 +25,8 @@ import OpenGL.GL as gl
 from OpenGL import GLU as glu
 # Removed GLUT import to prevent Windows compatibility issues
 # Migrate from QGLWidget to QOpenGLWidget for better stability
-from PyQt5.QtWidgets import QOpenGLWidget
-from PyQt5.QtGui import QSurfaceFormat, QOpenGLContext
+from PyQt6.QtOpenGLWidgets import QOpenGLWidget
+from PyQt6.QtGui import QSurfaceFormat, QOpenGLContext
 from scipy.spatial import ConvexHull
 from scipy import stats
 
@@ -112,7 +112,7 @@ class ObjectViewer2D(QLabel):
     def __init__(self, parent=None, transparent=False):
         if transparent:
             super(ObjectViewer2D, self).__init__(parent)
-            self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowTransparentForInput | Qt.Tool)
+            self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowTransparentForInput | Qt.WindowType.Tool)
             self.setAttribute(Qt.WA_TranslucentBackground)
             self.setAttribute(Qt.WA_NoSystemBackground, True)
         else:
@@ -352,19 +352,19 @@ class ObjectViewer2D(QLabel):
     def set_mode(self, mode):
         self.edit_mode = mode
         if self.edit_mode == MODE['EDIT_LANDMARK']:
-            self.setCursor(Qt.CrossCursor)
+            self.setCursor(Qt.CursorShape.CrossCursor)
             self.show_message(self.tr("Click on image to add landmark"))
         elif self.edit_mode == MODE['READY_MOVE_LANDMARK']:
-            self.setCursor(Qt.SizeAllCursor)
+            self.setCursor(Qt.CursorShape.SizeAllCursor)
             self.show_message(self.tr("Click on landmark to move"))
         elif self.edit_mode == MODE['MOVE_LANDMARK']:
-            self.setCursor(Qt.SizeAllCursor)
+            self.setCursor(Qt.CursorShape.SizeAllCursor)
             self.show_message(self.tr("Move landmark"))
         elif self.edit_mode == MODE['CALIBRATION']:
-            self.setCursor(Qt.CrossCursor)
+            self.setCursor(Qt.CursorShape.CrossCursor)
             self.show_message(self.tr("Click on image to calibrate"))
         else:
-            self.setCursor(Qt.ArrowCursor)
+            self.setCursor(Qt.CursorShape.ArrowCursor)
 
     def get_landmark_index_within_threshold(self, curr_pos, threshold=DISTANCE_THRESHOLD):
         for index, landmark in enumerate(self.landmark_list):
@@ -468,7 +468,7 @@ class ObjectViewer2D(QLabel):
 
     def mousePressEvent(self, event):
         me = QMouseEvent(event)
-        if me.button() == Qt.LeftButton:
+        if me.button() == Qt.MouseButton.LeftButton:
             if self.edit_mode == MODE['EDIT_LANDMARK']:
                 if self.orig_pixmap is None:
                     return
@@ -488,7 +488,7 @@ class ObjectViewer2D(QLabel):
                 self.calibration_from_img_x = self._2imgx(self.mouse_curr_x)
                 self.calibration_from_img_y = self._2imgy(self.mouse_curr_y)
 
-        elif me.button() == Qt.RightButton:
+        elif me.button() == Qt.MouseButton.RightButton:
             if self.edit_mode == MODE['WIREFRAME']:
                 if self.wire_start_index >= 0:
                     self.wire_start_index = -1
@@ -879,7 +879,7 @@ class ObjectViewer2D(QLabel):
                 self.image_canvas_ratio = self.orig_width / self.width()
             else:
                 self.image_canvas_ratio = self.orig_height / self.height()
-            self.curr_pixmap = self.orig_pixmap.scaled(int(self.orig_width*self.scale/self.image_canvas_ratio),int(self.orig_width*self.scale/self.image_canvas_ratio), Qt.KeepAspectRatio)
+            self.curr_pixmap = self.orig_pixmap.scaled(int(self.orig_width*self.scale/self.image_canvas_ratio),int(self.orig_width*self.scale/self.image_canvas_ratio), Qt.AspectRatioMode.KeepAspectRatio)
         else:
             if len(self.landmark_list) < 2:
                 return
@@ -1124,7 +1124,7 @@ class ObjectViewer3D(QOpenGLWidget):
             
             if transparent:
                 logger.info("ObjectViewer3D: Setting transparent mode attributes...")
-                self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowTransparentForInput | Qt.Tool)
+                self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowTransparentForInput | Qt.WindowType.Tool)
                 self.setAttribute(Qt.WA_TranslucentBackground)
                 self.setAttribute(Qt.WA_NoSystemBackground, True)
                 logger.info("ObjectViewer3D: Transparent mode setup complete")
@@ -1328,26 +1328,26 @@ class ObjectViewer3D(QOpenGLWidget):
         if self.edit_mode == MODE['EDIT_LANDMARK']:
             #print("edit landmark")
             self.initialize_colors()
-            self.setCursor(Qt.CrossCursor)
+            self.setCursor(Qt.CursorShape.CrossCursor)
             self.show_message("Click on image to add landmark")
         elif self.edit_mode == MODE['READY_MOVE_LANDMARK']:
-            self.setCursor(Qt.SizeAllCursor)
+            self.setCursor(Qt.CursorShape.SizeAllCursor)
             self.show_message("Click on landmark to move")
         elif self.edit_mode == MODE['MOVE_LANDMARK']:
-            self.setCursor(Qt.SizeAllCursor)
+            self.setCursor(Qt.CursorShape.SizeAllCursor)
             self.show_message("Move landmark")
         elif self.edit_mode == MODE['WIREFRAME']:
             self.initialize_colors()
-            self.setCursor(Qt.ArrowCursor)
+            self.setCursor(Qt.CursorShape.ArrowCursor)
             self.show_message("Wireframe mode")
         else:
-            self.setCursor(Qt.ArrowCursor)
+            self.setCursor(Qt.CursorShape.ArrowCursor)
         self.update()
 
     def mousePressEvent(self, event):
         self.down_x = event.x()
         self.down_y = event.y()
-        if event.buttons() == Qt.LeftButton:
+        if event.buttons() == Qt.MouseButton.LeftButton:
             if self.edit_mode == MODE['WIREFRAME'] and self.selected_landmark_idx > -1:
                 self.wireframe_from_idx = self.selected_landmark_idx
                 self.temp_edge = [ self.obj_ops.landmark_list[self.wireframe_from_idx][:], self.obj_ops.landmark_list[self.wireframe_from_idx][:]]
@@ -1356,14 +1356,14 @@ class ObjectViewer3D(QOpenGLWidget):
                 self.stored_landmark = { 'index': self.selected_landmark_idx, 'coords': self.threed_model.original_vertices[self.selected_landmark_idx] }
             else:                
                 self.view_mode = ROTATE_MODE
-        elif event.buttons() == Qt.RightButton:
+        elif event.buttons() == Qt.MouseButton.RightButton:
             if self.edit_mode == MODE['WIREFRAME'] and self.selected_edge_index > -1:
                 self.delete_wire(self.selected_edge_index)
             elif self.edit_mode == MODE['EDIT_LANDMARK'] and self.cursor_on_vertex > -1:
                 pass
             else:
                 self.view_mode = ZOOM_MODE
-        elif event.buttons() == Qt.MiddleButton:
+        elif event.buttons() == Qt.MouseButton.MiddleButton:
             self.view_mode = PAN_MODE
 
     def mouseReleaseEvent(self, event):
@@ -1371,7 +1371,7 @@ class ObjectViewer3D(QOpenGLWidget):
         self.is_dragging = False
         self.curr_x = event.x()
         self.curr_y = event.y()
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
             if self.edit_mode == MODE['WIREFRAME'] and self.wireframe_from_idx > -1:
                 if self.selected_landmark_idx > -1 and self.selected_landmark_idx != self.wireframe_from_idx:
                     self.wireframe_to_idx = self.selected_landmark_idx
@@ -1412,7 +1412,7 @@ class ObjectViewer3D(QOpenGLWidget):
                         self.sync_rotation()
                 self.temp_rotate_x = 0
                 self.temp_rotate_y = 0
-        elif event.button() == Qt.RightButton:
+        elif event.button() == Qt.MouseButton.RightButton:
             if self.edit_mode == MODE['EDIT_LANDMARK'] and self.selected_landmark_idx > -1 and self.curr_x == self.down_x and self.curr_y == self.down_y:
                 self.object_dialog.delete_landmark(self.selected_landmark_idx)
                 self.update_landmark_list()
@@ -1426,7 +1426,7 @@ class ObjectViewer3D(QOpenGLWidget):
                 if self.parent != None and callable(getattr(self.parent, 'sync_temp_zoom', None)):
                     self.parent.sync_temp_zoom(self, self.temp_dolly)
 
-        elif event.button() == Qt.MiddleButton:
+        elif event.button() == Qt.MouseButton.MiddleButton:
             self.pan_x += self.temp_pan_x
             self.pan_y += self.temp_pan_y
             self.temp_pan_x = 0
@@ -1466,20 +1466,20 @@ class ObjectViewer3D(QOpenGLWidget):
                 near, ray_direction = self.unproject_mouse(self.curr_x, self.curr_y)
                 self.temp_edge[1] = near
 
-        if event.buttons() == Qt.LeftButton and self.view_mode == ROTATE_MODE:
+        if event.buttons() == Qt.MouseButton.LeftButton and self.view_mode == ROTATE_MODE:
             self.is_dragging = True
             self.temp_rotate_x = self.curr_x - self.down_x
             self.temp_rotate_y = self.curr_y - self.down_y
             if self.parent != None and callable(getattr(self.parent, 'sync_temp_rotation', None)):
                 self.parent.sync_temp_rotation(self, self.temp_rotate_x, self.temp_rotate_y)
 
-        elif event.buttons() == Qt.RightButton and self.view_mode == ZOOM_MODE:
+        elif event.buttons() == Qt.MouseButton.RightButton and self.view_mode == ZOOM_MODE:
             self.is_dragging = True
             self.temp_dolly = ( self.curr_y - self.down_y ) / 100.0
             if self.parent != None and callable(getattr(self.parent, 'sync_temp_zoom', None)):
                 self.parent.sync_temp_zoom(self, self.temp_dolly)
 
-        elif event.buttons() == Qt.MiddleButton and self.view_mode == PAN_MODE:
+        elif event.buttons() == Qt.MouseButton.MiddleButton and self.view_mode == PAN_MODE:
             self.is_dragging = True
             self.temp_pan_x = self.curr_x - self.down_x
             self.temp_pan_y = self.curr_y - self.down_y
@@ -1796,7 +1796,7 @@ class ObjectViewer3D(QOpenGLWidget):
         
         try:
             # Log OpenGL info (only once)
-            from PyQt5.QtGui import QOpenGLContext
+            from PyQt6.QtGui import QOpenGLContext
             v  = gl.glGetString(gl.GL_VERSION)    or b""
             vr = gl.glGetString(gl.GL_RENDERER)   or b""
             vd = gl.glGetString(gl.GL_VENDOR)     or b""
@@ -1952,8 +1952,8 @@ class ObjectViewer3D(QOpenGLWidget):
 
     def draw_landmark_indices_overlay(self):
         """Draw landmark indices using QPainter overlay for better text quality."""
-        from PyQt5.QtGui import QPainter, QFont, QColor, QPen
-        from PyQt5.QtCore import QPoint
+        from PyQt6.QtGui import QPainter, QFont, QColor, QPen
+        from PyQt6.QtCore import QPoint
         
         painter = QPainter(self)
         try:
@@ -2705,7 +2705,7 @@ class ShapePreference(QWidget):
         self.cbxShowWireframe.setChecked(self.show_wireframe)
         self.cbxShowPolygon = QCheckBox("")
         self.cbxShowPolygon.setChecked(self.show_polygon)
-        self.sliderTransparency = QSlider(Qt.Horizontal)
+        self.sliderTransparency = QSlider(Qt.Orientation.Horizontal)
         self.sliderTransparency.setMinimum(0)
         self.sliderTransparency.setMaximum(100)
         self.sliderTransparency.setValue(0)
@@ -2714,7 +2714,7 @@ class ShapePreference(QWidget):
         self.btnLMColor.setMinimumSize(20,20)
         self.btnLMColor.setStyleSheet("background-color: red")
         self.btnLMColor.setToolTip("red")
-        self.btnLMColor.setCursor(Qt.PointingHandCursor)
+        self.btnLMColor.setCursor(Qt.CursorShape.PointingHandCursor)
         #self.btnLMColor.mousePressEvent = lambda event, type='LM': self.on_btnColor_clicked(event, 'LM')
         self.btnLMColor.clicked.connect(self.on_btnLMColor_clicked)
 
@@ -2722,14 +2722,14 @@ class ShapePreference(QWidget):
         self.btnEdgeColor.setMinimumSize(20,20)
         self.btnEdgeColor.setStyleSheet("background-color: red")
         self.btnEdgeColor.setToolTip("red")
-        self.btnEdgeColor.setCursor(Qt.PointingHandCursor)
+        self.btnEdgeColor.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btnEdgeColor.clicked.connect(self.on_btnEdgeColor_clicked)
 
         self.btnFaceColor = QPushButton("Face")
         self.btnFaceColor.setMinimumSize(20,20)
         self.btnFaceColor.setStyleSheet("background-color: red")
         self.btnFaceColor.setToolTip("red")
-        self.btnFaceColor.setCursor(Qt.PointingHandCursor)
+        self.btnFaceColor.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btnFaceColor.clicked.connect(self.on_btnFaceColor_clicked)        
 
         self.layout.addWidget(self.lblTitle)
@@ -3349,15 +3349,15 @@ class MdDrag(QDrag):
         logger = logging.getLogger(__name__)
         logger.debug("md drag init")
         self.shift_pressed = False
-        self.copy_cursor = QPixmap(QCursor(Qt.DragCopyCursor).pixmap())
-        self.move_cursor = QPixmap(QCursor(Qt.DragMoveCursor).pixmap())
+        self.copy_cursor = QPixmap(QCursor(Qt.CursorShape.DragCopyCursor).pixmap())
+        self.move_cursor = QPixmap(QCursor(Qt.CursorShape.DragMoveCursor).pixmap())
 
     def updateCursor(self, event):
-        self.shift_pressed = bool(event.modifiers() & Qt.ShiftModifier)
+        self.shift_pressed = bool(event.modifiers() & Qt.KeyboardModifier.ShiftModifier)
         if self.shift_pressed:
-            self.setDragCursor(self.copy_cursor, Qt.CopyAction)
+            self.setDragCursor(self.copy_cursor, Qt.DropAction.CopyAction)
         else:
-            self.setDragCursor(self.move_cursor, Qt.MoveAction)
+            self.setDragCursor(self.move_cursor, Qt.DropAction.MoveAction)
 
     def dragEnterEvent(self, event):
         logger = logging.getLogger(__name__)
@@ -3379,30 +3379,30 @@ class DragEventFilter(QObject):
     def eventFilter(self, obj, event):
         if event.type() in [QEvent.KeyPress, QEvent.KeyRelease]:
             modifiers = QApplication.keyboardModifiers()
-            if modifiers & Qt.ControlModifier:
-                self.drag_object.setDragCursor(self.drag_object.copy_cursor.pixmap(), Qt.CopyAction)
+            if modifiers & Qt.KeyboardModifier.ControlModifier:
+                self.drag_object.setDragCursor(self.drag_object.copy_cursor.pixmap(), Qt.DropAction.CopyAction)
                 logger.debug("Set Copy Cursor")
             else:
-                self.drag_object.setDragCursor(self.drag_object.move_cursor.pixmap(), Qt.MoveAction)
+                self.drag_object.setDragCursor(self.drag_object.move_cursor.pixmap(), Qt.DropAction.MoveAction)
                 logger.debug("Set Move Cursor")
         return False
 
 class CustomDrag(QDrag):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.copy_cursor = QCursor(Qt.DragCopyCursor)
-        self.move_cursor = QCursor(Qt.DragMoveCursor)
+        self.copy_cursor = QCursor(Qt.CursorShape.DragCopyCursor)
+        self.move_cursor = QCursor(Qt.CursorShape.DragMoveCursor)
 
-    def exec_(self, supportedActions, defaultAction=Qt.IgnoreAction):
+    def exec_(self, supportedActions, defaultAction=Qt.DropAction.IgnoreAction):
         event_filter = DragEventFilter(self)
         QApplication.instance().installEventFilter(event_filter)
         
         # Set initial cursor
         modifiers = QApplication.keyboardModifiers()
-        if modifiers & Qt.ControlModifier:
-            self.setDragCursor(self.copy_cursor.pixmap(), Qt.CopyAction)
+        if modifiers & Qt.KeyboardModifier.ControlModifier:
+            self.setDragCursor(self.copy_cursor.pixmap(), Qt.DropAction.CopyAction)
         else:
-            self.setDragCursor(self.move_cursor.pixmap(), Qt.MoveAction)
+            self.setDragCursor(self.move_cursor.pixmap(), Qt.DropAction.MoveAction)
         
         result = super().exec_(supportedActions, defaultAction)
         
@@ -3415,16 +3415,16 @@ class MdTableView(QTableView):
         super().__init__(parent)
         self.verticalHeader().hide()
         self.sort_later = False
-        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.customContextMenuRequested.connect(self.show_context_menu)
 
         self.copy_action = QAction(self.tr("Copy\tCtrl+C"), self)
         self.copy_action.triggered.connect(self.copy_selected_data)
-        copy_shortcut = QShortcut(QKeySequence.Copy, self)
+        copy_shortcut = QShortcut(QKeySequence.StandardKey.Copy, self)
         copy_shortcut.activated.connect(self.copy_action.trigger)  # Connect to the action
         self.paste_action = QAction(self.tr("Paste\tCtrl+V"), self)
         self.paste_action.triggered.connect(self.paste_data)
-        paste_shortcut = QShortcut(QKeySequence.Paste, self)
+        paste_shortcut = QShortcut(QKeySequence.StandardKey.Paste, self)
         paste_shortcut.activated.connect(self.paste_action.trigger)
         self.fill_sequence_action = QAction(self.tr("Fill sequence"), self)
         self.fill_sequence_action.triggered.connect(self.fill_sequence)
@@ -3434,7 +3434,7 @@ class MdTableView(QTableView):
         self.fill_action.triggered.connect(self.fill_value)
         self.clear_cells_action = QAction(self.tr("Clear"), self)
         self.clear_cells_action.triggered.connect(self.clear_selected_cells)
-        self.setDragDropMode(QAbstractItemView.DragDrop)
+        self.setDragDropMode(QAbstractItemView.DragDropMode.DragDrop)
         self.selection_mode = "Cells"
         self.drag_start_position = None
         self.is_dragging = False
@@ -3442,36 +3442,36 @@ class MdTableView(QTableView):
     def set_cells_selection_mode(self):
         self.selection_mode = "Cells"
         self.setDragEnabled(False)
-        self.setSelectionBehavior(QAbstractItemView.SelectItems)
+        self.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectItems)
 
     def set_rows_selection_mode(self):
         self.selection_mode = "Rows"
         self.setDragEnabled(True)
-        self.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
 
     def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
             self.drag_start_position = event.pos()
             index = self.indexAt(event.pos())
             self.was_cell_selected = index in self.selectionModel().selectedIndexes()
 
             if self.selection_mode == "Rows" and self.was_cell_selected:
-                self.startDrag(Qt.CopyAction)
+                self.startDrag(Qt.DropAction.CopyAction)
         super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
         if self.is_dragging:
-            if event.modifiers() & Qt.ShiftModifier:
-                QApplication.setOverrideCursor(Qt.DragCopyCursor)  # Copy cursor
+            if event.modifiers() & Qt.KeyboardModifier.ShiftModifier:
+                QApplication.setOverrideCursor(Qt.CursorShape.DragCopyCursor)  # Copy cursor
             else:
-                QApplication.setOverrideCursor(Qt.ClosedHandCursor)  # Move cursor (or Qt.SizeAllCursor)
+                QApplication.setOverrideCursor(Qt.CursorShape.ClosedHandCursor)  # Move cursor (or Qt.CursorShape.SizeAllCursor)
 
 
         if self.selection_mode != "Rows":
             super().mouseMoveEvent(event)
             return
         
-        if not (event.buttons() & Qt.LeftButton):
+        if not (event.buttons() & Qt.MouseButton.LeftButton):
             return
 
         if self.selection_mode == "Rows" and not self.was_cell_selected:
@@ -3491,7 +3491,7 @@ class MdTableView(QTableView):
         else:
             super().mouseMoveEvent(event)
 
-    def startDrag(self, supportedActions=Qt.CopyAction):
+    def startDrag(self, supportedActions=Qt.DropAction.CopyAction):
         indexes = self.selectionModel().selectedRows()
         if not indexes:
             return
@@ -3502,12 +3502,12 @@ class MdTableView(QTableView):
         drag.setMimeData(mimeData)
         
         # Set initial cursor based on current Shift key state
-        initial_action = Qt.CopyAction if QApplication.keyboardModifiers() & Qt.ShiftModifier else Qt.MoveAction
-        dropAction = drag.exec_(Qt.CopyAction | Qt.MoveAction)
+        initial_action = Qt.DropAction.CopyAction if QApplication.keyboardModifiers() & Qt.KeyboardModifier.ShiftModifier else Qt.DropAction.MoveAction
+        dropAction = drag.exec_(Qt.DropAction.CopyAction | Qt.DropAction.MoveAction)
         self.is_dragging = False
 
     def mouseReleaseEvent(self, event):
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
             if self.is_dragging:
                 # Select the row if a drag operation was started
                 row = self.rowAt(event.pos().y())
@@ -3524,7 +3524,7 @@ class MdTableView(QTableView):
         # Get column header text
         column_header = ""
         if self.model() and column >= 0:
-            column_header = self.model().headerData(column, Qt.Horizontal, Qt.DisplayRole)
+            column_header = self.model().headerData(column, Qt.Orientation.Horizontal, Qt.ItemDataRole.DisplayRole)
             if column_header is None:
                 column_header = ""
         
@@ -3594,14 +3594,14 @@ class MdTableView(QTableView):
             return
         # get the first cell
         first_index = selected_indices[0]
-        value = str(self.model().data(first_index, Qt.DisplayRole))
+        value = str(self.model().data(first_index, Qt.ItemDataRole.DisplayRole))
         # get user input
         value, ok = QInputDialog.getText(self, "Fill Values", "Enter value", text=value)
         if not ok:
             return
         # fill the values
         for index in selected_indices:
-            self.model().setData(index, value, Qt.EditRole)
+            self.model().setData(index, value, Qt.ItemDataRole.EditRole)
 
     def fill_sequence(self):
         logger = logging.getLogger(__name__)
@@ -3631,8 +3631,8 @@ class MdTableView(QTableView):
         first_cell = selected_cells[0]
         first_row = first_cell.row()
         column_0_index = self.model().index(first_row, 0)
-        object_id = self.model().data(column_0_index, Qt.DisplayRole)
-        sequence = self.model().data(first_cell, Qt.DisplayRole)
+        object_id = self.model().data(column_0_index, Qt.ItemDataRole.DisplayRole)
+        sequence = self.model().data(first_cell, Qt.ItemDataRole.DisplayRole)
         try:
             sequence = int(sequence)
         except:
@@ -3660,7 +3660,7 @@ class MdTableView(QTableView):
             index = self.model().index(row, 1)
             logger.debug(f"Setting row {row}, column 1 to value {sequence}")
             
-            result = self.model().setData(index, sequence, Qt.EditRole)
+            result = self.model().setData(index, sequence, Qt.ItemDataRole.EditRole)
             if not result:
                 logger.error(f"Failed to set data at row {row}, column 1")
             
@@ -3678,7 +3678,7 @@ class MdTableView(QTableView):
             columns = row_text.split("\t")
             for col, text in enumerate(columns):
                 index = self.model().index(current_index.row() + row, current_index.column() + col)
-                self.model().setData(index, text, Qt.EditRole)
+                self.model().setData(index, text, Qt.ItemDataRole.EditRole)
 
     def copy_selected_data(self):
         selected_indexes = self.selectionModel().selectedIndexes()
@@ -3690,7 +3690,7 @@ class MdTableView(QTableView):
                 if prev_index is not None and index.row() != prev_index.row():
                     all_data.append("\t".join(data_row))
                     data_row = []
-                data_row.append(str(self.model().data(index, Qt.DisplayRole)))
+                data_row.append(str(self.model().data(index, Qt.ItemDataRole.DisplayRole)))
                 prev_index = index
             all_data.append("\t".join(data_row))
             text = "\n".join(all_data)  # Tab-separated for multiple cells
@@ -3702,19 +3702,19 @@ class MdTableView(QTableView):
             self.sort_later = True        
 
     def keyPressEvent(self, event):
-        if event.key() in [Qt.Key_Return, Qt.Key_Enter]:
+        if event.key() in [Qt.Key.Key_Return, Qt.Key.Key_Enter]:
             #print("key return or enter")
             if not self.isPersistentEditorOpen(self.currentIndex()):
                 self.edit(self.currentIndex())
-        elif event.key() in [Qt.Key_Up, Qt.Key_Down]:
+        elif event.key() in [Qt.Key.Key_Up, Qt.Key.Key_Down]:
             #print("key up, key down")
             # Handle up/down arrow keys directly (e.g., move selection)
             current_index = self.currentIndex()
-            new_row = current_index.row() + (-1 if event.key() == Qt.Key_Up else 1)
+            new_row = current_index.row() + (-1 if event.key() == Qt.Key.Key_Up else 1)
             new_index = self.model().index(new_row, current_index.column())
             if new_index.isValid():
                 self.setCurrentIndex(new_index)
-        elif event.key() == Qt.Key_Delete:  # Check if Delete key is pressed
+        elif event.key() == Qt.Key.Key_Delete:  # Check if Delete key is pressed
             self.clear_selected_cells()
         else:
             super().keyPressEvent(event)
@@ -3727,7 +3727,7 @@ class MdTableView(QTableView):
                 # get source model 
                 source_model = self.model().sourceModel()
                 if index.column() not in source_model._uneditable_columns:
-                    self.model().setData(index, "", Qt.EditRole)  # Set data to empty string
+                    self.model().setData(index, "", Qt.ItemDataRole.EditRole)  # Set data to empty string
 
     def isPersistentEditorOpen(self, index):
         return self.indexWidget(index) is not None
@@ -3765,7 +3765,7 @@ class MdTableView(QTableView):
         for row in range(self.model().rowCount()):
             for col in range(column_count):
                 index = self.model().index(row, col)
-                text = str(self.model().data(index, Qt.DisplayRole))
+                text = str(self.model().data(index, Qt.ItemDataRole.DisplayRole))
                 text_width = self.fontMetrics().horizontalAdvance(text)
                 content_widths[col] = max(content_widths[col], text_width)
 
@@ -3796,11 +3796,11 @@ class MdTableModel(QAbstractTableModel):
     def columnCount(self, parent=QModelIndex()):
         return len(self._data[0]) if self._data else 0
 
-    def data(self, index, role=Qt.DisplayRole):
+    def data(self, index, role=Qt.ItemDataRole.DisplayRole):
         if not index.isValid():
             return None
         d = self._data[index.row()][index.column()]
-        if role == Qt.DisplayRole or role == Qt.EditRole:
+        if role == Qt.ItemDataRole.DisplayRole or role == Qt.ItemDataRole.EditRole:
             if isinstance(d, str):
                 return d #self._data[index.row()][index.column()]
             elif isinstance(d, list):
@@ -3815,20 +3815,20 @@ class MdTableModel(QAbstractTableModel):
                 return None
             elif isinstance(d, dict) and d.get('changed', False):
                 return QColor('yellow')
-        if role == Qt.ToolTipRole:
+        if role == Qt.ItemDataRole.ToolTipRole:
             return "Tooltip for cell ({}, {})".format(index.row(), index.column())
-        if role == Qt.TextAlignmentRole:
-            return Qt.AlignCenter | Qt.AlignVCenter
+        if role == Qt.ItemDataRole.TextAlignmentRole:
+            return Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignVCenter
         return None
 
-    def setData(self, index, value, role=Qt.EditRole):
+    def setData(self, index, value, role=Qt.ItemDataRole.EditRole):
         old_data = self._data[index.row()][index.column()]
         if isinstance(old_data, dict) and old_data.get('value', None):
             old_data = old_data['value']
         if str(value) == str(old_data):
             return False
 
-        if not index.isValid() or role != Qt.EditRole:
+        if not index.isValid() or role != Qt.ItemDataRole.EditRole:
             return False
         if index.row() >= len(self._data) or index.column() >= len(self._data[0]):
             return False
@@ -3850,9 +3850,9 @@ class MdTableModel(QAbstractTableModel):
         if not index.isValid():
             return Qt.NoItemFlags
         if index.column() in self._uneditable_columns:
-            return Qt.ItemIsEnabled | Qt.ItemIsSelectable
+            return Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable
         else:
-            return super().flags(index) | Qt.ItemIsEditable     
+            return super().flags(index) | Qt.ItemFlag.ItemIsEditable     
 
     def resetColors(self):
         for row in range(self.rowCount()):
@@ -3867,19 +3867,19 @@ class MdTableModel(QAbstractTableModel):
         self._data = data        
         self.endResetModel()
 
-    def headerData(self, section, orientation, role=Qt.DisplayRole):
-        if role == Qt.DisplayRole:
-            if orientation == Qt.Horizontal:
+    def headerData(self, section, orientation, role=Qt.ItemDataRole.DisplayRole):
+        if role == Qt.ItemDataRole.DisplayRole:
+            if orientation == Qt.Orientation.Horizontal:
                 # Return the header text for the given horizontal section
                 return "{}".format(self._hheader_data[section])
                 #return ""
-            elif orientation == Qt.Vertical:
+            elif orientation == Qt.Orientation.Vertical:
                 # Return the header text for the given vertical section
                 if len( self._vheader_data ) == 0:
                     return "{}".format(section+1)
                 else:
                     return "{}".format(self._vheader_data[section])
-        if role == Qt.ToolTipRole and orientation == Qt.Vertical:
+        if role == Qt.ItemDataRole.ToolTipRole and orientation == Qt.Orientation.Vertical:
             return ""
 
     def setVerticalHeader(self, header_data):
@@ -3895,13 +3895,13 @@ class MdTableModel(QAbstractTableModel):
             self._data = sorted(
                 self._data,
                 key=lambda x: float(x[column]['value']), 
-                reverse=(order == Qt.DescendingOrder)
+                reverse=(order == Qt.SortOrder.DescendingOrder)
             )
         except ValueError:  # Fallback to lexicographical sorting if not numeric
             self._data = sorted(
                 self._data,
                 key=lambda x: x[column]['value'],
-                reverse=(order == Qt.DescendingOrder)
+                reverse=(order == Qt.SortOrder.DescendingOrder)
             )
         self.layoutChanged.emit()
 

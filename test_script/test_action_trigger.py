@@ -14,8 +14,8 @@ sys.path.insert(0, '/home/jikhanjung/projects/Modan2')
 def test_action_connection():
     """Test if fill_sequence_action is properly connected"""
     
-    from PyQt5.QtWidgets import QApplication
-    from PyQt5.QtGui import QStandardItemModel, QStandardItem
+    from PyQt6.QtWidgets import QApplication
+    from PyQt6.QtGui import QStandardItemModel, QStandardItem
     from ModanComponents import MdTableView
     
     app = QApplication(sys.argv)

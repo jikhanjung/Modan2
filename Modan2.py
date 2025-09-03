@@ -12,14 +12,14 @@ if hasattr(sys, 'version') and '| packaged by Anaconda' in sys.version:
         # Keep only the first part (version) and last part (compiler info)
         sys.version = parts[0].strip() + ' ' + parts[-1].strip()
 
-from PyQt5.QtWidgets import QMainWindow, QHeaderView, QApplication, QAbstractItemView, \
-                            QMessageBox, QTreeView, QTableView, QSplitter, QAction, QActionGroup, QMenu, \
+from PyQt6.QtWidgets import QMainWindow, QHeaderView, QApplication, QAbstractItemView, \
+                            QMessageBox, QTreeView, QTableView, QSplitter, QMenu, \
                             QStatusBar, QInputDialog, QToolBar, QWidget, QPlainTextEdit, QVBoxLayout, QHBoxLayout, \
                             QPushButton, QRadioButton, QLabel, QDockWidget
-from PyQt5.QtGui import QIcon, QStandardItemModel, QStandardItem, QKeySequence, QCursor
-from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSettings, QSize, QTranslator, QItemSelectionModel, QObject, QEvent
+from PyQt6.QtGui import QIcon, QStandardItemModel, QStandardItem, QKeySequence, QCursor, QAction, QActionGroup
+from PyQt6.QtCore import Qt, QRect, QSortFilterProxyModel, QSettings, QSize, QTranslator, QItemSelectionModel, QObject, QEvent
 
-from PyQt5.QtCore import pyqtSlot
+from PyQt6.QtCore import pyqtSlot
 import logging
 from pathlib import Path
 from peewee import *
@@ -473,7 +473,7 @@ class ModanMainWindow(QMainWindow):
                         # Handle WindowGeometry keys that should return QRect
                         if key.startswith("WindowGeometry/") and key != "WindowGeometry/RememberGeometry":
                             if isinstance(value, list) and len(value) == 4:
-                                from PyQt5.QtCore import QRect
+                                from PyQt6.QtCore import QRect
                                 return QRect(*value)
                             elif hasattr(default_value, 'x'):  # default_value is QRect
                                 return default_value
@@ -532,22 +532,22 @@ class ModanMainWindow(QMainWindow):
                 geometry = [int(x) if isinstance(x, (int, float, str)) and str(x).isdigit() else x for x in geometry]
                 
                 # Get multi-monitor info for debugging
-                from PyQt5.QtWidgets import QDesktopWidget
-                desktop = QDesktopWidget()
-                primary_screen = desktop.primaryScreen()
-                primary_rect = desktop.screenGeometry(primary_screen)
+                from PyQt6.QtGui import QGuiApplication
+                screens = QGuiApplication.screens()
+                primary_screen = QGuiApplication.primaryScreen()
+                primary_rect = primary_screen.geometry()
                 
                 logger.debug(f"READ_SETTINGS - Using saved geometry: x={geometry[0]}, y={geometry[1]}, w={geometry[2]}, h={geometry[3]}")
                 logger.debug(f"READ_SETTINGS - Primary monitor size: {primary_rect.width()}x{primary_rect.height()}")
-                logger.debug(f"READ_SETTINGS - Number of screens: {desktop.screenCount()}")
+                logger.debug(f"READ_SETTINGS - Number of screens: {len(screens)}")
                 
                 # Show all screen geometries for debugging
-                for i in range(desktop.screenCount()):
-                    screen_geom = desktop.screenGeometry(i)
+                for i, screen in enumerate(screens):
+                    screen_geom = screen.geometry()
                     logger.debug(f"READ_SETTINGS - Screen {i}: {screen_geom.width()}x{screen_geom.height()} at ({screen_geom.x()}, {screen_geom.y()})")
                 
                 # Set geometry with window manager hints
-                from PyQt5.QtCore import Qt
+                from PyQt6.QtCore import Qt
                 
                 # Store desired position for later enforcement
                 self._desired_geometry = QRect(*geometry)
@@ -555,14 +555,14 @@ class ModanMainWindow(QMainWindow):
                 # Set window flags to control positioning behavior
                 current_flags = self.windowFlags()
                 # Don't let window manager auto-position the window
-                self.setWindowFlags(current_flags & ~Qt.WindowContextHelpButtonHint)
+                self.setWindowFlags(current_flags & ~Qt.WindowType.WindowContextHelpButtonHint)
                 
                 # Set geometry
                 self.setGeometry(QRect(*geometry))
                 logger.debug(f"SET_GEOMETRY - Requested: {geometry}, After setGeometry(): {[self.geometry().x(), self.geometry().y(), self.geometry().width(), self.geometry().height()]}")
                 
                 # Schedule position verification after window is fully shown
-                from PyQt5.QtCore import QTimer
+                from PyQt6.QtCore import QTimer
                 def verify_position():
                     actual = self.geometry()
                     if abs(actual.x() - geometry[0]) > 10 or abs(actual.y() - geometry[1]) > 10:
@@ -717,7 +717,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 return  # Controller will show appropriate error messages
             
             self.analysis_dialog = NewAnalysisDialog(self, self.selected_dataset)
-            ret = self.analysis_dialog.exec_()
+            ret = self.analysis_dialog.exec()
             logger.info("new analysis dialog return value %s", ret)
             
             if ret == 1:
@@ -769,7 +769,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         if dockable_object_view :
             # Create dock widget for the viewer
             self.viewer_dock = QDockWidget(self.tr("Object Viewer"), self)
-            self.viewer_dock.setAllowedAreas(Qt.AllDockWidgetAreas)
+            self.viewer_dock.setAllowedAreas(Qt.DockWidgetArea.AllDockWidgetAreas)
             self.viewer_dock.setFeatures(QDockWidget.DockWidgetMovable | 
                                     QDockWidget.DockWidgetFloatable |
                                     QDockWidget.DockWidgetClosable)
@@ -785,7 +785,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             self.viewer_dock.setWidget(self.viewer_container)
             
             # Add dock widget to main window
-            self.addDockWidget(Qt.RightDockWidgetArea, self.viewer_dock)
+            self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.viewer_dock)
 
         logger.info("Creating table view widgets...")
         self.tableview_widget = QWidget()
@@ -838,8 +838,8 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         logger.info("Button signals connected")
 
         logger.info("Creating splitters...")
-        self.hsplitter = QSplitter(Qt.Horizontal)
-        self.vsplitter = QSplitter(Qt.Vertical)
+        self.hsplitter = QSplitter(Qt.Orientation.Horizontal)
+        self.vsplitter = QSplitter(Qt.Orientation.Vertical)
         logger.info("Splitters created")
 
         logger.info("Adding widgets to vsplitter...")
@@ -884,8 +884,8 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
         logger.info("Connecting final signals...")
         self.treeView.doubleClicked.connect(self.on_treeView_doubleClicked)
-        self.treeView.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.treeView.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.treeView.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.treeView.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
 
         self.tableView.doubleClicked.connect(self.on_tableView_doubleClicked)
         self.treeView.customContextMenuRequested.connect(self.open_treeview_menu)
@@ -1034,8 +1034,8 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         """Handle import dataset action using controller"""
         self.dlg = ImportDatasetDialog(self)
         self.dlg.setModal(True)
-        self.dlg.setWindowModality(Qt.ApplicationModal)
-        self.dlg.exec_()
+        self.dlg.setWindowModality(Qt.WindowModality.ApplicationModal)
+        self.dlg.exec()
         # Controller signals will handle UI updates automatically        
 
     @pyqtSlot()
@@ -1047,8 +1047,8 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             self.dlg = ExportDatasetDialog(self)
             self.dlg.setModal(True)
             self.dlg.set_dataset(self.selected_dataset)
-            self.dlg.setWindowModality(Qt.ApplicationModal)
-            self.dlg.exec_()
+            self.dlg.setWindowModality(Qt.WindowModality.ApplicationModal)
+            self.dlg.exec()
         except Exception as e:
             show_error(self, f"Error exporting dataset: {str(e)}")
 
@@ -1073,7 +1073,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         else:
             self.dlg.set_parent_dataset(None)
 
-        ret = self.dlg.exec_()
+        ret = self.dlg.exec()
         # Controller signals will handle the UI updates automatically
         self.load_dataset()
         self.reset_tableView()
@@ -1116,7 +1116,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.selected_dataset.unpack_wireframe()
 
         self.dlg.set_dataset( self.selected_dataset )
-        ret = self.dlg.exec_()
+        ret = self.dlg.exec()
         if ret == 0:
             return
         elif ret == 1:
@@ -1175,7 +1175,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             self.dlg = ObjectDialog(self)
             self.dlg.set_dataset(dataset)
             self.dlg.set_object(new_object)
-            ret = self.dlg.exec_()
+            ret = self.dlg.exec()
             if ret != 0:
                 # Object was saved in dialog, UI will update via signals
                 pass
@@ -1193,7 +1193,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.dlg.set_dataset(self.selected_dataset)
         self.dlg.set_object( self.selected_object )
         self.dlg.set_tableview(self.tableView)
-        ret = self.dlg.exec_()
+        ret = self.dlg.exec()
         if ret == 0:
             return
         elif ret == 1:
@@ -1219,7 +1219,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.dataset_selection_model = self.treeView.selectionModel()
         self.dataset_selection_model.selectionChanged.connect(self.on_dataset_selection_changed)
         header = self.treeView.header()
-        self.treeView.setSelectionBehavior(QTreeView.SelectRows)
+        self.treeView.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
 
         self.treeView.setDragEnabled(True)
         self.treeView.setAcceptDrops(True)
@@ -1233,10 +1233,10 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     #    event.accept()
     def treeView_drag_enter_event(self, event):
         event.accept()
-        if QApplication.keyboardModifiers() & Qt.ControlModifier:
-            QApplication.setOverrideCursor(Qt.DragCopyCursor)
+        if QApplication.keyboardModifiers() & Qt.KeyboardModifier.ControlModifier:
+            QApplication.setOverrideCursor(Qt.CursorShape.DragCopyCursor)
         else:
-            QApplication.setOverrideCursor(Qt.DragMoveCursor)
+            QApplication.setOverrideCursor(Qt.CursorShape.DragMoveCursor)
 
     def treeView_drag_leave_event(self, event):
         event.accept()
@@ -1259,17 +1259,17 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         target_dataset = target_item.data()
 
         # Update cursor based on modifier keys
-        if QApplication.keyboardModifiers() & Qt.ControlModifier:
-            QApplication.changeOverrideCursor(Qt.DragCopyCursor)
+        if QApplication.keyboardModifiers() & Qt.KeyboardModifier.ControlModifier:
+            QApplication.changeOverrideCursor(Qt.CursorShape.DragCopyCursor)
         else:
-            QApplication.changeOverrideCursor(Qt.DragMoveCursor)
+            QApplication.changeOverrideCursor(Qt.CursorShape.DragMoveCursor)
         return
 
     def updateCursor(self, shift_pressed):
         if shift_pressed:
-            QApplication.setOverrideCursor(Qt.DragCopyCursor)
+            QApplication.setOverrideCursor(Qt.CursorShape.DragCopyCursor)
         else:
-            QApplication.setOverrideCursor(Qt.ClosedHandCursor)
+            QApplication.setOverrideCursor(Qt.CursorShape.ClosedHandCursor)
 
     def dropEvent(self, event):
         if event.source() == self.treeView:
@@ -1289,7 +1289,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         elif event.source() == self.tableView:
             shift_clicked = False
             modifiers = QApplication.keyboardModifiers()
-            if modifiers == Qt.ShiftModifier:
+            if modifiers == Qt.KeyboardModifier.ShiftModifier:
                 shift_clicked = True
 
             target_index=self.treeView.indexAt(event.pos())
@@ -1350,9 +1350,9 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             file_path = mu.process_dropped_file_name(file_path)
             self.import_dialog = ImportDatasetDialog(self)
             self.import_dialog.setModal(True)
-            self.import_dialog.setWindowModality(Qt.ApplicationModal)
+            self.import_dialog.setWindowModality(Qt.WindowModality.ApplicationModal)
             self.import_dialog.open_file2(file_path)
-            self.import_dialog.exec_()
+            self.import_dialog.exec()
             self.load_dataset()
 
     def get_selected_object_list(self):
@@ -1430,7 +1430,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.tableView.dragEnterEvent = self.tableView_drag_enter_event
         self.tableView.dragMoveEvent = self.tableView_drag_move_event
         self.tableView.setSortingEnabled(True)
-        self.tableView.sortByColumn(1, Qt.AscendingOrder)
+        self.tableView.sortByColumn(1, Qt.SortOrder.AscendingOrder)
         self.clear_object_view()
 
     def tableView_drop_event(self, event):
@@ -1447,7 +1447,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
         logger.debug(f"file name list: {file_name_list}")
 
-        QApplication.setOverrideCursor(Qt.WaitCursor)
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
         total_count = len(file_name_list)
         current_count = 0
         self.progress_dialog = ProgressDialog(self)
@@ -1519,33 +1519,33 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             logger.debug(f"proposed action: {event.proposedAction()}")
             logger.debug(f"drop action: {event.dropAction()}")
             logger.debug(f"possible action: {int(event.possibleActions())}")
-            logger.debug(f"kinds of drop actions: {Qt.CopyAction}, {Qt.MoveAction}, {Qt.LinkAction}, {Qt.ActionMask}, {Qt.TargetMoveAction}")
+            logger.debug(f"kinds of drop actions: {Qt.DropAction.CopyAction}, {Qt.DropAction.MoveAction}, {Qt.DropAction.LinkAction}, {Qt.DropAction.ActionMask}, {Qt.DropAction.TargetMoveAction}")
             #event.acceptProposedAction()
-            event.setDropAction(Qt.CopyAction)
+            event.setDropAction(Qt.DropAction.CopyAction)
             event.accept()
         else:
             event.ignore()
 
 
     def tableView_drag_move_event(self, event):
-        self.copy_cursor = QCursor(Qt.DragCopyCursor)
-        self.move_cursor = QCursor(Qt.DragMoveCursor)
+        self.copy_cursor = QCursor(Qt.CursorShape.DragCopyCursor)
+        self.move_cursor = QCursor(Qt.CursorShape.DragMoveCursor)
         #print("table view drag move event")
         #print("drag move", event.mimeData().text())
 
         # Check if Shift is pressed
         modifiers = QApplication.queryKeyboardModifiers()
-        if bool(modifiers & Qt.ShiftModifier):
+        if bool(modifiers & Qt.KeyboardModifier.ShiftModifier):
             logger = logging.getLogger(__name__)
             logger.debug("copy cursor")
             #QApplication.restoreOverrideCursor()
-            #QApplication.setOverrideCursor(Qt.CrossCursor) 
+            #QApplication.setOverrideCursor(Qt.CursorShape.CrossCursor) 
             #QApplication.changeOverrideCursor(self.copy_cursor)
         else:
             logger = logging.getLogger(__name__)
             logger.debug("move cursor")
             #QApplication.restoreOverrideCursor()
-            #QApplication.setOverrideCursor(Qt.ClosedHandCursor) 
+            #QApplication.setOverrideCursor(Qt.CursorShape.ClosedHandCursor) 
             #QApplication.changeOverrideCursor(self.move_cursor)
 
         event.accept()
@@ -1567,9 +1567,9 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             logger.debug(f"proposed action: {event.proposedAction()}")
             logger.debug(f"drop action: {event.dropAction()}")
             logger.debug(f"possible action: {int(event.possibleActions())}")
-            print("kinds of drop actions:", Qt.CopyAction, Qt.MoveAction, Qt.LinkAction, Qt.ActionMask, Qt.TargetMoveAction)
+            print("kinds of drop actions:", Qt.DropAction.CopyAction, Qt.DropAction.MoveAction, Qt.DropAction.LinkAction, Qt.DropAction.ActionMask, Qt.DropAction.TargetMoveAction)
             #event.acceptProposedAction()
-            event.setDropAction(Qt.CopyAction)
+            event.setDropAction(Qt.DropAction.CopyAction)
             event.accept()
         else:
             event.ignore()

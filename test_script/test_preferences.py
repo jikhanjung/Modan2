@@ -4,8 +4,8 @@ Test script for the Preferences Dialog to check WindowGeometry handling.
 """
 import sys
 from pathlib import Path
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtCore import QRect
+from PyQt6.QtWidgets import QApplication
+from PyQt6.QtCore import QRect
 
 # Add current directory to path
 sys.path.insert(0, str(Path(__file__).parent))

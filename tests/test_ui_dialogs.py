@@ -1,8 +1,8 @@
 """Tests for Modan2 dialog windows."""
 import pytest
-from PyQt5.QtCore import Qt
-from PyQt5.QtTest import QTest
-from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QMessageBox
+from PyQt6.QtCore import Qt
+from PyQt6.QtTest import QTest
+from PyQt6.QtWidgets import QDialog, QDialogButtonBox, QMessageBox
 from unittest.mock import Mock, MagicMock, patch
 import sys
 import os
@@ -43,7 +43,7 @@ class TestNewDatasetDialog:
         dialog.spinbox_no_landmark.setValue(10)
         
         # Accept dialog
-        result = dialog.exec_()
+        result = dialog.exec()
         
         assert result == QDialog.Accepted
         assert dialog.edit_dataset_name.text() == "Test Dataset"
@@ -59,7 +59,7 @@ class TestNewDatasetDialog:
         dialog = DatasetDialog(main_window)
         qtbot.addWidget(dialog)
         
-        result = dialog.exec_()
+        result = dialog.exec()
         assert result == QDialog.Rejected
     
     def test_new_dataset_dialog_validation(self, qtbot, main_window):
@@ -111,7 +111,7 @@ class TestPreferencesDialog:
         dialog.slider_landmark_size.setValue(5)
         
         # Accept dialog
-        result = dialog.exec_()
+        result = dialog.exec()
         
         assert result == QDialog.Accepted
         assert dialog.slider_toolbar_icon_size.value() == 48
@@ -125,8 +125,8 @@ class TestPreferencesDialog:
         qtbot.addWidget(dialog)
         
         # Test landmark color button
-        with patch('PyQt5.QtWidgets.QColorDialog.getColor') as mock_color:
-            from PyQt5.QtGui import QColor
+        with patch('PyQt6.QtWidgets.QColorDialog.getColor') as mock_color:
+            from PyQt6.QtGui import QColor
             mock_color.return_value = QColor(255, 0, 0)
             
             dialog.btn_landmark_color.click()
@@ -167,7 +167,7 @@ class TestAnalysisDialog:
         dialog.comboBox.setCurrentText("PCA")
         
         # Accept dialog
-        result = dialog.exec_()
+        result = dialog.exec()
         
         assert result == QDialog.Accepted
         assert dialog.get_analysis_type() == "PCA"
@@ -190,7 +190,7 @@ class TestAnalysisDialog:
         dialog.spinBox.setValue(3)
         
         # Accept dialog
-        result = dialog.exec_()
+        result = dialog.exec()
         
         assert result == QDialog.Accepted
         assert dialog.get_analysis_type() == "CVA"
@@ -219,7 +219,7 @@ class TestFileDialogs:
     
     def test_import_dialog(self, qtbot, main_window):
         """Test import file dialog."""
-        with patch('PyQt5.QtWidgets.QFileDialog.getOpenFileNames') as mock_dialog:
+        with patch('PyQt6.QtWidgets.QFileDialog.getOpenFileNames') as mock_dialog:
             mock_dialog.return_value = (['/path/to/file.tps'], 'TPS Files (*.tps)')
             
             main_window.on_action_import_dataset_triggered()
@@ -231,7 +231,7 @@ class TestFileDialogs:
         """Test export file dialog."""
         main_window.m_dataset = sample_dataset
         
-        with patch('PyQt5.QtWidgets.QFileDialog.getSaveFileName') as mock_dialog:
+        with patch('PyQt6.QtWidgets.QFileDialog.getSaveFileName') as mock_dialog:
             mock_dialog.return_value = ('/path/to/export.csv', 'CSV Files (*.csv)')
             
             with patch.object(main_window, 'export_dataset') as mock_export:
@@ -242,7 +242,7 @@ class TestFileDialogs:
     
     def test_open_image_dialog(self, qtbot, main_window):
         """Test open image file dialog."""
-        with patch('PyQt5.QtWidgets.QFileDialog.getOpenFileName') as mock_dialog:
+        with patch('PyQt6.QtWidgets.QFileDialog.getOpenFileName') as mock_dialog:
             mock_dialog.return_value = ('/path/to/image.jpg', 'Image Files (*.jpg)')
             
             with patch.object(main_window, 'load_image') as mock_load:
@@ -337,7 +337,7 @@ class TestEditObjectDialog:
         dialog.edit_object_desc.setText("New Description")
         
         # Accept dialog
-        result = dialog.exec_()
+        result = dialog.exec()
         
         assert result == QDialog.Accepted
         assert dialog.edit_object_name.text() == "New Name"

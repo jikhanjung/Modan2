@@ -1,25 +1,25 @@
 import sys
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
+from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QHBoxLayout, QTreeView, QTableView, QHeaderView)
-from PyQt5.QtGui import QStandardItemModel, QStandardItem, QDrag
-from PyQt5.QtCore import Qt, QMimeData, QObject, QEvent
+from PyQt6.QtGui import QStandardItemModel, QStandardItem, QDrag
+from PyQt6.QtCore import Qt, QMimeData, QObject, QEvent
 
 class DragCursorEventFilter(QObject):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.last_modifiers = Qt.NoModifier
+        self.last_modifiers = Qt.KeyboardModifier.NoModifier
 
     def eventFilter(self, obj, event):
         if event.type() in [QEvent.DragMove, QEvent.DragEnter]:
             modifiers = QApplication.keyboardModifiers()
             if modifiers != self.last_modifiers:
                 self.last_modifiers = modifiers
-                if modifiers & Qt.ControlModifier:
+                if modifiers & Qt.KeyboardModifier.ControlModifier:
                     print("copy cursor")
-                    QApplication.changeOverrideCursor(Qt.DragCopyCursor)
+                    QApplication.changeOverrideCursor(Qt.CursorShape.DragCopyCursor)
                 else:
                     print("move cursor")
-                    QApplication.changeOverrideCursor(Qt.DragMoveCursor)
+                    QApplication.changeOverrideCursor(Qt.CursorShape.DragMoveCursor)
         elif event.type() == QEvent.DragLeave:
             QApplication.restoreOverrideCursor()
         return False
@@ -30,12 +30,12 @@ class CustomTreeView(QTreeView):
         self.setDragEnabled(True)
 
     def mouseMoveEvent(self, event):
-        if event.buttons() & Qt.LeftButton:
+        if event.buttons() & Qt.MouseButton.LeftButton:
             drag = QDrag(self)
             mime_data = QMimeData()
             mime_data.setText(self.currentIndex().data())
             drag.setMimeData(mime_data)
-            drag.exec_(Qt.CopyAction | Qt.MoveAction)
+            drag.exec_(Qt.DropAction.CopyAction | Qt.DropAction.MoveAction)
         super().mouseMoveEvent(event)
 
 class CustomTableView(QTableView):
@@ -101,4 +101,4 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

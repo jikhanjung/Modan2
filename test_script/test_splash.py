@@ -4,8 +4,8 @@ Test script for the Modan2 splash screen.
 """
 import sys
 from pathlib import Path
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtCore import Qt, QTimer
+from PyQt6.QtWidgets import QApplication
+from PyQt6.QtCore import Qt, QTimer
 from MdSplashScreen import create_splash_screen
 
 def test_splash_screen():
@@ -58,7 +58,7 @@ def test_splash_screen():
     print("- Progress messages")
     print("- Version and copyright info")
     
-    app.exec_()
+    app.exec()
 
 if __name__ == "__main__":
     test_splash_screen()

@@ -27,7 +27,7 @@ else:
     pass
     # Ensure Qt finds plugins in bundled app
     if hasattr(sys, '_MEIPASS'):
-        plugin_path = os.path.join(sys._MEIPASS, "PyQt5", "Qt", "plugins")
+        plugin_path = os.path.join(sys._MEIPASS, "PyQt6", "Qt", "plugins")
         if os.path.exists(plugin_path):
             os.environ["QT_PLUGIN_PATH"] = plugin_path
 
@@ -122,7 +122,7 @@ def setup_logging(debug: bool = False):
     )
     
     # Reduce noise from Qt and matplotlib
-    logging.getLogger('PyQt5').setLevel(logging.WARNING)
+    logging.getLogger('PyQt6').setLevel(logging.WARNING)
     logging.getLogger('matplotlib.font_manager').setLevel(logging.ERROR)
 
 
@@ -167,25 +167,18 @@ def main():
     
     try:
         # Qt application setup
-        logger.info("Importing PyQt5 modules...")
+        logger.info("Importing PyQt6 modules...")
         try:
-            from PyQt5.QtWidgets import QApplication
-            from PyQt5.QtCore import Qt
-            from PyQt5.QtGui import QIcon, QSurfaceFormat
-            logger.info("PyQt5 modules imported successfully")
+            from PyQt6.QtWidgets import QApplication
+            from PyQt6.QtCore import Qt
+            from PyQt6.QtGui import QIcon, QSurfaceFormat
+            logger.info("PyQt6 modules imported successfully")
         except Exception as e:
-            logger.error(f"Failed to import PyQt5 modules: {e}")
+            logger.error(f"Failed to import PyQt6 modules: {e}")
             raise
         
-        # High DPI support
-        logger.info("Setting up High DPI support...")
-        try:
-            QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
-            QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
-            logger.info("High DPI support configured")
-        except Exception as e:
-            logger.error(f"Failed to setup High DPI support: {e}")
-            raise
+        # High DPI support - PyQt6 enables this by default
+        logger.info("High DPI support is enabled by default in PyQt6")
         
         # OpenGL Compatibility 프로파일 설정 (QApplication 생성 전)
         # This must be done before QApplication creation for QOpenGLWidget
@@ -193,11 +186,11 @@ def main():
         try:
             fmt = QSurfaceFormat()
             fmt.setVersion(2, 1)  # 안정성을 위해 2.1 사용 (GLU/immediate mode compatible)
-            fmt.setProfile(QSurfaceFormat.CompatibilityProfile)  # For GLU and fixed-function
+            fmt.setProfile(QSurfaceFormat.OpenGLContextProfile.CompatibilityProfile)  # For GLU and fixed-function
             fmt.setDepthBufferSize(24)  # Proper depth buffer
             fmt.setStencilBufferSize(8)  # Stencil buffer for advanced rendering
             fmt.setSamples(4)  # MSAA for smoother edges
-            fmt.setSwapBehavior(QSurfaceFormat.DoubleBuffer)  # Double buffering
+            fmt.setSwapBehavior(QSurfaceFormat.SwapBehavior.DoubleBuffer)  # Double buffering
             QSurfaceFormat.setDefaultFormat(fmt)
             logger.info("OpenGL surface format configured (2.1 Compatibility with enhanced buffers)")
         except Exception as e:
@@ -345,7 +338,7 @@ def main():
                 logger.info("Splash screen updated to Ready")
                 
                 logger.info("Scheduling splash screen close...")
-                from PyQt5.QtCore import QTimer
+                from PyQt6.QtCore import QTimer
                 QTimer.singleShot(1000, splash.close)
                 logger.info("Splash screen close scheduled")
             except Exception as e:
@@ -366,7 +359,7 @@ def main():
         
         # Run application
         try:
-            exit_code = app.exec_()
+            exit_code = app.exec()
             logger.info(f"Qt event loop exited with code: {exit_code}")
         except Exception as e:
             logger.error(f"Qt event loop crashed: {e}")
@@ -382,7 +375,7 @@ def main():
         
         # Try to show error dialog if Qt is available
         try:
-            from PyQt5.QtWidgets import QApplication, QMessageBox
+            from PyQt6.QtWidgets import QApplication, QMessageBox
             if QApplication.instance():
                 QMessageBox.critical(
                     None, 

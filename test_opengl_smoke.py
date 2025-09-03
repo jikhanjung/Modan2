@@ -40,32 +40,32 @@ def test_opengl_import():
     
     return True
 
-def test_pyqt5_import():
-    """Test that PyQt5 modules can be imported"""
-    print("\nTesting PyQt5 module imports...")
+def test_pyqt6_import():
+    """Test that PyQt6 modules can be imported"""
+    print("\nTesting PyQt6 module imports...")
     try:
-        from PyQt5 import QtCore
-        print(f"✓ PyQt5.QtCore version: {QtCore.QT_VERSION_STR}")
+        from PyQt6 import QtCore
+        print(f"✓ PyQt6.QtCore version: {QtCore.QT_VERSION_STR}")
     except ImportError as e:
-        print(f"✗ Failed to import PyQt5.QtCore: {e}")
+        print(f"✗ Failed to import PyQt6.QtCore: {e}")
         return False
     
     try:
-        from PyQt5.QtWidgets import QApplication
-        print("✓ PyQt5.QtWidgets.QApplication imported")
+        from PyQt6.QtWidgets import QApplication
+        print("✓ PyQt6.QtWidgets.QApplication imported")
     except ImportError as e:
-        print(f"✗ Failed to import PyQt5.QtWidgets.QApplication: {e}")
+        print(f"✗ Failed to import PyQt6.QtWidgets.QApplication: {e}")
         return False
     
     try:
-        from PyQt5.QtOpenGL import QGLWidget
-        print("✓ PyQt5.QtOpenGL.QGLWidget imported (legacy)")
+        from PyQt6.QtOpenGL import QGLWidget
+        print("✓ PyQt6.QtOpenGL.QGLWidget imported (legacy)")
     except ImportError as e:
         print(f"⚠ Could not import QGLWidget (legacy): {e}")
     
     try:
-        from PyQt5.QtWidgets import QOpenGLWidget
-        print("✓ PyQt5.QtWidgets.QOpenGLWidget imported")
+        from PyQt6.QtOpenGLWidgets import QOpenGLWidget
+        print("✓ PyQt6.QtOpenGLWidgets.QOpenGLWidget imported")
     except ImportError as e:
         print(f"✗ Failed to import QOpenGLWidget: {e}")
         return False
@@ -80,8 +80,8 @@ def test_offscreen_context():
     os.environ['QT_QPA_PLATFORM'] = 'offscreen'
     
     try:
-        from PyQt5.QtWidgets import QApplication
-        from PyQt5.QtGui import QSurfaceFormat, QOpenGLContext, QOffscreenSurface
+        from PyQt6.QtWidgets import QApplication
+        from PyQt6.QtGui import QSurfaceFormat, QOpenGLContext, QOffscreenSurface
         
         # Create application (required for Qt)
         app = QApplication.instance()
@@ -159,7 +159,7 @@ def main():
     if not test_opengl_import():
         all_passed = False
     
-    if not test_pyqt5_import():
+    if not test_pyqt6_import():
         all_passed = False
     
     # Test offscreen context (may not work in all CI environments)

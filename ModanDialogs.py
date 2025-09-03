@@ -1,13 +1,13 @@
-from PyQt5.QtWidgets import QTableWidgetItem, QHeaderView, QFileDialog, QCheckBox, QColorDialog, \
+from PyQt6.QtWidgets import QTableWidgetItem, QHeaderView, QFileDialog, QCheckBox, QColorDialog, \
                             QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QProgressBar, QApplication, \
                             QDialog, QLineEdit, QLabel, QPushButton, QAbstractItemView, QStatusBar, QMessageBox, \
                             QTableView, QSplitter, QRadioButton, QComboBox, QTextEdit, QSizePolicy, \
                             QTableWidget, QGridLayout, QAbstractButton, QButtonGroup, QGroupBox, QListWidgetItem,\
-                            QTabWidget, QListWidget, QSpinBox, QPlainTextEdit, QSlider, QScrollArea, QShortcut, QSpacerItem
-from PyQt5.QtGui import QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem, QImage,\
+                            QTabWidget, QListWidget, QSpinBox, QPlainTextEdit, QSlider, QScrollArea, QSpacerItem
+from PyQt6.QtGui import QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem, QImage,\
                         QFont, QPainter, QBrush, QMouseEvent, QWheelEvent, QDoubleValidator, QIcon, QCursor,\
-                        QFontMetrics, QIntValidator, QKeySequence
-from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSize, QPoint, QTranslator, \
+                        QFontMetrics, QIntValidator, QKeySequence, QShortcut
+from PyQt6.QtCore import Qt, QRect, QSortFilterProxyModel, QSize, QPoint, QTranslator, \
                          pyqtSlot, pyqtSignal, QItemSelectionModel, QTimer, QEvent
 
 import logging
@@ -497,8 +497,8 @@ class DatasetDialog(QDialog):
 
     def addVariable(self):
         item = QListWidgetItem(self.tr("New Variable"))
-        item.setFlags(item.flags() | Qt.ItemIsEditable)
-        item.setData(Qt.UserRole, -1)
+        item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
+        item.setData(Qt.ItemDataRole.UserRole, -1)
         self.lstVariableName.addItem(item)
         #print("new variable")
         self.lstVariableName.editItem(item)
@@ -580,8 +580,8 @@ class DatasetDialog(QDialog):
         variable_name_list = dataset.get_variablename_list()
         for idx, variable_name in enumerate(variable_name_list):
             item = QListWidgetItem(variable_name)
-            item.setFlags(item.flags() | Qt.ItemIsEditable)
-            item.setData(Qt.UserRole, idx)
+            item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
+            item.setData(Qt.ItemDataRole.UserRole, idx)
             self.lstVariableName.addItem(item)
         #self.edtVariableNameStr.setText(dataset.propertyname_str)
     
@@ -622,7 +622,7 @@ class DatasetDialog(QDialog):
         after_index_list = []
         for idx in range(self.lstVariableName.count()):
             item = self.lstVariableName.item(idx)
-            original_index = item.data(Qt.UserRole)
+            original_index = item.data(Qt.ItemDataRole.UserRole)
             variablename_list.append(item.text())
             before_index_list.append(original_index)
             after_index_list.append(idx)
@@ -703,7 +703,7 @@ class DatasetDialog(QDialog):
                         if item is None:
                             raise ValueError(f"No item found at index {idx}")
                         
-                        original_index = item.data(Qt.UserRole)
+                        original_index = item.data(Qt.ItemDataRole.UserRole)
                         variablename_list.append(item.text())
                         before_index_list.append(original_index)
                         after_index_list.append(idx)
@@ -788,8 +788,8 @@ class ObjectDialog(QDialog):
         self.status_bar = QStatusBar()
         self.landmark_list = []
 
-        self.hsplitter = QSplitter(Qt.Horizontal)
-        self.vsplitter = QSplitter(Qt.Vertical)
+        self.hsplitter = QSplitter(Qt.Orientation.Horizontal)
+        self.vsplitter = QSplitter(Qt.Orientation.Vertical)
 
         #self.vsplitter.addWidget(self.tableView)
         #self.vsplitter.addWidget(self.tableWidget)
@@ -990,7 +990,7 @@ class ObjectDialog(QDialog):
         self.dataset = None
         self.object = None
         self.edtPropertyList = []
-        self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
+        self.setWindowFlags(Qt.WindowType.WindowMaximizeButtonHint | Qt.WindowType.WindowMinimizeButtonHint | Qt.WindowType.WindowCloseButtonHint)
 
         self.cbxShowIndex.stateChanged.connect(self.show_index_state_changed)
         self.cbxShowWireframe.stateChanged.connect(self.show_wireframe_state_changed)
@@ -1125,7 +1125,7 @@ class ObjectDialog(QDialog):
         logger.debug(f"calibrate dialog created - edit_mode: {self.object_view.edit_mode}")
         self.calibrate_dlg.setModal(True)
         logger.debug(f"calibrate before exec - edit_mode: {self.object_view.edit_mode}")
-        self.calibrate_dlg.exec_()
+        self.calibrate_dlg.exec()
         logger.debug(f"calibrate after exec - edit_mode: {self.object_view.edit_mode}")
 
     def btnWireframe_clicked(self):
@@ -1369,16 +1369,16 @@ class ObjectDialog(QDialog):
             #print(idx, lm)
 
             item_x = QTableWidgetItem(str(float(lm[0])*1.0))
-            item_x.setTextAlignment(Qt.AlignRight|Qt.AlignVCenter)
+            item_x.setTextAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignVCenter)
             self.edtLandmarkStr.setItem(idx, 0, item_x)
 
             item_y = QTableWidgetItem(str(float(lm[1])*1.0))
-            item_y.setTextAlignment(Qt.AlignRight|Qt.AlignVCenter)
+            item_y.setTextAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignVCenter)
             self.edtLandmarkStr.setItem(idx, 1, item_y)
 
             if self.dataset.dimension == 3:
                 item_z = QTableWidgetItem(str(float(lm[2])*1.0))
-                item_z.setTextAlignment(Qt.AlignRight|Qt.AlignVCenter)
+                item_z.setTextAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignVCenter)
                 self.edtLandmarkStr.setItem(idx, 2, item_z)
         
 
@@ -1551,7 +1551,7 @@ class ObjectDialog(QDialog):
 
     def resizeEvent(self, event):
         #print("Window has been resized",self.image_label.width(), self.image_label.height())
-        #self.pixmap.scaled(self.image_label.width(), self.image_label.height(), Qt.KeepAspectRatio)
+        #self.pixmap.scaled(self.image_label.width(), self.image_label.height(), Qt.AspectRatioMode.KeepAspectRatio)
         #self.edtObjectDesc.resize(self.edtObjectDesc.height(),300)
         #self.image_label.setPixmap(self.pixmap)
         QDialog.resizeEvent(self, event)
@@ -1686,7 +1686,7 @@ class AnalysisResultDialog(QDialog):
     def __init__(self,parent):
         super().__init__()
         self.setWindowTitle(self.tr("Modan2 - Dataset Analysis"))
-        self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
+        self.setWindowFlags(Qt.WindowType.WindowMaximizeButtonHint | Qt.WindowType.WindowMinimizeButtonHint | Qt.WindowType.WindowCloseButtonHint)
         self.parent = parent
         self.remember_geometry = True
         self.m_app = QApplication.instance()
@@ -1703,7 +1703,7 @@ class AnalysisResultDialog(QDialog):
 
         self.initialize_UI()
         
-        self.main_hsplitter = QSplitter(Qt.Horizontal)
+        self.main_hsplitter = QSplitter(Qt.Orientation.Horizontal)
     
     def initialize_UI(self):
         pass
@@ -1715,7 +1715,7 @@ class DataExplorationDialog(QDialog):
         #print("DataExplorationDialog init")
         self.parent = parent
         self.setWindowTitle(self.tr("Modan2 - Data Exploration"))
-        self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
+        self.setWindowFlags(Qt.WindowType.WindowMaximizeButtonHint | Qt.WindowType.WindowMinimizeButtonHint | Qt.WindowType.WindowCloseButtonHint)
         #self.setWindowFlags(Qt.FramelessWindowHint)  # Removes window decoration
         #self.setAttribute(Qt.WA_TranslucentBackground)  # Enables transparency
         #self.setAttribute(Qt.WA_NoSystemBackground, True)  # Avoids system background paint
@@ -1778,19 +1778,19 @@ class DataExplorationDialog(QDialog):
         self.setLayout(self.layout)
 
         self.lblAnalysisName = QLabel(self.tr("Analysis name"))
-        self.lblAnalysisName.setAlignment(Qt.AlignVCenter|Qt.AlignRight)
+        self.lblAnalysisName.setAlignment(Qt.AlignmentFlag.AlignVCenter|Qt.AlignmentFlag.AlignRight)
         self.edtAnalysisName = QLineEdit()
         self.edtAnalysisName.setEnabled(False)
         self.lblSuperimposition = QLabel(self.tr("Superimposition method"))
-        self.lblSuperimposition.setAlignment(Qt.AlignVCenter|Qt.AlignRight)
+        self.lblSuperimposition.setAlignment(Qt.AlignmentFlag.AlignVCenter|Qt.AlignmentFlag.AlignRight)
         self.edtSuperimposition = QLineEdit()
         self.edtSuperimposition.setEnabled(False)
         self.lblOrdination = QLabel(self.tr("Ordination method"))
-        self.lblOrdination.setAlignment(Qt.AlignVCenter|Qt.AlignRight)
+        self.lblOrdination.setAlignment(Qt.AlignmentFlag.AlignVCenter|Qt.AlignmentFlag.AlignRight)
         self.edtOrdination = QLineEdit()
         self.edtOrdination.setEnabled(False)
         self.lblVisualization = QLabel(self.tr("Shape view"))
-        self.lblVisualization.setAlignment(Qt.AlignVCenter|Qt.AlignRight)
+        self.lblVisualization.setAlignment(Qt.AlignmentFlag.AlignVCenter|Qt.AlignmentFlag.AlignRight)
         self.comboVisualization = QComboBox()
         self.comboVisualization.addItem(self.tr("Exploration"),MODE_EXPLORATION)
         self.comboVisualization.addItem(self.tr("Regression"),MODE_REGRESSION)
@@ -1855,7 +1855,7 @@ class DataExplorationDialog(QDialog):
         spacer2.setMinimumWidth(20)
 
         self.lblGroupBy = QLabel(self.tr("Grouping variable"))
-        self.lblGroupBy.setAlignment(Qt.AlignVCenter|Qt.AlignRight)
+        self.lblGroupBy.setAlignment(Qt.AlignmentFlag.AlignVCenter|Qt.AlignmentFlag.AlignRight)
         self.comboGroupBy = QComboBox()
         self.comboGroupBy.setEnabled(False)
         self.comboGroupBy.currentIndexChanged.connect(self.comboGroupBy_changed)
@@ -1976,7 +1976,7 @@ class DataExplorationDialog(QDialog):
         self.btnArrowColor.setMinimumSize(20,20)
         self.btnArrowColor.setStyleSheet("background-color: yellow")
         self.btnArrowColor.setToolTip("yellow")
-        self.btnArrowColor.setCursor(Qt.PointingHandCursor)
+        self.btnArrowColor.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btnArrowColor.clicked.connect(self.on_btnArrowColor_clicked)
         self.sgpWidget.shape_preference_changed.connect(self.shape_grid_preference_changed)
 
@@ -2133,7 +2133,7 @@ class DataExplorationDialog(QDialog):
         self.shape_view_scroll_area.setWidget(self.shape_view_widget)
         self.view_layout.addWidget(self.shape_view_scroll_area)
 
-        self.visualization_splitter = QSplitter(Qt.Horizontal)
+        self.visualization_splitter = QSplitter(Qt.Orientation.Horizontal)
         self.visualization_splitter.addWidget(self.plot_widget)
         self.visualization_splitter.addWidget(self.view_widget)
         self.visualization_splitter.setSizes([800, 300])
@@ -2196,7 +2196,7 @@ class DataExplorationDialog(QDialog):
         dialog.setNameFilter("PNG (*.png);;JPG (*.jpg);;PDF (*.pdf);;SVG (*.svg);;All files (*.*)")
         dialog.setDefaultSuffix("png")
         #dialog.setDirectory(self.m_app.last_opened_dir)
-        if dialog.exec_():
+        if dialog.exec():
             filename = dialog.selectedFiles()[0]
             #self.m_app.last_opened_dir = dialog.directory().absolutePath()
             if filename:
@@ -2434,7 +2434,7 @@ class DataExplorationDialog(QDialog):
         if self.mode not in [ MODE_COMPARISON, ]:# or self.comboRegressionBy.currentText() == "By group":
             return
 
-        QApplication.setOverrideCursor(Qt.WaitCursor)
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
         self.pause_frame = 15
         self.toolbar_widget.hide()
         self.shape_option_widget.hide()
@@ -2602,11 +2602,11 @@ class DataExplorationDialog(QDialog):
         if mode == MODE_EXPLORATION:
             self.pick_idx = 0
             self.is_picking_shape = True
-            self.plot_widget2.setCursor(QCursor(Qt.CrossCursor))
+            self.plot_widget2.setCursor(QCursor(Qt.CursorShape.CrossCursor))
         else:
             self.is_picking_shape = False
             self.pick_idx = -1
-            self.plot_widget2.setCursor(QCursor(Qt.ArrowCursor))
+            self.plot_widget2.setCursor(QCursor(Qt.CursorShape.ArrowCursor))
 
     def prepare_shape_view(self):
         for shape_label in self.shape_label_list:
@@ -2836,7 +2836,7 @@ class DataExplorationDialog(QDialog):
         #print("shape_button_clicked", idx)
         self.is_picking_shape = True
         self.pick_idx = idx
-        self.plot_widget2.setCursor(QCursor(Qt.CrossCursor))
+        self.plot_widget2.setCursor(QCursor(Qt.CursorShape.CrossCursor))
 
         #self.shape_view_list[idx].show()
 
@@ -2873,7 +2873,7 @@ class DataExplorationDialog(QDialog):
             if is_maximized == True:
                 #print("maximized true. restoring maximized state")
                 #self.showMaximized()
-                self.setWindowState(Qt.WindowMaximized)
+                self.setWindowState(Qt.WindowState.WindowMaximized)
             else:
                 self.setGeometry(self.m_app.settings.value("WindowGeometry/DataExplorationWindow", QRect(100, 100, 1400, 800)))
                 #self.setGeometry(self.m_app.settings.value("WindowGeometry/DataExplorationWindow", QRect(100, 100, 1400, 800)))
@@ -3086,8 +3086,8 @@ class DataExplorationDialog(QDialog):
         # Make all items checkable
         for i in range(model.rowCount()):
             item = model.item(i)
-            item.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
-            item.setCheckState(Qt.Checked)  # Initially unchecked                
+            item.setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled)
+            item.setCheckState(Qt.CheckState.Checked)  # Initially unchecked                
 
 
     def comboGroupBy_changed(self):
@@ -3208,7 +3208,7 @@ class DataExplorationDialog(QDialog):
         select_group_list = []
         for i in range(self.comboSelectGroup.count()):
             item = self.comboSelectGroup.model().item(i)
-            if item.checkState() == Qt.Checked:
+            if item.checkState() == Qt.CheckState.Checked:
                 select_group_list.append(item.text())
         #print("select_group_list", select_group_list)
 
@@ -3648,11 +3648,11 @@ class DataExplorationDialog(QDialog):
     def on_hover_enter(self,event):
         return
         if event.inaxes == self.ax2:  # Check if mouse is over the axes
-            self.fig2.canvas.setCursor(QCursor(Qt.CrossCursor))
+            self.fig2.canvas.setCursor(QCursor(Qt.CursorShape.CrossCursor))
 
     def on_hover_leave(self,event):
         return
-        self.fig2.canvas.setCursor(QCursor(Qt.ArrowCursor))
+        self.fig2.canvas.setCursor(QCursor(Qt.CursorShape.ArrowCursor))
 
     def on_canvas_move(self, evt):
         
@@ -3725,11 +3725,11 @@ class DataExplorationDialog(QDialog):
             if self.is_picking_shape:
                 # set cursor to crosshair
                 if self.mode == MODE_COMPARISON:
-                    self.plot_widget2.setCursor(QCursor(Qt.ArrowCursor))
+                    self.plot_widget2.setCursor(QCursor(Qt.CursorShape.ArrowCursor))
                     self.is_picking_shape = False
                     self.pick_idx = -1
                 elif self.mode == MODE_EXPLORATION:
-                    self.plot_widget2.setCursor(QCursor(Qt.CrossCursor))
+                    self.plot_widget2.setCursor(QCursor(Qt.CursorShape.CrossCursor))
                     self.is_picking_shape = True
                     self.pick_idx = 0
             else:
@@ -3833,7 +3833,7 @@ class DataExplorationDialog(QDialog):
                     self.shape_regression(evt)
         elif self.mode in [ MODE_COMPARISON, MODE_EXPLORATION, MODE_COMPARISON2 ]:
             if evt.button == 1 and self.is_picking_shape:
-                self.plot_widget2.setCursor(QCursor(Qt.CrossCursor))
+                self.plot_widget2.setCursor(QCursor(Qt.CursorShape.CrossCursor))
                 self.pick_shape(x_val, y_val)
                 self.fig2.canvas.draw()
 
@@ -4053,7 +4053,7 @@ class DatasetAnalysisDialog(QDialog):
     def __init__(self,parent,dataset):
         super().__init__()
         self.setWindowTitle(self.tr("Modan2 - Dataset Analysis"))
-        self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
+        self.setWindowFlags(Qt.WindowType.WindowMaximizeButtonHint | Qt.WindowType.WindowMinimizeButtonHint | Qt.WindowType.WindowCloseButtonHint)
         self.parent = parent
         self.remember_geometry = True
         self.m_app = QApplication.instance()
@@ -4068,11 +4068,11 @@ class DatasetAnalysisDialog(QDialog):
         self.shape_list = []
         self.shape_name_list = []
         
-        self.main_hsplitter = QSplitter(Qt.Horizontal)
+        self.main_hsplitter = QSplitter(Qt.Orientation.Horizontal)
 
         # 2d shape
         self.lblShape2 = DatasetOpsViewer(self)
-        self.lblShape2.setAlignment(Qt.AlignCenter)
+        self.lblShape2.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.lblShape2.setMinimumWidth(400)
         self.lblShape2.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         # 3d shape
@@ -4119,7 +4119,7 @@ class DatasetAnalysisDialog(QDialog):
         self.cbx_widget = QWidget()
         self.cbx_widget.setLayout(self.checkbox_layout)
 
-        self.shape_vsplitter = QSplitter(Qt.Vertical)
+        self.shape_vsplitter = QSplitter(Qt.Orientation.Vertical)
         self.shape_vsplitter.addWidget(self.lblShape)
         self.shape_vsplitter.addWidget(self.cbx_widget)
         self.shape_vsplitter.setSizes([800,20])
@@ -4133,14 +4133,14 @@ class DatasetAnalysisDialog(QDialog):
         self.table_tab = QTabWidget()
 
         self.tableView1 = QTableView()
-        self.tableView1.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.tableView1.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.tableView1.setSortingEnabled(True)
-        self.tableView1.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.tableView1.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.tableView1.setSortingEnabled(True)
 
         self.tableView2 = QTableView()
-        self.tableView2.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.tableView2.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.tableView2.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.tableView2.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
 
         self.table_tab.addTab(self.tableView1, self.tr("Objects"))
         self.table_tab.addTab(self.tableView2, self.tr("Groups"))
@@ -4529,7 +4529,7 @@ class DatasetAnalysisDialog(QDialog):
                 msg.setIcon(QMessageBox.Critical)
                 msg.setText(self.tr("Error: landmark count is not consistent"))
                 msg.setWindowTitle("Error")
-                msg.exec_()
+                msg.exec()
                 self.close()
                 return False
             prev_lm_count = lm_count
@@ -4729,7 +4729,7 @@ class DatasetAnalysisDialog(QDialog):
     def on_btn_analysis_clicked(self):
         #print("pca button clicked")
         # set wait cursor
-        QApplication.setOverrideCursor(Qt.WaitCursor)
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
         QApplication.processEvents()
 
         self.ds_ops = MdDatasetOps(self.dataset)
@@ -5195,11 +5195,11 @@ class DatasetAnalysisDialog(QDialog):
         for obj in self.dataset.object_list:
             item0 = QStandardItem()
             item0.setCheckable(True)
-            item0.setCheckState(Qt.Checked)
-            item0.setData(obj.id,Qt.DisplayRole)
+            item0.setCheckState(Qt.CheckState.Checked)
+            item0.setData(obj.id,Qt.ItemDataRole.DisplayRole)
 
             item1 = QStandardItem()
-            item1.setData(obj.id,Qt.DisplayRole)
+            item1.setData(obj.id,Qt.ItemDataRole.DisplayRole)
             item2 = QStandardItem(obj.object_name)
             self.object_hash[obj.id] = item1
             if self.propertyname_index >= 0:
@@ -5210,10 +5210,10 @@ class DatasetAnalysisDialog(QDialog):
                     self.variable_list.append(obj.variable_list[self.propertyname_index])
                     p_item0 = QStandardItem()
                     p_item0.setCheckable(True)
-                    p_item0.setCheckState(Qt.Checked)
+                    p_item0.setCheckState(Qt.CheckState.Checked)
                     p_item1 = QStandardItem()
                     p_item1.setCheckable(True)
-                    p_item1.setCheckState(Qt.Checked)
+                    p_item1.setCheckState(Qt.CheckState.Checked)
                     self.property_model.appendRow([p_item0,p_item1,QStandardItem(obj.variable_list[self.propertyname_index])])
                 #self.variable_list.append(obj.variable_list[self.propertyname_index])
                 self.object_model.appendRow([item0,item1,item2,item3] )
@@ -5250,13 +5250,13 @@ class DatasetAnalysisDialog(QDialog):
         self.tableView1.setColumnWidth(2, 150)
         self.tableView1.verticalHeader().setDefaultSectionSize(20)
         self.tableView1.verticalHeader().setVisible(False)
-        self.tableView1.setSelectionBehavior(QTableView.SelectRows)
+        self.tableView1.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         #self.tableView.clicked.connect(self.on_tableView_clicked)
         self.object_selection_model = self.tableView1.selectionModel()
         self.object_selection_model.selectionChanged.connect(self.on_object_selection_changed)
         self.tableView1.setSortingEnabled(True)
-        self.tableView1.sortByColumn(0, Qt.AscendingOrder)
-        self.object_model.setSortRole(Qt.UserRole)
+        self.tableView1.sortByColumn(0, Qt.SortOrder.AscendingOrder)
+        self.object_model.setSortRole(Qt.ItemDataRole.UserRole)
 
         header = self.tableView1.horizontalHeader()   
         header.setSectionResizeMode(0, QHeaderView.Fixed)
@@ -5842,7 +5842,7 @@ class ImportDatasetDialog(QDialog):
         msg.setText(self.tr("Finished importing a {} file.".format(filetype)))
         msg.setStandardButtons(QMessageBox.Ok)
             
-        retval = msg.exec_()
+        retval = msg.exec()
         self.close()
         # add dataset to project
         #self.parent.parent.project.datasets.append(dataset)
@@ -5928,7 +5928,7 @@ class PreferencesDialog(QDialog):
         self.lbl2DLandmarkColor.setMinimumSize(20,20)
         self.lbl2DLandmarkColor.setStyleSheet("background-color: " + self.m_app.landmark_pref['2D']['color'])
         self.lbl2DLandmarkColor.setToolTip(self.m_app.landmark_pref['2D']['color'])
-        self.lbl2DLandmarkColor.setCursor(Qt.PointingHandCursor)
+        self.lbl2DLandmarkColor.setCursor(Qt.CursorShape.PointingHandCursor)
         self.lbl2DLandmarkColor.mousePressEvent = lambda event, dim='2D': self.on_lblLmColor_clicked(event, '2D')
         self.combo2DLandmarkSize.currentIndexChanged.connect(lambda event, dim='2D': self.on_comboLmSize_currentIndexChanged(event, '2D'))
 
@@ -5945,7 +5945,7 @@ class PreferencesDialog(QDialog):
         self.lbl3DLandmarkColor.setMinimumSize(20,20)
         self.lbl3DLandmarkColor.setStyleSheet("background-color: " + self.m_app.landmark_pref['3D']['color'])
         self.lbl3DLandmarkColor.setToolTip(self.m_app.landmark_pref['3D']['color'])
-        self.lbl3DLandmarkColor.setCursor(Qt.PointingHandCursor)
+        self.lbl3DLandmarkColor.setCursor(Qt.CursorShape.PointingHandCursor)
         self.lbl3DLandmarkColor.mousePressEvent = lambda event, dim='3D': self.on_lblLmColor_clicked(event, '3D')
         self.combo3DLandmarkSize.currentIndexChanged.connect(lambda event, dim='3D': self.on_comboLmSize_currentIndexChanged(event, '3D'))
 
@@ -5968,7 +5968,7 @@ class PreferencesDialog(QDialog):
         self.lbl2DWireframeColor.setMinimumSize(20,20)
         self.lbl2DWireframeColor.setStyleSheet("background-color: " + self.m_app.wireframe_pref['2D']['color'])
         self.lbl2DWireframeColor.setToolTip(self.m_app.wireframe_pref['2D']['color'])
-        self.lbl2DWireframeColor.setCursor(Qt.PointingHandCursor)
+        self.lbl2DWireframeColor.setCursor(Qt.CursorShape.PointingHandCursor)
         self.lbl2DWireframeColor.mousePressEvent = lambda event, dim='2D': self.on_lblWireframeColor_clicked(event, '2D')
         self.combo2DWireframeThickness.currentIndexChanged.connect(lambda event, dim='2D': self.on_comboWireframeThickness_currentIndexChanged(event, '2D'))
 
@@ -5985,7 +5985,7 @@ class PreferencesDialog(QDialog):
         self.lbl3DWireframeColor.setMinimumSize(20,20)
         self.lbl3DWireframeColor.setStyleSheet("background-color: " + self.m_app.wireframe_pref['3D']['color'])
         self.lbl3DWireframeColor.setToolTip(self.m_app.wireframe_pref['3D']['color'])
-        self.lbl3DWireframeColor.setCursor(Qt.PointingHandCursor)
+        self.lbl3DWireframeColor.setCursor(Qt.CursorShape.PointingHandCursor)
         self.lbl3DWireframeColor.mousePressEvent = lambda event, dim='3D': self.on_lblWireframeColor_clicked(event, '3D')
         self.combo3DWireframeThickness.currentIndexChanged.connect(lambda event, dim='3D': self.on_comboWireframeThickness_currentIndexChanged(event, '3D'))
 
@@ -6008,7 +6008,7 @@ class PreferencesDialog(QDialog):
         self.lbl2DIndexColor.setMinimumSize(20,20)
         self.lbl2DIndexColor.setStyleSheet("background-color: " + self.m_app.index_pref['2D']['color'])
         self.lbl2DIndexColor.setToolTip(self.m_app.index_pref['2D']['color'])
-        self.lbl2DIndexColor.setCursor(Qt.PointingHandCursor)
+        self.lbl2DIndexColor.setCursor(Qt.CursorShape.PointingHandCursor)
         self.lbl2DIndexColor.mousePressEvent = lambda event, dim='2D': self.on_lblIndexColor_clicked(event, '2D')
         self.combo2DIndexSize.currentIndexChanged.connect(lambda event, dim='2D': self.on_comboIndexSize_currentIndexChanged(event, '2D'))
 
@@ -6025,7 +6025,7 @@ class PreferencesDialog(QDialog):
         self.lbl3DIndexColor.setMinimumSize(20,20)
         self.lbl3DIndexColor.setStyleSheet("background-color: " + self.m_app.index_pref['3D']['color'])
         self.lbl3DIndexColor.setToolTip(self.m_app.index_pref['3D']['color'])
-        self.lbl3DIndexColor.setCursor(Qt.PointingHandCursor)
+        self.lbl3DIndexColor.setCursor(Qt.CursorShape.PointingHandCursor)
         self.lbl3DIndexColor.mousePressEvent = lambda event, dim='3D': self.on_lblIndexColor_clicked(event, '3D')
         self.combo3DIndexSize.currentIndexChanged.connect(lambda event, dim='3D': self.on_comboIndexSize_currentIndexChanged(event, '3D'))
 
@@ -6042,7 +6042,7 @@ class PreferencesDialog(QDialog):
         self.lblBgcolor.setMinimumSize(20,20)
         self.lblBgcolor.setStyleSheet("background-color: " + self.m_app.bgcolor)
         self.lblBgcolor.setToolTip(self.m_app.bgcolor)
-        self.lblBgcolor.setCursor(Qt.PointingHandCursor)
+        self.lblBgcolor.setCursor(Qt.CursorShape.PointingHandCursor)
         self.lblBgcolor.mousePressEvent = lambda event: self.on_lblBgcolor_clicked(event)
 
 
@@ -6107,7 +6107,7 @@ class PreferencesDialog(QDialog):
             #self.lblColor_list[i].setMaximumSize(20,20)
             self.lblColor_list[i].setStyleSheet("background-color: " + self.m_app.color_list[i])
             self.lblColor_list[i].setToolTip(self.m_app.color_list[i])
-            self.lblColor_list[i].setCursor(Qt.PointingHandCursor)
+            self.lblColor_list[i].setCursor(Qt.CursorShape.PointingHandCursor)
             self.lblColor_list[i].setText(str(i+1))
             #self.lblColor_list[i].mousePressEvent = self.on_lblColor_clicked
             self.lblColor_list[i].mousePressEvent = lambda event, index=i: self.on_lblColor_clicked(event, index)

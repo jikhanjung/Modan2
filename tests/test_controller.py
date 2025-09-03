@@ -1,7 +1,7 @@
 """Tests for ModanController business logic."""
 import pytest
 from unittest.mock import Mock, MagicMock, patch, call
-from PyQt5.QtCore import QObject, pyqtSignal
+from PyQt6.QtCore import QObject, pyqtSignal
 
 from ModanController import ModanController
 import MdModel

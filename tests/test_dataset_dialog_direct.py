@@ -2,9 +2,9 @@
 import pytest
 import sys
 import os
-from PyQt5.QtCore import Qt, QRect
-from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QMessageBox, QApplication
-from PyQt5.QtTest import QTest
+from PyQt6.QtCore import Qt, QRect
+from PyQt6.QtWidgets import QDialog, QDialogButtonBox, QMessageBox, QApplication
+from PyQt6.QtTest import QTest
 from unittest.mock import patch, Mock
 
 # Add parent directory to path for imports
@@ -28,7 +28,7 @@ def dataset_dialog(qtbot):
     mock_app = Mock()
     mock_app.settings = mock_settings
     
-    with patch('PyQt5.QtWidgets.QApplication.instance', return_value=mock_app):
+    with patch('PyQt6.QtWidgets.QApplication.instance', return_value=mock_app):
         dialog = DatasetDialog(parent=None)
         qtbot.addWidget(dialog)
         yield dialog
@@ -59,7 +59,7 @@ def object_dialog_with_dataset(qtbot):
     mock_app = Mock()
     mock_app.settings = mock_settings
     
-    with patch('PyQt5.QtWidgets.QApplication.instance', return_value=mock_app):
+    with patch('PyQt6.QtWidgets.QApplication.instance', return_value=mock_app):
         # Create a mock parent with necessary attributes
         mock_parent = Mock()
         mock_parent.pos.return_value = Mock()
@@ -143,7 +143,7 @@ class TestDatasetDialogDirect:
         assert dialog.rbtn2D.isChecked()
         
         # Try to click 3D - may need to wait for event processing
-        qtbot.mouseClick(dialog.rbtn3D, Qt.LeftButton)
+        qtbot.mouseClick(dialog.rbtn3D, Qt.MouseButton.LeftButton)
         qtbot.wait(10)  # Wait for event processing
         
         # Verify state change (if radio buttons are properly grouped, this should work)
@@ -226,7 +226,7 @@ class TestDatasetDialogDirect:
         assert cancel_button is not None
         
         # Test cancel button click
-        qtbot.mouseClick(cancel_button, Qt.LeftButton)
+        qtbot.mouseClick(cancel_button, Qt.MouseButton.LeftButton)
         # Dialog should close/reject
         # Note: In direct testing, we may not see immediate window closure
     
@@ -707,7 +707,7 @@ class TestDatasetObjectDialogIntegration:
         mock_app = Mock()
         mock_app.settings = mock_settings
         
-        with patch('PyQt5.QtWidgets.QApplication.instance', return_value=mock_app):
+        with patch('PyQt6.QtWidgets.QApplication.instance', return_value=mock_app):
             object_dialog = ObjectDialog(parent=mock_parent)
             object_dialog.set_dataset(created_dataset)
             qtbot.addWidget(object_dialog)
@@ -771,7 +771,7 @@ class TestDatasetObjectDialogIntegration:
         
         created_objects = []
         
-        with patch('PyQt5.QtWidgets.QApplication.instance', return_value=mock_app):
+        with patch('PyQt6.QtWidgets.QApplication.instance', return_value=mock_app):
             for name, desc, seq in object_data:
                 # Create new ObjectDialog for each object
                 object_dialog = ObjectDialog(parent=mock_parent)
@@ -832,7 +832,7 @@ class TestDatasetObjectDialogIntegration:
         mock_app = Mock()
         mock_app.settings = mock_settings
         
-        with patch('PyQt5.QtWidgets.QApplication.instance', return_value=mock_app):
+        with patch('PyQt6.QtWidgets.QApplication.instance', return_value=mock_app):
             object_dialog = ObjectDialog(parent=mock_parent)
             qtbot.addWidget(object_dialog)
             

@@ -2,10 +2,10 @@
 import pytest
 import tempfile
 from pathlib import Path
-from PyQt5.QtCore import Qt, QMimeData, QUrl, QPoint
-from PyQt5.QtGui import QDragEnterEvent, QDropEvent
-from PyQt5.QtTest import QTest
-from PyQt5.QtWidgets import QTreeWidgetItem, QDialog, QMessageBox
+from PyQt6.QtCore import Qt, QMimeData, QUrl, QPoint
+from PyQt6.QtGui import QDragEnterEvent, QDropEvent
+from PyQt6.QtTest import QTest
+from PyQt6.QtWidgets import QTreeWidgetItem, QDialog, QMessageBox
 from unittest.mock import Mock, MagicMock, patch
 import sys
 import os
@@ -71,7 +71,7 @@ ID=specimen_002
         # Step 2: Select the dataset in treeView
         item = QTreeWidgetItem()
         item.setText(0, dataset.dataset_name)
-        item.setData(0, Qt.UserRole, dataset)
+        item.setData(0, Qt.ItemDataRole.UserRole, dataset)
         main_window.treeView.addTopLevelItem(item)
         main_window.treeView.setCurrentItem(item)
         main_window.on_selection_changed()
@@ -85,10 +85,10 @@ ID=specimen_002
         # Create drop event
         drop_event = QDropEvent(
             QPoint(100, 100),
-            Qt.CopyAction,
+            Qt.DropAction.CopyAction,
             mime_data,
-            Qt.LeftButton,
-            Qt.NoModifier
+            Qt.MouseButton.LeftButton,
+            Qt.KeyboardModifier.NoModifier
         )
         
         with patch.object(main_window, 'process_dropped_file') as mock_process:
@@ -194,7 +194,7 @@ f 5 6 7 8
         
         try:
             # Import OBJ file
-            with patch('PyQt5.QtWidgets.QFileDialog.getOpenFileName') as mock_dialog:
+            with patch('PyQt6.QtWidgets.QFileDialog.getOpenFileName') as mock_dialog:
                 mock_dialog.return_value = (obj_path, '3D Files (*.obj)')
                 
                 with patch.object(main_window, 'on_action_import_dataset_triggered') as mock_import:
@@ -235,7 +235,7 @@ f 5 6 7 8
             csv_path = tmp_csv.name
         
         try:
-            with patch('PyQt5.QtWidgets.QFileDialog.getSaveFileName') as mock_dialog:
+            with patch('PyQt6.QtWidgets.QFileDialog.getSaveFileName') as mock_dialog:
                 mock_dialog.return_value = (csv_path, 'CSV Files (*.csv)')
                 
                 with patch.object(main_window, 'on_action_export_dataset_triggered') as mock_export:
@@ -325,7 +325,7 @@ f 5 6 7 8
             # Add to treeView
             item = QTreeWidgetItem()
             item.setText(0, ds.dataset_name)
-            item.setData(0, Qt.UserRole, ds)
+            item.setData(0, Qt.ItemDataRole.UserRole, ds)
             main_window.treeView.addTopLevelItem(item)
         
         # Switch between datasets
@@ -356,7 +356,7 @@ f 5 6 7 8
             assert "dataset" in args[2].lower()
         
         # Test handling corrupted file
-        with patch('PyQt5.QtWidgets.QFileDialog.getOpenFileName') as mock_dialog:
+        with patch('PyQt6.QtWidgets.QFileDialog.getOpenFileName') as mock_dialog:
             mock_dialog.return_value = ('/invalid/file.tps', 'TPS Files (*.tps)')
             
             with patch.object(main_window, 'show_error_message') as mock_error:
@@ -394,7 +394,7 @@ class TestIntegrationScenarios:
         # Add dataset to treeView
         dataset_item = QTreeWidgetItem()
         dataset_item.setText(0, dataset.dataset_name)
-        dataset_item.setData(0, Qt.UserRole, dataset)
+        dataset_item.setData(0, Qt.ItemDataRole.UserRole, dataset)
         main_window.treeView.addTopLevelItem(dataset_item)
         
         # Select dataset

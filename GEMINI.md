@@ -93,3 +93,15 @@ This document provides a comprehensive overview of the Modan2 project for AI age
 
 ---
 This document should serve as the primary reference for any AI agent working on this project.
+
+## 6. AI Collaboration Model
+
+To ensure efficient and clear development, the project utilizes a role-based collaboration model between different AI agents.
+
+-   **Gemini (Analysis & Planning):**
+    -   **Responsibilities:** Project analysis, strategic planning, creating development plans (like migration strategies or new feature proposals), and generating documentation (`devlog`, `README.md` updates, etc.).
+    -   **Primary Goal:** To provide clear, well-researched, and actionable plans for the implementation agent. Gemini does **not** write or commit production code.
+
+-   **Claude Code (Implementation):**
+    -   **Responsibilities:** Writing, refactoring, and debugging code based on the plans provided by Gemini. This includes implementing new features, fixing bugs, and executing migration tasks.
+    -   **Primary Goal:** To translate the strategic plans into high-quality, working code.

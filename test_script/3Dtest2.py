@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QApplication, QGridLayout
+from PyQt6.QtWidgets import QApplication, QGridLayout
 import numpy as np
 import pyqtgraph as pg
 import pyqtgraph.opengl as gl
@@ -25,4 +25,4 @@ glvw.sizeHint = lambda: pg.QtCore.QSize(100, 100)
 glvw.setSizePolicy(p1.sizePolicy())
 
 win.show()
-QApplication.instance().exec_()
+QApplication.instance().exec()

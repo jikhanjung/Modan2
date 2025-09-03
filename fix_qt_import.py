@@ -57,10 +57,10 @@ def check_display():
 def test_qt():
     """Test if Qt can initialize properly"""
     try:
-        from PyQt5.QtWidgets import QApplication
-        from PyQt5.QtCore import QT_VERSION_STR
+        from PyQt6.QtWidgets import QApplication
+        from PyQt6.QtCore import QT_VERSION_STR
         
-        print(f"PyQt5 version: {QT_VERSION_STR}")
+        print(f"PyQt6 version: {QT_VERSION_STR}")
         
         # Try to create QApplication
         app = QApplication.instance()

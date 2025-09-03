@@ -1,15 +1,15 @@
 import sys
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
+from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QHBoxLayout, QTreeView, QTableView, QHeaderView)
-from PyQt5.QtGui import QStandardItemModel, QStandardItem, QDrag, QCursor
-from PyQt5.QtCore import Qt, QMimeData, QObject, QEvent
+from PyQt6.QtGui import QStandardItemModel, QStandardItem, QDrag, QCursor
+from PyQt6.QtCore import Qt, QMimeData, QObject, QEvent
 
 
 class GlobalDragEventFilter(QObject):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.copy_cursor = QCursor(Qt.DragCopyCursor)
-        self.move_cursor = QCursor(Qt.DragMoveCursor)
+        self.copy_cursor = QCursor(Qt.CursorShape.DragCopyCursor)
+        self.move_cursor = QCursor(Qt.CursorShape.DragMoveCursor)
         self.is_active = False
 
     def eventFilter(self, obj, event):
@@ -18,7 +18,7 @@ class GlobalDragEventFilter(QObject):
 
         if event.type() in [QEvent.KeyPress, QEvent.KeyRelease, QEvent.DragMove, QEvent.DragEnter]:
             modifiers = QApplication.queryKeyboardModifiers()  # Use queryKeyboardModifiers instead
-            if modifiers & Qt.ControlModifier:
+            if modifiers & Qt.KeyboardModifier.ControlModifier:
                 QApplication.changeOverrideCursor(self.copy_cursor)
             else:
                 QApplication.changeOverrideCursor(self.move_cursor)
@@ -31,7 +31,7 @@ class CustomTreeView(QTreeView):
         QApplication.instance().installEventFilter(self.global_filter)
 
     def mouseMoveEvent(self, event):
-        if event.buttons() & Qt.LeftButton:
+        if event.buttons() & Qt.MouseButton.LeftButton:
             drag = QDrag(self)
             mime_data = QMimeData()
             mime_data.setText(self.currentIndex().data())
@@ -42,11 +42,11 @@ class CustomTreeView(QTreeView):
 
             # Set initial cursor
             modifiers = QApplication.keyboardModifiers()
-            initial_cursor = self.global_filter.copy_cursor if modifiers & Qt.ControlModifier else self.global_filter.move_cursor
+            initial_cursor = self.global_filter.copy_cursor if modifiers & Qt.KeyboardModifier.ControlModifier else self.global_filter.move_cursor
             QApplication.setOverrideCursor(initial_cursor)
 
             # Execute drag operation
-            result = drag.exec_(Qt.CopyAction | Qt.MoveAction)
+            result = drag.exec_(Qt.DropAction.CopyAction | Qt.DropAction.MoveAction)
 
             # Deactivate the global filter and restore cursor
             self.global_filter.is_active = False
@@ -115,4 +115,4 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

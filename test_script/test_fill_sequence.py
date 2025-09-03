@@ -4,9 +4,9 @@ Test script to verify the fill_sequence functionality
 """
 
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPushButton
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QStandardItemModel, QStandardItem
+from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPushButton
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QStandardItemModel, QStandardItem
 
 # Add project path
 sys.path.insert(0, '/home/jikhanjung/projects/Modan2')
@@ -79,7 +79,7 @@ def main():
     window = TestWindow()
     window.show()
     
-    return app.exec_()
+    return app.exec()
 
 if __name__ == "__main__":
     sys.exit(main())

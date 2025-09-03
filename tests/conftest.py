@@ -41,7 +41,7 @@ specimen_001
 @pytest.fixture(scope="session")
 def qt_app():
     """Create a QApplication for Qt tests."""
-    from PyQt5.QtWidgets import QApplication
+    from PyQt6.QtWidgets import QApplication
     from unittest.mock import Mock
     
     app = QApplication.instance()
@@ -50,7 +50,7 @@ def qt_app():
     
     # Setup mock settings for all tests
     if not hasattr(app, 'settings'):
-        from PyQt5.QtCore import QRect
+        from PyQt6.QtCore import QRect
         
         def mock_settings_value(key, default=None):
             if "Geometry" in key:
@@ -77,7 +77,7 @@ def qt_app():
 @pytest.fixture(scope='session')
 def qapp():
     """Global Qt Application fixture for pytest-qt."""
-    from PyQt5.QtWidgets import QApplication
+    from PyQt6.QtWidgets import QApplication
     from unittest.mock import Mock
     
     app = QApplication.instance()
@@ -86,7 +86,7 @@ def qapp():
     
     # Setup mock settings for all tests
     if not hasattr(app, 'settings'):
-        from PyQt5.QtCore import QRect
+        from PyQt6.QtCore import QRect
         
         def mock_settings_value(key, default=None):
             if "Geometry" in key:
@@ -131,12 +131,12 @@ def suppress_message_boxes(monkeypatch):
     mock_msgbox.question = Mock(return_value=1)
     
     # Patch the QMessageBox class
-    monkeypatch.setattr('PyQt5.QtWidgets.QMessageBox.exec_', lambda self: 1)
-    monkeypatch.setattr('PyQt5.QtWidgets.QMessageBox.exec', lambda self: 1)
-    monkeypatch.setattr('PyQt5.QtWidgets.QMessageBox.information', lambda *args, **kwargs: 1)
-    monkeypatch.setattr('PyQt5.QtWidgets.QMessageBox.warning', lambda *args, **kwargs: 1)
-    monkeypatch.setattr('PyQt5.QtWidgets.QMessageBox.critical', lambda *args, **kwargs: 1)
-    monkeypatch.setattr('PyQt5.QtWidgets.QMessageBox.question', lambda *args, **kwargs: 1)
+    monkeypatch.setattr('PyQt6.QtWidgets.QMessageBox.exec_', lambda self: 1)
+    monkeypatch.setattr('PyQt6.QtWidgets.QMessageBox.exec', lambda self: 1)
+    monkeypatch.setattr('PyQt6.QtWidgets.QMessageBox.information', lambda *args, **kwargs: 1)
+    monkeypatch.setattr('PyQt6.QtWidgets.QMessageBox.warning', lambda *args, **kwargs: 1)
+    monkeypatch.setattr('PyQt6.QtWidgets.QMessageBox.critical', lambda *args, **kwargs: 1)
+    monkeypatch.setattr('PyQt6.QtWidgets.QMessageBox.question', lambda *args, **kwargs: 1)
 
 
 @pytest.fixture

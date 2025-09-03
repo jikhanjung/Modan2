@@ -1,22 +1,22 @@
-from PyQt5.QtWidgets import QTableWidgetItem, QHeaderView, QFileDialog, QCheckBox, QColorDialog, \
+from PyQt6.QtWidgets import QTableWidgetItem, QHeaderView, QFileDialog, QCheckBox, QColorDialog, \
                             QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QProgressBar, QApplication, \
                             QDialog, QLineEdit, QLabel, QPushButton, QAbstractItemView, QStatusBar, QMessageBox, \
                             QTableView, QSplitter, QRadioButton, QComboBox, QTextEdit, QSizePolicy, \
                             QTableWidget, QGridLayout, QAbstractButton, QButtonGroup, QGroupBox, \
                             QTabWidget, QListWidget, QSpinBox, QPlainTextEdit
-from PyQt5.QtGui import QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem, QImage,\
+from PyQt6.QtGui import QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem, QImage,\
                         QFont, QPainter, QBrush, QMouseEvent, QWheelEvent, QDoubleValidator, QIcon, QCursor
-from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSize, QPoint,\
+from PyQt6.QtCore import Qt, QRect, QSortFilterProxyModel, QSize, QPoint,\
                          pyqtSlot, QItemSelectionModel, QTimer
 
-from PyQt5 import QtCore
+from PyQt6 import QtCore
 
 
 import OpenGL.GL as gl
 from OpenGL.GL import *
 from OpenGL import GLU as glu
 from OpenGL import GLUT as glut
-from PyQt5.QtOpenGL import *
+from PyQt6.QtOpenGL import *
 
 class TransparentGLWidget(QGLWidget):
     def __init__(self, parent=None):
@@ -67,4 +67,4 @@ if __name__ == "__main__":
     #myWindow.activateWindow()
 
     #프로그램을 이벤트루프로 진입시키는(프로그램을 작동시키는) 코드
-    app.exec_()
+    app.exec()

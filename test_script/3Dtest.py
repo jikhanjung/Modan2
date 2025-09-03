@@ -5,10 +5,10 @@
 
 import pyqtgraph.opengl as gl
 import sys
-from PyQt5.QtCore import pyqtSignal, QObject, QPropertyAnimation, QMetaProperty, pyqtProperty
-from PyQt5.QtGui import QGuiApplication, QMatrix4x4, QQuaternion, QVector3D
-from PyQt5 import Qt3DCore 
-from PyQt5 import Qt3DExtras 
+from PyQt6.QtCore import pyqtSignal, QObject, QPropertyAnimation, QMetaProperty, pyqtProperty
+from PyQt6.QtGui import QGuiApplication, QMatrix4x4, QQuaternion, QVector3D
+from PyQt6 import Qt3DCore 
+from PyQt6 import Qt3DExtras 
 
 class OrbitTransformController(QObject):
     def __init__(self, parent):

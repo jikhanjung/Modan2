@@ -1,9 +1,9 @@
 """Basic UI tests for Modan2 main window."""
 import pytest
-from PyQt5.QtCore import Qt, QMimeData, QUrl
-from PyQt5.QtGui import QDropEvent, QDragEnterEvent
-from PyQt5.QtTest import QTest
-from PyQt5.QtWidgets import QTreeWidgetItem, QTableWidgetItem
+from PyQt6.QtCore import Qt, QMimeData, QUrl
+from PyQt6.QtGui import QDropEvent, QDragEnterEvent
+from PyQt6.QtTest import QTest
+from PyQt6.QtWidgets import QTreeWidgetItem, QTableWidgetItem
 from unittest.mock import Mock, MagicMock, patch
 
 

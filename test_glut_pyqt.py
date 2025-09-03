@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow
-from PyQt5.QtOpenGL import QGLWidget
+from PyQt6.QtWidgets import QApplication, QMainWindow
+from PyQt6.QtOpenGL import QGLWidget
 from OpenGL import GL as gl
 from OpenGL import GLUT as glut
 from OpenGL import GLU as glu
@@ -13,7 +13,7 @@ class TestGLUTWidget(QGLWidget):
         self.glut_initialized = False
 
     def initializeGL(self):
-        print("=== Testing GLUT in PyQt5 OpenGL Context ===")
+        print("=== Testing GLUT in PyQt6 OpenGL Context ===")
         
         # Test GLUT initialization
         try:
@@ -56,7 +56,7 @@ class TestGLUTWidget(QGLWidget):
 class TestWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("GLUT + PyQt5 Test")
+        self.setWindowTitle("GLUT + PyQt6 Test")
         self.resize(400, 300)
         
         self.gl_widget = TestGLUTWidget()
@@ -73,4 +73,4 @@ if __name__ == '__main__':
     # Force a paint event
     window.gl_widget.update()
     
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

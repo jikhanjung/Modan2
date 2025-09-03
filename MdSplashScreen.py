@@ -1,16 +1,16 @@
 """
 Custom splash screen for Modan2 application with styled text overlay.
 """
-from PyQt5.QtWidgets import QSplashScreen, QApplication
-from PyQt5.QtCore import Qt, QTimer, QRect
-from PyQt5.QtGui import QPixmap, QPainter, QFont, QColor, QPen, QLinearGradient
+from PyQt6.QtWidgets import QSplashScreen, QApplication
+from PyQt6.QtCore import Qt, QTimer, QRect
+from PyQt6.QtGui import QPixmap, QPainter, QFont, QColor, QPen, QLinearGradient
 import MdUtils as mu
 
 
 class ModanSplashScreen(QSplashScreen):
     """Custom splash screen with application branding."""
     
-    def __init__(self, pixmap=None, flags=Qt.WindowStaysOnTopHint):
+    def __init__(self, pixmap=None, flags=Qt.WindowType.WindowStaysOnTopHint):
         """Initialize splash screen with custom text rendering.
         
         Args:
@@ -23,7 +23,7 @@ class ModanSplashScreen(QSplashScreen):
             pixmap.fill(QColor("#2c3e50"))  # Dark blue-gray background
         
         super().__init__(pixmap, flags)
-        self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint)
+        self.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.FramelessWindowHint)
         
         # Version and copyright info from MdUtils (consistent with main app)
         version_text = f"v{mu.PROGRAM_VERSION} (Build {mu.PROGRAM_BUILD_NUMBER})"
@@ -64,12 +64,12 @@ class ModanSplashScreen(QSplashScreen):
         shadow_pen = QPen(QColor(0, 0, 0, 100))
         painter.setPen(shadow_pen)
         title_rect = QRect(0, int(height * 0.3) + 3, width, 70)
-        painter.drawText(title_rect, Qt.AlignCenter, "Modan2")
+        painter.drawText(title_rect, Qt.AlignmentFlag.AlignCenter, "Modan2")
         
         # Draw title with gradient
         painter.setPen(QPen(QColor("#3498db")))
         title_rect = QRect(0, int(height * 0.3), width, 70)
-        painter.drawText(title_rect, Qt.AlignCenter, "Modan2")
+        painter.drawText(title_rect, Qt.AlignmentFlag.AlignCenter, "Modan2")
         
         # Draw subtitle "Morphometrics made easy" with stylish font
         subtitle_font = QFont()
@@ -91,12 +91,12 @@ class ModanSplashScreen(QSplashScreen):
         
         for dx, dy in offsets:
             offset_rect = QRect(dx, int(height * 0.45) + dy, width, 40)
-            painter.drawText(offset_rect, Qt.AlignCenter, "Morphometrics made easy")
+            painter.drawText(offset_rect, Qt.AlignmentFlag.AlignCenter, "Morphometrics made easy")
         
         # Draw main subtitle text on top
         painter.setPen(QPen(QColor("#ecf0f1")))  # Light gray
         subtitle_rect = QRect(0, int(height * 0.45), width, 40)
-        painter.drawText(subtitle_rect, Qt.AlignCenter, "Morphometrics made easy")
+        painter.drawText(subtitle_rect, Qt.AlignmentFlag.AlignCenter, "Morphometrics made easy")
         
         # Draw version info at bottom
         version_font = QFont()
@@ -107,11 +107,11 @@ class ModanSplashScreen(QSplashScreen):
         painter.setPen(QPen(QColor("#95a5a6")))  # Gray
         
         version_rect = QRect(0, height - 60, width, 20)
-        painter.drawText(version_rect, Qt.AlignCenter, self.version)
+        painter.drawText(version_rect, Qt.AlignmentFlag.AlignCenter, self.version)
         
         # Draw copyright
         copyright_rect = QRect(0, height - 40, width, 20)
-        painter.drawText(copyright_rect, Qt.AlignCenter, self.copyright)
+        painter.drawText(copyright_rect, Qt.AlignmentFlag.AlignCenter, self.copyright)
     
     def showWithTimer(self, duration_ms=3000):
         """Show splash screen for specified duration.
@@ -134,7 +134,7 @@ class ModanSplashScreen(QSplashScreen):
         """
         self.showMessage(
             message, 
-            Qt.AlignLeft | Qt.AlignBottom, 
+            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignBottom, 
             QColor("#bdc3c7")
         )
         if process_events:
@@ -159,8 +159,8 @@ def create_splash_screen(image_path=None):
             if pixmap.width() > 800 or pixmap.height() > 600:
                 pixmap = pixmap.scaled(
                     600, 400, 
-                    Qt.KeepAspectRatio, 
-                    Qt.SmoothTransformation
+                    Qt.AspectRatioMode.KeepAspectRatio, 
+                    Qt.TransformationMode.SmoothTransformation
                 )
         else:
             pixmap = None

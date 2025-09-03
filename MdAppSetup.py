@@ -200,8 +200,8 @@ class ApplicationSetup:
         """Load translation files."""
         if self.config.get('language') == 'ko':
             try:
-                from PyQt5.QtCore import QTranslator, QLocale
-                from PyQt5.QtWidgets import QApplication
+                from PyQt6.QtCore import QTranslator, QLocale
+                from PyQt6.QtWidgets import QApplication
                 
                 translator = QTranslator()
                 translation_path = Path(__file__).parent / 'translations' / 'Modan2_ko.qm'
@@ -221,7 +221,7 @@ class ApplicationSetup:
     def _setup_qt_style(self):
         """Setup Qt application style."""
         try:
-            from PyQt5.QtWidgets import QApplication
+            from PyQt6.QtWidgets import QApplication
             
             app = QApplication.instance()
             if app:

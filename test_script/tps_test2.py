@@ -2,10 +2,10 @@ import sys
 import numpy as np
 from scipy.spatial.distance import cdist
 from scipy.linalg import orthogonal_procrustes
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget, QCheckBox, QHBoxLayout
-from PyQt5.QtCore import Qt, QPoint, QPointF
-from PyQt5.QtGui import QPainter, QColor, QPen
-from PyQt5.QtGui import QPainter, QColor, QPen, QPolygonF
+from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget, QCheckBox, QHBoxLayout
+from PyQt6.QtCore import Qt, QPoint, QPointF
+from PyQt6.QtGui import QPainter, QColor, QPen
+from PyQt6.QtGui import QPainter, QColor, QPen, QPolygonF
 from math import atan2, cos, sin, pi
 
 
@@ -333,7 +333,7 @@ class MainWindow(QMainWindow):
 
     def toggle_same_shape(self, state):
         """Toggle between same shape and different shape"""
-        source, target = create_fish_shapes(same_shape=(state == Qt.Checked))
+        source, target = create_fish_shapes(same_shape=(state == Qt.CheckState.Checked))
         self.visualizer.source_fish = source
         self.visualizer.target_fish = target
         self.visualizer.setup_transformation()
@@ -408,4 +408,4 @@ if __name__ == '__main__':
     window = MainWindow()
     window.resize(800, 600)
     window.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

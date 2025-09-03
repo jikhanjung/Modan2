@@ -5,8 +5,8 @@ import pytest
 import tempfile
 import numpy as np
 from unittest.mock import patch, MagicMock
-from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QMessageBox
+from PyQt6.QtGui import QColor
+from PyQt6.QtWidgets import QMessageBox
 
 # Add project root to Python path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

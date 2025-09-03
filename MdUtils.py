@@ -1,8 +1,8 @@
-from PyQt5.QtWidgets import QMessageBox
+from PyQt6.QtWidgets import QMessageBox
 import sys, os
 import copy
 import logging
-from PyQt5.QtGui import QColor
+from PyQt6.QtGui import QColor
 
 import numpy as np
 #from stl import mesh
@@ -276,7 +276,7 @@ def show_error_message(error_message):
     msg.setIcon(QMessageBox.Critical)
     msg.setText(error_message)
     msg.setWindowTitle("Error")
-    msg.exec_()
+    msg.exec()
     return
 
 def is_numeric(value):

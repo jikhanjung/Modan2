@@ -8,8 +8,8 @@ MainWindow interaction, and Analysis execution.
 
 import pytest
 from unittest.mock import Mock, patch
-from PyQt5.QtWidgets import QApplication, QMessageBox
-from PyQt5.QtCore import QTimer, QPoint
+from PyQt6.QtWidgets import QApplication, QMessageBox
+from PyQt6.QtCore import QTimer, QPoint
 import MdModel
 from ModanDialogs import ImportDatasetDialog, NewAnalysisDialog
 from Modan2 import ModanMainWindow
@@ -193,8 +193,8 @@ class TestMainWindowAnalysis:
         imported_dataset = None
         
         try:
-            with patch('PyQt5.QtWidgets.QApplication.instance', return_value=mock_app), \
-                 patch('PyQt5.QtWidgets.QMessageBox.exec_', return_value=1):  # Suppress import completion messagebox
+            with patch('PyQt6.QtWidgets.QApplication.instance', return_value=mock_app), \
+                 patch('PyQt6.QtWidgets.QMessageBox.exec_', return_value=1):  # Suppress import completion messagebox
                 import_dialog = ImportDatasetDialog(parent=mock_parent)
                 qtbot.addWidget(import_dialog)
                 
@@ -337,8 +337,8 @@ class TestCompleteWorkflows:
             initial_dataset_count = MdModel.MdDataset.select().count()
             imported_dataset = None
             
-            with patch('PyQt5.QtWidgets.QApplication.instance', return_value=mock_app), \
-                 patch('PyQt5.QtWidgets.QMessageBox.exec_', return_value=1):  # Suppress import completion messagebox
+            with patch('PyQt6.QtWidgets.QApplication.instance', return_value=mock_app), \
+                 patch('PyQt6.QtWidgets.QMessageBox.exec_', return_value=1):  # Suppress import completion messagebox
                 import_dialog = ImportDatasetDialog(parent=mock_parent)
                 qtbot.addWidget(import_dialog)
                 
@@ -472,8 +472,8 @@ class TestCompleteWorkflows:
             mock_parent.pos.return_value = Mock()
             mock_parent.pos.return_value.__add__ = Mock(return_value=Mock())
             
-            with patch('PyQt5.QtWidgets.QApplication.instance', return_value=mock_app), \
-                 patch('PyQt5.QtWidgets.QMessageBox.exec_', return_value=1):  # Suppress import completion messagebox
+            with patch('PyQt6.QtWidgets.QApplication.instance', return_value=mock_app), \
+                 patch('PyQt6.QtWidgets.QMessageBox.exec_', return_value=1):  # Suppress import completion messagebox
                 import_dialog = ImportDatasetDialog(parent=mock_parent)
                 qtbot.addWidget(import_dialog)
                 

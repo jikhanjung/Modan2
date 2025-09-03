@@ -5,8 +5,8 @@ Test script to verify main window geometry saving.
 import sys
 import json
 from pathlib import Path
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtCore import QRect, QTimer
+from PyQt6.QtWidgets import QApplication
+from PyQt6.QtCore import QRect, QTimer
 
 sys.path.insert(0, str(Path(__file__).parent))
 

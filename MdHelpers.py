@@ -8,9 +8,9 @@ import logging
 from typing import Any, Dict, List, Optional, Tuple, Union
 from pathlib import Path
 from datetime import datetime
-from PyQt5.QtWidgets import QMessageBox, QFileDialog, QApplication
-from PyQt5.QtCore import QSettings, QStandardPaths, QUrl
-from PyQt5.QtGui import QColor, QPixmap, QIcon
+from PyQt6.QtWidgets import QMessageBox, QFileDialog, QApplication
+from PyQt6.QtCore import QSettings, QStandardPaths, QUrl
+from PyQt6.QtGui import QColor, QPixmap, QIcon
 
 from MdConstants import ERROR_MESSAGES, WARNING_MESSAGES, INFO_MESSAGES
 
@@ -993,7 +993,7 @@ def get_system_info() -> Dict[str, str]:
         'processor': platform.processor(),
         'python_version': sys.version,
         'python_executable': sys.executable,
-        'qt_version': '5.15.x',  # PyQt5 version
+        'qt_version': '5.15.x',  # PyQt6 version
     }
 
 
@@ -1014,7 +1014,7 @@ def check_dependencies() -> Dict[str, bool]:
         Dictionary with dependency availability
     """
     dependencies = {
-        'PyQt5': False,
+        'PyQt6': False,
         'numpy': False,
         'pandas': False,
         'scipy': False,
@@ -1025,8 +1025,8 @@ def check_dependencies() -> Dict[str, bool]:
     }
     
     try:
-        import PyQt5
-        dependencies['PyQt5'] = True
+        import PyQt6
+        dependencies['PyQt6'] = True
     except ImportError:
         pass
     
@@ -1179,7 +1179,7 @@ def debounce(wait_ms: int):
             def call_func():
                 func(*args, **kwargs)
             
-            from PyQt5.QtCore import QTimer
+            from PyQt6.QtCore import QTimer
             
             if timer:
                 timer.stop()

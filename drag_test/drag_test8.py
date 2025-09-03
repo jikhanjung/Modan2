@@ -1,8 +1,8 @@
 import sys
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, 
+from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, 
                              QListWidget, QListWidgetItem, QTextEdit)
-from PyQt5.QtGui import QDrag, QCursor, QPixmap
-from PyQt5.QtCore import Qt, QMimeData, QObject, QEvent
+from PyQt6.QtGui import QDrag, QCursor, QPixmap
+from PyQt6.QtCore import Qt, QMimeData, QObject, QEvent
 
 class DragEventFilter(QObject):
     def __init__(self, drag_object):
@@ -12,30 +12,30 @@ class DragEventFilter(QObject):
     def eventFilter(self, obj, event):
         if event.type() in [QEvent.KeyPress, QEvent.KeyRelease]:
             modifiers = QApplication.keyboardModifiers()
-            if modifiers & Qt.ControlModifier:
-                self.drag_object.setDragCursor(self.drag_object.copy_cursor.pixmap(), Qt.CopyAction)
+            if modifiers & Qt.KeyboardModifier.ControlModifier:
+                self.drag_object.setDragCursor(self.drag_object.copy_cursor.pixmap(), Qt.DropAction.CopyAction)
                 print("Set Copy Cursor")
             else:
-                self.drag_object.setDragCursor(self.drag_object.move_cursor.pixmap(), Qt.MoveAction)
+                self.drag_object.setDragCursor(self.drag_object.move_cursor.pixmap(), Qt.DropAction.MoveAction)
                 print("Set Move Cursor")
         return False
 
 class CustomDrag(QDrag):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.copy_cursor = QCursor(Qt.DragCopyCursor)
-        self.move_cursor = QCursor(Qt.DragMoveCursor)
+        self.copy_cursor = QCursor(Qt.CursorShape.DragCopyCursor)
+        self.move_cursor = QCursor(Qt.CursorShape.DragMoveCursor)
 
-    def exec_(self, supportedActions, defaultAction=Qt.IgnoreAction):
+    def exec_(self, supportedActions, defaultAction=Qt.DropAction.IgnoreAction):
         event_filter = DragEventFilter(self)
         QApplication.instance().installEventFilter(event_filter)
         
         # Set initial cursor
         modifiers = QApplication.keyboardModifiers()
-        if modifiers & Qt.ControlModifier:
-            self.setDragCursor(self.copy_cursor.pixmap(), Qt.CopyAction)
+        if modifiers & Qt.KeyboardModifier.ControlModifier:
+            self.setDragCursor(self.copy_cursor.pixmap(), Qt.DropAction.CopyAction)
         else:
-            self.setDragCursor(self.move_cursor.pixmap(), Qt.MoveAction)
+            self.setDragCursor(self.move_cursor.pixmap(), Qt.DropAction.MoveAction)
         
         result = super().exec_(supportedActions, defaultAction)
         
@@ -48,7 +48,7 @@ class DraggableListWidget(QListWidget):
         self.setDragEnabled(True)
 
     def mouseMoveEvent(self, event):
-        if event.buttons() & Qt.LeftButton:
+        if event.buttons() & Qt.MouseButton.LeftButton:
             item = self.currentItem()
             if item:
                 drag = CustomDrag(self)
@@ -61,9 +61,9 @@ class DraggableListWidget(QListWidget):
                 #self.viewport().render(pixmap)
                 #drag.setPixmap(pixmap)
 
-                result = drag.exec_(Qt.CopyAction | Qt.MoveAction)
+                result = drag.exec_(Qt.DropAction.CopyAction | Qt.DropAction.MoveAction)
                 
-                if result == Qt.MoveAction:
+                if result == Qt.DropAction.MoveAction:
                     self.takeItem(self.row(item))
 
 class DropTextEdit(QTextEdit):
@@ -103,4 +103,4 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

@@ -1,23 +1,23 @@
 import sys
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
+from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QHBoxLayout, QTreeView, QTableView, QHeaderView)
-from PyQt5.QtGui import QStandardItemModel, QStandardItem, QDrag, QCursor
-from PyQt5.QtCore import Qt, QMimeData, QObject, QEvent
+from PyQt6.QtGui import QStandardItemModel, QStandardItem, QDrag, QCursor
+from PyQt6.QtCore import Qt, QMimeData, QObject, QEvent
 
 class DragEventFilter(QObject):
     def __init__(self, drag_object):
         super().__init__()
         self.drag_object = drag_object
-        self.copy_cursor = QCursor(Qt.DragCopyCursor)
-        self.move_cursor = QCursor(Qt.DragMoveCursor)
+        self.copy_cursor = QCursor(Qt.CursorShape.DragCopyCursor)
+        self.move_cursor = QCursor(Qt.CursorShape.DragMoveCursor)
 
     def eventFilter(self, obj, event):
         if event.type() == QEvent.KeyPress or event.type() == QEvent.KeyRelease:
             modifiers = QApplication.keyboardModifiers()
-            if modifiers & Qt.ControlModifier:
-                self.drag_object.setDragCursor(self.copy_cursor.pixmap(), Qt.CopyAction)
+            if modifiers & Qt.KeyboardModifier.ControlModifier:
+                self.drag_object.setDragCursor(self.copy_cursor.pixmap(), Qt.DropAction.CopyAction)
             else:
-                self.drag_object.setDragCursor(self.move_cursor.pixmap(), Qt.MoveAction)
+                self.drag_object.setDragCursor(self.move_cursor.pixmap(), Qt.DropAction.MoveAction)
         return False
 
 class CustomTreeView(QTreeView):
@@ -26,7 +26,7 @@ class CustomTreeView(QTreeView):
         self.setDragEnabled(True)
 
     def mouseMoveEvent(self, event):
-        if event.buttons() & Qt.LeftButton:
+        if event.buttons() & Qt.MouseButton.LeftButton:
             drag = QDrag(self)
             mime_data = QMimeData()
             mime_data.setText(self.currentIndex().data())
@@ -38,13 +38,13 @@ class CustomTreeView(QTreeView):
 
             # Set initial cursor
             modifiers = QApplication.keyboardModifiers()
-            if modifiers & Qt.ControlModifier:
-                drag.setDragCursor(event_filter.copy_cursor.pixmap(), Qt.CopyAction)
+            if modifiers & Qt.KeyboardModifier.ControlModifier:
+                drag.setDragCursor(event_filter.copy_cursor.pixmap(), Qt.DropAction.CopyAction)
             else:
-                drag.setDragCursor(event_filter.move_cursor.pixmap(), Qt.MoveAction)
+                drag.setDragCursor(event_filter.move_cursor.pixmap(), Qt.DropAction.MoveAction)
 
             # Execute drag operation
-            result = drag.exec_(Qt.CopyAction | Qt.MoveAction)
+            result = drag.exec_(Qt.DropAction.CopyAction | Qt.DropAction.MoveAction)
 
             # Remove the event filter after drag operation
             QApplication.instance().removeEventFilter(event_filter)
@@ -111,4 +111,4 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

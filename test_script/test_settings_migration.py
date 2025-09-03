@@ -7,8 +7,8 @@ Tests that settings are properly saved and loaded from the JSON config file.
 import sys
 import json
 from pathlib import Path
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtCore import QRect
+from PyQt6.QtWidgets import QApplication
+from PyQt6.QtCore import QRect
 
 # Setup paths
 sys.path.insert(0, str(Path(__file__).parent))

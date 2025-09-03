@@ -12,7 +12,7 @@ class DragEventFilter(QObject):
         self.move_cursor = QCursor(Qt.CursorShape.DragMoveCursor)
 
     def eventFilter(self, obj, event):
-        if event.type() == QEvent.KeyPress or event.type() == QEvent.KeyRelease:
+        if event.type() == QEvent.Type.KeyPress or event.type() == QEvent.Type.KeyRelease:
             modifiers = QApplication.keyboardModifiers()
             if modifiers & Qt.KeyboardModifier.ControlModifier:
                 self.drag_object.setDragCursor(self.copy_cursor.pixmap(), Qt.DropAction.CopyAction)

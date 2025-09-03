@@ -39,10 +39,10 @@ class DatasetTreeWidget(QTreeWidget):
         
         # Column widths
         header = self.header()
-        header.setSectionResizeMode(0, QHeaderView.Stretch)
-        header.setSectionResizeMode(1, QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(2, QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(3, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
     
     def _setup_connections(self):
         """Setup signal connections."""
@@ -230,12 +230,12 @@ class ObjectTableWidget(QTableWidget):
         
         # Column widths
         header = self.horizontalHeader()
-        header.setSectionResizeMode(0, QHeaderView.Stretch)
-        header.setSectionResizeMode(1, QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(2, QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(3, QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(4, QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(5, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(5, QHeaderView.ResizeMode.ResizeToContents)
     
     def _setup_drag_drop(self):
         """Setup drag and drop functionality."""
@@ -772,7 +772,7 @@ class AnalysisResultWidget(QWidget):
         
         # Title label
         self.title_label = QLabel("Analysis Results")
-        self.title_label.setFont(QFont("Arial", 12, QFont.Bold))
+        self.title_label.setFont(QFont("Arial", 12, QFont.Weight.Bold))
         layout.addWidget(self.title_label)
         
         # Tab widget for different result views

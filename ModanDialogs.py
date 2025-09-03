@@ -237,7 +237,7 @@ class PicButton(QAbstractButton):
         if pixmap_disabled is None:
             result = pixmap_hover.copy()
             image = QPixmap.toImage(result)
-            grayscale = image.convertToFormat(QImage.Format_Grayscale8)
+            grayscale = image.convertToFormat(QImage.Format.Format_Grayscale8)
             pixmap_disabled = QPixmap.fromImage(grayscale)
             #self.Changed_view.emit(pixmap)            
         self.pixmap_disabled = pixmap_disabled
@@ -835,13 +835,13 @@ class ObjectDialog(QDialog):
         self.object_view_3d = ObjectViewer3D(self)
         self.object_view_3d.setMinimumWidth(300)
         self.object_view_3d.setMinimumHeight(300)
-        self.object_view_3d.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.object_view_3d.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.object_view_3d.object_dialog = self
         self.object_view_3d.setMouseTracking(True)
 
         self.object_view_2d = ObjectViewer2D(self)
         self.object_view_2d.object_dialog = self
-        self.object_view_2d.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        self.object_view_2d.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Ignored)
         #self.image_label.clicked.connect(self.on_image_clicked)
 
         self.pixmap = QPixmap(1024,768)
@@ -1160,8 +1160,8 @@ class ObjectDialog(QDialog):
             self.edtLandmarkStr.setHorizontalHeaderLabels(["X","Y"])
             #self.edtLandmarkStr.setColumnWidth(0, 80)
             #self.edtLandmarkStr.setColumnWidth(1, 80)
-            header.setSectionResizeMode(0, QHeaderView.Stretch)
-            header.setSectionResizeMode(1, QHeaderView.Stretch)
+            header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+            header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
             self.cbxAutoRotate.hide()
             self.cbxShowModel.hide()
             #self.btnCalibration.show()
@@ -1172,9 +1172,9 @@ class ObjectDialog(QDialog):
         elif self.dataset.dimension == 3:
             self.edtLandmarkStr.setColumnCount(3)
             self.edtLandmarkStr.setHorizontalHeaderLabels(["X","Y","Z"])
-            header.setSectionResizeMode(0, QHeaderView.Stretch)
-            header.setSectionResizeMode(1, QHeaderView.Stretch)
-            header.setSectionResizeMode(2, QHeaderView.Stretch)
+            header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+            header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+            header.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
             self.cbxAutoRotate.show()
             self.cbxShowModel.show()
             #self.btnCalibration.hide()
@@ -2298,7 +2298,7 @@ class DataExplorationDialog(QDialog):
                     self.shape_grid[key]['view'].update()
 
     def event(self, event):
-        if event.type() in [ QEvent.WindowActivate, QEvent.WindowStateChange] and self.initialized == True:
+        if event.type() in [ QEvent.Type.WindowActivate, QEvent.Type.WindowStateChange] and self.initialized == True:
             #print("Window has been activated")
             self.handle_window_focus()
         return super().event(event)
@@ -3602,7 +3602,12 @@ class DataExplorationDialog(QDialog):
                     obj = self.shape_to_object(shape)
                     
                     view = self.shape_grid[keyname]['view']
+                    # Force native window creation for transparency
+                    view.winId()
                     view.show()
+                    # Force transparency update after showing
+                    view.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
+                    view.update()
                     view.set_object(obj)
                     view.apply_rotation(self.rotation_matrix)
                     view.set_shape_preference(self.sgpWidget.get_preference())
@@ -4074,11 +4079,11 @@ class DatasetAnalysisDialog(QDialog):
         self.lblShape2 = DatasetOpsViewer(self)
         self.lblShape2.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.lblShape2.setMinimumWidth(400)
-        self.lblShape2.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.lblShape2.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         # 3d shape
         self.lblShape3 = ObjectViewer3D(self)
         self.lblShape3.setMinimumWidth(400)
-        self.lblShape3.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.lblShape3.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
         if dataset.dimension == 3:
             self.lblShape2.hide()
@@ -5231,9 +5236,9 @@ class DatasetAnalysisDialog(QDialog):
         self.tableView2.setColumnWidth(1, 20)
         self.tableView2.setColumnWidth(1, 100)
         header2 = self.tableView2.horizontalHeader()
-        header2.setSectionResizeMode(0, QHeaderView.Fixed)
-        header2.setSectionResizeMode(1, QHeaderView.Fixed)
-        header2.setSectionResizeMode(2, QHeaderView.Stretch)
+        header2.setSectionResizeMode(0, QHeaderView.ResizeMode.Fixed)
+        header2.setSectionResizeMode(1, QHeaderView.ResizeMode.Fixed)
+        header2.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
 
 
         self.object_model = QStandardItemModel()
@@ -5259,19 +5264,19 @@ class DatasetAnalysisDialog(QDialog):
         self.object_model.setSortRole(Qt.ItemDataRole.UserRole)
 
         header = self.tableView1.horizontalHeader()   
-        header.setSectionResizeMode(0, QHeaderView.Fixed)
-        header.setSectionResizeMode(1, QHeaderView.Fixed)
-        header.setSectionResizeMode(2, QHeaderView.Stretch)
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.Fixed)
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.Fixed)
+        header.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
         header2 = self.tableView2.horizontalHeader()   
-        header2.setSectionResizeMode(0, QHeaderView.Fixed)
-        header2.setSectionResizeMode(1, QHeaderView.Fixed)
-        header2.setSectionResizeMode(2, QHeaderView.Stretch)
+        header2.setSectionResizeMode(0, QHeaderView.ResizeMode.Fixed)
+        header2.setSectionResizeMode(1, QHeaderView.ResizeMode.Fixed)
+        header2.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
 
         if self.propertyname_index >= 0:
             self.object_model.setColumnCount(4)
             self.object_model.setHorizontalHeaderLabels(["", "ID", "Name", self.propertyname])
             self.tableView1.setColumnWidth(3, 150)
-            header.setSectionResizeMode(3, QHeaderView.Stretch)
+            header.setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
             self.property_model.setHorizontalHeaderLabels(["Show", "Avg", self.propertyname])
         
         self.tableView1.setStyleSheet("QTreeView::item:selected{background-color: palette(highlight); color: palette(highlightedText);};")
@@ -5587,7 +5592,7 @@ class ImportDatasetDialog(QDialog):
         self.edtFilename.setPlaceholderText(self.tr("Select a file to import"))
         self.edtFilename.setMinimumWidth(400)
         self.edtFilename.setMaximumWidth(400)
-        self.edtFilename.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.edtFilename.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.filename_layout.addWidget(self.edtFilename)
         self.filename_layout.addWidget(self.btnOpenFile)
         self.filename_widget.setLayout(self.filename_layout)
@@ -5614,7 +5619,7 @@ class ImportDatasetDialog(QDialog):
         self.gbxFileType.layout().addWidget(self.rbnX1Y1)
         self.gbxFileType.layout().addWidget(self.rbnMorphologika)
         self.gbxFileType.layout().addStretch(1)
-        self.gbxFileType.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.gbxFileType.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.gbxFileType.setMaximumHeight(50)
         self.gbxFileType.setMinimumHeight(50)
         #self.gbxFileType.setTitle("File Type")
@@ -5634,7 +5639,7 @@ class ImportDatasetDialog(QDialog):
         self.edtDatasetName.setPlaceholderText(self.tr("Dataset Name"))
         self.edtDatasetName.setMinimumWidth(400)
         self.edtDatasetName.setMaximumWidth(400)
-        self.edtDatasetName.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.edtDatasetName.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
                 
         # add object count edit
         self.edtObjectCount = QLineEdit()
@@ -5643,7 +5648,7 @@ class ImportDatasetDialog(QDialog):
         self.edtObjectCount.setPlaceholderText(self.tr("Object Count"))
         self.edtObjectCount.setMinimumWidth(100)
         self.edtObjectCount.setMaximumWidth(100)
-        self.edtObjectCount.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.edtObjectCount.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
 
         self.btnImport = QPushButton(self.tr("Excute Import"))
         self.btnImport.clicked.connect(self.import_file)
@@ -5654,7 +5659,7 @@ class ImportDatasetDialog(QDialog):
         self.prgImport.setMinimum(0)
         self.prgImport.setMaximum(100)
         self.prgImport.setValue(0)
-        self.prgImport.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.prgImport.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         
         # add layout
         self.main_layout = QFormLayout()

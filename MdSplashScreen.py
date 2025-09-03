@@ -39,8 +39,8 @@ class ModanSplashScreen(QSplashScreen):
         super().drawContents(painter)
         
         # Enable antialiasing for smooth text
-        painter.setRenderHint(QPainter.Antialiasing)
-        painter.setRenderHint(QPainter.TextAntialiasing)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.setRenderHint(QPainter.RenderHint.TextAntialiasing)
         
         # Get dimensions
         width = self.pixmap().width()
@@ -57,7 +57,7 @@ class ModanSplashScreen(QSplashScreen):
         title_font.setPointSize(48)
         title_font.setBold(True)
         title_font.setStrikeOut(False)  # Explicitly disable strikethrough
-        title_font.setLetterSpacing(QFont.AbsoluteSpacing, 3)
+        title_font.setLetterSpacing(QFont.SpacingType.AbsoluteSpacing, 3)
         painter.setFont(title_font)
         
         # Draw shadow for title
@@ -77,7 +77,7 @@ class ModanSplashScreen(QSplashScreen):
         subtitle_font.setPointSize(20)
         subtitle_font.setItalic(True)
         subtitle_font.setStrikeOut(False)  # Explicitly disable strikethrough
-        subtitle_font.setLetterSpacing(QFont.AbsoluteSpacing, 2)
+        subtitle_font.setLetterSpacing(QFont.SpacingType.AbsoluteSpacing, 2)
         painter.setFont(subtitle_font)
         
         # Draw dark border/outline for subtitle (multiple layers for thickness)

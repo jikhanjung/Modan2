@@ -18,9 +18,9 @@ class GlobalDragEventFilter(QObject):
         if not self.is_active:
             return False
 
-        if event.type() == QEvent.DragEnter:
+        if event.type() == QEvent.Type.DragEnter:
             self.timer.start()
-        elif event.type() == QEvent.DragLeave or event.type() == QEvent.Drop:
+        elif event.type() == QEvent.Type.DragLeave or event.type() == QEvent.Type.Drop:
             self.timer.stop()
 
         return False

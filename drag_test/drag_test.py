@@ -10,7 +10,7 @@ class DragCursorEventFilter(QObject):
         self.last_modifiers = Qt.KeyboardModifier.NoModifier
 
     def eventFilter(self, obj, event):
-        if event.type() in [QEvent.DragMove, QEvent.DragEnter]:
+        if event.type() in [QEvent.Type.DragMove, QEvent.Type.DragEnter]:
             modifiers = QApplication.keyboardModifiers()
             if modifiers != self.last_modifiers:
                 self.last_modifiers = modifiers
@@ -20,7 +20,7 @@ class DragCursorEventFilter(QObject):
                 else:
                     print("move cursor")
                     QApplication.changeOverrideCursor(Qt.CursorShape.DragMoveCursor)
-        elif event.type() == QEvent.DragLeave:
+        elif event.type() == QEvent.Type.DragLeave:
             QApplication.restoreOverrideCursor()
         return False
 

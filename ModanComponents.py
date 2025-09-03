@@ -112,9 +112,11 @@ class ObjectViewer2D(QLabel):
     def __init__(self, parent=None, transparent=False):
         if transparent:
             super(ObjectViewer2D, self).__init__(parent)
-            self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowTransparentForInput | Qt.WindowType.Tool)
-            self.setAttribute(Qt.WA_TranslucentBackground)
-            self.setAttribute(Qt.WA_NoSystemBackground, True)
+            # Only set window flags for top-level windows
+            if parent is None:
+                self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.FramelessWindowHint)
+            self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
+            self.setAttribute(Qt.WidgetAttribute.WA_NoSystemBackground, True)
         else:
             super(ObjectViewer2D, self).__init__(parent)
         self.transparent = transparent
@@ -415,9 +417,10 @@ class ObjectViewer2D(QLabel):
     def mouseMoveEvent(self, event):
         if self.object_dialog is None:
             return
-        me = QMouseEvent(event)
-        self.mouse_curr_x = me.x()
-        self.mouse_curr_y = me.y()
+        me = event  # event is already a QMouseEvent
+        pos = me.position()
+        self.mouse_curr_x = int(pos.x())
+        self.mouse_curr_y = int(pos.y())
         curr_pos = [self.mouse_curr_x, self.mouse_curr_y]
     
         if self.pan_mode == MODE['PAN']:
@@ -467,7 +470,7 @@ class ObjectViewer2D(QLabel):
         QLabel.mouseMoveEvent(self, event)
 
     def mousePressEvent(self, event):
-        me = QMouseEvent(event)
+        me = event  # event is already a QMouseEvent
         if me.button() == Qt.MouseButton.LeftButton:
             if self.edit_mode == MODE['EDIT_LANDMARK']:
                 if self.orig_pixmap is None:
@@ -503,15 +506,16 @@ class ObjectViewer2D(QLabel):
                     self.set_mode(MODE['EDIT_LANDMARK'])
             else:
                 self.pan_mode = MODE['PAN']
-                self.mouse_down_x = me.x()
-                self.mouse_down_y = me.y()
+                pos = me.position()
+                self.mouse_down_x = int(pos.x())
+                self.mouse_down_y = int(pos.y())
 
         self.repaint()
 
     def mouseReleaseEvent(self, ev: QMouseEvent) -> None:
         if self.object_dialog is None:
             return
-        me = QMouseEvent(ev)
+        me = ev  # ev is already a QMouseEvent
         if self.pan_mode == MODE['PAN']:
             self.pan_mode = MODE['NONE']
             self.pan_x += self.temp_pan_x
@@ -541,7 +545,7 @@ class ObjectViewer2D(QLabel):
         return super().mouseReleaseEvent(ev)    
 
     def wheelEvent(self, event):
-        we = QWheelEvent(event)
+        we = event  # event is already a QWheelEvent
         scale_delta_ratio = 0
         if we.angleDelta().y() > 0:
             scale_delta_ratio = 0.1
@@ -553,8 +557,9 @@ class ObjectViewer2D(QLabel):
         self.prev_scale = self.scale
         self.adjust_scale(scale_delta_ratio)
         scale_proportion = self.scale / self.prev_scale
-        self.pan_x = round( we.pos().x() - (we.pos().x() - self.pan_x) * scale_proportion )
-        self.pan_y = round( we.pos().y() - (we.pos().y() - self.pan_y) * scale_proportion )
+        pos = we.position()
+        self.pan_x = round( pos.x() - (pos.x() - self.pan_x) * scale_proportion )
+        self.pan_y = round( pos.y() - (pos.y() - self.pan_y) * scale_proportion )
 
         QLabel.wheelEvent(self, event)
         self.repaint()
@@ -773,8 +778,8 @@ class ObjectViewer2D(QLabel):
                     painter.drawLine(int(self._2canx(from_x)), int(self._2cany(from_y)), int(self._2canx(to_x)), int(self._2cany(to_y)))
 
         radius = BASE_LANDMARK_RADIUS * (int(self.landmark_size) + 1) 
-        painter.setPen(QPen(Qt.blue, 2))
-        painter.setBrush(QBrush(Qt.blue))
+        painter.setPen(QPen(Qt.GlobalColor.blue, 2))
+        painter.setBrush(QBrush(Qt.GlobalColor.blue))
         if self.edit_mode == MODE['CALIBRATION']:
             if self.calibration_from_img_x >= 0 and self.calibration_from_img_y >= 0:
                 x1 = int(self._2canx(self.calibration_from_img_x))
@@ -838,12 +843,12 @@ class ObjectViewer2D(QLabel):
             x = self.width() - 15 - ( bar_width + 20 )
             y = self.height() - 15 - 35
 
-            painter.setPen(QPen(Qt.white, 1))
-            painter.setBrush(QBrush(Qt.white))
+            painter.setPen(QPen(Qt.GlobalColor.white, 1))
+            painter.setBrush(QBrush(Qt.GlobalColor.white))
             painter.drawRect(x, y, bar_width + 20, 30)
             x += 10
             y += 20
-            painter.setPen(QPen(Qt.black, 1))
+            painter.setPen(QPen(Qt.GlobalColor.black, 1))
             painter.drawLine(x, y, x + bar_width, y)
             painter.drawLine(x, y - 5, x, y + 5)
             painter.drawLine(x + bar_width, y - 5, x + bar_width, y + 5)
@@ -857,12 +862,12 @@ class ObjectViewer2D(QLabel):
                 length_text = str(int(actual_length * 1000.0)) + " um"
             else:
                 length_text = str(round(actual_length * 1000000.0 *1000)/1000) + " nm"
-            painter.setPen(QPen(Qt.black, 1))
+            painter.setPen(QPen(Qt.GlobalColor.black, 1))
             painter.setFont(QFont('Helvetica', 10))
             painter.drawText(x + int(math.floor(float(bar_width) / 2.0 + 0.5)) - len(length_text) * 4, y - 5, length_text)
         
         if self.debug:
-            painter.setPen(QPen(Qt.black, 1))
+            painter.setPen(QPen(Qt.GlobalColor.black, 1))
             painter.setFont(QFont('Helvetica', 10))
             painter.drawText( 10, 20, f"Scale: {self.scale} prev_scale: {self.prev_scale} image_to_canvas_ratio: {self.image_canvas_ratio}, pan: {self.pan_x}, {self.pan_y}" )
 
@@ -1124,9 +1129,38 @@ class ObjectViewer3D(QOpenGLWidget):
             
             if transparent:
                 logger.info("ObjectViewer3D: Setting transparent mode attributes...")
-                self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowTransparentForInput | Qt.WindowType.Tool)
-                self.setAttribute(Qt.WA_TranslucentBackground)
-                self.setAttribute(Qt.WA_NoSystemBackground, True)
+                
+                # Set up surface format for this widget specifically
+                from PyQt6.QtGui import QSurfaceFormat
+                fmt = QSurfaceFormat()
+                fmt.setVersion(2, 1)  # Match main.py settings
+                fmt.setProfile(QSurfaceFormat.OpenGLContextProfile.CompatibilityProfile)
+                fmt.setAlphaBufferSize(8)  # Enable alpha channel
+                fmt.setDepthBufferSize(24)
+                fmt.setStencilBufferSize(8)
+                fmt.setSamples(0)  # Disable multisampling for transparency
+                fmt.setSwapBehavior(QSurfaceFormat.SwapBehavior.DoubleBuffer)
+                self.setFormat(fmt)  # Set format for this widget only
+                
+                # Set attributes for transparency
+                # Check if widget has a parent
+                if parent is None:
+                    # For top-level windows, set window flags
+                    self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.FramelessWindowHint)
+                    
+                # These attributes are needed regardless of parent
+                self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
+                self.setAttribute(Qt.WidgetAttribute.WA_NoSystemBackground, True)
+                self.setAttribute(Qt.WidgetAttribute.WA_PaintOnScreen, False)
+                self.setAttribute(Qt.WidgetAttribute.WA_OpaquePaintEvent, False)
+                self.setAttribute(Qt.WidgetAttribute.WA_AlwaysShowToolTips, True)
+                
+                # Ensure widget updates properly
+                self.setAutoFillBackground(False)
+                
+                # Set transparent stylesheet
+                self.setStyleSheet("QOpenGLWidget { background: transparent; }")
+                
                 logger.info("ObjectViewer3D: Transparent mode setup complete")
                 
         except Exception as e:
@@ -1345,8 +1379,9 @@ class ObjectViewer3D(QOpenGLWidget):
         self.update()
 
     def mousePressEvent(self, event):
-        self.down_x = event.x()
-        self.down_y = event.y()
+        pos = event.position()
+        self.down_x = int(pos.x())
+        self.down_y = int(pos.y())
         if event.buttons() == Qt.MouseButton.LeftButton:
             if self.edit_mode == MODE['WIREFRAME'] and self.selected_landmark_idx > -1:
                 self.wireframe_from_idx = self.selected_landmark_idx
@@ -1369,8 +1404,9 @@ class ObjectViewer3D(QOpenGLWidget):
     def mouseReleaseEvent(self, event):
         import datetime
         self.is_dragging = False
-        self.curr_x = event.x()
-        self.curr_y = event.y()
+        pos = event.position()
+        self.curr_x = int(pos.x())
+        self.curr_y = int(pos.y())
         if event.button() == Qt.MouseButton.LeftButton:
             if self.edit_mode == MODE['WIREFRAME'] and self.wireframe_from_idx > -1:
                 if self.selected_landmark_idx > -1 and self.selected_landmark_idx != self.wireframe_from_idx:
@@ -1440,8 +1476,9 @@ class ObjectViewer3D(QOpenGLWidget):
         self.update()
 
     def mouseMoveEvent(self, event):
-        self.curr_x = event.x()
-        self.curr_y = event.y()
+        pos = event.position()
+        self.curr_x = int(pos.x())
+        self.curr_y = int(pos.y())
         if self.edit_mode == MODE["WIREFRAME"]:
             kind, idx = self.hit_test(self.curr_x, self.curr_y)
             if kind == 'Landmark':
@@ -1807,7 +1844,7 @@ class ObjectViewer3D(QOpenGLWidget):
                     "OpenGL init | VER=%s | RENDERER=%s | VENDOR=%s | fmt=%s.%s %s depth=%d stencil=%d samples=%d",
                     v.decode(errors="ignore"), vr.decode(errors="ignore"), vd.decode(errors="ignore"),
                     fmt.majorVersion(), fmt.minorVersion(),
-                    "Core" if fmt.profile()==fmt.CoreProfile else "Compat",
+                    "Core" if fmt.profile()==QSurfaceFormat.OpenGLContextProfile.CoreProfile else "Compat",
                     fmt.depthBufferSize(), fmt.stencilBufferSize(), fmt.samples()
                 )
             else:
@@ -1815,6 +1852,25 @@ class ObjectViewer3D(QOpenGLWidget):
                     "OpenGL init | VER=%s | RENDERER=%s | VENDOR=%s | No format info available",
                     v.decode(errors="ignore"), vr.decode(errors="ignore"), vd.decode(errors="ignore")
                 )
+            
+            # Enable transparency settings if needed
+            if self.transparent:
+                logger.info("initializeGL: Enabling transparency...")
+                
+                # Clear to transparent
+                gl.glClearColor(0.0, 0.0, 0.0, 0.0)
+                
+                # Enable blending
+                gl.glEnable(gl.GL_BLEND)
+                gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)
+                
+                # Ensure alpha is preserved in framebuffer operations
+                gl.glColorMask(True, True, True, True)
+                
+                # Disable unnecessary features that might interfere with transparency
+                gl.glDisable(gl.GL_CULL_FACE)
+                
+                logger.info("initializeGL: Transparency enabled")
             
             logger.info("initializeGL: Initializing main frame buffer...")
             self.initialize_frame_buffer()
@@ -1861,6 +1917,11 @@ class ObjectViewer3D(QOpenGLWidget):
         gl.glDepthFunc(gl.GL_LESS)
         gl.glEnable(gl.GL_DEPTH_TEST)
         gl.glEnable(gl.GL_COLOR_MATERIAL)
+        
+        # Enable blending for transparent mode
+        if self.transparent:
+            gl.glEnable(gl.GL_BLEND)
+            gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)
         gl.glShadeModel(gl.GL_SMOOTH)
 
         gl.glEnable(gl.GL_LIGHTING)
@@ -1918,8 +1979,27 @@ class ObjectViewer3D(QOpenGLWidget):
             gl.glViewport(0, 0, self.width(), self.height())
             
             # Clear the buffer with background color
-            gl.glClearColor(0.7, 0.7, 0.7, 1.0)  # Light gray background
-            gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
+            if self.transparent:
+                # Make context current for transparent rendering
+                self.makeCurrent()
+                
+                # Disable depth test temporarily for clear
+                gl.glDisable(gl.GL_DEPTH_TEST)
+                
+                # Clear with transparent background
+                gl.glClearColor(0.0, 0.0, 0.0, 0.0)  # Transparent background
+                gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
+                
+                # Re-enable depth test
+                gl.glEnable(gl.GL_DEPTH_TEST)
+                
+                # Ensure blending is enabled for transparency
+                gl.glEnable(gl.GL_BLEND)
+                gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)
+            else:
+                gl.glClearColor(0.7, 0.7, 0.7, 1.0)  # Light gray background
+                gl.glDisable(gl.GL_BLEND)
+                gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
             
             # Initialize landmark screen positions for this frame
             self.landmark_screen_positions = []
@@ -1958,10 +2038,10 @@ class ObjectViewer3D(QOpenGLWidget):
         painter = QPainter(self)
         try:
             # Enable text antialiasing for better quality
-            painter.setRenderHint(QPainter.TextAntialiasing)
+            painter.setRenderHint(QPainter.RenderHint.TextAntialiasing)
             
             # Set up font - use a clear, readable font
-            font = QFont("Arial", 10, QFont.Bold)
+            font = QFont("Arial", 10, QFont.Weight.Bold)
             painter.setFont(font)
             
             # Set text color - white with black outline for visibility
@@ -3377,7 +3457,7 @@ class DragEventFilter(QObject):
         self.drag_object = drag_object
 
     def eventFilter(self, obj, event):
-        if event.type() in [QEvent.KeyPress, QEvent.KeyRelease]:
+        if event.type() in [QEvent.Type.KeyPress, QEvent.Type.KeyRelease]:
             modifiers = QApplication.keyboardModifiers()
             if modifiers & Qt.KeyboardModifier.ControlModifier:
                 self.drag_object.setDragCursor(self.drag_object.copy_cursor.pixmap(), Qt.DropAction.CopyAction)
@@ -3807,7 +3887,7 @@ class MdTableModel(QAbstractTableModel):
                 return " ".join(d)
             elif isinstance(d, dict) and 'value' in d:
                 return d['value']
-        if role == Qt.BackgroundRole:
+        if role == Qt.ItemDataRole.BackgroundRole:
             # if d is str or list, return default color
             if index.column() in self._uneditable_columns:
                 return QColor(240, 240, 240)            
@@ -3842,13 +3922,13 @@ class MdTableModel(QAbstractTableModel):
                 new_value = str(value)
 
         self._data[index.row()][index.column()] = {'value': new_value, 'changed': True}
-        self.dataChanged.emit(index, index, [role, Qt.BackgroundRole])
+        self.dataChanged.emit(index, index, [role, Qt.ItemDataRole.BackgroundRole])
         self.dataChangedCustomSignal.emit()
         return True
 
     def flags(self, index):
         if not index.isValid():
-            return Qt.NoItemFlags
+            return Qt.ItemFlag.NoItemFlags
         if index.column() in self._uneditable_columns:
             return Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable
         else:
@@ -3860,7 +3940,7 @@ class MdTableModel(QAbstractTableModel):
                 d = self._data[row][column]
                 if isinstance(d, dict) and d.get('changed', False):
                     d['changed'] = False
-        self.dataChanged.emit(self.index(0, 0), self.index(self.rowCount() - 1, self.columnCount() - 1), [Qt.BackgroundRole])
+        self.dataChanged.emit(self.index(0, 0), self.index(self.rowCount() - 1, self.columnCount() - 1), [Qt.ItemDataRole.BackgroundRole])
 
     def load_data(self, data):
         self.beginResetModel()

@@ -16,7 +16,7 @@ class GlobalDragEventFilter(QObject):
             #print("not active")
             return False
 
-        if event.type() in [QEvent.KeyPress, QEvent.KeyRelease,QEvent.DragMove, QEvent.DragEnter]:
+        if event.type() in [QEvent.Type.KeyPress, QEvent.Type.KeyRelease,QEvent.Type.DragMove, QEvent.Type.DragEnter]:
             print("key press key release, drag move, drag enter")
             modifiers = QApplication.keyboardModifiers()
             if modifiers & Qt.KeyboardModifier.ControlModifier:

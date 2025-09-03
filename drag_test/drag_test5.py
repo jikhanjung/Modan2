@@ -16,7 +16,7 @@ class GlobalDragEventFilter(QObject):
         if not self.is_active:
             return False
 
-        if event.type() in [QEvent.KeyPress, QEvent.KeyRelease, QEvent.DragMove, QEvent.DragEnter]:
+        if event.type() in [QEvent.Type.KeyPress, QEvent.Type.KeyRelease, QEvent.Type.DragMove, QEvent.Type.DragEnter]:
             modifiers = QApplication.queryKeyboardModifiers()  # Use queryKeyboardModifiers instead
             if modifiers & Qt.KeyboardModifier.ControlModifier:
                 QApplication.changeOverrideCursor(self.copy_cursor)
@@ -63,7 +63,8 @@ class CustomTableView(QTableView):
         event.accept()
 
     def dragMoveEvent(self, event):
-        QApplication.sendEvent(self, QEvent(QEvent.DragMove))
+        from PyQt6.QtCore import QEvent
+        QApplication.sendEvent(self, QEvent(QEvent.Type.DragMove))
         event.accept()
 
     def dropEvent(self, event):

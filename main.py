@@ -57,17 +57,36 @@ def parse_arguments():
 
 
 def setup_logging(debug: bool = False):
-    """Setup application logging."""
+    """Setup application logging with fallback options."""
     level = logging.DEBUG if debug else logging.INFO
     format_str = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     
-    # Ensure logs directory exists to avoid FileNotFoundError
+    # Try to get proper log directory, with fallbacks
+    log_file_path = None
     try:
-        log_dir = Path('logs')
-        log_dir.mkdir(parents=True, exist_ok=True)
-        file_handler = logging.FileHandler(log_dir / 'modan2.log', encoding='utf-8')
+        from MdUtils import DEFAULT_LOG_DIRECTORY, ensure_directories
+        ensure_directories()
+        log_file_path = Path(DEFAULT_LOG_DIRECTORY) / 'modan2.log'
+    except Exception as e:
+        print(f"Warning: Could not access configured log directory: {e}")
+        # Fallback to local logs directory
+        try:
+            log_dir = Path('logs')
+            log_dir.mkdir(parents=True, exist_ok=True)
+            log_file_path = log_dir / 'modan2.log'
+        except Exception:
+            # Final fallback to temp directory
+            import tempfile
+            temp_dir = Path(tempfile.gettempdir())
+            log_file_path = temp_dir / 'modan2.log'
+            print(f"Using fallback log file: {log_file_path}")
+    
+    # Setup handlers
+    try:
+        file_handler = logging.FileHandler(log_file_path, encoding='utf-8')
         handlers = [logging.StreamHandler(sys.stdout), file_handler]
-    except Exception:
+    except Exception as e:
+        print(f"Warning: Could not create file handler: {e}")
         # Fallback to console-only logging if file handler cannot be created
         handlers = [logging.StreamHandler(sys.stdout)]
 
@@ -138,16 +157,20 @@ def main():
             background_path = str(splash_bg_path) if splash_bg_path.exists() else None
             
             splash = create_splash_screen(background_path)
-            splash.setProgress("Initializing application...")
-            splash.showWithTimer(3000)  # Show for 3 seconds
-            
-            # Quick progress updates without blocking
-            splash.setProgress("Loading configuration...")
-            QApplication.processEvents()
-            splash.setProgress("Setting up database...")  
-            QApplication.processEvents()
-            splash.setProgress("Ready!")
-            QApplication.processEvents()
+            try:
+                splash.setProgress("Initializing application...")
+                splash.showWithTimer(3000)  # Show for 3 seconds
+                
+                # Quick progress updates without blocking
+                splash.setProgress("Loading configuration...")
+                QApplication.processEvents()
+                splash.setProgress("Setting up database...")  
+                QApplication.processEvents()
+                splash.setProgress("Ready!")
+                QApplication.processEvents()
+            except Exception as e:
+                logger.warning(f"Splash screen update failed: {e}")
+                # Continue without splash screen updates
         
         window.show()
         

@@ -191,6 +191,7 @@ def main():
             fmt.setStencilBufferSize(8)  # Stencil buffer for advanced rendering
             fmt.setSamples(4)  # MSAA for smoother edges
             fmt.setSwapBehavior(QSurfaceFormat.SwapBehavior.DoubleBuffer)  # Double buffering
+            fmt.setAlphaBufferSize(8)  # Ensure alpha channel for transparent compositions
             QSurfaceFormat.setDefaultFormat(fmt)
             logger.info("OpenGL surface format configured (2.1 Compatibility with enhanced buffers)")
         except Exception as e:

@@ -30,9 +30,10 @@ from pathlib import Path
 from PIL.ExifTags import TAGS
 import numpy as np
 
-from matplotlib.backends.backend_qt5agg import FigureCanvas as FigureCanvas
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.backends.backend_qtagg import FigureCanvas as FigureCanvas
+from matplotlib.backends.backend_qtagg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
+from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 import matplotlib.pyplot as plt
 import matplotlib
 
@@ -90,6 +91,105 @@ COLOR['SELECTED_LANDMARK'] = COLOR['RED']
 COLOR['WIREFRAME'] = COLOR['YELLOW']
 COLOR['SELECTED_EDGE'] = COLOR['RED']
 COLOR['BACKGROUND'] = COLOR['DARK_GRAY']
+
+class _ShapeOverlay(QWidget):
+    """Transparent overlay that composites offscreen renders of shape viewers over the chart."""
+    def __init__(self, dialog_parent):
+        super().__init__(dialog_parent.plot_widget2)
+        self.dialog = dialog_parent
+        self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
+        # For child widgets, avoid WA_TranslucentBackground which may cause black fills on some platforms
+        self.setAttribute(Qt.WidgetAttribute.WA_NoSystemBackground, True)
+        self.setAutoFillBackground(False)
+        # Keep overlay above the chart canvas
+        try:
+            self.setAttribute(Qt.WidgetAttribute.WA_AlwaysStackOnTop, True)
+        except Exception:
+            pass
+        self.resize(self.dialog.plot_widget2.width(), self.dialog.plot_widget2.height())
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        try:
+            self.resize(self.dialog.plot_widget2.width(), self.dialog.plot_widget2.height())
+        except Exception:
+            pass
+
+    def paintEvent(self, event):
+        if not hasattr(self.dialog, 'shape_grid'):
+            return
+        painter = QPainter(self)
+        try:
+            # Clear overlay with full transparency to avoid any stale pixels
+            painter.setCompositionMode(QPainter.CompositionMode.CompositionMode_Source)
+            painter.fillRect(self.rect(), Qt.GlobalColor.transparent)
+            painter.setCompositionMode(QPainter.CompositionMode.CompositionMode_SourceOver)
+            # Debug: outline overlay bounds to confirm painting (can disable later)
+            # from PyQt6.QtGui import QPen, QColor
+            # painter.setPen(QPen(QColor(0, 255, 0, 160), 1))
+            # painter.drawRect(self.rect().adjusted(0, 0, -1, -1))
+            painted = 0
+            for keyname, entry in self.dialog.shape_grid.items():
+                view = entry.get('view')
+                if not view:
+                    continue
+                try:
+                    transform = self.dialog.ax2.transData
+                    display_coords = transform.transform((entry['x_val'], entry['y_val']))
+                    x_pixel, y_pixel = display_coords
+                except Exception:
+                    continue
+
+                fig_height = self.dialog.fig2.canvas.height()
+                fig_width = self.dialog.fig2.canvas.width()
+                view_height = max(1, int(fig_height / 4))
+                view_width = max(1, int(fig_width / 4))
+                x_pos = int(x_pixel)
+                y_pos = int(fig_height - y_pixel)
+
+                try:
+                    image = view.render_to_image(view_width, view_height)
+                except Exception:
+                    continue
+                if image is None:
+                    continue
+                # Chroma key removal for platforms where GL alpha is not preserved
+                try:
+                    from PyQt6.QtGui import QPixmap, QColor, QImage
+                    px = QPixmap.fromImage(image)
+                    # If exact chroma fails due to conversion, do a tolerance-based mask
+                    # First try exact mask
+                    mask = px.createMaskFromColor(QColor(255, 0, 255), mode=Qt.MaskMode.MaskOutColor)
+                    if not mask.isNull():
+                        px.setMask(mask)
+                        painter.drawPixmap(x_pos - int(view_width/2), y_pos - int(view_height/2), px)
+                        painted += 1
+                    else:
+                        # Tolerance: iterate over pixels and zero alpha near magenta
+                        img = image.convertToFormat(QImage.Format.Format_RGBA8888)
+                        w, h = img.width(), img.height()
+                        ptr = img.bits()
+                        ptr.setsize(w*h*4)
+                        import numpy as np
+                        arr = np.frombuffer(ptr, dtype=np.uint8).reshape(h, w, 4)
+                        r, g, b, a = arr[:,:,0], arr[:,:,1], arr[:,:,2], arr[:,:,3]
+                        # near magenta condition
+                        mask2 = (abs(r-255) < 8) & (g < 8) & (abs(b-255) < 8)
+                        a[mask2] = 0
+                        arr[:,:,3] = a
+                        painter.drawImage(x_pos - int(view_width/2), y_pos - int(view_height/2), img)
+                        painted += 1
+                except Exception:
+                    # Fallback to direct image draw
+                    painter.drawImage(x_pos - int(view_width/2), y_pos - int(view_height/2), image)
+                    painted += 1
+        finally:
+            painter.end()
+        try:
+            import logging
+            logging.getLogger(__name__).info(f"Shape overlay painted items: {painted}")
+        except Exception:
+            pass
 
 ICON = {}
 ICON['landmark'] = mu.resource_path('icons/M2Landmark_2.png')
@@ -1771,9 +1871,15 @@ class DataExplorationDialog(QDialog):
         self.mode = MODE_EXPLORATION
         self.ignore_change = False
         self.init_UI()
+        # Thumbnail refresh debounce timer and mode
+        # Start thumbnails in live (low-cost) mode for faster first paint
+        self.thumbnail_live_mode = True
+        self._thumb_timer = QTimer(self)
+        self._thumb_timer.setSingleShot(True)
+        self._thumb_timer.timeout.connect(self._draw_shape_grid_thumbnails)
 
     def init_UI(self):
-
+        
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
 
@@ -2184,15 +2290,45 @@ class DataExplorationDialog(QDialog):
         if self.cbxShapeGrid.isChecked() == True:
             self.sgpWidget.show()
             self.update_chart()
+            # Initialize GL contexts for shape views after current events to avoid re-entrancy
+            try:
+                QTimer.singleShot(0, self._init_shape_grid_contexts)
+            except Exception:
+                pass
         else:
             self.sgpWidget.hide()
             self.update_chart()
 
+    def _init_shape_grid_contexts(self):
+        try:
+            app = QApplication.instance()
+            for keyname in self.shape_grid.keys():
+                view = self.shape_grid[keyname].get('view')
+                if not view:
+                    continue
+                # Show briefly to force context creation, then hide
+                try:
+                    view.resize(120, 90)
+                    view.show()
+                    view.update()
+                    if app:
+                        app.processEvents()
+                    view.hide()
+                except Exception:
+                    continue
+            # After ensuring contexts, trigger overlay repaint
+            if hasattr(self, 'shape_overlay') and self.shape_overlay:
+                self.shape_overlay.update()
+        except Exception:
+            pass
+
 
     def export_chart(self):
         dialog = QFileDialog()
-        dialog.setFileMode(QFileDialog.AnyFile)
-        dialog.setAcceptMode(QFileDialog.AcceptSave)
+        # PyQt6: enums are nested
+        from PyQt6.QtWidgets import QFileDialog as _QFD
+        dialog.setFileMode(_QFD.FileMode.AnyFile)
+        dialog.setAcceptMode(_QFD.AcceptMode.AcceptSave)
         dialog.setNameFilter("PNG (*.png);;JPG (*.jpg);;PDF (*.pdf);;SVG (*.svg);;All files (*.*)")
         dialog.setDefaultSuffix("png")
         #dialog.setDirectory(self.m_app.last_opened_dir)
@@ -2224,57 +2360,57 @@ class DataExplorationDialog(QDialog):
 
         # 2. Initialize QPainter for drawing on the canvas
         painter = QPainter(canvas)
+        try:
+            painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform, True)
 
-        # 3. Draw the Matplotlib chart onto the canvas
-        self.plot_widget2.render(painter)
+            # 3. Draw the Matplotlib chart onto the canvas
+            self.plot_widget2.render(painter)
 
-        # 4. Overlay the shape images
-        for keyname in self.shape_grid.keys():
-            view = self.shape_grid[keyname]['view']
-            if view:
-                #print("keyname", keyname, "x_val", self.shape_grid[keyname]['x_val'], "y_val", self.shape_grid[keyname]['y_val'])
-                transform = self.ax2.transData
-                display_coords =    transform.transform((self.shape_grid[keyname]['x_val'], self.shape_grid[keyname]['y_val']))
-                x_pixel, y_pixel = display_coords   
-                if sys.platform == 'darwin':
-                    x_pixel = x_pixel / 2
-                    y_pixel = y_pixel / 2
-                #print("display_coords", display_coords, "x_pixel", x_pixel, "y_pixel", y_pixel)
-                fig_height = self.fig2.canvas.height()
-                fig_width = self.fig2.canvas.width()
-                view_height = int( fig_height / 4 )
-                view_width = int( fig_width / 4 )
-                x_pos = int( x_pixel )
-                y_pos = int( fig_height - y_pixel )
-                w, h = view.width(), view.height()
-                w, h = 120, 90
-                w = max(w, view_width)
-                h = max(h, view_height)
-                #print("view size", w, h, "view pos", x_pixel, y_pixel, "fig_size", fig_width, fig_height, "view pos 2", x_pos, y_pos)
-                '''
-                self.shape_grid[keyname]['x_pos'] = x_pixel
-                self.shape_grid[keyname]['y_pos'] = y_pixel
-                #print("view size 2  ", w, h, "view pos", x_pixel, y_pixel, "fig_size", fig_width, fig_height)
+            # 4. Overlay the shape images (high-res offscreen render with oversampling)
+            for keyname in self.shape_grid.keys():
+                view = self.shape_grid[keyname]['view']
+                if view:
+                    transform = self.ax2.transData
+                    display_coords = transform.transform((self.shape_grid[keyname]['x_val'], self.shape_grid[keyname]['y_val']))
+                    x_pixel, y_pixel = display_coords
+                    if sys.platform == 'darwin':
+                        x_pixel = x_pixel / 2
+                        y_pixel = y_pixel / 2
+                    fig_height = self.fig2.canvas.height()
+                    fig_width = self.fig2.canvas.width()
+                    target_w = max(96, int(fig_width / 5))
+                    target_h = max(72, int(fig_height / 5))
+                    # Oversample for higher quality
+                    try:
+                        dpr = 1
+                        if hasattr(self.fig2.canvas, 'devicePixelRatio'):
+                            dpr = max(dpr, int(self.fig2.canvas.devicePixelRatio()))
+                        if hasattr(self.fig2.canvas, 'devicePixelRatioF'):
+                            dpr = max(dpr, int(self.fig2.canvas.devicePixelRatioF()))
+                    except Exception:
+                        dpr = 1
+                    oversample = max(2, dpr)
 
-                view.setGeometry(self.shape_grid[keyname]['x_pos']-int(w/2), self.shape_grid[keyname]['y_pos']-int(h/2), w, h)
-                '''
+                    # Temporarily disable indices for export thumbnail
+                    _old_show_index = getattr(view, 'show_index', False)
+                    try:
+                        view.show_index = False
+                    except Exception:
+                        pass
+                    qimg = view.render_to_image(target_w * oversample, target_h * oversample)
+                    try:
+                        view.show_index = _old_show_index
+                    except Exception:
+                        pass
 
+                    # Draw scaled to target size at computed pixel position
+                    dest_x = int(x_pixel) - target_w // 2
+                    dest_y = int(fig_height - y_pixel) - target_h // 2
+                    dest_rect = QRect(dest_x, dest_y, target_w, target_h)
+                    painter.drawImage(dest_rect, qimg)
 
-            #for shape_widget, (x, y) in zip(shape_widgets, pca_coordinates):
-                # Convert PCA coordinates to pixel positions on the canvas
-                #x_pixel, y_pixel = map_coordinates_to_pixels(x, y, canvas_width, canvas_height)
-
-                # Draw the shape image onto the canvas
-                view.update()
-                if isinstance(view,ObjectViewer3D):
-                    buffer = QPixmap(view.grabFrameBuffer(True))
-                else:
-                    buffer = QPixmap(view.grab())
-                #print(buffer)
-                painter.drawPixmap(x_pos-int(w/2), y_pos-int(h/2), buffer)
-
-        # 5. End painting
-        painter.end()
+        finally:
+            painter.end()
 
         # 6. Save the composite image
         canvas.save(filename, "PNG")        
@@ -2296,6 +2432,11 @@ class DataExplorationDialog(QDialog):
                 if self.shape_grid[key]['view'] is not None:
                     self.shape_grid[key]['view'].set_shape_preference(self.shape_grid_pref_dict)
                     self.shape_grid[key]['view'].update()
+            try:
+                if hasattr(self, 'shape_overlay') and self.shape_overlay:
+                    self.shape_overlay.update()
+            except Exception:
+                pass
 
     def event(self, event):
         if event.type() in [ QEvent.Type.WindowActivate, QEvent.Type.WindowStateChange] and self.initialized == True:
@@ -2310,6 +2451,12 @@ class DataExplorationDialog(QDialog):
                 if self.shape_grid[key]['view'] is not None:
                     self.shape_grid[key]['view'].raise_()
                     self.shape_grid[key]['view'].update()
+            try:
+                if hasattr(self, 'shape_overlay') and self.shape_overlay:
+                    self.shape_overlay.raise_()
+                    self.shape_overlay.update()
+            except Exception:
+                pass
 
     def shape_preference_button_clicked(self):
         #print("shape preference button clicked")
@@ -2846,6 +2993,8 @@ class DataExplorationDialog(QDialog):
         self.calculate_fit()
         #print("update chart", self.curve_list)
         self.show_analysis_result()
+        # Debounced thumbnail refresh to improve interaction performance
+        self._request_thumbnail_refresh(live=self.thumbnail_live_mode)
 
     def axis_changed(self):
         #if self.ds_ops is not None and self.analysis_done is True:
@@ -2857,6 +3006,179 @@ class DataExplorationDialog(QDialog):
     def flip_axis_changed(self, int):
         #if self.ds_ops is not None:
         self.update_chart()
+
+    def _request_thumbnail_refresh(self, live: bool):
+        try:
+            self.thumbnail_live_mode = bool(live)
+            delay = 90 if live else 0
+            # Cancel pending and schedule
+            if self._thumb_timer.isActive():
+                self._thumb_timer.stop()
+            self._thumb_timer.start(delay)
+        except Exception:
+            pass
+
+    def _draw_shape_grid_thumbnails(self):
+        # Compose shape grid thumbnails directly on axes using Matplotlib artists
+        try:
+            if not hasattr(self, '_shape_grid_artists'):
+                self._shape_grid_artists = []
+            # Remove old artists
+            for ab in self._shape_grid_artists:
+                try:
+                    ab.remove()
+                except Exception:
+                    pass
+            self._shape_grid_artists.clear()
+
+            if not self.cbxShapeGrid.isChecked():
+                self.fig2.canvas.draw_idle()
+                return
+
+            # Determine target pixel size for thumbnails
+            fig_height = self.fig2.canvas.height()
+            fig_width = self.fig2.canvas.width()
+            if self.thumbnail_live_mode:
+                target_w = max(72, int(fig_width / 6))
+                target_h = max(54, int(fig_height / 6))
+            else:
+                target_w = max(96, int(fig_width / 5))
+                target_h = max(72, int(fig_height / 5))
+            # Oversample (higher when not live)
+            try:
+                dpr = 1
+                if hasattr(self.fig2.canvas, 'devicePixelRatio'):
+                    dpr = max(dpr, int(self.fig2.canvas.devicePixelRatio()))
+                if hasattr(self.fig2.canvas, 'devicePixelRatioF'):
+                    dpr = max(dpr, int(self.fig2.canvas.devicePixelRatioF()))
+            except Exception:
+                dpr = 1
+            oversample = 1 if self.thumbnail_live_mode else max(2, dpr)
+            msaa = 0 if self.thumbnail_live_mode else 4
+
+            for keyname in self.shape_grid.keys():
+                entry = self.shape_grid[keyname]
+                view = entry.get('view')
+                if not view:
+                    continue
+                # Ensure view content up to date
+                view.set_shape_preference(self.sgpWidget.get_preference())
+                if not self.thumbnail_live_mode:
+                    # On final pass, rebuild object baseline and set absolute rotation (do not mutate geometry)
+                    try:
+                        shape = self.raw_chart_coords_to_shape(entry['x_val'], entry['y_val'])
+                        obj = self.shape_to_object(shape)
+                        view.set_object(obj, preserve_pose=True)
+                        if hasattr(view, 'set_rotation_matrix_abs'):
+                            view.set_rotation_matrix_abs(self.rotation_matrix)
+                        # Clear only temporary deltas
+                        try:
+                            view.temp_rotate_x = 0
+                            view.temp_rotate_y = 0
+                        except Exception:
+                            pass
+                        try:
+                            import numpy as _np
+                            view._base_rotation = _np.array(self.rotation_matrix, copy=True)
+                            view._debug_rotation_matrix = view._base_rotation
+                        except Exception:
+                            view._base_rotation = None
+                            view._debug_rotation_matrix = None
+                    except Exception:
+                        pass
+                else:
+                    # Live pass: ensure absolute/base rotation is reflected; geometry remains untouched
+                    try:
+                        if hasattr(view, 'set_rotation_matrix_abs'):
+                            view.set_rotation_matrix_abs(self.rotation_matrix)
+                    except Exception:
+                        pass
+
+                # Compute position
+                transform = self.ax2.transData
+                try:
+                    x_pixel, y_pixel = transform.transform((entry['x_val'], entry['y_val']))
+                except Exception:
+                    continue
+                if sys.platform == 'darwin':
+                    x_pixel = x_pixel / 2
+                    y_pixel = y_pixel / 2
+
+                # Temporarily hide landmark indices for thumbnail rendering
+                _old_show_index = getattr(view, 'show_index', False)
+                try:
+                    view.show_index = False
+                except Exception:
+                    pass
+                # Render to QImage (oversampled)
+                qimg = view.render_to_image(target_w * oversample, target_h * oversample, samples=msaa)
+                # Restore previous index flag
+                try:
+                    view.show_index = _old_show_index
+                except Exception:
+                    pass
+
+                # Convert to numpy RGBA array
+                arr = None
+                try:
+                    from PyQt6.QtGui import QImage
+                    import numpy as _np
+                    if qimg.format() != QImage.Format.Format_RGBA8888:
+                        qimg = qimg.convertToFormat(QImage.Format.Format_RGBA8888)
+                    w, h = qimg.width(), qimg.height()
+                    bpl = qimg.bytesPerLine()
+                    ptr = qimg.bits()
+                    ptr.setsize(bpl * h)
+                    arr = _np.frombuffer(ptr, dtype=_np.uint8).reshape((h, bpl // 4, 4))
+                    arr = arr[:, :w, :]
+                except Exception:
+                    arr = None
+                if arr is None:
+                    continue
+
+                # Build OffsetImage; compute zoom so width ~ target_w
+                try:
+                    zoom = target_w / float(arr.shape[1]) if arr.shape[1] else 1.0
+                    off = OffsetImage(arr, zoom=zoom, interpolation='bilinear')
+                    ab = AnnotationBbox(off, (entry['x_val'], entry['y_val']),
+                                        xycoords='data', frameon=False, box_alignment=(0.5, 0.5), zorder=10)
+                    self.ax2.add_artist(ab)
+                    self._shape_grid_artists.append(ab)
+                    # Debug text only in non-live mode
+                    if not self.thumbnail_live_mode:
+                        try:
+                            import numpy as _np
+                            def _euler_from_mat(m):
+                                m3 = _np.array(m)[:3, :3]
+                                sy = _np.sqrt(m3[0,0]*m3[0,0] + m3[1,0]*m3[1,0])
+                                singular = sy < 1e-6
+                                if not singular:
+                                    x = _np.arctan2(m3[2,1], m3[2,2])
+                                    y = _np.arctan2(-m3[2,0], sy)
+                                    z = _np.arctan2(m3[1,0], m3[0,0])
+                                else:
+                                    x = _np.arctan2(-m3[1,2], m3[1,1])
+                                    y = _np.arctan2(-m3[2,0], sy)
+                                    z = 0
+                                return (int(x*180/_np.pi), int(y*180/_np.pi), int(z*180/_np.pi))
+
+                            g_eul = _euler_from_mat(self.rotation_matrix) if hasattr(self, 'rotation_matrix') else None
+                            t_mat = getattr(view, '_debug_rotation_matrix', None)
+                            t_eul = _euler_from_mat(t_mat) if t_mat is not None else None
+                            if g_eul and t_eul:
+                                txt = f"G:{g_eul}\nT:{t_eul}"
+                                tx = self.ax2.text(entry['x_val'], entry['y_val'], txt,
+                                                   fontsize=12, color='black', ha='left', va='bottom', zorder=11,
+                                                   bbox=dict(facecolor='white', alpha=0.5, edgecolor='none', pad=1))
+                                self._shape_grid_artists.append(tx)
+                        except Exception:
+                            pass
+                except Exception:
+                    pass
+
+            self.fig2.canvas.draw_idle()
+        except Exception:
+            pass
 
     def read_settings(self):
         #self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
@@ -2939,10 +3261,30 @@ class DataExplorationDialog(QDialog):
             temp_rotate_y = math.radians(self.shape_view_list[0].temp_rotate_y)
             #(math.radians(self.rotate_x),math.radians(self.rotate_y),apply_rotation_to_vertex)
             self.store_rotation(temp_rotate_x,temp_rotate_y)
-        for key in self.shape_grid.keys():
-            if self.shape_grid[key]['view']:
-                self.shape_grid[key]['view'].sync_rotation()
-                self.shape_grid[key]['view'].update()
+        # Redraw thumbnails to reflect new viewpoint
+        try:
+            self.update_chart()
+        except Exception:
+            pass
+
+    def sync_rotation_with_deltas(self, dx, dy):
+        """Called by the main GL viewer on mouse release with drag deltas (pixels).
+        Update the global rotation matrix to EXACTLY match the viewer's current matrix,
+        then redraw thumbnails using only the global matrix.
+        """
+        # Prefer exact matrix from the main 3D viewer if available
+        try:
+            if hasattr(self, 'object_view_3d') and self.object_view_3d is not None:
+                rm = self.object_view_3d.get_rotation_matrix()
+                if rm is not None:
+                    self.rotation_matrix = rm
+        except Exception:
+            pass
+        # Redraw thumbnails using the updated global rotation matrix (final quality)
+        try:
+            self._request_thumbnail_refresh(live=False)
+        except Exception:
+            pass
 
         for sv in self.shape_view_list:
             #self.temp_rotate_x = sv.temp_rotate_x
@@ -2951,6 +3293,24 @@ class DataExplorationDialog(QDialog):
             #sv.rotate_y = sv.temp_rotate_y
             sv.sync_rotation()
             sv.update()
+
+    def sync_press_rotation(self):
+        """Called by the main GL viewer on mouse press to immediately align
+        thumbnails' base rotation to the current main view matrix, preventing
+        a momentary reset before movement begins.
+        """
+        try:
+            if hasattr(self, 'object_view_3d') and self.object_view_3d is not None:
+                rm = self.object_view_3d.get_rotation_matrix()
+                if rm is not None:
+                    self.rotation_matrix = rm
+        except Exception:
+            pass
+        # Immediate refresh for thumbnails to avoid visible reset on press
+        try:
+            self._request_thumbnail_refresh(live=False)
+        except Exception:
+            pass
 
 
     def sync_temp_pan(self, shape_view, temp_pan_x, temp_pan_y):
@@ -3028,12 +3388,21 @@ class DataExplorationDialog(QDialog):
                 view.temp_rotate_x = temp_rotate_x
                 view.temp_rotate_y = temp_rotate_y
                 view.update()
+        # Request a live (low-cost) thumbnails refresh
+        try:
+            self._request_thumbnail_refresh(live=True)
+        except Exception:
+            pass
 
         #self.object_view_3d.sync_rotation(rotation_x, rotation_y)
     def moveEvent(self, event):
         self.reposition_shape_grid()
 
     def resizeEvent(self, event):
+        # Update shape_grid_container size to match plot_widget2
+        if hasattr(self, 'shape_grid_container') and hasattr(self, 'plot_widget2'):
+            self.shape_grid_container.setGeometry(self.plot_widget2.rect())
+        
         for idx, shape_view in enumerate(self.shape_view_list):
             width = int(shape_view.width())
             half_width = int(width/2)
@@ -3197,6 +3566,11 @@ class DataExplorationDialog(QDialog):
 
 
     def prepare_scatter_data(self):
+        # Local Qt import to avoid any accidental shadowing of module-level Qt
+        try:
+            from PyQt6.QtCore import Qt as _Qt
+        except Exception:
+            _Qt = None
         show_shape_grid = self.cbxShapeGrid.isChecked()
         show_convex_hull = self.cbxConvexHull.isChecked()
         show_confidence_ellipse = self.cbxConfidenceEllipse.isChecked()
@@ -3208,8 +3582,16 @@ class DataExplorationDialog(QDialog):
         select_group_list = []
         for i in range(self.comboSelectGroup.count()):
             item = self.comboSelectGroup.model().item(i)
-            if item.checkState() == Qt.CheckState.Checked:
-                select_group_list.append(item.text())
+            if _Qt is not None:
+                if item.checkState() == _Qt.CheckState.Checked:
+                    select_group_list.append(item.text())
+            else:
+                # Fallback: Qt not available; treat non-Unchecked as selected
+                try:
+                    if int(item.checkState()) != 0:
+                        select_group_list.append(item.text())
+                except Exception:
+                    pass
         #print("select_group_list", select_group_list)
 
         #regression_by_group = self.rbByGroup.isChecked()
@@ -3336,11 +3718,43 @@ class DataExplorationDialog(QDialog):
                     scatter_key_name = x_key+"_"+y_key
                     self.shape_grid[scatter_key_name] = { 'x_val': self.data_range[x_key], 'y_val': self.data_range[y_key]}
                     if self.analysis.dataset.dimension == 3:
-                        self.shape_grid[scatter_key_name]['view'] = ObjectViewer3D(parent=None,transparent=True)
+                        # Create as a child widget; we'll composite offscreen renders over the chart
+                        self.shape_grid[scatter_key_name]['view'] = ObjectViewer3D(parent=self, transparent=True)
+                        # Use GL base rotation matrix in thumbnails to avoid geometry mutation
+                        try:
+                            self.shape_grid[scatter_key_name]['view'].use_base_rotation_gl = True
+                        except Exception:
+                            pass
                     else:
-                        self.shape_grid[scatter_key_name]['view'] = ObjectViewer2D(parent=None,transparent=True)
+                        self.shape_grid[scatter_key_name]['view'] = ObjectViewer2D(parent=self, transparent=True)
+                    # For overlay thumbnails, disable index numbers for better visibility
+                    try:
                         self.shape_grid[scatter_key_name]['view'].show_index = False
+                    except Exception:
+                        pass
                     self.shape_grid[scatter_key_name]['view'].set_object_name(scatter_key_name)
+                    # Ensure the underlying widget never shows on screen; we'll render offscreen only
+                    try:
+                        from PyQt6.QtCore import Qt
+                        v = self.shape_grid[scatter_key_name]['view']
+                        v.setAttribute(Qt.WidgetAttribute.WA_DontShowOnScreen, True)
+                        v.setVisible(False)
+                        v.setUpdatesEnabled(False)
+                        v.move(-10000, -10000)
+                        v.resize(1, 1)
+                        # Mark as offscreen-only for internal logic
+                        setattr(v, '_offscreen_only', True)
+                    except Exception:
+                        pass
+                    try:
+                        self.shape_grid[scatter_key_name]['view'].raise_()
+                    except Exception:
+                        pass
+                    # Keep the actual widget hidden; we composite its offscreen render instead
+                    try:
+                        self.shape_grid[scatter_key_name]['view'].hide()
+                    except Exception:
+                        pass
 
         # remove empty group
         if len(self.scatter_data['__default__']['x_val']) == 0:
@@ -3354,6 +3768,9 @@ class DataExplorationDialog(QDialog):
             self.average_shape[scatter_key_name]['z_val'] = np.mean(self.scatter_data[scatter_key_name]['z_val'])
             #group_hash[key_name]['text'].append(obj.object_name)
             #group_hash[key_name]['hoverinfo'].append(obj.id)
+
+        # Ensure overlay exists above the chart and reflects current size
+        # Overlay disabled; composition will be handled differently (to be implemented)
 
         if show_convex_hull:
             for scatter_key_name in self.scatter_data.keys():
@@ -3597,57 +4014,37 @@ class DataExplorationDialog(QDialog):
             # get widget position
             #print("fig_pos", fig_pos)
             if show_shape_grid:
+                # Keep GL widgets hidden; the Matplotlib thumbnails handle rendering
                 for keyname in self.shape_grid.keys():
-                    shape = self.raw_chart_coords_to_shape(self.shape_grid[keyname]['x_val'], self.shape_grid[keyname]['y_val'])
-                    obj = self.shape_to_object(shape)
-                    
                     view = self.shape_grid[keyname]['view']
-                    # Force native window creation for transparency
-                    view.winId()
-                    view.show()
-                    # Force transparency update after showing
-                    view.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
-                    view.update()
-                    view.set_object(obj)
-                    view.apply_rotation(self.rotation_matrix)
+                    if not view:
+                        continue
+                    try:
+                        view.hide()
+                    except Exception:
+                        pass
+                    # Only update visual prefs; do not reset object/rotation here to preserve baseline
                     view.set_shape_preference(self.sgpWidget.get_preference())
-                self.reposition_shape_grid()
+                # Update overlay instead of repositioning visible GL widgets
+                try:
+                    if hasattr(self, 'shape_overlay') and self.shape_overlay:
+                        self.shape_overlay.update()
+                except Exception:
+                    pass
 
     def reposition_shape_grid(self):
         #check if self has fig2
         if self.fig2 is None:
             return
 
-        pos_x = self.fig2.canvas.mapToGlobal(QPoint(0, 0)).x()
-        pos_y = self.fig2.canvas.mapToGlobal(QPoint(0, 0)).y()
-        #print("pos_x", pos_x, "pos_y", pos_y)
-        for keyname in self.shape_grid.keys():
-            view = self.shape_grid[keyname]['view']
-            if view:
-                #print("keyname", keyname, "x_val", self.shape_grid[keyname]['x_val'], "y_val", self.shape_grid[keyname]['y_val'])
-                transform = self.ax2.transData
-                display_coords =    transform.transform((self.shape_grid[keyname]['x_val'], self.shape_grid[keyname]['y_val']))
-                x_pixel, y_pixel = display_coords 
-                if sys.platform == 'darwin':
-                    x_pixel = x_pixel / 2
-                    y_pixel = y_pixel / 2
-                #print("display_coords", display_coords, "x_pixel", x_pixel, "y_pixel", y_pixel)
-                fig_height = self.fig2.canvas.height()
-                fig_width = self.fig2.canvas.width()
-                view_height = int( fig_height / 4 )
-                view_width = int( fig_width / 4 )
-                x_pixel = int( x_pixel + pos_x )
-                y_pixel = int( fig_height - y_pixel + pos_y )
-                self.shape_grid[keyname]['x_pos'] = x_pixel
-                self.shape_grid[keyname]['y_pos'] = y_pixel
-                w, h = view.width(), view.height()
-                #print("view size", w, h, "view pos", x_pixel, y_pixel, "fig_size", fig_width, fig_height)
-                w, h = 120, 90
-                w = max(w, view_width)
-                h = max(h, view_height)
-                #print("view size 2  ", w, h, "view pos", x_pixel, y_pixel, "fig_size", fig_width, fig_height)
-
-                view.setGeometry(self.shape_grid[keyname]['x_pos']-int(w/2), self.shape_grid[keyname]['y_pos']-int(h/2), w, h)
+        # With overlay rendering, geometry changes for hidden GL widgets are unnecessary.
+        try:
+            if hasattr(self, 'shape_overlay') and self.shape_overlay:
+                self.shape_overlay.resize(self.plot_widget2.width(), self.plot_widget2.height())
+                self.shape_overlay.raise_()
+                self.shape_overlay.update()
+        except Exception:
+            pass
 
 
     def on_hover_enter(self,event):
@@ -3751,18 +4148,20 @@ class DataExplorationDialog(QDialog):
 
     def shape_to_object(self, shape):
         obj = MdObject()
-        obj.dataset = self.analysis.dataset
-        #print("ds 1:", obj.dataset)
-        #ds = MdDataset()
-        #print("ds id", self.analysis.dataset_id)
-        ds = MdDataset.get(MdDataset.id==self.analysis.dataset_id)
-        #print("ds 2:", ds)
-        obj.dataset = ds
+        # Reuse in-memory dataset to avoid DB hits on every thumbnail
+        obj.dataset = self.analysis.dataset if hasattr(self, 'analysis') and self.analysis and self.analysis.dataset else None
+        if obj.dataset is None:
+            # Fallback to DB only if necessary
+            try:
+                obj.dataset = MdDataset.get(MdDataset.id == self.analysis.dataset_id)
+            except Exception:
+                pass
         #print("dataset:", obj.dataset, obj.dataset_id, obj.dataset.polygon_list, obj.dataset.edge_list)
         obj.landmark_list = []
         for i in range(0,len(shape),self.analysis.dimension):
             landmark = shape[i:i+self.analysis.dimension]
             obj.landmark_list.append(landmark)
+        # Prepare landmarks; packing/unpacking ensures downstream code sees expected structures
         obj.pack_landmark()
         obj.unpack_landmark()
         return obj

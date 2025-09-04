@@ -13,8 +13,8 @@ from PyQt6.QtCore import Qt, QRect, QSortFilterProxyModel, QSize, QPoint, QAbstr
 
 import logging
 
-from matplotlib.backends.backend_qt5agg import FigureCanvas as FigureCanvas
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.backends.backend_qtagg import FigureCanvas as FigureCanvas
+from matplotlib.backends.backend_qtagg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import matplotlib
@@ -27,6 +27,7 @@ from OpenGL import GLU as glu
 # Migrate from QGLWidget to QOpenGLWidget for better stability
 from PyQt6.QtOpenGLWidgets import QOpenGLWidget
 from PyQt6.QtGui import QSurfaceFormat, QOpenGLContext
+from PyQt6.QtOpenGL import QOpenGLFramebufferObject, QOpenGLFramebufferObjectFormat
 from scipy.spatial import ConvexHull
 from scipy import stats
 
@@ -1129,7 +1130,7 @@ class ObjectViewer3D(QOpenGLWidget):
             
             if transparent:
                 logger.info("ObjectViewer3D: Setting transparent mode attributes...")
-                
+
                 # Set up surface format for this widget specifically
                 from PyQt6.QtGui import QSurfaceFormat
                 fmt = QSurfaceFormat()
@@ -1141,26 +1142,31 @@ class ObjectViewer3D(QOpenGLWidget):
                 fmt.setSamples(0)  # Disable multisampling for transparency
                 fmt.setSwapBehavior(QSurfaceFormat.SwapBehavior.DoubleBuffer)
                 self.setFormat(fmt)  # Set format for this widget only
-                
-                # Set attributes for transparency
-                # Check if widget has a parent
+
+                # Transparent composition attributes
                 if parent is None:
-                    # For top-level windows, set window flags
+                    # Top-level window overlay (avoid for normal use)
                     self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.FramelessWindowHint)
-                    
-                # These attributes are needed regardless of parent
-                self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
-                self.setAttribute(Qt.WidgetAttribute.WA_NoSystemBackground, True)
+                    self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
+                    self.setAttribute(Qt.WidgetAttribute.WA_NoSystemBackground, True)
+                else:
+                    # Child widget overlay - keep it simple to reduce flicker
+                    self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
+                    # Avoid WA_NoSystemBackground for child widgets
+
+                # Render/update behavior
                 self.setAttribute(Qt.WidgetAttribute.WA_PaintOnScreen, False)
                 self.setAttribute(Qt.WidgetAttribute.WA_OpaquePaintEvent, False)
-                self.setAttribute(Qt.WidgetAttribute.WA_AlwaysShowToolTips, True)
-                
-                # Ensure widget updates properly
                 self.setAutoFillBackground(False)
-                
-                # Set transparent stylesheet
+                # Minimize partial update artifacts for overlays
+                try:
+                    self.setUpdateBehavior(QOpenGLWidget.UpdateBehavior.NoPartialUpdate)
+                except Exception:
+                    pass
+
+                # Transparent style hint
                 self.setStyleSheet("QOpenGLWidget { background: transparent; }")
-                
+
                 logger.info("ObjectViewer3D: Transparent mode setup complete")
                 
         except Exception as e:
@@ -1280,6 +1286,10 @@ class ObjectViewer3D(QOpenGLWidget):
         [0, 0, 0, 1]
         ])
         self.initialized = False
+        # Whether to apply self.rotation_matrix via GL matrix (for thumbnail composition)
+        self.use_base_rotation_gl = False
+        # Internal flag to use chroma-key clear for offscreen composition (when alpha fails)
+        self._use_chroma_clear = False
         self.fullpath = None
         self.edge_list = []
         self.landmark_list = []
@@ -1287,6 +1297,90 @@ class ObjectViewer3D(QOpenGLWidget):
         self.comparison_data = {}
         
         logger.info("=== ObjectViewer3D.__init__ completed successfully ===")
+
+    def render_to_image(self, width: int, height: int, samples: int = 0):
+        """Render the scene into an offscreen FBO of the requested size and return a QImage (RGBA).
+        samples: MSAA samples (0 for off, 2/4 for smoothing)
+        """
+        # Ensure valid size
+        width = max(1, int(width))
+        height = max(1, int(height))
+        from PyQt6.QtGui import QImage
+        # Use the widget's context to render offscreen
+        if not hasattr(self, '_fbo_cache'):
+            self._fbo_cache = {}
+        self.makeCurrent()
+        prev_fbo = None
+        prev_viewport = None
+        try:
+            # Save current bindings
+            prev_fbo = gl.glGetIntegerv(gl.GL_FRAMEBUFFER_BINDING)
+            prev_viewport = gl.glGetIntegerv(gl.GL_VIEWPORT)
+
+            fmt = QOpenGLFramebufferObjectFormat()
+            fmt.setAttachment(QOpenGLFramebufferObject.Attachment.Depth)
+            fmt.setSamples(max(0, int(samples)))
+            try:
+                fmt.setInternalTextureFormat(gl.GL_RGBA8)
+            except Exception:
+                pass
+            key = (width, height, fmt.samples())
+            fbo = self._fbo_cache.get(key)
+            if fbo is None or not fbo.isValid():
+                fbo = QOpenGLFramebufferObject(width, height, fmt)
+                if fbo.isValid():
+                    self._fbo_cache[key] = fbo
+            if not fbo.isValid():
+                return QImage(width, height, QImage.Format.Format_ARGB32_Premultiplied)
+
+            fbo.bind()
+
+            # Configure viewport and clear to transparent
+            gl.glViewport(0, 0, width, height)
+            gl.glDisable(gl.GL_CULL_FACE)
+            gl.glEnable(gl.GL_BLEND)
+            gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)
+            gl.glEnable(gl.GL_DEPTH_TEST)
+            if fmt.samples() > 0:
+                try:
+                    gl.glEnable(gl.GL_MULTISAMPLE)
+                except Exception:
+                    pass
+            gl.glEnable(gl.GL_LINE_SMOOTH)
+            gl.glHint(gl.GL_LINE_SMOOTH_HINT, gl.GL_NICEST)
+            gl.glEnable(gl.GL_POINT_SMOOTH)
+            gl.glHint(gl.GL_POINT_SMOOTH_HINT, gl.GL_NICEST)
+
+            gl.glClearColor(0.0, 0.0, 0.0, 0.0)
+            gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
+
+            # Adjust projection to match offscreen size
+            prev_aspect = getattr(self, 'aspect', 1.0)
+            self.aspect = width / float(height)
+
+            gl.glPushMatrix()
+            try:
+                self.draw_all()
+            finally:
+                gl.glPopMatrix()
+
+            # Read back image
+            img = fbo.toImage().convertToFormat(QImage.Format.Format_RGBA8888)
+        finally:
+            try:
+                # Restore viewport and framebuffer
+                if prev_viewport is not None:
+                    gl.glViewport(prev_viewport[0], prev_viewport[1], prev_viewport[2], prev_viewport[3])
+                if prev_fbo is not None:
+                    gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, int(prev_fbo))
+            except Exception:
+                pass
+            try:
+                self.aspect = prev_aspect
+            except Exception:
+                pass
+            self.doneCurrent()
+        return img
     
     def showEvent(self, event):
         """Override showEvent to handle first-time show initialization."""
@@ -1383,6 +1477,12 @@ class ObjectViewer3D(QOpenGLWidget):
         self.down_x = int(pos.x())
         self.down_y = int(pos.y())
         if event.buttons() == Qt.MouseButton.LeftButton:
+            # Sync thumbnails' base rotation immediately on new press to avoid flicker/reset
+            try:
+                if self.parent is not None and callable(getattr(self.parent, 'sync_press_rotation', None)):
+                    self.parent.sync_press_rotation()
+            except Exception:
+                pass
             if self.edit_mode == MODE['WIREFRAME'] and self.selected_landmark_idx > -1:
                 self.wireframe_from_idx = self.selected_landmark_idx
                 self.temp_edge = [ self.obj_ops.landmark_list[self.wireframe_from_idx][:], self.obj_ops.landmark_list[self.wireframe_from_idx][:]]
@@ -1436,16 +1536,18 @@ class ObjectViewer3D(QOpenGLWidget):
                 self.set_mode(MODE['EDIT_LANDMARK'])
             else:
                 if self.data_mode == OBJECT_MODE and self.obj_ops is not None:
-                    if self.parent != None and callable(getattr(self.parent, 'sync_rotation', None)):
+                    # First, commit our own rotation so get_rotation_matrix() reflects this drag
+                    self.sync_rotation()
+                    if self.parent != None and callable(getattr(self.parent, 'sync_rotation_with_deltas', None)):
+                        self.parent.sync_rotation_with_deltas(self.temp_rotate_x, self.temp_rotate_y)
+                    elif self.parent != None and callable(getattr(self.parent, 'sync_rotation', None)):
                         self.parent.sync_rotation()
-                    else:
-                        self.sync_rotation()
                 elif self.data_mode == DATASET_MODE and self.ds_ops is not None:
-                    if self.parent != None and callable(getattr(self.parent, 'sync_rotation', None)):
-                    #if self.parent != None and self.parent.sync_rotation is not None:
+                    self.sync_rotation()
+                    if self.parent != None and callable(getattr(self.parent, 'sync_rotation_with_deltas', None)):
+                        self.parent.sync_rotation_with_deltas(self.temp_rotate_x, self.temp_rotate_y)
+                    elif self.parent != None and callable(getattr(self.parent, 'sync_rotation', None)):
                         self.parent.sync_rotation()
-                    else:
-                        self.sync_rotation()
                 self.temp_rotate_x = 0
                 self.temp_rotate_y = 0
         elif event.button() == Qt.MouseButton.RightButton:
@@ -1711,15 +1813,54 @@ class ObjectViewer3D(QOpenGLWidget):
         if self.target_preference is not None:
             self.set_target_shape_preference(self.target_preference)
 
-    def set_object(self, object, idx=-1):
-        self.show()
-        # Force widget to be visible and process events to ensure GL context creation
-        QApplication.processEvents()
-        
+    def set_object(self, object, idx=-1, preserve_pose: bool = False):
+        """Set the underlying object data for this viewer.
+        When preserve_pose=True, keep current pose state (rotation/pan/zoom)
+        and the accumulated rotation_matrix across data refresh.
+        """
+        # Snapshot current pose if required
+        if preserve_pose:
+            _pose = {
+                'pan_x': self.pan_x,
+                'pan_y': self.pan_y,
+                'dolly': self.dolly,
+                'temp_pan_x': self.temp_pan_x,
+                'temp_pan_y': self.temp_pan_y,
+                'temp_dolly': self.temp_dolly,
+                'rotate_x': self.rotate_x,
+                'rotate_y': self.rotate_y,
+                'temp_rotate_x': self.temp_rotate_x,
+                'temp_rotate_y': self.temp_rotate_y,
+            }
+            try:
+                import numpy as _np
+                _pose['rotation_matrix'] = _np.array(self.rotation_matrix, copy=True)
+            except Exception:
+                _pose['rotation_matrix'] = None
+        else:
+            _pose = None
+
+        # For offscreen-only thumbnails, avoid on-screen flash; otherwise ensure context
+        if getattr(self, '_offscreen_only', False):
+            try:
+                # Try to create context without showing by briefly enabling updates
+                # Some platforms still require show() once; guard with WA_DontShowOnScreen
+                self.setUpdatesEnabled(True)
+                self.show()
+                QApplication.processEvents()
+                self.hide()
+                self.setUpdatesEnabled(False)
+            except Exception:
+                pass
+        else:
+            self.show()
+            # Force widget to be visible and process events to ensure GL context creation
+            QApplication.processEvents()
+
         # Only make current if context is valid
         if self.isValid():
             self.makeCurrent()
-        
+
         self.landmark_list = copy.deepcopy(object.landmark_list)
         m_app = QApplication.instance()
         if isinstance(object, MdObject):
@@ -1729,7 +1870,7 @@ class ObjectViewer3D(QOpenGLWidget):
             self.object = MdObject()
             obj_ops = MdObjectOps(self.object)
         else:
-            pass
+            obj_ops = None
         self.dataset = object.dataset
         if self.dataset.baseline is not None:
             self.dataset.unpack_baseline()
@@ -1737,8 +1878,16 @@ class ObjectViewer3D(QOpenGLWidget):
 
         self.obj_ops = obj_ops
         self.data_mode = OBJECT_MODE
-        self.pan_x = self.pan_y = 0
-        self.rotate_x = self.rotate_y = 0
+
+        # Reset pose only when not preserving
+        if not preserve_pose:
+            self.pan_x = self.pan_y = 0
+            self.rotate_x = self.rotate_y = 0
+            self.temp_pan_x = self.temp_pan_y = 0
+            self.temp_rotate_x = self.temp_rotate_y = 0
+            self.dolly = 0
+            self.temp_dolly = 0
+
         self.edge_list = self.dataset.unpack_wireframe()
         self.polygon_list = self.dataset.unpack_polygons()
         if object.threed_model.count() > 0:
@@ -1750,6 +1899,21 @@ class ObjectViewer3D(QOpenGLWidget):
 
         if self.dataset.baseline is not None:
             self.align_object()
+
+        # Restore pose if requested
+        if preserve_pose and _pose is not None:
+            self.pan_x = _pose['pan_x']
+            self.pan_y = _pose['pan_y']
+            self.dolly = _pose['dolly']
+            self.temp_pan_x = _pose['temp_pan_x']
+            self.temp_pan_y = _pose['temp_pan_y']
+            self.temp_dolly = _pose['temp_dolly']
+            self.rotate_x = _pose['rotate_x']
+            self.rotate_y = _pose['rotate_y']
+            self.temp_rotate_x = _pose['temp_rotate_x']
+            self.temp_rotate_y = _pose['temp_rotate_y']
+            if _pose['rotation_matrix'] is not None:
+                self.rotation_matrix = _pose['rotation_matrix']
 
     def update_object(self, object):
         return
@@ -1841,11 +2005,11 @@ class ObjectViewer3D(QOpenGLWidget):
             
             if fmt:
                 logger.info(
-                    "OpenGL init | VER=%s | RENDERER=%s | VENDOR=%s | fmt=%s.%s %s depth=%d stencil=%d samples=%d",
+                    "OpenGL init | VER=%s | RENDERER=%s | VENDOR=%s | fmt=%s.%s %s depth=%d stencil=%d samples=%d alpha=%d",
                     v.decode(errors="ignore"), vr.decode(errors="ignore"), vd.decode(errors="ignore"),
                     fmt.majorVersion(), fmt.minorVersion(),
                     "Core" if fmt.profile()==QSurfaceFormat.OpenGLContextProfile.CoreProfile else "Compat",
-                    fmt.depthBufferSize(), fmt.stencilBufferSize(), fmt.samples()
+                    fmt.depthBufferSize(), fmt.stencilBufferSize(), fmt.samples(), fmt.alphaBufferSize()
                 )
             else:
                 logger.info(
@@ -2016,6 +2180,12 @@ class ObjectViewer3D(QOpenGLWidget):
                 logger.info("paintGL: Drawing landmark indices with QPainter...")
                 self.draw_landmark_indices_overlay()
                 logger.info("paintGL: Landmark indices drawn")
+
+            # Draw debug rotation overlay (GL viewer vs global)
+            try:
+                self.draw_rotation_debug_overlay()
+            except Exception:
+                pass
             
             logger.info("=== paintGL() completed successfully ===")
             return
@@ -2057,6 +2227,67 @@ class ObjectViewer3D(QOpenGLWidget):
                 painter.setPen(QPen(QColor(255, 255, 255), 1))
                 painter.drawText(QPoint(int(x + 5), int(y - 5)), str(index))
                 
+        finally:
+            painter.end()
+
+    def draw_rotation_debug_overlay(self):
+        """Overlay GL/local and global rotation Euler angles for debugging alignment."""
+        from PyQt6.QtGui import QPainter, QFont, QColor, QPen
+        from PyQt6.QtCore import QRect
+        import numpy as _np
+
+        def _euler_from_mat(m):
+            try:
+                m3 = _np.array(m, dtype=float)[:3, :3]
+                sy = _np.sqrt(m3[0, 0] * m3[0, 0] + m3[1, 0] * m3[1, 0])
+                singular = sy < 1e-6
+                if not singular:
+                    x = _np.arctan2(m3[2, 1], m3[2, 2])
+                    y = _np.arctan2(-m3[2, 0], sy)
+                    z = _np.arctan2(m3[1, 0], m3[0, 0])
+                else:
+                    x = _np.arctan2(-m3[1, 2], m3[1, 1])
+                    y = _np.arctan2(-m3[2, 0], sy)
+                    z = 0.0
+                return (int(x * 180 / _np.pi), int(y * 180 / _np.pi), int(z * 180 / _np.pi))
+            except Exception:
+                return None
+
+        gl_mat = getattr(self, 'rotation_matrix', None)
+        g_mat = None
+        try:
+            if self.parent is not None and hasattr(self.parent, 'rotation_matrix'):
+                g_mat = self.parent.rotation_matrix
+        except Exception:
+            pass
+
+        gl_eul = _euler_from_mat(gl_mat) if gl_mat is not None else None
+        g_eul = _euler_from_mat(g_mat) if g_mat is not None else None
+
+        if gl_eul is None and g_eul is None:
+            return
+
+        lines = []
+        if gl_eul is not None:
+            lines.append(f"GL: {gl_eul}")
+        if g_eul is not None:
+            lines.append(f"GLOB: {g_eul}")
+        text = "\n".join(lines)
+
+        painter = QPainter(self)
+        try:
+            painter.setRenderHint(QPainter.RenderHint.TextAntialiasing)
+            # Larger, readable font as requested
+            font = QFont("Arial", 14, QFont.Weight.DemiBold)
+            painter.setFont(font)
+            metrics = painter.fontMetrics()
+            rect = metrics.boundingRect(text)
+            rect = QRect(6, 6, rect.width() + 12, rect.height() + 12)
+            painter.setPen(QPen(QColor(0, 0, 0, 160), 1))
+            painter.setBrush(QColor(255, 255, 255, 200))
+            painter.drawRect(rect)
+            painter.setPen(QPen(QColor(0, 0, 0), 1))
+            painter.drawText(rect.adjusted(6, 6, -6, -6), 0, text)
         finally:
             painter.end()
     
@@ -2111,35 +2342,52 @@ class ObjectViewer3D(QOpenGLWidget):
         gl.glMatrixMode(gl.GL_PROJECTION)
         gl.glLoadIdentity()
         glu.gluPerspective(45.0, aspect, 0.1, 100.0)
-        
-        # Ensure lighting is properly set up for each frame
+
+        # Switch to model-view, clear first, then apply transforms
+        gl.glMatrixMode(gl.GL_MODELVIEW)
+        bg_color = mu.as_gl_color(self.bgcolor)
+
+        gl.glEnable(gl.GL_BLEND)
+        gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)  # Standard alpha blending
+        if getattr(self, '_use_chroma_clear', False):
+            # Use chroma key clear when composing offscreen (alpha-invariant)
+            gl.glClearColor(1.0, 0.0, 1.0, 1.0)
+        else:
+            if self.transparent:
+                gl.glClearColor(0.0, 0.0, 0.0, 0.0)
+            else:
+                gl.glClearColor(*bg_color, 1.0)
+        gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
+
+        # Reset and apply camera + interaction transforms
+        gl.glLoadIdentity()
+
+        # Ensure lighting is properly set after resetting
         if current_buffer == 0:  # Only for main render buffer, not picker buffer
             gl.glEnable(gl.GL_LIGHTING)
             gl.glEnable(gl.GL_LIGHT0)
-            
+
             light_position = [1.0, 1.0, 1.0, 0.0]  # Directional light
             light_ambient = [0.2, 0.2, 0.2, 1.0]   # Ambient light
             light_diffuse = [0.8, 0.8, 0.8, 1.0]   # Diffuse light
-            
+
             gl.glLightfv(gl.GL_LIGHT0, gl.GL_POSITION, light_position)
             gl.glLightfv(gl.GL_LIGHT0, gl.GL_AMBIENT, light_ambient)
-            gl.glLightfv(gl.GL_LIGHT0, gl.GL_DIFFUSE, light_diffuse) 
-        gl.glTranslatef(0, 0, -5.0 + self.dolly + self.temp_dolly)   # x, y, z 
+            gl.glLightfv(gl.GL_LIGHT0, gl.GL_DIFFUSE, light_diffuse)
+
+        gl.glTranslatef(0, 0, -5.0 + self.dolly + self.temp_dolly)   # x, y, z
         gl.glTranslatef((self.pan_x + self.temp_pan_x)/100.0, (self.pan_y + self.temp_pan_y)/-100.0, 0.0)
+        # Apply absolute/base rotation matrix first (persistent orientation) when enabled
+        if getattr(self, 'use_base_rotation_gl', False):
+            try:
+                import numpy as _np
+                _mat = _np.array(self.rotation_matrix, dtype=_np.float32)
+                # OpenGL expects column-major order
+                gl.glMultMatrixf(_mat.T)
+            except Exception:
+                pass
         gl.glRotatef(self.rotate_y + self.temp_rotate_y, 1.0, 0.0, 0.0)
         gl.glRotatef(self.rotate_x + self.temp_rotate_x, 0.0, 1.0, 0.0)
-
-        gl.glMatrixMode(gl.GL_MODELVIEW)
-        bg_color = mu.as_gl_color(self.bgcolor)
-        
-        gl.glEnable(gl.GL_BLEND)
-        gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)  # Standard alpha blending
-        if self.transparent:
-            gl.glClearColor(0.0,0.0,0.0, 0.0)
-        else:
-            gl.glClearColor(*bg_color, 1.0)
-        gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
-        gl.glLoadIdentity()
         gl.glEnable(gl.GL_POINT_SMOOTH)
         if self.ds_ops is None and self.obj_ops is None:
             return
@@ -2722,6 +2970,23 @@ class ObjectViewer3D(QOpenGLWidget):
         self.temp_dolly = 0
         self.align_object()
 
+    def set_rotation_matrix_abs(self, rotation_matrix):
+        """Replace the accumulated absolute rotation matrix with the given one.
+        Does not mutate immediate pose deltas; callers typically zero temp deltas
+        to avoid compounding with GL rotations in draw_all().
+        """
+        try:
+            import numpy as _np
+            self.rotation_matrix = _np.array(rotation_matrix, copy=True)
+        except Exception:
+            self.rotation_matrix = rotation_matrix
+
+    def get_rotation_matrix(self):
+        try:
+            return np.array(self.rotation_matrix, copy=True)
+        except Exception:
+            return None
+
     def sync_rotation(self):
         self.rotate_x += self.temp_rotate_x
         self.rotate_y += self.temp_rotate_y
@@ -2749,6 +3014,27 @@ class ObjectViewer3D(QOpenGLWidget):
             for obj in self.ds_ops.object_list:
                 obj.rotate_3d(math.radians(-1*self.rotate_x),'Y')
                 obj.rotate_3d(math.radians(self.rotate_y),'X')
+
+        # Update internal rotation matrix to include this committed delta
+        try:
+            rx = math.radians(self.rotate_y)
+            ry = -math.radians(self.rotate_x)
+            rotationXMatrix = np.array([
+                [1, 0, 0, 0],
+                [0, np.cos(rx), -np.sin(rx), 0],
+                [0, np.sin(rx),  np.cos(rx), 0],
+                [0, 0, 0, 1]
+            ])
+            rotationYMatrix = np.array([
+                [ np.cos(ry), 0, np.sin(ry), 0],
+                [ 0, 1, 0, 0],
+                [-np.sin(ry), 0, np.cos(ry), 0],
+                [ 0, 0, 0, 1]
+            ])
+            delta_R = rotationYMatrix @ rotationXMatrix
+            self.rotation_matrix = delta_R @ self.rotation_matrix
+        except Exception:
+            pass
 
         self.rotate_x = 0
         self.rotate_y = 0        

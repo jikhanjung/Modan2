@@ -166,7 +166,7 @@ elif platform.system() == "Windows":
 onefile_args = [
     f"--name={NAME}_v{VERSION}_build{BUILD_NUMBER}{platform_suffix}{exe_extension}",
     "--onefile",
-    "--noconsole",
+    "--console",  # Changed to show console for debugging
     f"--add-data=icons/*.png{data_separator}icons",
     f"--add-data=translations/*.qm{data_separator}translations",
     f"--add-data=migrations/*{data_separator}migrations",
@@ -178,7 +178,7 @@ run_pyinstaller(onefile_args)
 # 2. Run PyInstaller (One-Directory Bundle)
 onedir_args = [
     "--onedir",
-    "--noconsole",
+    "--console",  # Changed to show console for debugging
     f"--add-data=icons/*.png{data_separator}icons",
     f"--add-data=translations/*.qm{data_separator}translations",
     f"--add-data=migrations/*{data_separator}migrations",

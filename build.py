@@ -177,6 +177,7 @@ run_pyinstaller(onefile_args)
 
 # 2. Run PyInstaller (One-Directory Bundle)
 onedir_args = [
+    "--name=Modan2",  # Explicitly set output name
     "--onedir",
     "--console",  # Changed to show console for debugging
     f"--add-data=icons/*.png{data_separator}icons",

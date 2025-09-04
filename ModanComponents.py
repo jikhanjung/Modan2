@@ -12,6 +12,13 @@ from PyQt6.QtCore import Qt, QRect, QSortFilterProxyModel, QSize, QPoint, QAbstr
                          pyqtSlot, pyqtSignal, QItemSelectionModel, QTimer, QEvent, QModelIndex, QObject, QPointF
 
 import logging
+# Suppress verbose logs from QOpenGLWidget (ObjectViewer3D) and this module by default
+try:
+    _mod_logger = logging.getLogger(__name__)
+    # Keep warnings and errors; drop info/debug noise
+    _mod_logger.setLevel(logging.WARNING)
+except Exception:
+    pass
 
 from matplotlib.backends.backend_qtagg import FigureCanvas as FigureCanvas
 from matplotlib.backends.backend_qtagg import NavigationToolbar2QT as NavigationToolbar
@@ -1539,13 +1546,21 @@ class ObjectViewer3D(QOpenGLWidget):
                     # First, commit our own rotation so get_rotation_matrix() reflects this drag
                     self.sync_rotation()
                     if self.parent != None and callable(getattr(self.parent, 'sync_rotation_with_deltas', None)):
-                        self.parent.sync_rotation_with_deltas(self.temp_rotate_x, self.temp_rotate_y)
+                        # Pass self so dialog can read exact rotation matrix from the source view
+                        try:
+                            self.parent.sync_rotation_with_deltas(self.temp_rotate_x, self.temp_rotate_y, source=self)
+                        except TypeError:
+                            # Backward compatibility: older signature without source
+                            self.parent.sync_rotation_with_deltas(self.temp_rotate_x, self.temp_rotate_y)
                     elif self.parent != None and callable(getattr(self.parent, 'sync_rotation', None)):
                         self.parent.sync_rotation()
                 elif self.data_mode == DATASET_MODE and self.ds_ops is not None:
                     self.sync_rotation()
                     if self.parent != None and callable(getattr(self.parent, 'sync_rotation_with_deltas', None)):
-                        self.parent.sync_rotation_with_deltas(self.temp_rotate_x, self.temp_rotate_y)
+                        try:
+                            self.parent.sync_rotation_with_deltas(self.temp_rotate_x, self.temp_rotate_y, source=self)
+                        except TypeError:
+                            self.parent.sync_rotation_with_deltas(self.temp_rotate_x, self.temp_rotate_y)
                     elif self.parent != None and callable(getattr(self.parent, 'sync_rotation', None)):
                         self.parent.sync_rotation()
                 self.temp_rotate_x = 0

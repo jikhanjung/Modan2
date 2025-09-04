@@ -3035,26 +3035,17 @@ class DataExplorationDialog(QDialog):
                 self.fig2.canvas.draw_idle()
                 return
 
-            # Determine target pixel size for thumbnails
-            fig_height = self.fig2.canvas.height()
-            fig_width = self.fig2.canvas.width()
+            # Determine target pixel size for thumbnails (favor speed)
+            # Use small fixed sizes to reduce per-thumbnail render cost
             if self.thumbnail_live_mode:
-                target_w = max(72, int(fig_width / 6))
-                target_h = max(54, int(fig_height / 6))
+                target_w = 64
+                target_h = 48
             else:
-                target_w = max(96, int(fig_width / 5))
-                target_h = max(72, int(fig_height / 5))
-            # Oversample (higher when not live)
-            try:
-                dpr = 1
-                if hasattr(self.fig2.canvas, 'devicePixelRatio'):
-                    dpr = max(dpr, int(self.fig2.canvas.devicePixelRatio()))
-                if hasattr(self.fig2.canvas, 'devicePixelRatioF'):
-                    dpr = max(dpr, int(self.fig2.canvas.devicePixelRatioF()))
-            except Exception:
-                dpr = 1
-            oversample = 1 if self.thumbnail_live_mode else max(2, dpr)
-            msaa = 0 if self.thumbnail_live_mode else 4
+                target_w = 96
+                target_h = 72
+            # Quality: no oversampling/MSAA for thumbnails
+            oversample = 1
+            msaa = 0
 
             for keyname in self.shape_grid.keys():
                 entry = self.shape_grid[keyname]
@@ -3144,35 +3135,7 @@ class DataExplorationDialog(QDialog):
                                         xycoords='data', frameon=False, box_alignment=(0.5, 0.5), zorder=10)
                     self.ax2.add_artist(ab)
                     self._shape_grid_artists.append(ab)
-                    # Debug text only in non-live mode
-                    if not self.thumbnail_live_mode:
-                        try:
-                            import numpy as _np
-                            def _euler_from_mat(m):
-                                m3 = _np.array(m)[:3, :3]
-                                sy = _np.sqrt(m3[0,0]*m3[0,0] + m3[1,0]*m3[1,0])
-                                singular = sy < 1e-6
-                                if not singular:
-                                    x = _np.arctan2(m3[2,1], m3[2,2])
-                                    y = _np.arctan2(-m3[2,0], sy)
-                                    z = _np.arctan2(m3[1,0], m3[0,0])
-                                else:
-                                    x = _np.arctan2(-m3[1,2], m3[1,1])
-                                    y = _np.arctan2(-m3[2,0], sy)
-                                    z = 0
-                                return (int(x*180/_np.pi), int(y*180/_np.pi), int(z*180/_np.pi))
-
-                            g_eul = _euler_from_mat(self.rotation_matrix) if hasattr(self, 'rotation_matrix') else None
-                            t_mat = getattr(view, '_debug_rotation_matrix', None)
-                            t_eul = _euler_from_mat(t_mat) if t_mat is not None else None
-                            if g_eul and t_eul:
-                                txt = f"G:{g_eul}\nT:{t_eul}"
-                                tx = self.ax2.text(entry['x_val'], entry['y_val'], txt,
-                                                   fontsize=12, color='black', ha='left', va='bottom', zorder=11,
-                                                   bbox=dict(facecolor='white', alpha=0.5, edgecolor='none', pad=1))
-                                self._shape_grid_artists.append(tx)
-                        except Exception:
-                            pass
+                    # Debug text overlays disabled for performance
                 except Exception:
                     pass
 
@@ -3267,20 +3230,45 @@ class DataExplorationDialog(QDialog):
         except Exception:
             pass
 
-    def sync_rotation_with_deltas(self, dx, dy):
+    def sync_rotation_with_deltas(self, dx, dy, source=None):
         """Called by the main GL viewer on mouse release with drag deltas (pixels).
         Update the global rotation matrix to EXACTLY match the viewer's current matrix,
         then redraw thumbnails using only the global matrix.
         """
         # Prefer exact matrix from the main 3D viewer if available
         try:
-            if hasattr(self, 'object_view_3d') and self.object_view_3d is not None:
+            rm = None
+            if source is not None and callable(getattr(source, 'get_rotation_matrix', None)):
+                rm = source.get_rotation_matrix()
+            elif hasattr(self, 'object_view_3d') and self.object_view_3d is not None:
                 rm = self.object_view_3d.get_rotation_matrix()
-                if rm is not None:
-                    self.rotation_matrix = rm
+            if rm is not None:
+                self.rotation_matrix = rm
         except Exception:
             pass
-        # Redraw thumbnails using the updated global rotation matrix (final quality)
+        # Immediately push the absolute matrix into all thumbnails (no debounce)
+        try:
+            for key in self.shape_grid.keys():
+                try:
+                    view = self.shape_grid[key].get('view')
+                except Exception:
+                    view = None
+                if view and hasattr(view, 'set_rotation_matrix_abs'):
+                    try:
+                        view.set_rotation_matrix_abs(self.rotation_matrix)
+                        # Clear transient deltas so next drag starts clean
+                        view.temp_rotate_x = 0
+                        view.temp_rotate_y = 0
+                        # Keep persistent pose neutral; base matrix carries orientation
+                        if hasattr(view, 'use_base_rotation_gl') and view.use_base_rotation_gl:
+                            view.rotate_x = 0
+                            view.rotate_y = 0
+                        view.update()
+                    except Exception:
+                        pass
+        except Exception:
+            pass
+        # Redraw thumbnails via final-quality path
         try:
             self._request_thumbnail_refresh(live=False)
         except Exception:
@@ -3382,17 +3370,8 @@ class DataExplorationDialog(QDialog):
                 sv.temp_rotate_y = temp_rotate_y
                 #sv.sync_rotation()
                 sv.update()
-        for key in self.shape_grid.keys():
-            view = self.shape_grid[key]['view']
-            if view:
-                view.temp_rotate_x = temp_rotate_x
-                view.temp_rotate_y = temp_rotate_y
-                view.update()
-        # Request a live (low-cost) thumbnails refresh
-        try:
-            self._request_thumbnail_refresh(live=True)
-        except Exception:
-            pass
+        # Skip live thumbnail updates during drag to avoid overhead and flicker
+        # Thumbnails will refresh on release via final pass
 
         #self.object_view_3d.sync_rotation(rotation_x, rotation_y)
     def moveEvent(self, event):

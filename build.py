@@ -171,7 +171,7 @@ onefile_args = [
     f"--add-data=translations/*.qm{data_separator}translations",
     f"--add-data=migrations/*{data_separator}migrations",
     f"--icon={ICON}",
-    "Modan2.py",
+    "main.py",  # Changed from Modan2.py to main.py for proper debugging
 ]
 run_pyinstaller(onefile_args)
 
@@ -184,7 +184,7 @@ onedir_args = [
     f"--add-data=migrations/*{data_separator}migrations",
     f"--icon={ICON}",
     "--noconfirm",
-    "Modan2.py",
+    "main.py",  # Changed from Modan2.py to main.py for proper debugging
 ]
 run_pyinstaller(onedir_args)
 

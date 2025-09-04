@@ -9,36 +9,66 @@ import tempfile
 from datetime import datetime
 
 # Create emergency log file immediately in a fixed location
-# Try multiple locations for emergency log
+# Simplified emergency logging - try user desktop first, then temp
 emergency_log_dir = None
-for try_dir in ['C:/modan2_logs', 'D:/modan2_logs', os.path.expanduser('~/modan2_logs'), tempfile.gettempdir()]:
+emergency_log_path = None
+
+# Try desktop first (most likely to work and easy to find)
+desktop_paths = [
+    os.path.join(os.path.expanduser('~'), 'Desktop'),
+    os.path.join(os.path.expanduser('~'), 'デスクトップ'),  # Japanese Windows
+    os.path.join(os.environ.get('USERPROFILE', ''), 'Desktop') if os.name == 'nt' else None,
+]
+
+for desktop in desktop_paths:
+    if desktop and os.path.exists(desktop):
+        try:
+            emergency_log_path = os.path.join(desktop, f'modan2_startup_{datetime.now().strftime("%Y%m%d_%H%M%S")}.log')
+            # Test write immediately
+            with open(emergency_log_path, 'w') as f:
+                f.write(f"Modan2 Emergency Log - {datetime.now()}\n")
+                f.write(f"Python: {sys.version}\n")
+                f.write(f"Executable: {sys.executable}\n")
+                f.write("=" * 50 + "\n")
+                f.flush()  # Force write to disk
+            emergency_log_dir = desktop
+            break
+        except:
+            continue
+
+# Fallback to temp directory
+if not emergency_log_path:
     try:
-        if not os.path.exists(try_dir):
-            os.makedirs(try_dir, exist_ok=True)
-        # Test if we can write to this directory
-        test_file = os.path.join(try_dir, 'test.txt')
-        with open(test_file, 'w') as f:
-            f.write('test')
-        os.remove(test_file)
-        emergency_log_dir = try_dir
-        break
+        emergency_log_dir = tempfile.gettempdir()
+        emergency_log_path = os.path.join(emergency_log_dir, f'modan2_startup_{datetime.now().strftime("%Y%m%d_%H%M%S")}.log')
+        with open(emergency_log_path, 'w') as f:
+            f.write(f"Modan2 Emergency Log - {datetime.now()}\n")
+            f.flush()
     except:
-        continue
+        # Last resort: create in current directory
+        emergency_log_path = f'modan2_startup_{datetime.now().strftime("%Y%m%d_%H%M%S")}.log'
+        try:
+            with open(emergency_log_path, 'w') as f:
+                f.write(f"Modan2 Emergency Log - {datetime.now()}\n")
+                f.flush()
+        except:
+            emergency_log_path = None
 
-if not emergency_log_dir:
-    emergency_log_dir = tempfile.gettempdir()
-
-emergency_log_path = os.path.join(emergency_log_dir, f'modan2_startup_{datetime.now().strftime("%Y%m%d_%H%M%S")}.log')
 def emergency_log(msg):
     """Write to emergency log file and stdout"""
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
     log_msg = f"[{timestamp}] {msg}"
     print(log_msg)
-    try:
-        with open(emergency_log_path, 'a') as f:
-            f.write(log_msg + '\n')
-    except:
-        pass
+    print(f"[LOG PATH: {emergency_log_path}]", file=sys.stderr)  # Also print path to stderr
+    sys.stdout.flush()  # Force console output
+    if emergency_log_path:
+        try:
+            with open(emergency_log_path, 'a') as f:
+                f.write(log_msg + '\n')
+                f.flush()  # Force write to disk immediately
+                os.fsync(f.fileno())  # Force OS to write to disk
+        except Exception as e:
+            print(f"Failed to write to log: {e}", file=sys.stderr)
 
 emergency_log(f"Modan2 startup initiated - Emergency log: {emergency_log_path}")
 emergency_log(f"Python version: {sys.version}")

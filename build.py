@@ -166,12 +166,12 @@ elif platform.system() == "Windows":
 onefile_args = [
     f"--name={NAME}_v{VERSION}_build{BUILD_NUMBER}{platform_suffix}{exe_extension}",
     "--onefile",
-    "--console",  # Changed to show console for debugging
+    "--noconsole",
     f"--add-data=icons/*.png{data_separator}icons",
     f"--add-data=translations/*.qm{data_separator}translations",
     f"--add-data=migrations/*{data_separator}migrations",
     f"--icon={ICON}",
-    "main.py",  # Changed from Modan2.py to main.py for proper debugging
+    "main.py",
 ]
 run_pyinstaller(onefile_args)
 
@@ -179,13 +179,13 @@ run_pyinstaller(onefile_args)
 onedir_args = [
     "--name=Modan2",  # Explicitly set output name
     "--onedir",
-    "--console",  # Changed to show console for debugging
+    "--noconsole",
     f"--add-data=icons/*.png{data_separator}icons",
     f"--add-data=translations/*.qm{data_separator}translations",
     f"--add-data=migrations/*{data_separator}migrations",
     f"--icon={ICON}",
     "--noconfirm",
-    "main.py",  # Changed from Modan2.py to main.py for proper debugging
+    "main.py",
 ]
 run_pyinstaller(onedir_args)
 

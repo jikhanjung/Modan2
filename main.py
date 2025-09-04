@@ -4,99 +4,9 @@ Modan2 - Morphometric Data Analysis Application
 Main entry point for the application
 """
 import sys
-import os
-import tempfile
-from datetime import datetime
-
-# Create emergency log file immediately in a fixed location
-# Simplified emergency logging - try user desktop first, then temp
-emergency_log_dir = None
-emergency_log_path = None
-
-# Try desktop first (most likely to work and easy to find)
-desktop_paths = [
-    os.path.join(os.path.expanduser('~'), 'Desktop'),
-    os.path.join(os.path.expanduser('~'), 'デスクトップ'),  # Japanese Windows
-    os.path.join(os.environ.get('USERPROFILE', ''), 'Desktop') if os.name == 'nt' else None,
-]
-
-for desktop in desktop_paths:
-    if desktop and os.path.exists(desktop):
-        try:
-            emergency_log_path = os.path.join(desktop, f'modan2_startup_{datetime.now().strftime("%Y%m%d_%H%M%S")}.log')
-            # Test write immediately
-            with open(emergency_log_path, 'w') as f:
-                f.write(f"Modan2 Emergency Log - {datetime.now()}\n")
-                f.write(f"Python: {sys.version}\n")
-                f.write(f"Executable: {sys.executable}\n")
-                f.write("=" * 50 + "\n")
-                f.flush()  # Force write to disk
-            emergency_log_dir = desktop
-            break
-        except:
-            continue
-
-# Fallback to temp directory
-if not emergency_log_path:
-    try:
-        emergency_log_dir = tempfile.gettempdir()
-        emergency_log_path = os.path.join(emergency_log_dir, f'modan2_startup_{datetime.now().strftime("%Y%m%d_%H%M%S")}.log')
-        with open(emergency_log_path, 'w') as f:
-            f.write(f"Modan2 Emergency Log - {datetime.now()}\n")
-            f.flush()
-    except:
-        # Last resort: create in current directory
-        emergency_log_path = f'modan2_startup_{datetime.now().strftime("%Y%m%d_%H%M%S")}.log'
-        try:
-            with open(emergency_log_path, 'w') as f:
-                f.write(f"Modan2 Emergency Log - {datetime.now()}\n")
-                f.flush()
-        except:
-            emergency_log_path = None
-
-def emergency_log(msg):
-    """Write to emergency log file and stdout"""
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-    log_msg = f"[{timestamp}] {msg}"
-    print(log_msg)
-    print(f"[LOG PATH: {emergency_log_path}]", file=sys.stderr)  # Also print path to stderr
-    sys.stdout.flush()  # Force console output
-    if emergency_log_path:
-        try:
-            with open(emergency_log_path, 'a') as f:
-                f.write(log_msg + '\n')
-                f.flush()  # Force write to disk immediately
-                os.fsync(f.fileno())  # Force OS to write to disk
-        except Exception as e:
-            print(f"Failed to write to log: {e}", file=sys.stderr)
-
-emergency_log(f"Modan2 startup initiated - Emergency log: {emergency_log_path}")
-emergency_log(f"Python version: {sys.version}")
-emergency_log(f"Executable: {sys.executable}")
-
-try:
-    emergency_log("Importing argparse...")
-    import argparse
-    emergency_log("Imported argparse successfully")
-except Exception as e:
-    emergency_log(f"Failed to import argparse: {e}")
-    raise
-
-try:
-    emergency_log("Importing logging...")
-    import logging
-    emergency_log("Imported logging successfully")
-except Exception as e:
-    emergency_log(f"Failed to import logging: {e}")
-    raise
-
-try:
-    emergency_log("Importing pathlib.Path...")
-    from pathlib import Path
-    emergency_log("Imported pathlib.Path successfully")
-except Exception as e:
-    emergency_log(f"Failed to import pathlib.Path: {e}")
-    raise
+import argparse
+import logging
+from pathlib import Path
 
 def parse_arguments():
     """Parse command line arguments."""
@@ -204,17 +114,9 @@ def main():
     
     try:
         # Qt application setup
-        emergency_log("Importing PyQt5.QtWidgets.QApplication...")
         from PyQt5.QtWidgets import QApplication
-        emergency_log("Imported PyQt5.QtWidgets.QApplication successfully")
-        
-        emergency_log("Importing PyQt5.QtCore.Qt...")
         from PyQt5.QtCore import Qt
-        emergency_log("Imported PyQt5.QtCore.Qt successfully")
-        
-        emergency_log("Importing PyQt5.QtGui.QIcon...")
         from PyQt5.QtGui import QIcon
-        emergency_log("Imported PyQt5.QtGui.QIcon successfully")
         
         # High DPI support
         QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
@@ -232,31 +134,18 @@ def main():
             app.setWindowIcon(QIcon(str(icon_path)))
         
         # Initialize application setup
-        emergency_log("Importing MdAppSetup.ApplicationSetup...")
         from MdAppSetup import ApplicationSetup
-        emergency_log("Imported MdAppSetup.ApplicationSetup successfully")
-        
-        emergency_log("Creating ApplicationSetup instance...")
         setup = ApplicationSetup(
             debug=args.debug,
             db_path=args.db,
             config_path=args.config,
             language=args.lang
         )
-        emergency_log("ApplicationSetup instance created")
-        
-        emergency_log("Initializing ApplicationSetup...")
         setup.initialize()
-        emergency_log("ApplicationSetup initialized")
         
         # Create and show main window
-        emergency_log("Importing Modan2.ModanMainWindow...")
         from Modan2 import ModanMainWindow
-        emergency_log("Imported Modan2.ModanMainWindow successfully")
-        
-        emergency_log("Creating ModanMainWindow instance...")
         window = ModanMainWindow(setup.get_config())
-        emergency_log("ModanMainWindow instance created")
         
         # Show splash screen if not disabled
         if not args.no_splash:

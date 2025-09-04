@@ -61,13 +61,20 @@ def setup_logging(debug: bool = False):
     level = logging.DEBUG if debug else logging.INFO
     format_str = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     
+    # Ensure logs directory exists to avoid FileNotFoundError
+    try:
+        log_dir = Path('logs')
+        log_dir.mkdir(parents=True, exist_ok=True)
+        file_handler = logging.FileHandler(log_dir / 'modan2.log', encoding='utf-8')
+        handlers = [logging.StreamHandler(sys.stdout), file_handler]
+    except Exception:
+        # Fallback to console-only logging if file handler cannot be created
+        handlers = [logging.StreamHandler(sys.stdout)]
+
     logging.basicConfig(
         level=level,
         format=format_str,
-        handlers=[
-            logging.StreamHandler(sys.stdout),
-            logging.FileHandler('logs/modan2.log', encoding='utf-8')
-        ]
+        handlers=handlers
     )
     
     # Reduce noise from Qt and matplotlib

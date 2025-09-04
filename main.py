@@ -4,9 +4,69 @@ Modan2 - Morphometric Data Analysis Application
 Main entry point for the application
 """
 import sys
-import argparse
-import logging
-from pathlib import Path
+import os
+import tempfile
+from datetime import datetime
+
+# Create emergency log file immediately in a fixed location
+# Try multiple locations for emergency log
+emergency_log_dir = None
+for try_dir in ['C:/modan2_logs', 'D:/modan2_logs', os.path.expanduser('~/modan2_logs'), tempfile.gettempdir()]:
+    try:
+        if not os.path.exists(try_dir):
+            os.makedirs(try_dir, exist_ok=True)
+        # Test if we can write to this directory
+        test_file = os.path.join(try_dir, 'test.txt')
+        with open(test_file, 'w') as f:
+            f.write('test')
+        os.remove(test_file)
+        emergency_log_dir = try_dir
+        break
+    except:
+        continue
+
+if not emergency_log_dir:
+    emergency_log_dir = tempfile.gettempdir()
+
+emergency_log_path = os.path.join(emergency_log_dir, f'modan2_startup_{datetime.now().strftime("%Y%m%d_%H%M%S")}.log')
+def emergency_log(msg):
+    """Write to emergency log file and stdout"""
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+    log_msg = f"[{timestamp}] {msg}"
+    print(log_msg)
+    try:
+        with open(emergency_log_path, 'a') as f:
+            f.write(log_msg + '\n')
+    except:
+        pass
+
+emergency_log(f"Modan2 startup initiated - Emergency log: {emergency_log_path}")
+emergency_log(f"Python version: {sys.version}")
+emergency_log(f"Executable: {sys.executable}")
+
+try:
+    emergency_log("Importing argparse...")
+    import argparse
+    emergency_log("Imported argparse successfully")
+except Exception as e:
+    emergency_log(f"Failed to import argparse: {e}")
+    raise
+
+try:
+    emergency_log("Importing logging...")
+    import logging
+    emergency_log("Imported logging successfully")
+except Exception as e:
+    emergency_log(f"Failed to import logging: {e}")
+    raise
+
+try:
+    emergency_log("Importing pathlib.Path...")
+    from pathlib import Path
+    emergency_log("Imported pathlib.Path successfully")
+except Exception as e:
+    emergency_log(f"Failed to import pathlib.Path: {e}")
+    raise
 
 def parse_arguments():
     """Parse command line arguments."""
@@ -114,9 +174,17 @@ def main():
     
     try:
         # Qt application setup
+        emergency_log("Importing PyQt5.QtWidgets.QApplication...")
         from PyQt5.QtWidgets import QApplication
+        emergency_log("Imported PyQt5.QtWidgets.QApplication successfully")
+        
+        emergency_log("Importing PyQt5.QtCore.Qt...")
         from PyQt5.QtCore import Qt
+        emergency_log("Imported PyQt5.QtCore.Qt successfully")
+        
+        emergency_log("Importing PyQt5.QtGui.QIcon...")
         from PyQt5.QtGui import QIcon
+        emergency_log("Imported PyQt5.QtGui.QIcon successfully")
         
         # High DPI support
         QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
@@ -134,18 +202,31 @@ def main():
             app.setWindowIcon(QIcon(str(icon_path)))
         
         # Initialize application setup
+        emergency_log("Importing MdAppSetup.ApplicationSetup...")
         from MdAppSetup import ApplicationSetup
+        emergency_log("Imported MdAppSetup.ApplicationSetup successfully")
+        
+        emergency_log("Creating ApplicationSetup instance...")
         setup = ApplicationSetup(
             debug=args.debug,
             db_path=args.db,
             config_path=args.config,
             language=args.lang
         )
+        emergency_log("ApplicationSetup instance created")
+        
+        emergency_log("Initializing ApplicationSetup...")
         setup.initialize()
+        emergency_log("ApplicationSetup initialized")
         
         # Create and show main window
+        emergency_log("Importing Modan2.ModanMainWindow...")
         from Modan2 import ModanMainWindow
+        emergency_log("Imported Modan2.ModanMainWindow successfully")
+        
+        emergency_log("Creating ModanMainWindow instance...")
         window = ModanMainWindow(setup.get_config())
+        emergency_log("ModanMainWindow instance created")
         
         # Show splash screen if not disabled
         if not args.no_splash:

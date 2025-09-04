@@ -23,7 +23,14 @@ from MdModel import *
 from scipy.spatial.distance import cdist
 import OpenGL.GL as gl
 from OpenGL import GLU as glu
-from OpenGL import GLUT as glut
+# GLUT import conditional - causes crashes on Windows builds
+try:
+    from OpenGL import GLUT as glut
+    GLUT_AVAILABLE = True
+except ImportError as e:
+    GLUT_AVAILABLE = False
+    print(f"Warning: GLUT not available ({e}), using fallback rendering")
+    glut = None
 from PyQt5.QtOpenGL import *
 from scipy.spatial import ConvexHull
 from scipy import stats
@@ -1702,7 +1709,8 @@ class ObjectViewer3D(QGLWidget):
         aspect_ratio = self.width() / self.height()
         glu.gluPerspective(45.0,aspect_ratio,0.1, 100.0) # 시야각, 종횡비, 근거리 클리핑, 원거리 클리핑
         gl.glMatrixMode(gl.GL_MODELVIEW)
-        glut.glutInit(sys.argv)
+        if GLUT_AVAILABLE and glut:
+            glut.glutInit(sys.argv)
         gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, 0)
 
     def paintGL(self):
@@ -1816,7 +1824,11 @@ class ObjectViewer3D(QGLWidget):
             gl.glTranslatef(*[x*-0.015 for x in direction])
             gl.glRotatef(angle, *axis)
             gl.glScalef(0.005, 0.005, length-0.03)
-            glut.glutSolidCube(1)
+            if GLUT_AVAILABLE and glut:
+                glut.glutSolidCube(1)
+            else:
+                # Fallback: draw wireframe cube
+                self.draw_wireframe_cube()
             gl.glPopMatrix()
 
             if True:
@@ -1824,7 +1836,11 @@ class ObjectViewer3D(QGLWidget):
                 gl.glTranslatef(*end_lm)
                 gl.glTranslatef(*[x*-0.03 for x in direction])
                 gl.glRotatef(angle, *axis)
-                glut.glutSolidCone(0.02, 0.03, 10, 10)
+                if GLUT_AVAILABLE and glut:
+                    glut.glutSolidCone(0.02, 0.03, 10, 10)
+                else:
+                    # Fallback: draw simple cone
+                    self.draw_simple_cone()
                 gl.glPopMatrix()
 
     def draw_object(self,object,landmark_as_sphere=True,color=COLOR['NORMAL_SHAPE'],edge_color=COLOR['NORMAL_SHAPE'],polygon_color=COLOR['NORMAL_SHAPE']):
@@ -1910,7 +1926,11 @@ class ObjectViewer3D(QGLWidget):
                     key = "lm_"+str(i)
                     color = self.lm_idx_to_color[key]
                     gl.glColor3f( *[ c * 1.0 / 255 for c in color] )
-                glut.glutSolidSphere(0.02 * ( int(self.landmark_size) + 1 ), 10, 10)
+                if GLUT_AVAILABLE and glut:
+                    glut.glutSolidSphere(0.02 * ( int(self.landmark_size) + 1 ), 10, 10)
+                else:
+                    # Fallback: use GLU sphere or point
+                    self.draw_sphere(0.02 * ( int(self.landmark_size) + 1 ))
                 if current_buffer == self.picker_buffer and self.object_dialog is not None:
                     gl.glEnable(gl.GL_LIGHTING)
                 gl.glPopMatrix()
@@ -1919,10 +1939,9 @@ class ObjectViewer3D(QGLWidget):
                     gl.glDisable(gl.GL_LIGHTING)
                     index_color = mu.as_gl_color(self.index_color)
                     gl.glColor3f( *index_color )
-                    gl.glRasterPos3f(lm[0] + 0.05, lm[1] + 0.05, lm[2])
-                    font_size_list = [ glut.GLUT_BITMAP_HELVETICA_10, glut.GLUT_BITMAP_HELVETICA_12, glut.GLUT_BITMAP_HELVETICA_18]
-                    for letter in list(str(i+1)):
-                        glut.glutBitmapCharacter(font_size_list[int(self.index_size)], ord(letter))
+                    # Text rendering disabled - GLUT causes crashes
+                    # TODO: Implement text rendering without GLUT
+                    pass
                     gl.glEnable(gl.GL_LIGHTING)
 
         elif object.show_landmark:
@@ -1945,7 +1964,11 @@ class ObjectViewer3D(QGLWidget):
                 gl.glPushMatrix()
                 gl.glTranslate(*lm)
                 gl.glColor3f( *COLOR['SELECTED_LANDMARK'] )
-                glut.glutSolidSphere(0.03, 10, 10)
+                if GLUT_AVAILABLE and glut:
+                    glut.glutSolidSphere(0.03, 10, 10)
+                else:
+                    # Fallback: use GLU sphere or point
+                    self.draw_sphere(0.03)
                 gl.glPopMatrix()
             return
 
@@ -2289,7 +2312,68 @@ class ObjectViewer3D(QGLWidget):
                 obj.rotate_3d(math.radians(self.rotate_y),'X')
 
         self.rotate_x = 0
-        self.rotate_y = 0        
+        self.rotate_y = 0
+    
+    # Fallback rendering functions for when GLUT is not available
+    def draw_wireframe_cube(self):
+        """Draw a simple wireframe cube as fallback for glutSolidCube."""
+        size = 0.5
+        gl.glBegin(gl.GL_LINES)
+        # Front face
+        gl.glVertex3f(-size, -size, size)
+        gl.glVertex3f(size, -size, size)
+        gl.glVertex3f(size, -size, size)
+        gl.glVertex3f(size, size, size)
+        gl.glVertex3f(size, size, size)
+        gl.glVertex3f(-size, size, size)
+        gl.glVertex3f(-size, size, size)
+        gl.glVertex3f(-size, -size, size)
+        # Back face
+        gl.glVertex3f(-size, -size, -size)
+        gl.glVertex3f(size, -size, -size)
+        gl.glVertex3f(size, -size, -size)
+        gl.glVertex3f(size, size, -size)
+        gl.glVertex3f(size, size, -size)
+        gl.glVertex3f(-size, size, -size)
+        gl.glVertex3f(-size, size, -size)
+        gl.glVertex3f(-size, -size, -size)
+        # Connecting lines
+        gl.glVertex3f(-size, -size, size)
+        gl.glVertex3f(-size, -size, -size)
+        gl.glVertex3f(size, -size, size)
+        gl.glVertex3f(size, -size, -size)
+        gl.glVertex3f(size, size, size)
+        gl.glVertex3f(size, size, -size)
+        gl.glVertex3f(-size, size, size)
+        gl.glVertex3f(-size, size, -size)
+        gl.glEnd()
+    
+    def draw_simple_cone(self):
+        """Draw a simple cone as fallback for glutSolidCone."""
+        # Use a simple pyramid shape
+        gl.glBegin(gl.GL_TRIANGLES)
+        # Base triangles
+        for i in range(8):
+            angle1 = 2.0 * math.pi * i / 8
+            angle2 = 2.0 * math.pi * (i + 1) / 8
+            gl.glVertex3f(0, 0, 0.03)  # Tip
+            gl.glVertex3f(0.02 * math.cos(angle1), 0.02 * math.sin(angle1), 0)
+            gl.glVertex3f(0.02 * math.cos(angle2), 0.02 * math.sin(angle2), 0)
+        gl.glEnd()
+    
+    def draw_sphere(self, radius):
+        """Draw a sphere using GLU as fallback for glutSolidSphere."""
+        if not hasattr(self, 'glu_quadric'):
+            self.glu_quadric = glu.gluNewQuadric()
+        
+        if self.glu_quadric:
+            glu.gluSphere(self.glu_quadric, radius, 10, 10)
+        else:
+            # Ultimate fallback: draw a point
+            gl.glPointSize(radius * 100)
+            gl.glBegin(gl.GL_POINTS)
+            gl.glVertex3f(0, 0, 0)
+            gl.glEnd()
 
 
 class ShapePreference(QWidget):

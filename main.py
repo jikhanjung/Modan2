@@ -113,7 +113,7 @@ def main():
     logger.debug(f"Command line arguments: {vars(args)}")
     
     try:
-        # Qt application setup
+        # Qt application setup - minimal imports for splash screen
         from PyQt5.QtWidgets import QApplication
         from PyQt5.QtCore import Qt
         from PyQt5.QtGui import QIcon
@@ -133,6 +133,25 @@ def main():
         if icon_path.exists():
             app.setWindowIcon(QIcon(str(icon_path)))
         
+        # Show splash screen FIRST, before any heavy imports
+        splash = None
+        if not args.no_splash:
+            from MdSplashScreen import create_splash_screen
+            
+            # Try to use background image if available
+            splash_bg_path = Path(__file__).parent / "icons" / "Modan2.png"
+            background_path = str(splash_bg_path) if splash_bg_path.exists() else None
+            
+            splash = create_splash_screen(background_path)
+            splash.setProgress("Starting Modan2...")
+            splash.show()
+            QApplication.processEvents()  # Force immediate display
+        
+        # Now do heavy imports and initialization with splash screen visible
+        if splash:
+            splash.setProgress("Loading application modules...")
+            QApplication.processEvents()
+        
         # Initialize application setup
         from MdAppSetup import ApplicationSetup
         setup = ApplicationSetup(
@@ -141,36 +160,26 @@ def main():
             config_path=args.config,
             language=args.lang
         )
+        
+        if splash:
+            splash.setProgress("Initializing configuration...")
+            QApplication.processEvents()
+        
         setup.initialize()
         
-        # Create and show main window
+        if splash:
+            splash.setProgress("Loading main window...")
+            QApplication.processEvents()
+        
+        # Create main window (heavy import)
         from Modan2 import ModanMainWindow
         window = ModanMainWindow(setup.get_config())
         
-        # Show splash screen if not disabled
-        if not args.no_splash:
-            from MdSplashScreen import create_splash_screen
-            from PyQt5.QtWidgets import QApplication
-            
-            # Try to use background image if available
-            splash_bg_path = Path(__file__).parent / "icons" / "Modan2.png"
-            background_path = str(splash_bg_path) if splash_bg_path.exists() else None
-            
-            splash = create_splash_screen(background_path)
-            try:
-                splash.setProgress("Initializing application...")
-                splash.showWithTimer(3000)  # Show for 3 seconds
-                
-                # Quick progress updates without blocking
-                splash.setProgress("Loading configuration...")
-                QApplication.processEvents()
-                splash.setProgress("Setting up database...")  
-                QApplication.processEvents()
-                splash.setProgress("Ready!")
-                QApplication.processEvents()
-            except Exception as e:
-                logger.warning(f"Splash screen update failed: {e}")
-                # Continue without splash screen updates
+        if splash:
+            splash.setProgress("Ready!")
+            QApplication.processEvents()
+            # Close splash screen when main window is about to show
+            splash.finish(window)
         
         window.show()
         

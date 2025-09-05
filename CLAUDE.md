@@ -21,7 +21,7 @@ sudo apt-get install -y libxcb-xinerama0 libxcb-icccm4 libxcb-image0 libxcb-keys
 
 #### Python Dependencies
 - Install: `pip install -r requirements.txt`
-- Key packages: PyQt5, numpy<2.0.0, pandas, scipy, opencv-python, peewee, trimesh
+- Key packages: PyQt5, numpy>2.0.0, pandas, scipy, opencv-python, peewee, trimesh
 
 ### Project Structure
 ```
@@ -102,7 +102,7 @@ Install GLUT libraries: `sudo apt-get install -y libglut-dev libglut3.12 python3
 ### Code Style Guidelines
 - Follow existing PyQt5 patterns in the codebase
 - Use Peewee ORM for all database operations
-- Maintain compatibility with numpy < 2.0.0
+- Numpy > 2.0.0 is now supported (OpenGL issues resolved with pip installation)
 - OpenCV (cv2) is used in ModanDialogs.py and ModanComponents.py
 
 ### Important Notes

@@ -370,8 +370,6 @@ def do_pca_analysis(landmarks_data, n_components=None):
     """
     try:
         import numpy as np
-        from sklearn.decomposition import PCA
-        from sklearn.preprocessing import StandardScaler
         import logging
         logger = logging.getLogger(__name__)
         
@@ -381,68 +379,83 @@ def do_pca_analysis(landmarks_data, n_components=None):
             if landmarks_data[0]:
                 logger.info(f"Each landmark has {len(landmarks_data[0][0])} dimensions")
         
+        # Use MdPrincipalComponent class for consistency with Analysis Detail
+        pca = MdPrincipalComponent()
+        
         # Flatten landmark data
-        flattened_data = []
+        datamatrix = []
         for landmarks in landmarks_data:
-            flat_coords = []
-            for landmark in landmarks:
-                flat_coords.extend(landmark)  # Use all coordinates (X, Y, Z for 3D)
-            flattened_data.append(flat_coords)
+            datum = []
+            for lm in landmarks:
+                datum.extend(lm)  # Use all coordinates (X, Y, Z for 3D)
+            datamatrix.append(datum)
         
-        # Convert to numpy array
-        data_matrix = np.array(flattened_data)
-        logger.info(f"Data matrix shape after flattening: {data_matrix.shape}")
+        # Perform PCA using the same method as Analysis Detail
+        pca.SetData(datamatrix)
+        pca.Analyze()
         
-        # Standardize data
-        scaler = StandardScaler()
-        data_scaled = scaler.fit_transform(data_matrix)
-        
-        # Perform PCA
+        # Get number of components (use all variables for morphometrics - no truncation)
         if n_components is None:
-            n_components = min(data_matrix.shape[0] - 1, data_matrix.shape[1])
+            n_components = pca.nVariable  # Use all 90 variables/PCs
         
-        pca = PCA(n_components=n_components)
-        scores = pca.fit_transform(data_scaled)
+        # Get scores (rotated matrix) - keep full dimensions for morphometrics
+        if hasattr(pca, 'rotated_matrix'):
+            scores = pca.rotated_matrix.tolist()  # Keep 62x90
+        else:
+            scores = []
+        
+        # Calculate mean shape from the centered data
+        mean_shape = []
+        dim = len(landmarks_data[0][0]) if landmarks_data and landmarks_data[0] else 2
+        n_landmarks = len(landmarks_data[0]) if landmarks_data else 0
+        
+        # The mean is already calculated in pca.Analyze() during centering
+        # We need to reconstruct it from the number of landmarks
+        for i in range(n_landmarks):
+            if dim == 2:
+                mean_shape.append([0.0, 0.0])  # Already centered
+            elif dim == 3:
+                mean_shape.append([0.0, 0.0, 0.0])  # Already centered
+        
+        # Get eigenvalues and calculate variance ratios
+        eigenvalues = pca.raw_eigen_values.tolist() if hasattr(pca, 'raw_eigen_values') else []
+        explained_variance_ratio = pca.eigen_value_percentages if hasattr(pca, 'eigen_value_percentages') else []
         
         # Calculate cumulative variance
-        cumulative_variance = np.cumsum(pca.explained_variance_ratio_)
+        cumulative_variance = []
+        cumul = 0
+        for ratio in explained_variance_ratio:
+            cumul += ratio
+            cumulative_variance.append(cumul)
         
-        # Calculate mean shape
-        mean_coords = np.mean(data_matrix, axis=0)
-        mean_shape = []
-        # Determine dimension from first landmark
-        dim = len(landmarks_data[0][0]) if landmarks_data and landmarks_data[0] else 2
-        for i in range(0, len(mean_coords), dim):
-            if dim == 2:
-                mean_shape.append([mean_coords[i], mean_coords[i+1]])
-            elif dim == 3:
-                mean_shape.append([mean_coords[i], mean_coords[i+1], mean_coords[i+2]])
+        # Get rotation matrix (eigenvectors) - should be 90x90 from SVD
+        import numpy as np
+        if hasattr(pca, 'rotation_matrix') and pca.rotation_matrix is not None:
+            full_rotation_matrix = np.array(pca.rotation_matrix)  # Should already be 90x90
+        else:
+            full_rotation_matrix = np.eye(pca.nVariable)  # Fallback to identity
         
-        # Create full rotation matrix (for compatibility with original code)
-        # This is the transformation matrix from original space to PCA space
-        rotation_matrix = pca.components_.T  # Transpose to get (n_features x n_components)
-        # Pad with identity for unused dimensions if needed
-        n_features = data_matrix.shape[1]
-        full_rotation_matrix = np.eye(n_features)
-        full_rotation_matrix[:, :rotation_matrix.shape[1]] = rotation_matrix
-        
+        logger.info(f"PCA Analysis completed")
+        logger.info(f"Number of components: {n_components}")
+        logger.info(f"Scores shape: {len(scores)}x{len(scores[0]) if scores else 0}")
         logger.info(f"Full rotation matrix shape: {full_rotation_matrix.shape}")
-        logger.info(f"PCA scores shape: {scores.shape}")
         
         return {
             'n_components': n_components,
-            'eigenvalues': pca.explained_variance_.tolist(),
-            'eigenvectors': pca.components_.tolist(),
-            'rotation_matrix': full_rotation_matrix.tolist(),  # Add full rotation matrix
-            'scores': scores.tolist(),
-            'explained_variance_ratio': pca.explained_variance_ratio_.tolist(),
-            'cumulative_variance_ratio': cumulative_variance.tolist(),
+            'eigenvalues': eigenvalues,  # Keep all eigenvalues
+            'eigenvectors': full_rotation_matrix.tolist(),  # Full 90x90 rotation matrix
+            'rotation_matrix': full_rotation_matrix.tolist(),  # Full 90x90 rotation matrix
+            'scores': scores,
+            'explained_variance_ratio': explained_variance_ratio,  # Keep all variance ratios
+            'cumulative_variance_ratio': cumulative_variance,  # Keep all cumulative variance
             'mean_shape': mean_shape,
-            'scaler_mean': scaler.mean_.tolist(),
-            'scaler_scale': scaler.scale_.tolist()
+            'raw_eigen_values': eigenvalues,
+            'eigen_value_percentages': explained_variance_ratio
         }
         
     except Exception as e:
+        import traceback
+        logger.error(f"PCA analysis error: {traceback.format_exc()}")
         raise ValueError(f"PCA analysis failed: {str(e)}")
 
 
@@ -459,7 +472,6 @@ def do_cva_analysis(landmarks_data, groups):
     try:
         import numpy as np
         from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-        from sklearn.preprocessing import StandardScaler
         from sklearn.metrics import accuracy_score
         
         # Flatten landmark data
@@ -473,16 +485,17 @@ def do_cva_analysis(landmarks_data, groups):
         data_matrix = np.array(flattened_data)
         group_array = np.array(groups)
         
-        # Standardize data
-        scaler = StandardScaler()
-        data_scaled = scaler.fit_transform(data_matrix)
-        
-        # Perform LDA (equivalent to CVA)
+        # Perform LDA (equivalent to CVA) without standardization
         lda = LinearDiscriminantAnalysis()
-        cv_scores = lda.fit_transform(data_scaled, group_array)
+        cv_scores = lda.fit_transform(data_matrix, group_array)
+        
+        # Pad CVA scores to at least 3 dimensions for UI compatibility
+        if cv_scores.shape[1] < 3:
+            padding_width = 3 - cv_scores.shape[1]
+            cv_scores = np.pad(cv_scores, ((0, 0), (0, padding_width)), mode='constant', constant_values=0)
         
         # Predict classifications
-        predictions = lda.predict(data_scaled)
+        predictions = lda.predict(data_matrix)
         accuracy = accuracy_score(group_array, predictions) * 100
         
         # Calculate group centroids

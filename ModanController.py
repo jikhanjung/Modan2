@@ -545,10 +545,21 @@ class ModanController(QObject):
             if len(objects_with_landmarks) < 2:
                 raise ValueError(f"At least 2 objects with landmarks are required for analysis (found {len(objects_with_landmarks)} objects with landmarks out of {len(objects)} total objects)")
             
-            # Extract landmarks
+            self.logger.info(f"Found {len(objects_with_landmarks)} objects with landmarks before Procrustes")
+            
+            # Perform Procrustes superimposition before analysis
+            self.logger.info("Performing Procrustes superimposition")
+            from MdModel import MdDatasetOps
+            ds_ops = MdDatasetOps(self.current_dataset)
+            if not ds_ops.procrustes_superimposition():
+                raise ValueError("Procrustes superimposition failed")
+            
+            self.logger.info(f"Procrustes completed - now have {len(ds_ops.object_list)} objects")
+
+            # Extract landmarks from the superimposed objects
             landmarks_data = []
             object_names = []
-            for obj in objects_with_landmarks:
+            for obj in ds_ops.object_list:  # Use superimposed objects from ds_ops
                 landmarks_data.append(obj.landmark_list)
                 object_names.append(obj.object_name)
             
@@ -578,7 +589,7 @@ class ModanController(QObject):
                         
                         if isinstance(cva_group_by, int) and 0 <= cva_group_by < len(variable_names):
                             # cva_group_by is an index
-                            for obj in objects_with_landmarks:
+                            for obj in ds_ops.object_list:  # Use superimposed objects from ds_ops
                                 obj_model = self.current_dataset.object_list.where(MdModel.MdObject.id == obj.id).first()
                                 if obj_model:
                                     variable_list = obj_model.get_variable_list()
@@ -594,7 +605,7 @@ class ModanController(QObject):
                                 self.logger.warning(f"CVA group_by is string: {cva_group_by}")
                             group_values = cva_group_by
                         
-                        self.logger.info(f"CVA groups extracted: {group_values[:5]}...")  # Show first 5
+                        self.logger.debug(f"CVA groups extracted: {group_values[:5]}...")  # Show first 5
                         cva_params = {"groups": group_values}
                         cva_result = self._run_cva(landmarks_data, cva_params)
                         self.logger.info("CVA analysis completed successfully")
@@ -615,7 +626,7 @@ class ModanController(QObject):
                         
                         if isinstance(manova_group_by, int) and 0 <= manova_group_by < len(variable_names):
                             # manova_group_by is an index
-                            for obj in objects_with_landmarks:
+                            for obj in ds_ops.object_list:  # Use superimposed objects from ds_ops
                                 obj_model = self.current_dataset.object_list.where(MdModel.MdObject.id == obj.id).first()
                                 if obj_model:
                                     variable_list = obj_model.get_variable_list()
@@ -628,7 +639,7 @@ class ModanController(QObject):
                         else:
                             manova_group_values = manova_group_by
                             
-                        self.logger.info(f"MANOVA groups extracted: {manova_group_values[:5]}...")
+                        self.logger.debug(f"MANOVA groups extracted: {manova_group_values[:5]}...")
                         manova_params = {"groups": manova_group_values}
                         manova_result = self._run_manova(landmarks_data, manova_params)
                         self.logger.info("MANOVA analysis completed successfully")
@@ -685,7 +696,7 @@ class ModanController(QObject):
                 
                 # Save superimposed landmark data (using current landmarks)
                 superimposed_landmark_list = []
-                for obj in objects_with_landmarks:
+                for obj in ds_ops.object_list:  # Use superimposed objects from ds_ops
                     superimposed_landmark_list.append(obj.landmark_list)
                 analysis.superimposed_landmark_json = json.dumps(superimposed_landmark_list)
                 
@@ -694,8 +705,7 @@ class ModanController(QObject):
                     self.logger.debug(f"PCA result keys: {list(result.keys())}")
                     if 'scores' in result:
                         scores_shape = f"{len(result['scores'])}x{len(result['scores'][0]) if result['scores'] and len(result['scores']) > 0 else 0}"
-                        self.logger.debug(f"PCA scores shape: {scores_shape}")
-                        self.logger.debug(f"Objects with landmarks count: {len(objects_with_landmarks)}")
+                        self.logger.debug(f"Saving PCA scores shape: {scores_shape}")
                         analysis.pca_analysis_result_json = json.dumps(result['scores'])
                     if 'rotation_matrix' in result:
                         analysis.pca_rotation_matrix_json = json.dumps(result['rotation_matrix'])
@@ -711,14 +721,14 @@ class ModanController(QObject):
                 
                     # Save CVA results if available (from comprehensive analysis)
                     if 'cva_result' in locals() and cva_result:
-                        self.logger.info(f"Saving CVA results: keys={list(cva_result.keys())}")
+                        self.logger.debug(f"Saving CVA results: keys={list(cva_result.keys())}")
                         # CVA uses 'canonical_variables' instead of 'scores'
                         if 'canonical_variables' in cva_result:
                             analysis.cva_analysis_result_json = json.dumps(cva_result['canonical_variables'])
-                            self.logger.info(f"CVA canonical variables saved: {len(cva_result['canonical_variables'])} objects")
+                            self.logger.debug(f"CVA canonical variables saved: {len(cva_result['canonical_variables'])} objects")
                         elif 'scores' in cva_result:
                             analysis.cva_analysis_result_json = json.dumps(cva_result['scores'])
-                            self.logger.info(f"CVA scores saved: {len(cva_result['scores'])} objects")
+                            self.logger.debug(f"CVA scores saved: {len(cva_result['scores'])} objects")
                         
                         if 'eigenvectors' in cva_result:
                             analysis.cva_rotation_matrix_json = json.dumps(cva_result['eigenvectors'])

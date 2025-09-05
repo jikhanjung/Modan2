@@ -4053,6 +4053,7 @@ class DataExplorationDialog(QDialog):
         elif self.analysis_method == 'CVA':
             rotation_matrix = json.loads(self.analysis.cva_rotation_matrix_json)
         #rotation_matrix = json.loads(self.analysis.rotation_matrix_json)
+        
         inverted_matrix = np.linalg.inv(rotation_matrix)
         #print("inverted_matrix", inverted_matrix)
         

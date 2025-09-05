@@ -12,6 +12,7 @@ from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSize, QPoint, QAbstr
                          pyqtSlot, pyqtSignal, QItemSelectionModel, QTimer, QEvent, QModelIndex, QObject, QPointF
 
 import logging
+import sys
 
 from matplotlib.backends.backend_qt5agg import FigureCanvas as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
@@ -24,6 +25,10 @@ from scipy.spatial.distance import cdist
 import OpenGL.GL as gl
 from OpenGL import GLU as glu
 # GLUT import conditional - causes crashes on Windows builds
+GLUT_AVAILABLE = False
+GLUT_INITIALIZED = False
+glut = None
+
 try:
     from OpenGL import GLUT as glut
     GLUT_AVAILABLE = True
@@ -31,6 +36,16 @@ except ImportError as e:
     GLUT_AVAILABLE = False
     print(f"Warning: GLUT not available ({e}), using fallback rendering")
     glut = None
+
+# Initialize GLUT once at module level if available
+if GLUT_AVAILABLE and glut:
+    try:
+        glut.glutInit(sys.argv)
+        GLUT_INITIALIZED = True
+    except Exception as e:
+        print(f"Warning: Failed to initialize GLUT ({e}), using fallback rendering")
+        GLUT_AVAILABLE = False
+        GLUT_INITIALIZED = False
 from PyQt5.QtOpenGL import *
 from scipy.spatial import ConvexHull
 from scipy import stats
@@ -40,7 +55,7 @@ import cv2
 import glob
 import xlsxwriter
 import json
-import math, re, os, sys, shutil, copy, random, struct
+import math, re, os, shutil, copy, random, struct
 from pathlib import Path
 from PIL.ExifTags import TAGS
 import numpy as np
@@ -1709,8 +1724,6 @@ class ObjectViewer3D(QGLWidget):
         aspect_ratio = self.width() / self.height()
         glu.gluPerspective(45.0,aspect_ratio,0.1, 100.0) # 시야각, 종횡비, 근거리 클리핑, 원거리 클리핑
         gl.glMatrixMode(gl.GL_MODELVIEW)
-        if GLUT_AVAILABLE and glut:
-            glut.glutInit(sys.argv)
         gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, 0)
 
     def paintGL(self):
@@ -1824,8 +1837,12 @@ class ObjectViewer3D(QGLWidget):
             gl.glTranslatef(*[x*-0.015 for x in direction])
             gl.glRotatef(angle, *axis)
             gl.glScalef(0.005, 0.005, length-0.03)
-            if GLUT_AVAILABLE and glut:
-                glut.glutSolidCube(1)
+            if GLUT_AVAILABLE and GLUT_INITIALIZED and glut:
+                try:
+                    glut.glutSolidCube(1)
+                except (OSError, AttributeError) as e:
+                    # Fallback to drawing a cube manually
+                    pass
             else:
                 # Fallback: draw wireframe cube
                 self.draw_wireframe_cube()
@@ -1836,8 +1853,12 @@ class ObjectViewer3D(QGLWidget):
                 gl.glTranslatef(*end_lm)
                 gl.glTranslatef(*[x*-0.03 for x in direction])
                 gl.glRotatef(angle, *axis)
-                if GLUT_AVAILABLE and glut:
-                    glut.glutSolidCone(0.02, 0.03, 10, 10)
+                if GLUT_AVAILABLE and GLUT_INITIALIZED and glut:
+                    try:
+                        glut.glutSolidCone(0.02, 0.03, 10, 10)
+                    except (OSError, AttributeError) as e:
+                        # Fallback if GLUT call fails
+                        pass
                 else:
                     # Fallback: draw simple cone
                     self.draw_simple_cone()
@@ -1926,8 +1947,12 @@ class ObjectViewer3D(QGLWidget):
                     key = "lm_"+str(i)
                     color = self.lm_idx_to_color[key]
                     gl.glColor3f( *[ c * 1.0 / 255 for c in color] )
-                if GLUT_AVAILABLE and glut:
-                    glut.glutSolidSphere(0.02 * ( int(self.landmark_size) + 1 ), 10, 10)
+                if GLUT_AVAILABLE and GLUT_INITIALIZED and glut:
+                    try:
+                        glut.glutSolidSphere(0.02 * ( int(self.landmark_size) + 1 ), 10, 10)
+                    except (OSError, AttributeError) as e:
+                        # Fallback if GLUT call fails
+                        self.draw_sphere(0.02 * ( int(self.landmark_size) + 1 ))
                 else:
                     # Fallback: use GLU sphere or point
                     self.draw_sphere(0.02 * ( int(self.landmark_size) + 1 ))
@@ -1964,8 +1989,12 @@ class ObjectViewer3D(QGLWidget):
                 gl.glPushMatrix()
                 gl.glTranslate(*lm)
                 gl.glColor3f( *COLOR['SELECTED_LANDMARK'] )
-                if GLUT_AVAILABLE and glut:
-                    glut.glutSolidSphere(0.03, 10, 10)
+                if GLUT_AVAILABLE and GLUT_INITIALIZED and glut:
+                    try:
+                        glut.glutSolidSphere(0.03, 10, 10)
+                    except (OSError, AttributeError) as e:
+                        # Fallback if GLUT call fails
+                        self.draw_sphere(0.03)
                 else:
                     # Fallback: use GLU sphere or point
                     self.draw_sphere(0.03)

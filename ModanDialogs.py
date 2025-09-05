@@ -1708,6 +1708,24 @@ class AnalysisResultDialog(QDialog):
     def initialize_UI(self):
         pass
 
+def safe_remove_artist(artist, ax=None):
+    """Safely remove matplotlib artist from plot"""
+    if artist is None:
+        return
+    try:
+        artist.remove()
+    except NotImplementedError:
+        # For scatter plots and other collections
+        if ax is not None:
+            if hasattr(ax, 'collections') and artist in ax.collections:
+                ax.collections.remove(artist)
+            elif hasattr(ax, 'texts') and artist in ax.texts:
+                ax.texts.remove(artist)
+            elif hasattr(ax, 'lines') and artist in ax.lines:
+                ax.lines.remove(artist)
+    except Exception:
+        pass  # Silently ignore if already removed or other issues
+
 class DataExplorationDialog(QDialog):
     def __init__(self, parent):
         self.initialized = False
@@ -2342,7 +2360,7 @@ class DataExplorationDialog(QDialog):
         elif self.animation_counter >= self.total_frame + 2 * self.pause_frame and self.animation_counter < self.total_frame + 3 * self.pause_frame:
             idx = 0
         elif self.animation_counter == self.total_frame + 3 * self.pause_frame:
-            self.animation_shape['point'].remove()
+            safe_remove_artist(self.animation_shape['point'], self.ax2)
             self.animation_shape['point'] = None
             self.timer.stop()
             self.fig2.canvas.draw()
@@ -2621,10 +2639,10 @@ class DataExplorationDialog(QDialog):
         for key in self.custom_shape_hash.keys():
             self.custom_shape_hash[key]['coords'] = []
             if self.custom_shape_hash[key]['point'] != None:
-                self.custom_shape_hash[key]['point'].remove()
+                safe_remove_artist(self.custom_shape_hash[key]['point'], self.ax2)
             self.custom_shape_hash[key]['point'] = None
             if self.custom_shape_hash[key]['label'] != None:
-                self.custom_shape_hash[key]['label'].remove()
+                safe_remove_artist(self.custom_shape_hash[key]['label'], self.ax2)
             self.custom_shape_hash[key]['label'] = None
         self.arrow_widget.hide()
 
@@ -3683,7 +3701,7 @@ class DataExplorationDialog(QDialog):
 
         if self.axvline is not None:
             #print("remove axvline",self.axvline)
-            self.axvline.remove()
+            safe_remove_artist(self.axvline, self.ax2)
             self.axvline = None
 
         #print(evt.button, evt.xdata, evt.ydata)
@@ -3701,7 +3719,7 @@ class DataExplorationDialog(QDialog):
                 #print("2-0:",datetime.datetime.now())
                 #self.show_analysis_result()
                 if self.axvline is not None:
-                    self.axvline.remove()
+                    safe_remove_artist(self.axvline, self.ax2)
                     self.axvline = None
                 self.axvline = self.ax2.axvline(x=self.vertical_line_xval, color='gray', linestyle=self.vertical_line_style)
                 self.fig2.canvas.draw()
@@ -3824,7 +3842,7 @@ class DataExplorationDialog(QDialog):
                 #print("2-0:",datetime.datetime.now())
                 #self.show_analysis_result()
                 if self.axvline is not None:
-                    self.axvline.remove()
+                    safe_remove_artist(self.axvline, self.ax2)
                     self.axvline = None
                 if evt.xdata is not None:
                 #print("xdata", evt.xdata)
@@ -3859,10 +3877,20 @@ class DataExplorationDialog(QDialog):
         shape = self.custom_shape_hash[self.pick_idx]
 
         if shape['point'] is not None:
-            shape['point'].remove()
+            try:
+                shape['point'].remove()
+            except NotImplementedError:
+                # For scatter plots, we need to remove from the axes collection
+                if shape['point'] in self.ax2.collections:
+                    self.ax2.collections.remove(shape['point'])
             shape['point'] = None
         if shape['label'] is not None:
-            shape['label'].remove()
+            try:
+                shape['label'].remove()
+            except NotImplementedError:
+                # For annotations, try removing from axes
+                if shape['label'] in self.ax2.texts:
+                    self.ax2.texts.remove(shape['label'])
             shape['label'] = None
 
         ''' need to improve speed by using offset, not creating new annotation every time '''

@@ -2308,6 +2308,7 @@ class ObjectViewer3D(QGLWidget):
         return new_vertices
 
     def reset_pose(self):
+        # Reset transient/view state
         self.temp_rotate_x = 0
         self.temp_rotate_y = 0
         self.rotate_x = 0
@@ -2316,7 +2317,38 @@ class ObjectViewer3D(QGLWidget):
         self.pan_y = 0
         self.dolly = 0
         self.temp_dolly = 0
-        self.align_object()
+        self.temp_pan_x = 0
+        self.temp_pan_y = 0
+
+        # Reset rotation matrix to identity for any consumers relying on it
+        self.rotation_matrix = np.array([
+            [1, 0, 0, 0],
+            [0, 1, 0, 0],
+            [0, 0, 1, 0],
+            [0, 0, 0, 1]
+        ])
+
+        # Restore underlying geometry to its original (pre-rotation) state.
+        # In OBJECT_MODE we can safely rebuild ops from the backing MdObject.
+        try:
+            if self.data_mode == OBJECT_MODE and getattr(self, 'object', None) is not None:
+                # Re-initialize ops/geometry from source object
+                self.set_object(self.object)
+            else:
+                # In DATASET_MODE, align all shapes to the dataset baseline which
+                # restores a canonical orientation without reconstructing ds_ops.
+                self.align_object()
+        except Exception:
+            # Fallback to alignment if reconstruction is unavailable
+            self.align_object()
+
+        # Invalidate any cached GL display lists
+        if hasattr(self, 'gl_list') and self.gl_list is not None:
+            gl.glDeleteLists(self.gl_list, 1)
+            self.gl_list = None
+
+        # Ensure immediate GL redraw
+        self.updateGL()
 
     def sync_rotation(self):
         self.rotate_x += self.temp_rotate_x

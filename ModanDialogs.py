@@ -2503,22 +2503,24 @@ class DataExplorationDialog(QDialog):
 
 
     def reset_shape_pose(self):
-        #print("reset_shape_pose")
+        logger = logging.getLogger(__name__)
+        logger.info("Reset shape pose initiated")
         self.rotation_matrix = np.array([
         [1, 0, 0, 0],
         [0, 1, 0, 0],
         [0, 0, 1, 0],
         [0, 0, 0, 1]
         ])
+        logger.info(f"Resetting {len(self.shape_view_list)} shape views")
         for shape_view in self.shape_view_list:
-            shape_view.reset_pose()
-            shape_view.update()
+            shape_view.reset_pose()  # Widget handles its own update
             
+        logger.info(f"Resetting {len(self.shape_grid.keys())} shape grid views")
         for key in self.shape_grid.keys():
             view = self.shape_grid[key]['view']
             if view:
-                view.reset_pose()
-                view.update()
+                view.reset_pose()  # Widget handles its own update
+        logger.info("Shape pose reset completed")
 
     def on_chart_dim_changed(self):
         #print("on chart dim changed")

@@ -146,6 +146,18 @@ print(f"Building {NAME} version {VERSION}")
 print(f"Build number: {BUILD_NUMBER}")
 print(f"Build date: {DATE}")
 
+# Create build_info.json
+import json
+build_info = {
+    "version": VERSION,
+    "build_number": BUILD_NUMBER,
+    "build_date": DATE,
+    "platform": platform.system().lower()
+}
+with open("build_info.json", "w") as f:
+    json.dump(build_info, f, indent=2)
+print(f"Created build_info.json")
+
 OUTPUT_DIR = "dist"
 ICON = "icons/Modan2_2.png"
 # --- End Configuration ---
@@ -170,6 +182,7 @@ onefile_args = [
     f"--add-data=icons/*.png{data_separator}icons",
     f"--add-data=translations/*.qm{data_separator}translations",
     f"--add-data=migrations/*{data_separator}migrations",
+    f"--add-data=build_info.json{data_separator}.",
     f"--icon={ICON}",
     "main.py",
 ]
@@ -183,6 +196,7 @@ onedir_args = [
     f"--add-data=icons/*.png{data_separator}icons",
     f"--add-data=translations/*.qm{data_separator}translations",
     f"--add-data=migrations/*{data_separator}migrations",
+    f"--add-data=build_info.json{data_separator}.",
     f"--icon={ICON}",
     "--noconfirm",
     "main.py",

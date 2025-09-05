@@ -4,6 +4,7 @@ Custom splash screen for Modan2 application with styled text overlay.
 from PyQt5.QtWidgets import QSplashScreen, QApplication
 from PyQt5.QtCore import Qt, QTimer, QRect
 from PyQt5.QtGui import QPixmap, QPainter, QFont, QColor, QPen, QLinearGradient
+import MdUtils as mu
 
 
 class ModanSplashScreen(QSplashScreen):
@@ -24,9 +25,10 @@ class ModanSplashScreen(QSplashScreen):
         super().__init__(pixmap, flags)
         self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint)
         
-        # Version and copyright info
-        self.version = "v0.1.4"
-        self.copyright = "© 2024 Modan2 Team"
+        # Version and copyright info from MdUtils (consistent with main app)
+        version_text = f"v{mu.PROGRAM_VERSION} (Build {mu.PROGRAM_BUILD_NUMBER})"
+        self.version = version_text
+        self.copyright = mu.PROGRAM_COPYRIGHT
         
     def drawContents(self, painter):
         """Draw custom contents on splash screen.
@@ -110,19 +112,6 @@ class ModanSplashScreen(QSplashScreen):
         # Draw copyright
         copyright_rect = QRect(0, height - 40, width, 20)
         painter.drawText(copyright_rect, Qt.AlignCenter, self.copyright)
-        
-        # Draw progress message if set
-        message = self.message()
-        if message:
-            message_font = QFont()
-            message_font.setFamily("Segoe UI")
-            message_font.setPointSize(9)
-            message_font.setStrikeOut(False)  # Explicitly disable strikethrough
-            painter.setFont(message_font)
-            painter.setPen(QPen(QColor("#bdc3c7")))
-            
-            message_rect = QRect(20, height - 80, width - 40, 20)
-            painter.drawText(message_rect, Qt.AlignLeft, message)
     
     def showWithTimer(self, duration_ms=3000):
         """Show splash screen for specified duration.

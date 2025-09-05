@@ -19,6 +19,49 @@ except ImportError:
 COMPANY_NAME = "PaleoBytes"
 PROGRAM_NAME = "Modan2"
 
+# Dynamic year for copyright
+from datetime import datetime
+CURRENT_YEAR = datetime.now().year
+PROGRAM_COPYRIGHT = f"© 2023-{CURRENT_YEAR} Jikhan Jung"
+
+# Build information
+def get_build_info():
+    """Get build information from build_info.json file.
+    
+    Returns:
+        dict: Build information with version, build_number, build_date, platform
+    """
+    import json
+    from pathlib import Path
+    
+    # Try to find build_info.json in various locations
+    search_paths = [
+        Path("build_info.json"),  # Development environment
+        Path(sys.executable).parent / "build_info.json",  # PyInstaller onedir
+        Path(sys._MEIPASS) / "build_info.json" if hasattr(sys, '_MEIPASS') else None,  # PyInstaller onefile
+    ]
+    
+    for path in search_paths:
+        if path and path.exists():
+            try:
+                with open(path, 'r') as f:
+                    return json.load(f)
+            except (json.JSONDecodeError, OSError):
+                pass
+    
+    # Return default values if build_info.json not found
+    return {
+        "version": PROGRAM_VERSION,
+        "build_number": "local",
+        "build_date": "development",
+        "platform": sys.platform
+    }
+
+# Get build information on module import
+BUILD_INFO = get_build_info()
+PROGRAM_BUILD_NUMBER = BUILD_INFO.get("build_number", "local")
+PROGRAM_BUILD_DATE = BUILD_INFO.get("build_date", "unknown")
+
 DB_LOCATION = ""
 
 #print(os.name)

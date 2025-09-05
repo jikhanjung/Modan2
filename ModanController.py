@@ -329,11 +329,15 @@ class ModanController(QObject):
             
             objects = []
             for idx, (specimen_name, landmarks) in enumerate(landmarks_data):
+                # Get expected landmark count from first object
+                first_obj = self.current_dataset.object_list.first() if self.current_dataset.object_list.count() > 0 else None
+                expected_landmark_count = first_obj.count_landmarks() if first_obj else len(landmarks)
+                
                 # Validate landmark count
-                if len(landmarks) != self.current_dataset.landmark_count:
+                if len(landmarks) != expected_landmark_count:
                     self.logger.warning(
                         f"Landmark count mismatch for {specimen_name}: "
-                        f"expected {self.current_dataset.landmark_count}, got {len(landmarks)}"
+                        f"expected {expected_landmark_count}, got {len(landmarks)}"
                     )
                 
                 # Create object
@@ -1061,11 +1065,15 @@ class ModanController(QObject):
             else:
                 analyses = []
             
+            # Get landmark count from first object
+            first_obj = dataset.object_list.first() if dataset.object_list.count() > 0 else None
+            landmark_count = first_obj.count_landmarks() if first_obj else 0
+            
             return {
                 'name': dataset.dataset_name,
                 'description': dataset.dataset_desc,
                 'dimension': dataset.dimension,
-                'landmark_count': dataset.landmark_count,
+                'landmark_count': landmark_count,
                 'object_count': len(objects),
                 'analysis_count': len(analyses),
                 'created_at': dataset.created_at,
@@ -1127,7 +1135,9 @@ class ModanController(QObject):
         
         # Check landmark consistency
         if objects_with_landmarks:
-            expected_count = self.current_dataset.landmark_count
+            # Get expected landmark count from first object
+            first_obj = objects_with_landmarks[0]
+            expected_count = first_obj.count_landmarks()
             for obj in objects_with_landmarks:
                 obj.unpack_landmark()
                 if len(obj.landmark_list) != expected_count:
@@ -1170,7 +1180,9 @@ class ModanController(QObject):
         
         # Check landmark consistency
         if objects_with_landmarks:
-            expected_count = dataset.landmark_count
+            # Get expected landmark count from first object
+            first_obj = objects_with_landmarks[0]
+            expected_count = first_obj.count_landmarks()
             for obj in objects_with_landmarks:
                 obj.unpack_landmark()
                 if len(obj.landmark_list) != expected_count:

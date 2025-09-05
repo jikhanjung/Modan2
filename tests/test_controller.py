@@ -51,7 +51,8 @@ class TestDatasetOperations:
         assert dataset is not None
         assert dataset.dataset_name == "Test Dataset"
         assert dataset.dimension == 2
-        assert dataset.landmark_count == 10
+        # landmark_count is now calculated dynamically from objects
+        # assert dataset.landmark_count == 10  # Removed: no longer a dataset attribute
     
     def test_create_dataset_empty_name(self, controller):
         """Test dataset creation with empty name."""

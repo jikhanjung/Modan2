@@ -165,7 +165,7 @@ class ObjectViewer2D(QLabel):
         self.edit_mode = MODE['NONE']
         self.data_mode = OBJECT_MODE
 
-        self.show_index = True
+        self.show_index = False
         self.show_wireframe = True
         self.show_polygon = True
         self.show_baseline = False  
@@ -1964,9 +1964,15 @@ class ObjectViewer3D(QGLWidget):
                     gl.glDisable(gl.GL_LIGHTING)
                     index_color = mu.as_gl_color(self.index_color)
                     gl.glColor3f( *index_color )
-                    # Text rendering disabled - GLUT causes crashes
-                    # TODO: Implement text rendering without GLUT
-                    pass
+                    gl.glRasterPos3f(lm[0] + 0.05, lm[1] + 0.05, lm[2])
+                    font_size_list = [ glut.GLUT_BITMAP_HELVETICA_10, glut.GLUT_BITMAP_HELVETICA_12, glut.GLUT_BITMAP_HELVETICA_18]
+                    if GLUT_AVAILABLE and GLUT_INITIALIZED and glut:
+                        try:
+                            for letter in list(str(i+1)):
+                                glut.glutBitmapCharacter(font_size_list[int(self.index_size)], ord(letter))
+                        except (OSError, AttributeError) as e:
+                            # Fallback if GLUT text rendering fails
+                            pass
                     gl.glEnable(gl.GL_LIGHTING)
 
         elif object.show_landmark:

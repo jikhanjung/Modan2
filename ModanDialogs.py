@@ -838,6 +838,7 @@ class ObjectDialog(QDialog):
         self.object_view_3d.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.object_view_3d.object_dialog = self
         self.object_view_3d.setMouseTracking(True)
+        self.object_view_3d.show_index = True  # Enable landmark index display in ObjectDialog
 
         self.object_view_2d = ObjectViewer2D(self)
         self.object_view_2d.object_dialog = self

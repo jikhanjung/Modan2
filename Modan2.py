@@ -37,7 +37,7 @@ from peewee_migrate import Router
 
 from ModanDialogs import DatasetAnalysisDialog, ObjectDialog, ImportDatasetDialog, DatasetDialog, PreferencesDialog, \
     MODE, ObjectViewer3D, ExportDatasetDialog, ObjectViewer2D, ProgressDialog, NewAnalysisDialog, DataExplorationDialog
-from ModanComponents import MdTableModel, MdTableView, MdSequenceDelegate, AnalysisInfoWidget
+from ModanComponents import MdTableModel, MdTableView, MdTreeView, MdSequenceDelegate, AnalysisInfoWidget
 from ModanWidgets import DatasetTreeWidget, ObjectTableWidget, LandmarkViewer2D
 from MdStatistics import PerformCVA, PerformPCA, PerformManova
 
@@ -68,7 +68,7 @@ class ModanMainWindow(QMainWindow):
         # Initialize widgets (temporary compatibility)
         self.tableView = MdTableView()
         self.tableView.setItemDelegateForColumn(1, MdSequenceDelegate())
-        self.treeView = QTreeView()
+        self.treeView = MdTreeView()
         
         # Setup connections after widgets are created
         self.setup_controller_connections()
@@ -175,6 +175,16 @@ class ModanMainWindow(QMainWindow):
         
         self.selected_dataset = None
         self.selected_object = None
+        
+        # Initialize button states - disabled until dataset/object is selected
+        self.actionNewObject.setEnabled(False)
+        self.actionEditObject.setEnabled(False)
+        self.actionExport.setEnabled(False)
+        self.actionAnalyze.setEnabled(False)
+        self.actionCellSelection.setEnabled(False)
+        self.actionRowSelection.setEnabled(False)
+        self.actionAddVariable.setEnabled(False)
+        
         self.reset_views()
         self.load_dataset()
 
@@ -232,12 +242,20 @@ class ModanMainWindow(QMainWindow):
         self.selected_dataset = dataset
         if dataset is None:
             self.actionNewObject.setEnabled(False)
+            self.actionEditObject.setEnabled(False)  # Disable Edit Object when no dataset
             self.actionExport.setEnabled(False)
             self.actionAnalyze.setEnabled(False)
+            self.actionCellSelection.setEnabled(False)
+            self.actionRowSelection.setEnabled(False)
+            self.actionAddVariable.setEnabled(False)
         else:
             self.actionNewObject.setEnabled(True)
+            self.actionEditObject.setEnabled(False)  # Start with disabled until object is selected
             self.actionExport.setEnabled(True)
             self.actionAnalyze.setEnabled(True)
+            self.actionCellSelection.setEnabled(True)
+            self.actionRowSelection.setEnabled(True)
+            self.actionAddVariable.setEnabled(True)
             self.load_object()
 
     def on_analysis_selected_from_tree(self, analysis):
@@ -246,6 +264,15 @@ class ModanMainWindow(QMainWindow):
         self.selected_analysis = analysis
         if analysis:
             logger.info(f"Analysis selected: {analysis.analysis_name}")
+            
+            # Disable all dataset-related buttons when analysis is selected
+            self.actionCellSelection.setEnabled(False)
+            self.actionRowSelection.setEnabled(False)
+            self.actionAddVariable.setEnabled(False)
+            self.actionNewObject.setEnabled(False)
+            self.actionEditObject.setEnabled(False)
+            self.actionExport.setEnabled(False)
+            self.actionAnalyze.setEnabled(False)
             
             # Switch to analysis view on right panel
             if hasattr(self, 'hsplitter') and hasattr(self, 'analysis_view'):
@@ -739,6 +766,16 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.hsplitter.addWidget(self.treeView)
         self.hsplitter.addWidget(self.vsplitter)
         self.hsplitter.setSizes([300, 800])
+        
+        # Create empty widget to show when nothing is selected
+        self.empty_view = QWidget()
+        empty_layout = QVBoxLayout()
+        empty_label = QLabel(self.tr("No dataset or analysis selected"))
+        empty_label.setAlignment(Qt.AlignCenter)
+        empty_label.setStyleSheet("QLabel { color: gray; font-size: 14px; }")
+        empty_layout.addWidget(empty_label)
+        self.empty_view.setLayout(empty_layout)
+        
         self.analysis_view = QWidget()
         self.analysis_view_layout = QVBoxLayout()
         self.analysis_view.setLayout(self.analysis_view_layout)
@@ -971,16 +1008,8 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     @pyqtSlot()
     def on_treeView_clicked(self,event):
         event.accept()
-        self.selected_dataset = self.get_selected_dataset()
-        if self.selected_dataset is None:
-            self.actionNewObject.setEnabled(False)
-            self.actionExport.setEnabled(False)
-            self.actionAnalyze.setEnabled(False)
-        else:
-            self.actionNewObject.setEnabled(True)
-            self.actionExport.setEnabled(True)
-            self.actionAnalyze.setEnabled(True)
-            self.load_object()
+        # The on_dataset_selection_changed handler will take care of button states
+        # This handler is just for accepting the event
 
     @pyqtSlot()
     def on_treeView_doubleClicked(self):
@@ -1522,21 +1551,58 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 self.actionAnalyze.setEnabled(True)
                 self.actionNewObject.setEnabled(True)
                 self.actionExport.setEnabled(True)
+                # Enable column mode buttons for dataset
+                self.actionCellSelection.setEnabled(True)
+                self.actionRowSelection.setEnabled(True)
+                self.actionAddVariable.setEnabled(True)
+                # Edit Object starts disabled until object is selected
+                self.actionEditObject.setEnabled(False)
             elif isinstance(obj, MdAnalysis):
                 self.selected_analysis = obj
                 if self.hsplitter.widget(1) != self.analysis_view:
                     self.hsplitter.replaceWidget(1,self.analysis_view)
                 self.analysis_info_widget.set_analysis(self.selected_analysis)
                 self.analysis_info_widget.show_analysis_result()
+                # Disable column mode buttons for analysis
+                self.actionCellSelection.setEnabled(False)
+                self.actionRowSelection.setEnabled(False)
+                self.actionAddVariable.setEnabled(False)
+                # Also disable object-related and dataset-related buttons
+                self.actionNewObject.setEnabled(False)
+                self.actionEditObject.setEnabled(False)
+                self.actionExport.setEnabled(False)
+                self.actionAnalyze.setEnabled(False)
         else:
+            # No selection - clear everything
+            self.selected_dataset = None
+            self.selected_analysis = None
+            self.selected_object = None
+            
+            # Clear the right panel
+            self.object_model.clear()
+            self.reset_tableView()
+            self.clear_object_view()
+            
+            # Show empty view
+            if self.hsplitter.widget(1) != self.empty_view:
+                self.hsplitter.replaceWidget(1, self.empty_view)
+            
+            # Disable all dataset/analysis related buttons
             self.actionAnalyze.setEnabled(False)
             self.actionNewObject.setEnabled(False)
+            self.actionEditObject.setEnabled(False)
             self.actionExport.setEnabled(False)
+            self.actionCellSelection.setEnabled(False)
+            self.actionRowSelection.setEnabled(False)
+            self.actionAddVariable.setEnabled(False)
 
     def load_object(self):
         self.object_model.clear()
         self.reset_tableView()
         self.clear_object_view()
+        self.selected_object = None  # Clear selected object
+        self.actionEditObject.setEnabled(False)  # Disable Edit Object button
+        
         if self.selected_dataset is None:
             return
 
@@ -1569,9 +1635,12 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         selected_object_list = self.get_selected_object_list()
         if selected_object_list is None or len(selected_object_list) != 1:
             self.btnEditObject.setEnabled(False)
+            self.actionEditObject.setEnabled(False)  # Disable Edit Object toolbar button
+            self.selected_object = None
             return
 
         self.btnEditObject.setEnabled(True)
+        self.actionEditObject.setEnabled(True)  # Enable Edit Object toolbar button
         object_id = selected_object_list[0].id
         self.selected_object = MdObject.get_by_id(object_id)
         self.selected_object.unpack_landmark()

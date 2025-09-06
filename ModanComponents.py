@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QTableWidgetItem, QHeaderView, QFileDialog, QCheckBox, QColorDialog, \
                             QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QProgressBar, QApplication, \
                             QDialog, QLineEdit, QLabel, QPushButton, QAbstractItemView, QStatusBar, QMessageBox, \
-                            QTableView, QSplitter, QRadioButton, QComboBox, QTextEdit, QSizePolicy, \
+                            QTableView, QTreeView, QSplitter, QRadioButton, QComboBox, QTextEdit, QSizePolicy, \
                             QTableWidget, QGridLayout, QAbstractButton, QButtonGroup, QGroupBox, QInputDialog,\
                             QTabWidget, QListWidget, QSpinBox, QPlainTextEdit, QSlider, QScrollArea, QStyledItemDelegate, \
                             QAction, QShortcut, QMenu
@@ -3178,6 +3178,25 @@ class CustomDrag(QDrag):
         QApplication.instance().removeEventFilter(event_filter)
         return result
 
+class MdTreeView(QTreeView):
+    """Custom TreeView that clears selection when clicking on empty space"""
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        
+    def mousePressEvent(self, event):
+        """Override mouse press to clear selection on empty space click"""
+        if event.button() == Qt.LeftButton:
+            index = self.indexAt(event.pos())
+            if not index.isValid():
+                # Clicked on empty space, clear selection
+                self.clearSelection()
+                if self.selectionModel():
+                    self.selectionModel().clearSelection()
+        
+        # Call parent implementation for normal behavior
+        super().mousePressEvent(event)
+
 class MdTableView(QTableView):
 
     def __init__(self, parent=None):
@@ -4142,7 +4161,8 @@ class AnalysisInfoWidget(QWidget):
                     elif len(analysis_result_list_list[idx][idx2]) <= max(axis1, axis2, axis3):
                         failure_reasons.append(f"result_len({len(analysis_result_list_list[idx][idx2])}) <= max_axis({max(axis1, axis2, axis3)})")
                     
-                    logger.warning(f"Skipping invalid analysis result data for object {idx2}: {', '.join(failure_reasons)}")
+                    # Silently skip invalid analysis result data
+                    # logger.warning(f"Skipping invalid analysis result data for object {idx2}: {', '.join(failure_reasons)}")
                     # Add default values to maintain consistency
                     scatter_data_list[idx][key_name]['x_val'].append(0.0)
                     scatter_data_list[idx][key_name]['y_val'].append(0.0)

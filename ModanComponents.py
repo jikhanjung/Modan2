@@ -3444,6 +3444,9 @@ class MdTableView(QTableView):
         self.sort_later = False
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.show_context_menu)
+        
+        # Store the currently selected object row for custom drawing
+        self.selected_object_row = -1
 
         self.copy_action = QAction(self.tr("Copy\tCtrl+C"), self)
         self.copy_action.triggered.connect(self.copy_selected_data)
@@ -3461,6 +3464,8 @@ class MdTableView(QTableView):
         self.fill_action.triggered.connect(self.fill_value)
         self.clear_cells_action = QAction(self.tr("Clear"), self)
         self.clear_cells_action.triggered.connect(self.clear_selected_cells)
+        self.edit_object_action = QAction(self.tr("Edit object"), self)
+        self.edit_object_action.triggered.connect(self.edit_selected_object)
         self.setDragDropMode(QAbstractItemView.DragDrop)
         self.selection_mode = "Cells"
         self.drag_start_position = None
@@ -3568,6 +3573,12 @@ class MdTableView(QTableView):
         logger.debug(f"Column '{column_header}' (normalized: '{column_header_lower}') is read-only: {is_readonly_column}")
 
         menu = QMenu(self)
+        
+        # Add Edit object option at the top if a row is selected
+        if selected_indices:
+            menu.addAction(self.edit_object_action)
+            menu.addSeparator()
+        
         menu.addAction(self.copy_action)
         
         # Only add paste and other actions if not a read-only column
@@ -3755,6 +3766,47 @@ class MdTableView(QTableView):
                 source_model = self.model().sourceModel()
                 if index.column() not in source_model._uneditable_columns:
                     self.model().setData(index, "", Qt.EditRole)  # Set data to empty string
+    
+    def edit_selected_object(self):
+        """Trigger the main window's edit object action"""
+        # Find the parent MainWindow and trigger its edit object action
+        parent = self.parent()
+        while parent and not hasattr(parent, 'actionEditObject'):
+            parent = parent.parent()
+        
+        if parent and hasattr(parent, 'actionEditObject'):
+            parent.actionEditObject.trigger()
+    
+    def setSelectedObjectRow(self, row):
+        """Set the currently selected object row for highlighting"""
+        if self.selected_object_row != row:
+            self.selected_object_row = row
+            self.viewport().update()  # Trigger repaint
+    
+    def paintEvent(self, event):
+        """Override paint event to draw row border for selected object"""
+        super().paintEvent(event)
+        
+        if self.selected_object_row >= 0 and self.model():
+            painter = QPainter(self.viewport())
+            painter.setRenderHint(QPainter.Antialiasing)
+            
+            # Get the row geometry
+            row_rect = QRect()
+            for col in range(self.model().columnCount()):
+                if not self.isColumnHidden(col):
+                    cell_rect = self.visualRect(self.model().index(self.selected_object_row, col))
+                    if row_rect.isNull():
+                        row_rect = cell_rect
+                    else:
+                        row_rect = row_rect.united(cell_rect)
+            
+            if not row_rect.isNull():
+                # Draw the border around the entire row
+                painter.setPen(QPen(QColor(0, 120, 212), 3))  # Blue border, 3px thick
+                painter.drawRect(row_rect.adjusted(1, 1, -1, -1))
+        
+        painter.end() if 'painter' in locals() else None
 
     def isPersistentEditorOpen(self, index):
         return self.indexWidget(index) is not None

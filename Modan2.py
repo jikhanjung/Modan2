@@ -790,8 +790,23 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         """)
         close_button.clicked.connect(self.hide_object_overlay)
         
-        # Header layout with close button
+        # Header layout with title and close button
         header_layout = QHBoxLayout()
+        header_layout.setContentsMargins(8, 5, 5, 5)  # Add some padding
+        
+        # Title label for object name
+        self.overlay_title_label = QLabel("Object")
+        self.overlay_title_label.setStyleSheet("""
+            QLabel {
+                color: #333333;
+                font-weight: bold;
+                font-size: 12px;
+            }
+        """)
+        self.overlay_title_label.setAlignment(Qt.AlignCenter)
+        
+        header_layout.addStretch()  # Push title to center
+        header_layout.addWidget(self.overlay_title_label)
         header_layout.addStretch()  # Push close button to the right
         header_layout.addWidget(close_button)
         overlay_layout.addLayout(header_layout)
@@ -1676,6 +1691,12 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             self.btnEditObject.setEnabled(False)
             self.actionEditObject.setEnabled(False)  # Disable Edit Object toolbar button
             self.selected_object = None
+            # Reset overlay title when no object is selected
+            if hasattr(self, 'overlay_title_label'):
+                self.overlay_title_label.setText("Object")
+            # Clear selected object row highlighting
+            if hasattr(self, 'tableView'):
+                self.tableView.setSelectedObjectRow(-1)
             # Hide overlay when no single object is selected
             self.hide_object_overlay()
             return
@@ -1685,6 +1706,14 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         object_id = selected_object_list[0].id
         self.selected_object = MdObject.get_by_id(object_id)
         self.selected_object.unpack_landmark()
+        
+        # Highlight the selected object row in the table
+        if hasattr(self, 'tableView') and self.tableView.selectionModel():
+            selected_indexes = self.tableView.selectionModel().selectedIndexes()
+            if selected_indexes:
+                selected_row = selected_indexes[0].row()
+                self.tableView.setSelectedObjectRow(selected_row)
+        
         self.show_object(self.selected_object)
 
     def show_object(self, obj):
@@ -1693,6 +1722,10 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.object_view.set_object(obj)
         self.object_view.read_only = True
         self.object_view.update()
+        
+        # Update overlay title with object name
+        if hasattr(self, 'overlay_title_label') and obj:
+            self.overlay_title_label.setText(obj.object_name)
         
         # Show the overlay when an object is selected
         self.show_object_overlay()

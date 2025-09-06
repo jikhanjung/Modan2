@@ -6,8 +6,6 @@ permissions:
 on:
   push:
     branches: [ "main" ]  # main 브랜치 푸시 시 실행
-    tags:
-      - 'v*.*.*'  # 태그 푸시 시에도 실행 (예: v1.2.3)
   workflow_dispatch:  # 수동 실행 가능
 
 jobs:

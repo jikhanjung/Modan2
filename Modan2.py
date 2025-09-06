@@ -17,7 +17,7 @@ from PyQt5.QtWidgets import QMainWindow, QHeaderView, QApplication, QAbstractIte
                             QStatusBar, QInputDialog, QToolBar, QWidget, QPlainTextEdit, QVBoxLayout, QHBoxLayout, \
                             QPushButton, QRadioButton, QLabel, QDockWidget
 from PyQt5.QtGui import QIcon, QStandardItemModel, QStandardItem, QKeySequence, QCursor
-from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSettings, QSize, QTranslator, QItemSelectionModel, QObject, QEvent
+from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSettings, QSize, QTranslator, QItemSelectionModel, QObject, QEvent, QTimer
 
 from PyQt5.QtCore import pyqtSlot
 import logging
@@ -37,7 +37,7 @@ from peewee_migrate import Router
 
 from ModanDialogs import DatasetAnalysisDialog, ObjectDialog, ImportDatasetDialog, DatasetDialog, PreferencesDialog, \
     MODE, ObjectViewer3D, ExportDatasetDialog, ObjectViewer2D, ProgressDialog, NewAnalysisDialog, DataExplorationDialog
-from ModanComponents import MdTableModel, MdTableView, MdTreeView, MdSequenceDelegate, AnalysisInfoWidget
+from ModanComponents import MdTableModel, MdTableView, MdTreeView, MdSequenceDelegate, AnalysisInfoWidget, ResizableOverlayWidget
 from ModanWidgets import DatasetTreeWidget, ObjectTableWidget, LandmarkViewer2D
 from MdStatistics import PerformCVA, PerformPCA, PerformManova
 
@@ -755,16 +755,55 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.btnAddProperty.clicked.connect(self.on_action_add_variable_triggered)
 
         self.hsplitter = QSplitter(Qt.Horizontal)
-        self.vsplitter = QSplitter(Qt.Vertical)
-
-        self.vsplitter.addWidget(self.tableview_widget)
+        
+        # Create dataset view that contains table and overlay object viewer
+        self.dataset_view = QWidget()
+        self.dataset_view.setLayout(QVBoxLayout())
+        self.dataset_view.layout().addWidget(self.tableview_widget)
+        self.dataset_view.layout().setContentsMargins(0, 0, 0, 0)
+        
+        # Create overlay container for object viewers (initially hidden)
+        self.object_overlay = ResizableOverlayWidget(self.dataset_view)
+        self.object_overlay.resize(400, 300)  # Initial size for overlay
+        # Background and border are now handled by paintEvent in ResizableOverlayWidget
+        self.object_overlay.hide()
+        
+        # Layout for object viewers inside overlay
+        overlay_layout = QVBoxLayout(self.object_overlay)
+        overlay_layout.setContentsMargins(5, 5, 5, 5)
+        
+        # Add close button to overlay
+        close_button = QPushButton("×")
+        close_button.setFixedSize(20, 20)
+        close_button.setStyleSheet("""
+            QPushButton {
+                background-color: #ff6b6b;
+                color: white;
+                border: none;
+                border-radius: 10px;
+                font-weight: bold;
+                font-size: 14px;
+            }
+            QPushButton:hover {
+                background-color: #ff5252;
+            }
+        """)
+        close_button.clicked.connect(self.hide_object_overlay)
+        
+        # Header layout with close button
+        header_layout = QHBoxLayout()
+        header_layout.addStretch()  # Push close button to the right
+        header_layout.addWidget(close_button)
+        overlay_layout.addLayout(header_layout)
+        
         if not dockable_object_view:
-            self.vsplitter.addWidget(self.object_view_2d)
-            self.vsplitter.addWidget(self.object_view_3d)
+            # Add object viewers to the overlay instead of vsplitter
+            overlay_layout.addWidget(self.object_view_2d)
+            overlay_layout.addWidget(self.object_view_3d)
 
         #self.treeView = MyTreeView()
         self.hsplitter.addWidget(self.treeView)
-        self.hsplitter.addWidget(self.vsplitter)
+        self.hsplitter.addWidget(self.dataset_view)
         self.hsplitter.setSizes([300, 800])
         
         # Create empty widget to show when nothing is selected
@@ -1546,8 +1585,8 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             if isinstance(obj, MdDataset):
                 self.selected_dataset = obj
                 self.load_object()
-                if self.hsplitter.widget(1) != self.vsplitter:
-                    self.hsplitter.replaceWidget(1,self.vsplitter)                
+                if self.hsplitter.widget(1) != self.dataset_view:
+                    self.hsplitter.replaceWidget(1, self.dataset_view)                
                 self.actionAnalyze.setEnabled(True)
                 self.actionNewObject.setEnabled(True)
                 self.actionExport.setEnabled(True)
@@ -1637,6 +1676,8 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             self.btnEditObject.setEnabled(False)
             self.actionEditObject.setEnabled(False)  # Disable Edit Object toolbar button
             self.selected_object = None
+            # Hide overlay when no single object is selected
+            self.hide_object_overlay()
             return
 
         self.btnEditObject.setEnabled(True)
@@ -1652,9 +1693,46 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.object_view.set_object(obj)
         self.object_view.read_only = True
         self.object_view.update()
+        
+        # Show the overlay when an object is selected
+        self.show_object_overlay()
 
     def clear_object_view(self):
         self.object_view.clear_object()
+        # Hide the overlay when no object is selected
+        self.hide_object_overlay()
+        
+    def position_object_overlay(self):
+        """Position the object overlay in the bottom-right corner of the dataset view"""
+        if hasattr(self, 'object_overlay') and hasattr(self, 'dataset_view'):
+            parent_size = self.dataset_view.size()
+            overlay_size = self.object_overlay.size()
+            
+            # Position in bottom-right corner with some margin
+            margin = 10
+            x = parent_size.width() - overlay_size.width() - margin
+            y = parent_size.height() - overlay_size.height() - margin
+            
+            self.object_overlay.move(x, y)
+    
+    def show_object_overlay(self):
+        """Show the object overlay and position it correctly"""
+        if hasattr(self, 'object_overlay'):
+            self.position_object_overlay()
+            self.object_overlay.show()
+            self.object_overlay.raise_()  # Bring to front
+    
+    def hide_object_overlay(self):
+        """Hide the object overlay"""
+        if hasattr(self, 'object_overlay'):
+            self.object_overlay.hide()
+    
+    def resizeEvent(self, event):
+        """Handle window resize to reposition overlay"""
+        super().resizeEvent(event)
+        # Reposition overlay when window is resized
+        if hasattr(self, 'object_overlay') and self.object_overlay.isVisible():
+            QTimer.singleShot(0, self.position_object_overlay)  # Defer positioning to next event loop
 
 
 ''' 

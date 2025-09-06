@@ -1,70 +1,101 @@
-# Modan2 - Comprehensive Morphometrics Software
+[한국어](README.ko.md)
 
-Modan2 empowers researchers and scientists to explore and understand shape variations in biological objects through geometric morphometrics. This user-friendly software streamlines your workflow from data acquisition to analysis and visualization.
+# Modan2 - Geometric Morphometrics Software
 
-## Table of Contents
+<!-- 
+TODO: Replace USER/REPO with the actual GitHub user and repository name to enable badges.
+-->
+[![Test Status](https://github.com/USER/REPO/actions/workflows/test.yml/badge.svg)](https://github.com/USER/REPO/actions/workflows/test.yml)
+[![Build Status](https://github.com/USER/REPO/actions/workflows/build.yml/badge.svg)](https://github.com/USER/REPO/actions/workflows/build.yml)
+[![Release Status](https://github.com/USER/REPO/actions/workflows/release.yml/badge.svg)](https://github.com/USER/REPO/actions/workflows/release.yml)
 
-- [Introduction](#introduction)
-- [Installation](#installation)
-- [Getting Started](#getting-started)
-- [Using Modan2](#using-modan2)
-- [Dataset and Object Management](#dataset-and-object-management)
-- [Dataset Analysis](#dataset-analysis)
-- [Preferences](#preferences)
+Modan2 is a user-friendly desktop application that empowers researchers to explore and understand shape variations through geometric morphometrics. It streamlines the entire workflow from data acquisition (2D/3D) to statistical analysis and visualization.
 
-## Introduction
+## Key Features
 
-Modan2 provides a holistic solution for geometric morphometrics, enabling:
+- **Hierarchical Data Management:** Organize data into nested datasets with a clear structure.
+- **2D & 3D Visualization:** Integrated viewers for 2D images and 3D models with landmark plotting.
+- **Statistical Analysis:** Perform Principal Component Analysis (PCA), Canonical Variate Analysis (CVA), and MANOVA.
+- **Data Import/Export:** Supports various file types and drag-and-drop for easy data handling.
+- **Persistent Storage:** All data and analyses are saved in a local database, managed by Peewee ORM.
 
-- **Seamless Data Management:**  Organize datasets, objects, and their properties effortlessly.
-- **Powerful Analysis:** Conduct in-depth morphometric analyses with various tools and visualizations.
-- **Customizable Workflow:** Tailor the software to your specific research needs through preferences.
+## Technology Stack
 
-## Installation
+- **Language:** Python 3
+- **GUI Framework:** PyQt5
+- **Core Libraries:**
+    - **Database ORM:** Peewee
+    - **Numerical/Scientific:** NumPy, SciPy, Pandas, Statsmodels
+    - **3D Graphics & Image Processing:** PyOpenGL, Trimesh, Pillow, OpenCV
 
-1. **System Requirements:**
-   - Windows 10, macOS 10.12, or Linux (Ubuntu 18.04 or equivalent)
-   - Intel Core i5 or equivalent CPU
-   - 8 GB RAM minimum
-   - 500 MB disk space
-   - Dedicated GPU recommended for 3D features
+## Installation and Usage (from Source)
 
-2. **Download and Install:**
-   - Get the latest Modan2 installer from our release section.
-   - Follow the on-screen instructions.
+Follow these instructions to run Modan2 from the source code.
 
-## Getting Started
+### Prerequisites
 
-- **Main Window:**
-  - Toolbar: Access key functions for datasets, objects, analysis, and preferences.
-  - Panes: View datasets, object lists, and object details.
-- **Adding Datasets and Objects:**
-  - Create new datasets and easily add objects via drag-and-drop.
-- **Importing and Exporting:**
-  - Seamlessly transfer datasets in and out of Modan2.
+- Python 3.10 or newer
+- Git
 
-## Using Modan2
+### 1. Clone the Repository
 
-- **Dataset Analysis:** Initiate and manage analyses through the intuitive wizard.
-- **Preferences:** Customize settings for visualization, window behavior, and more.
+```bash
+git clone <repository-url>
+cd Modan2
+```
 
-## Dataset and Object Management
+### 2. Install Dependencies
 
-- **Dataset and Object Dialogs:** Edit details, landmarks, wireframes, and properties.
-- **Bulk Editing:** Efficiently modify multiple objects at once.
-- **Drag-and-Drop:** Intuitively move and copy objects between datasets.
+Install the required Python packages using pip:
 
-## Dataset Analysis
+```bash
+pip install -r requirements.txt
+```
 
-- **Landmark Visualization:** View landmarks and average shapes in 2D or 3D.
-- **Object List and Scatterplot:** Explore relationships between objects.
-- **PCA Results:** Analyze principal component analysis data.
-- **Saving Results:** Export scatterplots and PCA data for further investigation.
+**For Linux users:** You also need to install system-level dependencies for Qt and other libraries.
 
-## Preferences
+```bash
+sudo apt-get update && sudo apt-get install -y \
+  libxcb-xinerama0 libxcb-icccm4 libxcb-image0 \
+  libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 \
+  libxcb-xfixes0 libxcb-shape0 libxcb-cursor0 \
+  qt5-qmake qtbase5-dev libqt5gui5 libqt5core5a libqt5widgets5
+```
 
-- **Window Geometry:** Control the position and size of the main window.
-- **Scatterplot Visualization:** Customize colors and symbols for data points.
+### 3. Run the Application
+
+Once the dependencies are installed, you can start the application:
+
+```bash
+python main.py
+```
+
+## Building from Source
+
+This project uses `PyInstaller` to create standalone executables. A helper script, `build.py`, automates this process.
+
+To create a distributable package for your operating system, run:
+
+```bash
+python build.py
+```
+
+The build artifacts will be located in the `dist/` directory.
+
+## Running Tests
+
+The project is tested using `pytest`. To run the test suite, first install the development dependencies:
+
+```bash
+pip install -r config/requirements-dev.txt
+```
+
+Then, run pytest from the project root:
+
+```bash
+pytest
+```
 
 ## License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.

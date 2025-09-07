@@ -28,12 +28,6 @@ jobs:
         id: get_version
         run: echo "VERSION=$(python -c 'from version import __version__; print(__version__)')" >> $GITHUB_OUTPUT
 
-      - name: Build Windows executable
-        run: |
-          python build.py
-        env:
-          BUILD_NUMBER: ${{ inputs.build_number }}
-
       - name: Download and Install Inno Setup
         shell: pwsh
         run: |
@@ -41,30 +35,21 @@ jobs:
           $inno_installer = "innosetup-installer.exe"
           Invoke-WebRequest -Uri $inno_url -OutFile $inno_installer
           Start-Process -FilePath $inno_installer -ArgumentList "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART" -Wait
+          echo "C:\Program Files (x86)\Inno Setup 6\" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
-      - name: Create Windows installer
+      - name: Build Windows Executables and Installer
         shell: pwsh
         run: |
-          $inno_path = "C:\Program Files (x86)\Inno Setup 6"
-          $env:PATH = "$inno_path;$env:PATH"
-          iscc.exe "/DBuildNumber=${{ inputs.build_number }}" "InnoSetup/Modan2.iss"
-        continue-on-error: true
+          python build.py # This will now run after Inno Setup is in PATH
 
       - name: Zip Windows Installer
         shell: pwsh
+        if: success() # Added condition
         run: |
           $installerPath = (Get-ChildItem -Path "InnoSetup/Output/" -Filter "Modan2_v*_build*_Installer.exe").FullName
           $zipFileName = "Modan2-Windows-Installer-${{ steps.get_version.outputs.VERSION }}.zip"
           Compress-Archive -Path $installerPath -DestinationPath $zipFileName
           echo "Zipped installer to $zipFileName"
-
-      - name: Zip Windows Portable (One-Dir)
-        shell: pwsh
-        run: |
-          $portablePath = "dist/Modan2"
-          $zipFileName = "Modan2-Windows-Portable-${{ steps.get_version.outputs.VERSION }}.zip"
-          Compress-Archive -Path $portablePath -DestinationPath $zipFileName
-          echo "Zipped portable to $zipFileName"
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
@@ -97,10 +82,6 @@ jobs:
           pip install -r requirements.txt
           pip install pyinstaller
 
-      - name: Get Version String
-        id: get_version
-        run: echo "VERSION=$(python -c 'from version import __version__; print(__version__)')" >> $GITHUB_OUTPUT
-
       - name: Build macOS application
         run: |
           export PATH=/usr/local/opt/qt5/bin:$PATH
@@ -119,7 +100,6 @@ jobs:
         run: |
           create-dmg \
             --volname "Modan2 Installer" \
-            --app-droploc 200 120 \
             --icon "icons/Modan2_2.png" \
             --window-pos 200 120 \
             --window-size 800 400 \
@@ -182,10 +162,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pyinstaller
-
-      - name: Get Version String
-        id: get_version
-        run: echo "VERSION=$(python -c 'from version import __version__; print(__version__)')" >> $GITHUB_OUTPUT
 
       - name: Build Linux executable
         run: |

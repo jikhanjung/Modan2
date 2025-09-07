@@ -50,13 +50,13 @@ cp icons/Modan2.png "${APP_DIR}/Modan2.png"
 # --appdir: Path to the AppDir (PyInstaller bundle)
 # --output appimage: Specify AppImage output format
 # --desktop-file: Path to the .desktop file
-# --icon: Path to the icon file
+# --icon-file: Path to the icon file (Corrected from --icon)
 # --output: Output filename (optional, linuxdeploy can name it)
 linuxdeploy \
   --appdir "$APP_DIR" \
   --output appimage \
   --desktop-file "${APP_DIR}/Modan2.desktop" \
-  --icon "${APP_DIR}/Modan2.png" \
+  --icon-file "${APP_DIR}/Modan2.png" \
   --output "$OUTPUT_FILE"
 
 if [ $? -eq 0 ]; then

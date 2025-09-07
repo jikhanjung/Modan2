@@ -42,7 +42,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.inputs.version_tag }}
-          name: Modan2 ${{ github.event.inputs.version_tag }}
+          name: Modan2 ${{ github.event.inputs.version_tag }} (Build ${{ github.run_number }})
           body: |
             🚀 Modan2 ${{ github.event.inputs.version_tag }} Release
             

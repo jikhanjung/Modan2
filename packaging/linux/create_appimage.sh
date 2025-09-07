@@ -31,8 +31,16 @@ fi
 
 echo "Creating Linux AppImage for Modan2 v${VERSION}..."
 
+# Create AppRun script
+cat << 'EOF' > "${APP_DIR}/AppRun"
+#!/bin/bash
+SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
+cd "$SCRIPT_DIR"
+exec "./Modan2" "$@"
+EOF
+chmod +x "${APP_DIR}/AppRun"
+
 # Create a .desktop file for the AppImage
-# This is a minimal example, you might want to customize it further
 cat << EOF > "${APP_DIR}/Modan2.desktop"
 [Desktop Entry]
 Name=Modan2
@@ -40,11 +48,19 @@ Exec=AppRun
 Icon=Modan2
 Type=Application
 Categories=Science;Education;
+Comment=Morphometric analysis application
 EOF
 
-# Copy icon (assuming it's in icons/Modan2.png)
-# You might need to adjust the path to your icon
-cp icons/Modan2.png "${APP_DIR}/Modan2.png"
+# Copy icon (assuming it's in icons/Modan2.png or use a default)
+if [ -f "icons/Modan2.png" ]; then
+    cp icons/Modan2.png "${APP_DIR}/Modan2.png"
+elif [ -f "icons/Modan2_2.png" ]; then
+    cp icons/Modan2_2.png "${APP_DIR}/Modan2.png"
+else
+    # Create a simple placeholder icon if none exists
+    echo "Warning: No icon found, creating placeholder"
+    touch "${APP_DIR}/Modan2.png"
+fi
 
 # Run linuxdeploy
 # --appdir: Path to the AppDir (PyInstaller bundle)

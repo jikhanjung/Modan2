@@ -102,7 +102,7 @@ def run_inno_setup(iss_file, version, build_number):
     temp_iss = prepare_inno_setup_template(iss_file, version)
     
     inno_setup_cmd = [
-        r"C:\Program Files (x86)\Inno Setup 6\ISCC.exe", 
+        "ISCC.exe", # Changed from r"C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
         f"/DBuildNumber={build_number}",
         str(temp_iss)
     ]
@@ -130,7 +130,7 @@ def get_platform_executable_extension():
     return ""
 
 def get_platform_separator():
-    """Get the appropriate path separator for PyInstaller add-data."""
+    """Get the appropriate path separator for PyInstaller add-data.""" 
     if platform.system() == "Windows":
         return ";"
     return ":"
@@ -189,6 +189,7 @@ onefile_args = [
 run_pyinstaller(onefile_args)
 
 # 2. Run PyInstaller (One-Directory Bundle)
+
 onedir_args = [
     "--name=Modan2",  # Explicitly set output name
     "--onedir",

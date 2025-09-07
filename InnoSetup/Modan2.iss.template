@@ -5,7 +5,7 @@
 AppName=Modan2
 AppVersion={#AppVersion}
 DefaultDirName={commonpf}\PaleoBytes\Modan2
-OutputDir=Output
+OutputDir={{DIST_PATH}}\..\InnoSetup\Output
 
 OutputBaseFilename=Modan2_v{#AppVersion}_build{#BuildNumber}_Installer
 

@@ -47,13 +47,20 @@ jobs:
           $env:BUILD_NUMBER = "${{ inputs.build_number }}"
           python build.py
           # List output directories to debug
-          echo "Listing InnoSetup directory:"
+          echo "=== Listing InnoSetup directory ==="
           if (Test-Path "InnoSetup") {
-            Get-ChildItem -Path "InnoSetup" -Recurse | Select-Object FullName
+            Get-ChildItem -Path "InnoSetup" -Recurse | Format-Table FullName
           }
-          echo "Listing dist directory:"
+          echo "=== Listing dist directory ==="
           if (Test-Path "dist") {
-            Get-ChildItem -Path "dist" | Select-Object Name
+            Get-ChildItem -Path "dist" -Name
+          }
+          echo "=== Checking for installer ==="
+          if (Test-Path "InnoSetup/Output") {
+            echo "InnoSetup/Output exists:"
+            Get-ChildItem -Path "InnoSetup/Output" -Name
+          } else {
+            echo "InnoSetup/Output does not exist"
           }
 
       - name: Zip Windows Installer or Portable Build

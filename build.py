@@ -208,6 +208,16 @@ onedir_args = [
 ]
 run_pyinstaller(onedir_args)
 
+# Copy ExampleDataset to dist folder for Inno Setup
+import shutil
+example_src = "ExampleDataset"
+example_dst = "dist/ExampleDataset"
+if os.path.exists(example_src):
+    if os.path.exists(example_dst):
+        shutil.rmtree(example_dst)
+    shutil.copytree(example_src, example_dst)
+    print(f"Copied {example_src} to {example_dst}")
+
 # 3. Run Inno Setup Compiler (Optional)
 iss_file = "InnoSetup/Modan2.iss"
 run_inno_setup(iss_file, VERSION, BUILD_NUMBER)

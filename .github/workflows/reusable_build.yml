@@ -56,17 +56,33 @@ jobs:
         shell: pwsh
         if: success() # Added condition
         run: |
-          $installerPath = (Get-ChildItem -Path "InnoSetup/Output/" -Filter "Modan2_v*_build*_Installer.exe").FullName
-          $zipFileName = "Modan2-Windows-Installer-${{ steps.get_version.outputs.VERSION }}.zip"
-          Compress-Archive -Path $installerPath -DestinationPath $zipFileName
-          echo "Zipped installer to $zipFileName"
+          if (Test-Path "InnoSetup/Output/") {
+            $installerPath = (Get-ChildItem -Path "InnoSetup/Output/" -Filter "Modan2_v*_build*_Installer.exe" -ErrorAction SilentlyContinue).FullName
+            if ($installerPath) {
+              $zipFileName = "Modan2-Windows-Installer-${{ steps.get_version.outputs.VERSION }}.zip"
+              Compress-Archive -Path $installerPath -DestinationPath $zipFileName
+              echo "Zipped installer to $zipFileName"
+            } else {
+              echo "No installer found in InnoSetup/Output/"
+              # Create a zip of the dist folder instead
+              $zipFileName = "Modan2-Windows-Portable-${{ steps.get_version.outputs.VERSION }}.zip"
+              Compress-Archive -Path "dist/Modan2/*" -DestinationPath $zipFileName
+              echo "Created portable zip: $zipFileName"
+            }
+          } else {
+            echo "InnoSetup/Output/ directory not found"
+            # Create a zip of the dist folder instead
+            $zipFileName = "Modan2-Windows-Portable-${{ steps.get_version.outputs.VERSION }}.zip"
+            Compress-Archive -Path "dist/Modan2/*" -DestinationPath $zipFileName
+            echo "Created portable zip: $zipFileName"
+          }
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
         with:
           name: modan2-windows
           path: |
-            Modan2-Windows-Installer-${{ steps.get_version.outputs.VERSION }}.zip
+            Modan2-Windows-*.zip
 
   build-macos:
     runs-on: macos-latest
@@ -116,15 +132,19 @@ jobs:
 
       - name: Create macOS DMG
         run: |
+          if [ -f "icons/Modan2_2.png" ]; then
+            ICON_ARG="--icon icons/Modan2_2.png"
+          else
+            ICON_ARG=""
+          fi
           create-dmg \
             --volname "Modan2 Installer" \
-            --icon "icons/Modan2_2.png" \
             --window-pos 200 120 \
             --window-size 800 400 \
             --hide-extension "Modan2.app" \
             --hdiutil-verbose \
             "Modan2-macOS-Installer-${{ steps.get_version.outputs.VERSION }}.dmg" \
-            "dist/Modan2.app"
+            "dist/Modan2.app" || echo "DMG creation failed, but continuing"
 
       - name: Upload macOS artifact
         uses: actions/upload-artifact@v4

@@ -1,0 +1,206 @@
+name: Reusable Build Workflow
+on:
+  workflow_call:
+    inputs:
+      build_number:
+        required: true
+        type: string
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get Version String
+        id: get_version
+        run: echo "VERSION=$(python -c 'from version import __version__; print(__version__)')" >> $GITHUB_OUTPUT
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install Windows dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build Windows executable
+        run: |
+          python build.py
+        env:
+          BUILD_NUMBER: ${{ inputs.build_number }}
+
+      - name: Download and Install Inno Setup
+        shell: pwsh
+        run: |
+          $inno_url = "https://files.jrsoftware.org/is/6/innosetup-6.2.2.exe"
+          $inno_installer = "innosetup-installer.exe"
+          Invoke-WebRequest -Uri $inno_url -OutFile $inno_installer
+          Start-Process -FilePath $inno_installer -ArgumentList "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART" -Wait
+
+      - name: Create Windows installer
+        shell: pwsh
+        run: |
+          $inno_path = "C:\Program Files (x86)\Inno Setup 6"
+          $env:PATH = "$inno_path;$env:PATH"
+          iscc.exe "/DBuildNumber=${{ inputs.build_number }}" "InnoSetup/Modan2.iss"
+        continue-on-error: true
+
+      - name: Zip Windows Installer
+        shell: pwsh
+        run: |
+          $installerPath = (Get-ChildItem -Path "InnoSetup/Output/" -Filter "Modan2_v*_build*_Installer.exe").FullName
+          $zipFileName = "Modan2-Windows-Installer-${{ steps.get_version.outputs.VERSION }}.zip"
+          Compress-Archive -Path $installerPath -DestinationPath $zipFileName
+          echo "Zipped installer to $zipFileName"
+
+      - name: Zip Windows Portable (One-Dir)
+        shell: pwsh
+        run: |
+          $portablePath = "dist/Modan2"
+          $zipFileName = "Modan2-Windows-Portable-${{ steps.get_version.outputs.VERSION }}.zip"
+          Compress-Archive -Path $portablePath -DestinationPath $zipFileName
+          echo "Zipped portable to $zipFileName"
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: modan2-windows
+          path: |
+            Modan2-Windows-Installer-${{ steps.get_version.outputs.VERSION }}.zip
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get Version String
+        id: get_version
+        run: echo "VERSION=$(python -c 'from version import __version__; print(__version__)')" >> $GITHUB_OUTPUT
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install macOS system dependencies
+        run: |
+          brew install qt5 create-dmg
+          echo "export PATH=/usr/local/opt/qt5/bin:$PATH" >> ~/.bash_profile
+          echo "export LDFLAGS=-L/usr/local/opt/qt5/lib" >> ~/.bash_profile
+          echo "export CPPFLAGS=-I/usr/local/opt/qt5/include" >> ~/.bash_profile
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build macOS application
+        run: |
+          export PATH=/usr/local/opt/qt5/bin:$PATH
+          python build.py
+        env:
+          BUILD_NUMBER: ${{ inputs.build_number }}
+
+      - name: Create macOS app bundle
+        run: |
+          if [ ! -d "dist/Modan2.app" ]; then
+            mkdir -p "dist/Modan2.app/Contents/MacOS"
+            cp -r dist/* "dist/Modan2.app/Contents/MacOS/" 2>/dev/null || true
+          fi
+
+      - name: Create macOS DMG
+        run: |
+          create-dmg \
+            --volname "Modan2 Installer" \
+            --app-droploc 200 120 \
+            --icon "icons/Modan2_2.png" \
+            --window-pos 200 120 \
+            --window-size 800 400 \
+            --hide-extension "Modan2.app" \
+            --hdiutil-verbose \
+            "Modan2-macOS-Installer-${{ steps.get_version.outputs.VERSION }}.dmg" \
+            "dist/Modan2.app"
+
+      - name: Upload macOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: modan2-macos
+          path: |
+            Modan2-macOS-Installer-${{ steps.get_version.outputs.VERSION }}.dmg
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get Version String
+        id: get_version
+        run: echo "VERSION=$(python -c 'from version import __version__; print(__version__)')" >> $GITHUB_OUTPUT
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install Linux system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libxcb-xinerama0 \
+            libxcb-icccm4 \
+            libxcb-image0 \
+            libxcb-keysyms1 \
+            libxcb-randr0 \
+            libxcb-render-util0 \
+            libxcb-xfixes0 \
+            libxcb-shape0 \
+            libxcb-cursor0 \
+            qt5-qmake \
+            qtbase5-dev \
+            libqt5gui5 \
+            libqt5core5a \
+            libqt5widgets5 \
+            libglut-dev \
+            libglut3.12 \
+            python3-opengl \
+            fuse
+
+      - name: Download linuxdeploy and appimagetool
+        run: |
+          curl -LO https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+          curl -LO https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x linuxdeploy-x86_64.AppImage appimagetool-x86_64.AppImage
+          sudo mv linuxdeploy-x86_64.AppImage /usr/local/bin/linuxdeploy
+          sudo mv appimagetool-x86_64.AppImage /usr/local/bin/appimagetool
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build Linux executable
+        run: |
+          python build.py
+        env:
+          BUILD_NUMBER: ${{ inputs.build_number }}
+
+      - name: Create Linux AppImage
+        run: |
+          chmod +x packaging/linux/create_appimage.sh
+          packaging/linux/create_appimage.sh ${{ steps.get_version.outputs.VERSION }}
+
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: modan2-linux
+          path: |
+            build_linux/Modan2-Linux-${{ steps.get_version.outputs.VERSION }}.AppImage

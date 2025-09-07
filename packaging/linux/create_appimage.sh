@@ -62,20 +62,23 @@ else
     touch "${APP_DIR}/Modan2.png"
 fi
 
+# Ensure output directory exists
+mkdir -p "$OUTPUT_DIR"
+
 # Run linuxdeploy
 # --appdir: Path to the AppDir (PyInstaller bundle)
 # --output appimage: Specify AppImage output format
 # --desktop-file: Path to the .desktop file
-# --icon-file: Path to the icon file (Corrected from --icon)
-# --output: Output filename (optional, linuxdeploy can name it)
+# --icon-file: Path to the icon file
 linuxdeploy \
   --appdir "$APP_DIR" \
   --output appimage \
   --desktop-file "${APP_DIR}/Modan2.desktop" \
-  --icon-file "${APP_DIR}/Modan2.png" \
-  --output "$OUTPUT_FILE"
+  --icon-file "${APP_DIR}/Modan2.png"
 
-if [ $? -eq 0 ]; then
+# Check if AppImage was created and rename it
+if [ -f "Modan2-x86_64.AppImage" ]; then
+  mv "Modan2-x86_64.AppImage" "$OUTPUT_FILE"
   echo "Successfully created AppImage: $OUTPUT_FILE"
 else
   echo "Failed to create AppImage."

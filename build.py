@@ -188,6 +188,8 @@ onefile_args = [
     f"--add-data=migrations/*{data_separator}migrations",
     f"--add-data=build_info.json{data_separator}.",
     f"--icon={ICON}",
+    "--noupx",  # Don't use UPX compression (reduces false positives)
+    "--clean",  # Clean PyInstaller cache before building
     "main.py",
 ]
 run_pyinstaller(onefile_args)
@@ -203,6 +205,8 @@ onedir_args = [
     f"--add-data=migrations/*{data_separator}migrations",
     f"--add-data=build_info.json{data_separator}.",
     f"--icon={ICON}",
+    "--noupx",  # Don't use UPX compression (reduces false positives)
+    "--clean",  # Clean PyInstaller cache before building
     "--noconfirm",
     "main.py",
 ]

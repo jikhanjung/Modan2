@@ -34,8 +34,8 @@ jobs:
             Built from commit: ${{ github.sha }}
           prerelease: ${{ contains(github.ref_name, '-alpha') || contains(github.ref_name, '-beta') || contains(github.ref_name, '-rc') }}
           files: |
-            release-files/modan2-windows/Modan2-Windows-Installer-*.zip
-            release-files/modan2-macos/Modan2-macOS-Installer-*.dmg
-            release-files/modan2-linux/Modan2-Linux-AppImage-*.run
+            release-files/modan2-windows/Modan2-Windows-*.zip
+            release-files/modan2-macos/Modan2-macOS-*.dmg
+            release-files/modan2-linux/Modan2-Linux-*.AppImage
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

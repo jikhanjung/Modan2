@@ -2,40 +2,30 @@
 
 ## Release Methods
 
-### 1. Manual Release (GitHub Actions UI)
+### 1. Manual Release (GitHub Actions UI) - RECOMMENDED
 **Best for**: Controlled releases at specific points
 
 1. Go to Actions tab in GitHub
 2. Select "Manual Release" workflow
 3. Click "Run workflow"
 4. Fill in:
-   - Version tag (e.g., `v0.1.4-beta.5`)
+   - Version tag (e.g., `v0.1.4-beta.5-build.123`)
    - Pre-release checkbox
    - Optional release notes
 5. Click "Run workflow"
 
-### 2. Commit Message Triggered Release
-**Best for**: Automated releases with specific commits
-
-Add `[release]` or `[pre-release]` to your commit message:
-
-```bash
-git commit -m "feat: Add new feature [pre-release]"
-git push
-```
-
-This will automatically:
-- Build all platforms
-- Create a release with version from version.py
-- Tag as `v{version}-build.{number}`
-
-### 3. Tag-based Release (Existing)
+### 2. Tag-based Release (Automatic)
 **Best for**: Version-specific releases
 
 ```bash
 git tag -a v0.1.4-beta.5 -m "Release v0.1.4-beta.5"
 git push origin v0.1.4-beta.5
 ```
+
+This triggers the automatic release workflow that:
+- Builds all platforms
+- Creates GitHub release
+- Attaches all artifacts
 
 ## Version Management Strategy
 
@@ -71,12 +61,6 @@ Use short commit hash:
    - Create tag and push
 
 ## Examples
-
-### Quick Pre-release from Current Commit
-```bash
-git commit -m "fix: Important bug fix [pre-release]"
-git push
-```
 
 ### Manual Release from Specific Commit
 1. Checkout the commit: `git checkout abc1234`

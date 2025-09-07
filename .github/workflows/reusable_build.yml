@@ -32,12 +32,6 @@ jobs:
       - name: Debug Version String
         run: echo "Version string captured - ${{ steps.get_version.outputs.VERSION }}"
 
-      - name: Build Windows executable
-        run: |
-          python build.py
-        env:
-          BUILD_NUMBER: ${{ inputs.build_number }}
-
       - name: Download and Install Inno Setup
         shell: pwsh
         run: |
@@ -45,36 +39,50 @@ jobs:
           $inno_installer = "innosetup-installer.exe"
           Invoke-WebRequest -Uri $inno_url -OutFile $inno_installer
           Start-Process -FilePath $inno_installer -ArgumentList "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART" -Wait
-          echo "C:\Program Files (x86)\Inno Setup 6\" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          echo "C:\Program Files (x86)\Inno Setup 6" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Build Windows Executables and Installer
         shell: pwsh
         run: |
-          python build.py # This will now run after Inno Setup is in PATH
+          $env:BUILD_NUMBER = "${{ inputs.build_number }}"
+          python build.py
+          # List output directories to debug
+          echo "Listing InnoSetup directory:"
+          if (Test-Path "InnoSetup") {
+            Get-ChildItem -Path "InnoSetup" -Recurse | Select-Object FullName
+          }
+          echo "Listing dist directory:"
+          if (Test-Path "dist") {
+            Get-ChildItem -Path "dist" | Select-Object Name
+          }
 
-      - name: Zip Windows Installer
+      - name: Zip Windows Installer or Portable Build
         shell: pwsh
-        if: success() # Added condition
+        if: success()
         run: |
+          # Check for installer in InnoSetup/Output/
+          $installerFound = $false
           if (Test-Path "InnoSetup/Output/") {
-            $installerPath = (Get-ChildItem -Path "InnoSetup/Output/" -Filter "Modan2_v*_build*_Installer.exe" -ErrorAction SilentlyContinue).FullName
+            $installerPath = Get-ChildItem -Path "InnoSetup/Output/" -Filter "*.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
             if ($installerPath) {
               $zipFileName = "Modan2-Windows-Installer-${{ steps.get_version.outputs.VERSION }}.zip"
-              Compress-Archive -Path $installerPath -DestinationPath $zipFileName
+              Compress-Archive -Path $installerPath.FullName -DestinationPath $zipFileName
               echo "Zipped installer to $zipFileName"
-            } else {
-              echo "No installer found in InnoSetup/Output/"
-              # Create a zip of the dist folder instead
-              $zipFileName = "Modan2-Windows-Portable-${{ steps.get_version.outputs.VERSION }}.zip"
+              $installerFound = $true
+            }
+          }
+          
+          # If no installer, create portable zip
+          if (-not $installerFound) {
+            echo "No installer found, creating portable zip"
+            $zipFileName = "Modan2-Windows-Portable-${{ steps.get_version.outputs.VERSION }}.zip"
+            if (Test-Path "dist/Modan2") {
               Compress-Archive -Path "dist/Modan2/*" -DestinationPath $zipFileName
               echo "Created portable zip: $zipFileName"
+            } else {
+              echo "ERROR: dist/Modan2 directory not found"
+              exit 1
             }
-          } else {
-            echo "InnoSetup/Output/ directory not found"
-            # Create a zip of the dist folder instead
-            $zipFileName = "Modan2-Windows-Portable-${{ steps.get_version.outputs.VERSION }}.zip"
-            Compress-Archive -Path "dist/Modan2/*" -DestinationPath $zipFileName
-            echo "Created portable zip: $zipFileName"
           }
 
       - name: Upload Windows artifact

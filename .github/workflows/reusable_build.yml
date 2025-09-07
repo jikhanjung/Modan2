@@ -26,10 +26,11 @@ jobs:
 
       - name: Get Version String
         id: get_version
+        shell: bash
         run: echo "VERSION=$(python -c 'from version import __version__; print(__version__)')" >> $GITHUB_OUTPUT
 
       - name: Debug Version String
-        run: echo "Version string captured: ${{ steps.get_version.outputs.VERSION }}"
+        run: echo "Version string captured - ${{ steps.get_version.outputs.VERSION }}"
 
       - name: Build Windows executable
         run: |
@@ -93,10 +94,11 @@ jobs:
 
       - name: Get Version String
         id: get_version
+        shell: bash
         run: echo "VERSION=$(python -c 'from version import __version__; print(__version__)')" >> $GITHUB_OUTPUT
 
       - name: Debug Version String
-        run: echo "Version string captured: ${{ steps.get_version.outputs.VERSION }}"
+        run: echo "Version string captured - ${{ steps.get_version.outputs.VERSION }}"
 
       - name: Build macOS application
         run: |

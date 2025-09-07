@@ -122,10 +122,11 @@ def create_git_tag(version: str, message: Optional[str] = None) -> None:
         subprocess.run(['git', 'tag', '-a', tag_name, '-m', message], check=True)
         print(f"✅ Git tag created: {tag_name}")
         
-        response = input("Push tag to remote? (y/N): ")
-        if response.lower() == 'y':
-            subprocess.run(['git', 'push', 'origin', tag_name], check=True)
-            print(f"✅ Tag pushed to remote")
+        # Removed automatic push to remote
+        # response = input("Push tag to remote? (y/N): ")
+        # if response.lower() == 'y':
+        #     subprocess.run(['git', 'push', 'origin', tag_name], check=True)
+        #     print(f"✅ Tag pushed to remote")
     except subprocess.CalledProcessError as e:
         print(f"❌ Failed to create git tag: {e}")
 

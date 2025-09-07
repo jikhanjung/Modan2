@@ -13,10 +13,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Get Version String
-        id: get_version
-        run: echo "VERSION=$(python -c 'from version import __version__; print(__version__)')" >> $GITHUB_OUTPUT
-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -27,6 +23,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pyinstaller
+
+      - name: Get Version String
+        id: get_version
+        run: echo "VERSION=$(python -c 'from version import __version__; print(__version__)')" >> $GITHUB_OUTPUT
 
       - name: Build Windows executable
         run: |
@@ -79,10 +79,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Get Version String
-        id: get_version
-        run: echo "VERSION=$(python -c 'from version import __version__; print(__version__)')" >> $GITHUB_OUTPUT
-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -100,6 +96,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pyinstaller
+
+      - name: Get Version String
+        id: get_version
+        run: echo "VERSION=$(python -c 'from version import __version__; print(__version__)')" >> $GITHUB_OUTPUT
 
       - name: Build macOS application
         run: |
@@ -140,10 +140,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Get Version String
-        id: get_version
-        run: echo "VERSION=$(python -c 'from version import __version__; print(__version__)')" >> $GITHUB_OUTPUT
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -186,6 +182,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pyinstaller
+
+      - name: Get Version String
+        id: get_version
+        run: echo "VERSION=$(python -c 'from version import __version__; print(__version__)')" >> $GITHUB_OUTPUT
 
       - name: Build Linux executable
         run: |

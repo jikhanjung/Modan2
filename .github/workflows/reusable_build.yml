@@ -72,7 +72,7 @@ jobs:
           if (Test-Path "InnoSetup/Output/") {
             $installerPath = Get-ChildItem -Path "InnoSetup/Output/" -Filter "*.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
             if ($installerPath) {
-              $zipFileName = "Modan2-Windows-Installer-${{ steps.get_version.outputs.VERSION }}.zip"
+              $zipFileName = "Modan2-Windows-Installer-${{ steps.get_version.outputs.VERSION }}-build${{ inputs.build_number }}.zip"
               Compress-Archive -Path $installerPath.FullName -DestinationPath $zipFileName
               echo "Zipped installer to $zipFileName"
               $installerFound = $true
@@ -82,7 +82,7 @@ jobs:
           # If no installer, create portable zip
           if (-not $installerFound) {
             echo "No installer found, creating portable zip"
-            $zipFileName = "Modan2-Windows-Portable-${{ steps.get_version.outputs.VERSION }}.zip"
+            $zipFileName = "Modan2-Windows-Portable-${{ steps.get_version.outputs.VERSION }}-build${{ inputs.build_number }}.zip"
             if (Test-Path "dist/Modan2") {
               Compress-Archive -Path "dist/Modan2/*" -DestinationPath $zipFileName
               echo "Created portable zip: $zipFileName"
@@ -158,7 +158,7 @@ jobs:
             --window-size 800 400 \
             --hide-extension "Modan2.app" \
             --hdiutil-verbose \
-            "Modan2-macOS-Installer-${{ steps.get_version.outputs.VERSION }}.dmg" \
+            "Modan2-macOS-Installer-${{ steps.get_version.outputs.VERSION }}-build${{ inputs.build_number }}.dmg" \
             "dist/Modan2.app" || echo "DMG creation failed, but continuing"
 
       - name: Upload macOS artifact
@@ -166,7 +166,7 @@ jobs:
         with:
           name: modan2-macos
           path: |
-            Modan2-macOS-Installer-${{ steps.get_version.outputs.VERSION }}.dmg
+            Modan2-macOS-Installer-${{ steps.get_version.outputs.VERSION }}-build${{ inputs.build_number }}.dmg
 
   build-linux:
     runs-on: ubuntu-latest
@@ -229,11 +229,11 @@ jobs:
       - name: Create Linux AppImage
         run: |
           chmod +x packaging/linux/create_appimage.sh
-          packaging/linux/create_appimage.sh ${{ steps.get_version.outputs.VERSION }}
+          packaging/linux/create_appimage.sh ${{ steps.get_version.outputs.VERSION }}-build${{ inputs.build_number }}
 
       - name: Upload Linux artifact
         uses: actions/upload-artifact@v4
         with:
           name: modan2-linux
           path: |
-            build_linux/Modan2-Linux-${{ steps.get_version.outputs.VERSION }}.AppImage
+            build_linux/Modan2-Linux-${{ steps.get_version.outputs.VERSION }}-build${{ inputs.build_number }}.AppImage

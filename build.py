@@ -88,6 +88,10 @@ def prepare_inno_setup_template(template_path, version):
     content = re.sub(r'#define AppVersion ".*?"', f'#define AppVersion "{version}"', content)
     content = content.replace('{{VERSION}}', version)  # Also support template syntax
     
+    # Get absolute path to dist directory
+    dist_abs_path = Path("dist").resolve()
+    content = content.replace('{{DIST_PATH}}', str(dist_abs_path)) # Replace DIST_PATH placeholder
+
     # Write temporary ISS file
     temp_iss.write_text(content)
     return temp_iss

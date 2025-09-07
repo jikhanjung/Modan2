@@ -28,6 +28,15 @@ jobs:
         id: get_version
         run: echo "VERSION=$(python -c 'from version import __version__; print(__version__)')" >> $GITHUB_OUTPUT
 
+      - name: Debug Version String
+        run: echo "Version string captured: ${{ steps.get_version.outputs.VERSION }}"
+
+      - name: Build Windows executable
+        run: |
+          python build.py
+        env:
+          BUILD_NUMBER: ${{ inputs.build_number }}
+
       - name: Download and Install Inno Setup
         shell: pwsh
         run: |
@@ -81,6 +90,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pyinstaller
+
+      - name: Get Version String
+        id: get_version
+        run: echo "VERSION=$(python -c 'from version import __version__; print(__version__)')" >> $GITHUB_OUTPUT
+
+      - name: Debug Version String
+        run: echo "Version string captured: ${{ steps.get_version.outputs.VERSION }}"
 
       - name: Build macOS application
         run: |
@@ -162,6 +178,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pyinstaller
+
+      - name: Get Version String
+        id: get_version
+        run: echo "VERSION=$(python -c 'from version import __version__; print(__version__)')" >> $GITHUB_OUTPUT
 
       - name: Build Linux executable
         run: |

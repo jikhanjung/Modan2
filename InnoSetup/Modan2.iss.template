@@ -11,13 +11,13 @@ OutputBaseFilename=Modan2_v{#AppVersion}_build{#BuildNumber}_Installer
 
 [Files]
 ; Include main executable
-Source: "..\dist\Modan2\Modan2.exe"; DestDir: "{app}"
+Source: "{{DIST_PATH}}\Modan2\Modan2.exe"; DestDir: "{app}"
 
 ; Include all other files and directories
-Source: "..\dist\Modan2\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs
+Source: "{{DIST_PATH}}\Modan2\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs
 
 ; Example datasets
-Source: "..\ExampleDataset\*"; DestDir: "{%userprofile}\PaleoBytes\Modan2\ExampleDataset"; Flags: recursesubdirs createallsubdirs
+Source: "{{DIST_PATH}}\ExampleDataset\*"; DestDir: "{%userprofile}\PaleoBytes\Modan2\ExampleDataset"; Flags: recursesubdirs createallsubdirs
 
 
 [Run]

@@ -1,0 +1,72 @@
+name: Commit Message Triggered Release
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: write
+
+jobs:
+  check-trigger:
+    runs-on: ubuntu-latest
+    outputs:
+      should_release: ${{ steps.check.outputs.should_release }}
+      version: ${{ steps.check.outputs.version }}
+    steps:
+      - name: Check commit message
+        id: check
+        run: |
+          # Check if commit message contains [release] or [pre-release]
+          if [[ "${{ github.event.head_commit.message }}" == *"[release]"* ]]; then
+            echo "should_release=true" >> $GITHUB_OUTPUT
+            echo "prerelease=false" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event.head_commit.message }}" == *"[pre-release]"* ]]; then
+            echo "should_release=true" >> $GITHUB_OUTPUT
+            echo "prerelease=true" >> $GITHUB_OUTPUT
+          else
+            echo "should_release=false" >> $GITHUB_OUTPUT
+          fi
+
+  call-build-workflow:
+    needs: check-trigger
+    if: needs.check-trigger.outputs.should_release == 'true'
+    uses: ./.github/workflows/reusable_build.yml
+    with:
+      build_number: ${{ github.run_number }}
+
+  create-release:
+    needs: [check-trigger, call-build-workflow]
+    if: needs.check-trigger.outputs.should_release == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get version from version.py
+        id: get_version
+        run: |
+          VERSION=$(python -c "from version import __version__; print(__version__)")
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-files/
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.get_version.outputs.VERSION }}-build.${{ github.run_number }}
+          name: Modan2 v${{ steps.get_version.outputs.VERSION }} (Build ${{ github.run_number }})
+          body: |
+            🚀 Automated Release from commit ${{ github.sha }}
+            
+            Triggered by commit message: ${{ github.event.head_commit.message }}
+          prerelease: ${{ contains(github.event.head_commit.message, '[pre-release]') }}
+          files: |
+            release-files/modan2-windows/Modan2-Windows-*.zip
+            release-files/modan2-macos/Modan2-macOS-*.dmg
+            release-files/modan2-linux/Modan2-Linux-*.AppImage
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,13 +1,13 @@
-[English](README.md)
 
 # Modan2 - 기하학적 형태분석 소프트웨어
 
-<!-- 
-TODO: USER/REPO 를 실제 GitHub 사용자 및 리포지토리 이름으로 바꾸면 배지가 활성화됩니다.
--->
-[![Test Status](https://github.com/USER/REPO/actions/workflows/test.yml/badge.svg)](https://github.com/USER/REPO/actions/workflows/test.yml)
-[![Build Status](https://github.com/USER/REPO/actions/workflows/build.yml/badge.svg)](https://github.com/USER/REPO/actions/workflows/build.yml)
-[![Release Status](https://github.com/USER/REPO/actions/workflows/release.yml/badge.svg)](https://github.com/USER/REPO/actions/workflows/release.yml)
+[![Build](https://github.com/jikhanjung/Modan2/actions/workflows/build.yml/badge.svg)](https://github.com/jikhanjung/Modan2/actions/workflows/build.yml)
+[![Tests](https://github.com/jikhanjung/Modan2/actions/workflows/test.yml/badge.svg)](https://github.com/jikhanjung/Modan2/actions/workflows/test.yml)
+[![Release Status](https://github.com/jikhanjung/Modan2/actions/workflows/release.yml/badge.svg)](https://github.com/jikhanjung/Modan2/actions/workflows/release.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+
+*Read this in other languages: [English](README.md), [한국어](README.ko.md)*
 
 Modan2는 연구자들이 기하학적 형태분석을 통해 형태의 변이를 탐색하고 이해할 수 있도록 돕는 사용자 친화적인 데스크톱 애플리케이션입니다. 데이터 수집(2D/3D)부터 통계 분석 및 시각화에 이르는 전체 워크플로우를 간소화합니다.
 

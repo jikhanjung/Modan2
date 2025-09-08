@@ -1,10 +1,4 @@
-[한국어](README.ko.md)
-
 # Modan2 - Geometric Morphometrics Software
-
-<!-- 
-TODO: Replace USER/REPO with the actual GitHub user and repository name to enable badges.
--->
 
 [![Build](https://github.com/jikhanjung/Modan2/actions/workflows/build.yml/badge.svg)](https://github.com/jikhanjung/Modan2/actions/workflows/build.yml)
 [![Tests](https://github.com/jikhanjung/Modan2/actions/workflows/test.yml/badge.svg)](https://github.com/jikhanjung/Modan2/actions/workflows/test.yml)
@@ -12,7 +6,7 @@ TODO: Replace USER/REPO with the actual GitHub user and repository name to enabl
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 
-https://github.com/jikhanjung/CTHarvester
+*Read this in other languages: [English](README.md), [한국어](README.ko.md)*
 
 Modan2 is a user-friendly desktop application that empowers researchers to explore and understand shape variations through geometric morphometrics. It streamlines the entire workflow from data acquisition (2D/3D) to statistical analysis and visualization.
 

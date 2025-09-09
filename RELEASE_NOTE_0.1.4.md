@@ -1,39 +1,39 @@
 # Modan2 v0.1.4 Release Note
 
-## 주요 개선사항
+## Major Improvements
 
-### 🚀 자동화 시스템 구축
-- GitHub Actions 기반 CI/CD 파이프라인 구축
-- Windows, Linux, macOS 크로스 플랫폼 자동 빌드
-- pytest 기반 자동화 테스트 (229개 테스트)
+### 🚀 Automation System
+- Built CI/CD pipeline with GitHub Actions
+- Cross-platform automatic builds for Windows, Linux, and macOS
+- pytest-based automated testing (229 tests)
 
-### 🎨 UI/UX 개선
-- 오버레이 드래그 및 코너 스냅 기능 추가
-- 스플래시 스크린 개선
-- 3D 랜드마크 인덱스 표시 복원
-- 한국어 번역 대폭 개선
+### 🎨 UI/UX Enhancements
+- Added overlay dragging and corner snapping
+- Improved splash screen with build information
+- Restored 3D landmark index display
+- Significantly improved Korean translation
 
-### 🔧 기술적 개선
-- 코드 모듈화 (Controller, Helpers, Constants, Widgets 분리)
-- NumPy 2.0+ 및 Python 3.12 지원
-- 에러 핸들링 및 로깅 시스템 강화
-- JSON 기반 설정 관리로 전환
+### 🔧 Technical Improvements
+- Code modularization (Controller, Helpers, Constants, Widgets separation)
+- Support for NumPy 2.0+ and Python 3.12
+- Enhanced error handling and logging system
+- Migrated to JSON-based settings management
 
-### 🐛 버그 수정
-- PCA 분석 일관성 문제 해결
-- Reset Pose 기능 복구
-- Linux/WSL Qt 호환성 문제 해결
-- Windows Defender 오탐 문제 완화
+### 🐛 Bug Fixes
+- Resolved PCA analysis consistency issues
+- Fixed Reset Pose functionality
+- Solved Linux/WSL Qt compatibility problems
+- Mitigated Windows Defender false positives
 
-### 📚 문서화
-- 한국어 README 추가
-- 개발 가이드 문서 작성 (CLAUDE.md, GEMINI.md)
-- 상세한 개발 로그 추가
+### 📚 Documentation
+- Added Korean README
+- Created development guides (CLAUDE.md, GEMINI.md)
+- Added comprehensive development logs
 
-## 설치 방법
+## Installation
 
 ### Windows
-- [Modan2-v0.1.4-Setup.exe](https://github.com/jikhanjung/Modan2/releases) 다운로드 및 실행
+- Download and run [Modan2-v0.1.4-Setup.exe](https://github.com/jikhanjung/Modan2/releases)
 
 ### Linux/macOS
 ```bash
@@ -41,21 +41,21 @@ pip install -r requirements.txt
 python Modan2.py
 ```
 
-### WSL/Linux Qt 오류 시
+### For WSL/Linux Qt errors
 ```bash
 python fix_qt_import.py
 ```
 
-## 시스템 요구사항
-- Python 3.11 이상
+## System Requirements
+- Python 3.11 or higher
 - NumPy 2.0+
 - PyQt5
 
-## 알려진 이슈
-- WSL 환경에서 썸네일 동기화 지연
-- 대용량 데이터셋 처리 시 메모리 사용량 증가
+## Known Issues
+- Thumbnail sync delay in WSL environment
+- Increased memory usage with large datasets
 
-## 다음 버전 계획
-- PyQt6 마이그레이션 검토
-- 성능 최적화
-- 추가 파일 형식 지원
+## Next Version Plans
+- Consider PyQt6 migration
+- Performance optimization
+- Additional file format support

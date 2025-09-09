@@ -19,11 +19,6 @@ except ImportError:
 COMPANY_NAME = "PaleoBytes"
 PROGRAM_NAME = "Modan2"
 
-# Dynamic year for copyright
-from datetime import datetime
-CURRENT_YEAR = datetime.now().year
-PROGRAM_COPYRIGHT = f"© 2023-{CURRENT_YEAR} Jikhan Jung"
-
 # Build information
 def get_build_info():
     """Get build information from build_info.json file.
@@ -50,15 +45,31 @@ def get_build_info():
                 pass
     
     # Return default values if build_info.json not found
+    from datetime import datetime
     return {
         "version": PROGRAM_VERSION,
         "build_number": "local",
         "build_date": "development",
+        "build_year": datetime.now().year,  # Use current year for development
         "platform": sys.platform
     }
 
 # Get build information on module import
 BUILD_INFO = get_build_info()
+
+# Copyright with build-time year
+from datetime import datetime
+
+# Get build year from build_info.json, fallback to current year for development
+def get_copyright_year():
+    """Get the year for copyright display, preferring build-time year."""
+    if 'build_year' in BUILD_INFO:
+        return BUILD_INFO['build_year']
+    # Fallback to current year for development environment
+    return datetime.now().year
+
+COPYRIGHT_YEAR = get_copyright_year()
+PROGRAM_COPYRIGHT = f"© 2023-{COPYRIGHT_YEAR} Jikhan Jung"
 PROGRAM_BUILD_NUMBER = BUILD_INFO.get("build_number", "local")
 PROGRAM_BUILD_DATE = BUILD_INFO.get("build_date", "unknown")
 

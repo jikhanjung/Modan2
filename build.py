@@ -152,10 +152,12 @@ print(f"Build date: {DATE}")
 
 # Create build_info.json
 import json
+from datetime import datetime
 build_info = {
     "version": VERSION,
     "build_number": BUILD_NUMBER,
     "build_date": DATE,
+    "build_year": datetime.now().year,
     "platform": platform.system().lower()
 }
 with open("build_info.json", "w") as f:

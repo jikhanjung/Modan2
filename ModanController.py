@@ -640,9 +640,16 @@ class ModanController(QObject):
                             manova_group_values = manova_group_by
                             
                         self.logger.debug(f"MANOVA groups extracted: {manova_group_values[:5]}...")
-                        manova_params = {"groups": manova_group_values}
+                        
+                        # MANOVA should use PCA scores, not raw landmarks
+                        # Pass the PCA result for proper eigenvalue-based component selection
+                        manova_params = {"groups": manova_group_values, "pca_result": pca_result}
                         manova_result = self._run_manova(landmarks_data, manova_params)
-                        self.logger.info("MANOVA analysis completed successfully")
+                        self.logger.info(f"MANOVA analysis completed successfully")
+                        self.logger.info(f"MANOVA result type: {type(manova_result)}")
+                        self.logger.info(f"MANOVA result keys: {manova_result.keys() if isinstance(manova_result, dict) else 'Not a dict'}")
+                        if isinstance(manova_result, dict) and 'stat_dict' in manova_result:
+                            self.logger.info(f"MANOVA stat_dict keys: {manova_result['stat_dict'].keys()}")
                     except Exception as e:
                         self.logger.warning(f"MANOVA analysis failed: {e}")
                         
@@ -657,13 +664,34 @@ class ModanController(QObject):
             
             self.analysis_progress.emit(75)
             
+            # Convert group_by indices to variable names for storage
+            variablename_list = self.current_dataset.get_variablename_list()
+            cva_group_by_name = None
+            manova_group_by_name = None
+            
+            if cva_group_by is not None and isinstance(cva_group_by, int):
+                if 0 <= cva_group_by < len(variablename_list):
+                    cva_group_by_name = variablename_list[cva_group_by]
+                    self.logger.info(f"CVA group_by: index {cva_group_by} -> variable '{cva_group_by_name}'")
+            elif cva_group_by is not None:
+                # If it's already a string, use it directly
+                cva_group_by_name = str(cva_group_by)
+                
+            if manova_group_by is not None and isinstance(manova_group_by, int):
+                if 0 <= manova_group_by < len(variablename_list):
+                    manova_group_by_name = variablename_list[manova_group_by]
+                    self.logger.info(f"MANOVA group_by: index {manova_group_by} -> variable '{manova_group_by_name}'")
+            elif manova_group_by is not None:
+                # If it's already a string, use it directly
+                manova_group_by_name = str(manova_group_by)
+            
             # Create analysis record with JSON data
             analysis = MdModel.MdAnalysis.create(
                 dataset=self.current_dataset,
                 analysis_name=analysis_name or f"{analysis_type}_Analysis",
                 superimposition_method=superimposition_method or "Procrustes",
-                cva_group_by=cva_group_by,
-                manova_group_by=manova_group_by,
+                cva_group_by=cva_group_by_name,
+                manova_group_by=manova_group_by_name,
                 propertyname_str=self.current_dataset.propertyname_str,
                 dimension=self.current_dataset.dimension,
                 wireframe=self.current_dataset.wireframe,
@@ -751,7 +779,24 @@ class ModanController(QObject):
                     
                     # Save MANOVA results if available (from comprehensive analysis)
                     if 'manova_result' in locals() and manova_result:
-                        analysis.manova_analysis_result_json = json.dumps(manova_result)
+                        self.logger.info(f"Saving MANOVA results...")
+                        self.logger.info(f"MANOVA result available: {type(manova_result)}")
+                        # MANOVA results need to be in the correct format for UI
+                        # The UI expects the stat_dict directly (not wrapped)
+                        if isinstance(manova_result, dict) and 'stat_dict' in manova_result:
+                            # Extract just the stat_dict
+                            manova_json = json.dumps(manova_result['stat_dict'])
+                            analysis.manova_analysis_result_json = manova_json
+                            self.logger.info(f"MANOVA results saved to JSON (stat_dict format)")
+                            self.logger.info(f"MANOVA JSON length: {len(manova_json)}")
+                        else:
+                            # Save as-is if it's not in expected format
+                            manova_json = json.dumps(manova_result)
+                            analysis.manova_analysis_result_json = manova_json
+                            self.logger.warning(f"MANOVA results saved in unexpected format")
+                            self.logger.info(f"MANOVA JSON length: {len(manova_json)}")
+                    else:
+                        self.logger.warning("No MANOVA result to save")
                 
                 # Save the analysis with JSON data
                 analysis.save()
@@ -800,6 +845,7 @@ class ModanController(QObject):
                 'analysis_type': 'PCA',
                 'n_components': pca_result.get('n_components', len(landmarks_data[0])),
                 'eigenvalues': pca_result.get('eigenvalues', []),
+                'explained_variance': pca_result.get('eigenvalues', []),  # Add for MANOVA
                 'eigenvectors': pca_result.get('eigenvectors', []),
                 'scores': pca_result.get('scores', []),
                 'explained_variance_ratio': pca_result.get('explained_variance_ratio', []),
@@ -851,7 +897,7 @@ class ModanController(QObject):
         
         Args:
             landmarks_data: List of landmark arrays
-            params: MANOVA parameters
+            params: MANOVA parameters (including groups and pca_result)
             
         Returns:
             MANOVA results dictionary
@@ -864,8 +910,58 @@ class ModanController(QObject):
             if not groups:
                 raise ValueError("Group information is required for MANOVA")
             
-            # Use existing MANOVA function
-            manova_result = MdStatistics.do_manova_analysis(landmarks_data, groups)
+            # Get PCA result for eigenvalue-based component selection
+            pca_result = params.get('pca_result', None)
+            
+            if pca_result and 'scores' in pca_result and 'explained_variance' in pca_result:
+                # Use PCA scores with proper eigenvalue-based selection
+                self.logger.info("Using PCA scores for MANOVA")
+                
+                # Get eigenvalues and calculate cumulative variance
+                eigenvalues = pca_result['explained_variance']
+                total_variance = sum(eigenvalues)
+                cumulative_variance = 0
+                effective_components = 0
+                
+                # Find components that explain 95% of variance
+                for i, eigenvalue in enumerate(eigenvalues):
+                    cumulative_variance += eigenvalue
+                    if cumulative_variance / total_variance >= 0.95:
+                        effective_components = i + 1
+                        break
+                
+                # Ensure we have at least some components but not too many
+                if effective_components == 0:
+                    effective_components = min(10, len(eigenvalues))
+                elif effective_components > 20:  # Limit for computational stability
+                    self.logger.warning(f"Limiting components from {effective_components} to 20 for MANOVA stability")
+                    effective_components = 20
+                
+                # Extract PCA scores and truncate to effective components
+                pca_scores = pca_result['scores']
+                manova_data = [score[:effective_components] for score in pca_scores]
+                
+                cumulative_var_explained = sum(eigenvalues[:effective_components]) / total_variance * 100
+                self.logger.info(f"MANOVA using {effective_components} PCA components ({cumulative_var_explained:.1f}% variance)")
+                
+                # Use PCA-based MANOVA
+                manova_result = MdStatistics.do_manova_analysis_on_pca(manova_data, groups)
+                
+            else:
+                # Fallback to Procrustes-aligned landmarks
+                self.logger.warning("No PCA result available, using Procrustes-aligned landmarks")
+                
+                # Flatten the landmark data
+                flattened_data = []
+                for landmarks in landmarks_data:
+                    flat_coords = []
+                    for landmark in landmarks:
+                        flat_coords.extend(landmark)
+                    flattened_data.append(flat_coords)
+                
+                manova_result = MdStatistics.do_manova_analysis_on_procrustes(flattened_data, groups)
+            
+            self.logger.info(f"MANOVA returned: {type(manova_result)}, keys: {manova_result.keys() if isinstance(manova_result, dict) else 'N/A'}")
             
             # Format results to match original structure
             stat_dict = {}
@@ -873,6 +969,7 @@ class ModanController(QObject):
             
             # Convert test_statistics to the format expected by UI
             if 'test_statistics' in manova_result:
+                self.logger.info(f"Processing {len(manova_result['test_statistics'])} test statistics")
                 for stat in manova_result['test_statistics']:
                     stat_name = stat['name']
                     stat_values = [
@@ -883,10 +980,13 @@ class ModanController(QObject):
                         stat['p_value']
                     ]
                     stat_dict[stat_name] = stat_values
+                    self.logger.info(f"Added stat: {stat_name}")
+            else:
+                self.logger.warning("No test_statistics in MANOVA result")
             
             stat_dict['column_names'] = column_names
             
-            return {
+            final_result = {
                 'analysis_type': 'MANOVA',
                 'stat_dict': stat_dict,
                 'group_means': manova_result.get('group_means', []),
@@ -894,6 +994,9 @@ class ModanController(QObject):
                 'n_groups': manova_result.get('n_groups', 0),
                 'group_sizes': manova_result.get('group_sizes', [])
             }
+            
+            self.logger.info(f"Returning MANOVA result with stat_dict containing {len(stat_dict)} items")
+            return final_result
             
         except Exception as e:
             raise ValueError(f"MANOVA analysis failed: {str(e)}")

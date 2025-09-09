@@ -4234,15 +4234,46 @@ class AnalysisInfoWidget(QWidget):
         else:
             logger.warning("CVA analysis_result_json is empty or None")
             
+        manova_result = None
         if self.analysis.manova_analysis_result_json:
             logger.info("Loading manova_analysis_result_json")
-            manova_result = json.loads(self.analysis.manova_analysis_result_json)
+            logger.info(f"MANOVA JSON length: {len(self.analysis.manova_analysis_result_json)}")
+            logger.info(f"MANOVA JSON preview: {self.analysis.manova_analysis_result_json[:200]}...")
+            
+            try:
+                manova_result_raw = json.loads(self.analysis.manova_analysis_result_json)
+                logger.info(f"MANOVA result loaded, type: {type(manova_result_raw)}")
+                
+                # Check if it's already in the expected format
+                if isinstance(manova_result_raw, dict):
+                    logger.info(f"MANOVA result keys: {manova_result_raw.keys()}")
+                    if 'stat_dict' in manova_result_raw:
+                        # Already has stat_dict wrapper
+                        manova_result = manova_result_raw
+                        logger.info("MANOVA format: Already has stat_dict wrapper")
+                    elif 'column_names' in manova_result_raw:
+                        # This IS the stat_dict, wrap it
+                        manova_result = {'stat_dict': manova_result_raw}
+                        logger.info("MANOVA format: Is stat_dict, wrapping it")
+                    else:
+                        # Unknown format, try to use as-is
+                        manova_result = manova_result_raw
+                        logger.warning("MANOVA format: Unknown, using as-is")
+                else:
+                    manova_result = manova_result_raw
+                    logger.warning(f"MANOVA result is not a dict, type: {type(manova_result_raw)}")
+            except Exception as e:
+                logger.error(f"Failed to parse MANOVA JSON: {e}")
+                manova_result = None
+        else:
+            logger.warning("No MANOVA analysis_result_json")
         
         # Handle MANOVA results
         self.tabManovaResult.clear()
         self.tabManovaResult.setRowCount(0)
         
         if manova_result:
+            logger.info(f"Processing MANOVA result for display")
             logger.debug(f"MANOVA result structure: {manova_result}")
             
             # Set up proper MANOVA table format
@@ -4257,11 +4288,13 @@ class AnalysisInfoWidget(QWidget):
                 logger.info("MANOVA: Processing stat_dict format")
                 stat_dict = manova_result['stat_dict']
                 column_names = stat_dict.get('column_names', column_headers)
+                logger.info(f"MANOVA stat_dict has {len(stat_dict)} items")
                 
                 for stat_name, stat_values in stat_dict.items():
                     if stat_name == 'column_names':
                         continue
-                        
+                    
+                    logger.info(f"Processing MANOVA stat: {stat_name} = {stat_values}")
                     row = self.tabManovaResult.rowCount()
                     self.tabManovaResult.insertRow(row)
                     
@@ -4275,6 +4308,9 @@ class AnalysisInfoWidget(QWidget):
                         self.tabManovaResult.setItem(row, 3, QTableWidgetItem(str(int(stat_values[2]))))
                         self.tabManovaResult.setItem(row, 4, QTableWidgetItem(f"{stat_values[3]:.3f}"))
                         self.tabManovaResult.setItem(row, 5, QTableWidgetItem(f"{stat_values[4]:.3f}"))
+                        logger.info(f"Added MANOVA row for {stat_name}")
+                    else:
+                        logger.warning(f"Invalid stat values for {stat_name}: {stat_values}")
                         
             elif 'statistics' in manova_result and isinstance(manova_result['statistics'], dict):
                 # Multiple statistics format

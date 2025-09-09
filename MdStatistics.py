@@ -520,6 +520,157 @@ def do_cva_analysis(landmarks_data, groups):
         raise ValueError(f"CVA analysis failed: {str(e)}")
 
 
+def do_manova_analysis_on_procrustes(flattened_landmarks, groups):
+    """Perform MANOVA analysis on Procrustes-aligned landmarks.
+    
+    Args:
+        flattened_landmarks: List of flattened landmark coordinate arrays
+        groups: List of group labels for each specimen
+        
+    Returns:
+        Dictionary with MANOVA results
+    """
+    try:
+        import numpy as np
+        import pandas as pd
+        from statsmodels.multivariate.manova import MANOVA
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        logger.info(f"MANOVA on Procrustes: {len(flattened_landmarks)} specimens, {len(flattened_landmarks[0]) if flattened_landmarks else 0} coordinates")
+        
+        # Create column names for coordinates
+        n_coords = len(flattened_landmarks[0]) if flattened_landmarks else 0
+        n_landmarks = n_coords // 3  # Assuming 3D coordinates
+        column_names = []
+        for i in range(n_landmarks):
+            column_names.extend([f"LM{i+1}_X", f"LM{i+1}_Y", f"LM{i+1}_Z"])
+        column_names = column_names[:n_coords]  # Trim if needed
+        
+        # Limit to first 20 variables to avoid computational issues
+        max_vars = 20
+        if len(column_names) > max_vars:
+            logger.warning(f"Too many variables ({len(column_names)}), limiting to first {max_vars}")
+            flattened_landmarks = [row[:max_vars] for row in flattened_landmarks]
+            column_names = column_names[:max_vars]
+        
+        # Create DataFrame for MANOVA
+        df = pd.DataFrame(flattened_landmarks, columns=column_names)
+        df['group'] = groups
+        
+        # Build formula for MANOVA
+        formula = " + ".join(column_names) + " ~ group"
+        logger.debug(f"MANOVA formula uses {len(column_names)} variables")
+        
+        # Perform MANOVA
+        model = MANOVA.from_formula(formula, data=df)
+        results = model.mv_test()
+        
+        # Extract test statistics
+        test_statistics = []
+        stats_summary = results.results['group']['stat']
+        
+        # Process each statistic type
+        for stat_name in ['Wilks\' lambda', 'Pillai\'s trace', 'Hotelling-Lawley trace', 'Roy\'s greatest root']:
+            if stat_name in stats_summary.index:
+                stat_row = stats_summary.loc[stat_name]
+                test_statistics.append({
+                    'name': stat_name,
+                    'value': float(stat_row['Value']),
+                    'df_num': int(stat_row['Num DF']),
+                    'df_den': int(stat_row['Den DF']),
+                    'f_statistic': float(stat_row['F Value']),
+                    'p_value': float(stat_row['Pr > F'])
+                })
+        
+        logger.info(f"MANOVA completed: {len(test_statistics)} statistics computed")
+        
+        return {
+            'analysis_type': 'MANOVA',
+            'test_statistics': test_statistics,
+            'n_groups': len(np.unique(groups)),
+            'n_observations': len(flattened_landmarks),
+            'n_variables': len(column_names)
+        }
+        
+    except Exception as e:
+        import traceback
+        logger = logging.getLogger(__name__)
+        logger.error(f"MANOVA on Procrustes failed: {e}")
+        logger.error(traceback.format_exc())
+        raise
+
+
+def do_manova_analysis_on_pca(pca_scores, groups):
+    """Perform MANOVA analysis on PCA scores.
+    
+    Args:
+        pca_scores: List of PCA score arrays (already truncated to effective components)
+        groups: List of group labels for each specimen
+        
+    Returns:
+        Dictionary with MANOVA results
+    """
+    try:
+        import numpy as np
+        import pandas as pd
+        from statsmodels.multivariate.manova import MANOVA
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        logger.info(f"MANOVA on PCA: {len(pca_scores)} specimens, {len(pca_scores[0]) if pca_scores else 0} components")
+        
+        # Create column names for PCA components
+        n_components = len(pca_scores[0]) if pca_scores else 0
+        column_names = [f"PC{i+1}" for i in range(n_components)]
+        
+        # Create DataFrame for MANOVA
+        df = pd.DataFrame(pca_scores, columns=column_names)
+        df['group'] = groups
+        
+        # Build formula for MANOVA
+        formula = " + ".join(column_names) + " ~ group"
+        logger.debug(f"MANOVA formula: {formula}")
+        
+        # Perform MANOVA
+        model = MANOVA.from_formula(formula, data=df)
+        results = model.mv_test()
+        
+        # Extract test statistics
+        test_statistics = []
+        stats_summary = results.results['group']['stat']
+        
+        # Process each statistic type
+        for stat_name in ['Wilks\' lambda', 'Pillai\'s trace', 'Hotelling-Lawley trace', 'Roy\'s greatest root']:
+            if stat_name in stats_summary.index:
+                stat_row = stats_summary.loc[stat_name]
+                test_statistics.append({
+                    'name': stat_name,
+                    'value': float(stat_row['Value']),
+                    'df_num': int(stat_row['Num DF']),
+                    'df_den': int(stat_row['Den DF']),
+                    'f_statistic': float(stat_row['F Value']),
+                    'p_value': float(stat_row['Pr > F'])
+                })
+        
+        logger.info(f"MANOVA completed: {len(test_statistics)} statistics computed")
+        
+        return {
+            'analysis_type': 'MANOVA',
+            'test_statistics': test_statistics,
+            'n_groups': len(np.unique(groups)),
+            'n_observations': len(pca_scores),
+            'n_variables': n_components
+        }
+        
+    except Exception as e:
+        import traceback
+        logger = logging.getLogger(__name__)
+        logger.error(f"MANOVA on PCA failed: {e}")
+        logger.error(traceback.format_exc())
+        raise
+
+
 def do_manova_analysis(landmarks_data, groups):
     """Perform MANOVA analysis on landmark data.
     

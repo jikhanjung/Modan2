@@ -30,21 +30,15 @@
 - 개발 가이드 문서 작성 (CLAUDE.md, GEMINI.md)
 - 상세한 개발 로그 추가
 
-## 설치 방법
+## 다운로드
 
-### Windows
-- [Modan2-v0.1.4-Setup.exe](https://github.com/jikhanjung/Modan2/releases) 다운로드 및 실행
+[릴리즈 페이지](https://github.com/jikhanjung/Modan2/releases)에서 플랫폼에 맞는 버전을 다운로드하세요:
 
-### Linux/macOS
-```bash
-pip install -r requirements.txt
-python Modan2.py
-```
+- **Windows**: `Modan2-Windows-Installer-v0.1.4-build*.zip`
+- **macOS**: `Modan2-macOS-Installer-v0.1.4-build*.dmg`
+- **Linux**: `Modan2-Linux-v0.1.4-build*.AppImage`
 
-### WSL/Linux Qt 오류 시
-```bash
-python fix_qt_import.py
-```
+자세한 설치 방법은 [README](https://github.com/jikhanjung/Modan2/blob/main/README.ko.md#설치)를 참조하세요.
 
 ## 시스템 요구사항
 - Python 3.11 이상

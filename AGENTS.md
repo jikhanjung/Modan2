@@ -36,3 +36,20 @@
 ## Security & Config Tips
 - Linux/WSL: install Qt/OpenGL system libs per `requirements.txt` comments; use `fix_qt_import.py` if the Qt platform plugin fails.
 - Keep large assets and sample data out of commits; prefer links or small subsets in `ExampleDataset/`.
+
+## Code Index & Search Tools
+- Build index: `python tools/build_index.py` (recursive scan; excludes `.index/`, `dist/`, `build/`, `__pycache__/`).
+- Search index: `python tools/search_index.py --help`.
+- Generate symbol cards: `python tools/generate_cards.py`.
+
+Notes and conventions
+- Scope: Tests (`tests/`) and tooling (`tools/`) are included in the index to improve coverage. Generated and build output folders are excluded.
+- Dialog parsing: Widget/layout discovery is now limited to each dialog class block for higher precision (no file-wide mixing).
+- Wait cursor scan: `--wait-cursor` inspects sources to report exact file, enclosing method, and line of `QApplication.setOverrideCursor`/`restoreOverrideCursor` usage.
+- Type filter: `--type` values map to internal categories (`class→classes`, `function→functions`, `dialog→dialogs`). Use with `--symbol`.
+
+Typical checks
+- Project stats: `python tools/search_index.py --stats`.
+- File info: `python tools/search_index.py --file ModanDialogs.py`.
+- Qt connections: `python tools/search_index.py --qt clicked`.
+- Dialog widgets: `python tools/search_index.py --dialog NewAnalysisDialog`.

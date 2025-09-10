@@ -35,13 +35,17 @@ class Modan2Indexer:
         """Build complete index of the project"""
         logger.info(f"Starting indexing of {self.project_root}")
         
-        # Collect all Python files
-        python_files = list(self.project_root.glob("*.py"))
-        logger.info(f"Found {len(python_files)} Python files")
+        # Collect all Python files recursively, excluding generated/irrelevant dirs
+        exclude_parts = {'.index', 'dist', 'build', '__pycache__'}
+        python_files = [
+            p for p in self.project_root.rglob('**/*.py')
+            if not any(part in exclude_parts for part in p.parts)
+        ]
+        logger.info(f"Found {len(python_files)} Python files (recursive)")
         
         # Process each file
         for py_file in python_files:
-            if '.index' in str(py_file) or 'tools' in str(py_file):
+            if '.index' in str(py_file):
                 continue
             logger.info(f"Processing {py_file.name}")
             self.process_file(py_file)
@@ -134,34 +138,85 @@ class Modan2Indexer:
                 self.symbols['functions'].append(func_info)
     
     def extract_qt_elements(self, source: str, filepath: Path):
-        """Extract Qt signals, slots, and connections"""
-        # Find signal definitions
-        signal_pattern = r'(\w+)\s*=\s*(?:pyqtSignal|Signal)\((.*?)\)'
-        for match in re.finditer(signal_pattern, source):
-            self.qt_signals['definitions'].append({
-                'name': match.group(1),
-                'signature': match.group(2),
-                'file': filepath.name
-            })
-        
-        # Find signal connections
-        connect_pattern = r'(\w+)\.(\w+)\.connect\(([^)]+)\)'
-        for match in re.finditer(connect_pattern, source):
-            self.qt_signals['connections'].append({
-                'object': match.group(1),
-                'signal': match.group(2),
-                'slot': match.group(3),
-                'file': filepath.name
-            })
-        
-        # Find QAction connections
-        action_pattern = r'(action\w+)\.triggered\.connect\(([^)]+)\)'
-        for match in re.finditer(action_pattern, source):
-            self.qt_signals['actions'].append({
-                'action': match.group(1),
-                'handler': match.group(2),
-                'file': filepath.name
-            })
+        """Extract Qt signals, slots, and connections using AST (handles lambda/partial)."""
+        try:
+            tree = ast.parse(source, str(filepath))
+        except Exception:
+            # Fallback to regex if AST parse fails
+            signal_pattern = r'(\w+)\s*=\s*(?:pyqtSignal|Signal)\((.*?)\)'
+            for match in re.finditer(signal_pattern, source):
+                self.qt_signals['definitions'].append({
+                    'name': match.group(1),
+                    'signature': match.group(2),
+                    'file': filepath.name
+                })
+            connect_pattern = r'(\w+)\.(\w+)\.connect\(([^)]+)\)'
+            for match in re.finditer(connect_pattern, source):
+                self.qt_signals['connections'].append({
+                    'object': match.group(1),
+                    'signal': match.group(2),
+                    'slot': match.group(3),
+                    'file': filepath.name
+                })
+            return
+
+        def expr_to_str(node: ast.AST) -> str:
+            if isinstance(node, ast.Attribute):
+                return f"{expr_to_str(node.value)}.{node.attr}"
+            if isinstance(node, ast.Name):
+                return node.id
+            if isinstance(node, ast.Call):
+                fn = expr_to_str(node.func)
+                # Show only first arg for partial-like calls
+                if fn.endswith('partial') and node.args:
+                    return f"{fn}({expr_to_str(node.args[0])}, …)"
+                return f"{fn}(…)"
+            if isinstance(node, ast.Lambda):
+                return 'lambda'
+            if isinstance(node, ast.Constant):
+                return repr(node.value)
+            return node.__class__.__name__
+
+        # pyqtSignal definitions: simple Assign with Call to pyqtSignal/Signal
+        for n in ast.walk(tree):
+            if isinstance(n, ast.Assign) and isinstance(n.value, ast.Call):
+                fn_name = expr_to_str(n.value.func)
+                if fn_name in ('pyqtSignal', 'Signal'):
+                    for tgt in n.targets:
+                        if isinstance(tgt, ast.Name):
+                            sig = {
+                                'name': tgt.id,
+                                'signature': ','.join([expr_to_str(a) for a in n.value.args]),
+                                'file': filepath.name
+                            }
+                            self.qt_signals['definitions'].append(sig)
+
+        # signal.connect(slot) calls
+        for n in ast.walk(tree):
+            if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) and n.func.attr == 'connect':
+                # Expect n.func.value to be Attribute: <object>.<signal>
+                obj = signal = None
+                if isinstance(n.func.value, ast.Attribute):
+                    signal = n.func.value.attr
+                    obj = expr_to_str(n.func.value.value)
+                else:
+                    obj = expr_to_str(n.func.value)
+                slot = expr_to_str(n.args[0]) if n.args else ''
+                entry = {
+                    'object': obj,
+                    'signal': signal or 'unknown',
+                    'slot': slot,
+                    'file': filepath.name
+                }
+                self.qt_signals['connections'].append(entry)
+                # Heuristic: QAction actions
+                if isinstance(n.func.value, ast.Attribute):
+                    if n.func.value.attr == 'triggered' or (obj and 'action' in obj.lower()):
+                        self.qt_signals['actions'].append({
+                            'action': obj,
+                            'handler': slot,
+                            'file': filepath.name
+                        })
     
     def extract_db_models(self, tree: ast.AST, filepath: Path):
         """Extract Peewee database models"""
@@ -201,8 +256,18 @@ class Modan2Indexer:
     
     def extract_dialog_info(self, tree: ast.AST, source: str, filepath: Path):
         """Extract dialog-specific information"""
+        source_lines = source.splitlines()
         for node in ast.walk(tree):
             if isinstance(node, ast.ClassDef) and 'Dialog' in node.name:
+                # Limit parsing to the class block for better precision
+                start = getattr(node, 'lineno', 1)
+                end = getattr(node, 'end_lineno', None)
+                if end is None:
+                    body_lines = [getattr(n, 'lineno', start) for n in node.body]
+                    end = max(body_lines) if body_lines else start
+
+                class_src = "\n".join(source_lines[start-1:end])
+
                 dialog_info = {
                     'name': node.name,
                     'file': filepath.name,
@@ -211,20 +276,20 @@ class Modan2Indexer:
                     'layouts': [],
                     'connections': []
                 }
-                
-                # Find widget creations
-                widget_pattern = r'self\.(\w+)\s*=\s*(Q\w+)\('
-                for match in re.finditer(widget_pattern, source):
+
+                # Find widget creations within class only
+                widget_pattern = r'\bself\.(\w+)\s*=\s*(Q\w+)\('
+                for match in re.finditer(widget_pattern, class_src):
                     dialog_info['widgets'].append({
                         'name': match.group(1),
                         'type': match.group(2)
                     })
-                
-                # Find layout creations
-                layout_pattern = r'(Q(?:HBox|VBox|Grid|Form)Layout)\('
-                for match in re.finditer(layout_pattern, source):
+
+                # Find layout creations within class only
+                layout_pattern = r'\b(Q(?:HBox|VBox|Grid|Form)Layout)\('
+                for match in re.finditer(layout_pattern, class_src):
                     dialog_info['layouts'].append(match.group(1))
-                
+
                 self.symbols['dialogs'].append(dialog_info)
     
     def extract_imports(self, tree: ast.AST, filepath: Path):
@@ -239,6 +304,9 @@ class Modan2Indexer:
     
     def save_indexes(self):
         """Save all indexes to JSON files"""
+        # Ensure index subdirectories exist
+        (self.index_dir / 'symbols').mkdir(parents=True, exist_ok=True)
+        (self.index_dir / 'graphs').mkdir(parents=True, exist_ok=True)
         # Save symbols
         symbols_file = self.index_dir / 'symbols' / 'symbols.json'
         with open(symbols_file, 'w', encoding='utf-8') as f:

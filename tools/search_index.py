@@ -15,6 +15,7 @@ import re
 class CodeSearcher:
     def __init__(self, index_dir: Path):
         self.index_dir = index_dir
+        self.project_root = index_dir.parent
         self.symbols = self.load_json('symbols/symbols.json')
         self.qt_data = self.load_json('graphs/qt_signals.json')
         self.db_models = self.load_json('graphs/db_models.json')
@@ -94,21 +95,70 @@ class CodeSearcher:
         return results
     
     def find_wait_cursor_methods(self) -> List[Dict]:
-        """Find methods that use wait cursor"""
-        results = []
-        
-        # Search for QApplication.setOverrideCursor patterns
-        wait_cursor_files = set()
-        
-        # For now, return known files (in real implementation, would search file contents)
-        known_wait_cursor = [
-            {'file': 'ModanDialogs.py', 'method': 'cbxShapeGrid_state_changed', 'line': 2402},
-            {'file': 'ModanDialogs.py', 'method': 'pick_shape', 'line': 4072},
-            {'file': 'ModanDialogs.py', 'method': 'btnOK_clicked', 'line': 1710},
-            {'file': 'Modan2.py', 'method': 'on_action_analyze_dataset_triggered', 'line': 659}
+        """Find methods that use wait cursor by scanning sources"""
+        patterns = [
+            'QApplication.setOverrideCursor',
+            'QApplication.restoreOverrideCursor'
         ]
-        
-        return known_wait_cursor
+
+        # Map line numbers to enclosing function/method using AST
+        def build_spans(py_path: Path):
+            try:
+                src = py_path.read_text(encoding='utf-8')
+            except Exception:
+                return [], ''
+            tree = None
+            try:
+                tree = __import__('ast').parse(src, str(py_path))
+            except Exception:
+                return [], src
+            spans = []  # (start, end, qualname)
+            for node in __import__('ast').walk(tree):
+                if isinstance(node, __import__('ast').FunctionDef):
+                    start = getattr(node, 'lineno', 1)
+                    end = getattr(node, 'end_lineno', None)
+                    if end is None and node.body:
+                        end = getattr(node.body[-1], 'lineno', start)
+                    qual = node.name
+                    # Try to prefix with class if inside class
+                    parent_class = getattr(node, 'parent_class', None)
+                    if parent_class:
+                        qual = f"{parent_class}.{qual}"
+                    spans.append((start, end or start, qual))
+                elif isinstance(node, __import__('ast').ClassDef):
+                    for item in node.body:
+                        if isinstance(item, __import__('ast').FunctionDef):
+                            setattr(item, 'parent_class', node.name)
+            return spans, src
+
+        results: List[Dict] = []
+        for filename in self.file_stats.keys():
+            py_path = self.project_root / filename
+            if not py_path.exists():
+                # Try to locate in subdirs if stats stored as basename
+                found = list(self.project_root.rglob(f"**/{filename}"))
+                py_path = found[0] if found else None
+            if not py_path or not py_path.exists():
+                continue
+            # Read source and quickly check for patterns
+            try:
+                src = py_path.read_text(encoding='utf-8')
+            except Exception:
+                continue
+            if not any(p in src for p in patterns):
+                continue
+            spans, _ = build_spans(py_path)
+            lines = src.splitlines()
+            for i, line in enumerate(lines, start=1):
+                if any(p in line for p in patterns):
+                    # Find enclosing function span
+                    method = None
+                    for start, end, qual in spans:
+                        if start <= i <= end:
+                            method = qual
+                            break
+                    results.append({'file': filename, 'method': method or '<module>', 'line': i})
+        return results
     
     def find_database_usage(self, model_name: str) -> List[Dict]:
         """Find where database models are used"""
@@ -215,7 +265,15 @@ def main():
     
     # Execute searches based on arguments
     if args.symbol:
-        results = searcher.search_symbols(args.symbol, args.type)
+        # Map CLI type to internal keys
+        type_map = {
+            'class': 'classes',
+            'function': 'functions',
+            'dialog': 'dialogs',
+            'method': 'method'
+        }
+        sym_type = type_map.get(args.type) if args.type else None
+        results = searcher.search_symbols(args.symbol, sym_type)
         print_results(results, f"Symbol search: '{args.symbol}'")
     
     elif args.qt:

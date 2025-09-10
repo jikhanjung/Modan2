@@ -6,10 +6,14 @@ end-to-end workflows that integrate all components: Dataset creation, Import,
 MainWindow interaction, and Analysis execution.
 """
 
+import os
+# Force pytest-qt to use PyQt5
+os.environ['PYTEST_QT_API'] = 'pyqt5'
+
 import pytest
 from unittest.mock import Mock, patch
 from PyQt5.QtWidgets import QApplication, QMessageBox
-from PyQt5.QtCore import QTimer, QPoint
+from PyQt5.QtCore import QTimer, QPoint, QRect
 import MdModel
 from ModanDialogs import ImportDatasetDialog, NewAnalysisDialog
 from Modan2 import ModanMainWindow
@@ -28,11 +32,20 @@ class TestAnalysisDialog:
         """Create a dataset with objects for analysis testing."""
         from ModanDialogs import DatasetDialog, ObjectDialog
         
-        mock_parent = Mock()
-        mock_parent.pos.return_value = QPoint(100, 100)
+        # Setup QApplication settings mock
+        app = QApplication.instance()
+        if not hasattr(app, 'settings'):
+            app.settings = Mock()
+            app.settings.value = Mock(return_value=QRect(100, 100, 600, 400))
+            app.settings.setValue = Mock()
         
-        # Create dataset
-        dataset_dialog = DatasetDialog(parent=mock_parent)
+        # Create a real QWidget parent instead of Mock
+        from PyQt5.QtWidgets import QWidget
+        parent_widget = QWidget()
+        qtbot.addWidget(parent_widget)
+        
+        # Create dataset dialog with real widget parent
+        dataset_dialog = DatasetDialog(parent=parent_widget)
         qtbot.addWidget(dataset_dialog)
         dataset_dialog.edtDatasetName.setText("AnalysisTestDataset")
         dataset_dialog.rbtn2D.setChecked(True)
@@ -42,7 +55,7 @@ class TestAnalysisDialog:
         
         # Create objects
         for i in range(5):
-            object_dialog = ObjectDialog(parent=mock_parent)
+            object_dialog = ObjectDialog(parent=parent_widget)
             qtbot.addWidget(object_dialog)
             object_dialog.set_dataset(dataset)
             object_dialog.edtObjectName.setText(f"TestObj{i+1}")
@@ -53,10 +66,14 @@ class TestAnalysisDialog:
 
     def test_analysis_dialog_creation(self, qtbot, sample_dataset_with_objects):
         """Test that NewAnalysisDialog can be created and displays correctly."""
-        mock_parent = Mock()
-        mock_parent.pos.return_value = QPoint(100, 100)
+        from PyQt5.QtWidgets import QWidget
         
-        dialog = NewAnalysisDialog(parent=mock_parent, dataset=sample_dataset_with_objects)
+        # Create a real QWidget parent with controller
+        parent_widget = QWidget()
+        parent_widget.controller = Mock()  # Add controller mock since NewAnalysisDialog expects it
+        qtbot.addWidget(parent_widget)
+        
+        dialog = NewAnalysisDialog(parent=parent_widget, dataset=sample_dataset_with_objects)
         qtbot.addWidget(dialog)
         
         assert dialog is not None
@@ -67,10 +84,14 @@ class TestAnalysisDialog:
 
     def test_analysis_dialog_default_values(self, qtbot, sample_dataset_with_objects):
         """Test analysis dialog default values and configuration."""
-        mock_parent = Mock()
-        mock_parent.pos.return_value = QPoint(100, 100)
+        from PyQt5.QtWidgets import QWidget
         
-        dialog = NewAnalysisDialog(parent=mock_parent, dataset=sample_dataset_with_objects)
+        # Create a real QWidget parent with controller
+        parent_widget = QWidget()
+        parent_widget.controller = Mock()  # Add controller mock since NewAnalysisDialog expects it
+        qtbot.addWidget(parent_widget)
+        
+        dialog = NewAnalysisDialog(parent=parent_widget, dataset=sample_dataset_with_objects)
         qtbot.addWidget(dialog)
         
         # Set analysis name

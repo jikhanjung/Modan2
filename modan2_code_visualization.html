@@ -1,0 +1,182 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modan2 Code Index Visualization</title>
+    <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+        .chart-container {
+            margin-bottom: 40px;
+        }
+        .chart-title {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        .visualization {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Modan2 Code Index Visualization</h1>
+        <div class="subtitle">Interactive dashboard for code structure analysis</div>
+        
+        <!-- Statistics Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">86</div>
+                <div class="stat-label">Files</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">35,303</div>
+                <div class="stat-label">Lines of Code</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">194</div>
+                <div class="stat-label">Classes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">1,541</div>
+                <div class="stat-label">Functions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">281</div>
+                <div class="stat-label">Qt Connections</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">11</div>
+                <div class="stat-label">Dialogs</div>
+            </div>
+        </div>
+        
+        <!-- File Size Treemap -->
+        <div class="chart-container">
+            <div class="chart-title">📁 File Size Distribution</div>
+            <div id="treemap" class="visualization"></div>
+        </div>
+        
+        <!-- Class Complexity Bubble Chart -->
+        <div class="chart-container">
+            <div class="chart-title">🔮 Class Complexity (Method Count)</div>
+            <div id="bubble" class="visualization"></div>
+        </div>
+        
+        <!-- Qt Connections Sankey Diagram -->
+        <div class="chart-container">
+            <div class="chart-title">🔗 Qt Signal/Slot Connections</div>
+            <div id="sankey" class="visualization"></div>
+        </div>
+        
+        <!-- File Types Pie Chart -->
+        <div class="chart-container">
+            <div class="chart-title">📊 Code Distribution by Component</div>
+            <div id="pie" class="visualization"></div>
+        </div>
+    </div>
+    
+    <script>
+        // File Size Treemap
+        var treemapData = [{"type": "treemap", "labels": ["Modan2", "build.py", "debug_landmark.py", "fix_qt_import.py", "main.py", "manage_version.py", "manova_test.py", "MdAppSetup.py", "MdConstants.py", "MdHelpers.py", "MdLogger.py", "MdModel.py", "MdModel1.py", "MdSplashScreen.py", "MdStatistics.py", "MdUtils.py", "migrate.py", "Modan2.py", "Modan2_original.py", "ModanComponents.py", "ModanController.py", "ModanDialogs.py", "ModanWidgets.py", "modan_convert.py", "objloader.py", "setup.py", "version.py", "version_utils.py", "drag_test.py", "drag_test2.py", "drag_test3.py", "drag_test4.py", "drag_test5.py", "drag_test6.py", "drag_test7.py", "drag_test8.py", "001_20240305.py", "002_20240319.py", "003_20240409.py", "004_20240604.py", "005_20240609.py", "objviewer.py", "__init__.py", "check_sys_version.py", "conftest.py", "test_analysis_workflow.py", "test_controller.py", "test_dataset_core.py", "test_dataset_dialog_direct.py", "test_import.py", "test_legacy_integration.py", "test_mdmodel.py", "test_mdstatistics.py", "test_mdutils.py", "test_performance.py", "test_ui_basic.py", "test_ui_dialogs.py", "test_workflows.py", "3Dtest.py", "3Dtest2.py", "3Dtest3.py", "3Dtest4.py", "3Dtest5.py", "3dtest6.py", "hog_test1.py", "orb_test1.py", "overlay_test.py", "sift_test1.py", "test_action_trigger.py", "test_context_menu.py", "test_context_menu_conditional.py", "test_error_handling.py", "test_fill_sequence.py", "test_fill_sequence_simple.py", "test_geometry_debug.py", "test_geometry_save.py", "test_preferences.py", "test_readonly_columns.py", "test_settings_migration.py", "test_splash.py", "tps_test.py", "tps_test2.py", "transparent_test.py", "build_index.py", "generate_cards.py", "generate_report.py", "search_index.py"], "parents": ["", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2", "Modan2"], "values": [0, 231, 47, 113, 217, 265, 73, 364, 684, 1193, 24, 1752, 46, 190, 916, 619, 35, 1782, 1501, 4528, 1309, 6724, 1008, 57, 123, 35, 11, 142, 104, 106, 114, 121, 118, 122, 129, 106, 117, 71, 69, 120, 49, 81, 0, 31, 267, 605, 642, 281, 854, 450, 339, 525, 249, 362, 216, 236, 344, 435, 127, 28, 28, 63, 94, 188, 32, 21, 280, 20, 60, 83, 174, 170, 85, 100, 89, 110, 77, 165, 124, 64, 221, 411, 70, 415, 294, 135, 323], "textinfo": "label+value", "marker": {"colorscale": "Viridis"}}];
+        var treemapLayout = {
+            margin: {t: 0, l: 0, r: 0, b: 0},
+            height: 500
+        };
+        Plotly.newPlot('treemap', treemapData, treemapLayout);
+        
+        // Class Complexity Bubble Chart
+        var bubbleData = [{"type": "scatter", "mode": "markers", "x": [14, 1123, 37, 223, 457, 656, 734, 1187, 1683, 53, 237, 517, 668, 1721, 4, 16, 35, 13, 32, 43, 10, 9, 70, 284, 57, 341, 51, 131, 1132, 2446], "y": ["MdAppSetup.py", "MdHelpers.py", "MdModel.py", "MdModel.py", "MdModel.py", "MdModel.py", "MdModel.py", "MdModel.py", "MdModel.py", "MdModel.py", "MdModel.py", "MdModel.py", "MdModel.py", "MdModel.py", "MdModel1.py", "MdModel1.py", "MdModel1.py", "MdModel1.py", "MdModel1.py", "MdModel1.py", "MdSplashScreen.py", "MdStatistics.py", "MdStatistics.py", "MdStatistics.py", "Modan2.py", "Modan2.py", "Modan2_original.py", "ModanComponents.py", "ModanComponents.py", "ModanComponents.py"], "text": ["ApplicationSetup<br>20 methods", "ProgressReporter<br>3 methods", "MdDataset<br>16 methods", "MdObject<br>23 methods", "MdImage<br>6 methods", "MdThreeDModel<br>5 methods", "MdObjectOps<br>16 methods", "MdDatasetOps<br>16 methods", "MdAnalysis<br>0 methods", "Meta<br>0 methods", "Meta<br>0 methods", "Meta<br>0 methods", "Meta<br>0 methods", "Meta<br>0 methods", "MdDataset<br>0 methods", "MdObject<br>0 methods", "MdLandmark<br>0 methods", "Meta<br>0 methods", "Meta<br>0 methods", "Meta<br>0 methods", "ModanSplashScreen<br>4 methods", "MdPrincipalComponent<br>3 methods", "MdCanonicalVariate<br>4 methods", "MdManova<br>6 methods", "ModanMainWindow<br>74 methods", "SettingsWrapper<br>7 methods", "ModanMainWindow<br>60 methods", "ObjectViewer2D<br>53 methods", "ObjectViewer3D<br>62 methods", "ShapePreference<br>21 methods"], "marker": {"size": [60, 9, 48, 69, 18, 15, 48, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 9, 12, 18, 222, 21, 180, 159, 186, 63], "color": [60, 9, 48, 69, 18, 15, 48, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 9, 12, 18, 222, 21, 180, 159, 186, 63], "colorscale": "Viridis", "showscale": true, "colorbar": {"title": "Methods"}}, "hovertemplate": "%{text}<extra></extra>"}];
+        var bubbleLayout = {
+            height: 500,
+            xaxis: {title: 'Line Number'},
+            yaxis: {title: 'File'},
+            margin: {l: 150}
+        };
+        Plotly.newPlot('bubble', bubbleData, bubbleLayout);
+        
+        // Qt Connections Sankey
+        var sankeyData = [{"type": "sankey", "node": {"pad": 15, "thickness": 20, "line": {"color": "black", "width": 0.5}, "label": []}, "link": {"source": [], "target": [], "value": []}}];
+        var sankeyLayout = {
+            height: 600,
+            font: {size: 10}
+        };
+        Plotly.newPlot('sankey', sankeyData, sankeyLayout);
+        
+        // Component Distribution Pie
+        var pieData = [{
+            type: 'pie',
+            labels: ['UI Dialogs', 'Components', 'Models', 'Statistics', 'Tests', 'Tools'],
+            values: [
+                11,
+                2,
+                5,
+                22,
+                48,
+                0
+            ],
+            hole: 0.4,
+            marker: {
+                colors: ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe', '#43e97b']
+            }
+        }];
+        var pieLayout = {
+            height: 400,
+            margin: {t: 0, b: 0}
+        };
+        Plotly.newPlot('pie', pieData, pieLayout);
+    </script>
+</body>
+</html>

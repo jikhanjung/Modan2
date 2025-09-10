@@ -1,0 +1,518 @@
+{
+  "symbol": "ObjectViewer2D",
+  "kind": "class",
+  "file": "ModanComponents.py",
+  "line": 131,
+  "bases": [
+    "QLabel"
+  ],
+  "methods": [
+    {
+      "name": "__init__",
+      "line": 132,
+      "params": [
+        "self",
+        "parent",
+        "transparent"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "set_source_shape_preference",
+      "line": 208,
+      "params": [
+        "self",
+        "pref"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "set_target_shape_preference",
+      "line": 221,
+      "params": [
+        "self",
+        "pref"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "set_source_shape_color",
+      "line": 234,
+      "params": [
+        "self",
+        "color"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "set_target_shape_color",
+      "line": 237,
+      "params": [
+        "self",
+        "color"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "set_source_shape",
+      "line": 240,
+      "params": [
+        "self",
+        "object"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "set_target_shape",
+      "line": 243,
+      "params": [
+        "self",
+        "object"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "set_intermediate_shape",
+      "line": 246,
+      "params": [
+        "self",
+        "object"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "generate_reference_shape",
+      "line": 249,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "set_ds_ops",
+      "line": 287,
+      "params": [
+        "self",
+        "ds_ops"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "set_shape_preference",
+      "line": 301,
+      "params": [
+        "self",
+        "object_preference"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "apply_rotation",
+      "line": 323,
+      "params": [
+        "self",
+        "angle"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "set_object_name",
+      "line": 326,
+      "params": [
+        "self",
+        "name"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "align_object",
+      "line": 329,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "set_landmark_pref",
+      "line": 343,
+      "params": [
+        "self",
+        "lm_pref",
+        "wf_pref",
+        "bgcolor"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "read_settings",
+      "line": 350,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "_2canx",
+      "line": 359,
+      "params": [
+        "self",
+        "coord"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "_2cany",
+      "line": 361,
+      "params": [
+        "self",
+        "coord"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "_2imgx",
+      "line": 363,
+      "params": [
+        "self",
+        "coord"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "_2imgy",
+      "line": 365,
+      "params": [
+        "self",
+        "coord"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "show_message",
+      "line": 368,
+      "params": [
+        "self",
+        "msg"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "set_mode",
+      "line": 372,
+      "params": [
+        "self",
+        "mode"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "get_landmark_index_within_threshold",
+      "line": 389,
+      "params": [
+        "self",
+        "curr_pos",
+        "threshold"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "get_edge_index_within_threshold",
+      "line": 397,
+      "params": [
+        "self",
+        "curr_pos",
+        "threshold"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "get_distance_to_line",
+      "line": 415,
+      "params": [
+        "self",
+        "curr_pos",
+        "line_start",
+        "line_end"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "get_distance",
+      "line": 432,
+      "params": [
+        "self",
+        "pos1",
+        "pos2"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "mouseMoveEvent",
+      "line": 435,
+      "params": [
+        "self",
+        "event"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "mousePressEvent",
+      "line": 489,
+      "params": [
+        "self",
+        "event"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "mouseReleaseEvent",
+      "line": 531,
+      "params": [
+        "self",
+        "ev"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "wheelEvent",
+      "line": 563,
+      "params": [
+        "self",
+        "event"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "adjust_scale",
+      "line": 583,
+      "params": [
+        "self",
+        "scale_delta_ratio",
+        "recurse"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "reset_pose",
+      "line": 600,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "dragEnterEvent",
+      "line": 603,
+      "params": [
+        "self",
+        "event"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "dropEvent",
+      "line": 612,
+      "params": [
+        "self",
+        "event"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "draw_dataset",
+      "line": 628,
+      "params": [
+        "self",
+        "painter"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "draw_dataset",
+      "line": 659,
+      "params": [
+        "self",
+        "painter"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "draw_arrow",
+      "line": 709,
+      "params": [
+        "self",
+        "painter",
+        "start_idx",
+        "end_idx"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "draw_object",
+      "line": 720,
+      "params": [
+        "self",
+        "painter",
+        "obj",
+        "landmark_as_sphere",
+        "color",
+        "edge_color",
+        "polygon_color"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "draw_line",
+      "line": 744,
+      "params": [
+        "self",
+        "painter",
+        "from_x",
+        "from_y",
+        "to_x",
+        "to_y",
+        "color"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "draw_landmark",
+      "line": 749,
+      "params": [
+        "self",
+        "painter",
+        "x",
+        "y",
+        "color"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "paintEvent",
+      "line": 755,
+      "params": [
+        "self",
+        "event"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "update_landmark_list",
+      "line": 889,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "calculate_resize",
+      "line": 892,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "resizeEvent",
+      "line": 928,
+      "params": [
+        "self",
+        "event"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "set_object",
+      "line": 932,
+      "params": [
+        "self",
+        "object"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "set_image",
+      "line": 971,
+      "params": [
+        "self",
+        "file_path"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "clear_object",
+      "line": 979,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "add_edge",
+      "line": 995,
+      "params": [
+        "self",
+        "wire_start_index",
+        "wire_end_index"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "delete_edge",
+      "line": 1011,
+      "params": [
+        "self",
+        "edge_index"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "generate_tps_grid",
+      "line": 1017,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "calculate_tps_params",
+      "line": 1095,
+      "params": [
+        "self",
+        "control_points",
+        "target_points"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "transform_point",
+      "line": 1112,
+      "params": [
+        "self",
+        "point",
+        "control_points",
+        "weights",
+        "affine"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "update_tps_grid",
+      "line": 1125,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    }
+  ],
+  "qt_metadata": {
+    "is_widget": false,
+    "signals": [],
+    "slots": []
+  },
+  "complexity": {
+    "method_count": 53,
+    "inheritance_depth": 1,
+    "estimated_loc": 1060
+  }
+}

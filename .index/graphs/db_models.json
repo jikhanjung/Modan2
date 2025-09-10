@@ -1,0 +1,308 @@
+{
+  "MdDataset": {
+    "name": "MdDataset",
+    "file": "MdModel.py",
+    "line": 37,
+    "fields": [
+      {
+        "name": "dataset_name",
+        "type": "CharField"
+      },
+      {
+        "name": "dataset_desc",
+        "type": "CharField"
+      },
+      {
+        "name": "dimension",
+        "type": "IntegerField"
+      },
+      {
+        "name": "wireframe",
+        "type": "CharField"
+      },
+      {
+        "name": "baseline",
+        "type": "CharField"
+      },
+      {
+        "name": "polygons",
+        "type": "CharField"
+      },
+      {
+        "name": "parent",
+        "type": "ForeignKeyField"
+      },
+      {
+        "name": "created_at",
+        "type": "DateTimeField"
+      },
+      {
+        "name": "modified_at",
+        "type": "DateTimeField"
+      },
+      {
+        "name": "propertyname_str",
+        "type": "CharField"
+      }
+    ],
+    "meta": {
+      "database": "gDatabase"
+    }
+  },
+  "MdObject": {
+    "name": "MdObject",
+    "file": "MdModel.py",
+    "line": 223,
+    "fields": [
+      {
+        "name": "object_name",
+        "type": "CharField"
+      },
+      {
+        "name": "object_desc",
+        "type": "CharField"
+      },
+      {
+        "name": "pixels_per_mm",
+        "type": "DoubleField"
+      },
+      {
+        "name": "landmark_str",
+        "type": "CharField"
+      },
+      {
+        "name": "dataset",
+        "type": "ForeignKeyField"
+      },
+      {
+        "name": "created_at",
+        "type": "DateTimeField"
+      },
+      {
+        "name": "modified_at",
+        "type": "DateTimeField"
+      },
+      {
+        "name": "property_str",
+        "type": "CharField"
+      },
+      {
+        "name": "sequence",
+        "type": "IntegerField"
+      }
+    ],
+    "meta": {
+      "database": "gDatabase"
+    }
+  },
+  "MdImage": {
+    "name": "MdImage",
+    "file": "MdModel.py",
+    "line": 457,
+    "fields": [
+      {
+        "name": "original_path",
+        "type": "CharField"
+      },
+      {
+        "name": "original_filename",
+        "type": "CharField"
+      },
+      {
+        "name": "name",
+        "type": "CharField"
+      },
+      {
+        "name": "md5hash",
+        "type": "CharField"
+      },
+      {
+        "name": "size",
+        "type": "IntegerField"
+      },
+      {
+        "name": "exifdatetime",
+        "type": "DateTimeField"
+      },
+      {
+        "name": "file_created",
+        "type": "DateTimeField"
+      },
+      {
+        "name": "file_modified",
+        "type": "DateTimeField"
+      },
+      {
+        "name": "created_at",
+        "type": "DateTimeField"
+      },
+      {
+        "name": "modified_at",
+        "type": "DateTimeField"
+      },
+      {
+        "name": "object",
+        "type": "ForeignKeyField"
+      }
+    ],
+    "meta": {
+      "database": "gDatabase"
+    }
+  },
+  "MdThreeDModel": {
+    "name": "MdThreeDModel",
+    "file": "MdModel.py",
+    "line": 656,
+    "fields": [
+      {
+        "name": "original_path",
+        "type": "CharField"
+      },
+      {
+        "name": "original_filename",
+        "type": "CharField"
+      },
+      {
+        "name": "name",
+        "type": "CharField"
+      },
+      {
+        "name": "md5hash",
+        "type": "CharField"
+      },
+      {
+        "name": "size",
+        "type": "IntegerField"
+      },
+      {
+        "name": "file_created",
+        "type": "DateTimeField"
+      },
+      {
+        "name": "file_modified",
+        "type": "DateTimeField"
+      },
+      {
+        "name": "created_at",
+        "type": "DateTimeField"
+      },
+      {
+        "name": "modified_at",
+        "type": "DateTimeField"
+      },
+      {
+        "name": "object",
+        "type": "ForeignKeyField"
+      }
+    ],
+    "meta": {
+      "database": "gDatabase"
+    }
+  },
+  "MdAnalysis": {
+    "name": "MdAnalysis",
+    "file": "MdModel.py",
+    "line": 1683,
+    "fields": [
+      {
+        "name": "analysis_name",
+        "type": "CharField"
+      },
+      {
+        "name": "analysis_desc",
+        "type": "CharField"
+      },
+      {
+        "name": "dataset",
+        "type": "ForeignKeyField"
+      },
+      {
+        "name": "dimension",
+        "type": "IntegerField"
+      },
+      {
+        "name": "wireframe",
+        "type": "CharField"
+      },
+      {
+        "name": "baseline",
+        "type": "CharField"
+      },
+      {
+        "name": "polygons",
+        "type": "CharField"
+      },
+      {
+        "name": "propertyname_str",
+        "type": "CharField"
+      },
+      {
+        "name": "superimposition_method",
+        "type": "CharField"
+      },
+      {
+        "name": "object_info_json",
+        "type": "CharField"
+      },
+      {
+        "name": "raw_landmark_json",
+        "type": "CharField"
+      },
+      {
+        "name": "superimposed_landmark_json",
+        "type": "CharField"
+      },
+      {
+        "name": "cva_group_by",
+        "type": "CharField"
+      },
+      {
+        "name": "pca_analysis_result_json",
+        "type": "CharField"
+      },
+      {
+        "name": "pca_rotation_matrix_json",
+        "type": "CharField"
+      },
+      {
+        "name": "pca_eigenvalues_json",
+        "type": "CharField"
+      },
+      {
+        "name": "cva_group_by",
+        "type": "CharField"
+      },
+      {
+        "name": "cva_analysis_result_json",
+        "type": "CharField"
+      },
+      {
+        "name": "cva_rotation_matrix_json",
+        "type": "CharField"
+      },
+      {
+        "name": "cva_eigenvalues_json",
+        "type": "CharField"
+      },
+      {
+        "name": "manova_group_by",
+        "type": "CharField"
+      },
+      {
+        "name": "manova_analysis_result_json",
+        "type": "CharField"
+      },
+      {
+        "name": "created_at",
+        "type": "DateTimeField"
+      },
+      {
+        "name": "modified_at",
+        "type": "DateTimeField"
+      }
+    ],
+    "meta": {
+      "database": "gDatabase"
+    }
+  }
+}

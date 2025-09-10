@@ -91,5 +91,36 @@ This document provides a comprehensive overview of the Modan2 project for AI age
   ```
 - **Compiling Translations (`.qm`):** Use the `linguist` tool from Qt.
 
+## 6. Code Intelligence & Analysis
+
+The project includes a code indexing system that provides valuable insights into the codebase, identifies refactoring opportunities, and offers powerful search capabilities. The output is stored in the `.index/` directory.
+
+### Building the Index
+To generate or update the code index:
+```bash
+python tools/build_index.py
+```
+
+### Searching the Index
+A command-line tool, `tools/search_index.py`, allows for querying the generated index. This is the primary tool for an AI agent to explore the codebase.
+
+**Example Usage:**
+```bash
+# Search for symbols (classes, functions, etc.)
+python tools/search_index.py --symbol "DataExploration"
+
+# Find all usages of a Qt signal like "clicked"
+python tools/search_index.py --qt "clicked"
+
+# Find where database models are used
+python tools/search_index.py --model "MdAnalysis"
+
+# Get statistics for a specific file
+python tools/search_index.py --file "ModanDialogs.py"
+
+# Show overall project statistics
+python tools/search_index.py --stats
+```
+
 ---
 This document should serve as the primary reference for any AI agent working on this project.

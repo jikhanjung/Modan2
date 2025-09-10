@@ -1,0 +1,573 @@
+{
+  "symbol": "ModanMainWindow",
+  "kind": "class",
+  "file": "Modan2_original.py",
+  "line": 51,
+  "bases": [
+    "QMainWindow"
+  ],
+  "methods": [
+    {
+      "name": "__init__",
+      "line": 52,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "update_settings",
+      "line": 177,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "set_toolbar_icon_size",
+      "line": 183,
+      "params": [
+        "self",
+        "size"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "on_action_open_db_triggered",
+      "line": 191,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "on_action_new_db_triggered",
+      "line": 194,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "on_action_save_as_triggered",
+      "line": 197,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "read_settings",
+      "line": 200,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "write_settings",
+      "line": 225,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "update_language",
+      "line": 235,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "prepare_database",
+      "line": 268,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "closeEvent",
+      "line": 306,
+      "params": [
+        "self",
+        "event"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "on_action_edit_preferences_triggered",
+      "line": 313,
+      "params": [
+        "self"
+      ],
+      "decorators": [
+        "Call"
+      ]
+    },
+    {
+      "name": "on_action_exit_triggered",
+      "line": 321,
+      "params": [
+        "self"
+      ],
+      "decorators": [
+        "Call"
+      ]
+    },
+    {
+      "name": "on_action_about_triggered",
+      "line": 325,
+      "params": [
+        "self"
+      ],
+      "decorators": [
+        "Call"
+      ]
+    },
+    {
+      "name": "on_action_analyze_dataset_triggered",
+      "line": 345,
+      "params": [
+        "self"
+      ],
+      "decorators": [
+        "Call"
+      ]
+    },
+    {
+      "name": "run_analysis",
+      "line": 403,
+      "params": [
+        "self",
+        "superimposition_method",
+        "cva_group_by",
+        "manova_group_by",
+        "analysis_name",
+        "dataset"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "initUI",
+      "line": 562,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "on_action_cell_selection_triggered",
+      "line": 675,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "on_action_row_selection_triggered",
+      "line": 679,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "btnAnalysisDetail_clicked",
+      "line": 689,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "btnSaveAnalysis_clicked",
+      "line": 695,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "btnDataExploration_clicked",
+      "line": 698,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "on_action_add_variable_triggered",
+      "line": 720,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "on_btnSaveChanges_clicked",
+      "line": 732,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "on_action_delete_object_triggered",
+      "line": 742,
+      "params": [
+        "self"
+      ],
+      "decorators": [
+        "Call"
+      ]
+    },
+    {
+      "name": "open_treeview_menu",
+      "line": 757,
+      "params": [
+        "self",
+        "position"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "on_action_delete_analysis_triggered",
+      "line": 794,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "on_action_explore_data_triggered",
+      "line": 806,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "on_action_import_dataset_triggered",
+      "line": 812,
+      "params": [
+        "self"
+      ],
+      "decorators": [
+        "Call"
+      ]
+    },
+    {
+      "name": "on_action_export_dataset_triggered",
+      "line": 820,
+      "params": [
+        "self"
+      ],
+      "decorators": [
+        "Call"
+      ]
+    },
+    {
+      "name": "on_action_new_dataset_triggered",
+      "line": 830,
+      "params": [
+        "self"
+      ],
+      "decorators": [
+        "Call"
+      ]
+    },
+    {
+      "name": "get_selected_dataset",
+      "line": 848,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "on_treeView_clicked",
+      "line": 861,
+      "params": [
+        "self",
+        "event"
+      ],
+      "decorators": [
+        "Call"
+      ]
+    },
+    {
+      "name": "on_treeView_doubleClicked",
+      "line": 875,
+      "params": [
+        "self"
+      ],
+      "decorators": [
+        "Call"
+      ]
+    },
+    {
+      "name": "select_dataset",
+      "line": 901,
+      "params": [
+        "self",
+        "dataset",
+        "node"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "on_action_new_object_triggered",
+      "line": 915,
+      "params": [
+        "self"
+      ],
+      "decorators": [
+        "Call"
+      ]
+    },
+    {
+      "name": "on_tableView_doubleClicked",
+      "line": 935,
+      "params": [
+        "self"
+      ],
+      "decorators": [
+        "Call"
+      ]
+    },
+    {
+      "name": "reset_treeView",
+      "line": 963,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "treeView_drag_enter_event",
+      "line": 982,
+      "params": [
+        "self",
+        "event"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "treeView_drag_leave_event",
+      "line": 989,
+      "params": [
+        "self",
+        "event"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "treeView_drag_move_event",
+      "line": 992,
+      "params": [
+        "self",
+        "event"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "treeView_drag_move_event",
+      "line": 1001,
+      "params": [
+        "self",
+        "event"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "updateCursor",
+      "line": 1016,
+      "params": [
+        "self",
+        "shift_pressed"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "dropEvent",
+      "line": 1022,
+      "params": [
+        "self",
+        "event"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "get_selected_object_list",
+      "line": 1106,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "on_object_data_changed",
+      "line": 1130,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "reset_tableView",
+      "line": 1134,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "tableView_drop_event",
+      "line": 1174,
+      "params": [
+        "self",
+        "event"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "tableView_drag_enter_event",
+      "line": 1244,
+      "params": [
+        "self",
+        "event"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "tableView_drag_move_event",
+      "line": 1266,
+      "params": [
+        "self",
+        "event"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "_tableView_drag_move_event",
+      "line": 1287,
+      "params": [
+        "self",
+        "event"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "reset_views",
+      "line": 1310,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "load_dataset",
+      "line": 1314,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "load_analysis",
+      "line": 1336,
+      "params": [
+        "self",
+        "parent_item",
+        "dataset"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "load_subdataset",
+      "line": 1345,
+      "params": [
+        "self",
+        "parent_item",
+        "dataset"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "on_dataset_selection_changed",
+      "line": 1362,
+      "params": [
+        "self",
+        "selected",
+        "deselected"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "load_object",
+      "line": 1401,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "on_object_selection_changed",
+      "line": 1433,
+      "params": [
+        "self",
+        "selected",
+        "deselected"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "show_object",
+      "line": 1445,
+      "params": [
+        "self",
+        "obj"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "clear_object_view",
+      "line": 1452,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    }
+  ],
+  "qt_metadata": {
+    "is_widget": true,
+    "signals": [],
+    "slots": [
+      "on_action_open_db_triggered",
+      "on_action_new_db_triggered",
+      "on_action_save_as_triggered",
+      "on_action_edit_preferences_triggered",
+      "on_action_exit_triggered",
+      "on_action_about_triggered",
+      "on_action_analyze_dataset_triggered",
+      "on_action_cell_selection_triggered",
+      "on_action_row_selection_triggered",
+      "on_action_add_variable_triggered",
+      "on_action_delete_object_triggered",
+      "on_action_delete_analysis_triggered",
+      "on_action_explore_data_triggered",
+      "on_action_import_dataset_triggered",
+      "on_action_export_dataset_triggered",
+      "on_action_new_dataset_triggered",
+      "on_action_new_object_triggered"
+    ]
+  },
+  "complexity": {
+    "method_count": 60,
+    "inheritance_depth": 1,
+    "estimated_loc": 1200
+  }
+}

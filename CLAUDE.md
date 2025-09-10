@@ -123,3 +123,131 @@ Install GLUT libraries: `sudo apt-get install -y libglut-dev libglut3.12 python3
 Currently no automated linting or type checking configured. Consider adding:
 - `ruff` for Python linting
 - `mypy` for type checking (would require adding type hints)
+
+## Code Navigation and Search Tools
+
+### Quick Reference
+The codebase has been indexed for fast navigation. Use these tools to quickly find code:
+
+#### Index Location
+- **Index files**: `.index/` directory contains all search indexes
+- **Index report**: `.index/INDEX_REPORT.md` - Overview of entire codebase
+- **Symbol cards**: `.index/cards/` - Detailed information about key components
+
+### Search Commands
+
+#### 1. Find Classes, Functions, Methods
+```bash
+# Search for any symbol (class, function, method)
+python tools/search_index.py --symbol "DataExploration"
+python tools/search_index.py -s "analyze"
+
+# Search only specific types
+python tools/search_index.py --symbol "Dialog" --type class
+python tools/search_index.py -s "calculate" -t function
+```
+
+#### 2. Find Qt Signal/Slot Connections
+```bash
+# Find all connections for a signal or slot
+python tools/search_index.py --qt "clicked"
+python tools/search_index.py --qt "triggered"
+python tools/search_index.py --qt "on_action"
+```
+
+#### 3. Find Wait Cursor Usage
+```bash
+# List all methods using wait cursor (for UX optimization)
+python tools/search_index.py --wait-cursor
+```
+
+#### 4. Find Database Model Usage
+```bash
+# Find where database models are used
+python tools/search_index.py --model "MdDataset"
+python tools/search_index.py -m "MdAnalysis"
+```
+
+#### 5. Get File Information
+```bash
+# Get statistics about a specific file
+python tools/search_index.py --file "ModanDialogs.py"
+python tools/search_index.py -f "Modan2.py"
+```
+
+#### 6. Find Dialog Widgets
+```bash
+# Find widgets and layouts in a dialog
+python tools/search_index.py --dialog "NewAnalysisDialog"
+python tools/search_index.py -d "DataExploration"
+```
+
+#### 7. Project Statistics
+```bash
+# Show overall project statistics
+python tools/search_index.py --stats
+```
+
+### Common Search Patterns
+
+#### Finding Implementation of a Feature
+```bash
+# Example: Find analysis-related code
+python tools/search_index.py -s "analysis"
+python tools/search_index.py -s "run_analysis"
+python tools/search_index.py --qt "analyze"
+```
+
+#### Finding UI Components
+```bash
+# Example: Find progress-related UI
+python tools/search_index.py -s "progress"
+python tools/search_index.py -s "ProgressDialog"
+python tools/search_index.py --dialog "Progress"
+```
+
+#### Finding Event Handlers
+```bash
+# Example: Find button click handlers
+python tools/search_index.py --qt "clicked"
+python tools/search_index.py -s "btnOK_clicked"
+python tools/search_index.py -s "_clicked"
+```
+
+### Rebuilding the Index
+If the code has changed significantly:
+```bash
+# Rebuild complete index
+python tools/build_index.py
+
+# Regenerate symbol cards
+python tools/generate_cards.py
+```
+
+### Key Files Quick Reference
+
+| Component | File | Key Classes/Functions |
+|-----------|------|----------------------|
+| Main Window | `Modan2.py` | ModanMainWindow (80+ methods) |
+| Dialogs | `ModanDialogs.py` (6,511 lines) | NewAnalysisDialog, DataExplorationDialog, etc. |
+| Custom Widgets | `ModanComponents.py` (4,359 lines) | ObjectViewer2D, ObjectViewer3D |
+| Database | `MdModel.py` | MdDataset, MdObject, MdAnalysis |
+| Statistics | `MdStatistics.py` | PCA, CVA, MANOVA functions |
+| Controller | `ModanController.py` | ModanController (35+ methods) |
+| Utilities | `MdUtils.py` | Helper functions, constants |
+
+### Performance Hotspots
+Methods with wait cursor (long operations):
+- `ModanDialogs.py:2402` - cbxShapeGrid_state_changed
+- `ModanDialogs.py:4072` - pick_shape  
+- `ModanDialogs.py:1710` - NewAnalysisDialog.btnOK_clicked
+- `Modan2.py:659` - on_action_analyze_dataset_triggered
+
+### Quick Stats (as of last index)
+- **Total Files**: 27
+- **Total Lines**: 24,145
+- **Classes**: 63
+- **Functions**: 960
+- **Dialogs**: 11
+- **Database Models**: 5
+- **Qt Connections**: 257

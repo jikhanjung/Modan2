@@ -1,0 +1,164 @@
+{
+  "symbol": "MdDatasetOps",
+  "kind": "class",
+  "file": "MdModel.py",
+  "line": 1187,
+  "bases": [],
+  "methods": [
+    {
+      "name": "__init__",
+      "line": 1188,
+      "params": [
+        "self",
+        "dataset"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "reset_pose",
+      "line": 1218,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "set_reference_shape",
+      "line": 1221,
+      "params": [
+        "self",
+        "shape"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "rotate_gls_to_reference_shape",
+      "line": 1224,
+      "params": [
+        "self",
+        "object_index"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "apply_rotation_matrix",
+      "line": 1268,
+      "params": [
+        "self",
+        "rotation_matrix"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "rotation_matrix",
+      "line": 1277,
+      "params": [
+        "self",
+        "ref",
+        "target"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "get_average_shape",
+      "line": 1290,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "check_object_list",
+      "line": 1323,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "procrustes_superimposition",
+      "line": 1340,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "is_same_shape",
+      "line": 1375,
+      "params": [
+        "self",
+        "shape1",
+        "shape2"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "resistant_fit_superimposition",
+      "line": 1392,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "rotate_vector_2d",
+      "line": 1415,
+      "params": [
+        "self",
+        "theta",
+        "vec"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "rotate_vector_3d",
+      "line": 1418,
+      "params": [
+        "self",
+        "theta",
+        "vec",
+        "axis"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "rotate_resistant_fit_to_reference_shape",
+      "line": 1446,
+      "params": [
+        "self",
+        "object_index"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "get_vector_rotation_matrix",
+      "line": 1595,
+      "params": [
+        "self",
+        "ref",
+        "target"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "get_median_index",
+      "line": 1675,
+      "params": [
+        "self",
+        "arr"
+      ],
+      "decorators": []
+    }
+  ],
+  "qt_metadata": {
+    "is_widget": false,
+    "signals": [],
+    "slots": []
+  },
+  "complexity": {
+    "method_count": 16,
+    "inheritance_depth": 0,
+    "estimated_loc": 320
+  }
+}

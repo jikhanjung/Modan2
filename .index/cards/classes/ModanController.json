@@ -1,0 +1,285 @@
+{
+  "symbol": "ModanController",
+  "kind": "class",
+  "file": "ModanController.py",
+  "line": 15,
+  "bases": [
+    "QObject"
+  ],
+  "methods": [
+    {
+      "name": "__init__",
+      "line": 36,
+      "params": [
+        "self",
+        "view"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "create_dataset",
+      "line": 56,
+      "params": [
+        "self",
+        "name",
+        "desc",
+        "dimension",
+        "landmark_count"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "update_dataset",
+      "line": 108,
+      "params": [
+        "self",
+        "dataset_id"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "delete_dataset",
+      "line": 137,
+      "params": [
+        "self",
+        "dataset_id"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "set_current_dataset",
+      "line": 191,
+      "params": [
+        "self",
+        "dataset"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "create_object",
+      "line": 208,
+      "params": [
+        "self",
+        "object_name",
+        "object_desc"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "import_objects",
+      "line": 247,
+      "params": [
+        "self",
+        "file_paths"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "_import_single_file",
+      "line": 292,
+      "params": [
+        "self",
+        "file_path"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "_import_landmark_file",
+      "line": 314,
+      "params": [
+        "self",
+        "file_path"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "_import_image_file",
+      "line": 359,
+      "params": [
+        "self",
+        "file_path"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "_import_3d_file",
+      "line": 389,
+      "params": [
+        "self",
+        "file_path"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "update_object",
+      "line": 422,
+      "params": [
+        "self",
+        "object_id"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "delete_object",
+      "line": 450,
+      "params": [
+        "self",
+        "object_id"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "set_current_object",
+      "line": 478,
+      "params": [
+        "self",
+        "obj"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "run_analysis",
+      "line": 493,
+      "params": [
+        "self",
+        "dataset",
+        "analysis_name",
+        "superimposition_method",
+        "cva_group_by",
+        "manova_group_by"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "_run_pca",
+      "line": 824,
+      "params": [
+        "self",
+        "landmarks_data",
+        "params"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "_run_cva",
+      "line": 861,
+      "params": [
+        "self",
+        "landmarks_data",
+        "params"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "_run_manova",
+      "line": 895,
+      "params": [
+        "self",
+        "landmarks_data",
+        "params"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "_run_procrustes",
+      "line": 1004,
+      "params": [
+        "self",
+        "landmarks_data",
+        "params"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "delete_analysis",
+      "line": 1035,
+      "params": [
+        "self",
+        "analysis_id"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "export_dataset",
+      "line": 1064,
+      "params": [
+        "self",
+        "file_path",
+        "format",
+        "include_metadata"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "get_current_state",
+      "line": 1111,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "restore_state",
+      "line": 1124,
+      "params": [
+        "self",
+        "state"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "get_dataset_summary",
+      "line": 1162,
+      "params": [
+        "self",
+        "dataset"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "validate_dataset_for_analysis",
+      "line": 1203,
+      "params": [
+        "self",
+        "dataset_or_analysis_type"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "_validate_dataset_for_analysis_type",
+      "line": 1220,
+      "params": [
+        "self",
+        "analysis_type"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "_validate_dataset_for_general_analysis",
+      "line": 1261,
+      "params": [
+        "self",
+        "dataset"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "is_processing",
+      "line": 1307,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    }
+  ],
+  "qt_metadata": {
+    "is_widget": false,
+    "signals": [],
+    "slots": []
+  },
+  "complexity": {
+    "method_count": 28,
+    "inheritance_depth": 1,
+    "estimated_loc": 560
+  }
+}

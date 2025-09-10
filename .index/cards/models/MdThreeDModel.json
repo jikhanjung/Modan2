@@ -1,0 +1,64 @@
+{
+  "symbol": "MdThreeDModel",
+  "kind": "peewee_model",
+  "file": "MdModel.py",
+  "line": 656,
+  "fields": [
+    {
+      "name": "original_path",
+      "type": "CharField"
+    },
+    {
+      "name": "original_filename",
+      "type": "CharField"
+    },
+    {
+      "name": "name",
+      "type": "CharField"
+    },
+    {
+      "name": "md5hash",
+      "type": "CharField"
+    },
+    {
+      "name": "size",
+      "type": "IntegerField"
+    },
+    {
+      "name": "file_created",
+      "type": "DateTimeField"
+    },
+    {
+      "name": "file_modified",
+      "type": "DateTimeField"
+    },
+    {
+      "name": "created_at",
+      "type": "DateTimeField"
+    },
+    {
+      "name": "modified_at",
+      "type": "DateTimeField"
+    },
+    {
+      "name": "object",
+      "type": "ForeignKeyField"
+    }
+  ],
+  "meta": {
+    "database": "gDatabase"
+  },
+  "relationships": {
+    "belongs_to": [
+      "object"
+    ],
+    "has_many": []
+  },
+  "usage": [
+    "ModanController",
+    "ProgressDialog",
+    "CalibrationDialog",
+    "DatasetDialog",
+    "ObjectDialog"
+  ]
+}

@@ -1,0 +1,120 @@
+{
+  "symbol": "MdAnalysis",
+  "kind": "peewee_model",
+  "file": "MdModel.py",
+  "line": 1683,
+  "fields": [
+    {
+      "name": "analysis_name",
+      "type": "CharField"
+    },
+    {
+      "name": "analysis_desc",
+      "type": "CharField"
+    },
+    {
+      "name": "dataset",
+      "type": "ForeignKeyField"
+    },
+    {
+      "name": "dimension",
+      "type": "IntegerField"
+    },
+    {
+      "name": "wireframe",
+      "type": "CharField"
+    },
+    {
+      "name": "baseline",
+      "type": "CharField"
+    },
+    {
+      "name": "polygons",
+      "type": "CharField"
+    },
+    {
+      "name": "propertyname_str",
+      "type": "CharField"
+    },
+    {
+      "name": "superimposition_method",
+      "type": "CharField"
+    },
+    {
+      "name": "object_info_json",
+      "type": "CharField"
+    },
+    {
+      "name": "raw_landmark_json",
+      "type": "CharField"
+    },
+    {
+      "name": "superimposed_landmark_json",
+      "type": "CharField"
+    },
+    {
+      "name": "cva_group_by",
+      "type": "CharField"
+    },
+    {
+      "name": "pca_analysis_result_json",
+      "type": "CharField"
+    },
+    {
+      "name": "pca_rotation_matrix_json",
+      "type": "CharField"
+    },
+    {
+      "name": "pca_eigenvalues_json",
+      "type": "CharField"
+    },
+    {
+      "name": "cva_group_by",
+      "type": "CharField"
+    },
+    {
+      "name": "cva_analysis_result_json",
+      "type": "CharField"
+    },
+    {
+      "name": "cva_rotation_matrix_json",
+      "type": "CharField"
+    },
+    {
+      "name": "cva_eigenvalues_json",
+      "type": "CharField"
+    },
+    {
+      "name": "manova_group_by",
+      "type": "CharField"
+    },
+    {
+      "name": "manova_analysis_result_json",
+      "type": "CharField"
+    },
+    {
+      "name": "created_at",
+      "type": "DateTimeField"
+    },
+    {
+      "name": "modified_at",
+      "type": "DateTimeField"
+    }
+  ],
+  "meta": {
+    "database": "gDatabase"
+  },
+  "relationships": {
+    "belongs_to": [
+      "dataset"
+    ],
+    "has_many": []
+  },
+  "usage": [
+    "ModanController",
+    "ProgressDialog",
+    "CalibrationDialog",
+    "DatasetDialog",
+    "ObjectDialog"
+  ]
+}

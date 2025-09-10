@@ -1,0 +1,2724 @@
+{
+  "signals": {
+    "connections": [
+      {
+        "object": "timer",
+        "signal": "timeout",
+        "slot": "call_func",
+        "file": "MdHelpers.py"
+      },
+      {
+        "object": "actionNewDataset",
+        "signal": "triggered",
+        "slot": "self.on_action_new_dataset_triggered",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "actionCellSelection",
+        "signal": "triggered",
+        "slot": "self.on_action_cell_selection_triggered",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "actionRowSelection",
+        "signal": "triggered",
+        "slot": "self.on_action_row_selection_triggered",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "actionAddVariable",
+        "signal": "triggered",
+        "slot": "self.on_action_add_variable_triggered",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "actionSaveChanges",
+        "signal": "triggered",
+        "slot": "self.on_btnSaveChanges_clicked",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "actionNewObject",
+        "signal": "triggered",
+        "slot": "self.on_action_new_object_triggered",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "actionEditObject",
+        "signal": "triggered",
+        "slot": "self.on_tableView_doubleClicked",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "actionImport",
+        "signal": "triggered",
+        "slot": "self.on_action_import_dataset_triggered",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "actionExport",
+        "signal": "triggered",
+        "slot": "self.on_action_export_dataset_triggered",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "actionAnalyze",
+        "signal": "triggered",
+        "slot": "self.on_action_analyze_dataset_triggered",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "actionPreferences",
+        "signal": "triggered",
+        "slot": "self.on_action_edit_preferences_triggered",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "actionExit",
+        "signal": "triggered",
+        "slot": "self.on_action_exit_triggered",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "actionAbout",
+        "signal": "triggered",
+        "slot": "self.on_action_about_triggered",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "controller",
+        "signal": "dataset_created",
+        "slot": "self.on_dataset_created",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "controller",
+        "signal": "dataset_updated",
+        "slot": "self.on_dataset_updated",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "controller",
+        "signal": "object_added",
+        "slot": "self.on_object_added",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "controller",
+        "signal": "object_updated",
+        "slot": "self.on_object_updated",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "controller",
+        "signal": "analysis_completed",
+        "slot": "self.on_analysis_completed",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "controller",
+        "signal": "analysis_failed",
+        "slot": "self.on_analysis_failed",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "controller",
+        "signal": "error_occurred",
+        "slot": "self.on_controller_error",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "rbSelectCells",
+        "signal": "clicked",
+        "slot": "self.on_rbSelectCells_clicked",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "rbSelectRows",
+        "signal": "clicked",
+        "slot": "self.on_rbSelectRows_clicked",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "btnSaveChanges",
+        "signal": "clicked",
+        "slot": "self.on_btnSaveChanges_clicked",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "btnAddObject",
+        "signal": "clicked",
+        "slot": "self.on_action_new_object_triggered",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "btnEditObject",
+        "signal": "clicked",
+        "slot": "self.on_tableView_doubleClicked",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "btnAddProperty",
+        "signal": "clicked",
+        "slot": "self.on_action_add_variable_triggered",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "close_button",
+        "signal": "clicked",
+        "slot": "self.hide_object_overlay",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "btnSaveAnalysis",
+        "signal": "clicked",
+        "slot": "self.btnSaveAnalysis_clicked",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "btnAnalysisDetail",
+        "signal": "clicked",
+        "slot": "self.btnAnalysisDetail_clicked",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "btnDataExploration",
+        "signal": "clicked",
+        "slot": "self.btnDataExploration_clicked",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "treeView",
+        "signal": "doubleClicked",
+        "slot": "self.on_treeView_doubleClicked",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "tableView",
+        "signal": "doubleClicked",
+        "slot": "self.on_tableView_doubleClicked",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "treeView",
+        "signal": "customContextMenuRequested",
+        "slot": "self.open_treeview_menu",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "action_add_dataset",
+        "signal": "triggered",
+        "slot": "self.on_action_new_dataset_triggered",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "action_add_object",
+        "signal": "triggered",
+        "slot": "self.on_action_new_object_triggered",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "action_add_analysis",
+        "signal": "triggered",
+        "slot": "self.on_action_analyze_dataset_triggered",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "action_explore_data",
+        "signal": "triggered",
+        "slot": "self.on_action_explore_data_triggered",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "action_delete_analysis",
+        "signal": "triggered",
+        "slot": "self.on_action_delete_analysis_triggered",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "action_refresh_tree",
+        "signal": "triggered",
+        "slot": "self.load_dataset",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "dataset_selection_model",
+        "signal": "selectionChanged",
+        "slot": "self.on_dataset_selection_changed",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "object_model",
+        "signal": "dataChangedCustomSignal",
+        "slot": "self.on_object_data_changed",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "object_selection_model",
+        "signal": "selectionChanged",
+        "slot": "self.on_object_selection_changed",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "actionNewDataset",
+        "signal": "triggered",
+        "slot": "self.on_action_new_dataset_triggered",
+        "file": "Modan2_original.py"
+      },
+      {
+        "object": "actionCellSelection",
+        "signal": "triggered",
+        "slot": "self.on_action_cell_selection_triggered",
+        "file": "Modan2_original.py"
+      },
+      {
+        "object": "actionRowSelection",
+        "signal": "triggered",
+        "slot": "self.on_action_row_selection_triggered",
+        "file": "Modan2_original.py"
+      },
+      {
+        "object": "actionAddVariable",
+        "signal": "triggered",
+        "slot": "self.on_action_add_variable_triggered",
+        "file": "Modan2_original.py"
+      },
+      {
+        "object": "actionSaveChanges",
+        "signal": "triggered",
+        "slot": "self.on_btnSaveChanges_clicked",
+        "file": "Modan2_original.py"
+      },
+      {
+        "object": "actionNewObject",
+        "signal": "triggered",
+        "slot": "self.on_action_new_object_triggered",
+        "file": "Modan2_original.py"
+      },
+      {
+        "object": "actionEditObject",
+        "signal": "triggered",
+        "slot": "self.on_tableView_doubleClicked",
+        "file": "Modan2_original.py"
+      },
+      {
+        "object": "actionImport",
+        "signal": "triggered",
+        "slot": "self.on_action_import_dataset_triggered",
+        "file": "Modan2_original.py"
+      },
+      {
+        "object": "actionExport",
+        "signal": "triggered",
+        "slot": "self.on_action_export_dataset_triggered",
+        "file": "Modan2_original.py"
+      },
+      {
+        "object": "actionAnalyze",
+        "signal": "triggered",
+        "slot": "self.on_action_analyze_dataset_triggered",
+        "file": "Modan2_original.py"
+      },
+      {
+        "object": "actionPreferences",
+        "signal": "triggered",
+        "slot": "self.on_action_edit_preferences_triggered",
+        "file": "Modan2_original.py"
+      },
+      {
+        "object": "actionExit",
+        "signal": "triggered",
+        "slot": "self.on_action_exit_triggered",
+        "file": "Modan2_original.py"
+      },
+      {
+        "object": "actionAbout",
+        "signal": "triggered",
+        "slot": "self.on_action_about_triggered",
+        "file": "Modan2_original.py"
+      },
+      {
+        "object": "rbSelectCells",
+        "signal": "clicked",
+        "slot": "self.on_rbSelectCells_clicked",
+        "file": "Modan2_original.py"
+      },
+      {
+        "object": "rbSelectRows",
+        "signal": "clicked",
+        "slot": "self.on_rbSelectRows_clicked",
+        "file": "Modan2_original.py"
+      },
+      {
+        "object": "btnSaveChanges",
+        "signal": "clicked",
+        "slot": "self.on_btnSaveChanges_clicked",
+        "file": "Modan2_original.py"
+      },
+      {
+        "object": "btnAddObject",
+        "signal": "clicked",
+        "slot": "self.on_action_new_object_triggered",
+        "file": "Modan2_original.py"
+      },
+      {
+        "object": "btnEditObject",
+        "signal": "clicked",
+        "slot": "self.on_tableView_doubleClicked",
+        "file": "Modan2_original.py"
+      },
+      {
+        "object": "btnAddProperty",
+        "signal": "clicked",
+        "slot": "self.on_action_add_variable_triggered",
+        "file": "Modan2_original.py"
+      },
+      {
+        "object": "btnSaveAnalysis",
+        "signal": "clicked",
+        "slot": "self.btnSaveAnalysis_clicked",
+        "file": "Modan2_original.py"
+      },
+      {
+        "object": "btnAnalysisDetail",
+        "signal": "clicked",
+        "slot": "self.btnAnalysisDetail_clicked",
+        "file": "Modan2_original.py"
+      },
+      {
+        "object": "btnDataExploration",
+        "signal": "clicked",
+        "slot": "self.btnDataExploration_clicked",
+        "file": "Modan2_original.py"
+      },
+      {
+        "object": "treeView",
+        "signal": "doubleClicked",
+        "slot": "self.on_treeView_doubleClicked",
+        "file": "Modan2_original.py"
+      },
+      {
+        "object": "tableView",
+        "signal": "doubleClicked",
+        "slot": "self.on_tableView_doubleClicked",
+        "file": "Modan2_original.py"
+      },
+      {
+        "object": "treeView",
+        "signal": "customContextMenuRequested",
+        "slot": "self.open_treeview_menu",
+        "file": "Modan2_original.py"
+      },
+      {
+        "object": "action_add_dataset",
+        "signal": "triggered",
+        "slot": "self.on_action_new_dataset_triggered",
+        "file": "Modan2_original.py"
+      },
+      {
+        "object": "action_add_object",
+        "signal": "triggered",
+        "slot": "self.on_action_new_object_triggered",
+        "file": "Modan2_original.py"
+      },
+      {
+        "object": "action_add_analysis",
+        "signal": "triggered",
+        "slot": "self.on_action_analyze_dataset_triggered",
+        "file": "Modan2_original.py"
+      },
+      {
+        "object": "action_explore_data",
+        "signal": "triggered",
+        "slot": "self.on_action_explore_data_triggered",
+        "file": "Modan2_original.py"
+      },
+      {
+        "object": "action_delete_analysis",
+        "signal": "triggered",
+        "slot": "self.on_action_delete_analysis_triggered",
+        "file": "Modan2_original.py"
+      },
+      {
+        "object": "action_refresh_tree",
+        "signal": "triggered",
+        "slot": "self.load_dataset",
+        "file": "Modan2_original.py"
+      },
+      {
+        "object": "dataset_selection_model",
+        "signal": "selectionChanged",
+        "slot": "self.on_dataset_selection_changed",
+        "file": "Modan2_original.py"
+      },
+      {
+        "object": "object_model",
+        "signal": "dataChangedCustomSignal",
+        "slot": "self.on_object_data_changed",
+        "file": "Modan2_original.py"
+      },
+      {
+        "object": "object_selection_model",
+        "signal": "selectionChanged",
+        "slot": "self.on_object_selection_changed",
+        "file": "Modan2_original.py"
+      },
+      {
+        "object": "timer",
+        "signal": "timeout",
+        "slot": "self.timeout",
+        "file": "ModanComponents.py"
+      },
+      {
+        "object": "btnLMColor",
+        "signal": "clicked",
+        "slot": "self.on_btnLMColor_clicked",
+        "file": "ModanComponents.py"
+      },
+      {
+        "object": "btnEdgeColor",
+        "signal": "clicked",
+        "slot": "self.on_btnEdgeColor_clicked",
+        "file": "ModanComponents.py"
+      },
+      {
+        "object": "btnFaceColor",
+        "signal": "clicked",
+        "slot": "self.on_btnFaceColor_clicked",
+        "file": "ModanComponents.py"
+      },
+      {
+        "object": "cbxShow",
+        "signal": "stateChanged",
+        "slot": "self.cbxShow_stateChanged",
+        "file": "ModanComponents.py"
+      },
+      {
+        "object": "cbxShowLandmark",
+        "signal": "stateChanged",
+        "slot": "self.cbxShowLandmark_stateChanged",
+        "file": "ModanComponents.py"
+      },
+      {
+        "object": "cbxShowWireframe",
+        "signal": "stateChanged",
+        "slot": "self.cbxShowWireframe_stateChanged",
+        "file": "ModanComponents.py"
+      },
+      {
+        "object": "cbxShowPolygon",
+        "signal": "stateChanged",
+        "slot": "self.cbxShowPolygon_stateChanged",
+        "file": "ModanComponents.py"
+      },
+      {
+        "object": "edtTitle",
+        "signal": "textChanged",
+        "slot": "self.edtTitle_textChanged",
+        "file": "ModanComponents.py"
+      },
+      {
+        "object": "sliderTransparency",
+        "signal": "valueChanged",
+        "slot": "self.sliderTransparency_valueChanged",
+        "file": "ModanComponents.py"
+      },
+      {
+        "object": "self",
+        "signal": "customContextMenuRequested",
+        "slot": "self.show_context_menu",
+        "file": "ModanComponents.py"
+      },
+      {
+        "object": "copy_action",
+        "signal": "triggered",
+        "slot": "self.copy_selected_data",
+        "file": "ModanComponents.py"
+      },
+      {
+        "object": "copy_shortcut",
+        "signal": "activated",
+        "slot": "self.copy_action.trigger",
+        "file": "ModanComponents.py"
+      },
+      {
+        "object": "paste_action",
+        "signal": "triggered",
+        "slot": "self.paste_data",
+        "file": "ModanComponents.py"
+      },
+      {
+        "object": "paste_shortcut",
+        "signal": "activated",
+        "slot": "self.paste_action.trigger",
+        "file": "ModanComponents.py"
+      },
+      {
+        "object": "fill_sequence_action",
+        "signal": "triggered",
+        "slot": "self.fill_sequence",
+        "file": "ModanComponents.py"
+      },
+      {
+        "object": "fill_action",
+        "signal": "triggered",
+        "slot": "self.fill_value",
+        "file": "ModanComponents.py"
+      },
+      {
+        "object": "clear_cells_action",
+        "signal": "triggered",
+        "slot": "self.clear_selected_cells",
+        "file": "ModanComponents.py"
+      },
+      {
+        "object": "edit_object_action",
+        "signal": "triggered",
+        "slot": "self.edit_selected_object",
+        "file": "ModanComponents.py"
+      },
+      {
+        "object": "analysis_tab",
+        "signal": "currentChanged",
+        "slot": "self.on_tab_changed",
+        "file": "ModanComponents.py"
+      },
+      {
+        "object": "comboPcaGroupBy",
+        "signal": "currentIndexChanged",
+        "slot": "self.comboPcaGroupBy_changed",
+        "file": "ModanComponents.py"
+      },
+      {
+        "object": "comboCvaGroupBy",
+        "signal": "currentIndexChanged",
+        "slot": "self.comboCvaGroupBy_changed",
+        "file": "ModanComponents.py"
+      },
+      {
+        "object": "comboManovaGroupBy",
+        "signal": "currentIndexChanged",
+        "slot": "self.comboManovaGroupBy_changed",
+        "file": "ModanComponents.py"
+      },
+      {
+        "object": "self",
+        "signal": "pressed",
+        "slot": "self.update",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "self",
+        "signal": "released",
+        "slot": "self.update",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnStop",
+        "signal": "clicked",
+        "slot": "self.set_stop_progress",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnOK",
+        "signal": "clicked",
+        "slot": "self.btnOK_clicked",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnCancel",
+        "signal": "clicked",
+        "slot": "self.btnCancel_clicked",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "close_shortcut",
+        "signal": "activated",
+        "slot": "self.close",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnAddVariable",
+        "signal": "clicked",
+        "slot": "self.addVariable",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnDeleteVariable",
+        "signal": "clicked",
+        "slot": "self.deleteVariable",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnMoveUp",
+        "signal": "clicked",
+        "slot": "self.moveUp",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnMoveDown",
+        "signal": "clicked",
+        "slot": "self.moveDown",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnOkay",
+        "signal": "clicked",
+        "slot": "self.Okay",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnDelete",
+        "signal": "clicked",
+        "slot": "self.Delete",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnCancel",
+        "signal": "clicked",
+        "slot": "self.Cancel",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "close_shortcut",
+        "signal": "activated",
+        "slot": "self.close",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "inputX",
+        "signal": "returnPressed",
+        "slot": "self.input_coords_process",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "inputY",
+        "signal": "returnPressed",
+        "slot": "self.input_coords_process",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "inputZ",
+        "signal": "returnPressed",
+        "slot": "self.input_coords_process",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnAddInput",
+        "signal": "clicked",
+        "slot": "self.input_coords_process",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "image_label",
+        "signal": "clicked",
+        "slot": "self.on_image_clicked",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnLandmark",
+        "signal": "clicked",
+        "slot": "self.btnLandmark_clicked",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnWireframe",
+        "signal": "clicked",
+        "slot": "self.btnWireframe_clicked",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnCalibration",
+        "signal": "clicked",
+        "slot": "self.btnCalibration_clicked",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnAddFile",
+        "signal": "clicked",
+        "slot": "self.btnAddFile_clicked",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnFBO",
+        "signal": "clicked",
+        "slot": "self.btnFBO_clicked",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnPrevious",
+        "signal": "clicked",
+        "slot": "self.Previous",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnNext",
+        "signal": "clicked",
+        "slot": "self.Next",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnOkay",
+        "signal": "clicked",
+        "slot": "self.Okay",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnDelete",
+        "signal": "clicked",
+        "slot": "self.Delete",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnCancel",
+        "signal": "clicked",
+        "slot": "self.Cancel",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "cbxShowIndex",
+        "signal": "stateChanged",
+        "slot": "self.show_index_state_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "cbxShowWireframe",
+        "signal": "stateChanged",
+        "slot": "self.show_wireframe_state_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "cbxShowPolygon",
+        "signal": "stateChanged",
+        "slot": "self.show_polygon_state_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "cbxShowBaseline",
+        "signal": "stateChanged",
+        "slot": "self.show_baseline_state_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "cbxAutoRotate",
+        "signal": "stateChanged",
+        "slot": "self.auto_rotate_state_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "cbxShowModel",
+        "signal": "stateChanged",
+        "slot": "self.show_model_state_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "edtAnalysisName",
+        "signal": "textChanged",
+        "slot": "self.edtAnalysisName_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "comboOrdination",
+        "signal": "currentIndexChanged",
+        "slot": "self.comboOrdination_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnOK",
+        "signal": "clicked",
+        "slot": "self.btnOK_clicked",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnCancel",
+        "signal": "clicked",
+        "slot": "self.btnCancel_clicked",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "controller",
+        "signal": "analysis_progress",
+        "slot": "self.on_analysis_progress",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "controller",
+        "signal": "analysis_completed",
+        "slot": "self.on_analysis_completed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "controller",
+        "signal": "analysis_failed",
+        "slot": "self.on_analysis_failed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "self",
+        "signal": "windowActivated",
+        "slot": "self.handle_window_focus",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "close_shortcut",
+        "signal": "activated",
+        "slot": "self.close",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "comboVisualization",
+        "signal": "currentIndexChanged",
+        "slot": "self.comboVisualizationMethod_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "comboGroupBy",
+        "signal": "currentIndexChanged",
+        "slot": "self.comboGroupBy_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "rb2DChartDim",
+        "signal": "toggled",
+        "slot": "self.on_chart_dim_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "rb3DChartDim",
+        "signal": "toggled",
+        "slot": "self.on_chart_dim_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "cbxLegend",
+        "signal": "toggled",
+        "slot": "self.update_chart",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "cbxFlipAxis1",
+        "signal": "stateChanged",
+        "slot": "self.flip_axis_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "cbxFlipAxis2",
+        "signal": "stateChanged",
+        "slot": "self.flip_axis_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "cbxFlipAxis3",
+        "signal": "stateChanged",
+        "slot": "self.flip_axis_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "comboAxis1",
+        "signal": "currentIndexChanged",
+        "slot": "self.axis_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "comboAxis2",
+        "signal": "currentIndexChanged",
+        "slot": "self.axis_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "comboAxis3",
+        "signal": "currentIndexChanged",
+        "slot": "self.axis_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "cbxDepthShade",
+        "signal": "toggled",
+        "slot": "self.update_chart",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "cbxAverage",
+        "signal": "stateChanged",
+        "slot": "self.update_chart",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "cbxConvexHull",
+        "signal": "stateChanged",
+        "slot": "self.update_chart",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "cbxConfidenceEllipse",
+        "signal": "stateChanged",
+        "slot": "self.update_chart",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "cbxShapeGrid",
+        "signal": "stateChanged",
+        "slot": "self.cbxShapeGrid_state_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "cbxArrow",
+        "signal": "stateChanged",
+        "slot": "self.arrow_preference_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnArrowColor",
+        "signal": "clicked",
+        "slot": "self.on_btnArrowColor_clicked",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "sgpWidget",
+        "signal": "shape_preference_changed",
+        "slot": "self.shape_grid_preference_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "cbxRegression",
+        "signal": "stateChanged",
+        "slot": "self.update_chart",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "comboRegressionBasedOn",
+        "signal": "currentIndexChanged",
+        "slot": "self.comboRegressionBasedOn_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "comboRegressionBy",
+        "signal": "currentIndexChanged",
+        "slot": "self.comboRegressionBy_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "comboSelectGroup",
+        "signal": "currentIndexChanged",
+        "slot": "self.comboSelectGroup_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "model",
+        "signal": "itemChanged",
+        "slot": "self.comboSelectGroup_itemChanged",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "cbxExtrapolate",
+        "signal": "stateChanged",
+        "slot": "self.update_chart",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "sbxDegree",
+        "signal": "textChanged",
+        "slot": "self.update_chart",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "cbxAnnotation",
+        "signal": "stateChanged",
+        "slot": "self.update_chart",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "plot_preference_button",
+        "signal": "clicked",
+        "slot": "self.show_plot_preference",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btn_save_plot",
+        "signal": "clicked",
+        "slot": "self.export_chart",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnResetPose",
+        "signal": "clicked",
+        "slot": "self.reset_shape_pose",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnAnimate",
+        "signal": "clicked",
+        "slot": "self.animate_shape",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "cbxRecordAnimation",
+        "signal": "stateChanged",
+        "slot": "self.record_animation_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "shape_preference_button",
+        "signal": "clicked",
+        "slot": "self.shape_preference_button_clicked",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "visualization_splitter",
+        "signal": "splitterMoved",
+        "slot": "self.on_splitter_moved",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "timer",
+        "signal": "timeout",
+        "slot": "self.chart_animation",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "shape_button",
+        "signal": "clicked",
+        "slot": "lambda checked, idx=idx: self.shape_button_clicked(idx",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "shape_preference",
+        "signal": "shape_preference_changed",
+        "slot": "self.shape_preference_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "shape_preference",
+        "signal": "shape_preference_changed",
+        "slot": "self.shape_preference_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "cbxShowIndex",
+        "signal": "stateChanged",
+        "slot": "self.show_index_state_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "cbxShowWireframe",
+        "signal": "stateChanged",
+        "slot": "self.show_wireframe_state_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "cbxShowBaseline",
+        "signal": "stateChanged",
+        "slot": "self.show_baseline_state_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "cbxShowAverage",
+        "signal": "stateChanged",
+        "slot": "self.show_average_state_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "cbxAutoRotate",
+        "signal": "stateChanged",
+        "slot": "self.auto_rotate_state_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnSelectAll",
+        "signal": "clicked",
+        "slot": "self.select_all",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnSelectNone",
+        "signal": "clicked",
+        "slot": "self.select_none",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnSelectInvert",
+        "signal": "clicked",
+        "slot": "self.select_invert",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "cbxFlipAxis1",
+        "signal": "stateChanged",
+        "slot": "self.flip_axis_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "cbxFlipAxis2",
+        "signal": "stateChanged",
+        "slot": "self.flip_axis_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "cbxFlipAxis3",
+        "signal": "stateChanged",
+        "slot": "self.flip_axis_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "rb2DChartDim",
+        "signal": "toggled",
+        "slot": "self.on_chart_dim_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "rb3DChartDim",
+        "signal": "toggled",
+        "slot": "self.on_chart_dim_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "cbxDepthShade",
+        "signal": "toggled",
+        "slot": "self.on_chart_dim_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "cbxLegend",
+        "signal": "toggled",
+        "slot": "self.on_chart_dim_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "cbxAxisLabel",
+        "signal": "toggled",
+        "slot": "self.on_chart_dim_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "comboPropertyName",
+        "signal": "currentIndexChanged",
+        "slot": "self.propertyname_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnChartOptions",
+        "signal": "clicked",
+        "slot": "self.chart_options_clicked",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "comboAxis1",
+        "signal": "currentIndexChanged",
+        "slot": "self.axis_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "comboAxis2",
+        "signal": "currentIndexChanged",
+        "slot": "self.axis_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "comboAxis3",
+        "signal": "currentIndexChanged",
+        "slot": "self.axis_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnSuperimpose",
+        "signal": "clicked",
+        "slot": "self.on_btnSuperimpose_clicked",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "rbPCA",
+        "signal": "toggled",
+        "slot": "self.on_analysis_type_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "rbCVA",
+        "signal": "toggled",
+        "slot": "self.on_analysis_type_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnAnalyze",
+        "signal": "clicked",
+        "slot": "self.on_btn_analysis_clicked",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnSaveResults",
+        "signal": "clicked",
+        "slot": "self.on_btnSaveResults_clicked",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "comboPropertyName",
+        "signal": "currentIndexChanged",
+        "slot": "self.propertyname_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "cbxShowIndex",
+        "signal": "stateChanged",
+        "slot": "self.show_index_state_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "cbxShowWireframe",
+        "signal": "stateChanged",
+        "slot": "self.show_wireframe_state_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "cbxShowBaseline",
+        "signal": "stateChanged",
+        "slot": "self.show_baseline_state_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "cbxShowAverage",
+        "signal": "stateChanged",
+        "slot": "self.show_average_state_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "cbxAutoRotate",
+        "signal": "stateChanged",
+        "slot": "self.auto_rotate_state_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "tableView",
+        "signal": "clicked",
+        "slot": "self.on_tableView_clicked",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "object_selection_model",
+        "signal": "selectionChanged",
+        "slot": "self.on_object_selection_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnExport",
+        "signal": "clicked",
+        "slot": "self.export_dataset",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnCancel",
+        "signal": "clicked",
+        "slot": "self.close",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnMoveRight",
+        "signal": "clicked",
+        "slot": "self.move_right",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnMoveLeft",
+        "signal": "clicked",
+        "slot": "self.move_left",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "rbTPS",
+        "signal": "clicked",
+        "slot": "self.on_rbTPS_clicked",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "rbNTS",
+        "signal": "clicked",
+        "slot": "self.on_rbNTS_clicked",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "rbX1Y1",
+        "signal": "clicked",
+        "slot": "self.on_rbX1Y1_clicked",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "rbMorphologika",
+        "signal": "clicked",
+        "slot": "self.on_rbMorphologika_clicked",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "rbProcrustes",
+        "signal": "clicked",
+        "slot": "self.on_rbProcrustes_clicked",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "rbBookstein",
+        "signal": "clicked",
+        "slot": "self.on_rbBookstein_clicked",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "rbRFTRA",
+        "signal": "clicked",
+        "slot": "self.on_rbRFTRA_clicked",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "rbNone",
+        "signal": "clicked",
+        "slot": "self.on_rbNone_clicked",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnOpenFile",
+        "signal": "clicked",
+        "slot": "self.open_file",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "chkFileType",
+        "signal": "buttonClicked",
+        "slot": "self.file_type_changed",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnImport",
+        "signal": "clicked",
+        "slot": "self.import_file",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "rbRememberGeometryYes",
+        "signal": "clicked",
+        "slot": "self.on_rbRememberGeometryYes_clicked",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "rbRememberGeometryNo",
+        "signal": "clicked",
+        "slot": "self.on_rbRememberGeometryNo_clicked",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "rbToolbarIconLarge",
+        "signal": "clicked",
+        "slot": "self.on_rbToolbarIconLarge_clicked",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "rbToolbarIconSmall",
+        "signal": "clicked",
+        "slot": "self.on_rbToolbarIconSmall_clicked",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "rbToolbarIconMedium",
+        "signal": "clicked",
+        "slot": "self.on_rbToolbarIconMedium_clicked",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "combo2DLandmarkSize",
+        "signal": "currentIndexChanged",
+        "slot": "lambda event, dim='2D': self.on_comboLmSize_currentIndexChanged(event, '2D'",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "combo3DLandmarkSize",
+        "signal": "currentIndexChanged",
+        "slot": "lambda event, dim='3D': self.on_comboLmSize_currentIndexChanged(event, '3D'",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "combo2DWireframeThickness",
+        "signal": "currentIndexChanged",
+        "slot": "lambda event, dim='2D': self.on_comboWireframeThickness_currentIndexChanged(event, '2D'",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "combo3DWireframeThickness",
+        "signal": "currentIndexChanged",
+        "slot": "lambda event, dim='3D': self.on_comboWireframeThickness_currentIndexChanged(event, '3D'",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "combo2DIndexSize",
+        "signal": "currentIndexChanged",
+        "slot": "lambda event, dim='2D': self.on_comboIndexSize_currentIndexChanged(event, '2D'",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "combo3DIndexSize",
+        "signal": "currentIndexChanged",
+        "slot": "lambda event, dim='3D': self.on_comboIndexSize_currentIndexChanged(event, '3D'",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "rbPlotLarge",
+        "signal": "clicked",
+        "slot": "self.on_rbPlotLarge_clicked",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "rbPlotSmall",
+        "signal": "clicked",
+        "slot": "self.on_rbPlotSmall_clicked",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "rbPlotMedium",
+        "signal": "clicked",
+        "slot": "self.on_rbPlotMedium_clicked",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnResetMarkers",
+        "signal": "clicked",
+        "slot": "self.on_btnResetMarkers_clicked",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnResetVivid",
+        "signal": "clicked",
+        "slot": "self.on_btnResetVivid_clicked",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnResetPastel",
+        "signal": "clicked",
+        "slot": "self.on_btnResetPastel_clicked",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "comboLang",
+        "signal": "currentIndexChanged",
+        "slot": "self.comboLangIndexChanged",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnOkay",
+        "signal": "clicked",
+        "slot": "self.Okay",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "btnCancel",
+        "signal": "clicked",
+        "slot": "self.Cancel",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "object": "self",
+        "signal": "itemSelectionChanged",
+        "slot": "self._on_selection_changed",
+        "file": "ModanWidgets.py"
+      },
+      {
+        "object": "self",
+        "signal": "customContextMenuRequested",
+        "slot": "self._show_context_menu",
+        "file": "ModanWidgets.py"
+      },
+      {
+        "object": "self",
+        "signal": "itemDoubleClicked",
+        "slot": "self._on_item_double_clicked",
+        "file": "ModanWidgets.py"
+      },
+      {
+        "object": "self",
+        "signal": "itemSelectionChanged",
+        "slot": "self._on_selection_changed",
+        "file": "ModanWidgets.py"
+      },
+      {
+        "object": "self",
+        "signal": "customContextMenuRequested",
+        "slot": "self._show_context_menu",
+        "file": "ModanWidgets.py"
+      },
+      {
+        "object": "self",
+        "signal": "cellDoubleClicked",
+        "slot": "self._on_cell_double_clicked",
+        "file": "ModanWidgets.py"
+      }
+    ],
+    "actions": [
+      {
+        "action": "actionNewDataset",
+        "handler": "self.on_action_new_dataset_triggered",
+        "file": "Modan2.py"
+      },
+      {
+        "action": "actionCellSelection",
+        "handler": "self.on_action_cell_selection_triggered",
+        "file": "Modan2.py"
+      },
+      {
+        "action": "actionRowSelection",
+        "handler": "self.on_action_row_selection_triggered",
+        "file": "Modan2.py"
+      },
+      {
+        "action": "actionAddVariable",
+        "handler": "self.on_action_add_variable_triggered",
+        "file": "Modan2.py"
+      },
+      {
+        "action": "actionSaveChanges",
+        "handler": "self.on_btnSaveChanges_clicked",
+        "file": "Modan2.py"
+      },
+      {
+        "action": "actionNewObject",
+        "handler": "self.on_action_new_object_triggered",
+        "file": "Modan2.py"
+      },
+      {
+        "action": "actionEditObject",
+        "handler": "self.on_tableView_doubleClicked",
+        "file": "Modan2.py"
+      },
+      {
+        "action": "actionImport",
+        "handler": "self.on_action_import_dataset_triggered",
+        "file": "Modan2.py"
+      },
+      {
+        "action": "actionExport",
+        "handler": "self.on_action_export_dataset_triggered",
+        "file": "Modan2.py"
+      },
+      {
+        "action": "actionAnalyze",
+        "handler": "self.on_action_analyze_dataset_triggered",
+        "file": "Modan2.py"
+      },
+      {
+        "action": "actionPreferences",
+        "handler": "self.on_action_edit_preferences_triggered",
+        "file": "Modan2.py"
+      },
+      {
+        "action": "actionExit",
+        "handler": "self.on_action_exit_triggered",
+        "file": "Modan2.py"
+      },
+      {
+        "action": "actionAbout",
+        "handler": "self.on_action_about_triggered",
+        "file": "Modan2.py"
+      },
+      {
+        "action": "action_add_dataset",
+        "handler": "self.on_action_new_dataset_triggered",
+        "file": "Modan2.py"
+      },
+      {
+        "action": "action_add_object",
+        "handler": "self.on_action_new_object_triggered",
+        "file": "Modan2.py"
+      },
+      {
+        "action": "action_add_analysis",
+        "handler": "self.on_action_analyze_dataset_triggered",
+        "file": "Modan2.py"
+      },
+      {
+        "action": "action_explore_data",
+        "handler": "self.on_action_explore_data_triggered",
+        "file": "Modan2.py"
+      },
+      {
+        "action": "action_delete_analysis",
+        "handler": "self.on_action_delete_analysis_triggered",
+        "file": "Modan2.py"
+      },
+      {
+        "action": "action_refresh_tree",
+        "handler": "self.load_dataset",
+        "file": "Modan2.py"
+      },
+      {
+        "action": "actionNewDataset",
+        "handler": "self.on_action_new_dataset_triggered",
+        "file": "Modan2_original.py"
+      },
+      {
+        "action": "actionCellSelection",
+        "handler": "self.on_action_cell_selection_triggered",
+        "file": "Modan2_original.py"
+      },
+      {
+        "action": "actionRowSelection",
+        "handler": "self.on_action_row_selection_triggered",
+        "file": "Modan2_original.py"
+      },
+      {
+        "action": "actionAddVariable",
+        "handler": "self.on_action_add_variable_triggered",
+        "file": "Modan2_original.py"
+      },
+      {
+        "action": "actionSaveChanges",
+        "handler": "self.on_btnSaveChanges_clicked",
+        "file": "Modan2_original.py"
+      },
+      {
+        "action": "actionNewObject",
+        "handler": "self.on_action_new_object_triggered",
+        "file": "Modan2_original.py"
+      },
+      {
+        "action": "actionEditObject",
+        "handler": "self.on_tableView_doubleClicked",
+        "file": "Modan2_original.py"
+      },
+      {
+        "action": "actionImport",
+        "handler": "self.on_action_import_dataset_triggered",
+        "file": "Modan2_original.py"
+      },
+      {
+        "action": "actionExport",
+        "handler": "self.on_action_export_dataset_triggered",
+        "file": "Modan2_original.py"
+      },
+      {
+        "action": "actionAnalyze",
+        "handler": "self.on_action_analyze_dataset_triggered",
+        "file": "Modan2_original.py"
+      },
+      {
+        "action": "actionPreferences",
+        "handler": "self.on_action_edit_preferences_triggered",
+        "file": "Modan2_original.py"
+      },
+      {
+        "action": "actionExit",
+        "handler": "self.on_action_exit_triggered",
+        "file": "Modan2_original.py"
+      },
+      {
+        "action": "actionAbout",
+        "handler": "self.on_action_about_triggered",
+        "file": "Modan2_original.py"
+      },
+      {
+        "action": "action_add_dataset",
+        "handler": "self.on_action_new_dataset_triggered",
+        "file": "Modan2_original.py"
+      },
+      {
+        "action": "action_add_object",
+        "handler": "self.on_action_new_object_triggered",
+        "file": "Modan2_original.py"
+      },
+      {
+        "action": "action_add_analysis",
+        "handler": "self.on_action_analyze_dataset_triggered",
+        "file": "Modan2_original.py"
+      },
+      {
+        "action": "action_explore_data",
+        "handler": "self.on_action_explore_data_triggered",
+        "file": "Modan2_original.py"
+      },
+      {
+        "action": "action_delete_analysis",
+        "handler": "self.on_action_delete_analysis_triggered",
+        "file": "Modan2_original.py"
+      },
+      {
+        "action": "action_refresh_tree",
+        "handler": "self.load_dataset",
+        "file": "Modan2_original.py"
+      }
+    ],
+    "definitions": [
+      {
+        "name": "shape_preference_changed",
+        "signature": "dict",
+        "file": "ModanComponents.py"
+      },
+      {
+        "name": "shiftStateChanged",
+        "signature": "bool",
+        "file": "ModanComponents.py"
+      },
+      {
+        "name": "dataChangedCustomSignal",
+        "signature": "",
+        "file": "ModanComponents.py"
+      },
+      {
+        "name": "dataset_created",
+        "signature": "object",
+        "file": "ModanController.py"
+      },
+      {
+        "name": "dataset_updated",
+        "signature": "object",
+        "file": "ModanController.py"
+      },
+      {
+        "name": "dataset_deleted",
+        "signature": "int",
+        "file": "ModanController.py"
+      },
+      {
+        "name": "object_added",
+        "signature": "object",
+        "file": "ModanController.py"
+      },
+      {
+        "name": "object_updated",
+        "signature": "object",
+        "file": "ModanController.py"
+      },
+      {
+        "name": "object_deleted",
+        "signature": "int",
+        "file": "ModanController.py"
+      },
+      {
+        "name": "analysis_started",
+        "signature": "str",
+        "file": "ModanController.py"
+      },
+      {
+        "name": "analysis_progress",
+        "signature": "int",
+        "file": "ModanController.py"
+      },
+      {
+        "name": "analysis_completed",
+        "signature": "object",
+        "file": "ModanController.py"
+      },
+      {
+        "name": "analysis_failed",
+        "signature": "str",
+        "file": "ModanController.py"
+      },
+      {
+        "name": "error_occurred",
+        "signature": "str",
+        "file": "ModanController.py"
+      },
+      {
+        "name": "warning_occurred",
+        "signature": "str",
+        "file": "ModanController.py"
+      },
+      {
+        "name": "info_message",
+        "signature": "str",
+        "file": "ModanController.py"
+      },
+      {
+        "name": "clicked",
+        "signature": "",
+        "file": "ModanDialogs.py"
+      },
+      {
+        "name": "dataset_selected",
+        "signature": "object",
+        "file": "ModanWidgets.py"
+      },
+      {
+        "name": "analysis_selected",
+        "signature": "object",
+        "file": "ModanWidgets.py"
+      },
+      {
+        "name": "dataset_context_menu",
+        "signature": "object, QPoint",
+        "file": "ModanWidgets.py"
+      },
+      {
+        "name": "analysis_context_menu",
+        "signature": "object, QPoint",
+        "file": "ModanWidgets.py"
+      },
+      {
+        "name": "object_selected",
+        "signature": "object",
+        "file": "ModanWidgets.py"
+      },
+      {
+        "name": "objects_dropped",
+        "signature": "list",
+        "file": "ModanWidgets.py"
+      },
+      {
+        "name": "object_context_menu",
+        "signature": "object, QPoint",
+        "file": "ModanWidgets.py"
+      },
+      {
+        "name": "landmark_clicked",
+        "signature": "int",
+        "file": "ModanWidgets.py"
+      },
+      {
+        "name": "landmark_moved",
+        "signature": "int, QPointF",
+        "file": "ModanWidgets.py"
+      }
+    ]
+  },
+  "slots": {
+    "actions": [
+      {
+        "class": "ModanMainWindow",
+        "method": "on_action_open_db_triggered",
+        "file": "Modan2.py",
+        "line": 321
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_action_new_db_triggered",
+        "file": "Modan2.py",
+        "line": 324
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_action_save_as_triggered",
+        "file": "Modan2.py",
+        "line": 327
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_action_edit_preferences_triggered",
+        "file": "Modan2.py",
+        "line": 627
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_action_exit_triggered",
+        "file": "Modan2.py",
+        "line": 635
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_action_about_triggered",
+        "file": "Modan2.py",
+        "line": 639
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_action_analyze_dataset_triggered",
+        "file": "Modan2.py",
+        "line": 659
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_action_cell_selection_triggered",
+        "file": "Modan2.py",
+        "line": 859
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_action_row_selection_triggered",
+        "file": "Modan2.py",
+        "line": 863
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_action_add_variable_triggered",
+        "file": "Modan2.py",
+        "line": 904
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_action_delete_object_triggered",
+        "file": "Modan2.py",
+        "line": 926
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_action_delete_analysis_triggered",
+        "file": "Modan2.py",
+        "line": 978
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_action_explore_data_triggered",
+        "file": "Modan2.py",
+        "line": 990
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_action_import_dataset_triggered",
+        "file": "Modan2.py",
+        "line": 996
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_action_export_dataset_triggered",
+        "file": "Modan2.py",
+        "line": 1005
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_action_new_dataset_triggered",
+        "file": "Modan2.py",
+        "line": 1019
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_action_new_object_triggered",
+        "file": "Modan2.py",
+        "line": 1104
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_action_open_db_triggered",
+        "file": "Modan2_original.py",
+        "line": 191
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_action_new_db_triggered",
+        "file": "Modan2_original.py",
+        "line": 194
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_action_save_as_triggered",
+        "file": "Modan2_original.py",
+        "line": 197
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_action_edit_preferences_triggered",
+        "file": "Modan2_original.py",
+        "line": 313
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_action_exit_triggered",
+        "file": "Modan2_original.py",
+        "line": 321
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_action_about_triggered",
+        "file": "Modan2_original.py",
+        "line": 325
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_action_analyze_dataset_triggered",
+        "file": "Modan2_original.py",
+        "line": 345
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_action_cell_selection_triggered",
+        "file": "Modan2_original.py",
+        "line": 675
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_action_row_selection_triggered",
+        "file": "Modan2_original.py",
+        "line": 679
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_action_add_variable_triggered",
+        "file": "Modan2_original.py",
+        "line": 720
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_action_delete_object_triggered",
+        "file": "Modan2_original.py",
+        "line": 742
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_action_delete_analysis_triggered",
+        "file": "Modan2_original.py",
+        "line": 794
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_action_explore_data_triggered",
+        "file": "Modan2_original.py",
+        "line": 806
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_action_import_dataset_triggered",
+        "file": "Modan2_original.py",
+        "line": 812
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_action_export_dataset_triggered",
+        "file": "Modan2_original.py",
+        "line": 820
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_action_new_dataset_triggered",
+        "file": "Modan2_original.py",
+        "line": 830
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_action_new_object_triggered",
+        "file": "Modan2_original.py",
+        "line": 915
+      }
+    ],
+    "ui_handlers": [
+      {
+        "class": "ModanMainWindow",
+        "method": "btnAnalysisDetail_clicked",
+        "file": "Modan2.py",
+        "line": 873
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "btnSaveAnalysis_clicked",
+        "file": "Modan2.py",
+        "line": 879
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "btnDataExploration_clicked",
+        "file": "Modan2.py",
+        "line": 882
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_btnSaveChanges_clicked",
+        "file": "Modan2.py",
+        "line": 916
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_treeView_clicked",
+        "file": "Modan2.py",
+        "line": 1058
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_object_data_changed",
+        "file": "Modan2.py",
+        "line": 1337
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_dataset_selection_changed",
+        "file": "Modan2.py",
+        "line": 1575
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_object_selection_changed",
+        "file": "Modan2.py",
+        "line": 1683
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "btnAnalysisDetail_clicked",
+        "file": "Modan2_original.py",
+        "line": 689
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "btnSaveAnalysis_clicked",
+        "file": "Modan2_original.py",
+        "line": 695
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "btnDataExploration_clicked",
+        "file": "Modan2_original.py",
+        "line": 698
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_btnSaveChanges_clicked",
+        "file": "Modan2_original.py",
+        "line": 732
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_treeView_clicked",
+        "file": "Modan2_original.py",
+        "line": 861
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_object_data_changed",
+        "file": "Modan2_original.py",
+        "line": 1130
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_dataset_selection_changed",
+        "file": "Modan2_original.py",
+        "line": 1362
+      },
+      {
+        "class": "ModanMainWindow",
+        "method": "on_object_selection_changed",
+        "file": "Modan2_original.py",
+        "line": 1433
+      },
+      {
+        "class": "ShapePreference",
+        "method": "on_btnLMColor_clicked",
+        "file": "ModanComponents.py",
+        "line": 2531
+      },
+      {
+        "class": "ShapePreference",
+        "method": "on_btnEdgeColor_clicked",
+        "file": "ModanComponents.py",
+        "line": 2541
+      },
+      {
+        "class": "ShapePreference",
+        "method": "on_btnFaceColor_clicked",
+        "file": "ModanComponents.py",
+        "line": 2551
+      },
+      {
+        "class": "ShapePreference",
+        "method": "emit_changed_signal",
+        "file": "ModanComponents.py",
+        "line": 2566
+      },
+      {
+        "class": "ShapePreference",
+        "method": "btnColor_clicked",
+        "file": "ModanComponents.py",
+        "line": 2603
+      },
+      {
+        "class": "AnalysisInfoWidget",
+        "method": "on_tab_changed",
+        "file": "ModanComponents.py",
+        "line": 4136
+      },
+      {
+        "class": "AnalysisInfoWidget",
+        "method": "comboPcaGroupBy_changed",
+        "file": "ModanComponents.py",
+        "line": 4147
+      },
+      {
+        "class": "AnalysisInfoWidget",
+        "method": "comboCvaGroupBy_changed",
+        "file": "ModanComponents.py",
+        "line": 4152
+      },
+      {
+        "class": "AnalysisInfoWidget",
+        "method": "comboManovaGroupBy_changed",
+        "file": "ModanComponents.py",
+        "line": 4157
+      },
+      {
+        "class": "CalibrationDialog",
+        "method": "btnOK_clicked",
+        "file": "ModanDialogs.py",
+        "line": 386
+      },
+      {
+        "class": "CalibrationDialog",
+        "method": "btnCancel_clicked",
+        "file": "ModanDialogs.py",
+        "line": 395
+      },
+      {
+        "class": "ObjectDialog",
+        "method": "btnAddFile_clicked",
+        "file": "ModanDialogs.py",
+        "line": 1022
+      },
+      {
+        "class": "ObjectDialog",
+        "method": "show_index_state_changed",
+        "file": "ModanDialogs.py",
+        "line": 1075
+      },
+      {
+        "class": "ObjectDialog",
+        "method": "show_model_state_changed",
+        "file": "ModanDialogs.py",
+        "line": 1079
+      },
+      {
+        "class": "ObjectDialog",
+        "method": "show_baseline_state_changed",
+        "file": "ModanDialogs.py",
+        "line": 1083
+      },
+      {
+        "class": "ObjectDialog",
+        "method": "auto_rotate_state_changed",
+        "file": "ModanDialogs.py",
+        "line": 1087
+      },
+      {
+        "class": "ObjectDialog",
+        "method": "show_wireframe_state_changed",
+        "file": "ModanDialogs.py",
+        "line": 1090
+      },
+      {
+        "class": "ObjectDialog",
+        "method": "show_polygon_state_changed",
+        "file": "ModanDialogs.py",
+        "line": 1094
+      },
+      {
+        "class": "ObjectDialog",
+        "method": "btnLandmark_clicked",
+        "file": "ModanDialogs.py",
+        "line": 1098
+      },
+      {
+        "class": "ObjectDialog",
+        "method": "btnCalibration_clicked",
+        "file": "ModanDialogs.py",
+        "line": 1111
+      },
+      {
+        "class": "ObjectDialog",
+        "method": "btnWireframe_clicked",
+        "file": "ModanDialogs.py",
+        "line": 1132
+      },
+      {
+        "class": "ObjectDialog",
+        "method": "x_changed",
+        "file": "ModanDialogs.py",
+        "line": 1307
+      },
+      {
+        "class": "NewAnalysisDialog",
+        "method": "edtAnalysisName_changed",
+        "file": "ModanDialogs.py",
+        "line": 1679
+      },
+      {
+        "class": "NewAnalysisDialog",
+        "method": "comboOrdination_changed",
+        "file": "ModanDialogs.py",
+        "line": 1686
+      },
+      {
+        "class": "NewAnalysisDialog",
+        "method": "btnOK_clicked",
+        "file": "ModanDialogs.py",
+        "line": 1707
+      },
+      {
+        "class": "NewAnalysisDialog",
+        "method": "btnCancel_clicked",
+        "file": "ModanDialogs.py",
+        "line": 1761
+      },
+      {
+        "class": "DataExplorationDialog",
+        "method": "comboSelectGroup_changed",
+        "file": "ModanDialogs.py",
+        "line": 2366
+      },
+      {
+        "class": "DataExplorationDialog",
+        "method": "comboRegressionBy_changed",
+        "file": "ModanDialogs.py",
+        "line": 2378
+      },
+      {
+        "class": "DataExplorationDialog",
+        "method": "comboRegressionBasedOn_changed",
+        "file": "ModanDialogs.py",
+        "line": 2395
+      },
+      {
+        "class": "DataExplorationDialog",
+        "method": "cbxShapeGrid_state_changed",
+        "file": "ModanDialogs.py",
+        "line": 2402
+      },
+      {
+        "class": "DataExplorationDialog",
+        "method": "on_btnArrowColor_clicked",
+        "file": "ModanDialogs.py",
+        "line": 2508
+      },
+      {
+        "class": "DataExplorationDialog",
+        "method": "shape_grid_preference_changed",
+        "file": "ModanDialogs.py",
+        "line": 2518
+      },
+      {
+        "class": "DataExplorationDialog",
+        "method": "shape_preference_button_clicked",
+        "file": "ModanDialogs.py",
+        "line": 2540
+      },
+      {
+        "class": "DataExplorationDialog",
+        "method": "record_animation_changed",
+        "file": "ModanDialogs.py",
+        "line": 2551
+      },
+      {
+        "class": "DataExplorationDialog",
+        "method": "on_chart_dim_changed",
+        "file": "ModanDialogs.py",
+        "line": 2732
+      },
+      {
+        "class": "DataExplorationDialog",
+        "method": "comboVisualizationMethod_changed",
+        "file": "ModanDialogs.py",
+        "line": 2774
+      },
+      {
+        "class": "DataExplorationDialog",
+        "method": "arrow_preference_changed",
+        "file": "ModanDialogs.py",
+        "line": 2956
+      },
+      {
+        "class": "DataExplorationDialog",
+        "method": "shape_preference_changed",
+        "file": "ModanDialogs.py",
+        "line": 2961
+      },
+      {
+        "class": "DataExplorationDialog",
+        "method": "shape_button_clicked",
+        "file": "ModanDialogs.py",
+        "line": 3063
+      },
+      {
+        "class": "DataExplorationDialog",
+        "method": "axis_changed",
+        "file": "ModanDialogs.py",
+        "line": 3078
+      },
+      {
+        "class": "DataExplorationDialog",
+        "method": "flip_axis_changed",
+        "file": "ModanDialogs.py",
+        "line": 3085
+      },
+      {
+        "class": "DataExplorationDialog",
+        "method": "comboGroupBy_changed",
+        "file": "ModanDialogs.py",
+        "line": 3321
+      },
+      {
+        "class": "DataExplorationDialog",
+        "method": "comboShapeview_changed",
+        "file": "ModanDialogs.py",
+        "line": 3334
+      },
+      {
+        "class": "DatasetAnalysisDialog",
+        "method": "on_analysis_type_changed",
+        "file": "ModanDialogs.py",
+        "line": 4697
+      },
+      {
+        "class": "DatasetAnalysisDialog",
+        "method": "chart_options_clicked",
+        "file": "ModanDialogs.py",
+        "line": 4728
+      },
+      {
+        "class": "DatasetAnalysisDialog",
+        "method": "on_chart_dim_changed",
+        "file": "ModanDialogs.py",
+        "line": 4739
+      },
+      {
+        "class": "DatasetAnalysisDialog",
+        "method": "propertyname_changed",
+        "file": "ModanDialogs.py",
+        "line": 4808
+      },
+      {
+        "class": "DatasetAnalysisDialog",
+        "method": "axis_changed",
+        "file": "ModanDialogs.py",
+        "line": 4825
+      },
+      {
+        "class": "DatasetAnalysisDialog",
+        "method": "flip_axis_changed",
+        "file": "ModanDialogs.py",
+        "line": 4829
+      },
+      {
+        "class": "DatasetAnalysisDialog",
+        "method": "on_btnSuperimpose_clicked",
+        "file": "ModanDialogs.py",
+        "line": 4833
+      },
+      {
+        "class": "DatasetAnalysisDialog",
+        "method": "on_btnAnalyze_clicked",
+        "file": "ModanDialogs.py",
+        "line": 4837
+      },
+      {
+        "class": "DatasetAnalysisDialog",
+        "method": "on_btnSaveResults_clicked",
+        "file": "ModanDialogs.py",
+        "line": 4846
+      },
+      {
+        "class": "DatasetAnalysisDialog",
+        "method": "show_index_state_changed",
+        "file": "ModanDialogs.py",
+        "line": 4922
+      },
+      {
+        "class": "DatasetAnalysisDialog",
+        "method": "show_average_state_changed",
+        "file": "ModanDialogs.py",
+        "line": 4931
+      },
+      {
+        "class": "DatasetAnalysisDialog",
+        "method": "auto_rotate_state_changed",
+        "file": "ModanDialogs.py",
+        "line": 4940
+      },
+      {
+        "class": "DatasetAnalysisDialog",
+        "method": "show_wireframe_state_changed",
+        "file": "ModanDialogs.py",
+        "line": 4950
+      },
+      {
+        "class": "DatasetAnalysisDialog",
+        "method": "show_baseline_state_changed",
+        "file": "ModanDialogs.py",
+        "line": 4959
+      },
+      {
+        "class": "DatasetAnalysisDialog",
+        "method": "on_btn_analysis_clicked",
+        "file": "ModanDialogs.py",
+        "line": 4975
+      },
+      {
+        "class": "DatasetAnalysisDialog",
+        "method": "on_mouse_clicked",
+        "file": "ModanDialogs.py",
+        "line": 5351
+      },
+      {
+        "class": "DatasetAnalysisDialog",
+        "method": "on_scatter_item_clicked",
+        "file": "ModanDialogs.py",
+        "line": 5367
+      },
+      {
+        "class": "DatasetAnalysisDialog",
+        "method": "on_object_selection_changed",
+        "file": "ModanDialogs.py",
+        "line": 5525
+      },
+      {
+        "class": "ExportDatasetDialog",
+        "method": "on_rbProcrustes_clicked",
+        "file": "ModanDialogs.py",
+        "line": 5693
+      },
+      {
+        "class": "ExportDatasetDialog",
+        "method": "on_rbBookstein_clicked",
+        "file": "ModanDialogs.py",
+        "line": 5695
+      },
+      {
+        "class": "ExportDatasetDialog",
+        "method": "on_rbRFTRA_clicked",
+        "file": "ModanDialogs.py",
+        "line": 5698
+      },
+      {
+        "class": "ExportDatasetDialog",
+        "method": "on_rbNone_clicked",
+        "file": "ModanDialogs.py",
+        "line": 5700
+      },
+      {
+        "class": "ExportDatasetDialog",
+        "method": "on_rbTPS_clicked",
+        "file": "ModanDialogs.py",
+        "line": 5703
+      },
+      {
+        "class": "ExportDatasetDialog",
+        "method": "on_rbNTS_clicked",
+        "file": "ModanDialogs.py",
+        "line": 5705
+      },
+      {
+        "class": "ExportDatasetDialog",
+        "method": "on_rbX1Y1_clicked",
+        "file": "ModanDialogs.py",
+        "line": 5707
+      },
+      {
+        "class": "ExportDatasetDialog",
+        "method": "on_rbMorphologika_clicked",
+        "file": "ModanDialogs.py",
+        "line": 5709
+      },
+      {
+        "class": "ImportDatasetDialog",
+        "method": "file_type_changed",
+        "file": "ModanDialogs.py",
+        "line": 5988
+      },
+      {
+        "class": "PreferencesDialog",
+        "method": "on_lblColor_clicked",
+        "file": "ModanDialogs.py",
+        "line": 6446
+      },
+      {
+        "class": "PreferencesDialog",
+        "method": "on_lblBgcolor_clicked",
+        "file": "ModanDialogs.py",
+        "line": 6458
+      },
+      {
+        "class": "PreferencesDialog",
+        "method": "on_lblLmColor_clicked",
+        "file": "ModanDialogs.py",
+        "line": 6475
+      },
+      {
+        "class": "PreferencesDialog",
+        "method": "on_lblIndexColor_clicked",
+        "file": "ModanDialogs.py",
+        "line": 6496
+      },
+      {
+        "class": "PreferencesDialog",
+        "method": "on_lblWireframeColor_clicked",
+        "file": "ModanDialogs.py",
+        "line": 6517
+      },
+      {
+        "class": "PreferencesDialog",
+        "method": "on_btnResetMarkers_clicked",
+        "file": "ModanDialogs.py",
+        "line": 6660
+      },
+      {
+        "class": "PreferencesDialog",
+        "method": "on_btnResetPastel_clicked",
+        "file": "ModanDialogs.py",
+        "line": 6665
+      },
+      {
+        "class": "PreferencesDialog",
+        "method": "on_btnResetVivid_clicked",
+        "file": "ModanDialogs.py",
+        "line": 6671
+      },
+      {
+        "class": "PreferencesDialog",
+        "method": "on_rbPlotLarge_clicked",
+        "file": "ModanDialogs.py",
+        "line": 6677
+      },
+      {
+        "class": "PreferencesDialog",
+        "method": "on_rbPlotMedium_clicked",
+        "file": "ModanDialogs.py",
+        "line": 6680
+      },
+      {
+        "class": "PreferencesDialog",
+        "method": "on_rbPlotSmall_clicked",
+        "file": "ModanDialogs.py",
+        "line": 6683
+      },
+      {
+        "class": "PreferencesDialog",
+        "method": "on_rbToolbarIconLarge_clicked",
+        "file": "ModanDialogs.py",
+        "line": 6686
+      },
+      {
+        "class": "PreferencesDialog",
+        "method": "on_rbToolbarIconSmall_clicked",
+        "file": "ModanDialogs.py",
+        "line": 6693
+      },
+      {
+        "class": "PreferencesDialog",
+        "method": "on_rbToolbarIconMedium_clicked",
+        "file": "ModanDialogs.py",
+        "line": 6700
+      },
+      {
+        "class": "PreferencesDialog",
+        "method": "on_rbRememberGeometryYes_clicked",
+        "file": "ModanDialogs.py",
+        "line": 6707
+      },
+      {
+        "class": "PreferencesDialog",
+        "method": "on_rbRememberGeometryNo_clicked",
+        "file": "ModanDialogs.py",
+        "line": 6710
+      },
+      {
+        "class": "DatasetTreeWidget",
+        "method": "_on_selection_changed",
+        "file": "ModanWidgets.py",
+        "line": 152
+      },
+      {
+        "class": "DatasetTreeWidget",
+        "method": "_on_item_double_clicked",
+        "file": "ModanWidgets.py",
+        "line": 187
+      },
+      {
+        "class": "ObjectTableWidget",
+        "method": "_on_selection_changed",
+        "file": "ModanWidgets.py",
+        "line": 423
+      },
+      {
+        "class": "ObjectTableWidget",
+        "method": "_on_cell_double_clicked",
+        "file": "ModanWidgets.py",
+        "line": 441
+      },
+      {
+        "class": "LandmarkViewer2D",
+        "method": "_on_selection_changed",
+        "file": "ModanWidgets.py",
+        "line": 733
+      }
+    ]
+  }
+}

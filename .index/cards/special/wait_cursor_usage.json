@@ -1,0 +1,31 @@
+{
+  "symbol": "wait_cursor_usage",
+  "kind": "analysis",
+  "description": "Methods that use wait cursor for long operations",
+  "methods": [
+    {
+      "file": "ModanDialogs.py",
+      "method": "cbxShapeGrid_state_changed",
+      "line": 2402,
+      "context": "Shape grid toggling"
+    },
+    {
+      "file": "ModanDialogs.py",
+      "method": "pick_shape",
+      "line": 4072,
+      "context": "Chart point selection"
+    },
+    {
+      "file": "ModanDialogs.py",
+      "method": "NewAnalysisDialog.btnOK_clicked",
+      "line": 1710,
+      "context": "Analysis execution"
+    },
+    {
+      "file": "Modan2.py",
+      "method": "on_action_analyze_dataset_triggered",
+      "line": 659,
+      "context": "Analysis trigger"
+    }
+  ]
+}

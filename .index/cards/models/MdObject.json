@@ -1,0 +1,60 @@
+{
+  "symbol": "MdObject",
+  "kind": "peewee_model",
+  "file": "MdModel.py",
+  "line": 223,
+  "fields": [
+    {
+      "name": "object_name",
+      "type": "CharField"
+    },
+    {
+      "name": "object_desc",
+      "type": "CharField"
+    },
+    {
+      "name": "pixels_per_mm",
+      "type": "DoubleField"
+    },
+    {
+      "name": "landmark_str",
+      "type": "CharField"
+    },
+    {
+      "name": "dataset",
+      "type": "ForeignKeyField"
+    },
+    {
+      "name": "created_at",
+      "type": "DateTimeField"
+    },
+    {
+      "name": "modified_at",
+      "type": "DateTimeField"
+    },
+    {
+      "name": "property_str",
+      "type": "CharField"
+    },
+    {
+      "name": "sequence",
+      "type": "IntegerField"
+    }
+  ],
+  "meta": {
+    "database": "gDatabase"
+  },
+  "relationships": {
+    "belongs_to": [
+      "dataset"
+    ],
+    "has_many": []
+  },
+  "usage": [
+    "ModanController",
+    "ProgressDialog",
+    "CalibrationDialog",
+    "DatasetDialog",
+    "ObjectDialog"
+  ]
+}

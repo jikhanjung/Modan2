@@ -1,0 +1,1564 @@
+{
+  "symbol": "ExportDatasetDialog",
+  "kind": "dialog",
+  "file": "ModanDialogs.py",
+  "line": 5556,
+  "widgets": [
+    {
+      "name": "layout",
+      "type": "QVBoxLayout"
+    },
+    {
+      "name": "lbl_text",
+      "type": "QLabel"
+    },
+    {
+      "name": "pb_progress",
+      "type": "QProgressBar"
+    },
+    {
+      "name": "pb_progress",
+      "type": "QProgressBar"
+    },
+    {
+      "name": "btnStop",
+      "type": "QPushButton"
+    },
+    {
+      "name": "status_bar",
+      "type": "QStatusBar"
+    },
+    {
+      "name": "lblText1",
+      "type": "QLabel"
+    },
+    {
+      "name": "lblText2",
+      "type": "QLabel"
+    },
+    {
+      "name": "edtLength",
+      "type": "QLineEdit"
+    },
+    {
+      "name": "comboUnit",
+      "type": "QComboBox"
+    },
+    {
+      "name": "btnOK",
+      "type": "QPushButton"
+    },
+    {
+      "name": "btnCancel",
+      "type": "QPushButton"
+    },
+    {
+      "name": "hbox",
+      "type": "QHBoxLayout"
+    },
+    {
+      "name": "vbox",
+      "type": "QVBoxLayout"
+    },
+    {
+      "name": "cbxParent",
+      "type": "QComboBox"
+    },
+    {
+      "name": "edtDatasetName",
+      "type": "QLineEdit"
+    },
+    {
+      "name": "edtDatasetDesc",
+      "type": "QLineEdit"
+    },
+    {
+      "name": "rbtn2D",
+      "type": "QRadioButton"
+    },
+    {
+      "name": "rbtn3D",
+      "type": "QRadioButton"
+    },
+    {
+      "name": "edtWireframe",
+      "type": "QTextEdit"
+    },
+    {
+      "name": "edtBaseline",
+      "type": "QLineEdit"
+    },
+    {
+      "name": "edtPolygons",
+      "type": "QTextEdit"
+    },
+    {
+      "name": "edtVariableNameStr",
+      "type": "QTextEdit"
+    },
+    {
+      "name": "lstVariableName",
+      "type": "QListWidget"
+    },
+    {
+      "name": "btnAddVariable",
+      "type": "QPushButton"
+    },
+    {
+      "name": "btnDeleteVariable",
+      "type": "QPushButton"
+    },
+    {
+      "name": "btnMoveUp",
+      "type": "QPushButton"
+    },
+    {
+      "name": "btnMoveDown",
+      "type": "QPushButton"
+    },
+    {
+      "name": "variable_widget",
+      "type": "QWidget"
+    },
+    {
+      "name": "variable_layout",
+      "type": "QVBoxLayout"
+    },
+    {
+      "name": "variable_button_widget",
+      "type": "QWidget"
+    },
+    {
+      "name": "variable_button_layout",
+      "type": "QHBoxLayout"
+    },
+    {
+      "name": "main_layout",
+      "type": "QFormLayout"
+    },
+    {
+      "name": "lblParent",
+      "type": "QLabel"
+    },
+    {
+      "name": "lblDatasetName",
+      "type": "QLabel"
+    },
+    {
+      "name": "lblDatasetDesc",
+      "type": "QLabel"
+    },
+    {
+      "name": "lblDimension",
+      "type": "QLabel"
+    },
+    {
+      "name": "lblWireframe",
+      "type": "QLabel"
+    },
+    {
+      "name": "lblBaseline",
+      "type": "QLabel"
+    },
+    {
+      "name": "lblPolygons",
+      "type": "QLabel"
+    },
+    {
+      "name": "lblVariableNameStr",
+      "type": "QLabel"
+    },
+    {
+      "name": "btnOkay",
+      "type": "QPushButton"
+    },
+    {
+      "name": "btnDelete",
+      "type": "QPushButton"
+    },
+    {
+      "name": "btnCancel",
+      "type": "QPushButton"
+    },
+    {
+      "name": "status_bar",
+      "type": "QStatusBar"
+    },
+    {
+      "name": "hsplitter",
+      "type": "QSplitter"
+    },
+    {
+      "name": "vsplitter",
+      "type": "QSplitter"
+    },
+    {
+      "name": "inputLayout",
+      "type": "QHBoxLayout"
+    },
+    {
+      "name": "inputCoords",
+      "type": "QWidget"
+    },
+    {
+      "name": "inputX",
+      "type": "QLineEdit"
+    },
+    {
+      "name": "inputY",
+      "type": "QLineEdit"
+    },
+    {
+      "name": "inputZ",
+      "type": "QLineEdit"
+    },
+    {
+      "name": "btnAddInput",
+      "type": "QPushButton"
+    },
+    {
+      "name": "edtObjectName",
+      "type": "QLineEdit"
+    },
+    {
+      "name": "edtSequence",
+      "type": "QLineEdit"
+    },
+    {
+      "name": "edtObjectDesc",
+      "type": "QTextEdit"
+    },
+    {
+      "name": "edtLandmarkStr",
+      "type": "QTableWidget"
+    },
+    {
+      "name": "lblDataset",
+      "type": "QLabel"
+    },
+    {
+      "name": "main_layout",
+      "type": "QVBoxLayout"
+    },
+    {
+      "name": "sub_layout",
+      "type": "QHBoxLayout"
+    },
+    {
+      "name": "pixmap",
+      "type": "QPixmap"
+    },
+    {
+      "name": "form_layout",
+      "type": "QFormLayout"
+    },
+    {
+      "name": "lblDatasetName",
+      "type": "QLabel"
+    },
+    {
+      "name": "lblObjectName",
+      "type": "QLabel"
+    },
+    {
+      "name": "lblSequence",
+      "type": "QLabel"
+    },
+    {
+      "name": "lblObjectDesc",
+      "type": "QLabel"
+    },
+    {
+      "name": "lblLandmarkStr",
+      "type": "QLabel"
+    },
+    {
+      "name": "btnGroup",
+      "type": "QButtonGroup"
+    },
+    {
+      "name": "btn_layout2",
+      "type": "QGridLayout"
+    },
+    {
+      "name": "cbxShowIndex",
+      "type": "QCheckBox"
+    },
+    {
+      "name": "cbxShowWireframe",
+      "type": "QCheckBox"
+    },
+    {
+      "name": "cbxShowPolygon",
+      "type": "QCheckBox"
+    },
+    {
+      "name": "cbxShowBaseline",
+      "type": "QCheckBox"
+    },
+    {
+      "name": "cbxAutoRotate",
+      "type": "QCheckBox"
+    },
+    {
+      "name": "cbxShowModel",
+      "type": "QCheckBox"
+    },
+    {
+      "name": "btnAddFile",
+      "type": "QPushButton"
+    },
+    {
+      "name": "btnFBO",
+      "type": "QPushButton"
+    },
+    {
+      "name": "left_widget",
+      "type": "QWidget"
+    },
+    {
+      "name": "right_top_widget",
+      "type": "QWidget"
+    },
+    {
+      "name": "right_middle_widget",
+      "type": "QWidget"
+    },
+    {
+      "name": "right_middle_layout",
+      "type": "QVBoxLayout"
+    },
+    {
+      "name": "right_bottom_widget",
+      "type": "QWidget"
+    },
+    {
+      "name": "object_view_layout",
+      "type": "QVBoxLayout"
+    },
+    {
+      "name": "object_view_widget",
+      "type": "QWidget"
+    },
+    {
+      "name": "btnPrevious",
+      "type": "QPushButton"
+    },
+    {
+      "name": "btnNext",
+      "type": "QPushButton"
+    },
+    {
+      "name": "btnOkay",
+      "type": "QPushButton"
+    },
+    {
+      "name": "btnDelete",
+      "type": "QPushButton"
+    },
+    {
+      "name": "btnCancel",
+      "type": "QPushButton"
+    },
+    {
+      "name": "lblAnalysisName",
+      "type": "QLabel"
+    },
+    {
+      "name": "edtAnalysisName",
+      "type": "QLineEdit"
+    },
+    {
+      "name": "lblSuperimposition",
+      "type": "QLabel"
+    },
+    {
+      "name": "comboSuperimposition",
+      "type": "QComboBox"
+    },
+    {
+      "name": "lblOrdination",
+      "type": "QLabel"
+    },
+    {
+      "name": "comboOrdination",
+      "type": "QComboBox"
+    },
+    {
+      "name": "lblCvaGroupBy",
+      "type": "QLabel"
+    },
+    {
+      "name": "comboCvaGroupBy",
+      "type": "QComboBox"
+    },
+    {
+      "name": "lblManovaGroupBy",
+      "type": "QLabel"
+    },
+    {
+      "name": "comboManovaGroupBy",
+      "type": "QComboBox"
+    },
+    {
+      "name": "btnOK",
+      "type": "QPushButton"
+    },
+    {
+      "name": "btnCancel",
+      "type": "QPushButton"
+    },
+    {
+      "name": "layout",
+      "type": "QGridLayout"
+    },
+    {
+      "name": "progressBar",
+      "type": "QProgressBar"
+    },
+    {
+      "name": "lblStatus",
+      "type": "QLabel"
+    },
+    {
+      "name": "buttonLayout",
+      "type": "QHBoxLayout"
+    },
+    {
+      "name": "main_hsplitter",
+      "type": "QSplitter"
+    },
+    {
+      "name": "layout",
+      "type": "QVBoxLayout"
+    },
+    {
+      "name": "lblAnalysisName",
+      "type": "QLabel"
+    },
+    {
+      "name": "edtAnalysisName",
+      "type": "QLineEdit"
+    },
+    {
+      "name": "lblSuperimposition",
+      "type": "QLabel"
+    },
+    {
+      "name": "edtSuperimposition",
+      "type": "QLineEdit"
+    },
+    {
+      "name": "lblOrdination",
+      "type": "QLabel"
+    },
+    {
+      "name": "edtOrdination",
+      "type": "QLineEdit"
+    },
+    {
+      "name": "lblVisualization",
+      "type": "QLabel"
+    },
+    {
+      "name": "comboVisualization",
+      "type": "QComboBox"
+    },
+    {
+      "name": "title_row_widget",
+      "type": "QWidget"
+    },
+    {
+      "name": "title_row_layout",
+      "type": "QHBoxLayout"
+    },
+    {
+      "name": "plot_setting_widget",
+      "type": "QWidget"
+    },
+    {
+      "name": "plot_setting_layout",
+      "type": "QVBoxLayout"
+    },
+    {
+      "name": "axis_option_widget",
+      "type": "QWidget"
+    },
+    {
+      "name": "axis_option_layout",
+      "type": "QHBoxLayout"
+    },
+    {
+      "name": "gbChartBasics",
+      "type": "QWidget"
+    },
+    {
+      "name": "lblGroupBy",
+      "type": "QLabel"
+    },
+    {
+      "name": "comboGroupBy",
+      "type": "QComboBox"
+    },
+    {
+      "name": "lblChartDim",
+      "type": "QLabel"
+    },
+    {
+      "name": "rb2DChartDim",
+      "type": "QRadioButton"
+    },
+    {
+      "name": "rb3DChartDim",
+      "type": "QRadioButton"
+    },
+    {
+      "name": "grpRadioButton1",
+      "type": "QButtonGroup"
+    },
+    {
+      "name": "cbxLegend",
+      "type": "QCheckBox"
+    },
+    {
+      "name": "lblAxis1",
+      "type": "QLabel"
+    },
+    {
+      "name": "lblAxis2",
+      "type": "QLabel"
+    },
+    {
+      "name": "lblAxis3",
+      "type": "QLabel"
+    },
+    {
+      "name": "comboAxis1",
+      "type": "QComboBox"
+    },
+    {
+      "name": "comboAxis2",
+      "type": "QComboBox"
+    },
+    {
+      "name": "comboAxis3",
+      "type": "QComboBox"
+    },
+    {
+      "name": "cbxFlipAxis1",
+      "type": "QCheckBox"
+    },
+    {
+      "name": "cbxFlipAxis2",
+      "type": "QCheckBox"
+    },
+    {
+      "name": "cbxFlipAxis3",
+      "type": "QCheckBox"
+    },
+    {
+      "name": "gbAxis",
+      "type": "QGroupBox"
+    },
+    {
+      "name": "overlay_setting_widget",
+      "type": "QWidget"
+    },
+    {
+      "name": "overlay_setting_layout",
+      "type": "QHBoxLayout"
+    },
+    {
+      "name": "gbOverlay",
+      "type": "QGroupBox"
+    },
+    {
+      "name": "cbxDepthShade",
+      "type": "QCheckBox"
+    },
+    {
+      "name": "cbxAverage",
+      "type": "QCheckBox"
+    },
+    {
+      "name": "cbxConvexHull",
+      "type": "QCheckBox"
+    },
+    {
+      "name": "cbxConfidenceEllipse",
+      "type": "QCheckBox"
+    },
+    {
+      "name": "cbxShapeGrid",
+      "type": "QCheckBox"
+    },
+    {
+      "name": "cbxArrow",
+      "type": "QCheckBox"
+    },
+    {
+      "name": "btnArrowColor",
+      "type": "QPushButton"
+    },
+    {
+      "name": "cbxRegression",
+      "type": "QCheckBox"
+    },
+    {
+      "name": "lblRegressionBasedon",
+      "type": "QLabel"
+    },
+    {
+      "name": "comboRegressionBasedOn",
+      "type": "QComboBox"
+    },
+    {
+      "name": "comboRegressionBy",
+      "type": "QComboBox"
+    },
+    {
+      "name": "comboSelectGroup",
+      "type": "QComboBox"
+    },
+    {
+      "name": "cbxExtrapolate",
+      "type": "QCheckBox"
+    },
+    {
+      "name": "lblDegree",
+      "type": "QLabel"
+    },
+    {
+      "name": "sbxDegree",
+      "type": "QSpinBox"
+    },
+    {
+      "name": "cbxAnnotation",
+      "type": "QCheckBox"
+    },
+    {
+      "name": "gbRegression",
+      "type": "QGroupBox"
+    },
+    {
+      "name": "visualization_layout",
+      "type": "QGridLayout"
+    },
+    {
+      "name": "visualization_widget",
+      "type": "QWidget"
+    },
+    {
+      "name": "plot_layout",
+      "type": "QVBoxLayout"
+    },
+    {
+      "name": "plot_widget",
+      "type": "QWidget"
+    },
+    {
+      "name": "plot_preference_button",
+      "type": "QPushButton"
+    },
+    {
+      "name": "btn_save_plot",
+      "type": "QPushButton"
+    },
+    {
+      "name": "toolbar_widget",
+      "type": "QWidget"
+    },
+    {
+      "name": "toolbar_layout",
+      "type": "QHBoxLayout"
+    },
+    {
+      "name": "view_layout",
+      "type": "QVBoxLayout"
+    },
+    {
+      "name": "view_widget",
+      "type": "QWidget"
+    },
+    {
+      "name": "shape_view_layout",
+      "type": "QVBoxLayout"
+    },
+    {
+      "name": "btnResetPose",
+      "type": "QPushButton"
+    },
+    {
+      "name": "btnAnimate",
+      "type": "QPushButton"
+    },
+    {
+      "name": "cbxRecordAnimation",
+      "type": "QCheckBox"
+    },
+    {
+      "name": "edtNumFrames",
+      "type": "QLineEdit"
+    },
+    {
+      "name": "animate_option_widget",
+      "type": "QWidget"
+    },
+    {
+      "name": "animate_option_layout",
+      "type": "QHBoxLayout"
+    },
+    {
+      "name": "shape_preference_button",
+      "type": "QPushButton"
+    },
+    {
+      "name": "shape_option_widget",
+      "type": "QWidget"
+    },
+    {
+      "name": "shape_option_layout",
+      "type": "QHBoxLayout"
+    },
+    {
+      "name": "shape_preference_widget",
+      "type": "QWidget"
+    },
+    {
+      "name": "shape_preference_layout",
+      "type": "QVBoxLayout"
+    },
+    {
+      "name": "arrow_widget",
+      "type": "QWidget"
+    },
+    {
+      "name": "arrow_layout",
+      "type": "QHBoxLayout"
+    },
+    {
+      "name": "shape_view_widget",
+      "type": "QWidget"
+    },
+    {
+      "name": "shape_view_scroll_area",
+      "type": "QScrollArea"
+    },
+    {
+      "name": "visualization_splitter",
+      "type": "QSplitter"
+    },
+    {
+      "name": "timer",
+      "type": "QTimer"
+    },
+    {
+      "name": "main_hsplitter",
+      "type": "QSplitter"
+    },
+    {
+      "name": "cbxShowIndex",
+      "type": "QCheckBox"
+    },
+    {
+      "name": "cbxShowWireframe",
+      "type": "QCheckBox"
+    },
+    {
+      "name": "cbxShowBaseline",
+      "type": "QCheckBox"
+    },
+    {
+      "name": "cbxShowAverage",
+      "type": "QCheckBox"
+    },
+    {
+      "name": "cbxAutoRotate",
+      "type": "QCheckBox"
+    },
+    {
+      "name": "checkbox_layout",
+      "type": "QHBoxLayout"
+    },
+    {
+      "name": "cbx_widget",
+      "type": "QWidget"
+    },
+    {
+      "name": "shape_vsplitter",
+      "type": "QSplitter"
+    },
+    {
+      "name": "table_widget",
+      "type": "QWidget"
+    },
+    {
+      "name": "table_layout",
+      "type": "QVBoxLayout"
+    },
+    {
+      "name": "table_tab",
+      "type": "QTabWidget"
+    },
+    {
+      "name": "tableView1",
+      "type": "QTableView"
+    },
+    {
+      "name": "tableView2",
+      "type": "QTableView"
+    },
+    {
+      "name": "table_control_widget",
+      "type": "QWidget"
+    },
+    {
+      "name": "table_control_layout",
+      "type": "QHBoxLayout"
+    },
+    {
+      "name": "btnSelectAll",
+      "type": "QPushButton"
+    },
+    {
+      "name": "btnSelectNone",
+      "type": "QPushButton"
+    },
+    {
+      "name": "btnSelectInvert",
+      "type": "QPushButton"
+    },
+    {
+      "name": "plot_layout",
+      "type": "QVBoxLayout"
+    },
+    {
+      "name": "plot_control_layout1",
+      "type": "QHBoxLayout"
+    },
+    {
+      "name": "plot_control_layout2",
+      "type": "QHBoxLayout"
+    },
+    {
+      "name": "plot_control_widget1",
+      "type": "QWidget"
+    },
+    {
+      "name": "plot_control_widget2",
+      "type": "QWidget"
+    },
+    {
+      "name": "comboAxis1",
+      "type": "QComboBox"
+    },
+    {
+      "name": "comboAxis2",
+      "type": "QComboBox"
+    },
+    {
+      "name": "comboAxis3",
+      "type": "QComboBox"
+    },
+    {
+      "name": "cbxFlipAxis1",
+      "type": "QCheckBox"
+    },
+    {
+      "name": "cbxFlipAxis2",
+      "type": "QCheckBox"
+    },
+    {
+      "name": "cbxFlipAxis3",
+      "type": "QCheckBox"
+    },
+    {
+      "name": "gbAxis1",
+      "type": "QGroupBox"
+    },
+    {
+      "name": "gbAxis2",
+      "type": "QGroupBox"
+    },
+    {
+      "name": "gbAxis3",
+      "type": "QGroupBox"
+    },
+    {
+      "name": "rb2DChartDim",
+      "type": "QRadioButton"
+    },
+    {
+      "name": "rb3DChartDim",
+      "type": "QRadioButton"
+    },
+    {
+      "name": "cbxDepthShade",
+      "type": "QCheckBox"
+    },
+    {
+      "name": "cbxLegend",
+      "type": "QCheckBox"
+    },
+    {
+      "name": "cbxAxisLabel",
+      "type": "QCheckBox"
+    },
+    {
+      "name": "gbChartDim",
+      "type": "QGroupBox"
+    },
+    {
+      "name": "gbGroupBy",
+      "type": "QGroupBox"
+    },
+    {
+      "name": "comboPropertyName",
+      "type": "QComboBox"
+    },
+    {
+      "name": "btnChartOptions",
+      "type": "QPushButton"
+    },
+    {
+      "name": "plot_view",
+      "type": "QWidget"
+    },
+    {
+      "name": "plot_tab",
+      "type": "QTabWidget"
+    },
+    {
+      "name": "plot_data",
+      "type": "QTableWidget"
+    },
+    {
+      "name": "rotation_matrix_data",
+      "type": "QTableWidget"
+    },
+    {
+      "name": "eigenvalue_data",
+      "type": "QTableWidget"
+    },
+    {
+      "name": "shapes_data",
+      "type": "QTableWidget"
+    },
+    {
+      "name": "plot_all_widget",
+      "type": "QWidget"
+    },
+    {
+      "name": "left_bottom_layout",
+      "type": "QVBoxLayout"
+    },
+    {
+      "name": "middle_bottom_layout",
+      "type": "QVBoxLayout"
+    },
+    {
+      "name": "right_bottom_layout",
+      "type": "QVBoxLayout"
+    },
+    {
+      "name": "rbProcrustes",
+      "type": "QRadioButton"
+    },
+    {
+      "name": "rbBookstein",
+      "type": "QRadioButton"
+    },
+    {
+      "name": "rbResistantFit",
+      "type": "QRadioButton"
+    },
+    {
+      "name": "btnSuperimpose",
+      "type": "QPushButton"
+    },
+    {
+      "name": "gbSuperimposition",
+      "type": "QGroupBox"
+    },
+    {
+      "name": "rbPCA",
+      "type": "QRadioButton"
+    },
+    {
+      "name": "rbCVA",
+      "type": "QRadioButton"
+    },
+    {
+      "name": "gbAnalysis",
+      "type": "QGroupBox"
+    },
+    {
+      "name": "btnAnalyze",
+      "type": "QPushButton"
+    },
+    {
+      "name": "empty_widget",
+      "type": "QWidget"
+    },
+    {
+      "name": "btnSaveResults",
+      "type": "QPushButton"
+    },
+    {
+      "name": "rb1_layout",
+      "type": "QVBoxLayout"
+    },
+    {
+      "name": "rb1_widget",
+      "type": "QWidget"
+    },
+    {
+      "name": "bottom_layout",
+      "type": "QHBoxLayout"
+    },
+    {
+      "name": "status_bar",
+      "type": "QStatusBar"
+    },
+    {
+      "name": "main_layout",
+      "type": "QVBoxLayout"
+    },
+    {
+      "name": "sub_layout",
+      "type": "QHBoxLayout"
+    },
+    {
+      "name": "property_model",
+      "type": "QStandardItemModel"
+    },
+    {
+      "name": "object_model",
+      "type": "QStandardItemModel"
+    },
+    {
+      "name": "proxy_model",
+      "type": "QSortFilterProxyModel"
+    },
+    {
+      "name": "lblDatasetName",
+      "type": "QLabel"
+    },
+    {
+      "name": "edtDatasetName",
+      "type": "QLineEdit"
+    },
+    {
+      "name": "lblObjectList",
+      "type": "QLabel"
+    },
+    {
+      "name": "lblExportList",
+      "type": "QLabel"
+    },
+    {
+      "name": "lstObjectList",
+      "type": "QListWidget"
+    },
+    {
+      "name": "lstExportList",
+      "type": "QListWidget"
+    },
+    {
+      "name": "btnExport",
+      "type": "QPushButton"
+    },
+    {
+      "name": "btnCancel",
+      "type": "QPushButton"
+    },
+    {
+      "name": "btnMoveRight",
+      "type": "QPushButton"
+    },
+    {
+      "name": "btnMoveLeft",
+      "type": "QPushButton"
+    },
+    {
+      "name": "lblExport",
+      "type": "QLabel"
+    },
+    {
+      "name": "rbTPS",
+      "type": "QRadioButton"
+    },
+    {
+      "name": "rbNTS",
+      "type": "QRadioButton"
+    },
+    {
+      "name": "rbX1Y1",
+      "type": "QRadioButton"
+    },
+    {
+      "name": "rbMorphologika",
+      "type": "QRadioButton"
+    },
+    {
+      "name": "lblSuperimposition",
+      "type": "QLabel"
+    },
+    {
+      "name": "rbProcrustes",
+      "type": "QRadioButton"
+    },
+    {
+      "name": "rbBookstein",
+      "type": "QRadioButton"
+    },
+    {
+      "name": "rbRFTRA",
+      "type": "QRadioButton"
+    },
+    {
+      "name": "rbNone",
+      "type": "QRadioButton"
+    },
+    {
+      "name": "form_layout",
+      "type": "QGridLayout"
+    },
+    {
+      "name": "button_layout1",
+      "type": "QHBoxLayout"
+    },
+    {
+      "name": "button_layout2",
+      "type": "QHBoxLayout"
+    },
+    {
+      "name": "button_group2",
+      "type": "QButtonGroup"
+    },
+    {
+      "name": "button_layout3",
+      "type": "QHBoxLayout"
+    },
+    {
+      "name": "button_group3",
+      "type": "QButtonGroup"
+    },
+    {
+      "name": "layout",
+      "type": "QVBoxLayout"
+    },
+    {
+      "name": "filename_layout",
+      "type": "QHBoxLayout"
+    },
+    {
+      "name": "filename_widget",
+      "type": "QWidget"
+    },
+    {
+      "name": "btnOpenFile",
+      "type": "QPushButton"
+    },
+    {
+      "name": "edtFilename",
+      "type": "QLineEdit"
+    },
+    {
+      "name": "chkFileType",
+      "type": "QButtonGroup"
+    },
+    {
+      "name": "rbnTPS",
+      "type": "QRadioButton"
+    },
+    {
+      "name": "rbnNTS",
+      "type": "QRadioButton"
+    },
+    {
+      "name": "rbnX1Y1",
+      "type": "QRadioButton"
+    },
+    {
+      "name": "rbnMorphologika",
+      "type": "QRadioButton"
+    },
+    {
+      "name": "gbxFileType",
+      "type": "QGroupBox"
+    },
+    {
+      "name": "rb2D",
+      "type": "QRadioButton"
+    },
+    {
+      "name": "rb3D",
+      "type": "QRadioButton"
+    },
+    {
+      "name": "gbxDimension",
+      "type": "QGroupBox"
+    },
+    {
+      "name": "cbxInvertY",
+      "type": "QCheckBox"
+    },
+    {
+      "name": "edtDatasetName",
+      "type": "QLineEdit"
+    },
+    {
+      "name": "edtObjectCount",
+      "type": "QLineEdit"
+    },
+    {
+      "name": "btnImport",
+      "type": "QPushButton"
+    },
+    {
+      "name": "prgImport",
+      "type": "QProgressBar"
+    },
+    {
+      "name": "main_layout",
+      "type": "QFormLayout"
+    },
+    {
+      "name": "rbRememberGeometryYes",
+      "type": "QRadioButton"
+    },
+    {
+      "name": "rbRememberGeometryNo",
+      "type": "QRadioButton"
+    },
+    {
+      "name": "gbRememberGeomegry",
+      "type": "QGroupBox"
+    },
+    {
+      "name": "rbToolbarIconLarge",
+      "type": "QRadioButton"
+    },
+    {
+      "name": "rbToolbarIconSmall",
+      "type": "QRadioButton"
+    },
+    {
+      "name": "rbToolbarIconMedium",
+      "type": "QRadioButton"
+    },
+    {
+      "name": "gb2DLandmarkPref",
+      "type": "QGroupBox"
+    },
+    {
+      "name": "combo2DLandmarkSize",
+      "type": "QComboBox"
+    },
+    {
+      "name": "lbl2DLandmarkColor",
+      "type": "QPushButton"
+    },
+    {
+      "name": "gb3DLandmarkPref",
+      "type": "QGroupBox"
+    },
+    {
+      "name": "combo3DLandmarkSize",
+      "type": "QComboBox"
+    },
+    {
+      "name": "lbl3DLandmarkColor",
+      "type": "QPushButton"
+    },
+    {
+      "name": "landmark_layout",
+      "type": "QHBoxLayout"
+    },
+    {
+      "name": "landmark_widget",
+      "type": "QWidget"
+    },
+    {
+      "name": "gb2DWireframePref",
+      "type": "QGroupBox"
+    },
+    {
+      "name": "combo2DWireframeThickness",
+      "type": "QComboBox"
+    },
+    {
+      "name": "lbl2DWireframeColor",
+      "type": "QPushButton"
+    },
+    {
+      "name": "gb3DWireframePref",
+      "type": "QGroupBox"
+    },
+    {
+      "name": "combo3DWireframeThickness",
+      "type": "QComboBox"
+    },
+    {
+      "name": "lbl3DWireframeColor",
+      "type": "QPushButton"
+    },
+    {
+      "name": "wireframe_layout",
+      "type": "QHBoxLayout"
+    },
+    {
+      "name": "wireframe_widget",
+      "type": "QWidget"
+    },
+    {
+      "name": "gb2DIndexPref",
+      "type": "QGroupBox"
+    },
+    {
+      "name": "combo2DIndexSize",
+      "type": "QComboBox"
+    },
+    {
+      "name": "lbl2DIndexColor",
+      "type": "QPushButton"
+    },
+    {
+      "name": "gb3DIndexPref",
+      "type": "QGroupBox"
+    },
+    {
+      "name": "combo3DIndexSize",
+      "type": "QComboBox"
+    },
+    {
+      "name": "lbl3DIndexColor",
+      "type": "QPushButton"
+    },
+    {
+      "name": "index_layout",
+      "type": "QHBoxLayout"
+    },
+    {
+      "name": "index_widget",
+      "type": "QWidget"
+    },
+    {
+      "name": "lblBgcolor",
+      "type": "QPushButton"
+    },
+    {
+      "name": "gbToolbarIconSize",
+      "type": "QGroupBox"
+    },
+    {
+      "name": "gbPlotColors",
+      "type": "QGroupBox"
+    },
+    {
+      "name": "gbPlotMarkers",
+      "type": "QGroupBox"
+    },
+    {
+      "name": "rbPlotLarge",
+      "type": "QRadioButton"
+    },
+    {
+      "name": "rbPlotSmall",
+      "type": "QRadioButton"
+    },
+    {
+      "name": "rbPlotMedium",
+      "type": "QRadioButton"
+    },
+    {
+      "name": "gbPlotSize",
+      "type": "QGroupBox"
+    },
+    {
+      "name": "btnResetMarkers",
+      "type": "QPushButton"
+    },
+    {
+      "name": "btnResetVivid",
+      "type": "QPushButton"
+    },
+    {
+      "name": "btnResetPastel",
+      "type": "QPushButton"
+    },
+    {
+      "name": "lang_layout",
+      "type": "QHBoxLayout"
+    },
+    {
+      "name": "comboLang",
+      "type": "QComboBox"
+    },
+    {
+      "name": "lang_widget",
+      "type": "QWidget"
+    },
+    {
+      "name": "btnOkay",
+      "type": "QPushButton"
+    },
+    {
+      "name": "btnCancel",
+      "type": "QPushButton"
+    },
+    {
+      "name": "main_layout",
+      "type": "QFormLayout"
+    },
+    {
+      "name": "lblGeometry",
+      "type": "QLabel"
+    },
+    {
+      "name": "lblToolbarIconSize",
+      "type": "QLabel"
+    },
+    {
+      "name": "lblPlotSize",
+      "type": "QLabel"
+    },
+    {
+      "name": "lblPlotColors",
+      "type": "QLabel"
+    },
+    {
+      "name": "lblPlotMarkers",
+      "type": "QLabel"
+    },
+    {
+      "name": "lblLandmark",
+      "type": "QLabel"
+    },
+    {
+      "name": "lblWireframe",
+      "type": "QLabel"
+    },
+    {
+      "name": "lblIndex",
+      "type": "QLabel"
+    },
+    {
+      "name": "lblBgcolor",
+      "type": "QLabel"
+    },
+    {
+      "name": "lblLang",
+      "type": "QLabel"
+    }
+  ],
+  "layouts": [
+    "QVBoxLayout",
+    "QHBoxLayout",
+    "QVBoxLayout",
+    "QHBoxLayout",
+    "QVBoxLayout",
+    "QHBoxLayout",
+    "QFormLayout",
+    "QHBoxLayout",
+    "QHBoxLayout",
+    "QVBoxLayout",
+    "QHBoxLayout",
+    "QFormLayout",
+    "QGridLayout",
+    "QVBoxLayout",
+    "QVBoxLayout",
+    "QHBoxLayout",
+    "QGridLayout",
+    "QHBoxLayout",
+    "QVBoxLayout",
+    "QHBoxLayout",
+    "QVBoxLayout",
+    "QHBoxLayout",
+    "QHBoxLayout",
+    "QHBoxLayout",
+    "QHBoxLayout",
+    "QHBoxLayout",
+    "QHBoxLayout",
+    "QGridLayout",
+    "QVBoxLayout",
+    "QHBoxLayout",
+    "QVBoxLayout",
+    "QVBoxLayout",
+    "QHBoxLayout",
+    "QHBoxLayout",
+    "QVBoxLayout",
+    "QHBoxLayout",
+    "QHBoxLayout",
+    "QVBoxLayout",
+    "QHBoxLayout",
+    "QVBoxLayout",
+    "QHBoxLayout",
+    "QHBoxLayout",
+    "QHBoxLayout",
+    "QHBoxLayout",
+    "QHBoxLayout",
+    "QHBoxLayout",
+    "QHBoxLayout",
+    "QVBoxLayout",
+    "QVBoxLayout",
+    "QVBoxLayout",
+    "QVBoxLayout",
+    "QHBoxLayout",
+    "QHBoxLayout",
+    "QVBoxLayout",
+    "QHBoxLayout",
+    "QVBoxLayout",
+    "QHBoxLayout",
+    "QGridLayout",
+    "QHBoxLayout",
+    "QHBoxLayout",
+    "QHBoxLayout",
+    "QVBoxLayout",
+    "QHBoxLayout",
+    "QHBoxLayout",
+    "QHBoxLayout",
+    "QFormLayout",
+    "QHBoxLayout",
+    "QHBoxLayout",
+    "QHBoxLayout",
+    "QHBoxLayout",
+    "QHBoxLayout",
+    "QHBoxLayout",
+    "QHBoxLayout",
+    "QHBoxLayout",
+    "QHBoxLayout",
+    "QHBoxLayout",
+    "QHBoxLayout",
+    "QGridLayout",
+    "QHBoxLayout",
+    "QHBoxLayout",
+    "QHBoxLayout",
+    "QFormLayout"
+  ],
+  "qt_connections": [],
+  "methods": [
+    "__init__",
+    "read_settings",
+    "write_settings",
+    "closeEvent",
+    "set_dataset",
+    "on_rbProcrustes_clicked",
+    "on_rbBookstein_clicked",
+    "on_rbRFTRA_clicked",
+    "on_rbNone_clicked",
+    "on_rbTPS_clicked",
+    "on_rbNTS_clicked",
+    "on_rbX1Y1_clicked",
+    "on_rbMorphologika_clicked",
+    "move_right",
+    "move_left",
+    "export_dataset"
+  ],
+  "performance": {
+    "requires_wait_cursor": false,
+    "has_progress": false,
+    "blocking_operations": []
+  }
+}

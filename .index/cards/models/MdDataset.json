@@ -1,0 +1,64 @@
+{
+  "symbol": "MdDataset",
+  "kind": "peewee_model",
+  "file": "MdModel.py",
+  "line": 37,
+  "fields": [
+    {
+      "name": "dataset_name",
+      "type": "CharField"
+    },
+    {
+      "name": "dataset_desc",
+      "type": "CharField"
+    },
+    {
+      "name": "dimension",
+      "type": "IntegerField"
+    },
+    {
+      "name": "wireframe",
+      "type": "CharField"
+    },
+    {
+      "name": "baseline",
+      "type": "CharField"
+    },
+    {
+      "name": "polygons",
+      "type": "CharField"
+    },
+    {
+      "name": "parent",
+      "type": "ForeignKeyField"
+    },
+    {
+      "name": "created_at",
+      "type": "DateTimeField"
+    },
+    {
+      "name": "modified_at",
+      "type": "DateTimeField"
+    },
+    {
+      "name": "propertyname_str",
+      "type": "CharField"
+    }
+  ],
+  "meta": {
+    "database": "gDatabase"
+  },
+  "relationships": {
+    "belongs_to": [
+      "parent"
+    ],
+    "has_many": []
+  },
+  "usage": [
+    "ModanController",
+    "ProgressDialog",
+    "CalibrationDialog",
+    "DatasetDialog",
+    "ObjectDialog"
+  ]
+}

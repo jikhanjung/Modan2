@@ -1,0 +1,585 @@
+{
+  "symbol": "ObjectViewer3D",
+  "kind": "class",
+  "file": "ModanComponents.py",
+  "line": 1132,
+  "bases": [
+    "QGLWidget"
+  ],
+  "methods": [
+    {
+      "name": "__init__",
+      "line": 1133,
+      "params": [
+        "self",
+        "parent",
+        "transparent"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "set_object_name",
+      "line": 1228,
+      "params": [
+        "self",
+        "object_name"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "set_landmark_pref",
+      "line": 1231,
+      "params": [
+        "self",
+        "lm_pref",
+        "wf_pref"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "read_settings",
+      "line": 1237,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "show_message",
+      "line": 1246,
+      "params": [
+        "self",
+        "msg"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "set_mode",
+      "line": 1250,
+      "params": [
+        "self",
+        "mode"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "mousePressEvent",
+      "line": 1271,
+      "params": [
+        "self",
+        "event"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "mouseReleaseEvent",
+      "line": 1293,
+      "params": [
+        "self",
+        "event"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "mouseMoveEvent",
+      "line": 1366,
+      "params": [
+        "self",
+        "event"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "wheelEvent",
+      "line": 1454,
+      "params": [
+        "self",
+        "event"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "add_wire",
+      "line": 1462,
+      "params": [
+        "self",
+        "wire_start_index",
+        "wire_end_index"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "delete_wire",
+      "line": 1479,
+      "params": [
+        "self",
+        "selected_edge_index"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "set_ds_ops",
+      "line": 1493,
+      "params": [
+        "self",
+        "ds_ops"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "set_shape_preference",
+      "line": 1503,
+      "params": [
+        "self",
+        "object_preference"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "set_source_shape_preference",
+      "line": 1524,
+      "params": [
+        "self",
+        "pref"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "set_target_shape_preference",
+      "line": 1537,
+      "params": [
+        "self",
+        "pref"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "set_source_shape_color",
+      "line": 1550,
+      "params": [
+        "self",
+        "color"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "set_target_shape_color",
+      "line": 1553,
+      "params": [
+        "self",
+        "color"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "set_source_shape",
+      "line": 1556,
+      "params": [
+        "self",
+        "object"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "set_target_shape",
+      "line": 1559,
+      "params": [
+        "self",
+        "object"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "set_intermediate_shape",
+      "line": 1562,
+      "params": [
+        "self",
+        "object"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "generate_reference_shape",
+      "line": 1565,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "set_object",
+      "line": 1601,
+      "params": [
+        "self",
+        "object",
+        "idx"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "update_object",
+      "line": 1634,
+      "params": [
+        "self",
+        "object"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "align_object",
+      "line": 1642,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "get_scale_from_object",
+      "line": 1651,
+      "params": [
+        "self",
+        "obj_ops"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "dragEnterEvent",
+      "line": 1674,
+      "params": [
+        "self",
+        "event"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "dropEvent",
+      "line": 1683,
+      "params": [
+        "self",
+        "event"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "set_threed_model",
+      "line": 1697,
+      "params": [
+        "self",
+        "file_path"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "initializeGL",
+      "line": 1703,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "initialize_frame_buffer",
+      "line": 1711,
+      "params": [
+        "self",
+        "frame_buffer_id"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "paintGL",
+      "line": 1729,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "draw_all",
+      "line": 1739,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "draw_dataset",
+      "line": 1780,
+      "params": [
+        "self",
+        "ds_ops"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "draw_arrow",
+      "line": 1808,
+      "params": [
+        "self",
+        "start_idx",
+        "end_idx"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "draw_object",
+      "line": 1867,
+      "params": [
+        "self",
+        "object",
+        "landmark_as_sphere",
+        "color",
+        "edge_color",
+        "polygon_color"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "calculate_normal",
+      "line": 2010,
+      "params": [
+        "self",
+        "obj_ops",
+        "polygon"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "calculate_face_normals",
+      "line": 2020,
+      "params": [
+        "self",
+        "polygon_list"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "calculate_normal_list",
+      "line": 2034,
+      "params": [
+        "self",
+        "obj_ops",
+        "polygon_list"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "create_picker_buffer",
+      "line": 2057,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "draw_picker_buffer",
+      "line": 2084,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "delete_picker_buffer",
+      "line": 2093,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "resizeGL",
+      "line": 2099,
+      "params": [
+        "self",
+        "width",
+        "height"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "closeEvent",
+      "line": 2129,
+      "params": [
+        "self",
+        "event"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "timeout",
+      "line": 2132,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "clear_object",
+      "line": 2140,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "hit_background_test",
+      "line": 2146,
+      "params": [
+        "self",
+        "x",
+        "y"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "hit_test",
+      "line": 2156,
+      "params": [
+        "self",
+        "x",
+        "y"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "initialize_colors",
+      "line": 2170,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "update_landmark_list",
+      "line": 2191,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "calculate_resize",
+      "line": 2195,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "unproject_mouse",
+      "line": 2211,
+      "params": [
+        "self",
+        "x",
+        "y"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "pick_element",
+      "line": 2221,
+      "params": [
+        "self",
+        "x",
+        "y"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "ray_triangle_intersection",
+      "line": 2239,
+      "params": [
+        "self",
+        "ray_origin",
+        "ray_direction",
+        "v0",
+        "v1",
+        "v2"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "distance_to_ray",
+      "line": 2271,
+      "params": [
+        "self",
+        "ray_origin",
+        "ray_direction",
+        "point"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "apply_rotation",
+      "line": 2280,
+      "params": [
+        "self",
+        "rotation_matrix"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "rotate",
+      "line": 2286,
+      "params": [
+        "self",
+        "rotationX_rad",
+        "rotationY_rad",
+        "vertices"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "reset_pose",
+      "line": 2310,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "sync_rotation",
+      "line": 2353,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "draw_wireframe_cube",
+      "line": 2385,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "draw_simple_cone",
+      "line": 2418,
+      "params": [
+        "self"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "draw_sphere",
+      "line": 2431,
+      "params": [
+        "self",
+        "radius"
+      ],
+      "decorators": []
+    }
+  ],
+  "qt_metadata": {
+    "is_widget": false,
+    "signals": [],
+    "slots": []
+  },
+  "complexity": {
+    "method_count": 62,
+    "inheritance_depth": 1,
+    "estimated_loc": 1240
+  }
+}

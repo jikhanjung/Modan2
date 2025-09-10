@@ -1,0 +1,26 @@
+{
+  "symbol": "progress_dialog_usage",
+  "kind": "analysis",
+  "description": "Dialogs with progress indicators",
+  "dialogs": [
+    {
+      "name": "NewAnalysisDialog",
+      "file": "ModanDialogs.py",
+      "features": [
+        "Progress bar at bottom",
+        "Status messages",
+        "Auto-close on completion",
+        "Centered on screen"
+      ]
+    },
+    {
+      "name": "ProgressDialog",
+      "file": "ModanDialogs.py",
+      "features": [
+        "Generic progress dialog",
+        "Stop button",
+        "Custom text format"
+      ]
+    }
+  ]
+}

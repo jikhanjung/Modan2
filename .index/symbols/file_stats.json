@@ -1,0 +1,137 @@
+{
+  "build.py": {
+    "lines": 231,
+    "size": 8152,
+    "modified": "2025-09-09T10:53:16.601093"
+  },
+  "debug_landmark.py": {
+    "lines": 47,
+    "size": 1132,
+    "modified": "2025-09-03T12:19:09.657328"
+  },
+  "fix_qt_import.py": {
+    "lines": 113,
+    "size": 3141,
+    "modified": "2025-09-04T16:20:04.485089"
+  },
+  "main.py": {
+    "lines": 217,
+    "size": 6849,
+    "modified": "2025-09-05T11:55:50.439422"
+  },
+  "manage_version.py": {
+    "lines": 265,
+    "size": 9298,
+    "modified": "2025-09-08T09:38:43.886419"
+  },
+  "manova_test.py": {
+    "lines": 73,
+    "size": 2437,
+    "modified": "2025-09-03T12:19:11.073099"
+  },
+  "MdAppSetup.py": {
+    "lines": 364,
+    "size": 12995,
+    "modified": "2025-09-04T16:20:04.101085"
+  },
+  "MdConstants.py": {
+    "lines": 684,
+    "size": 21127,
+    "modified": "2025-09-03T12:19:11.109501"
+  },
+  "MdHelpers.py": {
+    "lines": 1193,
+    "size": 30063,
+    "modified": "2025-09-04T16:20:04.107465"
+  },
+  "MdLogger.py": {
+    "lines": 24,
+    "size": 731,
+    "modified": "2025-09-03T12:19:11.142441"
+  },
+  "MdModel.py": {
+    "lines": 1752,
+    "size": 69881,
+    "modified": "2025-09-03T12:19:11.173730"
+  },
+  "MdModel1.py": {
+    "lines": 46,
+    "size": 1267,
+    "modified": "2025-09-03T12:19:11.187666"
+  },
+  "MdSplashScreen.py": {
+    "lines": 190,
+    "size": 7045,
+    "modified": "2025-09-05T13:04:23.999095"
+  },
+  "MdStatistics.py": {
+    "lines": 916,
+    "size": 33431,
+    "modified": "2025-09-09T17:31:33.357385"
+  },
+  "MdUtils.py": {
+    "lines": 619,
+    "size": 21578,
+    "modified": "2025-09-09T10:54:04.376949"
+  },
+  "migrate.py": {
+    "lines": 35,
+    "size": 1168,
+    "modified": "2025-09-04T18:01:33.117773"
+  },
+  "Modan2.py": {
+    "lines": 1782,
+    "size": 82155,
+    "modified": "2025-09-10T08:59:20.154856"
+  },
+  "Modan2_original.py": {
+    "lines": 1501,
+    "size": 67555,
+    "modified": "2025-09-04T16:20:04.156101"
+  },
+  "ModanComponents.py": {
+    "lines": 4528,
+    "size": 196527,
+    "modified": "2025-09-09T17:26:59.852249"
+  },
+  "ModanController.py": {
+    "lines": 1309,
+    "size": 57680,
+    "modified": "2025-09-09T17:35:00.095342"
+  },
+  "ModanDialogs.py": {
+    "lines": 6724,
+    "size": 307230,
+    "modified": "2025-09-10T09:09:21.862922"
+  },
+  "ModanWidgets.py": {
+    "lines": 1008,
+    "size": 34843,
+    "modified": "2025-09-04T16:20:04.198951"
+  },
+  "modan_convert.py": {
+    "lines": 57,
+    "size": 1807,
+    "modified": "2025-09-03T12:19:11.542175"
+  },
+  "objloader.py": {
+    "lines": 279,
+    "size": 10519,
+    "modified": "2025-09-04T16:20:04.518379"
+  },
+  "setup.py": {
+    "lines": 35,
+    "size": 1079,
+    "modified": "2025-09-04T16:20:04.542099"
+  },
+  "version.py": {
+    "lines": 11,
+    "size": 254,
+    "modified": "2025-09-08T09:38:43.902646"
+  },
+  "version_utils.py": {
+    "lines": 142,
+    "size": 3920,
+    "modified": "2025-09-03T12:19:12.357377"
+  }
+}

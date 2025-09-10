@@ -1560,14 +1560,23 @@ class ObjectDialog(QDialog):
 
 class NewAnalysisDialog(QDialog):
     def __init__(self,parent,dataset):
-        super().__init__()
+        super().__init__(parent)
         self.parent = parent
-        self.setGeometry(QRect(100, 100, 400, 300))
         self.setWindowTitle(self.tr("Modan2 - New Analysis"))
-        self.move(self.parent.pos()+QPoint(100,100))
-        #self.status_bar = QStatusBar()
+        self.setFixedSize(500, 450)  # Increased height for progress bar
+        
+        # Center the dialog on screen
+        screen = QApplication.primaryScreen()
+        screen_geometry = screen.geometry()
+        x = (screen_geometry.width() - self.width()) // 2
+        y = (screen_geometry.height() - self.height()) // 2
+        self.move(x, y)
+        
         self.dataset = dataset
         self.name_edited = False
+        self.controller = parent.controller  # Get controller reference
+        self.analysis_running = False
+        self.analysis_completed = False  # Track if analysis has completed
         self.lblAnalysisName = QLabel(self.tr("Analysis name"), self)
         self.edtAnalysisName = QLineEdit(self)
         self.edtAnalysisName.textChanged.connect(self.edtAnalysisName_changed)
@@ -1622,6 +1631,22 @@ class NewAnalysisDialog(QDialog):
         self.layout.addWidget(self.lblManovaGroupBy, i, 0)   
         self.layout.addWidget(self.comboManovaGroupBy, i, 1)
 
+        # Add progress bar and status label
+        i += 1
+        self.progressBar = QProgressBar(self)
+        self.progressBar.setMinimum(0)
+        self.progressBar.setMaximum(100)
+        self.progressBar.setValue(0)
+        self.progressBar.hide()  # Initially hidden
+        self.layout.addWidget(self.progressBar, i, 0, 1, 2)
+        
+        i += 1
+        self.lblStatus = QLabel("", self)
+        self.lblStatus.setAlignment(Qt.AlignCenter)
+        self.lblStatus.setStyleSheet("QLabel { color: #666; font-style: italic; }")
+        self.lblStatus.hide()  # Initially hidden
+        self.layout.addWidget(self.lblStatus, i, 0, 1, 2)
+        
         self.buttonLayout = QHBoxLayout()
         self.buttonLayout.addWidget(self.btnOK)
         self.buttonLayout.addWidget(self.btnCancel)
@@ -1630,6 +1655,26 @@ class NewAnalysisDialog(QDialog):
         i+= 1
         self.layout.addLayout(self.buttonLayout, i, 0, 1, 2)
         self.get_analysis_name()
+        
+        # Store signal connections for cleanup
+        self.signal_connections = []
+        
+        # Connect controller signals for progress
+        if hasattr(self.controller, 'analysis_progress'):
+            self.signal_connections.append(
+                (self.controller.analysis_progress, self.on_analysis_progress)
+            )
+            self.controller.analysis_progress.connect(self.on_analysis_progress)
+        if hasattr(self.controller, 'analysis_completed'):
+            self.signal_connections.append(
+                (self.controller.analysis_completed, self.on_analysis_completed)
+            )
+            self.controller.analysis_completed.connect(self.on_analysis_completed)
+        if hasattr(self.controller, 'analysis_failed'):
+            self.signal_connections.append(
+                (self.controller.analysis_failed, self.on_analysis_failed)
+            )
+            self.controller.analysis_failed.connect(self.on_analysis_failed)
 
     def edtAnalysisName_changed(self):
         if self.ignore_change is True:
@@ -1660,11 +1705,167 @@ class NewAnalysisDialog(QDialog):
             self.ignore_change = False
 
     def btnOK_clicked(self):
-        #self.parent.set_object_calibration( self.pixel_number, float(self.edtLength.text()),self.comboUnit.currentText())
-        self.accept()
+        """Run analysis with progress bar"""
+        if self.analysis_running:
+            return
+            
+        # Validate inputs
+        if not self.edtAnalysisName.text().strip():
+            QMessageBox.warning(self, self.tr("Warning"), self.tr("Please enter an analysis name"))
+            return
+            
+        # Store parameters for later use
+        self.analysis_name = self.edtAnalysisName.text()
+        self.superimposition_method = self.comboSuperimposition.currentText()
+        self.cva_group_by = self.comboCvaGroupBy.currentData()
+        self.manova_group_by = self.comboManovaGroupBy.currentData()
+        
+        # Disable controls during analysis
+        self.set_controls_enabled(False)
+        self.analysis_running = True
+        
+        # Set wait cursor during analysis
+        QApplication.setOverrideCursor(Qt.WaitCursor)
+        
+        # Show progress bar and status
+        self.progressBar.show()
+        self.lblStatus.show()
+        self.progressBar.setValue(0)
+        self.lblStatus.setText(self.tr("Validating dataset..."))
+        
+        # Change button text
+        self.btnOK.setText(self.tr("Running..."))
+        self.btnCancel.setText(self.tr("Close"))
+        
+        try:
+            # Validate dataset
+            if not self.controller.validate_dataset_for_analysis(self.dataset):
+                self.on_analysis_failed(self.tr("Dataset validation failed"))
+                return
+                
+            self.lblStatus.setText(self.tr("Starting analysis..."))
+            QApplication.processEvents()
+            
+            # Run analysis
+            self.controller.run_analysis(
+                dataset=self.dataset,
+                analysis_name=self.analysis_name,
+                superimposition_method=self.superimposition_method,
+                cva_group_by=self.cva_group_by,
+                manova_group_by=self.manova_group_by
+            )
+            
+        except Exception as e:
+            self.on_analysis_failed(str(e))
     
-    def btnCancel_clicked(self): 
-        self.close()
+    def btnCancel_clicked(self):
+        # Disconnect signals before closing
+        self.cleanup_connections()
+        
+        if self.analysis_completed:
+            # If analysis completed successfully, accept
+            self.accept()
+        else:
+            # Otherwise reject
+            self.reject()
+    
+    def set_controls_enabled(self, enabled):
+        """Enable/disable input controls"""
+        self.edtAnalysisName.setEnabled(enabled)
+        self.comboSuperimposition.setEnabled(enabled)
+        self.comboCvaGroupBy.setEnabled(enabled)
+        self.comboManovaGroupBy.setEnabled(enabled)
+        self.btnOK.setEnabled(enabled)
+    
+    def on_analysis_progress(self, progress):
+        """Update progress bar"""
+        self.progressBar.setValue(progress)
+        
+        # Update status message based on progress
+        if progress < 25:
+            self.lblStatus.setText(self.tr("Validating objects and landmarks..."))
+        elif progress < 50:
+            self.lblStatus.setText(self.tr("Performing Procrustes superimposition..."))
+        elif progress < 75:
+            self.lblStatus.setText(self.tr("Running PCA analysis..."))
+        elif progress < 90:
+            self.lblStatus.setText(self.tr("Computing CVA and MANOVA..."))
+        else:
+            self.lblStatus.setText(self.tr("Finalizing results..."))
+        
+        QApplication.processEvents()
+    
+    def on_analysis_completed(self, analysis):
+        """Handle successful analysis completion"""
+        if self.analysis_completed:  # Prevent multiple calls
+            return
+            
+        self.analysis_result = analysis
+        self.analysis_completed = True
+        self.analysis_running = False
+        
+        # Restore normal cursor
+        QApplication.restoreOverrideCursor()
+        
+        self.progressBar.setValue(100)
+        self.lblStatus.setText(self.tr("Analysis completed successfully!"))
+        self.lblStatus.setStyleSheet("QLabel { color: green; font-weight: bold; }")
+        
+        # Re-enable controls
+        self.set_controls_enabled(True)
+        
+        # Change button text
+        self.btnOK.setText(self.tr("OK"))
+        self.btnOK.hide()  # Hide OK button after success
+        self.btnCancel.setText(self.tr("Close"))
+        
+        # Auto-close after a short delay (with cleanup)
+        QTimer.singleShot(1500, self.close_dialog)
+    
+    def on_analysis_failed(self, error_msg):
+        """Handle analysis failure"""
+        # Restore normal cursor
+        QApplication.restoreOverrideCursor()
+        
+        self.progressBar.setValue(0)
+        self.lblStatus.setText(self.tr("Analysis failed: {}").format(error_msg))
+        self.lblStatus.setStyleSheet("QLabel { color: red; font-weight: bold; }")
+        
+        # Re-enable controls
+        self.set_controls_enabled(True)
+        self.analysis_running = False
+        
+        # Reset button text
+        self.btnOK.setText(self.tr("OK"))
+        self.btnCancel.setText(self.tr("Cancel"))
+        
+        QMessageBox.critical(self, self.tr("Analysis Failed"), 
+                            self.tr("Analysis failed:\n{}").format(error_msg))
+    
+    def cleanup_connections(self):
+        """Disconnect all signal connections to prevent errors on close"""
+        # Restore cursor if still in wait state
+        QApplication.restoreOverrideCursor()
+        
+        for signal, slot in self.signal_connections:
+            try:
+                signal.disconnect(slot)
+            except:
+                pass  # Signal might already be disconnected
+        self.signal_connections.clear()
+    
+    def close_dialog(self):
+        """Safely close the dialog"""
+        self.cleanup_connections()
+        if self.analysis_completed:
+            self.accept()
+        else:
+            self.reject()
+    
+    def closeEvent(self, event):
+        """Handle dialog close event"""
+        self.cleanup_connections()
+        event.accept()
 
     def get_unique_name(self, name, name_list):
         if name not in name_list:
@@ -2200,12 +2401,18 @@ class DataExplorationDialog(QDialog):
 
     def cbxShapeGrid_state_changed(self):
         #print("cbxShape_state_changed")
-        if self.cbxShapeGrid.isChecked() == True:
-            self.sgpWidget.show()
-            self.update_chart()
-        else:
-            self.sgpWidget.hide()
-            self.update_chart()
+        # Set wait cursor while processing shape grid
+        QApplication.setOverrideCursor(Qt.WaitCursor)
+        try:
+            if self.cbxShapeGrid.isChecked() == True:
+                self.sgpWidget.show()
+                self.update_chart()
+            else:
+                self.sgpWidget.hide()
+                self.update_chart()
+        finally:
+            # Restore normal cursor after processing
+            QApplication.restoreOverrideCursor()
 
 
     def export_chart(self):
@@ -3865,63 +4072,70 @@ class DataExplorationDialog(QDialog):
     def pick_shape(self, x_val, y_val):
         if self.pick_idx == -1:
             return
-        #print("pick_shape", evt.xdata, evt.ydata, self.pick_idx)
-        scatter_data_len = len(self.scatter_data.keys())
-        marker_list = self.marker_list
-        while scatter_data_len+2 > len(marker_list):
-            marker_list += self.marker_list
-        #print("scatter_data_len", scatter_data_len, self.marker_list, marker_list)
-        symbol_candidate = marker_list[scatter_data_len:scatter_data_len+2]
-        color_list = self.color_list
-        while scatter_data_len+2 > len(color_list):
-            color_list += self.color_list
-        color_candidate = color_list[scatter_data_len:scatter_data_len+2]
-        #print("pick_shape", evt.xdata, evt.ydata, self.pick_idx, scatter_data_len, symbol_candidate, color_candidate)
-        shape = self.custom_shape_hash[self.pick_idx]
+        
+        # Set wait cursor while processing shape display
+        QApplication.setOverrideCursor(Qt.WaitCursor)
+        try:
+            #print("pick_shape", evt.xdata, evt.ydata, self.pick_idx)
+            scatter_data_len = len(self.scatter_data.keys())
+            marker_list = self.marker_list
+            while scatter_data_len+2 > len(marker_list):
+                marker_list += self.marker_list
+            #print("scatter_data_len", scatter_data_len, self.marker_list, marker_list)
+            symbol_candidate = marker_list[scatter_data_len:scatter_data_len+2]
+            color_list = self.color_list
+            while scatter_data_len+2 > len(color_list):
+                color_list += self.color_list
+            color_candidate = color_list[scatter_data_len:scatter_data_len+2]
+            #print("pick_shape", evt.xdata, evt.ydata, self.pick_idx, scatter_data_len, symbol_candidate, color_candidate)
+            shape = self.custom_shape_hash[self.pick_idx]
 
-        if shape['point'] is not None:
-            try:
-                shape['point'].remove()
-            except NotImplementedError:
-                # For scatter plots, we need to remove from the axes collection
-                if shape['point'] in self.ax2.collections:
-                    self.ax2.collections.remove(shape['point'])
-            shape['point'] = None
-        if shape['label'] is not None:
-            try:
-                shape['label'].remove()
-            except NotImplementedError:
-                # For annotations, try removing from axes
-                if shape['label'] in self.ax2.texts:
-                    self.ax2.texts.remove(shape['label'])
-            shape['label'] = None
+            if shape['point'] is not None:
+                try:
+                    shape['point'].remove()
+                except NotImplementedError:
+                    # For scatter plots, we need to remove from the axes collection
+                    if shape['point'] in self.ax2.collections:
+                        self.ax2.collections.remove(shape['point'])
+                shape['point'] = None
+            if shape['label'] is not None:
+                try:
+                    shape['label'].remove()
+                except NotImplementedError:
+                    # For annotations, try removing from axes
+                    if shape['label'] in self.ax2.texts:
+                        self.ax2.texts.remove(shape['label'])
+                shape['label'] = None
 
-        ''' need to improve speed by using offset, not creating new annotation every time '''
-        #print("shape['name']", shape['name'], x_val, y_val, self.pick_idx, symbol_candidate, color_candidate)
-        shape['coords'] = [x_val, y_val]
-        shape['point'] = self.ax2.scatter([x_val],[y_val], s=150, marker=symbol_candidate[self.pick_idx], color=color_candidate[self.pick_idx] )
-        #print("shape['name']", shape['name'])
-        if shape['name'] != '':
-            shape['label'] = self.ax2.annotate(shape['name'], (x_val, y_val), xycoords='data',textcoords='offset pixels', xytext=(15,15), ha='center', fontsize=12, color='black')
-        #print("point:", self.custom_shape_hash[self.pick_idx]['point'])
-        #self.ax2.scatter(self.average_shape[name]['x_val'], self.average_shape[name]['y_val'], s=150, marker=group['symbol'], color=group['color'])
+            ''' need to improve speed by using offset, not creating new annotation every time '''
+            #print("shape['name']", shape['name'], x_val, y_val, self.pick_idx, symbol_candidate, color_candidate)
+            shape['coords'] = [x_val, y_val]
+            shape['point'] = self.ax2.scatter([x_val],[y_val], s=150, marker=symbol_candidate[self.pick_idx], color=color_candidate[self.pick_idx] )
+            #print("shape['name']", shape['name'])
+            if shape['name'] != '':
+                shape['label'] = self.ax2.annotate(shape['name'], (x_val, y_val), xycoords='data',textcoords='offset pixels', xytext=(15,15), ha='center', fontsize=12, color='black')
+            #print("point:", self.custom_shape_hash[self.pick_idx]['point'])
+            #self.ax2.scatter(self.average_shape[name]['x_val'], self.average_shape[name]['y_val'], s=150, marker=group['symbol'], color=group['color'])
 
-        axis1 = self.comboAxis1.currentData()
-        axis2 = self.comboAxis2.currentData()
-        flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
-        flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
-        shape_to_visualize = np.zeros((1,len(self.analysis_result_list[0])))
-        x_value = flip_axis1 * x_val
-        y_value = flip_axis2 * y_val
-        if axis1 != CENTROID_SIZE_VALUE:
-            shape_to_visualize[0][axis1] = x_value
-        if axis2 != CENTROID_SIZE_VALUE:
-            shape_to_visualize[0][axis2] = y_value
-        unrotated_shape = self.unrotate_shape(shape_to_visualize)
-        #print("0-4:",datetime.datetime.now())
-        self.show_shape(unrotated_shape[0], self.pick_idx)
+            axis1 = self.comboAxis1.currentData()
+            axis2 = self.comboAxis2.currentData()
+            flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
+            flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
+            shape_to_visualize = np.zeros((1,len(self.analysis_result_list[0])))
+            x_value = flip_axis1 * x_val
+            y_value = flip_axis2 * y_val
+            if axis1 != CENTROID_SIZE_VALUE:
+                shape_to_visualize[0][axis1] = x_value
+            if axis2 != CENTROID_SIZE_VALUE:
+                shape_to_visualize[0][axis2] = y_value
+            unrotated_shape = self.unrotate_shape(shape_to_visualize)
+            #print("0-4:",datetime.datetime.now())
+            self.show_shape(unrotated_shape[0], self.pick_idx)
 
-        #self.axvline = self.ax2.axvline(x=self.vertical_line_xval, color='gray', linestyle=self.vertical_line_style)
+            #self.axvline = self.ax2.axvline(x=self.vertical_line_xval, color='gray', linestyle=self.vertical_line_style)
+        finally:
+            # Restore normal cursor after shape display
+            QApplication.restoreOverrideCursor()
 
     def raw_chart_coords_to_shape(self, x_val, y_val):
         axis1 = self.comboAxis1.currentData()

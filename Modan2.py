@@ -15,7 +15,7 @@ if hasattr(sys, 'version') and '| packaged by Anaconda' in sys.version:
 from PyQt5.QtWidgets import QMainWindow, QHeaderView, QApplication, QAbstractItemView, \
                             QMessageBox, QTreeView, QTableView, QSplitter, QAction, QActionGroup, QMenu, \
                             QStatusBar, QInputDialog, QToolBar, QWidget, QPlainTextEdit, QVBoxLayout, QHBoxLayout, \
-                            QPushButton, QRadioButton, QLabel, QDockWidget
+                            QPushButton, QRadioButton, QLabel, QDockWidget, QDialog
 from PyQt5.QtGui import QIcon, QStandardItemModel, QStandardItem, QKeySequence, QCursor
 from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSettings, QSize, QTranslator, QItemSelectionModel, QObject, QEvent, QTimer
 
@@ -209,6 +209,7 @@ class ModanMainWindow(QMainWindow):
         self.controller.object_added.connect(self.on_object_added)
         self.controller.object_updated.connect(self.on_object_updated)
         self.controller.analysis_completed.connect(self.on_analysis_completed)
+        self.controller.analysis_failed.connect(self.on_analysis_failed)
         self.controller.error_occurred.connect(self.on_controller_error)
 
     def on_dataset_created(self, dataset):
@@ -232,6 +233,10 @@ class ModanMainWindow(QMainWindow):
         """Handle analysis completion from controller"""
         self.load_dataset()
         show_info(self, "Analysis completed successfully")
+
+    def on_analysis_failed(self, error_msg):
+        """Handle analysis failure from controller"""
+        show_error(self, f"Analysis failed: {error_msg}")
 
     def on_controller_error(self, error_msg):
         """Handle controller errors"""
@@ -658,30 +663,20 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             return
         
         try:
-            # Validate dataset using controller
-            if not self.controller.validate_dataset_for_analysis(self.selected_dataset):
-                return  # Controller will show appropriate error messages
-            
+            # Create and show analysis dialog
+            # The dialog now handles validation, running analysis, and showing progress internally
             self.analysis_dialog = NewAnalysisDialog(self, self.selected_dataset)
             ret = self.analysis_dialog.exec_()
             logger.info("new analysis dialog return value %s", ret)
             
-            if ret == 1:
-                superimposition_method = self.analysis_dialog.comboSuperimposition.currentText()
-                cva_group_by = self.analysis_dialog.comboCvaGroupBy.currentData()
-                manova_group_by = self.analysis_dialog.comboManovaGroupBy.currentData()
-                analysis_name = self.analysis_dialog.edtAnalysisName.text()
+            # Dialog returns 1 (accept) when analysis completes successfully
+            # The analysis is already complete at this point, so we just need to refresh the UI
+            if ret == QDialog.Accepted:
+                # Refresh the dataset tree to show the new analysis
+                self.load_dataset()
                 
-                # Use controller for analysis
-                self.controller.run_analysis(
-                    dataset=self.selected_dataset,
-                    analysis_name=analysis_name,
-                    superimposition_method=superimposition_method,
-                    cva_group_by=cva_group_by,
-                    manova_group_by=manova_group_by
-                )
         except Exception as e:
-            show_error(self, f"Error running analysis: {str(e)}")
+            show_error(self, f"Error opening analysis dialog: {str(e)}")
 
 
     def initUI(self):

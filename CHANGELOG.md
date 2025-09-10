@@ -5,7 +5,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.4] - 2024-12-09
+
+## [0.1.4] - 2025-09-10
 
 ### Added
 - **CI/CD 및 빌드 시스템**
@@ -41,6 +42,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 언어 설정 즉시 적용 기능
   - 번역 파일 업데이트 (Modan2_ko.ts)
 
+- **코드 인덱싱 시스템**
+  - 소스코드 구조 분석 및 인덱싱 도구 구축
+  - 대화형 HTML 대시보드 (tools/visualize_index.py)
+  - 심볼 검색 및 의존성 분석 도구
+
 ### Changed
 - **코드 구조 개선**
   - 새로운 모듈 분리: `ModanController.py`, `MdHelpers.py`, `MdConstants.py`, `ModanWidgets.py`
@@ -61,6 +67,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 속성(property)에서 변수(variable)로 용어 통일
 
 ### Fixed
+- **분석 기능 개선**
+  - CVA/MANOVA 변수 선택 오류 수정: 선택된 그룹화 변수가 분석 함수에 제대로 전달되지 않던 심각한 문제 해결
+  - 분석 정확도 향상: CVA 및 MANOVA 계산에 올바른 범주형 변수가 사용되도록 변수 인덱싱 수정
+  - 데이터 검증 강화: 분석 실행 전 그룹화 변수 요구사항에 대한 적절한 검사 추가
+
 - **주요 버그 수정**
   - PCA 분석 일관성 및 차원 문제 해결
   - Reset Pose 기능 완전 복구
@@ -80,6 +91,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Linux AppImage 생성 프로세스 개선
   - macOS 빌드 아티팩트 패턴 수정
   - Anaconda Python 호환성 개선
+
+- **테스트 수정**
+  - PyQt5 호환성 문제 해결
+  - 테스트 데이터에 그룹화 변수 추가
 
 ### Removed
 - 하드코딩된 Modan2.spec 파일 (동적 생성으로 전환)

@@ -18,9 +18,17 @@
 - Support for NumPy 2.0+ and Python 3.12
 - Enhanced error handling and logging system
 - Migrated to JSON-based settings management
+- **Code Indexing System**: Added source code structure analysis and search tools
+- **Interactive Dashboard**: HTML-based code structure visualization tool (`tools/visualize_index.py`)
+
+### 📊 Analysis Improvements
+- **CVA/MANOVA Variable Selection Fix**: Resolved critical issue where selected grouping variables were not being properly passed to analysis functions
+- **Improved Analysis Accuracy**: Fixed variable indexing to ensure correct categorical variables are used for CVA and MANOVA computations
+- **Enhanced Data Validation**: Added proper checks for grouping variable requirements before analysis execution
 
 ### 🐛 Bug Fixes
 - Resolved PCA analysis consistency issues
+- Fixed CVA/MANOVA variable selection and computation errors
 - Fixed Reset Pose functionality
 - Solved Linux/WSL Qt compatibility problems
 - Mitigated Windows Defender false positives

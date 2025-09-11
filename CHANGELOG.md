@@ -6,6 +6,64 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+
+## [0.1.5-alpha.1] - 2025-09-11
+
+### Added
+- **JSON+ZIP 데이터셋 패키징 시스템**
+  - 완전한 데이터셋 백업 및 공유를 위한 새로운 export/import 형식
+  - JSON schema v1.1 with 확장된 메타데이터 (wireframe, polygons, baseline, variables)
+  - ZIP 패키징으로 이미지 및 3D 모델 파일 포함 지원
+  - 구조화된 파일 레이아웃 (dataset.json, images/, models/)
+  - 손실 없는 라운드트립 데이터 보존
+
+- **보안 및 안정성 기능**
+  - Zip Slip 공격 방어 시스템
+  - 트랜잭션 기반 import (실패 시 자동 롤백)
+  - 파일 무결성 검증 (MD5 체크섬)
+  - 안전한 ZIP 압축 해제 (`safe_extract_zip()`)
+  - JSON 스키마 검증 및 에러 리포팅
+
+- **새로운 API 함수들 (MdUtils.py)**
+  - `serialize_dataset_to_json()` - 데이터셋을 JSON 구조로 직렬화
+  - `create_zip_package()` - 파일 수집 및 ZIP 패키징  
+  - `import_dataset_from_zip()` - 안전한 ZIP 기반 데이터셋 import
+  - `collect_dataset_files()` - 데이터셋 관련 파일 경로 수집
+  - `estimate_package_size()` - 패키지 크기 추정
+  - `validate_json_schema()` - JSON 스키마 유효성 검사
+
+- **사용자 인터페이스 개선**
+  - Export Dialog에 "JSON+ZIP Package" 옵션 추가
+  - "Include image and model files" 토글 기능
+  - 실시간 파일 크기 추정 표시
+  - Import Dialog에 JSON+ZIP 형식 지원 추가
+  - 진행률 추적 및 진행 상황 콜백
+
+### Changed
+- **기존 export 형식 유지**
+  - TPS, NTS, Morphologika, CSV/Excel 형식 계속 지원
+  - JSON+ZIP은 완전한 백업용 추가 옵션으로 제공
+  
+- **파일 명명 규칙 개선**
+  - ZIP 내부 파일은 `<object_id>.<ext>` 형식으로 충돌 방지
+  - 상대 경로 사용으로 플랫폼 독립성 확보
+
+- **데이터베이스 처리 개선**
+  - 중복 데이터셋 이름 자동 해결 ("Dataset (1)", "Dataset (2)" 등)
+  - 변수 매핑 및 랜드마크 처리 최적화
+
+### Fixed
+- **크로스 플랫폼 호환성**
+  - UTF-8 인코딩으로 한국어 파일명 지원
+  - Windows, macOS, Linux 경로 처리 통일
+  - 파일 시스템 안전성 검증 추가
+
+- **메모리 및 성능 최적화**
+  - 대용량 파일 스트리밍 처리
+  - 임시 파일 안전한 정리 (context manager 사용)
+  - 에러 발생 시 부분 import 방지
+
+
 ## [0.1.4] - 2025-09-10
 
 ### Added

@@ -19,7 +19,7 @@ try:
     from version import __version__ as PROGRAM_VERSION
 except ImportError:
     # Fallback for compatibility
-    PROGRAM_VERSION = "0.1.4"
+    PROGRAM_VERSION = "0.1.5-alpha.1"
 
 COMPANY_NAME = "PaleoBytes"
 PROGRAM_NAME = "Modan2"

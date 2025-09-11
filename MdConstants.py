@@ -3,9 +3,14 @@ Constants and configuration values for Modan2 application.
 """
 from pathlib import Path
 
+# Import version from centralized version file
+try:
+    from version import __version__ as APP_VERSION
+except ImportError:
+    APP_VERSION = "0.1.5-alpha.1"  # Fallback
+
 # ========== Application Information ==========
 APP_NAME = "Modan2"
-APP_VERSION = "0.1.4"
 APP_AUTHOR = "Modan2 Team"
 APP_LICENSE = "MIT"
 APP_DESCRIPTION = "Morphometric Data Analysis Application"
@@ -607,10 +612,10 @@ DEBUG = {
 VERSION_INFO = {
     'major': 0,
     'minor': 1,
-    'patch': 4,
-    'pre_release': None,  # 'alpha', 'beta', 'rc1', etc.
+    'patch': 5,
+    'pre_release': 'alpha.1',  # 'alpha', 'beta', 'rc1', etc.
     'build': None,
-    'full': f"{0}.{1}.{4}",
+    'full': APP_VERSION,
 }
 
 

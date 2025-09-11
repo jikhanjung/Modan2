@@ -47,10 +47,17 @@ def parse_arguments():
         help='Skip splash screen on startup'
     )
     
+    # Import version
+    try:
+        from version import __version__
+        version_string = f'Modan2 {__version__}'
+    except ImportError:
+        version_string = 'Modan2 0.1.5-alpha.1'
+    
     parser.add_argument(
         '--version',
         action='version',
-        version='Modan2 0.1.4'
+        version=version_string
     )
     
     return parser.parse_args()
@@ -122,10 +129,17 @@ def main():
         QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
         QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
         
+        # Import version for app metadata
+        try:
+            from version import __version__
+            app_version = __version__
+        except ImportError:
+            app_version = "0.1.5-alpha.1"
+        
         # Create Qt application
         app = QApplication(sys.argv)
         app.setApplicationName("Modan2")
-        app.setApplicationVersion("0.1.4")
+        app.setApplicationVersion(app_version)
         app.setOrganizationName("Modan2 Team")
         
         # Set application icon

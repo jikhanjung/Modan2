@@ -27,6 +27,7 @@ import xlsxwriter
 import json
 import math, re, os, sys, shutil, copy, random, struct
 from pathlib import Path
+from types import SimpleNamespace
 from PIL.ExifTags import TAGS
 import numpy as np
 
@@ -5602,6 +5603,15 @@ class ExportDatasetDialog(QDialog):
         #self.rbMorphologika.setEnabled(False)
         #self.rbMorphologika.setChecked(False)
 
+        # JSON+ZIP option
+        self.rbJSONZip = QRadioButton("JSON+ZIP")
+        self.rbJSONZip.clicked.connect(self.on_rbJSONZip_clicked)
+        self.chkIncludeFiles = QCheckBox(self.tr("Include image and model files"))
+        self.chkIncludeFiles.setChecked(True)
+        self.chkIncludeFiles.setEnabled(False)
+        self.chkIncludeFiles.toggled.connect(self.update_estimated_size)
+        self.lblEstimatedSize = QLabel(self.tr("Estimated size: -"))
+
         self.lblSuperimposition = QLabel(self.tr("Superimposition"))
         self.rbProcrustes = QRadioButton(self.tr("Procrustes"))
         self.rbProcrustes.clicked.connect(self.on_rbProcrustes_clicked)
@@ -5640,10 +5650,14 @@ class ExportDatasetDialog(QDialog):
         self.button_layout2.addWidget(self.rbTPS)
         self.button_layout2.addWidget(self.rbX1Y1)
         self.button_layout2.addWidget(self.rbMorphologika)
+        self.button_layout2.addWidget(self.rbJSONZip)
+        self.button_layout2.addWidget(self.chkIncludeFiles)
+        self.button_layout2.addWidget(self.lblEstimatedSize)
         self.button_group2 = QButtonGroup()
         self.button_group2.addButton(self.rbTPS)
         self.button_group2.addButton(self.rbX1Y1)
         self.button_group2.addButton(self.rbMorphologika)
+        self.button_group2.addButton(self.rbJSONZip)
 
         self.button_layout3 = QHBoxLayout()
         self.button_layout3.addWidget(self.lblSuperimposition)
@@ -5708,6 +5722,24 @@ class ExportDatasetDialog(QDialog):
         pass
     def on_rbMorphologika_clicked(self):
         pass
+    def on_rbJSONZip_clicked(self):
+        # Enable include files option and update estimate
+        self.chkIncludeFiles.setEnabled(True)
+        self.update_estimated_size()
+    def update_estimated_size(self):
+        try:
+            include_files = self.chkIncludeFiles.isChecked()
+            size_bytes = mu.estimate_package_size(self.ds_ops.id, include_files=include_files)
+            # Format human-readable
+            def fmt(sz):
+                for unit in ['B','KB','MB','GB','TB']:
+                    if sz < 1024.0:
+                        return f"{sz:3.1f} {unit}"
+                    sz /= 1024.0
+                return f"{sz:.1f} PB"
+            self.lblEstimatedSize.setText(self.tr("Estimated size: ") + fmt(size_bytes))
+        except Exception:
+            self.lblEstimatedSize.setText(self.tr("Estimated size: -"))
     def move_right(self):
         selected_items = self.lstObjectList.selectedItems()
         for item in selected_items:
@@ -5807,6 +5839,35 @@ class ExportDatasetDialog(QDialog):
                 # open text file
                 with open(filename, 'w') as f:
                     f.write(result_str)
+        elif hasattr(self, 'rbJSONZip') and self.rbJSONZip.isChecked():
+            filename_candidate = '{}_{}.zip'.format(self.ds_ops.dataset_name, date_str)
+            filepath = os.path.join(mu.USER_PROFILE_DIRECTORY, filename_candidate)
+            filename, _ = QFileDialog.getSaveFileName(self, "Save File As", filepath, "ZIP archive (*.zip)")
+            if filename:
+                try:
+                    # Simple progress dialog
+                    progress = ProgressDialog(self)
+                    progress.set_progress_text(self.tr("Exporting {}/{}..."))
+                    progress.set_max_value(100)
+                    progress.show()
+
+                    def cb(curr, total):
+                        try:
+                            val = int((curr/float(total))*100) if total else 0
+                        except Exception:
+                            val = 0
+                        progress.set_curr_value(val)
+
+                    include_files = self.chkIncludeFiles.isChecked()
+                    mu.create_zip_package(self.ds_ops.id, filename, include_files=include_files, progress_callback=cb)
+                    progress.close()
+                    QMessageBox.information(self, self.tr("Export"), self.tr("Export completed."))
+                except Exception as e:
+                    try:
+                        progress.close()
+                    except Exception:
+                        pass
+                    QMessageBox.critical(self, self.tr("Export"), self.tr("Export failed: ") + str(e))
         self.close()
 
 class ImportDatasetDialog(QDialog):
@@ -5844,12 +5905,14 @@ class ImportDatasetDialog(QDialog):
         self.rbnNTS = QRadioButton("NTS")
         self.rbnX1Y1 = QRadioButton("X1Y1")
         self.rbnMorphologika = QRadioButton("Morphologika")
+        self.rbnJSONZip = QRadioButton("JSON+ZIP")
         #self.rbnX1Y1.setDisabled(True)
         #self.rbnMorphologika.setDisabled(True)
         self.chkFileType.addButton(self.rbnTPS)
         self.chkFileType.addButton(self.rbnNTS)
         self.chkFileType.addButton(self.rbnX1Y1)
         self.chkFileType.addButton(self.rbnMorphologika)
+        self.chkFileType.addButton(self.rbnJSONZip)
         self.chkFileType.buttonClicked.connect(self.file_type_changed)
         self.chkFileType.setExclusive(True)
         # add qgroupbox for file type
@@ -5859,6 +5922,7 @@ class ImportDatasetDialog(QDialog):
         self.gbxFileType.layout().addWidget(self.rbnNTS)
         self.gbxFileType.layout().addWidget(self.rbnX1Y1)
         self.gbxFileType.layout().addWidget(self.rbnMorphologika)
+        self.gbxFileType.layout().addWidget(self.rbnJSONZip)
         self.gbxFileType.layout().addStretch(1)
         self.gbxFileType.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.gbxFileType.setMaximumHeight(50)
@@ -5934,7 +5998,7 @@ class ImportDatasetDialog(QDialog):
     def open_file2(self, filename):
         self.edtFilename.setText(filename)
         self.btnImport.setEnabled(True)
-        self.edtDatasetName.setText(Path(filename).stem)
+        self.edtDatasetName.setText(self.suggest_unique_dataset_name(Path(filename).stem))
         self.edtObjectCount.setText("")
         self.prgImport.setValue(0)
         # get file extension
@@ -5958,11 +6022,37 @@ class ImportDatasetDialog(QDialog):
             self.rbnMorphologika.setChecked(True)
             self.file_type_changed()
             import_data = Morphologika(filename, self.edtDatasetName.text(), self.cbxInvertY.isChecked())
+        elif self.file_ext.lower() == ".zip":
+            # JSON+ZIP
+            self.rbnJSONZip.setChecked(True)
+            self.file_type_changed()
+            try:
+                data = mu.read_json_from_zip(filename)
+                ds_meta = data.get('dataset', {})
+                objs = data.get('objects', [])
+                # Suggest unique dataset name derived from package's dataset.json
+                base_name = ds_meta.get('name') or self.tr('Imported Dataset')
+                self.edtDatasetName.setText(self.suggest_unique_dataset_name(base_name))
+                self.edtObjectCount.setText(str(len(objs)))
+                if int(ds_meta.get('dimension', 2)) == 2:
+                    self.rb2D.setChecked(True)
+                else:
+                    self.rb3D.setChecked(True)
+                import_data = SimpleNamespace(
+                    nobjects=len(objs),
+                    dimension=int(ds_meta.get('dimension', 2)),
+                    object_name_list=[o.get('name') for o in objs]
+                )
+            except Exception as e:
+                QMessageBox.critical(self, self.tr("Import"), self.tr("Failed to read package: ") + str(e))
+                return
         else:
             self.rbnTPS.setChecked(False)
             self.rbnNTS.setChecked(False)
             self.rbnX1Y1.setChecked(False)
             self.rbnMorphologika.setChecked(False)
+            if hasattr(self, 'rbnJSONZip'):
+                self.rbnJSONZip.setChecked(False)
             self.btnImport.setEnabled(False)
             self.edtObjectCount.setText("")
             self.prgImport.setValue(0)
@@ -5988,11 +6078,23 @@ class ImportDatasetDialog(QDialog):
     def file_type_changed(self):
         pass
 
+    def suggest_unique_dataset_name(self, base_name: str) -> str:
+        """Return a unique dataset name, appending (1), (2), ... if needed."""
+        try:
+            candidate = base_name
+            suffix = 1
+            while MdDataset.select().where(MdDataset.dataset_name == candidate).exists():
+                candidate = f"{base_name} ({suffix})"
+                suffix += 1
+            return candidate
+        except Exception:
+            return base_name
+
     def import_file(self):
 
         filename = self.edtFilename.text()
         filetype = self.chkFileType.checkedButton().text()
-        datasetname = self.edtDatasetName.text()
+        datasetname = self.suggest_unique_dataset_name(self.edtDatasetName.text())
         objectcount = self.edtObjectCount.text()
         invertY = self.cbxInvertY.isChecked()
         import_data = None
@@ -6004,6 +6106,30 @@ class ImportDatasetDialog(QDialog):
             import_data = X1Y1(filename, datasetname, invertY)
         elif filetype == "Morphologika":
             import_data = Morphologika(filename, datasetname, invertY)
+        elif filetype == "JSON+ZIP":
+            # progress
+            self.prgImport.setValue(0)
+            def cb(curr, total):
+                try:
+                    val = int((curr/float(total))*100) if total else 0
+                except Exception:
+                    val = 0
+                self.prgImport.setValue(val)
+                self.prgImport.update()
+            try:
+                new_ds_id = mu.import_dataset_from_zip(filename, progress_callback=cb)
+                self.prgImport.setValue(100)
+                QMessageBox.information(self, self.tr("Import"), self.tr("Import completed (Dataset ID: ") + str(new_ds_id) + ")")
+                # After the user closes the message box, close dialog and refresh tree
+                try:
+                    if hasattr(self.parent, 'load_dataset'):
+                        self.parent.load_dataset()
+                except Exception:
+                    pass
+                self.close()
+            except Exception as e:
+                QMessageBox.critical(self, self.tr("Import"), self.tr("Import failed: ") + str(e))
+            return
 
         if import_data is None:
             return
@@ -6089,6 +6215,11 @@ class ImportDatasetDialog(QDialog):
         msg.setStandardButtons(QMessageBox.Ok)
             
         retval = msg.exec_()
+        try:
+            if hasattr(self.parent, 'load_dataset'):
+                self.parent.load_dataset()
+        except Exception:
+            pass
         self.close()
         # add dataset to project
         #self.parent.parent.project.datasets.append(dataset)

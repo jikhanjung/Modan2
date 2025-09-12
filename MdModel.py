@@ -15,8 +15,8 @@ import MdUtils as mu
 import shutil
 import copy
 
-from MdLogger import setup_logger
-logger = setup_logger(__name__)
+import logging
+logger = logging.getLogger(__name__)
 
 LANDMARK_SEPARATOR = "\t"
 LINE_SEPARATOR = "\n"

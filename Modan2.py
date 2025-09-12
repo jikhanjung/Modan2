@@ -49,8 +49,8 @@ matplotlib.rcParams['font.serif'] = ['DejaVu Serif', 'serif']
 matplotlib.rcParams['font.sans-serif'] = ['DejaVu Sans', 'Arial', 'sans-serif']
 
 import json
-from MdLogger import setup_logger
-logger = setup_logger(mu.PROGRAM_NAME)
+import logging
+logger = logging.getLogger(mu.PROGRAM_NAME)
 
 
 

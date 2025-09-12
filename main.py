@@ -69,23 +69,27 @@ def setup_logging(debug: bool = False):
     format_str = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     
     # Try to get proper log directory, with fallbacks
+    from datetime import datetime
+    date_str = datetime.now().strftime("%Y%m%d")
+    log_filename = f'Modan2.{date_str}.log'
+    
     log_file_path = None
     try:
         from MdUtils import DEFAULT_LOG_DIRECTORY, ensure_directories
         ensure_directories()
-        log_file_path = Path(DEFAULT_LOG_DIRECTORY) / 'modan2.log'
+        log_file_path = Path(DEFAULT_LOG_DIRECTORY) / log_filename
     except Exception as e:
         print(f"Warning: Could not access configured log directory: {e}")
         # Fallback to local logs directory
         try:
             log_dir = Path('logs')
             log_dir.mkdir(parents=True, exist_ok=True)
-            log_file_path = log_dir / 'modan2.log'
+            log_file_path = log_dir / log_filename
         except Exception:
             # Final fallback to temp directory
             import tempfile
             temp_dir = Path(tempfile.gettempdir())
-            log_file_path = temp_dir / 'modan2.log'
+            log_file_path = temp_dir / log_filename
             print(f"Using fallback log file: {log_file_path}")
     
     # Setup handlers

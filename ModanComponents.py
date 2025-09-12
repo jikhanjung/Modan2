@@ -62,8 +62,7 @@ import numpy as np
 
 import MdUtils as mu
 
-from MdLogger import setup_logger
-logger = setup_logger(__name__)
+logger = logging.getLogger(__name__)
 
 MODE = {}
 MODE['NONE'] = 0

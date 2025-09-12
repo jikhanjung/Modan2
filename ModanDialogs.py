@@ -41,8 +41,8 @@ from MdStatistics import MdPrincipalComponent, MdCanonicalVariate
 from MdModel import *
 import MdUtils as mu
 
-from MdLogger import setup_logger
-logger = setup_logger(__name__)
+import logging
+logger = logging.getLogger(__name__)
 
 
 MODE = {}

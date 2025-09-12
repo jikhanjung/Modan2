@@ -4,8 +4,11 @@
 [Setup]
 AppName=Modan2
 AppVersion={#AppVersion}
-DefaultDirName={commonpf}\PaleoBytes\Modan2
+DefaultDirName={userappdata}\PaleoBytes\Modan2
 OutputDir={{DIST_PATH}}\..\InnoSetup\Output
+; Use more conservative compression to reduce AV heuristics
+Compression=lzma/normal
+SolidCompression=no
 
 OutputBaseFilename=Modan2_v{#AppVersion}_build{#BuildNumber}_Installer
 

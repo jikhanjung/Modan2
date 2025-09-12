@@ -71,6 +71,76 @@ def run_pyinstaller(args):
             print(f"STDERR: {e.stderr}")
         raise
 
+def prepare_version_info_file(version: str, app_name: str) -> str:
+    """Prepare a Windows version info file from template, return path to temp file.
+
+    This reads build/file_version_info.txt (template with placeholders) and writes
+    a temporary file with placeholders replaced by actual values.
+    """
+    template_path = Path("build/file_version_info.txt")
+    try:
+        content = template_path.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        # Minimal default template if the file is missing
+        content = (
+            "VSVersionInfo(\n"
+            "  ffi=FixedFileInfo(\n"
+            "    filevers=(0, 0, 0, 0),\n"
+            "    prodvers=(0, 0, 0, 0),\n"
+            "    mask=0x3f,\n"
+            "    flags=0x0,\n"
+            "    OS=0x40004,\n"
+            "    fileType=0x1,\n"
+            "    subtype=0x0,\n"
+            "    date=(0, 0)\n"
+            "    ),\n"
+            "  kids=[\n"
+            "    StringFileInfo([\n"
+            "      StringTable('040904B0', [\n"
+            "        StringStruct('CompanyName', 'PaleoBytes'),\n"
+            "        StringStruct('FileDescription', '" + app_name + "'),\n"
+            "        StringStruct('FileVersion', '0.0.0.0'),\n"
+            "        StringStruct('InternalName', '" + app_name + ".exe'),\n"
+            "        StringStruct('OriginalFilename', '" + app_name + ".exe'),\n"
+            "        StringStruct('ProductName', '" + app_name + "'),\n"
+            "        StringStruct('ProductVersion', '0.0.0.0')\n"
+            "      ])\n"
+            "    ]),\n"
+            "    VarFileInfo([VarStruct('Translation', [1033, 1200])])\n"
+            "  ]\n"
+            ")\n"
+        )
+
+    # Normalize version like "0.1.5-alpha" -> (0,1,5,0) and "0.1.5.0"
+    def version_tuple(v: str):
+        parts = re.findall(r"\d+", v)
+        nums = [int(p) for p in parts[:4]]
+        while len(nums) < 4:
+            nums.append(0)
+        return tuple(nums[:4])
+
+    vt = version_tuple(version)
+    product_version_str = ".".join(str(n) for n in vt)
+
+    # Replace placeholders in template
+    replaced = (
+        content
+        .replace("{{VERSION_TUPLE}}", str(vt))
+        .replace("{{PRODUCT_VERSION}}", product_version_str)
+        .replace("{{FILE_VERSION}}", product_version_str)
+        .replace("{{PRODUCT_NAME}}", app_name)
+        .replace("{{FILE_DESCRIPTION}}", app_name)
+        .replace("{{INTERNAL_NAME}}", f"{app_name}.exe")
+        .replace("{{ORIGINAL_FILENAME}}", f"{app_name}.exe")
+        .replace("{{COMPANY_NAME}}", "PaleoBytes")
+        .replace("{{COPYRIGHT}}", f"(c) {date.today().year} PaleoBytes")
+    )
+
+    tmp_dir = Path(tempfile.mkdtemp())
+    out_path = tmp_dir / "file_version_info.txt"
+    out_path.write_text(replaced, encoding="utf-8")
+    return str(out_path)
+
 def prepare_inno_setup_template(template_path, version):
     """Prepare Inno Setup script from template with version replacement."""
     temp_dir = Path(tempfile.mkdtemp())
@@ -194,6 +264,12 @@ onefile_args = [
     "--clean",  # Clean PyInstaller cache before building
     "main.py",
 ]
+if platform.system() == "Windows":
+    try:
+        version_file_path = prepare_version_info_file(VERSION, "Modan2")
+        onefile_args.insert(-1, f"--version-file={version_file_path}")
+    except Exception as e:
+        print(f"Warning: failed to prepare version info file: {e}")
 run_pyinstaller(onefile_args)
 
 # 2. Run PyInstaller (One-Directory Bundle)
@@ -212,6 +288,12 @@ onedir_args = [
     "--noconfirm",
     "main.py",
 ]
+if platform.system() == "Windows":
+    try:
+        version_file_path = prepare_version_info_file(VERSION, "Modan2")
+        onedir_args.insert(-1, f"--version-file={version_file_path}")
+    except Exception as e:
+        print(f"Warning: failed to prepare version info file: {e}")
 run_pyinstaller(onedir_args)
 
 # Copy ExampleDataset to dist folder for Inno Setup

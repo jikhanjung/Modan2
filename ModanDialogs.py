@@ -2094,6 +2094,10 @@ class DataExplorationDialog(QDialog):
         self.cbxLegend.setText(self.tr("Show legend"))
         self.cbxLegend.setChecked(True)
         self.cbxLegend.toggled.connect(self.update_chart)
+        self.cbxShowVariance = QCheckBox()
+        self.cbxShowVariance.setText(self.tr("Show var. explained"))
+        self.cbxShowVariance.setChecked(False)
+        self.cbxShowVariance.toggled.connect(self.update_chart)
         self.gbChartBasics.layout().addWidget(self.lblGroupBy)
         self.gbChartBasics.layout().addWidget(self.comboGroupBy)
         self.gbChartBasics.layout().addWidget(spacer1)
@@ -2101,6 +2105,7 @@ class DataExplorationDialog(QDialog):
         #self.gbChartBasics.layout().addWidget(self.rb2DChartDim)
         #self.gbChartBasics.layout().addWidget(self.rb3DChartDim)
         self.gbChartBasics.layout().addWidget(self.cbxLegend)
+        self.gbChartBasics.layout().addWidget(self.cbxShowVariance)
         self.gbChartBasics.layout().addWidget(spacer2)
         #self.axis_option_layout.addWidget(self.gbChartBasics)
 
@@ -3404,6 +3409,16 @@ class DataExplorationDialog(QDialog):
                 obj['variable_list'] = obj['property_list']
         if self.analysis_method == 'PCA':
             self.analysis_result_list = json.loads(self.analysis.pca_analysis_result_json)
+            # Load eigenvalues for displaying variance explained
+            if self.analysis.pca_eigenvalues_json:
+                try:
+                    eigenvalues_data = json.loads(self.analysis.pca_eigenvalues_json)
+                    # eigenvalues_data is a list of [eigenvalue, percentage] pairs
+                    self.eigen_value_percentages = [item[1] for item in eigenvalues_data] if eigenvalues_data else []
+                except:
+                    self.eigen_value_percentages = []
+            else:
+                self.eigen_value_percentages = []
         elif self.analysis_method == 'CVA':
             self.analysis_result_list = json.loads(self.analysis.cva_analysis_result_json)
 
@@ -3692,6 +3707,7 @@ class DataExplorationDialog(QDialog):
         show_regression = self.cbxRegression.isChecked()
         show_annotation = self.cbxAnnotation.isChecked()
         show_legend = self.cbxLegend.isChecked()
+        show_variance = self.cbxShowVariance.isChecked() if hasattr(self, 'cbxShowVariance') else False
         show_convex_hull = self.cbxConvexHull.isChecked()
         show_confidence_ellipse = self.cbxConfidenceEllipse.isChecked()
         show_axis_label = True
@@ -3786,9 +3802,37 @@ class DataExplorationDialog(QDialog):
             #print("show axis label:", show_axis_label)
             if show_axis_label:
                 #print("show axis label true")
+                # Add variance explained to axis titles if enabled and analysis is PCA
+                if show_variance and self.analysis_method == 'PCA':
+                    # Get axis indices from combo boxes
+                    axis1_idx = self.comboAxis1.currentIndex()
+                    axis2_idx = self.comboAxis2.currentIndex()
+
+                    # Try to get eigenvalues from analysis_result or from stored values
+                    var_explained = None
+                    if hasattr(self, 'analysis_result') and hasattr(self.analysis_result, 'eigen_value_percentages'):
+                        var_explained = self.analysis_result.eigen_value_percentages
+                    elif hasattr(self, 'eigen_value_percentages'):
+                        var_explained = self.eigen_value_percentages
+
+                    if var_explained:
+                        try:
+                            # Axis1: index 0 is CSize, so PC1 is at index 1, PC2 at index 2, etc.
+                            # So we need to subtract 1 to get the PC number (0-based)
+                            if axis1_idx > 0:  # Skip if CSize is selected (index 0)
+                                pc_idx_1 = axis1_idx - 1
+                                if pc_idx_1 >= 0 and pc_idx_1 < len(var_explained):
+                                    axis1_title += f" ({var_explained[pc_idx_1]*100:.1f}%)"
+
+                            # Axis2: PC1 is at index 0, PC2 at index 1, etc.
+                            # So the index directly corresponds to the PC number (0-based)
+                            if axis2_idx >= 0 and axis2_idx < len(var_explained):
+                                axis2_title += f" ({var_explained[axis2_idx]*100:.1f}%)"
+                        except:
+                            pass  # Silently continue if there's any issue
                 ret_x = self.ax2.set_xlabel(axis1_title)
                 #print("ret_x", ret_x)
-                
+
                 ret_y = self.ax2.set_ylabel(axis2_title)
                 #print("ret_y", ret_y)
 

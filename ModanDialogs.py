@@ -798,26 +798,54 @@ class ObjectDialog(QDialog):
         #self.hsplitter.addWidget(self.treeView)
         #self.hsplitter.addWidget(self.vsplitter)
 
-        self.inputLayout = QHBoxLayout()
-        self.inputCoords = QWidget()
-        self.inputCoords.setLayout(self.inputLayout)
+        # Create two-row layout for coordinate input
+        self.inputWidget = QWidget()
+        self.inputMainLayout = QVBoxLayout()
+        self.inputWidget.setLayout(self.inputMainLayout)
+        self.inputMainLayout.setContentsMargins(0,0,0,0)
+        self.inputMainLayout.setSpacing(2)
+
+        # First row: coordinate inputs
+        self.inputCoordsLayout = QHBoxLayout()
         self.inputX = QLineEdit()
         self.inputY = QLineEdit()
         self.inputZ = QLineEdit()
+        self.inputX.setPlaceholderText("X")
+        self.inputY.setPlaceholderText("Y")
+        self.inputZ.setPlaceholderText("Z")
 
-        self.inputLayout.addWidget(self.inputX)
-        self.inputLayout.addWidget(self.inputY)
-        self.inputLayout.addWidget(self.inputZ)
-        self.inputLayout.setContentsMargins(0,0,0,0)
-        self.inputLayout.setSpacing(0)
+        self.inputCoordsLayout.addWidget(self.inputX)
+        self.inputCoordsLayout.addWidget(self.inputY)
+        self.inputCoordsLayout.addWidget(self.inputZ)
+
+        # Second row: buttons
+        self.inputButtonLayout = QHBoxLayout()
         self.btnAddInput = QPushButton()
         self.btnAddInput.setText(self.tr("Add"))
-        self.inputLayout.addWidget(self.btnAddInput)
+        self.btnUpdateInput = QPushButton()
+        self.btnUpdateInput.setText(self.tr("Update"))
+        self.btnUpdateInput.setEnabled(False)
+        self.btnDeleteInput = QPushButton()
+        self.btnDeleteInput.setText(self.tr("Delete"))
+        self.btnDeleteInput.setEnabled(False)
+
+        self.inputButtonLayout.addWidget(self.btnAddInput)
+        self.inputButtonLayout.addWidget(self.btnUpdateInput)
+        self.inputButtonLayout.addWidget(self.btnDeleteInput)
+
+        self.inputMainLayout.addLayout(self.inputCoordsLayout)
+        self.inputMainLayout.addLayout(self.inputButtonLayout)
+
+        # Keep track of selected landmark
+        self.selected_landmark_index = -1
+
         self.inputX.returnPressed.connect(self.input_coords_process)
         self.inputY.returnPressed.connect(self.input_coords_process)
         self.inputZ.returnPressed.connect(self.input_coords_process)
         self.inputX.textChanged[str].connect(self.x_changed)
-        self.btnAddInput.clicked.connect(self.input_coords_process)
+        self.btnAddInput.clicked.connect(self.btnAddInput_clicked)
+        self.btnUpdateInput.clicked.connect(self.btnUpdateInput_clicked)
+        self.btnDeleteInput.clicked.connect(self.btnDeleteInput_clicked)
 
         self.edtObjectName = QLineEdit()
         self.edtSequence = QLineEdit()
@@ -860,7 +888,7 @@ class ObjectDialog(QDialog):
         self.form_layout.addRow(self.lblSequence, self.edtSequence)
         self.form_layout.addRow(self.lblObjectDesc, self.edtObjectDesc)
         self.form_layout.addRow(self.lblLandmarkStr, self.edtLandmarkStr)
-        self.form_layout.addRow("", self.inputCoords)
+        self.form_layout.addRow("", self.inputWidget)
 
         self.btnGroup = QButtonGroup() 
         self.btnLandmark = PicButton(QPixmap(ICON['landmark']), QPixmap(ICON['landmark_hover']), QPixmap(ICON['landmark_down']), QPixmap(ICON['landmark_disabled']))
@@ -932,6 +960,10 @@ class ObjectDialog(QDialog):
         self.right_middle_layout.addWidget(self.cbxShowModel)
         self.right_middle_layout.addWidget(self.cbxAutoRotate)
         self.right_middle_layout.addWidget(self.btnAddFile)
+        self.btnAddMissing = QPushButton()
+        self.btnAddMissing.setText(self.tr("Add Missing"))
+        self.btnAddMissing.clicked.connect(self.btnAddMissing_clicked)
+        self.right_middle_layout.addWidget(self.btnAddMissing)
         #self.right_middle_layout.addWidget(self.btnFBO)
         self.right_middle_widget.setLayout(self.right_middle_layout)
         self.right_bottom_widget = QWidget()
@@ -1072,6 +1104,26 @@ class ObjectDialog(QDialog):
 
     #def btnFBO_clicked(self):
     #    self.object_view_3d.show_picker_buffer()
+
+    def btnAddMissing_clicked(self):
+        """Add a missing landmark placeholder to the current object"""
+        if self.dataset is None:
+            return
+
+        if self.dataset.dimension == 2:
+            self.landmark_list.append([None, None])
+        elif self.dataset.dimension == 3:
+            self.landmark_list.append([None, None, None])
+
+        self.show_landmarks()
+
+        # Update the viewers
+        if self.object_view_2d:
+            self.object_view_2d.landmark_list = self.landmark_list
+            self.object_view_2d.update()
+        if self.object_view_3d:
+            self.object_view_3d.landmark_list = self.landmark_list
+            self.object_view_3d.update()
 
     def show_index_state_changed(self):
         self.object_view.show_index = self.cbxShowIndex.isChecked()
@@ -1308,6 +1360,14 @@ class ObjectDialog(QDialog):
     def x_changed(self, text):
         # if text is multiline and tab separated, add to table
         #print("x_changed called with", text)
+
+        # Update button states based on whether we're in selection mode
+        if self.selected_landmark_index >= 0:
+            self.btnUpdateInput.setEnabled(True)
+            self.btnAddInput.setEnabled(False)
+        else:
+            self.btnUpdateInput.setEnabled(False)
+            self.btnAddInput.setEnabled(True)
         if "\n" in text:
             lines = text.split("\n")
             for line in lines:
@@ -1344,7 +1404,106 @@ class ObjectDialog(QDialog):
         self.landmark_list.pop(idx)
         self.show_landmarks()
 
+    def on_landmark_selected(self):
+        """Handle landmark selection in table"""
+        selected_items = self.edtLandmarkStr.selectedItems()
+        if selected_items:
+            row = self.edtLandmarkStr.row(selected_items[0])
+            self.selected_landmark_index = row
+
+            # Load coordinates into input fields
+            if row < len(self.landmark_list):
+                lm = self.landmark_list[row]
+
+                # X coordinate
+                if lm[0] is None:
+                    self.inputX.setText("")
+                else:
+                    self.inputX.setText(str(lm[0]))
+
+                # Y coordinate
+                if lm[1] is None:
+                    self.inputY.setText("")
+                else:
+                    self.inputY.setText(str(lm[1]))
+
+                # Z coordinate
+                if self.dataset.dimension == 3 and len(lm) > 2:
+                    if lm[2] is None:
+                        self.inputZ.setText("")
+                    else:
+                        self.inputZ.setText(str(lm[2]))
+
+                # Enable update and delete buttons
+                self.btnUpdateInput.setEnabled(True)
+                self.btnDeleteInput.setEnabled(True)
+                self.btnAddInput.setEnabled(False)
+        else:
+            self.selected_landmark_index = -1
+            self.btnUpdateInput.setEnabled(False)
+            self.btnDeleteInput.setEnabled(False)
+            self.btnAddInput.setEnabled(True)
+
+    def btnAddInput_clicked(self):
+        """Handle Add button click"""
+        self.input_coords_process()
+
+    def btnUpdateInput_clicked(self):
+        """Handle Update button click"""
+        if self.selected_landmark_index >= 0:
+            x_str = self.inputX.text()
+            y_str = self.inputY.text()
+            z_str = self.inputZ.text()
+
+            if x_str == "" or y_str == "":
+                # Update to missing landmark
+                self.update_landmark(self.selected_landmark_index, None, None, None if self.dataset.dimension == 3 else None)
+            else:
+                if self.dataset.dimension == 2:
+                    self.update_landmark(self.selected_landmark_index, float(x_str), float(y_str))
+                elif self.dataset.dimension == 3:
+                    if z_str == "":
+                        z_str = "0"
+                    self.update_landmark(self.selected_landmark_index, float(x_str), float(y_str), float(z_str))
+
+            # Clear selection after update
+            self.edtLandmarkStr.clearSelection()
+            self.selected_landmark_index = -1
+            self.inputX.setText("")
+            self.inputY.setText("")
+            self.inputZ.setText("")
+            self.btnUpdateInput.setEnabled(False)
+            self.btnDeleteInput.setEnabled(False)
+            self.btnAddInput.setEnabled(True)
+
+            self.object_view.update_landmark_list()
+            self.object_view.calculate_resize()
+
+    def btnDeleteInput_clicked(self):
+        """Handle Delete button click"""
+        if self.selected_landmark_index >= 0:
+            self.delete_landmark(self.selected_landmark_index)
+
+            # Clear selection after delete
+            self.edtLandmarkStr.clearSelection()
+            self.selected_landmark_index = -1
+            self.inputX.setText("")
+            self.inputY.setText("")
+            self.inputZ.setText("")
+            self.btnUpdateInput.setEnabled(False)
+            self.btnDeleteInput.setEnabled(False)
+            self.btnAddInput.setEnabled(True)
+
+            self.object_view.update_landmark_list()
+            self.object_view.calculate_resize()
+
     def input_coords_process(self):
+        """Process coordinate input for Add action"""
+        if self.selected_landmark_index >= 0:
+            # If a landmark is selected, act as Update
+            self.btnUpdateInput_clicked()
+            return
+
         x_str = self.inputX.text()
         y_str = self.inputY.text()
         z_str = self.inputZ.text()
@@ -1366,20 +1525,46 @@ class ObjectDialog(QDialog):
         self.object_view.calculate_resize()
 
     def show_landmarks(self):
+        # Configure table
         self.edtLandmarkStr.setRowCount(len(self.landmark_list))
+        self.edtLandmarkStr.setSelectionBehavior(QTableWidget.SelectRows)
+        self.edtLandmarkStr.setSelectionMode(QTableWidget.SingleSelection)
+
+        # Connect selection handler
+        try:
+            self.edtLandmarkStr.itemSelectionChanged.disconnect()
+        except:
+            pass
+        self.edtLandmarkStr.itemSelectionChanged.connect(self.on_landmark_selected)
+
         for idx, lm in enumerate(self.landmark_list):
             #print(idx, lm)
 
-            item_x = QTableWidgetItem(str(float(lm[0])*1.0))
+            # Handle X coordinate
+            if lm[0] is None:
+                item_x = QTableWidgetItem("MISSING")
+                item_x.setForeground(Qt.red)
+            else:
+                item_x = QTableWidgetItem(str(float(lm[0])*1.0))
             item_x.setTextAlignment(Qt.AlignRight|Qt.AlignVCenter)
             self.edtLandmarkStr.setItem(idx, 0, item_x)
 
-            item_y = QTableWidgetItem(str(float(lm[1])*1.0))
+            # Handle Y coordinate
+            if lm[1] is None:
+                item_y = QTableWidgetItem("MISSING")
+                item_y.setForeground(Qt.red)
+            else:
+                item_y = QTableWidgetItem(str(float(lm[1])*1.0))
             item_y.setTextAlignment(Qt.AlignRight|Qt.AlignVCenter)
             self.edtLandmarkStr.setItem(idx, 1, item_y)
 
+            # Handle Z coordinate for 3D
             if self.dataset.dimension == 3:
-                item_z = QTableWidgetItem(str(float(lm[2])*1.0))
+                if len(lm) > 2 and lm[2] is not None:
+                    item_z = QTableWidgetItem(str(float(lm[2])*1.0))
+                else:
+                    item_z = QTableWidgetItem("MISSING")
+                    item_z.setForeground(Qt.red)
                 item_z.setTextAlignment(Qt.AlignRight|Qt.AlignVCenter)
                 self.edtLandmarkStr.setItem(idx, 2, item_z)
         
@@ -1416,10 +1601,16 @@ class ObjectDialog(QDialog):
 
     def make_landmark_str(self):
         # from table, make landmark_str
+        # Modified to handle MISSING values - store as "Missing" text
         landmark_str = ""
         for row in range(self.edtLandmarkStr.rowCount()):
             for col in range(self.edtLandmarkStr.columnCount()):
-                landmark_str += self.edtLandmarkStr.item(row, col).text()
+                cell_text = self.edtLandmarkStr.item(row, col).text()
+                # Keep "MISSING" as "Missing" for storage
+                if cell_text == "MISSING":
+                    landmark_str += "Missing"
+                else:
+                    landmark_str += cell_text
                 if col < self.edtLandmarkStr.columnCount()-1:
                     landmark_str += "\t"
             if row < self.edtLandmarkStr.rowCount()-1:

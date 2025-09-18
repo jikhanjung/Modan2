@@ -325,8 +325,17 @@ class MdObject(Model):
             os.rename(source_path, target_path)
 
     def pack_landmark(self):
-        # error check
-        self.landmark_str = LINE_SEPARATOR.join([LANDMARK_SEPARATOR.join([str(x) for x in lm[:self.dataset.dimension]]) for lm in self.landmark_list])
+        # error check - modified to handle None values as "Missing"
+        landmark_strs = []
+        for lm in self.landmark_list:
+            coords = []
+            for i in range(self.dataset.dimension):
+                if i < len(lm) and lm[i] is not None:
+                    coords.append(str(lm[i]))
+                else:
+                    coords.append("Missing")  # Store as "Missing" text
+            landmark_strs.append(LANDMARK_SEPARATOR.join(coords))
+        self.landmark_str = LINE_SEPARATOR.join(landmark_strs)
 
     def unpack_landmark(self):
         self.landmark_list = []
@@ -341,6 +350,9 @@ class MdObject(Model):
                 self.landmark_list.append([float(x) if self.is_float(x) else None for x in lm.split(LANDMARK_SEPARATOR)])
         return self.landmark_list
     def is_float(self, s):
+        # Check for "Missing" text specifically
+        if s == "Missing" or s == "missing" or s == "":
+            return False
         try:
             float(s)
             return True
@@ -386,16 +398,24 @@ class MdObject(Model):
         sum_of_x = 0
         sum_of_y = 0
         sum_of_z = 0
-        lm_count = len(self.landmark_list)
+        valid_lm_count = 0
         for lm in self.landmark_list:
+            # Skip landmarks with None values
+            if lm[0] is None or lm[1] is None:
+                continue
+            valid_lm_count += 1
             sum_of_x_squared += ( lm[0] - centroid[0]) ** 2
             sum_of_y_squared += ( lm[1] - centroid[1]) ** 2
-            if len(lm) == 3:
+            if len(lm) == 3 and lm[2] is not None:
                 sum_of_z_squared += ( lm[2] - centroid[2]) ** 2
             sum_of_x += lm[0] - centroid[0]
             sum_of_y += lm[1] - centroid[1]
-            if len(lm) == 3:
+            if len(lm) == 3 and lm[2] is not None:
                 sum_of_z += lm[2] - centroid[2]
+
+        if valid_lm_count == 0:
+            return 0
+
         centroid_size = sum_of_x_squared + sum_of_y_squared + sum_of_z_squared
         #centroid_size = sum_of_x_squared + sum_of_y_squared + sum_of_z_squared \
         #              - sum_of_x * sum_of_x / lm_count \
@@ -432,22 +452,35 @@ class MdObject(Model):
 
         if len(self.landmark_list) == 0:
             return c
-        
+
         sum_of_x = 0
         sum_of_y = 0
         sum_of_z = 0
+        count_x = 0
+        count_y = 0
+        count_z = 0
         lm_dim = 2
         for lm in ( self.landmark_list ):
-            sum_of_x += lm[0]
-            sum_of_y += lm[1]
+            # Skip None values when calculating centroid
+            if lm[0] is not None:
+                sum_of_x += lm[0]
+                count_x += 1
+            if lm[1] is not None:
+                sum_of_y += lm[1]
+                count_y += 1
             if len(lm) == 3:
                 lm_dim = 3
-                sum_of_z += lm[2]
-        lm_count = len(self.landmark_list)
-        c[0] = sum_of_x / lm_count
-        c[1] = sum_of_y / lm_count
-        if lm_dim == 3:
-            c[2] = sum_of_z / lm_count
+                if lm[2] is not None:
+                    sum_of_z += lm[2]
+                    count_z += 1
+
+        # Calculate average only for non-None values
+        if count_x > 0:
+            c[0] = sum_of_x / count_x
+        if count_y > 0:
+            c[1] = sum_of_y / count_y
+        if lm_dim == 3 and count_z > 0:
+            c[2] = sum_of_z / count_z
         return c
     
     def refresh(self):
@@ -788,22 +821,35 @@ class MdObjectOps:
 
         if len(self.landmark_list) == 0:
             return c
-        
+
         sum_of_x = 0
         sum_of_y = 0
         sum_of_z = 0
+        count_x = 0
+        count_y = 0
+        count_z = 0
         lm_dim = 2
         for lm in ( self.landmark_list ):
-            sum_of_x += lm[0]
-            sum_of_y += lm[1]
+            # Skip None values when calculating centroid
+            if lm[0] is not None:
+                sum_of_x += lm[0]
+                count_x += 1
+            if lm[1] is not None:
+                sum_of_y += lm[1]
+                count_y += 1
             if len(lm) == 3:
                 lm_dim = 3
-                sum_of_z += lm[2]
-        lm_count = len(self.landmark_list)
-        c[0] = sum_of_x / lm_count
-        c[1] = sum_of_y / lm_count
-        if lm_dim == 3:
-            c[2] = sum_of_z / lm_count
+                if lm[2] is not None:
+                    sum_of_z += lm[2]
+                    count_z += 1
+
+        # Calculate average only for non-None values
+        if count_x > 0:
+            c[0] = sum_of_x / count_x
+        if count_y > 0:
+            c[1] = sum_of_y / count_y
+        if lm_dim == 3 and count_z > 0:
+            c[2] = sum_of_z / count_z
         return c
 
     def get_centroid_size(self, refresh=False):
@@ -826,16 +872,24 @@ class MdObjectOps:
         sum_of_x = 0
         sum_of_y = 0
         sum_of_z = 0
-        lm_count = len(self.landmark_list)
+        valid_lm_count = 0
         for lm in self.landmark_list:
+            # Skip landmarks with None values
+            if lm[0] is None or lm[1] is None:
+                continue
+            valid_lm_count += 1
             sum_of_x_squared += ( lm[0] - centroid[0]) ** 2
             sum_of_y_squared += ( lm[1] - centroid[1]) ** 2
-            if len(lm) == 3:
+            if len(lm) == 3 and lm[2] is not None:
                 sum_of_z_squared += ( lm[2] - centroid[2]) ** 2
             sum_of_x += lm[0] - centroid[0]
             sum_of_y += lm[1] - centroid[1]
-            if len(lm) == 3:
+            if len(lm) == 3 and lm[2] is not None:
                 sum_of_z += lm[2] - centroid[2]
+
+        if valid_lm_count == 0:
+            return 0
+
         centroid_size = sum_of_x_squared + sum_of_y_squared + sum_of_z_squared
         #centroid_size = sum_of_x_squared + sum_of_y_squared + sum_of_z_squared \
         #              - sum_of_x * sum_of_x / lm_count \

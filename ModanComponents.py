@@ -356,12 +356,20 @@ class ObjectViewer2D(QLabel):
         self.bgcolor = self.m_app.settings.value("BackgroundColor", self.bgcolor)
 
     def _2canx(self, coord):
+        if coord is None:
+            return 0  # Return safe default value
         return round((float(coord) / self.image_canvas_ratio) * self.scale) + self.pan_x + self.temp_pan_x
     def _2cany(self, coord):
+        if coord is None:
+            return 0  # Return safe default value
         return round((float(coord) / self.image_canvas_ratio) * self.scale) + self.pan_y + self.temp_pan_y
     def _2imgx(self, coord):
+        if coord is None:
+            return 0  # Return safe default value
         return round(((float(coord) - self.pan_x) / self.scale) * self.image_canvas_ratio)
     def _2imgy(self, coord):
+        if coord is None:
+            return 0  # Return safe default value
         return round(((float(coord) - self.pan_y) / self.scale) * self.image_canvas_ratio)
 
     def show_message(self, msg):
@@ -387,6 +395,9 @@ class ObjectViewer2D(QLabel):
 
     def get_landmark_index_within_threshold(self, curr_pos, threshold=DISTANCE_THRESHOLD):
         for index, landmark in enumerate(self.landmark_list):
+            # Skip missing landmarks
+            if landmark[0] is None or landmark[1] is None:
+                continue
             lm_can_pos = [self._2canx(landmark[0]),self._2cany(landmark[1])]
             dist = self.get_distance(curr_pos, lm_can_pos)
             if dist < threshold:
@@ -404,8 +415,14 @@ class ObjectViewer2D(QLabel):
             if from_lm_idx >= len(self.landmark_list) or to_lm_idx >= len(self.landmark_list):
                 continue
 
-            wire_start = [self._2canx(float(self.landmark_list[from_lm_idx][0])),self._2cany(float(self.landmark_list[from_lm_idx][1]))]
-            wire_end = [self._2canx(float(self.landmark_list[to_lm_idx][0])),self._2cany(float(self.landmark_list[to_lm_idx][1]))]
+            # Skip edges with missing landmarks
+            from_lm = self.landmark_list[from_lm_idx]
+            to_lm = self.landmark_list[to_lm_idx]
+            if from_lm[0] is None or from_lm[1] is None or to_lm[0] is None or to_lm[1] is None:
+                continue
+
+            wire_start = [self._2canx(float(from_lm[0])),self._2cany(float(from_lm[1]))]
+            wire_end = [self._2canx(float(to_lm[0])),self._2cany(float(to_lm[1]))]
             dist = self.get_distance_to_line(curr_pos, wire_start, wire_end)
             if dist < threshold and dist > 0:
                 return index
@@ -477,6 +494,9 @@ class ObjectViewer2D(QLabel):
         elif self.edit_mode == MODE['READY_MOVE_LANDMARK']:
             curr_pos = [self.mouse_curr_x, self.mouse_curr_y]
             ready_landmark = self.landmark_list[self.selected_landmark_index]
+            # Don't try to move missing landmarks
+            if ready_landmark[0] is None or ready_landmark[1] is None:
+                return
             lm_can_pos = [self._2canx(ready_landmark[0]),self._2cany(ready_landmark[1])]
             if self.get_distance(curr_pos, lm_can_pos) > DISTANCE_THRESHOLD:
                 self.set_mode(MODE['EDIT_LANDMARK'])
@@ -670,6 +690,10 @@ class ObjectViewer2D(QLabel):
             
             # Draw transformed grid lines
             for direction, line in self.grid_lines_transformed:
+                # Skip lines with None values
+                valid_line = all(p[0] is not None and p[1] is not None for p in line)
+                if not valid_line:
+                    continue
                 points = [QPointF(self._2canx(p[0]), self._2cany(p[1])) for p in line]
                 for i in range(len(points) - 1):
                     painter.drawLine(points[i], points[i + 1])
@@ -719,7 +743,12 @@ class ObjectViewer2D(QLabel):
     def draw_object(self, painter, obj, landmark_as_sphere=False, color=COLOR['NORMAL_SHAPE'], edge_color=COLOR['WIREFRAME'], polygon_color=COLOR['WIREFRAME']):
         if obj.show_landmark:
             for idx, landmark in enumerate(obj.landmark_list):
-                self.draw_landmark(painter, landmark[0], landmark[1], color)
+                # Check for missing landmarks
+                if landmark[0] is None or landmark[1] is None:
+                    # Draw missing landmark indicator (X mark in red)
+                    self.draw_missing_landmark(painter, idx, len(obj.landmark_list))
+                else:
+                    self.draw_landmark(painter, landmark[0], landmark[1], color)
         if obj.show_wireframe:
             for edge in self.ds_ops.edge_list:
                 from_lm_idx = edge[0]-1
@@ -728,6 +757,9 @@ class ObjectViewer2D(QLabel):
                     continue
                 from_lm = obj.landmark_list[from_lm_idx]
                 to_lm = obj.landmark_list[to_lm_idx]
+                # Skip edges with missing landmarks
+                if from_lm[0] is None or from_lm[1] is None or to_lm[0] is None or to_lm[1] is None:
+                    continue
                 self.draw_line(painter, from_lm[0], from_lm[1], to_lm[0], to_lm[1], edge_color)
         return
         if obj.show_polygon:
@@ -746,10 +778,33 @@ class ObjectViewer2D(QLabel):
         painter.drawLine(int(self._2canx(from_x)), int(self._2cany(from_y)), int(self._2canx(to_x)), int(self._2cany(to_y)))
 
     def draw_landmark(self, painter, x, y, color):
-        radius = BASE_LANDMARK_RADIUS * (int(self.landmark_size) + 1) 
+        radius = BASE_LANDMARK_RADIUS * (int(self.landmark_size) + 1)
         painter.setPen(QPen(mu.as_qt_color(color), 2))
         painter.setBrush(QBrush(mu.as_qt_color(color)))
         painter.drawEllipse(int(self._2canx(x)-radius), int(self._2cany(y))-radius, radius*2, radius*2)
+
+    def draw_missing_landmark(self, painter, idx, total_landmarks):
+        """Draw an indicator for missing landmarks - shows as an X mark"""
+        # Try to position the X mark based on the index
+        # This is a rough approximation - ideally would be based on nearby landmarks
+        radius = BASE_LANDMARK_RADIUS * (int(self.landmark_size) + 1)
+
+        # Calculate an approximate position (will be improved in future)
+        # For now, just draw at origin or calculated from index
+        x = self.width() / 2
+        y = self.height() / 2
+        if total_landmarks > 0:
+            # Simple linear arrangement for visualization
+            x = self.width() * 0.2 + (self.width() * 0.6) * (idx / max(1, total_landmarks - 1))
+            y = self.height() * 0.5
+
+        # Draw X mark in red with dashed lines
+        painter.setPen(QPen(Qt.red, 2, Qt.DashLine))
+        x_pos = int(x)
+        y_pos = int(y)
+        # Draw X
+        painter.drawLine(x_pos - radius, y_pos - radius, x_pos + radius, y_pos + radius)
+        painter.drawLine(x_pos - radius, y_pos + radius, x_pos + radius, y_pos - radius)
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -776,8 +831,13 @@ class ObjectViewer2D(QLabel):
                 to_lm_idx = wire[1]-1
                 if from_lm_idx >= len(self.landmark_list) or to_lm_idx >= len(self.landmark_list):
                     continue
-                [ from_x, from_y ] = self.landmark_list[from_lm_idx]
-                [ to_x, to_y ] = self.landmark_list[to_lm_idx]
+                from_lm = self.landmark_list[from_lm_idx]
+                to_lm = self.landmark_list[to_lm_idx]
+                # Skip edges with missing landmarks
+                if from_lm[0] is None or from_lm[1] is None or to_lm[0] is None or to_lm[1] is None:
+                    continue
+                [ from_x, from_y ] = from_lm
+                [ to_x, to_y ] = to_lm
                 painter.drawLine(int(self._2canx(from_x)), int(self._2cany(from_y)), int(self._2canx(to_x)), int(self._2cany(to_y)))
             if self.selected_edge_index >= 0:
                 edge = self.edge_list[self.selected_edge_index]
@@ -805,6 +865,11 @@ class ObjectViewer2D(QLabel):
 
         painter.setFont(QFont('Helvetica', 10 + int(self.index_size) * 3))
         for idx, landmark in enumerate(self.landmark_list):
+            # Check for missing landmarks
+            if landmark[0] is None or landmark[1] is None:
+                self.draw_missing_landmark(painter, idx, len(self.landmark_list))
+                continue
+
             if idx == self.wire_hover_index:
                 painter.setPen(QPen(mu.as_qt_color(COLOR['SELECTED_LANDMARK']), 2))
                 painter.setBrush(QBrush(mu.as_qt_color(COLOR['SELECTED_LANDMARK'])))
@@ -820,7 +885,7 @@ class ObjectViewer2D(QLabel):
                 else:
                     color = QColor(self.landmark_color)
                 painter.setPen(QPen(color, 2))
-                painter.setBrush(QBrush(color))                
+                painter.setBrush(QBrush(color))
             painter.drawEllipse(int(self._2canx(landmark[0])-radius), int(self._2cany(landmark[1]))-radius, radius*2, radius*2)
             if self.show_index == True:
                 idx_color = QColor(self.index_color)
@@ -1901,10 +1966,20 @@ class ObjectViewer3D(QGLWidget):
                     line_width = 1*(int(self.wireframe_thickness)+1)
                     gl.glLineWidth(line_width)                        
                 gl.glBegin(gl.GL_LINE_STRIP)
+                valid_edge = True
                 for lm_idx in edge:
                     if lm_idx <= len(object.landmark_list):
                         lm = object.landmark_list[lm_idx-1]
-                        gl.glVertex3f(*lm)
+                        # Check if landmark is missing
+                        if len(lm) < 3 or lm[0] is None or lm[1] is None or lm[2] is None:
+                            valid_edge = False
+                            break
+                # Only draw edge if all landmarks are valid
+                if valid_edge:
+                    for lm_idx in edge:
+                        if lm_idx <= len(object.landmark_list):
+                            lm = object.landmark_list[lm_idx-1]
+                            gl.glVertex3f(*lm)
                 gl.glEnd()
                 if current_buffer == self.picker_buffer and self.object_dialog is not None:
                     gl.glEnable(gl.GL_LIGHTING)
@@ -1935,6 +2010,9 @@ class ObjectViewer3D(QGLWidget):
         if landmark_as_sphere and object.show_landmark:
             lm_count = len(object.landmark_list)
             for i, lm in enumerate(object.landmark_list):
+                # Skip missing landmarks in 3D view
+                if len(lm) < 3 or lm[0] is None or lm[1] is None or lm[2] is None:
+                    continue
                 gl.glPushMatrix()
                 gl.glTranslate(*lm)
                 gl.glColor3f( *color )
@@ -1982,6 +2060,9 @@ class ObjectViewer3D(QGLWidget):
             gl.glBegin(gl.GL_POINTS)
             #gl.glColor3f( 1.0, 1.0, 0.0 )
             for lm in object.landmark_list:
+                # Skip missing landmarks
+                if len(lm) < 3 or lm[0] is None or lm[1] is None or lm[2] is None:
+                    continue
                 gl.glVertex3f(lm[0], lm[1], lm[2])
             gl.glEnd()
             gl.glEnable(gl.GL_LIGHTING)

@@ -1311,61 +1311,86 @@ class MdDatasetOps:
         mo = self.object_list[object_index]
         nlandmarks = len(mo.landmark_list)
 
-        # Collect valid (non-None) landmarks for rotation calculation
-        valid_indices = []
-        target_points = []
-        reference_points = []
+        # Check if there are any None values
+        has_missing = False
+        for lm in mo.landmark_list:
+            if any(coord is None for coord in lm[:self.dimension]):
+                has_missing = True
+                break
 
-        for i in range(nlandmarks):
-            # Check if both object and reference have valid landmarks at this index
-            obj_lm = mo.landmark_list[i]
-            ref_lm = self.reference_shape.landmark_list[i] if i < len(self.reference_shape.landmark_list) else None
+        if not has_missing:
+            # Original implementation for complete data - rotate all landmarks
+            target_shape = np.zeros((nlandmarks, self.dimension))
+            reference_shape = np.zeros((nlandmarks, self.dimension))
 
-            if (obj_lm and ref_lm and
-                all(coord is not None for coord in obj_lm[:self.dimension]) and
-                all(coord is not None for coord in ref_lm[:self.dimension])):
-                valid_indices.append(i)
-                target_points.append(obj_lm[:self.dimension])
-                reference_points.append(ref_lm[:self.dimension])
-
-        # Need at least 3 points for rotation in 2D, 4 in 3D
-        min_points = 3 if self.dimension == 2 else 4
-        if len(valid_indices) < min_points:
-            return  # Not enough valid points for rotation
-
-        # Create arrays for valid points only
-        target_shape = np.array(target_points)
-        reference_shape = np.array(reference_points)
-
-        rotation_matrix = self.rotation_matrix(reference_shape, target_shape)
-        #print rotation_matrix
-        #target_transposed = np.transpose( target_shape )
-        #print target_transposed
-        #print rotation_matrix.shape
-        #print target_transposed.shape
-        rotated_shape = np.transpose(np.dot(rotation_matrix, np.transpose(target_shape)))
-
-        #print rotated_shape
-
-        # Apply rotation only to valid landmarks
-        new_landmark_list = []
-        valid_idx = 0
-        for i in range(len(mo.landmark_list)):
-            if i in valid_indices:
-                # This landmark was part of the rotation
-                lm = [0] * len(mo.landmark_list[i])
+            i = 0
+            for lm in mo.landmark_list:
                 for j in range(self.dimension):
-                    lm[j] = rotated_shape[valid_idx, j]
-                if len(mo.landmark_list[i]) > self.dimension:
-                    # Preserve additional dimensions if any
-                    for j in range(self.dimension, len(mo.landmark_list[i])):
-                        lm[j] = mo.landmark_list[i][j]
-                new_landmark_list.append(lm)
-                valid_idx += 1
-            else:
-                # This landmark has None values, keep it as is
-                new_landmark_list.append(mo.landmark_list[i])
-        mo.landmark_list = new_landmark_list
+                    target_shape[i,j] = lm[j]
+                i += 1
+
+            i = 0
+            for lm in self.reference_shape.landmark_list:
+                for j in range(self.dimension):
+                    reference_shape[i,j] = lm[j]
+                i += 1
+
+            rotation_matrix = self.rotation_matrix(reference_shape, target_shape)
+            rotated_shape = np.transpose(np.dot(rotation_matrix, np.transpose(target_shape)))
+
+            i = 0
+            for lm in mo.landmark_list:
+                for j in range(self.dimension):
+                    lm[j] = rotated_shape[i,j]
+                i += 1
+        else:
+            # New implementation for missing data - use only valid landmarks
+            valid_indices = []
+            target_points = []
+            reference_points = []
+
+            for i in range(nlandmarks):
+                obj_lm = mo.landmark_list[i]
+                ref_lm = self.reference_shape.landmark_list[i] if i < len(self.reference_shape.landmark_list) else None
+
+                if (obj_lm and ref_lm and
+                    all(coord is not None for coord in obj_lm[:self.dimension]) and
+                    all(coord is not None for coord in ref_lm[:self.dimension])):
+                    valid_indices.append(i)
+                    target_points.append(obj_lm[:self.dimension])
+                    reference_points.append(ref_lm[:self.dimension])
+
+            # Need at least 3 points for rotation in 2D, 4 in 3D
+            min_points = 3 if self.dimension == 2 else 4
+            if len(valid_indices) < min_points:
+                return  # Not enough valid points for rotation
+
+            # Create arrays for valid points only
+            target_shape = np.array(target_points)
+            reference_shape = np.array(reference_points)
+
+            rotation_matrix = self.rotation_matrix(reference_shape, target_shape)
+            rotated_shape = np.transpose(np.dot(rotation_matrix, np.transpose(target_shape)))
+
+            # Apply rotation only to valid landmarks
+            new_landmark_list = []
+            valid_idx = 0
+            for i in range(len(mo.landmark_list)):
+                if i in valid_indices:
+                    # This landmark was part of the rotation
+                    lm = [0] * len(mo.landmark_list[i])
+                    for j in range(self.dimension):
+                        lm[j] = rotated_shape[valid_idx, j]
+                    if len(mo.landmark_list[i]) > self.dimension:
+                        # Preserve additional dimensions if any
+                        for j in range(self.dimension, len(mo.landmark_list[i])):
+                            lm[j] = mo.landmark_list[i][j]
+                    new_landmark_list.append(lm)
+                    valid_idx += 1
+                else:
+                    # This landmark has None values, keep it as is
+                    new_landmark_list.append(mo.landmark_list[i])
+            mo.landmark_list = new_landmark_list
 
     def apply_rotation_matrix(self, rotation_matrix):
         #print("obj_ops apply rotation", rotation_matrix)

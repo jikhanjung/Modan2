@@ -345,9 +345,27 @@ class MdObject(Model):
         lm_list = self.landmark_str.split(LINE_SEPARATOR)
         for lm in lm_list:
             if lm != "":
-                #self.landmark_list.append([float(x) for x in lm.split(LANDMARK_SEPARATOR)])
-                #self.landmark_list.append([float(x) if x.replace('.', '', 1).isdigit() else 0.0 for x in lm.split(LANDMARK_SEPARATOR)])
-                self.landmark_list.append([float(x) if self.is_float(x) else None for x in lm.split(LANDMARK_SEPARATOR)])
+                # Try to detect the separator used
+                # Priority: tab > comma > multiple spaces > single space
+                if '\t' in lm:
+                    separator = '\t'
+                elif ',' in lm:
+                    separator = ','
+                elif '  ' in lm:  # Multiple spaces
+                    # Split by multiple spaces and filter empty strings
+                    coords = [x for x in lm.split() if x]
+                    self.landmark_list.append([float(x) if self.is_float(x) else None for x in coords])
+                    continue
+                elif ' ' in lm:
+                    separator = ' '
+                else:
+                    # Single value or unknown format
+                    separator = LANDMARK_SEPARATOR
+
+                coords = lm.split(separator)
+                # Filter out empty strings (can happen with multiple spaces)
+                coords = [x.strip() for x in coords if x.strip()]
+                self.landmark_list.append([float(x) if self.is_float(x) else None for x in coords])
         return self.landmark_list
     def is_float(self, s):
         # Check for "Missing" text specifically

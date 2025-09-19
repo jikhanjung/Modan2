@@ -1457,12 +1457,112 @@ class MdDatasetOps:
             return False
         return True
 
+    def estimate_missing_landmarks(self, obj_index, reference_shape):
+        """Estimate missing landmarks for an object using the reference shape.
+
+        This implements a simple imputation strategy where missing landmarks
+        are replaced with the corresponding landmarks from the reference shape
+        (typically the average shape).
+
+        Args:
+            obj_index: Index of the object in object_list
+            reference_shape: Reference shape (usually average shape) to use for imputation
+        """
+        if reference_shape is None:
+            return
+
+        obj = self.object_list[obj_index]
+
+        # Check each landmark
+        for lm_idx in range(len(obj.landmark_list)):
+            # If any coordinate is missing, replace with reference
+            if (obj.landmark_list[lm_idx][0] is None or
+                obj.landmark_list[lm_idx][1] is None):
+                # Replace with reference shape landmark
+                if lm_idx < len(reference_shape.landmark_list):
+                    ref_lm = reference_shape.landmark_list[lm_idx]
+                    if ref_lm[0] is not None and ref_lm[1] is not None:
+                        obj.landmark_list[lm_idx][0] = ref_lm[0]
+                        obj.landmark_list[lm_idx][1] = ref_lm[1]
+                        if len(obj.landmark_list[lm_idx]) == 3 and len(ref_lm) == 3:
+                            obj.landmark_list[lm_idx][2] = ref_lm[2] if ref_lm[2] is not None else 0
+
+    def has_missing_landmarks(self):
+        """Check if any object in the dataset has missing landmarks."""
+        for obj in self.object_list:
+            for lm in obj.landmark_list:
+                if lm[0] is None or lm[1] is None:
+                    return True
+                if len(lm) == 3 and lm[2] is None:
+                    return True
+        return False
+
+    def procrustes_superimposition_with_imputation(self):
+        """Procrustes superimposition with missing landmark imputation.
+
+        This implements an iterative imputation strategy similar to geomorph:
+        1. Initial alignment using only observed landmarks
+        2. Estimate missing landmarks from average shape
+        3. Iteratively refine estimates during Procrustes iterations
+        """
+        if not self.check_object_list():
+            print("check_object_list failed")
+            return False
+
+        has_missing = self.has_missing_landmarks()
+
+        # Store original missing positions for restoration if needed
+        missing_positions = []
+        if has_missing:
+            for obj_idx, obj in enumerate(self.object_list):
+                obj_missing = []
+                for lm_idx, lm in enumerate(obj.landmark_list):
+                    if lm[0] is None or lm[1] is None:
+                        obj_missing.append(lm_idx)
+                missing_positions.append(obj_missing)
+
+        # Initial centering and scaling
+        for mo in self.object_list:
+            mo.move_to_center()
+            mo.rescale_to_unitsize()
+
+        average_shape = None
+        previous_average_shape = None
+        i = 0
+        max_iterations = 100
+
+        while i < max_iterations:
+            i += 1
+            previous_average_shape = average_shape
+            average_shape = self.get_average_shape()
+
+            # If we have missing landmarks, impute them using average shape
+            if has_missing and average_shape is not None:
+                for obj_idx in range(len(self.object_list)):
+                    self.estimate_missing_landmarks(obj_idx, average_shape)
+
+            # Check for convergence
+            if self.is_same_shape(previous_average_shape, average_shape) and previous_average_shape != None:
+                break
+
+            self.set_reference_shape(average_shape)
+            for j in range(len(self.object_list)):
+                self.rotate_gls_to_reference_shape(j)
+
+        return True
+
     def procrustes_superimposition(self):
+        """Procrustes superimposition that automatically handles missing landmarks."""
         #print("begin_procrustes")
         if not self.check_object_list():
             print("check_object_list failed")
             return False
 
+        # Check if we have missing landmarks and use appropriate method
+        if self.has_missing_landmarks():
+            return self.procrustes_superimposition_with_imputation()
+
+        # Original implementation for complete data
         for mo in self.object_list:
             #mo.set_landmarks()
             mo.move_to_center()
@@ -1496,13 +1596,24 @@ class MdDatasetOps:
         if ( shape1 == None or shape2 == None ):
             return False
         sum_coord = 0
+        valid_count = 0
         for i in range(len(shape1.landmark_list)):
-            sum_coord += ( shape1.landmark_list[i][0] - shape2.landmark_list[i][0]) ** 2
-            sum_coord += ( shape1.landmark_list[i][1] - shape2.landmark_list[i][1]) ** 2
-            if self.dimension == 3:
-                sum_coord += ( shape1.landmark_list[i][2] - shape2.landmark_list[i][2]) ** 2
+            # Only compare landmarks that are valid in both shapes
+            if (shape1.landmark_list[i][0] is not None and
+                shape2.landmark_list[i][0] is not None and
+                shape1.landmark_list[i][1] is not None and
+                shape2.landmark_list[i][1] is not None):
+                sum_coord += ( shape1.landmark_list[i][0] - shape2.landmark_list[i][0]) ** 2
+                sum_coord += ( shape1.landmark_list[i][1] - shape2.landmark_list[i][1]) ** 2
+                valid_count += 1
+                if self.dimension == 3:
+                    if (len(shape1.landmark_list[i]) > 2 and len(shape2.landmark_list[i]) > 2 and
+                        shape1.landmark_list[i][2] is not None and shape2.landmark_list[i][2] is not None):
+                        sum_coord += ( shape1.landmark_list[i][2] - shape2.landmark_list[i][2]) ** 2
         #shape1.print_landmarks("shape1")
         #shape2.print_landmarks("shape2")
+        if valid_count == 0:
+            return False
         sum_coord = math.sqrt(sum_coord)
         #print "diff: ", sum
         if sum_coord < 10 ** -10:

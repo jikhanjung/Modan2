@@ -210,7 +210,6 @@ class TestProcrustesWithMissing:
 class TestProcrustesImputation:
     """Test Procrustes with missing landmark imputation."""
 
-    @pytest.mark.skip(reason="Imputation not yet implemented")
     def test_missing_landmarks_imputed(self, dataset_with_missing):
         """Test that missing landmarks are imputed during Procrustes."""
         ds_ops = MdDatasetOps(dataset_with_missing)
@@ -227,7 +226,6 @@ class TestProcrustesImputation:
                 assert lm[0] is not None
                 assert lm[1] is not None
 
-    @pytest.mark.skip(reason="Imputation not yet implemented")
     def test_imputation_convergence(self, dataset_with_missing):
         """Test that imputation converges to reasonable values."""
         ds_ops = MdDatasetOps(dataset_with_missing)
@@ -251,7 +249,6 @@ class TestProcrustesImputation:
         assert obj3_lm3[0] is not None
         assert obj3_lm3[1] is not None
 
-    @pytest.mark.skip(reason="Average shape with missing not yet implemented")
     def test_average_shape_with_missing(self, dataset_with_missing):
         """Test average shape calculation handles missing landmarks."""
         ds_ops = MdDatasetOps(dataset_with_missing)

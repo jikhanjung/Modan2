@@ -272,7 +272,8 @@ class TestAnalysisOperations:
             MdModel.MdObject.create(
                 dataset=dataset,
                 object_name=f"Object_{i+1}",
-                landmarks=[[j + i, j + i + 5] for j in range(5)]
+                sequence=i+1,
+                landmark_str="\n".join([f"{j + i}\t{j + i + 5}" for j in range(5)])
             )
         
         controller.set_current_dataset(dataset)

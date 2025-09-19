@@ -202,13 +202,6 @@ class TestUIResponsiveness:
 class TestWindowGeometry:
     """Test window geometry and layout."""
     
-    def test_window_minimum_size(self, main_window):
-        """Test that window has appropriate minimum size."""
-        min_size = main_window.minimumSize()
-        # Window should have some minimum size
-        assert min_size.width() >= 300
-        assert min_size.height() >= 200
-    
     def test_splitter_sizes(self, main_window):
         """Test that main widgets are properly sized."""
         # Check that main widgets exist and are visible

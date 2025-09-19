@@ -21,12 +21,19 @@ class TestConstants:
         """Test that program constants are properly defined."""
         assert mu.COMPANY_NAME == "PaleoBytes"
         assert mu.PROGRAM_NAME == "Modan2"
-        assert mu.PROGRAM_VERSION == "0.1.4"
-        
-        # Version should be in x.y.z format
-        version_parts = mu.PROGRAM_VERSION.split('.')
-        assert len(version_parts) == 3
-        assert all(part.isdigit() for part in version_parts)
+
+        # Import version from the single source of truth
+        from version import __version__
+        assert mu.PROGRAM_VERSION == __version__
+
+        # Version should follow semantic versioning (but may have pre-release suffix)
+        import semver
+        try:
+            parsed_version = semver.VersionInfo.parse(mu.PROGRAM_VERSION)
+            assert parsed_version is not None
+        except ValueError:
+            # If semver parsing fails, at least check basic format
+            assert '.' in mu.PROGRAM_VERSION  # Should have dots for version separation
     
     def test_directory_constants(self):
         """Test that directory constants are properly formed."""

@@ -345,9 +345,27 @@ class MdObject(Model):
         lm_list = self.landmark_str.split(LINE_SEPARATOR)
         for lm in lm_list:
             if lm != "":
-                #self.landmark_list.append([float(x) for x in lm.split(LANDMARK_SEPARATOR)])
-                #self.landmark_list.append([float(x) if x.replace('.', '', 1).isdigit() else 0.0 for x in lm.split(LANDMARK_SEPARATOR)])
-                self.landmark_list.append([float(x) if self.is_float(x) else None for x in lm.split(LANDMARK_SEPARATOR)])
+                # Try to detect the separator used
+                # Priority: tab > comma > multiple spaces > single space
+                if '\t' in lm:
+                    separator = '\t'
+                elif ',' in lm:
+                    separator = ','
+                elif '  ' in lm:  # Multiple spaces
+                    # Split by multiple spaces and filter empty strings
+                    coords = [x for x in lm.split() if x]
+                    self.landmark_list.append([float(x) if self.is_float(x) else None for x in coords])
+                    continue
+                elif ' ' in lm:
+                    separator = ' '
+                else:
+                    # Single value or unknown format
+                    separator = LANDMARK_SEPARATOR
+
+                coords = lm.split(separator)
+                # Filter out empty strings (can happen with multiple spaces)
+                coords = [x.strip() for x in coords if x.strip()]
+                self.landmark_list.append([float(x) if self.is_float(x) else None for x in coords])
         return self.landmark_list
     def is_float(self, s):
         # Check for "Missing" text specifically
@@ -905,11 +923,15 @@ class MdObjectOps:
         new_landmark_list = []
         #print("move 1:", id(self.landmark_list), self.landmark_list[0])
         for lm in self.landmark_list:
-            lm[0] = lm[0] + x
-            lm[1] = lm[1] + y
-            if len(lm) == 3:
-                lm[2] = lm[2] + z
-            new_landmark_list.append(lm)
+            new_lm = lm.copy()  # Create a copy to avoid modifying original
+            # Only move non-None coordinates
+            if new_lm[0] is not None:
+                new_lm[0] = new_lm[0] + x
+            if new_lm[1] is not None:
+                new_lm[1] = new_lm[1] + y
+            if len(new_lm) == 3 and new_lm[2] is not None:
+                new_lm[2] = new_lm[2] + z
+            new_landmark_list.append(new_lm)
         self.landmark_list = new_landmark_list
         #print("move 2:", id(self.landmark_list), self.landmark_list[0])
 
@@ -922,8 +944,14 @@ class MdObjectOps:
         #print("rescale:", factor, self.landmark_list[:5])
         new_landmark_list = []
         for lm in self.landmark_list:
-            lm = [x * factor for x in lm]
-            new_landmark_list.append(lm)
+            # Scale each coordinate individually, preserving None values
+            new_lm = []
+            for coord in lm:
+                if coord is not None:
+                    new_lm.append(coord * factor)
+                else:
+                    new_lm.append(None)
+            new_landmark_list.append(new_lm)
         self.landmark_list = new_landmark_list
         #print("rescale:", factor, self.objname, self.landmark_list[:5])
 
@@ -934,11 +962,29 @@ class MdObjectOps:
 
     def apply_rotation_matrix(self, rotation_matrix):
         #print("obj_ops apply rotation", rotation_matrix)
-        if len(self.landmark_list)>0:
-            ones_column = np.ones((np.array(self.landmark_list).shape[0], 1))
-            vertices_with_ones = np.hstack((self.landmark_list, ones_column))
-            new_vertices = np.dot(vertices_with_ones, rotation_matrix.T)
-            self.landmark_list = new_vertices[:, 0:3].tolist()
+        if len(self.landmark_list) > 0:
+            new_landmark_list = []
+            for lm in self.landmark_list:
+                # Check if all coordinates are valid (not None)
+                if all(coord is not None for coord in lm):
+                    # Prepare the landmark array based on dimension
+                    if len(lm) == 2:
+                        lm_array = np.array([lm[0], lm[1], 0, 1])  # 2D point with z=0 and homogeneous
+                    else:  # 3D
+                        lm_array = np.array(lm[:3] + [1])  # Add homogeneous coordinate
+
+                    # Apply rotation
+                    rotated = np.dot(rotation_matrix.T, lm_array)
+
+                    # Return the appropriate dimension
+                    if len(lm) == 2:
+                        new_landmark_list.append([rotated[0], rotated[1]])
+                    else:
+                        new_landmark_list.append(rotated[:3].tolist())
+                else:
+                    # Keep None values as is
+                    new_landmark_list.append(lm)
+            self.landmark_list = new_landmark_list
 
 
     def rotate_2d(self, theta):
@@ -1282,51 +1328,93 @@ class MdDatasetOps:
 
         mo = self.object_list[object_index]
         nlandmarks = len(mo.landmark_list)
-        target_shape = np.zeros((nlandmarks, self.dimension))
-        reference_shape = np.zeros((nlandmarks, self.dimension))
 
-        i = 0
-        for lm in ( mo.landmark_list ):
-            for j in range(self.dimension):
-                target_shape[i,j] = lm[j]
-            i += 1
+        # Check if there are any None values
+        has_missing = False
+        for lm in mo.landmark_list:
+            if any(coord is None for coord in lm[:self.dimension]):
+                has_missing = True
+                break
 
-        i = 0
-        for lm in self.reference_shape.landmark_list:
-            for j in range(self.dimension):
-                reference_shape[i,j] = lm[j]
-            i += 1
+        if not has_missing:
+            # Original implementation for complete data - rotate all landmarks
+            target_shape = np.zeros((nlandmarks, self.dimension))
+            reference_shape = np.zeros((nlandmarks, self.dimension))
 
-        rotation_matrix = self.rotation_matrix(reference_shape, target_shape)
-        #print rotation_matrix
-        #target_transposed = np.transpose( target_shape )
-        #print target_transposed
-        #print rotation_matrix.shape
-        #print target_transposed.shape
-        rotated_shape = np.transpose(np.dot(rotation_matrix, np.transpose(target_shape)))
+            i = 0
+            for lm in mo.landmark_list:
+                for j in range(self.dimension):
+                    target_shape[i,j] = lm[j]
+                i += 1
 
-        #print rotated_shape
+            i = 0
+            for lm in self.reference_shape.landmark_list:
+                for j in range(self.dimension):
+                    reference_shape[i,j] = lm[j]
+                i += 1
 
-        i = 0
-        new_landmark_list = []
-        for i in range( len(mo.landmark_list) ):
-            lm = [0] * self.dimension
-            #lm = [0,0,0]
-            for j in range(self.dimension):
-                lm[j] = rotated_shape[i,j]
-            new_landmark_list.append(lm)
-            #lm = [ rotated_shape[i, 0], rotated_shape[i, 1], rotated_shape[i, 2] ]
-            #i += 1
-        mo.landmark_list = new_landmark_list
+            rotation_matrix = self.rotation_matrix(reference_shape, target_shape)
+            rotated_shape = np.transpose(np.dot(rotation_matrix, np.transpose(target_shape)))
+
+            i = 0
+            for lm in mo.landmark_list:
+                for j in range(self.dimension):
+                    lm[j] = rotated_shape[i,j]
+                i += 1
+        else:
+            # New implementation for missing data - use only valid landmarks
+            valid_indices = []
+            target_points = []
+            reference_points = []
+
+            for i in range(nlandmarks):
+                obj_lm = mo.landmark_list[i]
+                ref_lm = self.reference_shape.landmark_list[i] if i < len(self.reference_shape.landmark_list) else None
+
+                if (obj_lm and ref_lm and
+                    all(coord is not None for coord in obj_lm[:self.dimension]) and
+                    all(coord is not None for coord in ref_lm[:self.dimension])):
+                    valid_indices.append(i)
+                    target_points.append(obj_lm[:self.dimension])
+                    reference_points.append(ref_lm[:self.dimension])
+
+            # Need at least 3 points for rotation in 2D, 4 in 3D
+            min_points = 3 if self.dimension == 2 else 4
+            if len(valid_indices) < min_points:
+                return  # Not enough valid points for rotation
+
+            # Create arrays for valid points only
+            target_shape = np.array(target_points)
+            reference_shape = np.array(reference_points)
+
+            rotation_matrix = self.rotation_matrix(reference_shape, target_shape)
+            rotated_shape = np.transpose(np.dot(rotation_matrix, np.transpose(target_shape)))
+
+            # Apply rotation only to valid landmarks
+            new_landmark_list = []
+            valid_idx = 0
+            for i in range(len(mo.landmark_list)):
+                if i in valid_indices:
+                    # This landmark was part of the rotation
+                    lm = [0] * len(mo.landmark_list[i])
+                    for j in range(self.dimension):
+                        lm[j] = rotated_shape[valid_idx, j]
+                    if len(mo.landmark_list[i]) > self.dimension:
+                        # Preserve additional dimensions if any
+                        for j in range(self.dimension, len(mo.landmark_list[i])):
+                            lm[j] = mo.landmark_list[i][j]
+                    new_landmark_list.append(lm)
+                    valid_idx += 1
+                else:
+                    # This landmark has None values, keep it as is
+                    new_landmark_list.append(mo.landmark_list[i])
+            mo.landmark_list = new_landmark_list
 
     def apply_rotation_matrix(self, rotation_matrix):
         #print("obj_ops apply rotation", rotation_matrix)
         for mo in self.object_list:
-            if len(mo.landmark_list)>0:
-                ones_column = np.ones((np.array(mo.landmark_list).shape[0], 1))
-                vertices_with_ones = np.hstack((mo.landmark_list, ones_column))
-                new_vertices = np.dot(vertices_with_ones, rotation_matrix.T)
-                mo.landmark_list = new_vertices[:, 0:3].tolist()
+            # Use the MdObjectOps apply_rotation_matrix which handles None values
+            mo.apply_rotation_matrix(rotation_matrix)
 
     def rotation_matrix(self, ref, target):
         #assert( ref[0] == 3 )
@@ -1351,24 +1439,45 @@ class MdDatasetOps:
         sum_x = []
         sum_y = []
         sum_z = []
+        count_x = []  # Count of valid values for each landmark
+        count_y = []
+        count_z = []
 
         for mo in self.object_list:
             i = 0
             for lm in mo.landmark_list:
+                # Initialize arrays if needed
                 if len(sum_x) <= i:
                     sum_x.append(0)
                     sum_y.append(0)
                     sum_z.append(0)
-                sum_x[i] += lm[0]
-                sum_y[i] += lm[1]
-                if self.dimension == 3:
+                    count_x.append(0)
+                    count_y.append(0)
+                    count_z.append(0)
+
+                # Only add non-None values
+                if lm[0] is not None:
+                    sum_x[i] += lm[0]
+                    count_x[i] += 1
+                if lm[1] is not None:
+                    sum_y[i] += lm[1]
+                    count_y[i] += 1
+                if self.dimension == 3 and len(lm) > 2 and lm[2] is not None:
                     sum_z[i] += lm[2]
+                    count_z[i] += 1
                 i += 1
+
         for i in range(len(sum_x)):
             if self.dimension == 2:
-                lm = [ float(sum_x[i]) / object_count, float(sum_y[i]) / object_count ]
+                # Calculate average only from valid values
+                x_avg = float(sum_x[i]) / count_x[i] if count_x[i] > 0 else None
+                y_avg = float(sum_y[i]) / count_y[i] if count_y[i] > 0 else None
+                lm = [x_avg, y_avg]
             else:
-                lm = [ float(sum_x[i]) / object_count, float(sum_y[i]) / object_count, float(sum_z[i]) / object_count ]
+                x_avg = float(sum_x[i]) / count_x[i] if count_x[i] > 0 else None
+                y_avg = float(sum_y[i]) / count_y[i] if count_y[i] > 0 else None
+                z_avg = float(sum_z[i]) / count_z[i] if count_z[i] > 0 else None
+                lm = [x_avg, y_avg, z_avg]
             average_shape.landmark_list.append(lm)
         if self.id:
             average_shape.dataset_id = self.id
@@ -1391,12 +1500,112 @@ class MdDatasetOps:
             return False
         return True
 
+    def estimate_missing_landmarks(self, obj_index, reference_shape):
+        """Estimate missing landmarks for an object using the reference shape.
+
+        This implements a simple imputation strategy where missing landmarks
+        are replaced with the corresponding landmarks from the reference shape
+        (typically the average shape).
+
+        Args:
+            obj_index: Index of the object in object_list
+            reference_shape: Reference shape (usually average shape) to use for imputation
+        """
+        if reference_shape is None:
+            return
+
+        obj = self.object_list[obj_index]
+
+        # Check each landmark
+        for lm_idx in range(len(obj.landmark_list)):
+            # If any coordinate is missing, replace with reference
+            if (obj.landmark_list[lm_idx][0] is None or
+                obj.landmark_list[lm_idx][1] is None):
+                # Replace with reference shape landmark
+                if lm_idx < len(reference_shape.landmark_list):
+                    ref_lm = reference_shape.landmark_list[lm_idx]
+                    if ref_lm[0] is not None and ref_lm[1] is not None:
+                        obj.landmark_list[lm_idx][0] = ref_lm[0]
+                        obj.landmark_list[lm_idx][1] = ref_lm[1]
+                        if len(obj.landmark_list[lm_idx]) == 3 and len(ref_lm) == 3:
+                            obj.landmark_list[lm_idx][2] = ref_lm[2] if ref_lm[2] is not None else 0
+
+    def has_missing_landmarks(self):
+        """Check if any object in the dataset has missing landmarks."""
+        for obj in self.object_list:
+            for lm in obj.landmark_list:
+                if lm[0] is None or lm[1] is None:
+                    return True
+                if len(lm) == 3 and lm[2] is None:
+                    return True
+        return False
+
+    def procrustes_superimposition_with_imputation(self):
+        """Procrustes superimposition with missing landmark imputation.
+
+        This implements an iterative imputation strategy similar to geomorph:
+        1. Initial alignment using only observed landmarks
+        2. Estimate missing landmarks from average shape
+        3. Iteratively refine estimates during Procrustes iterations
+        """
+        if not self.check_object_list():
+            print("check_object_list failed")
+            return False
+
+        has_missing = self.has_missing_landmarks()
+
+        # Store original missing positions for restoration if needed
+        missing_positions = []
+        if has_missing:
+            for obj_idx, obj in enumerate(self.object_list):
+                obj_missing = []
+                for lm_idx, lm in enumerate(obj.landmark_list):
+                    if lm[0] is None or lm[1] is None:
+                        obj_missing.append(lm_idx)
+                missing_positions.append(obj_missing)
+
+        # Initial centering and scaling
+        for mo in self.object_list:
+            mo.move_to_center()
+            mo.rescale_to_unitsize()
+
+        average_shape = None
+        previous_average_shape = None
+        i = 0
+        max_iterations = 100
+
+        while i < max_iterations:
+            i += 1
+            previous_average_shape = average_shape
+            average_shape = self.get_average_shape()
+
+            # If we have missing landmarks, impute them using average shape
+            if has_missing and average_shape is not None:
+                for obj_idx in range(len(self.object_list)):
+                    self.estimate_missing_landmarks(obj_idx, average_shape)
+
+            # Check for convergence
+            if self.is_same_shape(previous_average_shape, average_shape) and previous_average_shape != None:
+                break
+
+            self.set_reference_shape(average_shape)
+            for j in range(len(self.object_list)):
+                self.rotate_gls_to_reference_shape(j)
+
+        return True
+
     def procrustes_superimposition(self):
+        """Procrustes superimposition that automatically handles missing landmarks."""
         #print("begin_procrustes")
         if not self.check_object_list():
             print("check_object_list failed")
             return False
 
+        # Check if we have missing landmarks and use appropriate method
+        if self.has_missing_landmarks():
+            return self.procrustes_superimposition_with_imputation()
+
+        # Original implementation for complete data
         for mo in self.object_list:
             #mo.set_landmarks()
             mo.move_to_center()
@@ -1430,13 +1639,24 @@ class MdDatasetOps:
         if ( shape1 == None or shape2 == None ):
             return False
         sum_coord = 0
+        valid_count = 0
         for i in range(len(shape1.landmark_list)):
-            sum_coord += ( shape1.landmark_list[i][0] - shape2.landmark_list[i][0]) ** 2
-            sum_coord += ( shape1.landmark_list[i][1] - shape2.landmark_list[i][1]) ** 2
-            if self.dimension == 3:
-                sum_coord += ( shape1.landmark_list[i][2] - shape2.landmark_list[i][2]) ** 2
+            # Only compare landmarks that are valid in both shapes
+            if (shape1.landmark_list[i][0] is not None and
+                shape2.landmark_list[i][0] is not None and
+                shape1.landmark_list[i][1] is not None and
+                shape2.landmark_list[i][1] is not None):
+                sum_coord += ( shape1.landmark_list[i][0] - shape2.landmark_list[i][0]) ** 2
+                sum_coord += ( shape1.landmark_list[i][1] - shape2.landmark_list[i][1]) ** 2
+                valid_count += 1
+                if self.dimension == 3:
+                    if (len(shape1.landmark_list[i]) > 2 and len(shape2.landmark_list[i]) > 2 and
+                        shape1.landmark_list[i][2] is not None and shape2.landmark_list[i][2] is not None):
+                        sum_coord += ( shape1.landmark_list[i][2] - shape2.landmark_list[i][2]) ** 2
         #shape1.print_landmarks("shape1")
         #shape2.print_landmarks("shape2")
+        if valid_count == 0:
+            return False
         sum_coord = math.sqrt(sum_coord)
         #print "diff: ", sum
         if sum_coord < 10 ** -10:

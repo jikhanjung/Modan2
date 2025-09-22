@@ -1,7 +1,7 @@
 # Development and testing dependencies
 pytest==8.4.2           # Core testing framework
 pytest-cov==7.0.0       # Code coverage measurement
-pytest-mock==3.15.0     # Enhanced mocking capabilities
+pytest-mock==3.15.1     # Enhanced mocking capabilities
 pytest-qt==4.4.0        # PyQt5 UI testing (for future use)
 pytest-xvfb==3.0.0      # Headless GUI testing for CI/CD
 pytest-timeout          # Test timeout management

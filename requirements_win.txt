@@ -2,7 +2,7 @@ pyqt5
 pyqt5-sip
 peewee
 pillow
-numpy<2.0.0
+numpy<3.0.0
 trimesh
 PyOpenGL-3.1.7-cp312-cp312-win_amd64.whl
 PyOpenGL_accelerate-3.1.7-cp312-cp312-win_amd64.whl

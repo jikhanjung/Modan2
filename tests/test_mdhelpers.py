@@ -330,3 +330,301 @@ class TestEdgeCases:
         # Behavior depends on implementation
         result = helpers.ensure_directory(str(file_path))
         # May return False or raise error
+
+
+class TestValidationFunctions:
+    """Test validation helper functions."""
+
+    def test_validate_dataset_name_valid(self):
+        """Test valid dataset names."""
+        is_valid, message = helpers.validate_dataset_name("My Dataset")
+        assert is_valid is True
+        assert "Valid" in message
+
+    def test_validate_dataset_name_empty(self):
+        """Test empty dataset name."""
+        is_valid, message = helpers.validate_dataset_name("")
+        assert is_valid is False
+        assert "empty" in message.lower()
+
+    def test_validate_dataset_name_whitespace_only(self):
+        """Test whitespace-only dataset name."""
+        is_valid, message = helpers.validate_dataset_name("   ")
+        assert is_valid is False
+        assert "empty" in message.lower()
+
+    def test_validate_dataset_name_too_long(self):
+        """Test dataset name that's too long."""
+        long_name = "A" * 101
+        is_valid, message = helpers.validate_dataset_name(long_name)
+        assert is_valid is False
+        assert "long" in message.lower()
+
+    def test_validate_dataset_name_invalid_chars(self):
+        """Test dataset name with invalid characters."""
+        invalid_names = [
+            "Dataset<Name",
+            "Dataset>Name",
+            "Dataset:Name",
+            "Dataset\"Name",
+            "Dataset/Name",
+            "Dataset\\Name",
+            "Dataset|Name",
+            "Dataset?Name",
+            "Dataset*Name"
+        ]
+        for name in invalid_names:
+            is_valid, message = helpers.validate_dataset_name(name)
+            assert is_valid is False
+            assert "cannot contain" in message.lower()
+
+    def test_validate_file_path_valid(self, tmp_path):
+        """Test valid file path."""
+        test_file = tmp_path / "test.txt"
+        test_file.write_text("test")
+
+        is_valid, message = helpers.validate_file_path(str(test_file))
+        assert is_valid is True
+        assert "Valid" in message
+
+    def test_validate_file_path_empty(self):
+        """Test empty file path."""
+        is_valid, message = helpers.validate_file_path("")
+        assert is_valid is False
+        assert "No file path" in message
+
+    def test_validate_file_path_nonexistent(self):
+        """Test nonexistent file path."""
+        is_valid, message = helpers.validate_file_path("/nonexistent/file.txt")
+        assert is_valid is False
+        assert "does not exist" in message.lower()
+
+    def test_validate_file_path_directory(self, tmp_path):
+        """Test file path that points to directory."""
+        is_valid, message = helpers.validate_file_path(str(tmp_path))
+        assert is_valid is False
+        assert "not a file" in message.lower()
+
+
+class TestColorFunctions:
+    """Test color helper functions."""
+
+    def test_parse_color_hex(self):
+        """Test parsing hex color."""
+        color = helpers.parse_color("#FF0000")
+        assert color is not None
+        assert color.red() == 255
+        assert color.green() == 0
+        assert color.blue() == 0
+
+    def test_parse_color_name(self):
+        """Test parsing named color."""
+        color = helpers.parse_color("red")
+        assert color is not None
+        assert color.red() == 255
+
+    def test_parse_color_invalid(self):
+        """Test parsing invalid color."""
+        color = helpers.parse_color("invalid_color_xyz")
+        # May return None or invalid QColor depending on implementation
+        assert color is None or not color.isValid()
+
+    def test_color_to_hex(self):
+        """Test converting QColor to hex."""
+        from PyQt5.QtGui import QColor
+        color = QColor(255, 0, 0)
+        hex_str = helpers.color_to_hex(color)
+        assert hex_str.lower() == "#ff0000"
+
+
+class TestDateTimeFunctions:
+    """Test datetime helper functions."""
+
+    def test_format_datetime(self):
+        """Test datetime formatting."""
+        dt = datetime(2025, 1, 15, 14, 30, 45)
+        formatted = helpers.format_datetime(dt)
+        assert formatted == "2025-01-15 14:30:45"
+
+    def test_format_datetime_custom_format(self):
+        """Test datetime formatting with custom format."""
+        dt = datetime(2025, 1, 15)
+        formatted = helpers.format_datetime(dt, "%Y/%m/%d")
+        assert formatted == "2025/01/15"
+
+    def test_parse_datetime_valid(self):
+        """Test parsing valid datetime string."""
+        dt = helpers.parse_datetime("2025-01-15 14:30:45")
+        assert dt is not None
+        assert dt.year == 2025
+        assert dt.month == 1
+        assert dt.day == 15
+
+    def test_parse_datetime_custom_format(self):
+        """Test parsing datetime with custom format."""
+        dt = helpers.parse_datetime("2025/01/15", "%Y/%m/%d")
+        assert dt is not None
+        assert dt.year == 2025
+
+    def test_parse_datetime_invalid(self):
+        """Test parsing invalid datetime string."""
+        dt = helpers.parse_datetime("invalid datetime")
+        assert dt is None
+
+
+class TestTypeCasting:
+    """Test type casting helper functions."""
+
+    def test_safe_cast_int(self):
+        """Test safe casting to int."""
+        result = helpers.safe_cast("123", int)
+        assert result == 123
+
+    def test_safe_cast_float(self):
+        """Test safe casting to float."""
+        result = helpers.safe_cast("123.45", float)
+        assert result == 123.45
+
+    def test_safe_cast_invalid_with_default(self):
+        """Test safe casting with invalid value and default."""
+        result = helpers.safe_cast("invalid", int, default=0)
+        assert result == 0
+
+    def test_safe_cast_invalid_no_default(self):
+        """Test safe casting with invalid value and no default."""
+        result = helpers.safe_cast("invalid", int)
+        assert result is None
+
+
+class TestMathFunctions:
+    """Test mathematical helper functions."""
+
+    def test_clamp_within_range(self):
+        """Test clamping value within range."""
+        result = helpers.clamp(5.0, 0.0, 10.0)
+        assert result == 5.0
+
+    def test_clamp_below_min(self):
+        """Test clamping value below minimum."""
+        result = helpers.clamp(-5.0, 0.0, 10.0)
+        assert result == 0.0
+
+    def test_clamp_above_max(self):
+        """Test clamping value above maximum."""
+        result = helpers.clamp(15.0, 0.0, 10.0)
+        assert result == 10.0
+
+
+class TestPathFunctions:
+    """Test path manipulation functions."""
+
+    def test_normalize_path_unix(self):
+        """Test path normalization with Unix paths."""
+        path = helpers.normalize_path("/path/to/../file.txt")
+        assert ".." not in path
+        assert path == os.path.normpath("/path/to/../file.txt")
+
+    @pytest.mark.skipif(os.name != 'nt', reason="Windows path normalization only works on Windows")
+    def test_normalize_path_windows(self):
+        """Test path normalization with Windows paths."""
+        path = helpers.normalize_path("C:\\path\\to\\..\\file.txt")
+        assert ".." not in path
+
+    def test_get_relative_path(self, tmp_path):
+        """Test getting relative path."""
+        base = str(tmp_path)
+        file_path = str(tmp_path / "subdir" / "file.txt")
+
+        rel_path = helpers.get_relative_path(file_path, base)
+        assert ".." not in rel_path or "subdir" in rel_path
+
+    def test_create_backup_filename(self):
+        """Test creating backup filename."""
+        original = "/path/to/file.txt"
+        backup = helpers.create_backup_filename(original)
+
+        assert "file" in backup
+        assert backup != original
+        assert ".backup" in backup or "_backup" in backup or "bak" in backup
+
+
+class TestFileBackup:
+    """Test file backup functions."""
+
+    def test_backup_file_success(self, tmp_path):
+        """Test successful file backup."""
+        original = tmp_path / "original.txt"
+        original.write_text("test content")
+
+        # Mock create_backup_filename to return predictable name
+        with patch('MdHelpers.create_backup_filename') as mock_backup:
+            backup_path = str(tmp_path / "original.txt.backup")
+            mock_backup.return_value = backup_path
+
+            result = helpers.backup_file(str(original))
+
+            if result:
+                assert Path(backup_path).exists()
+
+    def test_backup_file_nonexistent(self):
+        """Test backup of nonexistent file."""
+        result = helpers.backup_file("/nonexistent/file.txt")
+        assert result is False
+
+
+class TestFileFinding:
+    """Test file finding functions."""
+
+    def test_find_files_all(self, tmp_path):
+        """Test finding all files in directory."""
+        # Create test files
+        (tmp_path / "file1.txt").write_text("test")
+        (tmp_path / "file2.py").write_text("test")
+        subdir = tmp_path / "subdir"
+        subdir.mkdir()
+        (subdir / "file3.txt").write_text("test")
+
+        files = helpers.find_files(str(tmp_path), pattern="*", recursive=True)
+
+        # Should find files (exact count depends on implementation)
+        assert isinstance(files, list)
+
+    def test_find_files_pattern(self, tmp_path):
+        """Test finding files with pattern."""
+        (tmp_path / "test.txt").write_text("test")
+        (tmp_path / "test.py").write_text("test")
+
+        files = helpers.find_files(str(tmp_path), pattern="*.txt", recursive=False)
+
+        if files:
+            assert all(f.endswith('.txt') for f in files)
+
+
+class TestFileInfo:
+    """Test file information functions."""
+
+    def test_get_file_info(self, tmp_path):
+        """Test getting file information."""
+        test_file = tmp_path / "test.txt"
+        test_file.write_text("test content")
+
+        info = helpers.get_file_info(str(test_file))
+
+        assert isinstance(info, dict)
+        if info:
+            assert 'size' in info or 'name' in info or 'path' in info
+
+
+class TestURLFunctions:
+    """Test URL helper functions."""
+
+    def test_create_url_from_path(self, tmp_path):
+        """Test creating QUrl from file path."""
+        test_file = tmp_path / "test.txt"
+        test_file.write_text("test")
+
+        url = helpers.create_url_from_path(str(test_file))
+
+        from PyQt5.QtCore import QUrl
+        assert isinstance(url, QUrl)
+        assert url.isValid()

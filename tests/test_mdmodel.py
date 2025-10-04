@@ -698,3 +698,215 @@ class TestMdAnalysisExtended:
         # Verify analysis is linked to dataset
         assert analysis.dataset == dataset
         assert analysis.dataset.id == dataset.id
+
+
+class TestMdObjectMethods:
+    """Test MdObject helper methods."""
+
+    def test_get_name_with_name(self, test_database):
+        """Test get_name when object_name is set."""
+        dataset = mm.MdDataset.create(dataset_name="Test")
+        obj = mm.MdObject.create(object_name="MyObject", dataset=dataset)
+
+        assert obj.get_name() == "MyObject"
+
+    def test_get_name_without_name(self, test_database):
+        """Test get_name when object_name is empty."""
+        dataset = mm.MdDataset.create(dataset_name="Test")
+        obj = mm.MdObject.create(object_name="", dataset=dataset)
+
+        # Should return string of ID
+        assert obj.get_name() == str(obj.id)
+
+    # Note: object_name has NOT NULL constraint, so we can't test with None
+
+    def test_count_landmarks_empty(self, test_database):
+        """Test count_landmarks with no landmarks."""
+        dataset = mm.MdDataset.create(dataset_name="Test")
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+
+        assert obj.count_landmarks() == 0
+        assert obj.count_landmarks(exclude_missing=False) == 0
+
+    def test_count_landmarks_with_data(self, test_database):
+        """Test count_landmarks with landmarks."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(
+            object_name="Test",
+            dataset=dataset,
+            landmark_str="1.0\t2.0\n3.0\t4.0\n5.0\t6.0"
+        )
+        obj.unpack_landmark()
+
+        assert obj.count_landmarks() == 3
+        assert obj.count_landmarks(exclude_missing=False) == 3
+
+    def test_count_landmarks_excluding_missing(self, test_database):
+        """Test count_landmarks excluding missing landmarks."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        # Create object with manually set missing landmark (None values)
+        obj = mm.MdObject.create(
+            object_name="Test",
+            dataset=dataset
+        )
+        # Set landmarks with one missing
+        obj.landmark_list = [[1.0, 2.0], [None, None], [5.0, 6.0]]
+        obj.pack_landmark()
+
+        # exclude_missing=True should count only valid landmarks
+        assert obj.count_landmarks(exclude_missing=True) == 2
+        # exclude_missing=False should count all landmarks
+        assert obj.count_landmarks(exclude_missing=False) == 3
+
+    def test_has_image_false(self, test_database):
+        """Test has_image when no image attached."""
+        dataset = mm.MdDataset.create(dataset_name="Test")
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+
+        assert obj.has_image() is False
+
+    def test_has_threed_model_false(self, test_database):
+        """Test has_threed_model when no model attached."""
+        dataset = mm.MdDataset.create(dataset_name="Test")
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+
+        assert obj.has_threed_model() is False
+
+    def test_str_repr(self, test_database):
+        """Test __str__ and __repr__ methods."""
+        dataset = mm.MdDataset.create(dataset_name="Test")
+        obj = mm.MdObject.create(object_name="MyObject", dataset=dataset)
+
+        assert str(obj) == "MyObject"
+        assert repr(obj) == "MyObject"
+
+    def test_str_repr_empty_name(self, test_database):
+        """Test __str__ and __repr__ with empty name."""
+        dataset = mm.MdDataset.create(dataset_name="Test")
+        obj = mm.MdObject.create(object_name="", dataset=dataset)
+
+        assert str(obj) == ""
+        assert repr(obj) == ""
+
+
+class TestMdDatasetPackingMethods:
+    """Test MdDataset pack/unpack methods."""
+
+    def test_pack_variablename_str_from_list(self, test_database):
+        """Test pack_variablename_str with provided list."""
+        dataset = mm.MdDataset.create(dataset_name="Test")
+
+        result = dataset.pack_variablename_str(['age', 'weight', 'length'])
+
+        assert result == "age,weight,length"
+        assert dataset.propertyname_str == "age,weight,length"
+
+    def test_pack_variablename_str_from_attribute(self, test_database):
+        """Test pack_variablename_str using variablename_list attribute."""
+        dataset = mm.MdDataset.create(dataset_name="Test")
+        dataset.variablename_list = ['var1', 'var2']
+
+        result = dataset.pack_variablename_str()
+
+        assert result == "var1,var2"
+
+    def test_unpack_variablename_str_with_parameter(self, test_database):
+        """Test unpack_variablename_str with parameter."""
+        dataset = mm.MdDataset.create(dataset_name="Test")
+
+        result = dataset.unpack_variablename_str("a,b,c")
+
+        assert result == ['a', 'b', 'c']
+        assert dataset.variablename_list == ['a', 'b', 'c']
+
+    def test_unpack_variablename_str_from_attribute(self, test_database):
+        """Test unpack_variablename_str using propertyname_str attribute."""
+        dataset = mm.MdDataset.create(
+            dataset_name="Test",
+            propertyname_str="x,y,z"
+        )
+
+        result = dataset.unpack_variablename_str()
+
+        assert result == ['x', 'y', 'z']
+
+    def test_get_variablename_list(self, test_database):
+        """Test get_variablename_list method."""
+        dataset = mm.MdDataset.create(
+            dataset_name="Test",
+            propertyname_str="v1,v2,v3"
+        )
+
+        result = dataset.get_variablename_list()
+
+        assert result == ['v1', 'v2', 'v3']
+
+    def test_pack_wireframe(self, test_database):
+        """Test pack_wireframe method."""
+        dataset = mm.MdDataset.create(dataset_name="Test")
+        dataset.edge_list = [[1, 2], [2, 3], [0, 1]]
+
+        result = dataset.pack_wireframe()
+
+        # Edges should be sorted
+        assert dataset.wireframe is not None
+        # Should contain edge data
+        assert '1-2' in dataset.wireframe or '2-1' in dataset.wireframe
+
+    def test_pack_polygons(self, test_database):
+        """Test pack_polygons method."""
+        dataset = mm.MdDataset.create(dataset_name="Test")
+        dataset.polygon_list = [[0, 1, 2], [1, 2, 3]]
+
+        result = dataset.pack_polygons()
+
+        assert dataset.polygons is not None
+        # Polygons use "-" to separate points, "," to separate polygons
+        assert '0-1-2' in dataset.polygons
+
+    def test_pack_baseline(self, test_database):
+        """Test pack_baseline method."""
+        dataset = mm.MdDataset.create(dataset_name="Test")
+        dataset.baseline_point_list = [0, 1, 2]
+
+        result = dataset.pack_baseline()
+
+        assert dataset.baseline == "0,1,2"
+
+    def test_get_edge_list(self, test_database):
+        """Test get_edge_list method."""
+        dataset = mm.MdDataset.create(
+            dataset_name="Test",
+            wireframe="0-1,1-2,2-0"
+        )
+        dataset.unpack_wireframe()
+
+        result = dataset.get_edge_list()
+
+        assert len(result) == 3
+        assert [0, 1] in result or [1, 0] in result
+
+    def test_get_polygon_list(self, test_database):
+        """Test get_polygon_list method."""
+        dataset = mm.MdDataset.create(
+            dataset_name="Test",
+            polygons="0-1-2,1-2-3"  # Use "-" for points, "," for polygons
+        )
+        dataset.unpack_polygons()
+
+        result = dataset.get_polygon_list()
+
+        assert len(result) == 2
+        assert [0, 1, 2] in result
+
+    def test_get_baseline_points(self, test_database):
+        """Test get_baseline_points method."""
+        dataset = mm.MdDataset.create(
+            dataset_name="Test",
+            baseline="0,1,2,3"
+        )
+        dataset.unpack_baseline()
+
+        result = dataset.get_baseline_points()
+
+        assert result == [0, 1, 2, 3]

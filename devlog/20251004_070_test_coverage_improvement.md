@@ -97,6 +97,7 @@ def test_calculate_file_hash(self, tmp_path):
 
 | Module | Before | After | Change |
 |--------|--------|-------|--------|
+| **MdConstants.py** | 75% | 97% | +22% ⬆️ |
 | **MdHelpers.py** | 17% | 37% | +20% ⬆️ |
 | **MdModel.py** | 47% | 49% | +2% ⬆️ |
 | **MdStatistics.py** | 44% | 59% | +15% ⬆️ |
@@ -111,8 +112,8 @@ def test_calculate_file_hash(self, tmp_path):
 ## Test Suite Growth
 
 - **Tests before**: 203 passing, 34 skipped
-- **Tests after**: 292 passing, 34 skipped (326 total)
-- **New tests**: 89 (+44% growth)
+- **Tests after**: 318 passing, 34 skipped (352 total)
+- **New tests**: 115 (+57% growth)
 - **All passing**: ✅ No regressions
 
 ### MdModel.py Coverage Improvement
@@ -397,9 +398,78 @@ def test_safe_extract_zip(self, tmp_path):
 - File I/O with mocks: ✅ Covered where possible
 - Complex export/import: Better suited for end-to-end testing
 
+### MdConstants.py Coverage Improvement
+
+**Coverage**: 75% → 97% (+29% improvement)
+
+#### New Tests Added (26 total)
+
+**Constant Definitions (17 tests)**
+- Application information constants (APP_NAME, APP_AUTHOR, APP_LICENSE, APP_URL)
+- Version information validation
+- Path constants (BASE_DIR, ICONS_DIR, CONFIG_DIR, etc.)
+- Icon mappings dictionary
+- File filters dictionary and format validation
+- Default settings dictionary and types
+- Analysis types list and structure
+- Supported file extensions
+
+**Message Constants (3 tests)**
+- ERROR_MESSAGES dictionary
+- WARNING_MESSAGES dictionary
+- INFO_MESSAGES dictionary
+
+**Helper Functions (6 tests)**
+- `get_icon_path()` - Icon path retrieval with fallback
+- `get_file_filter()` - File filter string lookup
+- `get_analysis_info()` - Analysis type information (case-insensitive)
+- `is_supported_file()` - File format support check (case-insensitive)
+- `get_file_category()` - File category detection by extension
+
+#### Test Implementation Highlights
+
+**Function Testing**:
+```python
+def test_get_file_category(self):
+    """Test get_file_category function."""
+    # Test landmark files
+    assert mc.get_file_category('test.tps') == 'landmark'
+    assert mc.get_file_category('test.nts') == 'landmark'
+
+    # Test case insensitivity
+    assert mc.get_file_category('TEST.TPS') == 'landmark'
+
+    # Test unknown files
+    assert mc.get_file_category('test.xyz') == 'unknown'
+```
+
+**Analysis Info Testing**:
+```python
+def test_get_analysis_info(self):
+    """Test get_analysis_info function."""
+    # Test valid analysis
+    info = mc.get_analysis_info('PCA')
+    assert info['name'] == 'PCA'
+
+    # Test case insensitivity
+    info = mc.get_analysis_info('pca')
+    assert info['name'] == 'PCA'
+
+    # Test invalid analysis returns empty dict
+    info = mc.get_analysis_info('INVALID')
+    assert len(info) == 0
+```
+
+#### Coverage Notes
+
+**Uncovered Lines** (9-10):
+- `except ImportError:` fallback for version import
+- Only executed when `version.py` is missing
+- Appropriate exception handling for development environment
+
 ---
 
 **Contributors**: Claude (AI Assistant)
 **Test Coverage**: 38% (was 36%)
-**New Tests**: 87 (35 MdHelpers + 12 MdModel + 17 MdStatistics + 23 MdUtils)
-**Status**: ✅ MdHelpers (17%→37%), ✅ MdModel (47%→49%), ✅ MdStatistics (44%→59%), ✅ MdUtils (23%→44%), continuing with other modules
+**New Tests**: 113 (35 MdHelpers + 12 MdModel + 17 MdStatistics + 23 MdUtils + 26 MdConstants)
+**Status**: ✅ MdHelpers (17%→37%), ✅ MdModel (47%→49%), ✅ MdStatistics (44%→59%), ✅ MdUtils (23%→44%), ✅ MdConstants (75%→97%), continuing with other modules

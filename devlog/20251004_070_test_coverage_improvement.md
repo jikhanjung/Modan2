@@ -100,18 +100,19 @@ def test_calculate_file_hash(self, tmp_path):
 | **MdHelpers.py** | 17% | 37% | +20% ⬆️ |
 | **MdModel.py** | 47% | 49% | +2% ⬆️ |
 | **MdStatistics.py** | 44% | 59% | +15% ⬆️ |
+| **MdUtils.py** | 23% | 44% | +21% ⬆️ |
 | ModanController.py | 60% | 60% | - |
 | Modan2.py | 40% | 40% | - |
 | ModanComponents.py | 25% | 25% | - |
 | ModanDialogs.py | 21% | 21% | - |
-| ModanWidgets.py | 15% | 15% | - |
-| **TOTAL** | 35% | 36% | +1% ⬆️ |
+| ModanWidgets.py | 15% | 21% | +6% ⬆️ |
+| **TOTAL** | 35% | 38% | +3% ⬆️ |
 
 ## Test Suite Growth
 
 - **Tests before**: 203 passing, 34 skipped
-- **Tests after**: 267 passing, 34 skipped (301 total)
-- **New tests**: 64 (+32% growth)
+- **Tests after**: 292 passing, 34 skipped (326 total)
+- **New tests**: 89 (+44% growth)
 - **All passing**: ✅ No regressions
 
 ### MdModel.py Coverage Improvement
@@ -309,9 +310,96 @@ TOTAL          20061  13021    35%
 - [Phase 1 Critical Fixes](20251004_068_phase1_critical_fixes.md)
 - [Test Status Analysis](20251004_066_test_status_analysis.md)
 
+### MdUtils.py Coverage Improvement
+
+**Coverage**: 23% → 44% (+91% improvement)
+
+#### New Tests Added (23 total)
+
+**Landmark File Reading (13 tests)**
+- `read_tps_file()` - TPS format parsing with multiple specimens
+- `read_nts_file()` - NTS format parsing with header validation
+- `read_landmark_file()` - Format auto-detection (.tps, .nts, .txt)
+- IMAGE/SCALE line handling in TPS files
+- Specimens without ID (auto-naming)
+- FileNotFoundError handling
+- Malformed file format error handling
+- UnicodeDecodeError handling
+
+**Build Information (3 tests)**
+- `get_build_info()` - Build metadata retrieval
+- `get_copyright_year()` - Copyright year calculation
+- BUILD_INFO constants validation
+
+**JSON+ZIP Functions (6 tests)**
+- `validate_json_schema()` - Schema validation for v1.1 format
+- Missing keys detection
+- Invalid dataset structure handling
+- Non-dict root error handling
+- `safe_extract_zip()` - Safe ZIP extraction preventing Zip Slip
+- `read_json_from_zip()` - JSON extraction from ZIP archives
+
+**Helper Functions (1 test)**
+- `_get_storage_dir()` - Storage directory resolution
+
+#### Test Implementation Highlights
+
+**Landmark File Format Testing**:
+```python
+def test_read_tps_file(self, tmp_path):
+    tps_content = """LM=3
+1.0 2.0
+3.0 4.0
+5.0 6.0
+ID=specimen1
+
+LM=3
+10.0 20.0
+30.0 40.0
+50.0 60.0
+ID=specimen2
+"""
+    tps_file = tmp_path / "test.tps"
+    tps_file.write_text(tps_content)
+    specimens = mu.read_tps_file(str(tps_file))
+
+    assert len(specimens) == 2
+    assert specimens[0][0] == "specimen1"
+    assert len(specimens[0][1]) == 3
+```
+
+**ZIP Safety Validation**:
+```python
+def test_safe_extract_zip(self, tmp_path):
+    zip_path = tmp_path / "test.zip"
+    with zipfile.ZipFile(zip_path, 'w') as zf:
+        zf.writestr("dataset.json", '{"test": "data"}')
+        zf.writestr("images/image1.jpg", "fake image data")
+
+    dest_dir = tmp_path / "extracted"
+    dest_dir.mkdir()
+    result = mu.safe_extract_zip(str(zip_path), str(dest_dir))
+
+    assert (dest_dir / "dataset.json").exists()
+    assert (dest_dir / "images" / "image1.jpg").exists()
+```
+
+#### Coverage Limitations
+
+**Uncovered Functions** (lines 508-624, 653-1005):
+- `export_dataset_to_csv()`, `export_dataset_to_excel()` - Require MdDataset instances with objects
+- `serialize_dataset_to_json()`, `import_dataset_from_zip()` - Complex integration functions requiring full database context
+- `collect_dataset_files()`, `estimate_package_size()`, `create_zip_package()` - File system operations with database dependencies
+
+**Testing Strategy**:
+- Pure functions and format parsing: ✅ Fully covered
+- Database-dependent functions: Deferred to integration tests
+- File I/O with mocks: ✅ Covered where possible
+- Complex export/import: Better suited for end-to-end testing
+
 ---
 
 **Contributors**: Claude (AI Assistant)
-**Test Coverage**: 36% (was 35%)
-**New Tests**: 64 (35 MdHelpers + 12 MdModel + 17 MdStatistics)
-**Status**: ✅ MdHelpers (17%→37%), ✅ MdModel (47%→49%), ✅ MdStatistics (44%→59%), continuing with other modules
+**Test Coverage**: 38% (was 36%)
+**New Tests**: 87 (35 MdHelpers + 12 MdModel + 17 MdStatistics + 23 MdUtils)
+**Status**: ✅ MdHelpers (17%→37%), ✅ MdModel (47%→49%), ✅ MdStatistics (44%→59%), ✅ MdUtils (23%→44%), continuing with other modules

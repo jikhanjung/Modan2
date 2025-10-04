@@ -343,17 +343,17 @@ class TestEdgeCases:
 
 class TestMathFunctions:
     """Test mathematical utility functions."""
-    
+
     def test_get_ellipse_params(self):
         """Test ellipse parameter calculation."""
         # Simple diagonal covariance matrix
         covariance = np.array([[4, 0], [0, 1]])
         width, height, angle = mu.get_ellipse_params(covariance, n_std=1)
-        
+
         assert pytest.approx(width, rel=1e-3) == 2.0  # sqrt(4) * 1
         assert pytest.approx(height, rel=1e-3) == 1.0  # sqrt(1) * 1
         assert pytest.approx(angle, abs=1) == 0.0  # No rotation
-    
+
     def test_get_ellipse_params_rotated(self):
         """Test ellipse params with rotation."""
         # Rotated covariance matrix
@@ -362,8 +362,324 @@ class TestMathFunctions:
                       [np.sin(theta), np.cos(theta)]])
         D = np.array([[4, 0], [0, 1]])
         covariance = R @ D @ R.T
-        
+
         width, height, angle = mu.get_ellipse_params(covariance, n_std=2)
-        
+
         assert pytest.approx(width, rel=1e-3) == 4.0  # sqrt(4) * 2
         assert pytest.approx(height, rel=1e-3) == 2.0  # sqrt(1) * 2
+
+
+class TestLandmarkFileReading:
+    """Test landmark file reading functions."""
+
+    def test_read_tps_file(self, tmp_path):
+        """Test reading TPS format landmark file."""
+        tps_content = """LM=3
+1.0 2.0
+3.0 4.0
+5.0 6.0
+ID=specimen1
+
+LM=3
+10.0 20.0
+30.0 40.0
+50.0 60.0
+ID=specimen2
+"""
+        tps_file = tmp_path / "test.tps"
+        tps_file.write_text(tps_content)
+
+        specimens = mu.read_tps_file(str(tps_file))
+
+        assert len(specimens) == 2
+        assert specimens[0][0] == "specimen1"
+        assert len(specimens[0][1]) == 3
+        assert specimens[0][1][0] == [1.0, 2.0]
+        assert specimens[1][0] == "specimen2"
+        assert specimens[1][1][0] == [10.0, 20.0]
+
+    def test_read_tps_file_with_image_scale(self, tmp_path):
+        """Test TPS file with IMAGE and SCALE lines."""
+        tps_content = """LM=2
+1.0 2.0
+3.0 4.0
+IMAGE=image.jpg
+SCALE=1.0
+ID=specimen1
+"""
+        tps_file = tmp_path / "test.tps"
+        tps_file.write_text(tps_content)
+
+        specimens = mu.read_tps_file(str(tps_file))
+
+        assert len(specimens) == 1
+        assert specimens[0][0] == "specimen1"
+        assert len(specimens[0][1]) == 2
+
+    def test_read_tps_file_without_id(self, tmp_path):
+        """Test TPS file without ID lines."""
+        tps_content = """LM=2
+1.0 2.0
+3.0 4.0
+"""
+        tps_file = tmp_path / "test.tps"
+        tps_file.write_text(tps_content)
+
+        specimens = mu.read_tps_file(str(tps_file))
+
+        assert len(specimens) == 1
+        assert specimens[0][0] == "specimen_1"
+        assert len(specimens[0][1]) == 2
+
+    def test_read_nts_file(self, tmp_path):
+        """Test reading NTS format landmark file."""
+        nts_content = """2 3 2 0 DIM=2
+specimen1
+1.0 2.0
+3.0 4.0
+5.0 6.0
+specimen2
+10.0 20.0
+30.0 40.0
+50.0 60.0
+"""
+        nts_file = tmp_path / "test.nts"
+        nts_file.write_text(nts_content)
+
+        specimens = mu.read_nts_file(str(nts_file))
+
+        assert len(specimens) == 2
+        assert specimens[0][0] == "specimen1"
+        assert len(specimens[0][1]) == 3
+        assert specimens[0][1][0] == [1.0, 2.0]
+        assert specimens[1][0] == "specimen2"
+
+    def test_read_landmark_file_tps(self, tmp_path):
+        """Test read_landmark_file with TPS format."""
+        tps_content = """LM=2
+1.0 2.0
+3.0 4.0
+ID=test
+"""
+        tps_file = tmp_path / "test.tps"
+        tps_file.write_text(tps_content)
+
+        specimens = mu.read_landmark_file(str(tps_file))
+
+        assert len(specimens) == 1
+        assert specimens[0][0] == "test"
+
+    def test_read_landmark_file_nts(self, tmp_path):
+        """Test read_landmark_file with NTS format."""
+        nts_content = """1 2 2 0 DIM=2
+specimen1
+1.0 2.0
+3.0 4.0
+"""
+        nts_file = tmp_path / "test.nts"
+        nts_file.write_text(nts_content)
+
+        specimens = mu.read_landmark_file(str(nts_file))
+
+        assert len(specimens) == 1
+        assert specimens[0][0] == "specimen1"
+
+    def test_read_landmark_file_txt_tps_format(self, tmp_path):
+        """Test .txt file with TPS format."""
+        tps_content = """LM=2
+1.0 2.0
+3.0 4.0
+ID=test
+"""
+        txt_file = tmp_path / "test.txt"
+        txt_file.write_text(tps_content)
+
+        specimens = mu.read_landmark_file(str(txt_file))
+
+        assert len(specimens) == 1
+
+    def test_read_landmark_file_txt_nts_format(self, tmp_path):
+        """Test .txt file with NTS format."""
+        nts_content = """1 2 2 0 DIM=2
+specimen1
+1.0 2.0
+3.0 4.0
+"""
+        txt_file = tmp_path / "test.txt"
+        txt_file.write_text(nts_content)
+
+        specimens = mu.read_landmark_file(str(txt_file))
+
+        assert len(specimens) == 1
+
+    def test_read_landmark_file_unsupported_format(self, tmp_path):
+        """Test unsupported file format."""
+        csv_file = tmp_path / "test.csv"
+        csv_file.write_text("x,y\n1,2\n3,4\n")
+
+        with pytest.raises(ValueError, match="Unsupported landmark file format"):
+            mu.read_landmark_file(str(csv_file))
+
+    def test_read_tps_file_not_found(self):
+        """Test reading non-existent TPS file."""
+        with pytest.raises(FileNotFoundError):
+            mu.read_tps_file("/nonexistent/file.tps")
+
+    def test_read_nts_file_not_found(self):
+        """Test reading non-existent NTS file."""
+        with pytest.raises(FileNotFoundError):
+            mu.read_nts_file("/nonexistent/file.nts")
+
+    def test_read_tps_file_malformed_lm(self, tmp_path):
+        """Test TPS file with malformed LM line."""
+        tps_content = """LM=invalid
+1.0 2.0
+"""
+        tps_file = tmp_path / "test.tps"
+        tps_file.write_text(tps_content)
+
+        with pytest.raises(ValueError, match="Malformed TPS file"):
+            mu.read_tps_file(str(tps_file))
+
+    def test_read_nts_file_malformed_header(self, tmp_path):
+        """Test NTS file with malformed header."""
+        nts_content = """invalid header DIM=2
+specimen1
+1.0 2.0
+"""
+        nts_file = tmp_path / "test.nts"
+        nts_file.write_text(nts_content)
+
+        with pytest.raises(ValueError, match="Malformed NTS file"):
+            mu.read_nts_file(str(nts_file))
+
+
+class TestBuildInfo:
+    """Test build information functions."""
+
+    def test_get_build_info(self):
+        """Test get_build_info returns valid structure."""
+        info = mu.get_build_info()
+
+        assert isinstance(info, dict)
+        assert 'version' in info
+        assert 'build_number' in info
+        assert 'build_date' in info
+        assert 'platform' in info
+
+    def test_get_copyright_year(self):
+        """Test copyright year retrieval."""
+        year = mu.get_copyright_year()
+
+        assert isinstance(year, int)
+        assert year >= 2023  # Project started in 2023
+
+    def test_build_info_constants(self):
+        """Test BUILD_INFO constants are set."""
+        assert mu.BUILD_INFO is not None
+        assert mu.COPYRIGHT_YEAR >= 2023
+        assert mu.PROGRAM_BUILD_NUMBER is not None
+        assert mu.PROGRAM_BUILD_DATE is not None
+
+
+class TestJSONZipFunctions:
+    """Test JSON+ZIP export/import functions."""
+
+    def test_validate_json_schema_valid(self):
+        """Test valid JSON schema validation."""
+        valid_data = {
+            'format_version': '1.1',
+            'export_info': {},
+            'dataset': {
+                'name': 'Test',
+                'dimension': 2,
+                'variables': []
+            },
+            'objects': []
+        }
+
+        is_valid, errors = mu.validate_json_schema(valid_data)
+
+        assert is_valid
+        assert len(errors) == 0
+
+    def test_validate_json_schema_missing_keys(self):
+        """Test JSON schema validation with missing keys."""
+        invalid_data = {
+            'format_version': '1.1',
+            'dataset': {}
+        }
+
+        is_valid, errors = mu.validate_json_schema(invalid_data)
+
+        assert not is_valid
+        assert len(errors) > 0
+
+    def test_validate_json_schema_invalid_dataset(self):
+        """Test JSON schema with invalid dataset."""
+        invalid_data = {
+            'format_version': '1.1',
+            'export_info': {},
+            'dataset': {},
+            'objects': []
+        }
+
+        is_valid, errors = mu.validate_json_schema(invalid_data)
+
+        assert not is_valid
+        assert any('missing' in err.lower() for err in errors)
+
+    def test_validate_json_schema_not_dict(self):
+        """Test JSON schema with non-dict root."""
+        is_valid, errors = mu.validate_json_schema([])
+
+        assert not is_valid
+        assert errors[0] == "Root is not an object"
+
+    def test_safe_extract_zip(self, tmp_path):
+        """Test safe ZIP extraction."""
+        import zipfile
+
+        # Create a safe ZIP file
+        zip_path = tmp_path / "test.zip"
+        with zipfile.ZipFile(zip_path, 'w') as zf:
+            zf.writestr("dataset.json", '{"test": "data"}')
+            zf.writestr("images/image1.jpg", "fake image data")
+
+        dest_dir = tmp_path / "extracted"
+        dest_dir.mkdir()
+
+        result = mu.safe_extract_zip(str(zip_path), str(dest_dir))
+
+        assert result == str(dest_dir)
+        assert (dest_dir / "dataset.json").exists()
+        assert (dest_dir / "images" / "image1.jpg").exists()
+
+    def test_read_json_from_zip(self, tmp_path):
+        """Test reading JSON from ZIP."""
+        import zipfile
+        import json
+
+        zip_path = tmp_path / "test.zip"
+        test_data = {'format_version': '1.1', 'test': 'data'}
+
+        with zipfile.ZipFile(zip_path, 'w') as zf:
+            zf.writestr("dataset.json", json.dumps(test_data))
+
+        data = mu.read_json_from_zip(str(zip_path))
+
+        assert data == test_data
+        assert data['format_version'] == '1.1'
+
+
+class TestGetStorageDir:
+    """Test _get_storage_dir helper function."""
+
+    def test_get_storage_dir_default(self):
+        """Test _get_storage_dir returns default when no QApplication."""
+        storage_dir = mu._get_storage_dir()
+
+        assert storage_dir is not None
+        assert os.path.isabs(storage_dir)
+        # Should be absolute path to DEFAULT_STORAGE_DIRECTORY
+        assert storage_dir == os.path.abspath(mu.DEFAULT_STORAGE_DIRECTORY)

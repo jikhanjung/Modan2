@@ -98,7 +98,7 @@ def test_calculate_file_hash(self, tmp_path):
 | Module | Before | After | Change |
 |--------|--------|-------|--------|
 | **MdConstants.py** | 75% | 97% | +22% ⬆️ |
-| **MdHelpers.py** | 17% | 37% | +20% ⬆️ |
+| **MdHelpers.py** | 17% | 51% | +34% ⬆️ |
 | **MdModel.py** | 47% | 49% | +2% ⬆️ |
 | **MdStatistics.py** | 44% | 59% | +15% ⬆️ |
 | **MdUtils.py** | 23% | 44% | +21% ⬆️ |
@@ -107,13 +107,13 @@ def test_calculate_file_hash(self, tmp_path):
 | ModanComponents.py | 25% | 25% | - |
 | ModanDialogs.py | 21% | 21% | - |
 | ModanWidgets.py | 15% | 21% | +6% ⬆️ |
-| **TOTAL** | 35% | 38% | +3% ⬆️ |
+| **TOTAL** | 35% | 39% | +4% ⬆️ |
 
 ## Test Suite Growth
 
 - **Tests before**: 203 passing, 34 skipped
-- **Tests after**: 318 passing, 34 skipped (352 total)
-- **New tests**: 115 (+57% growth)
+- **Tests after**: 353 passing, 34 skipped (387 total)
+- **New tests**: 150 (+74% growth)
 - **All passing**: ✅ No regressions
 
 ### MdModel.py Coverage Improvement
@@ -223,11 +223,24 @@ manova.Analyze()  # Performs multivariate analysis
 
 ## Completed Modules Summary
 
-### ✅ MdHelpers.py (17% → 37%)
-- Message functions, file dialogs, file operations
-- JSON operations, directory operations
-- Timestamp functions, landmark validation
-- **35 new tests**, +117% coverage improvement
+### ✅ MdHelpers.py (17% → 37% → 51%)
+- **Phase 1** (17% → 37%):
+  - Message functions, file dialogs, file operations
+  - JSON operations, directory operations
+  - Timestamp functions, landmark validation
+  - **35 new tests**, +117% coverage improvement
+- **Phase 2** (37% → 51%):
+  - Validation functions (dataset name, file path)
+  - Color functions (parse_color, color_to_hex)
+  - DateTime functions (format_datetime, parse_datetime)
+  - Type casting (safe_cast with defaults)
+  - Math functions (clamp)
+  - Path functions (normalize_path, get_relative_path)
+  - File backup operations
+  - File finding and info
+  - URL creation
+  - **35 additional tests**, +38% coverage improvement
+- **Total**: 70 tests, 17% → 51% (+200% coverage improvement)
 
 ### ✅ MdModel.py (47% → 49%)
 - Image operations (MD5 hash, EXIF info)
@@ -470,6 +483,6 @@ def test_get_analysis_info(self):
 ---
 
 **Contributors**: Claude (AI Assistant)
-**Test Coverage**: 38% (was 36%)
-**New Tests**: 113 (35 MdHelpers + 12 MdModel + 17 MdStatistics + 23 MdUtils + 26 MdConstants)
-**Status**: ✅ MdHelpers (17%→37%), ✅ MdModel (47%→49%), ✅ MdStatistics (44%→59%), ✅ MdUtils (23%→44%), ✅ MdConstants (75%→97%), continuing with other modules
+**Test Coverage**: 39% (was 35%)
+**New Tests**: 150 (70 MdHelpers + 12 MdModel + 17 MdStatistics + 23 MdUtils + 26 MdConstants + 2 fixes)
+**Status**: ✅ MdHelpers (17%→51%), ✅ MdModel (47%→49%), ✅ MdStatistics (44%→59%), ✅ MdUtils (23%→44%), ✅ MdConstants (75%→97%), completed utility modules coverage improvement

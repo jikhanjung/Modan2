@@ -14,6 +14,8 @@ from PyQt5.QtGui import QColor, QPixmap, QIcon
 
 from MdConstants import ERROR_MESSAGES, WARNING_MESSAGES, INFO_MESSAGES
 
+logger = logging.getLogger(__name__)
+
 
 def show_message(parent, title: str, message: str, 
                 message_type: str = 'info') -> Optional[int]:
@@ -440,9 +442,9 @@ def parse_color(color_str: str) -> Optional[QColor]:
         color = QColor(color_str)
         if color.isValid():
             return color
-    except:
-        pass
-    
+    except (TypeError, ValueError) as e:
+        logger.debug(f"Invalid color string '{color_str}': {e}")
+
     return None
 
 
@@ -762,9 +764,9 @@ def is_dark_theme() -> bool:
             palette = app.palette()
             bg_color = palette.color(palette.Window)
             return bg_color.lightness() < 128
-    except:
-        pass
-    
+    except (RuntimeError, AttributeError) as e:
+        logger.debug(f"Failed to detect dark theme: {e}")
+
     return False
 
 

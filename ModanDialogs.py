@@ -38,7 +38,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 
 from MdStatistics import MdPrincipalComponent, MdCanonicalVariate
-from MdModel import *
+from MdModel import MdDataset, MdDatasetOps, MdObject, MdObjectOps, MdImage
 import MdUtils as mu
 
 import logging
@@ -548,8 +548,9 @@ class DatasetDialog(QDialog):
 
     def read_dataset(self, dataset_id):
         try:
-            dataset = MdDataset.get(dataset.id == dataset_id)
-        except:
+            dataset = MdDataset.get(MdDataset.id == dataset_id)
+        except DoesNotExist:
+            logger.warning(f"Dataset {dataset_id} not found")
             dataset = None
         self.dataset = dataset
         #self
@@ -1717,7 +1718,8 @@ class ObjectDialog(QDialog):
         # Connect selection handler
         try:
             self.edtLandmarkStr.itemSelectionChanged.disconnect()
-        except:
+        except TypeError:
+            # No connections exist yet
             pass
         self.edtLandmarkStr.itemSelectionChanged.connect(self.on_landmark_selected)
 
@@ -2235,8 +2237,9 @@ class NewAnalysisDialog(QDialog):
         for signal, slot in self.signal_connections:
             try:
                 signal.disconnect(slot)
-            except:
-                pass  # Signal might already be disconnected
+            except TypeError:
+                # Signal might already be disconnected
+                pass
         self.signal_connections.clear()
     
     def close_dialog(self):
@@ -2378,10 +2381,24 @@ class DataExplorationDialog(QDialog):
         self.init_UI()
 
     def init_UI(self):
-
+        """Initialize the UI for data exploration dialog"""
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
 
+        self._setup_title_row()
+        self._setup_plot_canvases()
+        self._setup_chart_basic_options()
+        self._setup_overlay_settings()
+        self._setup_regression_controls()
+        self._setup_plot_layout()
+        self._setup_shape_view_controls()
+        self._assemble_final_layout()
+
+        self.on_chart_dim_changed()
+        self.initialized = True
+
+    def _setup_title_row(self):
+        """Setup the title row with analysis info fields"""
         self.lblAnalysisName = QLabel(self.tr("Analysis name"))
         self.lblAnalysisName.setAlignment(Qt.AlignVCenter|Qt.AlignRight)
         self.edtAnalysisName = QLineEdit()
@@ -2414,13 +2431,10 @@ class DataExplorationDialog(QDialog):
         self.title_row_layout.addWidget(self.edtSuperimposition,2)
         self.title_row_layout.addWidget(self.lblOrdination,1)
         self.title_row_layout.addWidget(self.edtOrdination,2)
-        #self.title_row_layout.addWidget(self.lblGroupBy,1)
-        #self.title_row_layout.addWidget(self.comboGroupBy,2)
-        #self.title_row_layout.addWidget(self.lblVisualization,1)
-        #self.title_row_layout.addWidget(self.comboVisualization,2)
         self.layout.addWidget(self.title_row_widget)
 
-
+    def _setup_plot_canvases(self):
+        """Setup matplotlib plot canvases for 2D and 3D visualization"""
         self.plot_widget2 = FigureCanvas(Figure(figsize=(20, 16),dpi=100))
         self.fig2 = self.plot_widget2.figure
         self.ax2 = self.fig2.add_subplot()
@@ -2438,13 +2452,15 @@ class DataExplorationDialog(QDialog):
         self.plot_widget3 = FigureCanvas(Figure(figsize=(20, 16),dpi=100))
         self.fig3 = self.plot_widget3.figure
         self.ax3 = self.fig3.add_subplot(projection='3d')
-        self.toolbar3 = NavigationToolbar(self.plot_widget3, self)        
+        self.toolbar3 = NavigationToolbar(self.plot_widget3, self)
 
         self.plot_setting_widget = QWidget()
         self.plot_setting_layout = QVBoxLayout()
         self.plot_setting_widget.setLayout(self.plot_setting_layout)
         self.plot_setting_widget.hide()
 
+    def _setup_chart_basic_options(self):
+        """Setup basic chart options like grouping, dimensions, and axes"""
         self.axis_option_widget = QWidget()
         self.axis_option_layout = QHBoxLayout()
         self.axis_option_widget.setLayout(self.axis_option_layout)
@@ -2538,10 +2554,8 @@ class DataExplorationDialog(QDialog):
         self.gbChartBasics.layout().addWidget(self.comboAxis3,1)
         self.gbChartBasics.layout().addWidget(self.cbxFlipAxis3,0)
 
-        #self.axis_option_layout.addWidget(self.gbAxis)
-        
-        #self.plot_setting_layout.addWidget(self.gbChartBasics)
-
+    def _setup_overlay_settings(self):
+        """Setup overlay visualization settings"""
         self.overlay_setting_widget = QWidget()
         self.overlay_setting_layout = QHBoxLayout()
         self.overlay_setting_widget.setLayout(self.overlay_setting_layout)
@@ -2599,7 +2613,8 @@ class DataExplorationDialog(QDialog):
         self.gbOverlay.layout().addWidget(self.sgpWidget,2)
         self.plot_setting_layout.addWidget(self.gbOverlay)
 
-        ''' regression related controls '''
+    def _setup_regression_controls(self):
+        """Setup regression-related controls"""
         self.cbxRegression = QCheckBox()
         self.cbxRegression.setText(self.tr("Show regression"))
         self.cbxRegression.setChecked(False)
@@ -2646,7 +2661,8 @@ class DataExplorationDialog(QDialog):
         self.gbRegression.layout().addWidget(self.cbxAnnotation, 1)
         self.plot_setting_layout.addWidget(self.gbRegression)
 
-
+    def _setup_plot_layout(self):
+        """Setup the main plot layout with toolbar and canvases"""
         self.visualization_layout = QGridLayout()
         self.visualization_widget = QWidget()
         self.visualization_widget.setLayout(self.visualization_layout)
@@ -2678,6 +2694,8 @@ class DataExplorationDialog(QDialog):
         self.plot_layout.addWidget(self.plot_widget2)
         self.plot_layout.addWidget(self.plot_widget3)
 
+    def _setup_shape_view_controls(self):
+        """Setup shape view controls and animation options"""
         self.view_layout = QVBoxLayout()
         self.view_widget = QWidget()
         self.view_widget.setLayout(self.view_layout)
@@ -2736,6 +2754,8 @@ class DataExplorationDialog(QDialog):
         self.arrow_layout.addWidget(self.btnArrowColor)
         self.view_layout.addWidget(self.arrow_widget,0)
 
+    def _assemble_final_layout(self):
+        """Assemble all components into the final layout"""
         self.shape_view_widget = QWidget()
         self.shape_view_widget.setLayout(self.shape_view_layout)
         self.shape_view_scroll_area = QScrollArea()
@@ -2750,8 +2770,6 @@ class DataExplorationDialog(QDialog):
         self.visualization_splitter.splitterMoved.connect(self.on_splitter_moved)
 
         self.layout.addWidget(self.visualization_splitter)
-        self.on_chart_dim_changed()
-        self.initialized = True
 
     def comboSelectGroup_changed(self):
         #print("comboSelectGroup_changed")
@@ -3799,7 +3817,8 @@ class DataExplorationDialog(QDialog):
                     eigenvalues_data = json.loads(self.analysis.pca_eigenvalues_json)
                     # eigenvalues_data is a list of [eigenvalue, percentage] pairs
                     self.eigen_value_percentages = [item[1] for item in eigenvalues_data] if eigenvalues_data else []
-                except:
+                except (json.JSONDecodeError, KeyError, IndexError, TypeError) as e:
+                    logger.warning(f"Failed to parse eigenvalues JSON: {e}")
                     self.eigen_value_percentages = []
             else:
                 self.eigen_value_percentages = []
@@ -4212,7 +4231,8 @@ class DataExplorationDialog(QDialog):
                             # So the index directly corresponds to the PC number (0-based)
                             if axis2_idx >= 0 and axis2_idx < len(var_explained):
                                 axis2_title += f" ({var_explained[axis2_idx]*100:.1f}%)"
-                        except:
+                        except (IndexError, TypeError, ValueError) as e:
+                            logger.debug(f"Could not add variance explained to axis labels: {e}")
                             pass  # Silently continue if there's any issue
                 ret_x = self.ax2.set_xlabel(axis1_title)
                 #print("ret_x", ret_x)

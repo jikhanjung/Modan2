@@ -5,9 +5,11 @@ Reusable UI components separated from the main window.
 import logging
 from typing import List, Optional, Dict, Any, Tuple
 from pathlib import Path
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
+from PyQt5.QtWidgets import (QTreeWidget, QTreeWidgetItem, QAbstractItemView, QHeaderView,
+                              QTableWidget, QTableWidgetItem, QWidget, QLabel, QVBoxLayout,
+                              QTabWidget, QTextEdit)
+from PyQt5.QtCore import Qt, QPoint, QPointF, QRect, QRectF, pyqtSignal
+from PyQt5.QtGui import QPainter, QColor, QBrush, QPen, QFont, QIcon, QDragEnterEvent, QDragMoveEvent, QDropEvent
 
 import MdModel
 

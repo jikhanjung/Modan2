@@ -20,7 +20,7 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import matplotlib
 from OBJFileLoader import OBJ
-from MdModel import *
+from MdModel import MdDataset, MdDatasetOps, MdObject, MdObjectOps
 from scipy.spatial.distance import cdist
 import OpenGL.GL as gl
 from OpenGL import GLU as glu
@@ -46,7 +46,7 @@ if GLUT_AVAILABLE and glut:
         print(f"Warning: Failed to initialize GLUT ({e}), using fallback rendering")
         GLUT_AVAILABLE = False
         GLUT_INITIALIZED = False
-from PyQt5.QtOpenGL import *
+from PyQt5.QtOpenGL import QGLWidget, QGLFormat
 from scipy.spatial import ConvexHull
 from scipy import stats
 
@@ -3795,7 +3795,8 @@ class MdTableView(QTableView):
         sequence = self.model().data(first_cell, Qt.DisplayRole)
         try:
             sequence = int(sequence)
-        except:
+        except (ValueError, TypeError) as e:
+            logger.debug(f"Could not convert sequence value '{sequence}' to int: {e}. Using default value 1")
             sequence = 1
         # get user input
         logger.debug(f"Showing input dialog for starting sequence, current value: {sequence}")

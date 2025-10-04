@@ -130,9 +130,9 @@ class MdDataset(Model):
                 for v in verts:
                     try:
                         v = int(v)
-                    except:
+                    except (ValueError, TypeError) as e:
                         has_edge = False
-                        #print "Invalid landmark number [", v, "] in wireframe:", edge
+                        logger.warning(f"Invalid landmark number '{v}' in wireframe edge '{edge}': {e}")
                     int_edge.append(v)
 
                 if has_edge:

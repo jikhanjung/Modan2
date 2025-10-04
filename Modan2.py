@@ -22,13 +22,13 @@ from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSettings, QSize, QTr
 from PyQt5.QtCore import pyqtSlot
 import logging
 from pathlib import Path
-from peewee import *
+from peewee import DoesNotExist
 from PIL.ExifTags import TAGS
 import shutil
 import copy
 from datetime import datetime
 
-from MdModel import *
+from MdModel import MdDataset, MdObject, MdAnalysis
 import MdUtils as mu
 from ModanController import ModanController
 from MdConstants import ICONS as ICON_CONSTANTS

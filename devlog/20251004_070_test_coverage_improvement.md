@@ -99,8 +99,8 @@ def test_calculate_file_hash(self, tmp_path):
 |--------|--------|-------|--------|
 | **MdHelpers.py** | 17% | 37% | +20% ⬆️ |
 | **MdModel.py** | 47% | 49% | +2% ⬆️ |
+| **MdStatistics.py** | 44% | 59% | +15% ⬆️ |
 | ModanController.py | 60% | 60% | - |
-| MdStatistics.py | 44% | 44% | - |
 | Modan2.py | 40% | 40% | - |
 | ModanComponents.py | 25% | 25% | - |
 | ModanDialogs.py | 21% | 21% | - |
@@ -110,8 +110,8 @@ def test_calculate_file_hash(self, tmp_path):
 ## Test Suite Growth
 
 - **Tests before**: 203 passing, 34 skipped
-- **Tests after**: 250 passing, 34 skipped (284 total)
-- **New tests**: 47 (+23% growth)
+- **Tests after**: 267 passing, 34 skipped (301 total)
+- **New tests**: 64 (+32% growth)
 - **All passing**: ✅ No regressions
 
 ### MdModel.py Coverage Improvement
@@ -162,6 +162,62 @@ obj_ops = mm.MdObjectOps(obj)  # Wrap for operations
 - Complex transformation methods (align, rotate, scale) are in MdObjectOps/MdDatasetOps helper classes
 - These classes require full dataset context and are better tested through integration tests
 - File I/O operations (MD5, EXIF) covered basic paths
+
+### MdStatistics.py Coverage Improvement
+
+**Coverage**: 44% → 59% (+34% improvement)
+
+#### New Tests Added (17 total)
+
+**MANOVA Class Tests (5 tests)**
+- Initialization and attribute setup
+- `SetData()`, `SetCategory()`, `SetColumnList()`, `SetGroupby()`
+- Data structure validation
+
+**Modern PCA Analysis Functions (6 tests)**
+- `do_pca_analysis()` with 2D/3D landmark data
+- n_components parameter handling
+- Variance ratio sum validation (must equal 1.0)
+- Cumulative variance calculation
+- Mean shape reconstruction
+
+**PerformManova Function (3 tests)**
+- Valid classifier index with category assignment
+- Invalid classifier index returns None
+- Category list length validation
+
+**Error Handling (3 tests)**
+- Empty data handling (raises IndexError)
+- Empty landmarks (raises Exception)
+- Invalid data structures
+
+#### Test Implementation Highlights
+
+**Statistical Validation**:
+```python
+def test_do_pca_analysis_variance_sum(self, landmark_data_2d):
+    result = ms.do_pca_analysis(landmark_data_2d)
+    variance_sum = sum(result['explained_variance_ratio'])
+    assert pytest.approx(variance_sum, rel=1e-5) == 1.0  # ✅ Statistical property
+```
+
+**Modern Controller API**:
+```python
+# do_pca_analysis returns comprehensive results dictionary
+result = ms.do_pca_analysis(landmarks_data, n_components=3)
+# Returns: eigenvalues, eigenvectors, scores, explained_variance_ratio,
+#          cumulative_variance_ratio, mean_shape
+```
+
+**MANOVA Setup Pattern**:
+```python
+manova = ms.MdManova()
+manova.SetData(datamatrix)
+manova.SetCategory(categories)
+manova.SetColumnList(['PC1', 'PC2', 'PC3'])
+manova.SetGroupby('Group')
+manova.Analyze()  # Performs multivariate analysis
+```
 
 ## Next Targets
 
@@ -244,5 +300,5 @@ TOTAL          20061  13021    35%
 
 **Contributors**: Claude (AI Assistant)
 **Test Coverage**: 36% (was 35%)
-**New Tests**: 47 (35 for MdHelpers + 12 for MdModel)
-**Status**: MdHelpers complete (17%→37%), MdModel improved (47%→49%), continuing with other modules
+**New Tests**: 64 (35 MdHelpers + 12 MdModel + 17 MdStatistics)
+**Status**: ✅ MdHelpers (17%→37%), ✅ MdModel (47%→49%), ✅ MdStatistics (44%→59%), continuing with other modules

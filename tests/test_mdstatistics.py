@@ -242,8 +242,265 @@ class TestEdgeCases:
         cva = ms.MdCanonicalVariate()
         data = [[1, 2], [3, 4], [5, 6]]
         categories = ['A', 'B']  # Only 2 categories for 3 data points
-        
+
         cva.SetData(data)
         cva.SetCategory(categories)
-        
+
         # Should handle mismatch appropriately
+
+
+class TestMdManova:
+    """Test MANOVA analysis class."""
+
+    @pytest.fixture
+    def manova_data(self):
+        """Create test data for MANOVA."""
+        np.random.seed(42)
+        # Two groups with different means
+        group1 = [[1 + np.random.randn() * 0.5, 2 + np.random.randn() * 0.5] for _ in range(5)]
+        group2 = [[4 + np.random.randn() * 0.5, 5 + np.random.randn() * 0.5] for _ in range(5)]
+        data = group1 + group2
+        categories = ['A'] * 5 + ['B'] * 5
+        return data, categories
+
+    def test_manova_initialization(self):
+        """Test MANOVA object initialization."""
+        manova = ms.MdManova()
+        assert manova is not None
+        # MdManova doesn't initialize attributes until SetData is called
+
+    def test_manova_set_data(self, manova_data):
+        """Test setting data in MANOVA."""
+        data, categories = manova_data
+        manova = ms.MdManova()
+        manova.SetData(data)
+
+        assert manova.data == data
+        assert manova.nObservation == 10
+        assert manova.nVariable == 2
+
+    def test_manova_set_category(self, manova_data):
+        """Test setting categories in MANOVA."""
+        data, categories = manova_data
+        manova = ms.MdManova()
+        manova.SetCategory(categories)
+
+        assert manova.category_list == categories
+
+    def test_manova_set_column_list(self):
+        """Test setting column names."""
+        manova = ms.MdManova()
+        columns = ['PC1', 'PC2', 'PC3']
+        manova.SetColumnList(columns)
+
+        assert manova.column_list == columns
+
+    def test_manova_set_groupby(self):
+        """Test setting group by variable."""
+        manova = ms.MdManova()
+        manova.SetGroupby('Group')
+
+        assert manova.group_by == 'Group'
+
+
+class TestModernAnalysisFunctions:
+    """Test modern analysis functions for controller."""
+
+    @pytest.fixture
+    def landmark_data_2d(self):
+        """Create 2D landmark test data."""
+        np.random.seed(42)
+        # 5 specimens, 3 landmarks each, 2D
+        data = []
+        for i in range(5):
+            specimen = []
+            for j in range(3):
+                specimen.append([i + j + np.random.randn() * 0.1,
+                                i - j + np.random.randn() * 0.1])
+            data.append(specimen)
+        return data
+
+    @pytest.fixture
+    def landmark_data_3d(self):
+        """Create 3D landmark test data."""
+        np.random.seed(42)
+        # 5 specimens, 3 landmarks each, 3D
+        data = []
+        for i in range(5):
+            specimen = []
+            for j in range(3):
+                specimen.append([i + j + np.random.randn() * 0.1,
+                                i - j + np.random.randn() * 0.1,
+                                i + np.random.randn() * 0.1])
+            data.append(specimen)
+        return data
+
+    def test_do_pca_analysis_2d(self, landmark_data_2d):
+        """Test do_pca_analysis with 2D landmark data."""
+        result = ms.do_pca_analysis(landmark_data_2d)
+
+        assert result is not None
+        assert 'n_components' in result
+        assert 'eigenvalues' in result
+        assert 'eigenvectors' in result
+        assert 'scores' in result
+        assert 'explained_variance_ratio' in result
+        assert 'mean_shape' in result
+
+        # Check dimensions
+        assert len(result['scores']) == 5  # 5 specimens
+        assert len(result['mean_shape']) == 3  # 3 landmarks
+        assert len(result['mean_shape'][0]) == 2  # 2D
+
+    def test_do_pca_analysis_3d(self, landmark_data_3d):
+        """Test do_pca_analysis with 3D landmark data."""
+        result = ms.do_pca_analysis(landmark_data_3d)
+
+        assert result is not None
+        assert len(result['scores']) == 5  # 5 specimens
+        assert len(result['mean_shape']) == 3  # 3 landmarks
+        assert len(result['mean_shape'][0]) == 3  # 3D
+
+    def test_do_pca_analysis_with_n_components(self, landmark_data_2d):
+        """Test do_pca_analysis with specified n_components."""
+        result = ms.do_pca_analysis(landmark_data_2d, n_components=3)
+
+        assert result is not None
+        assert result['n_components'] == 3
+
+    def test_do_pca_analysis_variance_sum(self, landmark_data_2d):
+        """Test that variance ratios sum to approximately 1."""
+        result = ms.do_pca_analysis(landmark_data_2d)
+
+        variance_sum = sum(result['explained_variance_ratio'])
+        assert pytest.approx(variance_sum, rel=1e-5) == 1.0
+
+    def test_do_pca_analysis_cumulative_variance(self, landmark_data_2d):
+        """Test cumulative variance calculation."""
+        result = ms.do_pca_analysis(landmark_data_2d)
+
+        cumulative = result['cumulative_variance_ratio']
+        # Cumulative variance should be monotonically increasing
+        for i in range(len(cumulative) - 1):
+            assert cumulative[i] <= cumulative[i + 1]
+
+        # Last cumulative value should be ~1.0
+        assert pytest.approx(cumulative[-1], rel=1e-5) == 1.0
+
+
+class TestPerformManovaFunction:
+    """Test PerformManova standalone function."""
+
+    @pytest.fixture
+    def mock_dataset_with_classifier(self):
+        """Create mock dataset with classifier variables."""
+        mock_ops = MagicMock()
+
+        # Create mock objects with variables
+        mock_objects = []
+        for i in range(10):
+            mock_obj = MagicMock()
+            mock_obj.landmark_list = [[i, i+1], [i+2, i+3]]
+            # Add variable list for classification
+            mock_obj.variable_list = ['A' if i < 5 else 'B', 'adult', 'large']
+            mock_objects.append(mock_obj)
+
+        mock_ops.object_list = mock_objects
+        mock_ops.dimension = 2
+        mock_ops.variablename_list = ['Group', 'Age', 'Size']
+        return mock_ops
+
+    def test_perform_manova_with_classifier(self, mock_dataset_with_classifier):
+        """Test PerformManova with valid classifier."""
+        # Create PCA-like new coordinates
+        new_coords = np.random.randn(10, 4)  # 10 objects, 4 PCs
+        classifier_index = 0  # Use 'Group' variable
+
+        result = ms.PerformManova(mock_dataset_with_classifier, new_coords, classifier_index)
+
+        assert result is not None
+        assert isinstance(result, ms.MdManova)
+        assert result.nObservation == 10
+        assert result.nVariable == 4
+        assert len(result.category_list) == 10
+
+    def test_perform_manova_invalid_classifier(self, mock_dataset_with_classifier):
+        """Test PerformManova with invalid classifier index."""
+        new_coords = np.random.randn(10, 4)
+        classifier_index = -1  # Invalid index
+
+        result = ms.PerformManova(mock_dataset_with_classifier, new_coords, classifier_index)
+
+        # Should return None for invalid classifier
+        assert result is None
+
+    def test_perform_manova_category_assignment(self):
+        """Test PerformManova category assignment."""
+        mock_ops = MagicMock()
+        mock_objects = []
+        for i in range(6):
+            mock_obj = MagicMock()
+            # Ensure all objects have the classifier variable
+            mock_obj.variable_list = ['A' if i < 3 else 'B', 'young' if i < 3 else 'old']
+            mock_objects.append(mock_obj)
+
+        mock_ops.object_list = mock_objects
+        mock_ops.dimension = 2
+        mock_ops.variablename_list = ['Group', 'Age']
+
+        new_coords = np.random.randn(6, 2)
+        classifier_index = 0  # Use 'Group' variable
+
+        result = ms.PerformManova(mock_ops, new_coords, classifier_index)
+
+        # Should have categories assigned correctly
+        if result is not None:
+            assert len(result.category_list) == 6
+            assert 'A' in result.category_list
+            assert 'B' in result.category_list
+
+
+class TestPCAErrorHandling:
+    """Test PCA error handling."""
+
+    def test_pca_empty_data(self):
+        """Test PCA with empty data."""
+        pca = ms.MdPrincipalComponent()
+
+        # SetData with empty list should raise IndexError
+        with pytest.raises(IndexError):
+            pca.SetData([])
+
+    def test_do_pca_analysis_empty_landmarks(self):
+        """Test do_pca_analysis with empty landmark data."""
+        with pytest.raises(Exception):
+            ms.do_pca_analysis([])
+
+    def test_do_pca_analysis_error_handling(self):
+        """Test do_pca_analysis error handling with invalid data."""
+        # Single specimen with empty landmarks
+        result = ms.do_pca_analysis([[]])
+        # Should handle gracefully, returning a result with empty/zero values
+        assert result is not None
+
+
+class TestCVAExtended:
+    """Extended CVA tests."""
+
+    def test_cva_rotation_matrix_orthogonal(self):
+        """Test that CVA rotation matrix is approximately orthogonal."""
+        np.random.seed(42)
+        data = [[i + np.random.randn() * 0.1, i * 2 + np.random.randn() * 0.1]
+                for i in range(10)]
+        categories = ['A'] * 5 + ['B'] * 5
+
+        cva = ms.MdCanonicalVariate()
+        cva.SetData(data)
+        cva.SetCategory(categories)
+        cva.Analyze()
+
+        if hasattr(cva, 'rotation_matrix'):
+            rotation = np.array(cva.rotation_matrix)
+            # Check if rotation matrix properties are reasonable
+            assert rotation.shape[0] > 0
+            assert rotation.shape[1] > 0

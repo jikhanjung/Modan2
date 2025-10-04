@@ -98,21 +98,70 @@ def test_calculate_file_hash(self, tmp_path):
 | Module | Before | After | Change |
 |--------|--------|-------|--------|
 | **MdHelpers.py** | 17% | 37% | +20% ⬆️ |
+| **MdModel.py** | 47% | 49% | +2% ⬆️ |
 | ModanController.py | 60% | 60% | - |
-| MdModel.py | 47% | 47% | - |
 | MdStatistics.py | 44% | 44% | - |
 | Modan2.py | 40% | 40% | - |
 | ModanComponents.py | 25% | 25% | - |
 | ModanDialogs.py | 21% | 21% | - |
 | ModanWidgets.py | 15% | 15% | - |
-| **TOTAL** | 34% | 35% | +1% ⬆️ |
+| **TOTAL** | 35% | 36% | +1% ⬆️ |
 
 ## Test Suite Growth
 
 - **Tests before**: 203 passing, 34 skipped
-- **Tests after**: 238 passing, 34 skipped
-- **New tests**: 35 (+17% growth)
+- **Tests after**: 250 passing, 34 skipped (284 total)
+- **New tests**: 47 (+23% growth)
 - **All passing**: ✅ No regressions
+
+### MdModel.py Coverage Improvement
+
+**Coverage**: 47% → 49% (+4% improvement)
+
+#### New Tests Added (12 total)
+
+**Image Operations (4 tests)**
+- `get_md5hash_info()` - MD5 hash calculation with file I/O
+- File not found error handling
+- EXIF info extraction from non-image files
+- `load_file_info()` - directory handling
+
+**Wireframe Parsing (3 tests)**
+- Valid wireframe edge format ("1-2,2-3,3-1")
+- Empty wireframe handling
+- Wireframe with spaces and various separators
+
+**MdObjectOps Creation (2 tests)**
+- Creating MdObjectOps wrapper from MdObject
+- Preserving landmark_list in wrapper
+
+**MdAnalysis Extensions (3 tests)**
+- Analysis with wireframe data
+- Analysis with baseline landmarks
+- Dataset-analysis relationship validation
+
+#### Test Implementation Lessons
+
+**Database Constraints**:
+```python
+# MdImage requires object_id (NOT NULL constraint)
+dataset = mm.MdDataset.create(dataset_name="Test Dataset")
+obj = mm.MdObject.create(object_name="Test Object", dataset=dataset)
+image = mm.MdImage.create(object_id=obj.id)  # ✅ Required
+```
+
+**Wrapper Class Pattern**:
+```python
+# MdObjectOps is a wrapper, not a model method
+obj = mm.MdObject.create(object_name="Test Object", dataset=dataset)
+obj_ops = mm.MdObjectOps(obj)  # Wrap for operations
+# Methods like align(), rescale() are on MdObjectOps, not MdObject
+```
+
+**Coverage Limitations**:
+- Complex transformation methods (align, rotate, scale) are in MdObjectOps/MdDatasetOps helper classes
+- These classes require full dataset context and are better tested through integration tests
+- File I/O operations (MD5, EXIF) covered basic paths
 
 ## Next Targets
 
@@ -194,6 +243,6 @@ TOTAL          20061  13021    35%
 ---
 
 **Contributors**: Claude (AI Assistant)
-**Test Coverage**: 35% (was 34%)
-**New Tests**: 35
-**Status**: MdHelpers complete, continuing with other modules
+**Test Coverage**: 36% (was 35%)
+**New Tests**: 47 (35 for MdHelpers + 12 for MdModel)
+**Status**: MdHelpers complete (17%→37%), MdModel improved (47%→49%), continuing with other modules

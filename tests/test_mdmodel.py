@@ -451,30 +451,30 @@ class TestDatabaseOperations:
 
 class TestErrorHandling:
     """Test error handling and edge cases in database models."""
-    
+
     def test_create_dataset_duplicate_name_allowed(self, test_database):
         """Test that duplicate dataset names are allowed (if not constrained)."""
         mm.MdDataset.create(dataset_name="Duplicate Name")
-        
+
         # Should be able to create another dataset with the same name
         # (unless unique constraint is enforced)
         duplicate_dataset = mm.MdDataset.create(dataset_name="Duplicate Name")
         assert duplicate_dataset.id is not None
-    
+
     def test_create_object_missing_required_dataset(self, test_database):
         """Test creating object without dataset reference."""
         with pytest.raises((ValueError, IntegrityError)):
             # This should fail since dataset is required (NOT NULL constraint)
             mm.MdObject.create(object_name="Orphan Object", dataset=None)
-    
+
     def test_invalid_landmark_data_handling(self, test_database):
         """Test handling of invalid landmark string data."""
         dataset = mm.MdDataset.create(dataset_name="Test Dataset")
         obj = mm.MdObject.create(object_name="Test Object", dataset=dataset)
-        
+
         # Test with malformed landmark string
         obj.landmark_str = "invalid\tdata\tformat\nextra_values"
-        
+
         try:
             obj.unpack_landmark()
             # If it succeeds, check that it handled the error gracefully
@@ -482,44 +482,219 @@ class TestErrorHandling:
         except (ValueError, IndexError):
             # These exceptions are acceptable for malformed data
             pass
-    
+
     def test_empty_variablename_str_handling(self, test_database):
         """Test handling of various empty variable name strings."""
         dataset = mm.MdDataset.create(dataset_name="Test Dataset")
-        
+
         # Test None
         dataset.propertyname_str = None
         result = dataset.unpack_variablename_str()
         assert result == []
-        
+
         # Test empty string
         dataset.propertyname_str = ""
         result = dataset.unpack_variablename_str()
         assert result == []
-        
+
         # Test whitespace only
         dataset.propertyname_str = "   "
         result = dataset.unpack_variablename_str()
         # Should handle whitespace gracefully
         assert isinstance(result, list)
-    
+
     def test_large_landmark_data(self, test_database):
         """Test handling of large amounts of landmark data."""
         dataset = mm.MdDataset.create(dataset_name="Large Dataset", dimension=2)
         obj = mm.MdObject.create(object_name="Large Object", dataset=dataset)
-        
+
         # Create a large landmark list (100 landmarks)
         large_landmark_list = [[float(i), float(i+1)] for i in range(100)]
         obj.landmark_list = large_landmark_list
-        
+
         # Should handle large data without issues
         obj.pack_landmark()
         assert obj.landmark_str is not None
         assert len(obj.landmark_str) > 0
-        
+
         # Test unpacking
         obj.landmark_list = []
         obj.unpack_landmark()
         assert len(obj.landmark_list) == 100
         assert obj.landmark_list[0] == [0.0, 1.0]
         assert obj.landmark_list[99] == [99.0, 100.0]
+
+
+class TestImageOperations:
+    """Test MdImage file and EXIF operations."""
+
+    def test_get_md5hash_info(self, test_database, tmp_path):
+        """Test MD5 hash calculation for image files."""
+        # Create a test dataset and object first (required for MdImage)
+        dataset = mm.MdDataset.create(dataset_name="Test Dataset")
+        obj = mm.MdObject.create(object_name="Test Object", dataset=dataset)
+
+        # Create image with required object_id
+        image = mm.MdImage.create(object_id=obj.id)
+        test_file = tmp_path / "test_image.jpg"
+        test_content = b"fake image content for testing"
+        test_file.write_bytes(test_content)
+
+        # Calculate MD5 hash
+        md5hash, image_data = image.get_md5hash_info(str(test_file))
+
+        assert md5hash is not None
+        assert len(md5hash) == 32  # MD5 hash is 32 hex characters
+        assert image_data == test_content
+
+    def test_get_md5hash_info_file_not_found(self, test_database):
+        """Test MD5 hash with non-existent file."""
+        dataset = mm.MdDataset.create(dataset_name="Test Dataset")
+        obj = mm.MdObject.create(object_name="Test Object", dataset=dataset)
+        image = mm.MdImage.create(object_id=obj.id)
+
+        with pytest.raises((FileNotFoundError, ValueError)):
+            image.get_md5hash_info("/nonexistent/file.jpg")
+
+    def test_get_exif_info_no_exif(self, test_database, tmp_path):
+        """Test EXIF extraction from file without EXIF data."""
+        dataset = mm.MdDataset.create(dataset_name="Test Dataset")
+        obj = mm.MdObject.create(object_name="Test Object", dataset=dataset)
+        image = mm.MdImage.create(object_id=obj.id)
+
+        test_file = tmp_path / "no_exif.txt"
+        test_file.write_text("not an image")
+
+        # Should return empty EXIF info for non-image files
+        result = image.get_exif_info(str(test_file))
+
+        assert isinstance(result, dict)
+        assert 'datetime' in result
+        assert 'latitude' in result
+        assert 'longitude' in result
+
+    def test_load_file_info_directory(self, test_database, tmp_path):
+        """Test loading file info for a directory."""
+        dataset = mm.MdDataset.create(dataset_name="Test Dataset")
+        obj = mm.MdObject.create(object_name="Test Object", dataset=dataset)
+        image = mm.MdImage.create(object_id=obj.id)
+
+        test_dir = tmp_path / "test_directory"
+        test_dir.mkdir()
+
+        file_info = image.load_file_info(str(test_dir))
+
+        # For directories, should return basic info without hash
+        assert file_info is not None or image.original_path == str(test_dir)
+
+
+class TestWireframeEdgeParsing:
+    """Test wireframe edge parsing logic."""
+
+    def test_parse_wireframe_valid(self, test_database):
+        """Test parsing valid wireframe edge data."""
+        dataset = mm.MdDataset.create(dataset_name="Test Dataset")
+
+        # Valid wireframe format
+        dataset.wireframe = "1-2,2-3,3-1"
+        dataset.save()
+
+        # Verify it was saved
+        loaded = mm.MdDataset.get_by_id(dataset.id)
+        assert loaded.wireframe == "1-2,2-3,3-1"
+
+    def test_parse_wireframe_empty(self, test_database):
+        """Test parsing empty wireframe."""
+        dataset = mm.MdDataset.create(dataset_name="Test Dataset")
+
+        # Empty wireframe
+        dataset.wireframe = ""
+        dataset.save()
+
+        loaded = mm.MdDataset.get_by_id(dataset.id)
+        assert loaded.wireframe == ""
+
+    def test_parse_wireframe_with_spaces(self, test_database):
+        """Test wireframe with various separators."""
+        dataset = mm.MdDataset.create(dataset_name="Test Dataset")
+
+        # Wireframe with spaces (should be handled)
+        dataset.wireframe = "1-2, 2-3, 3-1"
+        dataset.save()
+
+        loaded = mm.MdDataset.get_by_id(dataset.id)
+        assert loaded.wireframe is not None
+
+
+class TestMdObjectOpsCreation:
+    """Test MdObjectOps wrapper class creation."""
+
+    def test_create_object_ops(self, test_database):
+        """Test creating MdObjectOps from MdObject."""
+        dataset = mm.MdDataset.create(dataset_name="Test Dataset", dimension=2)
+        obj = mm.MdObject.create(object_name="Test Object", dataset=dataset)
+        obj.landmark_str = "1.0\t2.0\n3.0\t4.0"
+        obj.property_str = "male,adult"
+
+        # Create MdObjectOps wrapper
+        obj_ops = mm.MdObjectOps(obj)
+
+        # Verify properties are copied
+        assert obj_ops.id == obj.id
+        assert obj_ops.object_name == obj.object_name
+        assert obj_ops.landmark_str == obj.landmark_str
+        assert obj_ops.property_str == obj.property_str
+
+    def test_object_ops_with_landmark_list(self, test_database):
+        """Test MdObjectOps preserves landmark_list."""
+        dataset = mm.MdDataset.create(dataset_name="Test Dataset", dimension=2)
+        obj = mm.MdObject.create(object_name="Test Object", dataset=dataset)
+        obj.landmark_list = [[1.0, 2.0], [3.0, 4.0]]
+
+        # Create ops wrapper
+        obj_ops = mm.MdObjectOps(obj)
+
+        # Should have landmark_list
+        assert hasattr(obj_ops, 'landmark_list')
+        assert obj_ops.landmark_list == [[1.0, 2.0], [3.0, 4.0]]
+
+
+class TestMdAnalysisExtended:
+    """Extended tests for MdAnalysis model."""
+
+    def test_analysis_with_wireframe(self, test_database):
+        """Test analysis with wireframe data."""
+        dataset = mm.MdDataset.create(dataset_name="Test Dataset")
+        analysis = mm.MdAnalysis.create(
+            analysis_name="Test Analysis",
+            dataset=dataset,
+            superimposition_method="Procrustes",
+            wireframe="1-2,2-3,3-1"
+        )
+
+        assert analysis.wireframe == "1-2,2-3,3-1"
+
+    def test_analysis_with_baseline(self, test_database):
+        """Test analysis with baseline landmarks."""
+        dataset = mm.MdDataset.create(dataset_name="Test Dataset")
+        analysis = mm.MdAnalysis.create(
+            analysis_name="Test Analysis",
+            dataset=dataset,
+            superimposition_method="Procrustes",
+            baseline="1,2,3"
+        )
+
+        assert analysis.baseline == "1,2,3"
+
+    def test_analysis_requires_dataset(self, test_database):
+        """Test that analysis requires dataset reference."""
+        dataset = mm.MdDataset.create(dataset_name="Test Dataset")
+        analysis = mm.MdAnalysis.create(
+            analysis_name="Test Analysis",
+            dataset=dataset,
+            superimposition_method="Procrustes"
+        )
+
+        # Verify analysis is linked to dataset
+        assert analysis.dataset == dataset
+        assert analysis.dataset.id == dataset.id

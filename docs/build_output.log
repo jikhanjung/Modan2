@@ -1,0 +1,132 @@
+Running Sphinx v8.2.3
+loading translations [en]... done
+loading intersphinx inventory 'python' from https://docs.python.org/3/objects.inv ...
+loading intersphinx inventory 'numpy' from https://numpy.org/doc/stable/objects.inv ...
+loading intersphinx inventory 'pyqt5' from https://www.riverbankcomputing.com/static/Docs/PyQt5/objects.inv ...
+building [mo]: targets for 0 po files that are out of date
+writing output... 
+building [html]: targets for 5 source files that are out of date
+updating environment: [new config] 5 added, 0 changed, 0 removed
+reading sources... [ 20%] changelog
+reading sources... [ 40%] developer_guide
+reading sources... [ 60%] index
+reading sources... [ 80%] installation
+reading sources... [100%] user_guide
+
+looking for now-outdated files... none found
+pickling environment... done
+checking consistency... done
+preparing documents... done
+copying assets... 
+copying static files... 
+Writing evaluated template result to /mnt/d/projects/Modan2/docs/_build/html/en/_static/language_data.js
+Writing evaluated template result to /mnt/d/projects/Modan2/docs/_build/html/en/_static/documentation_options.js
+Writing evaluated template result to /mnt/d/projects/Modan2/docs/_build/html/en/_static/basic.css
+Writing evaluated template result to /mnt/d/projects/Modan2/docs/_build/html/en/_static/js/versions.js
+copying static files: done
+copying extra files... 
+copying extra files: done
+copying assets: done
+writing output... [ 20%] changelog
+writing output... [ 40%] developer_guide
+writing output... [ 60%] index
+writing output... [ 80%] installation
+writing output... [100%] user_guide
+
+/mnt/d/projects/Modan2/docs/developer_guide.rst:124: WARNING: Lexing literal_block 'MdDataset (1) ──< (many) MdObject\nMdDataset (1) ──< (many) MdAnalysis\nMdObject (1) ──< (0 or 1) MdImage\nMdObject (1) ──< (0 or 1) MdThreeDModel' as "python" resulted in an error at token: '─'. Retrying in relaxed mode. [misc.highlighting_failure]
+generating indices... genindex done
+highlighting module code... 
+writing additional pages... search done
+dumping search index in English (code: en)... done
+dumping object inventory... done
+build succeeded, 1 warning.
+
+The HTML pages are in _build/html/en.
+Running Sphinx v8.2.3
+loading translations [ko]... done
+loading intersphinx inventory 'python' from https://docs.python.org/3/objects.inv ...
+loading intersphinx inventory 'numpy' from https://numpy.org/doc/stable/objects.inv ...
+loading intersphinx inventory 'pyqt5' from https://www.riverbankcomputing.com/static/Docs/PyQt5/objects.inv ...
+building [mo]: targets for 4 po files that are out of date
+writing output... [ 25%] locale/ko/LC_MESSAGES/developer_guide.mo
+writing output... [ 50%] locale/ko/LC_MESSAGES/changelog.mo
+writing output... [ 75%] locale/ko/LC_MESSAGES/installation.mo
+writing output... [100%] locale/ko/LC_MESSAGES/user_guide.mo
+
+building [html]: targets for 5 source files that are out of date
+updating environment: [new config] 5 added, 0 changed, 0 removed
+reading sources... [ 20%] changelog
+reading sources... [ 40%] developer_guide
+reading sources... [ 60%] index
+reading sources... [ 80%] installation
+reading sources... [100%] user_guide
+
+/mnt/d/projects/Modan2/docs/index.rst:46:<translated>:1: WARNING: Inline literal start-string without end-string. [docutils]
+/mnt/d/projects/Modan2/docs/index.rst:46:<translated>:1: WARNING: Inline literal start-string without end-string. [docutils]
+/mnt/d/projects/Modan2/docs/installation.rst:68:<translated>:1: WARNING: Inline literal start-string without end-string. [docutils]
+/mnt/d/projects/Modan2/docs/installation.rst:68:<translated>:1: WARNING: Inline literal start-string without end-string. [docutils]
+looking for now-outdated files... none found
+pickling environment... done
+checking consistency... done
+preparing documents... done
+copying assets... 
+copying static files... 
+Writing evaluated template result to /mnt/d/projects/Modan2/docs/_build/html/ko/_static/language_data.js
+Writing evaluated template result to /mnt/d/projects/Modan2/docs/_build/html/ko/_static/documentation_options.js
+Writing evaluated template result to /mnt/d/projects/Modan2/docs/_build/html/ko/_static/basic.css
+Writing evaluated template result to /mnt/d/projects/Modan2/docs/_build/html/ko/_static/js/versions.js
+copying static files: done
+copying extra files... 
+copying extra files: done
+copying assets: done
+writing output... [ 20%] changelog
+writing output... [ 40%] developer_guide
+writing output... [ 60%] index
+writing output... [ 80%] installation
+writing output... [100%] user_guide
+
+/mnt/d/projects/Modan2/docs/developer_guide.rst:124: WARNING: Lexing literal_block 'MdDataset (1) ──< (many) MdObject\nMdDataset (1) ──< (many) MdAnalysis\nMdObject (1) ──< (0 or 1) MdImage\nMdObject (1) ──< (0 or 1) MdThreeDModel' as "python" resulted in an error at token: '─'. Retrying in relaxed mode. [misc.highlighting_failure]
+generating indices... genindex done
+highlighting module code... 
+writing additional pages... search done
+dumping search index in English (code: en)... done
+dumping object inventory... done
+build succeeded, 5 warnings.
+
+The HTML pages are in _build/html/ko.
+
+============================================================
+  Building Modan2 Documentation (English + Korean)
+============================================================
+
+🗑️  Cleaning previous build: /mnt/d/projects/Modan2/docs/_build/html
+
+============================================================
+  Building English documentation
+============================================================
+Running: sphinx-build -b html -D language=en . /mnt/d/projects/Modan2/docs/_build/html/en
+
+
+✅ Success: Building English documentation completed
+
+============================================================
+  Building Korean documentation
+============================================================
+Running: sphinx-build -b html -D language=ko . /mnt/d/projects/Modan2/docs/_build/html/ko
+
+
+✅ Success: Building Korean documentation completed
+✅ Copied .nojekyll to build directory
+
+============================================================
+  ✅ Build Complete!
+============================================================
+
+English: /mnt/d/projects/Modan2/docs/_build/html/en/index.html
+Korean:  /mnt/d/projects/Modan2/docs/_build/html/ko/index.html
+Root:    /mnt/d/projects/Modan2/docs/_build/html/index.html
+
+To view locally, open:
+  file:///mnt/d/projects/Modan2/docs/_build/html/en/index.html
+  file:///mnt/d/projects/Modan2/docs/_build/html/ko/index.html
+

@@ -1,8 +1,29 @@
-# Development and testing dependencies
-pytest==8.4.2           # Core testing framework
-pytest-cov==7.0.0       # Code coverage measurement
-pytest-mock==3.15.0     # Enhanced mocking capabilities
-pytest-qt==4.4.0        # PyQt5 UI testing (for future use)
-pytest-xvfb==3.0.0      # Headless GUI testing for CI/CD
-pytest-timeout          # Test timeout management
-psutil                  # System and process utilities for performance testing
+# Development and Testing Dependencies
+# Install with: pip install -r config/requirements-dev.txt
+#
+# Version Strategy:
+# - Lower bound: Minimum tested version with required features
+# - Upper bound: Next major version (breaking changes expected)
+# - Example: >=8.4.0,<9.0 means 8.4.x and 8.x series, but not 9.x
+
+# Core Testing Framework
+pytest>=8.4.0,<9.0              # Core testing framework
+pytest-cov>=7.0.0,<8.0          # Code coverage measurement
+pytest-mock>=3.14.0,<4.0        # Enhanced mocking capabilities
+pytest-qt>=4.5.0,<5.0           # PyQt5 UI testing support
+pytest-timeout>=2.3.0,<3.0      # Test timeout management
+
+# CI/CD Support
+pytest-xvfb>=3.0.0,<4.0         # Headless GUI testing for Linux CI/CD
+
+# Performance and System Monitoring
+psutil>=7.0.0,<8.0              # System and process utilities for memory testing
+
+# Coverage Reporting
+coverage[toml]>=7.10.0,<8.0     # Coverage with TOML config support
+
+# Code Quality Tools (optional - uncomment to use)
+# ruff>=0.1.0,<1.0              # Fast Python linter (recommended)
+# mypy>=1.0.0,<2.0              # Static type checker
+# black>=23.0.0,<24.0           # Code formatter
+# isort>=5.12.0,<6.0            # Import sorting

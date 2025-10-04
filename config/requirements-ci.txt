@@ -1,0 +1,23 @@
+# CI/CD Testing Dependencies
+# Install with: pip install -r config/requirements-ci.txt
+# This includes all dependencies needed for running tests in CI/CD environments
+#
+# Usage in GitHub Actions:
+#   - pip install -r config/requirements-ci.txt
+
+# Base application dependencies
+-r ../requirements.txt
+
+# Core Testing Framework
+pytest>=8.4.0,<9.0              # Core testing framework
+pytest-cov>=7.0.0,<8.0          # Code coverage measurement
+pytest-mock>=3.14.0,<4.0        # Enhanced mocking capabilities
+pytest-qt>=4.5.0,<5.0           # PyQt5 UI testing support
+pytest-timeout>=2.3.0,<3.0      # Test timeout management
+
+# CI/CD Specific
+pytest-xvfb>=3.0.0,<4.0         # Headless GUI testing for Linux CI
+coverage[toml]>=7.10.0,<8.0     # Coverage with TOML config support
+
+# Performance Monitoring
+psutil>=7.0.0,<8.0              # System and process utilities for memory testing

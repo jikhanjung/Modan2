@@ -100,7 +100,7 @@ msgstr "Windows:"
 
 #: ../../index.rst:36
 msgid "Download and run the installer (``Modan2-Setup.exe``)"
-msgstr "인스톨러(``Modan2-Setup.exe``)를 다운로드하여 실행"
+msgstr "인스톨러 (``Modan2-Setup.exe``) 를 다운로드하여 실행"
 
 #: ../../index.rst:38
 msgid "For Linux/macOS:"
@@ -122,7 +122,7 @@ msgstr "**새 데이터셋 만들기**"
 msgid ""
 "Click \"New Dataset\" or press ``Ctrl+N`` to create a dataset for your "
 "morphometric study."
-msgstr "\"새 데이터셋\"을 클릭하거나 ``Ctrl+N``을 눌러 형태분석 연구용 데이터셋을 만드세요."
+msgstr "\"새 데이터셋\"을 클릭하거나 ``Ctrl+N`` 을 눌러 형태분석 연구용 데이터셋을 만드세요."
 
 #: ../../index.rst:48
 msgid "**Import Objects**"

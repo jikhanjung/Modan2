@@ -21,1763 +21,1762 @@ msgstr ""
 
 #: ../../user_guide.rst:2
 msgid "User Guide"
-msgstr ""
+msgstr "사용자 가이드"
 
 #: ../../user_guide.rst:4
 msgid ""
 "This guide provides comprehensive instructions for using Modan2 for "
 "geometric morphometric analysis."
-msgstr ""
+msgstr "이 가이드는 Modan2를 사용한 기하학적 형태계측 분석에 대한 종합적인 지침을 제공합니다."
 
 #: ../../user_guide.rst:7
 msgid "Getting Started"
-msgstr ""
+msgstr "시작하기"
 
 #: ../../user_guide.rst:10
 msgid "Launching Modan2"
-msgstr ""
+msgstr "Modan2 실행하기"
 
 #: ../../user_guide.rst:12
 msgid "**From installed application**:"
-msgstr ""
+msgstr "**설치된 애플리케이션에서**:"
 
 #: ../../user_guide.rst:14
 msgid "**Windows**: Start Menu → Modan2"
-msgstr ""
+msgstr "**Windows**: 시작 메뉴 → Modan2"
 
 #: ../../user_guide.rst:15
 msgid "**macOS**: Applications → Modan2.app"
-msgstr ""
+msgstr "**macOS**: 응용 프로그램 → Modan2.app"
 
 #: ../../user_guide.rst:16
 msgid "**Linux**: Terminal: ``python3 Modan2.py``"
-msgstr ""
+msgstr "**Linux**: 터미널: ``python3 Modan2.py``"
 
 #: ../../user_guide.rst:18
 msgid "**From source**:"
-msgstr ""
+msgstr "**소스에서 실행**:"
 
 #: ../../user_guide.rst:26
 msgid "Main Window Overview"
-msgstr ""
+msgstr "메인 창 개요"
 
 #: ../../user_guide.rst:28
 msgid "The Modan2 main window consists of several key components:"
-msgstr ""
+msgstr "Modan2 메인 창은 여러 주요 구성 요소로 이루어져 있습니다:"
 
 #: ../../user_guide.rst:30
 msgid "**Menu Bar**: File, Edit, View, Tools, Help"
-msgstr ""
+msgstr "**메뉴 바**: 파일, 편집, 보기, 도구, 도움말"
 
 #: ../../user_guide.rst:31
 msgid "**Toolbar**: Quick access to common operations"
-msgstr ""
+msgstr "**툴바**: 일반 작업에 대한 빠른 접근"
 
 #: ../../user_guide.rst:32
 msgid "**Dataset Tree View** (Left): Hierarchical view of datasets"
-msgstr ""
+msgstr "**데이터셋 트리 뷰** (왼쪽): 데이터셋의 계층적 뷰"
 
 #: ../../user_guide.rst:33
 msgid "**Object Table** (Center): List of objects in the selected dataset"
-msgstr ""
+msgstr "**객체 테이블** (중앙): 선택한 데이터셋의 객체 목록"
 
 #: ../../user_guide.rst:34
 msgid "**Object Preview** (Right): Visual preview of selected object"
-msgstr ""
+msgstr "**객체 미리보기** (오른쪽): 선택한 객체의 시각적 미리보기"
 
 #: ../../user_guide.rst:35
 msgid "**Status Bar** (Bottom): Information and progress indicators"
-msgstr ""
+msgstr "**상태 바** (하단): 정보 및 진행 표시기"
 
 #: ../../user_guide.rst:38
 msgid "Working with Datasets"
-msgstr ""
+msgstr "데이터셋 다루기"
 
 #: ../../user_guide.rst:41
 msgid "Creating a New Dataset"
-msgstr ""
+msgstr "새 데이터셋 만들기"
 
 #: ../../user_guide.rst:43
 msgid "Click **\"New Dataset\"** button or press ``Ctrl+N``"
-msgstr ""
+msgstr "**\"새 데이터셋\"** 버튼을 클릭하거나 ``Ctrl+N`` 을 누르세요"
 
 #: ../../user_guide.rst:44
 msgid "Enter dataset information:"
-msgstr ""
+msgstr "데이터셋 정보를 입력하세요:"
 
 #: ../../user_guide.rst:46
 msgid "**Name**: Descriptive name for your dataset"
-msgstr ""
+msgstr "**이름**: 데이터셋의 설명적인 이름"
 
 #: ../../user_guide.rst:47
 msgid "**Dimension**: 2D or 3D"
-msgstr ""
+msgstr "**차원**: 2D 또는 3D"
 
 #: ../../user_guide.rst:48
 msgid "**Description**: Optional detailed description"
-msgstr ""
+msgstr "**설명**: 선택적 상세 설명"
 
 #: ../../user_guide.rst:49
 msgid "**Parent Dataset**: Optional - create hierarchical structure"
-msgstr ""
+msgstr "**상위 데이터셋**: 선택사항 - 계층 구조 생성"
 
 #: ../../user_guide.rst:51
 msgid "Click **OK** to create the dataset"
-msgstr ""
+msgstr "**확인** 을 클릭하여 데이터셋을 생성하세요"
 
 #: ../../user_guide.rst:54
 msgid "Hierarchical datasets allow you to organize related studies. For example:"
-msgstr ""
+msgstr "계층적 데이터셋을 사용하여 관련 연구를 구성할 수 있습니다. 예를 들어:"
 
 #: ../../user_guide.rst:56
 msgid "Study_2024 (parent)"
-msgstr ""
+msgstr "Study_2024 (상위)"
 
 #: ../../user_guide.rst:58
 msgid "Subspecies_A (child)"
-msgstr ""
+msgstr "Subspecies_A (하위)"
 
 #: ../../user_guide.rst:59
 msgid "Subspecies_B (child)"
-msgstr ""
+msgstr "Subspecies_B (하위)"
 
 #: ../../user_guide.rst:62
 msgid "Dataset Variables"
-msgstr ""
+msgstr "데이터셋 변수"
 
 #: ../../user_guide.rst:64
 msgid "Variables define grouping and categorical data for statistical analysis."
-msgstr ""
+msgstr "변수는 통계 분석을 위한 그룹화 및 범주형 데이터를 정의합니다."
 
 #: ../../user_guide.rst:66
 msgid "**Adding Variables**:"
-msgstr ""
+msgstr "**변수 추가**:"
 
 #: ../../user_guide.rst:68
 msgid "Select a dataset"
-msgstr ""
+msgstr "데이터셋 선택"
 
 #: ../../user_guide.rst:69
 msgid "Click **\"Add Variable\"** in the toolbar"
-msgstr ""
+msgstr "툴바에서 **\"변수 추가\"** 를 클릭하세요"
 
 #: ../../user_guide.rst:70
 msgid "Choose variable type:"
-msgstr ""
+msgstr "변수 유형 선택:"
 
 #: ../../user_guide.rst:72
 msgid "**Categorical**: Groups (e.g., \"male\", \"female\", \"juvenile\")"
-msgstr ""
+msgstr "**범주형**: 그룹 (예: \"수컷\", \"암컷\", \"유년\")"
 
 #: ../../user_guide.rst:73
 msgid "**Continuous**: Numeric measurements (e.g., age, weight)"
-msgstr ""
+msgstr "**연속형**: 수치 측정값 (예: 나이, 무게)"
 
 #: ../../user_guide.rst:75
 msgid "Enter variable name"
-msgstr ""
+msgstr "변수 이름 입력"
 
 #: ../../user_guide.rst:76
 msgid "For categorical variables, add possible values"
-msgstr ""
+msgstr "범주형 변수의 경우 가능한 값들을 추가하세요"
 
 #: ../../user_guide.rst:78
 msgid "**Setting Object Variables**:"
-msgstr ""
+msgstr "**객체 변수 설정**:"
 
 #: ../../user_guide.rst:80
 msgid "Select object(s) in the table"
-msgstr ""
+msgstr "테이블에서 객체 선택"
 
 #: ../../user_guide.rst:81
 msgid "Click on the variable column"
-msgstr ""
+msgstr "변수 열을 클릭하세요"
 
 #: ../../user_guide.rst:82
 msgid "Enter or select value"
-msgstr ""
+msgstr "값을 입력하거나 선택하세요"
 
 #: ../../user_guide.rst:83
 msgid "Press ``Enter`` or click away to save"
-msgstr ""
+msgstr "``Enter`` 를 누르거나 다른 곳을 클릭하여 저장하세요"
 
 #: ../../user_guide.rst:85 ../../user_guide.rst:410
 msgid "**Example Workflow**:"
-msgstr ""
+msgstr "**예제 워크플로우**:"
 
 #: ../../user_guide.rst:100
 msgid "Importing Data"
-msgstr ""
+msgstr "데이터 가져오기"
 
 #: ../../user_guide.rst:103
 msgid "Importing 2D Images"
-msgstr ""
+msgstr "2D 이미지 가져오기"
 
 #: ../../user_guide.rst:105
 msgid "**Supported formats**: JPG, PNG, BMP, TIFF, GIF"
-msgstr ""
+msgstr "**지원 형식**: JPG, PNG, BMP, TIFF, GIF"
 
 #: ../../user_guide.rst:107 ../../user_guide.rst:130
 msgid "**Method 1: Drag and Drop**"
-msgstr ""
+msgstr "**방법 1: 드래그 앤 드롭**"
 
 #: ../../user_guide.rst:109 ../../user_guide.rst:314
 msgid "Select a dataset in the tree view"
-msgstr ""
+msgstr "트리 뷰에서 데이터셋을 선택하세요"
 
 #: ../../user_guide.rst:110
 msgid "Drag image files from your file manager"
-msgstr ""
+msgstr "파일 관리자에서 이미지 파일을 드래그하세요"
 
 #: ../../user_guide.rst:111
 msgid "Drop them onto the dataset or object table"
-msgstr ""
+msgstr "데이터셋이나 객체 테이블에 드롭하세요"
 
 #: ../../user_guide.rst:112
 msgid "Images are automatically imported with filenames as object names"
-msgstr ""
+msgstr "이미지는 파일 이름을 객체 이름으로 자동 가져오기됩니다"
 
 #: ../../user_guide.rst:114 ../../user_guide.rst:136
 msgid "**Method 2: Import Dialog**"
-msgstr ""
+msgstr "**방법 2: 가져오기 대화상자**"
 
 #: ../../user_guide.rst:116
 msgid "Select dataset → **File → Import Objects**"
-msgstr ""
+msgstr "데이터셋 선택 → **파일 → 객체 가져오기**"
 
 #: ../../user_guide.rst:117
 msgid "Click **\"Add Images\"**"
-msgstr ""
+msgstr "**\"이미지 추가\"** 를 클릭하세요"
 
 #: ../../user_guide.rst:118
 msgid "Select one or more image files"
-msgstr ""
+msgstr "하나 이상의 이미지 파일을 선택하세요"
 
 #: ../../user_guide.rst:119
 msgid "Review the list"
-msgstr ""
+msgstr "목록을 검토하세요"
 
 #: ../../user_guide.rst:120 ../../user_guide.rst:180
 msgid "Click **\"Import\"**"
-msgstr ""
+msgstr "**\"가져오기\"** 를 클릭하세요"
 
 #: ../../user_guide.rst:123
 msgid ""
 "Use consistent naming: ``specimen_001.jpg``, ``specimen_002.jpg`` for "
 "easier sorting"
-msgstr ""
+msgstr "일관된 이름 사용: ``specimen_001.jpg``, ``specimen_002.jpg`` 등으로 쉬운 정렬을 위해"
 
 #: ../../user_guide.rst:126
 msgid "Importing 3D Models"
-msgstr ""
+msgstr "3D 모델 가져오기"
 
 #: ../../user_guide.rst:128
 msgid "**Supported formats**: OBJ, PLY, STL"
-msgstr ""
+msgstr "**지원 형식**: OBJ, PLY, STL"
 
 #: ../../user_guide.rst:132
 msgid "Select a 3D dataset"
-msgstr ""
+msgstr "3D 데이터셋을 선택하세요"
 
 #: ../../user_guide.rst:133
 msgid "Drag 3D model files into the application"
-msgstr ""
+msgstr "3D 모델 파일을 애플리케이션으로 드래그하세요"
 
 #: ../../user_guide.rst:134
 msgid "Models are imported with automatic scaling"
-msgstr ""
+msgstr "모델은 자동 스케일링과 함께 가져오기됩니다"
 
 #: ../../user_guide.rst:138
 msgid "**File → Import Objects → Add 3D Models**"
-msgstr ""
+msgstr "**파일 → 객체 가져오기 → 3D 모델 추가**"
 
 #: ../../user_guide.rst:139
 msgid "Select files"
-msgstr ""
+msgstr "파일 선택"
 
 #: ../../user_guide.rst:140
 msgid "Review and import"
-msgstr ""
+msgstr "검토 및 가져오기"
 
 #: ../../user_guide.rst:142
 msgid "**3D Model Requirements**:"
-msgstr ""
+msgstr "**3D 모델 요구사항**:"
 
 #: ../../user_guide.rst:144
 msgid "Mesh should be manifold (closed surface)"
-msgstr ""
+msgstr "메시는 다양체여야 합니다 (닫힌 표면)"
 
 #: ../../user_guide.rst:145
 msgid "Reasonable polygon count (<100k faces recommended)"
-msgstr ""
+msgstr "적절한 폴리곤 수 (<100k 면 권장)"
 
 #: ../../user_guide.rst:146
 msgid "Centered at origin for best visualization"
-msgstr ""
+msgstr "최상의 시각화를 위해 원점에 중심 배치"
 
 #: ../../user_guide.rst:149
 msgid "Importing Landmark Files"
-msgstr ""
+msgstr "랜드마크 파일 가져오기"
 
 #: ../../user_guide.rst:151
 msgid "**Supported formats**: TPS, NTS, CSV"
-msgstr ""
+msgstr "**지원 형식**: TPS, NTS, CSV"
 
 #: ../../user_guide.rst:153
 msgid "**TPS Format Example**:"
-msgstr ""
+msgstr "**TPS 형식 예제**:"
 
 #: ../../user_guide.rst:170
 msgid "**Importing TPS/NTS**:"
-msgstr ""
+msgstr "**TPS/NTS 가져오기**:"
 
 #: ../../user_guide.rst:172
 msgid "**File → Import → Import Landmark File**"
-msgstr ""
+msgstr "**파일 → 가져오기 → 랜드마크 파일 가져오기**"
 
 #: ../../user_guide.rst:173
 msgid "Select TPS or NTS file"
-msgstr ""
+msgstr "TPS 또는 NTS 파일을 선택하세요"
 
 #: ../../user_guide.rst:174
 msgid "Modan2 will:"
-msgstr ""
+msgstr "Modan2는 다음을 수행합니다:"
 
 #: ../../user_guide.rst:176
 msgid "Create objects for each specimen"
-msgstr ""
+msgstr "각 표본에 대한 객체 생성"
 
 #: ../../user_guide.rst:177
 msgid "Link to image files (if IMAGE= field exists)"
-msgstr ""
+msgstr "이미지 파일에 연결 (IMAGE= 필드가 있는 경우)"
 
 #: ../../user_guide.rst:178
 msgid "Import landmark coordinates"
-msgstr ""
+msgstr "랜드마크 좌표 가져오기"
 
 #: ../../user_guide.rst:182
 msgid "**CSV Format**:"
-msgstr ""
+msgstr "**CSV 형식**:"
 
 #: ../../user_guide.rst:191
 msgid "Working with Objects"
-msgstr ""
+msgstr "객체 다루기"
 
 #: ../../user_guide.rst:194
 msgid "Viewing an Object"
-msgstr ""
+msgstr "객체 보기"
 
 #: ../../user_guide.rst:196
 msgid "**Double-click** an object in the table to open the **Object Dialog**."
-msgstr ""
+msgstr "테이블에서 객체를 **더블클릭** 하여 **객체 대화상자** 를 여세요."
 
 #: ../../user_guide.rst:198
 msgid "The Object Dialog shows:"
-msgstr ""
+msgstr "객체 대화상자는 다음을 보여줍니다:"
 
 #: ../../user_guide.rst:200
 msgid "Object metadata (name, ID, creation date)"
-msgstr ""
+msgstr "객체 메타데이터 (이름, ID, 생성 날짜)"
 
 #: ../../user_guide.rst:201
 msgid "Associated image or 3D model"
-msgstr ""
+msgstr "연결된 이미지 또는 3D 모델"
 
 #: ../../user_guide.rst:202
 msgid "Landmark table"
-msgstr ""
+msgstr "랜드마크 테이블"
 
 #: ../../user_guide.rst:203
 msgid "2D/3D viewer with landmarks visualized"
-msgstr ""
+msgstr "랜드마크가 시각화된 2D/3D 뷰어"
 
 #: ../../user_guide.rst:206
 msgid "Placing Landmarks (2D)"
-msgstr ""
+msgstr "랜드마크 배치 (2D)"
 
 #: ../../user_guide.rst:208
 msgid "Open Object Dialog for a 2D object"
-msgstr ""
+msgstr "2D 객체에 대한 객체 대화상자 열기"
 
 #: ../../user_guide.rst:209
 msgid "Click on the image to place a landmark"
-msgstr ""
+msgstr "이미지를 클릭하여 랜드마크를 배치하세요"
 
 #: ../../user_guide.rst:210
 msgid "Landmarks are numbered sequentially (1, 2, 3, ...)"
-msgstr ""
+msgstr "랜드마크는 순차적으로 번호가 매겨집니다 (1, 2, 3, ...)"
 
 #: ../../user_guide.rst:211 ../../user_guide.rst:234
 msgid "Right-click a landmark to delete it"
-msgstr ""
+msgstr "랜드마크를 우클릭하여 삭제하세요"
 
 #: ../../user_guide.rst:212
 msgid "Click and drag to move an existing landmark"
-msgstr ""
+msgstr "클릭하고 드래그하여 기존 랜드마크를 이동하세요"
 
 #: ../../user_guide.rst:214
 msgid "**Keyboard Shortcuts in Object Dialog**:"
-msgstr ""
+msgstr "**객체 대화상자에서의 키보드 단축키**:"
 
 #: ../../user_guide.rst:216
 msgid "``Ctrl+Z`` - Undo last landmark"
-msgstr ""
+msgstr "``Ctrl+Z`` - 마지막 랜드마크 되돌리기"
 
 #: ../../user_guide.rst:217
 msgid "``Delete`` - Remove selected landmark"
-msgstr ""
+msgstr "``Delete`` - 선택한 랜드마크 제거"
 
 #: ../../user_guide.rst:218
 msgid "``+/-`` - Zoom in/out"
-msgstr ""
+msgstr "``+/-`` - 확대/축소"
 
 #: ../../user_guide.rst:219
 msgid "``Space+Drag`` - Pan image"
-msgstr ""
+msgstr "``Space+Drag`` - 이미지 이동"
 
 #: ../../user_guide.rst:220
 msgid "``Home`` - Reset zoom"
-msgstr ""
+msgstr "``Home`` - 확대 재설정"
 
 #: ../../user_guide.rst:223
 msgid "Placing Landmarks (3D)"
-msgstr ""
+msgstr "랜드마크 배치 (3D)"
 
 #: ../../user_guide.rst:225
 msgid "Open Object Dialog for a 3D object"
-msgstr ""
+msgstr "3D 객체에 대한 객체 대화상자 열기"
 
 #: ../../user_guide.rst:226
 msgid "Rotate the model:"
-msgstr ""
+msgstr "모델 회전:"
 
 #: ../../user_guide.rst:228
 msgid "**Left mouse drag**: Rotate"
-msgstr ""
+msgstr "**왼쪽 마우스 드래그**: 회전"
 
 #: ../../user_guide.rst:229
 msgid "**Right mouse drag**: Pan"
-msgstr ""
+msgstr "**오른쪽 마우스 드래그**: 이동"
 
 #: ../../user_guide.rst:230
 msgid "**Mouse wheel**: Zoom"
-msgstr ""
+msgstr "**마우스 휠**: 확대/축소"
 
 #: ../../user_guide.rst:232
 msgid "Click on the surface to place a landmark"
-msgstr ""
+msgstr "표면을 클릭하여 랜드마크를 배치하세요"
 
 #: ../../user_guide.rst:233
 msgid "Landmarks appear as colored spheres"
-msgstr ""
+msgstr "랜드마크는 색상이 있는 구체로 나타납니다"
 
 #: ../../user_guide.rst:236
 msgid "**3D Viewer Controls**:"
-msgstr ""
+msgstr "**3D 뷰어 컨트롤**:"
 
 #: ../../user_guide.rst:238
 msgid "``R`` - Reset camera"
-msgstr ""
+msgstr "``R`` - 카메라 재설정"
 
 #: ../../user_guide.rst:239
 msgid "``W`` - Wireframe mode"
-msgstr ""
+msgstr "``W`` - 와이어프레임 모드"
 
 #: ../../user_guide.rst:240
 msgid "``S`` - Solid/surface mode"
-msgstr ""
+msgstr "``S`` - 솔리드/표면 모드"
 
 #: ../../user_guide.rst:241
 msgid "``L`` - Toggle lighting"
-msgstr ""
+msgstr "``L`` - 조명 전환"
 
 #: ../../user_guide.rst:244
 msgid "Editing Landmark Coordinates"
-msgstr ""
+msgstr "랜드마크 좌표 편집"
 
 #: ../../user_guide.rst:246
 msgid "**In the landmark table**:"
-msgstr ""
+msgstr "**랜드마크 테이블에서**:"
 
 #: ../../user_guide.rst:248
 msgid "Double-click a coordinate cell"
-msgstr ""
+msgstr "좌표 셀을 더블클릭하세요"
 
 #: ../../user_guide.rst:249
 msgid "Enter new value"
-msgstr ""
+msgstr "새 값을 입력하세요"
 
 #: ../../user_guide.rst:250
 msgid "Press ``Enter`` to save"
-msgstr ""
+msgstr "``Enter`` 를 눌러 저장하세요"
 
 #: ../../user_guide.rst:251
 msgid "The viewer updates automatically"
-msgstr ""
+msgstr "뷰어가 자동으로 업데이트됩니다"
 
 #: ../../user_guide.rst:253
 msgid "**Manual coordinate entry is useful for**:"
-msgstr ""
+msgstr "**수동 좌표 입력이 유용한 경우**:"
 
 #: ../../user_guide.rst:255
 msgid "Precise adjustments"
-msgstr ""
+msgstr "정밀한 조정"
 
 #: ../../user_guide.rst:256
 msgid "Correcting digitization errors"
-msgstr ""
+msgstr "디지타이징 오류 수정"
 
 #: ../../user_guide.rst:257
 msgid "Importing coordinates from external sources"
-msgstr ""
+msgstr "외부 소스에서 좌표 가져오기"
 
 #: ../../user_guide.rst:260
 msgid "Missing Landmarks"
-msgstr ""
+msgstr "결측 랜드마크"
 
 #: ../../user_guide.rst:262
 msgid "If a landmark cannot be placed (damaged specimen, obscured feature):"
-msgstr ""
+msgstr "랜드마크를 배치할 수 없는 경우 (손상된 표본, 가려진 특징):"
 
 #: ../../user_guide.rst:264
 msgid "Leave the landmark position empty, or"
-msgstr ""
+msgstr "랜드마크 위치를 비워두거나,"
 
 #: ../../user_guide.rst:265
 msgid "Right-click in the landmark table → **\"Mark as Missing\"**"
-msgstr ""
+msgstr "랜드마크 테이블에서 우클릭 → **\"결측으로 표시\"**"
 
 #: ../../user_guide.rst:266
 msgid "The cell shows **\"MISSING\"**"
-msgstr ""
+msgstr "셀에 **\"MISSING\"** 이 표시됩니다"
 
 #: ../../user_guide.rst:267
 msgid "In the viewer:"
-msgstr ""
+msgstr "뷰어에서:"
 
 #: ../../user_guide.rst:269
 msgid ""
 "**Checkbox \"Show Estimated\" checked**: Hollow circle shows estimated "
 "position"
-msgstr ""
+msgstr "**\"추정값 표시\" 체크박스 선택됨**: 빈 원이 추정 위치를 표시합니다"
 
 #: ../../user_guide.rst:270
 msgid "**Checkbox unchecked**: No visualization"
-msgstr ""
+msgstr "**체크박스 선택 안 됨**: 시각화 없음"
 
 #: ../../user_guide.rst:272
 msgid "**How Estimation Works**:"
-msgstr ""
+msgstr "**추정 방식**:"
 
 #: ../../user_guide.rst:274
 msgid "Modan2 uses Procrustes-aligned mean shape from complete specimens"
-msgstr ""
+msgstr "Modan2는 완전한 표본에서 Procrustes 정렬된 평균 형태를 사용합니다"
 
 #: ../../user_guide.rst:275
 msgid ""
 "Estimates are transformed to match the scale and position of the current "
 "object"
-msgstr ""
+msgstr "추정값은 현재 객체의 스케일과 위치에 맞게 변환됩니다"
 
 #: ../../user_guide.rst:276
 msgid "Estimated landmarks shown as **hollow circles** with **\"3?\"** label"
-msgstr ""
+msgstr "추정된 랜드마크는 **\"3?\"** 레이블이 있는 **빈 원** 으로 표시됩니다"
 
 #: ../../user_guide.rst:279
 msgid ""
 "Missing landmarks are handled during Procrustes superimposition through "
 "iterative imputation. See :ref:`analysis-missing-landmarks` for details."
-msgstr ""
+msgstr "결측 랜드마크는 Procrustes 중첩 중 반복적 대체를 통해 처리됩니다. 자세한 내용은 :ref:`analysis-missing-landmarks` 를 참조하세요."
 
 #: ../../user_guide.rst:282
 msgid "Display Options"
-msgstr ""
+msgstr "표시 옵션"
 
 #: ../../user_guide.rst:284
 msgid "In the Object Dialog, customize visualization:"
-msgstr ""
+msgstr "객체 대화상자에서 시각화를 사용자 정의하세요:"
 
 #: ../../user_guide.rst:286
 msgid "**Show Landmarks**: Toggle landmark visibility"
-msgstr ""
+msgstr "**랜드마크 표시**: 랜드마크 가시성 전환"
 
 #: ../../user_guide.rst:287
 msgid "**Show Index**: Show/hide landmark numbers"
-msgstr ""
+msgstr "**인덱스 표시**: 랜드마크 번호 표시/숨기기"
 
 #: ../../user_guide.rst:288
 msgid "**Show Polygon**: Connect landmarks with lines (wireframe)"
-msgstr ""
+msgstr "**폴리곤 표시**: 랜드마크를 선으로 연결 (와이어프레임)"
 
 #: ../../user_guide.rst:289
 msgid "**Show Baseline**: Highlight baseline between specific landmarks"
-msgstr ""
+msgstr "**기준선 표시**: 특정 랜드마크 사이의 기준선 강조"
 
 #: ../../user_guide.rst:290
 msgid ""
 "**Show Estimated**: Display estimated positions for missing landmarks "
 "(hollow circles)"
-msgstr ""
+msgstr "**추정값 표시**: 결측 랜드마크에 대한 추정 위치 표시 (빈 원)"
 
 #: ../../user_guide.rst:292
 msgid "**Size Controls**:"
-msgstr ""
+msgstr "**크기 컨트롤**:"
 
 #: ../../user_guide.rst:294
 msgid "**Landmark Size**: Adjust circle radius"
-msgstr ""
+msgstr "**랜드마크 크기**: 원 반지름 조정"
 
 #: ../../user_guide.rst:295
 msgid "**Index Size**: Adjust label font size"
-msgstr ""
+msgstr "**인덱스 크기**: 레이블 글꼴 크기 조정"
 
 #: ../../user_guide.rst:298 ../../user_guide.rst:786
 msgid "Statistical Analysis"
-msgstr ""
+msgstr "통계 분석"
 
 #: ../../user_guide.rst:301
 msgid "Overview"
-msgstr ""
+msgstr "개요"
 
 #: ../../user_guide.rst:303
 msgid "Modan2 provides three main statistical analyses:"
-msgstr ""
+msgstr "Modan2는 세 가지 주요 통계 분석을 제공합니다:"
 
 #: ../../user_guide.rst:305
 msgid "**Principal Component Analysis (PCA)**: Explore shape variation"
-msgstr ""
+msgstr "**주성분 분석 (PCA)**: 형태 변이 탐색"
 
 #: ../../user_guide.rst:306
 msgid "**Canonical Variate Analysis (CVA)**: Discriminate between groups"
-msgstr ""
+msgstr "**정준 판별 분석 (CVA)**: 그룹 간 판별"
 
 #: ../../user_guide.rst:307
 msgid "**MANOVA**: Test for group differences"
-msgstr ""
+msgstr "**MANOVA**: 그룹 차이 검정"
 
 #: ../../user_guide.rst:309
 msgid ""
 "All analyses require **Procrustes superimposition** as a preprocessing "
 "step."
-msgstr ""
+msgstr "모든 분석은 전처리 단계로 **Procrustes 중첩** 을 필요로 합니다."
 
 #: ../../user_guide.rst:312
 msgid "Running an Analysis"
-msgstr ""
+msgstr "분석 실행"
 
 #: ../../user_guide.rst:315
 msgid "Click **\"Analyze Dataset\"** button or menu: **Tools → Analyze Dataset**"
-msgstr ""
+msgstr "**\"데이터셋 분석\"** 버튼을 클릭하거나 메뉴: **도구 → 데이터셋 분석**"
 
 #: ../../user_guide.rst:316
 msgid "The **New Analysis Dialog** opens:"
-msgstr ""
+msgstr "**새 분석 대화상자** 가 열립니다:"
 
 #: ../../user_guide.rst:318
 msgid "**Analysis Type**: PCA, CVA, or MANOVA"
-msgstr ""
+msgstr "**분석 유형**: PCA, CVA 또는 MANOVA"
 
 #: ../../user_guide.rst:319
 msgid "**Dataset**: Pre-selected"
-msgstr ""
+msgstr "**데이터셋**: 미리 선택됨"
 
 #: ../../user_guide.rst:320
 msgid "**Options**: Analysis-specific settings"
-msgstr ""
+msgstr "**옵션**: 분석별 설정"
 
 #: ../../user_guide.rst:322
 msgid "Configure options (see below)"
-msgstr ""
+msgstr "옵션 구성 (아래 참조)"
 
 #: ../../user_guide.rst:323
 msgid "Click **\"OK\"** to run"
-msgstr ""
+msgstr "**\"확인\"** 을 클릭하여 실행하세요"
 
 #: ../../user_guide.rst:328
 msgid "Procrustes Superimposition"
-msgstr ""
+msgstr "Procrustes 중첩"
 
 #: ../../user_guide.rst:330
 msgid "**What it does**:"
-msgstr ""
+msgstr "**수행 작업**:"
 
 #: ../../user_guide.rst:332
 msgid "Aligns all shapes to a common coordinate system"
-msgstr ""
+msgstr "모든 형태를 공통 좌표계에 정렬합니다"
 
 #: ../../user_guide.rst:333
 msgid "Removes differences due to position, rotation, and scale"
-msgstr ""
+msgstr "위치, 회전 및 스케일로 인한 차이를 제거합니다"
 
 #: ../../user_guide.rst:334
 msgid "Leaves only shape variation"
-msgstr ""
+msgstr "형태 변이만 남깁니다"
 
 #: ../../user_guide.rst:336
 msgid "**Handling Missing Landmarks**:"
-msgstr ""
+msgstr "**결측 랜드마크 처리**:"
 
 #: ../../user_guide.rst:338
 msgid ""
 "If your dataset has missing landmarks, Procrustes uses **iterative "
 "imputation**:"
-msgstr ""
+msgstr "데이터셋에 결측 랜드마크가 있는 경우, Procrustes는 **반복적 대체** 를 사용합니다:"
 
 #: ../../user_guide.rst:340
 msgid "Start with complete specimens only"
-msgstr ""
+msgstr "완전한 표본만으로 시작"
 
 #: ../../user_guide.rst:341
 msgid "Compute mean shape"
-msgstr ""
+msgstr "평균 형태 계산"
 
 #: ../../user_guide.rst:342
 msgid "Estimate missing landmarks from mean"
-msgstr ""
+msgstr "평균에서 결측 랜드마크 추정"
 
 #: ../../user_guide.rst:343
 msgid "Re-run Procrustes with estimated values"
-msgstr ""
+msgstr "추정값으로 Procrustes 재실행"
 
 #: ../../user_guide.rst:344
 msgid "Repeat until convergence (max 100 iterations)"
-msgstr ""
+msgstr "수렴할 때까지 반복 (최대 100회 반복)"
 
 #: ../../user_guide.rst:346
 msgid "**Options**:"
-msgstr ""
+msgstr "**옵션**:"
 
 #: ../../user_guide.rst:348
 msgid ""
 "**Reference Shape**: - *Mean shape*: Default, uses average - *First "
 "object*: Uses first specimen as reference"
-msgstr ""
+msgstr "**기준 형태**: - *평균 형태*: 기본값, 평균 사용 - *첫 번째 객체*: 첫 번째 표본을 기준으로 사용"
 
 #: ../../user_guide.rst:352
 msgid "**When Procrustes Runs**:"
-msgstr ""
+msgstr "**Procrustes 실행 시점**:"
 
 #: ../../user_guide.rst:354
 msgid "Automatically before PCA, CVA, or MANOVA"
-msgstr ""
+msgstr "PCA, CVA 또는 MANOVA 이전에 자동으로"
 
 #: ../../user_guide.rst:355
 msgid "Results are cached - subsequent analyses reuse aligned shapes"
-msgstr ""
+msgstr "결과가 캐시됨 - 후속 분석은 정렬된 형태를 재사용합니다"
 
 #: ../../user_guide.rst:360
 msgid "Principal Component Analysis (PCA)"
-msgstr ""
+msgstr "주성분 분석 (PCA)"
 
 #: ../../user_guide.rst:362
 msgid "**Purpose**: Identify major axes of shape variation"
-msgstr ""
+msgstr "**목적**: 형태 변이의 주요 축 식별"
 
 #: ../../user_guide.rst:364 ../../user_guide.rst:433 ../../user_guide.rst:498
 msgid "**Use when**:"
-msgstr ""
+msgstr "**사용 시기**:"
 
 #: ../../user_guide.rst:366
 msgid "Exploring shape diversity"
-msgstr ""
+msgstr "형태 다양성 탐색"
 
 #: ../../user_guide.rst:367
 msgid "Visualizing morphospace"
-msgstr ""
+msgstr "형태 공간 시각화"
 
 #: ../../user_guide.rst:368
 msgid "Identifying outliers"
-msgstr ""
+msgstr "이상치 식별"
 
 #: ../../user_guide.rst:369
 msgid "Reducing dimensionality"
-msgstr ""
+msgstr "차원 축소"
 
 #: ../../user_guide.rst:371
 msgid "**Running PCA**:"
-msgstr ""
+msgstr "**PCA 실행**:"
 
 #: ../../user_guide.rst:373
 msgid "**Tools → Analyze Dataset → PCA**"
-msgstr ""
+msgstr "**도구 → 데이터셋 분석 → PCA**"
 
 #: ../../user_guide.rst:374 ../../user_guide.rst:447 ../../user_guide.rst:507
 #: ../../user_guide.rst:668
 msgid "Options:"
-msgstr ""
+msgstr "옵션:"
 
 #: ../../user_guide.rst:376
 msgid "**Number of PCs**: How many principal components to compute (default: all)"
-msgstr ""
+msgstr "**PC 수**: 계산할 주성분 수 (기본값: 전체)"
 
 #: ../../user_guide.rst:377
 msgid "**Use Covariance Matrix**: Unchecked = correlation matrix (default)"
-msgstr ""
+msgstr "**공분산 행렬 사용**: 체크 해제 = 상관 행렬 (기본값)"
 
 #: ../../user_guide.rst:379 ../../user_guide.rst:452 ../../user_guide.rst:512
 msgid "Click **OK**"
-msgstr ""
+msgstr "**확인** 을 클릭하세요"
 
 #: ../../user_guide.rst:381 ../../user_guide.rst:454 ../../user_guide.rst:514
 msgid "**Interpreting Results**:"
-msgstr ""
+msgstr "**결과 해석**:"
 
 #: ../../user_guide.rst:383
 msgid "The **Data Exploration Dialog** opens with:"
-msgstr ""
+msgstr "**데이터 탐색 대화상자** 가 다음과 함께 열립니다:"
 
 #: ../../user_guide.rst:385
 msgid "**Scree Plot**: Shows variance explained by each PC"
-msgstr ""
+msgstr "**스크리 플롯**: 각 PC에 의해 설명되는 분산 표시"
 
 #: ../../user_guide.rst:387
 msgid "X-axis: PC number"
-msgstr ""
+msgstr "X축: PC 번호"
 
 #: ../../user_guide.rst:388
 msgid "Y-axis: % variance"
-msgstr ""
+msgstr "Y축: % 분산"
 
 #: ../../user_guide.rst:389
 msgid "Look for \"elbow\" to determine how many PCs are meaningful"
-msgstr ""
+msgstr "의미 있는 PC 수를 결정하기 위해 \"엘보\"를 찾으세요"
 
 #: ../../user_guide.rst:391
 msgid "**PC Score Plot**: Scatter plot of specimens"
-msgstr ""
+msgstr "**PC 점수 플롯**: 표본의 산점도"
 
 #: ../../user_guide.rst:393
 msgid "X-axis: PC1 (usually highest variance)"
-msgstr ""
+msgstr "X축: PC1 (일반적으로 가장 높은 분산)"
 
 #: ../../user_guide.rst:394
 msgid "Y-axis: PC2 (second highest)"
-msgstr ""
+msgstr "Y축: PC2 (두 번째로 높은)"
 
 #: ../../user_guide.rst:395
 msgid "Points colored by groups (if variables defined)"
-msgstr ""
+msgstr "그룹별로 색상이 지정된 점들 (변수가 정의된 경우)"
 
 #: ../../user_guide.rst:397
 msgid "**Shape Variation Wireframes**:"
-msgstr ""
+msgstr "**형태 변이 와이어프레임**:"
 
 #: ../../user_guide.rst:399
 msgid "Shows shape changes along each PC"
-msgstr ""
+msgstr "각 PC를 따른 형태 변화 표시"
 
 #: ../../user_guide.rst:400
 msgid "Min/Max shapes at extremes of PC axis"
-msgstr ""
+msgstr "PC 축의 극단에서 최소/최대 형태"
 
 #: ../../user_guide.rst:402
 msgid "**PC Scores Table**: Numeric scores for each specimen"
-msgstr ""
+msgstr "**PC 점수 테이블**: 각 표본의 수치 점수"
 
 #: ../../user_guide.rst:404
 msgid "**Exporting PCA Results**:"
-msgstr ""
+msgstr "**PCA 결과 내보내기**:"
 
 #: ../../user_guide.rst:406
 msgid "**Export PC Scores**: CSV file with scores for each object"
-msgstr ""
+msgstr "**PC 점수 내보내기**: 각 객체의 점수가 포함된 CSV 파일"
 
 #: ../../user_guide.rst:407
 msgid "**Export Loadings**: Landmark contributions to each PC"
-msgstr ""
+msgstr "**로딩 내보내기**: 각 PC에 대한 랜드마크 기여도"
 
 #: ../../user_guide.rst:408
 msgid "**Export Plot**: Save scatter plot as PNG/PDF"
-msgstr ""
+msgstr "**플롯 내보내기**: 산점도를 PNG/PDF로 저장"
 
 #: ../../user_guide.rst:429
 msgid "Canonical Variate Analysis (CVA)"
-msgstr ""
+msgstr "정준 판별 분석 (CVA)"
 
 #: ../../user_guide.rst:431
 msgid "**Purpose**: Maximize separation between predefined groups"
-msgstr ""
+msgstr "**목적**: 사전 정의된 그룹 간 분리 최대화"
 
 #: ../../user_guide.rst:435
 msgid "Discriminating between species/populations"
-msgstr ""
+msgstr "종/집단 간 판별"
 
 #: ../../user_guide.rst:436
 msgid "Testing classification accuracy"
-msgstr ""
+msgstr "분류 정확도 테스트"
 
 #: ../../user_guide.rst:437
 msgid "Identifying diagnostic features"
-msgstr ""
+msgstr "진단적 특징 식별"
 
 #: ../../user_guide.rst:439
 msgid "**Requirements**:"
-msgstr ""
+msgstr "**요구사항**:"
 
 #: ../../user_guide.rst:441
 msgid "At least 2 groups defined via dataset variables"
-msgstr ""
+msgstr "데이터셋 변수를 통해 정의된 최소 2개 그룹"
 
 #: ../../user_guide.rst:442
 msgid "At least 2 specimens per group"
-msgstr ""
+msgstr "그룹당 최소 2개 표본"
 
 #: ../../user_guide.rst:444
 msgid "**Running CVA**:"
-msgstr ""
+msgstr "**CVA 실행**:"
 
 #: ../../user_guide.rst:446
 msgid "**Tools → Analyze Dataset → CVA**"
-msgstr ""
+msgstr "**도구 → 데이터셋 분석 → CVA**"
 
 #: ../../user_guide.rst:449
 msgid "**Grouping Variable**: Select categorical variable (e.g., \"Species\")"
-msgstr ""
+msgstr "**그룹화 변수**: 범주형 변수 선택 (예: \"종\")"
 
 #: ../../user_guide.rst:450
 msgid "**Number of CVs**: Default = min(groups-1, landmarks*2)"
-msgstr ""
+msgstr "**CV 수**: 기본값 = min(그룹-1, 랜드마크*2)"
 
 #: ../../user_guide.rst:456
 msgid "**CV Score Plot**: Specimens plotted on CV axes"
-msgstr ""
+msgstr "**CV 점수 플롯**: CV 축에 표시된 표본"
 
 #: ../../user_guide.rst:458
 msgid "Ideally, groups form distinct clusters"
-msgstr ""
+msgstr "이상적으로는 그룹이 뚜렷한 클러스터를 형성합니다"
 
 #: ../../user_guide.rst:459
 msgid "Overlap indicates similarity"
-msgstr ""
+msgstr "중첩은 유사성을 나타냅니다"
 
 #: ../../user_guide.rst:461
 msgid "**Classification Table**: Shows how well CVA discriminates"
-msgstr ""
+msgstr "**분류 테이블**: CVA가 얼마나 잘 판별하는지 표시"
 
 #: ../../user_guide.rst:463
 msgid "Rows: True group"
-msgstr ""
+msgstr "행: 실제 그룹"
 
 #: ../../user_guide.rst:464
 msgid "Columns: Predicted group"
-msgstr ""
+msgstr "열: 예측된 그룹"
 
 #: ../../user_guide.rst:465
 msgid "Diagonal = correct classifications"
-msgstr ""
+msgstr "대각선 = 올바른 분류"
 
 #: ../../user_guide.rst:466
 msgid "Off-diagonal = misclassifications"
-msgstr ""
+msgstr "비대각선 = 오분류"
 
 #: ../../user_guide.rst:468
 msgid "**Discriminant Function**: Statistical details"
-msgstr ""
+msgstr "**판별 함수**: 통계적 세부사항"
 
 #: ../../user_guide.rst:470
 msgid "Wilks' Lambda: Smaller = better separation (0-1 scale)"
-msgstr ""
+msgstr "Wilks' Lambda: 작을수록 더 나은 분리 (0-1 척도)"
 
 #: ../../user_guide.rst:471
 msgid "P-value: Significance of group differences"
-msgstr ""
+msgstr "P-값: 그룹 차이의 유의성"
 
 #: ../../user_guide.rst:473 ../../user_guide.rst:530
 msgid "**Example**:"
-msgstr ""
+msgstr "**예제**:"
 
 #: ../../user_guide.rst:494
 msgid "MANOVA"
-msgstr ""
+msgstr "MANOVA"
 
 #: ../../user_guide.rst:496
 msgid "**Purpose**: Test if groups differ significantly in shape"
-msgstr ""
+msgstr "**목적**: 그룹이 형태에서 유의하게 다른지 검정"
 
 #: ../../user_guide.rst:500
 msgid "Formal hypothesis testing"
-msgstr ""
+msgstr "공식적인 가설 검정"
 
 #: ../../user_guide.rst:501
 msgid "Comparing multiple groups simultaneously"
-msgstr ""
+msgstr "여러 그룹을 동시에 비교"
 
 #: ../../user_guide.rst:502
 msgid "Assessing effect size"
-msgstr ""
+msgstr "효과 크기 평가"
 
 #: ../../user_guide.rst:504
 msgid "**Running MANOVA**:"
-msgstr ""
+msgstr "**MANOVA 실행**:"
 
 #: ../../user_guide.rst:506
 msgid "**Tools → Analyze Dataset → MANOVA**"
-msgstr ""
+msgstr "**도구 → 데이터셋 분석 → MANOVA**"
 
 #: ../../user_guide.rst:509
 msgid "**Grouping Variable**: Select categorical variable"
-msgstr ""
+msgstr "**그룹화 변수**: 범주형 변수 선택"
 
 #: ../../user_guide.rst:510
 msgid "**Alpha Level**: Significance threshold (default: 0.05)"
-msgstr ""
+msgstr "**알파 수준**: 유의성 임계값 (기본값: 0.05)"
 
 #: ../../user_guide.rst:516
 msgid "**Wilks' Lambda**: Test statistic (0-1)"
-msgstr ""
+msgstr "**Wilks' Lambda**: 검정 통계량 (0-1)"
 
 #: ../../user_guide.rst:518
 msgid "Smaller = more group separation"
-msgstr ""
+msgstr "작을수록 = 더 많은 그룹 분리"
 
 #: ../../user_guide.rst:519
 msgid "0 = perfect separation"
-msgstr ""
+msgstr "0 = 완벽한 분리"
 
 #: ../../user_guide.rst:520
 msgid "1 = no separation"
-msgstr ""
+msgstr "1 = 분리 없음"
 
 #: ../../user_guide.rst:522
 msgid "**F-statistic**: Ratio of between-group to within-group variation"
-msgstr ""
+msgstr "**F-통계량**: 그룹 간 변이 대 그룹 내 변이의 비율"
 
 #: ../../user_guide.rst:523
 msgid "**P-value**: Probability that group differences are due to chance"
-msgstr ""
+msgstr "**P-값**: 그룹 차이가 우연으로 인한 것일 확률"
 
 #: ../../user_guide.rst:525
 msgid "P < 0.05: Significant difference (reject null hypothesis)"
-msgstr ""
+msgstr "P < 0.05: 유의한 차이 (귀무가설 기각)"
 
 #: ../../user_guide.rst:526
 msgid "P ≥ 0.05: No significant difference"
-msgstr ""
+msgstr "P ≥ 0.05: 유의한 차이 없음"
 
 #: ../../user_guide.rst:528
 msgid "**Effect Size (Partial η²)**: Proportion of variance explained by groups"
-msgstr ""
+msgstr "**효과 크기 (부분 η²)**: 그룹에 의해 설명되는 분산의 비율"
 
 #: ../../user_guide.rst:548
 msgid "Handling Missing Landmarks"
-msgstr ""
+msgstr "결측 랜드마크 처리"
 
 #: ../../user_guide.rst:550
 msgid "Modan2 automatically handles missing landmarks during analysis:"
-msgstr ""
+msgstr "Modan2는 분석 중 결측 랜드마크를 자동으로 처리합니다:"
 
 #: ../../user_guide.rst:552
 msgid "**During Procrustes**:"
-msgstr ""
+msgstr "**Procrustes 중**:"
 
 #: ../../user_guide.rst:554
 msgid "Identifies complete specimens (no missing landmarks)"
-msgstr ""
+msgstr "완전한 표본 식별 (결측 랜드마크 없음)"
 
 #: ../../user_guide.rst:555
 msgid "Runs Procrustes on complete specimens → mean shape"
-msgstr ""
+msgstr "완전한 표본에 대해 Procrustes 실행 → 평균 형태"
 
 #: ../../user_guide.rst:556
 msgid "For each specimen with missing data:"
-msgstr ""
+msgstr "결측 데이터가 있는 각 표본에 대해:"
 
 #: ../../user_guide.rst:558
 msgid "Estimates missing landmarks from mean shape"
-msgstr ""
+msgstr "평균 형태에서 결측 랜드마크 추정"
 
 #: ../../user_guide.rst:559
 msgid "Applies scale/position transformation to match the specimen"
-msgstr ""
+msgstr "표본에 맞추기 위해 스케일/위치 변환 적용"
 
 #: ../../user_guide.rst:560
 msgid "Updates coordinates in temporary working copy (NOT in database)"
-msgstr ""
+msgstr "임시 작업 복사본에서 좌표 업데이트 (데이터베이스에는 아님)"
 
 #: ../../user_guide.rst:562
 msgid "Re-runs Procrustes with estimated values"
-msgstr ""
+msgstr "추정값으로 Procrustes 재실행"
 
 #: ../../user_guide.rst:563
 msgid "Repeats until convergence"
-msgstr ""
+msgstr "수렴할 때까지 반복"
 
 #: ../../user_guide.rst:565
 msgid "**During PCA/CVA/MANOVA**:"
-msgstr ""
+msgstr "**PCA/CVA/MANOVA 중**:"
 
 #: ../../user_guide.rst:567
 msgid "Uses coordinates after Procrustes (with imputed values)"
-msgstr ""
+msgstr "Procrustes 이후 좌표 사용 (대체된 값 포함)"
 
 #: ../../user_guide.rst:568
 msgid "Missing landmarks are treated as estimated values"
-msgstr ""
+msgstr "결측 랜드마크는 추정값으로 처리됩니다"
 
 #: ../../user_guide.rst:569
 msgid "No further imputation needed"
-msgstr ""
+msgstr "추가 대체 불필요"
 
 #: ../../user_guide.rst:571
 msgid "**Limitations**:"
-msgstr ""
+msgstr "**제한사항**:"
 
 #: ../../user_guide.rst:573
 msgid "Simple mean-based imputation (advanced methods in future releases)"
-msgstr ""
+msgstr "단순 평균 기반 대체 (향후 릴리스에서 고급 방법 제공)"
 
 #: ../../user_guide.rst:574
 msgid "Accuracy depends on having sufficient complete specimens"
-msgstr ""
+msgstr "정확도는 충분한 완전한 표본 보유에 달려 있습니다"
 
 #: ../../user_guide.rst:575
 msgid "Large amounts of missing data (>30%) may affect results"
-msgstr ""
+msgstr "많은 양의 결측 데이터 (>30%)는 결과에 영향을 줄 수 있습니다"
 
 #: ../../user_guide.rst:577
 msgid "**Best Practices**:"
-msgstr ""
+msgstr "**모범 사례**:"
 
 #: ../../user_guide.rst:579
 msgid "Aim for <10% missing landmarks in your dataset"
-msgstr ""
+msgstr "데이터셋에서 <10% 결측 랜드마크를 목표로 하세요"
 
 #: ../../user_guide.rst:580
 #, python-format
 msgid "Ensure at least 50% of specimens are complete"
-msgstr ""
+msgstr "최소 50%의 표본이 완전한지 확인하세요"
 
 #: ../../user_guide.rst:581
 msgid "Use biological knowledge to verify estimated positions make sense"
-msgstr ""
+msgstr "추정 위치가 타당한지 생물학적 지식을 사용하여 확인하세요"
 
 #: ../../user_guide.rst:584
 msgid "Visualization"
-msgstr ""
+msgstr "시각화"
 
 #: ../../user_guide.rst:587
 msgid "2D Viewer"
-msgstr ""
+msgstr "2D 뷰어"
 
 #: ../../user_guide.rst:589
 msgid "**Features**:"
-msgstr ""
+msgstr "**기능**:"
 
 #: ../../user_guide.rst:591
 msgid "Zoom: Mouse wheel or ``+/-``"
-msgstr ""
+msgstr "확대/축소: 마우스 휠 또는 ``+/-``"
 
 #: ../../user_guide.rst:592
 msgid "Pan: Space + drag or middle mouse button"
-msgstr ""
+msgstr "이동: Space + 드래그 또는 중간 마우스 버튼"
 
 #: ../../user_guide.rst:593
 msgid "Reset view: ``Home`` key"
-msgstr ""
+msgstr "뷰 재설정: ``Home`` 키"
 
 #: ../../user_guide.rst:594
 msgid "Landmark overlay: Colored circles with indices"
-msgstr ""
+msgstr "랜드마크 오버레이: 인덱스가 있는 색상 원"
 
 #: ../../user_guide.rst:596
 msgid "**Export Options**:"
-msgstr ""
+msgstr "**내보내기 옵션**:"
 
 #: ../../user_guide.rst:598
 msgid "Right-click → **\"Export Image\"**"
-msgstr ""
+msgstr "우클릭 → **\"이미지 내보내기\"**"
 
 #: ../../user_guide.rst:599
 msgid "Formats: PNG, JPG, PDF"
-msgstr ""
+msgstr "형식: PNG, JPG, PDF"
 
 #: ../../user_guide.rst:600
 msgid "Resolution: Original or custom DPI"
-msgstr ""
+msgstr "해상도: 원본 또는 사용자 정의 DPI"
 
 #: ../../user_guide.rst:603 ../../user_guide.rst:720
 msgid "3D Viewer"
-msgstr ""
+msgstr "3D 뷰어"
 
 #: ../../user_guide.rst:605
 msgid "**Controls**:"
-msgstr ""
+msgstr "**컨트롤**:"
 
 #: ../../user_guide.rst:607
 msgid "**Rotate**: Left mouse drag"
-msgstr ""
+msgstr "**회전**: 왼쪽 마우스 드래그"
 
 #: ../../user_guide.rst:608
 msgid "**Pan**: Right mouse drag or Shift + left drag"
-msgstr ""
+msgstr "**이동**: 오른쪽 마우스 드래그 또는 Shift + 왼쪽 드래그"
 
 #: ../../user_guide.rst:609
 msgid "**Zoom**: Mouse wheel"
-msgstr ""
+msgstr "**확대/축소**: 마우스 휠"
 
 #: ../../user_guide.rst:610
 msgid "**Reset**: ``R`` key"
-msgstr ""
+msgstr "**재설정**: ``R`` 키"
 
 #: ../../user_guide.rst:612
 msgid "**Rendering Modes**:"
-msgstr ""
+msgstr "**렌더링 모드**:"
 
 #: ../../user_guide.rst:614
 msgid "**Wireframe** (``W``): Shows mesh edges"
-msgstr ""
+msgstr "**와이어프레임** (``W``): 메시 가장자리 표시"
 
 #: ../../user_guide.rst:615
 msgid "**Solid** (``S``): Filled surface with lighting"
-msgstr ""
+msgstr "**솔리드** (``S``): 조명이 있는 채워진 표면"
 
 #: ../../user_guide.rst:616
 msgid "**Wireframe + Solid**: Both simultaneously"
-msgstr ""
+msgstr "**와이어프레임 + 솔리드**: 둘 다 동시에"
 
 #: ../../user_guide.rst:618
 msgid "**Landmark Display**:"
-msgstr ""
+msgstr "**랜드마크 표시**:"
 
 #: ../../user_guide.rst:620
 msgid "Landmarks rendered as spheres"
-msgstr ""
+msgstr "랜드마크를 구체로 렌더링"
 
 #: ../../user_guide.rst:621
 msgid "Size adjustable via slider"
-msgstr ""
+msgstr "슬라이더를 통해 크기 조정 가능"
 
 #: ../../user_guide.rst:622
 msgid "Index labels optional"
-msgstr ""
+msgstr "인덱스 레이블 선택사항"
 
 #: ../../user_guide.rst:624
 msgid "**Lighting**:"
-msgstr ""
+msgstr "**조명**:"
 
 #: ../../user_guide.rst:626
 msgid "Toggle: ``L`` key"
-msgstr ""
+msgstr "전환: ``L`` 키"
 
 #: ../../user_guide.rst:627
 msgid "Improves depth perception for complex surfaces"
-msgstr ""
+msgstr "복잡한 표면에 대한 깊이 인식 향상"
 
 #: ../../user_guide.rst:630
 msgid "Statistical Plots"
-msgstr ""
+msgstr "통계 플롯"
 
 #: ../../user_guide.rst:632
 msgid "**Available Plots**:"
-msgstr ""
+msgstr "**사용 가능한 플롯**:"
 
 #: ../../user_guide.rst:634
 msgid "**Scree Plot** (PCA): Variance explained per PC"
-msgstr ""
+msgstr "**스크리 플롯** (PCA): PC당 설명되는 분산"
 
 #: ../../user_guide.rst:635
 msgid "**PC Score Plot** (PCA): Specimens on PC axes"
-msgstr ""
+msgstr "**PC 점수 플롯** (PCA): PC 축의 표본"
 
 #: ../../user_guide.rst:636
 msgid "**CV Score Plot** (CVA): Specimens on CV axes"
-msgstr ""
+msgstr "**CV 점수 플롯** (CVA): CV 축의 표본"
 
 #: ../../user_guide.rst:637
 msgid "**Shape Variation Plot**: Wireframes at PC/CV extremes"
-msgstr ""
+msgstr "**형태 변이 플롯**: PC/CV 극단의 와이어프레임"
 
 #: ../../user_guide.rst:639
 msgid "**Customization**:"
-msgstr ""
+msgstr "**사용자 정의**:"
 
 #: ../../user_guide.rst:641
 msgid "**Group Colors**: Auto-assigned by variable"
-msgstr ""
+msgstr "**그룹 색상**: 변수별 자동 할당"
 
 #: ../../user_guide.rst:642
 msgid "**Point Size**: Adjustable"
-msgstr ""
+msgstr "**점 크기**: 조정 가능"
 
 #: ../../user_guide.rst:643
 msgid "**Axis Labels**: Automatic with variance %"
-msgstr ""
+msgstr "**축 레이블**: 분산 %와 함께 자동"
 
 #: ../../user_guide.rst:644
 msgid "**Legend**: Shows group names and colors"
-msgstr ""
+msgstr "**범례**: 그룹 이름 및 색상 표시"
 
 #: ../../user_guide.rst:646
 msgid "**Exporting Plots**:"
-msgstr ""
+msgstr "**플롯 내보내기**:"
 
 #: ../../user_guide.rst:648
 msgid "Right-click on plot → **\"Export Plot\"**"
-msgstr ""
+msgstr "플롯에서 우클릭 → **\"플롯 내보내기\"**"
 
 #: ../../user_guide.rst:649
 msgid "Formats: PNG, SVG, PDF"
-msgstr ""
+msgstr "형식: PNG, SVG, PDF"
 
 #: ../../user_guide.rst:650
 msgid "Resolution: 300 DPI default (adjustable)"
-msgstr ""
+msgstr "해상도: 300 DPI 기본값 (조정 가능)"
 
 #: ../../user_guide.rst:653
 msgid "Data Export"
-msgstr ""
+msgstr "데이터 내보내기"
 
 #: ../../user_guide.rst:656
 msgid "Exporting Datasets"
-msgstr ""
+msgstr "데이터셋 내보내기"
 
 #: ../../user_guide.rst:658
 msgid "**File → Export Dataset**"
-msgstr ""
+msgstr "**파일 → 데이터셋 내보내기**"
 
 #: ../../user_guide.rst:660
 msgid "Select dataset"
-msgstr ""
+msgstr "데이터셋 선택"
 
 #: ../../user_guide.rst:661
 msgid "Choose export format:"
-msgstr ""
+msgstr "내보내기 형식 선택:"
 
 #: ../../user_guide.rst:663
 msgid "**TPS**: Landmark coordinates in TPS format"
-msgstr ""
+msgstr "**TPS**: TPS 형식의 랜드마크 좌표"
 
 #: ../../user_guide.rst:664
 msgid "**NTS**: NTS format (legacy)"
-msgstr ""
+msgstr "**NTS**: NTS 형식 (레거시)"
 
 #: ../../user_guide.rst:665
 msgid "**CSV**: Spreadsheet-compatible"
-msgstr ""
+msgstr "**CSV**: 스프레드시트 호환"
 
 #: ../../user_guide.rst:666
 msgid "**JSON**: Machine-readable with metadata"
-msgstr ""
+msgstr "**JSON**: 메타데이터가 있는 기계 판독 가능"
 
 #: ../../user_guide.rst:670
 msgid "**Include Analysis Results**: Embed PC/CV scores"
-msgstr ""
+msgstr "**분석 결과 포함**: PC/CV 점수 포함"
 
 #: ../../user_guide.rst:671
 msgid "**Include Variables**: Export grouping data"
-msgstr ""
+msgstr "**변수 포함**: 그룹화 데이터 내보내기"
 
 #: ../../user_guide.rst:672
 msgid "**Include Missing**: Export \"NA\" for missing landmarks"
-msgstr ""
+msgstr "**결측 포함**: 결측 랜드마크에 대해 \"NA\" 내보내기"
 
 #: ../../user_guide.rst:674
 msgid "Click **\"Export\"**"
-msgstr ""
+msgstr "**\"내보내기\"** 를 클릭하세요"
 
 #: ../../user_guide.rst:676
 msgid "**CSV Export Format**:"
-msgstr ""
+msgstr "**CSV 내보내기 형식**:"
 
 #: ../../user_guide.rst:685
 msgid "Exporting Analysis Results"
-msgstr ""
+msgstr "분석 결과 내보내기"
 
 #: ../../user_guide.rst:687
 msgid "In the **Data Exploration Dialog**:"
-msgstr ""
+msgstr "**데이터 탐색 대화상자** 에서:"
 
 #: ../../user_guide.rst:689
 msgid "**Export PC Scores**: CSV with scores per specimen"
-msgstr ""
+msgstr "**PC 점수 내보내기**: 표본당 점수가 포함된 CSV"
 
 #: ../../user_guide.rst:690
 msgid "**Export Shape Data**: Aligned landmark coordinates (post-Procrustes)"
-msgstr ""
+msgstr "**형태 데이터 내보내기**: 정렬된 랜드마크 좌표 (Procrustes 이후)"
 
 #: ../../user_guide.rst:691
 msgid "**Export Statistics**: Summary statistics (mean, SD, etc.)"
-msgstr ""
+msgstr "**통계 내보내기**: 요약 통계 (평균, 표준편차 등)"
 
 #: ../../user_guide.rst:694
 msgid "Keyboard Shortcuts"
-msgstr ""
+msgstr "키보드 단축키"
 
 #: ../../user_guide.rst:697
 msgid "Global Shortcuts"
-msgstr ""
+msgstr "전역 단축키"
 
 #: ../../user_guide.rst:699
 msgid "``Ctrl+N`` - New Dataset"
-msgstr ""
+msgstr "``Ctrl+N`` - 새 데이터셋"
 
 #: ../../user_guide.rst:700
 msgid "``Ctrl+Shift+N`` - New Object"
-msgstr ""
+msgstr "``Ctrl+Shift+N`` - 새 객체"
 
 #: ../../user_guide.rst:701
 msgid "``Ctrl+O`` - Open Database"
-msgstr ""
+msgstr "``Ctrl+O`` - 데이터베이스 열기"
 
 #: ../../user_guide.rst:702
 msgid "``Ctrl+S`` - Save Changes"
-msgstr ""
+msgstr "``Ctrl+S`` - 변경사항 저장"
 
 #: ../../user_guide.rst:703
 msgid "``Ctrl+W`` - Close Window"
-msgstr ""
+msgstr "``Ctrl+W`` - 창 닫기"
 
 #: ../../user_guide.rst:704
 msgid "``Ctrl+Q`` - Quit Application"
-msgstr ""
+msgstr "``Ctrl+Q`` - 애플리케이션 종료"
 
 #: ../../user_guide.rst:705
 msgid "``Delete`` - Delete Selected Items"
-msgstr ""
+msgstr "``Delete`` - 선택한 항목 삭제"
 
 #: ../../user_guide.rst:706
 msgid "``F5`` - Refresh View"
-msgstr ""
+msgstr "``F5`` - 뷰 새로고침"
 
 #: ../../user_guide.rst:709
 msgid "Object Dialog"
-msgstr ""
+msgstr "객체 대화상자"
 
 #: ../../user_guide.rst:711
 msgid "``Ctrl+Z`` - Undo Last Action"
-msgstr ""
+msgstr "``Ctrl+Z`` - 마지막 작업 되돌리기"
 
 #: ../../user_guide.rst:712
 msgid "``Delete`` - Remove Selected Landmark"
-msgstr ""
+msgstr "``Delete`` - 선택한 랜드마크 제거"
 
 #: ../../user_guide.rst:713
 msgid "``+`` / ``-`` - Zoom In/Out"
-msgstr ""
+msgstr "``+`` / ``-`` - 확대/축소"
 
 #: ../../user_guide.rst:714
 msgid "``Home`` - Reset Zoom"
-msgstr ""
+msgstr "``Home`` - 확대 재설정"
 
 #: ../../user_guide.rst:715
 msgid "``Space+Drag`` - Pan"
-msgstr ""
+msgstr "``Space+Drag`` - 이동"
 
 #: ../../user_guide.rst:716
 msgid "``Ctrl+C`` - Copy Landmark Coordinates"
-msgstr ""
+msgstr "``Ctrl+C`` - 랜드마크 좌표 복사"
 
 #: ../../user_guide.rst:717
 msgid "``Ctrl+V`` - Paste Coordinates"
-msgstr ""
+msgstr "``Ctrl+V`` - 좌표 붙여넣기"
 
 #: ../../user_guide.rst:722
 msgid "``R`` - Reset Camera"
-msgstr ""
+msgstr "``R`` - 카메라 재설정"
 
 #: ../../user_guide.rst:723
 msgid "``W`` - Wireframe Mode"
-msgstr ""
+msgstr "``W`` - 와이어프레임 모드"
 
 #: ../../user_guide.rst:724
 msgid "``S`` - Solid Mode"
-msgstr ""
+msgstr "``S`` - 솔리드 모드"
 
 #: ../../user_guide.rst:725
 msgid "``L`` - Toggle Lighting"
-msgstr ""
+msgstr "``L`` - 조명 전환"
 
 #: ../../user_guide.rst:726
 msgid "``F`` - Fit to View"
-msgstr ""
+msgstr "``F`` - 뷰에 맞추기"
 
 #: ../../user_guide.rst:729
 msgid "Preferences"
-msgstr ""
+msgstr "환경설정"
 
 #: ../../user_guide.rst:731
 msgid "**File → Preferences** or ``Ctrl+,`` (macOS: ``Cmd+,``)"
-msgstr ""
+msgstr "**파일 → 환경설정** 또는 ``Ctrl+,`` (macOS: ``Cmd+,``)"
 
 #: ../../user_guide.rst:734
 msgid "General Settings"
-msgstr ""
+msgstr "일반 설정"
 
 #: ../../user_guide.rst:736
 msgid "**Default Database Location**: Where new databases are created"
-msgstr ""
+msgstr "**기본 데이터베이스 위치**: 새 데이터베이스가 생성되는 위치"
 
 #: ../../user_guide.rst:737
 msgid "**Auto-Save Interval**: Frequency of automatic saves (0 = disabled)"
-msgstr ""
+msgstr "**자동 저장 간격**: 자동 저장 빈도 (0 = 비활성화)"
 
 #: ../../user_guide.rst:738
 msgid "**Language**: English or Korean (한국어)"
-msgstr ""
+msgstr "**언어**: English 또는 Korean (한국어)"
 
 #: ../../user_guide.rst:741
 msgid "Display Settings"
-msgstr ""
+msgstr "표시 설정"
 
 #: ../../user_guide.rst:743
 msgid "**Landmark Color**: Default color for new objects"
-msgstr ""
+msgstr "**랜드마크 색상**: 새 객체의 기본 색상"
 
 #: ../../user_guide.rst:744
 msgid "**Index Color**: Color for landmark number labels"
-msgstr ""
+msgstr "**인덱스 색상**: 랜드마크 번호 레이블 색상"
 
 #: ../../user_guide.rst:745
 msgid "**Background Color**: Viewer background (white/black/gray)"
-msgstr ""
+msgstr "**배경 색상**: 뷰어 배경 (흰색/검정색/회색)"
 
 #: ../../user_guide.rst:746
 msgid "**Font Size**: UI text size"
-msgstr ""
+msgstr "**글꼴 크기**: UI 텍스트 크기"
 
 #: ../../user_guide.rst:747
 msgid "**Theme**: Light or Dark (if available)"
-msgstr ""
+msgstr "**테마**: 라이트 또는 다크 (사용 가능한 경우)"
 
 #: ../../user_guide.rst:750
 msgid "Analysis Settings"
-msgstr ""
+msgstr "분석 설정"
 
 #: ../../user_guide.rst:752
 msgid "**Max Procrustes Iterations**: Default 100"
-msgstr ""
+msgstr "**최대 Procrustes 반복**: 기본값 100"
 
 #: ../../user_guide.rst:753
 msgid "**Convergence Threshold**: When to stop iterating (default: 0.0001)"
-msgstr ""
+msgstr "**수렴 임계값**: 반복을 중단할 시점 (기본값: 0.0001)"
 
 #: ../../user_guide.rst:754
 msgid "**PCA Method**: Covariance or Correlation matrix"
-msgstr ""
+msgstr "**PCA 방법**: 공분산 또는 상관 행렬"
 
 #: ../../user_guide.rst:755
 msgid "**CVA Cross-Validation**: Leave-one-out or K-fold"
-msgstr ""
+msgstr "**CVA 교차 검증**: Leave-one-out 또는 K-fold"
 
 #: ../../user_guide.rst:758
 msgid "Advanced Settings"
-msgstr ""
+msgstr "고급 설정"
 
 #: ../../user_guide.rst:760
 msgid "**Enable Logging**: Write debug logs to file"
-msgstr ""
+msgstr "**로깅 활성화**: 디버그 로그를 파일에 작성"
 
 #: ../../user_guide.rst:761
 msgid "**Log Level**: INFO, DEBUG, WARNING, ERROR"
-msgstr ""
+msgstr "**로그 수준**: INFO, DEBUG, WARNING, ERROR"
 
 #: ../../user_guide.rst:762
 msgid "**GPU Acceleration**: Use GPU for 3D rendering (if available)"
-msgstr ""
+msgstr "**GPU 가속**: 3D 렌더링에 GPU 사용 (사용 가능한 경우)"
 
 #: ../../user_guide.rst:763
 msgid "**Memory Limit**: Max RAM for large datasets (MB)"
-msgstr ""
+msgstr "**메모리 제한**: 대용량 데이터셋을 위한 최대 RAM (MB)"
 
 #: ../../user_guide.rst:766
 msgid "Tips and Best Practices"
-msgstr ""
+msgstr "팁 및 모범 사례"
 
 #: ../../user_guide.rst:769
 msgid "Data Organization"
-msgstr ""
+msgstr "데이터 구성"
 
 #: ../../user_guide.rst:771
 msgid ""
 "**Use consistent naming**: ``species_ID_number.jpg`` (e.g., "
 "``sparrow_001.jpg``)"
-msgstr ""
+msgstr "**일관된 이름 사용**: ``species_ID_number.jpg`` (예: ``sparrow_001.jpg``)"
 
 #: ../../user_guide.rst:772
 msgid "**Organize hierarchically**: Group related datasets"
-msgstr ""
+msgstr "**계층적으로 구성**: 관련 데이터셋 그룹화"
 
 #: ../../user_guide.rst:773
 msgid "**Document metadata**: Use description fields"
-msgstr ""
+msgstr "**메타데이터 문서화**: 설명 필드 사용"
 
 #: ../../user_guide.rst:774
 msgid "**Back up regularly**: Export database or copy ``modan.db``"
-msgstr ""
+msgstr "**정기적 백업**: 데이터베이스 내보내기 또는 ``modan.db`` 복사"
 
 #: ../../user_guide.rst:777
 msgid "Landmark Placement"
-msgstr ""
+msgstr "랜드마크 배치"
 
 #: ../../user_guide.rst:779
 msgid "**Define landmarks carefully**: Use anatomically meaningful points"
-msgstr ""
+msgstr "**랜드마크를 신중하게 정의**: 해부학적으로 의미 있는 점 사용"
 
 #: ../../user_guide.rst:780
 msgid "**Be consistent**: Same landmarks across all specimens"
-msgstr ""
+msgstr "**일관성 유지**: 모든 표본에 동일한 랜드마크"
 
 #: ../../user_guide.rst:781
 msgid "**Use high-resolution images**: Better precision"
-msgstr ""
+msgstr "**고해상도 이미지 사용**: 더 나은 정밀도"
 
 #: ../../user_guide.rst:782
 msgid "**Avoid ambiguous points**: Choose clear, repeatable features"
-msgstr ""
+msgstr "**모호한 점 피하기**: 명확하고 반복 가능한 특징 선택"
 
 #: ../../user_guide.rst:783
 msgid "**Document landmarks**: Write down definitions (e.g., \"tip of beak\")"
-msgstr ""
+msgstr "**랜드마크 문서화**: 정의를 기록 (예: \"부리 끝\")"
 
 #: ../../user_guide.rst:788
 msgid "**Check assumptions**: Normal distribution, homogeneity of variance"
-msgstr ""
+msgstr "**가정 확인**: 정규 분포, 분산의 동질성"
 
 #: ../../user_guide.rst:789
 msgid "**Sample size**: At least 30 specimens for PCA, 10+ per group for CVA"
-msgstr ""
+msgstr "**표본 크기**: PCA는 최소 30개 표본, CVA는 그룹당 10개 이상"
 
 #: ../../user_guide.rst:790
 msgid "**Validate results**: Cross-validation, bootstrap resampling"
-msgstr ""
+msgstr "**결과 검증**: 교차 검증, 부트스트랩 재표본추출"
 
 #: ../../user_guide.rst:791
 msgid ""
 "**Interpret cautiously**: Statistical significance ≠ biological "
 "significance"
-msgstr ""
+msgstr "**신중하게 해석**: 통계적 유의성 ≠ 생물학적 유의성"
 
 #: ../../user_guide.rst:792
 msgid "**Visualize first**: Explore with PCA before formal tests"
-msgstr ""
+msgstr "**먼저 시각화**: 공식 검정 전에 PCA로 탐색"
 
 #: ../../user_guide.rst:795
 msgid "Performance Optimization"
-msgstr ""
+msgstr "성능 최적화"
 
 #: ../../user_guide.rst:797
 msgid "**Close unused datasets**: Reduces memory usage"
-msgstr ""
+msgstr "**사용하지 않는 데이터셋 닫기**: 메모리 사용량 감소"
 
 #: ../../user_guide.rst:798
 msgid "**Limit 3D polygon count**: Simplify meshes before import"
-msgstr ""
+msgstr "**3D 폴리곤 수 제한**: 가져오기 전에 메시 단순화"
 
 #: ../../user_guide.rst:799
 msgid "**Use lower resolution for preview**: Full resolution for analysis only"
-msgstr ""
+msgstr "**미리보기에 낮은 해상도 사용**: 분석에만 전체 해상도 사용"
 
 #: ../../user_guide.rst:800
 msgid "**Run analyses on subsets**: Test on small sample first"
-msgstr ""
+msgstr "**하위 집합에서 분석 실행**: 먼저 작은 샘플로 테스트"
 
 #: ../../user_guide.rst:801
 msgid "**Clear cache**: Tools → Clear Cache (if application becomes slow)"
-msgstr ""
+msgstr "**캐시 지우기**: 도구 → 캐시 지우기 (애플리케이션이 느려진 경우)"
 
 #: ../../user_guide.rst:804
 msgid "Common Workflows"
-msgstr ""
+msgstr "일반적인 워크플로우"
 
 #: ../../user_guide.rst:807
 msgid "Workflow 1: 2D Morphometric Study"
-msgstr ""
+msgstr "워크플로우 1: 2D 형태계측 연구"
 
 #: ../../user_guide.rst:823
 msgid "Workflow 2: 3D Morphometric Study"
-msgstr ""
+msgstr "워크플로우 2: 3D 형태계측 연구"
 
 #: ../../user_guide.rst:836
 msgid "Workflow 3: Missing Data Study"
-msgstr ""
+msgstr "워크플로우 3: 결측 데이터 연구"
 
 #: ../../user_guide.rst:849
 msgid "Troubleshooting"
-msgstr ""
+msgstr "문제 해결"
 
 #: ../../user_guide.rst:852
 msgid "Analysis Fails"
-msgstr ""
+msgstr "분석 실패"
 
 #: ../../user_guide.rst:854
 msgid "**Error**: ``Not enough complete specimens for Procrustes``"
-msgstr ""
+msgstr "**오류**: ``Not enough complete specimens for Procrustes``"
 
 #: ../../user_guide.rst:856
 msgid "**Solution**: Need at least 2 complete specimens without missing landmarks"
-msgstr ""
+msgstr "**해결책**: 결측 랜드마크가 없는 최소 2개의 완전한 표본 필요"
 
 #: ../../user_guide.rst:858
 msgid "**Error**: ``CVA requires at least 2 groups``"
-msgstr ""
+msgstr "**오류**: ``CVA requires at least 2 groups``"
 
 #: ../../user_guide.rst:860
 msgid "**Solution**: Define a grouping variable with multiple values"
-msgstr ""
+msgstr "**해결책**: 여러 값을 가진 그룹화 변수 정의"
 
 #: ../../user_guide.rst:863
 msgid "Landmarks Not Showing"
-msgstr ""
+msgstr "랜드마크가 표시되지 않음"
 
 #: ../../user_guide.rst:865
 msgid "**Problem**: Placed landmarks but not visible"
-msgstr ""
+msgstr "**문제**: 랜드마크를 배치했지만 보이지 않음"
 
 #: ../../user_guide.rst:867 ../../user_guide.rst:878
 msgid "**Solution**:"
-msgstr ""
+msgstr "**해결책**:"
 
 #: ../../user_guide.rst:869
 msgid "Check \"Show Landmarks\" checkbox is enabled"
-msgstr ""
+msgstr "\"랜드마크 표시\" 체크박스가 활성화되어 있는지 확인"
 
 #: ../../user_guide.rst:870
 msgid "Adjust \"Landmark Size\" slider"
-msgstr ""
+msgstr "\"랜드마크 크기\" 슬라이더 조정"
 
 #: ../../user_guide.rst:871
 msgid "Zoom in - landmarks may be too small"
-msgstr ""
+msgstr "확대 - 랜드마크가 너무 작을 수 있음"
 
 #: ../../user_guide.rst:874
 msgid "Slow Performance"
-msgstr ""
+msgstr "느린 성능"
 
 #: ../../user_guide.rst:876
 msgid "**Problem**: Application freezes during analysis"
-msgstr ""
+msgstr "**문제**: 분석 중 애플리케이션 멈춤"
 
 #: ../../user_guide.rst:880
 msgid "Reduce dataset size (split into smaller datasets)"
-msgstr ""
+msgstr "데이터셋 크기 축소 (더 작은 데이터셋으로 분할)"
 
 #: ../../user_guide.rst:881
 msgid "Close other applications"
-msgstr ""
+msgstr "다른 애플리케이션 닫기"
 
 #: ../../user_guide.rst:882
 msgid "Increase RAM allocation (Preferences → Memory Limit)"
-msgstr ""
+msgstr "RAM 할당 증가 (환경설정 → 메모리 제한)"
 
 #: ../../user_guide.rst:883
 msgid "Simplify 3D meshes (reduce polygon count)"
-msgstr ""
+msgstr "3D 메시 단순화 (폴리곤 수 축소)"
 
 #: ../../user_guide.rst:886
 msgid "Next Steps"
-msgstr ""
+msgstr "다음 단계"
 
 #: ../../user_guide.rst:888
 msgid "Explore the :doc:`developer_guide` to contribute or extend Modan2"
-msgstr ""
+msgstr "Modan2에 기여하거나 확장하려면 :doc:`developer_guide` 를 탐색하세요"
 
 #: ../../user_guide.rst:889
 msgid "Check the :doc:`changelog` for latest features and bug fixes"
-msgstr ""
+msgstr "최신 기능 및 버그 수정 사항은 :doc:`changelog` 를 확인하세요"
 
 #: ../../user_guide.rst:890
 msgid ""
 "Visit the `GitHub repository <https://github.com/jikhanjung/Modan2>`_ for"
 " example datasets"
-msgstr ""
-
+msgstr "예제 데이터셋은 `GitHub repository <https://github.com/jikhanjung/Modan2>`_ 를 방문하세요"

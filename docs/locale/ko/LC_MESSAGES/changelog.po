@@ -21,621 +21,628 @@ msgstr ""
 
 #: ../../changelog.rst:2
 msgid "Changelog"
-msgstr ""
+msgstr "변경 이력"
 
 #: ../../changelog.rst:4
 msgid "All notable changes to Modan2 are documented here."
-msgstr ""
+msgstr "Modan2의 모든 주요 변경 사항이 여기에 문서화되어 있습니다."
 
 #: ../../changelog.rst:6
 msgid ""
 "This project follows `Semantic Versioning "
 "<https://semver.org/spec/v2.0.0.html>`_."
 msgstr ""
+"이 프로젝트는 `유의적 버전 관리 "
+"<https://semver.org/spec/v2.0.0.html>`_ 를 따릅니다."
 
 #: ../../changelog.rst:9
 msgid "Version 0.1.5-alpha.1 (2025-09-11)"
-msgstr ""
+msgstr "버전 0.1.5-alpha.1 (2025-09-11)"
 
 #: ../../changelog.rst:12 ../../changelog.rst:84
 msgid "Added"
-msgstr ""
+msgstr "추가"
 
 #: ../../changelog.rst:14
 msgid "**JSON+ZIP Dataset Packaging System**"
-msgstr ""
+msgstr "**JSON+ZIP 데이터셋 패키징 시스템**"
 
 #: ../../changelog.rst:16
 msgid "Complete dataset backup and sharing with new export/import format"
-msgstr ""
+msgstr "새로운 내보내기/가져오기 형식을 사용한 완전한 데이터셋 백업 및 공유"
 
 #: ../../changelog.rst:17
 msgid ""
 "JSON schema v1.1 with extended metadata (wireframe, polygons, baseline, "
 "variables)"
 msgstr ""
+"확장된 메타데이터(와이어프레임, 폴리곤, 베이스라인, 변수)를 포함한 JSON 스키마 v1.1"
 
 #: ../../changelog.rst:18
 msgid "ZIP packaging with support for images and 3D model files"
-msgstr ""
+msgstr "이미지 및 3D 모델 파일을 지원하는 ZIP 패키징"
 
 #: ../../changelog.rst:19
 msgid "Structured file layout (dataset.json, images/, models/)"
-msgstr ""
+msgstr "구조화된 파일 레이아웃 (dataset.json, images/, models/)"
 
 #: ../../changelog.rst:20
 msgid "Lossless round-trip data preservation"
-msgstr ""
+msgstr "무손실 양방향 데이터 보존"
 
 #: ../../changelog.rst:22
 msgid "**Security and Stability Features**"
-msgstr ""
+msgstr "**보안 및 안정성 기능**"
 
 #: ../../changelog.rst:24
 msgid "Zip Slip attack defense system"
-msgstr ""
+msgstr "Zip Slip 공격 방어 시스템"
 
 #: ../../changelog.rst:25
 msgid "Transaction-based import (automatic rollback on failure)"
-msgstr ""
+msgstr "트랜잭션 기반 가져오기 (실패 시 자동 롤백)"
 
 #: ../../changelog.rst:26
 msgid "File integrity verification (MD5 checksums)"
-msgstr ""
+msgstr "파일 무결성 검증 (MD5 체크섬)"
 
 #: ../../changelog.rst:27
 msgid "Safe ZIP extraction (``safe_extract_zip()``)"
-msgstr ""
+msgstr "안전한 ZIP 압축 해제 (``safe_extract_zip()``)"
 
 #: ../../changelog.rst:28
 msgid "JSON schema validation and error reporting"
-msgstr ""
+msgstr "JSON 스키마 검증 및 오류 보고"
 
 #: ../../changelog.rst:30
 msgid "**New API Functions (MdUtils.py)**"
-msgstr ""
+msgstr "**새로운 API 함수 (MdUtils.py)**"
 
 #: ../../changelog.rst:32
 msgid "``serialize_dataset_to_json()`` - Serialize dataset to JSON structure"
-msgstr ""
+msgstr "``serialize_dataset_to_json()`` - 데이터셋을 JSON 구조로 직렬화"
 
 #: ../../changelog.rst:33
 msgid "``create_zip_package()`` - File collection and ZIP packaging"
-msgstr ""
+msgstr "``create_zip_package()`` - 파일 수집 및 ZIP 패키징"
 
 #: ../../changelog.rst:34
 msgid "``import_dataset_from_zip()`` - Safe ZIP-based dataset import"
-msgstr ""
+msgstr "``import_dataset_from_zip()`` - 안전한 ZIP 기반 데이터셋 가져오기"
 
 #: ../../changelog.rst:35
 msgid "``collect_dataset_files()`` - Collect dataset-related file paths"
-msgstr ""
+msgstr "``collect_dataset_files()`` - 데이터셋 관련 파일 경로 수집"
 
 #: ../../changelog.rst:36
 msgid "``estimate_package_size()`` - Estimate package size"
-msgstr ""
+msgstr "``estimate_package_size()`` - 패키지 크기 추정"
 
 #: ../../changelog.rst:37
 msgid "``validate_json_schema()`` - JSON schema validation"
-msgstr ""
+msgstr "``validate_json_schema()`` - JSON 스키마 검증"
 
 #: ../../changelog.rst:39
 msgid "**User Interface Improvements**"
-msgstr ""
+msgstr "**사용자 인터페이스 개선**"
 
 #: ../../changelog.rst:41
 msgid "\"JSON+ZIP Package\" option in Export Dialog"
-msgstr ""
+msgstr "내보내기 대화 상자에 \"JSON+ZIP 패키지\" 옵션 추가"
 
 #: ../../changelog.rst:42
 msgid "\"Include image and model files\" toggle"
-msgstr ""
+msgstr "\"이미지 및 모델 파일 포함\" 토글"
 
 #: ../../changelog.rst:43
 msgid "Real-time file size estimation display"
-msgstr ""
+msgstr "실시간 파일 크기 추정 표시"
 
 #: ../../changelog.rst:44
 msgid "JSON+ZIP format support in Import Dialog"
-msgstr ""
+msgstr "가져오기 대화 상자에서 JSON+ZIP 형식 지원"
 
 #: ../../changelog.rst:45
 msgid "Progress tracking with progress callbacks"
-msgstr ""
+msgstr "진행 상황 콜백을 통한 진행률 추적"
 
 #: ../../changelog.rst:48 ../../changelog.rst:130
 msgid "Changed"
-msgstr ""
+msgstr "변경"
 
 #: ../../changelog.rst:50
 msgid "**Existing Export Formats Maintained**"
-msgstr ""
+msgstr "**기존 내보내기 형식 유지**"
 
 #: ../../changelog.rst:52
 msgid "TPS, NTS, Morphologika, CSV/Excel formats continue to be supported"
-msgstr ""
+msgstr "TPS, NTS, Morphologika, CSV/Excel 형식 계속 지원"
 
 #: ../../changelog.rst:53
 msgid "JSON+ZIP provided as additional option for complete backups"
-msgstr ""
+msgstr "완전한 백업을 위한 추가 옵션으로 JSON+ZIP 제공"
 
 #: ../../changelog.rst:55
 msgid "**Improved File Naming Conventions**"
-msgstr ""
+msgstr "**개선된 파일 명명 규칙**"
 
 #: ../../changelog.rst:57
 msgid "Files inside ZIP use ``<object_id>.<ext>`` format to avoid conflicts"
-msgstr ""
+msgstr "ZIP 내부 파일은 충돌 방지를 위해 ``<object_id>.<ext>`` 형식 사용"
 
 #: ../../changelog.rst:58
 msgid "Relative paths for platform independence"
-msgstr ""
+msgstr "플랫폼 독립성을 위한 상대 경로 사용"
 
 #: ../../changelog.rst:60
 msgid "**Database Handling Improvements**"
-msgstr ""
+msgstr "**데이터베이스 처리 개선**"
 
 #: ../../changelog.rst:62
 msgid ""
 "Automatic duplicate dataset name resolution (\"Dataset (1)\", \"Dataset "
 "(2)\", etc.)"
 msgstr ""
+"자동 중복 데이터셋 이름 해결 (\"Dataset (1)\", \"Dataset "
+"(2)\" 등)"
 
 #: ../../changelog.rst:63
 msgid "Optimized variable mapping and landmark processing"
-msgstr ""
+msgstr "최적화된 변수 매핑 및 랜드마크 처리"
 
 #: ../../changelog.rst:66 ../../changelog.rst:152
 msgid "Fixed"
-msgstr ""
+msgstr "수정"
 
 #: ../../changelog.rst:68
 msgid "**Cross-Platform Compatibility**"
-msgstr ""
+msgstr "**크로스 플랫폼 호환성**"
 
 #: ../../changelog.rst:70
 msgid "UTF-8 encoding for Korean filenames"
-msgstr ""
+msgstr "한국어 파일명을 위한 UTF-8 인코딩"
 
 #: ../../changelog.rst:71
 msgid "Unified path handling for Windows, macOS, Linux"
-msgstr ""
+msgstr "Windows, macOS, Linux를 위한 통합 경로 처리"
 
 #: ../../changelog.rst:72
 msgid "Added file system safety verification"
-msgstr ""
+msgstr "파일 시스템 안전성 검증 추가"
 
 #: ../../changelog.rst:74
 msgid "**Memory and Performance Optimization**"
-msgstr ""
+msgstr "**메모리 및 성능 최적화**"
 
 #: ../../changelog.rst:76
 msgid "Streaming processing for large files"
-msgstr ""
+msgstr "대용량 파일에 대한 스트리밍 처리"
 
 #: ../../changelog.rst:77
 msgid "Safe temporary file cleanup (context managers)"
-msgstr ""
+msgstr "안전한 임시 파일 정리 (컨텍스트 매니저)"
 
 #: ../../changelog.rst:78
 msgid "Prevention of partial imports on error"
-msgstr ""
+msgstr "오류 발생 시 부분 가져오기 방지"
 
 #: ../../changelog.rst:81
 msgid "Version 0.1.4 (2025-09-10)"
-msgstr ""
+msgstr "버전 0.1.4 (2025-09-10)"
 
 #: ../../changelog.rst:86
 msgid "**CI/CD and Build System**"
-msgstr ""
+msgstr "**CI/CD 및 빌드 시스템**"
 
 #: ../../changelog.rst:88
 msgid "GitHub Actions workflows (automatic build, test, release)"
-msgstr ""
+msgstr "GitHub Actions 워크플로우 (자동 빌드, 테스트, 릴리스)"
 
 #: ../../changelog.rst:89
 msgid "Cross-platform build support (Windows, Linux, macOS)"
-msgstr ""
+msgstr "크로스 플랫폼 빌드 지원 (Windows, Linux, macOS)"
 
 #: ../../changelog.rst:90
 msgid "PyInstaller-based automated build script (``build.py``)"
-msgstr ""
+msgstr "PyInstaller 기반 자동화 빌드 스크립트 (``build.py``)"
 
 #: ../../changelog.rst:91
 msgid "Build number system and centralized version management (``version.py``)"
-msgstr ""
+msgstr "빌드 번호 시스템 및 중앙 집중식 버전 관리 (``version.py``)"
 
 #: ../../changelog.rst:93
 msgid "**Testing Infrastructure**"
-msgstr ""
+msgstr "**테스트 인프라**"
 
 #: ../../changelog.rst:95
 msgid "pytest-based automated test system (229 tests, 13 modules)"
-msgstr ""
+msgstr "pytest 기반 자동화 테스트 시스템 (229개 테스트, 13개 모듈)"
 
 #: ../../changelog.rst:96
 msgid "Test categories: unit, integration, performance, GUI, workflow"
-msgstr ""
+msgstr "테스트 카테고리: 단위, 통합, 성능, GUI, 워크플로우"
 
 #: ../../changelog.rst:97
 msgid "CI integration with automatic tests on PR"
-msgstr ""
+msgstr "PR에 대한 자동 테스트를 통한 CI 통합"
 
 #: ../../changelog.rst:98
 msgid "Test coverage analysis tools"
-msgstr ""
+msgstr "테스트 커버리지 분석 도구"
 
 #: ../../changelog.rst:100
 msgid "**UI/UX Features**"
-msgstr ""
+msgstr "**UI/UX 기능**"
 
 #: ../../changelog.rst:102
 msgid "Overlay drag and corner snap functionality"
-msgstr ""
+msgstr "오버레이 드래그 및 모서리 스냅 기능"
 
 #: ../../changelog.rst:103
 msgid "Overlay title display"
-msgstr ""
+msgstr "오버레이 제목 표시"
 
 #: ../../changelog.rst:104
 msgid "Splash screen (build info and copyright)"
-msgstr ""
+msgstr "스플래시 화면 (빌드 정보 및 저작권)"
 
 #: ../../changelog.rst:105
 msgid "3D landmark index display restored (using GLUT)"
-msgstr ""
+msgstr "3D 랜드마크 인덱스 표시 복원 (GLUT 사용)"
 
 #: ../../changelog.rst:106
 msgid "Improved toolbar button state management"
-msgstr ""
+msgstr "개선된 툴바 버튼 상태 관리"
 
 #: ../../changelog.rst:107
 msgid "TreeView usability improvements"
-msgstr ""
+msgstr "TreeView 사용성 개선"
 
 #: ../../changelog.rst:108
 msgid "Read-only column context menus"
-msgstr ""
+msgstr "읽기 전용 열 컨텍스트 메뉴"
 
 #: ../../changelog.rst:110
 msgid "**Documentation**"
-msgstr ""
+msgstr "**문서**"
 
 #: ../../changelog.rst:112
 msgid "Korean README (``README.ko.md``)"
-msgstr ""
+msgstr "한국어 README (``README.ko.md``)"
 
 #: ../../changelog.rst:113
 msgid "Development guide documents (CLAUDE.md, GEMINI.md)"
-msgstr ""
+msgstr "개발 가이드 문서 (CLAUDE.md, GEMINI.md)"
 
 #: ../../changelog.rst:114
 msgid "Release guide and version management documents"
-msgstr ""
+msgstr "릴리스 가이드 및 버전 관리 문서"
 
 #: ../../changelog.rst:115
 msgid "Windows Defender notice document"
-msgstr ""
+msgstr "Windows Defender 안내 문서"
 
 #: ../../changelog.rst:116
 msgid "Detailed development logs (devlog directory)"
-msgstr ""
+msgstr "상세 개발 로그 (devlog 디렉터리)"
 
 #: ../../changelog.rst:118
 msgid "**Internationalization (i18n)**"
-msgstr ""
+msgstr "**국제화 (i18n)**"
 
 #: ../../changelog.rst:120
 msgid "Significantly improved Korean translations"
-msgstr ""
+msgstr "대폭 개선된 한국어 번역"
 
 #: ../../changelog.rst:121
 msgid "Instant language setting application"
-msgstr ""
+msgstr "즉시 언어 설정 적용"
 
 #: ../../changelog.rst:123
 msgid "**Project Management**"
-msgstr ""
+msgstr "**프로젝트 관리**"
 
 #: ../../changelog.rst:125
 msgid "Refined requirements.txt (tested and verified dependencies)"
-msgstr ""
+msgstr "정제된 requirements.txt (테스트 및 검증된 의존성)"
 
 #: ../../changelog.rst:126
 msgid "Support for Python 3.11+"
-msgstr ""
+msgstr "Python 3.11+ 지원"
 
 #: ../../changelog.rst:127
 msgid "OpenGL implementation improvements (font rendering)"
-msgstr ""
+msgstr "OpenGL 구현 개선 (폰트 렌더링)"
 
 #: ../../changelog.rst:132
 msgid "**Code Refactoring**"
-msgstr ""
+msgstr "**코드 리팩토링**"
 
 #: ../../changelog.rst:134
 msgid "Modularized color constants (MdConstants.py)"
-msgstr ""
+msgstr "모듈화된 색상 상수 (MdConstants.py)"
 
 #: ../../changelog.rst:135
 msgid "Unified icon path management"
-msgstr ""
+msgstr "통합 아이콘 경로 관리"
 
 #: ../../changelog.rst:136
 msgid "Standardized logging system"
-msgstr ""
+msgstr "표준화된 로깅 시스템"
 
 #: ../../changelog.rst:137
 msgid "Optimized import statements"
-msgstr ""
+msgstr "최적화된 import 문"
 
 #: ../../changelog.rst:139
 msgid "**Analysis System**"
-msgstr ""
+msgstr "**분석 시스템**"
 
 #: ../../changelog.rst:141
 msgid "PCA/CVA/MANOVA stability improvements"
-msgstr ""
+msgstr "PCA/CVA/MANOVA 안정성 개선"
 
 #: ../../changelog.rst:142
 msgid "Enhanced progress indicators during analysis"
-msgstr ""
+msgstr "분석 중 향상된 진행 표시기"
 
 #: ../../changelog.rst:143
 msgid "Improved error handling and reporting"
-msgstr ""
+msgstr "개선된 오류 처리 및 보고"
 
 #: ../../changelog.rst:145
 msgid "**UI Behavior**"
-msgstr ""
+msgstr "**UI 동작**"
 
 #: ../../changelog.rst:147
 msgid "Consistent dialog behavior"
-msgstr ""
+msgstr "일관된 대화 상자 동작"
 
 #: ../../changelog.rst:148
 msgid "Auto-refresh after data changes"
-msgstr ""
+msgstr "데이터 변경 후 자동 새로고침"
 
 #: ../../changelog.rst:149
 msgid "More intuitive keyboard shortcuts"
-msgstr ""
+msgstr "더 직관적인 키보드 단축키"
 
 #: ../../changelog.rst:154
 msgid "**Critical Bugs**"
-msgstr ""
+msgstr "**중요 버그**"
 
 #: ../../changelog.rst:156
 msgid "Dataset import/export encoding issues"
-msgstr ""
+msgstr "데이터셋 가져오기/내보내기 인코딩 문제"
 
 #: ../../changelog.rst:157
 msgid "3D viewer crashes"
-msgstr ""
+msgstr "3D 뷰어 충돌"
 
 #: ../../changelog.rst:158
 msgid "TreeView update timing issues"
-msgstr ""
+msgstr "TreeView 업데이트 타이밍 문제"
 
 #: ../../changelog.rst:159
 msgid "Analysis result caching problems"
-msgstr ""
+msgstr "분석 결과 캐싱 문제"
 
 #: ../../changelog.rst:161
 msgid "**Platform-Specific Issues**"
-msgstr ""
+msgstr "**플랫폼별 문제**"
 
 #: ../../changelog.rst:163
 msgid "WSL/Linux Qt plugin errors (added fix_qt_import.py)"
-msgstr ""
+msgstr "WSL/Linux Qt 플러그인 오류 (fix_qt_import.py 추가)"
 
 #: ../../changelog.rst:164
 msgid "OpenGL version compatibility"
-msgstr ""
+msgstr "OpenGL 버전 호환성"
 
 #: ../../changelog.rst:165
 msgid "Font rendering on different platforms"
-msgstr ""
+msgstr "다양한 플랫폼에서의 폰트 렌더링"
 
 #: ../../changelog.rst:167
 msgid "**Data Integrity**"
-msgstr ""
+msgstr "**데이터 무결성**"
 
 #: ../../changelog.rst:169
 msgid "Landmark coordinate precision maintenance"
-msgstr ""
+msgstr "랜드마크 좌표 정밀도 유지"
 
 #: ../../changelog.rst:170
 msgid "Wireframe/polygon data preservation"
-msgstr ""
+msgstr "와이어프레임/폴리곤 데이터 보존"
 
 #: ../../changelog.rst:171
 msgid "Analysis result consistency"
-msgstr ""
+msgstr "분석 결과 일관성"
 
 #: ../../changelog.rst:174
 msgid "Previous Versions"
-msgstr ""
+msgstr "이전 버전"
 
 #: ../../changelog.rst:177
 msgid "Version 0.1.3"
-msgstr ""
+msgstr "버전 0.1.3"
 
 #: ../../changelog.rst:179
 msgid "Initial public release"
-msgstr ""
+msgstr "최초 공개 릴리스"
 
 #: ../../changelog.rst:180
 msgid "Basic 2D/3D landmark support"
-msgstr ""
+msgstr "기본 2D/3D 랜드마크 지원"
 
 #: ../../changelog.rst:181
 msgid "PCA, CVA, MANOVA analysis"
-msgstr ""
+msgstr "PCA, CVA, MANOVA 분석"
 
 #: ../../changelog.rst:182
 msgid "TPS/NTS file import"
-msgstr ""
+msgstr "TPS/NTS 파일 가져오기"
 
 #: ../../changelog.rst:183
 msgid "SQLite database with Peewee ORM"
-msgstr ""
+msgstr "Peewee ORM을 사용한 SQLite 데이터베이스"
 
 #: ../../changelog.rst:186
 msgid "Version 0.1.2"
-msgstr ""
+msgstr "버전 0.1.2"
 
 #: ../../changelog.rst:188
 msgid "Added 3D model support (OBJ, PLY, STL)"
-msgstr ""
+msgstr "3D 모델 지원 추가 (OBJ, PLY, STL)"
 
 #: ../../changelog.rst:189
 msgid "Improved 2D/3D viewers"
-msgstr ""
+msgstr "개선된 2D/3D 뷰어"
 
 #: ../../changelog.rst:190
 msgid "Dataset hierarchy"
-msgstr ""
+msgstr "데이터셋 계층 구조"
 
 #: ../../changelog.rst:193
 msgid "Version 0.1.1"
-msgstr ""
+msgstr "버전 0.1.1"
 
 #: ../../changelog.rst:195
 msgid "Basic morphometric analysis"
-msgstr ""
+msgstr "기본 형태계측 분석"
 
 #: ../../changelog.rst:196
 msgid "Procrustes superimposition"
-msgstr ""
+msgstr "Procrustes 중첩"
 
 #: ../../changelog.rst:197
 msgid "Simple data management"
-msgstr ""
+msgstr "간단한 데이터 관리"
 
 #: ../../changelog.rst:200
 msgid "Version 0.1.0"
-msgstr ""
+msgstr "버전 0.1.0"
 
 #: ../../changelog.rst:202
 msgid "Initial development version"
-msgstr ""
+msgstr "최초 개발 버전"
 
 #: ../../changelog.rst:203
 msgid "Proof of concept"
-msgstr ""
+msgstr "개념 증명"
 
 #: ../../changelog.rst:206
 msgid "Upcoming Features"
-msgstr ""
+msgstr "향후 기능"
 
 #: ../../changelog.rst:209
 msgid "Planned for Future Releases"
-msgstr ""
+msgstr "향후 릴리스 계획"
 
 #: ../../changelog.rst:211
 msgid "**Missing Landmark Support (Phase 3-5)**"
-msgstr ""
+msgstr "**결측 랜드마크 지원 (3-5단계)**"
 
 #: ../../changelog.rst:213
 msgid "Advanced imputation methods (TPS warping, regression)"
-msgstr ""
+msgstr "고급 대치 방법 (TPS 워핑, 회귀)"
 
 #: ../../changelog.rst:214
 msgid "Confidence intervals for estimated positions"
-msgstr ""
+msgstr "추정 위치에 대한 신뢰 구간"
 
 #: ../../changelog.rst:215
 msgid "Multiple imputation for uncertainty quantification"
-msgstr ""
+msgstr "불확실성 정량화를 위한 다중 대치"
 
 #: ../../changelog.rst:216
 msgid "Missing-aware statistical methods (PPCA, EM-based CVA)"
-msgstr ""
+msgstr "결측 인식 통계 방법 (PPCA, EM 기반 CVA)"
 
 #: ../../changelog.rst:218
 msgid "**Enhanced Analysis**"
-msgstr ""
+msgstr "**향상된 분석**"
 
 #: ../../changelog.rst:220
 msgid "Partial Least Squares (PLS)"
-msgstr ""
+msgstr "부분 최소 제곱법 (PLS)"
 
 #: ../../changelog.rst:221
 msgid "Phylogenetic comparative methods"
-msgstr ""
+msgstr "계통 발생 비교 방법"
 
 #: ../../changelog.rst:222
 msgid "Disparity analysis"
-msgstr ""
+msgstr "형태 다양성 분석"
 
 #: ../../changelog.rst:223
 msgid "Asymmetry analysis"
-msgstr ""
+msgstr "비대칭 분석"
 
 #: ../../changelog.rst:225
 msgid "**User Interface**"
-msgstr ""
+msgstr "**사용자 인터페이스**"
 
 #: ../../changelog.rst:227
 msgid "Dark mode theme"
-msgstr ""
+msgstr "다크 모드 테마"
 
 #: ../../changelog.rst:228
 msgid "Customizable toolbar"
-msgstr ""
+msgstr "사용자 정의 가능한 툴바"
 
 #: ../../changelog.rst:229
 msgid "Advanced plot customization"
-msgstr ""
+msgstr "고급 플롯 사용자 정의"
 
 #: ../../changelog.rst:230
 msgid "Interactive 3D landmark editing"
-msgstr ""
+msgstr "대화형 3D 랜드마크 편집"
 
 #: ../../changelog.rst:232
 msgid "**Performance**"
-msgstr ""
+msgstr "**성능**"
 
 #: ../../changelog.rst:234
 msgid "GPU-accelerated Procrustes"
-msgstr ""
+msgstr "GPU 가속 Procrustes"
 
 #: ../../changelog.rst:235
 msgid "Lazy loading for large datasets"
-msgstr ""
+msgstr "대용량 데이터셋을 위한 지연 로딩"
 
 #: ../../changelog.rst:236
 msgid "Caching improvements"
-msgstr ""
+msgstr "캐싱 개선"
 
 #: ../../changelog.rst:237
 msgid "Parallel processing support"
-msgstr ""
+msgstr "병렬 처리 지원"
 
 #: ../../changelog.rst:239
 msgid "**Integration**"
-msgstr ""
+msgstr "**통합**"
 
 #: ../../changelog.rst:241
 msgid "R integration (export to geomorph, Morpho)"
-msgstr ""
+msgstr "R 통합 (geomorph, Morpho로 내보내기)"
 
 #: ../../changelog.rst:242
 msgid "Python API for scripting"
-msgstr ""
+msgstr "스크립팅을 위한 Python API"
 
 #: ../../changelog.rst:243
 msgid "Command-line interface"
-msgstr ""
+msgstr "명령줄 인터페이스"
 
 #: ../../changelog.rst:244
 msgid "Plugin system"
-msgstr ""
+msgstr "플러그인 시스템"
 
 #: ../../changelog.rst:246
 msgid ""
 "See the `GitHub Issues <https://github.com/jikhanjung/Modan2/issues>`_ "
 "page for full roadmap and feature requests."
 msgstr ""
+"전체 로드맵 및 기능 요청은 `GitHub Issues <https://github.com/jikhanjung/Modan2/issues>`_ "
+"페이지를 참조하세요."
 

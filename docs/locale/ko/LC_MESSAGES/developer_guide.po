@@ -21,900 +21,900 @@ msgstr ""
 
 #: ../../developer_guide.rst:2
 msgid "Developer Guide"
-msgstr ""
+msgstr "개발자 가이드"
 
 #: ../../developer_guide.rst:4
 msgid ""
 "This guide provides information for developers who want to contribute to "
 "Modan2 or understand its architecture."
-msgstr ""
+msgstr "이 가이드는 Modan2에 기여하거나 아키텍처를 이해하고자 하는 개발자를 위한 정보를 제공합니다."
 
 #: ../../developer_guide.rst:7
 msgid "Project Overview"
-msgstr ""
+msgstr "프로젝트 개요"
 
 #: ../../developer_guide.rst:9
 msgid ""
 "Modan2 is a Python desktop application for geometric morphometrics built "
 "with:"
-msgstr ""
+msgstr "Modan2는 다음 기술로 구축된 기하학적 형태측정학용 Python 데스크톱 애플리케이션입니다:"
 
 #: ../../developer_guide.rst:11
 msgid "**GUI Framework**: PyQt5"
-msgstr ""
+msgstr "**GUI 프레임워크**: PyQt5"
 
 #: ../../developer_guide.rst:12
 msgid "**Database**: SQLite with Peewee ORM"
-msgstr ""
+msgstr "**데이터베이스**: SQLite with Peewee ORM"
 
 #: ../../developer_guide.rst:13
 msgid "**Scientific Computing**: NumPy, SciPy, Pandas, Statsmodels"
-msgstr ""
+msgstr "**과학 컴퓨팅**: NumPy, SciPy, Pandas, Statsmodels"
 
 #: ../../developer_guide.rst:14
 msgid "**3D Graphics**: PyOpenGL, Trimesh"
-msgstr ""
+msgstr "**3D 그래픽**: PyOpenGL, Trimesh"
 
 #: ../../developer_guide.rst:15
 msgid "**Image Processing**: Pillow, OpenCV"
-msgstr ""
+msgstr "**이미지 처리**: Pillow, OpenCV"
 
 #: ../../developer_guide.rst:17
 msgid "**Project Structure**:"
-msgstr ""
+msgstr "**프로젝트 구조**:"
 
 #: ../../developer_guide.rst:41
 msgid "Architecture"
-msgstr ""
+msgstr "아키텍처"
 
 #: ../../developer_guide.rst:44
 msgid "High-Level Overview"
-msgstr ""
+msgstr "고수준 개요"
 
 #: ../../developer_guide.rst:46
 msgid "Modan2 follows a modified **Model-View-Controller (MVC)** pattern:"
-msgstr ""
+msgstr "Modan2는 수정된 **Model-View-Controller (MVC)** 패턴을 따릅니다:"
 
 #: ../../developer_guide.rst:89
 msgid "Database Schema"
-msgstr ""
+msgstr "데이터베이스 스키마"
 
 #: ../../developer_guide.rst:91
 msgid "**Core Models** (defined in ``MdModel.py``):"
-msgstr ""
+msgstr "**핵심 모델** (``MdModel.py`` 에 정의됨):"
 
 #: ../../developer_guide.rst:93
 msgid "**MdDataset**:"
-msgstr ""
+msgstr "**MdDataset**:"
 
 #: ../../developer_guide.rst:95
 msgid "Hierarchical structure (parent/child relationships)"
-msgstr ""
+msgstr "계층적 구조 (부모/자식 관계)"
 
 #: ../../developer_guide.rst:96
 msgid "Stores dimension (2D/3D), description"
-msgstr ""
+msgstr "차원 (2D/3D), 설명 저장"
 
 #: ../../developer_guide.rst:97
 msgid "One-to-many relationship with MdObject"
-msgstr ""
+msgstr "MdObject와 일대다 관계"
 
 #: ../../developer_guide.rst:99
 msgid "**MdObject**:"
-msgstr ""
+msgstr "**MdObject**:"
 
 #: ../../developer_guide.rst:101
 msgid "Represents a specimen (image or 3D model)"
-msgstr ""
+msgstr "표본 (이미지 또는 3D 모델) 표현"
 
 #: ../../developer_guide.rst:102
 msgid "Stores landmark coordinates as JSON string (``landmark_str``)"
-msgstr ""
+msgstr "랜드마크 좌표를 JSON 문자열로 저장 (``landmark_str``)"
 
 #: ../../developer_guide.rst:103
 msgid "Foreign key to MdDataset"
-msgstr ""
+msgstr "MdDataset에 대한 외래 키"
 
 #: ../../developer_guide.rst:104
 msgid "Variable data stored as JSON (``propertyvalue_str``)"
-msgstr ""
+msgstr "변수 데이터를 JSON으로 저장 (``propertyvalue_str``)"
 
 #: ../../developer_guide.rst:106
 msgid "**MdImage**:"
-msgstr ""
+msgstr "**MdImage**:"
 
 #: ../../developer_guide.rst:108
 msgid "Links 2D images to objects"
-msgstr ""
+msgstr "2D 이미지를 객체에 연결"
 
 #: ../../developer_guide.rst:109
 msgid "Stores file path, EXIF data, width/height"
-msgstr ""
+msgstr "파일 경로, EXIF 데이터, 너비/높이 저장"
 
 #: ../../developer_guide.rst:111
 msgid "**MdThreeDModel**:"
-msgstr ""
+msgstr "**MdThreeDModel**:"
 
 #: ../../developer_guide.rst:113
 msgid "Links 3D models to objects"
-msgstr ""
+msgstr "3D 모델을 객체에 연결"
 
 #: ../../developer_guide.rst:114
 msgid "Stores file path, mesh metadata"
-msgstr ""
+msgstr "파일 경로, 메시 메타데이터 저장"
 
 #: ../../developer_guide.rst:116
 msgid "**MdAnalysis**:"
-msgstr ""
+msgstr "**MdAnalysis**:"
 
 #: ../../developer_guide.rst:118
 msgid "Stores analysis results (PCA, CVA, MANOVA)"
-msgstr ""
+msgstr "분석 결과 저장 (PCA, CVA, MANOVA)"
 
 #: ../../developer_guide.rst:119
 msgid "Linked to MdDataset"
-msgstr ""
+msgstr "MdDataset에 연결됨"
 
 #: ../../developer_guide.rst:120
 msgid "Results stored as JSON"
-msgstr ""
+msgstr "결과를 JSON으로 저장"
 
 #: ../../developer_guide.rst:122
 msgid "**Relationships**:"
-msgstr ""
+msgstr "**관계**:"
 
 #: ../../developer_guide.rst:131
 msgid "**Key Fields**:"
-msgstr ""
+msgstr "**주요 필드**:"
 
 #: ../../developer_guide.rst:133
 msgid ""
 "``landmark_str``: Serialized landmark coordinates (format: "
 "\"x,y\\\\nx,y\\\\n...\")"
-msgstr ""
+msgstr "``landmark_str``: 직렬화된 랜드마크 좌표 (형식: \"x,y\\\\nx,y\\\\n...\")"
 
 #: ../../developer_guide.rst:134
 msgid "``propertyvalue_str``: Serialized variable values (JSON)"
-msgstr ""
+msgstr "``propertyvalue_str``: 직렬화된 변수 값 (JSON)"
 
 #: ../../developer_guide.rst:136
 msgid ""
 "**Temporary Operations**: ``MdObjectOps`` and ``MdDatasetOps`` classes "
 "wrap database models for in-memory operations (e.g., Procrustes "
 "alignment) without modifying the database."
-msgstr ""
+msgstr "**임시 작업**: ``MdObjectOps``와 ``MdDatasetOps`` 클래스는 데이터베이스를 수정하지 않고 메모리 내 작업 (예: Procrustes 정렬)을 위해 데이터베이스 모델을 래핑합니다."
 
 #: ../../developer_guide.rst:139
 msgid "MVC Pattern in Modan2"
-msgstr ""
+msgstr "Modan2의 MVC 패턴"
 
 #: ../../developer_guide.rst:141
 msgid "**Model** (``MdModel.py``):"
-msgstr ""
+msgstr "**모델** (``MdModel.py``):"
 
 #: ../../developer_guide.rst:143
 msgid "Peewee ORM models"
-msgstr ""
+msgstr "Peewee ORM 모델"
 
 #: ../../developer_guide.rst:144
 msgid "Database queries and CRUD operations"
-msgstr ""
+msgstr "데이터베이스 쿼리 및 CRUD 작업"
 
 #: ../../developer_guide.rst:145
 msgid "Data validation"
-msgstr ""
+msgstr "데이터 검증"
 
 #: ../../developer_guide.rst:147
 msgid "**View** (``Modan2.py``, ``ModanDialogs.py``, ``ModanComponents.py``):"
-msgstr ""
+msgstr "**뷰** (``Modan2.py``, ``ModanDialogs.py``, ``ModanComponents.py``):"
 
 #: ../../developer_guide.rst:149
 msgid "``ModanMainWindow``: Main application window"
-msgstr ""
+msgstr "``ModanMainWindow``: 메인 애플리케이션 창"
 
 #: ../../developer_guide.rst:150
 msgid "``ObjectDialog``, ``NewAnalysisDialog``, etc.: Dialog windows"
-msgstr ""
+msgstr "``ObjectDialog``, ``NewAnalysisDialog`` 등: 대화상자 창"
 
 #: ../../developer_guide.rst:151
 msgid "``ObjectViewer2D``, ``ObjectViewer3D``: Visualization widgets"
-msgstr ""
+msgstr "``ObjectViewer2D``, ``ObjectViewer3D``: 시각화 위젯"
 
 #: ../../developer_guide.rst:152
 msgid "Qt signals emitted on user actions"
-msgstr ""
+msgstr "사용자 작업 시 Qt 시그널 발생"
 
 #: ../../developer_guide.rst:154
 msgid "**Controller** (``ModanController.py``):"
-msgstr ""
+msgstr "**컨트롤러** (``ModanController.py``):"
 
 #: ../../developer_guide.rst:156
 msgid "Connects signals from views to model operations"
-msgstr ""
+msgstr "뷰의 시그널을 모델 작업에 연결"
 
 #: ../../developer_guide.rst:157
 msgid "Coordinates between UI and business logic"
-msgstr ""
+msgstr "UI와 비즈니스 로직 간 조정"
 
 #: ../../developer_guide.rst:158
 msgid "Handles analysis workflow"
-msgstr ""
+msgstr "분석 워크플로우 처리"
 
 #: ../../developer_guide.rst:160
 msgid "**Example Flow**:"
-msgstr ""
+msgstr "**예제 흐름**:"
 
 #: ../../developer_guide.rst:174
 msgid "File Formats"
-msgstr ""
+msgstr "파일 형식"
 
 #: ../../developer_guide.rst:176
 msgid "**TPS Format** (morphometric standard):"
-msgstr ""
+msgstr "**TPS 형식** (형태측정학 표준):"
 
 #: ../../developer_guide.rst:188
 msgid "**NTS Format** (legacy):"
-msgstr ""
+msgstr "**NTS 형식** (레거시):"
 
 #: ../../developer_guide.rst:197
 msgid "**CSV Format** (custom):"
-msgstr ""
+msgstr "**CSV 형식** (사용자 정의):"
 
 #: ../../developer_guide.rst:204
 msgid "**Internal Storage** (in database):"
-msgstr ""
+msgstr "**내부 저장소** (데이터베이스 내):"
 
 #: ../../developer_guide.rst:206
 msgid "Landmarks stored as newline-separated \"x,y\" or \"x,y,z\" strings"
-msgstr ""
+msgstr "랜드마크는 줄바꿈으로 구분된 \"x,y\" 또는 \"x,y,z\" 문자열로 저장"
 
 #: ../../developer_guide.rst:207
 msgid "Parsing done by ``MdObject.unpack_landmark()``"
-msgstr ""
+msgstr "``MdObject.unpack_landmark()`` 에서 파싱 수행"
 
 #: ../../developer_guide.rst:208
 msgid "Packing done by ``MdObject.pack_landmark()``"
-msgstr ""
+msgstr "``MdObject.pack_landmark()`` 에서 패킹 수행"
 
 #: ../../developer_guide.rst:211
 msgid "Development Setup"
-msgstr ""
+msgstr "개발 환경 설정"
 
 #: ../../developer_guide.rst:214
 msgid "Prerequisites"
-msgstr ""
+msgstr "사전 요구사항"
 
 #: ../../developer_guide.rst:216
 msgid "**Python**: 3.11 or newer"
-msgstr ""
+msgstr "**Python**: 3.11 이상"
 
 #: ../../developer_guide.rst:217
 msgid "**Git**: For version control"
-msgstr ""
+msgstr "**Git**: 버전 관리용"
 
 #: ../../developer_guide.rst:218
 msgid "**IDE**: VSCode, PyCharm, or any Python IDE"
-msgstr ""
+msgstr "**IDE**: VSCode, PyCharm 또는 모든 Python IDE"
 
 #: ../../developer_guide.rst:219
 msgid "**Operating System**: Windows, macOS, or Linux"
-msgstr ""
+msgstr "**운영 체제**: Windows, macOS 또는 Linux"
 
 #: ../../developer_guide.rst:222
 msgid "Cloning the Repository"
-msgstr ""
+msgstr "저장소 복제"
 
 #: ../../developer_guide.rst:230
 msgid "Virtual Environment Setup"
-msgstr ""
+msgstr "가상 환경 설정"
 
 #: ../../developer_guide.rst:232
 msgid "**Linux/macOS**:"
-msgstr ""
+msgstr "**Linux/macOS**:"
 
 #: ../../developer_guide.rst:241 ../../developer_guide.rst:550
 msgid "**Windows**:"
-msgstr ""
+msgstr "**Windows**:"
 
 #: ../../developer_guide.rst:251
 msgid "Running from Source"
-msgstr ""
+msgstr "소스에서 실행"
 
 #: ../../developer_guide.rst:257
 msgid "**Linux/WSL**: If Qt errors occur:"
-msgstr ""
+msgstr "**Linux/WSL**: Qt 오류가 발생하는 경우:"
 
 #: ../../developer_guide.rst:264
 msgid "Development Dependencies"
-msgstr ""
+msgstr "개발 의존성"
 
 #: ../../developer_guide.rst:266
 msgid "Installed via ``config/requirements-dev.txt``:"
-msgstr ""
+msgstr "``config/requirements-dev.txt`` 를 통해 설치됨:"
 
 #: ../../developer_guide.rst:268
 msgid "``pytest``: Testing framework"
-msgstr ""
+msgstr "``pytest``: 테스트 프레임워크"
 
 #: ../../developer_guide.rst:269
 msgid "``pytest-cov``: Code coverage"
-msgstr ""
+msgstr "``pytest-cov``: 코드 커버리지"
 
 #: ../../developer_guide.rst:270
 msgid "``pytest-qt``: PyQt5 testing support (future)"
-msgstr ""
+msgstr "``pytest-qt``: PyQt5 테스트 지원 (향후)"
 
 #: ../../developer_guide.rst:271
 msgid "``ruff``: Linting (future)"
-msgstr ""
+msgstr "``ruff``: 린팅 (향후)"
 
 #: ../../developer_guide.rst:274
 msgid "Testing"
-msgstr ""
+msgstr "테스트"
 
 #: ../../developer_guide.rst:277
 msgid "Test Framework"
-msgstr ""
+msgstr "테스트 프레임워크"
 
 #: ../../developer_guide.rst:279
 msgid "Modan2 uses **pytest** for automated testing."
-msgstr ""
+msgstr "Modan2는 자동화된 테스트를 위해 **pytest** 를 사용합니다."
 
 #: ../../developer_guide.rst:281
 msgid "**Test Structure**:"
-msgstr ""
+msgstr "**테스트 구조**:"
 
 #: ../../developer_guide.rst:292
 msgid "Running Tests"
-msgstr ""
+msgstr "테스트 실행"
 
 #: ../../developer_guide.rst:294
 msgid "**Run all tests**:"
-msgstr ""
+msgstr "**모든 테스트 실행**:"
 
 #: ../../developer_guide.rst:300
 msgid "**Run specific test file**:"
-msgstr ""
+msgstr "**특정 테스트 파일 실행**:"
 
 #: ../../developer_guide.rst:306
 msgid "**Run with coverage**:"
-msgstr ""
+msgstr "**커버리지와 함께 실행**:"
 
 #: ../../developer_guide.rst:313
 msgid "**Verbose output**:"
-msgstr ""
+msgstr "**상세 출력**:"
 
 #: ../../developer_guide.rst:320
 msgid "Writing Tests"
-msgstr ""
+msgstr "테스트 작성"
 
 #: ../../developer_guide.rst:322
 msgid "**Example test** (``tests/test_mdutils.py``):"
-msgstr ""
+msgstr "**테스트 예제** (``tests/test_mdutils.py``):"
 
 #: ../../developer_guide.rst:337
 msgid "**Using fixtures** (``tests/conftest.py``):"
-msgstr ""
+msgstr "**픽스처 사용** (``tests/conftest.py``):"
 
 #: ../../developer_guide.rst:358
 msgid "Code Style Guidelines"
-msgstr ""
+msgstr "코드 스타일 가이드라인"
 
 #: ../../developer_guide.rst:361
 msgid "General Principles"
-msgstr ""
+msgstr "일반 원칙"
 
 #: ../../developer_guide.rst:363
 msgid "Follow **PEP 8** conventions"
-msgstr ""
+msgstr "**PEP 8** 규칙 준수"
 
 #: ../../developer_guide.rst:364
 msgid "Use descriptive variable names"
-msgstr ""
+msgstr "설명적인 변수명 사용"
 
 #: ../../developer_guide.rst:365
 msgid "Add docstrings to classes and functions"
-msgstr ""
+msgstr "클래스와 함수에 독스트링 추가"
 
 #: ../../developer_guide.rst:366
 msgid "Keep functions focused (single responsibility)"
-msgstr ""
+msgstr "함수를 집중적으로 유지 (단일 책임)"
 
 #: ../../developer_guide.rst:369
 msgid "Naming Conventions"
-msgstr ""
+msgstr "명명 규칙"
 
 #: ../../developer_guide.rst:371
 msgid "**Classes**: ``PascalCase`` (e.g., ``ModanController``, ``ObjectDialog``)"
-msgstr ""
+msgstr "**클래스**: ``PascalCase`` (예: ``ModanController``, ``ObjectDialog``)"
 
 #: ../../developer_guide.rst:372
 msgid ""
 "**Functions/Methods**: ``snake_case`` (e.g., ``create_dataset``, "
 "``pack_landmark``)"
-msgstr ""
+msgstr "**함수/메서드**: ``snake_case`` (예: ``create_dataset``, ``pack_landmark``)"
 
 #: ../../developer_guide.rst:373
 msgid ""
 "**Constants**: ``UPPER_SNAKE_CASE`` (e.g., ``PROGRAM_NAME``, "
 "``DEFAULT_COLOR``)"
-msgstr ""
+msgstr "**상수**: ``UPPER_SNAKE_CASE`` (예: ``PROGRAM_NAME``, ``DEFAULT_COLOR``)"
 
 #: ../../developer_guide.rst:374
 msgid "**Private methods**: ``_leading_underscore`` (e.g., ``_update_view``)"
-msgstr ""
+msgstr "**비공개 메서드**: ``_leading_underscore`` (예: ``_update_view``)"
 
 #: ../../developer_guide.rst:375
 msgid "**Qt slots**: ``on_<widget>_<action>`` (e.g., ``on_btnOK_clicked``)"
-msgstr ""
+msgstr "**Qt 슬롯**: ``on_<widget>_<action>`` (예: ``on_btnOK_clicked``)"
 
 #: ../../developer_guide.rst:378
 msgid "Docstring Format"
-msgstr ""
+msgstr "독스트링 형식"
 
 #: ../../developer_guide.rst:380
 msgid "Use **Google-style docstrings**:"
-msgstr ""
+msgstr "**Google 스타일 독스트링** 사용:"
 
 #: ../../developer_guide.rst:403
 msgid "PyQt5 Patterns"
-msgstr ""
+msgstr "PyQt5 패턴"
 
 #: ../../developer_guide.rst:405
 msgid "**Signal/Slot Connections**:"
-msgstr ""
+msgstr "**시그널/슬롯 연결**:"
 
 #: ../../developer_guide.rst:417
 msgid "**Wait Cursor for Long Operations**:"
-msgstr ""
+msgstr "**긴 작업에 대기 커서 사용**:"
 
 #: ../../developer_guide.rst:434
 msgid "Contributing"
-msgstr ""
+msgstr "기여하기"
 
 #: ../../developer_guide.rst:437
 msgid "Git Workflow"
-msgstr ""
+msgstr "Git 워크플로우"
 
 #: ../../developer_guide.rst:439
 msgid "**Fork the repository** on GitHub"
-msgstr ""
+msgstr "GitHub에서 **저장소 포크**"
 
 #: ../../developer_guide.rst:440
 msgid "**Clone your fork**:"
-msgstr ""
+msgstr "**포크 복제**:"
 
 #: ../../developer_guide.rst:447
 msgid "**Create a feature branch**:"
-msgstr ""
+msgstr "**기능 브랜치 생성**:"
 
 #: ../../developer_guide.rst:453
 msgid "**Make changes** and commit:"
-msgstr ""
+msgstr "**변경사항 작성** 및 커밋:"
 
 #: ../../developer_guide.rst:460
 msgid "**Push to your fork**:"
-msgstr ""
+msgstr "**포크에 푸시**:"
 
 #: ../../developer_guide.rst:466
 msgid "**Open a Pull Request** on GitHub"
-msgstr ""
+msgstr "GitHub에서 **Pull Request 열기**"
 
 #: ../../developer_guide.rst:469
 msgid "Commit Message Guidelines"
-msgstr ""
+msgstr "커밋 메시지 가이드라인"
 
 #: ../../developer_guide.rst:471
 msgid "Follow conventional commits:"
-msgstr ""
+msgstr "Conventional Commits 규칙 준수:"
 
 #: ../../developer_guide.rst:481
 msgid "**Types**:"
-msgstr ""
+msgstr "**타입**:"
 
 #: ../../developer_guide.rst:483
 msgid "``feat``: New feature"
-msgstr ""
+msgstr "``feat``: 새로운 기능"
 
 #: ../../developer_guide.rst:484
 msgid "``fix``: Bug fix"
-msgstr ""
+msgstr "``fix``: 버그 수정"
 
 #: ../../developer_guide.rst:485
 msgid "``docs``: Documentation changes"
-msgstr ""
+msgstr "``docs``: 문서 변경"
 
 #: ../../developer_guide.rst:486
 msgid "``style``: Code style (formatting, no logic change)"
-msgstr ""
+msgstr "``style``: 코드 스타일 (포맷팅, 로직 변경 없음)"
 
 #: ../../developer_guide.rst:487
 msgid "``refactor``: Code restructuring"
-msgstr ""
+msgstr "``refactor``: 코드 리팩토링"
 
 #: ../../developer_guide.rst:488
 msgid "``test``: Adding/updating tests"
-msgstr ""
+msgstr "``test``: 테스트 추가/업데이트"
 
 #: ../../developer_guide.rst:489
 msgid "``chore``: Maintenance tasks"
-msgstr ""
+msgstr "``chore``: 유지보수 작업"
 
 #: ../../developer_guide.rst:491
 msgid "**Examples**:"
-msgstr ""
+msgstr "**예제**:"
 
 #: ../../developer_guide.rst:504
 msgid "Pull Request Process"
-msgstr ""
+msgstr "Pull Request 프로세스"
 
 #: ../../developer_guide.rst:506
 msgid "**Describe your changes** clearly in the PR description"
-msgstr ""
+msgstr "PR 설명에 **변경사항을 명확하게 설명**"
 
 #: ../../developer_guide.rst:507
 msgid "**Reference related issues** (e.g., \"Fixes #42\")"
-msgstr ""
+msgstr "**관련 이슈 참조** (예: \"Fixes #42\")"
 
 #: ../../developer_guide.rst:508
 msgid "**Ensure tests pass**: Run ``pytest`` locally before submitting"
-msgstr ""
+msgstr "**테스트 통과 확인**: 제출 전 로컬에서 ``pytest`` 실행"
 
 #: ../../developer_guide.rst:509
 msgid "**Update documentation** if adding new features"
-msgstr ""
+msgstr "새로운 기능 추가 시 **문서 업데이트**"
 
 #: ../../developer_guide.rst:510
 msgid "**Respond to review comments** promptly"
-msgstr ""
+msgstr "리뷰 코멘트에 **신속하게 응답**"
 
 #: ../../developer_guide.rst:511
 msgid "**Squash commits** if requested (to keep history clean)"
-msgstr ""
+msgstr "요청 시 **커밋 스쿼시** (히스토리 정리)"
 
 #: ../../developer_guide.rst:514
 msgid "Code Review Checklist"
-msgstr ""
+msgstr "코드 리뷰 체크리스트"
 
 #: ../../developer_guide.rst:516
 msgid "Reviewers will check:"
-msgstr ""
+msgstr "리뷰어가 확인할 항목:"
 
 #: ../../developer_guide.rst:518
 msgid "[ ] Code follows style guidelines"
-msgstr ""
+msgstr "[ ] 코드가 스타일 가이드라인을 따름"
 
 #: ../../developer_guide.rst:519
 msgid "[ ] New features have tests"
-msgstr ""
+msgstr "[ ] 새로운 기능에 테스트가 있음"
 
 #: ../../developer_guide.rst:520
 msgid "[ ] Documentation updated (if needed)"
-msgstr ""
+msgstr "[ ] 문서가 업데이트됨 (필요한 경우)"
 
 #: ../../developer_guide.rst:521
 msgid "[ ] No breaking changes (or clearly documented)"
-msgstr ""
+msgstr "[ ] 호환성 깨는 변경사항 없음 (또는 명확히 문서화됨)"
 
 #: ../../developer_guide.rst:522
 msgid "[ ] Performance considerations addressed"
-msgstr ""
+msgstr "[ ] 성능 고려사항이 다뤄짐"
 
 #: ../../developer_guide.rst:523
 msgid "[ ] No security vulnerabilities introduced"
-msgstr ""
+msgstr "[ ] 보안 취약점이 도입되지 않음"
 
 #: ../../developer_guide.rst:526
 msgid "Building Executables"
-msgstr ""
+msgstr "실행 파일 빌드"
 
 #: ../../developer_guide.rst:529
 msgid "PyInstaller Configuration"
-msgstr ""
+msgstr "PyInstaller 설정"
 
 #: ../../developer_guide.rst:531
 msgid "Modan2 uses PyInstaller to create standalone executables."
-msgstr ""
+msgstr "Modan2는 독립 실행 파일을 생성하기 위해 PyInstaller를 사용합니다."
 
 #: ../../developer_guide.rst:533
 msgid "**Build script**: ``build.py``"
-msgstr ""
+msgstr "**빌드 스크립트**: ``build.py``"
 
 #: ../../developer_guide.rst:535
 msgid "**Running the build**:"
-msgstr ""
+msgstr "**빌드 실행**:"
 
 #: ../../developer_guide.rst:541
 msgid "**Output**:"
-msgstr ""
+msgstr "**출력**:"
 
 #: ../../developer_guide.rst:543
 msgid "``dist/Modan2/`` - Standalone application folder"
-msgstr ""
+msgstr "``dist/Modan2/`` - 독립 실행 애플리케이션 폴더"
 
 #: ../../developer_guide.rst:544
 msgid "``dist/Modan2.exe`` - Executable (Windows)"
-msgstr ""
+msgstr "``dist/Modan2.exe`` - 실행 파일 (Windows)"
 
 #: ../../developer_guide.rst:545
 msgid "``dist/Modan2`` - Executable (Linux/macOS)"
-msgstr ""
+msgstr "``dist/Modan2`` - 실행 파일 (Linux/macOS)"
 
 #: ../../developer_guide.rst:548
 msgid "Platform-Specific Builds"
-msgstr ""
+msgstr "플랫폼별 빌드"
 
 #: ../../developer_guide.rst:557
 msgid "**macOS**:"
-msgstr ""
+msgstr "**macOS**:"
 
 #: ../../developer_guide.rst:564
 msgid "**Linux**:"
-msgstr ""
+msgstr "**Linux**:"
 
 #: ../../developer_guide.rst:571
 msgid ""
 "**Note**: Cross-platform builds are not supported - build on the target "
 "platform."
-msgstr ""
+msgstr "**참고**: 크로스 플랫폼 빌드는 지원되지 않습니다 - 대상 플랫폼에서 빌드하세요."
 
 #: ../../developer_guide.rst:574
 msgid "InnoSetup Installer (Windows)"
-msgstr ""
+msgstr "InnoSetup 설치 프로그램 (Windows)"
 
 #: ../../developer_guide.rst:576
 msgid "For Windows installers:"
-msgstr ""
+msgstr "Windows 설치 프로그램의 경우:"
 
 #: ../../developer_guide.rst:578
 msgid "Install InnoSetup from https://jrsoftware.org/isinfo.php"
-msgstr ""
+msgstr "https://jrsoftware.org/isinfo.php에서 InnoSetup 설치"
 
 #: ../../developer_guide.rst:579
 msgid "Build executable: ``python build.py``"
-msgstr ""
+msgstr "실행 파일 빌드: ``python build.py``"
 
 #: ../../developer_guide.rst:580
 msgid "Compile installer:"
-msgstr ""
+msgstr "설치 프로그램 컴파일:"
 
 #: ../../developer_guide.rst:586
 msgid "Output: ``Output/Modan2-Setup.exe``"
-msgstr ""
+msgstr "출력: ``Output/Modan2-Setup.exe``"
 
 #: ../../developer_guide.rst:589
 msgid "Creating Releases"
-msgstr ""
+msgstr "릴리스 생성"
 
 #: ../../developer_guide.rst:591
 msgid "**Update version** in ``MdUtils.py``:"
-msgstr ""
+msgstr "``MdUtils.py`` 에서 **버전 업데이트** :"
 
 #: ../../developer_guide.rst:597
 msgid "**Update CHANGELOG.md** with release notes"
-msgstr ""
+msgstr "릴리스 노트로 **CHANGELOG.md 업데이트**"
 
 #: ../../developer_guide.rst:599
 msgid "**Commit changes**:"
-msgstr ""
+msgstr "**변경사항 커밋**:"
 
 #: ../../developer_guide.rst:607
 msgid "**Build executables** for Windows, macOS, Linux"
-msgstr ""
+msgstr "Windows, macOS, Linux용 **실행 파일 빌드**"
 
 #: ../../developer_guide.rst:609
 msgid "**Create GitHub Release**:"
-msgstr ""
+msgstr "**GitHub 릴리스 생성**:"
 
 #: ../../developer_guide.rst:611
 msgid "Go to Releases → Draft a new release"
-msgstr ""
+msgstr "Releases → Draft a new release로 이동"
 
 #: ../../developer_guide.rst:612
 msgid "Tag: ``v0.1.5``"
-msgstr ""
+msgstr "태그: ``v0.1.5``"
 
 #: ../../developer_guide.rst:613
 msgid "Title: ``Modan2 v0.1.5``"
-msgstr ""
+msgstr "제목: ``Modan2 v0.1.5``"
 
 #: ../../developer_guide.rst:614
 msgid "Description: Copy from CHANGELOG.md"
-msgstr ""
+msgstr "설명: CHANGELOG.md에서 복사"
 
 #: ../../developer_guide.rst:615
 msgid "Attach built executables"
-msgstr ""
+msgstr "빌드된 실행 파일 첨부"
 
 #: ../../developer_guide.rst:617
 msgid "**Publish release**"
-msgstr ""
+msgstr "**릴리스 게시**"
 
 #: ../../developer_guide.rst:620
 msgid "Database Migrations"
-msgstr ""
+msgstr "데이터베이스 마이그레이션"
 
 #: ../../developer_guide.rst:622
 msgid "Modan2 uses ``peewee-migrate`` for schema changes."
-msgstr ""
+msgstr "Modan2는 스키마 변경을 위해 ``peewee-migrate`` 를 사용합니다."
 
 #: ../../developer_guide.rst:625
 msgid "Creating a Migration"
-msgstr ""
+msgstr "마이그레이션 생성"
 
 #: ../../developer_guide.rst:627
 msgid "When you modify database models:"
-msgstr ""
+msgstr "데이터베이스 모델을 수정할 때:"
 
 #: ../../developer_guide.rst:633
 msgid "**Example**:"
-msgstr ""
+msgstr "**예제**:"
 
 #: ../../developer_guide.rst:639
 msgid "This creates a new migration file in ``migrations/``."
-msgstr ""
+msgstr "이는 ``migrations/`` 에 새 마이그레이션 파일을 생성합니다."
 
 #: ../../developer_guide.rst:641
 msgid "**Edit the migration file** to define changes:"
-msgstr ""
+msgstr "변경사항을 정의하기 위해 **마이그레이션 파일 편집**:"
 
 #: ../../developer_guide.rst:652
 msgid "Running Migrations"
-msgstr ""
+msgstr "마이그레이션 실행"
 
 #: ../../developer_guide.rst:654
 msgid "Apply pending migrations:"
-msgstr ""
+msgstr "대기 중인 마이그레이션 적용:"
 
 #: ../../developer_guide.rst:660
 msgid "Rollback last migration:"
-msgstr ""
+msgstr "마지막 마이그레이션 롤백:"
 
 #: ../../developer_guide.rst:667
 msgid "Advanced Topics"
-msgstr ""
+msgstr "고급 주제"
 
 #: ../../developer_guide.rst:670
 msgid "Custom Widgets"
-msgstr ""
+msgstr "사용자 정의 위젯"
 
 #: ../../developer_guide.rst:672
 msgid "Creating custom PyQt5 widgets (see ``ModanComponents.py``):"
-msgstr ""
+msgstr "사용자 정의 PyQt5 위젯 생성 (``ModanComponents.py`` 참조):"
 
 #: ../../developer_guide.rst:696
 msgid "Statistical Extensions"
-msgstr ""
+msgstr "통계 확장"
 
 #: ../../developer_guide.rst:698
 msgid "Adding new statistical methods (in ``MdStatistics.py``):"
-msgstr ""
+msgstr "새로운 통계 방법 추가 (``MdStatistics.py`` 에서):"
 
 #: ../../developer_guide.rst:724
 msgid "Plugin System (Future)"
-msgstr ""
+msgstr "플러그인 시스템 (향후)"
 
 #: ../../developer_guide.rst:726
 msgid "Modan2 may support plugins in future versions:"
-msgstr ""
+msgstr "Modan2는 향후 버전에서 플러그인을 지원할 수 있습니다:"
 
 #: ../../developer_guide.rst:740
 msgid "Profiling and Optimization"
-msgstr ""
+msgstr "프로파일링 및 최적화"
 
 #: ../../developer_guide.rst:742
 msgid "**Profiling with cProfile**:"
-msgstr ""
+msgstr "**cProfile로 프로파일링**:"
 
 #: ../../developer_guide.rst:751
 msgid "**Memory profiling**:"
-msgstr ""
+msgstr "**메모리 프로파일링**:"
 
 #: ../../developer_guide.rst:759
 msgid "Debugging"
-msgstr ""
+msgstr "디버깅"
 
 #: ../../developer_guide.rst:761
 msgid "**Enable detailed logging**:"
-msgstr ""
+msgstr "**상세 로깅 활성화**:"
 
 #: ../../developer_guide.rst:768
 msgid "**Qt debugging**:"
-msgstr ""
+msgstr "**Qt 디버깅**:"
 
 #: ../../developer_guide.rst:776
 msgid "Resources"
-msgstr ""
+msgstr "참고 자료"
 
 #: ../../developer_guide.rst:779
 msgid "Documentation"
-msgstr ""
+msgstr "문서"
 
 #: ../../developer_guide.rst:781
 msgid ""
 "`PyQt5 Documentation "
 "<https://www.riverbankcomputing.com/static/Docs/PyQt5/>`_"
-msgstr ""
+msgstr "`PyQt5 문서 <https://www.riverbankcomputing.com/static/Docs/PyQt5/>`_"
 
 #: ../../developer_guide.rst:782
 msgid "`Peewee ORM Documentation <http://docs.peewee-orm.com/>`_"
-msgstr ""
+msgstr "`Peewee ORM 문서 <http://docs.peewee-orm.com/>`_"
 
 #: ../../developer_guide.rst:783
 msgid "`NumPy Documentation <https://numpy.org/doc/>`_"
-msgstr ""
+msgstr "`NumPy 문서 <https://numpy.org/doc/>`_"
 
 #: ../../developer_guide.rst:784
 msgid "`SciPy Documentation <https://docs.scipy.org/doc/scipy/>`_"
-msgstr ""
+msgstr "`SciPy 문서 <https://docs.scipy.org/doc/scipy/>`_"
 
 #: ../../developer_guide.rst:787
 msgid "Morphometric Analysis"
-msgstr ""
+msgstr "형태측정학 분석"
 
 #: ../../developer_guide.rst:789
 msgid ""
 "`Geometric Morphometrics for Biologists <https://www.elsevier.com/books"
 "/geometric-morphometrics-for-biologists/zelditch/978-0-12-386903-6>`_ by "
 "Zelditch et al."
-msgstr ""
+msgstr "`Geometric Morphometrics for Biologists <https://www.elsevier.com/books/geometric-morphometrics-for-biologists/zelditch/978-0-12-386903-6>`_ (Zelditch 외 저)"
 
 #: ../../developer_guide.rst:790
 msgid ""
 "`Morphometrics with R <https://www.springer.com/gp/book/9780387777894>`_ "
 "by Claude"
-msgstr ""
+msgstr "`Morphometrics with R <https://www.springer.com/gp/book/9780387777894>`_ (Claude 저)"
 
 #: ../../developer_guide.rst:793
 msgid "Community"
-msgstr ""
+msgstr "커뮤니티"
 
 #: ../../developer_guide.rst:795
 msgid "**GitHub Issues**: https://github.com/jikhanjung/Modan2/issues"
-msgstr ""
+msgstr "**GitHub 이슈**: https://github.com/jikhanjung/Modan2/issues"
 
 #: ../../developer_guide.rst:796
 msgid "**Discussions**: https://github.com/jikhanjung/Modan2/discussions"
-msgstr ""
+msgstr "**토론**: https://github.com/jikhanjung/Modan2/discussions"
 
 #: ../../developer_guide.rst:799
 msgid "License"
-msgstr ""
+msgstr "라이선스"
 
 #: ../../developer_guide.rst:801
 msgid "Modan2 is released under the **MIT License**."
-msgstr ""
+msgstr "Modan2는 **MIT 라이선스** 하에 배포됩니다."
 
 #: ../../developer_guide.rst:803
 msgid "You are free to:"
-msgstr ""
+msgstr "다음 권한이 부여됩니다:"
 
 #: ../../developer_guide.rst:805
 msgid "Use commercially"
-msgstr ""
+msgstr "상업적 사용"
 
 #: ../../developer_guide.rst:806
 msgid "Modify"
-msgstr ""
+msgstr "수정"
 
 #: ../../developer_guide.rst:807
 msgid "Distribute"
-msgstr ""
+msgstr "배포"
 
 #: ../../developer_guide.rst:808
 msgid "Sublicense"
-msgstr ""
+msgstr "서브라이선스"
 
 #: ../../developer_guide.rst:810
 msgid ""
 "Under the condition that you include the original copyright and license "
 "notice."
-msgstr ""
+msgstr "원본 저작권 및 라이선스 표기를 포함해야 합니다."
 
 #: ../../developer_guide.rst:812
 msgid ""
 "See the `LICENSE "
 "<https://github.com/jikhanjung/Modan2/blob/main/LICENSE>`_ file for "
 "details."
-msgstr ""
+msgstr "자세한 내용은 `LICENSE <https://github.com/jikhanjung/Modan2/blob/main/LICENSE>`_ 파일을 참조하세요."
 

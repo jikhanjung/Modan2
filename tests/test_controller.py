@@ -853,3 +853,246 @@ class TestGetDatasetSummary:
         summary = controller.get_dataset_summary(sample_dataset)
 
         assert summary['object_count'] >= 2
+
+
+class TestAnalysisRunMethods:
+    """Test internal analysis run methods."""
+
+    @pytest.fixture
+    def controller(self, mock_database):
+        return ModanController()
+
+    def test_run_pca_internal(self, controller):
+        """Test _run_pca internal method."""
+        landmarks_data = [
+            [[10.0, 20.0], [30.0, 40.0], [50.0, 60.0]],
+            [[15.0, 25.0], [35.0, 45.0], [55.0, 65.0]],
+            [[12.0, 22.0], [32.0, 42.0], [52.0, 62.0]],
+        ]
+        params = {'n_components': 2}
+
+        result = controller._run_pca(landmarks_data, params)
+
+        assert result is not None
+        assert 'eigenvalues' in result
+        assert 'eigenvectors' in result
+        assert 'scores' in result
+
+    def test_run_cva_internal(self, controller):
+        """Test _run_cva internal method."""
+        landmarks_data = [
+            [[10.0, 20.0], [30.0, 40.0], [50.0, 60.0]],
+            [[15.0, 25.0], [35.0, 45.0], [55.0, 65.0]],
+            [[12.0, 22.0], [32.0, 42.0], [52.0, 62.0]],
+            [[11.0, 21.0], [31.0, 41.0], [51.0, 61.0]],
+            [[16.0, 26.0], [36.0, 46.0], [56.0, 66.0]],
+            [[13.0, 23.0], [33.0, 43.0], [53.0, 63.0]],
+        ]
+        params = {'groups': ['A', 'A', 'A', 'B', 'B', 'B']}
+
+        result = controller._run_cva(landmarks_data, params)
+
+        assert result is not None
+        # CVA should return results with groups
+        assert 'canonical_variables' in result or 'scores' in result
+
+
+class TestRestoreState:
+    """Test state restoration functionality."""
+
+    @pytest.fixture
+    def controller(self, mock_database, sample_dataset):
+        controller = ModanController()
+        controller.set_current_dataset(sample_dataset)
+        return controller
+
+    def test_restore_state_with_dataset(self, controller, sample_dataset):
+        """Test restoring state with dataset ID."""
+        state = {
+            'current_dataset_id': sample_dataset.id,
+            'current_object_id': None,
+            'current_analysis_id': None
+        }
+
+        controller.restore_state(state)
+
+        assert controller.current_dataset is not None
+        assert controller.current_dataset.id == sample_dataset.id
+
+    def test_restore_state_with_object(self, controller, sample_dataset):
+        """Test restoring state with object ID."""
+        obj = MdModel.MdObject.create(
+            dataset=sample_dataset,
+            object_name="Test Object"
+        )
+
+        state = {
+            'current_dataset_id': sample_dataset.id,
+            'current_object_id': obj.id,
+            'current_analysis_id': None
+        }
+
+        controller.restore_state(state)
+
+        assert controller.current_object is not None
+        assert controller.current_object.id == obj.id
+
+    def test_restore_state_empty(self, mock_database):
+        """Test restoring empty state."""
+        # Create controller without pre-set dataset
+        controller = ModanController()
+
+        state = {
+            'current_dataset_id': None,
+            'current_object_id': None,
+            'current_analysis_id': None
+        }
+
+        controller.restore_state(state)
+
+        assert controller.current_dataset is None
+        assert controller.current_object is None
+
+
+class TestUpdateOperations:
+    """Test update operations for datasets and objects."""
+
+    @pytest.fixture
+    def controller(self, mock_database, sample_dataset):
+        controller = ModanController()
+        controller.set_current_dataset(sample_dataset)
+        return controller
+
+    def test_update_dataset_name(self, controller, sample_dataset):
+        """Test updating dataset name."""
+        new_name = "Updated Dataset Name"
+
+        result = controller.update_dataset(
+            dataset_id=sample_dataset.id,
+            dataset_name=new_name
+        )
+
+        assert result is True
+        updated = MdModel.MdDataset.get_by_id(sample_dataset.id)
+        assert updated.dataset_name == new_name
+
+    def test_update_dataset_description(self, controller, sample_dataset):
+        """Test updating dataset description."""
+        new_desc = "New description"
+
+        result = controller.update_dataset(
+            dataset_id=sample_dataset.id,
+            dataset_desc=new_desc
+        )
+
+        assert result is True
+        updated = MdModel.MdDataset.get_by_id(sample_dataset.id)
+        assert updated.dataset_desc == new_desc
+
+    def test_update_object_name(self, controller, sample_dataset):
+        """Test updating object name."""
+        obj = MdModel.MdObject.create(
+            dataset=sample_dataset,
+            object_name="Original Name"
+        )
+
+        result = controller.update_object(
+            object_id=obj.id,
+            object_name="Updated Name"
+        )
+
+        assert result is True
+        updated = MdModel.MdObject.get_by_id(obj.id)
+        assert updated.object_name == "Updated Name"
+
+    def test_update_nonexistent_dataset(self, controller):
+        """Test updating non-existent dataset."""
+        result = controller.update_dataset(
+            dataset_id=99999,
+            dataset_name="Should Fail"
+        )
+
+        assert result is False
+
+    def test_update_nonexistent_object(self, controller):
+        """Test updating non-existent object."""
+        result = controller.update_object(
+            object_id=99999,
+            object_name="Should Fail"
+        )
+
+        assert result is False
+
+
+class TestDeleteOperations:
+    """Test delete operations with various scenarios."""
+
+    @pytest.fixture
+    def controller(self, mock_database):
+        return ModanController()
+
+    def test_delete_dataset_with_objects(self, controller, mock_database, sample_dataset):
+        """Test deleting dataset that has objects."""
+        # Add objects to dataset
+        obj1 = MdModel.MdObject.create(dataset=sample_dataset, object_name="Obj1")
+        obj2 = MdModel.MdObject.create(dataset=sample_dataset, object_name="Obj2")
+
+        dataset_id = sample_dataset.id
+
+        result = controller.delete_dataset(dataset_id)
+
+        assert result is True
+        # Verify dataset is deleted
+        assert MdModel.MdDataset.select().where(MdModel.MdDataset.id == dataset_id).count() == 0
+
+    def test_delete_object_updates_current(self, controller, mock_database, sample_dataset):
+        """Test that deleting current object clears current_object."""
+        controller.set_current_dataset(sample_dataset)
+
+        obj = MdModel.MdObject.create(dataset=sample_dataset, object_name="Test")
+        controller.set_current_object(obj)
+
+        assert controller.current_object is not None
+
+        controller.delete_object(obj.id)
+
+        assert controller.current_object is None
+
+    def test_delete_nonexistent_dataset(self, controller):
+        """Test deleting non-existent dataset."""
+        result = controller.delete_dataset(99999)
+
+        assert result is False
+
+    def test_delete_nonexistent_object(self, controller):
+        """Test deleting non-existent object."""
+        result = controller.delete_object(99999)
+
+        assert result is False
+
+
+class TestProcessingFlag:
+    """Test processing flag behavior."""
+
+    @pytest.fixture
+    def controller(self, mock_database):
+        return ModanController()
+
+    def test_is_processing_initially_false(self, controller):
+        """Test that processing flag is initially False."""
+        assert controller.is_processing() is False
+
+    def test_processing_flag_set(self, controller):
+        """Test setting processing flag."""
+        controller._processing = True
+
+        assert controller.is_processing() is True
+
+    def test_processing_prevents_import(self, controller, mock_database, sample_dataset):
+        """Test that processing flag prevents imports."""
+        controller.set_current_dataset(sample_dataset)
+        controller._processing = True
+
+        result = controller.import_objects(["/path/to/file.tps"])
+
+        assert result == []  # Should return empty list

@@ -1062,50 +1062,8 @@ class ModanController(QObject):
     
     # ========== Export Operations ==========
     
-    def export_dataset(self, file_path: str, format: str = 'CSV', 
-                      include_metadata: bool = True) -> bool:
-        """Export dataset to file.
-        
-        Args:
-            file_path: Output file path
-            format: Export format (CSV, Excel, etc.)
-            include_metadata: Include dataset metadata
-            
-        Returns:
-            True if successful, False otherwise
-        """
-        if not self.current_dataset:
-            self.error_occurred.emit("No dataset selected for export")
-            return False
-        
-        try:
-            self.logger.info(f"Exporting dataset to: {file_path}")
-            
-            if format.upper() == 'CSV':
-                success = mu.export_dataset_to_csv(
-                    self.current_dataset, 
-                    file_path, 
-                    include_metadata
-                )
-            elif format.upper() == 'EXCEL':
-                success = mu.export_dataset_to_excel(
-                    self.current_dataset, 
-                    file_path, 
-                    include_metadata
-                )
-            else:
-                raise ValueError(f"Unsupported export format: {format}")
-            
-            if success:
-                self.info_message.emit(f"Dataset exported to {Path(file_path).name}")
-                return True
-            else:
-                raise ValueError("Export function returned False")
-            
-        except Exception as e:
-            self.logger.error(f"Export failed: {e}")
-            self.error_occurred.emit(f"Export failed: {str(e)}")
-            return False
+    # Note: export_dataset method removed - CSV/Excel export not implemented in UI
+    # Export functionality is handled directly in ExportDatasetDialog for TPS, NTS, Morphologika, and JSON+ZIP formats
     
     # ========== State Management ==========
     

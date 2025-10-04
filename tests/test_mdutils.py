@@ -824,3 +824,113 @@ class TestShowErrorMessage:
         with patch.object(QMessageBox, 'exec_', return_value=QMessageBox.Ok):
             # Should not raise exception
             mu.show_error_message("Test error message")
+
+
+class TestColorFunctions:
+    """Test color conversion functions."""
+
+    def test_as_gl_color_from_hex(self):
+        """Test converting hex color to OpenGL RGB."""
+        from PyQt5.QtGui import QColor
+
+        # Test with red color
+        r, g, b = mu.as_gl_color("#FF0000")
+        assert r == 1.0
+        assert g == 0.0
+        assert b == 0.0
+
+    def test_as_gl_color_from_name(self):
+        """Test converting color name to OpenGL RGB."""
+        # Test with blue color
+        r, g, b = mu.as_gl_color("blue")
+        assert r == 0.0
+        assert g == 0.0
+        assert b == 1.0
+
+    def test_as_gl_color_from_qcolor(self):
+        """Test converting QColor to OpenGL RGB."""
+        from PyQt5.QtGui import QColor
+
+        # Green color
+        color = QColor(0, 255, 0)
+        r, g, b = mu.as_gl_color(color)
+        assert r == 0.0
+        assert g == 1.0
+        assert b == 0.0
+
+
+class TestBooleanConversion:
+    """Test boolean conversion functions."""
+
+    def test_value_to_bool_true_string(self):
+        """Test converting 'true' string to boolean."""
+        assert mu.value_to_bool("true") is True
+        assert mu.value_to_bool("True") is True
+        assert mu.value_to_bool("TRUE") is True
+
+    def test_value_to_bool_false_string(self):
+        """Test converting 'false' string to boolean."""
+        assert mu.value_to_bool("false") is False
+        assert mu.value_to_bool("False") is False
+        assert mu.value_to_bool("anything") is False
+
+    def test_value_to_bool_non_string(self):
+        """Test converting non-string values to boolean."""
+        assert mu.value_to_bool(True) is True
+        assert mu.value_to_bool(False) is False
+        assert mu.value_to_bool(1) is True
+        assert mu.value_to_bool(0) is False
+        assert mu.value_to_bool([]) is False
+        assert mu.value_to_bool([1]) is True
+
+
+class TestFilePathProcessing:
+    """Test file path processing functions."""
+
+    def test_process_dropped_file_name_windows(self):
+        """Test processing dropped file name on Windows."""
+        import sys
+        from unittest.mock import patch
+
+        # Simulate Windows
+        with patch.object(sys, 'platform', 'win32'):
+            with patch('os.name', 'nt'):
+                # Windows file URL format
+                url = "file:///C:/Users/test/file.txt"
+                result = mu.process_dropped_file_name(url)
+                assert result == "C:/Users/test/file.txt"
+
+    def test_process_dropped_file_name_linux(self):
+        """Test processing dropped file name on Linux."""
+        import sys
+        from unittest.mock import patch
+
+        # Simulate Linux
+        with patch.object(sys, 'platform', 'linux'):
+            with patch('os.name', 'posix'):
+                # Linux file URL format
+                url = "file:///home/user/file.txt"
+                result = mu.process_dropped_file_name(url)
+                assert result == "/home/user/file.txt"
+
+    def test_process_dropped_file_name_with_spaces(self):
+        """Test processing file name with URL-encoded spaces."""
+        import sys
+        from unittest.mock import patch
+
+        with patch('os.name', 'posix'):
+            # URL with encoded spaces
+            url = "file:///home/user/my%20file.txt"
+            result = mu.process_dropped_file_name(url)
+            assert result == "/home/user/my file.txt"
+
+    def test_process_dropped_file_name_with_special_chars(self):
+        """Test processing file name with special characters."""
+        import sys
+        from unittest.mock import patch
+
+        with patch('os.name', 'posix'):
+            # URL with encoded special characters
+            url = "file:///home/user/file%20(1).txt"
+            result = mu.process_dropped_file_name(url)
+            assert result == "/home/user/file (1).txt"

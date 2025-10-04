@@ -386,43 +386,8 @@ class TestExportOperations:
         controller.set_current_dataset(sample_dataset)
         return controller
     
-    def test_export_dataset_no_dataset(self, mock_database):
-        """Test export without dataset selected."""
-        controller = ModanController()
-        
-        success = controller.export_dataset("/path/to/export.csv")
-        
-        assert not success
-    
-    @patch('MdUtils.export_dataset_to_csv')
-    def test_export_dataset_csv(self, mock_export, controller):
-        """Test CSV export."""
-        mock_export.return_value = True
-        
-        success = controller.export_dataset("/path/to/test.csv", "CSV")
-        
-        assert success
-        mock_export.assert_called_once_with(
-            controller.current_dataset,
-            "/path/to/test.csv",
-            True  # include_metadata
-        )
-    
-    @patch('MdUtils.export_dataset_to_excel')
-    def test_export_dataset_excel(self, mock_export, controller):
-        """Test Excel export."""
-        mock_export.return_value = True
-        
-        success = controller.export_dataset("/path/to/test.xlsx", "EXCEL")
-        
-        assert success
-        mock_export.assert_called_once()
-    
-    def test_export_dataset_unsupported_format(self, controller):
-        """Test export with unsupported format."""
-        success = controller.export_dataset("/path/to/test.xyz", "UNKNOWN")
-        
-        assert not success
+    # Note: export_dataset tests removed - method no longer exists in ModanController
+    # Export functionality is handled directly in ExportDatasetDialog
 
 
 class TestStateManagement:

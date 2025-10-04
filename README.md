@@ -10,6 +10,15 @@
 
 Modan2 is a user-friendly desktop application that empowers researchers to explore and understand shape variations through geometric morphometrics. It streamlines the entire workflow from data acquisition (2D/3D) to statistical analysis and visualization.
 
+## 📚 Documentation
+
+**[View Documentation](https://jikhanjung.github.io/Modan2/en/)** | **[한국어 문서](https://jikhanjung.github.io/Modan2/ko/)**
+
+- [Installation Guide](https://jikhanjung.github.io/Modan2/en/installation.html)
+- [User Guide](https://jikhanjung.github.io/Modan2/en/user_guide.html)
+- [Developer Guide](https://jikhanjung.github.io/Modan2/en/developer_guide.html)
+- [Changelog](https://jikhanjung.github.io/Modan2/en/changelog.html)
+
 ## Download
 
 Get the latest version from our [releases page](https://github.com/jikhanjung/Modan2/releases).

@@ -745,8 +745,9 @@ class ObjectViewer2D(QLabel):
             for idx, landmark in enumerate(obj.landmark_list):
                 # Check for missing landmarks
                 if landmark[0] is None or landmark[1] is None:
-                    # Draw missing landmark indicator (X mark in red)
-                    self.draw_missing_landmark(painter, idx, len(obj.landmark_list))
+                    # Skip missing landmarks in dataset view
+                    # (they are properly displayed in Object Dialog with estimation)
+                    continue
                 else:
                     self.draw_landmark(painter, landmark[0], landmark[1], color)
         if obj.show_wireframe:
@@ -783,11 +784,38 @@ class ObjectViewer2D(QLabel):
         painter.setBrush(QBrush(mu.as_qt_color(color)))
         painter.drawEllipse(int(self._2canx(x)-radius), int(self._2cany(y))-radius, radius*2, radius*2)
 
+    def draw_estimated_landmark(self, painter, x, y, idx):
+        """Draw an estimated landmark position with distinctive visual style"""
+        radius = BASE_LANDMARK_RADIUS * (int(self.landmark_size) + 1)
+
+        # Convert to screen coordinates
+        screen_x = int(self._2canx(x))
+        screen_y = int(self._2cany(y))
+
+        # Use same color as normal landmarks
+        if self.obj_ops and self.obj_ops.landmark_color:
+            color = QColor(self.obj_ops.landmark_color)
+        else:
+            color = QColor(self.landmark_color)
+
+        # Draw unfilled circle (hollow) with solid line
+        painter.setPen(QPen(color, 2, Qt.SolidLine))
+        painter.setBrush(Qt.NoBrush)  # No fill
+        painter.drawEllipse(screen_x - radius, screen_y - radius, radius * 2, radius * 2)
+
+        # Draw index with question mark if enabled
+        if self.show_index:
+            idx_color = QColor(self.index_color)
+            painter.setFont(QFont('Helvetica', 10 + int(self.index_size) * 3))
+            painter.setPen(QPen(idx_color, 2))
+            # Draw index number followed by question mark
+            painter.drawText(screen_x + 10, screen_y + 10, f"{idx + 1}?")
+
     def draw_missing_landmark(self, painter, idx, total_landmarks):
         """Draw an indicator for missing landmarks - shows as an X mark"""
         # Try to position the X mark based on the index
         # This is a rough approximation - ideally would be based on nearby landmarks
-        radius = BASE_LANDMARK_RADIUS * (int(self.landmark_size) + 1)
+        radius = BASE_LANDMARK_RADIUS * (int(self.landmark_size) + 1) + 2
 
         # Calculate an approximate position (will be improved in future)
         # For now, just draw at origin or calculated from index
@@ -795,16 +823,19 @@ class ObjectViewer2D(QLabel):
         y = self.height() / 2
         if total_landmarks > 0:
             # Simple linear arrangement for visualization
-            x = self.width() * 0.2 + (self.width() * 0.6) * (idx / max(1, total_landmarks - 1))
+            # Ensure X mark stays within bounds with padding
+            padding = radius + 10
+            x = padding + (self.width() - 2 * padding) * (idx / max(1, total_landmarks - 1))
             y = self.height() * 0.5
 
         # Draw X mark in red with dashed lines
         painter.setPen(QPen(Qt.red, 2, Qt.DashLine))
         x_pos = int(x)
         y_pos = int(y)
-        # Draw X
-        painter.drawLine(x_pos - radius, y_pos - radius, x_pos + radius, y_pos + radius)
-        painter.drawLine(x_pos - radius, y_pos + radius, x_pos + radius, y_pos - radius)
+        # Draw X with slightly larger size to be more visible
+        x_size = radius
+        painter.drawLine(x_pos - x_size, y_pos - x_size, x_pos + x_size, y_pos + x_size)
+        painter.drawLine(x_pos - x_size, y_pos + x_size, x_pos + x_size, y_pos - x_size)
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -867,7 +898,18 @@ class ObjectViewer2D(QLabel):
         for idx, landmark in enumerate(self.landmark_list):
             # Check for missing landmarks
             if landmark[0] is None or landmark[1] is None:
-                self.draw_missing_landmark(painter, idx, len(self.landmark_list))
+                # Check if we have an estimated position from object_dialog
+                if hasattr(self, 'object_dialog') and self.object_dialog:
+                    if (hasattr(self.object_dialog, 'estimated_landmark_list') and
+                        self.object_dialog.estimated_landmark_list is not None and
+                        idx < len(self.object_dialog.estimated_landmark_list)):
+                        est_lm = self.object_dialog.estimated_landmark_list[idx]
+                        if est_lm[0] is not None and est_lm[1] is not None:
+                            # Draw estimated landmark with distinctive style
+                            self.draw_estimated_landmark(painter, est_lm[0], est_lm[1], idx)
+                            continue
+                # Skip missing landmarks (no estimation available or not in object_dialog)
+                # Missing landmarks should only be shown with proper estimation in Object Dialog
                 continue
 
             if idx == self.wire_hover_index:

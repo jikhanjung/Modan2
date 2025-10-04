@@ -1,0 +1,1783 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2023-2025, Modan2 Contributors
+# This file is distributed under the same license as the Modan2 package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Modan2 \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-04 11:41+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ko\n"
+"Language-Team: ko <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: ../../user_guide.rst:2
+msgid "User Guide"
+msgstr ""
+
+#: ../../user_guide.rst:4
+msgid ""
+"This guide provides comprehensive instructions for using Modan2 for "
+"geometric morphometric analysis."
+msgstr ""
+
+#: ../../user_guide.rst:7
+msgid "Getting Started"
+msgstr ""
+
+#: ../../user_guide.rst:10
+msgid "Launching Modan2"
+msgstr ""
+
+#: ../../user_guide.rst:12
+msgid "**From installed application**:"
+msgstr ""
+
+#: ../../user_guide.rst:14
+msgid "**Windows**: Start Menu → Modan2"
+msgstr ""
+
+#: ../../user_guide.rst:15
+msgid "**macOS**: Applications → Modan2.app"
+msgstr ""
+
+#: ../../user_guide.rst:16
+msgid "**Linux**: Terminal: ``python3 Modan2.py``"
+msgstr ""
+
+#: ../../user_guide.rst:18
+msgid "**From source**:"
+msgstr ""
+
+#: ../../user_guide.rst:26
+msgid "Main Window Overview"
+msgstr ""
+
+#: ../../user_guide.rst:28
+msgid "The Modan2 main window consists of several key components:"
+msgstr ""
+
+#: ../../user_guide.rst:30
+msgid "**Menu Bar**: File, Edit, View, Tools, Help"
+msgstr ""
+
+#: ../../user_guide.rst:31
+msgid "**Toolbar**: Quick access to common operations"
+msgstr ""
+
+#: ../../user_guide.rst:32
+msgid "**Dataset Tree View** (Left): Hierarchical view of datasets"
+msgstr ""
+
+#: ../../user_guide.rst:33
+msgid "**Object Table** (Center): List of objects in the selected dataset"
+msgstr ""
+
+#: ../../user_guide.rst:34
+msgid "**Object Preview** (Right): Visual preview of selected object"
+msgstr ""
+
+#: ../../user_guide.rst:35
+msgid "**Status Bar** (Bottom): Information and progress indicators"
+msgstr ""
+
+#: ../../user_guide.rst:38
+msgid "Working with Datasets"
+msgstr ""
+
+#: ../../user_guide.rst:41
+msgid "Creating a New Dataset"
+msgstr ""
+
+#: ../../user_guide.rst:43
+msgid "Click **\"New Dataset\"** button or press ``Ctrl+N``"
+msgstr ""
+
+#: ../../user_guide.rst:44
+msgid "Enter dataset information:"
+msgstr ""
+
+#: ../../user_guide.rst:46
+msgid "**Name**: Descriptive name for your dataset"
+msgstr ""
+
+#: ../../user_guide.rst:47
+msgid "**Dimension**: 2D or 3D"
+msgstr ""
+
+#: ../../user_guide.rst:48
+msgid "**Description**: Optional detailed description"
+msgstr ""
+
+#: ../../user_guide.rst:49
+msgid "**Parent Dataset**: Optional - create hierarchical structure"
+msgstr ""
+
+#: ../../user_guide.rst:51
+msgid "Click **OK** to create the dataset"
+msgstr ""
+
+#: ../../user_guide.rst:54
+msgid "Hierarchical datasets allow you to organize related studies. For example:"
+msgstr ""
+
+#: ../../user_guide.rst:56
+msgid "Study_2024 (parent)"
+msgstr ""
+
+#: ../../user_guide.rst:58
+msgid "Subspecies_A (child)"
+msgstr ""
+
+#: ../../user_guide.rst:59
+msgid "Subspecies_B (child)"
+msgstr ""
+
+#: ../../user_guide.rst:62
+msgid "Dataset Variables"
+msgstr ""
+
+#: ../../user_guide.rst:64
+msgid "Variables define grouping and categorical data for statistical analysis."
+msgstr ""
+
+#: ../../user_guide.rst:66
+msgid "**Adding Variables**:"
+msgstr ""
+
+#: ../../user_guide.rst:68
+msgid "Select a dataset"
+msgstr ""
+
+#: ../../user_guide.rst:69
+msgid "Click **\"Add Variable\"** in the toolbar"
+msgstr ""
+
+#: ../../user_guide.rst:70
+msgid "Choose variable type:"
+msgstr ""
+
+#: ../../user_guide.rst:72
+msgid "**Categorical**: Groups (e.g., \"male\", \"female\", \"juvenile\")"
+msgstr ""
+
+#: ../../user_guide.rst:73
+msgid "**Continuous**: Numeric measurements (e.g., age, weight)"
+msgstr ""
+
+#: ../../user_guide.rst:75
+msgid "Enter variable name"
+msgstr ""
+
+#: ../../user_guide.rst:76
+msgid "For categorical variables, add possible values"
+msgstr ""
+
+#: ../../user_guide.rst:78
+msgid "**Setting Object Variables**:"
+msgstr ""
+
+#: ../../user_guide.rst:80
+msgid "Select object(s) in the table"
+msgstr ""
+
+#: ../../user_guide.rst:81
+msgid "Click on the variable column"
+msgstr ""
+
+#: ../../user_guide.rst:82
+msgid "Enter or select value"
+msgstr ""
+
+#: ../../user_guide.rst:83
+msgid "Press ``Enter`` or click away to save"
+msgstr ""
+
+#: ../../user_guide.rst:85 ../../user_guide.rst:410
+msgid "**Example Workflow**:"
+msgstr ""
+
+#: ../../user_guide.rst:100
+msgid "Importing Data"
+msgstr ""
+
+#: ../../user_guide.rst:103
+msgid "Importing 2D Images"
+msgstr ""
+
+#: ../../user_guide.rst:105
+msgid "**Supported formats**: JPG, PNG, BMP, TIFF, GIF"
+msgstr ""
+
+#: ../../user_guide.rst:107 ../../user_guide.rst:130
+msgid "**Method 1: Drag and Drop**"
+msgstr ""
+
+#: ../../user_guide.rst:109 ../../user_guide.rst:314
+msgid "Select a dataset in the tree view"
+msgstr ""
+
+#: ../../user_guide.rst:110
+msgid "Drag image files from your file manager"
+msgstr ""
+
+#: ../../user_guide.rst:111
+msgid "Drop them onto the dataset or object table"
+msgstr ""
+
+#: ../../user_guide.rst:112
+msgid "Images are automatically imported with filenames as object names"
+msgstr ""
+
+#: ../../user_guide.rst:114 ../../user_guide.rst:136
+msgid "**Method 2: Import Dialog**"
+msgstr ""
+
+#: ../../user_guide.rst:116
+msgid "Select dataset → **File → Import Objects**"
+msgstr ""
+
+#: ../../user_guide.rst:117
+msgid "Click **\"Add Images\"**"
+msgstr ""
+
+#: ../../user_guide.rst:118
+msgid "Select one or more image files"
+msgstr ""
+
+#: ../../user_guide.rst:119
+msgid "Review the list"
+msgstr ""
+
+#: ../../user_guide.rst:120 ../../user_guide.rst:180
+msgid "Click **\"Import\"**"
+msgstr ""
+
+#: ../../user_guide.rst:123
+msgid ""
+"Use consistent naming: ``specimen_001.jpg``, ``specimen_002.jpg`` for "
+"easier sorting"
+msgstr ""
+
+#: ../../user_guide.rst:126
+msgid "Importing 3D Models"
+msgstr ""
+
+#: ../../user_guide.rst:128
+msgid "**Supported formats**: OBJ, PLY, STL"
+msgstr ""
+
+#: ../../user_guide.rst:132
+msgid "Select a 3D dataset"
+msgstr ""
+
+#: ../../user_guide.rst:133
+msgid "Drag 3D model files into the application"
+msgstr ""
+
+#: ../../user_guide.rst:134
+msgid "Models are imported with automatic scaling"
+msgstr ""
+
+#: ../../user_guide.rst:138
+msgid "**File → Import Objects → Add 3D Models**"
+msgstr ""
+
+#: ../../user_guide.rst:139
+msgid "Select files"
+msgstr ""
+
+#: ../../user_guide.rst:140
+msgid "Review and import"
+msgstr ""
+
+#: ../../user_guide.rst:142
+msgid "**3D Model Requirements**:"
+msgstr ""
+
+#: ../../user_guide.rst:144
+msgid "Mesh should be manifold (closed surface)"
+msgstr ""
+
+#: ../../user_guide.rst:145
+msgid "Reasonable polygon count (<100k faces recommended)"
+msgstr ""
+
+#: ../../user_guide.rst:146
+msgid "Centered at origin for best visualization"
+msgstr ""
+
+#: ../../user_guide.rst:149
+msgid "Importing Landmark Files"
+msgstr ""
+
+#: ../../user_guide.rst:151
+msgid "**Supported formats**: TPS, NTS, CSV"
+msgstr ""
+
+#: ../../user_guide.rst:153
+msgid "**TPS Format Example**:"
+msgstr ""
+
+#: ../../user_guide.rst:170
+msgid "**Importing TPS/NTS**:"
+msgstr ""
+
+#: ../../user_guide.rst:172
+msgid "**File → Import → Import Landmark File**"
+msgstr ""
+
+#: ../../user_guide.rst:173
+msgid "Select TPS or NTS file"
+msgstr ""
+
+#: ../../user_guide.rst:174
+msgid "Modan2 will:"
+msgstr ""
+
+#: ../../user_guide.rst:176
+msgid "Create objects for each specimen"
+msgstr ""
+
+#: ../../user_guide.rst:177
+msgid "Link to image files (if IMAGE= field exists)"
+msgstr ""
+
+#: ../../user_guide.rst:178
+msgid "Import landmark coordinates"
+msgstr ""
+
+#: ../../user_guide.rst:182
+msgid "**CSV Format**:"
+msgstr ""
+
+#: ../../user_guide.rst:191
+msgid "Working with Objects"
+msgstr ""
+
+#: ../../user_guide.rst:194
+msgid "Viewing an Object"
+msgstr ""
+
+#: ../../user_guide.rst:196
+msgid "**Double-click** an object in the table to open the **Object Dialog**."
+msgstr ""
+
+#: ../../user_guide.rst:198
+msgid "The Object Dialog shows:"
+msgstr ""
+
+#: ../../user_guide.rst:200
+msgid "Object metadata (name, ID, creation date)"
+msgstr ""
+
+#: ../../user_guide.rst:201
+msgid "Associated image or 3D model"
+msgstr ""
+
+#: ../../user_guide.rst:202
+msgid "Landmark table"
+msgstr ""
+
+#: ../../user_guide.rst:203
+msgid "2D/3D viewer with landmarks visualized"
+msgstr ""
+
+#: ../../user_guide.rst:206
+msgid "Placing Landmarks (2D)"
+msgstr ""
+
+#: ../../user_guide.rst:208
+msgid "Open Object Dialog for a 2D object"
+msgstr ""
+
+#: ../../user_guide.rst:209
+msgid "Click on the image to place a landmark"
+msgstr ""
+
+#: ../../user_guide.rst:210
+msgid "Landmarks are numbered sequentially (1, 2, 3, ...)"
+msgstr ""
+
+#: ../../user_guide.rst:211 ../../user_guide.rst:234
+msgid "Right-click a landmark to delete it"
+msgstr ""
+
+#: ../../user_guide.rst:212
+msgid "Click and drag to move an existing landmark"
+msgstr ""
+
+#: ../../user_guide.rst:214
+msgid "**Keyboard Shortcuts in Object Dialog**:"
+msgstr ""
+
+#: ../../user_guide.rst:216
+msgid "``Ctrl+Z`` - Undo last landmark"
+msgstr ""
+
+#: ../../user_guide.rst:217
+msgid "``Delete`` - Remove selected landmark"
+msgstr ""
+
+#: ../../user_guide.rst:218
+msgid "``+/-`` - Zoom in/out"
+msgstr ""
+
+#: ../../user_guide.rst:219
+msgid "``Space+Drag`` - Pan image"
+msgstr ""
+
+#: ../../user_guide.rst:220
+msgid "``Home`` - Reset zoom"
+msgstr ""
+
+#: ../../user_guide.rst:223
+msgid "Placing Landmarks (3D)"
+msgstr ""
+
+#: ../../user_guide.rst:225
+msgid "Open Object Dialog for a 3D object"
+msgstr ""
+
+#: ../../user_guide.rst:226
+msgid "Rotate the model:"
+msgstr ""
+
+#: ../../user_guide.rst:228
+msgid "**Left mouse drag**: Rotate"
+msgstr ""
+
+#: ../../user_guide.rst:229
+msgid "**Right mouse drag**: Pan"
+msgstr ""
+
+#: ../../user_guide.rst:230
+msgid "**Mouse wheel**: Zoom"
+msgstr ""
+
+#: ../../user_guide.rst:232
+msgid "Click on the surface to place a landmark"
+msgstr ""
+
+#: ../../user_guide.rst:233
+msgid "Landmarks appear as colored spheres"
+msgstr ""
+
+#: ../../user_guide.rst:236
+msgid "**3D Viewer Controls**:"
+msgstr ""
+
+#: ../../user_guide.rst:238
+msgid "``R`` - Reset camera"
+msgstr ""
+
+#: ../../user_guide.rst:239
+msgid "``W`` - Wireframe mode"
+msgstr ""
+
+#: ../../user_guide.rst:240
+msgid "``S`` - Solid/surface mode"
+msgstr ""
+
+#: ../../user_guide.rst:241
+msgid "``L`` - Toggle lighting"
+msgstr ""
+
+#: ../../user_guide.rst:244
+msgid "Editing Landmark Coordinates"
+msgstr ""
+
+#: ../../user_guide.rst:246
+msgid "**In the landmark table**:"
+msgstr ""
+
+#: ../../user_guide.rst:248
+msgid "Double-click a coordinate cell"
+msgstr ""
+
+#: ../../user_guide.rst:249
+msgid "Enter new value"
+msgstr ""
+
+#: ../../user_guide.rst:250
+msgid "Press ``Enter`` to save"
+msgstr ""
+
+#: ../../user_guide.rst:251
+msgid "The viewer updates automatically"
+msgstr ""
+
+#: ../../user_guide.rst:253
+msgid "**Manual coordinate entry is useful for**:"
+msgstr ""
+
+#: ../../user_guide.rst:255
+msgid "Precise adjustments"
+msgstr ""
+
+#: ../../user_guide.rst:256
+msgid "Correcting digitization errors"
+msgstr ""
+
+#: ../../user_guide.rst:257
+msgid "Importing coordinates from external sources"
+msgstr ""
+
+#: ../../user_guide.rst:260
+msgid "Missing Landmarks"
+msgstr ""
+
+#: ../../user_guide.rst:262
+msgid "If a landmark cannot be placed (damaged specimen, obscured feature):"
+msgstr ""
+
+#: ../../user_guide.rst:264
+msgid "Leave the landmark position empty, or"
+msgstr ""
+
+#: ../../user_guide.rst:265
+msgid "Right-click in the landmark table → **\"Mark as Missing\"**"
+msgstr ""
+
+#: ../../user_guide.rst:266
+msgid "The cell shows **\"MISSING\"**"
+msgstr ""
+
+#: ../../user_guide.rst:267
+msgid "In the viewer:"
+msgstr ""
+
+#: ../../user_guide.rst:269
+msgid ""
+"**Checkbox \"Show Estimated\" checked**: Hollow circle shows estimated "
+"position"
+msgstr ""
+
+#: ../../user_guide.rst:270
+msgid "**Checkbox unchecked**: No visualization"
+msgstr ""
+
+#: ../../user_guide.rst:272
+msgid "**How Estimation Works**:"
+msgstr ""
+
+#: ../../user_guide.rst:274
+msgid "Modan2 uses Procrustes-aligned mean shape from complete specimens"
+msgstr ""
+
+#: ../../user_guide.rst:275
+msgid ""
+"Estimates are transformed to match the scale and position of the current "
+"object"
+msgstr ""
+
+#: ../../user_guide.rst:276
+msgid "Estimated landmarks shown as **hollow circles** with **\"3?\"** label"
+msgstr ""
+
+#: ../../user_guide.rst:279
+msgid ""
+"Missing landmarks are handled during Procrustes superimposition through "
+"iterative imputation. See :ref:`analysis-missing-landmarks` for details."
+msgstr ""
+
+#: ../../user_guide.rst:282
+msgid "Display Options"
+msgstr ""
+
+#: ../../user_guide.rst:284
+msgid "In the Object Dialog, customize visualization:"
+msgstr ""
+
+#: ../../user_guide.rst:286
+msgid "**Show Landmarks**: Toggle landmark visibility"
+msgstr ""
+
+#: ../../user_guide.rst:287
+msgid "**Show Index**: Show/hide landmark numbers"
+msgstr ""
+
+#: ../../user_guide.rst:288
+msgid "**Show Polygon**: Connect landmarks with lines (wireframe)"
+msgstr ""
+
+#: ../../user_guide.rst:289
+msgid "**Show Baseline**: Highlight baseline between specific landmarks"
+msgstr ""
+
+#: ../../user_guide.rst:290
+msgid ""
+"**Show Estimated**: Display estimated positions for missing landmarks "
+"(hollow circles)"
+msgstr ""
+
+#: ../../user_guide.rst:292
+msgid "**Size Controls**:"
+msgstr ""
+
+#: ../../user_guide.rst:294
+msgid "**Landmark Size**: Adjust circle radius"
+msgstr ""
+
+#: ../../user_guide.rst:295
+msgid "**Index Size**: Adjust label font size"
+msgstr ""
+
+#: ../../user_guide.rst:298 ../../user_guide.rst:786
+msgid "Statistical Analysis"
+msgstr ""
+
+#: ../../user_guide.rst:301
+msgid "Overview"
+msgstr ""
+
+#: ../../user_guide.rst:303
+msgid "Modan2 provides three main statistical analyses:"
+msgstr ""
+
+#: ../../user_guide.rst:305
+msgid "**Principal Component Analysis (PCA)**: Explore shape variation"
+msgstr ""
+
+#: ../../user_guide.rst:306
+msgid "**Canonical Variate Analysis (CVA)**: Discriminate between groups"
+msgstr ""
+
+#: ../../user_guide.rst:307
+msgid "**MANOVA**: Test for group differences"
+msgstr ""
+
+#: ../../user_guide.rst:309
+msgid ""
+"All analyses require **Procrustes superimposition** as a preprocessing "
+"step."
+msgstr ""
+
+#: ../../user_guide.rst:312
+msgid "Running an Analysis"
+msgstr ""
+
+#: ../../user_guide.rst:315
+msgid "Click **\"Analyze Dataset\"** button or menu: **Tools → Analyze Dataset**"
+msgstr ""
+
+#: ../../user_guide.rst:316
+msgid "The **New Analysis Dialog** opens:"
+msgstr ""
+
+#: ../../user_guide.rst:318
+msgid "**Analysis Type**: PCA, CVA, or MANOVA"
+msgstr ""
+
+#: ../../user_guide.rst:319
+msgid "**Dataset**: Pre-selected"
+msgstr ""
+
+#: ../../user_guide.rst:320
+msgid "**Options**: Analysis-specific settings"
+msgstr ""
+
+#: ../../user_guide.rst:322
+msgid "Configure options (see below)"
+msgstr ""
+
+#: ../../user_guide.rst:323
+msgid "Click **\"OK\"** to run"
+msgstr ""
+
+#: ../../user_guide.rst:328
+msgid "Procrustes Superimposition"
+msgstr ""
+
+#: ../../user_guide.rst:330
+msgid "**What it does**:"
+msgstr ""
+
+#: ../../user_guide.rst:332
+msgid "Aligns all shapes to a common coordinate system"
+msgstr ""
+
+#: ../../user_guide.rst:333
+msgid "Removes differences due to position, rotation, and scale"
+msgstr ""
+
+#: ../../user_guide.rst:334
+msgid "Leaves only shape variation"
+msgstr ""
+
+#: ../../user_guide.rst:336
+msgid "**Handling Missing Landmarks**:"
+msgstr ""
+
+#: ../../user_guide.rst:338
+msgid ""
+"If your dataset has missing landmarks, Procrustes uses **iterative "
+"imputation**:"
+msgstr ""
+
+#: ../../user_guide.rst:340
+msgid "Start with complete specimens only"
+msgstr ""
+
+#: ../../user_guide.rst:341
+msgid "Compute mean shape"
+msgstr ""
+
+#: ../../user_guide.rst:342
+msgid "Estimate missing landmarks from mean"
+msgstr ""
+
+#: ../../user_guide.rst:343
+msgid "Re-run Procrustes with estimated values"
+msgstr ""
+
+#: ../../user_guide.rst:344
+msgid "Repeat until convergence (max 100 iterations)"
+msgstr ""
+
+#: ../../user_guide.rst:346
+msgid "**Options**:"
+msgstr ""
+
+#: ../../user_guide.rst:348
+msgid ""
+"**Reference Shape**: - *Mean shape*: Default, uses average - *First "
+"object*: Uses first specimen as reference"
+msgstr ""
+
+#: ../../user_guide.rst:352
+msgid "**When Procrustes Runs**:"
+msgstr ""
+
+#: ../../user_guide.rst:354
+msgid "Automatically before PCA, CVA, or MANOVA"
+msgstr ""
+
+#: ../../user_guide.rst:355
+msgid "Results are cached - subsequent analyses reuse aligned shapes"
+msgstr ""
+
+#: ../../user_guide.rst:360
+msgid "Principal Component Analysis (PCA)"
+msgstr ""
+
+#: ../../user_guide.rst:362
+msgid "**Purpose**: Identify major axes of shape variation"
+msgstr ""
+
+#: ../../user_guide.rst:364 ../../user_guide.rst:433 ../../user_guide.rst:498
+msgid "**Use when**:"
+msgstr ""
+
+#: ../../user_guide.rst:366
+msgid "Exploring shape diversity"
+msgstr ""
+
+#: ../../user_guide.rst:367
+msgid "Visualizing morphospace"
+msgstr ""
+
+#: ../../user_guide.rst:368
+msgid "Identifying outliers"
+msgstr ""
+
+#: ../../user_guide.rst:369
+msgid "Reducing dimensionality"
+msgstr ""
+
+#: ../../user_guide.rst:371
+msgid "**Running PCA**:"
+msgstr ""
+
+#: ../../user_guide.rst:373
+msgid "**Tools → Analyze Dataset → PCA**"
+msgstr ""
+
+#: ../../user_guide.rst:374 ../../user_guide.rst:447 ../../user_guide.rst:507
+#: ../../user_guide.rst:668
+msgid "Options:"
+msgstr ""
+
+#: ../../user_guide.rst:376
+msgid "**Number of PCs**: How many principal components to compute (default: all)"
+msgstr ""
+
+#: ../../user_guide.rst:377
+msgid "**Use Covariance Matrix**: Unchecked = correlation matrix (default)"
+msgstr ""
+
+#: ../../user_guide.rst:379 ../../user_guide.rst:452 ../../user_guide.rst:512
+msgid "Click **OK**"
+msgstr ""
+
+#: ../../user_guide.rst:381 ../../user_guide.rst:454 ../../user_guide.rst:514
+msgid "**Interpreting Results**:"
+msgstr ""
+
+#: ../../user_guide.rst:383
+msgid "The **Data Exploration Dialog** opens with:"
+msgstr ""
+
+#: ../../user_guide.rst:385
+msgid "**Scree Plot**: Shows variance explained by each PC"
+msgstr ""
+
+#: ../../user_guide.rst:387
+msgid "X-axis: PC number"
+msgstr ""
+
+#: ../../user_guide.rst:388
+msgid "Y-axis: % variance"
+msgstr ""
+
+#: ../../user_guide.rst:389
+msgid "Look for \"elbow\" to determine how many PCs are meaningful"
+msgstr ""
+
+#: ../../user_guide.rst:391
+msgid "**PC Score Plot**: Scatter plot of specimens"
+msgstr ""
+
+#: ../../user_guide.rst:393
+msgid "X-axis: PC1 (usually highest variance)"
+msgstr ""
+
+#: ../../user_guide.rst:394
+msgid "Y-axis: PC2 (second highest)"
+msgstr ""
+
+#: ../../user_guide.rst:395
+msgid "Points colored by groups (if variables defined)"
+msgstr ""
+
+#: ../../user_guide.rst:397
+msgid "**Shape Variation Wireframes**:"
+msgstr ""
+
+#: ../../user_guide.rst:399
+msgid "Shows shape changes along each PC"
+msgstr ""
+
+#: ../../user_guide.rst:400
+msgid "Min/Max shapes at extremes of PC axis"
+msgstr ""
+
+#: ../../user_guide.rst:402
+msgid "**PC Scores Table**: Numeric scores for each specimen"
+msgstr ""
+
+#: ../../user_guide.rst:404
+msgid "**Exporting PCA Results**:"
+msgstr ""
+
+#: ../../user_guide.rst:406
+msgid "**Export PC Scores**: CSV file with scores for each object"
+msgstr ""
+
+#: ../../user_guide.rst:407
+msgid "**Export Loadings**: Landmark contributions to each PC"
+msgstr ""
+
+#: ../../user_guide.rst:408
+msgid "**Export Plot**: Save scatter plot as PNG/PDF"
+msgstr ""
+
+#: ../../user_guide.rst:429
+msgid "Canonical Variate Analysis (CVA)"
+msgstr ""
+
+#: ../../user_guide.rst:431
+msgid "**Purpose**: Maximize separation between predefined groups"
+msgstr ""
+
+#: ../../user_guide.rst:435
+msgid "Discriminating between species/populations"
+msgstr ""
+
+#: ../../user_guide.rst:436
+msgid "Testing classification accuracy"
+msgstr ""
+
+#: ../../user_guide.rst:437
+msgid "Identifying diagnostic features"
+msgstr ""
+
+#: ../../user_guide.rst:439
+msgid "**Requirements**:"
+msgstr ""
+
+#: ../../user_guide.rst:441
+msgid "At least 2 groups defined via dataset variables"
+msgstr ""
+
+#: ../../user_guide.rst:442
+msgid "At least 2 specimens per group"
+msgstr ""
+
+#: ../../user_guide.rst:444
+msgid "**Running CVA**:"
+msgstr ""
+
+#: ../../user_guide.rst:446
+msgid "**Tools → Analyze Dataset → CVA**"
+msgstr ""
+
+#: ../../user_guide.rst:449
+msgid "**Grouping Variable**: Select categorical variable (e.g., \"Species\")"
+msgstr ""
+
+#: ../../user_guide.rst:450
+msgid "**Number of CVs**: Default = min(groups-1, landmarks*2)"
+msgstr ""
+
+#: ../../user_guide.rst:456
+msgid "**CV Score Plot**: Specimens plotted on CV axes"
+msgstr ""
+
+#: ../../user_guide.rst:458
+msgid "Ideally, groups form distinct clusters"
+msgstr ""
+
+#: ../../user_guide.rst:459
+msgid "Overlap indicates similarity"
+msgstr ""
+
+#: ../../user_guide.rst:461
+msgid "**Classification Table**: Shows how well CVA discriminates"
+msgstr ""
+
+#: ../../user_guide.rst:463
+msgid "Rows: True group"
+msgstr ""
+
+#: ../../user_guide.rst:464
+msgid "Columns: Predicted group"
+msgstr ""
+
+#: ../../user_guide.rst:465
+msgid "Diagonal = correct classifications"
+msgstr ""
+
+#: ../../user_guide.rst:466
+msgid "Off-diagonal = misclassifications"
+msgstr ""
+
+#: ../../user_guide.rst:468
+msgid "**Discriminant Function**: Statistical details"
+msgstr ""
+
+#: ../../user_guide.rst:470
+msgid "Wilks' Lambda: Smaller = better separation (0-1 scale)"
+msgstr ""
+
+#: ../../user_guide.rst:471
+msgid "P-value: Significance of group differences"
+msgstr ""
+
+#: ../../user_guide.rst:473 ../../user_guide.rst:530
+msgid "**Example**:"
+msgstr ""
+
+#: ../../user_guide.rst:494
+msgid "MANOVA"
+msgstr ""
+
+#: ../../user_guide.rst:496
+msgid "**Purpose**: Test if groups differ significantly in shape"
+msgstr ""
+
+#: ../../user_guide.rst:500
+msgid "Formal hypothesis testing"
+msgstr ""
+
+#: ../../user_guide.rst:501
+msgid "Comparing multiple groups simultaneously"
+msgstr ""
+
+#: ../../user_guide.rst:502
+msgid "Assessing effect size"
+msgstr ""
+
+#: ../../user_guide.rst:504
+msgid "**Running MANOVA**:"
+msgstr ""
+
+#: ../../user_guide.rst:506
+msgid "**Tools → Analyze Dataset → MANOVA**"
+msgstr ""
+
+#: ../../user_guide.rst:509
+msgid "**Grouping Variable**: Select categorical variable"
+msgstr ""
+
+#: ../../user_guide.rst:510
+msgid "**Alpha Level**: Significance threshold (default: 0.05)"
+msgstr ""
+
+#: ../../user_guide.rst:516
+msgid "**Wilks' Lambda**: Test statistic (0-1)"
+msgstr ""
+
+#: ../../user_guide.rst:518
+msgid "Smaller = more group separation"
+msgstr ""
+
+#: ../../user_guide.rst:519
+msgid "0 = perfect separation"
+msgstr ""
+
+#: ../../user_guide.rst:520
+msgid "1 = no separation"
+msgstr ""
+
+#: ../../user_guide.rst:522
+msgid "**F-statistic**: Ratio of between-group to within-group variation"
+msgstr ""
+
+#: ../../user_guide.rst:523
+msgid "**P-value**: Probability that group differences are due to chance"
+msgstr ""
+
+#: ../../user_guide.rst:525
+msgid "P < 0.05: Significant difference (reject null hypothesis)"
+msgstr ""
+
+#: ../../user_guide.rst:526
+msgid "P ≥ 0.05: No significant difference"
+msgstr ""
+
+#: ../../user_guide.rst:528
+msgid "**Effect Size (Partial η²)**: Proportion of variance explained by groups"
+msgstr ""
+
+#: ../../user_guide.rst:548
+msgid "Handling Missing Landmarks"
+msgstr ""
+
+#: ../../user_guide.rst:550
+msgid "Modan2 automatically handles missing landmarks during analysis:"
+msgstr ""
+
+#: ../../user_guide.rst:552
+msgid "**During Procrustes**:"
+msgstr ""
+
+#: ../../user_guide.rst:554
+msgid "Identifies complete specimens (no missing landmarks)"
+msgstr ""
+
+#: ../../user_guide.rst:555
+msgid "Runs Procrustes on complete specimens → mean shape"
+msgstr ""
+
+#: ../../user_guide.rst:556
+msgid "For each specimen with missing data:"
+msgstr ""
+
+#: ../../user_guide.rst:558
+msgid "Estimates missing landmarks from mean shape"
+msgstr ""
+
+#: ../../user_guide.rst:559
+msgid "Applies scale/position transformation to match the specimen"
+msgstr ""
+
+#: ../../user_guide.rst:560
+msgid "Updates coordinates in temporary working copy (NOT in database)"
+msgstr ""
+
+#: ../../user_guide.rst:562
+msgid "Re-runs Procrustes with estimated values"
+msgstr ""
+
+#: ../../user_guide.rst:563
+msgid "Repeats until convergence"
+msgstr ""
+
+#: ../../user_guide.rst:565
+msgid "**During PCA/CVA/MANOVA**:"
+msgstr ""
+
+#: ../../user_guide.rst:567
+msgid "Uses coordinates after Procrustes (with imputed values)"
+msgstr ""
+
+#: ../../user_guide.rst:568
+msgid "Missing landmarks are treated as estimated values"
+msgstr ""
+
+#: ../../user_guide.rst:569
+msgid "No further imputation needed"
+msgstr ""
+
+#: ../../user_guide.rst:571
+msgid "**Limitations**:"
+msgstr ""
+
+#: ../../user_guide.rst:573
+msgid "Simple mean-based imputation (advanced methods in future releases)"
+msgstr ""
+
+#: ../../user_guide.rst:574
+msgid "Accuracy depends on having sufficient complete specimens"
+msgstr ""
+
+#: ../../user_guide.rst:575
+msgid "Large amounts of missing data (>30%) may affect results"
+msgstr ""
+
+#: ../../user_guide.rst:577
+msgid "**Best Practices**:"
+msgstr ""
+
+#: ../../user_guide.rst:579
+msgid "Aim for <10% missing landmarks in your dataset"
+msgstr ""
+
+#: ../../user_guide.rst:580
+#, python-format
+msgid "Ensure at least 50% of specimens are complete"
+msgstr ""
+
+#: ../../user_guide.rst:581
+msgid "Use biological knowledge to verify estimated positions make sense"
+msgstr ""
+
+#: ../../user_guide.rst:584
+msgid "Visualization"
+msgstr ""
+
+#: ../../user_guide.rst:587
+msgid "2D Viewer"
+msgstr ""
+
+#: ../../user_guide.rst:589
+msgid "**Features**:"
+msgstr ""
+
+#: ../../user_guide.rst:591
+msgid "Zoom: Mouse wheel or ``+/-``"
+msgstr ""
+
+#: ../../user_guide.rst:592
+msgid "Pan: Space + drag or middle mouse button"
+msgstr ""
+
+#: ../../user_guide.rst:593
+msgid "Reset view: ``Home`` key"
+msgstr ""
+
+#: ../../user_guide.rst:594
+msgid "Landmark overlay: Colored circles with indices"
+msgstr ""
+
+#: ../../user_guide.rst:596
+msgid "**Export Options**:"
+msgstr ""
+
+#: ../../user_guide.rst:598
+msgid "Right-click → **\"Export Image\"**"
+msgstr ""
+
+#: ../../user_guide.rst:599
+msgid "Formats: PNG, JPG, PDF"
+msgstr ""
+
+#: ../../user_guide.rst:600
+msgid "Resolution: Original or custom DPI"
+msgstr ""
+
+#: ../../user_guide.rst:603 ../../user_guide.rst:720
+msgid "3D Viewer"
+msgstr ""
+
+#: ../../user_guide.rst:605
+msgid "**Controls**:"
+msgstr ""
+
+#: ../../user_guide.rst:607
+msgid "**Rotate**: Left mouse drag"
+msgstr ""
+
+#: ../../user_guide.rst:608
+msgid "**Pan**: Right mouse drag or Shift + left drag"
+msgstr ""
+
+#: ../../user_guide.rst:609
+msgid "**Zoom**: Mouse wheel"
+msgstr ""
+
+#: ../../user_guide.rst:610
+msgid "**Reset**: ``R`` key"
+msgstr ""
+
+#: ../../user_guide.rst:612
+msgid "**Rendering Modes**:"
+msgstr ""
+
+#: ../../user_guide.rst:614
+msgid "**Wireframe** (``W``): Shows mesh edges"
+msgstr ""
+
+#: ../../user_guide.rst:615
+msgid "**Solid** (``S``): Filled surface with lighting"
+msgstr ""
+
+#: ../../user_guide.rst:616
+msgid "**Wireframe + Solid**: Both simultaneously"
+msgstr ""
+
+#: ../../user_guide.rst:618
+msgid "**Landmark Display**:"
+msgstr ""
+
+#: ../../user_guide.rst:620
+msgid "Landmarks rendered as spheres"
+msgstr ""
+
+#: ../../user_guide.rst:621
+msgid "Size adjustable via slider"
+msgstr ""
+
+#: ../../user_guide.rst:622
+msgid "Index labels optional"
+msgstr ""
+
+#: ../../user_guide.rst:624
+msgid "**Lighting**:"
+msgstr ""
+
+#: ../../user_guide.rst:626
+msgid "Toggle: ``L`` key"
+msgstr ""
+
+#: ../../user_guide.rst:627
+msgid "Improves depth perception for complex surfaces"
+msgstr ""
+
+#: ../../user_guide.rst:630
+msgid "Statistical Plots"
+msgstr ""
+
+#: ../../user_guide.rst:632
+msgid "**Available Plots**:"
+msgstr ""
+
+#: ../../user_guide.rst:634
+msgid "**Scree Plot** (PCA): Variance explained per PC"
+msgstr ""
+
+#: ../../user_guide.rst:635
+msgid "**PC Score Plot** (PCA): Specimens on PC axes"
+msgstr ""
+
+#: ../../user_guide.rst:636
+msgid "**CV Score Plot** (CVA): Specimens on CV axes"
+msgstr ""
+
+#: ../../user_guide.rst:637
+msgid "**Shape Variation Plot**: Wireframes at PC/CV extremes"
+msgstr ""
+
+#: ../../user_guide.rst:639
+msgid "**Customization**:"
+msgstr ""
+
+#: ../../user_guide.rst:641
+msgid "**Group Colors**: Auto-assigned by variable"
+msgstr ""
+
+#: ../../user_guide.rst:642
+msgid "**Point Size**: Adjustable"
+msgstr ""
+
+#: ../../user_guide.rst:643
+msgid "**Axis Labels**: Automatic with variance %"
+msgstr ""
+
+#: ../../user_guide.rst:644
+msgid "**Legend**: Shows group names and colors"
+msgstr ""
+
+#: ../../user_guide.rst:646
+msgid "**Exporting Plots**:"
+msgstr ""
+
+#: ../../user_guide.rst:648
+msgid "Right-click on plot → **\"Export Plot\"**"
+msgstr ""
+
+#: ../../user_guide.rst:649
+msgid "Formats: PNG, SVG, PDF"
+msgstr ""
+
+#: ../../user_guide.rst:650
+msgid "Resolution: 300 DPI default (adjustable)"
+msgstr ""
+
+#: ../../user_guide.rst:653
+msgid "Data Export"
+msgstr ""
+
+#: ../../user_guide.rst:656
+msgid "Exporting Datasets"
+msgstr ""
+
+#: ../../user_guide.rst:658
+msgid "**File → Export Dataset**"
+msgstr ""
+
+#: ../../user_guide.rst:660
+msgid "Select dataset"
+msgstr ""
+
+#: ../../user_guide.rst:661
+msgid "Choose export format:"
+msgstr ""
+
+#: ../../user_guide.rst:663
+msgid "**TPS**: Landmark coordinates in TPS format"
+msgstr ""
+
+#: ../../user_guide.rst:664
+msgid "**NTS**: NTS format (legacy)"
+msgstr ""
+
+#: ../../user_guide.rst:665
+msgid "**CSV**: Spreadsheet-compatible"
+msgstr ""
+
+#: ../../user_guide.rst:666
+msgid "**JSON**: Machine-readable with metadata"
+msgstr ""
+
+#: ../../user_guide.rst:670
+msgid "**Include Analysis Results**: Embed PC/CV scores"
+msgstr ""
+
+#: ../../user_guide.rst:671
+msgid "**Include Variables**: Export grouping data"
+msgstr ""
+
+#: ../../user_guide.rst:672
+msgid "**Include Missing**: Export \"NA\" for missing landmarks"
+msgstr ""
+
+#: ../../user_guide.rst:674
+msgid "Click **\"Export\"**"
+msgstr ""
+
+#: ../../user_guide.rst:676
+msgid "**CSV Export Format**:"
+msgstr ""
+
+#: ../../user_guide.rst:685
+msgid "Exporting Analysis Results"
+msgstr ""
+
+#: ../../user_guide.rst:687
+msgid "In the **Data Exploration Dialog**:"
+msgstr ""
+
+#: ../../user_guide.rst:689
+msgid "**Export PC Scores**: CSV with scores per specimen"
+msgstr ""
+
+#: ../../user_guide.rst:690
+msgid "**Export Shape Data**: Aligned landmark coordinates (post-Procrustes)"
+msgstr ""
+
+#: ../../user_guide.rst:691
+msgid "**Export Statistics**: Summary statistics (mean, SD, etc.)"
+msgstr ""
+
+#: ../../user_guide.rst:694
+msgid "Keyboard Shortcuts"
+msgstr ""
+
+#: ../../user_guide.rst:697
+msgid "Global Shortcuts"
+msgstr ""
+
+#: ../../user_guide.rst:699
+msgid "``Ctrl+N`` - New Dataset"
+msgstr ""
+
+#: ../../user_guide.rst:700
+msgid "``Ctrl+Shift+N`` - New Object"
+msgstr ""
+
+#: ../../user_guide.rst:701
+msgid "``Ctrl+O`` - Open Database"
+msgstr ""
+
+#: ../../user_guide.rst:702
+msgid "``Ctrl+S`` - Save Changes"
+msgstr ""
+
+#: ../../user_guide.rst:703
+msgid "``Ctrl+W`` - Close Window"
+msgstr ""
+
+#: ../../user_guide.rst:704
+msgid "``Ctrl+Q`` - Quit Application"
+msgstr ""
+
+#: ../../user_guide.rst:705
+msgid "``Delete`` - Delete Selected Items"
+msgstr ""
+
+#: ../../user_guide.rst:706
+msgid "``F5`` - Refresh View"
+msgstr ""
+
+#: ../../user_guide.rst:709
+msgid "Object Dialog"
+msgstr ""
+
+#: ../../user_guide.rst:711
+msgid "``Ctrl+Z`` - Undo Last Action"
+msgstr ""
+
+#: ../../user_guide.rst:712
+msgid "``Delete`` - Remove Selected Landmark"
+msgstr ""
+
+#: ../../user_guide.rst:713
+msgid "``+`` / ``-`` - Zoom In/Out"
+msgstr ""
+
+#: ../../user_guide.rst:714
+msgid "``Home`` - Reset Zoom"
+msgstr ""
+
+#: ../../user_guide.rst:715
+msgid "``Space+Drag`` - Pan"
+msgstr ""
+
+#: ../../user_guide.rst:716
+msgid "``Ctrl+C`` - Copy Landmark Coordinates"
+msgstr ""
+
+#: ../../user_guide.rst:717
+msgid "``Ctrl+V`` - Paste Coordinates"
+msgstr ""
+
+#: ../../user_guide.rst:722
+msgid "``R`` - Reset Camera"
+msgstr ""
+
+#: ../../user_guide.rst:723
+msgid "``W`` - Wireframe Mode"
+msgstr ""
+
+#: ../../user_guide.rst:724
+msgid "``S`` - Solid Mode"
+msgstr ""
+
+#: ../../user_guide.rst:725
+msgid "``L`` - Toggle Lighting"
+msgstr ""
+
+#: ../../user_guide.rst:726
+msgid "``F`` - Fit to View"
+msgstr ""
+
+#: ../../user_guide.rst:729
+msgid "Preferences"
+msgstr ""
+
+#: ../../user_guide.rst:731
+msgid "**File → Preferences** or ``Ctrl+,`` (macOS: ``Cmd+,``)"
+msgstr ""
+
+#: ../../user_guide.rst:734
+msgid "General Settings"
+msgstr ""
+
+#: ../../user_guide.rst:736
+msgid "**Default Database Location**: Where new databases are created"
+msgstr ""
+
+#: ../../user_guide.rst:737
+msgid "**Auto-Save Interval**: Frequency of automatic saves (0 = disabled)"
+msgstr ""
+
+#: ../../user_guide.rst:738
+msgid "**Language**: English or Korean (한국어)"
+msgstr ""
+
+#: ../../user_guide.rst:741
+msgid "Display Settings"
+msgstr ""
+
+#: ../../user_guide.rst:743
+msgid "**Landmark Color**: Default color for new objects"
+msgstr ""
+
+#: ../../user_guide.rst:744
+msgid "**Index Color**: Color for landmark number labels"
+msgstr ""
+
+#: ../../user_guide.rst:745
+msgid "**Background Color**: Viewer background (white/black/gray)"
+msgstr ""
+
+#: ../../user_guide.rst:746
+msgid "**Font Size**: UI text size"
+msgstr ""
+
+#: ../../user_guide.rst:747
+msgid "**Theme**: Light or Dark (if available)"
+msgstr ""
+
+#: ../../user_guide.rst:750
+msgid "Analysis Settings"
+msgstr ""
+
+#: ../../user_guide.rst:752
+msgid "**Max Procrustes Iterations**: Default 100"
+msgstr ""
+
+#: ../../user_guide.rst:753
+msgid "**Convergence Threshold**: When to stop iterating (default: 0.0001)"
+msgstr ""
+
+#: ../../user_guide.rst:754
+msgid "**PCA Method**: Covariance or Correlation matrix"
+msgstr ""
+
+#: ../../user_guide.rst:755
+msgid "**CVA Cross-Validation**: Leave-one-out or K-fold"
+msgstr ""
+
+#: ../../user_guide.rst:758
+msgid "Advanced Settings"
+msgstr ""
+
+#: ../../user_guide.rst:760
+msgid "**Enable Logging**: Write debug logs to file"
+msgstr ""
+
+#: ../../user_guide.rst:761
+msgid "**Log Level**: INFO, DEBUG, WARNING, ERROR"
+msgstr ""
+
+#: ../../user_guide.rst:762
+msgid "**GPU Acceleration**: Use GPU for 3D rendering (if available)"
+msgstr ""
+
+#: ../../user_guide.rst:763
+msgid "**Memory Limit**: Max RAM for large datasets (MB)"
+msgstr ""
+
+#: ../../user_guide.rst:766
+msgid "Tips and Best Practices"
+msgstr ""
+
+#: ../../user_guide.rst:769
+msgid "Data Organization"
+msgstr ""
+
+#: ../../user_guide.rst:771
+msgid ""
+"**Use consistent naming**: ``species_ID_number.jpg`` (e.g., "
+"``sparrow_001.jpg``)"
+msgstr ""
+
+#: ../../user_guide.rst:772
+msgid "**Organize hierarchically**: Group related datasets"
+msgstr ""
+
+#: ../../user_guide.rst:773
+msgid "**Document metadata**: Use description fields"
+msgstr ""
+
+#: ../../user_guide.rst:774
+msgid "**Back up regularly**: Export database or copy ``modan.db``"
+msgstr ""
+
+#: ../../user_guide.rst:777
+msgid "Landmark Placement"
+msgstr ""
+
+#: ../../user_guide.rst:779
+msgid "**Define landmarks carefully**: Use anatomically meaningful points"
+msgstr ""
+
+#: ../../user_guide.rst:780
+msgid "**Be consistent**: Same landmarks across all specimens"
+msgstr ""
+
+#: ../../user_guide.rst:781
+msgid "**Use high-resolution images**: Better precision"
+msgstr ""
+
+#: ../../user_guide.rst:782
+msgid "**Avoid ambiguous points**: Choose clear, repeatable features"
+msgstr ""
+
+#: ../../user_guide.rst:783
+msgid "**Document landmarks**: Write down definitions (e.g., \"tip of beak\")"
+msgstr ""
+
+#: ../../user_guide.rst:788
+msgid "**Check assumptions**: Normal distribution, homogeneity of variance"
+msgstr ""
+
+#: ../../user_guide.rst:789
+msgid "**Sample size**: At least 30 specimens for PCA, 10+ per group for CVA"
+msgstr ""
+
+#: ../../user_guide.rst:790
+msgid "**Validate results**: Cross-validation, bootstrap resampling"
+msgstr ""
+
+#: ../../user_guide.rst:791
+msgid ""
+"**Interpret cautiously**: Statistical significance ≠ biological "
+"significance"
+msgstr ""
+
+#: ../../user_guide.rst:792
+msgid "**Visualize first**: Explore with PCA before formal tests"
+msgstr ""
+
+#: ../../user_guide.rst:795
+msgid "Performance Optimization"
+msgstr ""
+
+#: ../../user_guide.rst:797
+msgid "**Close unused datasets**: Reduces memory usage"
+msgstr ""
+
+#: ../../user_guide.rst:798
+msgid "**Limit 3D polygon count**: Simplify meshes before import"
+msgstr ""
+
+#: ../../user_guide.rst:799
+msgid "**Use lower resolution for preview**: Full resolution for analysis only"
+msgstr ""
+
+#: ../../user_guide.rst:800
+msgid "**Run analyses on subsets**: Test on small sample first"
+msgstr ""
+
+#: ../../user_guide.rst:801
+msgid "**Clear cache**: Tools → Clear Cache (if application becomes slow)"
+msgstr ""
+
+#: ../../user_guide.rst:804
+msgid "Common Workflows"
+msgstr ""
+
+#: ../../user_guide.rst:807
+msgid "Workflow 1: 2D Morphometric Study"
+msgstr ""
+
+#: ../../user_guide.rst:823
+msgid "Workflow 2: 3D Morphometric Study"
+msgstr ""
+
+#: ../../user_guide.rst:836
+msgid "Workflow 3: Missing Data Study"
+msgstr ""
+
+#: ../../user_guide.rst:849
+msgid "Troubleshooting"
+msgstr ""
+
+#: ../../user_guide.rst:852
+msgid "Analysis Fails"
+msgstr ""
+
+#: ../../user_guide.rst:854
+msgid "**Error**: ``Not enough complete specimens for Procrustes``"
+msgstr ""
+
+#: ../../user_guide.rst:856
+msgid "**Solution**: Need at least 2 complete specimens without missing landmarks"
+msgstr ""
+
+#: ../../user_guide.rst:858
+msgid "**Error**: ``CVA requires at least 2 groups``"
+msgstr ""
+
+#: ../../user_guide.rst:860
+msgid "**Solution**: Define a grouping variable with multiple values"
+msgstr ""
+
+#: ../../user_guide.rst:863
+msgid "Landmarks Not Showing"
+msgstr ""
+
+#: ../../user_guide.rst:865
+msgid "**Problem**: Placed landmarks but not visible"
+msgstr ""
+
+#: ../../user_guide.rst:867 ../../user_guide.rst:878
+msgid "**Solution**:"
+msgstr ""
+
+#: ../../user_guide.rst:869
+msgid "Check \"Show Landmarks\" checkbox is enabled"
+msgstr ""
+
+#: ../../user_guide.rst:870
+msgid "Adjust \"Landmark Size\" slider"
+msgstr ""
+
+#: ../../user_guide.rst:871
+msgid "Zoom in - landmarks may be too small"
+msgstr ""
+
+#: ../../user_guide.rst:874
+msgid "Slow Performance"
+msgstr ""
+
+#: ../../user_guide.rst:876
+msgid "**Problem**: Application freezes during analysis"
+msgstr ""
+
+#: ../../user_guide.rst:880
+msgid "Reduce dataset size (split into smaller datasets)"
+msgstr ""
+
+#: ../../user_guide.rst:881
+msgid "Close other applications"
+msgstr ""
+
+#: ../../user_guide.rst:882
+msgid "Increase RAM allocation (Preferences → Memory Limit)"
+msgstr ""
+
+#: ../../user_guide.rst:883
+msgid "Simplify 3D meshes (reduce polygon count)"
+msgstr ""
+
+#: ../../user_guide.rst:886
+msgid "Next Steps"
+msgstr ""
+
+#: ../../user_guide.rst:888
+msgid "Explore the :doc:`developer_guide` to contribute or extend Modan2"
+msgstr ""
+
+#: ../../user_guide.rst:889
+msgid "Check the :doc:`changelog` for latest features and bug fixes"
+msgstr ""
+
+#: ../../user_guide.rst:890
+msgid ""
+"Visit the `GitHub repository <https://github.com/jikhanjung/Modan2>`_ for"
+" example datasets"
+msgstr ""
+

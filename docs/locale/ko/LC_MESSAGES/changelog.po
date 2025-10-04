@@ -1,0 +1,641 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2023-2025, Modan2 Contributors
+# This file is distributed under the same license as the Modan2 package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Modan2 \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-04 11:41+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ko\n"
+"Language-Team: ko <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: ../../changelog.rst:2
+msgid "Changelog"
+msgstr ""
+
+#: ../../changelog.rst:4
+msgid "All notable changes to Modan2 are documented here."
+msgstr ""
+
+#: ../../changelog.rst:6
+msgid ""
+"This project follows `Semantic Versioning "
+"<https://semver.org/spec/v2.0.0.html>`_."
+msgstr ""
+
+#: ../../changelog.rst:9
+msgid "Version 0.1.5-alpha.1 (2025-09-11)"
+msgstr ""
+
+#: ../../changelog.rst:12 ../../changelog.rst:84
+msgid "Added"
+msgstr ""
+
+#: ../../changelog.rst:14
+msgid "**JSON+ZIP Dataset Packaging System**"
+msgstr ""
+
+#: ../../changelog.rst:16
+msgid "Complete dataset backup and sharing with new export/import format"
+msgstr ""
+
+#: ../../changelog.rst:17
+msgid ""
+"JSON schema v1.1 with extended metadata (wireframe, polygons, baseline, "
+"variables)"
+msgstr ""
+
+#: ../../changelog.rst:18
+msgid "ZIP packaging with support for images and 3D model files"
+msgstr ""
+
+#: ../../changelog.rst:19
+msgid "Structured file layout (dataset.json, images/, models/)"
+msgstr ""
+
+#: ../../changelog.rst:20
+msgid "Lossless round-trip data preservation"
+msgstr ""
+
+#: ../../changelog.rst:22
+msgid "**Security and Stability Features**"
+msgstr ""
+
+#: ../../changelog.rst:24
+msgid "Zip Slip attack defense system"
+msgstr ""
+
+#: ../../changelog.rst:25
+msgid "Transaction-based import (automatic rollback on failure)"
+msgstr ""
+
+#: ../../changelog.rst:26
+msgid "File integrity verification (MD5 checksums)"
+msgstr ""
+
+#: ../../changelog.rst:27
+msgid "Safe ZIP extraction (``safe_extract_zip()``)"
+msgstr ""
+
+#: ../../changelog.rst:28
+msgid "JSON schema validation and error reporting"
+msgstr ""
+
+#: ../../changelog.rst:30
+msgid "**New API Functions (MdUtils.py)**"
+msgstr ""
+
+#: ../../changelog.rst:32
+msgid "``serialize_dataset_to_json()`` - Serialize dataset to JSON structure"
+msgstr ""
+
+#: ../../changelog.rst:33
+msgid "``create_zip_package()`` - File collection and ZIP packaging"
+msgstr ""
+
+#: ../../changelog.rst:34
+msgid "``import_dataset_from_zip()`` - Safe ZIP-based dataset import"
+msgstr ""
+
+#: ../../changelog.rst:35
+msgid "``collect_dataset_files()`` - Collect dataset-related file paths"
+msgstr ""
+
+#: ../../changelog.rst:36
+msgid "``estimate_package_size()`` - Estimate package size"
+msgstr ""
+
+#: ../../changelog.rst:37
+msgid "``validate_json_schema()`` - JSON schema validation"
+msgstr ""
+
+#: ../../changelog.rst:39
+msgid "**User Interface Improvements**"
+msgstr ""
+
+#: ../../changelog.rst:41
+msgid "\"JSON+ZIP Package\" option in Export Dialog"
+msgstr ""
+
+#: ../../changelog.rst:42
+msgid "\"Include image and model files\" toggle"
+msgstr ""
+
+#: ../../changelog.rst:43
+msgid "Real-time file size estimation display"
+msgstr ""
+
+#: ../../changelog.rst:44
+msgid "JSON+ZIP format support in Import Dialog"
+msgstr ""
+
+#: ../../changelog.rst:45
+msgid "Progress tracking with progress callbacks"
+msgstr ""
+
+#: ../../changelog.rst:48 ../../changelog.rst:130
+msgid "Changed"
+msgstr ""
+
+#: ../../changelog.rst:50
+msgid "**Existing Export Formats Maintained**"
+msgstr ""
+
+#: ../../changelog.rst:52
+msgid "TPS, NTS, Morphologika, CSV/Excel formats continue to be supported"
+msgstr ""
+
+#: ../../changelog.rst:53
+msgid "JSON+ZIP provided as additional option for complete backups"
+msgstr ""
+
+#: ../../changelog.rst:55
+msgid "**Improved File Naming Conventions**"
+msgstr ""
+
+#: ../../changelog.rst:57
+msgid "Files inside ZIP use ``<object_id>.<ext>`` format to avoid conflicts"
+msgstr ""
+
+#: ../../changelog.rst:58
+msgid "Relative paths for platform independence"
+msgstr ""
+
+#: ../../changelog.rst:60
+msgid "**Database Handling Improvements**"
+msgstr ""
+
+#: ../../changelog.rst:62
+msgid ""
+"Automatic duplicate dataset name resolution (\"Dataset (1)\", \"Dataset "
+"(2)\", etc.)"
+msgstr ""
+
+#: ../../changelog.rst:63
+msgid "Optimized variable mapping and landmark processing"
+msgstr ""
+
+#: ../../changelog.rst:66 ../../changelog.rst:152
+msgid "Fixed"
+msgstr ""
+
+#: ../../changelog.rst:68
+msgid "**Cross-Platform Compatibility**"
+msgstr ""
+
+#: ../../changelog.rst:70
+msgid "UTF-8 encoding for Korean filenames"
+msgstr ""
+
+#: ../../changelog.rst:71
+msgid "Unified path handling for Windows, macOS, Linux"
+msgstr ""
+
+#: ../../changelog.rst:72
+msgid "Added file system safety verification"
+msgstr ""
+
+#: ../../changelog.rst:74
+msgid "**Memory and Performance Optimization**"
+msgstr ""
+
+#: ../../changelog.rst:76
+msgid "Streaming processing for large files"
+msgstr ""
+
+#: ../../changelog.rst:77
+msgid "Safe temporary file cleanup (context managers)"
+msgstr ""
+
+#: ../../changelog.rst:78
+msgid "Prevention of partial imports on error"
+msgstr ""
+
+#: ../../changelog.rst:81
+msgid "Version 0.1.4 (2025-09-10)"
+msgstr ""
+
+#: ../../changelog.rst:86
+msgid "**CI/CD and Build System**"
+msgstr ""
+
+#: ../../changelog.rst:88
+msgid "GitHub Actions workflows (automatic build, test, release)"
+msgstr ""
+
+#: ../../changelog.rst:89
+msgid "Cross-platform build support (Windows, Linux, macOS)"
+msgstr ""
+
+#: ../../changelog.rst:90
+msgid "PyInstaller-based automated build script (``build.py``)"
+msgstr ""
+
+#: ../../changelog.rst:91
+msgid "Build number system and centralized version management (``version.py``)"
+msgstr ""
+
+#: ../../changelog.rst:93
+msgid "**Testing Infrastructure**"
+msgstr ""
+
+#: ../../changelog.rst:95
+msgid "pytest-based automated test system (229 tests, 13 modules)"
+msgstr ""
+
+#: ../../changelog.rst:96
+msgid "Test categories: unit, integration, performance, GUI, workflow"
+msgstr ""
+
+#: ../../changelog.rst:97
+msgid "CI integration with automatic tests on PR"
+msgstr ""
+
+#: ../../changelog.rst:98
+msgid "Test coverage analysis tools"
+msgstr ""
+
+#: ../../changelog.rst:100
+msgid "**UI/UX Features**"
+msgstr ""
+
+#: ../../changelog.rst:102
+msgid "Overlay drag and corner snap functionality"
+msgstr ""
+
+#: ../../changelog.rst:103
+msgid "Overlay title display"
+msgstr ""
+
+#: ../../changelog.rst:104
+msgid "Splash screen (build info and copyright)"
+msgstr ""
+
+#: ../../changelog.rst:105
+msgid "3D landmark index display restored (using GLUT)"
+msgstr ""
+
+#: ../../changelog.rst:106
+msgid "Improved toolbar button state management"
+msgstr ""
+
+#: ../../changelog.rst:107
+msgid "TreeView usability improvements"
+msgstr ""
+
+#: ../../changelog.rst:108
+msgid "Read-only column context menus"
+msgstr ""
+
+#: ../../changelog.rst:110
+msgid "**Documentation**"
+msgstr ""
+
+#: ../../changelog.rst:112
+msgid "Korean README (``README.ko.md``)"
+msgstr ""
+
+#: ../../changelog.rst:113
+msgid "Development guide documents (CLAUDE.md, GEMINI.md)"
+msgstr ""
+
+#: ../../changelog.rst:114
+msgid "Release guide and version management documents"
+msgstr ""
+
+#: ../../changelog.rst:115
+msgid "Windows Defender notice document"
+msgstr ""
+
+#: ../../changelog.rst:116
+msgid "Detailed development logs (devlog directory)"
+msgstr ""
+
+#: ../../changelog.rst:118
+msgid "**Internationalization (i18n)**"
+msgstr ""
+
+#: ../../changelog.rst:120
+msgid "Significantly improved Korean translations"
+msgstr ""
+
+#: ../../changelog.rst:121
+msgid "Instant language setting application"
+msgstr ""
+
+#: ../../changelog.rst:123
+msgid "**Project Management**"
+msgstr ""
+
+#: ../../changelog.rst:125
+msgid "Refined requirements.txt (tested and verified dependencies)"
+msgstr ""
+
+#: ../../changelog.rst:126
+msgid "Support for Python 3.11+"
+msgstr ""
+
+#: ../../changelog.rst:127
+msgid "OpenGL implementation improvements (font rendering)"
+msgstr ""
+
+#: ../../changelog.rst:132
+msgid "**Code Refactoring**"
+msgstr ""
+
+#: ../../changelog.rst:134
+msgid "Modularized color constants (MdConstants.py)"
+msgstr ""
+
+#: ../../changelog.rst:135
+msgid "Unified icon path management"
+msgstr ""
+
+#: ../../changelog.rst:136
+msgid "Standardized logging system"
+msgstr ""
+
+#: ../../changelog.rst:137
+msgid "Optimized import statements"
+msgstr ""
+
+#: ../../changelog.rst:139
+msgid "**Analysis System**"
+msgstr ""
+
+#: ../../changelog.rst:141
+msgid "PCA/CVA/MANOVA stability improvements"
+msgstr ""
+
+#: ../../changelog.rst:142
+msgid "Enhanced progress indicators during analysis"
+msgstr ""
+
+#: ../../changelog.rst:143
+msgid "Improved error handling and reporting"
+msgstr ""
+
+#: ../../changelog.rst:145
+msgid "**UI Behavior**"
+msgstr ""
+
+#: ../../changelog.rst:147
+msgid "Consistent dialog behavior"
+msgstr ""
+
+#: ../../changelog.rst:148
+msgid "Auto-refresh after data changes"
+msgstr ""
+
+#: ../../changelog.rst:149
+msgid "More intuitive keyboard shortcuts"
+msgstr ""
+
+#: ../../changelog.rst:154
+msgid "**Critical Bugs**"
+msgstr ""
+
+#: ../../changelog.rst:156
+msgid "Dataset import/export encoding issues"
+msgstr ""
+
+#: ../../changelog.rst:157
+msgid "3D viewer crashes"
+msgstr ""
+
+#: ../../changelog.rst:158
+msgid "TreeView update timing issues"
+msgstr ""
+
+#: ../../changelog.rst:159
+msgid "Analysis result caching problems"
+msgstr ""
+
+#: ../../changelog.rst:161
+msgid "**Platform-Specific Issues**"
+msgstr ""
+
+#: ../../changelog.rst:163
+msgid "WSL/Linux Qt plugin errors (added fix_qt_import.py)"
+msgstr ""
+
+#: ../../changelog.rst:164
+msgid "OpenGL version compatibility"
+msgstr ""
+
+#: ../../changelog.rst:165
+msgid "Font rendering on different platforms"
+msgstr ""
+
+#: ../../changelog.rst:167
+msgid "**Data Integrity**"
+msgstr ""
+
+#: ../../changelog.rst:169
+msgid "Landmark coordinate precision maintenance"
+msgstr ""
+
+#: ../../changelog.rst:170
+msgid "Wireframe/polygon data preservation"
+msgstr ""
+
+#: ../../changelog.rst:171
+msgid "Analysis result consistency"
+msgstr ""
+
+#: ../../changelog.rst:174
+msgid "Previous Versions"
+msgstr ""
+
+#: ../../changelog.rst:177
+msgid "Version 0.1.3"
+msgstr ""
+
+#: ../../changelog.rst:179
+msgid "Initial public release"
+msgstr ""
+
+#: ../../changelog.rst:180
+msgid "Basic 2D/3D landmark support"
+msgstr ""
+
+#: ../../changelog.rst:181
+msgid "PCA, CVA, MANOVA analysis"
+msgstr ""
+
+#: ../../changelog.rst:182
+msgid "TPS/NTS file import"
+msgstr ""
+
+#: ../../changelog.rst:183
+msgid "SQLite database with Peewee ORM"
+msgstr ""
+
+#: ../../changelog.rst:186
+msgid "Version 0.1.2"
+msgstr ""
+
+#: ../../changelog.rst:188
+msgid "Added 3D model support (OBJ, PLY, STL)"
+msgstr ""
+
+#: ../../changelog.rst:189
+msgid "Improved 2D/3D viewers"
+msgstr ""
+
+#: ../../changelog.rst:190
+msgid "Dataset hierarchy"
+msgstr ""
+
+#: ../../changelog.rst:193
+msgid "Version 0.1.1"
+msgstr ""
+
+#: ../../changelog.rst:195
+msgid "Basic morphometric analysis"
+msgstr ""
+
+#: ../../changelog.rst:196
+msgid "Procrustes superimposition"
+msgstr ""
+
+#: ../../changelog.rst:197
+msgid "Simple data management"
+msgstr ""
+
+#: ../../changelog.rst:200
+msgid "Version 0.1.0"
+msgstr ""
+
+#: ../../changelog.rst:202
+msgid "Initial development version"
+msgstr ""
+
+#: ../../changelog.rst:203
+msgid "Proof of concept"
+msgstr ""
+
+#: ../../changelog.rst:206
+msgid "Upcoming Features"
+msgstr ""
+
+#: ../../changelog.rst:209
+msgid "Planned for Future Releases"
+msgstr ""
+
+#: ../../changelog.rst:211
+msgid "**Missing Landmark Support (Phase 3-5)**"
+msgstr ""
+
+#: ../../changelog.rst:213
+msgid "Advanced imputation methods (TPS warping, regression)"
+msgstr ""
+
+#: ../../changelog.rst:214
+msgid "Confidence intervals for estimated positions"
+msgstr ""
+
+#: ../../changelog.rst:215
+msgid "Multiple imputation for uncertainty quantification"
+msgstr ""
+
+#: ../../changelog.rst:216
+msgid "Missing-aware statistical methods (PPCA, EM-based CVA)"
+msgstr ""
+
+#: ../../changelog.rst:218
+msgid "**Enhanced Analysis**"
+msgstr ""
+
+#: ../../changelog.rst:220
+msgid "Partial Least Squares (PLS)"
+msgstr ""
+
+#: ../../changelog.rst:221
+msgid "Phylogenetic comparative methods"
+msgstr ""
+
+#: ../../changelog.rst:222
+msgid "Disparity analysis"
+msgstr ""
+
+#: ../../changelog.rst:223
+msgid "Asymmetry analysis"
+msgstr ""
+
+#: ../../changelog.rst:225
+msgid "**User Interface**"
+msgstr ""
+
+#: ../../changelog.rst:227
+msgid "Dark mode theme"
+msgstr ""
+
+#: ../../changelog.rst:228
+msgid "Customizable toolbar"
+msgstr ""
+
+#: ../../changelog.rst:229
+msgid "Advanced plot customization"
+msgstr ""
+
+#: ../../changelog.rst:230
+msgid "Interactive 3D landmark editing"
+msgstr ""
+
+#: ../../changelog.rst:232
+msgid "**Performance**"
+msgstr ""
+
+#: ../../changelog.rst:234
+msgid "GPU-accelerated Procrustes"
+msgstr ""
+
+#: ../../changelog.rst:235
+msgid "Lazy loading for large datasets"
+msgstr ""
+
+#: ../../changelog.rst:236
+msgid "Caching improvements"
+msgstr ""
+
+#: ../../changelog.rst:237
+msgid "Parallel processing support"
+msgstr ""
+
+#: ../../changelog.rst:239
+msgid "**Integration**"
+msgstr ""
+
+#: ../../changelog.rst:241
+msgid "R integration (export to geomorph, Morpho)"
+msgstr ""
+
+#: ../../changelog.rst:242
+msgid "Python API for scripting"
+msgstr ""
+
+#: ../../changelog.rst:243
+msgid "Command-line interface"
+msgstr ""
+
+#: ../../changelog.rst:244
+msgid "Plugin system"
+msgstr ""
+
+#: ../../changelog.rst:246
+msgid ""
+"See the `GitHub Issues <https://github.com/jikhanjung/Modan2/issues>`_ "
+"page for full roadmap and feature requests."
+msgstr ""
+

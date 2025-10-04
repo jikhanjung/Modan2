@@ -1,0 +1,920 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2023-2025, Modan2 Contributors
+# This file is distributed under the same license as the Modan2 package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Modan2 \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-04 11:41+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ko\n"
+"Language-Team: ko <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: ../../developer_guide.rst:2
+msgid "Developer Guide"
+msgstr ""
+
+#: ../../developer_guide.rst:4
+msgid ""
+"This guide provides information for developers who want to contribute to "
+"Modan2 or understand its architecture."
+msgstr ""
+
+#: ../../developer_guide.rst:7
+msgid "Project Overview"
+msgstr ""
+
+#: ../../developer_guide.rst:9
+msgid ""
+"Modan2 is a Python desktop application for geometric morphometrics built "
+"with:"
+msgstr ""
+
+#: ../../developer_guide.rst:11
+msgid "**GUI Framework**: PyQt5"
+msgstr ""
+
+#: ../../developer_guide.rst:12
+msgid "**Database**: SQLite with Peewee ORM"
+msgstr ""
+
+#: ../../developer_guide.rst:13
+msgid "**Scientific Computing**: NumPy, SciPy, Pandas, Statsmodels"
+msgstr ""
+
+#: ../../developer_guide.rst:14
+msgid "**3D Graphics**: PyOpenGL, Trimesh"
+msgstr ""
+
+#: ../../developer_guide.rst:15
+msgid "**Image Processing**: Pillow, OpenCV"
+msgstr ""
+
+#: ../../developer_guide.rst:17
+msgid "**Project Structure**:"
+msgstr ""
+
+#: ../../developer_guide.rst:41
+msgid "Architecture"
+msgstr ""
+
+#: ../../developer_guide.rst:44
+msgid "High-Level Overview"
+msgstr ""
+
+#: ../../developer_guide.rst:46
+msgid "Modan2 follows a modified **Model-View-Controller (MVC)** pattern:"
+msgstr ""
+
+#: ../../developer_guide.rst:89
+msgid "Database Schema"
+msgstr ""
+
+#: ../../developer_guide.rst:91
+msgid "**Core Models** (defined in ``MdModel.py``):"
+msgstr ""
+
+#: ../../developer_guide.rst:93
+msgid "**MdDataset**:"
+msgstr ""
+
+#: ../../developer_guide.rst:95
+msgid "Hierarchical structure (parent/child relationships)"
+msgstr ""
+
+#: ../../developer_guide.rst:96
+msgid "Stores dimension (2D/3D), description"
+msgstr ""
+
+#: ../../developer_guide.rst:97
+msgid "One-to-many relationship with MdObject"
+msgstr ""
+
+#: ../../developer_guide.rst:99
+msgid "**MdObject**:"
+msgstr ""
+
+#: ../../developer_guide.rst:101
+msgid "Represents a specimen (image or 3D model)"
+msgstr ""
+
+#: ../../developer_guide.rst:102
+msgid "Stores landmark coordinates as JSON string (``landmark_str``)"
+msgstr ""
+
+#: ../../developer_guide.rst:103
+msgid "Foreign key to MdDataset"
+msgstr ""
+
+#: ../../developer_guide.rst:104
+msgid "Variable data stored as JSON (``propertyvalue_str``)"
+msgstr ""
+
+#: ../../developer_guide.rst:106
+msgid "**MdImage**:"
+msgstr ""
+
+#: ../../developer_guide.rst:108
+msgid "Links 2D images to objects"
+msgstr ""
+
+#: ../../developer_guide.rst:109
+msgid "Stores file path, EXIF data, width/height"
+msgstr ""
+
+#: ../../developer_guide.rst:111
+msgid "**MdThreeDModel**:"
+msgstr ""
+
+#: ../../developer_guide.rst:113
+msgid "Links 3D models to objects"
+msgstr ""
+
+#: ../../developer_guide.rst:114
+msgid "Stores file path, mesh metadata"
+msgstr ""
+
+#: ../../developer_guide.rst:116
+msgid "**MdAnalysis**:"
+msgstr ""
+
+#: ../../developer_guide.rst:118
+msgid "Stores analysis results (PCA, CVA, MANOVA)"
+msgstr ""
+
+#: ../../developer_guide.rst:119
+msgid "Linked to MdDataset"
+msgstr ""
+
+#: ../../developer_guide.rst:120
+msgid "Results stored as JSON"
+msgstr ""
+
+#: ../../developer_guide.rst:122
+msgid "**Relationships**:"
+msgstr ""
+
+#: ../../developer_guide.rst:131
+msgid "**Key Fields**:"
+msgstr ""
+
+#: ../../developer_guide.rst:133
+msgid ""
+"``landmark_str``: Serialized landmark coordinates (format: "
+"\"x,y\\\\nx,y\\\\n...\")"
+msgstr ""
+
+#: ../../developer_guide.rst:134
+msgid "``propertyvalue_str``: Serialized variable values (JSON)"
+msgstr ""
+
+#: ../../developer_guide.rst:136
+msgid ""
+"**Temporary Operations**: ``MdObjectOps`` and ``MdDatasetOps`` classes "
+"wrap database models for in-memory operations (e.g., Procrustes "
+"alignment) without modifying the database."
+msgstr ""
+
+#: ../../developer_guide.rst:139
+msgid "MVC Pattern in Modan2"
+msgstr ""
+
+#: ../../developer_guide.rst:141
+msgid "**Model** (``MdModel.py``):"
+msgstr ""
+
+#: ../../developer_guide.rst:143
+msgid "Peewee ORM models"
+msgstr ""
+
+#: ../../developer_guide.rst:144
+msgid "Database queries and CRUD operations"
+msgstr ""
+
+#: ../../developer_guide.rst:145
+msgid "Data validation"
+msgstr ""
+
+#: ../../developer_guide.rst:147
+msgid "**View** (``Modan2.py``, ``ModanDialogs.py``, ``ModanComponents.py``):"
+msgstr ""
+
+#: ../../developer_guide.rst:149
+msgid "``ModanMainWindow``: Main application window"
+msgstr ""
+
+#: ../../developer_guide.rst:150
+msgid "``ObjectDialog``, ``NewAnalysisDialog``, etc.: Dialog windows"
+msgstr ""
+
+#: ../../developer_guide.rst:151
+msgid "``ObjectViewer2D``, ``ObjectViewer3D``: Visualization widgets"
+msgstr ""
+
+#: ../../developer_guide.rst:152
+msgid "Qt signals emitted on user actions"
+msgstr ""
+
+#: ../../developer_guide.rst:154
+msgid "**Controller** (``ModanController.py``):"
+msgstr ""
+
+#: ../../developer_guide.rst:156
+msgid "Connects signals from views to model operations"
+msgstr ""
+
+#: ../../developer_guide.rst:157
+msgid "Coordinates between UI and business logic"
+msgstr ""
+
+#: ../../developer_guide.rst:158
+msgid "Handles analysis workflow"
+msgstr ""
+
+#: ../../developer_guide.rst:160
+msgid "**Example Flow**:"
+msgstr ""
+
+#: ../../developer_guide.rst:174
+msgid "File Formats"
+msgstr ""
+
+#: ../../developer_guide.rst:176
+msgid "**TPS Format** (morphometric standard):"
+msgstr ""
+
+#: ../../developer_guide.rst:188
+msgid "**NTS Format** (legacy):"
+msgstr ""
+
+#: ../../developer_guide.rst:197
+msgid "**CSV Format** (custom):"
+msgstr ""
+
+#: ../../developer_guide.rst:204
+msgid "**Internal Storage** (in database):"
+msgstr ""
+
+#: ../../developer_guide.rst:206
+msgid "Landmarks stored as newline-separated \"x,y\" or \"x,y,z\" strings"
+msgstr ""
+
+#: ../../developer_guide.rst:207
+msgid "Parsing done by ``MdObject.unpack_landmark()``"
+msgstr ""
+
+#: ../../developer_guide.rst:208
+msgid "Packing done by ``MdObject.pack_landmark()``"
+msgstr ""
+
+#: ../../developer_guide.rst:211
+msgid "Development Setup"
+msgstr ""
+
+#: ../../developer_guide.rst:214
+msgid "Prerequisites"
+msgstr ""
+
+#: ../../developer_guide.rst:216
+msgid "**Python**: 3.11 or newer"
+msgstr ""
+
+#: ../../developer_guide.rst:217
+msgid "**Git**: For version control"
+msgstr ""
+
+#: ../../developer_guide.rst:218
+msgid "**IDE**: VSCode, PyCharm, or any Python IDE"
+msgstr ""
+
+#: ../../developer_guide.rst:219
+msgid "**Operating System**: Windows, macOS, or Linux"
+msgstr ""
+
+#: ../../developer_guide.rst:222
+msgid "Cloning the Repository"
+msgstr ""
+
+#: ../../developer_guide.rst:230
+msgid "Virtual Environment Setup"
+msgstr ""
+
+#: ../../developer_guide.rst:232
+msgid "**Linux/macOS**:"
+msgstr ""
+
+#: ../../developer_guide.rst:241 ../../developer_guide.rst:550
+msgid "**Windows**:"
+msgstr ""
+
+#: ../../developer_guide.rst:251
+msgid "Running from Source"
+msgstr ""
+
+#: ../../developer_guide.rst:257
+msgid "**Linux/WSL**: If Qt errors occur:"
+msgstr ""
+
+#: ../../developer_guide.rst:264
+msgid "Development Dependencies"
+msgstr ""
+
+#: ../../developer_guide.rst:266
+msgid "Installed via ``config/requirements-dev.txt``:"
+msgstr ""
+
+#: ../../developer_guide.rst:268
+msgid "``pytest``: Testing framework"
+msgstr ""
+
+#: ../../developer_guide.rst:269
+msgid "``pytest-cov``: Code coverage"
+msgstr ""
+
+#: ../../developer_guide.rst:270
+msgid "``pytest-qt``: PyQt5 testing support (future)"
+msgstr ""
+
+#: ../../developer_guide.rst:271
+msgid "``ruff``: Linting (future)"
+msgstr ""
+
+#: ../../developer_guide.rst:274
+msgid "Testing"
+msgstr ""
+
+#: ../../developer_guide.rst:277
+msgid "Test Framework"
+msgstr ""
+
+#: ../../developer_guide.rst:279
+msgid "Modan2 uses **pytest** for automated testing."
+msgstr ""
+
+#: ../../developer_guide.rst:281
+msgid "**Test Structure**:"
+msgstr ""
+
+#: ../../developer_guide.rst:292
+msgid "Running Tests"
+msgstr ""
+
+#: ../../developer_guide.rst:294
+msgid "**Run all tests**:"
+msgstr ""
+
+#: ../../developer_guide.rst:300
+msgid "**Run specific test file**:"
+msgstr ""
+
+#: ../../developer_guide.rst:306
+msgid "**Run with coverage**:"
+msgstr ""
+
+#: ../../developer_guide.rst:313
+msgid "**Verbose output**:"
+msgstr ""
+
+#: ../../developer_guide.rst:320
+msgid "Writing Tests"
+msgstr ""
+
+#: ../../developer_guide.rst:322
+msgid "**Example test** (``tests/test_mdutils.py``):"
+msgstr ""
+
+#: ../../developer_guide.rst:337
+msgid "**Using fixtures** (``tests/conftest.py``):"
+msgstr ""
+
+#: ../../developer_guide.rst:358
+msgid "Code Style Guidelines"
+msgstr ""
+
+#: ../../developer_guide.rst:361
+msgid "General Principles"
+msgstr ""
+
+#: ../../developer_guide.rst:363
+msgid "Follow **PEP 8** conventions"
+msgstr ""
+
+#: ../../developer_guide.rst:364
+msgid "Use descriptive variable names"
+msgstr ""
+
+#: ../../developer_guide.rst:365
+msgid "Add docstrings to classes and functions"
+msgstr ""
+
+#: ../../developer_guide.rst:366
+msgid "Keep functions focused (single responsibility)"
+msgstr ""
+
+#: ../../developer_guide.rst:369
+msgid "Naming Conventions"
+msgstr ""
+
+#: ../../developer_guide.rst:371
+msgid "**Classes**: ``PascalCase`` (e.g., ``ModanController``, ``ObjectDialog``)"
+msgstr ""
+
+#: ../../developer_guide.rst:372
+msgid ""
+"**Functions/Methods**: ``snake_case`` (e.g., ``create_dataset``, "
+"``pack_landmark``)"
+msgstr ""
+
+#: ../../developer_guide.rst:373
+msgid ""
+"**Constants**: ``UPPER_SNAKE_CASE`` (e.g., ``PROGRAM_NAME``, "
+"``DEFAULT_COLOR``)"
+msgstr ""
+
+#: ../../developer_guide.rst:374
+msgid "**Private methods**: ``_leading_underscore`` (e.g., ``_update_view``)"
+msgstr ""
+
+#: ../../developer_guide.rst:375
+msgid "**Qt slots**: ``on_<widget>_<action>`` (e.g., ``on_btnOK_clicked``)"
+msgstr ""
+
+#: ../../developer_guide.rst:378
+msgid "Docstring Format"
+msgstr ""
+
+#: ../../developer_guide.rst:380
+msgid "Use **Google-style docstrings**:"
+msgstr ""
+
+#: ../../developer_guide.rst:403
+msgid "PyQt5 Patterns"
+msgstr ""
+
+#: ../../developer_guide.rst:405
+msgid "**Signal/Slot Connections**:"
+msgstr ""
+
+#: ../../developer_guide.rst:417
+msgid "**Wait Cursor for Long Operations**:"
+msgstr ""
+
+#: ../../developer_guide.rst:434
+msgid "Contributing"
+msgstr ""
+
+#: ../../developer_guide.rst:437
+msgid "Git Workflow"
+msgstr ""
+
+#: ../../developer_guide.rst:439
+msgid "**Fork the repository** on GitHub"
+msgstr ""
+
+#: ../../developer_guide.rst:440
+msgid "**Clone your fork**:"
+msgstr ""
+
+#: ../../developer_guide.rst:447
+msgid "**Create a feature branch**:"
+msgstr ""
+
+#: ../../developer_guide.rst:453
+msgid "**Make changes** and commit:"
+msgstr ""
+
+#: ../../developer_guide.rst:460
+msgid "**Push to your fork**:"
+msgstr ""
+
+#: ../../developer_guide.rst:466
+msgid "**Open a Pull Request** on GitHub"
+msgstr ""
+
+#: ../../developer_guide.rst:469
+msgid "Commit Message Guidelines"
+msgstr ""
+
+#: ../../developer_guide.rst:471
+msgid "Follow conventional commits:"
+msgstr ""
+
+#: ../../developer_guide.rst:481
+msgid "**Types**:"
+msgstr ""
+
+#: ../../developer_guide.rst:483
+msgid "``feat``: New feature"
+msgstr ""
+
+#: ../../developer_guide.rst:484
+msgid "``fix``: Bug fix"
+msgstr ""
+
+#: ../../developer_guide.rst:485
+msgid "``docs``: Documentation changes"
+msgstr ""
+
+#: ../../developer_guide.rst:486
+msgid "``style``: Code style (formatting, no logic change)"
+msgstr ""
+
+#: ../../developer_guide.rst:487
+msgid "``refactor``: Code restructuring"
+msgstr ""
+
+#: ../../developer_guide.rst:488
+msgid "``test``: Adding/updating tests"
+msgstr ""
+
+#: ../../developer_guide.rst:489
+msgid "``chore``: Maintenance tasks"
+msgstr ""
+
+#: ../../developer_guide.rst:491
+msgid "**Examples**:"
+msgstr ""
+
+#: ../../developer_guide.rst:504
+msgid "Pull Request Process"
+msgstr ""
+
+#: ../../developer_guide.rst:506
+msgid "**Describe your changes** clearly in the PR description"
+msgstr ""
+
+#: ../../developer_guide.rst:507
+msgid "**Reference related issues** (e.g., \"Fixes #42\")"
+msgstr ""
+
+#: ../../developer_guide.rst:508
+msgid "**Ensure tests pass**: Run ``pytest`` locally before submitting"
+msgstr ""
+
+#: ../../developer_guide.rst:509
+msgid "**Update documentation** if adding new features"
+msgstr ""
+
+#: ../../developer_guide.rst:510
+msgid "**Respond to review comments** promptly"
+msgstr ""
+
+#: ../../developer_guide.rst:511
+msgid "**Squash commits** if requested (to keep history clean)"
+msgstr ""
+
+#: ../../developer_guide.rst:514
+msgid "Code Review Checklist"
+msgstr ""
+
+#: ../../developer_guide.rst:516
+msgid "Reviewers will check:"
+msgstr ""
+
+#: ../../developer_guide.rst:518
+msgid "[ ] Code follows style guidelines"
+msgstr ""
+
+#: ../../developer_guide.rst:519
+msgid "[ ] New features have tests"
+msgstr ""
+
+#: ../../developer_guide.rst:520
+msgid "[ ] Documentation updated (if needed)"
+msgstr ""
+
+#: ../../developer_guide.rst:521
+msgid "[ ] No breaking changes (or clearly documented)"
+msgstr ""
+
+#: ../../developer_guide.rst:522
+msgid "[ ] Performance considerations addressed"
+msgstr ""
+
+#: ../../developer_guide.rst:523
+msgid "[ ] No security vulnerabilities introduced"
+msgstr ""
+
+#: ../../developer_guide.rst:526
+msgid "Building Executables"
+msgstr ""
+
+#: ../../developer_guide.rst:529
+msgid "PyInstaller Configuration"
+msgstr ""
+
+#: ../../developer_guide.rst:531
+msgid "Modan2 uses PyInstaller to create standalone executables."
+msgstr ""
+
+#: ../../developer_guide.rst:533
+msgid "**Build script**: ``build.py``"
+msgstr ""
+
+#: ../../developer_guide.rst:535
+msgid "**Running the build**:"
+msgstr ""
+
+#: ../../developer_guide.rst:541
+msgid "**Output**:"
+msgstr ""
+
+#: ../../developer_guide.rst:543
+msgid "``dist/Modan2/`` - Standalone application folder"
+msgstr ""
+
+#: ../../developer_guide.rst:544
+msgid "``dist/Modan2.exe`` - Executable (Windows)"
+msgstr ""
+
+#: ../../developer_guide.rst:545
+msgid "``dist/Modan2`` - Executable (Linux/macOS)"
+msgstr ""
+
+#: ../../developer_guide.rst:548
+msgid "Platform-Specific Builds"
+msgstr ""
+
+#: ../../developer_guide.rst:557
+msgid "**macOS**:"
+msgstr ""
+
+#: ../../developer_guide.rst:564
+msgid "**Linux**:"
+msgstr ""
+
+#: ../../developer_guide.rst:571
+msgid ""
+"**Note**: Cross-platform builds are not supported - build on the target "
+"platform."
+msgstr ""
+
+#: ../../developer_guide.rst:574
+msgid "InnoSetup Installer (Windows)"
+msgstr ""
+
+#: ../../developer_guide.rst:576
+msgid "For Windows installers:"
+msgstr ""
+
+#: ../../developer_guide.rst:578
+msgid "Install InnoSetup from https://jrsoftware.org/isinfo.php"
+msgstr ""
+
+#: ../../developer_guide.rst:579
+msgid "Build executable: ``python build.py``"
+msgstr ""
+
+#: ../../developer_guide.rst:580
+msgid "Compile installer:"
+msgstr ""
+
+#: ../../developer_guide.rst:586
+msgid "Output: ``Output/Modan2-Setup.exe``"
+msgstr ""
+
+#: ../../developer_guide.rst:589
+msgid "Creating Releases"
+msgstr ""
+
+#: ../../developer_guide.rst:591
+msgid "**Update version** in ``MdUtils.py``:"
+msgstr ""
+
+#: ../../developer_guide.rst:597
+msgid "**Update CHANGELOG.md** with release notes"
+msgstr ""
+
+#: ../../developer_guide.rst:599
+msgid "**Commit changes**:"
+msgstr ""
+
+#: ../../developer_guide.rst:607
+msgid "**Build executables** for Windows, macOS, Linux"
+msgstr ""
+
+#: ../../developer_guide.rst:609
+msgid "**Create GitHub Release**:"
+msgstr ""
+
+#: ../../developer_guide.rst:611
+msgid "Go to Releases → Draft a new release"
+msgstr ""
+
+#: ../../developer_guide.rst:612
+msgid "Tag: ``v0.1.5``"
+msgstr ""
+
+#: ../../developer_guide.rst:613
+msgid "Title: ``Modan2 v0.1.5``"
+msgstr ""
+
+#: ../../developer_guide.rst:614
+msgid "Description: Copy from CHANGELOG.md"
+msgstr ""
+
+#: ../../developer_guide.rst:615
+msgid "Attach built executables"
+msgstr ""
+
+#: ../../developer_guide.rst:617
+msgid "**Publish release**"
+msgstr ""
+
+#: ../../developer_guide.rst:620
+msgid "Database Migrations"
+msgstr ""
+
+#: ../../developer_guide.rst:622
+msgid "Modan2 uses ``peewee-migrate`` for schema changes."
+msgstr ""
+
+#: ../../developer_guide.rst:625
+msgid "Creating a Migration"
+msgstr ""
+
+#: ../../developer_guide.rst:627
+msgid "When you modify database models:"
+msgstr ""
+
+#: ../../developer_guide.rst:633
+msgid "**Example**:"
+msgstr ""
+
+#: ../../developer_guide.rst:639
+msgid "This creates a new migration file in ``migrations/``."
+msgstr ""
+
+#: ../../developer_guide.rst:641
+msgid "**Edit the migration file** to define changes:"
+msgstr ""
+
+#: ../../developer_guide.rst:652
+msgid "Running Migrations"
+msgstr ""
+
+#: ../../developer_guide.rst:654
+msgid "Apply pending migrations:"
+msgstr ""
+
+#: ../../developer_guide.rst:660
+msgid "Rollback last migration:"
+msgstr ""
+
+#: ../../developer_guide.rst:667
+msgid "Advanced Topics"
+msgstr ""
+
+#: ../../developer_guide.rst:670
+msgid "Custom Widgets"
+msgstr ""
+
+#: ../../developer_guide.rst:672
+msgid "Creating custom PyQt5 widgets (see ``ModanComponents.py``):"
+msgstr ""
+
+#: ../../developer_guide.rst:696
+msgid "Statistical Extensions"
+msgstr ""
+
+#: ../../developer_guide.rst:698
+msgid "Adding new statistical methods (in ``MdStatistics.py``):"
+msgstr ""
+
+#: ../../developer_guide.rst:724
+msgid "Plugin System (Future)"
+msgstr ""
+
+#: ../../developer_guide.rst:726
+msgid "Modan2 may support plugins in future versions:"
+msgstr ""
+
+#: ../../developer_guide.rst:740
+msgid "Profiling and Optimization"
+msgstr ""
+
+#: ../../developer_guide.rst:742
+msgid "**Profiling with cProfile**:"
+msgstr ""
+
+#: ../../developer_guide.rst:751
+msgid "**Memory profiling**:"
+msgstr ""
+
+#: ../../developer_guide.rst:759
+msgid "Debugging"
+msgstr ""
+
+#: ../../developer_guide.rst:761
+msgid "**Enable detailed logging**:"
+msgstr ""
+
+#: ../../developer_guide.rst:768
+msgid "**Qt debugging**:"
+msgstr ""
+
+#: ../../developer_guide.rst:776
+msgid "Resources"
+msgstr ""
+
+#: ../../developer_guide.rst:779
+msgid "Documentation"
+msgstr ""
+
+#: ../../developer_guide.rst:781
+msgid ""
+"`PyQt5 Documentation "
+"<https://www.riverbankcomputing.com/static/Docs/PyQt5/>`_"
+msgstr ""
+
+#: ../../developer_guide.rst:782
+msgid "`Peewee ORM Documentation <http://docs.peewee-orm.com/>`_"
+msgstr ""
+
+#: ../../developer_guide.rst:783
+msgid "`NumPy Documentation <https://numpy.org/doc/>`_"
+msgstr ""
+
+#: ../../developer_guide.rst:784
+msgid "`SciPy Documentation <https://docs.scipy.org/doc/scipy/>`_"
+msgstr ""
+
+#: ../../developer_guide.rst:787
+msgid "Morphometric Analysis"
+msgstr ""
+
+#: ../../developer_guide.rst:789
+msgid ""
+"`Geometric Morphometrics for Biologists <https://www.elsevier.com/books"
+"/geometric-morphometrics-for-biologists/zelditch/978-0-12-386903-6>`_ by "
+"Zelditch et al."
+msgstr ""
+
+#: ../../developer_guide.rst:790
+msgid ""
+"`Morphometrics with R <https://www.springer.com/gp/book/9780387777894>`_ "
+"by Claude"
+msgstr ""
+
+#: ../../developer_guide.rst:793
+msgid "Community"
+msgstr ""
+
+#: ../../developer_guide.rst:795
+msgid "**GitHub Issues**: https://github.com/jikhanjung/Modan2/issues"
+msgstr ""
+
+#: ../../developer_guide.rst:796
+msgid "**Discussions**: https://github.com/jikhanjung/Modan2/discussions"
+msgstr ""
+
+#: ../../developer_guide.rst:799
+msgid "License"
+msgstr ""
+
+#: ../../developer_guide.rst:801
+msgid "Modan2 is released under the **MIT License**."
+msgstr ""
+
+#: ../../developer_guide.rst:803
+msgid "You are free to:"
+msgstr ""
+
+#: ../../developer_guide.rst:805
+msgid "Use commercially"
+msgstr ""
+
+#: ../../developer_guide.rst:806
+msgid "Modify"
+msgstr ""
+
+#: ../../developer_guide.rst:807
+msgid "Distribute"
+msgstr ""
+
+#: ../../developer_guide.rst:808
+msgid "Sublicense"
+msgstr ""
+
+#: ../../developer_guide.rst:810
+msgid ""
+"Under the condition that you include the original copyright and license "
+"notice."
+msgstr ""
+
+#: ../../developer_guide.rst:812
+msgid ""
+"See the `LICENSE "
+"<https://github.com/jikhanjung/Modan2/blob/main/LICENSE>`_ file for "
+"details."
+msgstr ""
+

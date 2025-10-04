@@ -1,0 +1,2 @@
+# This file tells GitHub Pages not to process the site with Jekyll
+# Required for Sphinx documentation with underscore directories (_static, _sources)

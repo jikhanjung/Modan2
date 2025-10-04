@@ -784,10 +784,16 @@ class ObjectDialog(QDialog):
         self.read_settings()
         #self.move(self.parent.pos()+QPoint(50,50))
         close_shortcut = QShortcut(QKeySequence("Ctrl+W"), self)
-        close_shortcut.activated.connect(self.close) 
+        close_shortcut.activated.connect(self.close)
 
         self.status_bar = QStatusBar()
         self.landmark_list = []
+
+        # Missing landmark estimation support
+        self.original_landmark_list = []
+        self.estimated_landmark_list = None
+        self._aligned_mean_cache = None
+        self.show_estimated = True
 
         self.hsplitter = QSplitter(Qt.Horizontal)
         self.vsplitter = QSplitter(Qt.Vertical)
@@ -927,6 +933,10 @@ class ObjectDialog(QDialog):
         self.cbxShowPolygon = QCheckBox()
         self.cbxShowPolygon.setText(self.tr("Polygon"))
         self.cbxShowPolygon.setChecked(True)
+        self.cbxShowEstimated = QCheckBox()
+        self.cbxShowEstimated.setText(self.tr("Show Estimated"))
+        self.cbxShowEstimated.setChecked(True)
+        self.cbxShowEstimated.stateChanged.connect(self.toggle_estimation)
         self.cbxShowBaseline = QCheckBox()
         self.cbxShowBaseline.setText(self.tr("Baseline"))
         self.cbxShowBaseline.setChecked(True)
@@ -956,6 +966,7 @@ class ObjectDialog(QDialog):
         self.right_middle_layout.addWidget(self.cbxShowIndex)
         self.right_middle_layout.addWidget(self.cbxShowWireframe)
         self.right_middle_layout.addWidget(self.cbxShowPolygon)
+        self.right_middle_layout.addWidget(self.cbxShowEstimated)
         self.right_middle_layout.addWidget(self.cbxShowBaseline)
         self.right_middle_layout.addWidget(self.cbxShowModel)
         self.right_middle_layout.addWidget(self.cbxAutoRotate)
@@ -1144,6 +1155,16 @@ class ObjectDialog(QDialog):
         self.object_view.show_wireframe = self.cbxShowWireframe.isChecked()
         self.object_view.update()
 
+    def toggle_estimation(self, state):
+        """Toggle display of estimated missing landmarks"""
+        self.show_estimated = (state == Qt.Checked)
+
+        # Re-process the current object to update estimation
+        if self.object is not None:
+            self.set_object(self.object)
+            self.show_landmarks()
+            self.object_view.update()
+
     def show_polygon_state_changed(self, int):
         self.object_view.show_polygon = self.cbxShowPolygon.isChecked()
         self.object_view.update()
@@ -1199,6 +1220,148 @@ class ObjectDialog(QDialog):
         if self.edtObjectName.text() == "":
             self.edtObjectName.setText(name)
 
+    def compute_aligned_mean(self):
+        """Compute aligned mean shape from complete specimens.
+
+        Returns:
+            MdObjectOps with average shape, or None if insufficient data
+        """
+        if self._aligned_mean_cache is not None:
+            return self._aligned_mean_cache
+
+        if self.dataset is None:
+            return None
+
+        # Collect complete objects (no missing landmarks)
+        complete_objects = []
+        for obj in self.dataset.object_list:
+            obj.unpack_landmark()
+            has_missing = any(
+                lm[0] is None or lm[1] is None
+                for lm in obj.landmark_list
+            )
+            if not has_missing:
+                complete_objects.append(obj)
+
+        if len(complete_objects) < 2:
+            return None
+
+        # Create temporary MdDatasetOps for Procrustes
+        from MdModel import MdDatasetOps, MdDataset, MdObjectOps
+
+        temp_dataset = MdDataset()
+        temp_dataset.dimension = self.dataset.dimension
+        temp_dataset.id = self.dataset.id
+
+        temp_ds_ops = MdDatasetOps(temp_dataset)
+        temp_ds_ops.object_list = [MdObjectOps(obj) for obj in complete_objects]
+        temp_ds_ops.dimension = self.dataset.dimension
+
+        # Run Procrustes (no missing landmarks, should be fast)
+        if not temp_ds_ops.procrustes_superimposition():
+            return None
+
+        # Get average shape
+        self._aligned_mean_cache = temp_ds_ops.get_average_shape()
+        return self._aligned_mean_cache
+
+    def estimate_missing_for_object(self, obj):
+        """Estimate missing landmarks for given object using aligned mean shape.
+
+        The mean shape is computed from Procrustes-aligned complete specimens,
+        then transformed to match the scale and position of the current object.
+
+        Args:
+            obj: MdObject with potential missing landmarks
+
+        Returns:
+            List of landmarks with missing values estimated, or original if estimation fails
+        """
+        import logging
+        import numpy as np
+        logger = logging.getLogger(__name__)
+
+        if obj is None:
+            return []
+
+        obj.unpack_landmark()
+
+        # Check if there are missing landmarks
+        has_missing = any(
+            lm[0] is None or lm[1] is None
+            for lm in obj.landmark_list
+        )
+
+        if not has_missing:
+            return obj.landmark_list
+
+        # Get aligned mean shape (Procrustes-normalized, unit size)
+        mean_shape = self.compute_aligned_mean()
+        if mean_shape is None:
+            # Cannot estimate, return original
+            logger.warning("Cannot compute aligned mean - insufficient complete specimens")
+            return obj.landmark_list
+
+        # Extract valid (non-missing) landmarks from current object
+        valid_indices = []
+        current_valid = []
+        mean_valid = []
+
+        for lm_idx in range(len(obj.landmark_list)):
+            lm = obj.landmark_list[lm_idx]
+            if lm[0] is not None and lm[1] is not None:
+                valid_indices.append(lm_idx)
+                current_valid.append([lm[0], lm[1]])
+                if lm_idx < len(mean_shape.landmark_list):
+                    mean_lm = mean_shape.landmark_list[lm_idx]
+                    if mean_lm[0] is not None and mean_lm[1] is not None:
+                        mean_valid.append([mean_lm[0], mean_lm[1]])
+
+        if len(valid_indices) < 2:
+            logger.warning(f"Not enough valid landmarks to estimate scale/position ({len(valid_indices)} found)")
+            return obj.landmark_list
+
+        # Calculate transformation: mean shape → current object
+        current_valid = np.array(current_valid)
+        mean_valid = np.array(mean_valid)
+
+        # Compute centroids
+        current_centroid = np.mean(current_valid, axis=0)
+        mean_centroid = np.mean(mean_valid, axis=0)
+
+        # Compute centroid sizes (scale)
+        current_centered = current_valid - current_centroid
+        mean_centered = mean_valid - mean_centroid
+
+        current_size = np.sqrt(np.sum(current_centered ** 2))
+        mean_size = np.sqrt(np.sum(mean_centered ** 2))
+
+        scale_factor = current_size / mean_size if mean_size > 0 else 1.0
+
+        logger.info(f"Transformation: scale={scale_factor:.4f}, centroid_shift={current_centroid - mean_centroid}")
+
+        # Create result with estimated missing landmarks
+        import copy
+        result_landmarks = copy.deepcopy(obj.landmark_list)
+        imputed_count = 0
+
+        for lm_idx in range(len(result_landmarks)):
+            lm = result_landmarks[lm_idx]
+            if lm[0] is None or lm[1] is None:
+                # Get mean shape landmark
+                if lm_idx < len(mean_shape.landmark_list):
+                    mean_lm = mean_shape.landmark_list[lm_idx]
+                    if mean_lm[0] is not None and mean_lm[1] is not None:
+                        # Transform: (mean_lm - mean_centroid) * scale + current_centroid
+                        mean_point = np.array([mean_lm[0], mean_lm[1]])
+                        transformed = (mean_point - mean_centroid) * scale_factor + current_centroid
+
+                        result_landmarks[lm_idx] = [float(transformed[0]), float(transformed[1])]
+                        imputed_count += 1
+
+        logger.info(f"Imputed {imputed_count} missing landmarks for object {obj.object_name}")
+        return result_landmarks
+
     def set_dataset(self, dataset):
         #print("object dialog set_dataset", dataset.dataset_name)
         if dataset is None:
@@ -1207,6 +1370,9 @@ class ObjectDialog(QDialog):
             return
         self.dataset = dataset
         self.lblDataset.setText(dataset.dataset_name)
+
+        # Invalidate cache when dataset changes
+        self._aligned_mean_cache = None
 
         header = self.edtLandmarkStr.horizontalHeader()    
         if self.dataset.dimension == 2:
@@ -1256,7 +1422,25 @@ class ObjectDialog(QDialog):
             self.edtObjectDesc.setText(object.object_desc)
             #self.edtLandmarkStr.setText(object.landmark_str)
             object.unpack_landmark()
-            self.landmark_list = copy.deepcopy(object.landmark_list)
+
+            # Store original landmark list
+            self.original_landmark_list = copy.deepcopy(object.landmark_list)
+
+            # Check if object has missing landmarks
+            has_missing = any(
+                lm[0] is None or lm[1] is None
+                for lm in object.landmark_list
+            )
+
+            # Estimate missing landmarks if needed and enabled
+            if has_missing and self.show_estimated:
+                self.estimated_landmark_list = self.estimate_missing_for_object(object)
+            else:
+                self.estimated_landmark_list = None
+
+            # Always use original for table display (keep "MISSING" text)
+            # Estimated values are only used for visualization in viewer
+            self.landmark_list = self.original_landmark_list
             # Use object's dataset if self.dataset is None
             dataset_to_use = self.dataset if self.dataset is not None else object.dataset
             if dataset_to_use is not None:
@@ -1544,6 +1728,9 @@ class ObjectDialog(QDialog):
             if lm[0] is None:
                 item_x = QTableWidgetItem("MISSING")
                 item_x.setForeground(Qt.red)
+                font = QFont()
+                font.setBold(True)
+                item_x.setFont(font)
             else:
                 item_x = QTableWidgetItem(str(float(lm[0])*1.0))
             item_x.setTextAlignment(Qt.AlignRight|Qt.AlignVCenter)
@@ -1553,6 +1740,9 @@ class ObjectDialog(QDialog):
             if lm[1] is None:
                 item_y = QTableWidgetItem("MISSING")
                 item_y.setForeground(Qt.red)
+                font = QFont()
+                font.setBold(True)
+                item_y.setFont(font)
             else:
                 item_y = QTableWidgetItem(str(float(lm[1])*1.0))
             item_y.setTextAlignment(Qt.AlignRight|Qt.AlignVCenter)
@@ -1565,6 +1755,9 @@ class ObjectDialog(QDialog):
                 else:
                     item_z = QTableWidgetItem("MISSING")
                     item_z.setForeground(Qt.red)
+                    font = QFont()
+                    font.setBold(True)
+                    item_z.setFont(font)
                 item_z.setTextAlignment(Qt.AlignRight|Qt.AlignVCenter)
                 self.edtLandmarkStr.setItem(idx, 2, item_z)
         

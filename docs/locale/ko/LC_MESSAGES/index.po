@@ -1,0 +1,253 @@
+# Modan2 Documentation - Korean Translation
+# Copyright (C) 2023-2025, Modan2 Contributors
+# This file is distributed under the same license as the Modan2 package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Modan2 \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-04 11:41+0900\n"
+"PO-Revision-Date: 2025-10-04 12:00+0900\n"
+"Last-Translator: Modan2 Contributors\n"
+"Language: ko\n"
+"Language-Team: ko <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: ../../index.rst:8
+msgid "Contents:"
+msgstr "목차:"
+
+#: ../../index.rst:2
+msgid "Modan2 Documentation"
+msgstr "Modan2 문서"
+
+#: ../../index.rst:4
+msgid "Welcome to Modan2's documentation!"
+msgstr "Modan2 문서에 오신 것을 환영합니다!"
+
+#: ../../index.rst:6
+msgid ""
+"Modan2 is a user-friendly desktop application that empowers researchers "
+"to explore and understand shape variations through geometric "
+"morphometrics. It streamlines the entire workflow from data acquisition "
+"(2D/3D) to statistical analysis and visualization."
+msgstr ""
+"Modan2는 기하학적 형태분석을 통해 연구자들이 형태 변이를 탐색하고 이해할 수 있도록 "
+"돕는 사용자 친화적인 데스크톱 애플리케이션입니다. 데이터 수집(2D/3D)부터 통계 분석 "
+"및 시각화에 이르는 전체 워크플로우를 간소화합니다."
+
+#: ../../index.rst:18
+msgid "Features"
+msgstr "주요 기능"
+
+#: ../../index.rst:20
+msgid ""
+"**Hierarchical Data Management**: Organize data into nested datasets with"
+" a clear structure"
+msgstr "**계층적 데이터 관리**: 명확한 구조로 데이터를 중첩된 데이터셋으로 구성"
+
+#: ../../index.rst:21
+msgid ""
+"**2D & 3D Visualization**: Integrated viewers for 2D images and 3D models"
+" with landmark plotting"
+msgstr "**2D 및 3D 시각화**: 랜드마크 플로팅을 포함한 2D 이미지 및 3D 모델용 통합 뷰어"
+
+#: ../../index.rst:22
+msgid ""
+"**Statistical Analysis**: Perform Principal Component Analysis (PCA), "
+"Canonical Variate Analysis (CVA), and MANOVA"
+msgstr "**통계 분석**: 주성분 분석(PCA), 정준 판별 분석(CVA), 다변량 분산 분석(MANOVA) 수행"
+
+#: ../../index.rst:23
+msgid ""
+"**Missing Landmark Support**: Advanced handling of incomplete landmark "
+"data with visual estimation"
+msgstr "**결측 랜드마크 지원**: 시각적 추정 기능이 있는 불완전한 랜드마크 데이터의 고급 처리"
+
+#: ../../index.rst:24
+msgid ""
+"**Data Import/Export**: Supports various file types (TPS, NTS, OBJ, PLY, "
+"STL) with drag-and-drop"
+msgstr "**데이터 가져오기/내보내기**: 드래그 앤 드롭으로 다양한 파일 형식(TPS, NTS, OBJ, PLY, STL) 지원"
+
+#: ../../index.rst:25
+msgid ""
+"**Persistent Storage**: All data and analyses saved in a local SQLite "
+"database managed by Peewee ORM"
+msgstr "**영구 저장소**: 모든 데이터와 분석 결과는 Peewee ORM으로 관리되는 로컬 SQLite 데이터베이스에 저장"
+
+#: ../../index.rst:28
+msgid "Quick Start"
+msgstr "빠른 시작"
+
+#: ../../index.rst:31
+msgid "Installation"
+msgstr "설치"
+
+#: ../../index.rst:33
+msgid ""
+"Download the latest version from the `releases page "
+"<https://github.com/jikhanjung/Modan2/releases>`_."
+msgstr "`릴리즈 페이지 <https://github.com/jikhanjung/Modan2/releases>`_ 에서 최신 버전을 다운로드하세요."
+
+#: ../../index.rst:35
+msgid "For Windows:"
+msgstr "Windows:"
+
+#: ../../index.rst:36
+msgid "Download and run the installer (``Modan2-Setup.exe``)"
+msgstr "인스톨러(``Modan2-Setup.exe``)를 다운로드하여 실행"
+
+#: ../../index.rst:38
+msgid "For Linux/macOS:"
+msgstr "Linux/macOS:"
+
+#: ../../index.rst:39
+msgid "Download the appropriate package or run from source"
+msgstr "적절한 패키지를 다운로드하거나 소스에서 실행"
+
+#: ../../index.rst:42
+msgid "Basic Usage"
+msgstr "기본 사용법"
+
+#: ../../index.rst:44
+msgid "**Create a New Dataset**"
+msgstr "**새 데이터셋 만들기**"
+
+#: ../../index.rst:46
+msgid ""
+"Click \"New Dataset\" or press ``Ctrl+N`` to create a dataset for your "
+"morphometric study."
+msgstr "\"새 데이터셋\"을 클릭하거나 ``Ctrl+N``을 눌러 형태분석 연구용 데이터셋을 만드세요."
+
+#: ../../index.rst:48
+msgid "**Import Objects**"
+msgstr "**객체 가져오기**"
+
+#: ../../index.rst:50
+msgid ""
+"Drag and drop 2D images or 3D models into your dataset, or use File → "
+"Import to load landmark files (TPS, NTS)."
+msgstr ""
+"2D 이미지나 3D 모델을 데이터셋에 드래그 앤 드롭하거나, 파일 → 가져오기를 사용하여 "
+"랜드마크 파일(TPS, NTS)을 불러오세요."
+
+#: ../../index.rst:52
+msgid "**Place Landmarks**"
+msgstr "**랜드마크 배치**"
+
+#: ../../index.rst:54
+msgid ""
+"Double-click an object to open the Object Dialog, then click on the "
+"image/model to place landmarks."
+msgstr "객체를 더블클릭하여 객체 대화상자를 열고, 이미지/모델을 클릭하여 랜드마크를 배치하세요."
+
+#: ../../index.rst:56
+msgid "**Run Analysis**"
+msgstr "**분석 실행**"
+
+#: ../../index.rst:58
+msgid "Select your dataset and click \"Analyze Dataset\" to perform:"
+msgstr "데이터셋을 선택하고 \"데이터셋 분석\"을 클릭하여 다음을 수행하세요:"
+
+#: ../../index.rst:60
+msgid "Procrustes superimposition (aligns shapes)"
+msgstr "Procrustes 중첩 (형태 정렬)"
+
+#: ../../index.rst:61
+msgid "Principal Component Analysis (PCA)"
+msgstr "주성분 분석 (PCA)"
+
+#: ../../index.rst:62
+msgid "Canonical Variate Analysis (CVA)"
+msgstr "정준 판별 분석 (CVA)"
+
+#: ../../index.rst:63
+msgid "MANOVA (multivariate analysis of variance)"
+msgstr "다변량 분산 분석 (MANOVA)"
+
+#: ../../index.rst:65
+msgid "**Explore Results**"
+msgstr "**결과 탐색**"
+
+#: ../../index.rst:67
+msgid ""
+"View PC plots, shape variations, and statistical outputs in the Data "
+"Exploration dialog."
+msgstr "데이터 탐색 대화상자에서 PC 플롯, 형태 변이, 통계 출력을 확인하세요."
+
+#: ../../index.rst:69
+msgid "**Keyboard Shortcuts**:"
+msgstr "**키보드 단축키**:"
+
+#: ../../index.rst:71
+msgid "``Ctrl+N`` - New Dataset"
+msgstr "``Ctrl+N`` - 새 데이터셋"
+
+#: ../../index.rst:72
+msgid "``Ctrl+Shift+N`` - New Object"
+msgstr "``Ctrl+Shift+N`` - 새 객체"
+
+#: ../../index.rst:73
+msgid "``Ctrl+S`` - Save changes"
+msgstr "``Ctrl+S`` - 변경사항 저장"
+
+#: ../../index.rst:74
+msgid "``Ctrl+O`` - Open database"
+msgstr "``Ctrl+O`` - 데이터베이스 열기"
+
+#: ../../index.rst:75
+msgid "``Delete`` - Delete selected items"
+msgstr "``Delete`` - 선택한 항목 삭제"
+
+#: ../../index.rst:77
+msgid "For more detailed instructions, see the :doc:`user_guide`."
+msgstr "자세한 사용법은 :doc:`user_guide` 를 참조하세요."
+
+#: ../../index.rst:80
+msgid "Technology Stack"
+msgstr "기술 스택"
+
+#: ../../index.rst:82
+msgid "**Language**: Python 3.11+"
+msgstr "**언어**: Python 3.11+"
+
+#: ../../index.rst:83
+msgid "**GUI Framework**: PyQt5"
+msgstr "**GUI 프레임워크**: PyQt5"
+
+#: ../../index.rst:84
+msgid "**Core Libraries**:"
+msgstr "**핵심 라이브러리**:"
+
+#: ../../index.rst:85
+msgid "**Database ORM**: Peewee"
+msgstr "**데이터베이스 ORM**: Peewee"
+
+#: ../../index.rst:86
+msgid "**Numerical/Scientific**: NumPy, SciPy, Pandas, Statsmodels"
+msgstr "**수치/과학**: NumPy, SciPy, Pandas, Statsmodels"
+
+#: ../../index.rst:87
+msgid "**3D Graphics & Image Processing**: PyOpenGL, Trimesh, Pillow, OpenCV"
+msgstr "**3D 그래픽스 및 이미지 처리**: PyOpenGL, Trimesh, Pillow, OpenCV"
+
+#: ../../index.rst:90
+msgid "Indices and tables"
+msgstr "색인 및 표"
+
+#: ../../index.rst:92
+msgid ":ref:`genindex`"
+msgstr ":ref:`genindex`"
+
+#: ../../index.rst:93
+msgid ":ref:`modindex`"
+msgstr ":ref:`modindex`"
+
+#: ../../index.rst:94
+msgid ":ref:`search`"
+msgstr ":ref:`search`"

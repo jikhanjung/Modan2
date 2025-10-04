@@ -1,0 +1,412 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2023-2025, Modan2 Contributors
+# This file is distributed under the same license as the Modan2 package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Modan2 \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-04 11:41+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ko\n"
+"Language-Team: ko <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: ../../installation.rst:2
+msgid "Installation"
+msgstr ""
+
+#: ../../installation.rst:4
+msgid ""
+"This guide provides instructions for installing Modan2 on different "
+"operating systems."
+msgstr ""
+
+#: ../../installation.rst:7
+msgid "System Requirements"
+msgstr ""
+
+#: ../../installation.rst:9
+msgid "**Minimum Requirements**:"
+msgstr ""
+
+#: ../../installation.rst:11
+msgid ""
+"**Operating System**: Windows 10/11, macOS 10.14+, or Linux (Ubuntu "
+"20.04+, Fedora 34+)"
+msgstr ""
+
+#: ../../installation.rst:12
+msgid "**Python**: 3.11 or newer (for source installation)"
+msgstr ""
+
+#: ../../installation.rst:13
+msgid "**RAM**: 4 GB (8 GB recommended for large datasets)"
+msgstr ""
+
+#: ../../installation.rst:14
+msgid "**Disk Space**: 500 MB for application + space for your data"
+msgstr ""
+
+#: ../../installation.rst:15
+msgid "**Display**: 1280x720 resolution (1920x1080 recommended)"
+msgstr ""
+
+#: ../../installation.rst:17
+msgid "**For 3D Visualization**:"
+msgstr ""
+
+#: ../../installation.rst:19
+msgid "OpenGL 3.3+ compatible graphics card"
+msgstr ""
+
+#: ../../installation.rst:20
+msgid "Up-to-date graphics drivers"
+msgstr ""
+
+#: ../../installation.rst:23
+msgid "Installation Methods"
+msgstr ""
+
+#: ../../installation.rst:26
+msgid "Windows Installation"
+msgstr ""
+
+#: ../../installation.rst:28
+msgid "**Option 1: Using the Installer (Recommended)**"
+msgstr ""
+
+#: ../../installation.rst:30
+msgid ""
+"Download the latest installer from the `releases page "
+"<https://github.com/jikhanjung/Modan2/releases>`_"
+msgstr ""
+
+#: ../../installation.rst:31
+msgid "Run ``Modan2-Setup.exe``"
+msgstr ""
+
+#: ../../installation.rst:32
+msgid "Follow the installation wizard"
+msgstr ""
+
+#: ../../installation.rst:33
+msgid "Launch Modan2 from the Start Menu or desktop shortcut"
+msgstr ""
+
+#: ../../installation.rst:36
+msgid ""
+"Windows Defender may show a warning for unsigned executables. Click "
+"\"More info\" → \"Run anyway\" if you trust the source."
+msgstr ""
+
+#: ../../installation.rst:38
+msgid "**Option 2: Portable Version**"
+msgstr ""
+
+#: ../../installation.rst:40
+msgid "Download ``Modan2-portable-windows.zip``"
+msgstr ""
+
+#: ../../installation.rst:41
+msgid "Extract to any folder"
+msgstr ""
+
+#: ../../installation.rst:42
+msgid "Run ``Modan2.exe``"
+msgstr ""
+
+#: ../../installation.rst:44
+msgid ""
+"No installation required - useful for USB drives or restricted "
+"environments."
+msgstr ""
+
+#: ../../installation.rst:46
+msgid "**Option 3: From Source**"
+msgstr ""
+
+#: ../../installation.rst:62
+msgid "macOS Installation"
+msgstr ""
+
+#: ../../installation.rst:64
+msgid "**Option 1: Application Bundle**"
+msgstr ""
+
+#: ../../installation.rst:66
+msgid ""
+"Download ``Modan2.dmg`` from the `releases page "
+"<https://github.com/jikhanjung/Modan2/releases>`_"
+msgstr ""
+
+#: ../../installation.rst:67
+msgid "Open the DMG file"
+msgstr ""
+
+#: ../../installation.rst:68
+msgid "Drag ``Modan2.app`` to your Applications folder"
+msgstr ""
+
+#: ../../installation.rst:69
+msgid "Launch from Applications"
+msgstr ""
+
+#: ../../installation.rst:72
+msgid ""
+"On first launch, right-click the app and select \"Open\" to bypass "
+"Gatekeeper warnings for unsigned applications."
+msgstr ""
+
+#: ../../installation.rst:74
+msgid "**Option 2: From Source**"
+msgstr ""
+
+#: ../../installation.rst:92
+msgid "Linux Installation"
+msgstr ""
+
+#: ../../installation.rst:94
+msgid "**Ubuntu/Debian**"
+msgstr ""
+
+#: ../../installation.rst:117
+msgid "**Fedora/RHEL**"
+msgstr ""
+
+#: ../../installation.rst:138
+msgid "**Arch Linux**"
+msgstr ""
+
+#: ../../installation.rst:156
+msgid "WSL (Windows Subsystem for Linux)"
+msgstr ""
+
+#: ../../installation.rst:158
+msgid "Modan2 can run on WSL with X11 forwarding:"
+msgstr ""
+
+#: ../../installation.rst:173
+msgid "If you encounter Qt platform plugin errors, use:"
+msgstr ""
+
+#: ../../installation.rst:180
+msgid "Troubleshooting"
+msgstr ""
+
+#: ../../installation.rst:183
+msgid "Qt Platform Plugin Error (Linux/WSL)"
+msgstr ""
+
+#: ../../installation.rst:185
+msgid "**Error**: ``could not load the Qt platform plugin \"xcb\"``"
+msgstr ""
+
+#: ../../installation.rst:187 ../../installation.rst:205
+#: ../../installation.rst:223 ../../installation.rst:241
+msgid "**Solution**:"
+msgstr ""
+
+#: ../../installation.rst:201
+msgid "OpenGL/GLUT Errors"
+msgstr ""
+
+#: ../../installation.rst:203
+msgid "**Error**: ``ImportError: Unable to load OpenGL library``"
+msgstr ""
+
+#: ../../installation.rst:219
+msgid "Missing Python Dependencies"
+msgstr ""
+
+#: ../../installation.rst:221
+msgid "**Error**: ``ModuleNotFoundError: No module named 'PyQt5'``"
+msgstr ""
+
+#: ../../installation.rst:237
+msgid "Database Migration Issues"
+msgstr ""
+
+#: ../../installation.rst:239
+msgid "**Error**: ``peewee.OperationalError: no such column``"
+msgstr ""
+
+#: ../../installation.rst:254
+msgid "Performance Issues"
+msgstr ""
+
+#: ../../installation.rst:256
+msgid "**Slow startup or rendering**:"
+msgstr ""
+
+#: ../../installation.rst:258
+msgid "Update graphics drivers"
+msgstr ""
+
+#: ../../installation.rst:259
+msgid "Reduce dataset size (split large datasets)"
+msgstr ""
+
+#: ../../installation.rst:260
+msgid "Close other GPU-intensive applications"
+msgstr ""
+
+#: ../../installation.rst:261
+msgid "Increase system RAM if working with large 3D models"
+msgstr ""
+
+#: ../../installation.rst:263
+msgid "**High memory usage**:"
+msgstr ""
+
+#: ../../installation.rst:265
+msgid "Close unused datasets"
+msgstr ""
+
+#: ../../installation.rst:266
+msgid "Limit the number of objects loaded simultaneously"
+msgstr ""
+
+#: ../../installation.rst:267
+msgid "Use lower resolution images for preview"
+msgstr ""
+
+#: ../../installation.rst:270
+msgid "Verifying Installation"
+msgstr ""
+
+#: ../../installation.rst:272
+msgid "After installation, verify that Modan2 works correctly:"
+msgstr ""
+
+#: ../../installation.rst:274
+msgid "**Launch the application**"
+msgstr ""
+
+#: ../../installation.rst:276
+msgid "Windows: Start Menu → Modan2"
+msgstr ""
+
+#: ../../installation.rst:277
+msgid "macOS: Applications → Modan2"
+msgstr ""
+
+#: ../../installation.rst:278
+msgid "Linux: ``python3 Modan2.py``"
+msgstr ""
+
+#: ../../installation.rst:280
+msgid "**Create a test dataset**"
+msgstr ""
+
+#: ../../installation.rst:282
+msgid "Click \"New Dataset\" (``Ctrl+N``)"
+msgstr ""
+
+#: ../../installation.rst:283
+msgid "Name it \"Test\""
+msgstr ""
+
+#: ../../installation.rst:284
+msgid "Click OK"
+msgstr ""
+
+#: ../../installation.rst:286
+msgid "**Import example data**"
+msgstr ""
+
+#: ../../installation.rst:288
+msgid ""
+"Download example TPS file from `examples/ "
+"<https://github.com/jikhanjung/Modan2/tree/main/ExampleDataset>`_"
+msgstr ""
+
+#: ../../installation.rst:289
+msgid "Drag and drop into your dataset"
+msgstr ""
+
+#: ../../installation.rst:291
+msgid "**Run a simple analysis**"
+msgstr ""
+
+#: ../../installation.rst:293
+msgid "Select dataset → \"Analyze Dataset\""
+msgstr ""
+
+#: ../../installation.rst:294
+msgid "Choose PCA"
+msgstr ""
+
+#: ../../installation.rst:295
+msgid "Verify that results display correctly"
+msgstr ""
+
+#: ../../installation.rst:297
+msgid "If all steps complete without errors, your installation is successful!"
+msgstr ""
+
+#: ../../installation.rst:300
+msgid "Updating Modan2"
+msgstr ""
+
+#: ../../installation.rst:302
+msgid "**Installed Version**:"
+msgstr ""
+
+#: ../../installation.rst:304
+msgid ""
+"Download the latest installer and run it - it will replace the old "
+"version."
+msgstr ""
+
+#: ../../installation.rst:306
+msgid "**Source Installation**:"
+msgstr ""
+
+#: ../../installation.rst:315
+msgid "Getting Help"
+msgstr ""
+
+#: ../../installation.rst:317
+msgid "If you encounter issues not covered here:"
+msgstr ""
+
+#: ../../installation.rst:319
+msgid ""
+"Check the `GitHub Issues page "
+"<https://github.com/jikhanjung/Modan2/issues>`_"
+msgstr ""
+
+#: ../../installation.rst:320
+msgid "Search for similar problems in closed issues"
+msgstr ""
+
+#: ../../installation.rst:321
+msgid ""
+"Create a new issue with: - Your OS and version - Python version "
+"(``python3 --version``) - Full error message - Steps to reproduce"
+msgstr ""
+
+#: ../../installation.rst:328
+msgid "Next Steps"
+msgstr ""
+
+#: ../../installation.rst:330
+msgid "Read the :doc:`user_guide` for a comprehensive tutorial"
+msgstr ""
+
+#: ../../installation.rst:331
+msgid "Explore the :doc:`developer_guide` if you want to contribute"
+msgstr ""
+
+#: ../../installation.rst:332
+msgid "Check the :doc:`changelog` for the latest updates"
+msgstr ""
+

@@ -258,10 +258,33 @@ class MdObject(Model):
     def __repr__(self):
         return self.object_name
     
-    def count_landmarks(self):
+    def count_landmarks(self, exclude_missing=True):
+        """Count landmarks.
+
+        Args:
+            exclude_missing: If True, exclude landmarks with None values (default: True)
+
+        Returns:
+            int: Number of landmarks (excluding missing if exclude_missing=True)
+        """
         if self.landmark_str is None or self.landmark_str == '':
             return 0
-        return len(self.landmark_str.strip().split(LINE_SEPARATOR))
+
+        if not exclude_missing:
+            # Simple count: just count lines
+            return len(self.landmark_str.strip().split(LINE_SEPARATOR))
+
+        # Unpack landmarks to check for missing values
+        self.unpack_landmark()
+
+        # Count only landmarks that are not missing
+        count = 0
+        for lm in self.landmark_list:
+            # Check if landmark has valid coordinates
+            if lm[0] is not None and lm[1] is not None:
+                count += 1
+
+        return count
     #def get_image_file_path(self):
 
     def add_image(self, file_name):

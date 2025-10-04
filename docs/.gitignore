@@ -1,0 +1,21 @@
+# Sphinx build outputs
+_build/
+
+# Don't ignore template files
+!_templates/
+!_static/
+
+# Compiled translation files
+locale/**/*.mo
+
+# Python cache
+__pycache__/
+*.pyc
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

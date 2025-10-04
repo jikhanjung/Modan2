@@ -1096,3 +1096,37 @@ class TestProcessingFlag:
         result = controller.import_objects(["/path/to/file.tps"])
 
         assert result == []  # Should return empty list
+
+
+class TestAnalysisDeletion:
+    """Test analysis deletion operations."""
+
+    @pytest.fixture
+    def controller(self, mock_database):
+        return ModanController()
+
+    def test_delete_analysis(self, controller, sample_dataset):
+        """Test deleting an analysis."""
+        controller.set_current_dataset(sample_dataset)
+
+        # Create analysis with all required fields
+        analysis = MdModel.MdAnalysis.create(
+            dataset=sample_dataset,
+            analysis_name="Test Analysis",
+            analysis_method="PCA",
+            superimposition_method="procrustes"
+        )
+
+        result = controller.delete_analysis(analysis.id)
+
+        assert result is True
+        # Verify analysis is deleted
+        assert MdModel.MdAnalysis.select().where(MdModel.MdAnalysis.id == analysis.id).count() == 0
+
+    def test_delete_nonexistent_analysis(self, controller):
+        """Test deleting non-existent analysis."""
+        result = controller.delete_analysis(99999)
+
+        assert result is False
+
+

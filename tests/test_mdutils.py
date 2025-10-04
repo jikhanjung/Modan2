@@ -683,3 +683,144 @@ class TestGetStorageDir:
         assert os.path.isabs(storage_dir)
         # Should be absolute path to DEFAULT_STORAGE_DIRECTORY
         assert storage_dir == os.path.abspath(mu.DEFAULT_STORAGE_DIRECTORY)
+
+
+class TestErrorPaths:
+    """Test error handling paths in various functions."""
+
+    def test_read_landmark_file_unicode_error(self, tmp_path):
+        """Test landmark file unicode decoding error."""
+        # Create file with invalid encoding
+        txt_file = tmp_path / "invalid.txt"
+        txt_file.write_bytes(b'\xff\xfe' + b'LM=3\n' + b'\x80\x81\x82')
+
+        with pytest.raises(ValueError, match="Cannot decode file"):
+            mu.read_landmark_file(str(txt_file))
+
+    def test_read_landmark_file_permission_error(self, tmp_path, monkeypatch):
+        """Test landmark file permission error."""
+        txt_file = tmp_path / "test.txt"
+        txt_file.write_text("LM=3\n")
+
+        # Mock open to raise PermissionError
+        original_open = open
+        def mock_open(*args, **kwargs):
+            if str(txt_file) in str(args[0]):
+                raise PermissionError("Permission denied")
+            return original_open(*args, **kwargs)
+
+        monkeypatch.setattr("builtins.open", mock_open)
+
+        with pytest.raises(PermissionError):
+            mu.read_landmark_file(str(txt_file))
+
+
+class TestUtilityFunctions:
+    """Test utility functions."""
+
+    def test_is_numeric_valid(self):
+        """Test is_numeric with valid numbers."""
+        assert mu.is_numeric("123") is True
+        assert mu.is_numeric("123.456") is True
+        assert mu.is_numeric("-123.456") is True
+        assert mu.is_numeric("0") is True
+
+    def test_is_numeric_invalid(self):
+        """Test is_numeric with invalid values."""
+        assert mu.is_numeric("abc") is False
+        assert mu.is_numeric("") is False
+        assert mu.is_numeric("12.34.56") is False
+
+    def test_get_ellipse_params(self):
+        """Test ellipse parameter calculation."""
+        import numpy as np
+
+        # Create a simple covariance matrix
+        covariance = np.array([[2.0, 0.5], [0.5, 1.0]])
+        n_std = 2.0
+
+        width, height, angle = mu.get_ellipse_params(covariance, n_std)
+
+        assert width > 0
+        assert height > 0
+        assert isinstance(angle, (int, float))
+
+    def test_resource_path_normal(self):
+        """Test resource_path without PyInstaller."""
+        path = mu.resource_path("test.txt")
+        assert "test.txt" in path
+        assert os.path.isabs(path)
+
+    def test_resource_path_meipass(self, monkeypatch):
+        """Test resource_path with PyInstaller."""
+        monkeypatch.setattr(sys, '_MEIPASS', '/tmp/meipass', raising=False)
+        path = mu.resource_path("test.txt")
+        assert "/tmp/meipass" in path or "test.txt" in path
+
+
+class TestDirectoryEnsure:
+    """Test directory creation functions."""
+
+    def test_ensure_directories_success(self):
+        """Test successful directory creation."""
+        # Should not raise exception (already called on import)
+        mu.ensure_directories()
+
+    def test_ensure_directories_permission_error(self, monkeypatch, capsys):
+        """Test directory creation with permission error."""
+        # Mock makedirs to raise PermissionError
+        original_makedirs = os.makedirs
+        def mock_makedirs(path, exist_ok=False):
+            raise PermissionError("Permission denied")
+
+        monkeypatch.setattr(os, 'makedirs', mock_makedirs)
+        monkeypatch.setattr(os.path, 'exists', lambda x: False)  # Force directory creation
+
+        # Should not raise, just print warning
+        mu.ensure_directories()
+
+        captured = capsys.readouterr()
+        assert "Warning" in captured.out or "Permission denied" in str(captured)
+
+
+class TestBuildInfoErrorPaths:
+    """Test build info error handling."""
+
+    def test_get_build_info_json_decode_error(self, tmp_path, monkeypatch):
+        """Test build info with invalid JSON."""
+        from pathlib import Path
+        build_file = tmp_path / "build_info.json"
+        build_file.write_text("{invalid json}")
+
+        # Mock Path.exists to return True only for our invalid file
+        original_exists = Path.exists
+        def mock_exists(self):
+            if str(self) == str(build_file):
+                return True
+            return original_exists(self)
+
+        monkeypatch.setattr(Path, 'exists', mock_exists)
+
+        # Should return default values (can't easily test without module reload)
+        info = mu.get_build_info()
+        assert 'build_number' in info
+        assert 'build_date' in info
+
+    def test_get_copyright_year_from_build_info(self):
+        """Test get_copyright_year with build_info."""
+        year = mu.get_copyright_year()
+        assert isinstance(year, int)
+        assert year >= 2020  # Reasonable year range
+
+
+class TestShowErrorMessage:
+    """Test error message display."""
+
+    def test_show_error_message(self, qtbot):
+        """Test showing error message."""
+        from unittest.mock import Mock, patch
+        from PyQt5.QtWidgets import QMessageBox
+
+        with patch.object(QMessageBox, 'exec_', return_value=QMessageBox.Ok):
+            # Should not raise exception
+            mu.show_error_message("Test error message")

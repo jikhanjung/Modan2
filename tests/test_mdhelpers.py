@@ -628,3 +628,412 @@ class TestURLFunctions:
         from PyQt5.QtCore import QUrl
         assert isinstance(url, QUrl)
         assert url.isValid()
+
+
+class TestFileDialogExtensions:
+    """Test additional file dialog functions."""
+
+    def test_get_open_file_names(self, qtbot):
+        """Test getting multiple file names."""
+        parent = Mock()
+        with patch.object(QFileDialog, 'getOpenFileNames',
+                         return_value=(['/path/to/file1.txt', '/path/to/file2.txt'], 'Text Files (*.txt)')):
+            result = helpers.get_open_file_names(parent, "Open Files", "*.txt")
+            assert len(result) == 2
+            assert '/path/to/file1.txt' in result
+
+
+class TestIconCreation:
+    """Test icon creation functions."""
+
+    def test_create_icon_nonexistent(self, tmp_path):
+        """Test creating icon from nonexistent file."""
+        icon_path = str(tmp_path / "nonexistent.png")
+        icon = helpers.create_icon(icon_path)
+        assert icon is not None
+        assert icon.isNull()
+
+    def test_create_icon_existing(self, tmp_path):
+        """Test creating icon from existing file."""
+        # Create a simple pixmap file
+        icon_path = str(tmp_path / "icon.png")
+        from PyQt5.QtGui import QPixmap
+        pixmap = QPixmap(32, 32)
+        pixmap.save(icon_path)
+
+        icon = helpers.create_icon(icon_path, size=32)
+        assert icon is not None
+
+
+class TestColorFunctions:
+    """Test color manipulation functions."""
+
+    def test_parse_color_invalid(self):
+        """Test parsing invalid color string."""
+        result = helpers.parse_color("invalid_color_xyz")
+        assert result is None
+
+    def test_interpolate_color(self):
+        """Test color interpolation."""
+        from PyQt5.QtGui import QColor
+        color1 = QColor(0, 0, 0)
+        color2 = QColor(255, 255, 255)
+
+        # Interpolate at 0.5 (midpoint)
+        result = helpers.interpolate_color(color1, color2, 0.5)
+        assert result.red() == 127 or result.red() == 128  # Allow for rounding
+        assert result.green() == 127 or result.green() == 128
+        assert result.blue() == 127 or result.blue() == 128
+
+    def test_interpolate_color_clamping(self):
+        """Test color interpolation clamping."""
+        from PyQt5.QtGui import QColor
+        color1 = QColor(0, 0, 0)
+        color2 = QColor(255, 255, 255)
+
+        # Factor > 1.0 should be clamped to 1.0
+        result = helpers.interpolate_color(color1, color2, 1.5)
+        assert result.red() == 255
+        assert result.green() == 255
+        assert result.blue() == 255
+
+
+class TestFileBackup:
+    """Test file backup functions."""
+
+    def test_backup_file_success(self, tmp_path):
+        """Test successful file backup."""
+        original = tmp_path / "original.txt"
+        original.write_text("original content")
+
+        result = helpers.backup_file(str(original))
+        assert result is True
+
+        # Check backup was created
+        backup_files = list(tmp_path.glob("original.backup_*.txt"))
+        assert len(backup_files) == 1
+
+    def test_backup_file_nonexistent(self, tmp_path):
+        """Test backing up nonexistent file."""
+        result = helpers.backup_file(str(tmp_path / "nonexistent.txt"))
+        assert result is False
+
+
+class TestFileFindingExtended:
+    """Test file finding functions."""
+
+    def test_find_files_recursive(self, tmp_path):
+        """Test finding files recursively."""
+        # Create directory structure
+        subdir = tmp_path / "subdir"
+        subdir.mkdir()
+
+        (tmp_path / "file1.txt").write_text("content")
+        (subdir / "file2.txt").write_text("content")
+
+        result = helpers.find_files(str(tmp_path), "*.txt", recursive=True)
+        assert len(result) == 2
+
+    def test_find_files_nonrecursive(self, tmp_path):
+        """Test finding files non-recursively."""
+        subdir = tmp_path / "subdir"
+        subdir.mkdir()
+
+        (tmp_path / "file1.txt").write_text("content")
+        (subdir / "file2.txt").write_text("content")
+
+        result = helpers.find_files(str(tmp_path), "*.txt", recursive=False)
+        assert len(result) == 1
+
+    def test_find_files_invalid_dir(self):
+        """Test finding files in invalid directory."""
+        result = helpers.find_files("/nonexistent/directory", "*.txt")
+        assert result == []
+
+
+class TestGetFileInfoExtended:
+    """Test file information functions."""
+
+    def test_get_file_info_nonexistent(self, tmp_path):
+        """Test getting info for nonexistent file."""
+        result = helpers.get_file_info(str(tmp_path / "nonexistent.txt"))
+        assert result == {}
+
+
+class TestMimeDataExtraction:
+    """Test mime data extraction functions."""
+
+    def test_extract_urls_from_mime_no_urls(self):
+        """Test extracting URLs from mime data without URLs."""
+        from PyQt5.QtCore import QMimeData
+        mime_data = QMimeData()
+
+        result = helpers.extract_urls_from_mime(mime_data)
+        assert result == []
+
+    def test_extract_urls_from_mime_with_urls(self, tmp_path):
+        """Test extracting URLs from mime data with file URLs."""
+        from PyQt5.QtCore import QMimeData, QUrl
+
+        test_file = tmp_path / "test.txt"
+        test_file.write_text("content")
+
+        mime_data = QMimeData()
+        mime_data.setUrls([QUrl.fromLocalFile(str(test_file))])
+
+        result = helpers.extract_urls_from_mime(mime_data)
+        assert len(result) == 1
+        assert str(test_file) in result
+
+
+class TestWindowState:
+    """Test window state save/restore functions."""
+
+    def test_save_window_state(self):
+        """Test saving window state."""
+        from PyQt5.QtWidgets import QMainWindow
+        from PyQt5.QtCore import QSettings
+
+        window = Mock(spec=QMainWindow)
+        window.saveGeometry.return_value = b"geometry_data"
+        window.saveState.return_value = b"state_data"
+
+        settings = QSettings("Test", "Test")
+        helpers.save_window_state(window, settings)
+
+        window.saveGeometry.assert_called_once()
+        window.saveState.assert_called_once()
+
+    def test_save_window_state_with_splitters(self):
+        """Test saving window state with splitters."""
+        from PyQt5.QtWidgets import QMainWindow
+        from PyQt5.QtCore import QSettings
+
+        window = Mock(spec=QMainWindow)
+        window.saveGeometry.return_value = b"geometry_data"
+        window.saveState.return_value = b"state_data"
+
+        # Add mock splitters
+        hsplitter = Mock()
+        hsplitter.saveState.return_value = b"hsplitter_state"
+        vsplitter = Mock()
+        vsplitter.saveState.return_value = b"vsplitter_state"
+        window.hsplitter = hsplitter
+        window.vsplitter = vsplitter
+
+        settings = QSettings("Test", "Test")
+        helpers.save_window_state(window, settings)
+
+        hsplitter.saveState.assert_called_once()
+        vsplitter.saveState.assert_called_once()
+
+    def test_restore_window_state_no_data(self):
+        """Test restoring window state with no saved data."""
+        from PyQt5.QtWidgets import QMainWindow
+        from PyQt5.QtCore import QSettings
+
+        window = Mock(spec=QMainWindow)
+        settings = QSettings("Test", "Test")
+        settings.clear()  # Ensure no saved data
+
+        helpers.restore_window_state(window, settings)
+
+        # Should not crash even with no data
+        window.restoreGeometry.assert_not_called()
+
+    def test_restore_window_state_with_data(self):
+        """Test restoring window state with saved data."""
+        from PyQt5.QtWidgets import QMainWindow
+        from PyQt5.QtCore import QSettings
+
+        window = Mock(spec=QMainWindow)
+        settings = QSettings("Test", "Test")
+        settings.setValue("geometry", b"geometry_data")
+        settings.setValue("windowState", b"state_data")
+
+        helpers.restore_window_state(window, settings)
+
+        window.restoreGeometry.assert_called_once_with(b"geometry_data")
+        window.restoreState.assert_called_once_with(b"state_data")
+
+
+class TestThemeDetection:
+    """Test theme detection functions."""
+
+    def test_is_dark_theme_no_app(self):
+        """Test dark theme detection when no app is running."""
+        with patch('PyQt5.QtWidgets.QApplication.instance', return_value=None):
+            result = helpers.is_dark_theme()
+            assert result is False
+
+
+class TestNumberFormatting:
+    """Test number formatting functions."""
+
+    def test_format_number_scientific(self):
+        """Test formatting number in scientific notation."""
+        result = helpers.format_number(1234.5678, precision=2, scientific=True)
+        assert 'e' in result.lower()
+
+    def test_format_number_regular(self):
+        """Test formatting number in regular notation."""
+        result = helpers.format_number(1234.5678, precision=2, scientific=False)
+        assert '1234.57' in result or '1234.56' in result
+
+
+class TestGeometryFunctions:
+    """Test geometry calculation functions."""
+
+    def test_calculate_centroid_empty(self):
+        """Test calculating centroid of empty points."""
+        result = helpers.calculate_centroid([])
+        assert result == []
+
+    def test_calculate_distance_mismatch(self):
+        """Test calculating distance with mismatched dimensions."""
+        import pytest
+        with pytest.raises(ValueError):
+            helpers.calculate_distance([1, 2], [1, 2, 3])
+
+    def test_calculate_bounding_box_empty(self):
+        """Test calculating bounding box of empty points."""
+        min_coords, max_coords = helpers.calculate_bounding_box([])
+        assert min_coords == []
+        assert max_coords == []
+
+    def test_scale_points(self):
+        """Test scaling points."""
+        points = [[1.0, 2.0], [3.0, 4.0]]
+        result = helpers.scale_points(points, 2.0)
+        assert result == [[2.0, 4.0], [6.0, 8.0]]
+
+    def test_translate_points(self):
+        """Test translating points."""
+        points = [[1.0, 2.0], [3.0, 4.0]]
+        result = helpers.translate_points(points, [1.0, 1.0])
+        assert result == [[2.0, 3.0], [4.0, 5.0]]
+
+    def test_center_points(self):
+        """Test centering points around centroid."""
+        points = [[1.0, 1.0], [3.0, 3.0]]
+        result = helpers.center_points(points)
+        centroid = helpers.calculate_centroid(result)
+        assert abs(centroid[0]) < 1e-10
+        assert abs(centroid[1]) < 1e-10
+
+
+class TestSystemInfo:
+    """Test system information functions."""
+
+    def test_get_system_info(self):
+        """Test getting system information."""
+        result = helpers.get_system_info()
+        assert 'platform' in result
+        assert 'system' in result
+        assert 'python_version' in result
+
+    def test_log_system_info(self):
+        """Test logging system information."""
+        # Should not raise exception
+        helpers.log_system_info()
+
+
+class TestDependencyChecking:
+    """Test dependency checking functions."""
+
+    def test_check_dependencies(self):
+        """Test checking dependencies."""
+        result = helpers.check_dependencies()
+        assert isinstance(result, dict)
+        assert 'PyQt5' in result
+        assert 'numpy' in result
+        # PyQt5 should be available in test environment
+        assert result['PyQt5'] is True
+
+
+class TestMemoryFunctions:
+    """Test memory-related functions."""
+
+    def test_memory_usage_mb(self):
+        """Test getting memory usage."""
+        result = helpers.memory_usage_mb()
+        # Should return 0 if psutil not available, or positive number
+        assert result >= 0.0
+
+    def test_get_available_memory_mb(self):
+        """Test getting available memory."""
+        result = helpers.get_available_memory_mb()
+        assert result >= 0.0
+
+
+class TestResourceCleanup:
+    """Test resource cleanup functions."""
+
+    def test_cleanup_resources(self, tmp_path, monkeypatch):
+        """Test cleanup resources."""
+        monkeypatch.setattr(helpers, 'get_temp_dir', lambda: tmp_path)
+        # Should not raise exception
+        helpers.cleanup_resources()
+
+
+class TestProgressReporter:
+    """Test ProgressReporter class."""
+
+    def test_progress_reporter_init(self):
+        """Test initializing progress reporter."""
+        reporter = helpers.ProgressReporter(total_steps=100)
+        assert reporter.total_steps == 100
+        assert reporter.current_step == 0
+
+    def test_progress_reporter_update_increment(self):
+        """Test updating progress with increment."""
+        callback = Mock()
+        reporter = helpers.ProgressReporter(callback=callback, total_steps=100)
+
+        reporter.update(message="Test")
+        assert reporter.current_step == 1
+        callback.assert_called_once_with(1, "Test")
+
+    def test_progress_reporter_update_explicit(self):
+        """Test updating progress with explicit step."""
+        callback = Mock()
+        reporter = helpers.ProgressReporter(callback=callback, total_steps=100)
+
+        reporter.update(step=50, message="Halfway")
+        assert reporter.current_step == 50
+        callback.assert_called_once_with(50, "Halfway")
+
+    def test_progress_reporter_finish(self):
+        """Test finishing progress."""
+        callback = Mock()
+        reporter = helpers.ProgressReporter(callback=callback, total_steps=100)
+
+        reporter.finish("Done")
+        assert reporter.current_step == 100
+        callback.assert_called_once_with(100, "Done")
+
+
+class TestDebounceDecorator:
+    """Test debounce decorator."""
+
+    def test_debounce_decorator(self, qtbot):
+        """Test debounce decorator delays function calls."""
+        call_count = []
+
+        @helpers.debounce(100)
+        def test_func():
+            call_count.append(1)
+
+        # Call multiple times rapidly
+        test_func()
+        test_func()
+        test_func()
+
+        # Should not be called immediately
+        assert len(call_count) == 0
+
+        # Wait for debounce timeout
+        qtbot.wait(150)
+
+        # Should be called once after timeout
+        assert len(call_count) == 1

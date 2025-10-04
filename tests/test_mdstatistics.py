@@ -504,3 +504,207 @@ class TestCVAExtended:
             # Check if rotation matrix properties are reasonable
             assert rotation.shape[0] > 0
             assert rotation.shape[1] > 0
+
+
+class TestCVAAnalysis:
+    """Test do_cva_analysis function."""
+
+    def test_do_cva_analysis_basic(self):
+        """Test basic CVA analysis."""
+        # Create landmark data with 3 specimens per group
+        landmarks_data = [
+            [[0.0, 0.0], [1.0, 0.0], [0.5, 1.0]],  # Group A
+            [[0.1, 0.1], [1.1, 0.1], [0.6, 1.1]],  # Group A
+            [[0.2, 0.2], [1.2, 0.2], [0.7, 1.2]],  # Group A
+            [[5.0, 5.0], [6.0, 5.0], [5.5, 6.0]],  # Group B
+            [[5.1, 5.1], [6.1, 5.1], [5.6, 6.1]],  # Group B
+            [[5.2, 5.2], [6.2, 5.2], [5.7, 6.2]],  # Group B
+        ]
+        groups = ['A', 'A', 'A', 'B', 'B', 'B']
+
+        result = ms.do_cva_analysis(landmarks_data, groups)
+
+        assert result is not None
+        assert 'canonical_variables' in result
+        assert 'eigenvalues' in result
+        assert 'group_centroids' in result
+        assert 'classification' in result
+        assert 'accuracy' in result
+        assert len(result['canonical_variables']) == 6
+
+    def test_do_cva_analysis_three_groups(self):
+        """Test CVA with three groups."""
+        landmarks_data = [
+            [[0.0, 0.0], [1.0, 0.0]],  # Group A
+            [[0.1, 0.1], [1.1, 0.1]],  # Group A
+            [[5.0, 5.0], [6.0, 5.0]],  # Group B
+            [[5.1, 5.1], [6.1, 5.1]],  # Group B
+            [[10.0, 0.0], [11.0, 0.0]],  # Group C
+            [[10.1, 0.1], [11.1, 0.1]],  # Group C
+        ]
+        groups = ['A', 'A', 'B', 'B', 'C', 'C']
+
+        result = ms.do_cva_analysis(landmarks_data, groups)
+
+        assert result is not None
+        assert result['n_components'] == 3  # Padded to 3
+        assert len(result['groups']) == 3
+
+    def test_do_cva_analysis_padding(self):
+        """Test CVA pads to 3 dimensions."""
+        # Simple 2-group case should produce 1 CV, padded to 3
+        landmarks_data = [
+            [[0.0, 0.0], [1.0, 0.0]],
+            [[0.1, 0.1], [1.1, 0.1]],
+            [[5.0, 5.0], [6.0, 5.0]],
+            [[5.1, 5.1], [6.1, 5.1]],
+        ]
+        groups = ['A', 'A', 'B', 'B']
+
+        result = ms.do_cva_analysis(landmarks_data, groups)
+
+        # Should be padded to 3 dimensions
+        assert result['n_components'] == 3
+        assert len(result['canonical_variables'][0]) == 3
+
+    def test_do_cva_analysis_error(self):
+        """Test CVA with invalid data."""
+        with pytest.raises(ValueError, match="CVA analysis failed"):
+            ms.do_cva_analysis([], [])
+
+
+class TestMANOVAOnProcrustes:
+    """Test do_manova_analysis_on_procrustes function."""
+
+    def test_manova_on_procrustes_basic(self):
+        """Test basic MANOVA on Procrustes data."""
+        # Create flattened 3D landmark data - need enough variation and samples
+        import numpy as np
+        np.random.seed(42)
+
+        # Need more samples and variation to avoid singular matrix
+        n_samples = 10
+        flattened_landmarks = []
+        groups = []
+
+        for i in range(n_samples // 2):
+            # Group A - centered around (0, 0, 0)
+            base = [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.5, 1.0, 0.0]
+            noise = np.random.randn(9) * 0.5
+            flattened_landmarks.append([b + n for b, n in zip(base, noise)])
+            groups.append('A')
+
+        for i in range(n_samples // 2):
+            # Group B - centered around (5, 5, 5)
+            base = [5.0, 5.0, 5.0, 6.0, 5.0, 5.0, 5.5, 6.0, 5.0]
+            noise = np.random.randn(9) * 0.5
+            flattened_landmarks.append([b + n for b, n in zip(base, noise)])
+            groups.append('B')
+
+        result = ms.do_manova_analysis_on_procrustes(flattened_landmarks, groups)
+
+        assert result is not None
+        assert result['analysis_type'] == 'MANOVA'
+        assert 'test_statistics' in result
+        assert result['n_groups'] == 2
+        assert result['n_observations'] == 10
+
+    def test_manova_on_procrustes_variable_limiting(self):
+        """Test MANOVA limits variables to 20."""
+        # Create data with many variables (> 20)
+        import numpy as np
+        np.random.seed(42)
+
+        n_landmarks = 15  # 15 landmarks * 3 coords = 45 variables
+        n_coords = n_landmarks * 3
+        n_samples = 10
+
+        flattened_landmarks = []
+        groups = []
+
+        for i in range(n_samples // 2):
+            base = [float((i % 10) * 0.5) for _ in range(n_coords)]
+            noise = np.random.randn(n_coords) * 0.3
+            flattened_landmarks.append([b + n for b, n in zip(base, noise)])
+            groups.append('A')
+
+        for i in range(n_samples // 2):
+            base = [float((i % 10) * 0.5 + 5.0) for _ in range(n_coords)]
+            noise = np.random.randn(n_coords) * 0.3
+            flattened_landmarks.append([b + n for b, n in zip(base, noise)])
+            groups.append('B')
+
+        result = ms.do_manova_analysis_on_procrustes(flattened_landmarks, groups)
+
+        assert result is not None
+        assert result['n_variables'] == 20  # Limited to 20
+
+    def test_manova_on_procrustes_error(self):
+        """Test MANOVA error handling."""
+        with pytest.raises(Exception):
+            ms.do_manova_analysis_on_procrustes([], [])
+
+
+class TestMANOVAOnPCA:
+    """Test do_manova_analysis_on_pca function."""
+
+    def test_manova_on_pca_basic(self):
+        """Test basic MANOVA on PCA scores."""
+        # PCA scores (already truncated) - need more samples and variation
+        import numpy as np
+        np.random.seed(42)
+
+        pca_scores = []
+        groups = []
+
+        for i in range(5):
+            base = [1.0, 0.5, 0.2]
+            noise = np.random.randn(3) * 0.3
+            pca_scores.append([b + n for b, n in zip(base, noise)])
+            groups.append('A')
+
+        for i in range(5):
+            base = [5.0, 2.0, 1.0]
+            noise = np.random.randn(3) * 0.3
+            pca_scores.append([b + n for b, n in zip(base, noise)])
+            groups.append('B')
+
+        result = ms.do_manova_analysis_on_pca(pca_scores, groups)
+
+        assert result is not None
+        assert result['analysis_type'] == 'MANOVA'  # Fixed: returns 'MANOVA' not 'MANOVA on PCA'
+        assert 'test_statistics' in result
+        assert result['n_groups'] == 2
+        assert result['n_observations'] == 10
+
+    def test_manova_on_pca_many_components(self):
+        """Test MANOVA on PCA with many components."""
+        # Many PCA components - need more samples
+        import numpy as np
+        np.random.seed(42)
+
+        pca_scores = []
+        groups = []
+
+        for i in range(5):
+            base = [float(j * 0.5) for j in range(15)]
+            noise = np.random.randn(15) * 0.3
+            pca_scores.append([b + n for b, n in zip(base, noise)])
+            groups.append('A')
+
+        for i in range(5):
+            base = [float(j * 0.5 + 5.0) for j in range(15)]
+            noise = np.random.randn(15) * 0.3
+            pca_scores.append([b + n for b, n in zip(base, noise)])
+            groups.append('B')
+
+        result = ms.do_manova_analysis_on_pca(pca_scores, groups)
+
+        assert result is not None
+        # Should have all components (not limited for PCA)
+        assert result['n_variables'] == 15
+
+    def test_manova_on_pca_error(self):
+        """Test MANOVA on PCA error handling."""
+        with pytest.raises(Exception):
+            ms.do_manova_analysis_on_pca([], [])

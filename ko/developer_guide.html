@@ -1,0 +1,1109 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ko" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Developer Guide &mdash; Modan2 0.1.5 문서</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=8ea13951"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/translations.js?v=afa94a99"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="색인" href="genindex.html" />
+    <link rel="search" title="검색" href="search.html" />
+    <link rel="next" title="Changelog" href="changelog.html" />
+    <link rel="prev" title="User Guide" href="user_guide.html" />
+ 
+<style>
+  .language-switcher {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+    background: #2c3e50;
+    border: 1px solid #34495e;
+    border-radius: 4px;
+    padding: 8px 15px;
+    font-size: 13px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+  .language-switcher a {
+    margin: 0 5px;
+    text-decoration: none;
+    color: #3498db;
+    font-weight: 500;
+    transition: color 0.2s;
+    cursor: pointer;
+  }
+  .language-switcher a:hover {
+    color: #5dade2;
+    text-decoration: underline;
+  }
+  .language-switcher .current {
+    color: #ecf0f1;
+    font-weight: 600;
+    cursor: default;
+    margin: 0 5px;
+  }
+  .language-switcher .separator {
+    color: #7f8c8d;
+    margin: 0 3px;
+  }
+  .language-switcher .icon {
+    margin-right: 5px;
+  }
+</style>
+<script>
+  // Language switcher: preserve current page path when switching languages
+  function switchLanguage(targetLang) {
+    var currentPath = window.location.pathname;
+    var newPath;
+
+    // Get the page name (e.g., 'index.html', 'user_guide.html')
+    var pageName = currentPath.split('/').pop() || 'index.html';
+
+    // Replace language code in path (en <-> ko)
+    if (currentPath.includes('/en/')) {
+      newPath = currentPath.replace('/en/', '/' + targetLang + '/');
+    } else if (currentPath.includes('/ko/')) {
+      newPath = currentPath.replace('/ko/', '/' + targetLang + '/');
+    } else {
+      // Fallback: construct path with language code
+      // Get the base path (everything before the last /)
+      var pathParts = currentPath.split('/');
+      pathParts.pop(); // Remove current file
+      var basePath = pathParts.join('/');
+      newPath = basePath + '/' + targetLang + '/' + pageName;
+    }
+
+    window.location.href = newPath;
+  }
+</script>
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Modan2
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">목차:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#system-requirements">System Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#installation-methods">Installation Methods</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#windows-installation">Windows Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#macos-installation">macOS Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#linux-installation">Linux Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#wsl-windows-subsystem-for-linux">WSL (Windows Subsystem for Linux)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#troubleshooting">Troubleshooting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#qt-platform-plugin-error-linux-wsl">Qt Platform Plugin Error (Linux/WSL)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#opengl-glut-errors">OpenGL/GLUT Errors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#missing-python-dependencies">Missing Python Dependencies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#database-migration-issues">Database Migration Issues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#performance-issues">Performance Issues</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#verifying-installation">Verifying Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#updating-modan2">Updating Modan2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#getting-help">Getting Help</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide.html">User Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="user_guide.html#getting-started">Getting Started</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#launching-modan2">Launching Modan2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#main-window-overview">Main Window Overview</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide.html#working-with-datasets">Working with Datasets</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#creating-a-new-dataset">Creating a New Dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#dataset-variables">Dataset Variables</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide.html#importing-data">Importing Data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#importing-2d-images">Importing 2D Images</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#importing-3d-models">Importing 3D Models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#importing-landmark-files">Importing Landmark Files</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide.html#working-with-objects">Working with Objects</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#viewing-an-object">Viewing an Object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#placing-landmarks-2d">Placing Landmarks (2D)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#placing-landmarks-3d">Placing Landmarks (3D)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#editing-landmark-coordinates">Editing Landmark Coordinates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#missing-landmarks">Missing Landmarks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#display-options">Display Options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide.html#statistical-analysis">Statistical Analysis</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#overview">Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#running-an-analysis">Running an Analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#procrustes-superimposition">Procrustes Superimposition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#principal-component-analysis-pca">Principal Component Analysis (PCA)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#canonical-variate-analysis-cva">Canonical Variate Analysis (CVA)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#manova">MANOVA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#handling-missing-landmarks">Handling Missing Landmarks</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide.html#visualization">Visualization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#d-viewer">2D Viewer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#id1">3D Viewer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#statistical-plots">Statistical Plots</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide.html#data-export">Data Export</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#exporting-datasets">Exporting Datasets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#exporting-analysis-results">Exporting Analysis Results</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide.html#keyboard-shortcuts">Keyboard Shortcuts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#global-shortcuts">Global Shortcuts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#object-dialog">Object Dialog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#id2">3D Viewer</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide.html#preferences">Preferences</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#general-settings">General Settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#display-settings">Display Settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#analysis-settings">Analysis Settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#advanced-settings">Advanced Settings</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide.html#tips-and-best-practices">Tips and Best Practices</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#data-organization">Data Organization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#landmark-placement">Landmark Placement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#id3">Statistical Analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#performance-optimization">Performance Optimization</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide.html#common-workflows">Common Workflows</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#workflow-1-2d-morphometric-study">Workflow 1: 2D Morphometric Study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#workflow-2-3d-morphometric-study">Workflow 2: 3D Morphometric Study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#workflow-3-missing-data-study">Workflow 3: Missing Data Study</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide.html#troubleshooting">Troubleshooting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#analysis-fails">Analysis Fails</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#landmarks-not-showing">Landmarks Not Showing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#slow-performance">Slow Performance</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide.html#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Developer Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#project-overview">Project Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#architecture">Architecture</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#high-level-overview">High-Level Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#database-schema">Database Schema</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mvc-pattern-in-modan2">MVC Pattern in Modan2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#file-formats">File Formats</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#development-setup">Development Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cloning-the-repository">Cloning the Repository</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#virtual-environment-setup">Virtual Environment Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-from-source">Running from Source</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#development-dependencies">Development Dependencies</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#testing">Testing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#test-framework">Test Framework</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-tests">Running Tests</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writing-tests">Writing Tests</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#code-style-guidelines">Code Style Guidelines</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#general-principles">General Principles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#naming-conventions">Naming Conventions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#docstring-format">Docstring Format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pyqt5-patterns">PyQt5 Patterns</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#contributing">Contributing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#git-workflow">Git Workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#commit-message-guidelines">Commit Message Guidelines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pull-request-process">Pull Request Process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#code-review-checklist">Code Review Checklist</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#building-executables">Building Executables</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pyinstaller-configuration">PyInstaller Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#platform-specific-builds">Platform-Specific Builds</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#innosetup-installer-windows">InnoSetup Installer (Windows)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#creating-releases">Creating Releases</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#database-migrations">Database Migrations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#creating-a-migration">Creating a Migration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-migrations">Running Migrations</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#advanced-topics">Advanced Topics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#custom-widgets">Custom Widgets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#statistical-extensions">Statistical Extensions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#plugin-system-future">Plugin System (Future)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#profiling-and-optimization">Profiling and Optimization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#debugging">Debugging</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#resources">Resources</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#documentation">Documentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#morphometric-analysis">Morphometric Analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#community">Community</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#license">License</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-0-1-5-alpha-1-2025-09-11">Version 0.1.5-alpha.1 (2025-09-11)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#added">Added</a></li>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#changed">Changed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#fixed">Fixed</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-0-1-4-2025-09-10">Version 0.1.4 (2025-09-10)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#id1">Added</a></li>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#id2">Changed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#id3">Fixed</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#previous-versions">Previous Versions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#version-0-1-3">Version 0.1.3</a></li>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#version-0-1-2">Version 0.1.2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#version-0-1-1">Version 0.1.1</a></li>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#version-0-1-0">Version 0.1.0</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#upcoming-features">Upcoming Features</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#planned-for-future-releases">Planned for Future Releases</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Modan2</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Developer Guide</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/jikhanjung/Modan2/blob/main/docs/developer_guide.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+<div class="language-switcher">
+  <span class="icon">🌐</span>
+  
+    <a onclick="switchLanguage('en')">English</a><span class="separator">|</span><span class="current">한국어</span>
+  
+</div>
+
+           <div itemprop="articleBody">
+             
+  <section id="developer-guide">
+<h1>Developer Guide<a class="headerlink" href="#developer-guide" title="Link to this heading"></a></h1>
+<p>This guide provides information for developers who want to contribute to Modan2 or understand its architecture.</p>
+<section id="project-overview">
+<h2>Project Overview<a class="headerlink" href="#project-overview" title="Link to this heading"></a></h2>
+<p>Modan2 is a Python desktop application for geometric morphometrics built with:</p>
+<ul class="simple">
+<li><p><strong>GUI Framework</strong>: PyQt5</p></li>
+<li><p><strong>Database</strong>: SQLite with Peewee ORM</p></li>
+<li><p><strong>Scientific Computing</strong>: NumPy, SciPy, Pandas, Statsmodels</p></li>
+<li><p><strong>3D Graphics</strong>: PyOpenGL, Trimesh</p></li>
+<li><p><strong>Image Processing</strong>: Pillow, OpenCV</p></li>
+</ul>
+<p><strong>Project Structure</strong>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Modan2/
+├── Modan2.py              # Main application entry point
+├── MdModel.py             # Database models (Peewee ORM)
+├── MdUtils.py             # Utility functions and constants
+├── MdStatistics.py        # Statistical analysis functions
+├── ModanDialogs.py        # PyQt5 dialog classes
+├── ModanComponents.py     # Custom PyQt5 widgets
+├── ModanController.py     # MVC controller
+├── MdHelpers.py           # Helper functions
+├── MdConstants.py         # Application constants
+├── build.py               # PyInstaller build script
+├── migrate.py             # Database migration tool
+├── requirements.txt       # Python dependencies
+├── tests/                 # Automated tests (pytest)
+├── devlog/                # Development documentation
+├── icons/                 # Application icons
+├── migrations/            # Database schema migrations
+└── docs/                  # This documentation
+</pre></div>
+</div>
+</section>
+<section id="architecture">
+<h2>Architecture<a class="headerlink" href="#architecture" title="Link to this heading"></a></h2>
+<section id="high-level-overview">
+<h3>High-Level Overview<a class="headerlink" href="#high-level-overview" title="Link to this heading"></a></h3>
+<p>Modan2 follows a modified <strong>Model-View-Controller (MVC)</strong> pattern:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>┌──────────────────────────────────────────┐
+│         ModanMainWindow (View)            │
+│  ┌────────────┐  ┌──────────────────┐   │
+│  │ TreeView   │  │  TableView       │   │
+│  │ (Datasets) │  │  (Objects)       │   │
+│  └────────────┘  └──────────────────┘   │
+└──────────────┬───────────────────────────┘
+               │
+               ├─── Signals/Slots ───┐
+               │                      │
+┌──────────────▼─────────────┐  ┌────▼──────────────┐
+│  ModanController           │  │  ModanDialogs     │
+│  - Dataset operations      │  │  - ObjectDialog   │
+│  - Object CRUD             │  │  - AnalysisDialog │
+│  - Analysis coordination   │  │  - Preferences    │
+└───────────┬────────────────┘  └───────────────────┘
+            │
+            │ Uses
+            │
+┌───────────▼────────────────────────────────┐
+│         MdModel (Model - Peewee ORM)       │
+│  ┌──────────┐  ┌─────────────┐            │
+│  │MdDataset │  │ MdObject    │            │
+│  │MdImage   │  │ MdAnalysis  │            │
+│  └──────────┘  └─────────────┘            │
+│                                             │
+│  Database: modan.db (SQLite)               │
+└────────────────────────────────────────────┘
+                 │
+                 │ Queries
+                 │
+┌────────────────▼──────────────────┐
+│    MdStatistics                    │
+│  - Procrustes superimposition      │
+│  - PCA, CVA, MANOVA                │
+│  - Missing landmark imputation     │
+└────────────────────────────────────┘
+</pre></div>
+</div>
+</section>
+<section id="database-schema">
+<h3>Database Schema<a class="headerlink" href="#database-schema" title="Link to this heading"></a></h3>
+<p><strong>Core Models</strong> (defined in <code class="docutils literal notranslate"><span class="pre">MdModel.py</span></code>):</p>
+<ol class="arabic simple">
+<li><p><strong>MdDataset</strong>:</p>
+<ul class="simple">
+<li><p>Hierarchical structure (parent/child relationships)</p></li>
+<li><p>Stores dimension (2D/3D), description</p></li>
+<li><p>One-to-many relationship with MdObject</p></li>
+</ul>
+</li>
+<li><p><strong>MdObject</strong>:</p>
+<ul class="simple">
+<li><p>Represents a specimen (image or 3D model)</p></li>
+<li><p>Stores landmark coordinates as JSON string (<code class="docutils literal notranslate"><span class="pre">landmark_str</span></code>)</p></li>
+<li><p>Foreign key to MdDataset</p></li>
+<li><p>Variable data stored as JSON (<code class="docutils literal notranslate"><span class="pre">propertyvalue_str</span></code>)</p></li>
+</ul>
+</li>
+<li><p><strong>MdImage</strong>:</p>
+<ul class="simple">
+<li><p>Links 2D images to objects</p></li>
+<li><p>Stores file path, EXIF data, width/height</p></li>
+</ul>
+</li>
+<li><p><strong>MdThreeDModel</strong>:</p>
+<ul class="simple">
+<li><p>Links 3D models to objects</p></li>
+<li><p>Stores file path, mesh metadata</p></li>
+</ul>
+</li>
+<li><p><strong>MdAnalysis</strong>:</p>
+<ul class="simple">
+<li><p>Stores analysis results (PCA, CVA, MANOVA)</p></li>
+<li><p>Linked to MdDataset</p></li>
+<li><p>Results stored as JSON</p></li>
+</ul>
+</li>
+</ol>
+<p><strong>Relationships</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">MdDataset</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="err">──</span><span class="o">&lt;</span> <span class="p">(</span><span class="n">many</span><span class="p">)</span> <span class="n">MdObject</span>
+<span class="n">MdDataset</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="err">──</span><span class="o">&lt;</span> <span class="p">(</span><span class="n">many</span><span class="p">)</span> <span class="n">MdAnalysis</span>
+<span class="n">MdObject</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="err">──</span><span class="o">&lt;</span> <span class="p">(</span><span class="mi">0</span> <span class="ow">or</span> <span class="mi">1</span><span class="p">)</span> <span class="n">MdImage</span>
+<span class="n">MdObject</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="err">──</span><span class="o">&lt;</span> <span class="p">(</span><span class="mi">0</span> <span class="ow">or</span> <span class="mi">1</span><span class="p">)</span> <span class="n">MdThreeDModel</span>
+</pre></div>
+</div>
+<p><strong>Key Fields</strong>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">landmark_str</span></code>: Serialized landmark coordinates (format: “x,y\nx,y\n…”)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">propertyvalue_str</span></code>: Serialized variable values (JSON)</p></li>
+</ul>
+<p><strong>Temporary Operations</strong>: <code class="docutils literal notranslate"><span class="pre">MdObjectOps</span></code> and <code class="docutils literal notranslate"><span class="pre">MdDatasetOps</span></code> classes wrap database models for in-memory operations (e.g., Procrustes alignment) without modifying the database.</p>
+</section>
+<section id="mvc-pattern-in-modan2">
+<h3>MVC Pattern in Modan2<a class="headerlink" href="#mvc-pattern-in-modan2" title="Link to this heading"></a></h3>
+<p><strong>Model</strong> (<code class="docutils literal notranslate"><span class="pre">MdModel.py</span></code>):</p>
+<ul class="simple">
+<li><p>Peewee ORM models</p></li>
+<li><p>Database queries and CRUD operations</p></li>
+<li><p>Data validation</p></li>
+</ul>
+<p><strong>View</strong> (<code class="docutils literal notranslate"><span class="pre">Modan2.py</span></code>, <code class="docutils literal notranslate"><span class="pre">ModanDialogs.py</span></code>, <code class="docutils literal notranslate"><span class="pre">ModanComponents.py</span></code>):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ModanMainWindow</span></code>: Main application window</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ObjectDialog</span></code>, <code class="docutils literal notranslate"><span class="pre">NewAnalysisDialog</span></code>, etc.: Dialog windows</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ObjectViewer2D</span></code>, <code class="docutils literal notranslate"><span class="pre">ObjectViewer3D</span></code>: Visualization widgets</p></li>
+<li><p>Qt signals emitted on user actions</p></li>
+</ul>
+<p><strong>Controller</strong> (<code class="docutils literal notranslate"><span class="pre">ModanController.py</span></code>):</p>
+<ul class="simple">
+<li><p>Connects signals from views to model operations</p></li>
+<li><p>Coordinates between UI and business logic</p></li>
+<li><p>Handles analysis workflow</p></li>
+</ul>
+<p><strong>Example Flow</strong>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>User clicks &quot;New Dataset&quot; button
+→ MainWindow emits signal
+→ Controller receives signal
+→ Controller opens DatasetDialog
+→ User fills form, clicks OK
+→ Controller creates MdDataset in database
+→ Controller refreshes TreeView
+→ TreeView displays new dataset
+</pre></div>
+</div>
+</section>
+<section id="file-formats">
+<h3>File Formats<a class="headerlink" href="#file-formats" title="Link to this heading"></a></h3>
+<p><strong>TPS Format</strong> (morphometric standard):</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>LM=5
+12.5 34.2
+45.6 78.9
+...
+IMAGE=specimen_001.jpg
+ID=1
+SCALE=1.0
+</pre></div>
+</div>
+<p><strong>NTS Format</strong> (legacy):</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>5
+12.5 34.2
+45.6 78.9
+...
+</pre></div>
+</div>
+<p><strong>CSV Format</strong> (custom):</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>object,lm1_x,lm1_y,lm2_x,lm2_y
+spec_001,12.5,34.2,45.6,78.9
+</pre></div>
+</div>
+<p><strong>Internal Storage</strong> (in database):</p>
+<ul class="simple">
+<li><p>Landmarks stored as newline-separated “x,y” or “x,y,z” strings</p></li>
+<li><p>Parsing done by <code class="docutils literal notranslate"><span class="pre">MdObject.unpack_landmark()</span></code></p></li>
+<li><p>Packing done by <code class="docutils literal notranslate"><span class="pre">MdObject.pack_landmark()</span></code></p></li>
+</ul>
+</section>
+</section>
+<section id="development-setup">
+<h2>Development Setup<a class="headerlink" href="#development-setup" title="Link to this heading"></a></h2>
+<section id="prerequisites">
+<h3>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Python</strong>: 3.11 or newer</p></li>
+<li><p><strong>Git</strong>: For version control</p></li>
+<li><p><strong>IDE</strong>: VSCode, PyCharm, or any Python IDE</p></li>
+<li><p><strong>Operating System</strong>: Windows, macOS, or Linux</p></li>
+</ul>
+</section>
+<section id="cloning-the-repository">
+<h3>Cloning the Repository<a class="headerlink" href="#cloning-the-repository" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/jikhanjung/Modan2.git
+<span class="nb">cd</span><span class="w"> </span>Modan2
+</pre></div>
+</div>
+</section>
+<section id="virtual-environment-setup">
+<h3>Virtual Environment Setup<a class="headerlink" href="#virtual-environment-setup" title="Link to this heading"></a></h3>
+<p><strong>Linux/macOS</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>venv
+<span class="nb">source</span><span class="w"> </span>venv/bin/activate
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>config/requirements-dev.txt
+</pre></div>
+</div>
+<p><strong>Windows</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>venv
+venv<span class="se">\\</span>Scripts<span class="se">\\</span>activate
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>config/requirements-dev.txt
+</pre></div>
+</div>
+</section>
+<section id="running-from-source">
+<h3>Running from Source<a class="headerlink" href="#running-from-source" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>Modan2.py
+</pre></div>
+</div>
+<p><strong>Linux/WSL</strong>: If Qt errors occur:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>fix_qt_import.py
+</pre></div>
+</div>
+</section>
+<section id="development-dependencies">
+<h3>Development Dependencies<a class="headerlink" href="#development-dependencies" title="Link to this heading"></a></h3>
+<p>Installed via <code class="docutils literal notranslate"><span class="pre">config/requirements-dev.txt</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pytest</span></code>: Testing framework</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pytest-cov</span></code>: Code coverage</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pytest-qt</span></code>: PyQt5 testing support (future)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ruff</span></code>: Linting (future)</p></li>
+</ul>
+</section>
+</section>
+<section id="testing">
+<h2>Testing<a class="headerlink" href="#testing" title="Link to this heading"></a></h2>
+<section id="test-framework">
+<h3>Test Framework<a class="headerlink" href="#test-framework" title="Link to this heading"></a></h3>
+<p>Modan2 uses <strong>pytest</strong> for automated testing.</p>
+<p><strong>Test Structure</strong>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>tests/
+├── conftest.py            # Shared fixtures
+├── test_mdutils.py        # Utility function tests
+├── test_mdmodel.py        # Database model tests
+└── test_statistics.py     # Statistical function tests
+</pre></div>
+</div>
+</section>
+<section id="running-tests">
+<h3>Running Tests<a class="headerlink" href="#running-tests" title="Link to this heading"></a></h3>
+<p><strong>Run all tests</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest
+</pre></div>
+</div>
+<p><strong>Run specific test file</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest<span class="w"> </span>tests/test_mdutils.py
+</pre></div>
+</div>
+<p><strong>Run with coverage</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest<span class="w"> </span>--cov<span class="o">=</span>.<span class="w"> </span>--cov-report<span class="o">=</span>html
+<span class="c1"># Open htmlcov/index.html</span>
+</pre></div>
+</div>
+<p><strong>Verbose output</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest<span class="w"> </span>-v
+</pre></div>
+</div>
+</section>
+<section id="writing-tests">
+<h3>Writing Tests<a class="headerlink" href="#writing-tests" title="Link to this heading"></a></h3>
+<p><strong>Example test</strong> (<code class="docutils literal notranslate"><span class="pre">tests/test_mdutils.py</span></code>):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MdUtils</span><span class="w"> </span><span class="kn">import</span> <span class="n">normalize_path</span><span class="p">,</span> <span class="n">is_valid_dimension</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_normalize_path</span><span class="p">():</span>
+    <span class="k">assert</span> <span class="n">normalize_path</span><span class="p">(</span><span class="s2">&quot;C:</span><span class="se">\\\\</span><span class="s2">Users</span><span class="se">\\\\</span><span class="s2">test&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;C:/Users/test&quot;</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_is_valid_dimension</span><span class="p">():</span>
+    <span class="k">assert</span> <span class="n">is_valid_dimension</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="kc">True</span>
+    <span class="k">assert</span> <span class="n">is_valid_dimension</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="o">==</span> <span class="kc">True</span>
+    <span class="k">assert</span> <span class="n">is_valid_dimension</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="o">==</span> <span class="kc">False</span>
+</pre></div>
+</div>
+<p><strong>Using fixtures</strong> (<code class="docutils literal notranslate"><span class="pre">tests/conftest.py</span></code>):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">peewee</span><span class="w"> </span><span class="kn">import</span> <span class="n">SqliteDatabase</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MdModel</span><span class="w"> </span><span class="kn">import</span> <span class="n">MdDataset</span><span class="p">,</span> <span class="n">MdObject</span>
+
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_db</span><span class="p">():</span>
+    <span class="n">test_database</span> <span class="o">=</span> <span class="n">SqliteDatabase</span><span class="p">(</span><span class="s1">&#39;:memory:&#39;</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">test_database</span><span class="o">.</span><span class="n">bind_ctx</span><span class="p">([</span><span class="n">MdDataset</span><span class="p">,</span> <span class="n">MdObject</span><span class="p">]):</span>
+        <span class="n">test_database</span><span class="o">.</span><span class="n">create_tables</span><span class="p">([</span><span class="n">MdDataset</span><span class="p">,</span> <span class="n">MdObject</span><span class="p">])</span>
+        <span class="k">yield</span> <span class="n">test_database</span>
+        <span class="n">test_database</span><span class="o">.</span><span class="n">drop_tables</span><span class="p">([</span><span class="n">MdDataset</span><span class="p">,</span> <span class="n">MdObject</span><span class="p">])</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_create_dataset</span><span class="p">(</span><span class="n">test_db</span><span class="p">):</span>
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">MdDataset</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Test&quot;</span><span class="p">,</span> <span class="n">dimension</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">dataset</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;Test&quot;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="code-style-guidelines">
+<h2>Code Style Guidelines<a class="headerlink" href="#code-style-guidelines" title="Link to this heading"></a></h2>
+<section id="general-principles">
+<h3>General Principles<a class="headerlink" href="#general-principles" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Follow <strong>PEP 8</strong> conventions</p></li>
+<li><p>Use descriptive variable names</p></li>
+<li><p>Add docstrings to classes and functions</p></li>
+<li><p>Keep functions focused (single responsibility)</p></li>
+</ul>
+</section>
+<section id="naming-conventions">
+<h3>Naming Conventions<a class="headerlink" href="#naming-conventions" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Classes</strong>: <code class="docutils literal notranslate"><span class="pre">PascalCase</span></code> (e.g., <code class="docutils literal notranslate"><span class="pre">ModanController</span></code>, <code class="docutils literal notranslate"><span class="pre">ObjectDialog</span></code>)</p></li>
+<li><p><strong>Functions/Methods</strong>: <code class="docutils literal notranslate"><span class="pre">snake_case</span></code> (e.g., <code class="docutils literal notranslate"><span class="pre">create_dataset</span></code>, <code class="docutils literal notranslate"><span class="pre">pack_landmark</span></code>)</p></li>
+<li><p><strong>Constants</strong>: <code class="docutils literal notranslate"><span class="pre">UPPER_SNAKE_CASE</span></code> (e.g., <code class="docutils literal notranslate"><span class="pre">PROGRAM_NAME</span></code>, <code class="docutils literal notranslate"><span class="pre">DEFAULT_COLOR</span></code>)</p></li>
+<li><p><strong>Private methods</strong>: <code class="docutils literal notranslate"><span class="pre">_leading_underscore</span></code> (e.g., <code class="docutils literal notranslate"><span class="pre">_update_view</span></code>)</p></li>
+<li><p><strong>Qt slots</strong>: <code class="docutils literal notranslate"><span class="pre">on_&lt;widget&gt;_&lt;action&gt;</span></code> (e.g., <code class="docutils literal notranslate"><span class="pre">on_btnOK_clicked</span></code>)</p></li>
+</ul>
+</section>
+<section id="docstring-format">
+<h3>Docstring Format<a class="headerlink" href="#docstring-format" title="Link to this heading"></a></h3>
+<p>Use <strong>Google-style docstrings</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">estimate_missing_landmarks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj_index</span><span class="p">,</span> <span class="n">reference_shape</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Estimate missing landmarks using aligned mean shape.</span>
+
+<span class="sd">    The mean shape is computed from Procrustes-aligned complete specimens,</span>
+<span class="sd">    then transformed to match the scale and position of the current object.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        obj_index (int): Index of object in object_list</span>
+<span class="sd">        reference_shape (MdObjectOps): Reference shape with complete landmarks</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: Estimated landmark coordinates, or None if estimation fails</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If obj_index is out of range</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Implementation...</span>
+</pre></div>
+</div>
+</section>
+<section id="pyqt5-patterns">
+<h3>PyQt5 Patterns<a class="headerlink" href="#pyqt5-patterns" title="Link to this heading"></a></h3>
+<p><strong>Signal/Slot Connections</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># In __init__</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">btnOK</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_btnOK_clicked</span><span class="p">)</span>
+
+<span class="c1"># Slot method</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">on_btnOK_clicked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="c1"># Handle button click</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<p><strong>Wait Cursor for Long Operations</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">PyQt5.QtCore</span><span class="w"> </span><span class="kn">import</span> <span class="n">Qt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt5.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="n">QApplication</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">long_operation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">QApplication</span><span class="o">.</span><span class="n">setOverrideCursor</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">WaitCursor</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Perform operation</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_something</span><span class="p">()</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">QApplication</span><span class="o">.</span><span class="n">restoreOverrideCursor</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">result</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="contributing">
+<h2>Contributing<a class="headerlink" href="#contributing" title="Link to this heading"></a></h2>
+<section id="git-workflow">
+<h3>Git Workflow<a class="headerlink" href="#git-workflow" title="Link to this heading"></a></h3>
+<ol class="arabic">
+<li><p><strong>Fork the repository</strong> on GitHub</p></li>
+<li><p><strong>Clone your fork</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/YOUR_USERNAME/Modan2.git
+<span class="nb">cd</span><span class="w"> </span>Modan2
+</pre></div>
+</div>
+</li>
+<li><p><strong>Create a feature branch</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>feature/my-new-feature
+</pre></div>
+</div>
+</li>
+<li><p><strong>Make changes</strong> and commit:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>.
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Add new feature: description&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Push to your fork</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>feature/my-new-feature
+</pre></div>
+</div>
+</li>
+<li><p><strong>Open a Pull Request</strong> on GitHub</p></li>
+</ol>
+</section>
+<section id="commit-message-guidelines">
+<h3>Commit Message Guidelines<a class="headerlink" href="#commit-message-guidelines" title="Link to this heading"></a></h3>
+<p>Follow conventional commits:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;type&gt;: &lt;subject&gt;
+
+&lt;body (optional)&gt;
+
+&lt;footer (optional)&gt;
+</pre></div>
+</div>
+<p><strong>Types</strong>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">feat</span></code>: New feature</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fix</span></code>: Bug fix</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">docs</span></code>: Documentation changes</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">style</span></code>: Code style (formatting, no logic change)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">refactor</span></code>: Code restructuring</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">test</span></code>: Adding/updating tests</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">chore</span></code>: Maintenance tasks</p></li>
+</ul>
+<p><strong>Examples</strong>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>feat: Add hollow circle visualization for estimated landmarks
+
+fix: Resolve scale mismatch in missing landmark estimation
+
+docs: Update user guide with missing landmark section
+
+test: Add tests for Procrustes with missing data
+</pre></div>
+</div>
+</section>
+<section id="pull-request-process">
+<h3>Pull Request Process<a class="headerlink" href="#pull-request-process" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Describe your changes</strong> clearly in the PR description</p></li>
+<li><p><strong>Reference related issues</strong> (e.g., “Fixes #42”)</p></li>
+<li><p><strong>Ensure tests pass</strong>: Run <code class="docutils literal notranslate"><span class="pre">pytest</span></code> locally before submitting</p></li>
+<li><p><strong>Update documentation</strong> if adding new features</p></li>
+<li><p><strong>Respond to review comments</strong> promptly</p></li>
+<li><p><strong>Squash commits</strong> if requested (to keep history clean)</p></li>
+</ol>
+</section>
+<section id="code-review-checklist">
+<h3>Code Review Checklist<a class="headerlink" href="#code-review-checklist" title="Link to this heading"></a></h3>
+<p>Reviewers will check:</p>
+<ul class="simple">
+<li><p>[ ] Code follows style guidelines</p></li>
+<li><p>[ ] New features have tests</p></li>
+<li><p>[ ] Documentation updated (if needed)</p></li>
+<li><p>[ ] No breaking changes (or clearly documented)</p></li>
+<li><p>[ ] Performance considerations addressed</p></li>
+<li><p>[ ] No security vulnerabilities introduced</p></li>
+</ul>
+</section>
+</section>
+<section id="building-executables">
+<h2>Building Executables<a class="headerlink" href="#building-executables" title="Link to this heading"></a></h2>
+<section id="pyinstaller-configuration">
+<h3>PyInstaller Configuration<a class="headerlink" href="#pyinstaller-configuration" title="Link to this heading"></a></h3>
+<p>Modan2 uses PyInstaller to create standalone executables.</p>
+<p><strong>Build script</strong>: <code class="docutils literal notranslate"><span class="pre">build.py</span></code></p>
+<p><strong>Running the build</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>build.py
+</pre></div>
+</div>
+<p><strong>Output</strong>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">dist/Modan2/</span></code> - Standalone application folder</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dist/Modan2.exe</span></code> - Executable (Windows)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dist/Modan2</span></code> - Executable (Linux/macOS)</p></li>
+</ul>
+</section>
+<section id="platform-specific-builds">
+<h3>Platform-Specific Builds<a class="headerlink" href="#platform-specific-builds" title="Link to this heading"></a></h3>
+<p><strong>Windows</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>build.py
+<span class="c1"># Creates dist/Modan2.exe</span>
+</pre></div>
+</div>
+<p><strong>macOS</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>build.py
+<span class="c1"># Creates dist/Modan2.app</span>
+</pre></div>
+</div>
+<p><strong>Linux</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>build.py
+<span class="c1"># Creates dist/Modan2</span>
+</pre></div>
+</div>
+<p><strong>Note</strong>: Cross-platform builds are not supported - build on the target platform.</p>
+</section>
+<section id="innosetup-installer-windows">
+<h3>InnoSetup Installer (Windows)<a class="headerlink" href="#innosetup-installer-windows" title="Link to this heading"></a></h3>
+<p>For Windows installers:</p>
+<ol class="arabic">
+<li><p>Install InnoSetup from <a class="reference external" href="https://jrsoftware.org/isinfo.php">https://jrsoftware.org/isinfo.php</a></p></li>
+<li><p>Build executable: <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">build.py</span></code></p></li>
+<li><p>Compile installer:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>iscc<span class="w"> </span>InnoSetup/Modan2.iss
+</pre></div>
+</div>
+</li>
+<li><p>Output: <code class="docutils literal notranslate"><span class="pre">Output/Modan2-Setup.exe</span></code></p></li>
+</ol>
+</section>
+<section id="creating-releases">
+<h3>Creating Releases<a class="headerlink" href="#creating-releases" title="Link to this heading"></a></h3>
+<ol class="arabic">
+<li><p><strong>Update version</strong> in <code class="docutils literal notranslate"><span class="pre">MdUtils.py</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">PROGRAM_VERSION</span> <span class="o">=</span> <span class="s2">&quot;0.1.5&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Update CHANGELOG.md</strong> with release notes</p></li>
+<li><p><strong>Commit changes</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>commit<span class="w"> </span>-am<span class="w"> </span><span class="s2">&quot;Release v0.1.5&quot;</span>
+git<span class="w"> </span>tag<span class="w"> </span>v0.1.5
+git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>main<span class="w"> </span>--tags
+</pre></div>
+</div>
+</li>
+<li><p><strong>Build executables</strong> for Windows, macOS, Linux</p></li>
+<li><p><strong>Create GitHub Release</strong>:</p>
+<ul class="simple">
+<li><p>Go to Releases → Draft a new release</p></li>
+<li><p>Tag: <code class="docutils literal notranslate"><span class="pre">v0.1.5</span></code></p></li>
+<li><p>Title: <code class="docutils literal notranslate"><span class="pre">Modan2</span> <span class="pre">v0.1.5</span></code></p></li>
+<li><p>Description: Copy from CHANGELOG.md</p></li>
+<li><p>Attach built executables</p></li>
+</ul>
+</li>
+<li><p><strong>Publish release</strong></p></li>
+</ol>
+</section>
+</section>
+<section id="database-migrations">
+<h2>Database Migrations<a class="headerlink" href="#database-migrations" title="Link to this heading"></a></h2>
+<p>Modan2 uses <code class="docutils literal notranslate"><span class="pre">peewee-migrate</span></code> for schema changes.</p>
+<section id="creating-a-migration">
+<h3>Creating a Migration<a class="headerlink" href="#creating-a-migration" title="Link to this heading"></a></h3>
+<p>When you modify database models:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>migrate.py<span class="w"> </span>create<span class="w"> </span>&lt;migration_name&gt;
+</pre></div>
+</div>
+<p><strong>Example</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>migrate.py<span class="w"> </span>create<span class="w"> </span>add_missing_landmark_flag
+</pre></div>
+</div>
+<p>This creates a new migration file in <code class="docutils literal notranslate"><span class="pre">migrations/</span></code>.</p>
+<p><strong>Edit the migration file</strong> to define changes:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">migrate</span><span class="p">(</span><span class="n">migrator</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="n">fake</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">migrator</span><span class="o">.</span><span class="n">add_column</span><span class="p">(</span><span class="s1">&#39;mdobject&#39;</span><span class="p">,</span> <span class="s1">&#39;has_missing&#39;</span><span class="p">,</span> <span class="n">BooleanField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">rollback</span><span class="p">(</span><span class="n">migrator</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="n">fake</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">migrator</span><span class="o">.</span><span class="n">drop_column</span><span class="p">(</span><span class="s1">&#39;mdobject&#39;</span><span class="p">,</span> <span class="s1">&#39;has_missing&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="running-migrations">
+<h3>Running Migrations<a class="headerlink" href="#running-migrations" title="Link to this heading"></a></h3>
+<p>Apply pending migrations:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>migrate.py
+</pre></div>
+</div>
+<p>Rollback last migration:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>migrate.py<span class="w"> </span>rollback
+</pre></div>
+</div>
+</section>
+</section>
+<section id="advanced-topics">
+<h2>Advanced Topics<a class="headerlink" href="#advanced-topics" title="Link to this heading"></a></h2>
+<section id="custom-widgets">
+<h3>Custom Widgets<a class="headerlink" href="#custom-widgets" title="Link to this heading"></a></h3>
+<p>Creating custom PyQt5 widgets (see <code class="docutils literal notranslate"><span class="pre">ModanComponents.py</span></code>):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">PyQt5.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="n">QWidget</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt5.QtCore</span><span class="w"> </span><span class="kn">import</span> <span class="n">pyqtSignal</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">CustomWidget</span><span class="p">(</span><span class="n">QWidget</span><span class="p">):</span>
+    <span class="c1"># Define custom signals</span>
+    <span class="n">valueChanged</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initUI</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">initUI</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Setup UI components</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">setValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="c1"># Custom logic</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="statistical-extensions">
+<h3>Statistical Extensions<a class="headerlink" href="#statistical-extensions" title="Link to this heading"></a></h3>
+<p>Adding new statistical methods (in <code class="docutils literal notranslate"><span class="pre">MdStatistics.py</span></code>):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">perform_new_analysis</span><span class="p">(</span><span class="n">dataset_ops</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Perform new statistical analysis.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dataset_ops (MdDatasetOps): Dataset with aligned shapes</span>
+<span class="sd">        options (dict): Analysis parameters</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Results including scores, statistics, etc.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Extract shape data</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="n">extract_coordinates</span><span class="p">(</span><span class="n">dataset_ops</span><span class="p">)</span>
+
+    <span class="c1"># Perform analysis</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">compute_something</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;scores&#39;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">scores</span><span class="p">,</span>
+        <span class="s1">&#39;statistics&#39;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">stats</span><span class="p">,</span>
+    <span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="plugin-system-future">
+<h3>Plugin System (Future)<a class="headerlink" href="#plugin-system-future" title="Link to this heading"></a></h3>
+<p>Modan2 may support plugins in future versions:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># plugins/my_plugin.py</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MyPlugin</span><span class="p">:</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;My Analysis Plugin&quot;</span>
+    <span class="n">version</span> <span class="o">=</span> <span class="s2">&quot;1.0&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">):</span>
+        <span class="c1"># Plugin logic</span>
+        <span class="k">return</span> <span class="n">result</span>
+</pre></div>
+</div>
+</section>
+<section id="profiling-and-optimization">
+<h3>Profiling and Optimization<a class="headerlink" href="#profiling-and-optimization" title="Link to this heading"></a></h3>
+<p><strong>Profiling with cProfile</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>cProfile<span class="w"> </span>-o<span class="w"> </span>profile.stats<span class="w"> </span>Modan2.py
+<span class="c1"># Analyze with snakeviz</span>
+pip<span class="w"> </span>install<span class="w"> </span>snakeviz
+snakeviz<span class="w"> </span>profile.stats
+</pre></div>
+</div>
+<p><strong>Memory profiling</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>memory_profiler
+python<span class="w"> </span>-m<span class="w"> </span>memory_profiler<span class="w"> </span>Modan2.py
+</pre></div>
+</div>
+</section>
+<section id="debugging">
+<h3>Debugging<a class="headerlink" href="#debugging" title="Link to this heading"></a></h3>
+<p><strong>Enable detailed logging</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># In Modan2.py</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Qt debugging</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">QT_DEBUG_PLUGINS</span><span class="o">=</span><span class="m">1</span>
+python<span class="w"> </span>Modan2.py
+</pre></div>
+</div>
+</section>
+</section>
+<section id="resources">
+<h2>Resources<a class="headerlink" href="#resources" title="Link to this heading"></a></h2>
+<section id="documentation">
+<h3>Documentation<a class="headerlink" href="#documentation" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.riverbankcomputing.com/static/Docs/PyQt5/">PyQt5 Documentation</a></p></li>
+<li><p><a class="reference external" href="http://docs.peewee-orm.com/">Peewee ORM Documentation</a></p></li>
+<li><p><a class="reference external" href="https://numpy.org/doc/">NumPy Documentation</a></p></li>
+<li><p><a class="reference external" href="https://docs.scipy.org/doc/scipy/">SciPy Documentation</a></p></li>
+</ul>
+</section>
+<section id="morphometric-analysis">
+<h3>Morphometric Analysis<a class="headerlink" href="#morphometric-analysis" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.elsevier.com/books/geometric-morphometrics-for-biologists/zelditch/978-0-12-386903-6">Geometric Morphometrics for Biologists</a> by Zelditch et al.</p></li>
+<li><p><a class="reference external" href="https://www.springer.com/gp/book/9780387777894">Morphometrics with R</a> by Claude</p></li>
+</ul>
+</section>
+<section id="community">
+<h3>Community<a class="headerlink" href="#community" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>GitHub Issues</strong>: <a class="reference external" href="https://github.com/jikhanjung/Modan2/issues">https://github.com/jikhanjung/Modan2/issues</a></p></li>
+<li><p><strong>Discussions</strong>: <a class="reference external" href="https://github.com/jikhanjung/Modan2/discussions">https://github.com/jikhanjung/Modan2/discussions</a></p></li>
+</ul>
+</section>
+</section>
+<section id="license">
+<h2>License<a class="headerlink" href="#license" title="Link to this heading"></a></h2>
+<p>Modan2 is released under the <strong>MIT License</strong>.</p>
+<p>You are free to:</p>
+<ul class="simple">
+<li><p>Use commercially</p></li>
+<li><p>Modify</p></li>
+<li><p>Distribute</p></li>
+<li><p>Sublicense</p></li>
+</ul>
+<p>Under the condition that you include the original copyright and license notice.</p>
+<p>See the <a class="reference external" href="https://github.com/jikhanjung/Modan2/blob/main/LICENSE">LICENSE</a> file for details.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="user_guide.html" class="btn btn-neutral float-left" title="User Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="changelog.html" class="btn btn-neutral float-right" title="Changelog" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023-2025, Modan2 Contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

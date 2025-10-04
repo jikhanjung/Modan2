@@ -1,0 +1,1264 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ko" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Guide &mdash; Modan2 0.1.5 문서</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=8ea13951"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/translations.js?v=afa94a99"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="색인" href="genindex.html" />
+    <link rel="search" title="검색" href="search.html" />
+    <link rel="next" title="Developer Guide" href="developer_guide.html" />
+    <link rel="prev" title="Installation" href="installation.html" />
+ 
+<style>
+  .language-switcher {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+    background: #2c3e50;
+    border: 1px solid #34495e;
+    border-radius: 4px;
+    padding: 8px 15px;
+    font-size: 13px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+  .language-switcher a {
+    margin: 0 5px;
+    text-decoration: none;
+    color: #3498db;
+    font-weight: 500;
+    transition: color 0.2s;
+    cursor: pointer;
+  }
+  .language-switcher a:hover {
+    color: #5dade2;
+    text-decoration: underline;
+  }
+  .language-switcher .current {
+    color: #ecf0f1;
+    font-weight: 600;
+    cursor: default;
+    margin: 0 5px;
+  }
+  .language-switcher .separator {
+    color: #7f8c8d;
+    margin: 0 3px;
+  }
+  .language-switcher .icon {
+    margin-right: 5px;
+  }
+</style>
+<script>
+  // Language switcher: preserve current page path when switching languages
+  function switchLanguage(targetLang) {
+    var currentPath = window.location.pathname;
+    var newPath;
+
+    // Get the page name (e.g., 'index.html', 'user_guide.html')
+    var pageName = currentPath.split('/').pop() || 'index.html';
+
+    // Replace language code in path (en <-> ko)
+    if (currentPath.includes('/en/')) {
+      newPath = currentPath.replace('/en/', '/' + targetLang + '/');
+    } else if (currentPath.includes('/ko/')) {
+      newPath = currentPath.replace('/ko/', '/' + targetLang + '/');
+    } else {
+      // Fallback: construct path with language code
+      // Get the base path (everything before the last /)
+      var pathParts = currentPath.split('/');
+      pathParts.pop(); // Remove current file
+      var basePath = pathParts.join('/');
+      newPath = basePath + '/' + targetLang + '/' + pageName;
+    }
+
+    window.location.href = newPath;
+  }
+</script>
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Modan2
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">목차:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#system-requirements">System Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#installation-methods">Installation Methods</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#windows-installation">Windows Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#macos-installation">macOS Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#linux-installation">Linux Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#wsl-windows-subsystem-for-linux">WSL (Windows Subsystem for Linux)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#troubleshooting">Troubleshooting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#qt-platform-plugin-error-linux-wsl">Qt Platform Plugin Error (Linux/WSL)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#opengl-glut-errors">OpenGL/GLUT Errors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#missing-python-dependencies">Missing Python Dependencies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#database-migration-issues">Database Migration Issues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#performance-issues">Performance Issues</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#verifying-installation">Verifying Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#updating-modan2">Updating Modan2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#getting-help">Getting Help</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">User Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#getting-started">Getting Started</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#launching-modan2">Launching Modan2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#main-window-overview">Main Window Overview</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#working-with-datasets">Working with Datasets</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#creating-a-new-dataset">Creating a New Dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dataset-variables">Dataset Variables</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#importing-data">Importing Data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#importing-2d-images">Importing 2D Images</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#importing-3d-models">Importing 3D Models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#importing-landmark-files">Importing Landmark Files</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#working-with-objects">Working with Objects</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#viewing-an-object">Viewing an Object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#placing-landmarks-2d">Placing Landmarks (2D)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#placing-landmarks-3d">Placing Landmarks (3D)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#editing-landmark-coordinates">Editing Landmark Coordinates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#missing-landmarks">Missing Landmarks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#display-options">Display Options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#statistical-analysis">Statistical Analysis</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-an-analysis">Running an Analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#procrustes-superimposition">Procrustes Superimposition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#principal-component-analysis-pca">Principal Component Analysis (PCA)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#canonical-variate-analysis-cva">Canonical Variate Analysis (CVA)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manova">MANOVA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#handling-missing-landmarks">Handling Missing Landmarks</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#visualization">Visualization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#d-viewer">2D Viewer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">3D Viewer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#statistical-plots">Statistical Plots</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#data-export">Data Export</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#exporting-datasets">Exporting Datasets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#exporting-analysis-results">Exporting Analysis Results</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#keyboard-shortcuts">Keyboard Shortcuts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#global-shortcuts">Global Shortcuts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#object-dialog">Object Dialog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">3D Viewer</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#preferences">Preferences</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#general-settings">General Settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#display-settings">Display Settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#analysis-settings">Analysis Settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#advanced-settings">Advanced Settings</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#tips-and-best-practices">Tips and Best Practices</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#data-organization">Data Organization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#landmark-placement">Landmark Placement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Statistical Analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#performance-optimization">Performance Optimization</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#common-workflows">Common Workflows</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#workflow-1-2d-morphometric-study">Workflow 1: 2D Morphometric Study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#workflow-2-3d-morphometric-study">Workflow 2: 3D Morphometric Study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#workflow-3-missing-data-study">Workflow 3: Missing Data Study</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#analysis-fails">Analysis Fails</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#landmarks-not-showing">Landmarks Not Showing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#slow-performance">Slow Performance</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="developer_guide.html">Developer Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="developer_guide.html#project-overview">Project Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="developer_guide.html#architecture">Architecture</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#high-level-overview">High-Level Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#database-schema">Database Schema</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#mvc-pattern-in-modan2">MVC Pattern in Modan2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#file-formats">File Formats</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="developer_guide.html#development-setup">Development Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#cloning-the-repository">Cloning the Repository</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#virtual-environment-setup">Virtual Environment Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#running-from-source">Running from Source</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#development-dependencies">Development Dependencies</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="developer_guide.html#testing">Testing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#test-framework">Test Framework</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#running-tests">Running Tests</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#writing-tests">Writing Tests</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="developer_guide.html#code-style-guidelines">Code Style Guidelines</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#general-principles">General Principles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#naming-conventions">Naming Conventions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#docstring-format">Docstring Format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#pyqt5-patterns">PyQt5 Patterns</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="developer_guide.html#contributing">Contributing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#git-workflow">Git Workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#commit-message-guidelines">Commit Message Guidelines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#pull-request-process">Pull Request Process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#code-review-checklist">Code Review Checklist</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="developer_guide.html#building-executables">Building Executables</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#pyinstaller-configuration">PyInstaller Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#platform-specific-builds">Platform-Specific Builds</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#innosetup-installer-windows">InnoSetup Installer (Windows)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#creating-releases">Creating Releases</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="developer_guide.html#database-migrations">Database Migrations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#creating-a-migration">Creating a Migration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#running-migrations">Running Migrations</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="developer_guide.html#advanced-topics">Advanced Topics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#custom-widgets">Custom Widgets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#statistical-extensions">Statistical Extensions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#plugin-system-future">Plugin System (Future)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#profiling-and-optimization">Profiling and Optimization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#debugging">Debugging</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="developer_guide.html#resources">Resources</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#documentation">Documentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#morphometric-analysis">Morphometric Analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#community">Community</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="developer_guide.html#license">License</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-0-1-5-alpha-1-2025-09-11">Version 0.1.5-alpha.1 (2025-09-11)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#added">Added</a></li>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#changed">Changed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#fixed">Fixed</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-0-1-4-2025-09-10">Version 0.1.4 (2025-09-10)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#id1">Added</a></li>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#id2">Changed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#id3">Fixed</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#previous-versions">Previous Versions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#version-0-1-3">Version 0.1.3</a></li>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#version-0-1-2">Version 0.1.2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#version-0-1-1">Version 0.1.1</a></li>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#version-0-1-0">Version 0.1.0</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#upcoming-features">Upcoming Features</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#planned-for-future-releases">Planned for Future Releases</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Modan2</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">User Guide</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/jikhanjung/Modan2/blob/main/docs/user_guide.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+<div class="language-switcher">
+  <span class="icon">🌐</span>
+  
+    <a onclick="switchLanguage('en')">English</a><span class="separator">|</span><span class="current">한국어</span>
+  
+</div>
+
+           <div itemprop="articleBody">
+             
+  <section id="user-guide">
+<h1>User Guide<a class="headerlink" href="#user-guide" title="Link to this heading"></a></h1>
+<p>This guide provides comprehensive instructions for using Modan2 for geometric morphometric analysis.</p>
+<section id="getting-started">
+<h2>Getting Started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h2>
+<section id="launching-modan2">
+<h3>Launching Modan2<a class="headerlink" href="#launching-modan2" title="Link to this heading"></a></h3>
+<p><strong>From installed application</strong>:</p>
+<ul class="simple">
+<li><p><strong>Windows</strong>: Start Menu → Modan2</p></li>
+<li><p><strong>macOS</strong>: Applications → Modan2.app</p></li>
+<li><p><strong>Linux</strong>: Terminal: <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">Modan2.py</span></code></p></li>
+</ul>
+<p><strong>From source</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>Modan2
+python3<span class="w"> </span>Modan2.py
+</pre></div>
+</div>
+</section>
+<section id="main-window-overview">
+<h3>Main Window Overview<a class="headerlink" href="#main-window-overview" title="Link to this heading"></a></h3>
+<p>The Modan2 main window consists of several key components:</p>
+<ol class="arabic simple">
+<li><p><strong>Menu Bar</strong>: File, Edit, View, Tools, Help</p></li>
+<li><p><strong>Toolbar</strong>: Quick access to common operations</p></li>
+<li><p><strong>Dataset Tree View</strong> (Left): Hierarchical view of datasets</p></li>
+<li><p><strong>Object Table</strong> (Center): List of objects in the selected dataset</p></li>
+<li><p><strong>Object Preview</strong> (Right): Visual preview of selected object</p></li>
+<li><p><strong>Status Bar</strong> (Bottom): Information and progress indicators</p></li>
+</ol>
+</section>
+</section>
+<section id="working-with-datasets">
+<h2>Working with Datasets<a class="headerlink" href="#working-with-datasets" title="Link to this heading"></a></h2>
+<section id="creating-a-new-dataset">
+<h3>Creating a New Dataset<a class="headerlink" href="#creating-a-new-dataset" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p>Click <strong>“New Dataset”</strong> button or press <code class="docutils literal notranslate"><span class="pre">Ctrl+N</span></code></p></li>
+<li><p>Enter dataset information:</p>
+<ul class="simple">
+<li><p><strong>Name</strong>: Descriptive name for your dataset</p></li>
+<li><p><strong>Dimension</strong>: 2D or 3D</p></li>
+<li><p><strong>Description</strong>: Optional detailed description</p></li>
+<li><p><strong>Parent Dataset</strong>: Optional - create hierarchical structure</p></li>
+</ul>
+</li>
+<li><p>Click <strong>OK</strong> to create the dataset</p></li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">참고</p>
+<p>Hierarchical datasets allow you to organize related studies. For example:</p>
+<ul class="simple">
+<li><p>Study_2024 (parent)</p>
+<ul>
+<li><p>Subspecies_A (child)</p></li>
+<li><p>Subspecies_B (child)</p></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="dataset-variables">
+<h3>Dataset Variables<a class="headerlink" href="#dataset-variables" title="Link to this heading"></a></h3>
+<p>Variables define grouping and categorical data for statistical analysis.</p>
+<p><strong>Adding Variables</strong>:</p>
+<ol class="arabic simple">
+<li><p>Select a dataset</p></li>
+<li><p>Click <strong>“Add Variable”</strong> in the toolbar</p></li>
+<li><p>Choose variable type:</p>
+<ul class="simple">
+<li><p><strong>Categorical</strong>: Groups (e.g., “male”, “female”, “juvenile”)</p></li>
+<li><p><strong>Continuous</strong>: Numeric measurements (e.g., age, weight)</p></li>
+</ul>
+</li>
+<li><p>Enter variable name</p></li>
+<li><p>For categorical variables, add possible values</p></li>
+</ol>
+<p><strong>Setting Object Variables</strong>:</p>
+<ol class="arabic simple">
+<li><p>Select object(s) in the table</p></li>
+<li><p>Click on the variable column</p></li>
+<li><p>Enter or select value</p></li>
+<li><p>Press <code class="docutils literal notranslate"><span class="pre">Enter</span></code> or click away to save</p></li>
+</ol>
+<p><strong>Example Workflow</strong>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Dataset: Bird Wings
+Variables:
+  - Species (categorical): sparrow, robin, finch
+  - Sex (categorical): male, female
+  - Age (continuous): numeric
+
+Objects:
+  - wing_001.jpg → Species: sparrow, Sex: male, Age: 2.5
+  - wing_002.jpg → Species: sparrow, Sex: female, Age: 1.8
+</pre></div>
+</div>
+</section>
+</section>
+<section id="importing-data">
+<h2>Importing Data<a class="headerlink" href="#importing-data" title="Link to this heading"></a></h2>
+<section id="importing-2d-images">
+<h3>Importing 2D Images<a class="headerlink" href="#importing-2d-images" title="Link to this heading"></a></h3>
+<p><strong>Supported formats</strong>: JPG, PNG, BMP, TIFF, GIF</p>
+<p><strong>Method 1: Drag and Drop</strong></p>
+<ol class="arabic simple">
+<li><p>Select a dataset in the tree view</p></li>
+<li><p>Drag image files from your file manager</p></li>
+<li><p>Drop them onto the dataset or object table</p></li>
+<li><p>Images are automatically imported with filenames as object names</p></li>
+</ol>
+<p><strong>Method 2: Import Dialog</strong></p>
+<ol class="arabic simple">
+<li><p>Select dataset → <strong>File → Import Objects</strong></p></li>
+<li><p>Click <strong>“Add Images”</strong></p></li>
+<li><p>Select one or more image files</p></li>
+<li><p>Review the list</p></li>
+<li><p>Click <strong>“Import”</strong></p></li>
+</ol>
+<div class="admonition tip">
+<p class="admonition-title">팁</p>
+<p>Use consistent naming: <code class="docutils literal notranslate"><span class="pre">specimen_001.jpg</span></code>, <code class="docutils literal notranslate"><span class="pre">specimen_002.jpg</span></code> for easier sorting</p>
+</div>
+</section>
+<section id="importing-3d-models">
+<h3>Importing 3D Models<a class="headerlink" href="#importing-3d-models" title="Link to this heading"></a></h3>
+<p><strong>Supported formats</strong>: OBJ, PLY, STL</p>
+<p><strong>Method 1: Drag and Drop</strong></p>
+<ol class="arabic simple">
+<li><p>Select a 3D dataset</p></li>
+<li><p>Drag 3D model files into the application</p></li>
+<li><p>Models are imported with automatic scaling</p></li>
+</ol>
+<p><strong>Method 2: Import Dialog</strong></p>
+<ol class="arabic simple">
+<li><p><strong>File → Import Objects → Add 3D Models</strong></p></li>
+<li><p>Select files</p></li>
+<li><p>Review and import</p></li>
+</ol>
+<p><strong>3D Model Requirements</strong>:</p>
+<ul class="simple">
+<li><p>Mesh should be manifold (closed surface)</p></li>
+<li><p>Reasonable polygon count (&lt;100k faces recommended)</p></li>
+<li><p>Centered at origin for best visualization</p></li>
+</ul>
+</section>
+<section id="importing-landmark-files">
+<h3>Importing Landmark Files<a class="headerlink" href="#importing-landmark-files" title="Link to this heading"></a></h3>
+<p><strong>Supported formats</strong>: TPS, NTS, CSV</p>
+<p><strong>TPS Format Example</strong>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>LM=5
+12.5 34.2
+45.6 78.9
+23.1 56.4
+67.8 12.3
+89.0 45.6
+IMAGE=specimen_001.jpg
+ID=1
+
+LM=5
+15.2 32.8
+...
+</pre></div>
+</div>
+<p><strong>Importing TPS/NTS</strong>:</p>
+<ol class="arabic simple">
+<li><p><strong>File → Import → Import Landmark File</strong></p></li>
+<li><p>Select TPS or NTS file</p></li>
+<li><p>Modan2 will:</p>
+<ul class="simple">
+<li><p>Create objects for each specimen</p></li>
+<li><p>Link to image files (if IMAGE= field exists)</p></li>
+<li><p>Import landmark coordinates</p></li>
+</ul>
+</li>
+<li><p>Click <strong>“Import”</strong></p></li>
+</ol>
+<p><strong>CSV Format</strong>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>object,lm1_x,lm1_y,lm2_x,lm2_y,lm3_x,lm3_y
+specimen_001,12.5,34.2,45.6,78.9,23.1,56.4
+specimen_002,15.2,32.8,48.1,76.2,25.3,54.7
+</pre></div>
+</div>
+</section>
+</section>
+<section id="working-with-objects">
+<h2>Working with Objects<a class="headerlink" href="#working-with-objects" title="Link to this heading"></a></h2>
+<section id="viewing-an-object">
+<h3>Viewing an Object<a class="headerlink" href="#viewing-an-object" title="Link to this heading"></a></h3>
+<p><strong>Double-click</strong> an object in the table to open the <strong>Object Dialog</strong>.</p>
+<p>The Object Dialog shows:</p>
+<ul class="simple">
+<li><p>Object metadata (name, ID, creation date)</p></li>
+<li><p>Associated image or 3D model</p></li>
+<li><p>Landmark table</p></li>
+<li><p>2D/3D viewer with landmarks visualized</p></li>
+</ul>
+</section>
+<section id="placing-landmarks-2d">
+<h3>Placing Landmarks (2D)<a class="headerlink" href="#placing-landmarks-2d" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p>Open Object Dialog for a 2D object</p></li>
+<li><p>Click on the image to place a landmark</p></li>
+<li><p>Landmarks are numbered sequentially (1, 2, 3, …)</p></li>
+<li><p>Right-click a landmark to delete it</p></li>
+<li><p>Click and drag to move an existing landmark</p></li>
+</ol>
+<p><strong>Keyboard Shortcuts in Object Dialog</strong>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Ctrl+Z</span></code> - Undo last landmark</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Delete</span></code> - Remove selected landmark</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">+/-</span></code> - Zoom in/out</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Space+Drag</span></code> - Pan image</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Home</span></code> - Reset zoom</p></li>
+</ul>
+</section>
+<section id="placing-landmarks-3d">
+<h3>Placing Landmarks (3D)<a class="headerlink" href="#placing-landmarks-3d" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p>Open Object Dialog for a 3D object</p></li>
+<li><p>Rotate the model:</p>
+<ul class="simple">
+<li><p><strong>Left mouse drag</strong>: Rotate</p></li>
+<li><p><strong>Right mouse drag</strong>: Pan</p></li>
+<li><p><strong>Mouse wheel</strong>: Zoom</p></li>
+</ul>
+</li>
+<li><p>Click on the surface to place a landmark</p></li>
+<li><p>Landmarks appear as colored spheres</p></li>
+<li><p>Right-click a landmark to delete it</p></li>
+</ol>
+<p><strong>3D Viewer Controls</strong>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">R</span></code> - Reset camera</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">W</span></code> - Wireframe mode</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">S</span></code> - Solid/surface mode</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">L</span></code> - Toggle lighting</p></li>
+</ul>
+</section>
+<section id="editing-landmark-coordinates">
+<h3>Editing Landmark Coordinates<a class="headerlink" href="#editing-landmark-coordinates" title="Link to this heading"></a></h3>
+<p><strong>In the landmark table</strong>:</p>
+<ol class="arabic simple">
+<li><p>Double-click a coordinate cell</p></li>
+<li><p>Enter new value</p></li>
+<li><p>Press <code class="docutils literal notranslate"><span class="pre">Enter</span></code> to save</p></li>
+<li><p>The viewer updates automatically</p></li>
+</ol>
+<p><strong>Manual coordinate entry is useful for</strong>:</p>
+<ul class="simple">
+<li><p>Precise adjustments</p></li>
+<li><p>Correcting digitization errors</p></li>
+<li><p>Importing coordinates from external sources</p></li>
+</ul>
+</section>
+<section id="missing-landmarks">
+<h3>Missing Landmarks<a class="headerlink" href="#missing-landmarks" title="Link to this heading"></a></h3>
+<p>If a landmark cannot be placed (damaged specimen, obscured feature):</p>
+<ol class="arabic simple">
+<li><p>Leave the landmark position empty, or</p></li>
+<li><p>Right-click in the landmark table → <strong>“Mark as Missing”</strong></p></li>
+<li><p>The cell shows <strong>“MISSING”</strong></p></li>
+<li><p>In the viewer:</p>
+<ul class="simple">
+<li><p><strong>Checkbox “Show Estimated” checked</strong>: Hollow circle shows estimated position</p></li>
+<li><p><strong>Checkbox unchecked</strong>: No visualization</p></li>
+</ul>
+</li>
+</ol>
+<p><strong>How Estimation Works</strong>:</p>
+<ul class="simple">
+<li><p>Modan2 uses Procrustes-aligned mean shape from complete specimens</p></li>
+<li><p>Estimates are transformed to match the scale and position of the current object</p></li>
+<li><p>Estimated landmarks shown as <strong>hollow circles</strong> with <strong>“3?”</strong> label</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">참고</p>
+<p>Missing landmarks are handled during Procrustes superimposition through iterative imputation. See <a class="reference internal" href="#analysis-missing-landmarks"><span class="std std-ref">Handling Missing Landmarks</span></a> for details.</p>
+</div>
+</section>
+<section id="display-options">
+<h3>Display Options<a class="headerlink" href="#display-options" title="Link to this heading"></a></h3>
+<p>In the Object Dialog, customize visualization:</p>
+<ul class="simple">
+<li><p><strong>Show Landmarks</strong>: Toggle landmark visibility</p></li>
+<li><p><strong>Show Index</strong>: Show/hide landmark numbers</p></li>
+<li><p><strong>Show Polygon</strong>: Connect landmarks with lines (wireframe)</p></li>
+<li><p><strong>Show Baseline</strong>: Highlight baseline between specific landmarks</p></li>
+<li><p><strong>Show Estimated</strong>: Display estimated positions for missing landmarks (hollow circles)</p></li>
+</ul>
+<p><strong>Size Controls</strong>:</p>
+<ul class="simple">
+<li><p><strong>Landmark Size</strong>: Adjust circle radius</p></li>
+<li><p><strong>Index Size</strong>: Adjust label font size</p></li>
+</ul>
+</section>
+</section>
+<section id="statistical-analysis">
+<h2>Statistical Analysis<a class="headerlink" href="#statistical-analysis" title="Link to this heading"></a></h2>
+<section id="overview">
+<h3>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h3>
+<p>Modan2 provides three main statistical analyses:</p>
+<ol class="arabic simple">
+<li><p><strong>Principal Component Analysis (PCA)</strong>: Explore shape variation</p></li>
+<li><p><strong>Canonical Variate Analysis (CVA)</strong>: Discriminate between groups</p></li>
+<li><p><strong>MANOVA</strong>: Test for group differences</p></li>
+</ol>
+<p>All analyses require <strong>Procrustes superimposition</strong> as a preprocessing step.</p>
+</section>
+<section id="running-an-analysis">
+<h3>Running an Analysis<a class="headerlink" href="#running-an-analysis" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p>Select a dataset in the tree view</p></li>
+<li><p>Click <strong>“Analyze Dataset”</strong> button or menu: <strong>Tools → Analyze Dataset</strong></p></li>
+<li><p>The <strong>New Analysis Dialog</strong> opens:</p>
+<ul class="simple">
+<li><p><strong>Analysis Type</strong>: PCA, CVA, or MANOVA</p></li>
+<li><p><strong>Dataset</strong>: Pre-selected</p></li>
+<li><p><strong>Options</strong>: Analysis-specific settings</p></li>
+</ul>
+</li>
+<li><p>Configure options (see below)</p></li>
+<li><p>Click <strong>“OK”</strong> to run</p></li>
+</ol>
+</section>
+<section id="procrustes-superimposition">
+<span id="analysis-procrustes"></span><h3>Procrustes Superimposition<a class="headerlink" href="#procrustes-superimposition" title="Link to this heading"></a></h3>
+<p><strong>What it does</strong>:</p>
+<ul class="simple">
+<li><p>Aligns all shapes to a common coordinate system</p></li>
+<li><p>Removes differences due to position, rotation, and scale</p></li>
+<li><p>Leaves only shape variation</p></li>
+</ul>
+<p><strong>Handling Missing Landmarks</strong>:</p>
+<p>If your dataset has missing landmarks, Procrustes uses <strong>iterative imputation</strong>:</p>
+<ol class="arabic simple">
+<li><p>Start with complete specimens only</p></li>
+<li><p>Compute mean shape</p></li>
+<li><p>Estimate missing landmarks from mean</p></li>
+<li><p>Re-run Procrustes with estimated values</p></li>
+<li><p>Repeat until convergence (max 100 iterations)</p></li>
+</ol>
+<p><strong>Options</strong>:</p>
+<ul class="simple">
+<li><p><strong>Reference Shape</strong>:
+- <em>Mean shape</em>: Default, uses average
+- <em>First object</em>: Uses first specimen as reference</p></li>
+</ul>
+<p><strong>When Procrustes Runs</strong>:</p>
+<ul class="simple">
+<li><p>Automatically before PCA, CVA, or MANOVA</p></li>
+<li><p>Results are cached - subsequent analyses reuse aligned shapes</p></li>
+</ul>
+</section>
+<section id="principal-component-analysis-pca">
+<span id="analysis-pca"></span><h3>Principal Component Analysis (PCA)<a class="headerlink" href="#principal-component-analysis-pca" title="Link to this heading"></a></h3>
+<p><strong>Purpose</strong>: Identify major axes of shape variation</p>
+<p><strong>Use when</strong>:</p>
+<ul class="simple">
+<li><p>Exploring shape diversity</p></li>
+<li><p>Visualizing morphospace</p></li>
+<li><p>Identifying outliers</p></li>
+<li><p>Reducing dimensionality</p></li>
+</ul>
+<p><strong>Running PCA</strong>:</p>
+<ol class="arabic simple">
+<li><p><strong>Tools → Analyze Dataset → PCA</strong></p></li>
+<li><p>Options:</p>
+<ul class="simple">
+<li><p><strong>Number of PCs</strong>: How many principal components to compute (default: all)</p></li>
+<li><p><strong>Use Covariance Matrix</strong>: Unchecked = correlation matrix (default)</p></li>
+</ul>
+</li>
+<li><p>Click <strong>OK</strong></p></li>
+</ol>
+<p><strong>Interpreting Results</strong>:</p>
+<p>The <strong>Data Exploration Dialog</strong> opens with:</p>
+<ul class="simple">
+<li><p><strong>Scree Plot</strong>: Shows variance explained by each PC</p>
+<ul>
+<li><p>X-axis: PC number</p></li>
+<li><p>Y-axis: % variance</p></li>
+<li><p>Look for “elbow” to determine how many PCs are meaningful</p></li>
+</ul>
+</li>
+<li><p><strong>PC Score Plot</strong>: Scatter plot of specimens</p>
+<ul>
+<li><p>X-axis: PC1 (usually highest variance)</p></li>
+<li><p>Y-axis: PC2 (second highest)</p></li>
+<li><p>Points colored by groups (if variables defined)</p></li>
+</ul>
+</li>
+<li><p><strong>Shape Variation Wireframes</strong>:</p>
+<ul>
+<li><p>Shows shape changes along each PC</p></li>
+<li><p>Min/Max shapes at extremes of PC axis</p></li>
+</ul>
+</li>
+<li><p><strong>PC Scores Table</strong>: Numeric scores for each specimen</p></li>
+</ul>
+<p><strong>Exporting PCA Results</strong>:</p>
+<ul class="simple">
+<li><p><strong>Export PC Scores</strong>: CSV file with scores for each object</p></li>
+<li><p><strong>Export Loadings</strong>: Landmark contributions to each PC</p></li>
+<li><p><strong>Export Plot</strong>: Save scatter plot as PNG/PDF</p></li>
+</ul>
+<p><strong>Example Workflow</strong>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Dataset: Skull shapes (50 specimens, 20 landmarks)
+
+PCA Results:
+  PC1: 45% variance → Overall size (allometry)
+  PC2: 23% variance → Skull width
+  PC3: 12% variance → Jaw length
+
+Interpretation:
+  - Most variation is size-related
+  - PC2 separates species A (narrow) vs. B (wide)
+  - PC3 shows sexual dimorphism within species
+</pre></div>
+</div>
+</section>
+<section id="canonical-variate-analysis-cva">
+<span id="analysis-cva"></span><h3>Canonical Variate Analysis (CVA)<a class="headerlink" href="#canonical-variate-analysis-cva" title="Link to this heading"></a></h3>
+<p><strong>Purpose</strong>: Maximize separation between predefined groups</p>
+<p><strong>Use when</strong>:</p>
+<ul class="simple">
+<li><p>Discriminating between species/populations</p></li>
+<li><p>Testing classification accuracy</p></li>
+<li><p>Identifying diagnostic features</p></li>
+</ul>
+<p><strong>Requirements</strong>:</p>
+<ul class="simple">
+<li><p>At least 2 groups defined via dataset variables</p></li>
+<li><p>At least 2 specimens per group</p></li>
+</ul>
+<p><strong>Running CVA</strong>:</p>
+<ol class="arabic simple">
+<li><p><strong>Tools → Analyze Dataset → CVA</strong></p></li>
+<li><p>Options:</p>
+<ul class="simple">
+<li><p><strong>Grouping Variable</strong>: Select categorical variable (e.g., “Species”)</p></li>
+<li><p><strong>Number of CVs</strong>: Default = min(groups-1, landmarks*2)</p></li>
+</ul>
+</li>
+<li><p>Click <strong>OK</strong></p></li>
+</ol>
+<p><strong>Interpreting Results</strong>:</p>
+<ul class="simple">
+<li><p><strong>CV Score Plot</strong>: Specimens plotted on CV axes</p>
+<ul>
+<li><p>Ideally, groups form distinct clusters</p></li>
+<li><p>Overlap indicates similarity</p></li>
+</ul>
+</li>
+<li><p><strong>Classification Table</strong>: Shows how well CVA discriminates</p>
+<ul>
+<li><p>Rows: True group</p></li>
+<li><p>Columns: Predicted group</p></li>
+<li><p>Diagonal = correct classifications</p></li>
+<li><p>Off-diagonal = misclassifications</p></li>
+</ul>
+</li>
+<li><p><strong>Discriminant Function</strong>: Statistical details</p>
+<ul>
+<li><p>Wilks’ Lambda: Smaller = better separation (0-1 scale)</p></li>
+<li><p>P-value: Significance of group differences</p></li>
+</ul>
+</li>
+</ul>
+<p><strong>Example</strong>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Dataset: Bird beaks, Variable: Species (A, B, C)
+
+CVA Results:
+  CV1: 78% discrimination
+  CV2: 15% discrimination
+
+Classification Table:
+           Predicted A  Predicted B  Predicted C
+Actual A      18           2            0
+Actual B       1          19            0
+Actual C       0           1           19
+
+Overall accuracy: 93.3%
+</pre></div>
+</div>
+</section>
+<section id="manova">
+<span id="analysis-manova"></span><h3>MANOVA<a class="headerlink" href="#manova" title="Link to this heading"></a></h3>
+<p><strong>Purpose</strong>: Test if groups differ significantly in shape</p>
+<p><strong>Use when</strong>:</p>
+<ul class="simple">
+<li><p>Formal hypothesis testing</p></li>
+<li><p>Comparing multiple groups simultaneously</p></li>
+<li><p>Assessing effect size</p></li>
+</ul>
+<p><strong>Running MANOVA</strong>:</p>
+<ol class="arabic simple">
+<li><p><strong>Tools → Analyze Dataset → MANOVA</strong></p></li>
+<li><p>Options:</p>
+<ul class="simple">
+<li><p><strong>Grouping Variable</strong>: Select categorical variable</p></li>
+<li><p><strong>Alpha Level</strong>: Significance threshold (default: 0.05)</p></li>
+</ul>
+</li>
+<li><p>Click <strong>OK</strong></p></li>
+</ol>
+<p><strong>Interpreting Results</strong>:</p>
+<ul class="simple">
+<li><p><strong>Wilks’ Lambda</strong>: Test statistic (0-1)</p>
+<ul>
+<li><p>Smaller = more group separation</p></li>
+<li><p>0 = perfect separation</p></li>
+<li><p>1 = no separation</p></li>
+</ul>
+</li>
+<li><p><strong>F-statistic</strong>: Ratio of between-group to within-group variation</p></li>
+<li><p><strong>P-value</strong>: Probability that group differences are due to chance</p>
+<ul>
+<li><p>P &lt; 0.05: Significant difference (reject null hypothesis)</p></li>
+<li><p>P ≥ 0.05: No significant difference</p></li>
+</ul>
+</li>
+<li><p><strong>Effect Size (Partial η²)</strong>: Proportion of variance explained by groups</p></li>
+</ul>
+<p><strong>Example</strong>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Hypothesis: Male and female skulls differ in shape
+
+MANOVA Results:
+  Wilks&#39; Lambda: 0.234
+  F(40, 18) = 3.45
+  P-value: 0.002
+  Partial η²: 0.766
+
+Conclusion: Significant sex-related shape differences (P &lt; 0.05)
+76.6% of shape variation explained by sex
+</pre></div>
+</div>
+</section>
+<section id="handling-missing-landmarks">
+<span id="analysis-missing-landmarks"></span><h3>Handling Missing Landmarks<a class="headerlink" href="#handling-missing-landmarks" title="Link to this heading"></a></h3>
+<p>Modan2 automatically handles missing landmarks during analysis:</p>
+<p><strong>During Procrustes</strong>:</p>
+<ol class="arabic simple">
+<li><p>Identifies complete specimens (no missing landmarks)</p></li>
+<li><p>Runs Procrustes on complete specimens → mean shape</p></li>
+<li><p>For each specimen with missing data:</p>
+<ul class="simple">
+<li><p>Estimates missing landmarks from mean shape</p></li>
+<li><p>Applies scale/position transformation to match the specimen</p></li>
+<li><p>Updates coordinates in temporary working copy (NOT in database)</p></li>
+</ul>
+</li>
+<li><p>Re-runs Procrustes with estimated values</p></li>
+<li><p>Repeats until convergence</p></li>
+</ol>
+<p><strong>During PCA/CVA/MANOVA</strong>:</p>
+<ul class="simple">
+<li><p>Uses coordinates after Procrustes (with imputed values)</p></li>
+<li><p>Missing landmarks are treated as estimated values</p></li>
+<li><p>No further imputation needed</p></li>
+</ul>
+<p><strong>Limitations</strong>:</p>
+<ul class="simple">
+<li><p>Simple mean-based imputation (advanced methods in future releases)</p></li>
+<li><p>Accuracy depends on having sufficient complete specimens</p></li>
+<li><p>Large amounts of missing data (&gt;30%) may affect results</p></li>
+</ul>
+<p><strong>Best Practices</strong>:</p>
+<ul class="simple">
+<li><p>Aim for &lt;10% missing landmarks in your dataset</p></li>
+<li><p>Ensure at least 50% of specimens are complete</p></li>
+<li><p>Use biological knowledge to verify estimated positions make sense</p></li>
+</ul>
+</section>
+</section>
+<section id="visualization">
+<h2>Visualization<a class="headerlink" href="#visualization" title="Link to this heading"></a></h2>
+<section id="d-viewer">
+<h3>2D Viewer<a class="headerlink" href="#d-viewer" title="Link to this heading"></a></h3>
+<p><strong>Features</strong>:</p>
+<ul class="simple">
+<li><p>Zoom: Mouse wheel or <code class="docutils literal notranslate"><span class="pre">+/-</span></code></p></li>
+<li><p>Pan: Space + drag or middle mouse button</p></li>
+<li><p>Reset view: <code class="docutils literal notranslate"><span class="pre">Home</span></code> key</p></li>
+<li><p>Landmark overlay: Colored circles with indices</p></li>
+</ul>
+<p><strong>Export Options</strong>:</p>
+<ul class="simple">
+<li><p>Right-click → <strong>“Export Image”</strong></p></li>
+<li><p>Formats: PNG, JPG, PDF</p></li>
+<li><p>Resolution: Original or custom DPI</p></li>
+</ul>
+</section>
+<section id="id1">
+<h3>3D Viewer<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<p><strong>Controls</strong>:</p>
+<ul class="simple">
+<li><p><strong>Rotate</strong>: Left mouse drag</p></li>
+<li><p><strong>Pan</strong>: Right mouse drag or Shift + left drag</p></li>
+<li><p><strong>Zoom</strong>: Mouse wheel</p></li>
+<li><p><strong>Reset</strong>: <code class="docutils literal notranslate"><span class="pre">R</span></code> key</p></li>
+</ul>
+<p><strong>Rendering Modes</strong>:</p>
+<ul class="simple">
+<li><p><strong>Wireframe</strong> (<code class="docutils literal notranslate"><span class="pre">W</span></code>): Shows mesh edges</p></li>
+<li><p><strong>Solid</strong> (<code class="docutils literal notranslate"><span class="pre">S</span></code>): Filled surface with lighting</p></li>
+<li><p><strong>Wireframe + Solid</strong>: Both simultaneously</p></li>
+</ul>
+<p><strong>Landmark Display</strong>:</p>
+<ul class="simple">
+<li><p>Landmarks rendered as spheres</p></li>
+<li><p>Size adjustable via slider</p></li>
+<li><p>Index labels optional</p></li>
+</ul>
+<p><strong>Lighting</strong>:</p>
+<ul class="simple">
+<li><p>Toggle: <code class="docutils literal notranslate"><span class="pre">L</span></code> key</p></li>
+<li><p>Improves depth perception for complex surfaces</p></li>
+</ul>
+</section>
+<section id="statistical-plots">
+<h3>Statistical Plots<a class="headerlink" href="#statistical-plots" title="Link to this heading"></a></h3>
+<p><strong>Available Plots</strong>:</p>
+<ul class="simple">
+<li><p><strong>Scree Plot</strong> (PCA): Variance explained per PC</p></li>
+<li><p><strong>PC Score Plot</strong> (PCA): Specimens on PC axes</p></li>
+<li><p><strong>CV Score Plot</strong> (CVA): Specimens on CV axes</p></li>
+<li><p><strong>Shape Variation Plot</strong>: Wireframes at PC/CV extremes</p></li>
+</ul>
+<p><strong>Customization</strong>:</p>
+<ul class="simple">
+<li><p><strong>Group Colors</strong>: Auto-assigned by variable</p></li>
+<li><p><strong>Point Size</strong>: Adjustable</p></li>
+<li><p><strong>Axis Labels</strong>: Automatic with variance %</p></li>
+<li><p><strong>Legend</strong>: Shows group names and colors</p></li>
+</ul>
+<p><strong>Exporting Plots</strong>:</p>
+<ol class="arabic simple">
+<li><p>Right-click on plot → <strong>“Export Plot”</strong></p></li>
+<li><p>Formats: PNG, SVG, PDF</p></li>
+<li><p>Resolution: 300 DPI default (adjustable)</p></li>
+</ol>
+</section>
+</section>
+<section id="data-export">
+<h2>Data Export<a class="headerlink" href="#data-export" title="Link to this heading"></a></h2>
+<section id="exporting-datasets">
+<h3>Exporting Datasets<a class="headerlink" href="#exporting-datasets" title="Link to this heading"></a></h3>
+<p><strong>File → Export Dataset</strong></p>
+<ol class="arabic simple">
+<li><p>Select dataset</p></li>
+<li><p>Choose export format:</p>
+<ul class="simple">
+<li><p><strong>TPS</strong>: Landmark coordinates in TPS format</p></li>
+<li><p><strong>NTS</strong>: NTS format (legacy)</p></li>
+<li><p><strong>CSV</strong>: Spreadsheet-compatible</p></li>
+<li><p><strong>JSON</strong>: Machine-readable with metadata</p></li>
+</ul>
+</li>
+<li><p>Options:</p>
+<ul class="simple">
+<li><p><strong>Include Analysis Results</strong>: Embed PC/CV scores</p></li>
+<li><p><strong>Include Variables</strong>: Export grouping data</p></li>
+<li><p><strong>Include Missing</strong>: Export “NA” for missing landmarks</p></li>
+</ul>
+</li>
+<li><p>Click <strong>“Export”</strong></p></li>
+</ol>
+<p><strong>CSV Export Format</strong>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>object,lm1_x,lm1_y,lm2_x,lm2_y,species,sex,PC1,PC2
+spec_001,12.5,34.2,45.6,78.9,A,male,0.234,-0.123
+spec_002,15.2,32.8,48.1,76.2,A,female,0.156,-0.089
+</pre></div>
+</div>
+</section>
+<section id="exporting-analysis-results">
+<h3>Exporting Analysis Results<a class="headerlink" href="#exporting-analysis-results" title="Link to this heading"></a></h3>
+<p>In the <strong>Data Exploration Dialog</strong>:</p>
+<ul class="simple">
+<li><p><strong>Export PC Scores</strong>: CSV with scores per specimen</p></li>
+<li><p><strong>Export Shape Data</strong>: Aligned landmark coordinates (post-Procrustes)</p></li>
+<li><p><strong>Export Statistics</strong>: Summary statistics (mean, SD, etc.)</p></li>
+</ul>
+</section>
+</section>
+<section id="keyboard-shortcuts">
+<h2>Keyboard Shortcuts<a class="headerlink" href="#keyboard-shortcuts" title="Link to this heading"></a></h2>
+<section id="global-shortcuts">
+<h3>Global Shortcuts<a class="headerlink" href="#global-shortcuts" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Ctrl+N</span></code> - New Dataset</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Ctrl+Shift+N</span></code> - New Object</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Ctrl+O</span></code> - Open Database</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Ctrl+S</span></code> - Save Changes</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Ctrl+W</span></code> - Close Window</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Ctrl+Q</span></code> - Quit Application</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Delete</span></code> - Delete Selected Items</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">F5</span></code> - Refresh View</p></li>
+</ul>
+</section>
+<section id="object-dialog">
+<h3>Object Dialog<a class="headerlink" href="#object-dialog" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Ctrl+Z</span></code> - Undo Last Action</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Delete</span></code> - Remove Selected Landmark</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">+</span></code> / <code class="docutils literal notranslate"><span class="pre">-</span></code> - Zoom In/Out</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Home</span></code> - Reset Zoom</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Space+Drag</span></code> - Pan</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Ctrl+C</span></code> - Copy Landmark Coordinates</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Ctrl+V</span></code> - Paste Coordinates</p></li>
+</ul>
+</section>
+<section id="id2">
+<h3>3D Viewer<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">R</span></code> - Reset Camera</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">W</span></code> - Wireframe Mode</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">S</span></code> - Solid Mode</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">L</span></code> - Toggle Lighting</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">F</span></code> - Fit to View</p></li>
+</ul>
+</section>
+</section>
+<section id="preferences">
+<h2>Preferences<a class="headerlink" href="#preferences" title="Link to this heading"></a></h2>
+<p><strong>File → Preferences</strong> or <code class="docutils literal notranslate"><span class="pre">Ctrl+,</span></code> (macOS: <code class="docutils literal notranslate"><span class="pre">Cmd+,</span></code>)</p>
+<section id="general-settings">
+<h3>General Settings<a class="headerlink" href="#general-settings" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Default Database Location</strong>: Where new databases are created</p></li>
+<li><p><strong>Auto-Save Interval</strong>: Frequency of automatic saves (0 = disabled)</p></li>
+<li><p><strong>Language</strong>: English or Korean (한국어)</p></li>
+</ul>
+</section>
+<section id="display-settings">
+<h3>Display Settings<a class="headerlink" href="#display-settings" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Landmark Color</strong>: Default color for new objects</p></li>
+<li><p><strong>Index Color</strong>: Color for landmark number labels</p></li>
+<li><p><strong>Background Color</strong>: Viewer background (white/black/gray)</p></li>
+<li><p><strong>Font Size</strong>: UI text size</p></li>
+<li><p><strong>Theme</strong>: Light or Dark (if available)</p></li>
+</ul>
+</section>
+<section id="analysis-settings">
+<h3>Analysis Settings<a class="headerlink" href="#analysis-settings" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Max Procrustes Iterations</strong>: Default 100</p></li>
+<li><p><strong>Convergence Threshold</strong>: When to stop iterating (default: 0.0001)</p></li>
+<li><p><strong>PCA Method</strong>: Covariance or Correlation matrix</p></li>
+<li><p><strong>CVA Cross-Validation</strong>: Leave-one-out or K-fold</p></li>
+</ul>
+</section>
+<section id="advanced-settings">
+<h3>Advanced Settings<a class="headerlink" href="#advanced-settings" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Enable Logging</strong>: Write debug logs to file</p></li>
+<li><p><strong>Log Level</strong>: INFO, DEBUG, WARNING, ERROR</p></li>
+<li><p><strong>GPU Acceleration</strong>: Use GPU for 3D rendering (if available)</p></li>
+<li><p><strong>Memory Limit</strong>: Max RAM for large datasets (MB)</p></li>
+</ul>
+</section>
+</section>
+<section id="tips-and-best-practices">
+<h2>Tips and Best Practices<a class="headerlink" href="#tips-and-best-practices" title="Link to this heading"></a></h2>
+<section id="data-organization">
+<h3>Data Organization<a class="headerlink" href="#data-organization" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Use consistent naming</strong>: <code class="docutils literal notranslate"><span class="pre">species_ID_number.jpg</span></code> (e.g., <code class="docutils literal notranslate"><span class="pre">sparrow_001.jpg</span></code>)</p></li>
+<li><p><strong>Organize hierarchically</strong>: Group related datasets</p></li>
+<li><p><strong>Document metadata</strong>: Use description fields</p></li>
+<li><p><strong>Back up regularly</strong>: Export database or copy <code class="docutils literal notranslate"><span class="pre">modan.db</span></code></p></li>
+</ol>
+</section>
+<section id="landmark-placement">
+<h3>Landmark Placement<a class="headerlink" href="#landmark-placement" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Define landmarks carefully</strong>: Use anatomically meaningful points</p></li>
+<li><p><strong>Be consistent</strong>: Same landmarks across all specimens</p></li>
+<li><p><strong>Use high-resolution images</strong>: Better precision</p></li>
+<li><p><strong>Avoid ambiguous points</strong>: Choose clear, repeatable features</p></li>
+<li><p><strong>Document landmarks</strong>: Write down definitions (e.g., “tip of beak”)</p></li>
+</ol>
+</section>
+<section id="id3">
+<h3>Statistical Analysis<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Check assumptions</strong>: Normal distribution, homogeneity of variance</p></li>
+<li><p><strong>Sample size</strong>: At least 30 specimens for PCA, 10+ per group for CVA</p></li>
+<li><p><strong>Validate results</strong>: Cross-validation, bootstrap resampling</p></li>
+<li><p><strong>Interpret cautiously</strong>: Statistical significance ≠ biological significance</p></li>
+<li><p><strong>Visualize first</strong>: Explore with PCA before formal tests</p></li>
+</ol>
+</section>
+<section id="performance-optimization">
+<h3>Performance Optimization<a class="headerlink" href="#performance-optimization" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Close unused datasets</strong>: Reduces memory usage</p></li>
+<li><p><strong>Limit 3D polygon count</strong>: Simplify meshes before import</p></li>
+<li><p><strong>Use lower resolution for preview</strong>: Full resolution for analysis only</p></li>
+<li><p><strong>Run analyses on subsets</strong>: Test on small sample first</p></li>
+<li><p><strong>Clear cache</strong>: Tools → Clear Cache (if application becomes slow)</p></li>
+</ol>
+</section>
+</section>
+<section id="common-workflows">
+<h2>Common Workflows<a class="headerlink" href="#common-workflows" title="Link to this heading"></a></h2>
+<section id="workflow-1-2d-morphometric-study">
+<h3>Workflow 1: 2D Morphometric Study<a class="headerlink" href="#workflow-1-2d-morphometric-study" title="Link to this heading"></a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>1. Collect images (photographs, scans)
+2. Create dataset in Modan2
+3. Import images
+4. Define landmarks (e.g., 15 points on butterfly wing)
+5. Place landmarks on all specimens
+6. Define variables (species, sex, location)
+7. Run Procrustes + PCA
+8. Explore shape variation
+9. Run CVA if groups exist
+10. Export results for publication
+</pre></div>
+</div>
+</section>
+<section id="workflow-2-3d-morphometric-study">
+<h3>Workflow 2: 3D Morphometric Study<a class="headerlink" href="#workflow-2-3d-morphometric-study" title="Link to this heading"></a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>1. Acquire 3D scans (CT, laser, photogrammetry)
+2. Clean/process meshes (MeshLab, Blender)
+3. Import OBJ/PLY files to Modan2
+4. Place 3D landmarks
+5. Run Procrustes
+6. Perform PCA/CVA
+7. Export shape data for further analysis (R, Python)
+</pre></div>
+</div>
+</section>
+<section id="workflow-3-missing-data-study">
+<h3>Workflow 3: Missing Data Study<a class="headerlink" href="#workflow-3-missing-data-study" title="Link to this heading"></a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>1. Import dataset with incomplete specimens
+2. Mark missing landmarks (right-click → &quot;Mark as Missing&quot;)
+3. Verify estimation: Object Dialog → &quot;Show Estimated&quot; checkbox
+4. Run Procrustes (automatic imputation)
+5. Check convergence (logged in console)
+6. Run PCA/CVA/MANOVA with imputed data
+7. Validate results against complete-specimen-only analysis
+</pre></div>
+</div>
+</section>
+</section>
+<section id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h2>
+<section id="analysis-fails">
+<h3>Analysis Fails<a class="headerlink" href="#analysis-fails" title="Link to this heading"></a></h3>
+<p><strong>Error</strong>: <code class="docutils literal notranslate"><span class="pre">Not</span> <span class="pre">enough</span> <span class="pre">complete</span> <span class="pre">specimens</span> <span class="pre">for</span> <span class="pre">Procrustes</span></code></p>
+<p><strong>Solution</strong>: Need at least 2 complete specimens without missing landmarks</p>
+<p><strong>Error</strong>: <code class="docutils literal notranslate"><span class="pre">CVA</span> <span class="pre">requires</span> <span class="pre">at</span> <span class="pre">least</span> <span class="pre">2</span> <span class="pre">groups</span></code></p>
+<p><strong>Solution</strong>: Define a grouping variable with multiple values</p>
+</section>
+<section id="landmarks-not-showing">
+<h3>Landmarks Not Showing<a class="headerlink" href="#landmarks-not-showing" title="Link to this heading"></a></h3>
+<p><strong>Problem</strong>: Placed landmarks but not visible</p>
+<p><strong>Solution</strong>:</p>
+<ul class="simple">
+<li><p>Check “Show Landmarks” checkbox is enabled</p></li>
+<li><p>Adjust “Landmark Size” slider</p></li>
+<li><p>Zoom in - landmarks may be too small</p></li>
+</ul>
+</section>
+<section id="slow-performance">
+<h3>Slow Performance<a class="headerlink" href="#slow-performance" title="Link to this heading"></a></h3>
+<p><strong>Problem</strong>: Application freezes during analysis</p>
+<p><strong>Solution</strong>:</p>
+<ul class="simple">
+<li><p>Reduce dataset size (split into smaller datasets)</p></li>
+<li><p>Close other applications</p></li>
+<li><p>Increase RAM allocation (Preferences → Memory Limit)</p></li>
+<li><p>Simplify 3D meshes (reduce polygon count)</p></li>
+</ul>
+</section>
+</section>
+<section id="next-steps">
+<h2>Next Steps<a class="headerlink" href="#next-steps" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Explore the <a class="reference internal" href="developer_guide.html"><span class="doc">Developer Guide</span></a> to contribute or extend Modan2</p></li>
+<li><p>Check the <a class="reference internal" href="changelog.html"><span class="doc">Changelog</span></a> for latest features and bug fixes</p></li>
+<li><p>Visit the <a class="reference external" href="https://github.com/jikhanjung/Modan2">GitHub repository</a> for example datasets</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="developer_guide.html" class="btn btn-neutral float-right" title="Developer Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023-2025, Modan2 Contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

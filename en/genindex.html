@@ -1,0 +1,377 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Index &mdash; Modan2 0.1.5 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=59fadc99"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="#" />
+    <link rel="search" title="Search" href="search.html" />
+ 
+<style>
+  .language-switcher {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+    background: #2c3e50;
+    border: 1px solid #34495e;
+    border-radius: 4px;
+    padding: 8px 15px;
+    font-size: 13px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+  .language-switcher a {
+    margin: 0 5px;
+    text-decoration: none;
+    color: #3498db;
+    font-weight: 500;
+    transition: color 0.2s;
+    cursor: pointer;
+  }
+  .language-switcher a:hover {
+    color: #5dade2;
+    text-decoration: underline;
+  }
+  .language-switcher .current {
+    color: #ecf0f1;
+    font-weight: 600;
+    cursor: default;
+    margin: 0 5px;
+  }
+  .language-switcher .separator {
+    color: #7f8c8d;
+    margin: 0 3px;
+  }
+  .language-switcher .icon {
+    margin-right: 5px;
+  }
+</style>
+<script>
+  // Language switcher: preserve current page path when switching languages
+  function switchLanguage(targetLang) {
+    var currentPath = window.location.pathname;
+    var newPath;
+
+    // Get the page name (e.g., 'index.html', 'user_guide.html')
+    var pageName = currentPath.split('/').pop() || 'index.html';
+
+    // Replace language code in path (en <-> ko)
+    if (currentPath.includes('/en/')) {
+      newPath = currentPath.replace('/en/', '/' + targetLang + '/');
+    } else if (currentPath.includes('/ko/')) {
+      newPath = currentPath.replace('/ko/', '/' + targetLang + '/');
+    } else {
+      // Fallback: construct path with language code
+      // Get the base path (everything before the last /)
+      var pathParts = currentPath.split('/');
+      pathParts.pop(); // Remove current file
+      var basePath = pathParts.join('/');
+      newPath = basePath + '/' + targetLang + '/' + pageName;
+    }
+
+    window.location.href = newPath;
+  }
+</script>
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Modan2
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#system-requirements">System Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#installation-methods">Installation Methods</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#windows-installation">Windows Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#macos-installation">macOS Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#linux-installation">Linux Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#wsl-windows-subsystem-for-linux">WSL (Windows Subsystem for Linux)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#troubleshooting">Troubleshooting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#qt-platform-plugin-error-linux-wsl">Qt Platform Plugin Error (Linux/WSL)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#opengl-glut-errors">OpenGL/GLUT Errors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#missing-python-dependencies">Missing Python Dependencies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#database-migration-issues">Database Migration Issues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#performance-issues">Performance Issues</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#verifying-installation">Verifying Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#updating-modan2">Updating Modan2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#getting-help">Getting Help</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide.html">User Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="user_guide.html#getting-started">Getting Started</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#launching-modan2">Launching Modan2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#main-window-overview">Main Window Overview</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide.html#working-with-datasets">Working with Datasets</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#creating-a-new-dataset">Creating a New Dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#dataset-variables">Dataset Variables</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide.html#importing-data">Importing Data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#importing-2d-images">Importing 2D Images</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#importing-3d-models">Importing 3D Models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#importing-landmark-files">Importing Landmark Files</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide.html#working-with-objects">Working with Objects</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#viewing-an-object">Viewing an Object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#placing-landmarks-2d">Placing Landmarks (2D)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#placing-landmarks-3d">Placing Landmarks (3D)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#editing-landmark-coordinates">Editing Landmark Coordinates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#missing-landmarks">Missing Landmarks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#display-options">Display Options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide.html#statistical-analysis">Statistical Analysis</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#overview">Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#running-an-analysis">Running an Analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#procrustes-superimposition">Procrustes Superimposition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#principal-component-analysis-pca">Principal Component Analysis (PCA)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#canonical-variate-analysis-cva">Canonical Variate Analysis (CVA)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#manova">MANOVA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#handling-missing-landmarks">Handling Missing Landmarks</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide.html#visualization">Visualization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#d-viewer">2D Viewer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#id1">3D Viewer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#statistical-plots">Statistical Plots</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide.html#data-export">Data Export</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#exporting-datasets">Exporting Datasets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#exporting-analysis-results">Exporting Analysis Results</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide.html#keyboard-shortcuts">Keyboard Shortcuts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#global-shortcuts">Global Shortcuts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#object-dialog">Object Dialog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#id2">3D Viewer</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide.html#preferences">Preferences</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#general-settings">General Settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#display-settings">Display Settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#analysis-settings">Analysis Settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#advanced-settings">Advanced Settings</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide.html#tips-and-best-practices">Tips and Best Practices</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#data-organization">Data Organization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#landmark-placement">Landmark Placement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#id3">Statistical Analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#performance-optimization">Performance Optimization</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide.html#common-workflows">Common Workflows</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#workflow-1-2d-morphometric-study">Workflow 1: 2D Morphometric Study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#workflow-2-3d-morphometric-study">Workflow 2: 3D Morphometric Study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#workflow-3-missing-data-study">Workflow 3: Missing Data Study</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide.html#troubleshooting">Troubleshooting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#analysis-fails">Analysis Fails</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#landmarks-not-showing">Landmarks Not Showing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide.html#slow-performance">Slow Performance</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide.html#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="developer_guide.html">Developer Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="developer_guide.html#project-overview">Project Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="developer_guide.html#architecture">Architecture</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#high-level-overview">High-Level Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#database-schema">Database Schema</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#mvc-pattern-in-modan2">MVC Pattern in Modan2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#file-formats">File Formats</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="developer_guide.html#development-setup">Development Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#cloning-the-repository">Cloning the Repository</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#virtual-environment-setup">Virtual Environment Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#running-from-source">Running from Source</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#development-dependencies">Development Dependencies</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="developer_guide.html#testing">Testing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#test-framework">Test Framework</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#running-tests">Running Tests</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#writing-tests">Writing Tests</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="developer_guide.html#code-style-guidelines">Code Style Guidelines</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#general-principles">General Principles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#naming-conventions">Naming Conventions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#docstring-format">Docstring Format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#pyqt5-patterns">PyQt5 Patterns</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="developer_guide.html#contributing">Contributing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#git-workflow">Git Workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#commit-message-guidelines">Commit Message Guidelines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#pull-request-process">Pull Request Process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#code-review-checklist">Code Review Checklist</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="developer_guide.html#building-executables">Building Executables</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#pyinstaller-configuration">PyInstaller Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#platform-specific-builds">Platform-Specific Builds</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#innosetup-installer-windows">InnoSetup Installer (Windows)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#creating-releases">Creating Releases</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="developer_guide.html#database-migrations">Database Migrations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#creating-a-migration">Creating a Migration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#running-migrations">Running Migrations</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="developer_guide.html#advanced-topics">Advanced Topics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#custom-widgets">Custom Widgets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#statistical-extensions">Statistical Extensions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#plugin-system-future">Plugin System (Future)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#profiling-and-optimization">Profiling and Optimization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#debugging">Debugging</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="developer_guide.html#resources">Resources</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#documentation">Documentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#morphometric-analysis">Morphometric Analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer_guide.html#community">Community</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="developer_guide.html#license">License</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-0-1-5-alpha-1-2025-09-11">Version 0.1.5-alpha.1 (2025-09-11)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#added">Added</a></li>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#changed">Changed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#fixed">Fixed</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-0-1-4-2025-09-10">Version 0.1.4 (2025-09-10)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#id1">Added</a></li>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#id2">Changed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#id3">Fixed</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#previous-versions">Previous Versions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#version-0-1-3">Version 0.1.3</a></li>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#version-0-1-2">Version 0.1.2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#version-0-1-1">Version 0.1.1</a></li>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#version-0-1-0">Version 0.1.0</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#upcoming-features">Upcoming Features</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#planned-for-future-releases">Planned for Future Releases</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Modan2</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Index</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/jikhanjung/Modan2/blob/main/docs/genindex" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+<div class="language-switcher">
+  <span class="icon">🌐</span>
+  
+    <span class="current">English</span><span class="separator">|</span><a onclick="switchLanguage('ko')">한국어</a>
+  
+</div>
+
+           <div itemprop="articleBody">
+             
+
+<h1 id="index">Index</h1>
+
+<div class="genindex-jumpbox">
+ 
+</div>
+
+
+           </div>
+          </div>
+
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023-2025, Modan2 Contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

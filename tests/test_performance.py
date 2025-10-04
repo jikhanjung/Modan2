@@ -159,8 +159,8 @@ class TestMdStatisticsPerformance:
 
 class TestMemoryUsage:
     """Tests for memory usage and garbage collection."""
-    
-    def test_memory_cleanup_after_large_operations(self):
+
+    def test_memory_cleanup_after_large_operations(self, mock_database):
         """Test that memory is properly cleaned up after large operations."""
         try:
             import psutil

@@ -1034,24 +1034,25 @@ class ModanController(QObject):
     
     def delete_analysis(self, analysis_id: int) -> bool:
         """Delete analysis result.
-        
+
         Args:
             analysis_id: ID of analysis to delete
-            
+
         Returns:
             True if successful, False otherwise
         """
         try:
             analysis = MdModel.MdAnalysis.get_by_id(analysis_id)
-            analysis_type = analysis.analysis_type
-            
+            # MdAnalysis doesn't have analysis_type field, derive from analysis_name or results
+            analysis_name = analysis.analysis_name
+
             analysis.delete_instance()
-            
+
             # Clear current selection if it was the deleted analysis
             if self.current_analysis and self.current_analysis.id == analysis_id:
                 self.current_analysis = None
-            
-            self.info_message.emit(f"{analysis_type} analysis deleted")
+
+            self.info_message.emit(f"Analysis '{analysis_name}' deleted")
             return True
             
         except Exception as e:

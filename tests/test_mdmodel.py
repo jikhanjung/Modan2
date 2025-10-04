@@ -910,3 +910,159 @@ class TestMdDatasetPackingMethods:
         result = dataset.get_baseline_points()
 
         assert result == [0, 1, 2, 3]
+
+
+class TestCentroidCalculations:
+    """Test centroid calculation methods."""
+
+    def test_get_centroid_size_2d(self, test_database):
+        """Test centroid size calculation for 2D landmarks."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Object1", dataset=dataset)
+
+        # Create symmetric landmarks around origin
+        obj.landmark_list = [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0], [1.0, 1.0]]
+        obj.pack_landmark()
+        obj.save()
+
+        centroid_size = obj.get_centroid_size()
+
+        # Centroid size should be positive
+        assert centroid_size > 0
+
+    def test_get_centroid_size_3d(self, test_database):
+        """Test centroid size calculation for 3D landmarks."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=3)
+        obj = mm.MdObject.create(object_name="Object1", dataset=dataset)
+
+        # Create 3D landmarks
+        obj.landmark_list = [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+        obj.pack_landmark()
+        obj.save()
+
+        centroid_size = obj.get_centroid_size()
+
+        assert centroid_size > 0
+
+    def test_get_centroid_size_with_missing_landmarks(self, test_database):
+        """Test centroid size with missing landmarks."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Object1", dataset=dataset)
+
+        # Include missing landmark (None values)
+        obj.landmark_list = [[1.0, 2.0], [None, None], [3.0, 4.0]]
+        obj.pack_landmark()
+        obj.save()
+
+        centroid_size = obj.get_centroid_size()
+
+        # Should calculate centroid excluding missing landmarks
+        assert centroid_size > 0
+
+    def test_get_centroid_size_single_landmark(self, test_database):
+        """Test centroid size with single landmark."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Object1", dataset=dataset)
+
+        obj.landmark_list = [[5.0, 10.0]]
+        obj.pack_landmark()
+        obj.save()
+
+        centroid_size = obj.get_centroid_size()
+
+        # Single landmark returns 1
+        assert centroid_size == 1
+
+    def test_get_centroid_size_no_landmarks(self, test_database):
+        """Test centroid size with no landmarks."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Object1", dataset=dataset)
+
+        centroid_size = obj.get_centroid_size()
+
+        # No landmarks returns -1
+        assert centroid_size == -1
+
+    def test_get_centroid_size_with_pixels_per_mm(self, test_database):
+        """Test centroid size with pixels_per_mm conversion."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Object1", dataset=dataset, pixels_per_mm=10.0)
+
+        obj.landmark_list = [[0.0, 0.0], [10.0, 0.0], [0.0, 10.0], [10.0, 10.0]]
+        obj.pack_landmark()
+        obj.save()
+
+        centroid_size = obj.get_centroid_size()
+
+        # Should be scaled by pixels_per_mm
+        assert centroid_size > 0
+
+    def test_get_centroid_size_cached(self, test_database):
+        """Test that centroid size is cached."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Object1", dataset=dataset)
+
+        obj.landmark_list = [[0.0, 0.0], [1.0, 1.0]]
+        obj.pack_landmark()
+        obj.save()
+
+        # First call calculates
+        size1 = obj.get_centroid_size()
+        # Second call should return cached value
+        size2 = obj.get_centroid_size(refresh=False)
+
+        assert size1 == size2
+        assert size1 > 0
+
+    def test_get_centroid_coord_2d(self, test_database):
+        """Test centroid coordinate calculation for 2D."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Object1", dataset=dataset)
+
+        # Landmarks with known centroid: (0.5, 0.5)
+        obj.landmark_list = [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0], [1.0, 1.0]]
+
+        centroid = obj.get_centroid_coord()
+
+        assert len(centroid) == 3  # Returns [x, y, z]
+        assert centroid[0] == 0.5  # X coordinate
+        assert centroid[1] == 0.5  # Y coordinate
+
+    def test_get_centroid_coord_3d(self, test_database):
+        """Test centroid coordinate calculation for 3D."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=3)
+        obj = mm.MdObject.create(object_name="Object1", dataset=dataset)
+
+        # 3D landmarks
+        obj.landmark_list = [[0.0, 0.0, 0.0], [2.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 2.0]]
+
+        centroid = obj.get_centroid_coord()
+
+        assert len(centroid) == 3
+        assert centroid[0] == 0.5  # Mean of X
+        assert centroid[1] == 0.5  # Mean of Y
+        assert centroid[2] == 0.5  # Mean of Z
+
+    def test_get_centroid_coord_with_missing(self, test_database):
+        """Test centroid coordinate with missing landmarks."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Object1", dataset=dataset)
+
+        # Include None values
+        obj.landmark_list = [[0.0, 0.0], [None, None], [2.0, 2.0]]
+
+        centroid = obj.get_centroid_coord()
+
+        # Should calculate mean excluding None values
+        assert centroid[0] == 1.0  # (0 + 2) / 2
+        assert centroid[1] == 1.0  # (0 + 2) / 2
+
+    def test_get_centroid_coord_empty(self, test_database):
+        """Test centroid coordinate with no landmarks."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Object1", dataset=dataset)
+
+        centroid = obj.get_centroid_coord()
+
+        # Empty landmarks should return [0, 0, 0]
+        assert centroid == [0, 0, 0]

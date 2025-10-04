@@ -12,6 +12,7 @@ from PyQt5.QtWidgets import QMessageBox
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import MdUtils as mu
+import MdModel as mm
 
 
 class TestConstants:
@@ -934,3 +935,390 @@ class TestFilePathProcessing:
             url = "file:///home/user/file%20(1).txt"
             result = mu.process_dropped_file_name(url)
             assert result == "/home/user/file (1).txt"
+
+
+class TestDatasetSerialization:
+    """Tests for dataset serialization to JSON."""
+
+    def test_serialize_dataset_to_json_basic(self, mock_database):
+        """Test basic dataset serialization to JSON."""
+        dataset = mm.MdDataset.create(
+            dataset_name="Test Dataset",
+            dataset_desc="Test description",
+            dimension=2
+        )
+        obj1 = mm.MdObject.create(
+            object_name="Object1",
+            dataset=dataset,
+            sequence=1
+        )
+        obj1.landmark_list = [[1.0, 2.0], [3.0, 4.0]]
+        obj1.pack_landmark()
+        obj1.save()
+
+        result = mu.serialize_dataset_to_json(dataset.id, include_files=False)
+
+        assert result['format_version'] == '1.1'
+        assert 'export_info' in result
+        assert result['dataset']['name'] == "Test Dataset"
+        assert result['dataset']['dimension'] == 2
+        assert len(result['objects']) == 1
+        assert result['objects'][0]['name'] == "Object1"
+        assert result['objects'][0]['landmarks'] == [[1.0, 2.0], [3.0, 4.0]]
+
+    def test_serialize_dataset_with_variables(self, mock_database):
+        """Test dataset serialization with variables."""
+        dataset = mm.MdDataset.create(
+            dataset_name="Test Dataset",
+            dimension=2
+        )
+        dataset.pack_variablename_str(['age', 'weight'])
+        dataset.save()
+
+        obj1 = mm.MdObject.create(
+            object_name="Object1",
+            dataset=dataset
+        )
+        obj1.variable_list = [5.0, 10.5]
+        obj1.pack_variable([str(v) for v in obj1.variable_list])
+        obj1.save()
+
+        result = mu.serialize_dataset_to_json(dataset.id, include_files=False)
+
+        assert result['dataset']['variables'] == ['age', 'weight']
+        # Variables are stored as strings in the database
+        assert result['objects'][0]['variables'] == {'age': '5.0', 'weight': '10.5'}
+
+    def test_serialize_dataset_with_wireframe(self, mock_database):
+        """Test dataset serialization with wireframe."""
+        dataset = mm.MdDataset.create(
+            dataset_name="Test Dataset",
+            dimension=2
+        )
+        dataset.edge_list = [[0, 1], [1, 2]]
+        dataset.pack_wireframe()
+        dataset.save()
+
+        result = mu.serialize_dataset_to_json(dataset.id, include_files=False)
+
+        assert result['dataset']['wireframe'] == [[0, 1], [1, 2]]
+
+    def test_serialize_dataset_with_polygons(self, mock_database):
+        """Test dataset serialization with polygons."""
+        dataset = mm.MdDataset.create(
+            dataset_name="Test Dataset",
+            dimension=2
+        )
+        dataset.polygon_list = [[0, 1, 2]]
+        dataset.pack_polygons()
+        dataset.save()
+
+        result = mu.serialize_dataset_to_json(dataset.id, include_files=False)
+
+        assert result['dataset']['polygons'] == [[0, 1, 2]]
+
+    def test_serialize_dataset_with_baseline(self, mock_database):
+        """Test dataset serialization with baseline."""
+        dataset = mm.MdDataset.create(
+            dataset_name="Test Dataset",
+            dimension=2
+        )
+        dataset.baseline_point_list = [0, 1, 2]
+        dataset.pack_baseline()
+        dataset.save()
+
+        result = mu.serialize_dataset_to_json(dataset.id, include_files=False)
+
+        assert result['dataset']['baseline'] == [0, 1, 2]
+
+
+class TestFileCollection:
+    """Tests for file collection utilities."""
+
+    def test_collect_dataset_files_no_files(self, mock_database):
+        """Test collecting files from dataset with no attached files."""
+        dataset = mm.MdDataset.create(dataset_name="Test Dataset", dimension=2)
+        obj = mm.MdObject.create(object_name="Object1", dataset=dataset)
+
+        images, models = mu.collect_dataset_files(dataset.id)
+
+        assert images == []
+        assert models == []
+
+    def test_estimate_package_size_basic(self, mock_database):
+        """Test estimating package size."""
+        dataset = mm.MdDataset.create(
+            dataset_name="Test Dataset",
+            dimension=2
+        )
+        obj = mm.MdObject.create(
+            object_name="Object1",
+            dataset=dataset
+        )
+        obj.landmark_list = [[1.0, 2.0]]
+        obj.pack_landmark()
+        obj.save()
+
+        size = mu.estimate_package_size(dataset.id, include_files=False)
+
+        assert size > 0  # Should have JSON data
+
+
+class TestZipPackaging:
+    """Tests for ZIP package creation."""
+
+    def test_create_zip_package_basic(self, mock_database, tmp_path):
+        """Test creating basic ZIP package without files."""
+        dataset = mm.MdDataset.create(
+            dataset_name="Test Dataset",
+            dimension=2
+        )
+        obj = mm.MdObject.create(
+            object_name="Object1",
+            dataset=dataset
+        )
+        obj.landmark_list = [[1.0, 2.0], [3.0, 4.0]]
+        obj.pack_landmark()
+        obj.save()
+
+        zip_path = tmp_path / "test.zip"
+        result = mu.create_zip_package(dataset.id, str(zip_path), include_files=False)
+
+        assert result is True
+        assert zip_path.exists()
+
+        # Verify ZIP contents
+        import zipfile
+        with zipfile.ZipFile(str(zip_path), 'r') as zf:
+            assert 'dataset.json' in zf.namelist()
+
+    def test_create_zip_package_with_progress_callback(self, mock_database, tmp_path):
+        """Test ZIP package creation with progress callback."""
+        dataset = mm.MdDataset.create(dataset_name="Test Dataset", dimension=2)
+        obj = mm.MdObject.create(object_name="Object1", dataset=dataset)
+        obj.landmark_list = [[1.0, 2.0]]
+        obj.pack_landmark()
+        obj.save()
+
+        zip_path = tmp_path / "test.zip"
+        progress_calls = []
+
+        def progress_cb(curr, total):
+            progress_calls.append((curr, total))
+
+        result = mu.create_zip_package(
+            dataset.id,
+            str(zip_path),
+            include_files=False,
+            progress_callback=progress_cb
+        )
+
+        assert result is True
+        assert len(progress_calls) > 0  # Should have been called
+
+
+class TestJsonValidation:
+    """Tests for JSON schema validation."""
+
+    def test_validate_json_schema_valid(self):
+        """Test validation of valid JSON schema."""
+        data = {
+            'format_version': '1.1',
+            'export_info': {},
+            'dataset': {
+                'name': 'Test',
+                'dimension': 2,
+                'variables': []
+            },
+            'objects': []
+        }
+
+        is_valid, errors = mu.validate_json_schema(data)
+
+        assert is_valid is True
+        assert len(errors) == 0
+
+    def test_validate_json_schema_missing_keys(self):
+        """Test validation with missing required keys."""
+        data = {
+            'format_version': '1.1',
+            'dataset': {}
+        }
+
+        is_valid, errors = mu.validate_json_schema(data)
+
+        assert is_valid is False
+        assert 'Missing key: export_info' in errors
+        assert 'Missing key: objects' in errors
+
+    def test_validate_json_schema_invalid_dataset(self):
+        """Test validation with invalid dataset structure."""
+        data = {
+            'format_version': '1.1',
+            'export_info': {},
+            'dataset': {
+                'name': 'Test'
+                # Missing 'dimension' and 'variables'
+            },
+            'objects': []
+        }
+
+        is_valid, errors = mu.validate_json_schema(data)
+
+        assert is_valid is False
+        assert any('dataset missing' in err for err in errors)
+
+    def test_validate_json_schema_objects_not_list(self):
+        """Test validation when objects is not a list."""
+        data = {
+            'format_version': '1.1',
+            'export_info': {},
+            'dataset': {
+                'name': 'Test',
+                'dimension': 2,
+                'variables': []
+            },
+            'objects': {}  # Should be list, not dict
+        }
+
+        is_valid, errors = mu.validate_json_schema(data)
+
+        assert is_valid is False
+        assert 'objects must be a list' in errors
+
+
+class TestZipUtilities:
+    """Tests for ZIP utility functions."""
+
+    def test_safe_extract_zip(self, tmp_path):
+        """Test safe ZIP extraction."""
+        import zipfile
+
+        # Create a test ZIP
+        zip_path = tmp_path / "test.zip"
+        with zipfile.ZipFile(str(zip_path), 'w') as zf:
+            zf.writestr('dataset.json', '{"test": "data"}')
+            zf.writestr('images/1.jpg', 'fake image data')
+
+        extract_dir = tmp_path / "extracted"
+        extract_dir.mkdir()
+
+        result = mu.safe_extract_zip(str(zip_path), str(extract_dir))
+
+        assert result == str(extract_dir.resolve())
+        assert (extract_dir / 'dataset.json').exists()
+        assert (extract_dir / 'images' / '1.jpg').exists()
+
+    def test_safe_extract_zip_prevents_zip_slip(self, tmp_path):
+        """Test that ZIP extraction prevents path traversal (Zip Slip)."""
+        import zipfile
+
+        # Create malicious ZIP with path traversal
+        zip_path = tmp_path / "malicious.zip"
+        with zipfile.ZipFile(str(zip_path), 'w') as zf:
+            # Try to write outside the extraction directory
+            zf.writestr('../../../etc/passwd', 'malicious content')
+
+        extract_dir = tmp_path / "extracted"
+        extract_dir.mkdir()
+
+        with pytest.raises(ValueError, match="Unsafe path in ZIP"):
+            mu.safe_extract_zip(str(zip_path), str(extract_dir))
+
+    def test_read_json_from_zip(self, tmp_path):
+        """Test reading JSON from ZIP."""
+        import zipfile
+
+        test_data = {'test': 'data', 'number': 123}
+        zip_path = tmp_path / "test.zip"
+
+        with zipfile.ZipFile(str(zip_path), 'w') as zf:
+            import json
+            zf.writestr('dataset.json', json.dumps(test_data))
+
+        result = mu.read_json_from_zip(str(zip_path))
+
+        assert result == test_data
+
+
+class TestDatasetImportFromZip:
+    """Tests for dataset import from ZIP packages."""
+
+    def test_import_dataset_from_zip_basic(self, mock_database, tmp_path):
+        """Test basic dataset import from ZIP."""
+        # First, create a valid ZIP package
+        dataset = mm.MdDataset.create(
+            dataset_name="Original Dataset",
+            dataset_desc="Original description",
+            dimension=2
+        )
+        obj = mm.MdObject.create(
+            object_name="Object1",
+            dataset=dataset,
+            sequence=1
+        )
+        obj.landmark_list = [[1.0, 2.0], [3.0, 4.0]]
+        obj.pack_landmark()
+        obj.save()
+
+        zip_path = tmp_path / "export.zip"
+        mu.create_zip_package(dataset.id, str(zip_path), include_files=False)
+
+        # Now import it
+        new_dataset_id = mu.import_dataset_from_zip(str(zip_path))
+
+        # Verify imported dataset
+        imported_ds = mm.MdDataset.get_by_id(new_dataset_id)
+        # Dataset name may have a number appended to avoid duplicates
+        assert "Original Dataset" in imported_ds.dataset_name
+        assert imported_ds.dimension == 2
+        assert imported_ds.object_list.count() == 1
+
+        imported_obj = imported_ds.object_list.first()
+        imported_obj.unpack_landmark()
+        assert imported_obj.object_name == "Object1"
+        assert imported_obj.landmark_list == [[1.0, 2.0], [3.0, 4.0]]
+
+    def test_import_dataset_from_zip_with_progress(self, mock_database, tmp_path):
+        """Test dataset import with progress callback."""
+        # Create and export dataset
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Obj1", dataset=dataset)
+        obj.landmark_list = [[1.0, 2.0]]
+        obj.pack_landmark()
+        obj.save()
+
+        zip_path = tmp_path / "export.zip"
+        mu.create_zip_package(dataset.id, str(zip_path), include_files=False)
+
+        # Import with progress tracking
+        progress_calls = []
+
+        def progress_cb(curr, total):
+            progress_calls.append((curr, total))
+
+        new_dataset_id = mu.import_dataset_from_zip(
+            str(zip_path),
+            progress_callback=progress_cb
+        )
+
+        assert new_dataset_id > 0
+        assert len(progress_calls) > 0
+
+    def test_import_dataset_invalid_json(self, mock_database, tmp_path):
+        """Test import fails with invalid JSON schema."""
+        import zipfile
+
+        # Create ZIP with invalid JSON
+        zip_path = tmp_path / "invalid.zip"
+        invalid_data = {
+            'format_version': '1.1',
+            'dataset': {}  # Missing required keys
+        }
+
+        with zipfile.ZipFile(str(zip_path), 'w') as zf:
+            import json
+            zf.writestr('dataset.json', json.dumps(invalid_data))
+
+        with pytest.raises(ValueError, match="Invalid dataset.json"):
+            mu.import_dataset_from_zip(str(zip_path))

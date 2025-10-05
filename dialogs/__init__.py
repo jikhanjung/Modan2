@@ -7,6 +7,8 @@ to individual module files.
 
 # Base dialog
 # Migrated dialogs
+# Re-export widgets from components.widgets for backward compatibility
+from components.widgets import DatasetOpsViewer, PicButton
 from dialogs.analysis_dialog import NewAnalysisDialog
 from dialogs.analysis_result_dialog import AnalysisResultDialog
 from dialogs.base_dialog import BaseDialog
@@ -22,7 +24,6 @@ from dialogs.progress_dialog import ProgressDialog
 from ModanDialogs import (
     DataExplorationDialog,
     DatasetAnalysisDialog,
-    DatasetOpsViewer,
     ObjectDialog,
 )
 

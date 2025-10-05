@@ -1,11 +1,12 @@
 # https://github.com/yarolig/OBJFileLoader
 
+import math
 import os
+
+import numpy as np
+
 #import pygame
 from OpenGL.GL import *
-from OpenGL import GLUT as glut
-import math
-import numpy as np
 
 _3D_SCREEN_WIDTH = _3D_SCREEN_HEIGHT = 5
 
@@ -31,7 +32,7 @@ class OBJ:
         mtl = None
         dirname = os.path.dirname(filename)
 
-        for line in open(filename, "r"):
+        for line in open(filename):
             if line.startswith('#'): continue
             values = line.split()
             if not values: continue
@@ -75,7 +76,7 @@ class OBJ:
         dirname = os.path.dirname(filename)
 
         material = None
-        for line in open(filename, "r"):
+        for line in open(filename):
             if line.startswith('#'): continue
             values = line.split()
             if not values: continue

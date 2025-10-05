@@ -1,29 +1,68 @@
-from PyQt5.QtWidgets import QTableWidgetItem, QHeaderView, QFileDialog, QCheckBox, QColorDialog, \
-                            QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QProgressBar, QApplication, \
-                            QDialog, QLineEdit, QLabel, QPushButton, QAbstractItemView, QStatusBar, QMessageBox, \
-                            QTableView, QTreeView, QSplitter, QRadioButton, QComboBox, QTextEdit, QSizePolicy, \
-                            QTableWidget, QGridLayout, QAbstractButton, QButtonGroup, QGroupBox, QInputDialog,\
-                            QTabWidget, QListWidget, QSpinBox, QPlainTextEdit, QSlider, QScrollArea, QStyledItemDelegate, \
-                            QAction, QShortcut, QMenu
-from PyQt5.QtGui import QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem, QImage,\
-                        QFont, QPainter, QBrush, QMouseEvent, QWheelEvent, QIntValidator, QIcon, QCursor,\
-                        QFontMetrics, QKeySequence, QDrag
-from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSize, QPoint, QAbstractTableModel, QTranslator, \
-                         pyqtSlot, pyqtSignal, QItemSelectionModel, QTimer, QEvent, QModelIndex, QObject, QPointF
-
 import logging
 import sys
 
+import OpenGL.GL as gl
 from matplotlib.backends.backend_qt5agg import FigureCanvas as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
-import matplotlib.pyplot as plt
-import matplotlib
-from OBJFileLoader import OBJ
-from MdModel import MdDataset, MdDatasetOps, MdObject, MdObjectOps
-from scipy.spatial.distance import cdist
-import OpenGL.GL as gl
 from OpenGL import GLU as glu
+from PyQt5.QtCore import (
+    QAbstractTableModel,
+    QEvent,
+    QItemSelectionModel,
+    QModelIndex,
+    QObject,
+    QPoint,
+    QPointF,
+    QRect,
+    Qt,
+    QTimer,
+    QTranslator,
+    pyqtSignal,
+)
+from PyQt5.QtGui import (
+    QBrush,
+    QColor,
+    QCursor,
+    QDrag,
+    QFont,
+    QIntValidator,
+    QKeySequence,
+    QMouseEvent,
+    QPainter,
+    QPen,
+    QPixmap,
+    QWheelEvent,
+)
+from PyQt5.QtWidgets import (
+    QAbstractItemView,
+    QAction,
+    QApplication,
+    QCheckBox,
+    QColorDialog,
+    QComboBox,
+    QGridLayout,
+    QHBoxLayout,
+    QInputDialog,
+    QLabel,
+    QLineEdit,
+    QMenu,
+    QPushButton,
+    QShortcut,
+    QSlider,
+    QStyledItemDelegate,
+    QTableView,
+    QTableWidget,
+    QTableWidgetItem,
+    QTabWidget,
+    QTreeView,
+    QWidget,
+)
+from scipy.spatial.distance import cdist
+
+from MdModel import MdDataset, MdDatasetOps, MdObject, MdObjectOps
+from OBJFileLoader import OBJ
+
 # GLUT import conditional - causes crashes on Windows builds
 GLUT_AVAILABLE = False
 GLUT_INITIALIZED = False
@@ -46,19 +85,17 @@ if GLUT_AVAILABLE and glut:
         print(f"Warning: Failed to initialize GLUT ({e}), using fallback rendering")
         GLUT_AVAILABLE = False
         GLUT_INITIALIZED = False
-from PyQt5.QtOpenGL import QGLWidget, QGLFormat
-from scipy.spatial import ConvexHull
-from scipy import stats
-
-import tempfile
-import cv2
-import glob
-import xlsxwriter
+import copy
 import json
-import math, re, os, shutil, copy, random, struct
+import math
+import os
+import random
+import re
+import struct
 from pathlib import Path
-from PIL.ExifTags import TAGS
+
 import numpy as np
+from PyQt5.QtOpenGL import QGLFormat, QGLWidget
 
 import MdUtils as mu
 
@@ -1397,7 +1434,6 @@ class ObjectViewer3D(QGLWidget):
             self.view_mode = PAN_MODE
 
     def mouseReleaseEvent(self, event):
-        import datetime
         self.is_dragging = False
         self.curr_x = event.x()
         self.curr_y = event.y()
@@ -1946,7 +1982,7 @@ class ObjectViewer3D(QGLWidget):
             if GLUT_AVAILABLE and GLUT_INITIALIZED and glut:
                 try:
                     glut.glutSolidCube(1)
-                except (OSError, AttributeError) as e:
+                except (OSError, AttributeError):
                     # Fallback to drawing a cube manually
                     pass
             else:
@@ -1962,7 +1998,7 @@ class ObjectViewer3D(QGLWidget):
                 if GLUT_AVAILABLE and GLUT_INITIALIZED and glut:
                     try:
                         glut.glutSolidCone(0.02, 0.03, 10, 10)
-                    except (OSError, AttributeError) as e:
+                    except (OSError, AttributeError):
                         # Fallback if GLUT call fails
                         pass
                 else:
@@ -2069,7 +2105,7 @@ class ObjectViewer3D(QGLWidget):
                 if GLUT_AVAILABLE and GLUT_INITIALIZED and glut:
                     try:
                         glut.glutSolidSphere(0.02 * ( int(self.landmark_size) + 1 ), 10, 10)
-                    except (OSError, AttributeError) as e:
+                    except (OSError, AttributeError):
                         # Fallback if GLUT call fails
                         self.draw_sphere(0.02 * ( int(self.landmark_size) + 1 ))
                 else:
@@ -2089,7 +2125,7 @@ class ObjectViewer3D(QGLWidget):
                         try:
                             for letter in list(str(i+1)):
                                 glut.glutBitmapCharacter(font_size_list[int(self.index_size)], ord(letter))
-                        except (OSError, AttributeError) as e:
+                        except (OSError, AttributeError):
                             # Fallback if GLUT text rendering fails
                             pass
                     gl.glEnable(gl.GL_LIGHTING)
@@ -2120,7 +2156,7 @@ class ObjectViewer3D(QGLWidget):
                 if GLUT_AVAILABLE and GLUT_INITIALIZED and glut:
                     try:
                         glut.glutSolidSphere(0.03, 10, 10)
-                    except (OSError, AttributeError) as e:
+                    except (OSError, AttributeError):
                         # Fallback if GLUT call fails
                         self.draw_sphere(0.03)
                 else:
@@ -2779,7 +2815,7 @@ class X1Y1:
             return False
 
     def read(self):
-        with open(self.filename, 'r') as f:
+        with open(self.filename) as f:
             lines = f.readlines()
             dataset = {}
             object_count = 0
@@ -2867,7 +2903,7 @@ class TPS:
             return False
 
     def read(self):
-        with open(self.filename, 'r') as f:
+        with open(self.filename) as f:
             tps_lines = f.readlines()
             dataset = {}
             object_count = 0
@@ -3003,7 +3039,7 @@ class NTS:
             return False
 
     def read(self):
-        with open(self.filename, 'r') as f:
+        with open(self.filename) as f:
             nts_lines = f.readlines()
 
             dataset = {}
@@ -3126,7 +3162,7 @@ class Morphologika:
         self.read()
 
     def read(self):
-        f = open(self.filename, 'r')
+        f = open(self.filename)
         morphologika_data = f.read()
         f.close()
 
@@ -4018,7 +4054,7 @@ class MdTableModel(QAbstractTableModel):
             elif isinstance(d, dict) and d.get('changed', False):
                 return QColor('yellow')
         if role == Qt.ToolTipRole:
-            return "Tooltip for cell ({}, {})".format(index.row(), index.column())
+            return f"Tooltip for cell ({index.row()}, {index.column()})"
         if role == Qt.TextAlignmentRole:
             return Qt.AlignCenter | Qt.AlignVCenter
         return None
@@ -4073,14 +4109,14 @@ class MdTableModel(QAbstractTableModel):
         if role == Qt.DisplayRole:
             if orientation == Qt.Horizontal:
                 # Return the header text for the given horizontal section
-                return "{}".format(self._hheader_data[section])
+                return f"{self._hheader_data[section]}"
                 #return ""
             elif orientation == Qt.Vertical:
                 # Return the header text for the given vertical section
                 if len( self._vheader_data ) == 0:
-                    return "{}".format(section+1)
+                    return f"{section+1}"
                 else:
-                    return "{}".format(self._vheader_data[section])
+                    return f"{self._vheader_data[section]}"
         if role == Qt.ToolTipRole and orientation == Qt.Vertical:
             return ""
 
@@ -4246,7 +4282,7 @@ class AnalysisInfoWidget(QWidget):
                 self.m_app.translator = None
 
             translator = QTranslator()
-            translator_path = mu.resource_path("translations/Modan2_{}.qm".format(language))
+            translator_path = mu.resource_path(f"translations/Modan2_{language}.qm")
             if os.path.exists(translator_path):
                 translator.load(translator_path)
                 self.m_app.installTranslator(translator)
@@ -4396,7 +4432,7 @@ class AnalysisInfoWidget(QWidget):
         self.tabManovaResult.setRowCount(0)
         
         if manova_result:
-            logger.info(f"Processing MANOVA result for display")
+            logger.info("Processing MANOVA result for display")
             logger.debug(f"MANOVA result structure: {manova_result}")
             
             # Set up proper MANOVA table format

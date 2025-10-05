@@ -1,8 +1,17 @@
 import sys
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
-                             QHBoxLayout, QTreeView, QTableView, QHeaderView)
-from PyQt5.QtGui import QStandardItemModel, QStandardItem, QDrag, QCursor
-from PyQt5.QtCore import Qt, QMimeData, QObject, QEvent
+
+from PyQt5.QtCore import QEvent, QMimeData, QObject, Qt
+from PyQt5.QtGui import QCursor, QDrag, QStandardItem, QStandardItemModel
+from PyQt5.QtWidgets import (
+    QApplication,
+    QHBoxLayout,
+    QHeaderView,
+    QMainWindow,
+    QTableView,
+    QTreeView,
+    QWidget,
+)
+
 
 class GlobalDragEventFilter(QObject):
     def __init__(self, parent=None):

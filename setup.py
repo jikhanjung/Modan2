@@ -1,6 +1,8 @@
-import sys
 import re
-from cx_Freeze import setup, Executable
+import sys
+
+from cx_Freeze import Executable, setup
+
 
 def get_version():
     """Extract version from version.py file"""
@@ -10,7 +12,7 @@ def get_version():
         return __version__
     except ImportError:
         # Fallback to regex extraction
-        with open("version.py", "r") as f:
+        with open("version.py") as f:
             content = f.read()
             match = re.search(r'__version__ = "(.*?)"', content)
             if match:

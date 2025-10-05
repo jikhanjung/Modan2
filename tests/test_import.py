@@ -7,15 +7,16 @@ These tests depend on the core dataset/object functionality but are isolated
 from analysis workflows.
 """
 
-import pytest
-import tempfile
 from pathlib import Path
 from unittest.mock import Mock, patch
+
+import pytest
+from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QApplication, QMessageBox
-from PyQt5.QtCore import QTimer, QPoint
+
 import MdModel
-from ModanDialogs import ImportDatasetDialog
 from ModanComponents import TPS
+from ModanDialogs import ImportDatasetDialog
 
 
 class TestSampleDataCreation:
@@ -214,17 +215,17 @@ class TestImportWithMessageBoxHandling:
                     # Try multiple ways to close the message box
                     try:
                         widget.accept()
-                        print(f"   → Accepted via accept()")
+                        print("   → Accepted via accept()")
                     except:
                         try:
                             widget.close()
-                            print(f"   → Closed via close()")
+                            print("   → Closed via close()")
                         except:
                             try:
                                 widget.done(1)
-                                print(f"   → Closed via done(1)")
+                                print("   → Closed via done(1)")
                             except:
-                                print(f"   → Failed to close message box")
+                                print("   → Failed to close message box")
                     
                     return True
                     

@@ -1,8 +1,10 @@
-import MdUtils as mu
 import logging
 import os
+
 # get date as string
 from datetime import datetime
+
+import MdUtils as mu
 
 
 def setup_logger(name, level=logging.INFO):

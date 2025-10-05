@@ -11,10 +11,11 @@ Output:
 """
 
 import os
-import sys
 import shutil
 import subprocess
+import sys
 from pathlib import Path
+
 
 def run_command(cmd, description):
     """Run a shell command and print status."""
@@ -86,7 +87,7 @@ def main():
     nojekyll_dst = build_dir / ".nojekyll"
     if nojekyll_src.exists():
         shutil.copy(nojekyll_src, nojekyll_dst)
-        print(f"✅ Copied .nojekyll to build directory")
+        print("✅ Copied .nojekyll to build directory")
 
     print("\n" + "="*60)
     print("  ✅ Build Complete!")

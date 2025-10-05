@@ -6,13 +6,12 @@ and specialized integration tests that don't fit cleanly into other modules.
 These tests are kept for historical compatibility and edge case coverage.
 """
 
-import pytest
-import sys
 import os
-from PyQt5.QtCore import Qt, QRect, QPoint
-from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QMessageBox, QApplication
-from PyQt5.QtTest import QTest
-from unittest.mock import patch, Mock
+import sys
+from unittest.mock import Mock, patch
+
+import pytest
+from PyQt5.QtCore import QPoint, QRect
 
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -136,7 +135,6 @@ class TestObjectDialogEdgeCases:
     def test_object_dialog_with_none_dataset_only(self, qtbot):
         """Test ObjectDialog behavior - simplified test without dataset parameter."""
         from ModanDialogs import ObjectDialog
-        import MdModel
         
         mock_parent = Mock()
         mock_parent.pos.return_value = Mock()
@@ -161,8 +159,9 @@ class TestImportEdgeCasesLegacy:
     
     def test_import_with_special_characters_in_filename(self, qtbot):
         """Test import handling of filenames with special characters."""
-        from ModanDialogs import ImportDatasetDialog
         from unittest.mock import Mock, patch
+
+        from ModanDialogs import ImportDatasetDialog
         
         mock_parent = Mock()
         mock_parent.pos.return_value = Mock()
@@ -193,8 +192,9 @@ class TestImportEdgeCasesLegacy:
 
     def test_import_dialog_ui_state_consistency(self, qtbot):
         """Test UI state consistency in ImportDatasetDialog."""
-        from ModanDialogs import ImportDatasetDialog
         from unittest.mock import Mock, patch
+
+        from ModanDialogs import ImportDatasetDialog
         
         mock_parent = Mock()
         mock_parent.pos.return_value = Mock()

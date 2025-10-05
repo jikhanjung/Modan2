@@ -1,15 +1,14 @@
 """
 Tests for MdHelpers module - utility and helper functions.
 """
-import pytest
 import os
-import json
-import tempfile
-from pathlib import Path
 from datetime import datetime, timedelta
-from unittest.mock import Mock, patch, MagicMock
-from PyQt5.QtWidgets import QMessageBox, QFileDialog
+from pathlib import Path
+from unittest.mock import Mock, patch
+
+import pytest
 from PyQt5.QtCore import QSettings
+from PyQt5.QtWidgets import QFileDialog, QMessageBox
 
 import MdHelpers as helpers
 
@@ -792,7 +791,6 @@ class TestWindowState:
     def test_save_window_state(self):
         """Test saving window state."""
         from PyQt5.QtWidgets import QMainWindow
-        from PyQt5.QtCore import QSettings
 
         window = Mock(spec=QMainWindow)
         window.saveGeometry.return_value = b"geometry_data"
@@ -807,7 +805,6 @@ class TestWindowState:
     def test_save_window_state_with_splitters(self):
         """Test saving window state with splitters."""
         from PyQt5.QtWidgets import QMainWindow
-        from PyQt5.QtCore import QSettings
 
         window = Mock(spec=QMainWindow)
         window.saveGeometry.return_value = b"geometry_data"
@@ -830,7 +827,6 @@ class TestWindowState:
     def test_restore_window_state_no_data(self):
         """Test restoring window state with no saved data."""
         from PyQt5.QtWidgets import QMainWindow
-        from PyQt5.QtCore import QSettings
 
         window = Mock(spec=QMainWindow)
         settings = QSettings("Test", "Test")
@@ -844,7 +840,6 @@ class TestWindowState:
     def test_restore_window_state_with_data(self):
         """Test restoring window state with saved data."""
         from PyQt5.QtWidgets import QMainWindow
-        from PyQt5.QtCore import QSettings
 
         window = Mock(spec=QMainWindow)
         settings = QSettings("Test", "Test")

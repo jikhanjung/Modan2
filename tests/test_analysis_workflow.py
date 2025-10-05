@@ -7,16 +7,19 @@ MainWindow interaction, and Analysis execution.
 """
 
 import os
+
 # Force pytest-qt to use PyQt5
 os.environ['PYTEST_QT_API'] = 'pyqt5'
 
-import pytest
 from unittest.mock import Mock, patch
+
+import pytest
+from PyQt5.QtCore import QRect, QTimer
 from PyQt5.QtWidgets import QApplication, QMessageBox
-from PyQt5.QtCore import QTimer, QPoint, QRect
+
 import MdModel
-from ModanDialogs import ImportDatasetDialog, NewAnalysisDialog
 from Modan2 import ModanMainWindow
+from ModanDialogs import ImportDatasetDialog, NewAnalysisDialog
 
 
 class TestAnalysisDialog:
@@ -166,17 +169,17 @@ class TestMainWindowAnalysis:
                     # Try multiple ways to close the message box
                     try:
                         widget.accept()
-                        print(f"   → Accepted via accept()")
+                        print("   → Accepted via accept()")
                     except:
                         try:
                             widget.close()
-                            print(f"   → Closed via close()")
+                            print("   → Closed via close()")
                         except:
                             try:
                                 widget.done(1)
-                                print(f"   → Closed via done(1)")
+                                print("   → Closed via done(1)")
                             except:
-                                print(f"   → Failed to close message box")
+                                print("   → Failed to close message box")
                     
                     return True
                     
@@ -544,12 +547,12 @@ class TestCompleteWorkflows:
                 print(f"✅ Dataset has {len(grouping_vars)} grouping variables")
                 
                 if has_grouping_vars:
-                    print(f"📊 Performing analysis on large dataset with grouping variables")
+                    print("📊 Performing analysis on large dataset with grouping variables")
                     initial_analysis_count = MdModel.MdAnalysis.select().count()
                     
                     # Since this dataset has proper grouping variables, we can run real analysis
                     # For now, just verify the dataset is properly set up for analysis
-                    print(f"✅ Large dataset ready for analysis (skipping actual analysis execution for performance)")
+                    print("✅ Large dataset ready for analysis (skipping actual analysis execution for performance)")
                     final_analysis_count = initial_analysis_count  # Skip actual analysis for large datasets
                 
             # Large dataset import completed successfully
@@ -570,8 +573,9 @@ class TestAnalysisValidation:
     @pytest.mark.skip(reason="Requires manual dialog interaction - run locally with UI")
     def test_analysis_with_insufficient_data(self, qtbot):
         """Test analysis behavior with insufficient data."""
-        from ModanDialogs import DatasetDialog, ObjectDialog
         from PyQt5.QtWidgets import QWidget
+
+        from ModanDialogs import DatasetDialog, ObjectDialog
         
         try:
             # Setup QApplication settings mock

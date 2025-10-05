@@ -4,16 +4,14 @@ Modan2 Code Indexing System
 Build comprehensive index of the codebase including symbols, relationships, and metadata
 """
 
-import os
-import sys
-import json
 import ast
-import re
-from pathlib import Path
-from typing import Dict, List, Set, Any, Optional
+import json
 import logging
-from datetime import datetime
+import re
+import sys
 from collections import defaultdict
+from datetime import datetime
+from pathlib import Path
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -57,7 +55,7 @@ class Modan2Indexer:
     def process_file(self, filepath: Path):
         """Process a single Python file"""
         try:
-            with open(filepath, 'r', encoding='utf-8') as f:
+            with open(filepath, encoding='utf-8') as f:
                 source = f.read()
             
             # Basic file stats

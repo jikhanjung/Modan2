@@ -6,15 +6,14 @@ and their relationships. These are the foundational tests that other test
 modules depend on.
 """
 
+from unittest.mock import Mock
+
 import pytest
-import tempfile
-from pathlib import Path
-from unittest.mock import Mock, patch
-from PyQt5.QtWidgets import QApplication, QWidget
 from PyQt5.QtCore import QPoint
-from PyQt5.QtTest import QTest
+
 import MdModel
 from ModanDialogs import DatasetDialog, ObjectDialog
+
 
 class TestDatasetCore:
     """Test core dataset creation and management functionality."""

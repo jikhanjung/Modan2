@@ -5,10 +5,9 @@ Generates an interactive HTML dashboard from the code index
 """
 
 import json
-import sys
-from pathlib import Path
-from typing import Dict, List, Any
 import logging
+from pathlib import Path
+from typing import Any
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -18,38 +17,38 @@ class IndexVisualizer:
         self.project_root = project_root or Path(__file__).parent.parent
         self.index_dir = self.project_root / '.index'
         
-    def load_index_data(self) -> Dict[str, Any]:
+    def load_index_data(self) -> dict[str, Any]:
         """Load all index data"""
         data = {}
         
         # Load summary
         summary_path = self.index_dir / 'index_summary.json'
         if summary_path.exists():
-            with open(summary_path, 'r') as f:
+            with open(summary_path) as f:
                 data['summary'] = json.load(f)
         
         # Load symbols
         symbols_path = self.index_dir / 'symbols' / 'symbols.json'
         if symbols_path.exists():
-            with open(symbols_path, 'r') as f:
+            with open(symbols_path) as f:
                 data['symbols'] = json.load(f)
         
         # Load file stats
         stats_path = self.index_dir / 'symbols' / 'file_stats.json'
         if stats_path.exists():
-            with open(stats_path, 'r') as f:
+            with open(stats_path) as f:
                 data['file_stats'] = json.load(f)
         
         # Load Qt signals
         qt_path = self.index_dir / 'graphs' / 'qt_signals.json'
         if qt_path.exists():
-            with open(qt_path, 'r') as f:
+            with open(qt_path) as f:
                 data['qt_signals'] = json.load(f)
         
         # Load DB models
         db_path = self.index_dir / 'graphs' / 'db_models.json'
         if db_path.exists():
-            with open(db_path, 'r') as f:
+            with open(db_path) as f:
                 data['db_models'] = json.load(f)
         
         return data
@@ -249,7 +248,7 @@ class IndexVisualizer:
 """
         return html
     
-    def prepare_file_treemap(self, file_stats: Dict) -> Dict:
+    def prepare_file_treemap(self, file_stats: dict) -> dict:
         """Prepare data for file size treemap"""
         labels = ['Modan2']  # Root
         parents = ['']
@@ -269,7 +268,7 @@ class IndexVisualizer:
             'marker': {'colorscale': 'Viridis'}
         }
     
-    def prepare_class_bubble(self, symbols: Dict) -> Dict:
+    def prepare_class_bubble(self, symbols: dict) -> dict:
         """Prepare data for class complexity bubble chart"""
         classes = symbols.get('classes', [])
         
@@ -301,7 +300,7 @@ class IndexVisualizer:
             'hovertemplate': '%{text}<extra></extra>'
         }
     
-    def prepare_qt_network(self, qt_signals: Dict) -> Dict:
+    def prepare_qt_network(self, qt_signals: dict) -> dict:
         """Prepare data for Qt connections Sankey diagram"""
         connections = qt_signals.get('connections', [])[:50]  # Limit to 50 for readability
         

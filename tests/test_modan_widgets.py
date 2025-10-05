@@ -1,11 +1,12 @@
 """Tests for ModanWidgets module - UI widgets."""
-import pytest
-from unittest.mock import Mock
 from datetime import datetime
-from PyQt5.QtCore import Qt
+from unittest.mock import Mock
 
-import ModanWidgets as mw
+import pytest
+
 import MdModel
+import ModanWidgets as mw
+
 
 @pytest.fixture
 def mock_dataset():

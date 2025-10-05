@@ -1,10 +1,13 @@
 import datetime
-from peewee_migrate import Router
-from peewee import SqliteDatabase
-from MdModel import MdDataset, MdObject, MdImage, MdThreeDModel, MdAnalysis
-import MdUtils as mu
-import os
 import logging
+import os
+
+from peewee import SqliteDatabase
+from peewee_migrate import Router
+
+import MdUtils as mu
+from MdModel import MdAnalysis, MdDataset, MdImage, MdObject, MdThreeDModel
+
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
@@ -12,7 +15,6 @@ database_path = os.path.join(mu.DEFAULT_DB_DIRECTORY, 'Modan2.db')
 gDatabase = SqliteDatabase(database_path,pragmas={'foreign_keys': 1})
 
 def get_timestamp():
-    import datetime
     now = datetime.datetime.now()
     return now.strftime("%Y%m%d")
 migrations_path = mu.resource_path('migrations')

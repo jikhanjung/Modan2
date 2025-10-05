@@ -1,9 +1,9 @@
-import pandas as pd
-import MdUtils as mu
+import logging
+
 import numpy
+import pandas as pd
 from statsmodels.multivariate.manova import MANOVA
 
-import logging
 logger = logging.getLogger(__name__)
 
 class MdPrincipalComponent:
@@ -190,7 +190,7 @@ class MdCanonicalVariate:
 
         try:
             wi = numpy.linalg.inv(w)
-        except numpy.linalg.LinAlgError as e:
+        except numpy.linalg.LinAlgError:
             #print "Singular matrix: ", e
             return False
         #print "wi", wi
@@ -369,8 +369,9 @@ def do_pca_analysis(landmarks_data, n_components=None):
         Dictionary with PCA results
     """
     try:
-        import numpy as np
         import logging
+
+        import numpy as np
         logger = logging.getLogger(__name__)
         
         logger.info(f"PCA Analysis starting with {len(landmarks_data)} specimens")
@@ -429,13 +430,12 @@ def do_pca_analysis(landmarks_data, n_components=None):
             cumulative_variance.append(cumul)
         
         # Get rotation matrix (eigenvectors) - should be 90x90 from SVD
-        import numpy as np
         if hasattr(pca, 'rotation_matrix') and pca.rotation_matrix is not None:
             full_rotation_matrix = np.array(pca.rotation_matrix)  # Should already be 90x90
         else:
             full_rotation_matrix = np.eye(pca.nVariable)  # Fallback to identity
         
-        logger.info(f"PCA Analysis completed")
+        logger.info("PCA Analysis completed")
         logger.info(f"Number of components: {n_components}")
         logger.info(f"Scores shape: {len(scores)}x{len(scores[0]) if scores else 0}")
         logger.info(f"Full rotation matrix shape: {full_rotation_matrix.shape}")
@@ -531,10 +531,11 @@ def do_manova_analysis_on_procrustes(flattened_landmarks, groups):
         Dictionary with MANOVA results
     """
     try:
+        import logging
+
         import numpy as np
         import pandas as pd
         from statsmodels.multivariate.manova import MANOVA
-        import logging
         logger = logging.getLogger(__name__)
         
         logger.info(f"MANOVA on Procrustes: {len(flattened_landmarks)} specimens, {len(flattened_landmarks[0]) if flattened_landmarks else 0} coordinates")
@@ -612,10 +613,11 @@ def do_manova_analysis_on_pca(pca_scores, groups):
         Dictionary with MANOVA results
     """
     try:
+        import logging
+
         import numpy as np
         import pandas as pd
         from statsmodels.multivariate.manova import MANOVA
-        import logging
         logger = logging.getLogger(__name__)
         
         logger.info(f"MANOVA on PCA: {len(pca_scores)} specimens, {len(pca_scores[0]) if pca_scores else 0} components")

@@ -1,13 +1,16 @@
 """Test Procrustes superimposition with missing landmarks."""
-import pytest
-import numpy as np
-import sys
 import os
+import sys
+
+import numpy as np
+import pytest
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from MdModel import MdDataset, MdObject, MdDatasetOps, MdObjectOps
 from peewee import SqliteDatabase
+
 import MdModel
+from MdModel import MdDataset, MdDatasetOps, MdObject
 
 # Initialize in-memory database for testing
 test_db = SqliteDatabase(':memory:')

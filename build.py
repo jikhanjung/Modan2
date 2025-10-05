@@ -1,10 +1,9 @@
-import subprocess
 import os
-import sys
 import platform
 import re
-import tempfile
 import shutil
+import subprocess
+import tempfile
 from datetime import date
 from pathlib import Path
 
@@ -14,7 +13,7 @@ try:
 except ImportError:
     # Fallback: extract from version.py file
     def get_version_from_file():
-        with open("version.py", "r") as f:
+        with open("version.py") as f:
             content = f.read()
             match = re.search(r'__version__ = "(.*?)"', content)
             if match:
@@ -23,6 +22,7 @@ except ImportError:
     VERSION = get_version_from_file()
 
 import MdUtils as mu
+
 
 def run_pyinstaller(args):
     """Runs PyInstaller with the specified arguments."""
@@ -52,11 +52,11 @@ def run_pyinstaller(args):
             # List actual files in dist directory for debugging
             dist_path = Path("dist")
             if dist_path.exists():
-                print(f"Contents of dist directory:")
+                print("Contents of dist directory:")
                 for item in dist_path.iterdir():
                     print(f"  {item}")
                 if (dist_path / "Modan2").exists():
-                    print(f"Contents of dist/Modan2 directory:")
+                    print("Contents of dist/Modan2 directory:")
                     for item in (dist_path / "Modan2").iterdir():
                         print(f"  {item}")
             raise FileNotFoundError(f"Expected executable not found: {exe_path}")
@@ -223,6 +223,7 @@ print(f"Build date: {DATE}")
 # Create build_info.json
 import json
 from datetime import datetime
+
 build_info = {
     "version": VERSION,
     "build_number": BUILD_NUMBER,
@@ -232,7 +233,7 @@ build_info = {
 }
 with open("build_info.json", "w") as f:
     json.dump(build_info, f, indent=2)
-print(f"Created build_info.json")
+print("Created build_info.json")
 
 OUTPUT_DIR = "dist"
 ICON = "icons/Modan2_2.png"
@@ -297,7 +298,6 @@ if platform.system() == "Windows":
 run_pyinstaller(onedir_args)
 
 # Copy ExampleDataset to dist folder for Inno Setup
-import shutil
 example_src = "ExampleDataset"
 example_dst = "dist/ExampleDataset"
 if os.path.exists(example_src):

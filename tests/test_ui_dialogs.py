@@ -1,11 +1,10 @@
 """Tests for Modan2 dialog windows."""
-import pytest
-from PyQt5.QtCore import Qt
-from PyQt5.QtTest import QTest
-from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QMessageBox
-from unittest.mock import Mock, MagicMock, patch
-import sys
 import os
+import sys
+from unittest.mock import Mock, patch
+
+import pytest
+from PyQt5.QtWidgets import QDialog, QMessageBox
 
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

@@ -1,9 +1,10 @@
 """Tests for MdStatistics module - Statistical analysis functions."""
-import sys
 import os
-import pytest
+import sys
+from unittest.mock import MagicMock
+
 import numpy as np
-from unittest.mock import MagicMock, patch
+import pytest
 
 # Add project root to Python path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

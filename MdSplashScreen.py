@@ -1,9 +1,10 @@
 """
 Custom splash screen for Modan2 application with styled text overlay.
 """
-from PyQt5.QtWidgets import QSplashScreen, QApplication
-from PyQt5.QtCore import Qt, QTimer, QRect
-from PyQt5.QtGui import QPixmap, QPainter, QFont, QColor, QPen, QLinearGradient
+from PyQt5.QtCore import QRect, Qt, QTimer
+from PyQt5.QtGui import QColor, QFont, QLinearGradient, QPainter, QPen, QPixmap
+from PyQt5.QtWidgets import QApplication, QSplashScreen
+
 import MdUtils as mu
 
 

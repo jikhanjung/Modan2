@@ -1,24 +1,23 @@
 """
 Helper functions and utilities for Modan2 application.
 """
-import os
-import json
 import hashlib
+import json
 import logging
-from typing import Any, Dict, List, Optional, Tuple, Union
-from pathlib import Path
+import os
 from datetime import datetime
-from PyQt5.QtWidgets import QMessageBox, QFileDialog, QApplication
-from PyQt5.QtCore import QSettings, QStandardPaths, QUrl
-from PyQt5.QtGui import QColor, QPixmap, QIcon
+from pathlib import Path
+from typing import Any
 
-from MdConstants import ERROR_MESSAGES, WARNING_MESSAGES, INFO_MESSAGES
+from PyQt5.QtCore import QSettings, QStandardPaths, QUrl
+from PyQt5.QtGui import QColor, QIcon, QPixmap
+from PyQt5.QtWidgets import QApplication, QFileDialog, QMessageBox
 
 logger = logging.getLogger(__name__)
 
 
 def show_message(parent, title: str, message: str, 
-                message_type: str = 'info') -> Optional[int]:
+                message_type: str = 'info') -> int | None:
     """Show message box to user.
     
     Args:
@@ -93,7 +92,7 @@ def confirm_action(parent, message: str, title: str = "Confirm") -> bool:
 
 
 def get_open_file_name(parent, title: str, file_filter: str, 
-                      start_dir: str = '') -> Optional[str]:
+                      start_dir: str = '') -> str | None:
     """Show open file dialog.
     
     Args:
@@ -112,7 +111,7 @@ def get_open_file_name(parent, title: str, file_filter: str,
 
 
 def get_open_file_names(parent, title: str, file_filter: str,
-                       start_dir: str = '') -> List[str]:
+                       start_dir: str = '') -> list[str]:
     """Show open multiple files dialog.
     
     Args:
@@ -131,7 +130,7 @@ def get_open_file_names(parent, title: str, file_filter: str,
 
 
 def get_save_file_name(parent, title: str, file_filter: str,
-                      start_dir: str = '') -> Optional[str]:
+                      start_dir: str = '') -> str | None:
     """Show save file dialog.
     
     Args:
@@ -149,7 +148,7 @@ def get_save_file_name(parent, title: str, file_filter: str,
     return file_name if file_name else None
 
 
-def get_directory(parent, title: str, start_dir: str = '') -> Optional[str]:
+def get_directory(parent, title: str, start_dir: str = '') -> str | None:
     """Show directory selection dialog.
     
     Args:
@@ -183,7 +182,7 @@ def calculate_file_hash(file_path: str, algorithm: str = 'md5') -> str:
             for chunk in iter(lambda: f.read(4096), b''):
                 hash_func.update(chunk)
         return hash_func.hexdigest()
-    except IOError:
+    except OSError:
         return ''
 
 
@@ -214,11 +213,11 @@ def get_file_size(file_path: str) -> int:
     """
     try:
         return Path(file_path).stat().st_size
-    except (OSError, IOError):
+    except OSError:
         return 0
 
 
-def load_json_file(file_path: str) -> Dict[str, Any]:
+def load_json_file(file_path: str) -> dict[str, Any]:
     """Load JSON file.
     
     Args:
@@ -232,7 +231,7 @@ def load_json_file(file_path: str) -> Dict[str, Any]:
         FileNotFoundError: If file doesn't exist
     """
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, encoding='utf-8') as f:
             return json.load(f)
     except json.JSONDecodeError as e:
         raise ValueError(f"Invalid JSON in {file_path}: {e}")
@@ -240,7 +239,7 @@ def load_json_file(file_path: str) -> Dict[str, Any]:
         raise FileNotFoundError(f"JSON file not found: {file_path}")
 
 
-def save_json_file(file_path: str, data: Dict[str, Any], 
+def save_json_file(file_path: str, data: dict[str, Any], 
                   indent: int = 2) -> bool:
     """Save data to JSON file.
     
@@ -261,7 +260,7 @@ def save_json_file(file_path: str, data: Dict[str, Any],
         
         return True
         
-    except (IOError, OSError) as e:
+    except OSError as e:
         logging.getLogger(__name__).error(f"Failed to save JSON file {file_path}: {e}")
         return False
 
@@ -278,7 +277,7 @@ def ensure_directory(path: str) -> bool:
     try:
         Path(path).mkdir(parents=True, exist_ok=True)
         return True
-    except (OSError, IOError):
+    except OSError:
         return False
 
 
@@ -340,14 +339,14 @@ def cleanup_temp_files(older_than_days: int = 7):
                 if file_path.stat().st_mtime < cutoff_time:
                     file_path.unlink()
                     removed_count += 1
-            except (OSError, IOError):
+            except OSError:
                 pass
     
     if removed_count > 0:
         logging.getLogger(__name__).info(f"Cleaned up {removed_count} temporary files")
 
 
-def validate_landmark_data(landmarks: List[List[float]], expected_count: int) -> Tuple[bool, str]:
+def validate_landmark_data(landmarks: list[list[float]], expected_count: int) -> tuple[bool, str]:
     """Validate landmark data.
     
     Args:
@@ -374,7 +373,7 @@ def validate_landmark_data(landmarks: List[List[float]], expected_count: int) ->
     return True, "Valid landmark data"
 
 
-def validate_dataset_name(name: str) -> Tuple[bool, str]:
+def validate_dataset_name(name: str) -> tuple[bool, str]:
     """Validate dataset name.
     
     Args:
@@ -403,7 +402,7 @@ def validate_dataset_name(name: str) -> Tuple[bool, str]:
     return True, "Valid dataset name"
 
 
-def validate_file_path(file_path: str) -> Tuple[bool, str]:
+def validate_file_path(file_path: str) -> tuple[bool, str]:
     """Validate file path.
     
     Args:
@@ -429,7 +428,7 @@ def validate_file_path(file_path: str) -> Tuple[bool, str]:
     return True, "Valid file path"
 
 
-def parse_color(color_str: str) -> Optional[QColor]:
+def parse_color(color_str: str) -> QColor | None:
     """Parse color string to QColor.
     
     Args:
@@ -493,7 +492,7 @@ def format_datetime(dt: datetime, format_str: str = "%Y-%m-%d %H:%M:%S") -> str:
     return dt.strftime(format_str)
 
 
-def parse_datetime(dt_str: str, format_str: str = "%Y-%m-%d %H:%M:%S") -> Optional[datetime]:
+def parse_datetime(dt_str: str, format_str: str = "%Y-%m-%d %H:%M:%S") -> datetime | None:
     """Parse datetime string.
     
     Args:
@@ -602,12 +601,12 @@ def backup_file(file_path: str) -> bool:
         logging.getLogger(__name__).info(f"Created backup: {backup_path}")
         return True
         
-    except (IOError, OSError) as e:
+    except OSError as e:
         logging.getLogger(__name__).error(f"Failed to create backup: {e}")
         return False
 
 
-def find_files(directory: str, pattern: str = "*", recursive: bool = True) -> List[str]:
+def find_files(directory: str, pattern: str = "*", recursive: bool = True) -> list[str]:
     """Find files matching pattern.
     
     Args:
@@ -631,11 +630,11 @@ def find_files(directory: str, pattern: str = "*", recursive: bool = True) -> Li
         
         return [str(f) for f in files if f.is_file()]
         
-    except (OSError, IOError):
+    except OSError:
         return []
 
 
-def get_file_info(file_path: str) -> Dict[str, Any]:
+def get_file_info(file_path: str) -> dict[str, Any]:
     """Get file information.
     
     Args:
@@ -664,7 +663,7 @@ def get_file_info(file_path: str) -> Dict[str, Any]:
             'is_writable': os.access(file_path, os.W_OK),
         }
         
-    except (OSError, IOError):
+    except OSError:
         return {'name': path.name}
 
 
@@ -680,7 +679,7 @@ def create_url_from_path(file_path: str) -> QUrl:
     return QUrl.fromLocalFile(str(Path(file_path).resolve()))
 
 
-def extract_urls_from_mime(mime_data) -> List[str]:
+def extract_urls_from_mime(mime_data) -> list[str]:
     """Extract file paths from QMimeData.
     
     Args:
@@ -791,7 +790,7 @@ def interpolate_color(color1: QColor, color2: QColor, factor: float) -> QColor:
     return QColor(r, g, b, a)
 
 
-def generate_unique_name(base_name: str, existing_names: List[str]) -> str:
+def generate_unique_name(base_name: str, existing_names: list[str]) -> str:
     """Generate unique name by appending number if needed.
     
     Args:
@@ -811,7 +810,7 @@ def generate_unique_name(base_name: str, existing_names: List[str]) -> str:
     return f"{base_name}_{counter}"
 
 
-def chunk_list(lst: List, chunk_size: int) -> List[List]:
+def chunk_list(lst: list, chunk_size: int) -> list[list]:
     """Split list into chunks.
     
     Args:
@@ -824,7 +823,7 @@ def chunk_list(lst: List, chunk_size: int) -> List[List]:
     return [lst[i:i + chunk_size] for i in range(0, len(lst), chunk_size)]
 
 
-def flatten_list(nested_list: List[List]) -> List:
+def flatten_list(nested_list: list[list]) -> list:
     """Flatten nested list.
     
     Args:
@@ -855,7 +854,7 @@ def round_to_precision(value: float, precision: int) -> float:
     return round(value, precision)
 
 
-def format_number(value: Union[int, float], precision: int = 6, 
+def format_number(value: int | float, precision: int = 6, 
                  scientific: bool = False) -> str:
     """Format number for display.
     
@@ -873,7 +872,7 @@ def format_number(value: Union[int, float], precision: int = 6,
         return f"{value:.{precision}f}".rstrip('0').rstrip('.')
 
 
-def calculate_centroid(points: List[List[float]]) -> List[float]:
+def calculate_centroid(points: list[list[float]]) -> list[float]:
     """Calculate centroid of points.
     
     Args:
@@ -898,7 +897,7 @@ def calculate_centroid(points: List[List[float]]) -> List[float]:
     return centroid
 
 
-def calculate_distance(point1: List[float], point2: List[float]) -> float:
+def calculate_distance(point1: list[float], point2: list[float]) -> float:
     """Calculate Euclidean distance between points.
     
     Args:
@@ -914,7 +913,7 @@ def calculate_distance(point1: List[float], point2: List[float]) -> float:
     return sum((a - b) ** 2 for a, b in zip(point1, point2)) ** 0.5
 
 
-def calculate_bounding_box(points: List[List[float]]) -> Tuple[List[float], List[float]]:
+def calculate_bounding_box(points: list[list[float]]) -> tuple[list[float], list[float]]:
     """Calculate bounding box of points.
     
     Args:
@@ -938,7 +937,7 @@ def calculate_bounding_box(points: List[List[float]]) -> Tuple[List[float], List
     return min_coords, max_coords
 
 
-def scale_points(points: List[List[float]], scale_factor: float) -> List[List[float]]:
+def scale_points(points: list[list[float]], scale_factor: float) -> list[list[float]]:
     """Scale points by factor.
     
     Args:
@@ -951,7 +950,7 @@ def scale_points(points: List[List[float]], scale_factor: float) -> List[List[fl
     return [[coord * scale_factor for coord in point] for point in points]
 
 
-def translate_points(points: List[List[float]], translation: List[float]) -> List[List[float]]:
+def translate_points(points: list[list[float]], translation: list[float]) -> list[list[float]]:
     """Translate points by offset.
     
     Args:
@@ -964,7 +963,7 @@ def translate_points(points: List[List[float]], translation: List[float]) -> Lis
     return [[point[i] + translation[i] for i in range(len(point))] for point in points]
 
 
-def center_points(points: List[List[float]]) -> List[List[float]]:
+def center_points(points: list[list[float]]) -> list[list[float]]:
     """Center points around their centroid.
     
     Args:
@@ -978,7 +977,7 @@ def center_points(points: List[List[float]]) -> List[List[float]]:
     return translate_points(points, translation)
 
 
-def get_system_info() -> Dict[str, str]:
+def get_system_info() -> dict[str, str]:
     """Get system information.
     
     Returns:
@@ -1009,7 +1008,7 @@ def log_system_info():
         logger.info(f"  {key}: {value}")
 
 
-def check_dependencies() -> Dict[str, bool]:
+def check_dependencies() -> dict[str, bool]:
     """Check if all required dependencies are available.
     
     Returns:

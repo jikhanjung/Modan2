@@ -6,7 +6,7 @@ This script sets up proper Qt environment variables and runs Modan2
 
 import os
 import sys
-import subprocess
+
 
 def setup_qt_environment():
     """Setup Qt environment variables for WSL/Linux"""
@@ -57,8 +57,8 @@ def check_display():
 def test_qt():
     """Test if Qt can initialize properly"""
     try:
-        from PyQt5.QtWidgets import QApplication
         from PyQt5.QtCore import QT_VERSION_STR
+        from PyQt5.QtWidgets import QApplication
         
         print(f"PyQt5 version: {QT_VERSION_STR}")
         

@@ -3,9 +3,9 @@
 Generate .index/INDEX_REPORT.md from the current JSON index
 """
 
-from pathlib import Path
 import json
 from datetime import datetime
+from pathlib import Path
 
 
 def load_json(path: Path):

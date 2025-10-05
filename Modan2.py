@@ -1,6 +1,5 @@
-import sys
 import os
-import re
+import sys
 
 # Fix for Anaconda Python sys.version parsing issue with pandas/platform module
 # This must be done before importing any module that uses platform.python_implementation()
@@ -12,44 +11,70 @@ if hasattr(sys, 'version') and '| packaged by Anaconda' in sys.version:
         # Keep only the first part (version) and last part (compiler info)
         sys.version = parts[0].strip() + ' ' + parts[-1].strip()
 
-from PyQt5.QtWidgets import QMainWindow, QHeaderView, QApplication, QAbstractItemView, \
-                            QMessageBox, QTreeView, QTableView, QSplitter, QAction, QActionGroup, QMenu, \
-                            QStatusBar, QInputDialog, QToolBar, QWidget, QPlainTextEdit, QVBoxLayout, QHBoxLayout, \
-                            QPushButton, QRadioButton, QLabel, QDockWidget, QDialog
-from PyQt5.QtGui import QIcon, QStandardItemModel, QStandardItem, QKeySequence, QCursor
-from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSettings, QSize, QTranslator, QItemSelectionModel, QObject, QEvent, QTimer
-
-from PyQt5.QtCore import pyqtSlot
+import copy
 import logging
 from pathlib import Path
-from peewee import DoesNotExist
-from PIL.ExifTags import TAGS
-import shutil
-import copy
-from datetime import datetime
 
-from MdModel import MdDataset, MdObject, MdAnalysis
-import MdUtils as mu
-from ModanController import ModanController
-from MdConstants import ICONS as ICON_CONSTANTS
-from MdHelpers import show_error, show_warning, show_info, confirm_action
-from peewee_migrate import Router
-
-from ModanDialogs import DatasetAnalysisDialog, ObjectDialog, ImportDatasetDialog, DatasetDialog, PreferencesDialog, \
-    MODE, ObjectViewer3D, ExportDatasetDialog, ObjectViewer2D, ProgressDialog, NewAnalysisDialog, DataExplorationDialog
-from ModanComponents import MdTableModel, MdTableView, MdTreeView, MdSequenceDelegate, AnalysisInfoWidget, ResizableOverlayWidget
-from ModanWidgets import DatasetTreeWidget, ObjectTableWidget, LandmarkViewer2D
-from MdStatistics import PerformCVA, PerformPCA, PerformManova
-
-import matplotlib.pyplot as plt
 import matplotlib
+import matplotlib.pyplot as plt
+from peewee import DoesNotExist
+from PyQt5.QtCore import QItemSelectionModel, QRect, QSize, QSortFilterProxyModel, Qt, QTimer, QTranslator, pyqtSlot
+from PyQt5.QtGui import QCursor, QIcon, QKeySequence, QStandardItem, QStandardItemModel
+from PyQt5.QtWidgets import (
+    QAbstractItemView,
+    QAction,
+    QActionGroup,
+    QApplication,
+    QDialog,
+    QDockWidget,
+    QHBoxLayout,
+    QInputDialog,
+    QLabel,
+    QMainWindow,
+    QMenu,
+    QMessageBox,
+    QPushButton,
+    QSplitter,
+    QStatusBar,
+    QToolBar,
+    QTreeView,
+    QVBoxLayout,
+    QWidget,
+)
+
+import MdUtils as mu
+from MdConstants import ICONS as ICON_CONSTANTS
+from MdHelpers import show_error, show_info, show_warning
+from MdModel import MdAnalysis, MdDataset, MdObject
+from ModanComponents import (
+    AnalysisInfoWidget,
+    MdSequenceDelegate,
+    MdTableModel,
+    MdTableView,
+    MdTreeView,
+    ResizableOverlayWidget,
+)
+from ModanController import ModanController
+from ModanDialogs import (
+    MODE,
+    DataExplorationDialog,
+    DatasetAnalysisDialog,
+    DatasetDialog,
+    ExportDatasetDialog,
+    ImportDatasetDialog,
+    NewAnalysisDialog,
+    ObjectDialog,
+    ObjectViewer2D,
+    ObjectViewer3D,
+    PreferencesDialog,
+    ProgressDialog,
+)
+
 # Configure matplotlib to avoid font warnings
 matplotlib.rcParams['font.family'] = ['DejaVu Sans', 'sans-serif']
 matplotlib.rcParams['font.serif'] = ['DejaVu Serif', 'serif']
 matplotlib.rcParams['font.sans-serif'] = ['DejaVu Sans', 'Arial', 'sans-serif']
 
-import json
-import logging
 logger = logging.getLogger(mu.PROGRAM_NAME)
 
 
@@ -590,13 +615,13 @@ class ModanMainWindow(QMainWindow):
                 self.m_app.translator = None
 
             translator = QTranslator()
-            translator_path = mu.resource_path("translations/Modan2_{}.qm".format(language))
+            translator_path = mu.resource_path(f"translations/Modan2_{language}.qm")
             if os.path.exists(translator_path):
                 translator.load(translator_path)
                 self.m_app.installTranslator(translator)
                 self.m_app.translator = translator
 
-        self.setWindowTitle("{} v{}".format(self.tr(mu.PROGRAM_NAME), mu.PROGRAM_VERSION))
+        self.setWindowTitle(f"{self.tr(mu.PROGRAM_NAME)} v{mu.PROGRAM_VERSION}")
 
         self.file_menu.setTitle(self.tr("File"))
         self.edit_menu.setTitle(self.tr("Edit"))
@@ -1258,9 +1283,9 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             self.progress_dialog = ProgressDialog(self)
             self.progress_dialog.setModal(True)
             if shift_clicked:
-                label_text = "Moving {} objects...".format(total_count)
+                label_text = f"Moving {total_count} objects..."
             else:
-                label_text = "Copying {} objects...".format(total_count)
+                label_text = f"Copying {total_count} objects..."
             self.progress_dialog.lbl_text.setText(label_text)
             self.progress_dialog.pb_progress.setValue(0)
             self.progress_dialog.show()

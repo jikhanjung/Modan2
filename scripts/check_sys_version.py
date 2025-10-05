@@ -3,8 +3,8 @@
 Script to check sys.version string in the packaged executable
 Run this after unpacking the .exe to see what Python version string is embedded
 """
-import sys
 import platform
+import sys
 
 print("=== Python Version Information ===")
 print(f"sys.version: {sys.version}")

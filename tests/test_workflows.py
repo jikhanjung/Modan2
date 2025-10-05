@@ -1,14 +1,14 @@
 """End-to-end workflow tests for Modan2."""
-import pytest
+import os
+import sys
 import tempfile
 from pathlib import Path
-from PyQt5.QtCore import Qt, QMimeData, QUrl, QPoint
-from PyQt5.QtGui import QDragEnterEvent, QDropEvent
-from PyQt5.QtTest import QTest
-from PyQt5.QtWidgets import QTreeWidgetItem, QDialog, QMessageBox
-from unittest.mock import Mock, MagicMock, patch
-import sys
-import os
+from unittest.mock import Mock, patch
+
+import pytest
+from PyQt5.QtCore import QMimeData, QPoint, Qt, QUrl
+from PyQt5.QtGui import QDropEvent
+from PyQt5.QtWidgets import QDialog, QMessageBox, QTreeWidgetItem
 
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

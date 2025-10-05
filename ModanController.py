@@ -3,8 +3,9 @@ Controller layer for Modan2 application.
 Handles business logic and coordinates between View and Model.
 """
 import logging
-from typing import Optional, List, Dict, Any, Tuple
 from pathlib import Path
+from typing import Any
+
 from PyQt5.QtCore import QObject, pyqtSignal
 
 import MdModel
@@ -44,9 +45,9 @@ class ModanController(QObject):
         self.logger = logging.getLogger(__name__)
         
         # Current state
-        self.current_dataset: Optional[MdModel.MdDataset] = None
-        self.current_object: Optional[MdModel.MdObject] = None
-        self.current_analysis: Optional[MdModel.MdAnalysis] = None
+        self.current_dataset: MdModel.MdDataset | None = None
+        self.current_object: MdModel.MdObject | None = None
+        self.current_analysis: MdModel.MdAnalysis | None = None
         
         # Processing flags
         self._processing = False
@@ -54,7 +55,7 @@ class ModanController(QObject):
     # ========== Dataset Operations ==========
     
     def create_dataset(self, name: str, desc: str, dimension: int, 
-                      landmark_count: int, **kwargs) -> Optional[MdModel.MdDataset]:
+                      landmark_count: int, **kwargs) -> MdModel.MdDataset | None:
         """Create a new dataset.
         
         Args:
@@ -188,7 +189,7 @@ class ModanController(QObject):
             self.error_occurred.emit(f"Failed to delete dataset: {str(e)}")
             return False
     
-    def set_current_dataset(self, dataset: Optional[MdModel.MdDataset]):
+    def set_current_dataset(self, dataset: MdModel.MdDataset | None):
         """Set currently selected dataset.
         
         Args:
@@ -244,7 +245,7 @@ class ModanController(QObject):
             self.error_occurred.emit(f"Failed to create object: {str(e)}")
             return None
     
-    def import_objects(self, file_paths: List[str]) -> List[MdModel.MdObject]:
+    def import_objects(self, file_paths: list[str]) -> list[MdModel.MdObject]:
         """Import objects from files.
         
         Args:
@@ -289,7 +290,7 @@ class ModanController(QObject):
         finally:
             self._processing = False
     
-    def _import_single_file(self, file_path: str) -> List[MdModel.MdObject]:
+    def _import_single_file(self, file_path: str) -> list[MdModel.MdObject]:
         """Import objects from a single file.
         
         Args:
@@ -311,7 +312,7 @@ class ModanController(QObject):
         else:
             raise ValueError(f"Unsupported file type: {file_ext}")
     
-    def _import_landmark_file(self, file_path: str) -> List[MdModel.MdObject]:
+    def _import_landmark_file(self, file_path: str) -> list[MdModel.MdObject]:
         """Import landmarks from TPS/NTS file.
         
         Args:
@@ -475,7 +476,7 @@ class ModanController(QObject):
             self.error_occurred.emit(f"Failed to delete object: {str(e)}")
             return False
     
-    def set_current_object(self, obj: Optional[MdModel.MdObject]):
+    def set_current_object(self, obj: MdModel.MdObject | None):
         """Set currently selected object.
         
         Args:
@@ -491,7 +492,7 @@ class ModanController(QObject):
     # ========== Analysis Operations ==========
     
     def run_analysis(self, dataset=None, analysis_name="", superimposition_method="", 
-                     cva_group_by=None, manova_group_by=None, **kwargs) -> Optional[MdModel.MdAnalysis]:
+                     cva_group_by=None, manova_group_by=None, **kwargs) -> MdModel.MdAnalysis | None:
         """Run statistical analysis.
         
         Args:
@@ -645,7 +646,7 @@ class ModanController(QObject):
                         # Pass the PCA result for proper eigenvalue-based component selection
                         manova_params = {"groups": manova_group_values, "pca_result": pca_result}
                         manova_result = self._run_manova(landmarks_data, manova_params)
-                        self.logger.info(f"MANOVA analysis completed successfully")
+                        self.logger.info("MANOVA analysis completed successfully")
                         self.logger.info(f"MANOVA result type: {type(manova_result)}")
                         self.logger.info(f"MANOVA result keys: {manova_result.keys() if isinstance(manova_result, dict) else 'Not a dict'}")
                         if isinstance(manova_result, dict) and 'stat_dict' in manova_result:
@@ -777,7 +778,7 @@ class ModanController(QObject):
                     
                     # Save MANOVA results if available (from comprehensive analysis)
                     if 'manova_result' in locals() and manova_result:
-                        self.logger.info(f"Saving MANOVA results...")
+                        self.logger.info("Saving MANOVA results...")
                         self.logger.info(f"MANOVA result available: {type(manova_result)}")
                         # MANOVA results need to be in the correct format for UI
                         # The UI expects the stat_dict directly (not wrapped)
@@ -785,13 +786,13 @@ class ModanController(QObject):
                             # Extract just the stat_dict
                             manova_json = json.dumps(manova_result['stat_dict'])
                             analysis.manova_analysis_result_json = manova_json
-                            self.logger.info(f"MANOVA results saved to JSON (stat_dict format)")
+                            self.logger.info("MANOVA results saved to JSON (stat_dict format)")
                             self.logger.info(f"MANOVA JSON length: {len(manova_json)}")
                         else:
                             # Save as-is if it's not in expected format
                             manova_json = json.dumps(manova_result)
                             analysis.manova_analysis_result_json = manova_json
-                            self.logger.warning(f"MANOVA results saved in unexpected format")
+                            self.logger.warning("MANOVA results saved in unexpected format")
                             self.logger.info(f"MANOVA JSON length: {len(manova_json)}")
                     else:
                         self.logger.warning("No MANOVA result to save")
@@ -819,7 +820,7 @@ class ModanController(QObject):
         finally:
             self._processing = False
     
-    def _run_pca(self, landmarks_data: List[List], params: Dict[str, Any]) -> Dict[str, Any]:
+    def _run_pca(self, landmarks_data: list[list], params: dict[str, Any]) -> dict[str, Any]:
         """Run PCA analysis.
         
         Args:
@@ -856,7 +857,7 @@ class ModanController(QObject):
         except Exception as e:
             raise ValueError(f"PCA analysis failed: {str(e)}")
     
-    def _run_cva(self, landmarks_data: List[List], params: Dict[str, Any]) -> Dict[str, Any]:
+    def _run_cva(self, landmarks_data: list[list], params: dict[str, Any]) -> dict[str, Any]:
         """Run CVA analysis.
         
         Args:
@@ -890,7 +891,7 @@ class ModanController(QObject):
         except Exception as e:
             raise ValueError(f"CVA analysis failed: {str(e)}")
     
-    def _run_manova(self, landmarks_data: List[List], params: Dict[str, Any]) -> Dict[str, Any]:
+    def _run_manova(self, landmarks_data: list[list], params: dict[str, Any]) -> dict[str, Any]:
         """Run MANOVA analysis.
         
         Args:
@@ -1034,7 +1035,7 @@ class ModanController(QObject):
     
     # ========== State Management ==========
     
-    def get_current_state(self) -> Dict[str, Any]:
+    def get_current_state(self) -> dict[str, Any]:
         """Get current application state.
         
         Returns:
@@ -1047,7 +1048,7 @@ class ModanController(QObject):
             'processing': self._processing
         }
     
-    def restore_state(self, state: Dict[str, Any]):
+    def restore_state(self, state: dict[str, Any]):
         """Restore application state.
         
         Args:
@@ -1085,7 +1086,7 @@ class ModanController(QObject):
     
     # ========== Utility Methods ==========
     
-    def get_dataset_summary(self, dataset: MdModel.MdDataset) -> Dict[str, Any]:
+    def get_dataset_summary(self, dataset: MdModel.MdDataset) -> dict[str, Any]:
         """Get dataset summary information.
         
         Args:
@@ -1143,7 +1144,7 @@ class ModanController(QObject):
             # Called with dataset object - validate for general analysis
             return self._validate_dataset_for_general_analysis(dataset_or_analysis_type)
     
-    def _validate_dataset_for_analysis_type(self, analysis_type: str) -> Tuple[bool, str]:
+    def _validate_dataset_for_analysis_type(self, analysis_type: str) -> tuple[bool, str]:
         """Validate that current dataset is suitable for specific analysis type.
         
         Args:

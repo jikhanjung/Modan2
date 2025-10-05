@@ -4,10 +4,8 @@ Generate detailed symbol cards for important Modan2 components
 """
 
 import json
-import re
-from pathlib import Path
-from typing import Dict, List, Any
 import logging
+from pathlib import Path
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -23,10 +21,10 @@ class SymbolCardGenerator:
         self.qt_data = self.load_json('graphs/qt_signals.json')
         self.db_models = self.load_json('graphs/db_models.json')
         
-    def load_json(self, path: str) -> Dict:
+    def load_json(self, path: str) -> dict:
         file_path = self.index_dir / path
         if file_path.exists():
-            with open(file_path, 'r') as f:
+            with open(file_path) as f:
                 return json.load(f)
         return {}
     
@@ -181,7 +179,7 @@ class SymbolCardGenerator:
         
         logger.info("Generated special analysis cards")
     
-    def find_qt_connections_for_class(self, class_name: str) -> List[Dict]:
+    def find_qt_connections_for_class(self, class_name: str) -> list[dict]:
         """Find Qt connections for a class"""
         connections = []
         
@@ -192,14 +190,14 @@ class SymbolCardGenerator:
         
         return connections
     
-    def find_methods_for_class(self, class_name: str) -> List[str]:
+    def find_methods_for_class(self, class_name: str) -> list[str]:
         """Find methods for a class"""
         for cls in self.symbols.get('classes', []):
             if cls['name'] == class_name:
                 return [m['name'] for m in cls.get('methods', [])]
         return []
     
-    def analyze_performance(self, class_name: str) -> Dict:
+    def analyze_performance(self, class_name: str) -> dict:
         """Analyze performance characteristics"""
         perf = {
             'requires_wait_cursor': False,
@@ -219,7 +217,7 @@ class SymbolCardGenerator:
         
         return perf
     
-    def analyze_model_relationships(self, model_name: str) -> Dict:
+    def analyze_model_relationships(self, model_name: str) -> dict:
         """Analyze database model relationships"""
         relationships = {
             'belongs_to': [],
@@ -234,7 +232,7 @@ class SymbolCardGenerator:
         
         return relationships
     
-    def find_model_usage(self, model_name: str) -> List[str]:
+    def find_model_usage(self, model_name: str) -> list[str]:
         """Find where a model is used"""
         usage = []
         
@@ -245,7 +243,7 @@ class SymbolCardGenerator:
         
         return usage[:5]  # Limit to top 5
     
-    def extract_qt_metadata(self, class_data: Dict) -> Dict:
+    def extract_qt_metadata(self, class_data: dict) -> dict:
         """Extract Qt-specific metadata"""
         qt_meta = {
             'is_widget': any(base in ['QWidget', 'QDialog', 'QMainWindow'] 
@@ -263,7 +261,7 @@ class SymbolCardGenerator:
         
         return qt_meta
     
-    def calculate_complexity(self, class_data: Dict) -> Dict:
+    def calculate_complexity(self, class_data: dict) -> dict:
         """Calculate class complexity metrics"""
         return {
             'method_count': len(class_data.get('methods', [])),
@@ -271,7 +269,7 @@ class SymbolCardGenerator:
             'estimated_loc': len(class_data.get('methods', [])) * 20  # Rough estimate
         }
     
-    def save_card(self, card: Dict, category: str):
+    def save_card(self, card: dict, category: str):
         """Save a symbol card to JSON file"""
         filename = f"{card['symbol']}.json"
         filepath = self.cards_dir / category / filename

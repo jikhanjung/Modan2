@@ -24,12 +24,11 @@ Commands:
     (e.g., 1.3.0-alpha.2 -> 1.3.0)
 """
 
-import sys
 import re
 import subprocess
+import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 try:
     import semver
@@ -71,7 +70,7 @@ def update_version_file(new_version: str) -> None:
         backup_file.rename(version_file)
         raise e
 
-def get_new_version(command: str, current_ver_info: semver.VersionInfo, token: Optional[str] = None) -> str:
+def get_new_version(command: str, current_ver_info: semver.VersionInfo, token: str | None = None) -> str:
     """Get the new version based on the command."""
     if command in ['major', 'minor', 'patch']:
         if current_ver_info.prerelease:
@@ -107,7 +106,7 @@ def get_new_version(command: str, current_ver_info: semver.VersionInfo, token: O
 
     raise ValueError(f"Invalid command: {command}")
 
-def create_git_tag(version: str, message: Optional[str] = None) -> None:
+def create_git_tag(version: str, message: str | None = None) -> None:
     """Create and optionally push git tag"""
     tag_name = f"v{version}"
     if message is None:

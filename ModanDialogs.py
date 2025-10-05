@@ -1,45 +1,97 @@
-from PyQt5.QtWidgets import QTableWidgetItem, QHeaderView, QFileDialog, QCheckBox, QColorDialog, \
-                            QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QProgressBar, QApplication, \
-                            QDialog, QLineEdit, QLabel, QPushButton, QAbstractItemView, QStatusBar, QMessageBox, \
-                            QTableView, QSplitter, QRadioButton, QComboBox, QTextEdit, QSizePolicy, \
-                            QTableWidget, QGridLayout, QAbstractButton, QButtonGroup, QGroupBox, QListWidgetItem,\
-                            QTabWidget, QListWidget, QSpinBox, QPlainTextEdit, QSlider, QScrollArea, QShortcut, QSpacerItem
-from PyQt5.QtGui import QColor, QPainter, QPen, QPixmap, QStandardItemModel, QStandardItem, QImage,\
-                        QFont, QPainter, QBrush, QMouseEvent, QWheelEvent, QDoubleValidator, QIcon, QCursor,\
-                        QFontMetrics, QIntValidator, QKeySequence
-from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSize, QPoint, QTranslator, \
-                         pyqtSlot, pyqtSignal, QItemSelectionModel, QTimer, QEvent
-
-from OBJFileLoader import OBJ
-
-from ModanComponents import ObjectViewer2D, ObjectViewer3D, ShapePreference, \
-                            X1Y1, Morphologika, TPS, NTS
-
-from scipy.spatial import ConvexHull
-from scipy import stats
-
-import tempfile
-import cv2
+import copy
 import glob
-import xlsxwriter
 import json
-import math, re, os, sys, shutil, copy, random, struct
+import logging
+import math
+import os
+import re
+import shutil
+import sys
+import tempfile
 from pathlib import Path
 from types import SimpleNamespace
-from PIL.ExifTags import TAGS
-import numpy as np
 
+import cv2
+import matplotlib
+import numpy as np
+import xlsxwriter
 from matplotlib.backends.backend_qt5agg import FigureCanvas as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
-import matplotlib.pyplot as plt
-import matplotlib
+from PyQt5.QtCore import (
+    QEvent,
+    QItemSelectionModel,
+    QPoint,
+    QRect,
+    QSize,
+    QSortFilterProxyModel,
+    Qt,
+    QTimer,
+    QTranslator,
+    pyqtSlot,
+)
+from PyQt5.QtGui import (
+    QBrush,
+    QColor,
+    QCursor,
+    QDoubleValidator,
+    QFont,
+    QFontMetrics,
+    QIcon,
+    QImage,
+    QIntValidator,
+    QKeySequence,
+    QPainter,
+    QPen,
+    QPixmap,
+    QStandardItem,
+    QStandardItemModel,
+)
+from PyQt5.QtWidgets import (
+    QAbstractButton,
+    QAbstractItemView,
+    QApplication,
+    QButtonGroup,
+    QCheckBox,
+    QColorDialog,
+    QComboBox,
+    QDialog,
+    QFileDialog,
+    QFormLayout,
+    QGridLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QLineEdit,
+    QListWidget,
+    QListWidgetItem,
+    QMessageBox,
+    QProgressBar,
+    QPushButton,
+    QRadioButton,
+    QScrollArea,
+    QShortcut,
+    QSizePolicy,
+    QSpinBox,
+    QSplitter,
+    QStatusBar,
+    QTableView,
+    QTableWidget,
+    QTableWidgetItem,
+    QTabWidget,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
+from scipy import stats
+from scipy.spatial import ConvexHull
 
-from MdStatistics import MdPrincipalComponent, MdCanonicalVariate
-from MdModel import MdDataset, MdDatasetOps, MdObject, MdObjectOps, MdImage
 import MdUtils as mu
+from MdModel import MdDataset, MdDatasetOps, MdImage, MdObject, MdObjectOps
+from MdStatistics import MdCanonicalVariate, MdPrincipalComponent
+from ModanComponents import NTS, TPS, X1Y1, Morphologika, ObjectViewer2D, ObjectViewer3D, ShapePreference
 
-import logging
 logger = logging.getLogger(__name__)
 
 
@@ -1246,7 +1298,7 @@ class ObjectDialog(QDialog):
             return None
 
         # Create temporary MdDatasetOps for Procrustes
-        from MdModel import MdDatasetOps, MdDataset, MdObjectOps
+        from MdModel import MdDataset, MdDatasetOps
 
         temp_dataset = MdDataset()
         temp_dataset.dimension = self.dataset.dimension
@@ -1277,6 +1329,7 @@ class ObjectDialog(QDialog):
             List of landmarks with missing values estimated, or original if estimation fails
         """
         import logging
+
         import numpy as np
         logger = logging.getLogger(__name__)
 
@@ -5294,7 +5347,7 @@ class DatasetAnalysisDialog(QDialog):
         today = datetime. datetime. now()
         date_str = today. strftime("%Y%m%d_%H%M%S")
 
-        filename_candidate = '{}_analysis_{}.xlsx'.format(self.ds_ops.dataset_name, date_str)
+        filename_candidate = f'{self.ds_ops.dataset_name}_analysis_{date_str}.xlsx'
         filepath = os.path.join(mu.USER_PROFILE_DIRECTORY, filename_candidate)
         #print("filepath:", filepath)
         filename, _ = QFileDialog.getSaveFileName(self, self.tr("Save File As"), filepath, "Excel format (*.xlsx)")
@@ -6208,14 +6261,14 @@ class ExportDatasetDialog(QDialog):
         date_str = today.strftime("%Y%m%d_%H%M%S")
 
         if self.rbTPS.isChecked():
-            filename_candidate = '{}_{}.tps'.format(self.ds_ops.dataset_name, date_str)
+            filename_candidate = f'{self.ds_ops.dataset_name}_{date_str}.tps'
             filepath = os.path.join(mu.USER_PROFILE_DIRECTORY, filename_candidate)
             filename, _ = QFileDialog.getSaveFileName(self, "Save File As", filepath, "TPS format (*.tps)")
             if filename:
                 # open text file
                 with open(filename, 'w') as f:
                     for object in object_list:
-                        f.write('LM={}\n'.format(len(object.landmark_list)))
+                        f.write(f'LM={len(object.landmark_list)}\n')
                         for lm in object.landmark_list:
                             if self.ds_ops.dimension == 2:
                                 f.write('{}\t{}\n'.format(*lm))
@@ -6223,10 +6276,10 @@ class ExportDatasetDialog(QDialog):
                                 f.write('{}\t{}\t{}\n'.format(*lm))
                         #if object.has_image():
                         #    f.write('IMAGE={}\n'.format(object.image_filename))
-                        f.write('ID={}\n'.format(object.object_name))
+                        f.write(f'ID={object.object_name}\n')
 
         elif self.rbMorphologika.isChecked():
-            filename_candidate = '{}_{}.txt'.format(self.ds_ops.dataset_name, date_str)
+            filename_candidate = f'{self.ds_ops.dataset_name}_{date_str}.txt'
             filepath = os.path.join(mu.USER_PROFILE_DIRECTORY, filename_candidate)
             filename, _ = QFileDialog.getSaveFileName(self, "Save File As", filepath, "Morphologika format (*.txt)")
             if filename:
@@ -6286,7 +6339,7 @@ class ExportDatasetDialog(QDialog):
                 with open(filename, 'w') as f:
                     f.write(result_str)
         elif hasattr(self, 'rbJSONZip') and self.rbJSONZip.isChecked():
-            filename_candidate = '{}_{}.zip'.format(self.ds_ops.dataset_name, date_str)
+            filename_candidate = f'{self.ds_ops.dataset_name}_{date_str}.zip'
             filepath = os.path.join(mu.USER_PROFILE_DIRECTORY, filename_candidate)
             filename, _ = QFileDialog.getSaveFileName(self, "Save File As", filepath, "ZIP archive (*.zip)")
             if filename:
@@ -6648,7 +6701,7 @@ class ImportDatasetDialog(QDialog):
                     shutil.copyfile(file_name, new_filepath)
                     new_image.save()
 
-            val = int( (float(i+1)*100.0 / float(import_data.nobjects)) )
+            val = int( float(i+1)*100.0 / float(import_data.nobjects) )
             #print("progress:", i+1, tps.nobjects, val)
             self.update_progress(val)
             #progress = int( (i / float(tps.nobjects)) * 100)
@@ -6657,7 +6710,7 @@ class ImportDatasetDialog(QDialog):
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Information)
 
-        msg.setText(self.tr("Finished importing a {} file.".format(filetype)))
+        msg.setText(self.tr(f"Finished importing a {filetype} file."))
         msg.setStandardButtons(QMessageBox.Ok)
             
         retval = msg.exec_()
@@ -6673,7 +6726,7 @@ class ImportDatasetDialog(QDialog):
 
     def update_progress(self, value):
         self.prgImport.setValue(value)
-        self.prgImport.setFormat(self.tr("Importing...{}%".format(value)))
+        self.prgImport.setFormat(self.tr(f"Importing...{value}%"))
         self.prgImport.update()
         self.prgImport.repaint()
         QApplication.processEvents()
@@ -7004,7 +7057,7 @@ class PreferencesDialog(QDialog):
         else:
             pass
         translator = QTranslator()
-        translator_path = mu.resource_path("translations/Modan2_{}.qm".format(self.m_app.language))
+        translator_path = mu.resource_path(f"translations/Modan2_{self.m_app.language}.qm")
         if os.path.exists(translator_path):
             translator.load(translator_path)
             self.m_app.installTranslator(translator)

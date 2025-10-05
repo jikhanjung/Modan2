@@ -1,8 +1,9 @@
 import sys
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, 
-                             QListWidget, QListWidgetItem, QTextEdit)
-from PyQt5.QtGui import QDrag, QCursor, QPixmap
-from PyQt5.QtCore import Qt, QMimeData, QObject, QEvent
+
+from PyQt5.QtCore import QEvent, QMimeData, QObject, Qt
+from PyQt5.QtGui import QCursor, QDrag
+from PyQt5.QtWidgets import QApplication, QHBoxLayout, QListWidget, QListWidgetItem, QMainWindow, QTextEdit, QWidget
+
 
 class DragEventFilter(QObject):
     def __init__(self, drag_object):

@@ -1,18 +1,18 @@
 """Tests for MdUtils module."""
-import sys
 import os
-import pytest
-import tempfile
+import sys
+from unittest.mock import MagicMock, patch
+
 import numpy as np
-from unittest.mock import patch, MagicMock
+import pytest
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QMessageBox
 
 # Add project root to Python path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import MdUtils as mu
 import MdModel as mm
+import MdUtils as mu
 
 
 class TestConstants:
@@ -658,8 +658,8 @@ class TestJSONZipFunctions:
 
     def test_read_json_from_zip(self, tmp_path):
         """Test reading JSON from ZIP."""
-        import zipfile
         import json
+        import zipfile
 
         zip_path = tmp_path / "test.zip"
         test_data = {'format_version': '1.1', 'test': 'data'}
@@ -819,8 +819,7 @@ class TestShowErrorMessage:
 
     def test_show_error_message(self, qtbot):
         """Test showing error message."""
-        from unittest.mock import Mock, patch
-        from PyQt5.QtWidgets import QMessageBox
+        from unittest.mock import patch
 
         with patch.object(QMessageBox, 'exec_', return_value=QMessageBox.Ok):
             # Should not raise exception
@@ -832,7 +831,6 @@ class TestColorFunctions:
 
     def test_as_gl_color_from_hex(self):
         """Test converting hex color to OpenGL RGB."""
-        from PyQt5.QtGui import QColor
 
         # Test with red color
         r, g, b = mu.as_gl_color("#FF0000")
@@ -916,7 +914,6 @@ class TestFilePathProcessing:
 
     def test_process_dropped_file_name_with_spaces(self):
         """Test processing file name with URL-encoded spaces."""
-        import sys
         from unittest.mock import patch
 
         with patch('os.name', 'posix'):
@@ -927,7 +924,6 @@ class TestFilePathProcessing:
 
     def test_process_dropped_file_name_with_special_chars(self):
         """Test processing file name with special characters."""
-        import sys
         from unittest.mock import patch
 
         with patch('os.name', 'posix'):

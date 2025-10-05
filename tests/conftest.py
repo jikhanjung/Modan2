@@ -1,9 +1,10 @@
 """Pytest configuration and shared fixtures."""
-import sys
 import os
-import pytest
+import sys
 import tempfile
 from pathlib import Path
+
+import pytest
 
 # Add project root to Python path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -41,8 +42,9 @@ specimen_001
 @pytest.fixture(scope="session")
 def qt_app():
     """Create a QApplication for Qt tests."""
-    from PyQt5.QtWidgets import QApplication
     from unittest.mock import Mock
+
+    from PyQt5.QtWidgets import QApplication
     
     app = QApplication.instance()
     if app is None:
@@ -77,8 +79,9 @@ def qt_app():
 @pytest.fixture(scope='session')
 def qapp():
     """Global Qt Application fixture for pytest-qt."""
-    from PyQt5.QtWidgets import QApplication
     from unittest.mock import Mock
+
+    from PyQt5.QtWidgets import QApplication
     
     app = QApplication.instance()
     if app is None:
@@ -142,8 +145,9 @@ def suppress_message_boxes(monkeypatch):
 @pytest.fixture
 def mock_database(monkeypatch, temp_db):
     """Mock database operations."""
-    import MdModel
     from peewee import SqliteDatabase
+
+    import MdModel
     
     # Create test database
     test_db = SqliteDatabase(temp_db, pragmas={'foreign_keys': 1})

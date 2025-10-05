@@ -1,18 +1,17 @@
 """Performance tests for Modan2 - measure execution time and resource usage."""
-import sys
-import os
-import pytest
-import time
 import gc
-from unittest.mock import MagicMock
+import os
+import sys
+import time
+
+import pytest
 
 # Add project root to Python path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import MdUtils as mu
 import MdModel as mm
 import MdStatistics as ms
-
+import MdUtils as mu
 
 # Mark all tests in this module as slow
 pytestmark = pytest.mark.slow
@@ -163,8 +162,9 @@ class TestMemoryUsage:
     def test_memory_cleanup_after_large_operations(self, mock_database):
         """Test that memory is properly cleaned up after large operations."""
         try:
-            import psutil
             import os
+
+            import psutil
             
             # Get initial memory usage
             process = psutil.Process(os.getpid())

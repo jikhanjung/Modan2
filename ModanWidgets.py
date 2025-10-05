@@ -3,13 +3,24 @@ Custom widgets for Modan2 application.
 Reusable UI components separated from the main window.
 """
 import logging
-from typing import List, Optional, Dict, Any, Tuple
 from pathlib import Path
-from PyQt5.QtWidgets import (QTreeWidget, QTreeWidgetItem, QAbstractItemView, QHeaderView,
-                              QTableWidget, QTableWidgetItem, QWidget, QLabel, QVBoxLayout,
-                              QTabWidget, QTextEdit)
-from PyQt5.QtCore import Qt, QPoint, QPointF, QRect, QRectF, pyqtSignal
-from PyQt5.QtGui import QPainter, QColor, QBrush, QPen, QFont, QIcon, QDragEnterEvent, QDragMoveEvent, QDropEvent
+from typing import Any
+
+from PyQt5.QtCore import QPoint, QPointF, QRect, QRectF, Qt, pyqtSignal
+from PyQt5.QtGui import QBrush, QColor, QDragEnterEvent, QDragMoveEvent, QDropEvent, QFont, QIcon, QPainter, QPen
+from PyQt5.QtWidgets import (
+    QAbstractItemView,
+    QHeaderView,
+    QLabel,
+    QTableWidget,
+    QTableWidgetItem,
+    QTabWidget,
+    QTextEdit,
+    QTreeWidget,
+    QTreeWidgetItem,
+    QVBoxLayout,
+    QWidget,
+)
 
 import MdModel
 
@@ -409,7 +420,7 @@ class ObjectTableWidget(QTableWidget):
         """Clear all objects from table."""
         self.setRowCount(0)
     
-    def get_selected_object(self) -> Optional[MdModel.MdObject]:
+    def get_selected_object(self) -> MdModel.MdObject | None:
         """Get currently selected object.
         
         Returns:
@@ -552,7 +563,7 @@ class LandmarkViewer2D(QWidget):
             self.landmark_color = color
         self.update()
     
-    def set_wireframe(self, wireframe_data: List[Tuple[int, int]]):
+    def set_wireframe(self, wireframe_data: list[tuple[int, int]]):
         """Set wireframe connections.
         
         Args:
@@ -895,7 +906,7 @@ class AnalysisResultWidget(QWidget):
         elif self.analysis.analysis_type == 'CVA':
             self._populate_cva_table(results)
     
-    def _populate_pca_table(self, results: Dict[str, Any]):
+    def _populate_pca_table(self, results: dict[str, Any]):
         """Populate table with PCA results."""
         scores = results.get('scores', [])
         if not scores:
@@ -922,7 +933,7 @@ class AnalysisResultWidget(QWidget):
                 item.setTextAlignment(Qt.AlignRight)
                 self.data_table.setItem(i, j + 1, item)
     
-    def _populate_cva_table(self, results: Dict[str, Any]):
+    def _populate_cva_table(self, results: dict[str, Any]):
         """Populate table with CVA results."""
         # Similar to PCA but with canonical variables
         cv_scores = results.get('canonical_variables', [])

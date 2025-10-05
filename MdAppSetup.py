@@ -1,21 +1,19 @@
 """
 Application setup and initialization module for Modan2.
 """
-import os
 import json
 import logging
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Any
 
 import MdModel
-import MdUtils as mu
 
 
 class ApplicationSetup:
     """Application initialization and configuration management."""
     
-    def __init__(self, debug: bool = False, db_path: Optional[str] = None,
-                 config_path: Optional[str] = None, language: Optional[str] = None):
+    def __init__(self, debug: bool = False, db_path: str | None = None,
+                 config_path: str | None = None, language: str | None = None):
         """Initialize application setup.
         
         Args:
@@ -28,7 +26,7 @@ class ApplicationSetup:
         self.db_path = db_path or self._get_default_db_path()
         self.config_path = config_path or self._get_default_config_path()
         self.language = language or 'en'
-        self.config: Dict[str, Any] = {}
+        self.config: dict[str, Any] = {}
         
         # Setup logging
         self.logger = logging.getLogger(__name__)
@@ -97,10 +95,10 @@ class ApplicationSetup:
         
         if Path(self.config_path).exists():
             try:
-                with open(self.config_path, 'r', encoding='utf-8') as f:
+                with open(self.config_path, encoding='utf-8') as f:
                     self.config = json.load(f)
                 self.logger.debug("Settings loaded successfully")
-            except (json.JSONDecodeError, IOError) as e:
+            except (OSError, json.JSONDecodeError) as e:
                 self.logger.warning(f"Failed to load settings: {e}, using defaults")
                 self.config = self._get_default_config()
         else:
@@ -112,7 +110,7 @@ class ApplicationSetup:
         if self.language:
             self.config['language'] = self.language
     
-    def _get_default_config(self) -> Dict[str, Any]:
+    def _get_default_config(self) -> dict[str, Any]:
         """Get default application configuration."""
         return {
             'language': self.language,
@@ -163,14 +161,14 @@ class ApplicationSetup:
             
             self.logger.debug("Settings saved successfully")
             
-        except (IOError, OSError) as e:
+        except OSError as e:
             self.logger.error(f"Failed to save settings: {e}")
     
     def _load_translations(self):
         """Load translation files."""
         if self.config.get('language') == 'ko':
             try:
-                from PyQt5.QtCore import QTranslator, QLocale
+                from PyQt5.QtCore import QTranslator
                 from PyQt5.QtWidgets import QApplication
                 
                 translator = QTranslator()
@@ -260,11 +258,11 @@ class ApplicationSetup:
                     except Exception as e:
                         self.logger.warning(f"Failed to load plugin {plugin_file.name}: {e}")
     
-    def get_config(self) -> Dict[str, Any]:
+    def get_config(self) -> dict[str, Any]:
         """Get current application configuration."""
         return self.config.copy()
     
-    def update_config(self, updates: Dict[str, Any]):
+    def update_config(self, updates: dict[str, Any]):
         """Update configuration and save to file."""
         self.config.update(updates)
         self._save_settings()

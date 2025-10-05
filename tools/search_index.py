@@ -4,13 +4,11 @@ Modan2 Code Search Tool
 Search and query the code index
 """
 
+import argparse
 import json
 import sys
 from pathlib import Path
-from typing import List, Dict, Any, Optional
-import argparse
-from collections import defaultdict
-import re
+
 
 class CodeSearcher:
     def __init__(self, index_dir: Path):
@@ -23,15 +21,15 @@ class CodeSearcher:
         self.file_stats = self.load_json('symbols/file_stats.json')
         self.summary = self.load_json('index_summary.json')
     
-    def load_json(self, path: str) -> Dict:
+    def load_json(self, path: str) -> dict:
         """Load JSON file from index directory"""
         file_path = self.index_dir / path
         if file_path.exists():
-            with open(file_path, 'r') as f:
+            with open(file_path) as f:
                 return json.load(f)
         return {}
     
-    def search_symbols(self, query: str, symbol_type: Optional[str] = None) -> List[Dict]:
+    def search_symbols(self, query: str, symbol_type: str | None = None) -> list[dict]:
         """Search for symbols by name"""
         results = []
         query_lower = query.lower()
@@ -63,7 +61,7 @@ class CodeSearcher:
         
         return results
     
-    def find_qt_connections(self, signal_or_slot: str) -> List[Dict]:
+    def find_qt_connections(self, signal_or_slot: str) -> list[dict]:
         """Find Qt signal/slot connections"""
         results = []
         query_lower = signal_or_slot.lower()
@@ -94,7 +92,7 @@ class CodeSearcher:
         
         return results
     
-    def find_wait_cursor_methods(self) -> List[Dict]:
+    def find_wait_cursor_methods(self) -> list[dict]:
         """Find methods that use wait cursor by scanning sources"""
         patterns = [
             'QApplication.setOverrideCursor',
@@ -128,10 +126,10 @@ class CodeSearcher:
                 elif isinstance(node, __import__('ast').ClassDef):
                     for item in node.body:
                         if isinstance(item, __import__('ast').FunctionDef):
-                            setattr(item, 'parent_class', node.name)
+                            item.parent_class = node.name
             return spans, src
 
-        results: List[Dict] = []
+        results: list[dict] = []
         for filename in self.file_stats.keys():
             py_path = self.project_root / filename
             if not py_path.exists():
@@ -160,7 +158,7 @@ class CodeSearcher:
                     results.append({'file': filename, 'method': method or '<module>', 'line': i})
         return results
     
-    def find_database_usage(self, model_name: str) -> List[Dict]:
+    def find_database_usage(self, model_name: str) -> list[dict]:
         """Find where database models are used"""
         results = []
         
@@ -185,7 +183,7 @@ class CodeSearcher:
         
         return results
     
-    def get_file_info(self, filename: str) -> Dict:
+    def get_file_info(self, filename: str) -> dict:
         """Get information about a specific file"""
         if filename in self.file_stats:
             info = self.file_stats[filename]
@@ -204,11 +202,11 @@ class CodeSearcher:
             }
         return {}
     
-    def get_project_stats(self) -> Dict:
+    def get_project_stats(self) -> dict:
         """Get overall project statistics"""
         return self.summary.get('statistics', {})
     
-    def find_dialog_widgets(self, dialog_name: str) -> List[Dict]:
+    def find_dialog_widgets(self, dialog_name: str) -> list[dict]:
         """Find widgets in a specific dialog"""
         results = []
         
@@ -223,7 +221,7 @@ class CodeSearcher:
         
         return results
 
-def print_results(results: List[Dict], title: str):
+def print_results(results: list[dict], title: str):
     """Pretty print search results"""
     print(f"\n{title}")
     print("=" * 60)

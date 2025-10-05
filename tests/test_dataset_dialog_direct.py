@@ -1,11 +1,11 @@
 """Direct manipulation tests for Dataset Dialog and Object Dialog without mocks."""
-import pytest
-import sys
 import os
-from PyQt5.QtCore import Qt, QRect
-from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QMessageBox, QApplication
-from PyQt5.QtTest import QTest
-from unittest.mock import patch, Mock
+import sys
+from unittest.mock import Mock, patch
+
+import pytest
+from PyQt5.QtCore import QRect, Qt
+from PyQt5.QtWidgets import QDialog
 
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -39,7 +39,6 @@ def object_dialog_with_dataset(qtbot):
     """Create an ObjectDialog with a test dataset."""
     import MdModel
     from ModanDialogs import ObjectDialog
-    from ModanController import ModanController
     
     # First create a test dataset
     test_dataset = MdModel.MdDataset.create(
@@ -345,9 +344,10 @@ class TestDatasetObjectIntegration:
     
     def test_multiple_datasets_with_objects(self, dataset_dialog):
         """Test creating multiple datasets each with their own objects."""
+        import time
+
         import MdModel
         from ModanController import ModanController
-        import time
         
         dialog = dataset_dialog
         controller = ModanController()
@@ -673,9 +673,10 @@ class TestDatasetObjectDialogIntegration:
     
     def test_complete_dataset_object_dialog_workflow(self, dataset_dialog, qtbot):
         """Test complete workflow: Create dataset via dialog, then create object via dialog."""
+        import time
+
         import MdModel
         from ModanDialogs import ObjectDialog
-        import time
         
         # Step 1: Create Dataset via DatasetDialog
         dataset_name = f"Integration Dataset {int(time.time())}"
@@ -733,9 +734,10 @@ class TestDatasetObjectDialogIntegration:
     
     def test_multiple_objects_via_dialogs(self, dataset_dialog, qtbot):
         """Test creating multiple objects for the same dataset via dialogs."""
+        import time
+
         import MdModel
         from ModanDialogs import ObjectDialog
-        import time
         
         # Create dataset
         dataset_name = f"Multi Object Dataset {int(time.time())}"
@@ -804,9 +806,10 @@ class TestDatasetObjectDialogIntegration:
     
     def test_dataset_object_dialog_error_handling(self, dataset_dialog, qtbot):
         """Test error handling in dialog workflow."""
+        import time
+
         import MdModel
         from ModanDialogs import ObjectDialog
-        import time
         
         # Create dataset first
         dataset_name = f"Error Test Dataset {int(time.time())}"

@@ -1,25 +1,23 @@
-from peewee import (
-    Model, SqliteDatabase,
-    CharField, IntegerField, DoubleField, DateTimeField,
-    ForeignKeyField
-)
-import datetime
-import os
-import hashlib
-from PIL import Image, ExifTags
-from PIL.ExifTags import TAGS
-import io
-from pathlib import Path
-import time
-import math
-import numpy as np
 import copy
-import MdUtils as mu
+import datetime
+import hashlib
+import io
+import logging
+import math
+import os
+
 #from MdUtils import *
 import shutil
-import copy
+import time
+from pathlib import Path
 
-import logging
+import numpy as np
+from peewee import CharField, DateTimeField, DoubleField, ForeignKeyField, IntegerField, Model, SqliteDatabase
+from PIL import Image
+from PIL.ExifTags import TAGS
+
+import MdUtils as mu
+
 logger = logging.getLogger(__name__)
 
 LANDMARK_SEPARATOR = "\t"
@@ -717,7 +715,7 @@ class MdImage(Model):
                 pass
                 #print( "DateTime Don't Exist")
 
-        except Exception as e:
+        except Exception:
             pass
             #print(e)
 
@@ -985,7 +983,7 @@ class MdObjectOps:
     def rescale_to_unitsize(self):
         centroid_size = self.get_centroid_size(True)
         
-        self.rescale(( 1 / centroid_size ))
+        self.rescale( 1 / centroid_size )
 
     def apply_rotation_matrix(self, rotation_matrix):
         #print("obj_ops apply rotation", rotation_matrix)
@@ -1265,9 +1263,9 @@ class MdObjectOps:
         #print "size: ", size
         #print "rescale: ", rescale
         if ( rescale < 0 ):
-            self.rescale(( 1 / size ))
+            self.rescale( 1 / size )
         elif ( rescale > 0 ):
-            self.rescale(( 1 / rescale ))
+            self.rescale( 1 / rescale )
 
         #self.print_landmarks("rescaling");
 
@@ -1922,7 +1920,7 @@ class MdDatasetOps:
         #print "2 ref", ref
         #print "2 target", target
 
-        cos_val = target[x] / math.sqrt(( target[x] ** 2 + target[z] ** 2 ))
+        cos_val = target[x] / math.sqrt( target[x] ** 2 + target[z] ** 2 )
         theta1 = math.acos(cos_val)
         if ( target[z] < 0 ):
             theta1 = theta1 * -1
@@ -1931,7 +1929,7 @@ class MdDatasetOps:
         #print "3 ref", ref
         #print "3 target", target
 
-        cos_val = target[x] / math.sqrt(( target[x] ** 2 + target[y] ** 2 ))
+        cos_val = target[x] / math.sqrt( target[x] ** 2 + target[y] ** 2 )
         theta2 = math.acos(cos_val)
         if ( target[y] < 0 ):
             theta2 = theta2 * -1

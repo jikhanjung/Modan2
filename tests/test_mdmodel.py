@@ -1,16 +1,16 @@
 """Tests for MdModel module - Database models and operations."""
-import sys
 import os
-import pytest
+import sys
 import tempfile
-import datetime
-from pathlib import Path
+
+import pytest
 from peewee import IntegrityError
 
 # Add project root to Python path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from peewee import SqliteDatabase
+
 import MdModel as mm
 
 

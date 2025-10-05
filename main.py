@@ -3,10 +3,11 @@
 Modan2 - Morphometric Data Analysis Application
 Main entry point for the application
 """
-import sys
 import argparse
 import logging
+import sys
 from pathlib import Path
+
 
 def parse_arguments():
     """Parse command line arguments."""
@@ -125,9 +126,9 @@ def main():
     
     try:
         # Qt application setup - minimal imports for splash screen
-        from PyQt5.QtWidgets import QApplication
         from PyQt5.QtCore import Qt
         from PyQt5.QtGui import QIcon
+        from PyQt5.QtWidgets import QApplication
         
         # High DPI support
         QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)

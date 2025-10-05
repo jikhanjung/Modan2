@@ -4,7 +4,7 @@ Provides validation and parsing functions for semantic versioning
 """
 
 import re
-from typing import Tuple, Optional
+
 
 def validate_version(version: str) -> bool:
     """
@@ -31,7 +31,7 @@ def validate_version(version: str) -> bool:
         raise ValueError(f"Invalid semantic version format: {version}")
     return True
 
-def parse_version(version: str) -> Tuple[int, int, int, Optional[str]]:
+def parse_version(version: str) -> tuple[int, int, int, str | None]:
     """
     Parse version string into its components
     
@@ -78,7 +78,7 @@ def compare_versions(v1: str, v2: str) -> int:
         return 1
     return 0
 
-def format_version(major: int, minor: int, patch: int, prerelease: Optional[str] = None) -> str:
+def format_version(major: int, minor: int, patch: int, prerelease: str | None = None) -> str:
     """
     Format version components into a version string
     
@@ -134,7 +134,7 @@ def get_version_from_file(file_path: str = "version.py") -> str:
     Raises:
         RuntimeError: If version cannot be found in file
     """
-    with open(file_path, "r") as f:
+    with open(file_path) as f:
         content = f.read()
         match = re.search(r'__version__ = "(.*?)"', content)
         if match:

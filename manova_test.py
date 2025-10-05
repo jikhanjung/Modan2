@@ -1,6 +1,6 @@
 import pandas as pd
-from statsmodels.multivariate.manova import MANOVA
 from sklearn import datasets
+from statsmodels.multivariate.manova import MANOVA
 
 # Load the Iris dataset
 iris = datasets.load_iris()

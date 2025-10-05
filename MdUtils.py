@@ -1,18 +1,19 @@
-from PyQt5.QtWidgets import QMessageBox
-import sys, os
-import copy
+import json
 import logging
-from PyQt5.QtGui import QColor
+import os
+import shutil
+import sys
+import tempfile
+import zipfile
+from collections.abc import Callable
+from pathlib import Path
 
 import numpy as np
+
 #from stl import mesh
 import trimesh
-import tempfile
-import json
-import zipfile
-import shutil
-from pathlib import Path
-from typing import List, Tuple, Optional, Callable
+from PyQt5.QtGui import QColor
+from PyQt5.QtWidgets import QMessageBox
 
 # Import version from centralized version file
 try:
@@ -44,7 +45,7 @@ def get_build_info():
     for path in search_paths:
         if path and path.exists():
             try:
-                with open(path, 'r') as f:
+                with open(path) as f:
                     return json.load(f)
             except (json.JSONDecodeError, OSError):
                 pass
@@ -64,6 +65,7 @@ BUILD_INFO = get_build_info()
 
 # Copyright with build-time year
 from datetime import datetime
+
 
 # Get build year from build_info.json, fallback to current year for development
 def get_copyright_year():
@@ -199,7 +201,7 @@ def value_to_bool(value):
 
 def process_dropped_file_name(file_name):
     import os
-    from urllib.parse import urlparse, unquote
+    from urllib.parse import unquote, urlparse
     #print("file_name:", file_name)
     url = file_name
     parsed_url = urlparse(url)            
@@ -331,7 +333,7 @@ def read_landmark_file(file_path):
     elif file_ext == '.txt':
         # Try to detect format
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, encoding='utf-8') as f:
                 first_line = f.readline().strip()
                 if first_line.startswith('LM='):
                     return read_tps_file(file_path)
@@ -363,7 +365,7 @@ def read_tps_file(file_path):
     current_name = ""
     
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, encoding='utf-8') as f:
             for line in f:
                 line = line.strip()
                 
@@ -374,7 +376,7 @@ def read_tps_file(file_path):
                     
                     try:
                         landmark_count = int(line.split('=')[1])
-                    except (ValueError, IndexError) as e:
+                    except (ValueError, IndexError):
                         logger = logging.getLogger(__name__)
                         logger.error(f"Invalid LM line in {file_path}: {line}")
                         raise ValueError(f"Malformed TPS file: invalid LM line '{line}'")
@@ -432,7 +434,7 @@ def read_nts_file(file_path):
     specimens = []
     
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, encoding='utf-8') as f:
             lines = f.readlines()
     except (FileNotFoundError, PermissionError) as e:
         logger = logging.getLogger(__name__)
@@ -455,7 +457,7 @@ def read_nts_file(file_path):
                     n_specimens = int(parts[0])
                     n_landmarks = int(parts[1])
                     n_dimensions = int(parts[2])
-                except (ValueError, IndexError) as e:
+                except (ValueError, IndexError):
                     logger = logging.getLogger(__name__)
                     logger.error(f"Invalid NTS header in {file_path}: {line}")
                     raise ValueError(f"Malformed NTS file: invalid header '{line}'")
@@ -504,13 +506,13 @@ def _get_storage_dir() -> str:
         from PyQt5.QtWidgets import QApplication
         app = QApplication.instance()
         if app and hasattr(app, 'storage_directory'):
-            return os.path.abspath(getattr(app, 'storage_directory'))
+            return os.path.abspath(app.storage_directory)
     except Exception:
         pass
     return os.path.abspath(DEFAULT_STORAGE_DIRECTORY)
 
 
-def serialize_dataset_to_json(dataset_id: int, include_files: bool = True, storage_dir: Optional[str] = None) -> dict:
+def serialize_dataset_to_json(dataset_id: int, include_files: bool = True, storage_dir: str | None = None) -> dict:
     """Serialize dataset and objects to JSON structure for export.
 
     Args:
@@ -623,14 +625,14 @@ def serialize_dataset_to_json(dataset_id: int, include_files: bool = True, stora
     }
 
 
-def collect_dataset_files(dataset_id: int, storage_dir: Optional[str] = None) -> Tuple[List[str], List[str]]:
+def collect_dataset_files(dataset_id: int, storage_dir: str | None = None) -> tuple[list[str], list[str]]:
     """Collect absolute file paths (images, models) for the dataset."""
     from MdModel import MdDataset, MdObject
 
     storage_base = os.path.abspath(storage_dir or _get_storage_dir())
     ds = MdDataset.get_by_id(dataset_id)
-    images: List[str] = []
-    models: List[str] = []
+    images: list[str] = []
+    models: list[str] = []
     for obj in ds.object_list.order_by(MdObject.sequence):
         if obj.has_image():
             p = obj.get_image().get_file_path(storage_base)
@@ -661,7 +663,7 @@ def estimate_package_size(dataset_id: int, include_files: bool = True) -> int:
     return total
 
 
-def create_zip_package(dataset_id: int, output_path: str, include_files: bool = True, progress_callback: Optional[Callable[[int, int], None]] = None) -> bool:
+def create_zip_package(dataset_id: int, output_path: str, include_files: bool = True, progress_callback: Callable[[int, int], None] | None = None) -> bool:
     """Create JSON+ZIP package for a dataset.
 
     progress_callback: callable(curr, total)
@@ -683,7 +685,7 @@ def create_zip_package(dataset_id: int, output_path: str, include_files: bool = 
             json.dump(data, f, ensure_ascii=False, indent=2)
 
         total_steps = 1
-        files_to_copy: List[Tuple[Path, Path]] = []
+        files_to_copy: list[tuple[Path, Path]] = []
         if include_files:
             # Build copy plan based on objects in JSON
             for obj in data.get('objects', []):
@@ -730,9 +732,9 @@ def create_zip_package(dataset_id: int, output_path: str, include_files: bool = 
     return True
 
 
-def validate_json_schema(data: dict) -> Tuple[bool, List[str]]:
+def validate_json_schema(data: dict) -> tuple[bool, list[str]]:
     """Lightweight validation of the exported schema."""
-    errors: List[str] = []
+    errors: list[str] = []
     if not isinstance(data, dict):
         return False, ["Root is not an object"]
     for k in ['format_version', 'export_info', 'dataset', 'objects']:
@@ -766,9 +768,9 @@ def read_json_from_zip(zip_path: str) -> dict:
             return json.loads(f.read().decode('utf-8'))
 
 
-def import_dataset_from_zip(zip_path: str, progress_callback: Optional[Callable[[int, int], None]] = None) -> int:
+def import_dataset_from_zip(zip_path: str, progress_callback: Callable[[int, int], None] | None = None) -> int:
     """Import dataset from a JSON+ZIP package. Returns new dataset id."""
-    from MdModel import MdDataset, MdObject, MdImage, MdThreeDModel, gDatabase
+    from MdModel import MdDataset, MdImage, MdObject, MdThreeDModel, gDatabase
 
     with tempfile.TemporaryDirectory() as tmpdir:
         root = safe_extract_zip(zip_path, tmpdir)

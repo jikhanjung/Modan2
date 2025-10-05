@@ -1,4 +1,8 @@
-from peewee import *
+from peewee import (
+    Model, SqliteDatabase,
+    CharField, IntegerField, DoubleField, DateTimeField,
+    ForeignKeyField
+)
 import datetime
 import os
 import hashlib

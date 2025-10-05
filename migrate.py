@@ -1,7 +1,7 @@
 import datetime
 from peewee_migrate import Router
-from peewee import *
-from MdModel import *
+from peewee import SqliteDatabase
+from MdModel import MdDataset, MdObject, MdImage, MdThreeDModel, MdAnalysis
 import MdUtils as mu
 import os
 import logging

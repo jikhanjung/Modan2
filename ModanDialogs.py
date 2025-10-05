@@ -10,8 +10,6 @@ from PyQt5.QtGui import QColor, QPainter, QPen, QPixmap, QStandardItemModel, QSt
 from PyQt5.QtCore import Qt, QRect, QSortFilterProxyModel, QSize, QPoint, QTranslator, \
                          pyqtSlot, pyqtSignal, QItemSelectionModel, QTimer, QEvent
 
-import logging
-
 from OBJFileLoader import OBJ
 
 from ModanComponents import ObjectViewer2D, ObjectViewer3D, ShapePreference, \

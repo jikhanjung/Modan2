@@ -53,7 +53,8 @@ class ImportDatasetDialog(BaseDialog):
         Args:
             parent: Parent window with load_dataset method
         """
-        super().__init__(parent, title=self.tr("Modan2 - Import"))
+        super().__init__(parent, title="Modan2 - Import")
+        self.setWindowTitle(self.tr("Modan2 - Import"))
         self.parent = parent
         self.remember_geometry = True
         self.m_app = QApplication.instance()

@@ -17,7 +17,7 @@ Modan2 프로젝트 전반에 산재되어 있던 print문들을 Python의 표�
 def setup_logging(debug: bool = False):
     level = logging.DEBUG if debug else logging.INFO
     format_str = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    
+
     logging.basicConfig(
         level=level,
         format=format_str,
@@ -35,11 +35,11 @@ def setup_logger(name, level=logging.INFO):
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     handler = logging.FileHandler(logfile_path)
     handler.setFormatter(formatter)
-    
+
     logger = logging.getLogger(name)
     logger.setLevel(level)
     logger.addHandler(handler)
-    
+
     return logger
 ```
 
@@ -274,7 +274,7 @@ tail -f modan2.log
 일부 주석처리된 print문들은 향후 제거 검토:
 ```python
 # 제거 대상
-# print("debug info")  
+# print("debug info")
 ```
 
 ### 8.3 성능 고려사항

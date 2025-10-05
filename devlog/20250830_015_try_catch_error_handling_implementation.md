@@ -23,7 +23,7 @@ Modan2 프로젝트 전반에 걸쳐 try-catch 블록이 누락된 부분들을 
 
 #### High Priority (최우선)
 1. **파일 I/O 작업** - 사용자 데이터 손실 위험
-2. **데이터베이스 작업** - 데이터 무결성 문제  
+2. **데이터베이스 작업** - 데이터 무결성 문제
 3. **외부 라이브러리 호출** - 예측 불가능한 크래시
 
 #### Medium Priority (중요)
@@ -70,12 +70,12 @@ def read_tps_file(file_path):
     specimens = []
     current_landmarks = []
     current_name = ""
-    
+
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             for line in f:
                 line = line.strip()
-                
+
                 if line.startswith('LM='):
                     # Safe integer parsing
                     try:
@@ -83,7 +83,7 @@ def read_tps_file(file_path):
                     except (ValueError, IndexError) as e:
                         logger.error(f"Invalid LM line in {file_path}: {line}")
                         raise ValueError(f"Malformed TPS file: invalid LM line '{line}'")
-                
+
                 elif line.startswith('ID='):
                     # Safe string extraction
                     try:
@@ -91,16 +91,16 @@ def read_tps_file(file_path):
                     except IndexError:
                         logger.warning(f"Invalid ID line in {file_path}: {line}")
                         current_name = "Unknown"
-                        
+
                 # ... 좌표 파싱 with error handling
-                
+
     except (FileNotFoundError, PermissionError) as e:
         logger.error(f"Cannot read TPS file {file_path}: {e}")
         raise
     except UnicodeDecodeError as e:
         logger.error(f"Encoding error reading TPS file {file_path}: {e}")
         raise ValueError(f"Cannot decode TPS file {file_path}. Please check file encoding.")
-    
+
     return specimens
 ```
 
@@ -109,7 +109,7 @@ def read_tps_file(file_path):
 def read_nts_file(file_path):
     """Read NTS format landmark file with error handling"""
     specimens = []
-    
+
     # File reading with encoding handling
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
@@ -120,7 +120,7 @@ def read_nts_file(file_path):
     except UnicodeDecodeError as e:
         logger.error(f"Encoding error reading NTS file {file_path}: {e}")
         raise ValueError(f"Cannot decode NTS file {file_path}. Please check file encoding.")
-    
+
     # Parse with error handling
     try:
         # Header validation
@@ -133,7 +133,7 @@ def read_nts_file(file_path):
             except (ValueError, IndexError) as e:
                 logger.error(f"Invalid NTS header in {file_path}: {line}")
                 raise ValueError(f"Malformed NTS file: invalid header '{line}'")
-        
+
         # Coordinate parsing with validation
         try:
             coords = [float(x) for x in lines[i].split()]
@@ -141,11 +141,11 @@ def read_nts_file(file_path):
         except (ValueError, IndexError):
             # Skip invalid coordinate lines
             continue
-            
+
     except Exception as e:
         logger.error(f"Error parsing NTS file {file_path}: {e}")
         raise ValueError(f"Failed to parse NTS file {file_path}: {e}")
-    
+
     return specimens
 ```
 
@@ -184,7 +184,7 @@ def add_file(self, file_name):
     try:
         self.load_file_info(file_name)
         new_filepath = self.get_file_path()
-        
+
         # Directory creation with error handling
         try:
             if not os.path.exists(os.path.dirname(new_filepath)):
@@ -192,18 +192,18 @@ def add_file(self, file_name):
         except OSError as e:
             logger.error(f"Failed to create directory for {new_filepath}: {e}")
             raise ValueError(f"Cannot create directory for file storage: {e}")
-        
+
         # File copy with error handling
         try:
             ret = shutil.copyfile(file_name, new_filepath)
         except (OSError, shutil.Error) as e:
             logger.error(f"Failed to copy file from {file_name} to {new_filepath}: {e}")
             raise ValueError(f"Cannot copy file: {e}")
-            
+
     except Exception as e:
         logger.error(f"Failed to add file {file_name}: {e}")
         raise
-        
+
     return self
 ```
 
@@ -286,7 +286,7 @@ try:
 except (ValueError, OverflowError) as e:
     logger.error(f"Math error calculating centroid size: {e}")
     centroid_size = 0
-    
+
 self.centroid_size = centroid_size
 if self.pixels_per_mm is not None and self.pixels_per_mm != 0:
     try:
@@ -376,7 +376,7 @@ except trimesh.exceptions.MeshError as e:
 def test_file_io_error_handling():
     """Test file I/O error handling"""
     # 1. 존재하지 않는 파일 테스트
-    # 2. 잘못된 파일 형식 테스트  
+    # 2. 잘못된 파일 형식 테스트
     # 3. 권한 오류 테스트
 
 def test_database_error_handling():
@@ -399,7 +399,7 @@ Testing File I/O Error Handling
 1. Testing non-existent file...
 ✅ Correctly handled: FileNotFoundError
 
-2. Testing invalid TPS file content...  
+2. Testing invalid TPS file content...
 ✅ Correctly handled invalid format
 
 3. Testing permission/access error...
@@ -453,7 +453,7 @@ except PerformanceWarning:
 
 #### 파일 작업 시
 - [ ] FileNotFoundError 처리
-- [ ] PermissionError 처리  
+- [ ] PermissionError 처리
 - [ ] UnicodeDecodeError 처리
 - [ ] Context manager 사용 (`with` 문)
 - [ ] 적절한 인코딩 지정
@@ -487,7 +487,7 @@ except SpecificError as e:
     logger.error(f"Operation failed for {data}: {e}")
     raise ValueError(f"Cannot process data: {e}")
 
-# ❌ 나쁜 예  
+# ❌ 나쁜 예
 try:
     result = risky_operation(data)
     return result
@@ -522,7 +522,7 @@ except:  # bare except
 class ErrorTracker:
     def __init__(self):
         self.error_counts = defaultdict(int)
-    
+
     def track_error(self, error_type, context):
         self.error_counts[error_type] += 1
         if self.error_counts[error_type] > THRESHOLD:
@@ -557,7 +557,7 @@ def robust_file_operation(filepath):
 ### 9.2 변경 통계
 
 - **추가된 try-catch 블록**: 47개
-- **개선된 에러 메시지**: 23개  
+- **개선된 에러 메시지**: 23개
 - **새로운 로깅 포인트**: 34개
 - **테스트 케이스**: 15개
 
@@ -588,7 +588,7 @@ def robust_file_operation(filepath):
 ### 10.3 장기적 효과
 
 - **개발 효율성**: 디버깅 시간 단축으로 새로운 기능 개발에 집중 가능
-- **사용자 만족도**: 안정적인 동작과 친화적인 메시지로 사용자 경험 향상  
+- **사용자 만족도**: 안정적인 동작과 친화적인 메시지로 사용자 경험 향상
 - **유지보수 비용**: 명확한 에러 처리 패턴으로 향후 수정 작업 효율화
 - **확장성**: 새로운 기능 추가 시 검증된 에러 처리 패턴 재사용 가능
 

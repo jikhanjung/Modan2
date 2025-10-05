@@ -1,7 +1,7 @@
 # PCA 분석 결과 일치화 및 차원 문제 해결
 
-**작업일**: 2025-09-05  
-**작업자**: Claude Code Assistant  
+**작업일**: 2025-09-05
+**작업자**: Claude Code Assistant
 **관련 이슈**: PCA 분석 결과 불일치, 차원 오류, UI 워닝 해결
 
 ## 문제 개요
@@ -76,7 +76,7 @@ scores = pca.rotated_matrix.tolist()  # 62×90 유지
 n_components = min(pca.nObservation - 1, pca.nVariable)  # 61
 scores = full_scores[:, :n_components].tolist()  # 62×61
 
-# 수정 후  
+# 수정 후
 n_components = pca.nVariable  # 90
 scores = pca.rotated_matrix.tolist()  # 62×90
 ```
@@ -100,7 +100,7 @@ if cv_scores.shape[1] < 3:
 
 ### ✅ 해결된 문제들
 1. **PCA 결과 일치**: Add Analysis ↔ Analysis Detail 동일한 결과
-2. **차원 오류 해결**: 
+2. **차원 오류 해결**:
    - PCA: `62×90` scores, `90×90` rotation_matrix
    - CVA: `62×3` (패딩으로 확장)
 3. **워닝 완전 제거**: `result_len(1) <= max_axis(2)` 사라짐
@@ -116,7 +116,7 @@ if cv_scores.shape[1] < 3:
 
 ### Morphometric PCA의 특성
 - **표준화 없이 centering만**: 형태학적 변이의 자연스러운 보존
-- **모든 변수 유지**: PC90까지 모든 형태 변화 보존  
+- **모든 변수 유지**: PC90까지 모든 형태 변화 보존
 - **Procrustes 필수**: 크기/위치/방향 효과 제거
 
 ### CVA의 수학적 특성
@@ -131,6 +131,6 @@ if cv_scores.shape[1] < 3:
 
 ---
 
-**완료 상태**: ✅ 모든 문제 해결 완료  
-**테스트**: ✅ PCA/CVA/MANOVA 모든 분석 정상 작동  
+**완료 상태**: ✅ 모든 문제 해결 완료
+**테스트**: ✅ PCA/CVA/MANOVA 모든 분석 정상 작동
 **호환성**: ✅ 기존 Analysis Detail과 완전 일치

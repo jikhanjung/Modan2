@@ -19,6 +19,7 @@ except ImportError:
             if match:
                 return match.group(1)
         raise RuntimeError("Unable to find version string")
+
     VERSION = get_version_from_file()
 
 import MdUtils as mu
@@ -28,17 +29,17 @@ def run_pyinstaller(args):
     """Runs PyInstaller with the specified arguments."""
     pyinstaller_cmd = ["pyinstaller"] + args
     try:
-        result = subprocess.run(pyinstaller_cmd, check=True, capture_output=True, text=True)
+        subprocess.run(pyinstaller_cmd, check=True, capture_output=True, text=True)
         print("PyInstaller completed successfully")
-        
+
         # Check if the executable was created
         # Extract the actual name from PyInstaller args
         actual_name = "Modan2"  # default
-        for i, arg in enumerate(args):
+        for _i, arg in enumerate(args):
             if arg.startswith("--name="):
                 actual_name = arg.split("=", 1)[1]
                 break
-        
+
         # For onedir, the main executable is in a subdirectory and might need .exe extension
         if "--onedir" in args:
             # For onedir mode, check if we need to add .exe extension
@@ -47,7 +48,7 @@ def run_pyinstaller(args):
             exe_path = Path(f"dist/{actual_name}/{base_exe_name}{exe_extension}")
         else:
             exe_path = Path(f"dist/{actual_name}")
-            
+
         if not exe_path.exists():
             # List actual files in dist directory for debugging
             dist_path = Path("dist")
@@ -62,7 +63,7 @@ def run_pyinstaller(args):
             raise FileNotFoundError(f"Expected executable not found: {exe_path}")
         else:
             print(f"Executable created: {exe_path}")
-            
+
     except subprocess.CalledProcessError as e:
         print(f"PyInstaller failed with exit code {e.returncode}")
         if e.stdout:
@@ -70,6 +71,7 @@ def run_pyinstaller(args):
         if e.stderr:
             print(f"STDERR: {e.stderr}")
         raise
+
 
 def prepare_version_info_file(version: str, app_name: str) -> str:
     """Prepare a Windows version info file from template, return path to temp file.
@@ -124,8 +126,7 @@ def prepare_version_info_file(version: str, app_name: str) -> str:
 
     # Replace placeholders in template
     replaced = (
-        content
-        .replace("{{VERSION_TUPLE}}", str(vt))
+        content.replace("{{VERSION_TUPLE}}", str(vt))
         .replace("{{PRODUCT_VERSION}}", product_version_str)
         .replace("{{FILE_VERSION}}", product_version_str)
         .replace("{{PRODUCT_NAME}}", app_name)
@@ -141,47 +142,49 @@ def prepare_version_info_file(version: str, app_name: str) -> str:
     out_path.write_text(replaced, encoding="utf-8")
     return str(out_path)
 
+
 def prepare_inno_setup_template(template_path, version):
     """Prepare Inno Setup script from template with version replacement."""
     temp_dir = Path(tempfile.mkdtemp())
     temp_iss = temp_dir / "Modan2_build.iss"
-    
+
     # Read template or original file
     template_file = Path(template_path)
-    if template_file.with_suffix('.iss.template').exists():
+    if template_file.with_suffix(".iss.template").exists():
         # Use template if it exists
-        template_file = template_file.with_suffix('.iss.template')
-    
+        template_file = template_file.with_suffix(".iss.template")
+
     content = template_file.read_text()
-    
+
     # Replace version placeholder or hardcoded version
     content = re.sub(r'#define AppVersion ".*?"', f'#define AppVersion "{version}"', content)
-    content = content.replace('{{VERSION}}', version)  # Also support template syntax
-    
+    content = content.replace("{{VERSION}}", version)  # Also support template syntax
+
     # Get absolute path to dist directory
     dist_abs_path = Path("dist").resolve()
-    content = content.replace('{{DIST_PATH}}', str(dist_abs_path)) # Replace DIST_PATH placeholder
+    content = content.replace("{{DIST_PATH}}", str(dist_abs_path))  # Replace DIST_PATH placeholder
 
     # Write temporary ISS file
     temp_iss.write_text(content)
     return temp_iss
+
 
 def run_inno_setup(iss_file, version, build_number):
     """Runs Inno Setup Compiler with the specified ISS file, version, and build number."""
     if platform.system() != "Windows":
         print("Inno Setup is Windows-only, skipping...")
         return
-    
+
     # Prepare ISS file from template
     temp_iss = prepare_inno_setup_template(iss_file, version)
-    
+
     inno_setup_cmd = [
-        "ISCC.exe", # Changed from r"C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+        "ISCC.exe",  # Changed from r"C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
         f"/DBuildNumber={build_number}",
-        str(temp_iss)
+        str(temp_iss),
     ]
     try:
-        result = subprocess.run(inno_setup_cmd, check=True, capture_output=True, text=True)
+        subprocess.run(inno_setup_cmd, check=True, capture_output=True, text=True)
         print(f"Installer created with version {version}")
     except subprocess.CalledProcessError as e:
         print(f"Inno Setup failed with exit code {e.returncode}")
@@ -197,22 +200,25 @@ def run_inno_setup(iss_file, version, build_number):
         if temp_iss.parent.exists():
             shutil.rmtree(temp_iss.parent)
 
+
 def get_platform_executable_extension():
     """Get the appropriate executable extension for the current platform."""
     if platform.system() == "Windows":
         return ".exe"
     return ""
 
+
 def get_platform_separator():
-    """Get the appropriate path separator for PyInstaller add-data.""" 
+    """Get the appropriate path separator for PyInstaller add-data."""
     if platform.system() == "Windows":
         return ";"
     return ":"
 
+
 # --- Configuration ---
 NAME = mu.PROGRAM_NAME
 # Use centralized version
-BUILD_NUMBER = os.environ.get('BUILD_NUMBER', 'local')
+BUILD_NUMBER = os.environ.get("BUILD_NUMBER", "local")
 today = date.today()
 DATE = today.strftime("%Y%m%d")
 
@@ -229,7 +235,7 @@ build_info = {
     "build_number": BUILD_NUMBER,
     "build_date": DATE,
     "build_year": datetime.now().year,
-    "platform": platform.system().lower()
+    "platform": platform.system().lower(),
 }
 with open("build_info.json", "w") as f:
     json.dump(build_info, f, indent=2)

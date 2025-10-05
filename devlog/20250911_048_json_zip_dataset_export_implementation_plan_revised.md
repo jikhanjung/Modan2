@@ -1,8 +1,8 @@
 # JSON+ZIP Dataset Export/Import — Revised Plan
 
-Date: 2025-09-11  
-Issue: #048  
-Status: Planning (Revised)  
+Date: 2025-09-11
+Issue: #048
+Status: Planning (Revised)
 Priority: Medium
 
 ## Overview

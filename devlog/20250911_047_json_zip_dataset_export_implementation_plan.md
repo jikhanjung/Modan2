@@ -1,9 +1,9 @@
 # JSON+ZIP Dataset Export Implementation Plan
 
-**Date**: 2025-09-11  
-**Issue**: #047  
-**Status**: Planning Phase  
-**Priority**: Medium  
+**Date**: 2025-09-11
+**Issue**: #047
+**Status**: Planning Phase
+**Priority**: Medium
 
 ## Overview
 
@@ -88,7 +88,7 @@ dataset_export.zip
         },
         "model": {
           "path": "models/specimen_001.obj",
-          "original_filename": "model_001.obj", 
+          "original_filename": "model_001.obj",
           "size": 1024000,
           "md5hash": "efgh5678..."
         }
@@ -169,7 +169,7 @@ self.progressBar = QProgressBar()
 - `ModanComponents.py` - Add JSON+ZIP reader class
 
 **Tasks:**
-1. Create ZIP extraction functionality  
+1. Create ZIP extraction functionality
 2. Parse and validate JSON schema
 3. Create dataset and objects in database
 4. Import files to internal storage

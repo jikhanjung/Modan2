@@ -6,7 +6,7 @@ import logging
 import math
 import os
 
-#from MdUtils import *
+# from MdUtils import *
 import shutil
 import time
 from pathlib import Path
@@ -29,11 +29,7 @@ DATABASE_FILENAME = mu.PROGRAM_NAME + ".db"
 
 database_path = os.path.join(mu.DEFAULT_DB_DIRECTORY, DATABASE_FILENAME)
 
-gDatabase = SqliteDatabase(database_path,pragmas={'foreign_keys': 1})
-
-def setup_database_location(database_dir):
-    database_handle = SqliteDatabase(database_path,pragmas={'foreign_keys': 1})
-    return database_handle
+gDatabase = SqliteDatabase(database_path, pragmas={"foreign_keys": 1})
 
 
 class MdDataset(Model):
@@ -43,7 +39,7 @@ class MdDataset(Model):
     wireframe = CharField(null=True)
     baseline = CharField(null=True)
     polygons = CharField(null=True)
-    parent = ForeignKeyField('self', backref='children', null=True,on_delete="CASCADE")
+    parent = ForeignKeyField("self", backref="children", null=True, on_delete="CASCADE")
     created_at = DateTimeField(default=datetime.datetime.now)
     modified_at = DateTimeField(default=datetime.datetime.now)
     propertyname_str = CharField(null=True)
@@ -59,22 +55,21 @@ class MdDataset(Model):
         variablename_list = self.get_variablename_list()
         object_count = len(self.object_list)
         valid_property_index_list = []
-        #print("object count:", object_count, "propertyname_list:", propertyname_list)
-        for idx, variablename in enumerate(variablename_list):
-            #print("propertyname:", propertyname, idx)
+        # print("object count:", object_count, "propertyname_list:", propertyname_list)
+        for idx, _variablename in enumerate(variablename_list):
+            # print("propertyname:", propertyname, idx)
             unique_variable_list = []
             for obj in self.object_list:
                 variable_list = obj.get_variable_list()
                 if idx < len(variable_list) and variable_list[idx] not in unique_variable_list:
                     unique_variable_list.append(variable_list[idx])
-            #print("unique_variable_list:", unique_variable_list, len(unique_variable_list))
+            # print("unique_variable_list:", unique_variable_list, len(unique_variable_list))
             if len(unique_variable_list) <= 10 or len(unique_variable_list) < 0.5 * object_count:
                 valid_property_index_list.append(idx)
-        #print("valid_property_index_list:", valid_property_index_list)
+        # print("valid_property_index_list:", valid_property_index_list)
         if len(valid_property_index_list) == 0:
-            valid_property_index_list = [x for x in range(len(variablename_list))]
+            valid_property_index_list = list(range(len(variablename_list)))
         return valid_property_index_list
-
 
     def get_variablename_list(self):
         return self.unpack_variablename_str(self.propertyname_str)
@@ -85,15 +80,15 @@ class MdDataset(Model):
         self.propertyname_str = VARIABLE_SEPARATOR.join(variablename_list)
         return self.propertyname_str
 
-    def unpack_variablename_str(self, propertyname_str=''):
-        if propertyname_str == '' and self.propertyname_str != '':
+    def unpack_variablename_str(self, propertyname_str=""):
+        if propertyname_str == "" and self.propertyname_str != "":
             propertyname_str = self.propertyname_str
 
         self.variablename_list = []
-        if propertyname_str is None or propertyname_str == '':
+        if propertyname_str is None or propertyname_str == "":
             return []
 
-        self.variablename_list = [x for x in propertyname_str.split(VARIABLE_SEPARATOR)]
+        self.variablename_list = list(propertyname_str.split(VARIABLE_SEPARATOR))
         return self.variablename_list
 
     def pack_wireframe(self, edge_list=None):
@@ -113,20 +108,20 @@ class MdDataset(Model):
         self.wireframe = WIREFRAME_SEPARATOR.join(new_edges)
         return self.wireframe
 
-    def unpack_wireframe(self, wireframe=''):
-        if wireframe == '' and self.wireframe != '':
+    def unpack_wireframe(self, wireframe=""):
+        if wireframe == "" and self.wireframe != "":
             wireframe = self.wireframe
 
         self.edge_list = []
 
-        if wireframe is None or wireframe == '':
+        if wireframe is None or wireframe == "":
             return []
 
         # print wireframe
         for edge in wireframe.split(WIREFRAME_SEPARATOR):
             has_edge = True
-            if edge != '':
-                #print edge
+            if edge != "":
+                # print edge
                 verts = edge.split(EDGE_SEPARATOR)
                 int_edge = []
                 for v in verts:
@@ -139,7 +134,7 @@ class MdDataset(Model):
 
                 if has_edge:
                     if len(int_edge) != 2:
-                        pass  #print "Invalid edge in wireframe:", edge
+                        pass  # print "Invalid edge in wireframe:", edge
                     self.edge_list.append(int_edge)
 
         return self.edge_list
@@ -155,21 +150,21 @@ class MdDataset(Model):
 
         new_polygons = []
         for polygon in polygon_list:
-            #print points
+            # print points
             new_polygons.append("-".join([str(x) for x in polygon]))
         self.polygons = ",".join(new_polygons)
         return self.polygons
 
-    def unpack_polygons(self, polygons=''):
-        if polygons == '' and self.polygons != '':
+    def unpack_polygons(self, polygons=""):
+        if polygons == "" and self.polygons != "":
             polygons = self.polygons
 
         self.polygon_list = []
-        if polygons is None or polygons == '':
+        if polygons is None or polygons == "":
             return []
 
         for polygon in polygons.split(","):
-            if polygon != '':
+            if polygon != "":
                 self.polygon_list.append([(int(x)) for x in polygon.split("-")])
 
         return self.polygon_list
@@ -185,15 +180,15 @@ class MdDataset(Model):
             baseline_point_list = self.baseline_point_list
         # print baseline_points
         self.baseline = ",".join([str(x) for x in baseline_point_list])
-        #print self.baseline
+        # print self.baseline
         return self.baseline
 
-    def unpack_baseline(self, baseline=''):
-        if baseline == '' and self.baseline != '':
+    def unpack_baseline(self, baseline=""):
+        if baseline == "" and self.baseline != "":
             baseline = self.baseline
 
         self.baseline_point_list = []
-        if self.baseline is None or self.baseline == '':
+        if self.baseline is None or self.baseline == "":
             return []
 
         self.baseline_point_list = [(int(x)) for x in self.baseline.split(",")]
@@ -204,12 +199,12 @@ class MdDataset(Model):
 
     def add_object(self, object_name, object_desc=None, pixels_per_mm=None, landmark_str=None, property_str=None):
         obj = MdObject()
-        obj.object_name=object_name
-        obj.object_desc=object_desc
-        obj.pixels_per_mm=pixels_per_mm
-        obj.landmark_str=landmark_str
-        obj.property_str=property_str
-        obj.dataset=self
+        obj.object_name = object_name
+        obj.object_desc = object_desc
+        obj.pixels_per_mm = pixels_per_mm
+        obj.landmark_str = landmark_str
+        obj.property_str = property_str
+        obj.dataset = self
         return obj
 
     def add_variablename(self, propertyname):
@@ -217,17 +212,18 @@ class MdDataset(Model):
         self.pack_variablename_str()
         self.save()
         return propertyname
-    
+
     def refresh(self):
         """Refresh dataset from database"""
         return self.get_by_id(self.id)
+
 
 class MdObject(Model):
     object_name = CharField()
     object_desc = CharField(null=True)
     pixels_per_mm = DoubleField(null=True)
     landmark_str = CharField(null=True)
-    dataset = ForeignKeyField(MdDataset, backref='object_list', on_delete="CASCADE")
+    dataset = ForeignKeyField(MdDataset, backref="object_list", on_delete="CASCADE")
     created_at = DateTimeField(default=datetime.datetime.now)
     modified_at = DateTimeField(default=datetime.datetime.now)
     property_str = CharField(null=True)
@@ -247,19 +243,20 @@ class MdObject(Model):
         new_object.landmark_str = self.landmark_str
         new_object.dataset = new_dataset
         new_object.property_str = self.property_str
-        #new_object.save()
+        # new_object.save()
         return new_object
 
     def get_name(self):
-        if self.object_name is None or self.object_name == '':
+        if self.object_name is None or self.object_name == "":
             return str(self.id)
         return self.object_name
 
     def __str__(self):
-        return self.object_name or ''
+        return self.object_name or ""
+
     def __repr__(self):
         return self.object_name
-    
+
     def count_landmarks(self, exclude_missing=True):
         """Count landmarks.
 
@@ -269,7 +266,7 @@ class MdObject(Model):
         Returns:
             int: Number of landmarks (excluding missing if exclude_missing=True)
         """
-        if self.landmark_str is None or self.landmark_str == '':
+        if self.landmark_str is None or self.landmark_str == "":
             return 0
 
         if not exclude_missing:
@@ -287,7 +284,8 @@ class MdObject(Model):
                 count += 1
 
         return count
-    #def get_image_file_path(self):
+
+    # def get_image_file_path(self):
 
     def add_image(self, file_name):
         img = MdImage()
@@ -296,17 +294,17 @@ class MdObject(Model):
         return img
 
     def update_image(self, file_name):
-        #print("update image:", file_name)
+        # print("update image:", file_name)
         img = self.get_image()
         if img is None:
             img = MdImage()
-            #img.object = self
+            # img.object = self
         else:
             img.delete_instance()
             img = MdImage()
         img.object = self
-        img2 = img.add_file(file_name)
-        #print("update image:", img, img2)
+        img.add_file(file_name)
+        # print("update image:", img, img2)
         return img
 
     def add_threed_model(self, file_name):
@@ -314,7 +312,7 @@ class MdObject(Model):
         model.object = self
         model.add_file(file_name)
         return model
-    
+
     def has_image(self):
         return self.image.count() > 0
 
@@ -364,25 +362,25 @@ class MdObject(Model):
 
     def unpack_landmark(self):
         self.landmark_list = []
-        #print "[", self.landmark_str,"]"
-        if self.landmark_str is None or self.landmark_str == '':
+        # print "[", self.landmark_str,"]"
+        if self.landmark_str is None or self.landmark_str == "":
             return self.landmark_list
         lm_list = self.landmark_str.split(LINE_SEPARATOR)
         for lm in lm_list:
             if lm != "":
                 # Try to detect the separator used
                 # Priority: tab > comma > multiple spaces > single space
-                if '\t' in lm:
-                    separator = '\t'
-                elif ',' in lm:
-                    separator = ','
-                elif '  ' in lm:  # Multiple spaces
+                if "\t" in lm:
+                    separator = "\t"
+                elif "," in lm:
+                    separator = ","
+                elif "  " in lm:  # Multiple spaces
                     # Split by multiple spaces and filter empty strings
                     coords = [x for x in lm.split() if x]
                     self.landmark_list.append([float(x) if self.is_float(x) else None for x in coords])
                     continue
-                elif ' ' in lm:
-                    separator = ' '
+                elif " " in lm:
+                    separator = " "
                 else:
                     # Single value or unknown format
                     separator = LANDMARK_SEPARATOR
@@ -392,6 +390,7 @@ class MdObject(Model):
                 coords = [x.strip() for x in coords if x.strip()]
                 self.landmark_list.append([float(x) if self.is_float(x) else None for x in coords])
         return self.landmark_list
+
     def is_float(self, s):
         # Check for "Missing" text specifically
         if s == "Missing" or s == "missing" or s == "":
@@ -401,6 +400,7 @@ class MdObject(Model):
             return True
         except ValueError:
             return False
+
     def get_landmark_list(self):
         return self.unpack_landmark()
 
@@ -411,16 +411,16 @@ class MdObject(Model):
 
     def unpack_variable(self):
         self.variable_list = []
-        if self.property_str is None or self.property_str == '':
+        if self.property_str is None or self.property_str == "":
             return []
-        self.variable_list = [x for x in self.property_str.split(VARIABLE_SEPARATOR)]
+        self.variable_list = list(self.property_str.split(VARIABLE_SEPARATOR))
         return self.variable_list
+
     def get_variable_list(self):
         return self.unpack_variable()
 
     def get_centroid_size(self, refresh=False):
-
-        #if len(self.landmark_list) == 0 and self.landmark_str != "":
+        # if len(self.landmark_list) == 0 and self.landmark_str != "":
         #    self.unpack_landmark()
 
         if len(self.landmark_list) == 0:
@@ -428,9 +428,9 @@ class MdObject(Model):
                 self.unpack_landmark()
             if len(self.landmark_list) == 0:
                 return -1
-        elif len(self.landmark_list)== 1:
+        elif len(self.landmark_list) == 1:
             return 1
-        if ( self.centroid_size > 0 ) and ( refresh == False ):
+        if (self.centroid_size > 0) and (not refresh):
             return self.centroid_size
 
         centroid = self.get_centroid_coord()
@@ -447,10 +447,10 @@ class MdObject(Model):
             if lm[0] is None or lm[1] is None:
                 continue
             valid_lm_count += 1
-            sum_of_x_squared += ( lm[0] - centroid[0]) ** 2
-            sum_of_y_squared += ( lm[1] - centroid[1]) ** 2
+            sum_of_x_squared += (lm[0] - centroid[0]) ** 2
+            sum_of_y_squared += (lm[1] - centroid[1]) ** 2
             if len(lm) == 3 and lm[2] is not None:
-                sum_of_z_squared += ( lm[2] - centroid[2]) ** 2
+                sum_of_z_squared += (lm[2] - centroid[2]) ** 2
             sum_of_x += lm[0] - centroid[0]
             sum_of_y += lm[1] - centroid[1]
             if len(lm) == 3 and lm[2] is not None:
@@ -460,11 +460,11 @@ class MdObject(Model):
             return 0
 
         centroid_size = sum_of_x_squared + sum_of_y_squared + sum_of_z_squared
-        #centroid_size = sum_of_x_squared + sum_of_y_squared + sum_of_z_squared \
+        # centroid_size = sum_of_x_squared + sum_of_y_squared + sum_of_z_squared \
         #              - sum_of_x * sum_of_x / lm_count \
         #              - sum_of_y * sum_of_y / lm_count \
         #              - sum_of_z * sum_of_z / lm_count
-        #print centroid_size
+        # print centroid_size
         try:
             if centroid_size < 0:
                 logger = logging.getLogger(__name__)
@@ -475,7 +475,7 @@ class MdObject(Model):
             logger = logging.getLogger(__name__)
             logger.error(f"Math error calculating centroid size: {e}")
             centroid_size = 0
-            
+
         self.centroid_size = centroid_size
         if self.pixels_per_mm is not None and self.pixels_per_mm != 0:
             try:
@@ -484,13 +484,13 @@ class MdObject(Model):
                 logger = logging.getLogger(__name__)
                 logger.error("Division by zero: pixels_per_mm is 0")
                 centroid_size = 0
-        #centroid_size = float( int(  * 100 ) ) / 100
+        # centroid_size = float( int(  * 100 ) ) / 100
         return centroid_size
 
     def get_centroid_coord(self):
         c = [0, 0, 0]
 
-        #if len(self.landmark_list) == 0 and self.landmark_str != "":
+        # if len(self.landmark_list) == 0 and self.landmark_str != "":
         #    self.unpack_landmark()
 
         if len(self.landmark_list) == 0:
@@ -503,7 +503,7 @@ class MdObject(Model):
         count_y = 0
         count_z = 0
         lm_dim = 2
-        for lm in ( self.landmark_list ):
+        for lm in self.landmark_list:
             # Skip None values when calculating centroid
             if lm[0] is not None:
                 sum_of_x += lm[0]
@@ -525,10 +525,11 @@ class MdObject(Model):
         if lm_dim == 3 and count_z > 0:
             c[2] = sum_of_z / count_z
         return c
-    
+
     def refresh(self):
         """Refresh object from database"""
         return self.get_by_id(self.id)
+
 
 class MdImage(Model):
     original_path = CharField(null=True)
@@ -541,7 +542,7 @@ class MdImage(Model):
     file_modified = DateTimeField(null=True)
     created_at = DateTimeField(default=datetime.datetime.now)
     modified_at = DateTimeField(default=datetime.datetime.now)
-    object = ForeignKeyField(MdObject, backref='image', on_delete="CASCADE")
+    object = ForeignKeyField(MdObject, backref="image", on_delete="CASCADE")
 
     def copy_image(self, new_object):
         new_image = MdImage()
@@ -558,11 +559,11 @@ class MdImage(Model):
         return new_image
 
     def add_file(self, file_name):
-        #print("add file:", file_name)
+        # print("add file:", file_name)
         try:
             self.load_file_info(file_name)
             new_filepath = self.get_file_path()
-            
+
             # Create directory if it doesn't exist
             try:
                 if not os.path.exists(os.path.dirname(new_filepath)):
@@ -570,70 +571,71 @@ class MdImage(Model):
             except OSError as e:
                 logger = logging.getLogger(__name__)
                 logger.error(f"Failed to create directory for {new_filepath}: {e}")
-                raise ValueError(f"Cannot create directory for file storage: {e}")
-            
+                raise ValueError(f"Cannot create directory for file storage: {e}") from e
+
             # Copy file
             try:
-                ret = shutil.copyfile(file_name, new_filepath)
+                shutil.copyfile(file_name, new_filepath)
             except (OSError, shutil.Error) as e:
                 logger = logging.getLogger(__name__)
                 logger.error(f"Failed to copy file from {file_name} to {new_filepath}: {e}")
-                raise ValueError(f"Cannot copy file: {e}")
-                
+                raise ValueError(f"Cannot copy file: {e}") from e
+
         except Exception as e:
             logger = logging.getLogger(__name__)
             logger.error(f"Failed to add file {file_name}: {e}")
             raise
-            
+
         return self
 
-    def get_file_path(self, base_path =  mu.DEFAULT_STORAGE_DIRECTORY ):
-        return os.path.join( base_path, str(self.object.dataset.id), str(self.object.id) + "." + self.original_path.split('.')[-1])
+    def get_file_path(self, base_path=mu.DEFAULT_STORAGE_DIRECTORY):
+        return os.path.join(
+            base_path, str(self.object.dataset.id), str(self.object.id) + "." + self.original_path.split(".")[-1]
+        )
 
     class Meta:
         database = gDatabase
 
     def load_file_info(self, fullpath):
-
         file_info = {}
 
-        ''' file stat '''
+        """ file stat """
         stat_result = os.stat(fullpath)
-        file_info['mtime'] = stat_result.st_mtime
-        file_info['ctime'] = stat_result.st_ctime
+        file_info["mtime"] = stat_result.st_mtime
+        file_info["ctime"] = stat_result.st_ctime
 
         if os.path.isdir(fullpath):
-            file_info['type'] = 'dir'
+            file_info["type"] = "dir"
         else:
-            file_info['type'] = 'file'
+            file_info["type"] = "file"
 
-        if os.path.isdir( fullpath ):
+        if os.path.isdir(fullpath):
             return file_info
 
-        file_info['size'] = stat_result.st_size
+        file_info["size"] = stat_result.st_size
 
-        ''' md5 hash value '''
-        file_info['md5hash'], image_data = self.get_md5hash_info(fullpath)
+        """ md5 hash value """
+        file_info["md5hash"], image_data = self.get_md5hash_info(fullpath)
 
-        ''' exif info '''
+        """ exif info """
         exif_info = self.get_exif_info(fullpath, image_data)
-        file_info['exifdatetime'] = exif_info['datetime']
-        file_info['latitude'] = exif_info['latitude']
-        file_info['longitude'] = exif_info['longitude']
-        file_info['map_datum'] = exif_info['map_datum']
+        file_info["exifdatetime"] = exif_info["datetime"]
+        file_info["latitude"] = exif_info["latitude"]
+        file_info["longitude"] = exif_info["longitude"]
+        file_info["map_datum"] = exif_info["map_datum"]
 
         self.original_path = fullpath
         self.original_filename = Path(fullpath).name
-        self.md5hash = file_info['md5hash']
-        self.size = file_info['size']
-        self.exifdatetime = file_info['exifdatetime']
-        self.file_created = file_info['ctime']
-        self.file_modified = file_info['mtime']
+        self.md5hash = file_info["md5hash"]
+        self.size = file_info["size"]
+        self.exifdatetime = file_info["exifdatetime"]
+        self.file_created = file_info["ctime"]
+        self.file_modified = file_info["mtime"]
 
     def get_md5hash_info(self, filepath):
         try:
             hasher = hashlib.md5()
-            with open(filepath, 'rb') as afile:
+            with open(filepath, "rb") as afile:
                 image_data = afile.read()
                 hasher.update(image_data)
             md5hash = hasher.hexdigest()
@@ -645,15 +647,15 @@ class MdImage(Model):
         except Exception as e:
             logger = logging.getLogger(__name__)
             logger.error(f"Unexpected error calculating MD5 for {filepath}: {e}")
-            raise ValueError(f"Cannot calculate MD5 hash for {filepath}: {e}")
+            raise ValueError(f"Cannot calculate MD5 hash for {filepath}: {e}") from e
 
     def get_exif_info(self, fullpath, image_data=None):
-        image_info = {'date':'','time':'','latitude':'','longitude':'','map_datum':''}
+        image_info = {"date": "", "time": "", "latitude": "", "longitude": "", "map_datum": ""}
         img = None
-        
+
         try:
             if image_data:
-                #img = Image.open()
+                # img = Image.open()
                 img = Image.open(io.BytesIO(image_data))
             else:
                 img = Image.open(fullpath)
@@ -665,69 +667,69 @@ class MdImage(Model):
             logger = logging.getLogger(__name__)
             logger.warning(f"Cannot process image {fullpath}: {e}")
             # Return empty info if image cannot be processed
-            return {'datetime': '', 'latitude': '', 'longitude': '', 'map_datum': ''}
+            return {"datetime": "", "latitude": "", "longitude": "", "map_datum": ""}
         ret = {}
-        #print(filename)
+        # print(filename)
         try:
             info = img._getexif()
             for tag, value in info.items():
-                decoded=TAGS.get(tag, tag)
-                ret[decoded]= value
-                #print("exif:", decoded, value)
+                decoded = TAGS.get(tag, tag)
+                ret[decoded] = value
+                # print("exif:", decoded, value)
             try:
-                if ret['GPSInfo'] != None:
-                    gps_info = ret['GPSInfo']
-                    #print("gps info:", gps_info)
+                if ret["GPSInfo"] is not None:
+                    gps_info = ret["GPSInfo"]
+                    # print("gps info:", gps_info)
                 degree_symbol = "°"
                 minute_symbol = "'"
                 longitude = str(int(gps_info[4][0])) + degree_symbol + str(gps_info[4][1]) + minute_symbol + gps_info[3]
                 latitude = str(int(gps_info[2][0])) + degree_symbol + str(gps_info[2][1]) + minute_symbol + gps_info[1]
                 map_datum = gps_info[18]
-                image_info['latitude'] = latitude
-                image_info['longitude'] = longitude
-                image_info['map_datum'] = map_datum
+                image_info["latitude"] = latitude
+                image_info["longitude"] = longitude
+                image_info["map_datum"] = map_datum
 
             except KeyError:
                 pass
-                #print( "GPS Data Don't Exist for", Path(filename).name)
+                # print( "GPS Data Don't Exist for", Path(filename).name)
 
-
             try:
-                if ret['DateTimeOriginal'] is not None:
-                    exif_timestamp = ret['DateTimeOriginal']
-                    #print("original:", exifTimestamp)
-                    image_info['date'], image_info['time'] = exif_timestamp.split()
+                if ret["DateTimeOriginal"] is not None:
+                    exif_timestamp = ret["DateTimeOriginal"]
+                    # print("original:", exifTimestamp)
+                    image_info["date"], image_info["time"] = exif_timestamp.split()
             except KeyError:
                 pass
-                #print( "DateTimeOriginal Don't Exist")
+                # print( "DateTimeOriginal Don't Exist")
             try:
-                if ret['DateTimeDigitized'] is not None:
-                    exif_timestamp = ret['DateTimeDigitized']
-                    image_info['date'], image_info['time'] = exif_timestamp.split()
+                if ret["DateTimeDigitized"] is not None:
+                    exif_timestamp = ret["DateTimeDigitized"]
+                    image_info["date"], image_info["time"] = exif_timestamp.split()
             except KeyError:
                 pass
-                #print( "DateTimeDigitized Don't Exist")
+                # print( "DateTimeDigitized Don't Exist")
             try:
-                if ret['DateTime'] is not None:
-                    exif_timestamp = ret['DateTime']
-                    image_info['date'], image_info['time'] = exif_timestamp.split()
+                if ret["DateTime"] is not None:
+                    exif_timestamp = ret["DateTime"]
+                    image_info["date"], image_info["time"] = exif_timestamp.split()
             except KeyError:
                 pass
-                #print( "DateTime Don't Exist")
+                # print( "DateTime Don't Exist")
 
         except Exception:
             pass
-            #print(e)
+            # print(e)
 
-        if image_info['date'] == '':
+        if image_info["date"] == "":
             str1 = time.ctime(os.path.getmtime(fullpath))
-            datetime_object = datetime.datetime.strptime(str1, '%a %b %d %H:%M:%S %Y')
-            image_info['date'] = datetime_object.strftime("%Y-%m-%d")
-            image_info['time'] = datetime_object.strftime("%H:%M:%S")
+            datetime_object = datetime.datetime.strptime(str1, "%a %b %d %H:%M:%S %Y")
+            image_info["date"] = datetime_object.strftime("%Y-%m-%d")
+            image_info["time"] = datetime_object.strftime("%H:%M:%S")
         else:
-            image_info['date'] = "-".join( image_info['date'].split(":") )
-        image_info['datetime'] = image_info['date'] + ' ' + image_info['time']
+            image_info["date"] = "-".join(image_info["date"].split(":"))
+        image_info["datetime"] = image_info["date"] + " " + image_info["time"]
         return image_info
+
 
 class MdThreeDModel(Model):
     original_path = CharField(null=True)
@@ -739,7 +741,7 @@ class MdThreeDModel(Model):
     file_modified = DateTimeField(null=True)
     created_at = DateTimeField(default=datetime.datetime.now)
     modified_at = DateTimeField(default=datetime.datetime.now)
-    object = ForeignKeyField(MdObject, backref='threed_model', on_delete="CASCADE")
+    object = ForeignKeyField(MdObject, backref="threed_model", on_delete="CASCADE")
 
     class Meta:
         database = gDatabase
@@ -766,34 +768,35 @@ class MdThreeDModel(Model):
         shutil.copyfile(file_name, new_filepath)
         return self
 
-    def get_file_path(self, base_path =  mu.DEFAULT_STORAGE_DIRECTORY ):
-        return os.path.join( base_path, str(self.object.dataset.id), str(self.object.id) + "." + self.original_path.split('.')[-1])
+    def get_file_path(self, base_path=mu.DEFAULT_STORAGE_DIRECTORY):
+        return os.path.join(
+            base_path, str(self.object.dataset.id), str(self.object.id) + "." + self.original_path.split(".")[-1]
+        )
 
     def load_file_info(self, fullpath):
-
         file_info = {}
 
-        ''' file stat '''
+        """ file stat """
         stat_result = os.stat(fullpath)
-        file_info['mtime'] = stat_result.st_mtime
-        file_info['ctime'] = stat_result.st_ctime
-        file_info['type'] = 'file'
-        file_info['size'] = stat_result.st_size
+        file_info["mtime"] = stat_result.st_mtime
+        file_info["ctime"] = stat_result.st_ctime
+        file_info["type"] = "file"
+        file_info["size"] = stat_result.st_size
 
-        ''' md5 hash value '''
-        file_info['md5hash'], image_data = self.get_md5hash_info(fullpath)
+        """ md5 hash value """
+        file_info["md5hash"], image_data = self.get_md5hash_info(fullpath)
 
         self.original_path = fullpath
         self.original_filename = Path(fullpath).name
-        self.md5hash = file_info['md5hash']
-        self.size = file_info['size']
-        self.file_created = file_info['ctime']
-        self.file_modified = file_info['mtime']
+        self.md5hash = file_info["md5hash"]
+        self.size = file_info["size"]
+        self.file_created = file_info["ctime"]
+        self.file_modified = file_info["mtime"]
 
     def get_md5hash_info(self, filepath):
         try:
             hasher = hashlib.md5()
-            with open(filepath, 'rb') as afile:
+            with open(filepath, "rb") as afile:
                 image_data = afile.read()
                 hasher.update(image_data)
             md5hash = hasher.hexdigest()
@@ -805,27 +808,28 @@ class MdThreeDModel(Model):
         except Exception as e:
             logger = logging.getLogger(__name__)
             logger.error(f"Unexpected error calculating MD5 for {filepath}: {e}")
-            raise ValueError(f"Cannot calculate MD5 hash for {filepath}: {e}")
+            raise ValueError(f"Cannot calculate MD5 hash for {filepath}: {e}") from e
+
 
 class MdObjectOps:
-    def __init__(self,mdobject):
+    def __init__(self, mdobject):
         self.id = mdobject.id
         self.object_name = mdobject.object_name
         self.object_desc = mdobject.object_desc
         self.pixel_per_mm = mdobject.pixels_per_mm
         self.sequence = mdobject.sequence
-        #self.dataset_id = mdobject.dataset
-        #self.scale = mdobject.scale
+        # self.dataset_id = mdobject.dataset
+        # self.scale = mdobject.scale
         self.landmark_str = mdobject.landmark_str
         self.property_str = mdobject.property_str
         if self.landmark_str is not None and self.landmark_str != "":
             mdobject.unpack_landmark()
         self.landmark_list = copy.deepcopy(mdobject.landmark_list)
-        #if mdobject.polygons is not None and mdobject.polygons != "":
+        # if mdobject.polygons is not None and mdobject.polygons != "":
         #    mdobject.unpack_polygons()
-        #self.polygon_list = copy.deepcopy(mdobject.polygon_list)
-        #print("landmark list:", self.landmark_list)
-        #for lm in mdobject.landmark_list:
+        # self.polygon_list = copy.deepcopy(mdobject.polygon_list)
+        # print("landmark list:", self.landmark_list)
+        # for lm in mdobject.landmark_list:
         #    self.landmark_list.append(lm)
         self.variable_list = []
         if self.property_str is not None and self.property_str != "":
@@ -844,8 +848,8 @@ class MdObjectOps:
         if self.pixel_per_mm is None:
             self.pixel_per_mm = 1.0
         self.scale_applied = False
-        #self.apply_scale()
-    
+        # self.apply_scale()
+
     def apply_scale(self):
         if self.pixel_per_mm is not None:
             for lm in self.landmark_list:
@@ -855,11 +859,10 @@ class MdObjectOps:
                     lm[2] = lm[2] / self.pixel_per_mm
         self.scale_applied = True
 
-
     def get_centroid_coord(self):
         c = [0, 0, 0]
 
-        #if len(self.landmark_list) == 0 and self.landmark_str != "":
+        # if len(self.landmark_list) == 0 and self.landmark_str != "":
         #    self.unpack_landmark()
 
         if len(self.landmark_list) == 0:
@@ -872,7 +875,7 @@ class MdObjectOps:
         count_y = 0
         count_z = 0
         lm_dim = 2
-        for lm in ( self.landmark_list ):
+        for lm in self.landmark_list:
             # Skip None values when calculating centroid
             if lm[0] is not None:
                 sum_of_x += lm[0]
@@ -896,15 +899,14 @@ class MdObjectOps:
         return c
 
     def get_centroid_size(self, refresh=False):
-
-        #if len(self.landmark_list) == 0 and self.landmark_str != "":
+        # if len(self.landmark_list) == 0 and self.landmark_str != "":
         #    self.unpack_landmark()
 
         if len(self.landmark_list) == 0:
             return -1
-        elif len(self.landmark_list)== 1:
+        elif len(self.landmark_list) == 1:
             return 1
-        if ( self.centroid_size > 0 ) and ( refresh == False ):
+        if (self.centroid_size > 0) and (not refresh):
             return self.centroid_size
 
         centroid = self.get_centroid_coord()
@@ -921,10 +923,10 @@ class MdObjectOps:
             if lm[0] is None or lm[1] is None:
                 continue
             valid_lm_count += 1
-            sum_of_x_squared += ( lm[0] - centroid[0]) ** 2
-            sum_of_y_squared += ( lm[1] - centroid[1]) ** 2
+            sum_of_x_squared += (lm[0] - centroid[0]) ** 2
+            sum_of_y_squared += (lm[1] - centroid[1]) ** 2
             if len(lm) == 3 and lm[2] is not None:
-                sum_of_z_squared += ( lm[2] - centroid[2]) ** 2
+                sum_of_z_squared += (lm[2] - centroid[2]) ** 2
             sum_of_x += lm[0] - centroid[0]
             sum_of_y += lm[1] - centroid[1]
             if len(lm) == 3 and lm[2] is not None:
@@ -934,19 +936,19 @@ class MdObjectOps:
             return 0
 
         centroid_size = sum_of_x_squared + sum_of_y_squared + sum_of_z_squared
-        #centroid_size = sum_of_x_squared + sum_of_y_squared + sum_of_z_squared \
+        # centroid_size = sum_of_x_squared + sum_of_y_squared + sum_of_z_squared \
         #              - sum_of_x * sum_of_x / lm_count \
         #              - sum_of_y * sum_of_y / lm_count \
         #              - sum_of_z * sum_of_z / lm_count
-        #print centroid_size
+        # print centroid_size
         centroid_size = math.sqrt(centroid_size)
         self.centroid_size = centroid_size
-        #centroid_size = float( int(  * 100 ) ) / 100
+        # centroid_size = float( int(  * 100 ) ) / 100
         return centroid_size
 
     def move(self, x, y, z=0):
         new_landmark_list = []
-        #print("move 1:", id(self.landmark_list), self.landmark_list[0])
+        # print("move 1:", id(self.landmark_list), self.landmark_list[0])
         for lm in self.landmark_list:
             new_lm = lm.copy()  # Create a copy to avoid modifying original
             # Only move non-None coordinates
@@ -958,15 +960,15 @@ class MdObjectOps:
                 new_lm[2] = new_lm[2] + z
             new_landmark_list.append(new_lm)
         self.landmark_list = new_landmark_list
-        #print("move 2:", id(self.landmark_list), self.landmark_list[0])
+        # print("move 2:", id(self.landmark_list), self.landmark_list[0])
 
     def move_to_center(self):
         centroid = self.get_centroid_coord()
-        #print("centroid:", centroid[0], centroid[1], centroid[2])
+        # print("centroid:", centroid[0], centroid[1], centroid[2])
         self.move(-1 * centroid[0], -1 * centroid[1], -1 * centroid[2])
 
     def rescale(self, factor):
-        #print("rescale:", factor, self.landmark_list[:5])
+        # print("rescale:", factor, self.landmark_list[:5])
         new_landmark_list = []
         for lm in self.landmark_list:
             # Scale each coordinate individually, preserving None values
@@ -978,15 +980,15 @@ class MdObjectOps:
                     new_lm.append(None)
             new_landmark_list.append(new_lm)
         self.landmark_list = new_landmark_list
-        #print("rescale:", factor, self.objname, self.landmark_list[:5])
+        # print("rescale:", factor, self.objname, self.landmark_list[:5])
 
     def rescale_to_unitsize(self):
         centroid_size = self.get_centroid_size(True)
-        
-        self.rescale( 1 / centroid_size )
+
+        self.rescale(1 / centroid_size)
 
     def apply_rotation_matrix(self, rotation_matrix):
-        #print("obj_ops apply rotation", rotation_matrix)
+        # print("obj_ops apply rotation", rotation_matrix)
         if len(self.landmark_list) > 0:
             new_landmark_list = []
             for lm in self.landmark_list:
@@ -1011,26 +1013,25 @@ class MdObjectOps:
                     new_landmark_list.append(lm)
             self.landmark_list = new_landmark_list
 
-
     def rotate_2d(self, theta):
-        self.rotate_3d(theta, 'Z')
+        self.rotate_3d(theta, "Z")
         return
 
     def rotate_3d(self, theta, axis):
         cos_theta = math.cos(theta)
         sin_theta = math.sin(theta)
         r_mx = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-        if ( axis == 'Z' ):
+        if axis == "Z":
             r_mx[0][0] = cos_theta
             r_mx[0][1] = sin_theta
             r_mx[1][0] = -1 * sin_theta
             r_mx[1][1] = cos_theta
-        elif ( axis == 'Y' ):
+        elif axis == "Y":
             r_mx[0][0] = cos_theta
             r_mx[0][2] = sin_theta
             r_mx[2][0] = -1 * sin_theta
             r_mx[2][2] = cos_theta
-        elif ( axis == 'X' ):
+        elif axis == "X":
             r_mx[1][1] = cos_theta
             r_mx[1][2] = sin_theta
             r_mx[2][1] = -1 * sin_theta
@@ -1038,13 +1039,13 @@ class MdObjectOps:
         # print "rotation matrix", r_mx
 
         for i, lm in enumerate(self.landmark_list):
-            coords = [0,0,0]
+            coords = [0, 0, 0]
             for j in range(len(lm)):
                 coords[j] = lm[j]
             x_rotated = coords[0] * r_mx[0][0] + coords[1] * r_mx[1][0] + coords[2] * r_mx[2][0]
             y_rotated = coords[0] * r_mx[0][1] + coords[1] * r_mx[1][1] + coords[2] * r_mx[2][1]
             z_rotated = coords[0] * r_mx[0][2] + coords[1] * r_mx[1][2] + coords[2] * r_mx[2][2]
-            self.landmark_list[i] = [ x_rotated, y_rotated, z_rotated ]
+            self.landmark_list[i] = [x_rotated, y_rotated, z_rotated]
 
     def trim_decimal(self, dec=4):
         factor = math.pow(10, dec)
@@ -1052,15 +1053,15 @@ class MdObjectOps:
         for lm in self.landmark_list:
             lm = [float(round(x * factor)) / factor for x in lm]
 
-    def print_landmarks(self, text=''):
+    def print_landmarks(self, text=""):
         print("[", text, "] [", str(self.get_centroid_size()), "]")
         # lm= self.landmarks[0]
         print(self.landmark_list[:5])
-        #for lm in self.landmark_list:
+        # for lm in self.landmark_list:
         #    print(lm)
-            #break
-            #lm= self.landmarks[1]
-            #print lm.xcoord, ", ", lm.ycoord, ", ", lm.zcoord
+        # break
+        # lm= self.landmarks[1]
+        # print lm.xcoord, ", ", lm.ycoord, ", ", lm.zcoord
 
     def align(self, baseline):
         if len(baseline) == 3:
@@ -1073,24 +1074,21 @@ class MdObjectOps:
             point3 = baseline[0]
         else:
             return
-        #print("baseline:",baseline)
-        #print(self.landmark_list)
-        #print(self.landmark_list[point2 - 1], self.landmark_list[point1 - 1])
+        # print("baseline:",baseline)
+        # print(self.landmark_list)
+        # print(self.landmark_list[point2 - 1], self.landmark_list[point1 - 1])
 
         curr_vector1 = np.array(self.landmark_list[point2 - 1]) - np.array(self.landmark_list[point1 - 1])
 
         if len(curr_vector1) == 2:
             to_vector1 = np.array([1, 0])
-        else:        
+        else:
             to_vector1 = np.array([1, 0, 0])
 
-
-        #print("curr_vector1:", curr_vector1)
-        #print("to_vector1:", to_vector1)
+        # print("curr_vector1:", curr_vector1)
+        # print("to_vector1:", to_vector1)
         v1_norm = curr_vector1 / np.linalg.norm(curr_vector1)
         to_norm = to_vector1 / np.linalg.norm(to_vector1)
-
-
 
         if np.allclose(v1_norm, to_norm):
             if len(curr_vector1) == 2:
@@ -1099,58 +1097,60 @@ class MdObjectOps:
             pass
         else:
             if len(curr_vector1) == 2:
-                #print("2D rotation", curr_vector1, to_vector1)
+                # print("2D rotation", curr_vector1, to_vector1)
 
                 curr_vector1 = curr_vector1 / np.linalg.norm(curr_vector1)
                 to_vector1 = to_vector1 / np.linalg.norm(to_vector1)
 
                 cos_theta = np.dot(curr_vector1, to_vector1)
-                sin_theta = np.sqrt(1 - cos_theta ** 2)
+                sin_theta = np.sqrt(1 - cos_theta**2)
 
-                #print
-                #cos_theta = np.dot(curr_vector1, to_vector1) / (np.linalg.norm(curr_vector1) * np.linalg.norm(to_vector1))
-                #sin_theta = np.sqrt(1 - cos_theta ** 2)
-                #print("cos_theta:", cos_theta, "sin_theta:", sin_theta)
+                # print
+                # cos_theta = np.dot(curr_vector1, to_vector1) / (np.linalg.norm(curr_vector1) * np.linalg.norm(to_vector1))
+                # sin_theta = np.sqrt(1 - cos_theta ** 2)
+                # print("cos_theta:", cos_theta, "sin_theta:", sin_theta)
                 # calculate theta
                 theta = math.acos(cos_theta)
                 if sin_theta < 0:
                     theta = -1 * theta
-                #print("theta:", theta)
+                # print("theta:", theta)
 
                 rotation_matrix = np.array([[cos_theta, -1 * sin_theta], [sin_theta, cos_theta]])
 
-                #rotation_matrix = [ [ cos_theta, -1 * sin_theta], [sin_theta, cos_theta] ]
+                # rotation_matrix = [ [ cos_theta, -1 * sin_theta], [sin_theta, cos_theta] ]
                 # apply rotation matrix to landmarks
-                #print("landmarks before rotation", self.landmark_list)
-                #print("rotation matrix", rotation_matrix)
+                # print("landmarks before rotation", self.landmark_list)
+                # print("rotation matrix", rotation_matrix)
 
                 rotated_landmarks = []
-                for i, lm in enumerate(self.landmark_list):
+                for _i, lm in enumerate(self.landmark_list):
                     coords = np.array(lm)
                     rotated_coords = np.dot(rotation_matrix, coords)
                     rotated_landmarks.append(rotated_coords.tolist())
-                    
-                    #coords = [0,0]
-                    #for j in range(len(lm)):
+
+                    # coords = [0,0]
+                    # for j in range(len(lm)):
                     #    coords[j] = lm[j]
-                    #x_rotated = coords[0] * rotation_matrix[0][0] + coords[1] * rotation_matrix[1][0]
-                    #y_rotated = coords[0] * rotation_matrix[0][1] + coords[1] * rotation_matrix[1][1]
-                    #self.landmark_list[i] = [ x_rotated, y_rotated ]
+                    # x_rotated = coords[0] * rotation_matrix[0][0] + coords[1] * rotation_matrix[1][0]
+                    # y_rotated = coords[0] * rotation_matrix[0][1] + coords[1] * rotation_matrix[1][1]
+                    # self.landmark_list[i] = [ x_rotated, y_rotated ]
                 self.landmark_list = rotated_landmarks
-                #print("landmarks after rotation", self.landmark_list)
+                # print("landmarks after rotation", self.landmark_list)
                 return
             else:
                 # calculate cosine and sine of rotation angle
-                cos_theta = np.dot(curr_vector1, to_vector1) / (np.linalg.norm(curr_vector1) * np.linalg.norm(to_vector1))
-                sin_theta = np.sqrt(1 - cos_theta ** 2)
+                cos_theta = np.dot(curr_vector1, to_vector1) / (
+                    np.linalg.norm(curr_vector1) * np.linalg.norm(to_vector1)
+                )
+                sin_theta = np.sqrt(1 - cos_theta**2)
 
-                #calculate rotation axis
+                # calculate rotation axis
                 rotation_axis = np.cross(curr_vector1, to_vector1)
                 rotation_axis = rotation_axis / np.linalg.norm(rotation_axis)
 
                 # calculate rotation matrix to align vector1 to x-axis - Rodrigues' rotation formula
                 # https://en.wikipedia.org/wiki/Rodrigues%27_rotation_formula
-                r_mx = [[1, 0, 0,0], [0, 1, 0,0], [0, 0, 1,0],[0,0,0,1]]
+                r_mx = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
                 r_mx[0][0] = cos_theta + rotation_axis[0] * rotation_axis[0] * (1 - cos_theta)
                 r_mx[0][1] = rotation_axis[0] * rotation_axis[1] * (1 - cos_theta) - rotation_axis[2] * sin_theta
                 r_mx[0][2] = rotation_axis[0] * rotation_axis[2] * (1 - cos_theta) + rotation_axis[1] * sin_theta
@@ -1161,55 +1161,51 @@ class MdObjectOps:
                 r_mx[2][1] = rotation_axis[2] * rotation_axis[1] * (1 - cos_theta) + rotation_axis[0] * sin_theta
                 r_mx[2][2] = cos_theta + rotation_axis[2] * rotation_axis[2] * (1 - cos_theta)
 
-                #r_mx = [[1, 0, 0,0], [0, 1, 0,0], [0, 0, 1,0],[0,0,0,1]]
-                #r_mx[1][1] = cos_theta
-                #r_mx[1][2] = sin_theta
-                #r_mx[2][1] = -1 * sin_theta
-                #r_mx[2][2] = cos_theta
+                # r_mx = [[1, 0, 0,0], [0, 1, 0,0], [0, 0, 1,0],[0,0,0,1]]
+                # r_mx[1][1] = cos_theta
+                # r_mx[1][2] = sin_theta
+                # r_mx[2][1] = -1 * sin_theta
+                # r_mx[2][2] = cos_theta
 
-                #print("rotation matrix:", r_mx)
+                # print("rotation matrix:", r_mx)
 
                 # apply rotation matrix to all landmarks
                 self.apply_rotation_matrix(np.array(r_mx))
 
                 curr_vector1 = np.array(self.landmark_list[point2 - 1]) - np.array(self.landmark_list[point1 - 1])
-                #print("curr_vector1 after rotation:", curr_vector1)
-                #print(self.landmark_list[point2 - 1], self.landmark_list[point1 - 1])
+                # print("curr_vector1 after rotation:", curr_vector1)
+                # print(self.landmark_list[point2 - 1], self.landmark_list[point1 - 1])
 
         mid_point12 = np.array(self.landmark_list[point1 - 1]) + curr_vector1 / 2
         curr_vector2 = np.array(self.landmark_list[point3 - 1]) - np.array(mid_point12)
-        #projection_vector2 = np.dot(curr_vector2, curr_vector1) / np.linalg.norm(curr_vector1) * curr_vector1
-        projection_vector2 = (np.dot(curr_vector2, curr_vector1) / np.linalg.norm(curr_vector1)**2) * curr_vector1
-
-
+        # projection_vector2 = np.dot(curr_vector2, curr_vector1) / np.linalg.norm(curr_vector1) * curr_vector1
+        projection_vector2 = (np.dot(curr_vector2, curr_vector1) / np.linalg.norm(curr_vector1) ** 2) * curr_vector1
 
         curr_vector2 = curr_vector2 - projection_vector2
         to_vector2 = np.array([0, 1, 0])
-        #print("curr_vector2:", curr_vector2)
-        #print("to_vector2:", to_vector2)
+        # print("curr_vector2:", curr_vector2)
+        # print("to_vector2:", to_vector2)
 
         v2_norm = curr_vector2 / np.linalg.norm(curr_vector2)
         to_norm = to_vector2 / np.linalg.norm(to_vector2)
-
 
         if np.allclose(v2_norm, to_norm):
             # do nothing
             pass
         else:
-
             # calculate cosine and sine of rotation angle
             cos_theta = np.dot(curr_vector2, to_vector2) / (np.linalg.norm(curr_vector2) * np.linalg.norm(to_vector2))
-            sin_theta = np.sqrt(1 - cos_theta ** 2)
-            #print("cos_theta:", cos_theta, "sin_theta:", sin_theta)
+            sin_theta = np.sqrt(1 - cos_theta**2)
+            # print("cos_theta:", cos_theta, "sin_theta:", sin_theta)
 
-            #calculate rotation axis
+            # calculate rotation axis
             rotation_axis = np.cross(curr_vector2, to_vector2)
             rotation_axis = rotation_axis / np.linalg.norm(rotation_axis)
-            #print("rotation axis", rotation_axis)
+            # print("rotation axis", rotation_axis)
 
             # calculate rotation matrix to align vector1 to x-axis - Rodrigues' rotation formula
             # https://en.wikipedia.org/wiki/Rodrigues%27_rotation_formula
-            r_mx = [[1, 0, 0,0], [0, 1, 0,0], [0, 0, 1,0],[0,0,0,1]]
+            r_mx = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
             r_mx[0][0] = cos_theta + rotation_axis[0] * rotation_axis[0] * (1 - cos_theta)
             r_mx[0][1] = rotation_axis[0] * rotation_axis[1] * (1 - cos_theta) - rotation_axis[2] * sin_theta
             r_mx[0][2] = rotation_axis[0] * rotation_axis[2] * (1 - cos_theta) + rotation_axis[1] * sin_theta
@@ -1229,7 +1225,7 @@ class MdObjectOps:
 
     def bookstein_registration(self, baseline, rescale=-1):
         # c = self.get_centroid_coord()
-        #print "centroid:", c.xcoord, ", ", c.ycoord, ", ", c.zcoord
+        # print "centroid:", c.xcoord, ", ", c.ycoord, ", ", c.zcoord
         point1 = point2 = point3 = -1
         if len(baseline) == 3:
             point1 = baseline[0]
@@ -1241,48 +1237,48 @@ class MdObjectOps:
             point3 = None
         point1 = point1 - 1
         point2 = point2 - 1
-        if ( point3 != None ):
+        if point3 is not None:
             point3 = point3 - 1
 
-        #self.print_landmarks("before any processing");
+        # self.print_landmarks("before any processing");
 
         center = [0, 0, 0]
-        center[0] = ( self.landmark_list[point1][0] + self.landmark_list[point2][0] ) / 2
-        center[1] = ( self.landmark_list[point1][1] + self.landmark_list[point2][1] ) / 2
-        center[2] = ( self.landmark_list[point1][2] + self.landmark_list[point2][2] ) / 2
+        center[0] = (self.landmark_list[point1][0] + self.landmark_list[point2][0]) / 2
+        center[1] = (self.landmark_list[point1][1] + self.landmark_list[point2][1]) / 2
+        center[2] = (self.landmark_list[point1][2] + self.landmark_list[point2][2]) / 2
         self.move(-1 * center[0], -1 * center[1], -1 * center[2])
 
-        #self.print_landmarks("translation");
-        #self.scale_to_univsize()
+        # self.print_landmarks("translation");
+        # self.scale_to_univsize()
         xdiff = self.landmark_list[point1][0] - self.landmark_list[point2][0]
         ydiff = self.landmark_list[point1][1] - self.landmark_list[point2][1]
         zdiff = self.landmark_list[point1][2] - self.landmark_list[point2][2]
-        #print "x, y, z diff: ", xdiff, ",", ydiff, ",", zdiff
+        # print "x, y, z diff: ", xdiff, ",", ydiff, ",", zdiff
 
         size = math.sqrt(xdiff * xdiff + ydiff * ydiff + zdiff * zdiff)
-        #print "size: ", size
-        #print "rescale: ", rescale
-        if ( rescale < 0 ):
-            self.rescale( 1 / size )
-        elif ( rescale > 0 ):
-            self.rescale( 1 / rescale )
+        # print "size: ", size
+        # print "rescale: ", rescale
+        if rescale < 0:
+            self.rescale(1 / size)
+        elif rescale > 0:
+            self.rescale(1 / rescale)
 
-        #self.print_landmarks("rescaling");
+        # self.print_landmarks("rescaling");
 
-        if ( point3 != None ):
+        if point3 is not None:
             xdiff = self.landmark_list[point1][0] - self.landmark_list[point2][0]
             ydiff = self.landmark_list[point1][1] - self.landmark_list[point2][1]
             zdiff = self.landmark_list[point1][2] - self.landmark_list[point2][2]
             cos_val = xdiff / math.sqrt(xdiff * xdiff + zdiff * zdiff)
-            #print "x, y, z diff: ", xdiff, ",", ydiff, ",", zdiff
-            #print "cos val: ", cos_val
+            # print "x, y, z diff: ", xdiff, ",", ydiff, ",", zdiff
+            # print "cos val: ", cos_val
             theta = math.acos(cos_val)
-            #print "theta: ", theta, ", ", theta * 180/math.pi
-            if ( zdiff < 0 ):
+            # print "theta: ", theta, ", ", theta * 180/math.pi
+            if zdiff < 0:
                 theta = theta * -1
-            self.rotate_3d(-1 * theta, 'Y')
+            self.rotate_3d(-1 * theta, "Y")
 
-        #self.print_landmarks("rotate along xz plane");
+        # self.print_landmarks("rotate along xz plane");
 
         xdiff = self.landmark_list[point1][0] - self.landmark_list[point2][0]
         ydiff = self.landmark_list[point1][1] - self.landmark_list[point2][1]
@@ -1290,27 +1286,28 @@ class MdObjectOps:
 
         size = math.sqrt(xdiff * xdiff + ydiff * ydiff)
         cos_val = xdiff / size
-        #print "x, y, z diff: ", xdiff, ",", ydiff, ",", zdiff
-        #print "cos val: ", cos_val
+        # print "x, y, z diff: ", xdiff, ",", ydiff, ",", zdiff
+        # print "cos val: ", cos_val
         theta = math.acos(cos_val)
-        #print "theta: ", theta, ", ", theta * 180/math.pi
-        if ( ydiff < 0 ):
+        # print "theta: ", theta, ", ", theta * 180/math.pi
+        if ydiff < 0:
             theta = theta * -1
         self.rotate_2d(-1 * theta)
 
-        if ( point3 != None ):
+        if point3 is not None:
             xdiff = self.landmark_list[point3][0]
             ydiff = self.landmark_list[point3][1]
             zdiff = self.landmark_list[point3][2]
-            size = math.sqrt(ydiff ** 2 + zdiff ** 2)
+            size = math.sqrt(ydiff**2 + zdiff**2)
             cos_val = ydiff / size
             theta = math.acos(cos_val)
-            if ( zdiff < 0 ):
+            if zdiff < 0:
                 theta = theta * -1
-            self.rotate_3d(-1 * theta, 'X')
+            self.rotate_3d(-1 * theta, "X")
+
 
 class MdDatasetOps:
-    def __init__(self,dataset):
+    def __init__(self, dataset):
         self.id = dataset.id
         self.dataset_name = dataset.dataset_name
         self.dataset_desc = dataset.dataset_desc
@@ -1323,23 +1320,24 @@ class MdDatasetOps:
         self.edge_list = []
         object_list = dataset.object_list.order_by(MdObject.sequence)
         for mo in object_list:
-            #self.object_list.append(mo.copy())
-            #print(mo.id, mo.sequence)
+            # self.object_list.append(mo.copy())
+            # print(mo.id, mo.sequence)
             self.object_list.append(MdObjectOps(mo))
-        
-        if dataset.wireframe is not None and dataset.wireframe != '':
+
+        if dataset.wireframe is not None and dataset.wireframe != "":
             dataset.unpack_wireframe()
         if dataset.edge_list is not None and len(dataset.edge_list) > 0:
             self.edge_list = dataset.edge_list[:]
-        #print("edge list in MdDatasetOps.__init__:", dataset.wireframe, dataset.edge_list, self.edge_list)
+        # print("edge list in MdDatasetOps.__init__:", dataset.wireframe, dataset.edge_list, self.edge_list)
         self.variablename_list = dataset.variablename_list
-        if dataset.polygons != '':
+        if dataset.polygons != "":
             dataset.unpack_polygons()
-        if dataset.baseline != '':
+        if dataset.baseline != "":
             dataset.unpack_baseline()
-        
+
         self.baseline_point_list = dataset.baseline_point_list
-        #print self
+        # print self
+
     def reset_pose(self):
         pass
 
@@ -1348,7 +1346,7 @@ class MdDatasetOps:
 
     def rotate_gls_to_reference_shape(self, object_index):
         num_obj = len(self.object_list)
-        if ( num_obj == 0 or num_obj - 1 < object_index  ):
+        if num_obj == 0 or num_obj - 1 < object_index:
             return
 
         mo = self.object_list[object_index]
@@ -1357,7 +1355,7 @@ class MdDatasetOps:
         # Check if there are any None values
         has_missing = False
         for lm in mo.landmark_list:
-            if any(coord is None for coord in lm[:self.dimension]):
+            if any(coord is None for coord in lm[: self.dimension]):
                 has_missing = True
                 break
 
@@ -1369,13 +1367,13 @@ class MdDatasetOps:
             i = 0
             for lm in mo.landmark_list:
                 for j in range(self.dimension):
-                    target_shape[i,j] = lm[j]
+                    target_shape[i, j] = lm[j]
                 i += 1
 
             i = 0
             for lm in self.reference_shape.landmark_list:
                 for j in range(self.dimension):
-                    reference_shape[i,j] = lm[j]
+                    reference_shape[i, j] = lm[j]
                 i += 1
 
             rotation_matrix = self.rotation_matrix(reference_shape, target_shape)
@@ -1384,7 +1382,7 @@ class MdDatasetOps:
             i = 0
             for lm in mo.landmark_list:
                 for j in range(self.dimension):
-                    lm[j] = rotated_shape[i,j]
+                    lm[j] = rotated_shape[i, j]
                 i += 1
         else:
             # New implementation for missing data - use only valid landmarks
@@ -1396,12 +1394,15 @@ class MdDatasetOps:
                 obj_lm = mo.landmark_list[i]
                 ref_lm = self.reference_shape.landmark_list[i] if i < len(self.reference_shape.landmark_list) else None
 
-                if (obj_lm and ref_lm and
-                    all(coord is not None for coord in obj_lm[:self.dimension]) and
-                    all(coord is not None for coord in ref_lm[:self.dimension])):
+                if (
+                    obj_lm
+                    and ref_lm
+                    and all(coord is not None for coord in obj_lm[: self.dimension])
+                    and all(coord is not None for coord in ref_lm[: self.dimension])
+                ):
                     valid_indices.append(i)
-                    target_points.append(obj_lm[:self.dimension])
-                    reference_points.append(ref_lm[:self.dimension])
+                    target_points.append(obj_lm[: self.dimension])
+                    reference_points.append(ref_lm[: self.dimension])
 
             # Need at least 3 points for rotation in 2D, 4 in 3D
             min_points = 3 if self.dimension == 2 else 4
@@ -1436,27 +1437,26 @@ class MdDatasetOps:
             mo.landmark_list = new_landmark_list
 
     def apply_rotation_matrix(self, rotation_matrix):
-        #print("obj_ops apply rotation", rotation_matrix)
+        # print("obj_ops apply rotation", rotation_matrix)
         for mo in self.object_list:
             # Use the MdObjectOps apply_rotation_matrix which handles None values
             mo.apply_rotation_matrix(rotation_matrix)
 
     def rotation_matrix(self, ref, target):
-        #assert( ref[0] == 3 )
-        #assert( ref.shape == target.shape )
+        # assert( ref[0] == 3 )
+        # assert( ref.shape == target.shape )
 
         correlation_matrix = np.dot(np.transpose(ref), target)
         v, s, w = np.linalg.svd(correlation_matrix)
-        is_reflection = ( np.linalg.det(v) * np.linalg.det(w) ) < 0.0
+        is_reflection = (np.linalg.det(v) * np.linalg.det(w)) < 0.0
         if is_reflection:
             v[-1, :] = -v[-1, :]
         rot_mx = np.dot(v, w)
-        #print("rotation_matrix:",rot_mx)
+        # print("rotation_matrix:",rot_mx)
         return rot_mx
 
     def get_average_shape(self):
-
-        object_count = len(self.object_list)
+        len(self.object_list)
 
         average_shape = MdObjectOps(MdObject())
         average_shape.landmark_list = []
@@ -1518,8 +1518,8 @@ class MdDatasetOps:
             sum_val += number_of_landmarks
             min_number_of_landmarks = min(min_number_of_landmarks, number_of_landmarks)
             max_number_of_landmarks = max(max_number_of_landmarks, number_of_landmarks)
-        #average_number_of_landmarks = float( sum_val ) / len( self.objects )
-        #print min_number_of_landmarks, max_number_of_landmarks
+        # average_number_of_landmarks = float( sum_val ) / len( self.objects )
+        # print min_number_of_landmarks, max_number_of_landmarks
         if sum_val > 0 and min_number_of_landmarks != max_number_of_landmarks:
             print("Inconsistent number of landmarks", min_number_of_landmarks, max_number_of_landmarks)
             return False
@@ -1544,8 +1544,7 @@ class MdDatasetOps:
         # Check each landmark
         for lm_idx in range(len(obj.landmark_list)):
             # If any coordinate is missing, replace with reference
-            if (obj.landmark_list[lm_idx][0] is None or
-                obj.landmark_list[lm_idx][1] is None):
+            if obj.landmark_list[lm_idx][0] is None or obj.landmark_list[lm_idx][1] is None:
                 # Replace with reference shape landmark
                 if lm_idx < len(reference_shape.landmark_list):
                     ref_lm = reference_shape.landmark_list[lm_idx]
@@ -1582,7 +1581,7 @@ class MdDatasetOps:
         # Store original missing positions for restoration if needed
         missing_positions = []
         if has_missing:
-            for obj_idx, obj in enumerate(self.object_list):
+            for _obj_idx, obj in enumerate(self.object_list):
                 obj_missing = []
                 for lm_idx, lm in enumerate(obj.landmark_list):
                     if lm[0] is None or lm[1] is None:
@@ -1610,7 +1609,7 @@ class MdDatasetOps:
                     self.estimate_missing_landmarks(obj_idx, average_shape)
 
             # Check for convergence
-            if self.is_same_shape(previous_average_shape, average_shape) and previous_average_shape != None:
+            if self.is_same_shape(previous_average_shape, average_shape) and previous_average_shape is not None:
                 break
 
             self.set_reference_shape(average_shape)
@@ -1621,7 +1620,7 @@ class MdDatasetOps:
 
     def procrustes_superimposition(self):
         """Procrustes superimposition that automatically handles missing landmarks."""
-        #print("begin_procrustes")
+        # print("begin_procrustes")
         if not self.check_object_list():
             print("check_object_list failed")
             return False
@@ -1632,66 +1631,72 @@ class MdDatasetOps:
 
         # Original implementation for complete data
         for mo in self.object_list:
-            #mo.set_landmarks()
+            # mo.set_landmarks()
             mo.move_to_center()
             mo.rescale_to_unitsize()
-        #print("move_to_center and rescale_to_unitsize done")
-        #print("object",self.object_list[0].landmark_list[:5])
+        # print("move_to_center and rescale_to_unitsize done")
+        # print("object",self.object_list[0].landmark_list[:5])
 
         average_shape = None
         previous_average_shape = None
         i = 0
-        while ( True ):
+        while True:
             i += 1
-            #print("progressing...", i)
+            # print("progressing...", i)
             previous_average_shape = average_shape
             average_shape = self.get_average_shape()
 
-            #average_shape.print_landmarks("average_shape")
+            # average_shape.print_landmarks("average_shape")
 
-            if ( self.is_same_shape(previous_average_shape, average_shape) and previous_average_shape != None ):
+            if self.is_same_shape(previous_average_shape, average_shape) and previous_average_shape is not None:
                 break
             self.set_reference_shape(average_shape)
             for j in range(len(self.object_list)):
                 self.rotate_gls_to_reference_shape(j)
-                #self.objects[0].print_landmarks('aa')
-                #self.objects[1].print_landmarks('bb')
-                #average_shape.print_landmarks('cc')
-        #print("end procrustes")
+                # self.objects[0].print_landmarks('aa')
+                # self.objects[1].print_landmarks('bb')
+                # average_shape.print_landmarks('cc')
+        # print("end procrustes")
         return True
 
     def is_same_shape(self, shape1, shape2):
-        if ( shape1 == None or shape2 == None ):
+        if shape1 is None or shape2 is None:
             return False
         sum_coord = 0
         valid_count = 0
         for i in range(len(shape1.landmark_list)):
             # Only compare landmarks that are valid in both shapes
-            if (shape1.landmark_list[i][0] is not None and
-                shape2.landmark_list[i][0] is not None and
-                shape1.landmark_list[i][1] is not None and
-                shape2.landmark_list[i][1] is not None):
-                sum_coord += ( shape1.landmark_list[i][0] - shape2.landmark_list[i][0]) ** 2
-                sum_coord += ( shape1.landmark_list[i][1] - shape2.landmark_list[i][1]) ** 2
+            if (
+                shape1.landmark_list[i][0] is not None
+                and shape2.landmark_list[i][0] is not None
+                and shape1.landmark_list[i][1] is not None
+                and shape2.landmark_list[i][1] is not None
+            ):
+                sum_coord += (shape1.landmark_list[i][0] - shape2.landmark_list[i][0]) ** 2
+                sum_coord += (shape1.landmark_list[i][1] - shape2.landmark_list[i][1]) ** 2
                 valid_count += 1
                 if self.dimension == 3:
-                    if (len(shape1.landmark_list[i]) > 2 and len(shape2.landmark_list[i]) > 2 and
-                        shape1.landmark_list[i][2] is not None and shape2.landmark_list[i][2] is not None):
-                        sum_coord += ( shape1.landmark_list[i][2] - shape2.landmark_list[i][2]) ** 2
-        #shape1.print_landmarks("shape1")
-        #shape2.print_landmarks("shape2")
+                    if (
+                        len(shape1.landmark_list[i]) > 2
+                        and len(shape2.landmark_list[i]) > 2
+                        and shape1.landmark_list[i][2] is not None
+                        and shape2.landmark_list[i][2] is not None
+                    ):
+                        sum_coord += (shape1.landmark_list[i][2] - shape2.landmark_list[i][2]) ** 2
+        # shape1.print_landmarks("shape1")
+        # shape2.print_landmarks("shape2")
         if valid_count == 0:
             return False
         sum_coord = math.sqrt(sum_coord)
-        #print "diff: ", sum
-        if sum_coord < 10 ** -10:
+        # print "diff: ", sum
+        if sum_coord < 10**-10:
             return True
         return False
 
     def resistant_fit_superimposition(self):
         if len(self.object_list) == 0:
-            print( "No objects to transform!")
-            raise 
+            print("No objects to transform!")
+            raise
 
         for mo in self.object_list:
             mo.move_to_center()
@@ -1701,7 +1706,7 @@ class MdDatasetOps:
         i = 0
         while True:
             i += 1
-            #print "iteration: ", i
+            # print "iteration: ", i
             previous_average_shape = average_shape
             average_shape = self.get_average_shape()
             average_shape.rescale_to_unitsize()
@@ -1712,23 +1717,23 @@ class MdDatasetOps:
                 self.rotate_resistant_fit_to_reference_shape(j)
 
     def rotate_vector_2d(self, theta, vec):
-        return self.rotate_vector_3d(theta, vec, 'Z')
+        return self.rotate_vector_3d(theta, vec, "Z")
 
     def rotate_vector_3d(self, theta, vec, axis):
         cos_theta = math.cos(theta)
         sin_theta = math.sin(theta)
         r_mx = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-        if ( axis == 'Z' ):
+        if axis == "Z":
             r_mx[0][0] = cos_theta
             r_mx[0][1] = sin_theta
             r_mx[1][0] = -1 * sin_theta
             r_mx[1][1] = cos_theta
-        elif ( axis == 'Y' ):
+        elif axis == "Y":
             r_mx[0][0] = cos_theta
             r_mx[0][2] = sin_theta
             r_mx[2][0] = -1 * sin_theta
             r_mx[2][2] = cos_theta
-        elif ( axis == 'X' ):
+        elif axis == "X":
             r_mx[1][1] = cos_theta
             r_mx[1][2] = sin_theta
             r_mx[2][1] = -1 * sin_theta
@@ -1749,12 +1754,12 @@ class MdDatasetOps:
 
         target_shape = self.object_list[object_index]
         nlandmarks = len(target_shape.landmark_list)
-        #target_shape = np.zeros((nlandmarks,3))
+        # target_shape = np.zeros((nlandmarks,3))
         reference_shape = self.reference_shape
 
-        #rotation_matrix = self.rotation_matrix( reference_shape, target_shape )
+        # rotation_matrix = self.rotation_matrix( reference_shape, target_shape )
 
-        #rotated_shape = np.transpose( np.dot( rotation_matrix, np.transpose( target_shape ) ) )
+        # rotated_shape = np.transpose( np.dot( rotation_matrix, np.transpose( target_shape ) ) )
 
         # obtain scale factor using repeated median
         landmark_count = len(reference_shape.landmark_list)
@@ -1764,31 +1769,33 @@ class MdDatasetOps:
         for i in range(landmark_count - 1):
             for j in range(i + 1, landmark_count):
                 target_distance = math.sqrt(
-                    ( target_shape.landmark_list[i][0] - target_shape.landmark_list[j][0] ) ** 2 + \
-                    ( target_shape.landmark_list[i][1] - target_shape.landmark_list[j][1] ) ** 2 + \
-                    ( target_shape.landmark_list[i][2] - target_shape.landmark_list[j][2] ) ** 2)
+                    (target_shape.landmark_list[i][0] - target_shape.landmark_list[j][0]) ** 2
+                    + (target_shape.landmark_list[i][1] - target_shape.landmark_list[j][1]) ** 2
+                    + (target_shape.landmark_list[i][2] - target_shape.landmark_list[j][2]) ** 2
+                )
                 reference_distance = math.sqrt(
-                    ( reference_shape.landmark_list[i][0] - reference_shape.landmark_list[j][0] ) ** 2 + \
-                    ( reference_shape.landmark_list[i][1] - reference_shape.landmark_list[j][1] ) ** 2 + \
-                    ( reference_shape.landmark_list[i][2] - reference_shape.landmark_list[j][2] ) ** 2)
+                    (reference_shape.landmark_list[i][0] - reference_shape.landmark_list[j][0]) ** 2
+                    + (reference_shape.landmark_list[i][1] - reference_shape.landmark_list[j][1]) ** 2
+                    + (reference_shape.landmark_list[i][2] - reference_shape.landmark_list[j][2]) ** 2
+                )
                 tau = reference_distance / target_distance
                 inner_tau_array.append(tau)
                 median_index = self.get_median_index(inner_tau_array)
             #       print median_index
-            #print "tau: ", inner_tau_array
+            # print "tau: ", inner_tau_array
             outer_tau_array.append(inner_tau_array[median_index])
             inner_tau_array = []
         median_index = self.get_median_index(outer_tau_array)
-        #print "tau: ", outer_tau_array
+        # print "tau: ", outer_tau_array
         tau_final = outer_tau_array[median_index]
 
         # rescale to scale factor
-        #print "index:", object_index
-        #print "scale factor:", tau_final
-        #target_shape.print_landmarks("before rescale")
+        # print "index:", object_index
+        # print "scale factor:", tau_final
+        # target_shape.print_landmarks("before rescale")
         target_shape.rescale(tau_final)
-        #target_shape.print_landmarks("after rescale")
-        #exit
+        # target_shape.print_landmarks("after rescale")
+        # exit
 
         # obtain rotation angle using repeated median
         inner_theta_array = []
@@ -1798,12 +1805,20 @@ class MdDatasetOps:
         for i in range(landmark_count - 1):
             for j in range(i + 1, landmark_count):
                 # get vector
-                target_vector = np.array([target_shape.landmark_list[i][0] - target_shape.landmark_list[j][0],
-                                             target_shape.landmark_list[i][1] - target_shape.landmark_list[j][1],
-                                             target_shape.landmark_list[i][2] - target_shape.landmark_list[j][2]])
-                reference_vector = np.array([reference_shape.landmark_list[i][0] - reference_shape.landmark_list[j][0],
-                                             reference_shape.landmark_list[i][1] - reference_shape.landmark_list[j][1],
-                                             reference_shape.landmark_list[i][2] - reference_shape.landmark_list[j][2]])
+                target_vector = np.array(
+                    [
+                        target_shape.landmark_list[i][0] - target_shape.landmark_list[j][0],
+                        target_shape.landmark_list[i][1] - target_shape.landmark_list[j][1],
+                        target_shape.landmark_list[i][2] - target_shape.landmark_list[j][2],
+                    ]
+                )
+                reference_vector = np.array(
+                    [
+                        reference_shape.landmark_list[i][0] - reference_shape.landmark_list[j][0],
+                        reference_shape.landmark_list[i][1] - reference_shape.landmark_list[j][1],
+                        reference_shape.landmark_list[i][2] - reference_shape.landmark_list[j][2],
+                    ]
+                )
                 #       cos_val = ( target_vector[0] * reference_vector[0] + \
                 #                   target_vector[1] * reference_vector[1] + \
                 #                   target_vector[2] * reference_vector[2] ) \
@@ -1816,8 +1831,11 @@ class MdDatasetOps:
                 #          print reference_vector
                 #          print math.acos( cos_val )
                 #          cos_val = 1.0
-                cos_val = np.vdot(target_vector, reference_vector) / np.linalg.norm(
-                    target_vector) * np.linalg.norm(reference_vector)
+                cos_val = (
+                    np.vdot(target_vector, reference_vector)
+                    / np.linalg.norm(target_vector)
+                    * np.linalg.norm(reference_vector)
+                )
                 #        if( cos_val > 1.0 ):
                 #          print "cos_val 2: ", cos_val
                 #          cos_val = 1.0
@@ -1831,7 +1849,7 @@ class MdDatasetOps:
                 #          theta = 0.0
                 inner_theta_array.append(theta)
                 inner_vector_array.append(np.array([target_vector, reference_vector]))
-                #print inner_vector_array[-1]
+                # print inner_vector_array[-1]
             median_index = self.get_median_index(inner_theta_array)
             #      print inner_vector_array[median_index]
             outer_theta_array.append(inner_theta_array[median_index])
@@ -1845,178 +1863,179 @@ class MdDatasetOps:
 
         target_shape = np.zeros((1, 3))
         reference_shape = np.zeros((1, 3))
-        #print vector_final
+        # print vector_final
         target_shape[0] = vector_final[0]
         reference_shape[0] = vector_final[1]
 
         rotation_matrix = self.get_vector_rotation_matrix(vector_final[1], vector_final[0])
 
-        #rotation_matrix = self.rotation_matrix( reference_shape, target_shape )
-        #print reference_shape
-        #print target_shape
-        #rotated_shape = np.transpose( np.dot( rotation_matrix, np.transpose( target_shape ) ) )
-        #print rotated_shape
-        #exit
+        # rotation_matrix = self.rotation_matrix( reference_shape, target_shape )
+        # print reference_shape
+        # print target_shape
+        # rotated_shape = np.transpose( np.dot( rotation_matrix, np.transpose( target_shape ) ) )
+        # print rotated_shape
+        # exit
         target_shape = np.zeros((nlandmarks, 3))
         i = 0
-        for lm in ( self.object_list[object_index].landmark_list ):
+        for lm in self.object_list[object_index].landmark_list:
             target_shape[i] = lm
             i += 1
 
         reference_shape = np.zeros((nlandmarks, 3))
         i = 0
-        for lm in ( self.reference_shape.landmark_list ):
+        for lm in self.reference_shape.landmark_list:
             reference_shape[i] = lm
             i += 1
 
         rotated_shape = np.transpose(np.dot(rotation_matrix, np.transpose(target_shape)))
 
-        #print "reference: ", reference_shape[0]
-        #print "target: ", target_shape[0], np.linalg.norm(target_shape[0])
-        #print "rotation: ", rotation_matrix
-        #print "rotated: ", rotated_shape[0], np.linalg.norm(rotated_shape[0])
-        #print "determinant: ", np.linalg.det( rotation_matrix )
+        # print "reference: ", reference_shape[0]
+        # print "target: ", target_shape[0], np.linalg.norm(target_shape[0])
+        # print "rotation: ", rotation_matrix
+        # print "rotated: ", rotated_shape[0], np.linalg.norm(rotated_shape[0])
+        # print "determinant: ", np.linalg.det( rotation_matrix )
 
         i = 0
-        for lm in ( self.object_list[object_index].landmark_list ):
-            lm = [ rotated_shape[i, 0], rotated_shape[i, 1], rotated_shape[i, 2] ]
+        for lm in self.object_list[object_index].landmark_list:
+            lm = [rotated_shape[i, 0], rotated_shape[i, 1], rotated_shape[i, 2]]
             i += 1
-        if ( object_index == 0 ):
+        if object_index == 0:
             pass
-            #self.reference_shape.print_landmarks("ref:")
-            #self.objects[object_index].print_landmarks(str(object_index))
-            #print "reference: ", reference_shape[0]
-            #print "target: ", target_shape[0], np.linalg.norm(target_shape[0])
-            #print "rotation: ", rotation_matrix
-            #print "rotated: ", rotated_shape[0], np.linalg.norm(rotated_shape[0])
-            #print "determinant: ", np.linalg.det( rotation_matrix )
+            # self.reference_shape.print_landmarks("ref:")
+            # self.objects[object_index].print_landmarks(str(object_index))
+            # print "reference: ", reference_shape[0]
+            # print "target: ", target_shape[0], np.linalg.norm(target_shape[0])
+            # print "rotation: ", rotation_matrix
+            # print "rotated: ", rotated_shape[0], np.linalg.norm(rotated_shape[0])
+            # print "determinant: ", np.linalg.det( rotation_matrix )
 
     def get_vector_rotation_matrix(self, ref, target):
-        ( x, y, z ) = ( 0, 1, 2 )
-        #print ref
-        #print target
-        #print "0 ref", ref
-        #print "0 target", target
+        (x, y, z) = (0, 1, 2)
+        # print ref
+        # print target
+        # print "0 ref", ref
+        # print "0 target", target
 
         ref_1 = ref
         ref_1[z] = 0
         cos_val = ref[x] / math.sqrt(ref[x] ** 2 + ref[z] ** 2)
         theta1 = math.acos(cos_val)
-        if ( ref[z] < 0 ):
+        if ref[z] < 0:
             theta1 = theta1 * -1
-        ref = self.rotate_vector_3d(-1 * theta1, ref, 'Y')
-        target = self.rotate_vector_3d(-1 * theta1, target, 'Y')
+        ref = self.rotate_vector_3d(-1 * theta1, ref, "Y")
+        target = self.rotate_vector_3d(-1 * theta1, target, "Y")
 
-        #print "1 ref", ref
-        #print "1 target", target
+        # print "1 ref", ref
+        # print "1 target", target
 
         cos_val = ref[x] / math.sqrt(ref[x] ** 2 + ref[y] ** 2)
         theta2 = math.acos(cos_val)
-        if ( ref[y] < 0 ):
+        if ref[y] < 0:
             theta2 = theta2 * -1
         ref = self.rotate_vector_2d(-1 * theta2, ref)
         target = self.rotate_vector_2d(-1 * theta2, target)
 
-        #print "2 ref", ref
-        #print "2 target", target
+        # print "2 ref", ref
+        # print "2 target", target
 
-        cos_val = target[x] / math.sqrt( target[x] ** 2 + target[z] ** 2 )
+        cos_val = target[x] / math.sqrt(target[x] ** 2 + target[z] ** 2)
         theta1 = math.acos(cos_val)
-        if ( target[z] < 0 ):
+        if target[z] < 0:
             theta1 = theta1 * -1
-        target = self.rotate_vector_3d(-1 * theta1, target, 'Y')
+        target = self.rotate_vector_3d(-1 * theta1, target, "Y")
 
-        #print "3 ref", ref
-        #print "3 target", target
+        # print "3 ref", ref
+        # print "3 target", target
 
-        cos_val = target[x] / math.sqrt( target[x] ** 2 + target[y] ** 2 )
+        cos_val = target[x] / math.sqrt(target[x] ** 2 + target[y] ** 2)
         theta2 = math.acos(cos_val)
-        if ( target[y] < 0 ):
+        if target[y] < 0:
             theta2 = theta2 * -1
         target = self.rotate_vector_2d(-1 * theta2, target)
 
-        #print "4 ref", ref
-        #print "4 target", target
+        # print "4 ref", ref
+        # print "4 target", target
 
         r_mx1 = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
         r_mx2 = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
-        #print "shape:", r_mx1.shape
-        #print "r_mx1", r_mx1
-        #print "theta1", theta1
-        #print "cos theta1", math.cos( theta1 )
-        #print "sin theta1", math.sin( theta1 )
-        #print "r_mx2", r_mx2
-        #print "theta2", theta2
+        # print "shape:", r_mx1.shape
+        # print "r_mx1", r_mx1
+        # print "theta1", theta1
+        # print "cos theta1", math.cos( theta1 )
+        # print "sin theta1", math.sin( theta1 )
+        # print "r_mx2", r_mx2
+        # print "theta2", theta2
         r_mx1[0][0] = math.cos(theta1)
         r_mx1[0][2] = math.sin(theta1)
         r_mx1[2][0] = math.sin(theta1) * -1
         r_mx1[2][2] = math.cos(theta1)
 
-        #print "r_mx1", r_mx1
-        #print "theta1", theta1
-        #print "r_mx2", r_mx2
-        #print "theta2", theta2
+        # print "r_mx1", r_mx1
+        # print "theta1", theta1
+        # print "r_mx2", r_mx2
+        # print "theta2", theta2
 
         r_mx2[0][0] = math.cos(theta2)
         r_mx2[0][1] = math.sin(theta2)
         r_mx2[1][0] = math.sin(theta2) * -1
         r_mx2[1][1] = math.cos(theta2)
 
-        #print "r_mx1", r_mx1
-        #print "theta1", theta1
-        #print "r_mx2", r_mx2
-        #print "theta2", theta2
+        # print "r_mx1", r_mx1
+        # print "theta1", theta1
+        # print "r_mx2", r_mx2
+        # print "theta2", theta2
 
         rotation_matrix = np.dot(r_mx1, r_mx2)
         return rotation_matrix
 
-
     def get_median_index(self, arr):
         arr.sort()
         len_arr = len(arr)
-        if ( len_arr == 0 ):
+        if len_arr == 0:
             return -1
         half_len = int(math.floor(len_arr / 2.0))
         return half_len
 
+
 class MdAnalysis(Model):
     analysis_name = CharField()
     analysis_desc = CharField(null=True)
-    ''' dataset info '''
-    dataset = ForeignKeyField(MdDataset, backref='analyses', null=True,on_delete="CASCADE")
+    """ dataset info """
+    dataset = ForeignKeyField(MdDataset, backref="analyses", null=True, on_delete="CASCADE")
     dimension = IntegerField(default=2)
     wireframe = CharField(null=True)
     baseline = CharField(null=True)
     polygons = CharField(null=True)
     propertyname_str = CharField(null=True)
     superimposition_method = CharField()
-    #analysis_method = CharField() # PCA or CVA
+    # analysis_method = CharField() # PCA or CVA
 
-    ''' object info '''
-    object_info_json = CharField(null=True) # object name, id, properties and centroid size
-    raw_landmark_json = CharField(null=True)    # raw landmark info in list of list format
-    superimposed_landmark_json = CharField(null=True) # superimposed landmark info in list of list format
+    """ object info """
+    object_info_json = CharField(null=True)  # object name, id, properties and centroid size
+    raw_landmark_json = CharField(null=True)  # raw landmark info in list of list format
+    superimposed_landmark_json = CharField(null=True)  # superimposed landmark info in list of list format
 
-    ''' PCA result '''
+    """ PCA result """
     cva_group_by = CharField(null=True)
-    pca_analysis_result_json = CharField(null=True) # PCA result in list of list format
-    pca_rotation_matrix_json = CharField(null=True) # rotation matrix from PCA
-    pca_eigenvalues_json = CharField(null=True) # PCA eigenvalues and percentages of variance explained
+    pca_analysis_result_json = CharField(null=True)  # PCA result in list of list format
+    pca_rotation_matrix_json = CharField(null=True)  # rotation matrix from PCA
+    pca_eigenvalues_json = CharField(null=True)  # PCA eigenvalues and percentages of variance explained
 
-    ''' CVA result '''
+    """ CVA result """
     cva_group_by = CharField(null=True)
-    cva_analysis_result_json = CharField(null=True) # CVA result in list of list format
-    cva_rotation_matrix_json = CharField(null=True) # rotation matrix from CVA
-    cva_eigenvalues_json = CharField(null=True) # CVA eigenvalues and percentages of variance explained
+    cva_analysis_result_json = CharField(null=True)  # CVA result in list of list format
+    cva_rotation_matrix_json = CharField(null=True)  # rotation matrix from CVA
+    cva_eigenvalues_json = CharField(null=True)  # CVA eigenvalues and percentages of variance explained
 
-    ''' MANOVA result'''
+    """ MANOVA result"""
     manova_group_by = CharField(null=True)
-    manova_analysis_result_json = CharField(null=True) # MANOVA results
+    manova_analysis_result_json = CharField(null=True)  # MANOVA results
 
-    #virtual_specimens_json = CharField(null=True) # list of virtual specimens
+    # virtual_specimens_json = CharField(null=True) # list of virtual specimens
 
     created_at = DateTimeField(default=datetime.datetime.now)
     modified_at = DateTimeField(default=datetime.datetime.now)
+
     class Meta:
         database = gDatabase
 
@@ -2024,7 +2043,7 @@ class MdAnalysis(Model):
 def prepare_database():
     """Prepare the database by running migrations and backups"""
     from peewee_migrate import Router
-    
+
     migrations_path = mu.resource_path("migrations")
     logger.info("migrations path: %s", migrations_path)
     logger.info("database path: %s", database_path)
@@ -2032,7 +2051,7 @@ def prepare_database():
     date_str = now.strftime("%Y%m%d")
 
     # backup database file to backup directory
-    backup_path = os.path.join(mu.DB_BACKUP_DIRECTORY, DATABASE_FILENAME + '.' + date_str)
+    backup_path = os.path.join(mu.DB_BACKUP_DIRECTORY, DATABASE_FILENAME + "." + date_str)
     if not os.path.exists(backup_path) and os.path.exists(database_path):
         shutil.copy2(database_path, backup_path)
         logger.info("backup database to %s", backup_path)

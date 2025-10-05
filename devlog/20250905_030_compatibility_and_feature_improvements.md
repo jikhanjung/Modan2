@@ -112,8 +112,8 @@ if self.show_index:
     index_color = mu.as_gl_color(self.index_color)
     gl.glColor3f( *index_color )
     gl.glRasterPos3f(lm[0] + 0.05, lm[1] + 0.05, lm[2])
-    font_size_list = [ glut.GLUT_BITMAP_HELVETICA_10, 
-                      glut.GLUT_BITMAP_HELVETICA_12, 
+    font_size_list = [ glut.GLUT_BITMAP_HELVETICA_10,
+                      glut.GLUT_BITMAP_HELVETICA_12,
                       glut.GLUT_BITMAP_HELVETICA_18]
     if GLUT_AVAILABLE and GLUT_INITIALIZED and glut:
         try:

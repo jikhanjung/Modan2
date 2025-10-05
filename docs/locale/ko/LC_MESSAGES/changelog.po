@@ -645,4 +645,3 @@ msgid ""
 msgstr ""
 "전체 로드맵 및 기능 요청은 `GitHub Issues <https://github.com/jikhanjung/Modan2/issues>`_ "
 "페이지를 참조하세요."
-

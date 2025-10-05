@@ -2,6 +2,7 @@
 Modan2 Version Information
 Single Source of Truth for version management
 """
+
 import semver
 
 __version__ = "0.1.5-alpha.1"

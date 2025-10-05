@@ -1,7 +1,7 @@
 # Data Exploration Dialog - Reset Pose 버튼 문제 해결 현황
 
-**작업일**: 2025-09-05  
-**작업자**: Claude Code Assistant  
+**작업일**: 2025-09-05
+**작업자**: Claude Code Assistant
 **관련 컴포넌트**: DataExplorationDialog, ObjectViewer3D
 
 ## 문제 개요
@@ -13,7 +13,7 @@ Data Exploration Dialog에서 Reset Pose 버튼이 정상적으로 작동하지 
 - **동작**: 그래프에서 새로운 점을 클릭했을 때만 reset된 pose로 표시됨
 - **로그**: `Resetting 1 shape views` 정상 출력
 
-### 2. 썸네일 (Shape Grid) 문제  
+### 2. 썸네일 (Shape Grid) 문제
 - **증상**: 썸네일들이 reset되지 않음
 - **동작**: Reset Pose 버튼 클릭해도 회전된 상태 그대로 유지
 - **로그**: 상황에 따라 `Resetting 0 shape grid views` 또는 `Resetting 9 shape grid views` 출력
@@ -39,7 +39,7 @@ def reset_pose(self):
     self.temp_dolly = 0
     self.temp_pan_x = 0
     self.temp_pan_y = 0
-    
+
     # Reset rotation matrix to identity
     self.rotation_matrix = np.array([
         [1, 0, 0, 0],
@@ -47,9 +47,9 @@ def reset_pose(self):
         [0, 0, 1, 0],
         [0, 0, 0, 1]
     ])
-    
+
     self.align_object()
-    
+
     # Force complete redraw by invalidating GL state
     if hasattr(self, 'gl_list') and self.gl_list is not None:
         gl.glDeleteLists(self.gl_list, 1)
@@ -146,5 +146,5 @@ self.paintGL()
 
 ---
 
-**현재 우선순위**: 렌더링 즉시 갱신 메커니즘 해결  
+**현재 우선순위**: 렌더링 즉시 갱신 메커니즘 해결
 **다음 단계**: OpenGL 컨텍스트 강제 갱신 또는 데이터 레벨 해결책 시도

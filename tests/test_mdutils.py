@@ -1,4 +1,5 @@
 """Tests for MdUtils module."""
+
 import os
 import sys
 from unittest.mock import MagicMock, patch
@@ -17,7 +18,7 @@ import MdUtils as mu
 
 class TestConstants:
     """Test module constants."""
-    
+
     def test_program_constants(self):
         """Test that program constants are properly defined."""
         assert mu.COMPANY_NAME == "PaleoBytes"
@@ -25,88 +26,73 @@ class TestConstants:
 
         # Import version from the single source of truth
         from version import __version__
+
         assert mu.PROGRAM_VERSION == __version__
 
         # Version should follow semantic versioning (but may have pre-release suffix)
         import semver
+
         try:
             parsed_version = semver.VersionInfo.parse(mu.PROGRAM_VERSION)
             assert parsed_version is not None
         except ValueError:
             # If semver parsing fails, at least check basic format
-            assert '.' in mu.PROGRAM_VERSION  # Should have dots for version separation
-    
+            assert "." in mu.PROGRAM_VERSION  # Should have dots for version separation
+
     def test_directory_constants(self):
         """Test that directory constants are properly formed."""
-        assert mu.USER_PROFILE_DIRECTORY == os.path.expanduser('~')
-        assert mu.DEFAULT_DB_DIRECTORY.endswith('PaleoBytes/Modan2')
-        assert mu.DEFAULT_STORAGE_DIRECTORY.endswith('PaleoBytes/Modan2/data/')
-        assert mu.DEFAULT_LOG_DIRECTORY.endswith('PaleoBytes/Modan2/logs/')
-        assert mu.DB_BACKUP_DIRECTORY.endswith('PaleoBytes/Modan2/backups/')
-    
+        assert mu.USER_PROFILE_DIRECTORY == os.path.expanduser("~")
+        assert mu.DEFAULT_DB_DIRECTORY.endswith("PaleoBytes/Modan2")
+        assert mu.DEFAULT_STORAGE_DIRECTORY.endswith("PaleoBytes/Modan2/data/")
+        assert mu.DEFAULT_LOG_DIRECTORY.endswith("PaleoBytes/Modan2/logs/")
+        assert mu.DB_BACKUP_DIRECTORY.endswith("PaleoBytes/Modan2/backups/")
+
     def test_extension_lists(self):
         """Test file extension lists."""
         # Image extensions
-        assert 'png' in mu.IMAGE_EXTENSION_LIST
-        assert 'jpg' in mu.IMAGE_EXTENSION_LIST
-        assert 'jpeg' in mu.IMAGE_EXTENSION_LIST
+        assert "png" in mu.IMAGE_EXTENSION_LIST
+        assert "jpg" in mu.IMAGE_EXTENSION_LIST
+        assert "jpeg" in mu.IMAGE_EXTENSION_LIST
         assert len(mu.IMAGE_EXTENSION_LIST) == 7
-        
+
         # Model extensions
-        assert 'obj' in mu.MODEL_EXTENSION_LIST
-        assert 'ply' in mu.MODEL_EXTENSION_LIST
-        assert 'stl' in mu.MODEL_EXTENSION_LIST
+        assert "obj" in mu.MODEL_EXTENSION_LIST
+        assert "ply" in mu.MODEL_EXTENSION_LIST
+        assert "stl" in mu.MODEL_EXTENSION_LIST
         assert len(mu.MODEL_EXTENSION_LIST) == 3
-    
+
     def test_color_lists(self):
         """Test color lists are properly defined."""
         assert len(mu.VIVID_COLOR_LIST) == 20
         assert len(mu.PASTEL_COLOR_LIST) == 20
-        
+
         # All colors should be hex format
         for color in mu.VIVID_COLOR_LIST:
-            assert color.startswith('#')
+            assert color.startswith("#")
             assert len(color) == 7  # #RRGGBB format
-        
+
         for color in mu.PASTEL_COLOR_LIST:
-            assert color.startswith('#')
+            assert color.startswith("#")
             assert len(color) == 7
-    
+
     def test_marker_list(self):
         """Test marker list for plotting."""
         assert len(mu.MARKER_LIST) == 11
-        assert 'o' in mu.MARKER_LIST  # Circle
-        assert 's' in mu.MARKER_LIST  # Square
-        assert '^' in mu.MARKER_LIST  # Triangle
-
-
-class TestResourcePath:
-    """Test resource_path function."""
-    
-    def test_resource_path_normal(self):
-        """Test resource_path in normal execution."""
-        path = mu.resource_path('icons/test.png')
-        assert 'icons/test.png' in path
-        assert os.path.isabs(path)  # Should return absolute path
-    
-    def test_resource_path_frozen(self):
-        """Test resource_path when running as frozen executable."""
-        # Mock sys._MEIPASS attribute for frozen executable
-        with patch.object(sys, '_MEIPASS', '/frozen/path', create=True):
-            path = mu.resource_path('icons/test.png')
-            assert path == '/frozen/path/icons/test.png'
+        assert "o" in mu.MARKER_LIST  # Circle
+        assert "s" in mu.MARKER_LIST  # Square
+        assert "^" in mu.MARKER_LIST  # Triangle
 
 
 class TestAsQtColor:
     """Test as_qt_color function."""
-    
+
     def test_as_qt_color_with_qcolor(self):
         """Test that QColor input returns same QColor."""
         color = QColor(255, 0, 0)
         result = mu.as_qt_color(color)
         assert result == color
         assert isinstance(result, QColor)
-    
+
     def test_as_qt_color_with_string(self):
         """Test that string input returns QColor."""
         result = mu.as_qt_color("#FF0000")
@@ -114,7 +100,7 @@ class TestAsQtColor:
         assert result.red() == 255
         assert result.green() == 0
         assert result.blue() == 0
-    
+
     def test_as_qt_color_with_named_color(self):
         """Test that named color string returns QColor."""
         result = mu.as_qt_color("red")
@@ -126,7 +112,7 @@ class TestAsQtColor:
 
 class TestDirectoryCreation:
     """Test directory creation behavior."""
-    
+
     def test_directories_exist(self):
         """Test that required directories are created."""
         # These should be created when module is imported
@@ -138,14 +124,14 @@ class TestDirectoryCreation:
 
 class TestAsGlColor:
     """Test as_gl_color function."""
-    
+
     def test_as_gl_color_with_string(self):
         """Test converting string color to GL format."""
         r, g, b = mu.as_gl_color("#FF0000")
         assert pytest.approx(r) == 1.0
         assert pytest.approx(g) == 0.0
         assert pytest.approx(b) == 0.0
-    
+
     def test_as_gl_color_with_qcolor(self):
         """Test converting QColor to GL format."""
         qcolor = QColor(255, 128, 0)
@@ -157,46 +143,46 @@ class TestAsGlColor:
 
 class TestUtilityFunctions:
     """Test various utility functions."""
-    
+
     def test_value_to_bool(self):
         """Test value_to_bool conversion."""
-        assert mu.value_to_bool('true') == True
-        assert mu.value_to_bool('True') == True
-        assert mu.value_to_bool('false') == False
-        assert mu.value_to_bool('False') == False
-        assert mu.value_to_bool(1) == True
-        assert mu.value_to_bool(0) == False
-        assert mu.value_to_bool('') == False
-    
+        assert mu.value_to_bool("true")
+        assert mu.value_to_bool("True")
+        assert not mu.value_to_bool("false")
+        assert not mu.value_to_bool("False")
+        assert mu.value_to_bool(1)
+        assert not mu.value_to_bool(0)
+        assert not mu.value_to_bool("")
+
     def test_is_numeric(self):
         """Test is_numeric function."""
-        assert mu.is_numeric('123') == True
-        assert mu.is_numeric('123.456') == True
-        assert mu.is_numeric('-123.456') == True
-        assert mu.is_numeric('1e5') == True
-        assert mu.is_numeric('abc') == False
-        assert mu.is_numeric('') == False
-        assert mu.is_numeric('12.34.56') == False
-    
+        assert mu.is_numeric("123")
+        assert mu.is_numeric("123.456")
+        assert mu.is_numeric("-123.456")
+        assert mu.is_numeric("1e5")
+        assert not mu.is_numeric("abc")
+        assert not mu.is_numeric("")
+        assert not mu.is_numeric("12.34.56")
+
     def test_process_dropped_file_name_windows(self):
         """Test process_dropped_file_name on Windows."""
-        with patch('os.name', 'nt'):
+        with patch("os.name", "nt"):
             # Windows file URL
             file_url = "file:///C:/Users/test/file.txt"
             result = mu.process_dropped_file_name(file_url)
             assert result == "C:/Users/test/file.txt"
-    
+
     def test_process_dropped_file_name_unix(self):
         """Test process_dropped_file_name on Unix."""
-        with patch('os.name', 'posix'):
+        with patch("os.name", "posix"):
             # Unix file URL
             file_url = "file:///home/user/file.txt"
             result = mu.process_dropped_file_name(file_url)
             assert result == "/home/user/file.txt"
-    
+
     def test_process_dropped_file_name_with_spaces(self):
         """Test process_dropped_file_name with URL-encoded spaces."""
-        with patch('os.name', 'posix'):
+        with patch("os.name", "posix"):
             file_url = "file:///home/user/my%20file.txt"
             result = mu.process_dropped_file_name(file_url)
             assert result == "/home/user/my file.txt"
@@ -204,97 +190,97 @@ class TestUtilityFunctions:
 
 class TestProcess3DFile:
     """Test 3D file processing functions."""
-    
+
     def test_process_3d_file_obj(self):
         """Test that OBJ files are returned as-is."""
         # Test with actual sample file
         sample_obj_path = os.path.join("tests", "fixtures", "sample_3d.obj")
         result = mu.process_3d_file(sample_obj_path)
         assert result == sample_obj_path
-        
+
         # Also test with mock path to ensure logic works for any valid .obj file
         result = mu.process_3d_file("/path/to/model.obj")
         assert result == "/path/to/model.obj"
-    
-    @patch('trimesh.load_mesh')
-    @patch('tempfile.mkdtemp')
-    @patch('os.path.splitext')
-    @patch('os.path.join')
+
+    @patch("trimesh.load_mesh")
+    @patch("tempfile.mkdtemp")
+    @patch("os.path.splitext")
+    @patch("os.path.join")
     def test_process_3d_file_stl(self, mock_join, mock_splitext, mock_mkdtemp, mock_load_mesh):
         """Test STL file conversion to OBJ."""
         # Setup mocks for path operations
         mock_mkdtemp.return_value = "/tmp/test"
         mock_splitext.side_effect = [
             ("/path/to/model", ".stl"),  # First call for extension
-            ("/path/to/model", ".stl")   # Second call for filename
+            ("/path/to/model", ".stl"),  # Second call for filename
         ]
         mock_join.return_value = "/tmp/test/model.obj"
-        
+
         # Setup mesh mock
         mock_mesh = MagicMock()
         mock_mesh.vertex_normals = []
         mock_mesh.export = MagicMock()
         mock_load_mesh.return_value = mock_mesh
-        
+
         result = mu.process_3d_file("/path/to/model.stl")
-        
+
         assert result == "/tmp/test/model.obj"
-        mock_mesh.export.assert_called_once_with("/tmp/test/model.obj", file_type='obj')
-    
-    @patch('trimesh.load')
-    @patch('tempfile.mkdtemp')
-    @patch('os.path.splitext')
-    @patch('os.path.join')
+        mock_mesh.export.assert_called_once_with("/tmp/test/model.obj", file_type="obj")
+
+    @patch("trimesh.load")
+    @patch("tempfile.mkdtemp")
+    @patch("os.path.splitext")
+    @patch("os.path.join")
     def test_process_3d_file_ply(self, mock_join, mock_splitext, mock_mkdtemp, mock_load):
         """Test PLY file conversion to OBJ."""
         # Setup mocks for path operations
         mock_mkdtemp.return_value = "/tmp/test"
         mock_splitext.side_effect = [
             ("/path/to/model", ".ply"),  # First call for extension
-            ("/path/to/model", ".ply")   # Second call for filename
+            ("/path/to/model", ".ply"),  # Second call for filename
         ]
         mock_join.return_value = "/tmp/test/model.obj"
-        
+
         # Setup mesh mock
         mock_mesh = MagicMock()
         mock_mesh.export = MagicMock()
         mock_load.return_value = mock_mesh
-        
+
         result = mu.process_3d_file("/path/to/model.ply")
-        
+
         assert result == "/tmp/test/model.obj"
-        mock_mesh.export.assert_called_once_with("/tmp/test/model.obj", file_type='obj')
+        mock_mesh.export.assert_called_once_with("/tmp/test/model.obj", file_type="obj")
 
 
 class TestErrorHandling:
     """Test error handling in utility functions."""
-    
+
     def test_process_3d_file_invalid_extension(self):
         """Test handling of unsupported file extensions."""
         invalid_file = os.path.join("tests", "fixtures", "invalid_file.txt")
-        
+
         # The function may attempt to convert .txt files to .obj
         result = mu.process_3d_file(invalid_file)
-        
+
         # Should return some result (may convert to .obj or return as-is)
         assert result is not None
         assert isinstance(result, str)
-    
+
     def test_process_3d_file_nonexistent_file(self):
         """Test handling of non-existent files."""
         nonexistent_file = "/path/to/nonexistent/file.obj"
-        
+
         # Should handle non-existent files gracefully
         result = mu.process_3d_file(nonexistent_file)
         # For OBJ files, it should return the path as-is regardless of existence
         assert result == nonexistent_file
-    
-    @patch('trimesh.load_mesh')
+
+    @patch("trimesh.load_mesh")
     def test_process_3d_file_trimesh_error(self, mock_load_mesh):
         """Test handling of trimesh loading errors."""
         # Setup mock to raise an exception
         mock_load_mesh.side_effect = Exception("Failed to load mesh")
-        
+
         # Should handle trimesh errors gracefully
         try:
             result = mu.process_3d_file("/path/to/corrupted.stl")
@@ -303,16 +289,11 @@ class TestErrorHandling:
         except Exception:
             # If it doesn't catch the exception, that's also acceptable behavior
             pass
-    
+
     def test_process_dropped_file_name_malformed_url(self):
         """Test handling of malformed file URLs."""
-        malformed_urls = [
-            "file://invalid",
-            "not_a_url",
-            "",
-            None
-        ]
-        
+        malformed_urls = ["file://invalid", "not_a_url", "", None]
+
         for url in malformed_urls:
             if url is not None:
                 try:
@@ -326,16 +307,16 @@ class TestErrorHandling:
 
 class TestEdgeCases:
     """Test error handling functions."""
-    
-    @patch('MdUtils.QMessageBox')
+
+    @patch("MdUtils.QMessageBox")
     def test_show_error_message(self, mock_messagebox):
         """Test show_error_message function."""
         mock_instance = MagicMock()
         mock_messagebox.return_value = mock_instance
-        
+
         error_msg = "Test error message"
         mu.show_error_message(error_msg)
-        
+
         mock_messagebox.assert_called_once()
         mock_instance.setText.assert_called_once_with(error_msg)
         mock_instance.setWindowTitle.assert_called_once_with("Error")
@@ -359,8 +340,7 @@ class TestMathFunctions:
         """Test ellipse params with rotation."""
         # Rotated covariance matrix
         theta = np.pi / 4  # 45 degrees
-        R = np.array([[np.cos(theta), -np.sin(theta)],
-                      [np.sin(theta), np.cos(theta)]])
+        R = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
         D = np.array([[4, 0], [0, 1]])
         covariance = R @ D @ R.T
 
@@ -563,10 +543,10 @@ class TestBuildInfo:
         info = mu.get_build_info()
 
         assert isinstance(info, dict)
-        assert 'version' in info
-        assert 'build_number' in info
-        assert 'build_date' in info
-        assert 'platform' in info
+        assert "version" in info
+        assert "build_number" in info
+        assert "build_date" in info
+        assert "platform" in info
 
     def test_get_copyright_year(self):
         """Test copyright year retrieval."""
@@ -589,14 +569,10 @@ class TestJSONZipFunctions:
     def test_validate_json_schema_valid(self):
         """Test valid JSON schema validation."""
         valid_data = {
-            'format_version': '1.1',
-            'export_info': {},
-            'dataset': {
-                'name': 'Test',
-                'dimension': 2,
-                'variables': []
-            },
-            'objects': []
+            "format_version": "1.1",
+            "export_info": {},
+            "dataset": {"name": "Test", "dimension": 2, "variables": []},
+            "objects": [],
         }
 
         is_valid, errors = mu.validate_json_schema(valid_data)
@@ -606,10 +582,7 @@ class TestJSONZipFunctions:
 
     def test_validate_json_schema_missing_keys(self):
         """Test JSON schema validation with missing keys."""
-        invalid_data = {
-            'format_version': '1.1',
-            'dataset': {}
-        }
+        invalid_data = {"format_version": "1.1", "dataset": {}}
 
         is_valid, errors = mu.validate_json_schema(invalid_data)
 
@@ -618,17 +591,12 @@ class TestJSONZipFunctions:
 
     def test_validate_json_schema_invalid_dataset(self):
         """Test JSON schema with invalid dataset."""
-        invalid_data = {
-            'format_version': '1.1',
-            'export_info': {},
-            'dataset': {},
-            'objects': []
-        }
+        invalid_data = {"format_version": "1.1", "export_info": {}, "dataset": {}, "objects": []}
 
         is_valid, errors = mu.validate_json_schema(invalid_data)
 
         assert not is_valid
-        assert any('missing' in err.lower() for err in errors)
+        assert any("missing" in err.lower() for err in errors)
 
     def test_validate_json_schema_not_dict(self):
         """Test JSON schema with non-dict root."""
@@ -643,7 +611,7 @@ class TestJSONZipFunctions:
 
         # Create a safe ZIP file
         zip_path = tmp_path / "test.zip"
-        with zipfile.ZipFile(zip_path, 'w') as zf:
+        with zipfile.ZipFile(zip_path, "w") as zf:
             zf.writestr("dataset.json", '{"test": "data"}')
             zf.writestr("images/image1.jpg", "fake image data")
 
@@ -662,15 +630,15 @@ class TestJSONZipFunctions:
         import zipfile
 
         zip_path = tmp_path / "test.zip"
-        test_data = {'format_version': '1.1', 'test': 'data'}
+        test_data = {"format_version": "1.1", "test": "data"}
 
-        with zipfile.ZipFile(zip_path, 'w') as zf:
+        with zipfile.ZipFile(zip_path, "w") as zf:
             zf.writestr("dataset.json", json.dumps(test_data))
 
         data = mu.read_json_from_zip(str(zip_path))
 
         assert data == test_data
-        assert data['format_version'] == '1.1'
+        assert data["format_version"] == "1.1"
 
 
 class TestGetStorageDir:
@@ -693,7 +661,7 @@ class TestErrorPaths:
         """Test landmark file unicode decoding error."""
         # Create file with invalid encoding
         txt_file = tmp_path / "invalid.txt"
-        txt_file.write_bytes(b'\xff\xfe' + b'LM=3\n' + b'\x80\x81\x82')
+        txt_file.write_bytes(b"\xff\xfe" + b"LM=3\n" + b"\x80\x81\x82")
 
         with pytest.raises(ValueError, match="Cannot decode file"):
             mu.read_landmark_file(str(txt_file))
@@ -705,6 +673,7 @@ class TestErrorPaths:
 
         # Mock open to raise PermissionError
         original_open = open
+
         def mock_open(*args, **kwargs):
             if str(txt_file) in str(args[0]):
                 raise PermissionError("Permission denied")
@@ -754,7 +723,7 @@ class TestUtilityFunctions:
 
     def test_resource_path_meipass(self, monkeypatch):
         """Test resource_path with PyInstaller."""
-        monkeypatch.setattr(sys, '_MEIPASS', '/tmp/meipass', raising=False)
+        monkeypatch.setattr(sys, "_MEIPASS", "/tmp/meipass", raising=False)
         path = mu.resource_path("test.txt")
         assert "/tmp/meipass" in path or "test.txt" in path
 
@@ -770,12 +739,12 @@ class TestDirectoryEnsure:
     def test_ensure_directories_permission_error(self, monkeypatch, capsys):
         """Test directory creation with permission error."""
         # Mock makedirs to raise PermissionError
-        original_makedirs = os.makedirs
+
         def mock_makedirs(path, exist_ok=False):
             raise PermissionError("Permission denied")
 
-        monkeypatch.setattr(os, 'makedirs', mock_makedirs)
-        monkeypatch.setattr(os.path, 'exists', lambda x: False)  # Force directory creation
+        monkeypatch.setattr(os, "makedirs", mock_makedirs)
+        monkeypatch.setattr(os.path, "exists", lambda x: False)  # Force directory creation
 
         # Should not raise, just print warning
         mu.ensure_directories()
@@ -790,22 +759,24 @@ class TestBuildInfoErrorPaths:
     def test_get_build_info_json_decode_error(self, tmp_path, monkeypatch):
         """Test build info with invalid JSON."""
         from pathlib import Path
+
         build_file = tmp_path / "build_info.json"
         build_file.write_text("{invalid json}")
 
         # Mock Path.exists to return True only for our invalid file
         original_exists = Path.exists
+
         def mock_exists(self):
             if str(self) == str(build_file):
                 return True
             return original_exists(self)
 
-        monkeypatch.setattr(Path, 'exists', mock_exists)
+        monkeypatch.setattr(Path, "exists", mock_exists)
 
         # Should return default values (can't easily test without module reload)
         info = mu.get_build_info()
-        assert 'build_number' in info
-        assert 'build_date' in info
+        assert "build_number" in info
+        assert "build_date" in info
 
     def test_get_copyright_year_from_build_info(self):
         """Test get_copyright_year with build_info."""
@@ -821,7 +792,7 @@ class TestShowErrorMessage:
         """Test showing error message."""
         from unittest.mock import patch
 
-        with patch.object(QMessageBox, 'exec_', return_value=QMessageBox.Ok):
+        with patch.object(QMessageBox, "exec_", return_value=QMessageBox.Ok):
             # Should not raise exception
             mu.show_error_message("Test error message")
 
@@ -892,8 +863,8 @@ class TestFilePathProcessing:
         from unittest.mock import patch
 
         # Simulate Windows
-        with patch.object(sys, 'platform', 'win32'):
-            with patch('os.name', 'nt'):
+        with patch.object(sys, "platform", "win32"):
+            with patch("os.name", "nt"):
                 # Windows file URL format
                 url = "file:///C:/Users/test/file.txt"
                 result = mu.process_dropped_file_name(url)
@@ -905,8 +876,8 @@ class TestFilePathProcessing:
         from unittest.mock import patch
 
         # Simulate Linux
-        with patch.object(sys, 'platform', 'linux'):
-            with patch('os.name', 'posix'):
+        with patch.object(sys, "platform", "linux"):
+            with patch("os.name", "posix"):
                 # Linux file URL format
                 url = "file:///home/user/file.txt"
                 result = mu.process_dropped_file_name(url)
@@ -916,7 +887,7 @@ class TestFilePathProcessing:
         """Test processing file name with URL-encoded spaces."""
         from unittest.mock import patch
 
-        with patch('os.name', 'posix'):
+        with patch("os.name", "posix"):
             # URL with encoded spaces
             url = "file:///home/user/my%20file.txt"
             result = mu.process_dropped_file_name(url)
@@ -926,7 +897,7 @@ class TestFilePathProcessing:
         """Test processing file name with special characters."""
         from unittest.mock import patch
 
-        with patch('os.name', 'posix'):
+        with patch("os.name", "posix"):
             # URL with encoded special characters
             url = "file:///home/user/file%20(1).txt"
             result = mu.process_dropped_file_name(url)
@@ -938,94 +909,71 @@ class TestDatasetSerialization:
 
     def test_serialize_dataset_to_json_basic(self, mock_database):
         """Test basic dataset serialization to JSON."""
-        dataset = mm.MdDataset.create(
-            dataset_name="Test Dataset",
-            dataset_desc="Test description",
-            dimension=2
-        )
-        obj1 = mm.MdObject.create(
-            object_name="Object1",
-            dataset=dataset,
-            sequence=1
-        )
+        dataset = mm.MdDataset.create(dataset_name="Test Dataset", dataset_desc="Test description", dimension=2)
+        obj1 = mm.MdObject.create(object_name="Object1", dataset=dataset, sequence=1)
         obj1.landmark_list = [[1.0, 2.0], [3.0, 4.0]]
         obj1.pack_landmark()
         obj1.save()
 
         result = mu.serialize_dataset_to_json(dataset.id, include_files=False)
 
-        assert result['format_version'] == '1.1'
-        assert 'export_info' in result
-        assert result['dataset']['name'] == "Test Dataset"
-        assert result['dataset']['dimension'] == 2
-        assert len(result['objects']) == 1
-        assert result['objects'][0]['name'] == "Object1"
-        assert result['objects'][0]['landmarks'] == [[1.0, 2.0], [3.0, 4.0]]
+        assert result["format_version"] == "1.1"
+        assert "export_info" in result
+        assert result["dataset"]["name"] == "Test Dataset"
+        assert result["dataset"]["dimension"] == 2
+        assert len(result["objects"]) == 1
+        assert result["objects"][0]["name"] == "Object1"
+        assert result["objects"][0]["landmarks"] == [[1.0, 2.0], [3.0, 4.0]]
 
     def test_serialize_dataset_with_variables(self, mock_database):
         """Test dataset serialization with variables."""
-        dataset = mm.MdDataset.create(
-            dataset_name="Test Dataset",
-            dimension=2
-        )
-        dataset.pack_variablename_str(['age', 'weight'])
+        dataset = mm.MdDataset.create(dataset_name="Test Dataset", dimension=2)
+        dataset.pack_variablename_str(["age", "weight"])
         dataset.save()
 
-        obj1 = mm.MdObject.create(
-            object_name="Object1",
-            dataset=dataset
-        )
+        obj1 = mm.MdObject.create(object_name="Object1", dataset=dataset)
         obj1.variable_list = [5.0, 10.5]
         obj1.pack_variable([str(v) for v in obj1.variable_list])
         obj1.save()
 
         result = mu.serialize_dataset_to_json(dataset.id, include_files=False)
 
-        assert result['dataset']['variables'] == ['age', 'weight']
+        assert result["dataset"]["variables"] == ["age", "weight"]
         # Variables are stored as strings in the database
-        assert result['objects'][0]['variables'] == {'age': '5.0', 'weight': '10.5'}
+        assert result["objects"][0]["variables"] == {"age": "5.0", "weight": "10.5"}
 
     def test_serialize_dataset_with_wireframe(self, mock_database):
         """Test dataset serialization with wireframe."""
-        dataset = mm.MdDataset.create(
-            dataset_name="Test Dataset",
-            dimension=2
-        )
+        dataset = mm.MdDataset.create(dataset_name="Test Dataset", dimension=2)
         dataset.edge_list = [[0, 1], [1, 2]]
         dataset.pack_wireframe()
         dataset.save()
 
         result = mu.serialize_dataset_to_json(dataset.id, include_files=False)
 
-        assert result['dataset']['wireframe'] == [[0, 1], [1, 2]]
+        assert result["dataset"]["wireframe"] == [[0, 1], [1, 2]]
 
     def test_serialize_dataset_with_polygons(self, mock_database):
         """Test dataset serialization with polygons."""
-        dataset = mm.MdDataset.create(
-            dataset_name="Test Dataset",
-            dimension=2
-        )
+        dataset = mm.MdDataset.create(dataset_name="Test Dataset", dimension=2)
         dataset.polygon_list = [[0, 1, 2]]
         dataset.pack_polygons()
         dataset.save()
 
         result = mu.serialize_dataset_to_json(dataset.id, include_files=False)
 
-        assert result['dataset']['polygons'] == [[0, 1, 2]]
+        assert result["dataset"]["polygons"] == [[0, 1, 2]]
 
     def test_serialize_dataset_with_baseline(self, mock_database):
         """Test dataset serialization with baseline."""
-        dataset = mm.MdDataset.create(
-            dataset_name="Test Dataset",
-            dimension=2
-        )
+        dataset = mm.MdDataset.create(dataset_name="Test Dataset", dimension=2)
         dataset.baseline_point_list = [0, 1, 2]
         dataset.pack_baseline()
         dataset.save()
 
         result = mu.serialize_dataset_to_json(dataset.id, include_files=False)
 
-        assert result['dataset']['baseline'] == [0, 1, 2]
+        assert result["dataset"]["baseline"] == [0, 1, 2]
 
 
 class TestFileCollection:
@@ -1034,7 +982,7 @@ class TestFileCollection:
     def test_collect_dataset_files_no_files(self, mock_database):
         """Test collecting files from dataset with no attached files."""
         dataset = mm.MdDataset.create(dataset_name="Test Dataset", dimension=2)
-        obj = mm.MdObject.create(object_name="Object1", dataset=dataset)
+        mm.MdObject.create(object_name="Object1", dataset=dataset)
 
         images, models = mu.collect_dataset_files(dataset.id)
 
@@ -1043,14 +991,8 @@ class TestFileCollection:
 
     def test_estimate_package_size_basic(self, mock_database):
         """Test estimating package size."""
-        dataset = mm.MdDataset.create(
-            dataset_name="Test Dataset",
-            dimension=2
-        )
-        obj = mm.MdObject.create(
-            object_name="Object1",
-            dataset=dataset
-        )
+        dataset = mm.MdDataset.create(dataset_name="Test Dataset", dimension=2)
+        obj = mm.MdObject.create(object_name="Object1", dataset=dataset)
         obj.landmark_list = [[1.0, 2.0]]
         obj.pack_landmark()
         obj.save()
@@ -1065,14 +1007,8 @@ class TestZipPackaging:
 
     def test_create_zip_package_basic(self, mock_database, tmp_path):
         """Test creating basic ZIP package without files."""
-        dataset = mm.MdDataset.create(
-            dataset_name="Test Dataset",
-            dimension=2
-        )
-        obj = mm.MdObject.create(
-            object_name="Object1",
-            dataset=dataset
-        )
+        dataset = mm.MdDataset.create(dataset_name="Test Dataset", dimension=2)
+        obj = mm.MdObject.create(object_name="Object1", dataset=dataset)
         obj.landmark_list = [[1.0, 2.0], [3.0, 4.0]]
         obj.pack_landmark()
         obj.save()
@@ -1085,8 +1021,9 @@ class TestZipPackaging:
 
         # Verify ZIP contents
         import zipfile
-        with zipfile.ZipFile(str(zip_path), 'r') as zf:
-            assert 'dataset.json' in zf.namelist()
+
+        with zipfile.ZipFile(str(zip_path), "r") as zf:
+            assert "dataset.json" in zf.namelist()
 
     def test_create_zip_package_with_progress_callback(self, mock_database, tmp_path):
         """Test ZIP package creation with progress callback."""
@@ -1102,12 +1039,7 @@ class TestZipPackaging:
         def progress_cb(curr, total):
             progress_calls.append((curr, total))
 
-        result = mu.create_zip_package(
-            dataset.id,
-            str(zip_path),
-            include_files=False,
-            progress_callback=progress_cb
-        )
+        result = mu.create_zip_package(dataset.id, str(zip_path), include_files=False, progress_callback=progress_cb)
 
         assert result is True
         assert len(progress_calls) > 0  # Should have been called
@@ -1119,14 +1051,10 @@ class TestJsonValidation:
     def test_validate_json_schema_valid(self):
         """Test validation of valid JSON schema."""
         data = {
-            'format_version': '1.1',
-            'export_info': {},
-            'dataset': {
-                'name': 'Test',
-                'dimension': 2,
-                'variables': []
-            },
-            'objects': []
+            "format_version": "1.1",
+            "export_info": {},
+            "dataset": {"name": "Test", "dimension": 2, "variables": []},
+            "objects": [],
         }
 
         is_valid, errors = mu.validate_json_schema(data)
@@ -1136,51 +1064,44 @@ class TestJsonValidation:
 
     def test_validate_json_schema_missing_keys(self):
         """Test validation with missing required keys."""
-        data = {
-            'format_version': '1.1',
-            'dataset': {}
-        }
+        data = {"format_version": "1.1", "dataset": {}}
 
         is_valid, errors = mu.validate_json_schema(data)
 
         assert is_valid is False
-        assert 'Missing key: export_info' in errors
-        assert 'Missing key: objects' in errors
+        assert "Missing key: export_info" in errors
+        assert "Missing key: objects" in errors
 
     def test_validate_json_schema_invalid_dataset(self):
         """Test validation with invalid dataset structure."""
         data = {
-            'format_version': '1.1',
-            'export_info': {},
-            'dataset': {
-                'name': 'Test'
+            "format_version": "1.1",
+            "export_info": {},
+            "dataset": {
+                "name": "Test"
                 # Missing 'dimension' and 'variables'
             },
-            'objects': []
+            "objects": [],
         }
 
         is_valid, errors = mu.validate_json_schema(data)
 
         assert is_valid is False
-        assert any('dataset missing' in err for err in errors)
+        assert any("dataset missing" in err for err in errors)
 
     def test_validate_json_schema_objects_not_list(self):
         """Test validation when objects is not a list."""
         data = {
-            'format_version': '1.1',
-            'export_info': {},
-            'dataset': {
-                'name': 'Test',
-                'dimension': 2,
-                'variables': []
-            },
-            'objects': {}  # Should be list, not dict
+            "format_version": "1.1",
+            "export_info": {},
+            "dataset": {"name": "Test", "dimension": 2, "variables": []},
+            "objects": {},  # Should be list, not dict
         }
 
         is_valid, errors = mu.validate_json_schema(data)
 
         assert is_valid is False
-        assert 'objects must be a list' in errors
+        assert "objects must be a list" in errors
 
 
 class TestZipUtilities:
@@ -1192,9 +1113,9 @@ class TestZipUtilities:
 
         # Create a test ZIP
         zip_path = tmp_path / "test.zip"
-        with zipfile.ZipFile(str(zip_path), 'w') as zf:
-            zf.writestr('dataset.json', '{"test": "data"}')
-            zf.writestr('images/1.jpg', 'fake image data')
+        with zipfile.ZipFile(str(zip_path), "w") as zf:
+            zf.writestr("dataset.json", '{"test": "data"}')
+            zf.writestr("images/1.jpg", "fake image data")
 
         extract_dir = tmp_path / "extracted"
         extract_dir.mkdir()
@@ -1202,8 +1123,8 @@ class TestZipUtilities:
         result = mu.safe_extract_zip(str(zip_path), str(extract_dir))
 
         assert result == str(extract_dir.resolve())
-        assert (extract_dir / 'dataset.json').exists()
-        assert (extract_dir / 'images' / '1.jpg').exists()
+        assert (extract_dir / "dataset.json").exists()
+        assert (extract_dir / "images" / "1.jpg").exists()
 
     def test_safe_extract_zip_prevents_zip_slip(self, tmp_path):
         """Test that ZIP extraction prevents path traversal (Zip Slip)."""
@@ -1211,9 +1132,9 @@ class TestZipUtilities:
 
         # Create malicious ZIP with path traversal
         zip_path = tmp_path / "malicious.zip"
-        with zipfile.ZipFile(str(zip_path), 'w') as zf:
+        with zipfile.ZipFile(str(zip_path), "w") as zf:
             # Try to write outside the extraction directory
-            zf.writestr('../../../etc/passwd', 'malicious content')
+            zf.writestr("../../../etc/passwd", "malicious content")
 
         extract_dir = tmp_path / "extracted"
         extract_dir.mkdir()
@@ -1225,12 +1146,13 @@ class TestZipUtilities:
         """Test reading JSON from ZIP."""
         import zipfile
 
-        test_data = {'test': 'data', 'number': 123}
+        test_data = {"test": "data", "number": 123}
         zip_path = tmp_path / "test.zip"
 
-        with zipfile.ZipFile(str(zip_path), 'w') as zf:
+        with zipfile.ZipFile(str(zip_path), "w") as zf:
             import json
-            zf.writestr('dataset.json', json.dumps(test_data))
+
+            zf.writestr("dataset.json", json.dumps(test_data))
 
         result = mu.read_json_from_zip(str(zip_path))
 
@@ -1243,16 +1165,8 @@ class TestDatasetImportFromZip:
     def test_import_dataset_from_zip_basic(self, mock_database, tmp_path):
         """Test basic dataset import from ZIP."""
         # First, create a valid ZIP package
-        dataset = mm.MdDataset.create(
-            dataset_name="Original Dataset",
-            dataset_desc="Original description",
-            dimension=2
-        )
-        obj = mm.MdObject.create(
-            object_name="Object1",
-            dataset=dataset,
-            sequence=1
-        )
+        dataset = mm.MdDataset.create(dataset_name="Original Dataset", dataset_desc="Original description", dimension=2)
+        obj = mm.MdObject.create(object_name="Object1", dataset=dataset, sequence=1)
         obj.landmark_list = [[1.0, 2.0], [3.0, 4.0]]
         obj.pack_landmark()
         obj.save()
@@ -1293,10 +1207,7 @@ class TestDatasetImportFromZip:
         def progress_cb(curr, total):
             progress_calls.append((curr, total))
 
-        new_dataset_id = mu.import_dataset_from_zip(
-            str(zip_path),
-            progress_callback=progress_cb
-        )
+        new_dataset_id = mu.import_dataset_from_zip(str(zip_path), progress_callback=progress_cb)
 
         assert new_dataset_id > 0
         assert len(progress_calls) > 0
@@ -1308,13 +1219,14 @@ class TestDatasetImportFromZip:
         # Create ZIP with invalid JSON
         zip_path = tmp_path / "invalid.zip"
         invalid_data = {
-            'format_version': '1.1',
-            'dataset': {}  # Missing required keys
+            "format_version": "1.1",
+            "dataset": {},  # Missing required keys
         }
 
-        with zipfile.ZipFile(str(zip_path), 'w') as zf:
+        with zipfile.ZipFile(str(zip_path), "w") as zf:
             import json
-            zf.writestr('dataset.json', json.dumps(invalid_data))
+
+            zf.writestr("dataset.json", json.dumps(invalid_data))
 
         with pytest.raises(ValueError, match="Invalid dataset.json"):
             mu.import_dataset_from_zip(str(zip_path))

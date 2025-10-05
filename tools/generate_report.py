@@ -9,19 +9,19 @@ from pathlib import Path
 
 
 def load_json(path: Path):
-    return json.loads(path.read_text(encoding='utf-8')) if path.exists() else {}
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
 
 
 def format_stats_table(stats: dict) -> str:
     rows = [
-        ("Total Files", stats.get('files', 0)),
-        ("Total Lines", stats.get('total_lines', 0)),
-        ("Classes", stats.get('classes', 0)),
-        ("Functions", stats.get('functions', 0)),
-        ("Dialogs", stats.get('dialogs', 0)),
-        ("Database Models", stats.get('db_models', 0)),
-        ("Qt Signal Definitions", stats.get('qt_signals', 0)),
-        ("Qt Connections", stats.get('qt_connections', 0)),
+        ("Total Files", stats.get("files", 0)),
+        ("Total Lines", stats.get("total_lines", 0)),
+        ("Classes", stats.get("classes", 0)),
+        ("Functions", stats.get("functions", 0)),
+        ("Dialogs", stats.get("dialogs", 0)),
+        ("Database Models", stats.get("db_models", 0)),
+        ("Qt Signal Definitions", stats.get("qt_signals", 0)),
+        ("Qt Connections", stats.get("qt_connections", 0)),
     ]
     lines = ["| Metric | Count |", "|--------|-------|"]
     for k, v in rows:
@@ -30,19 +30,19 @@ def format_stats_table(stats: dict) -> str:
 
 
 def top_files_by_lines(files: dict, n: int = 5):
-    sorted_files = sorted(files.items(), key=lambda kv: kv[1].get('lines', 0), reverse=True)
+    sorted_files = sorted(files.items(), key=lambda kv: kv[1].get("lines", 0), reverse=True)
     return sorted_files[:n]
 
 
 def most_complex_classes(symbols: dict, n: int = 4):
-    classes = symbols.get('classes', [])
-    scored = [(c['name'], len(c.get('methods', [])), c['file'], c['line']) for c in classes]
+    classes = symbols.get("classes", [])
+    scored = [(c["name"], len(c.get("methods", [])), c["file"], c["line"]) for c in classes]
     scored.sort(key=lambda x: x[1], reverse=True)
     return scored[:n]
 
 
 def list_dialogs(symbols: dict):
-    return [d['name'] for d in symbols.get('dialogs', []) if 'Dialog' in d.get('name', '')]
+    return [d["name"] for d in symbols.get("dialogs", []) if "Dialog" in d.get("name", "")]
 
 
 def list_models(db_models: dict):
@@ -51,15 +51,15 @@ def list_models(db_models: dict):
 
 def main():
     repo_root = Path(__file__).parent.parent
-    idx_dir = repo_root / '.index'
-    summary = load_json(idx_dir / 'index_summary.json')
-    symbols = load_json(idx_dir / 'symbols' / 'symbols.json')
-    qt = load_json(idx_dir / 'graphs' / 'qt_signals.json')
-    db = load_json(idx_dir / 'graphs' / 'db_models.json')
+    idx_dir = repo_root / ".index"
+    summary = load_json(idx_dir / "index_summary.json")
+    symbols = load_json(idx_dir / "symbols" / "symbols.json")
+    qt = load_json(idx_dir / "graphs" / "qt_signals.json")
+    db = load_json(idx_dir / "graphs" / "db_models.json")
 
-    generated = datetime.now().strftime('%Y-%m-%d')
-    stats = summary.get('statistics', {})
-    files = summary.get('files', {})
+    generated = datetime.now().strftime("%Y-%m-%d")
+    stats = summary.get("statistics", {})
+    files = summary.get("files", {})
 
     dialogs = list_dialogs(symbols)
     models = list_models(db)
@@ -89,8 +89,8 @@ def main():
     out.append("")
     out.append("## Qt Signal/Slot Analysis")
     out.append("")
-    cons = len(qt.get('connections', [])) if isinstance(qt, list) else len(qt.get('signals', {}).get('connections', []))
-    defs = len(qt.get('definitions', [])) if isinstance(qt, list) else len(qt.get('signals', {}).get('definitions', []))
+    cons = len(qt.get("connections", [])) if isinstance(qt, list) else len(qt.get("signals", {}).get("connections", []))
+    defs = len(qt.get("definitions", [])) if isinstance(qt, list) else len(qt.get("signals", {}).get("definitions", []))
     out.append(f"- Signal definitions: {defs}")
     out.append(f"- Connections: {cons}")
     out.append("")
@@ -126,10 +126,9 @@ def main():
 
     # Write
     idx_dir.mkdir(exist_ok=True)
-    (idx_dir / 'INDEX_REPORT.md').write_text("\n".join(out), encoding='utf-8')
+    (idx_dir / "INDEX_REPORT.md").write_text("\n".join(out), encoding="utf-8")
     print("Wrote .index/INDEX_REPORT.md")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
-

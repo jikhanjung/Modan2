@@ -70,6 +70,7 @@ glut = None
 
 try:
     from OpenGL import GLUT as glut
+
     GLUT_AVAILABLE = True
 except ImportError as e:
     GLUT_AVAILABLE = False
@@ -102,15 +103,15 @@ import MdUtils as mu
 logger = logging.getLogger(__name__)
 
 MODE = {}
-MODE['NONE'] = 0
-MODE['PAN'] = 12
-MODE['EDIT_LANDMARK'] = 1
-MODE['WIREFRAME'] = 2
-MODE['READY_MOVE_LANDMARK'] = 3
-MODE['MOVE_LANDMARK'] = 4
-MODE['PRE_WIRE_FROM'] = 5
-MODE['CALIBRATION'] = 6
-MODE['VIEW'] = 7
+MODE["NONE"] = 0
+MODE["PAN"] = 12
+MODE["EDIT_LANDMARK"] = 1
+MODE["WIREFRAME"] = 2
+MODE["READY_MOVE_LANDMARK"] = 3
+MODE["MOVE_LANDMARK"] = 4
+MODE["PRE_WIRE_FROM"] = 5
+MODE["CALIBRATION"] = 6
+MODE["VIEW"] = 7
 
 
 MODE_EXPLORATION = 0
@@ -119,7 +120,7 @@ MODE_GROWTH_TRAJECTORY = 2
 MODE_AVERAGE = 3
 MODE_COMPARISON = 4
 MODE_COMPARISON2 = 5
-#MODE_GRID = 6
+# MODE_GRID = 6
 
 BASE_LANDMARK_RADIUS = 2
 DISTANCE_THRESHOLD = BASE_LANDMARK_RADIUS * 3
@@ -135,48 +136,60 @@ ROTATE_MODE = 3
 ZOOM_MODE = 4
 LANDMARK_MODE = 1
 WIREFRAME_MODE = 2
-COLOR = { 'RED': (1,0,0), 'GREEN': (0,1,0), 'BLUE': (0,0,1), 'YELLOW': (1,1,0), 'CYAN': (0,1,1), 'MAGENTA': (1,0,1), 'WHITE': (1,1,1), 'LIGHT_GRAY': (0.8,0.8,0.8), 'GRAY': (0.5,0.5,0.5), 'DARK_GRAY': (0.3,0.3,0.3), 'BLACK': (0,0,0)}
+COLOR = {
+    "RED": (1, 0, 0),
+    "GREEN": (0, 1, 0),
+    "BLUE": (0, 0, 1),
+    "YELLOW": (1, 1, 0),
+    "CYAN": (0, 1, 1),
+    "MAGENTA": (1, 0, 1),
+    "WHITE": (1, 1, 1),
+    "LIGHT_GRAY": (0.8, 0.8, 0.8),
+    "GRAY": (0.5, 0.5, 0.5),
+    "DARK_GRAY": (0.3, 0.3, 0.3),
+    "BLACK": (0, 0, 0),
+}
 
-COLOR['SINGLE_SHAPE'] = COLOR['GREEN']
-COLOR['AVERAGE_SHAPE'] = COLOR['LIGHT_GRAY']
-COLOR['NORMAL_SHAPE'] = COLOR['BLUE']
-COLOR['NORMAL_TEXT'] = COLOR['WHITE']
-COLOR['SELECTED_SHAPE'] = COLOR['RED']
-COLOR['SELECTED_TEXT'] = COLOR['RED']
-COLOR['SELECTED_LANDMARK'] = COLOR['RED']
-COLOR['WIREFRAME'] = COLOR['YELLOW']
-COLOR['SELECTED_EDGE'] = COLOR['RED']
-COLOR['BACKGROUND'] = COLOR['DARK_GRAY']
+COLOR["SINGLE_SHAPE"] = COLOR["GREEN"]
+COLOR["AVERAGE_SHAPE"] = COLOR["LIGHT_GRAY"]
+COLOR["NORMAL_SHAPE"] = COLOR["BLUE"]
+COLOR["NORMAL_TEXT"] = COLOR["WHITE"]
+COLOR["SELECTED_SHAPE"] = COLOR["RED"]
+COLOR["SELECTED_TEXT"] = COLOR["RED"]
+COLOR["SELECTED_LANDMARK"] = COLOR["RED"]
+COLOR["WIREFRAME"] = COLOR["YELLOW"]
+COLOR["SELECTED_EDGE"] = COLOR["RED"]
+COLOR["BACKGROUND"] = COLOR["DARK_GRAY"]
 
 ICON = {}
-ICON['landmark'] = mu.resource_path('icons/M2Landmark_2.png')
-ICON['landmark_hover'] = mu.resource_path('icons/M2Landmark_2_hover.png')
-ICON['landmark_down'] = mu.resource_path('icons/M2Landmark_2_down.png')
-ICON['landmark_disabled'] = mu.resource_path('icons/M2Landmark_2_disabled.png')
-ICON['wireframe'] = mu.resource_path('icons/M2Wireframe_2.png')
-ICON['wireframe_hover'] = mu.resource_path('icons/M2Wireframe_2_hover.png')
-ICON['wireframe_down'] = mu.resource_path('icons/M2Wireframe_2_down.png')
-ICON['calibration'] = mu.resource_path('icons/M2Calibration_2.png')
-ICON['calibration_hover'] = mu.resource_path('icons/M2Calibration_2_hover.png')
-ICON['calibration_down'] = mu.resource_path('icons/M2Calibration_2_down.png')
-ICON['calibration_disabled'] = mu.resource_path('icons/M2Calibration_2_disabled.png')
+ICON["landmark"] = mu.resource_path("icons/M2Landmark_2.png")
+ICON["landmark_hover"] = mu.resource_path("icons/M2Landmark_2_hover.png")
+ICON["landmark_down"] = mu.resource_path("icons/M2Landmark_2_down.png")
+ICON["landmark_disabled"] = mu.resource_path("icons/M2Landmark_2_disabled.png")
+ICON["wireframe"] = mu.resource_path("icons/M2Wireframe_2.png")
+ICON["wireframe_hover"] = mu.resource_path("icons/M2Wireframe_2_hover.png")
+ICON["wireframe_down"] = mu.resource_path("icons/M2Wireframe_2_down.png")
+ICON["calibration"] = mu.resource_path("icons/M2Calibration_2.png")
+ICON["calibration_hover"] = mu.resource_path("icons/M2Calibration_2_hover.png")
+ICON["calibration_down"] = mu.resource_path("icons/M2Calibration_2_down.png")
+ICON["calibration_disabled"] = mu.resource_path("icons/M2Calibration_2_disabled.png")
 
-NEWLINE = '\n'
+NEWLINE = "\n"
 
 
 class ObjectViewer2D(QLabel):
     def __init__(self, parent=None, transparent=False):
         if transparent:
-            super(ObjectViewer2D, self).__init__(parent)
+            super().__init__(parent)
             self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowTransparentForInput | Qt.Tool)
             self.setAttribute(Qt.WA_TranslucentBackground)
             self.setAttribute(Qt.WA_NoSystemBackground, True)
         else:
-            super(ObjectViewer2D, self).__init__(parent)
+            super().__init__(parent)
         self.transparent = transparent
         self.parent = parent
         logger.info("object viewer 2d init")
-        self.setMinimumSize(300,200)
+        self.setMinimumSize(300, 200)
 
         self.debug = False
         self.landmark_size = 1
@@ -197,14 +210,14 @@ class ObjectViewer2D(QLabel):
         self.prev_scale = 1.0
         self.fullpath = None
         self.image_changed = False
-        self.pan_mode = MODE['NONE']
-        self.edit_mode = MODE['NONE']
+        self.pan_mode = MODE["NONE"]
+        self.edit_mode = MODE["NONE"]
         self.data_mode = OBJECT_MODE
 
         self.show_index = False
         self.show_wireframe = True
         self.show_polygon = True
-        self.show_baseline = False  
+        self.show_baseline = False
         self.read_only = False
         self.show_model = False
         self.show_arrow = False
@@ -235,7 +248,7 @@ class ObjectViewer2D(QLabel):
 
         self.setAcceptDrops(True)
         self.setMouseTracking(True)
-        self.set_mode(MODE['EDIT_LANDMARK'])
+        self.set_mode(MODE["EDIT_LANDMARK"])
         self.comparison_data = {}
         self.source_preference = None
         self.target_preference = None
@@ -245,27 +258,27 @@ class ObjectViewer2D(QLabel):
         self.source_preference = pref
         if self.ds_ops is not None and len(self.ds_ops.object_list) > 0:
             obj = self.ds_ops.object_list[0]
-            obj.visible = pref['visible']
-            obj.show_landmark = pref['show_landmark']
-            obj.show_wireframe = pref['show_wireframe']
-            obj.show_polygon = pref['show_polygon']
-            obj.opacity = pref['opacity']
-            obj.polygon_color = pref['polygon_color']
-            obj.edge_color = pref['edge_color']
-            obj.landmark_color = pref['landmark_color']
-    
+            obj.visible = pref["visible"]
+            obj.show_landmark = pref["show_landmark"]
+            obj.show_wireframe = pref["show_wireframe"]
+            obj.show_polygon = pref["show_polygon"]
+            obj.opacity = pref["opacity"]
+            obj.polygon_color = pref["polygon_color"]
+            obj.edge_color = pref["edge_color"]
+            obj.landmark_color = pref["landmark_color"]
+
     def set_target_shape_preference(self, pref):
         self.target_preference = pref
         if self.ds_ops is not None and len(self.ds_ops.object_list) > 1:
             obj = self.ds_ops.object_list[1]
-            obj.visible = pref['visible']
-            obj.show_landmark = pref['show_landmark']
-            obj.show_wireframe = pref['show_wireframe']
-            obj.show_polygon = pref['show_polygon']
-            obj.opacity = pref['opacity']
-            obj.polygon_color = pref['polygon_color']
-            obj.edge_color = pref['edge_color']
-            obj.landmark_color = pref['landmark_color']
+            obj.visible = pref["visible"]
+            obj.show_landmark = pref["show_landmark"]
+            obj.show_wireframe = pref["show_wireframe"]
+            obj.show_polygon = pref["show_polygon"]
+            obj.opacity = pref["opacity"]
+            obj.polygon_color = pref["polygon_color"]
+            obj.edge_color = pref["edge_color"]
+            obj.landmark_color = pref["landmark_color"]
 
     def set_source_shape_color(self, color):
         self.source_shape_color = color
@@ -274,13 +287,13 @@ class ObjectViewer2D(QLabel):
         self.target_shape_color = color
 
     def set_source_shape(self, object):
-        self.comparison_data['source_shape'] = object
+        self.comparison_data["source_shape"] = object
 
     def set_target_shape(self, object):
-        self.comparison_data['target_shape'] = object
+        self.comparison_data["target_shape"] = object
 
     def set_intermediate_shape(self, object):
-        self.comparison_data['intermediate_shape'] = object
+        self.comparison_data["intermediate_shape"] = object
 
     def generate_reference_shape(self):
         shape_list = []
@@ -292,32 +305,32 @@ class ObjectViewer2D(QLabel):
         ds.polygon_list = self.dataset.polygon_list
         ds_ops = MdDatasetOps(ds)
 
-        if 'source_shape' in self.comparison_data:
-            shape_list.append(self.comparison_data['source_shape'])
-            source = self.comparison_data['source_shape']
+        if "source_shape" in self.comparison_data:
+            shape_list.append(self.comparison_data["source_shape"])
+            source = self.comparison_data["source_shape"]
             source_ops = MdObjectOps(source)
             ds_ops.object_list.append(source_ops)
-        if 'target_shape' in self.comparison_data:
-            shape_list.append(self.comparison_data['target_shape'])
-            target = self.comparison_data['target_shape']
+        if "target_shape" in self.comparison_data:
+            shape_list.append(self.comparison_data["target_shape"])
+            target = self.comparison_data["target_shape"]
             target_ops = MdObjectOps(target)
             ds_ops.object_list.append(target_ops)
 
         ret = ds_ops.procrustes_superimposition()
-        if ret == False:
+        if not ret:
             logger = logging.getLogger(__name__)
             logger.error("procrustes failed")
             return
-        self.comparison_data['ds_ops'] = ds_ops
-        self.comparison_data['average_shape'] = ds_ops.get_average_shape()
+        self.comparison_data["ds_ops"] = ds_ops
+        self.comparison_data["average_shape"] = ds_ops.get_average_shape()
         self.set_ds_ops(ds_ops)
-        
+
         self.data_mode = DATASET_MODE
         if self.source_preference is not None:
             self.set_source_shape_preference(self.source_preference)
         if self.target_preference is not None:
             self.set_target_shape_preference(self.target_preference)
-            
+
         self.update_tps_grid()
 
     def set_ds_ops(self, ds_ops):
@@ -325,35 +338,35 @@ class ObjectViewer2D(QLabel):
         self.data_mode = DATASET_MODE
         average_shape = self.ds_ops.get_average_shape()
         self.landmark_list = average_shape.landmark_list
-        #self.set_object(average_shape)
+        # self.set_object(average_shape)
         self.calculate_resize()
         self.align_object()
-        #scale = self.get_scale_from_object(average_shape)
-        #average_shape.rescale(scale)
-        #for obj in self.ds_ops.object_list:
+        # scale = self.get_scale_from_object(average_shape)
+        # average_shape.rescale(scale)
+        # for obj in self.ds_ops.object_list:
         #    obj.rescale(scale)
         self.edge_list = ds_ops.edge_list
 
     def set_shape_preference(self, object_preference):
         self.shape_preference = object_preference
-        if self.obj_ops is not None :
+        if self.obj_ops is not None:
             obj = self.obj_ops
-            if 'visible' in object_preference:
-                obj.visible = object_preference['visible']
-            if 'show_landmark' in object_preference:
-                obj.show_landmark = object_preference['show_landmark']
-            if 'show_wireframe' in object_preference:
-                obj.show_wireframe = object_preference['show_wireframe']
-            if 'show_polygon' in object_preference:
-                obj.show_polygon = object_preference['show_polygon']
-            if 'opacity' in object_preference:
-                obj.opacity = object_preference['opacity']
-            if 'polygon_color' in object_preference:
-                obj.polygon_color = object_preference['polygon_color']
-            if 'edge_color' in object_preference:
-                obj.edge_color = object_preference['edge_color']
-            if 'landmark_color' in object_preference:
-                obj.landmark_color = object_preference['landmark_color']
+            if "visible" in object_preference:
+                obj.visible = object_preference["visible"]
+            if "show_landmark" in object_preference:
+                obj.show_landmark = object_preference["show_landmark"]
+            if "show_wireframe" in object_preference:
+                obj.show_wireframe = object_preference["show_wireframe"]
+            if "show_polygon" in object_preference:
+                obj.show_polygon = object_preference["show_polygon"]
+            if "opacity" in object_preference:
+                obj.opacity = object_preference["opacity"]
+            if "polygon_color" in object_preference:
+                obj.polygon_color = object_preference["polygon_color"]
+            if "edge_color" in object_preference:
+                obj.edge_color = object_preference["edge_color"]
+            if "landmark_color" in object_preference:
+                obj.landmark_color = object_preference["landmark_color"]
         return
 
     def apply_rotation(self, angle):
@@ -376,11 +389,11 @@ class ObjectViewer2D(QLabel):
             for obj_ops in self.ds_ops.object_list:
                 obj_ops.align(self.ds_ops.baseline_point_list)
 
-    def set_landmark_pref(self,lm_pref,wf_pref,bgcolor):
-        self.landmark_size = lm_pref['size']
-        self.landmark_color = lm_pref['color']
-        self.wireframe_thickness = wf_pref['thickness']
-        self.wireframe_color = wf_pref['color']
+    def set_landmark_pref(self, lm_pref, wf_pref, bgcolor):
+        self.landmark_size = lm_pref["size"]
+        self.landmark_color = lm_pref["color"]
+        self.wireframe_thickness = wf_pref["thickness"]
+        self.wireframe_color = wf_pref["color"]
         self.bgcolor = bgcolor
 
     def read_settings(self):
@@ -396,14 +409,17 @@ class ObjectViewer2D(QLabel):
         if coord is None:
             return 0  # Return safe default value
         return round((float(coord) / self.image_canvas_ratio) * self.scale) + self.pan_x + self.temp_pan_x
+
     def _2cany(self, coord):
         if coord is None:
             return 0  # Return safe default value
         return round((float(coord) / self.image_canvas_ratio) * self.scale) + self.pan_y + self.temp_pan_y
+
     def _2imgx(self, coord):
         if coord is None:
             return 0  # Return safe default value
         return round(((float(coord) - self.pan_x) / self.scale) * self.image_canvas_ratio)
+
     def _2imgy(self, coord):
         if coord is None:
             return 0  # Return safe default value
@@ -411,20 +427,20 @@ class ObjectViewer2D(QLabel):
 
     def show_message(self, msg):
         if self.object_dialog is not None:
-            self.object_dialog.status_bar.showMessage(msg) 
+            self.object_dialog.status_bar.showMessage(msg)
 
     def set_mode(self, mode):
         self.edit_mode = mode
-        if self.edit_mode == MODE['EDIT_LANDMARK']:
+        if self.edit_mode == MODE["EDIT_LANDMARK"]:
             self.setCursor(Qt.CrossCursor)
             self.show_message(self.tr("Click on image to add landmark"))
-        elif self.edit_mode == MODE['READY_MOVE_LANDMARK']:
+        elif self.edit_mode == MODE["READY_MOVE_LANDMARK"]:
             self.setCursor(Qt.SizeAllCursor)
             self.show_message(self.tr("Click on landmark to move"))
-        elif self.edit_mode == MODE['MOVE_LANDMARK']:
+        elif self.edit_mode == MODE["MOVE_LANDMARK"]:
             self.setCursor(Qt.SizeAllCursor)
             self.show_message(self.tr("Move landmark"))
-        elif self.edit_mode == MODE['CALIBRATION']:
+        elif self.edit_mode == MODE["CALIBRATION"]:
             self.setCursor(Qt.CrossCursor)
             self.show_message(self.tr("Click on image to calibrate"))
         else:
@@ -435,20 +451,19 @@ class ObjectViewer2D(QLabel):
             # Skip missing landmarks
             if landmark[0] is None or landmark[1] is None:
                 continue
-            lm_can_pos = [self._2canx(landmark[0]),self._2cany(landmark[1])]
+            lm_can_pos = [self._2canx(landmark[0]), self._2cany(landmark[1])]
             dist = self.get_distance(curr_pos, lm_can_pos)
             if dist < threshold:
                 return index
         return -1
-    
+
     def get_edge_index_within_threshold(self, curr_pos, threshold=DISTANCE_THRESHOLD):
         if len(self.edge_list) == 0:
             return -1
 
-        landmark_list = self.landmark_list
         for index, wire in enumerate(self.edge_list):
-            from_lm_idx = wire[0]-1
-            to_lm_idx = wire[1]-1
+            from_lm_idx = wire[0] - 1
+            to_lm_idx = wire[1] - 1
             if from_lm_idx >= len(self.landmark_list) or to_lm_idx >= len(self.landmark_list):
                 continue
 
@@ -458,32 +473,32 @@ class ObjectViewer2D(QLabel):
             if from_lm[0] is None or from_lm[1] is None or to_lm[0] is None or to_lm[1] is None:
                 continue
 
-            wire_start = [self._2canx(float(from_lm[0])),self._2cany(float(from_lm[1]))]
-            wire_end = [self._2canx(float(to_lm[0])),self._2cany(float(to_lm[1]))]
+            wire_start = [self._2canx(float(from_lm[0])), self._2cany(float(from_lm[1]))]
+            wire_end = [self._2canx(float(to_lm[0])), self._2cany(float(to_lm[1]))]
             dist = self.get_distance_to_line(curr_pos, wire_start, wire_end)
             if dist < threshold and dist > 0:
                 return index
         return -1
-    
+
     def get_distance_to_line(self, curr_pos, line_start, line_end):
         x1 = line_start[0]
         y1 = line_start[1]
         x2 = line_end[0]
         y2 = line_end[1]
-        max_x = max(x1,x2)
-        min_x = min(x1,x2)
-        max_y = max(y1,y2)
-        min_y = min(y1,y2)
+        max_x = max(x1, x2)
+        min_x = min(x1, x2)
+        max_y = max(y1, y2)
+        min_y = min(y1, y2)
         if curr_pos[0] > max_x or curr_pos[0] < min_x or curr_pos[1] > max_y or curr_pos[1] < min_y:
             return -1
         x0 = curr_pos[0]
         y0 = curr_pos[1]
-        numerator = abs((y2-y1)*x0 - (x2-x1)*y0 + x2*y1 - y2*x1)
-        denominator = math.sqrt(math.pow(y2-y1,2) + math.pow(x2-x1,2))
-        return numerator/denominator
+        numerator = abs((y2 - y1) * x0 - (x2 - x1) * y0 + x2 * y1 - y2 * x1)
+        denominator = math.sqrt(math.pow(y2 - y1, 2) + math.pow(x2 - x1, 2))
+        return numerator / denominator
 
     def get_distance(self, pos1, pos2):
-        return math.sqrt((pos1[0] - pos2[0])**2 + (pos1[1] - pos2[1])**2)
+        return math.sqrt((pos1[0] - pos2[0]) ** 2 + (pos1[1] - pos2[1]) ** 2)
 
     def mouseMoveEvent(self, event):
         if self.object_dialog is None:
@@ -492,18 +507,18 @@ class ObjectViewer2D(QLabel):
         self.mouse_curr_x = me.x()
         self.mouse_curr_y = me.y()
         curr_pos = [self.mouse_curr_x, self.mouse_curr_y]
-    
-        if self.pan_mode == MODE['PAN']:
+
+        if self.pan_mode == MODE["PAN"]:
             self.temp_pan_x = int(self.mouse_curr_x - self.mouse_down_x)
             self.temp_pan_y = int(self.mouse_curr_y - self.mouse_down_y)
 
-        elif self.edit_mode == MODE['EDIT_LANDMARK']:
+        elif self.edit_mode == MODE["EDIT_LANDMARK"]:
             near_idx = self.get_landmark_index_within_threshold(curr_pos, DISTANCE_THRESHOLD)
             if near_idx >= 0:
-                self.set_mode(MODE['READY_MOVE_LANDMARK'])
+                self.set_mode(MODE["READY_MOVE_LANDMARK"])
                 self.selected_landmark_index = near_idx
 
-        elif self.edit_mode == MODE['WIREFRAME']:
+        elif self.edit_mode == MODE["WIREFRAME"]:
             near_idx = self.get_landmark_index_within_threshold(curr_pos, DISTANCE_THRESHOLD)
             if near_idx >= 0:
                 self.selected_edge_index = -1
@@ -517,35 +532,40 @@ class ObjectViewer2D(QLabel):
                 self.wire_hover_index = -1
                 near_wire_idx = self.get_edge_index_within_threshold(curr_pos, DISTANCE_THRESHOLD)
                 if near_wire_idx >= 0:
-                    edge = self.edge_list[near_wire_idx]
+                    self.edge_list[near_wire_idx]
                     self.selected_edge_index = near_wire_idx
                 else:
                     self.selected_edge_index = -1
 
-        elif self.edit_mode == MODE['MOVE_LANDMARK']:
+        elif self.edit_mode == MODE["MOVE_LANDMARK"]:
             if self.selected_landmark_index >= 0:
-                self.landmark_list[self.selected_landmark_index] = [self._2imgx(self.mouse_curr_x), self._2imgy(self.mouse_curr_y)]
+                self.landmark_list[self.selected_landmark_index] = [
+                    self._2imgx(self.mouse_curr_x),
+                    self._2imgy(self.mouse_curr_y),
+                ]
                 if self.object_dialog is not None:
-                    self.object_dialog.update_landmark(self.selected_landmark_index, *self.landmark_list[self.selected_landmark_index])
+                    self.object_dialog.update_landmark(
+                        self.selected_landmark_index, *self.landmark_list[self.selected_landmark_index]
+                    )
 
-        elif self.edit_mode == MODE['READY_MOVE_LANDMARK']:
+        elif self.edit_mode == MODE["READY_MOVE_LANDMARK"]:
             curr_pos = [self.mouse_curr_x, self.mouse_curr_y]
             ready_landmark = self.landmark_list[self.selected_landmark_index]
             # Don't try to move missing landmarks
             if ready_landmark[0] is None or ready_landmark[1] is None:
                 return
-            lm_can_pos = [self._2canx(ready_landmark[0]),self._2cany(ready_landmark[1])]
+            lm_can_pos = [self._2canx(ready_landmark[0]), self._2cany(ready_landmark[1])]
             if self.get_distance(curr_pos, lm_can_pos) > DISTANCE_THRESHOLD:
-                self.set_mode(MODE['EDIT_LANDMARK'])
+                self.set_mode(MODE["EDIT_LANDMARK"])
                 self.selected_landmark_index = -1
-            
+
         self.repaint()
         QLabel.mouseMoveEvent(self, event)
 
     def mousePressEvent(self, event):
         me = QMouseEvent(event)
         if me.button() == Qt.LeftButton:
-            if self.edit_mode == MODE['EDIT_LANDMARK']:
+            if self.edit_mode == MODE["EDIT_LANDMARK"]:
                 if self.orig_pixmap is None:
                     return
                 img_x = self._2imgx(self.mouse_curr_x)
@@ -553,32 +573,32 @@ class ObjectViewer2D(QLabel):
                 if img_x < 0 or img_x > self.orig_pixmap.width() or img_y < 0 or img_y > self.orig_pixmap.height():
                     return
                 self.object_dialog.add_landmark(img_x, img_y)
-            elif self.edit_mode == MODE['READY_MOVE_LANDMARK']:
-                self.set_mode(MODE['MOVE_LANDMARK'])
-            elif self.edit_mode == MODE['WIREFRAME']:
+            elif self.edit_mode == MODE["READY_MOVE_LANDMARK"]:
+                self.set_mode(MODE["MOVE_LANDMARK"])
+            elif self.edit_mode == MODE["WIREFRAME"]:
                 if self.wire_hover_index >= 0:
                     if self.wire_start_index < 0:
                         self.wire_start_index = self.wire_hover_index
                         self.wire_hover_index = -1
-            elif self.edit_mode == MODE['CALIBRATION']:
+            elif self.edit_mode == MODE["CALIBRATION"]:
                 self.calibration_from_img_x = self._2imgx(self.mouse_curr_x)
                 self.calibration_from_img_y = self._2imgy(self.mouse_curr_y)
 
         elif me.button() == Qt.RightButton:
-            if self.edit_mode == MODE['WIREFRAME']:
+            if self.edit_mode == MODE["WIREFRAME"]:
                 if self.wire_start_index >= 0:
                     self.wire_start_index = -1
                     self.wire_hover_index = -1
                 elif self.selected_edge_index >= 0:
-                    self.delete_edge(self.selected_edge_index)                    
+                    self.delete_edge(self.selected_edge_index)
                     self.selected_edge_index = -1
-            elif self.edit_mode == MODE['READY_MOVE_LANDMARK']:
+            elif self.edit_mode == MODE["READY_MOVE_LANDMARK"]:
                 if self.selected_landmark_index >= 0:
                     self.object_dialog.delete_landmark(self.selected_landmark_index)
                     self.selected_landmark_index = -1
-                    self.set_mode(MODE['EDIT_LANDMARK'])
+                    self.set_mode(MODE["EDIT_LANDMARK"])
             else:
-                self.pan_mode = MODE['PAN']
+                self.pan_mode = MODE["PAN"]
                 self.mouse_down_x = me.x()
                 self.mouse_down_y = me.y()
 
@@ -587,25 +607,25 @@ class ObjectViewer2D(QLabel):
     def mouseReleaseEvent(self, ev: QMouseEvent) -> None:
         if self.object_dialog is None:
             return
-        me = QMouseEvent(ev)
-        if self.pan_mode == MODE['PAN']:
-            self.pan_mode = MODE['NONE']
+        QMouseEvent(ev)
+        if self.pan_mode == MODE["PAN"]:
+            self.pan_mode = MODE["NONE"]
             self.pan_x += self.temp_pan_x
             self.pan_y += self.temp_pan_y
             self.temp_pan_x = 0
             self.temp_pan_y = 0
             self.repaint()
-        elif self.edit_mode == MODE['MOVE_LANDMARK']:
-            self.set_mode(MODE['EDIT_LANDMARK'])
+        elif self.edit_mode == MODE["MOVE_LANDMARK"]:
+            self.set_mode(MODE["EDIT_LANDMARK"])
             self.selected_landmark_index = -1
-        elif self.edit_mode == MODE['WIREFRAME']:
+        elif self.edit_mode == MODE["WIREFRAME"]:
             if self.wire_start_index >= 0 and self.wire_hover_index >= 0:
-                #print("wire start:", self.wire_start_index, "wire hover:", self.wire_hover_index)
+                # print("wire start:", self.wire_start_index, "wire hover:", self.wire_hover_index)
                 self.add_edge(self.wire_start_index, self.wire_hover_index)
                 self.wire_start_index = -1
                 self.wire_hover_index = -1
                 self.wire_end_index = -1
-        elif self.edit_mode == MODE['CALIBRATION']:
+        elif self.edit_mode == MODE["CALIBRATION"]:
             diff_x = self._2imgx(self.mouse_curr_x) - self.calibration_from_img_x
             diff_y = self._2imgy(self.mouse_curr_y) - self.calibration_from_img_y
             dist = math.sqrt(diff_x * diff_x + diff_y * diff_y)
@@ -614,7 +634,7 @@ class ObjectViewer2D(QLabel):
             self.calibration_from_img_y = -1
 
         self.repaint()
-        return super().mouseReleaseEvent(ev)    
+        return super().mouseReleaseEvent(ev)
 
     def wheelEvent(self, event):
         we = QWheelEvent(event)
@@ -629,15 +649,15 @@ class ObjectViewer2D(QLabel):
         self.prev_scale = self.scale
         self.adjust_scale(scale_delta_ratio)
         scale_proportion = self.scale / self.prev_scale
-        self.pan_x = round( we.pos().x() - (we.pos().x() - self.pan_x) * scale_proportion )
-        self.pan_y = round( we.pos().y() - (we.pos().y() - self.pan_y) * scale_proportion )
+        self.pan_x = round(we.pos().x() - (we.pos().x() - self.pan_x) * scale_proportion)
+        self.pan_y = round(we.pos().y() - (we.pos().y() - self.pan_y) * scale_proportion)
 
         QLabel.wheelEvent(self, event)
         self.repaint()
         event.accept()
 
-    def adjust_scale(self, scale_delta_ratio, recurse = True):
-        if self.parent != None and callable(getattr(self.parent, 'sync_zoom', None)) and recurse == True:
+    def adjust_scale(self, scale_delta_ratio, recurse=True):
+        if self.parent is not None and callable(getattr(self.parent, "sync_zoom", None)) and recurse:
             self.parent.sync_zoom(self, scale_delta_ratio)
 
         if self.scale > 1:
@@ -649,7 +669,10 @@ class ObjectViewer2D(QLabel):
         self.scale = round(self.scale * 10) / 10
 
         if self.orig_pixmap is not None:
-            self.curr_pixmap = self.orig_pixmap.scaled(int(self.orig_pixmap.width() * self.scale / self.image_canvas_ratio), int(self.orig_pixmap.height() * self.scale / self.image_canvas_ratio))
+            self.curr_pixmap = self.orig_pixmap.scaled(
+                int(self.orig_pixmap.width() * self.scale / self.image_canvas_ratio),
+                int(self.orig_pixmap.height() * self.scale / self.image_canvas_ratio),
+            )
 
         self.repaint()
 
@@ -660,7 +683,7 @@ class ObjectViewer2D(QLabel):
         if self.object_dialog is None:
             return
         file_name = event.mimeData().text()
-        if file_name.split('.')[-1].lower() in mu.IMAGE_EXTENSION_LIST:
+        if file_name.split(".")[-1].lower() in mu.IMAGE_EXTENSION_LIST:
             event.acceptProposedAction()
         else:
             event.ignore()
@@ -673,11 +696,11 @@ class ObjectViewer2D(QLabel):
         file_path = mu.process_dropped_file_name(file_path)
 
         self.set_image(file_path)
-        
+
         self.calculate_resize()
         if self.object_dialog is not None:
             self.object_dialog.set_object_name(Path(file_path).stem)
-            self.object_dialog.btnLandmark_clicked()    
+            self.object_dialog.btnLandmark_clicked()
             self.object_dialog.btnLandmark.setDown(True)
             self.object_dialog.btnLandmark.setEnabled(True)
 
@@ -688,45 +711,52 @@ class ObjectViewer2D(QLabel):
         if self.show_arrow and len(ds_ops.object_list) > 1:
             self.draw_arrow(painter, 0, 1)
 
-        for idx, obj in enumerate(ds_ops.object_list):
+        for _idx, obj in enumerate(ds_ops.object_list):
             logger.debug(f"draw object: {obj}, landmarks: {obj.landmark_list}")
-            if obj.visible == False:
+            if not obj.visible:
                 continue
             if obj.id in ds_ops.selected_object_id_list:
-                object_color = COLOR['SELECTED_SHAPE']
+                object_color = COLOR["SELECTED_SHAPE"]
             else:
                 if obj.landmark_color is not None:
                     object_color = mu.as_gl_color(obj.landmark_color)
                 else:
-                    object_color = mu.as_gl_color(self.landmark_color) #COLOR['NORMAL_SHAPE']
-            edge_color=self.wireframe_color
+                    object_color = mu.as_gl_color(self.landmark_color)  # COLOR['NORMAL_SHAPE']
+            edge_color = self.wireframe_color
             if obj.edge_color is not None:
                 edge_color = obj.edge_color
-            polygon_color=self.wireframe_color
+            polygon_color = self.wireframe_color
             if obj.polygon_color is not None:
                 polygon_color = obj.polygon_color
 
-            self.draw_object(painter, obj, landmark_as_sphere=False, color=object_color, edge_color=edge_color,polygon_color=polygon_color)
+            self.draw_object(
+                painter,
+                obj,
+                landmark_as_sphere=False,
+                color=object_color,
+                edge_color=edge_color,
+                polygon_color=polygon_color,
+            )
 
         if self.show_average:
-            object_color = COLOR['AVERAGE_SHAPE']
+            object_color = COLOR["AVERAGE_SHAPE"]
             self.draw_object(ds_ops.get_average_shape(), landmark_as_sphere=True, color=object_color)
 
     def draw_dataset(self, painter):
         ds_ops = self.ds_ops
-        
+
         # Generate TPS grid if not already generated
-        if not hasattr(self, 'grid_lines_transformed'):
+        if not hasattr(self, "grid_lines_transformed"):
             self.generate_tps_grid()
-        
+
         # Draw TPS grid
-        if hasattr(self, 'grid_lines_transformed'):
+        if hasattr(self, "grid_lines_transformed"):
             pen = QPen(QColor(235, 235, 235, 70))  # Light blue, semi-transparent
             pen.setWidth(2)
             painter.setPen(pen)
-            
+
             # Draw transformed grid lines
-            for direction, line in self.grid_lines_transformed:
+            for _direction, line in self.grid_lines_transformed:
                 # Skip lines with None values
                 valid_line = all(p[0] is not None and p[1] is not None for p in line)
                 if not valid_line:
@@ -734,16 +764,16 @@ class ObjectViewer2D(QLabel):
                 points = [QPointF(self._2canx(p[0]), self._2cany(p[1])) for p in line]
                 for i in range(len(points) - 1):
                     painter.drawLine(points[i], points[i + 1])
-        
+
         # Draw shapes
         if self.show_arrow and len(ds_ops.object_list) > 1:
             self.draw_arrow(painter, 0, 1)
 
-        for idx, obj in enumerate(ds_ops.object_list):
-            if obj.visible == False:
+        for _idx, obj in enumerate(ds_ops.object_list):
+            if not obj.visible:
                 continue
             if obj.id in ds_ops.selected_object_id_list:
-                object_color = COLOR['SELECTED_SHAPE']
+                object_color = COLOR["SELECTED_SHAPE"]
             else:
                 if obj.landmark_color is not None:
                     object_color = mu.as_gl_color(obj.landmark_color)
@@ -756,15 +786,18 @@ class ObjectViewer2D(QLabel):
             if obj.polygon_color is not None:
                 polygon_color = obj.polygon_color
 
-            self.draw_object(painter, obj, landmark_as_sphere=False, 
-                            color=object_color, edge_color=edge_color,
-                            polygon_color=polygon_color)
+            self.draw_object(
+                painter,
+                obj,
+                landmark_as_sphere=False,
+                color=object_color,
+                edge_color=edge_color,
+                polygon_color=polygon_color,
+            )
 
         if self.show_average:
-            object_color = COLOR['AVERAGE_SHAPE']
-            self.draw_object(ds_ops.get_average_shape(), landmark_as_sphere=True, 
-                            color=object_color)
-
+            object_color = COLOR["AVERAGE_SHAPE"]
+            self.draw_object(ds_ops.get_average_shape(), landmark_as_sphere=True, color=object_color)
 
     def draw_arrow(self, painter, start_idx, end_idx):
         from_obj = self.ds_ops.object_list[start_idx]
@@ -775,9 +808,17 @@ class ObjectViewer2D(QLabel):
             from_y = from_lm[1]
             to_x = to_lm[0]
             to_y = to_lm[1]
-            self.draw_line( painter, from_x, from_y, to_x, to_y, COLOR['RED'])
-    
-    def draw_object(self, painter, obj, landmark_as_sphere=False, color=COLOR['NORMAL_SHAPE'], edge_color=COLOR['WIREFRAME'], polygon_color=COLOR['WIREFRAME']):
+            self.draw_line(painter, from_x, from_y, to_x, to_y, COLOR["RED"])
+
+    def draw_object(
+        self,
+        painter,
+        obj,
+        landmark_as_sphere=False,
+        color=COLOR["NORMAL_SHAPE"],
+        edge_color=COLOR["WIREFRAME"],
+        polygon_color=COLOR["WIREFRAME"],
+    ):
         if obj.show_landmark:
             for idx, landmark in enumerate(obj.landmark_list):
                 # Check for missing landmarks
@@ -789,8 +830,8 @@ class ObjectViewer2D(QLabel):
                     self.draw_landmark(painter, landmark[0], landmark[1], color)
         if obj.show_wireframe:
             for edge in self.ds_ops.edge_list:
-                from_lm_idx = edge[0]-1
-                to_lm_idx = edge[1]-1
+                from_lm_idx = edge[0] - 1
+                to_lm_idx = edge[1] - 1
                 if from_lm_idx >= len(obj.landmark_list) or to_lm_idx >= len(obj.landmark_list):
                     continue
                 from_lm = obj.landmark_list[from_lm_idx]
@@ -809,17 +850,19 @@ class ObjectViewer2D(QLabel):
                     landmark = obj.landmark_list[idx]
                     polygon_points.append(landmark)
                 self.draw_polygon(polygon_points, polygon_color)
-       
+
     def draw_line(self, painter, from_x, from_y, to_x, to_y, color):
-        #print("color:", color)
+        # print("color:", color)
         painter.setPen(QPen(mu.as_qt_color(color), 2))
-        painter.drawLine(int(self._2canx(from_x)), int(self._2cany(from_y)), int(self._2canx(to_x)), int(self._2cany(to_y)))
+        painter.drawLine(
+            int(self._2canx(from_x)), int(self._2cany(from_y)), int(self._2canx(to_x)), int(self._2cany(to_y))
+        )
 
     def draw_landmark(self, painter, x, y, color):
         radius = BASE_LANDMARK_RADIUS * (int(self.landmark_size) + 1)
         painter.setPen(QPen(mu.as_qt_color(color), 2))
         painter.setBrush(QBrush(mu.as_qt_color(color)))
-        painter.drawEllipse(int(self._2canx(x)-radius), int(self._2cany(y))-radius, radius*2, radius*2)
+        painter.drawEllipse(int(self._2canx(x) - radius), int(self._2cany(y)) - radius, radius * 2, radius * 2)
 
     def draw_estimated_landmark(self, painter, x, y, idx):
         """Draw an estimated landmark position with distinctive visual style"""
@@ -843,7 +886,7 @@ class ObjectViewer2D(QLabel):
         # Draw index with question mark if enabled
         if self.show_index:
             idx_color = QColor(self.index_color)
-            painter.setFont(QFont('Helvetica', 10 + int(self.index_size) * 3))
+            painter.setFont(QFont("Helvetica", 10 + int(self.index_size) * 3))
             painter.setPen(QPen(idx_color, 2))
             # Draw index number followed by question mark
             painter.drawText(screen_x + 10, screen_y + 10, f"{idx + 1}?")
@@ -876,27 +919,27 @@ class ObjectViewer2D(QLabel):
 
     def paintEvent(self, event):
         painter = QPainter(self)
-        if self.transparent == False:
+        if not self.transparent:
             painter.fillRect(self.rect(), QBrush(QColor(self.bgcolor)))
         if self.object is None:
-            #print("no object")
+            # print("no object")
             if self.ds_ops is not None:
                 self.draw_dataset(painter)
             return
         if self.curr_pixmap is not None:
-            painter.drawPixmap(self.pan_x+self.temp_pan_x, self.pan_y+self.temp_pan_y,self.curr_pixmap)
+            painter.drawPixmap(self.pan_x + self.temp_pan_x, self.pan_y + self.temp_pan_y, self.curr_pixmap)
 
-        if self.show_wireframe == True:
+        if self.show_wireframe:
             if self.obj_ops.edge_color:
                 color = QColor(self.obj_ops.edge_color)
             else:
                 color = QColor(self.wireframe_color)
-            painter.setPen(QPen(color, int(self.wireframe_thickness)+1))
-            painter.setBrush(QBrush(color))                
+            painter.setPen(QPen(color, int(self.wireframe_thickness) + 1))
+            painter.setBrush(QBrush(color))
 
             for wire in self.edge_list:
-                from_lm_idx = wire[0]-1
-                to_lm_idx = wire[1]-1
+                from_lm_idx = wire[0] - 1
+                to_lm_idx = wire[1] - 1
                 if from_lm_idx >= len(self.landmark_list) or to_lm_idx >= len(self.landmark_list):
                     continue
                 from_lm = self.landmark_list[from_lm_idx]
@@ -904,42 +947,51 @@ class ObjectViewer2D(QLabel):
                 # Skip edges with missing landmarks
                 if from_lm[0] is None or from_lm[1] is None or to_lm[0] is None or to_lm[1] is None:
                     continue
-                [ from_x, from_y ] = from_lm
-                [ to_x, to_y ] = to_lm
-                painter.drawLine(int(self._2canx(from_x)), int(self._2cany(from_y)), int(self._2canx(to_x)), int(self._2cany(to_y)))
+                [from_x, from_y] = from_lm
+                [to_x, to_y] = to_lm
+                painter.drawLine(
+                    int(self._2canx(from_x)), int(self._2cany(from_y)), int(self._2canx(to_x)), int(self._2cany(to_y))
+                )
             if self.selected_edge_index >= 0:
                 edge = self.edge_list[self.selected_edge_index]
-                from_lm_idx = edge[0]-1
-                to_lm_idx = edge[1]-1
-                painter.setPen(QPen(mu.as_qt_color(COLOR['SELECTED_EDGE']), 2))
+                from_lm_idx = edge[0] - 1
+                to_lm_idx = edge[1] - 1
+                painter.setPen(QPen(mu.as_qt_color(COLOR["SELECTED_EDGE"]), 2))
                 if from_lm_idx >= len(self.landmark_list) or to_lm_idx >= len(self.landmark_list):
                     pass
                 else:
-                    [ from_x, from_y ] = self.landmark_list[from_lm_idx]
-                    [ to_x, to_y ] = self.landmark_list[to_lm_idx]
-                    painter.drawLine(int(self._2canx(from_x)), int(self._2cany(from_y)), int(self._2canx(to_x)), int(self._2cany(to_y)))
+                    [from_x, from_y] = self.landmark_list[from_lm_idx]
+                    [to_x, to_y] = self.landmark_list[to_lm_idx]
+                    painter.drawLine(
+                        int(self._2canx(from_x)),
+                        int(self._2cany(from_y)),
+                        int(self._2canx(to_x)),
+                        int(self._2cany(to_y)),
+                    )
 
-        radius = BASE_LANDMARK_RADIUS * (int(self.landmark_size) + 1) 
+        radius = BASE_LANDMARK_RADIUS * (int(self.landmark_size) + 1)
         painter.setPen(QPen(Qt.blue, 2))
         painter.setBrush(QBrush(Qt.blue))
-        if self.edit_mode == MODE['CALIBRATION']:
+        if self.edit_mode == MODE["CALIBRATION"]:
             if self.calibration_from_img_x >= 0 and self.calibration_from_img_y >= 0:
                 x1 = int(self._2canx(self.calibration_from_img_x))
                 y1 = int(self._2cany(self.calibration_from_img_y))
                 x2 = self.mouse_curr_x
                 y2 = self.mouse_curr_y
-                painter.setPen(QPen(mu.as_qt_color(COLOR['SELECTED_LANDMARK']), 2))
-                painter.drawLine(x1,y1,x2,y2)
+                painter.setPen(QPen(mu.as_qt_color(COLOR["SELECTED_LANDMARK"]), 2))
+                painter.drawLine(x1, y1, x2, y2)
 
-        painter.setFont(QFont('Helvetica', 10 + int(self.index_size) * 3))
+        painter.setFont(QFont("Helvetica", 10 + int(self.index_size) * 3))
         for idx, landmark in enumerate(self.landmark_list):
             # Check for missing landmarks
             if landmark[0] is None or landmark[1] is None:
                 # Check if we have an estimated position from object_dialog
-                if hasattr(self, 'object_dialog') and self.object_dialog:
-                    if (hasattr(self.object_dialog, 'estimated_landmark_list') and
-                        self.object_dialog.estimated_landmark_list is not None and
-                        idx < len(self.object_dialog.estimated_landmark_list)):
+                if hasattr(self, "object_dialog") and self.object_dialog:
+                    if (
+                        hasattr(self.object_dialog, "estimated_landmark_list")
+                        and self.object_dialog.estimated_landmark_list is not None
+                        and idx < len(self.object_dialog.estimated_landmark_list)
+                    ):
                         est_lm = self.object_dialog.estimated_landmark_list[idx]
                         if est_lm[0] is not None and est_lm[1] is not None:
                             # Draw estimated landmark with distinctive style
@@ -950,14 +1002,14 @@ class ObjectViewer2D(QLabel):
                 continue
 
             if idx == self.wire_hover_index:
-                painter.setPen(QPen(mu.as_qt_color(COLOR['SELECTED_LANDMARK']), 2))
-                painter.setBrush(QBrush(mu.as_qt_color(COLOR['SELECTED_LANDMARK'])))
+                painter.setPen(QPen(mu.as_qt_color(COLOR["SELECTED_LANDMARK"]), 2))
+                painter.setBrush(QBrush(mu.as_qt_color(COLOR["SELECTED_LANDMARK"])))
             elif idx == self.wire_start_index or idx == self.wire_end_index:
-                painter.setPen(QPen(mu.as_qt_color(COLOR['SELECTED_LANDMARK']), 2))
-                painter.setBrush(QBrush(mu.as_qt_color(COLOR['SELECTED_LANDMARK'])))
+                painter.setPen(QPen(mu.as_qt_color(COLOR["SELECTED_LANDMARK"]), 2))
+                painter.setBrush(QBrush(mu.as_qt_color(COLOR["SELECTED_LANDMARK"])))
             elif idx == self.selected_landmark_index:
-                painter.setPen(QPen(mu.as_qt_color(COLOR['SELECTED_LANDMARK']), 2))
-                painter.setBrush(QBrush(mu.as_qt_color(COLOR['SELECTED_LANDMARK'])))
+                painter.setPen(QPen(mu.as_qt_color(COLOR["SELECTED_LANDMARK"]), 2))
+                painter.setBrush(QBrush(mu.as_qt_color(COLOR["SELECTED_LANDMARK"])))
             else:
                 if self.obj_ops.landmark_color:
                     color = QColor(self.obj_ops.landmark_color)
@@ -965,24 +1017,28 @@ class ObjectViewer2D(QLabel):
                     color = QColor(self.landmark_color)
                 painter.setPen(QPen(color, 2))
                 painter.setBrush(QBrush(color))
-            painter.drawEllipse(int(self._2canx(landmark[0])-radius), int(self._2cany(landmark[1]))-radius, radius*2, radius*2)
-            if self.show_index == True:
+            painter.drawEllipse(
+                int(self._2canx(landmark[0]) - radius), int(self._2cany(landmark[1])) - radius, radius * 2, radius * 2
+            )
+            if self.show_index:
                 idx_color = QColor(self.index_color)
-                painter.setPen(QPen(idx_color, 2 ))
+                painter.setPen(QPen(idx_color, 2))
                 painter.setBrush(QBrush(idx_color))
-                painter.drawText(int(self._2canx(landmark[0])+10), int(self._2cany(landmark[1]))+10, str(idx+1))
+                painter.drawText(int(self._2canx(landmark[0]) + 10), int(self._2cany(landmark[1])) + 10, str(idx + 1))
 
         # draw wireframe being edited
         if self.wire_start_index >= 0:
-            painter.setPen(QPen(mu.as_qt_color(COLOR['WIREFRAME']), 2))
-            painter.setBrush(QBrush(mu.as_qt_color(COLOR['WIREFRAME'])))
+            painter.setPen(QPen(mu.as_qt_color(COLOR["WIREFRAME"]), 2))
+            painter.setBrush(QBrush(mu.as_qt_color(COLOR["WIREFRAME"])))
             start_lm = self.landmark_list[self.wire_start_index]
-            painter.drawLine(int(self._2canx(start_lm[0])), int(self._2cany(start_lm[1])), self.mouse_curr_x, self.mouse_curr_y)
+            painter.drawLine(
+                int(self._2canx(start_lm[0])), int(self._2cany(start_lm[1])), self.mouse_curr_x, self.mouse_curr_y
+            )
 
         if self.object.pixels_per_mm is not None and self.object.pixels_per_mm > 0:
             pixels_per_mm = self.object.pixels_per_mm
             max_scalebar_size = 120
-            bar_width = ( float(pixels_per_mm) / self.image_canvas_ratio ) * self.scale
+            bar_width = (float(pixels_per_mm) / self.image_canvas_ratio) * self.scale
             actual_length = 1.0
             while bar_width > max_scalebar_size:
                 bar_width /= 10.0
@@ -998,7 +1054,7 @@ class ObjectViewer2D(QLabel):
                 actual_length *= 2.0
 
             bar_width = int(math.floor(bar_width + 0.5))
-            x = self.width() - 15 - ( bar_width + 20 )
+            x = self.width() - 15 - (bar_width + 20)
             y = self.height() - 15 - 35
 
             painter.setPen(QPen(Qt.white, 1))
@@ -1013,21 +1069,27 @@ class ObjectViewer2D(QLabel):
             if actual_length >= 1000:
                 length_text = str(int(actual_length / 1000.0)) + " m"
             elif actual_length >= 10:
-                length_text = str(int(actual_length /10)) + " cm"
+                length_text = str(int(actual_length / 10)) + " cm"
             elif actual_length >= 1:
                 length_text = str(int(actual_length)) + " mm"
             elif actual_length >= 0.001:
                 length_text = str(int(actual_length * 1000.0)) + " um"
             else:
-                length_text = str(round(actual_length * 1000000.0 *1000)/1000) + " nm"
+                length_text = str(round(actual_length * 1000000.0 * 1000) / 1000) + " nm"
             painter.setPen(QPen(Qt.black, 1))
-            painter.setFont(QFont('Helvetica', 10))
-            painter.drawText(x + int(math.floor(float(bar_width) / 2.0 + 0.5)) - len(length_text) * 4, y - 5, length_text)
-        
+            painter.setFont(QFont("Helvetica", 10))
+            painter.drawText(
+                x + int(math.floor(float(bar_width) / 2.0 + 0.5)) - len(length_text) * 4, y - 5, length_text
+            )
+
         if self.debug:
             painter.setPen(QPen(Qt.black, 1))
-            painter.setFont(QFont('Helvetica', 10))
-            painter.drawText( 10, 20, f"Scale: {self.scale} prev_scale: {self.prev_scale} image_to_canvas_ratio: {self.image_canvas_ratio}, pan: {self.pan_x}, {self.pan_y}" )
+            painter.setFont(QFont("Helvetica", 10))
+            painter.drawText(
+                10,
+                20,
+                f"Scale: {self.scale} prev_scale: {self.prev_scale} image_to_canvas_ratio: {self.image_canvas_ratio}, pan: {self.pan_x}, {self.pan_y}",
+            )
 
     def update_landmark_list(self):
         return
@@ -1042,7 +1104,11 @@ class ObjectViewer2D(QLabel):
                 self.image_canvas_ratio = self.orig_width / self.width()
             else:
                 self.image_canvas_ratio = self.orig_height / self.height()
-            self.curr_pixmap = self.orig_pixmap.scaled(int(self.orig_width*self.scale/self.image_canvas_ratio),int(self.orig_width*self.scale/self.image_canvas_ratio), Qt.KeepAspectRatio)
+            self.curr_pixmap = self.orig_pixmap.scaled(
+                int(self.orig_width * self.scale / self.image_canvas_ratio),
+                int(self.orig_width * self.scale / self.image_canvas_ratio),
+                Qt.KeepAspectRatio,
+            )
         else:
             if len(self.landmark_list) < 2:
                 return
@@ -1051,7 +1117,7 @@ class ObjectViewer2D(QLabel):
             max_x = -999999999
             min_y = 999999999
             max_y = -999999999
-            for idx, landmark in enumerate(self.landmark_list):
+            for _idx, landmark in enumerate(self.landmark_list):
                 if landmark[0] < min_x:
                     min_x = landmark[0]
                 if landmark[0] > max_x:
@@ -1062,11 +1128,11 @@ class ObjectViewer2D(QLabel):
                     max_y = landmark[1]
             width = max_x - min_x
             height = max_y - min_y
-            w_scale = ( self.width() * 1.0 ) / ( width * 1.5 )
-            h_scale = ( self.height() * 1.0 ) / ( height * 1.5 )
+            w_scale = (self.width() * 1.0) / (width * 1.5)
+            h_scale = (self.height() * 1.0) / (height * 1.5)
             self.scale = min(w_scale, h_scale)
-            self.pan_x = int( -min_x * self.scale + (self.width() - width * self.scale) / 2.0 )
-            self.pan_y = int( -min_y * self.scale + (self.height() - height * self.scale) / 2.0 )
+            self.pan_x = int(-min_x * self.scale + (self.width() - width * self.scale) / 2.0)
+            self.pan_y = int(-min_y * self.scale + (self.height() - height * self.scale) / 2.0)
 
     def resizeEvent(self, event):
         self.calculate_resize()
@@ -1103,7 +1169,6 @@ class ObjectViewer2D(QLabel):
         self.rotate_x = self.rotate_y = 0
         self.edge_list = self.dataset.unpack_wireframe()
 
-
         self.landmark_list = object.landmark_list
         self.edge_list = object.dataset.edge_list
         self.calculate_resize()
@@ -1111,16 +1176,16 @@ class ObjectViewer2D(QLabel):
             self.dataset.unpack_baseline()
             self.align_object()
 
-    def set_image(self,file_path):
+    def set_image(self, file_path):
         if self.fullpath is not None:
             self.image_changed = True
-        
+
         self.fullpath = file_path
         self.curr_pixmap = self.orig_pixmap = QPixmap(file_path)
         self.setPixmap(self.curr_pixmap)
 
     def clear_object(self):
-        #print("object view clear object")
+        # print("object view clear object")
         self.landmark_list = []
         self.edge_list = []
         self.orig_pixmap = None
@@ -1135,22 +1200,22 @@ class ObjectViewer2D(QLabel):
         self.image_canvas_ratio = 1.0
         self.update()
 
-    def add_edge(self,wire_start_index, wire_end_index):
-        #print("add edge")
+    def add_edge(self, wire_start_index, wire_end_index):
+        # print("add edge")
         if wire_start_index == wire_end_index:
             return
         if wire_start_index > wire_end_index:
             wire_start_index, wire_end_index = wire_end_index, wire_start_index
         dataset = self.object.dataset
-        #print("edge list 1:", dataset.edge_list)
+        # print("edge list 1:", dataset.edge_list)
         for wire in dataset.edge_list:
-            if wire[0] == wire_start_index+1 and wire[1] == wire_end_index+1:
+            if wire[0] == wire_start_index + 1 and wire[1] == wire_end_index + 1:
                 return
-        dataset.edge_list.append([wire_start_index+1, wire_end_index+1])
-        #print("edge list 2:", dataset.edge_list)
+        dataset.edge_list.append([wire_start_index + 1, wire_end_index + 1])
+        # print("edge list 2:", dataset.edge_list)
         dataset.pack_wireframe()
         dataset.save()
-        
+
     def delete_edge(self, edge_index):
         dataset = self.object.dataset
         dataset.edge_list.pop(edge_index)
@@ -1161,102 +1226,96 @@ class ObjectViewer2D(QLabel):
         """Generate TPS grid for visualization"""
         if self.ds_ops is None or len(self.ds_ops.object_list) < 2:
             return
-        
+
         # Get source and target points
         source_obj = self.ds_ops.object_list[0]
         target_obj = self.ds_ops.object_list[1]
-        
+
         source_points = np.array(source_obj.landmark_list)
         target_points = np.array(target_obj.landmark_list)
-        
+
         # Add boundary points around the shape
         def create_boundary_points(points, n_points=24):
             # Calculate shape bounds
             center = np.mean(points, axis=0)
             points_centered = points - center
-            
+
             # Calculate radius based on shape size
             max_dist = np.max(np.sqrt(np.sum(points_centered**2, axis=1)))
             radius = max_dist * 1.2  # Make boundary slightly larger than shape
-            
+
             # Generate boundary points in a circle
-            angles = np.linspace(0, 2*np.pi, n_points, endpoint=False)
-            boundary = np.column_stack((
-                center[0] + radius * np.cos(angles),
-                center[1] + radius * np.sin(angles)
-            ))
+            angles = np.linspace(0, 2 * np.pi, n_points, endpoint=False)
+            boundary = np.column_stack((center[0] + radius * np.cos(angles), center[1] + radius * np.sin(angles)))
             return boundary
-        
+
         # Add boundary points
         boundary_source = create_boundary_points(source_points)
         boundary_target = create_boundary_points(target_points)
-        
+
         # Combine with landmark points
         self.source_with_boundary = np.vstack([source_points, boundary_source])
         self.target_with_boundary = np.vstack([target_points, boundary_target])
-        
+
         # Create rectangular grid that encloses the shape
         padding = 0.1
         x_min = np.min(source_points[:, 0]) - padding
         x_max = np.max(source_points[:, 0]) + padding
         y_min = np.min(source_points[:, 1]) - padding
         y_max = np.max(source_points[:, 1]) + padding
-        
+
         # Generate grid points
         n_grid = 20  # Number of grid lines
         x = np.linspace(x_min, x_max, n_grid)
         y = np.linspace(y_min, y_max, n_grid)
-        
+
         # Create vertical and horizontal lines
         self.grid_lines_orig = []
-        
+
         # Vertical lines
         for i in range(n_grid):
             line_points = np.array([(x[i], y_) for y_ in y])
-            self.grid_lines_orig.append(('v', line_points))
-        
+            self.grid_lines_orig.append(("v", line_points))
+
         # Horizontal lines
         for i in range(n_grid):
             line_points = np.array([(x_, y[i]) for x_ in x])
-            self.grid_lines_orig.append(('h', line_points))
-        
+            self.grid_lines_orig.append(("h", line_points))
+
         # Calculate TPS parameters
         self.tps_weights, self.tps_affine = self.calculate_tps_params(
-            self.source_with_boundary, 
-            self.target_with_boundary
+            self.source_with_boundary, self.target_with_boundary
         )
-        
+
         # Transform grid lines
         self.grid_lines_transformed = []
         for direction, line in self.grid_lines_orig:
-            transformed_line = np.array([
-                self.transform_point(p, self.source_with_boundary, self.tps_weights, self.tps_affine)
-                for p in line
-            ])
+            transformed_line = np.array(
+                [self.transform_point(p, self.source_with_boundary, self.tps_weights, self.tps_affine) for p in line]
+            )
             self.grid_lines_transformed.append((direction, transformed_line))
 
     def calculate_tps_params(self, control_points, target_points):
         """Calculate TPS transformation parameters"""
+
         def U(r):
             return (r**2) * np.log(r + np.finfo(float).eps)
-        
+
         n = control_points.shape[0]
         K = cdist(control_points, control_points)
         K = U(K)
         P = np.hstack([np.ones((n, 1)), control_points])
-        L = np.vstack([
-            np.hstack([K, P]),
-            np.hstack([P.T, np.zeros((3, 3))])
-        ])
+        L = np.vstack([np.hstack([K, P]), np.hstack([P.T, np.zeros((3, 3))])])
         Y = np.vstack([target_points, np.zeros((3, 2))])
         params = np.linalg.solve(L, Y)
         return params[:-3], params[-3:]
 
     def transform_point(self, point, control_points, weights, affine):
         """Transform a single point using TPS"""
+
         def U(r):
             return (r**2) * np.log(r + np.finfo(float).eps)
-        
+
         k = cdist(point.reshape(1, -1), control_points)
         k = U(k)
         wx = weights[:, 0]
@@ -1267,25 +1326,26 @@ class ObjectViewer2D(QLabel):
 
     def update_tps_grid(self):
         """Update TPS grid after shape changes"""
-        if hasattr(self, 'grid_lines_transformed'):
-            delattr(self, 'grid_lines_transformed')
+        if hasattr(self, "grid_lines_transformed"):
+            delattr(self, "grid_lines_transformed")
         self.generate_tps_grid()
         self.update()
+
 
 class ObjectViewer3D(QGLWidget):
     def __init__(self, parent=None, transparent=False):
         if transparent:
             fmt = QGLFormat()
             fmt.setAlpha(True)  # Ensure the format includes an alpha channel
-            super(ObjectViewer3D, self).__init__(fmt, parent)
+            super().__init__(fmt, parent)
             self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowTransparentForInput | Qt.Tool)
             self.setAttribute(Qt.WA_TranslucentBackground)
             self.setAttribute(Qt.WA_NoSystemBackground, True)
         else:
-            QGLWidget.__init__(self,parent)
+            QGLWidget.__init__(self, parent)
         self.transparent = transparent
         self.parent = parent
-        self.setMinimumSize(120,90)
+        self.setMinimumSize(120, 90)
         self.landmark_size = 1
         self.landmark_color = "#0000FF"
         self.wireframe_thickness = 1
@@ -1294,7 +1354,7 @@ class ObjectViewer3D(QGLWidget):
         self.index_color = "#FFFFFF"
         self.bgcolor = "#AAAAAA"
         self.arrow_color = "#FFFF00"
-        self.m_app = QApplication.instance()        
+        self.m_app = QApplication.instance()
         self.read_settings()
         self.object_name = ""
         self.source_preference = None
@@ -1331,15 +1391,15 @@ class ObjectViewer3D(QGLWidget):
         self.dolly = 0
         self.data_mode = OBJECT_MODE
         self.view_mode = VIEW_MODE
-        self.edit_mode = MODE['NONE']
+        self.edit_mode = MODE["NONE"]
         self.auto_rotate = False
         self.is_dragging = False
-        #self.setMinimumSize(400,400)
+        # self.setMinimumSize(400,400)
         self.timer = QTimer(self)
         self.timer.setInterval(50)
         self.timer.timeout.connect(self.timeout)
         self.timer.start()
-        self.frustum_args = {'width': 1.0, 'height': 1.0, 'znear': 0.1, 'zfar': 1000.0}
+        self.frustum_args = {"width": 1.0, "height": 1.0, "znear": 0.1, "zfar": 1000.0}
         self.color_to_lm_idx = {}
         self.lm_idx_to_color = {}
         self.picker_buffer = None
@@ -1349,7 +1409,7 @@ class ObjectViewer3D(QGLWidget):
         self.polygon_list = []
         self.comparison_data = {}
 
-        #self.no_drawing = False
+        # self.no_drawing = False
         self.wireframe_from_idx = -1
         self.wireframe_to_idx = -1
         self.selected_landmark_idx = -1
@@ -1357,25 +1417,20 @@ class ObjectViewer3D(QGLWidget):
         self.no_hit_count = 0
         self.threed_model = None
         self.cursor_on_vertex = -1
-        self.rotation_matrix = np.array([
-        [1, 0, 0, 0],
-        [0, 1, 0, 0],
-        [0, 0, 1, 0],
-        [0, 0, 0, 1]
-        ])
+        self.rotation_matrix = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
         self.initialized = False
         self.fullpath = None
         self.edge_list = []
         self.landmark_list = []
 
-    def set_object_name (self, object_name):
+    def set_object_name(self, object_name):
         self.object_name = object_name
 
-    def set_landmark_pref(self,lm_pref,wf_pref):
-        self.landmark_size = lm_pref['size']
-        self.landmark_color = lm_pref['color']
-        self.wireframe_thickness = wf_pref['thickness']
-        self.wireframe_color = wf_pref['color']
+    def set_landmark_pref(self, lm_pref, wf_pref):
+        self.landmark_size = lm_pref["size"]
+        self.landmark_color = lm_pref["color"]
+        self.wireframe_thickness = wf_pref["thickness"]
+        self.wireframe_color = wf_pref["color"]
 
     def read_settings(self):
         self.landmark_size = self.m_app.settings.value("LandmarkSize/3D", self.landmark_size)
@@ -1388,22 +1443,22 @@ class ObjectViewer3D(QGLWidget):
 
     def show_message(self, msg):
         if self.object_dialog is not None:
-            self.object_dialog.status_bar.showMessage(msg) 
+            self.object_dialog.status_bar.showMessage(msg)
 
     def set_mode(self, mode):
-        self.edit_mode = mode  
-        if self.edit_mode == MODE['EDIT_LANDMARK']:
-            #print("edit landmark")
+        self.edit_mode = mode
+        if self.edit_mode == MODE["EDIT_LANDMARK"]:
+            # print("edit landmark")
             self.initialize_colors()
             self.setCursor(Qt.CrossCursor)
             self.show_message("Click on image to add landmark")
-        elif self.edit_mode == MODE['READY_MOVE_LANDMARK']:
+        elif self.edit_mode == MODE["READY_MOVE_LANDMARK"]:
             self.setCursor(Qt.SizeAllCursor)
             self.show_message("Click on landmark to move")
-        elif self.edit_mode == MODE['MOVE_LANDMARK']:
+        elif self.edit_mode == MODE["MOVE_LANDMARK"]:
             self.setCursor(Qt.SizeAllCursor)
             self.show_message("Move landmark")
-        elif self.edit_mode == MODE['WIREFRAME']:
+        elif self.edit_mode == MODE["WIREFRAME"]:
             self.initialize_colors()
             self.setCursor(Qt.ArrowCursor)
             self.show_message("Wireframe mode")
@@ -1415,18 +1470,24 @@ class ObjectViewer3D(QGLWidget):
         self.down_x = event.x()
         self.down_y = event.y()
         if event.buttons() == Qt.LeftButton:
-            if self.edit_mode == MODE['WIREFRAME'] and self.selected_landmark_idx > -1:
+            if self.edit_mode == MODE["WIREFRAME"] and self.selected_landmark_idx > -1:
                 self.wireframe_from_idx = self.selected_landmark_idx
-                self.temp_edge = [ self.obj_ops.landmark_list[self.wireframe_from_idx][:], self.obj_ops.landmark_list[self.wireframe_from_idx][:]]
-            elif self.edit_mode == MODE['EDIT_LANDMARK'] and self.selected_landmark_idx > -1:
-                self.set_mode(MODE['MOVE_LANDMARK'])
-                self.stored_landmark = { 'index': self.selected_landmark_idx, 'coords': self.threed_model.original_vertices[self.selected_landmark_idx] }
-            else:                
+                self.temp_edge = [
+                    self.obj_ops.landmark_list[self.wireframe_from_idx][:],
+                    self.obj_ops.landmark_list[self.wireframe_from_idx][:],
+                ]
+            elif self.edit_mode == MODE["EDIT_LANDMARK"] and self.selected_landmark_idx > -1:
+                self.set_mode(MODE["MOVE_LANDMARK"])
+                self.stored_landmark = {
+                    "index": self.selected_landmark_idx,
+                    "coords": self.threed_model.original_vertices[self.selected_landmark_idx],
+                }
+            else:
                 self.view_mode = ROTATE_MODE
         elif event.buttons() == Qt.RightButton:
-            if self.edit_mode == MODE['WIREFRAME'] and self.selected_edge_index > -1:
+            if self.edit_mode == MODE["WIREFRAME"] and self.selected_edge_index > -1:
                 self.delete_wire(self.selected_edge_index)
-            elif self.edit_mode == MODE['EDIT_LANDMARK'] and self.cursor_on_vertex > -1:
+            elif self.edit_mode == MODE["EDIT_LANDMARK"] and self.cursor_on_vertex > -1:
                 pass
             else:
                 self.view_mode = ZOOM_MODE
@@ -1438,7 +1499,7 @@ class ObjectViewer3D(QGLWidget):
         self.curr_x = event.x()
         self.curr_y = event.y()
         if event.button() == Qt.LeftButton:
-            if self.edit_mode == MODE['WIREFRAME'] and self.wireframe_from_idx > -1:
+            if self.edit_mode == MODE["WIREFRAME"] and self.wireframe_from_idx > -1:
                 if self.selected_landmark_idx > -1 and self.selected_landmark_idx != self.wireframe_from_idx:
                     self.wireframe_to_idx = self.selected_landmark_idx
                     self.add_wire(self.wireframe_from_idx, self.wireframe_to_idx)
@@ -1451,45 +1512,59 @@ class ObjectViewer3D(QGLWidget):
                     self.update()
                 self.temp_edge = []
 
-            elif self.edit_mode == MODE['EDIT_LANDMARK'] and self.cursor_on_vertex > -1 and self.curr_x == self.down_x and self.curr_y == self.down_y:
+            elif (
+                self.edit_mode == MODE["EDIT_LANDMARK"]
+                and self.cursor_on_vertex > -1
+                and self.curr_x == self.down_x
+                and self.curr_y == self.down_y
+            ):
                 x, y, z = self.threed_model.original_vertices[self.cursor_on_vertex]
-                self.object_dialog.add_landmark(x,y,z)
+                self.object_dialog.add_landmark(x, y, z)
                 self.update_landmark_list()
                 self.initialize_colors()
                 self.calculate_resize()
-            elif self.edit_mode == MODE['MOVE_LANDMARK'] and self.selected_landmark_idx > -1 and self.cursor_on_vertex > -1:
+            elif (
+                self.edit_mode == MODE["MOVE_LANDMARK"]
+                and self.selected_landmark_idx > -1
+                and self.cursor_on_vertex > -1
+            ):
                 self.update_landmark_list()
                 self.initialize_colors()
                 self.calculate_resize()
                 self.selected_landmark_idx = -1
                 self.cursor_on_vertex = -1
-                self.set_mode(MODE['EDIT_LANDMARK'])
+                self.set_mode(MODE["EDIT_LANDMARK"])
             else:
                 if self.data_mode == OBJECT_MODE and self.obj_ops is not None:
-                    if self.parent != None and callable(getattr(self.parent, 'sync_rotation', None)):
+                    if self.parent is not None and callable(getattr(self.parent, "sync_rotation", None)):
                         self.parent.sync_rotation()
                     else:
                         self.sync_rotation()
                 elif self.data_mode == DATASET_MODE and self.ds_ops is not None:
-                    if self.parent != None and callable(getattr(self.parent, 'sync_rotation', None)):
-                    #if self.parent != None and self.parent.sync_rotation is not None:
+                    if self.parent is not None and callable(getattr(self.parent, "sync_rotation", None)):
+                        # if self.parent != None and self.parent.sync_rotation is not None:
                         self.parent.sync_rotation()
                     else:
                         self.sync_rotation()
                 self.temp_rotate_x = 0
                 self.temp_rotate_y = 0
         elif event.button() == Qt.RightButton:
-            if self.edit_mode == MODE['EDIT_LANDMARK'] and self.selected_landmark_idx > -1 and self.curr_x == self.down_x and self.curr_y == self.down_y:
+            if (
+                self.edit_mode == MODE["EDIT_LANDMARK"]
+                and self.selected_landmark_idx > -1
+                and self.curr_x == self.down_x
+                and self.curr_y == self.down_y
+            ):
                 self.object_dialog.delete_landmark(self.selected_landmark_idx)
                 self.update_landmark_list()
                 self.initialize_colors()
                 self.calculate_resize()
             else:
-                self.dolly += self.temp_dolly 
+                self.dolly += self.temp_dolly
                 self.temp_dolly = 0
-                if self.parent != None and callable(getattr(self.parent, 'sync_zoom', None)):
+                if self.parent is not None and callable(getattr(self.parent, "sync_zoom", None)):
                     self.parent.sync_zoom(self, self.dolly)
-                if self.parent != None and callable(getattr(self.parent, 'sync_temp_zoom', None)):
+                if self.parent is not None and callable(getattr(self.parent, "sync_temp_zoom", None)):
                     self.parent.sync_temp_zoom(self, self.temp_dolly)
 
         elif event.button() == Qt.MiddleButton:
@@ -1497,9 +1572,9 @@ class ObjectViewer3D(QGLWidget):
             self.pan_y += self.temp_pan_y
             self.temp_pan_x = 0
             self.temp_pan_y = 0
-            if self.parent != None and callable(getattr(self.parent, 'sync_temp_pan', None)):
+            if self.parent is not None and callable(getattr(self.parent, "sync_temp_pan", None)):
                 self.parent.sync_temp_pan(self, self.temp_pan_x, self.temp_pan_y)
-            if self.parent != None and callable(getattr(self.parent, 'sync_pan', None)):
+            if self.parent is not None and callable(getattr(self.parent, "sync_pan", None)):
                 self.parent.sync_pan(self, self.pan_x, self.pan_y)
 
         self.view_mode = VIEW_MODE
@@ -1510,9 +1585,9 @@ class ObjectViewer3D(QGLWidget):
         self.curr_y = event.y()
         if self.edit_mode == MODE["WIREFRAME"]:
             kind, idx = self.hit_test(self.curr_x, self.curr_y)
-            if kind == 'Landmark':
+            if kind == "Landmark":
                 lm_idx = idx
-            
+
                 if lm_idx > -1:
                     self.selected_landmark_idx = lm_idx
                     self.no_hit_count = 0
@@ -1521,7 +1596,7 @@ class ObjectViewer3D(QGLWidget):
                     if self.no_hit_count > 5:
                         self.selected_landmark_idx = -1
                         self.no_hit_count = 0
-            elif kind == 'Edge':
+            elif kind == "Edge":
                 self.selected_edge_index = idx
                 self.selected_landmark_idx = -1
             else:
@@ -1536,32 +1611,32 @@ class ObjectViewer3D(QGLWidget):
             self.is_dragging = True
             self.temp_rotate_x = self.curr_x - self.down_x
             self.temp_rotate_y = self.curr_y - self.down_y
-            if self.parent != None and callable(getattr(self.parent, 'sync_temp_rotation', None)):
+            if self.parent is not None and callable(getattr(self.parent, "sync_temp_rotation", None)):
                 self.parent.sync_temp_rotation(self, self.temp_rotate_x, self.temp_rotate_y)
 
         elif event.buttons() == Qt.RightButton and self.view_mode == ZOOM_MODE:
             self.is_dragging = True
-            self.temp_dolly = ( self.curr_y - self.down_y ) / 100.0
-            if self.parent != None and callable(getattr(self.parent, 'sync_temp_zoom', None)):
+            self.temp_dolly = (self.curr_y - self.down_y) / 100.0
+            if self.parent is not None and callable(getattr(self.parent, "sync_temp_zoom", None)):
                 self.parent.sync_temp_zoom(self, self.temp_dolly)
 
         elif event.buttons() == Qt.MiddleButton and self.view_mode == PAN_MODE:
             self.is_dragging = True
             self.temp_pan_x = self.curr_x - self.down_x
             self.temp_pan_y = self.curr_y - self.down_y
-            if self.parent != None and callable(getattr(self.parent, 'sync_temp_pan', None)):
+            if self.parent is not None and callable(getattr(self.parent, "sync_temp_pan", None)):
                 self.parent.sync_temp_pan(self, self.temp_pan_x, self.temp_pan_y)
-        elif self.edit_mode == MODE['EDIT_LANDMARK']:
+        elif self.edit_mode == MODE["EDIT_LANDMARK"]:
             hit_type, hit_idx = self.hit_test(self.curr_x, self.curr_y)
-            if hit_type == 'Landmark':
+            if hit_type == "Landmark":
                 self.selected_landmark_idx = hit_idx
                 self.no_hit_count = 0
             else:
                 self.selected_landmark_idx = -1
 
-            if self.show_model == True:
+            if self.show_model:
                 on_background = self.hit_background_test(self.curr_x, self.curr_y)
-                if on_background == True:
+                if on_background:
                     self.cursor_on_vertex = -1
                 else:
                     closest_element = self.pick_element(self.curr_x, self.curr_y)
@@ -1569,22 +1644,26 @@ class ObjectViewer3D(QGLWidget):
                         self.cursor_on_vertex = closest_element
                     else:
                         self.cursor_on_vertex = -1
-        elif self.edit_mode == MODE['MOVE_LANDMARK']:
-            if self.show_model == True:
+        elif self.edit_mode == MODE["MOVE_LANDMARK"]:
+            if self.show_model:
                 on_background = self.hit_background_test(self.curr_x, self.curr_y)
-                if on_background == True:
+                if on_background:
                     self.cursor_on_vertex = -1
-                    self.landmark_list[self.selected_landmark_idx] = self.stored_landmark['coords']
+                    self.landmark_list[self.selected_landmark_idx] = self.stored_landmark["coords"]
                     self.selected_landmark_idx = -1
-                    self.set_mode(MODE['EDIT_LANDMARK'])
+                    self.set_mode(MODE["EDIT_LANDMARK"])
                 else:
                     closest_element = self.pick_element(self.curr_x, self.curr_y)
                     if closest_element is not None:
                         self.cursor_on_vertex = closest_element
                         if self.selected_landmark_idx >= 0:
-                            self.landmark_list[self.selected_landmark_idx] = self.threed_model.original_vertices[closest_element]
+                            self.landmark_list[self.selected_landmark_idx] = self.threed_model.original_vertices[
+                                closest_element
+                            ]
                             if self.object_dialog is not None:
-                                self.object_dialog.update_landmark(self.selected_landmark_idx, *self.landmark_list[self.selected_landmark_idx])
+                                self.object_dialog.update_landmark(
+                                    self.selected_landmark_idx, *self.landmark_list[self.selected_landmark_idx]
+                                )
                                 self.update_landmark_list()
                                 self.initialize_colors()
                                 self.calculate_resize()
@@ -1595,7 +1674,7 @@ class ObjectViewer3D(QGLWidget):
 
     def wheelEvent(self, event):
         self.dolly -= event.angleDelta().y() / 240.0
-        if self.parent != None and callable(getattr(self.parent, 'sync_zoom', None)):
+        if self.parent is not None and callable(getattr(self.parent, "sync_zoom", None)):
             self.parent.sync_zoom(self, self.dolly)
 
         self.updateGL()
@@ -1612,11 +1691,11 @@ class ObjectViewer3D(QGLWidget):
         for wire in dataset.edge_list:
             if wire[0] == wire_start_index and wire[1] == wire_end_index:
                 return
-        dataset.edge_list.append([wire_start_index+1, wire_end_index+1])
+        dataset.edge_list.append([wire_start_index + 1, wire_end_index + 1])
         dataset.pack_wireframe()
         self.edge_list = dataset.edge_list
         dataset.save()
-        self.initialize_colors()        
+        self.initialize_colors()
 
     def delete_wire(self, selected_edge_index):
         if selected_edge_index >= len(self.edge_list):
@@ -1630,7 +1709,7 @@ class ObjectViewer3D(QGLWidget):
         dataset.pack_wireframe()
         self.edge_list = dataset.edge_list
         dataset.save()
-        self.initialize_colors()        
+        self.initialize_colors()
 
     def set_ds_ops(self, ds_ops):
         self.ds_ops = ds_ops
@@ -1644,50 +1723,50 @@ class ObjectViewer3D(QGLWidget):
 
     def set_shape_preference(self, object_preference):
         self.shape_preference = object_preference
-        if self.obj_ops is not None :
+        if self.obj_ops is not None:
             obj = self.obj_ops
-            if 'visible' in object_preference:
-                obj.visible = object_preference['visible']
-            if 'show_landmark' in object_preference:
-                obj.show_landmark = object_preference['show_landmark']
-            if 'show_wireframe' in object_preference:
-                obj.show_wireframe = object_preference['show_wireframe']
-            if 'show_polygon' in object_preference:
-                obj.show_polygon = object_preference['show_polygon']
-            if 'opacity' in object_preference:
-                obj.opacity = object_preference['opacity']
-            if 'polygon_color' in object_preference:
-                obj.polygon_color = object_preference['polygon_color']
-            if 'edge_color' in object_preference:
-                obj.edge_color = object_preference['edge_color']
-            if 'landmark_color' in object_preference:
-                obj.landmark_color = object_preference['landmark_color']
+            if "visible" in object_preference:
+                obj.visible = object_preference["visible"]
+            if "show_landmark" in object_preference:
+                obj.show_landmark = object_preference["show_landmark"]
+            if "show_wireframe" in object_preference:
+                obj.show_wireframe = object_preference["show_wireframe"]
+            if "show_polygon" in object_preference:
+                obj.show_polygon = object_preference["show_polygon"]
+            if "opacity" in object_preference:
+                obj.opacity = object_preference["opacity"]
+            if "polygon_color" in object_preference:
+                obj.polygon_color = object_preference["polygon_color"]
+            if "edge_color" in object_preference:
+                obj.edge_color = object_preference["edge_color"]
+            if "landmark_color" in object_preference:
+                obj.landmark_color = object_preference["landmark_color"]
 
     def set_source_shape_preference(self, pref):
         self.source_preference = pref
         if self.ds_ops is not None and len(self.ds_ops.object_list) > 0:
             obj = self.ds_ops.object_list[0]
-            obj.visible = pref['visible']
-            obj.show_landmark = pref['show_landmark']
-            obj.show_wireframe = pref['show_wireframe']
-            obj.show_polygon = pref['show_polygon']
-            obj.opacity = pref['opacity']
-            obj.polygon_color = pref['polygon_color']
-            obj.edge_color = pref['edge_color']
-            obj.landmark_color = pref['landmark_color']
-    
+            obj.visible = pref["visible"]
+            obj.show_landmark = pref["show_landmark"]
+            obj.show_wireframe = pref["show_wireframe"]
+            obj.show_polygon = pref["show_polygon"]
+            obj.opacity = pref["opacity"]
+            obj.polygon_color = pref["polygon_color"]
+            obj.edge_color = pref["edge_color"]
+            obj.landmark_color = pref["landmark_color"]
+
     def set_target_shape_preference(self, pref):
         self.target_preference = pref
         if self.ds_ops is not None and len(self.ds_ops.object_list) > 1:
             obj = self.ds_ops.object_list[1]
-            obj.visible = pref['visible']
-            obj.show_landmark = pref['show_landmark']
-            obj.show_wireframe = pref['show_wireframe']
-            obj.show_polygon = pref['show_polygon']
-            obj.opacity = pref['opacity']
-            obj.polygon_color = pref['polygon_color']
-            obj.edge_color = pref['edge_color']
-            obj.landmark_color = pref['landmark_color']
+            obj.visible = pref["visible"]
+            obj.show_landmark = pref["show_landmark"]
+            obj.show_wireframe = pref["show_wireframe"]
+            obj.show_polygon = pref["show_polygon"]
+            obj.opacity = pref["opacity"]
+            obj.polygon_color = pref["polygon_color"]
+            obj.edge_color = pref["edge_color"]
+            obj.landmark_color = pref["landmark_color"]
 
     def set_source_shape_color(self, color):
         self.source_shape_color = color
@@ -1696,13 +1775,13 @@ class ObjectViewer3D(QGLWidget):
         self.target_shape_color = color
 
     def set_source_shape(self, object):
-        self.comparison_data['source_shape'] = object
-    
+        self.comparison_data["source_shape"] = object
+
     def set_target_shape(self, object):
-        self.comparison_data['target_shape'] = object
-    
+        self.comparison_data["target_shape"] = object
+
     def set_intermediate_shape(self, object):
-        self.comparison_data['intermediate_shape'] = object
+        self.comparison_data["intermediate_shape"] = object
 
     def generate_reference_shape(self):
         shape_list = []
@@ -1714,26 +1793,26 @@ class ObjectViewer3D(QGLWidget):
         ds.polygon_list = self.dataset.polygon_list
         ds_ops = MdDatasetOps(ds)
 
-        if 'source_shape' in self.comparison_data:
-            shape_list.append(self.comparison_data['source_shape'])
-            source = self.comparison_data['source_shape']
+        if "source_shape" in self.comparison_data:
+            shape_list.append(self.comparison_data["source_shape"])
+            source = self.comparison_data["source_shape"]
             source_ops = MdObjectOps(source)
             ds_ops.object_list.append(source_ops)
-        if 'target_shape' in self.comparison_data:
-            shape_list.append(self.comparison_data['target_shape'])
-            target = self.comparison_data['target_shape']
+        if "target_shape" in self.comparison_data:
+            shape_list.append(self.comparison_data["target_shape"])
+            target = self.comparison_data["target_shape"]
             target_ops = MdObjectOps(target)
             ds_ops.object_list.append(target_ops)
 
         ret = ds_ops.procrustes_superimposition()
-        if ret == False:
+        if not ret:
             logger = logging.getLogger(__name__)
             logger.error("procrustes failed")
             return
-        self.comparison_data['ds_ops'] = ds_ops
-        self.comparison_data['average_shape'] = ds_ops.get_average_shape()
+        self.comparison_data["ds_ops"] = ds_ops
+        self.comparison_data["average_shape"] = ds_ops.get_average_shape()
         self.set_ds_ops(ds_ops)
-        
+
         self.data_mode = DATASET_MODE
         if self.source_preference is not None:
             self.set_source_shape_preference(self.source_preference)
@@ -1793,9 +1872,9 @@ class ObjectViewer3D(QGLWidget):
     def get_scale_from_object(self, obj_ops):
         if len(obj_ops.landmark_list) == 0:
             return 1.0
-        centroid_size = obj_ops.get_centroid_size()
-        min_x, max_x = min( [ lm[0] for lm in obj_ops.landmark_list] ), max( [ lm[0] for lm in obj_ops.landmark_list] )
-        min_y, max_y = min( [ lm[1] for lm in obj_ops.landmark_list] ), max( [ lm[1] for lm in obj_ops.landmark_list] )
+        obj_ops.get_centroid_size()
+        min_x, max_x = min([lm[0] for lm in obj_ops.landmark_list]), max([lm[0] for lm in obj_ops.landmark_list])
+        min_y, max_y = min([lm[1] for lm in obj_ops.landmark_list]), max([lm[1] for lm in obj_ops.landmark_list])
         width = max_x - min_x
         if width == 0:
             width = 1
@@ -1803,21 +1882,21 @@ class ObjectViewer3D(QGLWidget):
         if height == 0:
             height = 1
 
-        if len(obj_ops.landmark_list[0])>2:
-            min_z, max_z = min( [ lm[2] for lm in obj_ops.landmark_list] ), max( [ lm[2] for lm in obj_ops.landmark_list] )
-            #obj_ops.rescale(5)
-            depth = max_z - min_z
+        if len(obj_ops.landmark_list[0]) > 2:
+            min_z, max_z = min([lm[2] for lm in obj_ops.landmark_list]), max([lm[2] for lm in obj_ops.landmark_list])
+            # obj_ops.rescale(5)
+            max_z - min_z
         _3D_SCREEN_WIDTH = 5
         _3D_SCREEN_HEIGHT = 5
-        scale = min( _3D_SCREEN_WIDTH / width, _3D_SCREEN_HEIGHT / height )
-        #print("scale:", scale)
-        return scale*0.5
+        scale = min(_3D_SCREEN_WIDTH / width, _3D_SCREEN_HEIGHT / height)
+        # print("scale:", scale)
+        return scale * 0.5
 
     def dragEnterEvent(self, event):
         if self.object_dialog is None:
             return
         file_name = event.mimeData().text()
-        if file_name.split('.')[-1].lower() in mu.MODEL_EXTENSION_LIST:
+        if file_name.split(".")[-1].lower() in mu.MODEL_EXTENSION_LIST:
             event.acceptProposedAction()
         else:
             event.ignore()
@@ -1837,7 +1916,7 @@ class ObjectViewer3D(QGLWidget):
             self.object_dialog.enable_landmark_edit()
 
     def set_threed_model(self, file_path):
-        if file_path.split('.')[-1].lower() == 'obj':
+        if file_path.split(".")[-1].lower() == "obj":
             self.threed_model = OBJ(file_path)
             self.fullpath = file_path
         self.updateGL()
@@ -1847,7 +1926,7 @@ class ObjectViewer3D(QGLWidget):
         self.picker_buffer = self.create_picker_buffer()
         self.initialize_frame_buffer(self.picker_buffer)
         self.initialized = True
-        if self.initialized == True and self.threed_model is not None and self.threed_model.generated == False:
+        if self.initialized and self.threed_model is not None and not self.threed_model.generated:
             self.threed_model.generate()
 
     def initialize_frame_buffer(self, frame_buffer_id=0):
@@ -1864,41 +1943,41 @@ class ObjectViewer3D(QGLWidget):
         gl.glMatrixMode(gl.GL_PROJECTION)
         gl.glLoadIdentity()
         aspect_ratio = self.width() / self.height()
-        glu.gluPerspective(45.0,aspect_ratio,0.1, 100.0) # 시야각, 종횡비, 근거리 클리핑, 원거리 클리핑
+        glu.gluPerspective(45.0, aspect_ratio, 0.1, 100.0)  # 시야각, 종횡비, 근거리 클리핑, 원거리 클리핑
         gl.glMatrixMode(gl.GL_MODELVIEW)
         gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, 0)
 
     def paintGL(self):
-        if self.edit_mode == MODE['WIREFRAME'] or self.edit_mode == MODE['EDIT_LANDMARK']:
+        if self.edit_mode == MODE["WIREFRAME"] or self.edit_mode == MODE["EDIT_LANDMARK"]:
             self.draw_picker_buffer()
         gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, 0)
 
-        gl.glPushMatrix() 
+        gl.glPushMatrix()
         self.draw_all()
         gl.glPopMatrix()
         return
 
     def draw_all(self):
-        current_buffer = gl.glGetIntegerv(gl.GL_FRAMEBUFFER_BINDING)
+        gl.glGetIntegerv(gl.GL_FRAMEBUFFER_BINDING)
         gl.glMatrixMode(gl.GL_PROJECTION)
         gl.glLoadIdentity()
         glu.gluPerspective(45.0, self.aspect, 0.1, 100.0)
         light_position = [1.0, 1.0, 1.0, 0.0]  # x, y, z, w (w=0 for directional light)
         diffuse_intensity = (1.0, 1.0, 1.0, 1.0)
         gl.glLightfv(gl.GL_LIGHT0, gl.GL_POSITION, light_position)
-        gl.glLightfv(gl.GL_LIGHT0, gl.GL_DIFFUSE, diffuse_intensity) 
-        gl.glTranslatef(0, 0, -5.0 + self.dolly + self.temp_dolly)   # x, y, z 
-        gl.glTranslatef((self.pan_x + self.temp_pan_x)/100.0, (self.pan_y + self.temp_pan_y)/-100.0, 0.0)
+        gl.glLightfv(gl.GL_LIGHT0, gl.GL_DIFFUSE, diffuse_intensity)
+        gl.glTranslatef(0, 0, -5.0 + self.dolly + self.temp_dolly)  # x, y, z
+        gl.glTranslatef((self.pan_x + self.temp_pan_x) / 100.0, (self.pan_y + self.temp_pan_y) / -100.0, 0.0)
         gl.glRotatef(self.rotate_y + self.temp_rotate_y, 1.0, 0.0, 0.0)
         gl.glRotatef(self.rotate_x + self.temp_rotate_x, 0.0, 1.0, 0.0)
 
         gl.glMatrixMode(gl.GL_MODELVIEW)
         bg_color = mu.as_gl_color(self.bgcolor)
-        
+
         gl.glEnable(gl.GL_BLEND)
         gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)  # Standard alpha blending
         if self.transparent:
-            gl.glClearColor(0.0,0.0,0.0, 0.0)
+            gl.glClearColor(0.0, 0.0, 0.0, 0.0)
         else:
             gl.glClearColor(*bg_color, 1.0)
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
@@ -1906,14 +1985,14 @@ class ObjectViewer3D(QGLWidget):
         gl.glEnable(gl.GL_POINT_SMOOTH)
         if self.ds_ops is None and self.obj_ops is None:
             return
-        
+
         # pan, rotate, dolly
         if self.data_mode == OBJECT_MODE:
-            if self.obj_ops and hasattr(self.obj_ops, 'landmark_color') and self.obj_ops.landmark_color is not None:
+            if self.obj_ops and hasattr(self.obj_ops, "landmark_color") and self.obj_ops.landmark_color is not None:
                 object_color = mu.as_gl_color(self.obj_ops.landmark_color)
             else:
-                object_color = mu.as_gl_color(self.landmark_color) #COLOR['NORMAL_SHAPE']
-            self.draw_object(self.obj_ops,color=object_color)
+                object_color = mu.as_gl_color(self.landmark_color)  # COLOR['NORMAL_SHAPE']
+            self.draw_object(self.obj_ops, color=object_color)
         else:
             self.draw_dataset(self.ds_ops)
         gl.glDisable(gl.GL_BLEND)
@@ -1923,29 +2002,30 @@ class ObjectViewer3D(QGLWidget):
         if self.show_arrow:
             self.draw_arrow(0, 1)
 
-        for idx, obj in enumerate(ds_ops.object_list):
-            if obj.visible == False:
+        for _idx, obj in enumerate(ds_ops.object_list):
+            if not obj.visible:
                 continue
             if obj.id in ds_ops.selected_object_id_list:
-                object_color = COLOR['SELECTED_SHAPE']
+                object_color = COLOR["SELECTED_SHAPE"]
             else:
                 if obj.landmark_color is not None:
                     object_color = mu.as_gl_color(obj.landmark_color)
                 else:
-                    object_color = mu.as_gl_color(self.landmark_color) #COLOR['NORMAL_SHAPE']
-            edge_color=self.wireframe_color
+                    object_color = mu.as_gl_color(self.landmark_color)  # COLOR['NORMAL_SHAPE']
+            edge_color = self.wireframe_color
             if obj.edge_color is not None:
                 edge_color = obj.edge_color
-            polygon_color=self.wireframe_color
+            polygon_color = self.wireframe_color
             if obj.polygon_color is not None:
                 polygon_color = obj.polygon_color
 
-            self.draw_object(obj, landmark_as_sphere=False, color=object_color, edge_color=edge_color,polygon_color=polygon_color)
+            self.draw_object(
+                obj, landmark_as_sphere=False, color=object_color, edge_color=edge_color, polygon_color=polygon_color
+            )
 
         if self.show_average:
-            object_color = COLOR['AVERAGE_SHAPE']
+            object_color = COLOR["AVERAGE_SHAPE"]
             self.draw_object(ds_ops.get_average_shape(), landmark_as_sphere=True, color=object_color)
-
 
     def draw_arrow(self, start_idx, end_idx):
         if self.data_mode == OBJECT_MODE:
@@ -1962,7 +2042,7 @@ class ObjectViewer3D(QGLWidget):
 
             direction = [end_lm[0] - start_lm[0], end_lm[1] - start_lm[1], end_lm[2] - start_lm[2]]
             length = math.sqrt(sum(x**2 for x in direction))  # More concise length calculation
-            direction = [x/length for x in direction]
+            direction = [x / length for x in direction]
 
             # Rotation axis using cross product
             up_direction = [0, 0, 1]  # Cone should point upwards along Z
@@ -1970,15 +2050,15 @@ class ObjectViewer3D(QGLWidget):
 
             # Calculate angle
             angle = math.degrees(math.acos(np.dot(direction, up_direction))) * -1
-            
+
             # draw rod instead of GL_LINES
             arrow_color = mu.as_gl_color(self.arrow_color)
             gl.glColor3f(*arrow_color)
             gl.glPushMatrix()
-            gl.glTranslatef(*((np.array(start_lm)+np.array(end_lm))/2))
-            gl.glTranslatef(*[x*-0.015 for x in direction])
+            gl.glTranslatef(*((np.array(start_lm) + np.array(end_lm)) / 2))
+            gl.glTranslatef(*[x * -0.015 for x in direction])
             gl.glRotatef(angle, *axis)
-            gl.glScalef(0.005, 0.005, length-0.03)
+            gl.glScalef(0.005, 0.005, length - 0.03)
             if GLUT_AVAILABLE and GLUT_INITIALIZED and glut:
                 try:
                     glut.glutSolidCube(1)
@@ -1993,7 +2073,7 @@ class ObjectViewer3D(QGLWidget):
             if True:
                 gl.glPushMatrix()
                 gl.glTranslatef(*end_lm)
-                gl.glTranslatef(*[x*-0.03 for x in direction])
+                gl.glTranslatef(*[x * -0.03 for x in direction])
                 gl.glRotatef(angle, *axis)
                 if GLUT_AVAILABLE and GLUT_INITIALIZED and glut:
                     try:
@@ -2006,7 +2086,14 @@ class ObjectViewer3D(QGLWidget):
                     self.draw_simple_cone()
                 gl.glPopMatrix()
 
-    def draw_object(self,object,landmark_as_sphere=True,color=COLOR['NORMAL_SHAPE'],edge_color=COLOR['NORMAL_SHAPE'],polygon_color=COLOR['NORMAL_SHAPE']):
+    def draw_object(
+        self,
+        object,
+        landmark_as_sphere=True,
+        color=COLOR["NORMAL_SHAPE"],
+        edge_color=COLOR["NORMAL_SHAPE"],
+        polygon_color=COLOR["NORMAL_SHAPE"],
+    ):
         if object is None:
             return
         current_buffer = gl.glGetIntegerv(gl.GL_FRAMEBUFFER_BINDING)
@@ -2016,8 +2103,8 @@ class ObjectViewer3D(QGLWidget):
                 wf_color = mu.as_gl_color(object.edge_color)
             else:
                 wf_color = mu.as_gl_color(self.wireframe_color)
-            gl.glColor3f( *wf_color ) #*COLOR['WIREFRAME'])
-            gl.glLineWidth(int(self.wireframe_thickness)+1)
+            gl.glColor3f(*wf_color)  # *COLOR['WIREFRAME'])
+            gl.glLineWidth(int(self.wireframe_thickness) + 1)
             gl.glBegin(gl.GL_LINE_STRIP)
             for v in self.temp_edge:
                 gl.glVertex3f(*v)
@@ -2027,27 +2114,27 @@ class ObjectViewer3D(QGLWidget):
             for i, edge in enumerate(self.edge_list):
                 if current_buffer == self.picker_buffer and self.object_dialog is not None:
                     gl.glDisable(gl.GL_LIGHTING)
-                    key = "edge_"+str(i)
+                    key = "edge_" + str(i)
                     color = self.edge_idx_to_color[key]
-                    gl.glColor3f( *[ c * 1.0 / 255 for c in color] )
-                    line_width = 3*(int(self.wireframe_thickness)+1)
+                    gl.glColor3f(*[c * 1.0 / 255 for c in color])
+                    line_width = 3 * (int(self.wireframe_thickness) + 1)
                     gl.glLineWidth(line_width)
                 else:
                     if i == self.selected_edge_index:
-                        gl.glColor3f( *COLOR['SELECTED_EDGE'] )
+                        gl.glColor3f(*COLOR["SELECTED_EDGE"])
                     else:
                         if object.edge_color:
                             wf_color = mu.as_gl_color(object.edge_color)
                         else:
                             wf_color = mu.as_gl_color(self.wireframe_color)
-                        gl.glColor3f( *wf_color )
-                    line_width = 1*(int(self.wireframe_thickness)+1)
-                    gl.glLineWidth(line_width)                        
+                        gl.glColor3f(*wf_color)
+                    line_width = 1 * (int(self.wireframe_thickness) + 1)
+                    gl.glLineWidth(line_width)
                 gl.glBegin(gl.GL_LINE_STRIP)
                 valid_edge = True
                 for lm_idx in edge:
                     if lm_idx <= len(object.landmark_list):
-                        lm = object.landmark_list[lm_idx-1]
+                        lm = object.landmark_list[lm_idx - 1]
                         # Check if landmark is missing
                         if len(lm) < 3 or lm[0] is None or lm[1] is None or lm[2] is None:
                             valid_edge = False
@@ -2056,61 +2143,60 @@ class ObjectViewer3D(QGLWidget):
                 if valid_edge:
                     for lm_idx in edge:
                         if lm_idx <= len(object.landmark_list):
-                            lm = object.landmark_list[lm_idx-1]
+                            lm = object.landmark_list[lm_idx - 1]
                             gl.glVertex3f(*lm)
                 gl.glEnd()
                 if current_buffer == self.picker_buffer and self.object_dialog is not None:
                     gl.glEnable(gl.GL_LIGHTING)
 
-
         if self.show_polygon and len(self.polygon_list) > 0 and object.show_polygon:
-            normal_list = self.calculate_normal_list(object,self.polygon_list)
+            self.calculate_normal_list(object, self.polygon_list)
             for i, polygon in enumerate(self.polygon_list):
-                normal = self.calculate_normal(object,polygon)
+                normal = self.calculate_normal(object, polygon)
                 gl.glEnable(gl.GL_LIGHTING)
                 if object.polygon_color:
                     pg_color = mu.as_gl_color(object.polygon_color)
-                elif isinstance(polygon_color,QColor):
+                elif isinstance(polygon_color, QColor):
                     pg_color = mu.as_gl_color(polygon_color)
                 elif len(polygon_color) == 3:
                     pg_color = polygon_color
                 else:
                     pg_color = mu.as_gl_color(polygon_color)
-                gl.glColor4f( *pg_color, object.opacity )
+                gl.glColor4f(*pg_color, object.opacity)
                 gl.glNormal3f(*normal)
                 gl.glBegin(gl.GL_POLYGON)
                 for lm_idx in polygon:
                     if lm_idx <= len(object.landmark_list):
-                        lm = object.landmark_list[lm_idx-1]
+                        lm = object.landmark_list[lm_idx - 1]
                         gl.glVertex3f(*lm)
                 gl.glEnd()
 
         if landmark_as_sphere and object.show_landmark:
-            lm_count = len(object.landmark_list)
+            len(object.landmark_list)
             for i, lm in enumerate(object.landmark_list):
                 # Skip missing landmarks in 3D view
                 if len(lm) < 3 or lm[0] is None or lm[1] is None or lm[2] is None:
                     continue
                 gl.glPushMatrix()
                 gl.glTranslate(*lm)
-                gl.glColor3f( *color )
-                if i in [ self.selected_landmark_idx, self.wireframe_from_idx, self.wireframe_to_idx ]:
-                    gl.glColor3f( *COLOR['SELECTED_LANDMARK'] )
+                gl.glColor3f(*color)
+                if i in [self.selected_landmark_idx, self.wireframe_from_idx, self.wireframe_to_idx]:
+                    gl.glColor3f(*COLOR["SELECTED_LANDMARK"])
 
                 if current_buffer == self.picker_buffer and self.object_dialog is not None:
                     gl.glDisable(gl.GL_LIGHTING)
-                    key = "lm_"+str(i)
+                    key = "lm_" + str(i)
                     color = self.lm_idx_to_color[key]
-                    gl.glColor3f( *[ c * 1.0 / 255 for c in color] )
+                    gl.glColor3f(*[c * 1.0 / 255 for c in color])
                 if GLUT_AVAILABLE and GLUT_INITIALIZED and glut:
                     try:
-                        glut.glutSolidSphere(0.02 * ( int(self.landmark_size) + 1 ), 10, 10)
+                        glut.glutSolidSphere(0.02 * (int(self.landmark_size) + 1), 10, 10)
                     except (OSError, AttributeError):
                         # Fallback if GLUT call fails
-                        self.draw_sphere(0.02 * ( int(self.landmark_size) + 1 ))
+                        self.draw_sphere(0.02 * (int(self.landmark_size) + 1))
                 else:
                     # Fallback: use GLU sphere or point
-                    self.draw_sphere(0.02 * ( int(self.landmark_size) + 1 ))
+                    self.draw_sphere(0.02 * (int(self.landmark_size) + 1))
                 if current_buffer == self.picker_buffer and self.object_dialog is not None:
                     gl.glEnable(gl.GL_LIGHTING)
                 gl.glPopMatrix()
@@ -2118,12 +2204,16 @@ class ObjectViewer3D(QGLWidget):
                 if self.show_index:
                     gl.glDisable(gl.GL_LIGHTING)
                     index_color = mu.as_gl_color(self.index_color)
-                    gl.glColor3f( *index_color )
+                    gl.glColor3f(*index_color)
                     gl.glRasterPos3f(lm[0] + 0.05, lm[1] + 0.05, lm[2])
-                    font_size_list = [ glut.GLUT_BITMAP_HELVETICA_10, glut.GLUT_BITMAP_HELVETICA_12, glut.GLUT_BITMAP_HELVETICA_18]
+                    font_size_list = [
+                        glut.GLUT_BITMAP_HELVETICA_10,
+                        glut.GLUT_BITMAP_HELVETICA_12,
+                        glut.GLUT_BITMAP_HELVETICA_18,
+                    ]
                     if GLUT_AVAILABLE and GLUT_INITIALIZED and glut:
                         try:
-                            for letter in list(str(i+1)):
+                            for letter in list(str(i + 1)):
                                 glut.glutBitmapCharacter(font_size_list[int(self.index_size)], ord(letter))
                         except (OSError, AttributeError):
                             # Fallback if GLUT text rendering fails
@@ -2131,12 +2221,11 @@ class ObjectViewer3D(QGLWidget):
                     gl.glEnable(gl.GL_LIGHTING)
 
         elif object.show_landmark:
-            
             gl.glPointSize(5)
             gl.glDisable(gl.GL_LIGHTING)
-            gl.glColor3f( *color )
+            gl.glColor3f(*color)
             gl.glBegin(gl.GL_POINTS)
-            #gl.glColor3f( 1.0, 1.0, 0.0 )
+            # gl.glColor3f( 1.0, 1.0, 0.0 )
             for lm in object.landmark_list:
                 # Skip missing landmarks
                 if len(lm) < 3 or lm[0] is None or lm[1] is None or lm[2] is None:
@@ -2152,7 +2241,7 @@ class ObjectViewer3D(QGLWidget):
                 lm = self.threed_model.vertices[self.cursor_on_vertex]
                 gl.glPushMatrix()
                 gl.glTranslate(*lm)
-                gl.glColor3f( *COLOR['SELECTED_LANDMARK'] )
+                gl.glColor3f(*COLOR["SELECTED_LANDMARK"])
                 if GLUT_AVAILABLE and GLUT_INITIALIZED and glut:
                     try:
                         glut.glutSolidSphere(0.03, 10, 10)
@@ -2166,9 +2255,9 @@ class ObjectViewer3D(QGLWidget):
             return
 
     def calculate_normal(self, obj_ops, polygon):
-        p1 = obj_ops.landmark_list[polygon[0]-1]
-        p2 = obj_ops.landmark_list[polygon[1]-1]
-        p3 = obj_ops.landmark_list[polygon[2]-1]
+        p1 = obj_ops.landmark_list[polygon[0] - 1]
+        p2 = obj_ops.landmark_list[polygon[1] - 1]
+        p3 = obj_ops.landmark_list[polygon[2] - 1]
         v1 = np.array(p2) - np.array(p1)
         v2 = np.array(p3) - np.array(p1)
         normal = -1.0 * np.cross(v1, v2)
@@ -2185,30 +2274,32 @@ class ObjectViewer3D(QGLWidget):
                 face_normal[1] += self.normal_list[lm_idx - 1][1]
                 face_normal[2] += self.normal_list[lm_idx - 1][2]
                 # Normalize the face normal
-                length = math.sqrt(face_normal[0] * face_normal[0] + face_normal[1] * face_normal[1] + face_normal[2] * face_normal[2])
+                length = math.sqrt(
+                    face_normal[0] * face_normal[0] + face_normal[1] * face_normal[1] + face_normal[2] * face_normal[2]
+                )
                 face_normals.append([f / length for f in face_normal])
         return face_normals
 
     def calculate_normal_list(self, obj_ops, polygon_list):
         normal_dict = {}
         for polygon in polygon_list:
-            lm_idx_list = [i-1 for i in polygon]
+            lm_idx_list = [i - 1 for i in polygon]
             landmark_list = [obj_ops.landmark_list[i] for i in lm_idx_list]
             v1 = np.array(landmark_list[1]) - np.array(landmark_list[0])
             v2 = np.array(landmark_list[2]) - np.array(landmark_list[0])
             normal = -1.0 * np.cross(v1, v2)
             for i in lm_idx_list:
                 if i in normal_dict:
-                    normal_dict[i]['normal'] += normal
-                    normal_dict[i]['count'] += 1
+                    normal_dict[i]["normal"] += normal
+                    normal_dict[i]["count"] += 1
                 else:
-                    normal_dict[i] = { 'normal': normal, 'count': 1 }
+                    normal_dict[i] = {"normal": normal, "count": 1}
         normal_list = []
         for i in range(len(obj_ops.landmark_list)):
             if i in normal_dict:
-                normal = normal_dict[i]['normal'] / normal_dict[i]['count']
+                normal = normal_dict[i]["normal"] / normal_dict[i]["count"]
             else:
-                normal = np.array([0,0,0])
+                normal = np.array([0, 0, 0])
             normal_list.append(normal)
         return normal_list
 
@@ -2219,7 +2310,9 @@ class ObjectViewer3D(QGLWidget):
         # Create a texture to hold the color buffer
         self.texture_buffer = gl.glGenTextures(1)
         gl.glBindTexture(gl.GL_TEXTURE_2D, self.texture_buffer)
-        gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGB, self.width(), self.height(), 0, gl.GL_RGB, gl.GL_UNSIGNED_BYTE, None)
+        gl.glTexImage2D(
+            gl.GL_TEXTURE_2D, 0, gl.GL_RGB, self.width(), self.height(), 0, gl.GL_RGB, gl.GL_UNSIGNED_BYTE, None
+        )
         gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR)
         gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR)
 
@@ -2266,14 +2359,14 @@ class ObjectViewer3D(QGLWidget):
             # Resize the renderbuffer
             gl.glBindRenderbuffer(gl.GL_RENDERBUFFER, self.render_buffer)
             gl.glRenderbufferStorage(gl.GL_RENDERBUFFER, gl.GL_DEPTH_COMPONENT, width, height)
-            
+
             # Don't forget to update the size of your texture if you have one attached to the FBO
             gl.glBindTexture(gl.GL_TEXTURE_2D, self.texture_buffer)
             gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGB, width, height, 0, gl.GL_RGB, gl.GL_UNSIGNED_BYTE, None)
             gl.glBindTexture(gl.GL_TEXTURE_2D, 0)
-            
+
             # Unbind the renderbuffer
-            gl.glBindRenderbuffer(gl.GL_RENDERBUFFER, 0)            
+            gl.glBindRenderbuffer(gl.GL_RENDERBUFFER, 0)
 
             gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, self.picker_buffer)
             gl.glViewport(0, 0, width, height)
@@ -2288,7 +2381,7 @@ class ObjectViewer3D(QGLWidget):
         pass
 
     def timeout(self):
-        if self.auto_rotate == False:
+        if not self.auto_rotate:
             return
         if self.is_dragging:
             return
@@ -2302,10 +2395,10 @@ class ObjectViewer3D(QGLWidget):
         self.updateGL()
 
     def hit_background_test(self, x, y):
-        pixels = gl.glReadPixels(x, self.height()-y, 1, 1, gl.GL_RGB, gl.GL_UNSIGNED_BYTE)
-        r, g, b = struct.unpack('BBB', pixels)
+        pixels = gl.glReadPixels(x, self.height() - y, 1, 1, gl.GL_RGB, gl.GL_UNSIGNED_BYTE)
+        r, g, b = struct.unpack("BBB", pixels)
         rgb_list = [r, g, b]
-        bg_color = [int(255* c) for c in COLOR['BACKGROUND']]
+        bg_color = [int(255 * c) for c in COLOR["BACKGROUND"]]
         if bg_color == rgb_list:
             return True
         else:
@@ -2313,8 +2406,8 @@ class ObjectViewer3D(QGLWidget):
 
     def hit_test(self, x, y):
         gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, self.picker_buffer)
-        pixels = gl.glReadPixels(x, self.height()-y, 1, 1, gl.GL_RGB, gl.GL_UNSIGNED_BYTE)
-        r, g, b = struct.unpack('BBB', pixels)
+        pixels = gl.glReadPixels(x, self.height() - y, 1, 1, gl.GL_RGB, gl.GL_UNSIGNED_BYTE)
+        r, g, b = struct.unpack("BBB", pixels)
         rgb_tuple = (r, g, b)
 
         if rgb_tuple in self.color_to_lm_idx.keys():
@@ -2334,7 +2427,7 @@ class ObjectViewer3D(QGLWidget):
                 if color not in self.color_to_lm_idx.keys():
                     break
             self.color_to_lm_idx[color] = str(i)
-            self.lm_idx_to_color["lm_"+str(i)] = color
+            self.lm_idx_to_color["lm_" + str(i)] = color
 
         self.color_to_edge_idx = {}
         self.edge_idx_to_color = {}
@@ -2344,7 +2437,7 @@ class ObjectViewer3D(QGLWidget):
                 if color not in self.color_to_lm_idx.keys() and color not in self.color_to_edge_idx.keys():
                     break
             self.color_to_edge_idx[color] = str(i)
-            self.edge_idx_to_color["edge_"+str(i)] = color
+            self.edge_idx_to_color["edge_" + str(i)] = color
 
     def update_landmark_list(self):
         self.obj_ops.landmark_list = copy.deepcopy(self.landmark_list)
@@ -2352,15 +2445,17 @@ class ObjectViewer3D(QGLWidget):
 
     def calculate_resize(self):
         if self.threed_model is not None:
-            if self.initialized == True and self.threed_model.generated == False:
+            if self.initialized and not self.threed_model.generated:
                 self.threed_model.generate()
-            self.obj_ops.move(-1 * self.threed_model.center_x, -1 * self.threed_model.center_y, -1 * self.threed_model.center_z)
+            self.obj_ops.move(
+                -1 * self.threed_model.center_x, -1 * self.threed_model.center_y, -1 * self.threed_model.center_z
+            )
             self.obj_ops.rescale(self.threed_model.scale)
             self.obj_ops.apply_rotation_matrix(self.threed_model.rotation_matrix)
         else:
             self.obj_ops.landmark_list = copy.deepcopy(self.landmark_list)
             self.obj_ops.move_to_center()
-            centroid_size = self.obj_ops.get_centroid_size()
+            self.obj_ops.get_centroid_size()
             self.obj_ops.rescale_to_unitsize()
             scale = self.get_scale_from_object(self.obj_ops)
             self.obj_ops.rescale(scale)
@@ -2378,10 +2473,8 @@ class ObjectViewer3D(QGLWidget):
 
     def pick_element(self, x, y):
         near, ray_direction = self.unproject_mouse(x, y)
-        closest_distance = float('inf')
+        closest_distance = float("inf")
         closest_element = None
-        vert_is_closest = False
-        faces = self.threed_model.faces
         vertices = self.threed_model.vertices
 
         for i, vertex in enumerate(vertices):
@@ -2391,7 +2484,6 @@ class ObjectViewer3D(QGLWidget):
             if distance is not None and distance < closest_distance and distance < pick_radius:
                 closest_distance = distance
                 closest_element = i
-                vert_is_closest = True
         return closest_element
 
     def ray_triangle_intersection(self, ray_origin, ray_direction, v0, v1, v2):
@@ -2411,12 +2503,12 @@ class ObjectViewer3D(QGLWidget):
         edge0 = v0 - v2
         C0 = intersection_point - v0
         C1 = intersection_point - v1
-        C2 = intersection_point - v2
+        intersection_point - v2
         dot00 = np.dot(edge0, edge0)
         dot01 = np.dot(edge0, edge1)
-        dot02 = np.dot(edge0, edge2)
+        np.dot(edge0, edge2)
         dot11 = np.dot(edge1, edge1)
-        dot12 = np.dot(edge1, edge2)
+        np.dot(edge1, edge2)
         inv_denom = 1.0 / (dot00 * dot11 - dot01 * dot01)
         u = (dot11 * np.dot(C0, edge0) - dot01 * np.dot(C0, edge1)) * inv_denom
         v = (dot00 * np.dot(C1, edge1) - dot01 * np.dot(C1, edge0)) * inv_denom
@@ -2441,25 +2533,29 @@ class ObjectViewer3D(QGLWidget):
         elif self.data_mode == DATASET_MODE:
             self.ds_ops.apply_rotation_matrix(rotation_matrix)
 
-    def rotate(self, rotationX_rad, rotationY_rad, vertices ):
-        rotationXMatrix = np.array([
-            [1, 0, 0, 0],
-            [0, np.cos(rotationY_rad), -np.sin(rotationY_rad), 0],
-            [0, np.sin(rotationY_rad), np.cos(rotationY_rad), 0],
-            [0, 0, 0, 1]
-        ])
+    def rotate(self, rotationX_rad, rotationY_rad, vertices):
+        rotationXMatrix = np.array(
+            [
+                [1, 0, 0, 0],
+                [0, np.cos(rotationY_rad), -np.sin(rotationY_rad), 0],
+                [0, np.sin(rotationY_rad), np.cos(rotationY_rad), 0],
+                [0, 0, 0, 1],
+            ]
+        )
 
-        rotationYMatrix = np.array([
-            [np.cos(rotationX_rad), 0, np.sin(rotationX_rad), 0],
-            [0, 1, 0, 0],
-            [-np.sin(rotationX_rad), 0, np.cos(rotationX_rad), 0],
-            [0, 0, 0, 1]
-        ])
+        rotationYMatrix = np.array(
+            [
+                [np.cos(rotationX_rad), 0, np.sin(rotationX_rad), 0],
+                [0, 1, 0, 0],
+                [-np.sin(rotationX_rad), 0, np.cos(rotationX_rad), 0],
+                [0, 0, 0, 1],
+            ]
+        )
 
         new_rotation_matrix = np.dot(rotationXMatrix, rotationYMatrix)
         self.rotation_matrix = np.dot(new_rotation_matrix, self.rotation_matrix)
         ones_column = np.ones((np.array(vertices).shape[0], 1))
-        vertices_with_ones = np.hstack(( vertices, ones_column))
+        vertices_with_ones = np.hstack((vertices, ones_column))
         new_vertices_with_ones = np.dot(vertices_with_ones, self.rotation_matrix.T)
         new_vertices = new_vertices_with_ones[:, 0:3]
 
@@ -2479,17 +2575,12 @@ class ObjectViewer3D(QGLWidget):
         self.temp_pan_y = 0
 
         # Reset rotation matrix to identity for any consumers relying on it
-        self.rotation_matrix = np.array([
-            [1, 0, 0, 0],
-            [0, 1, 0, 0],
-            [0, 0, 1, 0],
-            [0, 0, 0, 1]
-        ])
+        self.rotation_matrix = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
 
         # Restore underlying geometry to its original (pre-rotation) state.
         # In OBJECT_MODE we can safely rebuild ops from the backing MdObject.
         try:
-            if self.data_mode == OBJECT_MODE and getattr(self, 'object', None) is not None:
+            if self.data_mode == OBJECT_MODE and getattr(self, "object", None) is not None:
                 # Re-initialize ops/geometry from source object
                 self.set_object(self.object)
             else:
@@ -2501,7 +2592,7 @@ class ObjectViewer3D(QGLWidget):
             self.align_object()
 
         # Invalidate any cached GL display lists
-        if hasattr(self, 'gl_list') and self.gl_list is not None:
+        if hasattr(self, "gl_list") and self.gl_list is not None:
             gl.glDeleteLists(self.gl_list, 1)
             self.gl_list = None
 
@@ -2518,27 +2609,29 @@ class ObjectViewer3D(QGLWidget):
             if self.obj_ops is None:
                 return
 
-            self.obj_ops.rotate_3d(math.radians(-1*self.rotate_x),'Y')
-            self.obj_ops.rotate_3d(math.radians(self.rotate_y),'X')
+            self.obj_ops.rotate_3d(math.radians(-1 * self.rotate_x), "Y")
+            self.obj_ops.rotate_3d(math.radians(self.rotate_y), "X")
             if self.threed_model is not None:
-                if self.show_model == True:
+                if self.show_model:
                     apply_rotation_to_vertex = True
                 else:
                     apply_rotation_to_vertex = False
-                self.threed_model.rotate(math.radians(self.rotate_x),math.radians(self.rotate_y),apply_rotation_to_vertex)
-                if self.show_model == True:
+                self.threed_model.rotate(
+                    math.radians(self.rotate_x), math.radians(self.rotate_y), apply_rotation_to_vertex
+                )
+                if self.show_model:
                     self.threed_model.generate()
 
         elif self.data_mode == DATASET_MODE:
             if self.ds_ops is None:
                 return
             for obj in self.ds_ops.object_list:
-                obj.rotate_3d(math.radians(-1*self.rotate_x),'Y')
-                obj.rotate_3d(math.radians(self.rotate_y),'X')
+                obj.rotate_3d(math.radians(-1 * self.rotate_x), "Y")
+                obj.rotate_3d(math.radians(self.rotate_y), "X")
 
         self.rotate_x = 0
         self.rotate_y = 0
-    
+
     # Fallback rendering functions for when GLUT is not available
     def draw_wireframe_cube(self):
         """Draw a simple wireframe cube as fallback for glutSolidCube."""
@@ -2572,7 +2665,7 @@ class ObjectViewer3D(QGLWidget):
         gl.glVertex3f(-size, size, size)
         gl.glVertex3f(-size, size, -size)
         gl.glEnd()
-    
+
     def draw_simple_cone(self):
         """Draw a simple cone as fallback for glutSolidCone."""
         # Use a simple pyramid shape
@@ -2585,12 +2678,12 @@ class ObjectViewer3D(QGLWidget):
             gl.glVertex3f(0.02 * math.cos(angle1), 0.02 * math.sin(angle1), 0)
             gl.glVertex3f(0.02 * math.cos(angle2), 0.02 * math.sin(angle2), 0)
         gl.glEnd()
-    
+
     def draw_sphere(self, radius):
         """Draw a sphere using GLU as fallback for glutSolidSphere."""
-        if not hasattr(self, 'glu_quadric'):
+        if not hasattr(self, "glu_quadric"):
             self.glu_quadric = glu.gluNewQuadric()
-        
+
         if self.glu_quadric:
             glu.gluSphere(self.glu_quadric, radius, 10, 10)
         else:
@@ -2603,6 +2696,7 @@ class ObjectViewer3D(QGLWidget):
 
 class ShapePreference(QWidget):
     shape_preference_changed = pyqtSignal(dict)
+
     def __init__(self, parent):
         super().__init__()
         self.parent = parent
@@ -2638,26 +2732,26 @@ class ShapePreference(QWidget):
         self.sliderTransparency.setValue(0)
 
         self.btnLMColor = QPushButton("LM")
-        self.btnLMColor.setMinimumSize(20,20)
+        self.btnLMColor.setMinimumSize(20, 20)
         self.btnLMColor.setStyleSheet("background-color: red")
         self.btnLMColor.setToolTip("red")
         self.btnLMColor.setCursor(Qt.PointingHandCursor)
-        #self.btnLMColor.mousePressEvent = lambda event, type='LM': self.on_btnColor_clicked(event, 'LM')
+        # self.btnLMColor.mousePressEvent = lambda event, type='LM': self.on_btnColor_clicked(event, 'LM')
         self.btnLMColor.clicked.connect(self.on_btnLMColor_clicked)
 
         self.btnEdgeColor = QPushButton("Edge")
-        self.btnEdgeColor.setMinimumSize(20,20)
+        self.btnEdgeColor.setMinimumSize(20, 20)
         self.btnEdgeColor.setStyleSheet("background-color: red")
         self.btnEdgeColor.setToolTip("red")
         self.btnEdgeColor.setCursor(Qt.PointingHandCursor)
         self.btnEdgeColor.clicked.connect(self.on_btnEdgeColor_clicked)
 
         self.btnFaceColor = QPushButton("Face")
-        self.btnFaceColor.setMinimumSize(20,20)
+        self.btnFaceColor.setMinimumSize(20, 20)
         self.btnFaceColor.setStyleSheet("background-color: red")
         self.btnFaceColor.setToolTip("red")
         self.btnFaceColor.setCursor(Qt.PointingHandCursor)
-        self.btnFaceColor.clicked.connect(self.on_btnFaceColor_clicked)        
+        self.btnFaceColor.clicked.connect(self.on_btnFaceColor_clicked)
 
         self.layout.addWidget(self.lblTitle)
         self.layout.addWidget(self.edtTitle)
@@ -2682,11 +2776,11 @@ class ShapePreference(QWidget):
 
     def hide_name(self):
         self.edtTitle.hide()
-    
+
     def hide_cbxShow(self):
         self.cbxShow.hide()
 
-    def on_btnLMColor_clicked(self,event):
+    def on_btnLMColor_clicked(self, event):
         dialog = QColorDialog()
         color = dialog.getColor(initial=QColor(self.btnLMColor.toolTip()))
         if color is not None:
@@ -2696,7 +2790,7 @@ class ShapePreference(QWidget):
         if self.ignore_change is False:
             self.emit_changed_signal()
 
-    def on_btnEdgeColor_clicked(self,event):
+    def on_btnEdgeColor_clicked(self, event):
         dialog = QColorDialog()
         color = dialog.getColor(initial=QColor(self.btnEdgeColor.toolTip()))
         if color is not None:
@@ -2706,7 +2800,7 @@ class ShapePreference(QWidget):
         if self.ignore_change is False:
             self.emit_changed_signal()
 
-    def on_btnFaceColor_clicked(self,event):
+    def on_btnFaceColor_clicked(self, event):
         dialog = QColorDialog()
         color = dialog.getColor(initial=QColor(self.btnFaceColor.toolTip()))
         if color is not None:
@@ -2722,15 +2816,33 @@ class ShapePreference(QWidget):
             self.emit_changed_signal()
 
     def emit_changed_signal(self):
-        pref = {'name': self.name, 'index': self.index, 'visible': self.visible, 
-                'show_landmark': self.show_landmark, 'show_wireframe': self.show_wireframe, 'show_polygon': self.show_polygon, 'opacity': self.opacity,
-                'landmark_color': self.landmark_color, 'edge_color': self.edge_color, 'polygon_color': self.polygon_color}
+        pref = {
+            "name": self.name,
+            "index": self.index,
+            "visible": self.visible,
+            "show_landmark": self.show_landmark,
+            "show_wireframe": self.show_wireframe,
+            "show_polygon": self.show_polygon,
+            "opacity": self.opacity,
+            "landmark_color": self.landmark_color,
+            "edge_color": self.edge_color,
+            "polygon_color": self.polygon_color,
+        }
         self.shape_preference_changed.emit(pref)
 
     def get_preference(self):
-        pref = {'name': self.name, 'index': self.index, 'visible': self.visible,
-                'show_landmark': self.show_landmark, 'show_wireframe': self.show_wireframe, 'show_polygon': self.show_polygon, 'opacity': self.opacity,
-                'landmark_color': self.landmark_color, 'edge_color': self.edge_color, 'polygon_color': self.polygon_color}
+        pref = {
+            "name": self.name,
+            "index": self.index,
+            "visible": self.visible,
+            "show_landmark": self.show_landmark,
+            "show_wireframe": self.show_wireframe,
+            "show_polygon": self.show_polygon,
+            "opacity": self.opacity,
+            "landmark_color": self.landmark_color,
+            "edge_color": self.edge_color,
+            "polygon_color": self.polygon_color,
+        }
         return pref
 
     def set_color(self, color):
@@ -2747,7 +2859,7 @@ class ShapePreference(QWidget):
         self.sliderTransparency.setValue(int(self.transparency * 100))
 
     def set_title(self, title):
-        self.lblTitle.setText(title)        
+        self.lblTitle.setText(title)
 
     def set_name(self, name):
         self.name = name
@@ -2765,32 +2877,33 @@ class ShapePreference(QWidget):
         self.visible = self.cbxShow.isChecked()
         if self.ignore_change is False:
             self.emit_changed_signal()
-    
+
     def cbxShowLandmark_stateChanged(self, int):
         self.show_landmark = self.cbxShowLandmark.isChecked()
         if self.ignore_change is False:
             self.emit_changed_signal()
-    
+
     def cbxShowWireframe_stateChanged(self, int):
         self.show_wireframe = self.cbxShowWireframe.isChecked()
         if self.ignore_change is False:
             self.emit_changed_signal()
-    
+
     def cbxShowPolygon_stateChanged(self, int):
         self.show_polygon = self.cbxShowPolygon.isChecked()
         if self.ignore_change is False:
             self.emit_changed_signal()
-    
+
     def sliderTransparency_valueChanged(self, int):
         self.transparency = self.sliderTransparency.value() / 100.0
         self.opacity = 1 - self.transparency
         if self.ignore_change is False:
             self.emit_changed_signal()
 
+
 class X1Y1:
-    def __init__(self, filename, datasetname, invertY = False):
+    def __init__(self, filename, datasetname, invertY=False):
         #
-        self.dirname = os.path.dirname(filename) 
+        self.dirname = os.path.dirname(filename)
         self.filename = filename
         self.datasetname = datasetname
         self.dimension = 0
@@ -2807,7 +2920,7 @@ class X1Y1:
         self.invertY = invertY
         self.read()
 
-    def isNumber(self,s):
+    def isNumber(self, s):
         try:
             float(s)
             return True
@@ -2818,23 +2931,11 @@ class X1Y1:
         with open(self.filename) as f:
             lines = f.readlines()
             dataset = {}
-            object_count = 0
             landmark_count = 0
             data = []
             object_name_list = []
-            threed = 0
-            twod = 0
             objects = {}
-            object_comment = {}
-            object_images = {}
-            header = ''
-            comment = ''
-            image_count = 0
-            currently_in_data_section = False
-            object_id = ''
-            object_image_path = ''
-            object_comment_1 = ''
-            object_comment_2 = ''
+            header = ""
             y_flip = 1.0
             if self.invertY:
                 y_flip = -1.0
@@ -2845,12 +2946,12 @@ class X1Y1:
                 self.dimension = 2
             else:
                 self.dimension = 3
-            lendmark_count = int(len(xyz_header_list) / self.dimension)
+            int(len(xyz_header_list) / self.dimension)
             lines = lines[1:]
-            
+
             for line in lines:
                 line = line.strip()
-                if line == '':
+                if line == "":
                     continue
                 if line.startswith("#"):
                     continue
@@ -2865,10 +2966,16 @@ class X1Y1:
                 if len(landmark_list) > 0:
                     if self.dimension == 2:
                         for idx in range(0, len(landmark_list), 2):
-                            data.append([float(landmark_list[idx]), y_flip * float(landmark_list[idx+1])])
+                            data.append([float(landmark_list[idx]), y_flip * float(landmark_list[idx + 1])])
                     elif self.dimension == 3:
                         for idx in range(0, len(landmark_list), 3):
-                            data.append([float(landmark_list[idx]), float(landmark_list[idx+1]), float(landmark_list[idx+2])])
+                            data.append(
+                                [
+                                    float(landmark_list[idx]),
+                                    float(landmark_list[idx + 1]),
+                                    float(landmark_list[idx + 2]),
+                                ]
+                            )
                 objects[object_name] = data
             self.nobjects = len(object_name_list)
             self.nlandmarks = landmark_count
@@ -2876,10 +2983,11 @@ class X1Y1:
             self.object_name_list = object_name_list
             return dataset
 
+
 class TPS:
-    def __init__(self, filename, datasetname, invertY = False):
+    def __init__(self, filename, datasetname, invertY=False):
         #
-        self.dirname = os.path.dirname(filename) 
+        self.dirname = os.path.dirname(filename)
         self.filename = filename
         self.datasetname = datasetname
         self.dimension = 0
@@ -2895,7 +3003,7 @@ class TPS:
         self.invertY = invertY
         self.read()
 
-    def isNumber(self,s):
+    def isNumber(self, s):
         try:
             float(s)
             return True
@@ -2915,60 +3023,57 @@ class TPS:
             objects = {}
             object_comment = {}
             object_images = {}
-            header = ''
-            comment = ''
-            image_count = 0
             currently_in_data_section = False
-            object_id = ''
-            object_image_path = ''
-            object_comment_1 = ''
-            object_comment_2 = ''
-            
+            object_id = ""
+            object_image_path = ""
+            object_comment_1 = ""
+            object_comment_2 = ""
+
             for line in tps_lines:
                 line = line.strip()
-                if line == '':
+                if line == "":
                     continue
                 if line.startswith("#"):
                     continue
                 if line.startswith('"') or line.startswith("'"):
                     continue
-                headerline = re.search(r'^\s*LM\s*=\s*(\d+)\s*(.*)', line, re.IGNORECASE)
+                headerline = re.search(r"^\s*LM\s*=\s*(\d+)\s*(.*)", line, re.IGNORECASE)
 
                 if headerline is not None:
-                    if currently_in_data_section == True:
+                    if currently_in_data_section:
                         if len(data) > 0:
-                            if object_id != '':
+                            if object_id != "":
                                 key = object_id
-                            elif object_comment_1 != '':
+                            elif object_comment_1 != "":
                                 key = object_comment_1
-                                object_comment_1 = ''
+                                object_comment_1 = ""
                             else:
-                                key = self.datasetname + "_" + str(object_count+1)
+                                key = self.datasetname + "_" + str(object_count + 1)
                             objects[key] = data
                             object_name_list.append(key)
-                            object_comment[key] = " ".join( [ object_comment_1, object_comment_2 ] ).strip()
-                            if object_image_path != '':
+                            object_comment[key] = " ".join([object_comment_1, object_comment_2]).strip()
+                            if object_image_path != "":
                                 object_images[key] = object_image_path
-                            #print("data:", data)
+                            # print("data:", data)
                             data = []
-                            object_id = ''
-                            object_comment_1 = ''
-                            object_comment_2 = ''
-                            object_image_path = ''
+                            object_id = ""
+                            object_comment_1 = ""
+                            object_comment_2 = ""
+                            object_image_path = ""
                         landmark_count, object_comment_1 = int(headerline.group(1)), headerline.group(2).strip()
                         object_count += 1
                     else:
                         currently_in_data_section = True
                         landmark_count, object_comment_1 = int(headerline.group(1)), headerline.group(2).strip()
                 else:
-                    dataline = re.search(r'^\s*(\w+)\s*=(.+)', line)
+                    dataline = re.search(r"^\s*(\w+)\s*=(.+)", line)
                     if dataline is None:
-                        point = [ float(x) for x in re.split(r'\s+', line)]
+                        point = [float(x) for x in re.split(r"\s+", line)]
                         if len(point) > 2 and self.isNumber(point[2]):
                             threed += 1
                         else:
                             twod += 1
-                        if len(point)>1:
+                        if len(point) > 1:
                             data.append(point)
                     elif dataline.group(1).lower() == "image":
                         object_image_path = dataline.group(2)
@@ -2979,17 +3084,17 @@ class TPS:
                         pass
 
             if len(data) > 0:
-                if object_id != '':
+                if object_id != "":
                     key = object_id
-                elif object_comment_1 != '':
+                elif object_comment_1 != "":
                     key = object_comment_1
-                    object_comment_1 = ''
+                    object_comment_1 = ""
                 else:
-                    key = self.datasetname + "_" + str(object_count+1)
+                    key = self.datasetname + "_" + str(object_count + 1)
                 objects[key] = data
                 object_name_list.append(key)
-                object_comment[key] = " ".join( [ object_comment_1, object_comment_2 ] ).strip()
-                if object_image_path != '':
+                object_comment[key] = " ".join([object_comment_1, object_comment_2]).strip()
+                if object_image_path != "":
                     object_images[key] = object_image_path
 
             if object_count == 0 and landmark_count == 0:
@@ -2999,12 +3104,12 @@ class TPS:
                 self.dimension = 3
             else:
                 self.dimension = 2
-            
+
             if self.dimension == 2 and self.invertY:
                 for key in objects.keys():
                     for idx in range(len(objects[key])):
                         objects[key][idx][1] = -1 * objects[key][idx][1]
-            
+
             self.nobjects = len(object_name_list)
             self.nlandmarks = landmark_count
             self.landmark_data = objects
@@ -3013,8 +3118,9 @@ class TPS:
             self.object_images = object_images
             return dataset
 
+
 class NTS:
-    def __init__(self, filename, datasetname, invertY = False):
+    def __init__(self, filename, datasetname, invertY=False):
         self.filename = filename
         self.datasetname = datasetname
         self.dimension = 0
@@ -3031,7 +3137,7 @@ class NTS:
         self.invertY = invertY
         self.read()
 
-    def isNumber(self,s):
+    def isNumber(self, s):
         try:
             float(s)
             return True
@@ -3046,15 +3152,8 @@ class NTS:
 
             total_object_count = 0
             landmark_count = 0
-            data = []
             object_name_list = []
-            threed = 0
-            twod = 0
             objects = {}
-            header = ''
-            comment = ''
-            image_count = 0
-            matrix_type = -1
             total_object_count = -1
             variable_count = -1
             dimension = -1
@@ -3071,20 +3170,22 @@ class NTS:
 
             for line in nts_lines:
                 line = line.strip()
-                if line == '':
+                if line == "":
                     continue
                 if line.startswith('"') or line.startswith("'"):
                     comments += line
                     continue
                 #                          1    2     3   4    5     6    7   8    9    10   11   12   13    14
-                headerline = re.search(r'^(\d+)(\s+)(\d+)(\w*)(\s+)(\d+)(\w*)(\s+)(\d+)(\s+)(\d*)(\s*)(\w+)=(\d+)(.*)', line)
+                headerline = re.search(
+                    r"^(\d+)(\s+)(\d+)(\w*)(\s+)(\d+)(\w*)(\s+)(\d+)(\s+)(\d*)(\s*)(\w+)=(\d+)(.*)", line
+                )
                 if headerline is not None:
-                    matrix_type = headerline.group(1)
+                    headerline.group(1)
                     total_object_count = int(headerline.group(3))
                     variable_count = int(headerline.group(6))
                     self.dimension = int(headerline.group(14))
                     if variable_count > 0 and dimension > 0:
-                        landmark_count = int( float(variable_count) / float(dimension) )
+                        landmark_count = int(float(variable_count) / float(dimension))
                     if headerline.group(4).lower() == "l":
                         row_names_exist_in_separate_line = True
                     elif headerline.group(4).lower() == "b":
@@ -3098,30 +3199,30 @@ class NTS:
                     headerline_processed = True
                     continue
 
-                if headerline_processed == True and row_names_exist_in_separate_line == True and row_names_read == False:
-                    row_names_list = re.split(r'\s+', line)
+                if headerline_processed and row_names_exist_in_separate_line and not row_names_read:
+                    row_names_list = re.split(r"\s+", line)
                     row_names_read = True
                     continue
 
-                if headerline_processed == True and column_names_exist == True and column_names_read == False:
-                    column_names_list = re.split(r'\s+', line)
+                if headerline_processed and column_names_exist and not column_names_read:
+                    re.split(r"\s+", line)
                     column_names_read = True
                     continue
 
-                if headerline_processed == True:
-                    data_list = re.split(r'\s+', line)
-                    if row_names_exist_at_row_beginning == True:
+                if headerline_processed:
+                    data_list = re.split(r"\s+", line)
+                    if row_names_exist_at_row_beginning:
                         row_name = data_list.pop(0)
-                    elif row_names_exist_at_row_ending == True:
+                    elif row_names_exist_at_row_ending:
                         row_name = data_list.pop(-1)
                     elif len(row_names_list) > 0:
                         row_name = row_names_list[current_object_count]
                     else:
-                        row_name = self.datasetname + "_" + str(current_object_count+1)
-                    data_list = [ float(x) for x in data_list ]
+                        row_name = self.datasetname + "_" + str(current_object_count + 1)
+                    data_list = [float(x) for x in data_list]
                     objects[row_name] = []
-                    for idx in range(0,len(data_list),self.dimension):
-                        objects[row_name].append(data_list[idx:idx+self.dimension])
+                    for idx in range(0, len(data_list), self.dimension):
+                        objects[row_name].append(data_list[idx : idx + self.dimension])
                     object_name_list.append(row_name)
                     current_object_count += 1
 
@@ -3134,16 +3235,17 @@ class NTS:
             self.object_name_list = object_name_list
             self.description = comments
 
-            if self.dimension == 2 and self.invertY == True:
+            if self.dimension == 2 and self.invertY:
                 for key in objects.keys():
                     for idx in range(len(objects[key])):
                         objects[key][idx][1] = -1 * objects[key][idx][1]
 
             return dataset
 
+
 class Morphologika:
-    def __init__(self, filename, datasetname, invertY = False):
-        self.dirname = os.path.dirname(filename) 
+    def __init__(self, filename, datasetname, invertY=False):
+        self.dirname = os.path.dirname(filename)
         self.filename = filename
         self.datasetname = datasetname
         self.dimension = 0
@@ -3168,9 +3270,8 @@ class Morphologika:
 
         object_count = -1
         landmark_count = -1
-        data_lines = [l.strip() for l in morphologika_data.split('\n')]
-        found = False
-        dsl = ''
+        data_lines = [l.strip() for l in morphologika_data.split("\n")]
+        dsl = ""
         dimension = 2
         raw_data = {}
         for line in data_lines:
@@ -3178,19 +3279,19 @@ class Morphologika:
             if line == "":
                 continue
             if line[0] == "'":
-                '''comment'''
+                """comment"""
                 continue
-            elif line[0] == '[':
-                dsl = re.search(r'(\w+)', line).group(0).lower()
+            elif line[0] == "[":
+                dsl = re.search(r"(\w+)", line).group(0).lower()
                 raw_data[dsl] = []
                 continue
             else:
                 raw_data[dsl].append(line)
-                if dsl == 'individuals':
+                if dsl == "individuals":
                     object_count = int(line)
-                if dsl == 'landmarks':
+                if dsl == "landmarks":
                     landmark_count = int(line)
-                if dsl == 'dimensions':
+                if dsl == "dimensions":
                     dimension = int(line)
 
         if object_count < 0 or landmark_count < 0:
@@ -3199,7 +3300,7 @@ class Morphologika:
         self.raw_data = raw_data
         self.nlandmarks = landmark_count
         self.dimension = dimension
-        self.object_name_list = self.raw_data['names']
+        self.object_name_list = self.raw_data["names"]
         self.nobjects = len(self.object_name_list)
         self.nobjects = object_count
 
@@ -3208,8 +3309,8 @@ class Morphologika:
             begin = i * self.nlandmarks
             count = self.nlandmarks
             objects[name] = []
-            for point in self.raw_data['rawpoints'][begin:begin + count]:
-                coords = re.split(r'\s+', point)[:dimension]
+            for point in self.raw_data["rawpoints"][begin : begin + count]:
+                coords = re.split(r"\s+", point)[:dimension]
                 objects[name].append(coords)
 
         self.landmark_data = objects
@@ -3219,46 +3320,47 @@ class Morphologika:
         self.variablename_list = []
         self.property_list_list = []
 
-        if self.dimension == 2 and self.invertY == True:
+        if self.dimension == 2 and self.invertY:
             for key in objects.keys():
                 for idx in range(len(objects[key])):
                     objects[key][idx][1] = -1.0 * float(objects[key][idx][1])
 
-        if 'labels' in self.raw_data.keys():
-            for line in self.raw_data['labels']:
-                labels = re.split(r'\s+', line)
+        if "labels" in self.raw_data.keys():
+            for line in self.raw_data["labels"]:
+                labels = re.split(r"\s+", line)
                 for label in labels:
-                    self.variablename_list.append( label )
-                    
-        if 'labelvalues' in self.raw_data.keys():
-            for line in self.raw_data['labelvalues']:
-                property_list = re.split(r'\s+', line)
+                    self.variablename_list.append(label)
+
+        if "labelvalues" in self.raw_data.keys():
+            for line in self.raw_data["labelvalues"]:
+                property_list = re.split(r"\s+", line)
                 self.property_list_list.append(property_list)
 
-        if 'wireframe' in self.raw_data.keys():
-            for line in self.raw_data['wireframe']:
-                edge = [int(v) for v in re.split(r'\s+', line)]
+        if "wireframe" in self.raw_data.keys():
+            for line in self.raw_data["wireframe"]:
+                edge = [int(v) for v in re.split(r"\s+", line)]
                 edge.sort()
                 self.edge_list.append(edge)
 
-        if 'polygons' in self.raw_data.keys():
-            for line in self.raw_data['polygons']:
-                poly = [int(v) for v in re.split(r'\s+', line)]
+        if "polygons" in self.raw_data.keys():
+            for line in self.raw_data["polygons"]:
+                poly = [int(v) for v in re.split(r"\s+", line)]
                 poly.sort()
                 self.polygon_list.append(poly)
 
-        if 'images' in self.raw_data.keys():
-            for idx, line in enumerate(self.raw_data['images']):
+        if "images" in self.raw_data.keys():
+            for idx, line in enumerate(self.raw_data["images"]):
                 object_name = self.object_name_list[idx]
                 self.object_images[object_name] = line
 
-        if 'pixelspermm' in self.raw_data.keys():
-            for idx, line in enumerate(self.raw_data['pixelspermm']):
+        if "pixelspermm" in self.raw_data.keys():
+            for idx, line in enumerate(self.raw_data["pixelspermm"]):
                 self.ppmm_list.append(line)
 
         self.edge_list.sort()
         self.polygon_list.sort()
         return
+
 
 class MdSequenceDelegate(QStyledItemDelegate):
     def createEditor(self, parent, option, index):
@@ -3269,8 +3371,9 @@ class MdSequenceDelegate(QStyledItemDelegate):
         else:
             return super().createEditor(parent, option, index)
 
+
 class MdDrag(QDrag):
-    #shiftStateChanged = Signal(bool)
+    # shiftStateChanged = Signal(bool)
     def __init__(self, parent):
         super().__init__(parent)
         logger = logging.getLogger(__name__)
@@ -3298,6 +3401,7 @@ class MdDrag(QDrag):
         self.updateCursor(event)
         super().dragMoveEvent(event)
 
+
 class DragEventFilter(QObject):
     def __init__(self, drag_object):
         super().__init__()
@@ -3314,6 +3418,7 @@ class DragEventFilter(QObject):
                 logger.debug("Set Move Cursor")
         return False
 
+
 class CustomDrag(QDrag):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -3323,25 +3428,26 @@ class CustomDrag(QDrag):
     def exec_(self, supportedActions, defaultAction=Qt.IgnoreAction):
         event_filter = DragEventFilter(self)
         QApplication.instance().installEventFilter(event_filter)
-        
+
         # Set initial cursor
         modifiers = QApplication.keyboardModifiers()
         if modifiers & Qt.ControlModifier:
             self.setDragCursor(self.copy_cursor.pixmap(), Qt.CopyAction)
         else:
             self.setDragCursor(self.move_cursor.pixmap(), Qt.MoveAction)
-        
+
         result = super().exec_(supportedActions, defaultAction)
-        
+
         QApplication.instance().removeEventFilter(event_filter)
         return result
 
+
 class MdTreeView(QTreeView):
     """Custom TreeView that clears selection when clicking on empty space"""
-    
+
     def __init__(self, parent=None):
         super().__init__(parent)
-        
+
     def mousePressEvent(self, event):
         """Override mouse press to clear selection on empty space click"""
         if event.button() == Qt.LeftButton:
@@ -3351,13 +3457,14 @@ class MdTreeView(QTreeView):
                 self.clearSelection()
                 if self.selectionModel():
                     self.selectionModel().clearSelection()
-        
+
         # Call parent implementation for normal behavior
         super().mousePressEvent(event)
 
+
 class ResizableOverlayWidget(QWidget):
     """Custom widget with resize handles for overlay functionality"""
-    
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setMinimumSize(200, 150)
@@ -3368,17 +3475,17 @@ class ResizableOverlayWidget(QWidget):
         self.dragging = False
         self.resize_direction = None
         self.setMouseTracking(True)  # Enable mouse tracking for cursor changes
-        
+
         # Track which edges/corners are being resized
         self.RESIZE_NONE = 0
         self.RESIZE_TOP_LEFT = 1
         self.RESIZE_TOP_RIGHT = 2
         self.RESIZE_BOTTOM_LEFT = 3
         self.RESIZE_BOTTOM_RIGHT = 4
-        
+
         # Track current corner position (default: bottom-right)
-        self.current_corner = 'bottom_right'
-        
+        self.current_corner = "bottom_right"
+
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             # Check resize first (higher priority)
@@ -3394,7 +3501,7 @@ class ResizableOverlayWidget(QWidget):
                 self.drag_start_pos = event.globalPos()
                 self.drag_start_geometry = self.geometry()
         super().mousePressEvent(event)
-    
+
     def mouseMoveEvent(self, event):
         if self.resizing:
             self.handle_resize(event.globalPos())
@@ -3413,7 +3520,7 @@ class ResizableOverlayWidget(QWidget):
                 else:
                     self.setCursor(Qt.ArrowCursor)
         super().mouseMoveEvent(event)
-    
+
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
             if self.dragging:
@@ -3426,54 +3533,54 @@ class ResizableOverlayWidget(QWidget):
             self.resizing = False
             self.resize_direction = self.RESIZE_NONE
         super().mouseReleaseEvent(event)
-    
+
     def is_header_area(self, pos):
         """Check if position is in draggable header area (excluding close button)"""
         if pos.y() > self.header_height:
             return False
-        
+
         # Exclude close button area
         if self.is_close_button_area(pos):
             return False
-            
+
         return True
-    
+
     def is_close_button_area(self, pos):
         """Check if position is in close button area"""
         close_button_area = QRect(
             self.width() - self.close_button_size - 5,  # 5px margin from right edge
             5,  # 5px margin from top edge
             self.close_button_size,
-            self.close_button_size
+            self.close_button_size,
         )
         return close_button_area.contains(pos)
-    
+
     def get_resize_direction(self, pos):
         """Determine resize direction based on current corner position"""
         rect = self.rect()
         margin = self.resize_margin
-        
+
         left_edge = pos.x() <= margin
         right_edge = pos.x() >= rect.width() - margin
         top_edge = pos.y() <= margin
         bottom_edge = pos.y() >= rect.height() - margin
-        
+
         # Return appropriate resize direction based on current corner
-        if self.current_corner == 'top_left':
+        if self.current_corner == "top_left":
             if right_edge and bottom_edge:
                 return self.RESIZE_BOTTOM_RIGHT
-        elif self.current_corner == 'top_right':
+        elif self.current_corner == "top_right":
             if left_edge and bottom_edge:
                 return self.RESIZE_BOTTOM_LEFT
-        elif self.current_corner == 'bottom_left':
+        elif self.current_corner == "bottom_left":
             if right_edge and top_edge:
                 return self.RESIZE_TOP_RIGHT
-        elif self.current_corner == 'bottom_right':
+        elif self.current_corner == "bottom_right":
             if left_edge and top_edge:
                 return self.RESIZE_TOP_LEFT
-        
+
         return self.RESIZE_NONE
-    
+
     def update_cursor(self, direction):
         """Update cursor based on resize direction"""
         if direction in [self.RESIZE_TOP_LEFT, self.RESIZE_BOTTOM_RIGHT]:
@@ -3482,15 +3589,15 @@ class ResizableOverlayWidget(QWidget):
             self.setCursor(Qt.SizeBDiagCursor)
         else:
             self.setCursor(Qt.ArrowCursor)
-    
+
     def handle_resize(self, global_pos):
         """Handle the resizing operation based on current corner position"""
         if self.resize_direction == self.RESIZE_NONE:
             return
-            
+
         delta = global_pos - self.resize_start_pos
         original_geometry = self.resize_start_geometry
-        
+
         if self.resize_direction == self.RESIZE_TOP_LEFT:
             # Resize from top-left corner
             new_width = max(self.minimumWidth(), original_geometry.width() - delta.x())
@@ -3498,7 +3605,7 @@ class ResizableOverlayWidget(QWidget):
             new_x = original_geometry.x() + original_geometry.width() - new_width
             new_y = original_geometry.y() + original_geometry.height() - new_height
             self.setGeometry(new_x, new_y, new_width, new_height)
-            
+
         elif self.resize_direction == self.RESIZE_TOP_RIGHT:
             # Resize from top-right corner
             new_width = max(self.minimumWidth(), original_geometry.width() + delta.x())
@@ -3506,7 +3613,7 @@ class ResizableOverlayWidget(QWidget):
             new_x = original_geometry.x()
             new_y = original_geometry.y() + original_geometry.height() - new_height
             self.setGeometry(new_x, new_y, new_width, new_height)
-            
+
         elif self.resize_direction == self.RESIZE_BOTTOM_LEFT:
             # Resize from bottom-left corner
             new_width = max(self.minimumWidth(), original_geometry.width() - delta.x())
@@ -3514,7 +3621,7 @@ class ResizableOverlayWidget(QWidget):
             new_x = original_geometry.x() + original_geometry.width() - new_width
             new_y = original_geometry.y()
             self.setGeometry(new_x, new_y, new_width, new_height)
-            
+
         elif self.resize_direction == self.RESIZE_BOTTOM_RIGHT:
             # Resize from bottom-right corner
             new_width = max(self.minimumWidth(), original_geometry.width() + delta.x())
@@ -3522,87 +3629,88 @@ class ResizableOverlayWidget(QWidget):
             new_x = original_geometry.x()
             new_y = original_geometry.y()
             self.setGeometry(new_x, new_y, new_width, new_height)
-    
+
     def handle_dragging(self, global_pos):
         """Handle dragging of the overlay widget"""
         if not self.dragging:
             return
-            
+
         delta = global_pos - self.drag_start_pos
         new_geometry = QRect(self.drag_start_geometry)
         new_geometry.translate(delta.x(), delta.y())
-        
+
         # Move the widget to follow the mouse
         self.setGeometry(new_geometry)
-    
+
     def snap_to_corner(self):
         """Snap the overlay to the nearest corner based on center position relative to parent center"""
         if not self.parent():
             return False
-            
+
         parent_rect = self.parent().rect()
         current_rect = self.geometry()
-        
+
         # Calculate corner positions
         corners = {
-            'top_left': QPoint(0, 0),
-            'top_right': QPoint(parent_rect.width() - current_rect.width(), 0),
-            'bottom_left': QPoint(0, parent_rect.height() - current_rect.height()),
-            'bottom_right': QPoint(parent_rect.width() - current_rect.width(), 
-                                 parent_rect.height() - current_rect.height())
+            "top_left": QPoint(0, 0),
+            "top_right": QPoint(parent_rect.width() - current_rect.width(), 0),
+            "bottom_left": QPoint(0, parent_rect.height() - current_rect.height()),
+            "bottom_right": QPoint(
+                parent_rect.width() - current_rect.width(), parent_rect.height() - current_rect.height()
+            ),
         }
-        
+
         # Get centers for comparison
         parent_center = parent_rect.center()
         current_center = current_rect.center()
-        
+
         # Determine target corner based on which quadrant the center is in
         is_right = current_center.x() > parent_center.x()
         is_bottom = current_center.y() > parent_center.y()
-        
+
         if is_right and is_bottom:
-            target_corner = 'bottom_right'
+            target_corner = "bottom_right"
         elif is_right and not is_bottom:
-            target_corner = 'top_right'
+            target_corner = "top_right"
         elif not is_right and is_bottom:
-            target_corner = 'bottom_left'
+            target_corner = "bottom_left"
         else:
-            target_corner = 'top_left'
-        
+            target_corner = "top_left"
+
         # Snap to the determined corner
         self.current_corner = target_corner
         self.move(corners[target_corner])
-        
+
         # Update parent to trigger resize handle repositioning if needed
-        if hasattr(self.parent(), 'update_overlay_position'):
+        if hasattr(self.parent(), "update_overlay_position"):
             self.parent().update_overlay_position()
         return True
-    
+
     def paintEvent(self, event):
         """Override paint event to draw background and border"""
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
-        
+
         rect = self.rect()
-        
+
         # Draw background
         painter.fillRect(rect, QColor(255, 255, 255))  # White background
-        
+
         # Draw border
         painter.setPen(QPen(QColor(102, 102, 102), 2))  # Gray border, 2px thick
         painter.drawRoundedRect(rect.adjusted(1, 1, -1, -1), 6, 6)  # Adjust for border thickness
-        
+
         # Don't call super() - we're handling everything ourselves
 
-class MdTableView(QTableView):
 
+class MdTableView(QTableView):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.verticalHeader().hide()
         self.sort_later = False
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.show_context_menu)
-        
+
         # Store the currently selected object row for custom drawing
         self.selected_object_row = -1
 
@@ -3618,7 +3726,7 @@ class MdTableView(QTableView):
         self.fill_sequence_action.triggered.connect(self.fill_sequence)
         logger = logging.getLogger(__name__)
         logger.debug("Fill sequence action created and connected")
-        self.fill_action = QAction(self.tr("Fill value"), self) 
+        self.fill_action = QAction(self.tr("Fill value"), self)
         self.fill_action.triggered.connect(self.fill_value)
         self.clear_cells_action = QAction(self.tr("Clear"), self)
         self.clear_cells_action.triggered.connect(self.clear_selected_cells)
@@ -3656,11 +3764,10 @@ class MdTableView(QTableView):
             else:
                 QApplication.setOverrideCursor(Qt.ClosedHandCursor)  # Move cursor (or Qt.SizeAllCursor)
 
-
         if self.selection_mode != "Rows":
             super().mouseMoveEvent(event)
             return
-        
+
         if not (event.buttons() & Qt.LeftButton):
             return
 
@@ -3690,10 +3797,10 @@ class MdTableView(QTableView):
             return
         drag = CustomDrag(self)
         drag.setMimeData(mimeData)
-        
+
         # Set initial cursor based on current Shift key state
-        initial_action = Qt.CopyAction if QApplication.keyboardModifiers() & Qt.ShiftModifier else Qt.MoveAction
-        dropAction = drag.exec_(Qt.CopyAction | Qt.MoveAction)
+        Qt.CopyAction if QApplication.keyboardModifiers() & Qt.ShiftModifier else Qt.MoveAction
+        drag.exec_(Qt.CopyAction | Qt.MoveAction)
         self.is_dragging = False
 
     def mouseReleaseEvent(self, event):
@@ -3701,7 +3808,9 @@ class MdTableView(QTableView):
             if self.is_dragging:
                 # Select the row if a drag operation was started
                 row = self.rowAt(event.pos().y())
-                self.selectionModel().select(self.model().index(row, 0), QItemSelectionModel.Select | QItemSelectionModel.Rows)
+                self.selectionModel().select(
+                    self.model().index(row, 0), QItemSelectionModel.Select | QItemSelectionModel.Rows
+                )
                 self.is_dragging = False
             else:
                 super().mouseReleaseEvent(event)
@@ -3710,35 +3819,39 @@ class MdTableView(QTableView):
         logger = logging.getLogger(__name__)
         index = self.indexAt(pos)  # Get the index of the clicked cell
         column = index.column()  # Get the column index
-        
+
         # Get column header text
         column_header = ""
         if self.model() and column >= 0:
             column_header = self.model().headerData(column, Qt.Horizontal, Qt.DisplayRole)
             if column_header is None:
                 column_header = ""
-        
-        logger.debug(f"Context menu requested at pos: {pos}, index: {index}, column: {column}, header: '{column_header}'")
-        
+
+        logger.debug(
+            f"Context menu requested at pos: {pos}, index: {index}, column: {column}, header: '{column_header}'"
+        )
+
         selected_indices = self.selectionModel().selectedIndexes()
         logger.debug(f"Selected indices: {len(selected_indices)} items")
-        
+
         # Check if this is a read-only column (name, count, csize)
-        readonly_columns = ['name', 'count', 'csize']
+        readonly_columns = ["name", "count", "csize"]
         column_header_lower = str(column_header).lower().strip()
         is_readonly_column = column_header_lower in readonly_columns
-        
-        logger.debug(f"Column '{column_header}' (normalized: '{column_header_lower}') is read-only: {is_readonly_column}")
+
+        logger.debug(
+            f"Column '{column_header}' (normalized: '{column_header_lower}') is read-only: {is_readonly_column}"
+        )
 
         menu = QMenu(self)
-        
+
         # Add Edit object option at the top if a row is selected
         if selected_indices:
             menu.addAction(self.edit_object_action)
             menu.addSeparator()
-        
+
         menu.addAction(self.copy_action)
-        
+
         # Only add paste and other actions if not a read-only column
         if not is_readonly_column:
             menu.addAction(self.paste_action)
@@ -3749,7 +3862,7 @@ class MdTableView(QTableView):
             show_fill_sequence = False
             if selected_indices:
                 # Check if all selected cells are in column 1
-                selected_columns = set(idx.column() for idx in selected_indices)
+                selected_columns = {idx.column() for idx in selected_indices}
                 if len(selected_columns) == 1 and 1 in selected_columns:
                     show_fill_sequence = True
                     logger.debug(f"All {len(selected_indices)} selected cells are in sequence column (column 1)")
@@ -3759,32 +3872,34 @@ class MdTableView(QTableView):
                 # No selection, but clicked on sequence column
                 show_fill_sequence = True
                 logger.debug("Clicked on sequence column, enabling Fill sequence")
-            
+
             if show_fill_sequence:
                 menu.addAction(self.fill_sequence_action)
                 logger.debug("Added Fill sequence action")
             else:
                 logger.debug("Fill sequence not available (only works when sequence column cells are selected)")
-                
+
             menu.addAction(self.fill_action)
             menu.addAction(self.clear_cells_action)
         else:
             logger.debug(f"Read-only column '{column_header}': only showing copy action")
-        
+
         actions_list = ["Copy"]
         if not is_readonly_column:
             actions_list.append("Paste")
-            if 'show_fill_sequence' in locals() and show_fill_sequence:
+            if "show_fill_sequence" in locals() and show_fill_sequence:
                 actions_list.append("Fill sequence")
             actions_list.extend(["Fill value", "Clear"])
-        
+
         logger.debug(f"Context menu showing with actions: {', '.join(actions_list)}")
-        logger.info(f"Context menu for column '{column_header}' ({'read-only' if is_readonly_column else 'editable'}): {', '.join(actions_list)}")
-        
-        menu.exec_(self.mapToGlobal(pos)) 
+        logger.info(
+            f"Context menu for column '{column_header}' ({'read-only' if is_readonly_column else 'editable'}): {', '.join(actions_list)}"
+        )
+
+        menu.exec_(self.mapToGlobal(pos))
 
     def fill_value(self):
-        #print("fill value")
+        # print("fill value")
         selected_indices = self.selectionModel().selectedIndexes()
         if len(selected_indices) == 0:
             return
@@ -3802,10 +3917,10 @@ class MdTableView(QTableView):
     def fill_sequence(self):
         logger = logging.getLogger(__name__)
         logger.info("Fill sequence action triggered")
-        
+
         selected_cells = self.selectionModel().selectedIndexes()
         logger.debug(f"Selected cells: {len(selected_cells)}")
-        
+
         if len(selected_cells) == 0:
             logger.warning("No cells selected for fill sequence")
             return
@@ -3814,20 +3929,22 @@ class MdTableView(QTableView):
         # get column number of all the cells
         column_numbers = [cell.column() for cell in selected_cells]
         logger.debug(f"Column numbers: {column_numbers}")
-        
+
         if len(set(column_numbers)) > 1:
             logger.warning("Multiple columns selected, fill sequence only works on single column")
             return
-        
+
         if column_numbers[0] != 1:
-            logger.warning(f"Fill sequence only works on column 1 (sequence column), selected column: {column_numbers[0]}")
+            logger.warning(
+                f"Fill sequence only works on column 1 (sequence column), selected column: {column_numbers[0]}"
+            )
             return
-        
+
         # get the first cell
         first_cell = selected_cells[0]
         first_row = first_cell.row()
         column_0_index = self.model().index(first_row, 0)
-        object_id = self.model().data(column_0_index, Qt.DisplayRole)
+        self.model().data(column_0_index, Qt.DisplayRole)
         sequence = self.model().data(first_cell, Qt.DisplayRole)
         try:
             sequence = int(sequence)
@@ -3840,29 +3957,31 @@ class MdTableView(QTableView):
         if not ok:
             logger.info("User cancelled starting sequence input")
             return
-            
+
         logger.debug(f"User entered starting sequence: {sequence}")
         # get increment
         increment, ok = QInputDialog.getInt(self, "Fill Sequence", "Enter increment", 1)
         if not ok:
             logger.info("User cancelled increment input")
             return
-            
+
         logger.debug(f"User entered increment: {increment}")
         # fill the sequence
-        logger.info(f"Filling sequence for {len(selected_cells)} cells, starting at {sequence} with increment {increment}")
-        
-        for i, cell in enumerate(selected_cells):
+        logger.info(
+            f"Filling sequence for {len(selected_cells)} cells, starting at {sequence} with increment {increment}"
+        )
+
+        for _i, cell in enumerate(selected_cells):
             row = cell.row()
             index = self.model().index(row, 1)
             logger.debug(f"Setting row {row}, column 1 to value {sequence}")
-            
+
             result = self.model().setData(index, sequence, Qt.EditRole)
             if not result:
                 logger.error(f"Failed to set data at row {row}, column 1")
-            
+
             sequence += increment
-            
+
         logger.info("Fill sequence completed successfully")
 
     def paste_data(self):
@@ -3895,16 +4014,16 @@ class MdTableView(QTableView):
 
     def defer_sort(self, topLeft, bottomRight, roles):
         # Only defer if the sequence column was edited
-        if topLeft.column() == 1: 
-            self.sort_later = True        
+        if topLeft.column() == 1:
+            self.sort_later = True
 
     def keyPressEvent(self, event):
         if event.key() in [Qt.Key_Return, Qt.Key_Enter]:
-            #print("key return or enter")
+            # print("key return or enter")
             if not self.isPersistentEditorOpen(self.currentIndex()):
                 self.edit(self.currentIndex())
         elif event.key() in [Qt.Key_Up, Qt.Key_Down]:
-            #print("key up, key down")
+            # print("key up, key down")
             # Handle up/down arrow keys directly (e.g., move selection)
             current_index = self.currentIndex()
             new_row = current_index.row() + (-1 if event.key() == Qt.Key_Up else 1)
@@ -3916,40 +4035,39 @@ class MdTableView(QTableView):
         else:
             super().keyPressEvent(event)
 
-
     def clear_selected_cells(self):
         indexes = self.selectionModel().selectedIndexes()
         if indexes:
             for index in indexes:
-                # get source model 
+                # get source model
                 source_model = self.model().sourceModel()
                 if index.column() not in source_model._uneditable_columns:
                     self.model().setData(index, "", Qt.EditRole)  # Set data to empty string
-    
+
     def edit_selected_object(self):
         """Trigger the main window's edit object action"""
         # Find the parent MainWindow and trigger its edit object action
         parent = self.parent()
-        while parent and not hasattr(parent, 'actionEditObject'):
+        while parent and not hasattr(parent, "actionEditObject"):
             parent = parent.parent()
-        
-        if parent and hasattr(parent, 'actionEditObject'):
+
+        if parent and hasattr(parent, "actionEditObject"):
             parent.actionEditObject.trigger()
-    
+
     def setSelectedObjectRow(self, row):
         """Set the currently selected object row for highlighting"""
         if self.selected_object_row != row:
             self.selected_object_row = row
             self.viewport().update()  # Trigger repaint
-    
+
     def paintEvent(self, event):
         """Override paint event to draw row border for selected object"""
         super().paintEvent(event)
-        
+
         if self.selected_object_row >= 0 and self.model():
             painter = QPainter(self.viewport())
             painter.setRenderHint(QPainter.Antialiasing)
-            
+
             # Get the row geometry
             row_rect = QRect()
             for col in range(self.model().columnCount()):
@@ -3959,13 +4077,13 @@ class MdTableView(QTableView):
                         row_rect = cell_rect
                     else:
                         row_rect = row_rect.united(cell_rect)
-            
+
             if not row_rect.isNull():
                 # Draw the border around the entire row
                 painter.setPen(QPen(QColor(0, 120, 212), 3))  # Blue border, 3px thick
                 painter.drawRect(row_rect.adjusted(1, 1, -1, -1))
-        
-        painter.end() if 'painter' in locals() else None
+
+        painter.end() if "painter" in locals() else None
 
     def isPersistentEditorOpen(self, index):
         return self.indexWidget(index) is not None
@@ -3980,9 +4098,9 @@ class MdTableView(QTableView):
         # Define your desired column widths
         default_width = 60
         fixed_widths = {
-            0: 50,   # First column 100 pixels
-            1: 50,   # First column 100 pixels
-            2: 300,   # Third column 150 pixels
+            0: 50,  # First column 100 pixels
+            1: 50,  # First column 100 pixels
+            2: 300,  # Third column 150 pixels
         }
 
         # Calculate remaining width for flexible columns
@@ -4016,14 +4134,16 @@ class MdTableView(QTableView):
                 width = max(flexible_width, content_widths[i] + 20)  # Add some padding
                 header.resizeSection(i, width)
 
+
 class MdTableModel(QAbstractTableModel):
     dataChangedCustomSignal = pyqtSignal()
+
     def __init__(self, data=None):
         super().__init__()
         self._data = data or []  # Initialize with provided data or an empty list
         self._vheader_data = []
         self._hheader_data = []
-        self._uneditable_columns = [0,2,3,4]
+        self._uneditable_columns = [0, 2, 3, 4]
 
     def set_columns_uneditable(self, columns):
         self._uneditable_columns = columns
@@ -4040,19 +4160,19 @@ class MdTableModel(QAbstractTableModel):
         d = self._data[index.row()][index.column()]
         if role == Qt.DisplayRole or role == Qt.EditRole:
             if isinstance(d, str):
-                return d #self._data[index.row()][index.column()]
+                return d  # self._data[index.row()][index.column()]
             elif isinstance(d, list):
                 return " ".join(d)
-            elif isinstance(d, dict) and 'value' in d:
-                return d['value']
+            elif isinstance(d, dict) and "value" in d:
+                return d["value"]
         if role == Qt.BackgroundRole:
             # if d is str or list, return default color
             if index.column() in self._uneditable_columns:
-                return QColor(240, 240, 240)            
+                return QColor(240, 240, 240)
             if isinstance(d, (str, list)):
                 return None
-            elif isinstance(d, dict) and d.get('changed', False):
-                return QColor('yellow')
+            elif isinstance(d, dict) and d.get("changed", False):
+                return QColor("yellow")
         if role == Qt.ToolTipRole:
             return f"Tooltip for cell ({index.row()}, {index.column()})"
         if role == Qt.TextAlignmentRole:
@@ -4061,8 +4181,8 @@ class MdTableModel(QAbstractTableModel):
 
     def setData(self, index, value, role=Qt.EditRole):
         old_data = self._data[index.row()][index.column()]
-        if isinstance(old_data, dict) and old_data.get('value', None):
-            old_data = old_data['value']
+        if isinstance(old_data, dict) and old_data.get("value", None):
+            old_data = old_data["value"]
         if str(value) == str(old_data):
             return False
 
@@ -4072,14 +4192,14 @@ class MdTableModel(QAbstractTableModel):
             return False
 
         try:
-            new_value = int(value) 
+            new_value = int(value)
         except ValueError:
             try:
                 new_value = float(value)
             except ValueError:
                 new_value = str(value)
 
-        self._data[index.row()][index.column()] = {'value': new_value, 'changed': True}
+        self._data[index.row()][index.column()] = {"value": new_value, "changed": True}
         self.dataChanged.emit(index, index, [role, Qt.BackgroundRole])
         self.dataChangedCustomSignal.emit()
         return True
@@ -4090,19 +4210,21 @@ class MdTableModel(QAbstractTableModel):
         if index.column() in self._uneditable_columns:
             return Qt.ItemIsEnabled | Qt.ItemIsSelectable
         else:
-            return super().flags(index) | Qt.ItemIsEditable     
+            return super().flags(index) | Qt.ItemIsEditable
 
     def resetColors(self):
         for row in range(self.rowCount()):
             for column in range(self.columnCount()):
                 d = self._data[row][column]
-                if isinstance(d, dict) and d.get('changed', False):
-                    d['changed'] = False
-        self.dataChanged.emit(self.index(0, 0), self.index(self.rowCount() - 1, self.columnCount() - 1), [Qt.BackgroundRole])
+                if isinstance(d, dict) and d.get("changed", False):
+                    d["changed"] = False
+        self.dataChanged.emit(
+            self.index(0, 0), self.index(self.rowCount() - 1, self.columnCount() - 1), [Qt.BackgroundRole]
+        )
 
     def load_data(self, data):
         self.beginResetModel()
-        self._data = data        
+        self._data = data
         self.endResetModel()
 
     def headerData(self, section, orientation, role=Qt.DisplayRole):
@@ -4110,11 +4232,11 @@ class MdTableModel(QAbstractTableModel):
             if orientation == Qt.Horizontal:
                 # Return the header text for the given horizontal section
                 return f"{self._hheader_data[section]}"
-                #return ""
+                # return ""
             elif orientation == Qt.Vertical:
                 # Return the header text for the given vertical section
-                if len( self._vheader_data ) == 0:
-                    return f"{section+1}"
+                if len(self._vheader_data) == 0:
+                    return f"{section + 1}"
                 else:
                     return f"{self._vheader_data[section]}"
         if role == Qt.ToolTipRole and orientation == Qt.Vertical:
@@ -4125,22 +4247,16 @@ class MdTableModel(QAbstractTableModel):
 
     def setHorizontalHeader(self, header_data):
         self._hheader_data = header_data
-        #print("header_data:", header_data)
+        # print("header_data:", header_data)
 
     def sort(self, column, order):
         self.layoutAboutToBeChanged.emit()
         try:  # Attempt to sort numerically
             self._data = sorted(
-                self._data,
-                key=lambda x: float(x[column]['value']), 
-                reverse=(order == Qt.DescendingOrder)
+                self._data, key=lambda x: float(x[column]["value"]), reverse=(order == Qt.DescendingOrder)
             )
         except ValueError:  # Fallback to lexicographical sorting if not numeric
-            self._data = sorted(
-                self._data,
-                key=lambda x: x[column]['value'],
-                reverse=(order == Qt.DescendingOrder)
-            )
+            self._data = sorted(self._data, key=lambda x: x[column]["value"], reverse=(order == Qt.DescendingOrder))
         self.layoutChanged.emit()
 
     def clear(self):
@@ -4159,34 +4275,35 @@ class MdTableModel(QAbstractTableModel):
 
     def save_object_info(self):
         for row in self._data:
-            #print(row)
-            id = row[0]['value']
+            # print(row)
+            id = row[0]["value"]
             obj = MdObject.get_by_id(id)
             ds = obj.dataset
-            variablename_list = ds.get_variablename_list()
+            ds.get_variablename_list()
             property_list = []
             for idx, col in enumerate(row):
                 if idx > max(self._uneditable_columns):
-                    #print("idx:", idx, "col:", col['value'])
-                    property_list.append(str(col['value']))
+                    # print("idx:", idx, "col:", col['value'])
+                    property_list.append(str(col["value"]))
                 elif idx == 1:
-                    obj.sequence = col['value']
+                    obj.sequence = col["value"]
             obj.variable_list = property_list
             obj.pack_variable()
             obj.save()
         self.data_changed = False
-        
+
+
 class AnalysisInfoWidget(QWidget):
     def __init__(self, parent):
         super().__init__()
         self.parent = parent
         self.m_app = QApplication.instance()
-        self.default_color_list = mu.VIVID_COLOR_LIST[:]        
+        self.default_color_list = mu.VIVID_COLOR_LIST[:]
         self.color_list = self.default_color_list[:]
-        #print("color_list", self.color_list)        
+        # print("color_list", self.color_list)
         self.marker_list = mu.MARKER_LIST[:]
         self.plot_size = "medium"
-        #print("color_list", self.color_list)        
+        # print("color_list", self.color_list)
         self.layout = QGridLayout()
         self.setLayout(self.layout)
         self.lblAnalysisName = QLabel(self.tr("Analysis Name"))
@@ -4210,14 +4327,14 @@ class AnalysisInfoWidget(QWidget):
         self.analysis_tab.addTab(self.ManovaView, "MANOVA")
         self.analysis_tab.currentChanged.connect(self.on_tab_changed)
 
-        ''' PCA 3D plot '''
+        """ PCA 3D plot """
         self.lblPcaGroupBy = QLabel(self.tr("Grouping variable"))
         self.comboPcaGroupBy = QComboBox()
         self.comboPcaGroupBy.setEnabled(False)
         self.comboPcaGroupBy.currentIndexChanged.connect(self.comboPcaGroupBy_changed)
-        self.pca_plot_widget3 = FigureCanvas(Figure(figsize=(20, 16),dpi=100))
+        self.pca_plot_widget3 = FigureCanvas(Figure(figsize=(20, 16), dpi=100))
         self.pca_fig3 = self.pca_plot_widget3.figure
-        self.pca_ax3 = self.pca_fig3.add_subplot(projection='3d')
+        self.pca_ax3 = self.pca_fig3.add_subplot(projection="3d")
         self.pca_toolbar3 = NavigationToolbar(self.pca_plot_widget3, self)
         i = 0
         self.pca_layout.addWidget(self.pca_toolbar3, i, 0)
@@ -4227,14 +4344,14 @@ class AnalysisInfoWidget(QWidget):
         self.pca_layout.addWidget(self.pca_plot_widget3, i, 0, 1, 2)
         self.pca_layout.setRowStretch(i, 1)
 
-        ''' CVA 3D plot '''
+        """ CVA 3D plot """
         self.lblCvaGroupBy = QLabel("Grouping variable")
         self.comboCvaGroupBy = QComboBox()
         self.comboCvaGroupBy.setEnabled(False)
         self.comboCvaGroupBy.currentIndexChanged.connect(self.comboCvaGroupBy_changed)
-        self.cva_plot_widget3 = FigureCanvas(Figure(figsize=(20, 16),dpi=100))
+        self.cva_plot_widget3 = FigureCanvas(Figure(figsize=(20, 16), dpi=100))
         self.cva_fig3 = self.cva_plot_widget3.figure
-        self.cva_ax3 = self.cva_fig3.add_subplot(projection='3d')
+        self.cva_ax3 = self.cva_fig3.add_subplot(projection="3d")
         self.cva_toolbar3 = NavigationToolbar(self.cva_plot_widget3, self)
         i = 0
         self.cva_layout.addWidget(self.cva_toolbar3, i, 0)
@@ -4244,12 +4361,12 @@ class AnalysisInfoWidget(QWidget):
         self.cva_layout.addWidget(self.cva_plot_widget3, i, 0, 1, 3)
         self.cva_layout.setRowStretch(i, 1)
 
-        ''' MANOVA info '''
+        """ MANOVA info """
         self.lblManovaGroupBy = QLabel("Grouping variable")
         self.comboManovaGroupBy = QComboBox()
         self.comboManovaGroupBy.setEnabled(False)
-        ''' manova output table '''
-        self.tabManovaResult = QTableWidget()        
+        """ manova output table """
+        self.tabManovaResult = QTableWidget()
         self.comboManovaGroupBy.currentIndexChanged.connect(self.comboManovaGroupBy_changed)
         i = 0
         self.manova_layout.addWidget(self.lblManovaGroupBy, i, 0)
@@ -4270,10 +4387,10 @@ class AnalysisInfoWidget(QWidget):
     def read_settings(self):
         self.plot_size = self.m_app.settings.value("PlotSize", self.plot_size)
         for i in range(len(self.color_list)):
-            self.color_list[i] = self.m_app.settings.value("DataPointColor/"+str(i), self.default_color_list[i])
+            self.color_list[i] = self.m_app.settings.value("DataPointColor/" + str(i), self.default_color_list[i])
         for i in range(len(self.marker_list)):
-            self.marker_list[i] = self.m_app.settings.value("DataPointMarker/"+str(i), self.marker_list[i])
-        self.update_language()#self.m_app.settings.value("Language", "en"))
+            self.marker_list[i] = self.m_app.settings.value("DataPointMarker/" + str(i), self.marker_list[i])
+        self.update_language()  # self.m_app.settings.value("Language", "en"))
 
     def update_language(self):
         if False:
@@ -4291,16 +4408,16 @@ class AnalysisInfoWidget(QWidget):
         self.lblAnalysisName.setText(self.tr("Analysis Name"))
         self.lblSuperimposition.setText(self.tr("Superimposition"))
         self.lblPcaGroupBy.setText(self.tr("Grouping variable"))
-    
+
     def on_tab_changed(self, index):
         """Handle tab change event - enable buttons only for PCA tab"""
         # Enable Analysis Detail and Data Exploration buttons only for PCA tab (index 0)
-        is_pca_tab = (index == 0)
-        
+        is_pca_tab = index == 0
+
         # Access parent's buttons (ModanMainWindow)
-        if hasattr(self.parent, 'btnAnalysisDetail'):
+        if hasattr(self.parent, "btnAnalysisDetail"):
             self.parent.btnAnalysisDetail.setEnabled(is_pca_tab)
-        if hasattr(self.parent, 'btnDataExploration'):
+        if hasattr(self.parent, "btnDataExploration"):
             self.parent.btnDataExploration.setEnabled(is_pca_tab)
 
     def comboPcaGroupBy_changed(self):
@@ -4318,12 +4435,12 @@ class AnalysisInfoWidget(QWidget):
             return
         self.show_analysis_result()
 
-    def set_analysis(self, analysis):        
+    def set_analysis(self, analysis):
         self.ignore_change = True
         self.analysis = analysis
         self.edtAnalysisName.setText(analysis.analysis_name)
         self.edtSuperimposition.setText(analysis.superimposition_method)
-        for combo in [ self.comboPcaGroupBy, self.comboCvaGroupBy, self.comboManovaGroupBy ]:
+        for combo in [self.comboPcaGroupBy, self.comboCvaGroupBy, self.comboManovaGroupBy]:
             combo.clear()
 
             valid_property_index_list = analysis.dataset.get_grouping_variable_index_list()
@@ -4335,7 +4452,7 @@ class AnalysisInfoWidget(QWidget):
         self.comboPcaGroupBy.setEnabled(True)
         self.comboCvaGroupBy.setEnabled(False)
         self.comboManovaGroupBy.setEnabled(False)
-        
+
         self.comboPcaGroupBy.setCurrentIndex(0)
 
         if analysis.cva_group_by in analysis.dataset.get_variablename_list():
@@ -4348,18 +4465,17 @@ class AnalysisInfoWidget(QWidget):
         else:
             self.comboManovaGroupBy.setCurrentIndex(0)
         self.ignore_change = False
-        
+
         # Set tab to PCA by default
         self.analysis_tab.setCurrentIndex(0)
-        
+
         # Set initial button state - enable only for PCA tab
         self.on_tab_changed(0)
-
 
     def show_analysis_result(self):
         logger = logging.getLogger(__name__)
         logger.info(f"show_analysis_result called for: {self.analysis.analysis_name}")
-        
+
         # Handle legacy analysis data - if JSON is missing, show basic info
         if not self.analysis.object_info_json:
             logger.warning("No JSON data found - showing basic analysis info")
@@ -4367,52 +4483,56 @@ class AnalysisInfoWidget(QWidget):
             self.edtAnalysisName.setText(self.analysis.analysis_name)
             self.edtSuperimposition.setText(self.analysis.superimposition_method or "Unknown")
             return
-        
+
         # Continue with full analysis display if JSON data exists
         logger.info("Loading object_info_json")
         object_info_list = json.loads(self.analysis.object_info_json)
         for obj in object_info_list:
-            if 'property_list' in obj.keys():
-                obj['variable_list'] = obj['property_list']
-            
+            if "property_list" in obj.keys():
+                obj["variable_list"] = obj["property_list"]
+
         # Initialize result variables
         pca_analysis_result_list = None
         cva_analysis_result_list = None
         manova_result = None
-        
+
         if self.analysis.pca_analysis_result_json:
             logger.info("Loading pca_analysis_result_json")
             pca_analysis_result_list = json.loads(self.analysis.pca_analysis_result_json)
-            logger.info(f"PCA result loaded: type={type(pca_analysis_result_list)}, len={len(pca_analysis_result_list) if pca_analysis_result_list else 'None'}")
-        
+            logger.info(
+                f"PCA result loaded: type={type(pca_analysis_result_list)}, len={len(pca_analysis_result_list) if pca_analysis_result_list else 'None'}"
+            )
+
         logger.info(f"CVA JSON exists: {bool(self.analysis.cva_analysis_result_json)}")
         if self.analysis.cva_analysis_result_json:
             logger.info("Loading cva_analysis_result_json")
             cva_analysis_result_list = json.loads(self.analysis.cva_analysis_result_json)
-            logger.info(f"CVA result loaded: type={type(cva_analysis_result_list)}, len={len(cva_analysis_result_list) if cva_analysis_result_list else 'None'}")
+            logger.info(
+                f"CVA result loaded: type={type(cva_analysis_result_list)}, len={len(cva_analysis_result_list) if cva_analysis_result_list else 'None'}"
+            )
         else:
             logger.warning("CVA analysis_result_json is empty or None")
-            
+
         manova_result = None
         if self.analysis.manova_analysis_result_json:
             logger.info("Loading manova_analysis_result_json")
             logger.info(f"MANOVA JSON length: {len(self.analysis.manova_analysis_result_json)}")
             logger.info(f"MANOVA JSON preview: {self.analysis.manova_analysis_result_json[:200]}...")
-            
+
             try:
                 manova_result_raw = json.loads(self.analysis.manova_analysis_result_json)
                 logger.info(f"MANOVA result loaded, type: {type(manova_result_raw)}")
-                
+
                 # Check if it's already in the expected format
                 if isinstance(manova_result_raw, dict):
                     logger.info(f"MANOVA result keys: {manova_result_raw.keys()}")
-                    if 'stat_dict' in manova_result_raw:
+                    if "stat_dict" in manova_result_raw:
                         # Already has stat_dict wrapper
                         manova_result = manova_result_raw
                         logger.info("MANOVA format: Already has stat_dict wrapper")
-                    elif 'column_names' in manova_result_raw:
+                    elif "column_names" in manova_result_raw:
                         # This IS the stat_dict, wrap it
-                        manova_result = {'stat_dict': manova_result_raw}
+                        manova_result = {"stat_dict": manova_result_raw}
                         logger.info("MANOVA format: Is stat_dict, wrapping it")
                     else:
                         # Unknown format, try to use as-is
@@ -4426,40 +4546,40 @@ class AnalysisInfoWidget(QWidget):
                 manova_result = None
         else:
             logger.warning("No MANOVA analysis_result_json")
-        
+
         # Handle MANOVA results
         self.tabManovaResult.clear()
         self.tabManovaResult.setRowCount(0)
-        
+
         if manova_result:
             logger.info("Processing MANOVA result for display")
             logger.debug(f"MANOVA result structure: {manova_result}")
-            
+
             # Set up proper MANOVA table format
             # Columns: Statistic, Value, Num DF, Den DF, F Value, Pr>F
             column_headers = ["Statistic", "Value", "Num DF", "Den DF", "F Value", "Pr>F"]
             self.tabManovaResult.setColumnCount(len(column_headers))
             self.tabManovaResult.setHorizontalHeaderLabels(column_headers)
-            
+
             # Check if MANOVA result contains multiple statistics or single values
-            if 'stat_dict' in manova_result and isinstance(manova_result['stat_dict'], dict):
+            if "stat_dict" in manova_result and isinstance(manova_result["stat_dict"], dict):
                 # New stat_dict format (matches original Modan2)
                 logger.info("MANOVA: Processing stat_dict format")
-                stat_dict = manova_result['stat_dict']
-                column_names = stat_dict.get('column_names', column_headers)
+                stat_dict = manova_result["stat_dict"]
+                stat_dict.get("column_names", column_headers)
                 logger.info(f"MANOVA stat_dict has {len(stat_dict)} items")
-                
+
                 for stat_name, stat_values in stat_dict.items():
-                    if stat_name == 'column_names':
+                    if stat_name == "column_names":
                         continue
-                    
+
                     logger.info(f"Processing MANOVA stat: {stat_name} = {stat_values}")
                     row = self.tabManovaResult.rowCount()
                     self.tabManovaResult.insertRow(row)
-                    
+
                     # Set statistic name
                     self.tabManovaResult.setItem(row, 0, QTableWidgetItem(stat_name))
-                    
+
                     # Set values from the list
                     if isinstance(stat_values, list) and len(stat_values) >= 5:
                         self.tabManovaResult.setItem(row, 1, QTableWidgetItem(f"{stat_values[0]:.6e}"))
@@ -4470,63 +4590,67 @@ class AnalysisInfoWidget(QWidget):
                         logger.info(f"Added MANOVA row for {stat_name}")
                     else:
                         logger.warning(f"Invalid stat values for {stat_name}: {stat_values}")
-                        
-            elif 'statistics' in manova_result and isinstance(manova_result['statistics'], dict):
+
+            elif "statistics" in manova_result and isinstance(manova_result["statistics"], dict):
                 # Multiple statistics format
                 logger.info("MANOVA: Processing multiple statistics format")
-                for stat_name, stat_data in manova_result['statistics'].items():
+                for stat_name, stat_data in manova_result["statistics"].items():
                     row = self.tabManovaResult.rowCount()
                     self.tabManovaResult.insertRow(row)
-                    
+
                     # Set statistic name
                     self.tabManovaResult.setItem(row, 0, QTableWidgetItem(stat_name))
-                    
+
                     # Set values if available
                     if isinstance(stat_data, dict):
-                        self.tabManovaResult.setItem(row, 1, QTableWidgetItem(str(stat_data.get('value', 'N/A'))))
-                        self.tabManovaResult.setItem(row, 2, QTableWidgetItem(str(stat_data.get('num_df', 'N/A'))))
-                        self.tabManovaResult.setItem(row, 3, QTableWidgetItem(str(stat_data.get('den_df', 'N/A'))))
-                        self.tabManovaResult.setItem(row, 4, QTableWidgetItem(str(stat_data.get('f_statistic', 'N/A'))))
-                        self.tabManovaResult.setItem(row, 5, QTableWidgetItem(str(stat_data.get('p_value', 'N/A'))))
+                        self.tabManovaResult.setItem(row, 1, QTableWidgetItem(str(stat_data.get("value", "N/A"))))
+                        self.tabManovaResult.setItem(row, 2, QTableWidgetItem(str(stat_data.get("num_df", "N/A"))))
+                        self.tabManovaResult.setItem(row, 3, QTableWidgetItem(str(stat_data.get("den_df", "N/A"))))
+                        self.tabManovaResult.setItem(row, 4, QTableWidgetItem(str(stat_data.get("f_statistic", "N/A"))))
+                        self.tabManovaResult.setItem(row, 5, QTableWidgetItem(str(stat_data.get("p_value", "N/A"))))
             else:
                 # Single statistics - convert current format to table rows
                 logger.info("MANOVA: Processing single statistics format")
-                
+
                 # Map common MANOVA statistics to display names
                 stat_mapping = {
-                    'wilks_lambda': "Wilks' Lambda",
-                    'pillais_trace': "Pillai's Trace", 
-                    'hotellings_trace': "Hotelling's Trace",
-                    'roys_largest_root': "Roy's Largest Root",
-                    'f_statistic': 'F Statistic',
-                    'p_value': 'P Value'
+                    "wilks_lambda": "Wilks' Lambda",
+                    "pillais_trace": "Pillai's Trace",
+                    "hotellings_trace": "Hotelling's Trace",
+                    "roys_largest_root": "Roy's Largest Root",
+                    "f_statistic": "F Statistic",
+                    "p_value": "P Value",
                 }
-                
+
                 for key, value in manova_result.items():
-                    if key in ['analysis_type', 'degrees_of_freedom']:
+                    if key in ["analysis_type", "degrees_of_freedom"]:
                         continue  # Skip meta information
-                        
+
                     row = self.tabManovaResult.rowCount()
                     self.tabManovaResult.insertRow(row)
-                    
+
                     # Use mapped name if available, otherwise use key
-                    display_name = stat_mapping.get(key, key.replace('_', ' ').title())
+                    display_name = stat_mapping.get(key, key.replace("_", " ").title())
                     self.tabManovaResult.setItem(row, 0, QTableWidgetItem(display_name))
-                    
+
                     # Set the value
                     self.tabManovaResult.setItem(row, 1, QTableWidgetItem(str(value)))
-                    
+
                     # For degrees of freedom, try to extract if available
-                    if key == 'degrees_of_freedom' and isinstance(value, (list, tuple)) and len(value) >= 2:
+                    if key == "degrees_of_freedom" and isinstance(value, (list, tuple)) and len(value) >= 2:
                         self.tabManovaResult.setItem(row, 2, QTableWidgetItem(str(value[0])))  # Num DF
                         self.tabManovaResult.setItem(row, 3, QTableWidgetItem(str(value[1])))  # Den DF
-                    elif 'degrees_of_freedom' in manova_result and isinstance(manova_result['degrees_of_freedom'], (list, tuple)):
-                        df = manova_result['degrees_of_freedom']
+                    elif "degrees_of_freedom" in manova_result and isinstance(
+                        manova_result["degrees_of_freedom"], (list, tuple)
+                    ):
+                        df = manova_result["degrees_of_freedom"]
                         if len(df) >= 2:
                             self.tabManovaResult.setItem(row, 2, QTableWidgetItem(str(df[0])))
                             self.tabManovaResult.setItem(row, 3, QTableWidgetItem(str(df[1])))
-            
-            logger.info(f"MANOVA table final size: {self.tabManovaResult.rowCount()}x{self.tabManovaResult.columnCount()}")
+
+            logger.info(
+                f"MANOVA table final size: {self.tabManovaResult.rowCount()}x{self.tabManovaResult.columnCount()}"
+            )
         else:
             logger.warning("MANOVA result is empty or None")
 
@@ -4538,33 +4662,30 @@ class AnalysisInfoWidget(QWidget):
             variablename_list = self.analysis.dataset.get_variablename_list()
             logger.info(f"Using dataset variable names: {variablename_list}")
 
-        symbol_candidate = ['o','s','^','x','+','d','v','<','>','p','h']
+        symbol_candidate = ["o", "s", "^", "x", "+", "d", "v", "<", ">", "p", "h"]
         symbol_candidate = self.marker_list[:]
-        color_candidate = ['blue','green','black','cyan','magenta','yellow','gray','red']
+        color_candidate = ["blue", "green", "black", "cyan", "magenta", "yellow", "gray", "red"]
         color_candidate = self.color_list[:]
 
-        SCATTER_SMALL_SIZE = 30
         SCATTER_MEDIUM_SIZE = 50
-        SCATTER_LARGE_SIZE = 60
         scatter_size = SCATTER_MEDIUM_SIZE
 
         self.pca_ax3.clear()
         self.cva_ax3.clear()
 
-        axis_prefix_list = [ "PC", "CV" ]
-        combo_list = [ self.comboPcaGroupBy, self.comboCvaGroupBy ]
-        plot_widget_list = [ self.pca_plot_widget3, self.cva_plot_widget3 ]
-        fig_list = [ self.pca_fig3, self.cva_fig3 ]
-        ax_list = [ self.pca_ax3, self.cva_ax3 ]
-        propertyname_index_list = [ -1, -1 ]
+        axis_prefix_list = ["PC", "CV"]
+        combo_list = [self.comboPcaGroupBy, self.comboCvaGroupBy]
+        fig_list = [self.pca_fig3, self.cva_fig3]
+        ax_list = [self.pca_ax3, self.cva_ax3]
+        propertyname_index_list = [-1, -1]
         self.pca_scatter_data = {}
         self.cva_scatter_data = {}
-        scatter_data_list = [ self.pca_scatter_data, self.cva_scatter_data ]
+        scatter_data_list = [self.pca_scatter_data, self.cva_scatter_data]
         self.pca_scatter_result = {}
         self.cva_scatter_result = {}
-        scatter_result_list = [ self.pca_scatter_result, self.cva_scatter_result ]
-        analysis_result_list_list = [ pca_analysis_result_list, cva_analysis_result_list ]
-        
+        scatter_result_list = [self.pca_scatter_result, self.cva_scatter_result]
+        analysis_result_list_list = [pca_analysis_result_list, cva_analysis_result_list]
+
         # Debug logging for analysis results
         logger.info(f"Object count: {len(object_info_list)}")
         if pca_analysis_result_list:
@@ -4577,64 +4698,90 @@ class AnalysisInfoWidget(QWidget):
             logger.info("CVA result is None/empty")
 
         for idx, axis_prefix in enumerate(axis_prefix_list):
-            logger.info(f"Processing analysis type idx={idx}, prefix='{axis_prefix}', has_data={analysis_result_list_list[idx] is not None}")
-            
+            logger.info(
+                f"Processing analysis type idx={idx}, prefix='{axis_prefix}', has_data={analysis_result_list_list[idx] is not None}"
+            )
+
             # Skip processing if no data available for this analysis type
             if not analysis_result_list_list[idx]:
                 logger.info(f"Skipping {axis_prefix} processing - no data available")
                 continue
-                
+
             depth_shade = False
-            show_legend = False
-            show_axis_label = True
             axis1 = 0
             axis2 = 1
             axis3 = 2
-            axis1_title = axis_prefix + str(axis1+1)
-            axis2_title = axis_prefix + str(axis2+1)
-            axis3_title = axis_prefix + str(axis3+1)
+            axis1_title = axis_prefix + str(axis1 + 1)
+            axis2_title = axis_prefix + str(axis2 + 1)
+            axis3_title = axis_prefix + str(axis3 + 1)
             propertyname = combo_list[idx].currentText()
-            propertyname_index_list[idx] = variablename_list.index(propertyname) if propertyname in variablename_list else -1
-            logger.info(f"Grouping for {axis_prefix}: propertyname='{propertyname}', index={propertyname_index_list[idx]}")
+            propertyname_index_list[idx] = (
+                variablename_list.index(propertyname) if propertyname in variablename_list else -1
+            )
+            logger.info(
+                f"Grouping for {axis_prefix}: propertyname='{propertyname}', index={propertyname_index_list[idx]}"
+            )
             logger.info(f"Available variables: {variablename_list[:10]}")  # Show first 10 variables
             scatter_data_list[idx] = {}
             scatter_result_list[idx] = {}
 
             key_list = []
-            key_list.append('__default__')
-            scatter_data_list[idx]['__default__'] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'hoverinfo':[], 'text':[], 'property':'', 'symbol':'o', 'color':color_candidate[0], 'size':scatter_size}
+            key_list.append("__default__")
+            scatter_data_list[idx]["__default__"] = {
+                "x_val": [],
+                "y_val": [],
+                "z_val": [],
+                "data": [],
+                "hoverinfo": [],
+                "text": [],
+                "property": "",
+                "symbol": "o",
+                "color": color_candidate[0],
+                "size": scatter_size,
+            }
 
             for idx2, obj in enumerate(object_info_list):
-                key_name = '__default__'
-                ''' get propertyname '''
+                key_name = "__default__"
+                """ get propertyname """
                 if idx2 < 3:  # Debug first 3 objects
                     logger.info(f"Object {idx2} keys: {list(obj.keys())}")
-                    if 'variable_list' in obj.keys():
-                        logger.info(f"Object {idx2} variable_list: {obj['variable_list'][:5] if len(obj['variable_list']) > 5 else obj['variable_list']}")
-                
-                if 'variable_list' in obj.keys():
-                    if propertyname_index_list[idx] > -1 and propertyname_index_list[idx] < len(obj['variable_list']):
-                        key_name = obj['variable_list'][propertyname_index_list[idx]]
-                else:
-                    if propertyname_index_list[idx] > -1 and propertyname_index_list[idx] < len(obj['property_list']):
-                        key_name = obj['property_list'][propertyname_index_list[idx]]
+                    if "variable_list" in obj.keys():
+                        logger.info(
+                            f"Object {idx2} variable_list: {obj['variable_list'][:5] if len(obj['variable_list']) > 5 else obj['variable_list']}"
+                        )
 
+                if "variable_list" in obj.keys():
+                    if propertyname_index_list[idx] > -1 and propertyname_index_list[idx] < len(obj["variable_list"]):
+                        key_name = obj["variable_list"][propertyname_index_list[idx]]
+                else:
+                    if propertyname_index_list[idx] > -1 and propertyname_index_list[idx] < len(obj["property_list"]):
+                        key_name = obj["property_list"][propertyname_index_list[idx]]
 
                 if key_name not in scatter_data_list[idx].keys():
-                    scatter_data_list[idx][key_name] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'property':key_name, 'symbol':'', 'color':'', 'size':scatter_size}
+                    scatter_data_list[idx][key_name] = {
+                        "x_val": [],
+                        "y_val": [],
+                        "z_val": [],
+                        "data": [],
+                        "property": key_name,
+                        "symbol": "",
+                        "color": "",
+                        "size": scatter_size,
+                    }
                     if idx2 < 5:  # Only log first few objects
                         logger.info(f"Created new group '{key_name}' for object {idx2}")
 
                 # Safety check for analysis result data
-                if (analysis_result_list_list[idx] and 
-                    idx2 < len(analysis_result_list_list[idx]) and 
-                    analysis_result_list_list[idx][idx2] is not None and
-                    len(analysis_result_list_list[idx][idx2]) > max(axis1, axis2, axis3)):
-                    
-                    scatter_data_list[idx][key_name]['x_val'].append(analysis_result_list_list[idx][idx2][axis1])
-                    scatter_data_list[idx][key_name]['y_val'].append(analysis_result_list_list[idx][idx2][axis2])
-                    scatter_data_list[idx][key_name]['z_val'].append(analysis_result_list_list[idx][idx2][axis3])
-                    scatter_data_list[idx][key_name]['data'].append(obj)
+                if (
+                    analysis_result_list_list[idx]
+                    and idx2 < len(analysis_result_list_list[idx])
+                    and analysis_result_list_list[idx][idx2] is not None
+                    and len(analysis_result_list_list[idx][idx2]) > max(axis1, axis2, axis3)
+                ):
+                    scatter_data_list[idx][key_name]["x_val"].append(analysis_result_list_list[idx][idx2][axis1])
+                    scatter_data_list[idx][key_name]["y_val"].append(analysis_result_list_list[idx][idx2][axis2])
+                    scatter_data_list[idx][key_name]["z_val"].append(analysis_result_list_list[idx][idx2][axis3])
+                    scatter_data_list[idx][key_name]["data"].append(obj)
                 else:
                     # Debug detailed failure reason
                     failure_reasons = []
@@ -4645,39 +4792,57 @@ class AnalysisInfoWidget(QWidget):
                     elif analysis_result_list_list[idx][idx2] is None:
                         failure_reasons.append("result is None")
                     elif len(analysis_result_list_list[idx][idx2]) <= max(axis1, axis2, axis3):
-                        failure_reasons.append(f"result_len({len(analysis_result_list_list[idx][idx2])}) <= max_axis({max(axis1, axis2, axis3)})")
-                    
+                        failure_reasons.append(
+                            f"result_len({len(analysis_result_list_list[idx][idx2])}) <= max_axis({max(axis1, axis2, axis3)})"
+                        )
+
                     # Silently skip invalid analysis result data
                     # logger.warning(f"Skipping invalid analysis result data for object {idx2}: {', '.join(failure_reasons)}")
                     # Add default values to maintain consistency
-                    scatter_data_list[idx][key_name]['x_val'].append(0.0)
-                    scatter_data_list[idx][key_name]['y_val'].append(0.0)
-                    scatter_data_list[idx][key_name]['z_val'].append(0.0)
-                    scatter_data_list[idx][key_name]['data'].append(obj)
+                    scatter_data_list[idx][key_name]["x_val"].append(0.0)
+                    scatter_data_list[idx][key_name]["y_val"].append(0.0)
+                    scatter_data_list[idx][key_name]["z_val"].append(0.0)
+                    scatter_data_list[idx][key_name]["data"].append(obj)
 
-            ''' remove empty group '''
-            if len(scatter_data_list[idx]['__default__']['x_val']) == 0:
-                del scatter_data_list[idx]['__default__']
+            """ remove empty group """
+            if len(scatter_data_list[idx]["__default__"]["x_val"]) == 0:
+                del scatter_data_list[idx]["__default__"]
 
-            ''' assign color and symbol '''
+            """ assign color and symbol """
             sc_idx = 0
             for key_name in scatter_data_list[idx].keys():
-                if scatter_data_list[idx][key_name]['color'] == '':
-                    scatter_data_list[idx][key_name]['color'] = color_candidate[sc_idx % len(color_candidate)]
-                    scatter_data_list[idx][key_name]['symbol'] = symbol_candidate[sc_idx % len(symbol_candidate)]
+                if scatter_data_list[idx][key_name]["color"] == "":
+                    scatter_data_list[idx][key_name]["color"] = color_candidate[sc_idx % len(color_candidate)]
+                    scatter_data_list[idx][key_name]["symbol"] = symbol_candidate[sc_idx % len(symbol_candidate)]
                     sc_idx += 1
 
             if True:
                 ax_list[idx].clear()
                 for name in scatter_data_list[idx].keys():
                     group = scatter_data_list[idx][name]
-                    if len(scatter_data_list[idx][name]['x_val']) > 0:
-                        scatter_result_list[idx][name] = ax_list[idx].scatter(group['x_val'], group['y_val'], group['z_val'], s=group['size'], marker=group['symbol'], color=group['color'], data=group['data'],depthshade=depth_shade, picker=True, pickradius=5)
+                    if len(scatter_data_list[idx][name]["x_val"]) > 0:
+                        scatter_result_list[idx][name] = ax_list[idx].scatter(
+                            group["x_val"],
+                            group["y_val"],
+                            group["z_val"],
+                            s=group["size"],
+                            marker=group["symbol"],
+                            color=group["color"],
+                            data=group["data"],
+                            depthshade=depth_shade,
+                            picker=True,
+                            pickradius=5,
+                        )
 
                 if True:
-                    if '__default__' in scatter_result_list[idx].keys():
-                        del scatter_result_list[idx]['__default__']
-                    ax_list[idx].legend(scatter_result_list[idx].values(), scatter_result_list[idx].keys(), loc='upper right', bbox_to_anchor=(1.05, 1))
+                    if "__default__" in scatter_result_list[idx].keys():
+                        del scatter_result_list[idx]["__default__"]
+                    ax_list[idx].legend(
+                        scatter_result_list[idx].values(),
+                        scatter_result_list[idx].keys(),
+                        loc="upper right",
+                        bbox_to_anchor=(1.05, 1),
+                    )
                 if True:
                     ax_list[idx].set_xlabel(axis1_title)
                     ax_list[idx].set_ylabel(axis2_title)

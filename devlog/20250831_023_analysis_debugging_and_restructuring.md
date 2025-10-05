@@ -13,7 +13,7 @@ Modan2의 통계 분석 시스템(PCA, CVA, MANOVA)에서 발생한 여러 문�
 - 증상: 마치 숨겨진 모달 다이얼로그가 있는 것처럼 UI가 완전히 멈춤
 - 원인: `ModanMainWindow`에 `set_splash` 메서드가 없어서 발생한 AttributeError
 
-**해결**: 
+**해결**:
 ```python
 # Modan2.py에 누락된 메서드 추가
 def set_splash(self, splash):
@@ -39,12 +39,12 @@ analysis.manova_analysis_result_json = json.dumps(manova_result)
 ```python
 if analysis_type.upper() == "PCA":
     pca_result = self._run_pca(landmarks_data, params)
-    
+
     # CVA도 함께 실행
     if cva_group_by is not None:
         cva_result = self._run_cva(landmarks_data, cva_params)
-    
-    # MANOVA도 함께 실행  
+
+    # MANOVA도 함께 실행
     if manova_group_by is not None:
         manova_result = self._run_manova(landmarks_data, manova_params)
 ```
@@ -63,7 +63,7 @@ if 'canonical_variables' in cva_result:
 ### 5. MANOVA 테이블 형식 문제
 **문제**: MANOVA 결과가 단일 통계량만 표시되고 4개의 다변량 검정 통계량이 모두 표시되지 않음
 
-**해결**: 
+**해결**:
 1. MdStatistics.py에서 4개 통계량 모두 계산
    - Wilks' Lambda
    - Pillai's Trace
@@ -105,7 +105,7 @@ return {
 for landmark in landmarks:
     flat_coords.extend(landmark[:2])  # X, Y만 사용
 
-# 수정 후  
+# 수정 후
 for landmark in landmarks:
     flat_coords.extend(landmark)  # 모든 차원(X, Y, Z) 사용
 ```
@@ -175,7 +175,7 @@ analysis = MdModel.MdAnalysis.create(
 
 ## 파일 변경 목록
 1. **Modan2.py**: set_splash 메서드 추가
-2. **ModanController.py**: 
+2. **ModanController.py**:
    - 통합 분석 실행 로직 구현
    - JSON 데이터 생성 및 저장
    - 분석 객체 속성 복사

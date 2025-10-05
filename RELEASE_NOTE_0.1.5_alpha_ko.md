@@ -20,7 +20,7 @@ my_dataset.zip
 ├── dataset.json          # 모든 메타데이터 + 랜드마크 + 변수
 ├── images/              # 이미지 파일들
 │   ├── 123.jpg
-│   └── 456.png  
+│   └── 456.png
 └── models/              # 3D 모델 파일들
     ├── 123.obj
     └── 456.ply
@@ -60,7 +60,7 @@ my_dataset.zip
   "format_version": "1.1",
   "dataset": {
     "wireframe": [[1,2], [2,3], ...],    // 와이어프레임 정보
-    "polygons": [[1,2,3], ...],          // 폴리곤 정보  
+    "polygons": [[1,2,3], ...],          // 폴리곤 정보
     "baseline": [1,2],                   // 베이스라인 (2점 또는 3점)
     "variables": ["Sex", "Age", ...]     // 변수 목록
   },
@@ -112,7 +112,7 @@ my_dataset.zip
 3. **"Include image and model files"** 체크 (필요한 경우)
 4. 저장 위치 선택 후 Export
 
-### 데이터셋 Import  
+### 데이터셋 Import
 1. 메뉴: **Dataset > Import Dataset**
 2. **"JSON+ZIP"** 형식 선택
 3. ZIP 파일 선택 후 Import

@@ -5,7 +5,7 @@
 
 ## 1. 개요
 
-현재 Modan2는 QSettings와 JSON 기반 설정 시스템이 혼재되어 있는 과도기적 상태입니다. 
+현재 Modan2는 QSettings와 JSON 기반 설정 시스템이 혼재되어 있는 과도기적 상태입니다.
 이를 완전한 JSON 기반 시스템으로 통합하여 일관성을 확보하고 유지보수성을 향상시킵니다.
 
 ## 2. 현재 상태 분석
@@ -46,13 +46,13 @@ class SettingsWrapper:
     def __init__(self, config, config_path):
         self.config = config
         self.config_path = config_path
-        
+
     def value(self, key, default_value):
         # 기존 읽기 기능
-        
+
     def setValue(self, key, value):
         # 새로운 쓰기 기능
-        
+
     def sync(self):
         # 설정 파일에 저장
 ```

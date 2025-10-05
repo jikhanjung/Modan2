@@ -47,7 +47,7 @@ Use short commit hash:
 
 ## Recommended Workflow
 
-1. **Development Phase**: 
+1. **Development Phase**:
    - Regular commits without releases
    - Use `[skip ci]` in commit message to skip builds
 

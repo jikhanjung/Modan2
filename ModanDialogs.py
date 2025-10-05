@@ -96,24 +96,24 @@ logger = logging.getLogger(__name__)
 
 
 MODE = {}
-MODE['NONE'] = 0
-MODE['PAN'] = 12
-MODE['EDIT_LANDMARK'] = 1
-MODE['WIREFRAME'] = 2
-MODE['READY_MOVE_LANDMARK'] = 3
-MODE['MOVE_LANDMARK'] = 4
-MODE['PRE_WIRE_FROM'] = 5
-MODE['CALIBRATION'] = 6
-MODE['VIEW'] = 7
+MODE["NONE"] = 0
+MODE["PAN"] = 12
+MODE["EDIT_LANDMARK"] = 1
+MODE["WIREFRAME"] = 2
+MODE["READY_MOVE_LANDMARK"] = 3
+MODE["MOVE_LANDMARK"] = 4
+MODE["PRE_WIRE_FROM"] = 5
+MODE["CALIBRATION"] = 6
+MODE["VIEW"] = 7
 
 
 MODE_EXPLORATION = 0
 MODE_REGRESSION = 1
-#MODE_GROWTH_TRAJECTORY = 2
+# MODE_GROWTH_TRAJECTORY = 2
 MODE_AVERAGE = 2
 MODE_COMPARISON = 3
 MODE_COMPARISON2 = 4
-#MODE_GRID = 6
+# MODE_GRID = 6
 
 BASE_LANDMARK_RADIUS = 2
 DISTANCE_THRESHOLD = BASE_LANDMARK_RADIUS * 3
@@ -129,41 +129,51 @@ ROTATE_MODE = 3
 ZOOM_MODE = 4
 LANDMARK_MODE = 1
 WIREFRAME_MODE = 2
-COLOR = { 'RED': (1,0,0), 'GREEN': (0,1,0), 'BLUE': (0,0,1), 'YELLOW': (1,1,0), 'CYAN': (0,1,1), 'MAGENTA': (1,0,1), 'WHITE': (1,1,1), 'LIGHT_GRAY': (0.8,0.8,0.8), 'GRAY': (0.5,0.5,0.5), 'DARK_GRAY': (0.3,0.3,0.3), 'BLACK': (0,0,0)}
+COLOR = {
+    "RED": (1, 0, 0),
+    "GREEN": (0, 1, 0),
+    "BLUE": (0, 0, 1),
+    "YELLOW": (1, 1, 0),
+    "CYAN": (0, 1, 1),
+    "MAGENTA": (1, 0, 1),
+    "WHITE": (1, 1, 1),
+    "LIGHT_GRAY": (0.8, 0.8, 0.8),
+    "GRAY": (0.5, 0.5, 0.5),
+    "DARK_GRAY": (0.3, 0.3, 0.3),
+    "BLACK": (0, 0, 0),
+}
 
-COLOR['SINGLE_SHAPE'] = COLOR['GREEN']
-COLOR['AVERAGE_SHAPE'] = COLOR['LIGHT_GRAY']
-COLOR['NORMAL_SHAPE'] = COLOR['BLUE']
-COLOR['NORMAL_TEXT'] = COLOR['WHITE']
-COLOR['SELECTED_SHAPE'] = COLOR['RED']
-COLOR['SELECTED_TEXT'] = COLOR['RED']
-COLOR['SELECTED_LANDMARK'] = COLOR['RED']
-COLOR['WIREFRAME'] = COLOR['YELLOW']
-COLOR['SELECTED_EDGE'] = COLOR['RED']
-COLOR['BACKGROUND'] = COLOR['DARK_GRAY']
+COLOR["SINGLE_SHAPE"] = COLOR["GREEN"]
+COLOR["AVERAGE_SHAPE"] = COLOR["LIGHT_GRAY"]
+COLOR["NORMAL_SHAPE"] = COLOR["BLUE"]
+COLOR["NORMAL_TEXT"] = COLOR["WHITE"]
+COLOR["SELECTED_SHAPE"] = COLOR["RED"]
+COLOR["SELECTED_TEXT"] = COLOR["RED"]
+COLOR["SELECTED_LANDMARK"] = COLOR["RED"]
+COLOR["WIREFRAME"] = COLOR["YELLOW"]
+COLOR["SELECTED_EDGE"] = COLOR["RED"]
+COLOR["BACKGROUND"] = COLOR["DARK_GRAY"]
 
 ICON = {}
-ICON['landmark'] = mu.resource_path('icons/M2Landmark_2.png')
-ICON['landmark_hover'] = mu.resource_path('icons/M2Landmark_2_hover.png')
-ICON['landmark_down'] = mu.resource_path('icons/M2Landmark_2_down.png')
-ICON['landmark_disabled'] = mu.resource_path('icons/M2Landmark_2_disabled.png')
-ICON['wireframe'] = mu.resource_path('icons/M2Wireframe_2.png')
-ICON['wireframe_hover'] = mu.resource_path('icons/M2Wireframe_2_hover.png')
-ICON['wireframe_down'] = mu.resource_path('icons/M2Wireframe_2_down.png')
-ICON['calibration'] = mu.resource_path('icons/M2Calibration_2.png')
-ICON['calibration_hover'] = mu.resource_path('icons/M2Calibration_2_hover.png')
-ICON['calibration_down'] = mu.resource_path('icons/M2Calibration_2_down.png')
-ICON['calibration_disabled'] = mu.resource_path('icons/M2Calibration_2_disabled.png')
+ICON["landmark"] = mu.resource_path("icons/M2Landmark_2.png")
+ICON["landmark_hover"] = mu.resource_path("icons/M2Landmark_2_hover.png")
+ICON["landmark_down"] = mu.resource_path("icons/M2Landmark_2_down.png")
+ICON["landmark_disabled"] = mu.resource_path("icons/M2Landmark_2_disabled.png")
+ICON["wireframe"] = mu.resource_path("icons/M2Wireframe_2.png")
+ICON["wireframe_hover"] = mu.resource_path("icons/M2Wireframe_2_hover.png")
+ICON["wireframe_down"] = mu.resource_path("icons/M2Wireframe_2_down.png")
+ICON["calibration"] = mu.resource_path("icons/M2Calibration_2.png")
+ICON["calibration_hover"] = mu.resource_path("icons/M2Calibration_2_hover.png")
+ICON["calibration_down"] = mu.resource_path("icons/M2Calibration_2_down.png")
+ICON["calibration_disabled"] = mu.resource_path("icons/M2Calibration_2_disabled.png")
 
-NEWLINE = '\n'
-
-
+NEWLINE = "\n"
 
 
 class DatasetOpsViewer(QLabel):
-    #clicked = pyqtSignal()
+    # clicked = pyqtSignal()
     def __init__(self, widget):
-        super(DatasetOpsViewer, self).__init__(widget)
+        super().__init__(widget)
         self.ds_ops = None
         self.scale = 1.0
         self.pan_x = 0
@@ -172,12 +182,12 @@ class DatasetOpsViewer(QLabel):
         self.show_wireframe = False
         self.show_baseline = False
         self.show_average = True
-        #self.setMinimumSize(200,200)
+        # self.setMinimumSize(200,200)
 
     def set_ds_ops(self, ds_ops):
         self.ds_ops = ds_ops
         self.calculate_scale_and_pan()
-    
+
     def calculate_scale_and_pan(self):
         min_x = 100000000
         max_x = -100000000
@@ -186,7 +196,7 @@ class DatasetOpsViewer(QLabel):
 
         # get min and max x,y from landmarks
         for obj in self.ds_ops.object_list:
-            for idx, landmark in enumerate(obj.landmark_list):
+            for _idx, landmark in enumerate(obj.landmark_list):
                 if landmark[0] < min_x:
                     min_x = landmark[0]
                 if landmark[0] > max_x:
@@ -195,43 +205,43 @@ class DatasetOpsViewer(QLabel):
                     min_y = landmark[1]
                 if landmark[1] > max_y:
                     max_y = landmark[1]
-        #print("min_x:", min_x, "max_x:", max_x, "min_y:", min_y, "max_y:", max_y)
+        # print("min_x:", min_x, "max_x:", max_x, "min_y:", min_y, "max_y:", max_y)
         width = max_x - min_x
         height = max_y - min_y
-        w_scale = ( self.width() * 1.0 ) / ( width * 1.5 )
-        h_scale = ( self.height() * 1.0 ) / ( height * 1.5 )
+        w_scale = (self.width() * 1.0) / (width * 1.5)
+        h_scale = (self.height() * 1.0) / (height * 1.5)
         self.scale = min(w_scale, h_scale)
         self.pan_x = -min_x * self.scale + (self.width() - width * self.scale) / 2.0
         self.pan_y = -min_y * self.scale + (self.height() - height * self.scale) / 2.0
-        #print("scale:", self.scale, "pan_x:", self.pan_x, "pan_y:", self.pan_y)
+        # print("scale:", self.scale, "pan_x:", self.pan_x, "pan_y:", self.pan_y)
         self.repaint()
-    
+
     def resizeEvent(self, ev):
-        #print("resizeEvent")
+        # print("resizeEvent")
         self.calculate_scale_and_pan()
         self.repaint()
 
         return super().resizeEvent(ev)
 
     def paintEvent(self, event):
-        #print("paint event")
-        #self.pixmap
-        #return super().paintEvent(event)
+        # print("paint event")
+        # self.pixmap
+        # return super().paintEvent(event)
         painter = QPainter(self)
-        painter.fillRect(self.rect(), QBrush(mu.as_qt_color(COLOR['BACKGROUND'])))
+        painter.fillRect(self.rect(), QBrush(mu.as_qt_color(COLOR["BACKGROUND"])))
 
         if self.ds_ops is None:
             return
 
-        if self.show_wireframe == True:
-            painter.setPen(QPen(mu.as_qt_color(COLOR['WIREFRAME']), 2))
-            painter.setBrush(QBrush(mu.as_qt_color(COLOR['WIREFRAME'])))
+        if self.show_wireframe:
+            painter.setPen(QPen(mu.as_qt_color(COLOR["WIREFRAME"]), 2))
+            painter.setBrush(QBrush(mu.as_qt_color(COLOR["WIREFRAME"])))
 
-            #print("wireframe 2", dataset.edge_list, dataset.wireframe)
+            # print("wireframe 2", dataset.edge_list, dataset.wireframe)
             landmark_list = self.ds_ops.get_average_shape().landmark_list
-            #print("landmark_list:", landmark_list)
+            # print("landmark_list:", landmark_list)
             for wire in self.ds_ops.edge_list:
-                #print("wire:", wire, landmark_list[wire[0]], landmark_list[wire[1]])
+                # print("wire:", wire, landmark_list[wire[0]], landmark_list[wire[1]])
 
                 if wire[0] >= len(landmark_list) or wire[1] >= len(landmark_list):
                     continue
@@ -239,49 +249,52 @@ class DatasetOpsViewer(QLabel):
                 from_y = landmark_list[wire[0]][1]
                 to_x = landmark_list[wire[1]][0]
                 to_y = landmark_list[wire[1]][1]
-                #[ from_x, from_y, from_z ] = landmark_list[wire[0]]
-                #[ to_x, to_y, to_z ] = landmark_list[wire[1]]
-                painter.drawLine(int(self._2canx(from_x)), int(self._2cany(from_y)), int(self._2canx(to_x)), int(self._2cany(to_y)))
-                #painter.drawLine(self.landmark_list[wire[0]][0], self.landmark_list[wire[0]][1], self.landmark_list[wire[1]][0], self.landmark_list[wire[1]][1])
+                # [ from_x, from_y, from_z ] = landmark_list[wire[0]]
+                # [ to_x, to_y, to_z ] = landmark_list[wire[1]]
+                painter.drawLine(
+                    int(self._2canx(from_x)), int(self._2cany(from_y)), int(self._2canx(to_x)), int(self._2cany(to_y))
+                )
+                # painter.drawLine(self.landmark_list[wire[0]][0], self.landmark_list[wire[0]][1], self.landmark_list[wire[1]][0], self.landmark_list[wire[1]][1])
 
         radius = 1
-        painter.setFont(QFont('Helvetica', 12))
+        painter.setFont(QFont("Helvetica", 12))
         for obj in self.ds_ops.object_list:
-            #print("obj:", obj.id)
+            # print("obj:", obj.id)
             if obj.id in self.ds_ops.selected_object_id_list:
-                painter.setPen(QPen(mu.as_qt_color(COLOR['SELECTED_SHAPE']), 2))
-                painter.setBrush(QBrush(mu.as_qt_color(COLOR['SELECTED_SHAPE'])))
+                painter.setPen(QPen(mu.as_qt_color(COLOR["SELECTED_SHAPE"]), 2))
+                painter.setBrush(QBrush(mu.as_qt_color(COLOR["SELECTED_SHAPE"])))
             else:
-                painter.setPen(QPen(mu.as_qt_color(COLOR['NORMAL_SHAPE']), 2))
-                painter.setBrush(QBrush(mu.as_qt_color(COLOR['NORMAL_SHAPE'])))
+                painter.setPen(QPen(mu.as_qt_color(COLOR["NORMAL_SHAPE"]), 2))
+                painter.setBrush(QBrush(mu.as_qt_color(COLOR["NORMAL_SHAPE"])))
             for idx, landmark in enumerate(obj.landmark_list):
                 x = self._2canx(landmark[0])
                 y = self._2cany(landmark[1])
-                #print("x:", x, "y:", y, "lm", landmark[0], landmark[1], "scale:", self.scale, "pan_x:", self.pan_x, "pan_y:", self.pan_y)
-                painter.drawEllipse(x-radius, y-radius, radius*2, radius*2)
-                #painter.drawText(x+10, y+10, str(idx+1))
+                # print("x:", x, "y:", y, "lm", landmark[0], landmark[1], "scale:", self.scale, "pan_x:", self.pan_x, "pan_y:", self.pan_y)
+                painter.drawEllipse(x - radius, y - radius, radius * 2, radius * 2)
+                # painter.drawText(x+10, y+10, str(idx+1))
 
         # show average shape
         if self.show_average:
-            radius=3
+            radius = 3
             for idx, landmark in enumerate(self.ds_ops.get_average_shape().landmark_list):
-                painter.setPen(QPen(mu.as_qt_color(COLOR['AVERAGE_SHAPE']), 2))
-                painter.setBrush(QBrush(mu.as_qt_color(COLOR['AVERAGE_SHAPE'])))
+                painter.setPen(QPen(mu.as_qt_color(COLOR["AVERAGE_SHAPE"]), 2))
+                painter.setBrush(QBrush(mu.as_qt_color(COLOR["AVERAGE_SHAPE"])))
                 x = self._2canx(landmark[0])
                 y = self._2cany(landmark[1])
-                painter.drawEllipse(x-radius, y-radius, radius*2, radius*2)
+                painter.drawEllipse(x - radius, y - radius, radius * 2, radius * 2)
                 if self.show_index:
-                    painter.drawText(x+10, y+10, str(idx+1))
+                    painter.drawText(x + 10, y + 10, str(idx + 1))
 
     def _2canx(self, x):
-        return int(x*self.scale + self.pan_x)
+        return int(x * self.scale + self.pan_x)
+
     def _2cany(self, y):
-        return int(y*self.scale + self.pan_y)
+        return int(y * self.scale + self.pan_y)
 
 
 class PicButton(QAbstractButton):
     def __init__(self, pixmap, pixmap_hover, pixmap_pressed, pixmap_disabled=None, parent=None):
-        super(PicButton, self).__init__(parent)
+        super().__init__(parent)
         self.pixmap = pixmap
         self.pixmap_hover = pixmap_hover
         self.pixmap_pressed = pixmap_pressed
@@ -290,7 +303,7 @@ class PicButton(QAbstractButton):
             image = QPixmap.toImage(result)
             grayscale = image.convertToFormat(QImage.Format_Grayscale8)
             pixmap_disabled = QPixmap.fromImage(grayscale)
-            #self.Changed_view.emit(pixmap)            
+            # self.Changed_view.emit(pixmap)
         self.pixmap_disabled = pixmap_disabled
 
         self.pressed.connect(self.update)
@@ -300,7 +313,7 @@ class PicButton(QAbstractButton):
         pix = self.pixmap_hover if self.underMouse() else self.pixmap
         if self.isDown():
             pix = self.pixmap_pressed
-        if self.isEnabled() == False and self.pixmap_disabled is not None:
+        if not self.isEnabled() and self.pixmap_disabled is not None:
             pix = self.pixmap_disabled
 
         painter = QPainter(self)
@@ -315,28 +328,29 @@ class PicButton(QAbstractButton):
     def sizeHint(self):
         return QSize(200, 200)
 
+
 class ProgressDialog(QDialog):
-    def __init__(self,parent):
+    def __init__(self, parent):
         super().__init__()
-        #self.setupUi(self)
-        #self.setGeometry(200, 250, 400, 250)
+        # self.setupUi(self)
+        # self.setGeometry(200, 250, 400, 250)
         self.setWindowTitle("Modan2 - Progress Dialog")
         self.parent = parent
         self.setGeometry(QRect(100, 100, 320, 180))
-        self.move(self.parent.pos()+QPoint(100,100))
+        self.move(self.parent.pos() + QPoint(100, 100))
 
         self.layout = QVBoxLayout(self)
-        self.layout.setContentsMargins(50,50, 50, 50)
+        self.layout.setContentsMargins(50, 50, 50, 50)
 
         self.lbl_text = QLabel(self)
-        #self.lbl_text.setGeometry(50, 50, 320, 80)
-        #self.pb_progress = QProgressBar(self)
+        # self.lbl_text.setGeometry(50, 50, 320, 80)
+        # self.pb_progress = QProgressBar(self)
         self.pb_progress = QProgressBar(self)
-        #self.pb_progress.setGeometry(50, 150, 320, 40)
+        # self.pb_progress.setGeometry(50, 150, 320, 40)
         self.pb_progress.setValue(0)
         self.stop_progress = False
         self.btnStop = QPushButton(self)
-        #self.btnStop.setGeometry(175, 200, 50, 30)
+        # self.btnStop.setGeometry(175, 200, 50, 30)
         self.btnStop.setText("Stop")
         self.btnStop.clicked.connect(self.set_stop_progress)
         self.layout.addWidget(self.lbl_text)
@@ -347,29 +361,30 @@ class ProgressDialog(QDialog):
     def set_stop_progress(self):
         self.stop_progress = True
 
-    def set_progress_text(self,text_format):
+    def set_progress_text(self, text_format):
         self.text_format = text_format
 
-    def set_max_value(self,max_value):
+    def set_max_value(self, max_value):
         self.max_value = max_value
 
-    def set_curr_value(self,curr_value):
+    def set_curr_value(self, curr_value):
         self.curr_value = curr_value
-        self.pb_progress.setValue(int((self.curr_value/float(self.max_value))*100))
+        self.pb_progress.setValue(int((self.curr_value / float(self.max_value)) * 100))
         self.lbl_text.setText(self.text_format.format(self.curr_value, self.max_value))
-        #self.lbl_text.setText(label_text)
+        # self.lbl_text.setText(label_text)
         self.update()
         QApplication.processEvents()
 
+
 class CalibrationDialog(QDialog):
-    def __init__(self,parent,dist):
+    def __init__(self, parent, dist):
         super().__init__()
         self.setWindowTitle("Calibration")
         self.parent = parent
         self.last_calibration_unit = "mm"
-        #print(self.parent.pos())
+        # print(self.parent.pos())
         self.setGeometry(QRect(100, 100, 320, 180))
-        self.move(self.parent.pos()+QPoint(100,100))
+        self.move(self.parent.pos() + QPoint(100, 100))
         self.m_app = QApplication.instance()
         self.read_settings()
 
@@ -398,7 +413,7 @@ class CalibrationDialog(QDialog):
         self.btnCancel.setFixedWidth(100)
         self.btnCancel.setFixedHeight(30)
         self.btnOK.clicked.connect(self.btnOK_clicked)
-        self.btnCancel.clicked.connect(self.btnCancel_clicked)  
+        self.btnCancel.clicked.connect(self.btnCancel_clicked)
         self.hbox = QHBoxLayout()
         self.hbox.addWidget(self.edtLength)
         self.hbox.addWidget(self.comboUnit)
@@ -409,57 +424,59 @@ class CalibrationDialog(QDialog):
         self.vbox.addWidget(self.lblText2)
         self.vbox.addLayout(self.hbox)
         self.setLayout(self.vbox)
-        #print("last_calibration_unit:", self.last_calibration_unit)
+        # print("last_calibration_unit:", self.last_calibration_unit)
         self.comboUnit.setCurrentText(self.last_calibration_unit)
 
         if dist is not None:
             self.set_pixel_number(dist)
 
     def read_settings(self):
-        #print("read settings")
+        # print("read settings")
         self.last_calibration_unit = self.m_app.settings.value("Calibration/Unit", self.last_calibration_unit)
-        #print("last_calibration_unit:", self.last_calibration_unit)
-    
-    def write_settings(self):
-        #print("write settings")
-        self.m_app.settings.setValue("Calibration/Unit", self.last_calibration_unit)
-        #print("last_calibration_unit:", self.last_calibration_unit)
+        # print("last_calibration_unit:", self.last_calibration_unit)
 
+    def write_settings(self):
+        # print("write settings")
+        self.m_app.settings.setValue("Calibration/Unit", self.last_calibration_unit)
+        # print("last_calibration_unit:", self.last_calibration_unit)
 
     def set_pixel_number(self, pixel_number):
         self.pixel_number = pixel_number
-        # show number of pixel in calibration text 
-        self.lblText1.setText("Enter the unit length in metric scale.") 
+        # show number of pixel in calibration text
+        self.lblText1.setText("Enter the unit length in metric scale.")
         self.lblText2.setText(f"{self.pixel_number:.2f} pixels are equivalent to:")
         # select all text in edtLength
         self.edtLength.selectAll()
-        
+
     def btnOK_clicked(self):
-        #self.parent.calibration_length = float(self.edtLength.text())
-        #self.parent.calibration_unit = self.cbxUnit.currentText()        
-        self.parent.set_object_calibration( self.pixel_number, float(self.edtLength.text()),self.comboUnit.currentText())
+        # self.parent.calibration_length = float(self.edtLength.text())
+        # self.parent.calibration_unit = self.cbxUnit.currentText()
+        self.parent.set_object_calibration(
+            self.pixel_number, float(self.edtLength.text()), self.comboUnit.currentText()
+        )
         self.last_calibration_unit = self.comboUnit.currentText()
-        #print("last_calibration_unit:", self.last_calibration_unit)
+        # print("last_calibration_unit:", self.last_calibration_unit)
         self.write_settings()
         self.close()
-    
+
     def btnCancel_clicked(self):
         self.close()
 
+
 class DatasetDialog(QDialog):
     # NewDatasetDialog shows new dataset dialog.
-    def __init__(self,parent):
+    def __init__(self, parent):
         super().__init__()
         self.setWindowTitle(self.tr("Modan2 - Dataset Information"))
         self.parent = parent
-        #print(self.parent.pos())
-        #self.setGeometry(QRect(100, 100, 600, 400))
+        # print(self.parent.pos())
+        # self.setGeometry(QRect(100, 100, 600, 400))
         self.remember_geometry = True
         self.m_app = QApplication.instance()
         self.read_settings()
-        #self.move(self.parent.pos()+QPoint(100,100))
+        # self.move(self.parent.pos()+QPoint(100,100))
         close_shortcut = QShortcut(QKeySequence("Ctrl+W"), self)
-        close_shortcut.activated.connect(self.close) 
+        close_shortcut.activated.connect(self.close)
 
         self.cbxParent = QComboBox()
         self.edtDatasetName = QLineEdit()
@@ -477,7 +494,9 @@ class DatasetDialog(QDialog):
         self.edtPolygons = QTextEdit()
         self.edtVariableNameStr = QTextEdit()
         self.lstVariableName = QListWidget()
-        self.lstVariableName.setEditTriggers(QListWidget.DoubleClicked|QListWidget.EditKeyPressed|QListWidget.SelectedClicked)
+        self.lstVariableName.setEditTriggers(
+            QListWidget.DoubleClicked | QListWidget.EditKeyPressed | QListWidget.SelectedClicked
+        )
         self.btnAddVariable = QPushButton(self.tr("Add Variable"))
         self.btnDeleteVariable = QPushButton(self.tr("Delete Variable"))
         self.btnMoveUp = QPushButton(self.tr("Move Up"))
@@ -542,34 +561,34 @@ class DatasetDialog(QDialog):
         self.dataset = None
         self.load_parent_dataset()
 
-        #self.edtDataFolder.setText(str(self.data_folder.resolve()))
-        #self.edtServerAddress.setText(self.server_address)
-        #self.edtServerPort.setText(self.server_port)
+        # self.edtDataFolder.setText(str(self.data_folder.resolve()))
+        # self.edtServerAddress.setText(self.server_address)
+        # self.edtServerPort.setText(self.server_port)
 
     def addVariable(self):
         item = QListWidgetItem(self.tr("New Variable"))
         item.setFlags(item.flags() | Qt.ItemIsEditable)
         item.setData(Qt.UserRole, -1)
         self.lstVariableName.addItem(item)
-        #print("new variable")
+        # print("new variable")
         self.lstVariableName.editItem(item)
-    
+
     def deleteVariable(self):
         for item in self.lstVariableName.selectedItems():
             self.lstVariableName.takeItem(self.lstVariableName.row(item))
-    
+
     def moveUp(self):
         row = self.lstVariableName.currentRow()
         if row > 0:
             item = self.lstVariableName.takeItem(row)
-            self.lstVariableName.insertItem(row-1, item)
+            self.lstVariableName.insertItem(row - 1, item)
             self.lstVariableName.setCurrentItem(item)
 
     def moveDown(self):
         row = self.lstVariableName.currentRow()
         if row < self.lstVariableName.count() - 1:
             item = self.lstVariableName.takeItem(row)
-            self.lstVariableName.insertItem(row+1, item)
+            self.lstVariableName.insertItem(row + 1, item)
             self.lstVariableName.setCurrentItem(item)
 
     def read_settings(self):
@@ -578,8 +597,7 @@ class DatasetDialog(QDialog):
             self.setGeometry(self.m_app.settings.value("WindowGeometry/DatasetDialog", QRect(100, 100, 600, 400)))
         else:
             self.setGeometry(QRect(100, 100, 600, 400))
-            self.move(self.parent.pos()+QPoint(100,100))
-
+            self.move(self.parent.pos() + QPoint(100, 100))
 
     def write_settings(self):
         if self.remember_geometry is True:
@@ -589,7 +607,7 @@ class DatasetDialog(QDialog):
         self.write_settings()
         event.accept()
 
-    def load_parent_dataset(self,curr_dataset_id = None):
+    def load_parent_dataset(self, curr_dataset_id=None):
         self.cbxParent.clear()
         datasets = MdDataset.select()
         for dataset in datasets:
@@ -603,8 +621,8 @@ class DatasetDialog(QDialog):
             logger.warning(f"Dataset {dataset_id} not found")
             dataset = None
         self.dataset = dataset
-        #self
-        #return dataset
+        # self
+        # return dataset
 
     def set_dataset(self, dataset):
         if dataset is None:
@@ -622,7 +640,7 @@ class DatasetDialog(QDialog):
             self.rbtn2D.setChecked(True)
         elif dataset.dimension == 3:
             self.rbtn3D.setChecked(True)
-        #print(dataset.dimension,self.dataset.objects)
+        # print(dataset.dimension,self.dataset.objects)
         if len(self.dataset.object_list) > 0:
             self.rbtn2D.setEnabled(False)
             self.rbtn3D.setEnabled(False)
@@ -635,10 +653,10 @@ class DatasetDialog(QDialog):
             item.setFlags(item.flags() | Qt.ItemIsEditable)
             item.setData(Qt.UserRole, idx)
             self.lstVariableName.addItem(item)
-        #self.edtVariableNameStr.setText(dataset.propertyname_str)
-    
+        # self.edtVariableNameStr.setText(dataset.propertyname_str)
+
     def set_parent_dataset(self, parent_dataset):
-        #print("parent:", parent_dataset_id, "dataset:", self.dataset)
+        # print("parent:", parent_dataset_id, "dataset:", self.dataset)
         if parent_dataset is None:
             self.cbxParent.setCurrentIndex(-1)
         else:
@@ -647,9 +665,10 @@ class DatasetDialog(QDialog):
                 self.rbtn2D.setChecked(True)
             elif parent_dataset.dimension == 3:
                 self.rbtn3D.setChecked(True)
-            #self.rbtn2D.setEnabled(False)
-            #self.rbtn3D.setEnabled(False)
-    '''
+            # self.rbtn2D.setEnabled(False)
+            # self.rbtn3D.setEnabled(False)
+
+    """
     def Okay(self):
         logger.info("Dataset dialog Okay button pressed")
 
@@ -701,7 +720,8 @@ class DatasetDialog(QDialog):
         self.dataset.save()
         logger.info("saved")
         self.accept()
-    '''
+    """
+
     def Okay(self):
         try:
             logger.info("Dataset dialog Okay button pressed")
@@ -717,9 +737,7 @@ class DatasetDialog(QDialog):
                 self.dataset.parent_id = self.cbxParent.currentData()
                 self.dataset.dataset_name = self.edtDatasetName.text()
                 self.dataset.dataset_desc = self.edtDatasetDesc.text()
-                logger.info("Dataset name: %s, Dataset desc: %s", 
-                        self.dataset.dataset_name, 
-                        self.dataset.dataset_desc)
+                logger.info("Dataset name: %s, Dataset desc: %s", self.dataset.dataset_name, self.dataset.dataset_desc)
             except AttributeError as e:
                 logger.error("Failed to set basic dataset properties: %s", str(e))
                 raise
@@ -729,14 +747,16 @@ class DatasetDialog(QDialog):
                     self.dataset.dimension = 2
                 elif self.rbtn3D.isChecked():
                     self.dataset.dimension = 3
-                    
+
                 self.dataset.wireframe = self.edtWireframe.toPlainText()
                 self.dataset.baseline = self.edtBaseline.text()
                 self.dataset.polygons = self.edtPolygons.toPlainText()
-                logger.info("Wireframe: %s, Baseline: %s, Polygons: %s", 
-                        self.dataset.wireframe, 
-                        self.dataset.baseline, 
-                        self.dataset.polygons)
+                logger.info(
+                    "Wireframe: %s, Baseline: %s, Polygons: %s",
+                    self.dataset.wireframe,
+                    self.dataset.baseline,
+                    self.dataset.polygons,
+                )
             except AttributeError as e:
                 logger.error("Failed to set geometric properties: %s", str(e))
                 raise
@@ -744,17 +764,17 @@ class DatasetDialog(QDialog):
             try:
                 self.dataset.propertyname_str = self.edtVariableNameStr.toPlainText()
                 logger.info("variable names 1: %s", self.dataset.propertyname_str)
-                
+
                 variablename_list = []
                 before_index_list = []
                 after_index_list = []
-                
+
                 for idx in range(self.lstVariableName.count()):
                     try:
                         item = self.lstVariableName.item(idx)
                         if item is None:
                             raise ValueError(f"No item found at index {idx}")
-                        
+
                         original_index = item.data(Qt.UserRole)
                         variablename_list.append(item.text())
                         before_index_list.append(original_index)
@@ -765,7 +785,7 @@ class DatasetDialog(QDialog):
 
                 self.dataset.propertyname_str = ",".join(variablename_list)
                 logger.info("variable names 2: %s", self.dataset.propertyname_str)
-                
+
             except Exception as e:
                 logger.error("Failed to process variable names: %s", str(e))
                 raise
@@ -775,19 +795,19 @@ class DatasetDialog(QDialog):
                     try:
                         variable_list = obj.get_variable_list()
                         new_variable_list = []
-                        
+
                         for before_index in before_index_list:
                             if before_index == -1:
                                 new_variable_list.append("")
                             else:
                                 new_variable_list.append(variable_list[before_index])
-                                
+
                         obj.pack_variable(new_variable_list)
                         obj.save()
                     except Exception as e:
                         logger.error("Failed to process object: %s", str(e))
                         raise
-                        
+
             except Exception as e:
                 logger.error("Failed to process object list: %s", str(e))
                 raise
@@ -800,40 +820,40 @@ class DatasetDialog(QDialog):
             except Exception as e:
                 logger.error("Failed to save dataset: %s", str(e))
                 raise
-                
+
         except Exception as e:
             logger.error("Operation failed: %s", str(e))
             # You might want to show an error dialog to the user here
-            QMessageBox.critical(
-                self,
-                "Error",
-                f"Failed to save dataset: {str(e)}"
-            )
+            QMessageBox.critical(self, "Error", f"Failed to save dataset: {str(e)}")
             return
+
     def Delete(self):
-        ret = QMessageBox.question(self, "", self.tr("Are you sure to delete this dataset?"), QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-        #print("ret:", ret)
+        ret = QMessageBox.question(
+            self, "", self.tr("Are you sure to delete this dataset?"), QMessageBox.Yes | QMessageBox.No, QMessageBox.No
+        )
+        # print("ret:", ret)
         if ret == QMessageBox.Yes:
             self.dataset.delete_instance()
             self.parent.selected_dataset = None
-            #self.dataset.delete_dataset()
-        #self.delete_dataset()
+            # self.dataset.delete_dataset()
+        # self.delete_dataset()
         self.accept()
 
     def Cancel(self):
         self.reject()
 
+
 class ObjectDialog(QDialog):
     # NewDatasetDialog shows new dataset dialog.
-    def __init__(self,parent):
+    def __init__(self, parent):
         super().__init__()
         self.setWindowTitle(self.tr("Modan2 - Object Information"))
         self.parent = parent
-        #print(self.parent.pos())
+        # print(self.parent.pos())
         self.remember_geometry = True
         self.m_app = QApplication.instance()
         self.read_settings()
-        #self.move(self.parent.pos()+QPoint(50,50))
+        # self.move(self.parent.pos()+QPoint(50,50))
         close_shortcut = QShortcut(QKeySequence("Ctrl+W"), self)
         close_shortcut.activated.connect(self.close)
 
@@ -849,17 +869,17 @@ class ObjectDialog(QDialog):
         self.hsplitter = QSplitter(Qt.Horizontal)
         self.vsplitter = QSplitter(Qt.Vertical)
 
-        #self.vsplitter.addWidget(self.tableView)
-        #self.vsplitter.addWidget(self.tableWidget)
+        # self.vsplitter.addWidget(self.tableView)
+        # self.vsplitter.addWidget(self.tableWidget)
 
-        #self.hsplitter.addWidget(self.treeView)
-        #self.hsplitter.addWidget(self.vsplitter)
+        # self.hsplitter.addWidget(self.treeView)
+        # self.hsplitter.addWidget(self.vsplitter)
 
         # Create two-row layout for coordinate input
         self.inputWidget = QWidget()
         self.inputMainLayout = QVBoxLayout()
         self.inputWidget.setLayout(self.inputMainLayout)
-        self.inputMainLayout.setContentsMargins(0,0,0,0)
+        self.inputMainLayout.setContentsMargins(0, 0, 0, 0)
         self.inputMainLayout.setSpacing(2)
 
         # First row: coordinate inputs
@@ -929,9 +949,9 @@ class ObjectDialog(QDialog):
         self.object_view_2d = ObjectViewer2D(self)
         self.object_view_2d.object_dialog = self
         self.object_view_2d.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
-        #self.image_label.clicked.connect(self.on_image_clicked)
+        # self.image_label.clicked.connect(self.on_image_clicked)
 
-        self.pixmap = QPixmap(1024,768)
+        self.pixmap = QPixmap(1024, 768)
         self.object_view_2d.setPixmap(self.pixmap)
 
         self.form_layout = QFormLayout()
@@ -947,10 +967,22 @@ class ObjectDialog(QDialog):
         self.form_layout.addRow(self.lblLandmarkStr, self.edtLandmarkStr)
         self.form_layout.addRow("", self.inputWidget)
 
-        self.btnGroup = QButtonGroup() 
-        self.btnLandmark = PicButton(QPixmap(ICON['landmark']), QPixmap(ICON['landmark_hover']), QPixmap(ICON['landmark_down']), QPixmap(ICON['landmark_disabled']))
-        self.btnWireframe = PicButton(QPixmap(ICON['wireframe']), QPixmap(ICON['wireframe_hover']), QPixmap(ICON['wireframe_down']))
-        self.btnCalibration = PicButton(QPixmap(ICON['calibration']), QPixmap(ICON['calibration_hover']), QPixmap(ICON['calibration_down']),QPixmap(ICON['calibration_disabled']))
+        self.btnGroup = QButtonGroup()
+        self.btnLandmark = PicButton(
+            QPixmap(ICON["landmark"]),
+            QPixmap(ICON["landmark_hover"]),
+            QPixmap(ICON["landmark_down"]),
+            QPixmap(ICON["landmark_disabled"]),
+        )
+        self.btnWireframe = PicButton(
+            QPixmap(ICON["wireframe"]), QPixmap(ICON["wireframe_hover"]), QPixmap(ICON["wireframe_down"])
+        )
+        self.btnCalibration = PicButton(
+            QPixmap(ICON["calibration"]),
+            QPixmap(ICON["calibration_hover"]),
+            QPixmap(ICON["calibration_down"]),
+            QPixmap(ICON["calibration_disabled"]),
+        )
         self.btnGroup.addButton(self.btnLandmark)
         self.btnGroup.addButton(self.btnWireframe)
         self.btnGroup.addButton(self.btnCalibration)
@@ -967,13 +999,13 @@ class ObjectDialog(QDialog):
         self.btnWireframe.clicked.connect(self.btnWireframe_clicked)
         self.btnCalibration.clicked.connect(self.btnCalibration_clicked)
         BUTTON_SIZE = 48
-        self.btnLandmark.setFixedSize(BUTTON_SIZE,BUTTON_SIZE)
-        self.btnWireframe.setFixedSize(BUTTON_SIZE,BUTTON_SIZE)
-        self.btnCalibration.setFixedSize(BUTTON_SIZE,BUTTON_SIZE)
+        self.btnLandmark.setFixedSize(BUTTON_SIZE, BUTTON_SIZE)
+        self.btnWireframe.setFixedSize(BUTTON_SIZE, BUTTON_SIZE)
+        self.btnCalibration.setFixedSize(BUTTON_SIZE, BUTTON_SIZE)
         self.btn_layout2 = QGridLayout()
-        self.btn_layout2.addWidget(self.btnLandmark,0,0)
-        self.btn_layout2.addWidget(self.btnWireframe,0,1)
-        self.btn_layout2.addWidget(self.btnCalibration,1,0)
+        self.btn_layout2.addWidget(self.btnLandmark, 0, 0)
+        self.btn_layout2.addWidget(self.btnWireframe, 0, 1)
+        self.btn_layout2.addWidget(self.btnCalibration, 1, 0)
 
         self.cbxShowIndex = QCheckBox()
         self.cbxShowIndex.setText(self.tr("Index"))
@@ -1002,10 +1034,9 @@ class ObjectDialog(QDialog):
         self.btnAddFile.setText(self.tr("Load Image"))
         self.btnAddFile.clicked.connect(self.btnAddFile_clicked)
 
-        #self.btnFBO = QPushButton()
-        #self.btnFBO.setText("FBO")
-        #self.btnFBO.clicked.connect(self.btnFBO_clicked)
-
+        # self.btnFBO = QPushButton()
+        # self.btnFBO.setText("FBO")
+        # self.btnFBO.clicked.connect(self.btnFBO_clicked)
 
         self.left_widget = QWidget()
         self.left_widget.setLayout(self.form_layout)
@@ -1026,13 +1057,13 @@ class ObjectDialog(QDialog):
         self.btnAddMissing.setText(self.tr("Add Missing"))
         self.btnAddMissing.clicked.connect(self.btnAddMissing_clicked)
         self.right_middle_layout.addWidget(self.btnAddMissing)
-        #self.right_middle_layout.addWidget(self.btnFBO)
+        # self.right_middle_layout.addWidget(self.btnFBO)
         self.right_middle_widget.setLayout(self.right_middle_layout)
         self.right_bottom_widget = QWidget()
         self.vsplitter.addWidget(self.right_top_widget)
         self.vsplitter.addWidget(self.right_middle_widget)
         self.vsplitter.addWidget(self.right_bottom_widget)
-        self.vsplitter.setSizes([50,50,400])
+        self.vsplitter.setSizes([50, 50, 400])
         self.vsplitter.setStretchFactor(0, 0)
         self.vsplitter.setStretchFactor(1, 0)
         self.vsplitter.setStretchFactor(2, 1)
@@ -1043,13 +1074,12 @@ class ObjectDialog(QDialog):
         self.object_view_widget = QWidget()
         self.object_view_widget.setLayout(self.object_view_layout)
 
-
         self.hsplitter.addWidget(self.left_widget)
         self.hsplitter.addWidget(self.object_view_widget)
-        #self.hsplitter.addWidget(self.object_view_3d)
+        # self.hsplitter.addWidget(self.object_view_3d)
         self.hsplitter.addWidget(self.vsplitter)
-        #self.hsplitter.addWidget(self.right_widget)
-        self.hsplitter.setSizes([200,800,100])
+        # self.hsplitter.addWidget(self.right_widget)
+        self.hsplitter.setSizes([200, 800, 100])
         self.hsplitter.setStretchFactor(0, 0)
         self.hsplitter.setStretchFactor(1, 1)
         self.hsplitter.setStretchFactor(2, 0)
@@ -1078,7 +1108,7 @@ class ObjectDialog(QDialog):
         btn_layout.addWidget(self.btnNext)
 
         self.status_bar.setMaximumHeight(20)
-        #self.main_layout.addLayout(self.sub_layout)
+        # self.main_layout.addLayout(self.sub_layout)
         self.main_layout.addWidget(self.hsplitter)
         self.main_layout.addLayout(btn_layout)
         self.main_layout.addWidget(self.status_bar)
@@ -1096,7 +1126,7 @@ class ObjectDialog(QDialog):
         self.cbxShowModel.stateChanged.connect(self.show_model_state_changed)
         self.object_deleted = False
 
-        #self.show_index_state_changed()
+        # self.show_index_state_changed()
 
     def read_settings(self):
         self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
@@ -1104,7 +1134,7 @@ class ObjectDialog(QDialog):
             self.setGeometry(self.m_app.settings.value("WindowGeometry/ObjectDialog", QRect(100, 100, 1400, 800)))
         else:
             self.setGeometry(QRect(100, 100, 1400, 800))
-            self.move(self.parent.pos()+QPoint(100,100))
+            self.move(self.parent.pos() + QPoint(100, 100))
 
     def write_settings(self):
         if self.remember_geometry is True:
@@ -1116,15 +1146,16 @@ class ObjectDialog(QDialog):
 
     def btnAddFile_clicked(self):
         # open file dialog
-        #print("btnAddFile_clicked")
+        # print("btnAddFile_clicked")
         if self.dataset is None:
-
             return
-        #print("btnAddFile_clicked")
+        # print("btnAddFile_clicked")
 
         if self.dataset.dimension == 2:
-            extension = " ".join([ "*."+x for x in mu.IMAGE_EXTENSION_LIST])
-            file_path, _ = QFileDialog.getOpenFileName(self, self.tr("Open File"), mu.USER_PROFILE_DIRECTORY, "Image Files ("+extension+")")
+            extension = " ".join(["*." + x for x in mu.IMAGE_EXTENSION_LIST])
+            file_path, _ = QFileDialog.getOpenFileName(
+                self, self.tr("Open File"), mu.USER_PROFILE_DIRECTORY, "Image Files (" + extension + ")"
+            )
             if file_path == "":
                 return
             self.object_view.set_image(file_path)
@@ -1132,39 +1163,38 @@ class ObjectDialog(QDialog):
             self.set_object_name(Path(file_path).stem)
             self.enable_landmark_edit()
 
-
         else:
-            file_path, _ = QFileDialog.getOpenFileName(self, self.tr("Open File"), mu.USER_PROFILE_DIRECTORY, "3D Files (*.obj *.stl *.ply)")
+            file_path, _ = QFileDialog.getOpenFileName(
+                self, self.tr("Open File"), mu.USER_PROFILE_DIRECTORY, "3D Files (*.obj *.stl *.ply)"
+            )
             if file_path == "":
                 return
-            #print("file_path 1:", file_path)
+            # print("file_path 1:", file_path)
             file_path = mu.process_3d_file(file_path)
-            #print("file_path 2:", file_path)
+            # print("file_path 2:", file_path)
 
             self.object_view.set_threed_model(file_path)
             self.object_view.calculate_resize()
             self.set_object_name(Path(file_path).stem)
             self.enable_landmark_edit()
 
-        
-
     def set_object_calibration(self, pixels, calibration_length, calibration_unit):
         self.object.pixels_per_mm = pixels * 1.0 / calibration_length
-        if calibration_unit == 'mm':
+        if calibration_unit == "mm":
             self.object.pixels_per_mm /= 1.0
-        elif calibration_unit == 'cm':
+        elif calibration_unit == "cm":
             self.object.pixels_per_mm /= 10.0
-        elif calibration_unit == 'm':
+        elif calibration_unit == "m":
             self.object.pixels_per_mm /= 1000.0
-        elif calibration_unit == 'um':
+        elif calibration_unit == "um":
             self.object.pixels_per_mm /= 0.001
-        elif calibration_unit == 'nm':
+        elif calibration_unit == "nm":
             self.object.pixels_per_mm /= 0.000001
         self.object_view_2d.pixels_per_mm = self.object.pixels_per_mm
-        #print(pixels, calibration_length, calibration_unit, self.object.pixels_per_mm)
-        #self.object.save()
+        # print(pixels, calibration_length, calibration_unit, self.object.pixels_per_mm)
+        # self.object.save()
 
-    #def btnFBO_clicked(self):
+    # def btnFBO_clicked(self):
     #    self.object_view_3d.show_picker_buffer()
 
     def btnAddMissing_clicked(self):
@@ -1208,7 +1238,7 @@ class ObjectDialog(QDialog):
 
     def toggle_estimation(self, state):
         """Toggle display of estimated missing landmarks"""
-        self.show_estimated = (state == Qt.Checked)
+        self.show_estimated = state == Qt.Checked
 
         # Re-process the current object to update estimation
         if self.object is not None:
@@ -1221,10 +1251,10 @@ class ObjectDialog(QDialog):
         self.object_view.update()
 
     def btnLandmark_clicked(self):
-        #self.edit_mode = MODE_ADD_LANDMARK
-        #if self.object.image.count() == 0:
+        # self.edit_mode = MODE_ADD_LANDMARK
+        # if self.object.image.count() == 0:
         #    return
-        self.object_view.set_mode(MODE['EDIT_LANDMARK'])
+        self.object_view.set_mode(MODE["EDIT_LANDMARK"])
         self.object_view.update()
         self.btnLandmark.setDown(True)
         self.btnLandmark.setChecked(True)
@@ -1234,8 +1264,8 @@ class ObjectDialog(QDialog):
         self.btnCalibration.setChecked(False)
 
     def btnCalibration_clicked(self):
-        #self.edit_mode = MODE_ADD_LANDMARK
-        self.object_view.set_mode(MODE['CALIBRATION'])
+        # self.edit_mode = MODE_ADD_LANDMARK
+        self.object_view.set_mode(MODE["CALIBRATION"])
         self.object_view.update()
         self.btnCalibration.setDown(True)
         self.btnCalibration.setChecked(True)
@@ -1255,8 +1285,8 @@ class ObjectDialog(QDialog):
         logger.debug(f"calibrate after exec - edit_mode: {self.object_view.edit_mode}")
 
     def btnWireframe_clicked(self):
-        #self.edit_mode = MODE_ADD_LANDMARK
-        self.object_view.set_mode(MODE['WIREFRAME'])
+        # self.edit_mode = MODE_ADD_LANDMARK
+        self.object_view.set_mode(MODE["WIREFRAME"])
         self.object_view.update()
         self.btnWireframe.setDown(True)
         self.btnWireframe.setChecked(True)
@@ -1266,7 +1296,7 @@ class ObjectDialog(QDialog):
         self.btnCalibration.setChecked(False)
 
     def set_object_name(self, name):
-        #print("set_object_name", self.edtObjectName.text(), name)
+        # print("set_object_name", self.edtObjectName.text(), name)
 
         if self.edtObjectName.text() == "":
             self.edtObjectName.setText(name)
@@ -1287,10 +1317,7 @@ class ObjectDialog(QDialog):
         complete_objects = []
         for obj in self.dataset.object_list:
             obj.unpack_landmark()
-            has_missing = any(
-                lm[0] is None or lm[1] is None
-                for lm in obj.landmark_list
-            )
+            has_missing = any(lm[0] is None or lm[1] is None for lm in obj.landmark_list)
             if not has_missing:
                 complete_objects.append(obj)
 
@@ -1331,6 +1358,7 @@ class ObjectDialog(QDialog):
         import logging
 
         import numpy as np
+
         logger = logging.getLogger(__name__)
 
         if obj is None:
@@ -1339,10 +1367,7 @@ class ObjectDialog(QDialog):
         obj.unpack_landmark()
 
         # Check if there are missing landmarks
-        has_missing = any(
-            lm[0] is None or lm[1] is None
-            for lm in obj.landmark_list
-        )
+        has_missing = any(lm[0] is None or lm[1] is None for lm in obj.landmark_list)
 
         if not has_missing:
             return obj.landmark_list
@@ -1385,8 +1410,8 @@ class ObjectDialog(QDialog):
         current_centered = current_valid - current_centroid
         mean_centered = mean_valid - mean_centroid
 
-        current_size = np.sqrt(np.sum(current_centered ** 2))
-        mean_size = np.sqrt(np.sum(mean_centered ** 2))
+        current_size = np.sqrt(np.sum(current_centered**2))
+        mean_size = np.sqrt(np.sum(mean_centered**2))
 
         scale_factor = current_size / mean_size if mean_size > 0 else 1.0
 
@@ -1394,6 +1419,7 @@ class ObjectDialog(QDialog):
 
         # Create result with estimated missing landmarks
         import copy
+
         result_landmarks = copy.deepcopy(obj.landmark_list)
         imputed_count = 0
 
@@ -1415,7 +1441,7 @@ class ObjectDialog(QDialog):
         return result_landmarks
 
     def set_dataset(self, dataset):
-        #print("object dialog set_dataset", dataset.dataset_name)
+        # print("object dialog set_dataset", dataset.dataset_name)
         if dataset is None:
             self.dataset = None
             self.lblDataset.setText("No dataset selected")
@@ -1426,63 +1452,58 @@ class ObjectDialog(QDialog):
         # Invalidate cache when dataset changes
         self._aligned_mean_cache = None
 
-        header = self.edtLandmarkStr.horizontalHeader()    
+        header = self.edtLandmarkStr.horizontalHeader()
         if self.dataset.dimension == 2:
             self.edtLandmarkStr.setColumnCount(2)
-            self.edtLandmarkStr.setHorizontalHeaderLabels(["X","Y"])
-            #self.edtLandmarkStr.setColumnWidth(0, 80)
-            #self.edtLandmarkStr.setColumnWidth(1, 80)
+            self.edtLandmarkStr.setHorizontalHeaderLabels(["X", "Y"])
+            # self.edtLandmarkStr.setColumnWidth(0, 80)
+            # self.edtLandmarkStr.setColumnWidth(1, 80)
             header.setSectionResizeMode(0, QHeaderView.Stretch)
             header.setSectionResizeMode(1, QHeaderView.Stretch)
             self.cbxAutoRotate.hide()
             self.cbxShowModel.hide()
-            #self.btnCalibration.show()
+            # self.btnCalibration.show()
             self.inputZ.hide()
             self.object_view_3d.hide()
             self.object_view = self.object_view_2d
-            input_width = 80
         elif self.dataset.dimension == 3:
             self.edtLandmarkStr.setColumnCount(3)
-            self.edtLandmarkStr.setHorizontalHeaderLabels(["X","Y","Z"])
+            self.edtLandmarkStr.setHorizontalHeaderLabels(["X", "Y", "Z"])
             header.setSectionResizeMode(0, QHeaderView.Stretch)
             header.setSectionResizeMode(1, QHeaderView.Stretch)
             header.setSectionResizeMode(2, QHeaderView.Stretch)
             self.cbxAutoRotate.show()
             self.cbxShowModel.show()
-            #self.btnCalibration.hide()
+            # self.btnCalibration.hide()
             self.inputZ.show()
             self.object_view_2d.hide()
             self.object_view = self.object_view_3d
-            input_width = 60
         if self.dataset.propertyname_str is not None and self.dataset.propertyname_str != "":
             self.edtPropertyList = []
             self.dataset.unpack_variablename_str()
             for variablename in self.dataset.variablename_list:
-                self.edtPropertyList.append( QLineEdit() )
+                self.edtPropertyList.append(QLineEdit())
                 self.form_layout.addRow(variablename, self.edtPropertyList[-1])
-        #self.inputX.setFixedWidth(input_width)
-        #self.inputY.setFixedWidth(input_width)
-        #self.inputZ.setFixedWidth(input_width)
-        #self.btnAddInput.setFixedWidth(input_width)
+        # self.inputX.setFixedWidth(input_width)
+        # self.inputY.setFixedWidth(input_width)
+        # self.inputZ.setFixedWidth(input_width)
+        # self.btnAddInput.setFixedWidth(input_width)
 
     def set_object(self, object):
-        #print("set_object", object.object_name, object.dataset.dimension)
+        # print("set_object", object.object_name, object.dataset.dimension)
         if object is not None:
             self.object = object
             self.edtObjectName.setText(object.object_name)
             self.edtSequence.setText(str(object.sequence or 1))
             self.edtObjectDesc.setText(object.object_desc)
-            #self.edtLandmarkStr.setText(object.landmark_str)
+            # self.edtLandmarkStr.setText(object.landmark_str)
             object.unpack_landmark()
 
             # Store original landmark list
             self.original_landmark_list = copy.deepcopy(object.landmark_list)
 
             # Check if object has missing landmarks
-            has_missing = any(
-                lm[0] is None or lm[1] is None
-                for lm in object.landmark_list
-            )
+            has_missing = any(lm[0] is None or lm[1] is None for lm in object.landmark_list)
 
             # Estimate missing landmarks if needed and enabled
             if has_missing and self.show_estimated:
@@ -1499,68 +1520,68 @@ class ObjectDialog(QDialog):
                 self.edge_list = dataset_to_use.unpack_wireframe()
             else:
                 self.edge_list = []
-            #for lm in self.landmark_list:
+            # for lm in self.landmark_list:
             #    self.show_landmark(*lm)
-            #self.show_landmarks()
+            # self.show_landmarks()
 
         # Use object's dataset if self.dataset is None
         dataset_to_use = self.dataset if self.dataset is not None else (object.dataset if object is not None else None)
         if dataset_to_use is not None and dataset_to_use.dimension == 3:
-            #print("set_object 3d 1")
+            # print("set_object 3d 1")
             self.object_view = self.object_view_3d
             self.object_view.auto_rotate = False
-            #obj_ops = MdObjectOps(object)
-            #self.object_view.set_dataset(object.dataset)
-            #self.btnLandmark.setDisabled(True)
-            #print("set_object 3d 2")
+            # obj_ops = MdObjectOps(object)
+            # self.object_view.set_dataset(object.dataset)
+            # self.btnLandmark.setDisabled(True)
+            # print("set_object 3d 2")
             self.btnCalibration.setDisabled(True)
             self.cbxAutoRotate.show()
             self.cbxShowModel.show()
             self.cbxShowPolygon.show()
-            #self.cbxShowModel.setEnabled(True)
+            # self.cbxShowModel.setEnabled(True)
             self.btnAddFile.setText(self.tr("Load 3D Model"))
-            #print("set_object 3d 3")
+            # print("set_object 3d 3")
             if object is not None:
-                #print("object dialog self.landmark_list in set object 3d", self.landmark_list)
+                # print("object dialog self.landmark_list in set object 3d", self.landmark_list)
                 self.object_view.set_object(object)
                 self.object_view.landmark_list = self.landmark_list
                 self.object_view.update_landmark_list()
                 self.object_view.calculate_resize()
                 if object.threed_model is not None and len(object.threed_model) > 0:
                     self.enable_landmark_edit()
-                    #self.cbxShowModel.show()
+                    # self.cbxShowModel.show()
                     self.cbxShowModel.setEnabled(True)
                     self.cbxShowModel.setChecked(True)
                 else:
                     self.disable_landmark_edit()
                     self.cbxShowModel.setEnabled(False)
-                #self.object_view.landmark_list = self.landmark_list
+                # self.object_view.landmark_list = self.landmark_list
         else:
-            #print("set_object 2d")
+            # print("set_object 2d")
             self.object_view = self.object_view_2d
             self.cbxAutoRotate.hide()
             self.cbxShowModel.hide()
             self.cbxShowPolygon.hide()
-            #self.cbxShowModel.setEnabled(True)
+            # self.cbxShowModel.setEnabled(True)
             self.btnAddFile.setText(self.tr("Load Image"))
 
             if object is not None:
                 if object.image is not None and len(object.image) > 0:
-                    #img = object.image[0]
-                    #image_path = img.get_file_path(self.m_app.storage_directory)
+                    # img = object.image[0]
+                    # image_path = img.get_file_path(self.m_app.storage_directory)
                     ##check if image_path exists
-                    #if os.path.exists(image_path):
+                    # if os.path.exists(image_path):
                     #    self.object_view.set_image(image_path)
                     self.btnCalibration.setEnabled(True)
                     self.enable_landmark_edit()
                     if object.pixels_per_mm is None:
                         self.btnCalibration_clicked()
-                        #self.btnCalibration.setDisabled(False)
+                        # self.btnCalibration.setDisabled(False)
                 else:
                     self.btnCalibration.setDisabled(True)
                     self.disable_landmark_edit()
-                #elif len(self.landmark_list) > 0:
-                #print("objectdialog self.landmark_list in set object 2d", self.landmark_list)
+                # elif len(self.landmark_list) > 0:
+                # print("objectdialog self.landmark_list in set object 2d", self.landmark_list)
                 self.object_view.clear_object()
                 self.object_view.set_object(object)
                 self.object_view.image_changed = False
@@ -1568,15 +1589,15 @@ class ObjectDialog(QDialog):
                 self.object_view.update_landmark_list()
                 self.object_view.calculate_resize()
 
-        if len(self.dataset.variablename_list) >0:
+        if len(self.dataset.variablename_list) > 0:
             self.object.unpack_variable()
             self.dataset.unpack_variablename_str()
-            for idx, propertyname in enumerate(self.dataset.variablename_list):
+            for idx, _propertyname in enumerate(self.dataset.variablename_list):
                 if idx < len(object.variable_list):
                     self.edtPropertyList[idx].setText(object.variable_list[idx])
 
-            #self.object_view_3d.landmark_list = self.landmark_list
-        #self.set_dataset(object.dataset)
+            # self.object_view_3d.landmark_list = self.landmark_list
+        # self.set_dataset(object.dataset)
         self.show_index_state_changed()
         self.object_view.align_object()
         self.show_landmarks()
@@ -1584,18 +1605,17 @@ class ObjectDialog(QDialog):
     def enable_landmark_edit(self):
         self.btnLandmark.setEnabled(True)
         self.btnLandmark.setDown(True)
-        self.object_view.set_mode(MODE['EDIT_LANDMARK'])
+        self.object_view.set_mode(MODE["EDIT_LANDMARK"])
 
     def disable_landmark_edit(self):
         self.btnLandmark.setDisabled(True)
         self.btnLandmark.setDown(False)
-        self.object_view.set_mode(MODE['VIEW'])
-
+        self.object_view.set_mode(MODE["VIEW"])
 
     @pyqtSlot(str)
     def x_changed(self, text):
         # if text is multiline and tab separated, add to table
-        #print("x_changed called with", text)
+        # print("x_changed called with", text)
 
         # Update button states based on whether we're in selection mode
         if self.selected_landmark_index >= 0:
@@ -1607,10 +1627,10 @@ class ObjectDialog(QDialog):
         if "\n" in text:
             lines = text.split("\n")
             for line in lines:
-                #print(line)
+                # print(line)
                 if "\t" in line:
                     coords = line.split("\t")
-                    #add landmarks using add_landmark method
+                    # add landmarks using add_landmark method
                     if self.dataset.dimension == 2 and len(coords) == 2:
                         self.add_landmark(coords[0], coords[1])
                     elif self.dataset.dimension == 3 and len(coords) == 3:
@@ -1621,22 +1641,22 @@ class ObjectDialog(QDialog):
 
     def update_landmark(self, idx, x, y, z=None):
         if self.dataset.dimension == 2:
-            self.landmark_list[idx] = [x,y]
+            self.landmark_list[idx] = [x, y]
         elif self.dataset.dimension == 3:
-            self.landmark_list[idx] = [x,y,z]
+            self.landmark_list[idx] = [x, y, z]
         self.show_landmarks()
 
     def add_landmark(self, x, y, z=None):
-        #print("adding landmark", x, y, z, self.landmark_list)
+        # print("adding landmark", x, y, z, self.landmark_list)
         if self.dataset.dimension == 2:
-            self.landmark_list.append([float(x),float(y)])
+            self.landmark_list.append([float(x), float(y)])
         elif self.dataset.dimension == 3:
-            self.landmark_list.append([float(x),float(y),float(z)])
+            self.landmark_list.append([float(x), float(y), float(z)])
         self.show_landmarks()
-        #self.object_view.calculate_resize()
+        # self.object_view.calculate_resize()
 
     def delete_landmark(self, idx):
-        #print("delete_landmark", idx)
+        # print("delete_landmark", idx)
         self.landmark_list.pop(idx)
         self.show_landmarks()
 
@@ -1693,7 +1713,9 @@ class ObjectDialog(QDialog):
 
             if x_str == "" or y_str == "":
                 # Update to missing landmark
-                self.update_landmark(self.selected_landmark_index, None, None, None if self.dataset.dimension == 3 else None)
+                self.update_landmark(
+                    self.selected_landmark_index, None, None, None if self.dataset.dimension == 3 else None
+                )
             else:
                 if self.dataset.dimension == 2:
                     self.update_landmark(self.selected_landmark_index, float(x_str), float(y_str))
@@ -1775,7 +1797,7 @@ class ObjectDialog(QDialog):
         self.edtLandmarkStr.itemSelectionChanged.connect(self.on_landmark_selected)
 
         for idx, lm in enumerate(self.landmark_list):
-            #print(idx, lm)
+            # print(idx, lm)
 
             # Handle X coordinate
             if lm[0] is None:
@@ -1785,8 +1807,8 @@ class ObjectDialog(QDialog):
                 font.setBold(True)
                 item_x.setFont(font)
             else:
-                item_x = QTableWidgetItem(str(float(lm[0])*1.0))
-            item_x.setTextAlignment(Qt.AlignRight|Qt.AlignVCenter)
+                item_x = QTableWidgetItem(str(float(lm[0]) * 1.0))
+            item_x.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             self.edtLandmarkStr.setItem(idx, 0, item_x)
 
             # Handle Y coordinate
@@ -1797,26 +1819,25 @@ class ObjectDialog(QDialog):
                 font.setBold(True)
                 item_y.setFont(font)
             else:
-                item_y = QTableWidgetItem(str(float(lm[1])*1.0))
-            item_y.setTextAlignment(Qt.AlignRight|Qt.AlignVCenter)
+                item_y = QTableWidgetItem(str(float(lm[1]) * 1.0))
+            item_y.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             self.edtLandmarkStr.setItem(idx, 1, item_y)
 
             # Handle Z coordinate for 3D
             if self.dataset.dimension == 3:
                 if len(lm) > 2 and lm[2] is not None:
-                    item_z = QTableWidgetItem(str(float(lm[2])*1.0))
+                    item_z = QTableWidgetItem(str(float(lm[2]) * 1.0))
                 else:
                     item_z = QTableWidgetItem("MISSING")
                     item_z.setForeground(Qt.red)
                     font = QFont()
                     font.setBold(True)
                     item_z.setFont(font)
-                item_z.setTextAlignment(Qt.AlignRight|Qt.AlignVCenter)
+                item_z.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
                 self.edtLandmarkStr.setItem(idx, 2, item_z)
-        
 
     def save_object(self):
-        #print("save object")
+        # print("save object")
 
         if self.object is None:
             self.object = MdObject()
@@ -1824,14 +1845,14 @@ class ObjectDialog(QDialog):
         self.object.object_name = self.edtObjectName.text()
         self.object.sequence = int(self.edtSequence.text())
         self.object.object_desc = self.edtObjectDesc.toPlainText()
-        #self.object.landmark_str = self.edtLandmarkStr.text()
+        # self.object.landmark_str = self.edtLandmarkStr.text()
         self.object.landmark_str = self.make_landmark_str()
-        #print("scale:", self.object.pixels_per_mm)
+        # print("scale:", self.object.pixels_per_mm)
         if self.dataset.propertyname_str is not None and self.dataset.propertyname_str != "":
-            self.object.property_str = ",".join([ edt.text() for edt in self.edtPropertyList ])
+            self.object.property_str = ",".join([edt.text() for edt in self.edtPropertyList])
 
         self.object.save()
-        #print("object_view_2d.fullpath in save_object:", self.object_view_2d.fullpath, "has image", self.object.has_image(), "image changed", self.object_view_2d.image_changed)
+        # print("object_view_2d.fullpath in save_object:", self.object_view_2d.fullpath, "has image", self.object.has_image(), "image changed", self.object_view_2d.image_changed)
         if self.object_view_2d.fullpath is not None:
             if not self.object.has_image():
                 img = self.object.add_image(self.object_view_2d.fullpath)
@@ -1839,8 +1860,8 @@ class ObjectDialog(QDialog):
             elif self.object_view_2d.image_changed is True:
                 img = self.object.update_image(self.object_view_2d.fullpath)
                 img.save()
-            #print("img:", img)
-            
+            # print("img:", img)
+
         elif self.object_view_3d.fullpath is not None and not self.object.has_threed_model():
             mdl = self.object.add_threed_model(self.object_view_3d.fullpath)
             mdl.save()
@@ -1857,9 +1878,9 @@ class ObjectDialog(QDialog):
                     landmark_str += "Missing"
                 else:
                     landmark_str += cell_text
-                if col < self.edtLandmarkStr.columnCount()-1:
+                if col < self.edtLandmarkStr.columnCount() - 1:
                     landmark_str += "\t"
-            if row < self.edtLandmarkStr.rowCount()-1:
+            if row < self.edtLandmarkStr.rowCount() - 1:
                 landmark_str += "\n"
         return landmark_str
 
@@ -1867,14 +1888,16 @@ class ObjectDialog(QDialog):
         self.tableView = tableview
 
     def Delete(self):
-        ret = QMessageBox.question(self, "", self.tr("Are you sure to delete this object?"), QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        ret = QMessageBox.question(
+            self, "", self.tr("Are you sure to delete this object?"), QMessageBox.Yes | QMessageBox.No, QMessageBox.No
+        )
         if ret == QMessageBox.Yes:
             if self.object.image.count() > 0:
                 image_path = self.object.image[0].get_file_path(self.m_app.storage_directory)
                 if os.path.exists(image_path):
                     os.remove(image_path)
             self.object.delete_instance()
-        #self.delete_dataset()
+        # self.delete_dataset()
         self.object_deleted = True
         self.accept()
 
@@ -1885,12 +1908,12 @@ class ObjectDialog(QDialog):
 
         new_index_list = []
         model = selected_indexes[0].model()
-        if hasattr(model, 'mapToSource'):
+        if hasattr(model, "mapToSource"):
             for index in selected_indexes:
                 new_index = model.mapToSource(index)
                 new_index_list.append(new_index)
             selected_indexes = new_index_list
-        
+
         selected_object_list = []
         for index in selected_indexes:
             item = self.object_model.itemFromIndex(index)
@@ -1900,7 +1923,6 @@ class ObjectDialog(QDialog):
             selected_object_list.append(object)
 
         return selected_object_list
-
 
     def Previous(self):
         # get all items from tableView
@@ -1923,24 +1945,24 @@ class ObjectDialog(QDialog):
             new_object = MdObject.get_by_id(new_object_id)
 
         if new_index >= 0:
-            # enable or disable prev and next button 
+            # enable or disable prev and next button
             if new_index == 0:
                 self.btnPrevious.setEnabled(False)
             else:
                 self.btnPrevious.setEnabled(True)
-            if new_index == len(object_id_list)-1:
+            if new_index == len(object_id_list) - 1:
                 self.btnNext.setEnabled(False)
             else:
                 self.btnNext.setEnabled(True)
-                
+
             self.save_object()
             self.set_object(new_object)
             # select new object in tableView
             new_proxy_index = proxy_index_list[new_index]
-            #new_index = self.object_model.indexFromId(new_object_id)
+            # new_index = self.object_model.indexFromId(new_object_id)
             self.tableView.selectRow(new_proxy_index.row())
-            
-            #self.accept()
+
+            # self.accept()
 
     def Next(self):
         # get all items from tableView
@@ -1957,28 +1979,28 @@ class ObjectDialog(QDialog):
             object_id_list.append(object_id)
 
         new_index = -1
-        if object_id_list.index(self.object.id) < len(object_id_list)-1:
+        if object_id_list.index(self.object.id) < len(object_id_list) - 1:
             new_index = object_id_list.index(self.object.id) + 1
             new_object_id = object_id_list[new_index]
             new_object = MdObject.get_by_id(new_object_id)
 
         if new_index >= 0:
-            # enable or disable prev and next button 
+            # enable or disable prev and next button
             if new_index == 0:
                 self.btnPrevious.setEnabled(False)
             else:
                 self.btnPrevious.setEnabled(True)
-            if new_index == len(object_id_list)-1:
+            if new_index == len(object_id_list) - 1:
                 self.btnNext.setEnabled(False)
             else:
                 self.btnNext.setEnabled(True)
-            
-            self.save_object()    
-            self.set_object(new_object)            
+
+            self.save_object()
+            self.set_object(new_object)
             new_proxy_index = proxy_index_list[new_index]
-            #new_index = self.object_model.indexFromId(new_object_id)
+            # new_index = self.object_model.indexFromId(new_object_id)
             self.tableView.selectRow(new_proxy_index.row())
-            #self.accept()
+            # self.accept()
 
     def Okay(self):
         self.save_object()
@@ -1989,27 +2011,27 @@ class ObjectDialog(QDialog):
         self.reject()
 
     def resizeEvent(self, event):
-        #print("Window has been resized",self.image_label.width(), self.image_label.height())
-        #self.pixmap.scaled(self.image_label.width(), self.image_label.height(), Qt.KeepAspectRatio)
-        #self.edtObjectDesc.resize(self.edtObjectDesc.height(),300)
-        #self.image_label.setPixmap(self.pixmap)
+        # print("Window has been resized",self.image_label.width(), self.image_label.height())
+        # self.pixmap.scaled(self.image_label.width(), self.image_label.height(), Qt.KeepAspectRatio)
+        # self.edtObjectDesc.resize(self.edtObjectDesc.height(),300)
+        # self.image_label.setPixmap(self.pixmap)
         QDialog.resizeEvent(self, event)
 
 
 class NewAnalysisDialog(QDialog):
-    def __init__(self,parent,dataset):
+    def __init__(self, parent, dataset):
         super().__init__(parent)
         self.parent = parent
         self.setWindowTitle(self.tr("Modan2 - New Analysis"))
         self.setFixedSize(500, 450)  # Increased height for progress bar
-        
+
         # Center the dialog on screen
         screen = QApplication.primaryScreen()
         screen_geometry = screen.geometry()
         x = (screen_geometry.width() - self.width()) // 2
         y = (screen_geometry.height() - self.height()) // 2
         self.move(x, y)
-        
+
         self.dataset = dataset
         self.name_edited = False
         self.controller = parent.controller  # Get controller reference
@@ -2023,13 +2045,13 @@ class NewAnalysisDialog(QDialog):
         self.comboSuperimposition.addItem(self.tr("Procrustes"))
         self.comboSuperimposition.addItem(self.tr("Bookstein"))
         self.comboSuperimposition.addItem(self.tr("Resistant Fit"))
-        #self.lblOrdination = QLabel("Ordination method", self)
-        #self.comboOrdination = QComboBox(self)
-        #self.comboOrdination.addItem("PCA")
-        #self.comboOrdination.addItem("CVA")
-        #self.comboOrdination.addItem("MANOVA")
-        #self.comboOrdination.currentIndexChanged.connect(self.comboOrdination_changed)
-        #self.comboOrdination.addItem("MDS")
+        # self.lblOrdination = QLabel("Ordination method", self)
+        # self.comboOrdination = QComboBox(self)
+        # self.comboOrdination.addItem("PCA")
+        # self.comboOrdination.addItem("CVA")
+        # self.comboOrdination.addItem("MANOVA")
+        # self.comboOrdination.currentIndexChanged.connect(self.comboOrdination_changed)
+        # self.comboOrdination.addItem("MDS")
         self.lblCvaGroupBy = QLabel(self.tr("CVA grouping variable"), self)
         self.comboCvaGroupBy = QComboBox(self)
         self.lblManovaGroupBy = QLabel(self.tr("MANOVA grouping variable"), self)
@@ -2037,14 +2059,14 @@ class NewAnalysisDialog(QDialog):
 
         valid_property_index_list = self.dataset.get_grouping_variable_index_list()
         variablename_list = self.dataset.get_variablename_list()
-        #print("valid_property_index_list", valid_property_index_list, variablename_list)
+        # print("valid_property_index_list", valid_property_index_list, variablename_list)
         for idx in valid_property_index_list:
             property = variablename_list[idx]
             self.comboCvaGroupBy.addItem(property, idx)
             self.comboManovaGroupBy.addItem(property, idx)
 
         self.ignore_change = False
-        #self.comboOrdination_changed()
+        # self.comboOrdination_changed()
 
         self.btnOK = QPushButton(self.tr("OK"), self)
         self.btnCancel = QPushButton(self.tr("Cancel"), self)
@@ -2056,17 +2078,17 @@ class NewAnalysisDialog(QDialog):
         i = 0
         self.layout.addWidget(self.lblAnalysisName, i, 0)
         self.layout.addWidget(self.edtAnalysisName, i, 1)
-        i+= 1
+        i += 1
         self.layout.addWidget(self.lblSuperimposition, i, 0)
         self.layout.addWidget(self.comboSuperimposition, i, 1)
-        #i+= 1
-        #self.layout.addWidget(self.lblOrdination, i, 0)
-        #self.layout.addWidget(self.comboOrdination, i, 1)
-        i+= 1
-        self.layout.addWidget(self.lblCvaGroupBy, i, 0)   
+        # i+= 1
+        # self.layout.addWidget(self.lblOrdination, i, 0)
+        # self.layout.addWidget(self.comboOrdination, i, 1)
+        i += 1
+        self.layout.addWidget(self.lblCvaGroupBy, i, 0)
         self.layout.addWidget(self.comboCvaGroupBy, i, 1)
-        i+= 1
-        self.layout.addWidget(self.lblManovaGroupBy, i, 0)   
+        i += 1
+        self.layout.addWidget(self.lblManovaGroupBy, i, 0)
         self.layout.addWidget(self.comboManovaGroupBy, i, 1)
 
         # Add progress bar and status label
@@ -2077,41 +2099,35 @@ class NewAnalysisDialog(QDialog):
         self.progressBar.setValue(0)
         self.progressBar.hide()  # Initially hidden
         self.layout.addWidget(self.progressBar, i, 0, 1, 2)
-        
+
         i += 1
         self.lblStatus = QLabel("", self)
         self.lblStatus.setAlignment(Qt.AlignCenter)
         self.lblStatus.setStyleSheet("QLabel { color: #666; font-style: italic; }")
         self.lblStatus.hide()  # Initially hidden
         self.layout.addWidget(self.lblStatus, i, 0, 1, 2)
-        
+
         self.buttonLayout = QHBoxLayout()
         self.buttonLayout.addWidget(self.btnOK)
         self.buttonLayout.addWidget(self.btnCancel)
         i += 1
         self.layout.addWidget(QLabel(""), i, 0, 1, 2)
-        i+= 1
+        i += 1
         self.layout.addLayout(self.buttonLayout, i, 0, 1, 2)
         self.get_analysis_name()
-        
+
         # Store signal connections for cleanup
         self.signal_connections = []
-        
+
         # Connect controller signals for progress
-        if hasattr(self.controller, 'analysis_progress'):
-            self.signal_connections.append(
-                (self.controller.analysis_progress, self.on_analysis_progress)
-            )
+        if hasattr(self.controller, "analysis_progress"):
+            self.signal_connections.append((self.controller.analysis_progress, self.on_analysis_progress))
             self.controller.analysis_progress.connect(self.on_analysis_progress)
-        if hasattr(self.controller, 'analysis_completed'):
-            self.signal_connections.append(
-                (self.controller.analysis_completed, self.on_analysis_completed)
-            )
+        if hasattr(self.controller, "analysis_completed"):
+            self.signal_connections.append((self.controller.analysis_completed, self.on_analysis_completed))
             self.controller.analysis_completed.connect(self.on_analysis_completed)
-        if hasattr(self.controller, 'analysis_failed'):
-            self.signal_connections.append(
-                (self.controller.analysis_failed, self.on_analysis_failed)
-            )
+        if hasattr(self.controller, "analysis_failed"):
+            self.signal_connections.append((self.controller.analysis_failed, self.on_analysis_failed))
             self.controller.analysis_failed.connect(self.on_analysis_failed)
 
     def edtAnalysisName_changed(self):
@@ -2119,10 +2135,10 @@ class NewAnalysisDialog(QDialog):
             pass
         else:
             self.name_edited = True
-            #print("name edited")
+            # print("name edited")
 
     def comboOrdination_changed(self):
-        if self.comboOrdination.currentText() in ["CVA","MANOVA"]:
+        if self.comboOrdination.currentText() in ["CVA", "MANOVA"]:
             self.comboGroupBy.setEnabled(True)
             self.comboGroupBy.show()
             self.lblGroupBy.show()
@@ -2146,67 +2162,67 @@ class NewAnalysisDialog(QDialog):
         """Run analysis with progress bar"""
         if self.analysis_running:
             return
-            
+
         # Validate inputs
         if not self.edtAnalysisName.text().strip():
             QMessageBox.warning(self, self.tr("Warning"), self.tr("Please enter an analysis name"))
             return
-            
+
         # Store parameters for later use
         self.analysis_name = self.edtAnalysisName.text()
         self.superimposition_method = self.comboSuperimposition.currentText()
         self.cva_group_by = self.comboCvaGroupBy.currentData()
         self.manova_group_by = self.comboManovaGroupBy.currentData()
-        
+
         # Disable controls during analysis
         self.set_controls_enabled(False)
         self.analysis_running = True
-        
+
         # Set wait cursor during analysis
         QApplication.setOverrideCursor(Qt.WaitCursor)
-        
+
         # Show progress bar and status
         self.progressBar.show()
         self.lblStatus.show()
         self.progressBar.setValue(0)
         self.lblStatus.setText(self.tr("Validating dataset..."))
-        
+
         # Change button text
         self.btnOK.setText(self.tr("Running..."))
         self.btnCancel.setText(self.tr("Close"))
-        
+
         try:
             # Validate dataset
             if not self.controller.validate_dataset_for_analysis(self.dataset):
                 self.on_analysis_failed(self.tr("Dataset validation failed"))
                 return
-                
+
             self.lblStatus.setText(self.tr("Starting analysis..."))
             QApplication.processEvents()
-            
+
             # Run analysis
             self.controller.run_analysis(
                 dataset=self.dataset,
                 analysis_name=self.analysis_name,
                 superimposition_method=self.superimposition_method,
                 cva_group_by=self.cva_group_by,
-                manova_group_by=self.manova_group_by
+                manova_group_by=self.manova_group_by,
             )
-            
+
         except Exception as e:
             self.on_analysis_failed(str(e))
-    
+
     def btnCancel_clicked(self):
         # Disconnect signals before closing
         self.cleanup_connections()
-        
+
         if self.analysis_completed:
             # If analysis completed successfully, accept
             self.accept()
         else:
             # Otherwise reject
             self.reject()
-    
+
     def set_controls_enabled(self, enabled):
         """Enable/disable input controls"""
         self.edtAnalysisName.setEnabled(enabled)
@@ -2214,11 +2230,11 @@ class NewAnalysisDialog(QDialog):
         self.comboCvaGroupBy.setEnabled(enabled)
         self.comboManovaGroupBy.setEnabled(enabled)
         self.btnOK.setEnabled(enabled)
-    
+
     def on_analysis_progress(self, progress):
         """Update progress bar"""
         self.progressBar.setValue(progress)
-        
+
         # Update status message based on progress
         if progress < 25:
             self.lblStatus.setText(self.tr("Validating objects and landmarks..."))
@@ -2230,61 +2246,60 @@ class NewAnalysisDialog(QDialog):
             self.lblStatus.setText(self.tr("Computing CVA and MANOVA..."))
         else:
             self.lblStatus.setText(self.tr("Finalizing results..."))
-        
+
         QApplication.processEvents()
-    
+
     def on_analysis_completed(self, analysis):
         """Handle successful analysis completion"""
         if self.analysis_completed:  # Prevent multiple calls
             return
-            
+
         self.analysis_result = analysis
         self.analysis_completed = True
         self.analysis_running = False
-        
+
         # Restore normal cursor
         QApplication.restoreOverrideCursor()
-        
+
         self.progressBar.setValue(100)
         self.lblStatus.setText(self.tr("Analysis completed successfully!"))
         self.lblStatus.setStyleSheet("QLabel { color: green; font-weight: bold; }")
-        
+
         # Re-enable controls
         self.set_controls_enabled(True)
-        
+
         # Change button text
         self.btnOK.setText(self.tr("OK"))
         self.btnOK.hide()  # Hide OK button after success
         self.btnCancel.setText(self.tr("Close"))
-        
+
         # Auto-close after a short delay (with cleanup)
         QTimer.singleShot(1500, self.close_dialog)
-    
+
     def on_analysis_failed(self, error_msg):
         """Handle analysis failure"""
         # Restore normal cursor
         QApplication.restoreOverrideCursor()
-        
+
         self.progressBar.setValue(0)
         self.lblStatus.setText(self.tr("Analysis failed: {}").format(error_msg))
         self.lblStatus.setStyleSheet("QLabel { color: red; font-weight: bold; }")
-        
+
         # Re-enable controls
         self.set_controls_enabled(True)
         self.analysis_running = False
-        
+
         # Reset button text
         self.btnOK.setText(self.tr("OK"))
         self.btnCancel.setText(self.tr("Cancel"))
-        
-        QMessageBox.critical(self, self.tr("Analysis Failed"), 
-                            self.tr("Analysis failed:\n{}").format(error_msg))
-    
+
+        QMessageBox.critical(self, self.tr("Analysis Failed"), self.tr("Analysis failed:\n{}").format(error_msg))
+
     def cleanup_connections(self):
         """Disconnect all signal connections to prevent errors on close"""
         # Restore cursor if still in wait state
         QApplication.restoreOverrideCursor()
-        
+
         for signal, slot in self.signal_connections:
             try:
                 signal.disconnect(slot)
@@ -2292,7 +2307,7 @@ class NewAnalysisDialog(QDialog):
                 # Signal might already be disconnected
                 pass
         self.signal_connections.clear()
-    
+
     def close_dialog(self):
         """Safely close the dialog"""
         self.cleanup_connections()
@@ -2300,7 +2315,7 @@ class NewAnalysisDialog(QDialog):
             self.accept()
         else:
             self.reject()
-    
+
     def closeEvent(self, event):
         """Handle dialog close event"""
         self.cleanup_connections()
@@ -2312,19 +2327,20 @@ class NewAnalysisDialog(QDialog):
         else:
             i = 1
             # get last index of current name which is in the form of "name (i)" using regular expression
-            match = re.match(r"(.+)\s+\((\d+)\)",name)
+            match = re.match(r"(.+)\s+\((\d+)\)", name)
             if match:
                 name = match.group(1)
                 i = int(match.group(2))
                 i += 1
             while True:
-                new_name = name + " ("+str(i)+")"
+                new_name = name + " (" + str(i) + ")"
                 if new_name not in name_list:
                     return new_name
-                i += 1        
+                i += 1
+
 
 class AnalysisResultDialog(QDialog):
-    def __init__(self,parent):
+    def __init__(self, parent):
         super().__init__()
         self.setWindowTitle(self.tr("Modan2 - Dataset Analysis"))
         self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
@@ -2336,18 +2352,19 @@ class AnalysisResultDialog(QDialog):
         self.marker_list = mu.MARKER_LIST[:]
         self.plot_size = "medium"
         self.read_settings()
-        #self.setGeometry(QRect(100, 100, 1400, 800))
+        # self.setGeometry(QRect(100, 100, 1400, 800))
         self.ds_ops = None
         self.object_hash = {}
         self.shape_list = []
         self.shape_name_list = []
 
         self.initialize_UI()
-        
+
         self.main_hsplitter = QSplitter(Qt.Horizontal)
-    
+
     def initialize_UI(self):
         pass
+
 
 def safe_remove_artist(artist, ax=None):
     """Safely remove matplotlib artist from plot"""
@@ -2358,41 +2375,42 @@ def safe_remove_artist(artist, ax=None):
     except NotImplementedError:
         # For scatter plots and other collections
         if ax is not None:
-            if hasattr(ax, 'collections') and artist in ax.collections:
+            if hasattr(ax, "collections") and artist in ax.collections:
                 ax.collections.remove(artist)
-            elif hasattr(ax, 'texts') and artist in ax.texts:
+            elif hasattr(ax, "texts") and artist in ax.texts:
                 ax.texts.remove(artist)
-            elif hasattr(ax, 'lines') and artist in ax.lines:
+            elif hasattr(ax, "lines") and artist in ax.lines:
                 ax.lines.remove(artist)
     except Exception:
         pass  # Silently ignore if already removed or other issues
+
 
 class DataExplorationDialog(QDialog):
     def __init__(self, parent):
         self.initialized = False
         super().__init__()
-        #print("DataExplorationDialog init")
+        # print("DataExplorationDialog init")
         self.parent = parent
         self.setWindowTitle(self.tr("Modan2 - Data Exploration"))
         self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
-        #self.setWindowFlags(Qt.FramelessWindowHint)  # Removes window decoration
-        #self.setAttribute(Qt.WA_TranslucentBackground)  # Enables transparency
-        #self.setAttribute(Qt.WA_NoSystemBackground, True)  # Avoids system background paint
+        # self.setWindowFlags(Qt.FramelessWindowHint)  # Removes window decoration
+        # self.setAttribute(Qt.WA_TranslucentBackground)  # Enables transparency
+        # self.setAttribute(Qt.WA_NoSystemBackground, True)  # Avoids system background paint
 
-        #self.windowActivated.connect(self.handle_window_focus)
+        # self.windowActivated.connect(self.handle_window_focus)
         close_shortcut = QShortcut(QKeySequence("Ctrl+W"), self)
-        close_shortcut.activated.connect(self.close) 
+        close_shortcut.activated.connect(self.close)
 
         self.m_app = QApplication.instance()
         self.fig2 = None
-        self.default_color_list = mu.VIVID_COLOR_LIST[:]        
+        self.default_color_list = mu.VIVID_COLOR_LIST[:]
         self.color_list = self.default_color_list[:]
-        #print("color_list", self.color_list)        
+        # print("color_list", self.color_list)
         self.marker_list = mu.MARKER_LIST[:]
         self.plot_size = "medium"
         self.remember_geometry = True
         self.on_pick_happened = False
-        self.bgcolor = "#AAAAAA"        
+        self.bgcolor = "#AAAAAA"
 
         self.curve_list = []
         self.shape_view_list = []
@@ -2402,9 +2420,9 @@ class DataExplorationDialog(QDialog):
         self.shape_grid = {}
         self.shape_grid_pref_dict = {}
         self.shape_button_list = []
-        #self.shape_combo_list = []
+        # self.shape_combo_list = []
         self.vertical_line_xval = None
-        #self.ds_ops = None
+        # self.ds_ops = None
         self.vertical_line_style = "dashed"
         self.axvline = None
         self.temp_rotate_x = 0
@@ -2418,13 +2436,8 @@ class DataExplorationDialog(QDialog):
         self.show_arrow = True
         self.arrow_color = "red"
         self.object_info_list = []
-        #self.shape_mode = MODE_REGRESSION
-        self.rotation_matrix = np.array([
-        [1, 0, 0, 0],
-        [0, 1, 0, 0],
-        [0, 0, 1, 0],
-        [0, 0, 0, 1]
-        ])
+        # self.shape_mode = MODE_REGRESSION
+        self.rotation_matrix = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
 
         self.read_settings()
         self.mode = MODE_EXPLORATION
@@ -2451,58 +2464,58 @@ class DataExplorationDialog(QDialog):
     def _setup_title_row(self):
         """Setup the title row with analysis info fields"""
         self.lblAnalysisName = QLabel(self.tr("Analysis name"))
-        self.lblAnalysisName.setAlignment(Qt.AlignVCenter|Qt.AlignRight)
+        self.lblAnalysisName.setAlignment(Qt.AlignVCenter | Qt.AlignRight)
         self.edtAnalysisName = QLineEdit()
         self.edtAnalysisName.setEnabled(False)
         self.lblSuperimposition = QLabel(self.tr("Superimposition method"))
-        self.lblSuperimposition.setAlignment(Qt.AlignVCenter|Qt.AlignRight)
+        self.lblSuperimposition.setAlignment(Qt.AlignVCenter | Qt.AlignRight)
         self.edtSuperimposition = QLineEdit()
         self.edtSuperimposition.setEnabled(False)
         self.lblOrdination = QLabel(self.tr("Ordination method"))
-        self.lblOrdination.setAlignment(Qt.AlignVCenter|Qt.AlignRight)
+        self.lblOrdination.setAlignment(Qt.AlignVCenter | Qt.AlignRight)
         self.edtOrdination = QLineEdit()
         self.edtOrdination.setEnabled(False)
         self.lblVisualization = QLabel(self.tr("Shape view"))
-        self.lblVisualization.setAlignment(Qt.AlignVCenter|Qt.AlignRight)
+        self.lblVisualization.setAlignment(Qt.AlignVCenter | Qt.AlignRight)
         self.comboVisualization = QComboBox()
-        self.comboVisualization.addItem(self.tr("Exploration"),MODE_EXPLORATION)
-        self.comboVisualization.addItem(self.tr("Regression"),MODE_REGRESSION)
-        self.comboVisualization.addItem(self.tr("Average"),MODE_AVERAGE)
-        self.comboVisualization.addItem(self.tr("Comparison"),MODE_COMPARISON)
-        self.comboVisualization.addItem(self.tr("Comparison (overlap)"),MODE_COMPARISON2)
+        self.comboVisualization.addItem(self.tr("Exploration"), MODE_EXPLORATION)
+        self.comboVisualization.addItem(self.tr("Regression"), MODE_REGRESSION)
+        self.comboVisualization.addItem(self.tr("Average"), MODE_AVERAGE)
+        self.comboVisualization.addItem(self.tr("Comparison"), MODE_COMPARISON)
+        self.comboVisualization.addItem(self.tr("Comparison (overlap)"), MODE_COMPARISON2)
         self.comboVisualization.currentIndexChanged.connect(self.comboVisualizationMethod_changed)
         self.comboVisualization.setCurrentIndex(0)
 
         self.title_row_widget = QWidget()
         self.title_row_layout = QHBoxLayout()
         self.title_row_widget.setLayout(self.title_row_layout)
-        self.title_row_layout.addWidget(self.lblAnalysisName,1)
-        self.title_row_layout.addWidget(self.edtAnalysisName,2)
-        self.title_row_layout.addWidget(self.lblSuperimposition,1)
-        self.title_row_layout.addWidget(self.edtSuperimposition,2)
-        self.title_row_layout.addWidget(self.lblOrdination,1)
-        self.title_row_layout.addWidget(self.edtOrdination,2)
+        self.title_row_layout.addWidget(self.lblAnalysisName, 1)
+        self.title_row_layout.addWidget(self.edtAnalysisName, 2)
+        self.title_row_layout.addWidget(self.lblSuperimposition, 1)
+        self.title_row_layout.addWidget(self.edtSuperimposition, 2)
+        self.title_row_layout.addWidget(self.lblOrdination, 1)
+        self.title_row_layout.addWidget(self.edtOrdination, 2)
         self.layout.addWidget(self.title_row_widget)
 
     def _setup_plot_canvases(self):
         """Setup matplotlib plot canvases for 2D and 3D visualization"""
-        self.plot_widget2 = FigureCanvas(Figure(figsize=(20, 16),dpi=100))
+        self.plot_widget2 = FigureCanvas(Figure(figsize=(20, 16), dpi=100))
         self.fig2 = self.plot_widget2.figure
         self.ax2 = self.fig2.add_subplot()
         self.ax2.set_xlabel("X-axis Label")
         self.ax2.set_ylabel("Y-axis Label")
         self.toolbar2 = NavigationToolbar(self.plot_widget2, self)
-        #self.fig2.canvas.mpl_connect('pick_event',self.on_pick)
-        self.fig2.canvas.mpl_connect('button_press_event', self.on_canvas_button_press)
-        self.fig2.canvas.mpl_connect('button_release_event', self.on_canvas_button_release)
-        self.fig2.canvas.mpl_connect('motion_notify_event', self.on_canvas_move)
-        self.fig2.canvas.mpl_connect('resize_event', self.resizeEvent)
-        #self.fig2.canvas.mpl_connect('motion_notify_event', self.on_hover_enter)
-        #self.fig2.canvas.mpl_connect('motion_notify_event', self.on_hover_leave)
+        # self.fig2.canvas.mpl_connect('pick_event',self.on_pick)
+        self.fig2.canvas.mpl_connect("button_press_event", self.on_canvas_button_press)
+        self.fig2.canvas.mpl_connect("button_release_event", self.on_canvas_button_release)
+        self.fig2.canvas.mpl_connect("motion_notify_event", self.on_canvas_move)
+        self.fig2.canvas.mpl_connect("resize_event", self.resizeEvent)
+        # self.fig2.canvas.mpl_connect('motion_notify_event', self.on_hover_enter)
+        # self.fig2.canvas.mpl_connect('motion_notify_event', self.on_hover_leave)
 
-        self.plot_widget3 = FigureCanvas(Figure(figsize=(20, 16),dpi=100))
+        self.plot_widget3 = FigureCanvas(Figure(figsize=(20, 16), dpi=100))
         self.fig3 = self.plot_widget3.figure
-        self.ax3 = self.fig3.add_subplot(projection='3d')
+        self.ax3 = self.fig3.add_subplot(projection="3d")
         self.toolbar3 = NavigationToolbar(self.plot_widget3, self)
 
         self.plot_setting_widget = QWidget()
@@ -2518,16 +2531,16 @@ class DataExplorationDialog(QDialog):
 
         # basic chart options
         self.gbChartBasics = QWidget()
-        #self.gbChartBasics.setTitle(self.tr("Basic settings"))
+        # self.gbChartBasics.setTitle(self.tr("Basic settings"))
         self.gbChartBasics.setLayout(QHBoxLayout())
-        
+
         spacer1 = QWidget()
         spacer1.setMinimumWidth(20)
         spacer2 = QWidget()
         spacer2.setMinimumWidth(20)
 
         self.lblGroupBy = QLabel(self.tr("Grouping variable"))
-        self.lblGroupBy.setAlignment(Qt.AlignVCenter|Qt.AlignRight)
+        self.lblGroupBy.setAlignment(Qt.AlignVCenter | Qt.AlignRight)
         self.comboGroupBy = QComboBox()
         self.comboGroupBy.setEnabled(False)
         self.comboGroupBy.currentIndexChanged.connect(self.comboGroupBy_changed)
@@ -2552,13 +2565,13 @@ class DataExplorationDialog(QDialog):
         self.gbChartBasics.layout().addWidget(self.lblGroupBy)
         self.gbChartBasics.layout().addWidget(self.comboGroupBy)
         self.gbChartBasics.layout().addWidget(spacer1)
-        #self.gbChartBasics.layout().addWidget(self.lblChartDim)
-        #self.gbChartBasics.layout().addWidget(self.rb2DChartDim)
-        #self.gbChartBasics.layout().addWidget(self.rb3DChartDim)
+        # self.gbChartBasics.layout().addWidget(self.lblChartDim)
+        # self.gbChartBasics.layout().addWidget(self.rb2DChartDim)
+        # self.gbChartBasics.layout().addWidget(self.rb3DChartDim)
         self.gbChartBasics.layout().addWidget(self.cbxLegend)
         self.gbChartBasics.layout().addWidget(self.cbxShowVariance)
         self.gbChartBasics.layout().addWidget(spacer2)
-        #self.axis_option_layout.addWidget(self.gbChartBasics)
+        # self.axis_option_layout.addWidget(self.gbChartBasics)
 
         self.lblAxis1 = QLabel("Axis 1")
         self.lblAxis2 = QLabel("Axis 2")
@@ -2580,10 +2593,10 @@ class DataExplorationDialog(QDialog):
         self.cbxFlipAxis2.stateChanged.connect(self.flip_axis_changed)
         self.cbxFlipAxis3.stateChanged.connect(self.flip_axis_changed)
 
-        for i in range(1,11):
-            self.comboAxis1.addItem("PC"+str(i))
-            self.comboAxis2.addItem("PC"+str(i))
-            self.comboAxis3.addItem("PC"+str(i))
+        for i in range(1, 11):
+            self.comboAxis1.addItem("PC" + str(i))
+            self.comboAxis2.addItem("PC" + str(i))
+            self.comboAxis3.addItem("PC" + str(i))
         self.comboAxis1.addItem("CSize")
         self.comboAxis1.setCurrentIndex(0)
         self.comboAxis2.setCurrentIndex(1)
@@ -2592,18 +2605,18 @@ class DataExplorationDialog(QDialog):
         self.comboAxis2.currentIndexChanged.connect(self.axis_changed)
         self.comboAxis3.currentIndexChanged.connect(self.axis_changed)
 
-        #self.gbAxis= QGroupBox()
-        #self.gbAxis.setTitle(self.tr("Axes settings"))
-        #self.gbAxis.setLayout(QHBoxLayout())
-        self.gbChartBasics.layout().addWidget(self.lblAxis1,0)
-        self.gbChartBasics.layout().addWidget(self.comboAxis1,1)
-        self.gbChartBasics.layout().addWidget(self.cbxFlipAxis1,0)
-        self.gbChartBasics.layout().addWidget(self.lblAxis2,0)
-        self.gbChartBasics.layout().addWidget(self.comboAxis2,1)
-        self.gbChartBasics.layout().addWidget(self.cbxFlipAxis2,0)
-        self.gbChartBasics.layout().addWidget(self.lblAxis3,0)
-        self.gbChartBasics.layout().addWidget(self.comboAxis3,1)
-        self.gbChartBasics.layout().addWidget(self.cbxFlipAxis3,0)
+        # self.gbAxis= QGroupBox()
+        # self.gbAxis.setTitle(self.tr("Axes settings"))
+        # self.gbAxis.setLayout(QHBoxLayout())
+        self.gbChartBasics.layout().addWidget(self.lblAxis1, 0)
+        self.gbChartBasics.layout().addWidget(self.comboAxis1, 1)
+        self.gbChartBasics.layout().addWidget(self.cbxFlipAxis1, 0)
+        self.gbChartBasics.layout().addWidget(self.lblAxis2, 0)
+        self.gbChartBasics.layout().addWidget(self.comboAxis2, 1)
+        self.gbChartBasics.layout().addWidget(self.cbxFlipAxis2, 0)
+        self.gbChartBasics.layout().addWidget(self.lblAxis3, 0)
+        self.gbChartBasics.layout().addWidget(self.comboAxis3, 1)
+        self.gbChartBasics.layout().addWidget(self.cbxFlipAxis3, 0)
 
     def _setup_overlay_settings(self):
         """Setup overlay visualization settings"""
@@ -2622,7 +2635,7 @@ class DataExplorationDialog(QDialog):
 
         self.cbxAverage = QCheckBox()
         self.cbxAverage.setText(self.tr("Group average"))
-        self.cbxAverage.setChecked(False)        
+        self.cbxAverage.setChecked(False)
         self.cbxAverage.stateChanged.connect(self.update_chart)
         self.cbxConvexHull = QCheckBox()
         self.cbxConvexHull.setText(self.tr("Convex hull"))
@@ -2648,20 +2661,19 @@ class DataExplorationDialog(QDialog):
         self.cbxArrow.setChecked(True)
         self.cbxArrow.stateChanged.connect(self.arrow_preference_changed)
         self.btnArrowColor = QPushButton(self.tr("Arrow color"))
-        self.btnArrowColor.setMinimumSize(20,20)
+        self.btnArrowColor.setMinimumSize(20, 20)
         self.btnArrowColor.setStyleSheet("background-color: yellow")
         self.btnArrowColor.setToolTip("yellow")
         self.btnArrowColor.setCursor(Qt.PointingHandCursor)
         self.btnArrowColor.clicked.connect(self.on_btnArrowColor_clicked)
         self.sgpWidget.shape_preference_changed.connect(self.shape_grid_preference_changed)
 
-
-        self.gbOverlay.layout().addWidget(self.cbxDepthShade,1)
-        self.gbOverlay.layout().addWidget(self.cbxAverage,1)
-        self.gbOverlay.layout().addWidget(self.cbxConvexHull,1)
-        self.gbOverlay.layout().addWidget(self.cbxConfidenceEllipse,1)
-        self.gbOverlay.layout().addWidget(self.cbxShapeGrid,1)
-        self.gbOverlay.layout().addWidget(self.sgpWidget,2)
+        self.gbOverlay.layout().addWidget(self.cbxDepthShade, 1)
+        self.gbOverlay.layout().addWidget(self.cbxAverage, 1)
+        self.gbOverlay.layout().addWidget(self.cbxConvexHull, 1)
+        self.gbOverlay.layout().addWidget(self.cbxConfidenceEllipse, 1)
+        self.gbOverlay.layout().addWidget(self.cbxShapeGrid, 1)
+        self.gbOverlay.layout().addWidget(self.sgpWidget, 2)
         self.plot_setting_layout.addWidget(self.gbOverlay)
 
     def _setup_regression_controls(self):
@@ -2680,7 +2692,7 @@ class DataExplorationDialog(QDialog):
         self.comboRegressionBy.addItem("Select group")
         self.comboRegressionBy.setCurrentIndex(1)
         self.comboRegressionBy.currentIndexChanged.connect(self.comboRegressionBy_changed)
-        self.comboSelectGroup = QComboBox()        
+        self.comboSelectGroup = QComboBox()
         self.comboSelectGroup.currentIndexChanged.connect(self.comboSelectGroup_changed)
         self.comboSelectGroup.hide()
         model = self.comboSelectGroup.model()
@@ -2704,7 +2716,7 @@ class DataExplorationDialog(QDialog):
         self.gbRegression.layout().addWidget(self.cbxRegression, 1)
         self.gbRegression.layout().addWidget(self.lblRegressionBasedon, 0)
         self.gbRegression.layout().addWidget(self.comboRegressionBasedOn, 1)
-        #self.gbRegression.layout().addWidget(self.comboRegressionBy, 1)
+        # self.gbRegression.layout().addWidget(self.comboRegressionBy, 1)
         self.gbRegression.layout().addWidget(self.comboSelectGroup, 1)
         self.gbRegression.layout().addWidget(self.cbxExtrapolate, 1)
         self.gbRegression.layout().addWidget(self.lblDegree, 0)
@@ -2720,16 +2732,15 @@ class DataExplorationDialog(QDialog):
         self.plot_layout = QVBoxLayout()
         self.plot_widget = QWidget()
         self.plot_widget.setLayout(self.plot_layout)
-        #self.plot_layout.addWidget(self.plot_control_widget)
-        #self.plot_layout.addWidget(self.regression_widget)
-        self.plot_preference_button = QPushButton(QIcon(mu.resource_path('icons/M2Preferences_1.png')), "")
+        # self.plot_layout.addWidget(self.plot_control_widget)
+        # self.plot_layout.addWidget(self.regression_widget)
+        self.plot_preference_button = QPushButton(QIcon(mu.resource_path("icons/M2Preferences_1.png")), "")
         self.plot_preference_button.setStyleSheet("border: none; padding: 0px;")
         self.plot_preference_button.setIconSize(QSize(32, 32))
         self.plot_preference_button.clicked.connect(self.show_plot_preference)
         self.plot_preference_button.setAutoDefault(False)
         self.btn_save_plot = QPushButton(self.tr("Export Chart"))
         self.btn_save_plot.clicked.connect(self.export_chart)
-
 
         self.toolbar_widget = QWidget()
         self.toolbar_layout = QHBoxLayout()
@@ -2775,7 +2786,7 @@ class DataExplorationDialog(QDialog):
         self.animate_option_layout.addWidget(self.cbxRecordAnimation)
         self.animate_option_layout.addWidget(self.edtNumFrames)
 
-        self.shape_preference_button = QPushButton(QIcon(mu.resource_path('icons/M2Preferences_1.png')), "")
+        self.shape_preference_button = QPushButton(QIcon(mu.resource_path("icons/M2Preferences_1.png")), "")
         self.shape_preference_button.setStyleSheet("border: none; padding: 0px;")
         self.shape_preference_button.setIconSize(QSize(32, 32))
         self.shape_preference_button.clicked.connect(self.shape_preference_button_clicked)
@@ -2784,26 +2795,26 @@ class DataExplorationDialog(QDialog):
         self.shape_option_widget = QWidget()
         self.shape_option_layout = QHBoxLayout()
         self.shape_option_widget.setLayout(self.shape_option_layout)
-        self.shape_option_layout.addWidget(self.lblVisualization,0)
-        self.shape_option_layout.addWidget(self.comboVisualization,1)
+        self.shape_option_layout.addWidget(self.lblVisualization, 0)
+        self.shape_option_layout.addWidget(self.comboVisualization, 1)
 
-        self.shape_option_layout.addWidget(self.animate_option_widget,1)
-        self.shape_option_layout.addWidget(self.btnResetPose,0)
-        self.shape_option_layout.addWidget(self.shape_preference_button,0)
-        self.view_layout.addWidget(self.shape_option_widget,0)
+        self.shape_option_layout.addWidget(self.animate_option_widget, 1)
+        self.shape_option_layout.addWidget(self.btnResetPose, 0)
+        self.shape_option_layout.addWidget(self.shape_preference_button, 0)
+        self.view_layout.addWidget(self.shape_option_widget, 0)
 
         self.shape_preference_widget = QWidget()
         self.shape_preference_layout = QVBoxLayout()
         self.shape_preference_widget.setLayout(self.shape_preference_layout)
         self.shape_preference_widget.hide()
-        self.view_layout.addWidget(self.shape_preference_widget,0)
+        self.view_layout.addWidget(self.shape_preference_widget, 0)
 
         self.arrow_widget = QWidget()
         self.arrow_layout = QHBoxLayout()
         self.arrow_widget.setLayout(self.arrow_layout)
         self.arrow_layout.addWidget(self.cbxArrow)
         self.arrow_layout.addWidget(self.btnArrowColor)
-        self.view_layout.addWidget(self.arrow_widget,0)
+        self.view_layout.addWidget(self.arrow_widget, 0)
 
     def _assemble_final_layout(self):
         """Assemble all components into the final layout"""
@@ -2823,20 +2834,20 @@ class DataExplorationDialog(QDialog):
         self.layout.addWidget(self.visualization_splitter)
 
     def comboSelectGroup_changed(self):
-        #print("comboSelectGroup_changed")
-        #self.update_chart()
+        # print("comboSelectGroup_changed")
+        # self.update_chart()
         return
-    
+
     def comboSelectGroup_itemChanged(self, item):
-        #print("comboSelectGroup_itemChanged", self.ignore_change)
-        if self.ignore_change == True:
+        # print("comboSelectGroup_itemChanged", self.ignore_change)
+        if self.ignore_change:
             return
 
         self.update_chart()
 
     def comboRegressionBy_changed(self):
         self.comboSelectGroup.hide()
-        if self.comboRegressionBy.currentText() == "By group":            
+        if self.comboRegressionBy.currentText() == "By group":
             for shape_view in self.shape_view_list:
                 shape_view.show()
         else:
@@ -2847,23 +2858,22 @@ class DataExplorationDialog(QDialog):
                     shape_view.show()
                 else:
                     shape_view.hide()
-        
-            
+
         self.update_chart()
 
     def comboRegressionBasedOn_changed(self):
         if len(self.object_info_list) == 0:
-            return  
+            return
         self.update_chart()
-        #pass
-        #self.update_chart()
+        # pass
+        # self.update_chart()
 
     def cbxShapeGrid_state_changed(self):
-        #print("cbxShape_state_changed")
+        # print("cbxShape_state_changed")
         # Set wait cursor while processing shape grid
         QApplication.setOverrideCursor(Qt.WaitCursor)
         try:
-            if self.cbxShapeGrid.isChecked() == True:
+            if self.cbxShapeGrid.isChecked():
                 self.sgpWidget.show()
                 self.update_chart()
             else:
@@ -2873,39 +2883,38 @@ class DataExplorationDialog(QDialog):
             # Restore normal cursor after processing
             QApplication.restoreOverrideCursor()
 
-
     def export_chart(self):
         dialog = QFileDialog()
         dialog.setFileMode(QFileDialog.AnyFile)
         dialog.setAcceptMode(QFileDialog.AcceptSave)
         dialog.setNameFilter("PNG (*.png);;JPG (*.jpg);;PDF (*.pdf);;SVG (*.svg);;All files (*.*)")
         dialog.setDefaultSuffix("png")
-        #dialog.setDirectory(self.m_app.last_opened_dir)
+        # dialog.setDirectory(self.m_app.last_opened_dir)
         if dialog.exec_():
             filename = dialog.selectedFiles()[0]
-            #self.m_app.last_opened_dir = dialog.directory().absolutePath()
+            # self.m_app.last_opened_dir = dialog.directory().absolutePath()
             if filename:
-                if self.cbxShapeGrid.isChecked() == True:
+                if self.cbxShapeGrid.isChecked():
                     self.save_composite_plot(filename)
                 else:
                     self.fig2.savefig(filename)
 
     def save_composite_plot(self, filename):
-    #def export_composite_image(chart_widget, shape_widgets, filename, format="PNG"):
+        # def export_composite_image(chart_widget, shape_widgets, filename, format="PNG"):
         # 1. Create the combined canvas (QPixmap)
         canvas_width = self.plot_widget2.width()
         canvas_height = self.plot_widget2.height()
-        #chart_aspect_ratio = canvas_width / canvas_height
-        #target_width = 2048
-        #canvas_width = target_width
-        #size_ratio = target_width / canvas_width
-        #canvas_height = int(target_width / chart_aspect_ratio)  # Maintain aspect ratio
+        # chart_aspect_ratio = canvas_width / canvas_height
+        # target_width = 2048
+        # canvas_width = target_width
+        # size_ratio = target_width / canvas_width
+        # canvas_height = int(target_width / chart_aspect_ratio)  # Maintain aspect ratio
         canvas = QPixmap(canvas_width, canvas_height)
 
-        #canvas = QPixmap(canvas_width, canvas_height)
-        #fig = self.plot_widget2.figure  # Assuming your chart widget has a 'figure' attribute
-        #fig.set_size_inches(canvas_width / fig.dpi, canvas_height / fig.dpi)
-        #chart_widget.render(painter)        
+        # canvas = QPixmap(canvas_width, canvas_height)
+        # fig = self.plot_widget2.figure  # Assuming your chart widget has a 'figure' attribute
+        # fig.set_size_inches(canvas_width / fig.dpi, canvas_height / fig.dpi)
+        # chart_widget.render(painter)
 
         # 2. Initialize QPainter for drawing on the canvas
         painter = QPainter(canvas)
@@ -2915,89 +2924,90 @@ class DataExplorationDialog(QDialog):
 
         # 4. Overlay the shape images
         for keyname in self.shape_grid.keys():
-            view = self.shape_grid[keyname]['view']
+            view = self.shape_grid[keyname]["view"]
             if view:
-                #print("keyname", keyname, "x_val", self.shape_grid[keyname]['x_val'], "y_val", self.shape_grid[keyname]['y_val'])
+                # print("keyname", keyname, "x_val", self.shape_grid[keyname]['x_val'], "y_val", self.shape_grid[keyname]['y_val'])
                 transform = self.ax2.transData
-                display_coords =    transform.transform((self.shape_grid[keyname]['x_val'], self.shape_grid[keyname]['y_val']))
-                x_pixel, y_pixel = display_coords   
-                if sys.platform == 'darwin':
+                display_coords = transform.transform(
+                    (self.shape_grid[keyname]["x_val"], self.shape_grid[keyname]["y_val"])
+                )
+                x_pixel, y_pixel = display_coords
+                if sys.platform == "darwin":
                     x_pixel = x_pixel / 2
                     y_pixel = y_pixel / 2
-                #print("display_coords", display_coords, "x_pixel", x_pixel, "y_pixel", y_pixel)
+                # print("display_coords", display_coords, "x_pixel", x_pixel, "y_pixel", y_pixel)
                 fig_height = self.fig2.canvas.height()
                 fig_width = self.fig2.canvas.width()
-                view_height = int( fig_height / 4 )
-                view_width = int( fig_width / 4 )
-                x_pos = int( x_pixel )
-                y_pos = int( fig_height - y_pixel )
+                view_height = int(fig_height / 4)
+                view_width = int(fig_width / 4)
+                x_pos = int(x_pixel)
+                y_pos = int(fig_height - y_pixel)
                 w, h = view.width(), view.height()
                 w, h = 120, 90
                 w = max(w, view_width)
                 h = max(h, view_height)
-                #print("view size", w, h, "view pos", x_pixel, y_pixel, "fig_size", fig_width, fig_height, "view pos 2", x_pos, y_pos)
-                '''
+                # print("view size", w, h, "view pos", x_pixel, y_pixel, "fig_size", fig_width, fig_height, "view pos 2", x_pos, y_pos)
+                """
                 self.shape_grid[keyname]['x_pos'] = x_pixel
                 self.shape_grid[keyname]['y_pos'] = y_pixel
                 #print("view size 2  ", w, h, "view pos", x_pixel, y_pixel, "fig_size", fig_width, fig_height)
 
                 view.setGeometry(self.shape_grid[keyname]['x_pos']-int(w/2), self.shape_grid[keyname]['y_pos']-int(h/2), w, h)
-                '''
+                """
 
-
-            #for shape_widget, (x, y) in zip(shape_widgets, pca_coordinates):
+                # for shape_widget, (x, y) in zip(shape_widgets, pca_coordinates):
                 # Convert PCA coordinates to pixel positions on the canvas
-                #x_pixel, y_pixel = map_coordinates_to_pixels(x, y, canvas_width, canvas_height)
+                # x_pixel, y_pixel = map_coordinates_to_pixels(x, y, canvas_width, canvas_height)
 
                 # Draw the shape image onto the canvas
                 view.update()
-                if isinstance(view,ObjectViewer3D):
+                if isinstance(view, ObjectViewer3D):
                     buffer = QPixmap(view.grabFrameBuffer(True))
                 else:
                     buffer = QPixmap(view.grab())
-                #print(buffer)
-                painter.drawPixmap(x_pos-int(w/2), y_pos-int(h/2), buffer)
+                # print(buffer)
+                painter.drawPixmap(x_pos - int(w / 2), y_pos - int(h / 2), buffer)
 
         # 5. End painting
         painter.end()
 
         # 6. Save the composite image
-        canvas.save(filename, "PNG")        
+        canvas.save(filename, "PNG")
 
-    def on_btnArrowColor_clicked(self,event):
+    def on_btnArrowColor_clicked(self, event):
         dialog = QColorDialog()
         color = dialog.getColor(initial=QColor(self.btnArrowColor.toolTip()))
         if color is not None:
             self.btnArrowColor.setStyleSheet("background-color: " + color.name())
             self.btnArrowColor.setToolTip(color.name())
             self.arrow_color = color.name()
-            #self.m_app.landmark_pref[dim]['color'] = color.name()        
+            # self.m_app.landmark_pref[dim]['color'] = color.name()
         self.arrow_preference_changed()
 
     def shape_grid_preference_changed(self, pref):
         self.shape_grid_pref_dict = pref
-        if self.cbxShapeGrid.isChecked() == True:
+        if self.cbxShapeGrid.isChecked():
             for key in self.shape_grid:
-                if self.shape_grid[key]['view'] is not None:
-                    self.shape_grid[key]['view'].set_shape_preference(self.shape_grid_pref_dict)
-                    self.shape_grid[key]['view'].update()
+                if self.shape_grid[key]["view"] is not None:
+                    self.shape_grid[key]["view"].set_shape_preference(self.shape_grid_pref_dict)
+                    self.shape_grid[key]["view"].update()
 
     def event(self, event):
-        if event.type() in [ QEvent.WindowActivate, QEvent.WindowStateChange] and self.initialized == True:
-            #print("Window has been activated")
+        if event.type() in [QEvent.WindowActivate, QEvent.WindowStateChange] and self.initialized:
+            # print("Window has been activated")
             self.handle_window_focus()
         return super().event(event)
-    
+
     def handle_window_focus(self):
-        #print("handle_window_focus")
-        if self.cbxShapeGrid.isChecked() == True:
+        # print("handle_window_focus")
+        if self.cbxShapeGrid.isChecked():
             for key in self.shape_grid:
-                if self.shape_grid[key]['view'] is not None:
-                    self.shape_grid[key]['view'].raise_()
-                    self.shape_grid[key]['view'].update()
+                if self.shape_grid[key]["view"] is not None:
+                    self.shape_grid[key]["view"].raise_()
+                    self.shape_grid[key]["view"].update()
 
     def shape_preference_button_clicked(self):
-        #print("shape preference button clicked")
+        # print("shape preference button clicked")
         if self.shape_preference_widget.isVisible():
             self.shape_preference_widget.hide()
             self.arrow_widget.hide()
@@ -3005,88 +3015,95 @@ class DataExplorationDialog(QDialog):
             self.shape_preference_widget.show()
             if self.mode == MODE_COMPARISON2:
                 self.arrow_widget.show()
-            #self.chart_option_widget.hide()
+            # self.chart_option_widget.hide()
 
     def record_animation_changed(self):
         self.record_animation = self.cbxRecordAnimation.isChecked()
 
-
     def chart_animation(self):
-        #print("chart_animation", self.animation_counter)
+        # print("chart_animation", self.animation_counter)
         idx = 0
         if self.animation_counter < self.pause_frame:
             idx = 0
         elif self.animation_counter >= self.pause_frame and self.animation_counter < self.half_frame + self.pause_frame:
             # 0 -> half frame
             idx = self.animation_counter - self.pause_frame
-        elif self.animation_counter >= self.half_frame + self.pause_frame and self.animation_counter < self.half_frame + 2 * self.pause_frame:
+        elif (
+            self.animation_counter >= self.half_frame + self.pause_frame
+            and self.animation_counter < self.half_frame + 2 * self.pause_frame
+        ):
             idx = self.half_frame - 1
-        elif self.animation_counter >= self.half_frame + 2 * self.pause_frame and self.animation_counter < self.total_frame + 2 * self.pause_frame:
+        elif (
+            self.animation_counter >= self.half_frame + 2 * self.pause_frame
+            and self.animation_counter < self.total_frame + 2 * self.pause_frame
+        ):
             # half_frame -> 0
             idx = self.total_frame - self.animation_counter + 2 * self.pause_frame - 1
-        elif self.animation_counter >= self.total_frame + 2 * self.pause_frame and self.animation_counter < self.total_frame + 3 * self.pause_frame:
+        elif (
+            self.animation_counter >= self.total_frame + 2 * self.pause_frame
+            and self.animation_counter < self.total_frame + 3 * self.pause_frame
+        ):
             idx = 0
         elif self.animation_counter == self.total_frame + 3 * self.pause_frame:
-            safe_remove_artist(self.animation_shape['point'], self.ax2)
-            self.animation_shape['point'] = None
+            safe_remove_artist(self.animation_shape["point"], self.ax2)
+            self.animation_shape["point"] = None
             self.timer.stop()
             self.fig2.canvas.draw()
             # wait cursor
-            if self.record_animation == True:
+            if self.record_animation:
                 self.create_video_from_frames()
             QApplication.restoreOverrideCursor()
             self.toolbar_widget.show()
             self.shape_option_widget.show()
             return
-        #print("chart_animation", self.animation_counter, idx, self.pause_frame, self.half_frame, self.total_frame)
+        # print("chart_animation", self.animation_counter, idx, self.pause_frame, self.half_frame, self.total_frame)
 
         x = self.animation_x_range[idx]
         y = self.animation_y_range[idx]
-        #print("chart_animation", x, y, self.animation_counter)
-        #self.animation_shape['point']
-        self.animation_shape['point'].set_offsets([x, y])
+        # print("chart_animation", x, y, self.animation_counter)
+        # self.animation_shape['point']
+        self.animation_shape["point"].set_offsets([x, y])
         self.fig2.canvas.draw()
         self.animation_counter += 1
 
-        ''' show shape '''
+        """ show shape """
         axis1 = self.comboAxis1.currentData()
         axis2 = self.comboAxis2.currentData()
-        flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
-        flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
-        shape_to_visualize = np.zeros((1,len(self.analysis_result_list[0])))
+        flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() else 1.0
+        flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() else 1.0
+        shape_to_visualize = np.zeros((1, len(self.analysis_result_list[0])))
         x_value = flip_axis1 * x
         y_value = flip_axis2 * y
         if axis1 != CENTROID_SIZE_VALUE:
             shape_to_visualize[0][axis1] = x_value
         shape_to_visualize[0][axis2] = y_value
         unrotated_shape = self.unrotate_shape(shape_to_visualize)
-        
-        #print("0-4:",datetime.datetime.now())
+
+        # print("0-4:",datetime.datetime.now())
         self.show_shape(unrotated_shape[0], 0)
 
-        if self.record_animation == True:
+        if self.record_animation:
             screen = QApplication.primaryScreen()
             x, y, width, height = self.geometry().getRect()
-            #print("x,y,width,height", x, y, width, height)
+            # print("x,y,width,height", x, y, width, height)
             pixmap = screen.grabWindow(self.winId(), 0, 0, width, height)
             self.animation_frame_list.append(pixmap)
-            #print("frame added", len(self.animation_frame_list))
+            # print("frame added", len(self.animation_frame_list))
 
-
-        #print("chart_animation done")
+        # print("chart_animation done")
 
     def create_video_from_frames(self):
-        with tempfile.TemporaryDirectory() as temp_dir:        
+        with tempfile.TemporaryDirectory() as temp_dir:
             for idx, frame in enumerate(self.animation_frame_list):
                 # padding 3 digits
                 filename = f"{temp_dir}/frame{idx:03}.png"
-                #print("saving frame", filename)
+                # print("saving frame", filename)
                 frame.save(filename)
             # Specify the path to your image files
-            #image_folder = 'd:/'
-            #video_name = 'output_video.avi'
+            # image_folder = 'd:/'
+            # video_name = 'output_video.avi'
 
-            images = [img for img in sorted(glob.glob(f"{temp_dir}/frame*.png"))]
+            images = sorted(glob.glob(f"{temp_dir}/frame*.png"))
             if len(images) == 0:
                 logger = logging.getLogger(__name__)
                 logger.warning("No frame found")
@@ -3095,28 +3112,28 @@ class DataExplorationDialog(QDialog):
             height, width, layers = frame.shape
 
             # Define the codec and create VideoWriter object
-            fourcc = cv2.VideoWriter_fourcc(*'DIVX')  # or use 'XVID'
+            fourcc = cv2.VideoWriter_fourcc(*"DIVX")  # or use 'XVID'
 
             # ask user for video directory
-            #options = QFileDialog.Options()
-            #options |= QFileDialog.DontUseNativeDialog
+            # options = QFileDialog.Options()
+            # options |= QFileDialog.DontUseNativeDialog
             video_name, _ = QFileDialog.getSaveFileName(self, "Save video file", "", "Video Files (*.avi)")
             if video_name == "":
                 return
-            #print("video_name", video_name)
-            
+            # print("video_name", video_name)
+
             video = cv2.VideoWriter(video_name, fourcc, 20.0, (width, height))
 
             for image in images:
                 video.write(cv2.imread(image))
 
             cv2.destroyAllWindows()
-            video.release()            
-
-
+            video.release()
 
     def animate_shape(self):
-        if self.mode not in [ MODE_COMPARISON, ]:# or self.comboRegressionBy.currentText() == "By group":
+        if self.mode not in [
+            MODE_COMPARISON,
+        ]:  # or self.comboRegressionBy.currentText() == "By group":
             return
 
         QApplication.setOverrideCursor(Qt.WaitCursor)
@@ -3129,67 +3146,60 @@ class DataExplorationDialog(QDialog):
         if self.mode in [MODE_COMPARISON]:
             from_shape = self.custom_shape_hash[0]
             to_shape = self.custom_shape_hash[1]
-            x_from, y_from = from_shape['coords']
-            x_to, y_to = to_shape['coords']
-            #print("animate_shape", x_from, y_from, x_to, y_to)
+            x_from, y_from = from_shape["coords"]
+            x_to, y_to = to_shape["coords"]
+            # print("animate_shape", x_from, y_from, x_to, y_to)
 
             self.animation_x_range = np.linspace(x_from, x_to, self.half_frame)
             self.animation_y_range = np.linspace(y_from, y_to, self.half_frame)
-            self.animation_shape = { 'coords': [x_from, y_from], 'point': None}
-
+            self.animation_shape = {"coords": [x_from, y_from], "point": None}
 
         elif self.mode in []:
-            x_from = min(self.regression_data['x_val'])
-            x_to = max(self.regression_data['x_val'])
+            x_from = min(self.regression_data["x_val"])
+            x_to = max(self.regression_data["x_val"])
 
             self.animation_x_range = np.linspace(x_from, x_to, self.half_frame)
             self.animation_y_range = np.zeros(self.half_frame)
-            show_extrapolate = self.cbxExtrapolate.isChecked()
+            self.cbxExtrapolate.isChecked()
             curve = self.curve_list[0]
-            #print("curve", curve)
-            model = curve['model']
-            #if show_extrapolate:
+            # print("curve", curve)
+            model = curve["model"]
+            # if show_extrapolate:
             #    model = curve['curve2']
-            #else:
+            # else:
             #    model = curve['curve']
-            #print("model", model)
+            # print("model", model)
             for idx, x in enumerate(self.animation_x_range):
                 self.animation_y_range[idx] = np.polyval(model, x)
             y_from = self.animation_y_range[0]
-            self.animation_shape = { 'coords': [x_from, y_from], 'point': None}
+            self.animation_shape = {"coords": [x_from, y_from], "point": None}
 
         self.animation_counter = 0
         self.animation_frame_list = []
-        self.animation_shape['point'] = self.ax2.scatter(x_from, y_from, s=100, c='red', marker='o')
+        self.animation_shape["point"] = self.ax2.scatter(x_from, y_from, s=100, c="red", marker="o")
         self.fig2.canvas.draw()
 
         self.timer = QTimer()
         self.timer.timeout.connect(self.chart_animation)
         self.timer.start(100)
 
-
     def reset_shape_pose(self):
         logger = logging.getLogger(__name__)
         logger.info("Reset shape pose initiated")
-        self.rotation_matrix = np.array([
-        [1, 0, 0, 0],
-        [0, 1, 0, 0],
-        [0, 0, 1, 0],
-        [0, 0, 0, 1]
-        ])
+        self.rotation_matrix = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
         logger.info(f"Resetting {len(self.shape_view_list)} shape views")
         for shape_view in self.shape_view_list:
             shape_view.reset_pose()  # Widget handles its own update
-            
+
         logger.info(f"Resetting {len(self.shape_grid.keys())} shape grid views")
         for key in self.shape_grid.keys():
-            view = self.shape_grid[key]['view']
+            view = self.shape_grid[key]["view"]
             if view:
                 view.reset_pose()  # Widget handles its own update
         logger.info("Shape pose reset completed")
 
     def on_chart_dim_changed(self):
-        #print("on chart dim changed")
+        # print("on chart dim changed")
         if self.rb2DChartDim.isChecked():
             self.toolbar3.hide()
             self.toolbar2.show()
@@ -3215,58 +3225,58 @@ class DataExplorationDialog(QDialog):
             self.cbxFlipAxis3.show()
             self.comboAxis3.show()
             self.cbxFlipAxis3.show()
-            self.cbxDepthShade.show()        
+            self.cbxDepthShade.show()
 
     def show_plot_preference(self):
         if self.plot_setting_widget.isVisible():
             self.plot_setting_widget.hide()
         else:
             self.plot_setting_widget.show()
-        
+
     def on_splitter_moved(self):
         self.resizeEvent(None)
 
     def showEvent(self, event):
-        #print("show event")
+        # print("show event")
         self.resizeEvent(None)
 
     def comboVisualizationMethod_changed(self):
         new_mode = self.comboVisualization.currentIndex()
-        #print("before set_mode")
+        # print("before set_mode")
         self.set_mode(new_mode)
-        #print("after set_mode")
-        
+        # print("after set_mode")
+
     def set_growth_trajectory_mode(self):
-        #self.mode = MODE_GROWTH_TRAJECTORY
-        #self.comboGroupBy.setEnabled(False)
-        #self.comboGroupBy.hide()
-        #self.lblGroupBy.hide()
-        #self.show_analysis_result()
-        
+        # self.mode = MODE_GROWTH_TRAJECTORY
+        # self.comboGroupBy.setEnabled(False)
+        # self.comboGroupBy.hide()
+        # self.lblGroupBy.hide()
+        # self.show_analysis_result()
+
         self.comboAxis1.setCurrentText(CENTROID_SIZE_TEXT)
         self.comboAxis2.setCurrentIndex(0)
         self.update_chart()
 
     def set_mode(self, mode):
-        #print("set mode", mode)
+        # print("set mode", mode)
         self.mode = mode
 
         self.ignore_change = True
-        if False: #mode == MODE_GROWTH_TRAJECTORY:
+        if False:  # mode == MODE_GROWTH_TRAJECTORY:
             self.comboAxis1.setCurrentText(CENTROID_SIZE_TEXT)
             self.comboAxis2.setCurrentIndex(0)
             self.comboAxis3.setCurrentIndex(1)
         else:
-            #elif mode == MODE_CUSTOM:
+            # elif mode == MODE_CUSTOM:
             self.comboAxis1.setCurrentIndex(1)
             self.comboAxis2.setCurrentIndex(1)
             self.comboAxis3.setCurrentIndex(2)
-        #print("inside set_mode 1")
+        # print("inside set_mode 1")
         self.cbxRegression.setChecked(False)
-        if mode in [ MODE_REGRESSION ]:
+        if mode in [MODE_REGRESSION]:
             self.cbxRegression.setChecked(True)
 
-        #print("inside set_mode 1.5")
+        # print("inside set_mode 1.5")
         self.cbxAverage.setChecked(False)
         if mode == MODE_AVERAGE:
             self.cbxAverage.setChecked(True)
@@ -3285,7 +3295,7 @@ class DataExplorationDialog(QDialog):
         self.prepare_shape_view()
         self.resizeEvent(None)
 
-        #print("inside set_mode 3")
+        # print("inside set_mode 3")
         if mode == MODE_EXPLORATION:
             self.pick_idx = 0
             self.is_picking_shape = True
@@ -3306,37 +3316,55 @@ class DataExplorationDialog(QDialog):
             self.shape_view_layout.removeWidget(shape_view)
             shape_view.deleteLater()
         for key in self.custom_shape_hash.keys():
-            self.custom_shape_hash[key]['coords'] = []
-            if self.custom_shape_hash[key]['point'] != None:
-                safe_remove_artist(self.custom_shape_hash[key]['point'], self.ax2)
-            self.custom_shape_hash[key]['point'] = None
-            if self.custom_shape_hash[key]['label'] != None:
-                safe_remove_artist(self.custom_shape_hash[key]['label'], self.ax2)
-            self.custom_shape_hash[key]['label'] = None
+            self.custom_shape_hash[key]["coords"] = []
+            if self.custom_shape_hash[key]["point"] is not None:
+                safe_remove_artist(self.custom_shape_hash[key]["point"], self.ax2)
+            self.custom_shape_hash[key]["point"] = None
+            if self.custom_shape_hash[key]["label"] is not None:
+                safe_remove_artist(self.custom_shape_hash[key]["label"], self.ax2)
+            self.custom_shape_hash[key]["label"] = None
         self.arrow_widget.hide()
 
-        #self.custom_shape_list = []
+        # self.custom_shape_list = []
         self.shape_view_list = []
         self.shape_label_list = []
         self.shape_button_list = []
         self.shape_preference_list = []
         self.custom_shape_hash = {}
         self.grid_view_list = []
-      
-        if self.mode in [ MODE_REGRESSION, MODE_AVERAGE]:
+
+        if self.mode in [MODE_REGRESSION, MODE_AVERAGE]:
             keyname_list = self.scatter_data.keys()
         elif self.mode == MODE_COMPARISON:
-            keyname_list = [ "A", "B"]
+            keyname_list = ["A", "B"]
             for idx, keyname in enumerate(keyname_list):
-                self.custom_shape_hash[idx] = {'name': keyname, 'coords': [], 'point': None, 'color': None, 'label': None}
+                self.custom_shape_hash[idx] = {
+                    "name": keyname,
+                    "coords": [],
+                    "point": None,
+                    "color": None,
+                    "label": None,
+                }
         elif self.mode == MODE_COMPARISON2:
-            keyname_list = [ "A", "B" ]
+            keyname_list = ["A", "B"]
             for idx, keyname in enumerate(keyname_list):
-                self.custom_shape_hash[idx] = {'name': keyname, 'coords': [], 'point': None, 'color': None, 'label': None}
+                self.custom_shape_hash[idx] = {
+                    "name": keyname,
+                    "coords": [],
+                    "point": None,
+                    "color": None,
+                    "label": None,
+                }
         elif self.mode == MODE_EXPLORATION:
-            keyname_list = [ ''  ]
+            keyname_list = [""]
             for idx, keyname in enumerate(keyname_list):
-                self.custom_shape_hash[idx] = {'name': keyname, 'coords': [], 'point': None, 'color': None, 'label': None}
+                self.custom_shape_hash[idx] = {
+                    "name": keyname,
+                    "coords": [],
+                    "point": None,
+                    "color": None,
+                    "label": None,
+                }
 
         for idx, keyname in enumerate(keyname_list):
             if self.analysis.dimension == 2:
@@ -3347,15 +3375,15 @@ class DataExplorationDialog(QDialog):
             self.shape_view_list.append(shape_view)
 
             if self.mode in [MODE_COMPARISON, MODE_COMPARISON2]:
-                shape_button = QPushButton(QIcon(mu.resource_path('icons/M2Landmark_2.png')), "")
+                shape_button = QPushButton(QIcon(mu.resource_path("icons/M2Landmark_2.png")), "")
                 # send idx to lambda function
                 shape_button.clicked.connect(lambda checked, idx=idx: self.shape_button_clicked(idx))
-                
+
                 shape_button.setParent(shape_view)
                 self.shape_button_list.append(shape_button)
                 shape_button.setAutoDefault(False)
 
-                #print("shape_preference", idx)
+                # print("shape_preference", idx)
                 shape_preference = ShapePreference(self)
                 if idx == 0:
                     shape_preference.set_title(self.tr("Source shape"))
@@ -3367,7 +3395,7 @@ class DataExplorationDialog(QDialog):
                     shape_preference.set_opacity(0.5)
                 shape_preference.set_name(keyname)
                 shape_preference.set_index(idx)
-                #shape_preference.set_color(self.color_list[idx])
+                # shape_preference.set_color(self.color_list[idx])
                 # connect shape_preference signal to self.shape_preference_changed
                 shape_preference.shape_preference_changed.connect(self.shape_preference_changed)
 
@@ -3380,36 +3408,35 @@ class DataExplorationDialog(QDialog):
                 shape_preference.hide_cbxShow()
                 shape_preference.set_name(keyname)
                 shape_preference.set_index(idx)
-                
+
                 shape_preference.set_color(self.color_list[idx])
                 self.shape_preference_list.append(shape_preference)
                 self.shape_preference_layout.addWidget(shape_preference)
                 shape_preference.shape_preference_changed.connect(self.shape_preference_changed)
 
-
             shape_label = QLabel(keyname)
             shape_label.setParent(shape_view)
-            shape_label.setStyleSheet("background-color: "+self.bgcolor+"; color: white")
+            shape_label.setStyleSheet("background-color: " + self.bgcolor + "; color: white")
 
             self.shape_label_list.append(shape_label)
-            if keyname == '__default__' :
+            if keyname == "__default__":
                 shape_label.hide()
 
-            self.shape_view_layout.addWidget(shape_view,1)
+            self.shape_view_layout.addWidget(shape_view, 1)
             shape_view.set_object_name(keyname)
-            shape_view.show()  
+            shape_view.show()
         if self.mode == MODE_AVERAGE:
             self.show_average_shapes()
-            #pass
+            # pass
         if self.mode == MODE_COMPARISON2:
-            #self.arrow_widget.hi()
+            # self.arrow_widget.hi()
             self.shape_label_list[1].setParent(self.shape_view_list[0])
             self.shape_button_list[1].setParent(self.shape_view_list[0])
             self.shape_label_list[1].show()
             self.shape_button_list[1].show()
             self.shape_view_list[1].hide()
-            #self.shape_view_list[0].set_source_shape_color(QColor(255,0,0))
-            #self.shape_view_list[0].set_target_shape_color(QColor(0,0,255))
+            # self.shape_view_list[0].set_source_shape_color(QColor(255,0,0))
+            # self.shape_view_list[0].set_target_shape_color(QColor(0,0,255))
             self.shape_view_list[0].show_arrow = True
 
     def arrow_preference_changed(self):
@@ -3418,31 +3445,31 @@ class DataExplorationDialog(QDialog):
         self.shape_view_list[0].update()
 
     def shape_preference_changed(self, pref_dict):
-        #print("shape_preference_changed", pref_dict)
-        idx = pref_dict['index']
-        name = pref_dict['name']
-        #color = pref_dict['color']
-        #self.custom_shape_hash[idx]['color'] = color
+        # print("shape_preference_changed", pref_dict)
+        idx = pref_dict["index"]
+        name = pref_dict["name"]
+        # color = pref_dict['color']
+        # self.custom_shape_hash[idx]['color'] = color
         shape_label = self.shape_label_list[idx]
         shape_label.setText(name)
-        #label = QLabel("Your sample text")
+        # label = QLabel("Your sample text")
         font_metrics = QFontMetrics(shape_label.font())
         text_rect = font_metrics.boundingRect(shape_label.text())
 
         width = text_rect.width() + 10  # Add some padding for visual comfort
         height = shape_label.height()
         x, y = shape_label.pos().x(), shape_label.pos().y()  # Get current position
-        shape_label.setGeometry(x, y, width, height) 
+        shape_label.setGeometry(x, y, width, height)
 
-        #shape_label.adjustSize()
+        # shape_label.adjustSize()
 
-        #rendered_width = text_rect.width()
-        #print("Rendered width:", rendered_width)        
+        # rendered_width = text_rect.width()
+        # print("Rendered width:", rendered_width)
 
         if self.mode == MODE_COMPARISON2:
-            self.custom_shape_hash[idx]['name'] = name
+            self.custom_shape_hash[idx]["name"] = name
             shape_view = self.shape_view_list[0]
-            idx = pref_dict['index']
+            idx = pref_dict["index"]
             if idx == 0:
                 shape_view.set_source_shape_preference(pref_dict)
             else:
@@ -3453,202 +3480,188 @@ class DataExplorationDialog(QDialog):
             shape_view.set_shape_preference(pref_dict)
             shape_view.update()
 
-        #self.custom_shape_hash[idx]['point'].set_color(color)
-        #self.custom_shape_hash[idx]['label'].set_color(color)
-        #self.custom_shape_hash[idx]['label'].setText(name)
-
+        # self.custom_shape_hash[idx]['point'].set_color(color)
+        # self.custom_shape_hash[idx]['label'].set_color(color)
+        # self.custom_shape_hash[idx]['label'].setText(name)
 
     def show_average_shapes(self):
         keyname_list = self.scatter_data.keys()
-        #print("show_average_shapes", keyname_list, self.average_shape)
+        # print("show_average_shapes", keyname_list, self.average_shape)
         for idx, keyname in enumerate(keyname_list):
-            #shape_view = ObjectViewer3D(self)
-            #for idx, shape_view in enumerate(self.shape_view_list):
+            # shape_view = ObjectViewer3D(self)
+            # for idx, shape_view in enumerate(self.shape_view_list):
             axis1 = self.comboAxis1.currentData()
             axis2 = self.comboAxis2.currentData()
 
-            x_average = self.average_shape[keyname]['x_val']
-            y_average = self.average_shape[keyname]['y_val']
-            flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
-            flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
+            x_average = self.average_shape[keyname]["x_val"]
+            y_average = self.average_shape[keyname]["y_val"]
+            flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() else 1.0
+            flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() else 1.0
             x_value = flip_axis1 * x_average
             y_value = flip_axis2 * y_average
-            shape_to_visualize = np.zeros((1,len(self.analysis_result_list[0])))
+            shape_to_visualize = np.zeros((1, len(self.analysis_result_list[0])))
 
             if axis1 != CENTROID_SIZE_VALUE:
                 shape_to_visualize[0][axis1] = x_value
             shape_to_visualize[0][axis2] = y_value
-            unrotated_shape = self.unrotate_shape(shape_to_visualize)            
-            self.show_shape(unrotated_shape[0], idx)        
-            
-            #shape_view.show()
+            unrotated_shape = self.unrotate_shape(shape_to_visualize)
+            self.show_shape(unrotated_shape[0], idx)
+
+            # shape_view.show()
 
     def shape_regression(self, evt):
-        #print("shape regression", evt.xdata)
-        for idx, shape_view in enumerate(self.shape_view_list):
-            #print("0-1:",datetime.datetime.now())
-            #shape_view.clear_object()
+        # print("shape regression", evt.xdata)
+        for idx, _shape_view in enumerate(self.shape_view_list):
+            # print("0-1:",datetime.datetime.now())
+            # shape_view.clear_object()
 
-            
             axis1 = self.comboAxis1.currentData()
             axis2 = self.comboAxis2.currentData()
-            flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
-            flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
-            shape_to_visualize = np.zeros((1,len(self.analysis_result_list[0])))
-            #if axis1 == 10:
-            #fit regression line
+            flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() else 1.0
+            flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() else 1.0
+            shape_to_visualize = np.zeros((1, len(self.analysis_result_list[0])))
+            # if axis1 == 10:
+            # fit regression line
             y_value = 0
             curve = self.curve_list[idx]
-            #print("0-2:",datetime.datetime.now(), evt.xdata, min(curve['size_range2']), max(curve['size_range2']))
-            if evt.xdata >= min(curve['size_range2']) and evt.xdata <= max(curve['size_range2']):
-                y_value = np.polyval(curve['model'], evt.xdata)
+            # print("0-2:",datetime.datetime.now(), evt.xdata, min(curve['size_range2']), max(curve['size_range2']))
+            if evt.xdata >= min(curve["size_range2"]) and evt.xdata <= max(curve["size_range2"]):
+                y_value = np.polyval(curve["model"], evt.xdata)
             else:
                 continue
             x_value = flip_axis1 * evt.xdata
-            #y_value = flip_axis2 * y_value
-
+            # y_value = flip_axis2 * y_value
 
             if axis1 != CENTROID_SIZE_VALUE:
                 shape_to_visualize[0][axis1] = x_value
 
             shape_to_visualize[0][axis2] = flip_axis2 * y_value
-            #print("0-3:",datetime.datetime.now())
+            # print("0-3:",datetime.datetime.now())
             unrotated_shape = self.unrotate_shape(shape_to_visualize)
-            #print("0-4:",datetime.datetime.now())
-            self.show_shape(unrotated_shape[0], idx)        
-
-
+            # print("0-4:",datetime.datetime.now())
+            self.show_shape(unrotated_shape[0], idx)
 
     def shape_button_clicked(self, idx):
-        #print("shape_button_clicked", idx)
+        # print("shape_button_clicked", idx)
         self.is_picking_shape = True
         self.pick_idx = idx
         self.plot_widget2.setCursor(QCursor(Qt.CrossCursor))
 
-        #self.shape_view_list[idx].show()
+        # self.shape_view_list[idx].show()
 
     def update_chart(self):
-        #if self.ds_ops is not None and self.analysis_done is True:
+        # if self.ds_ops is not None and self.analysis_done is True:
         self.prepare_scatter_data()
         self.calculate_fit()
-        #print("update chart", self.curve_list)
+        # print("update chart", self.curve_list)
         self.show_analysis_result()
 
     def axis_changed(self):
-        #if self.ds_ops is not None and self.analysis_done is True:
+        # if self.ds_ops is not None and self.analysis_done is True:
         if self.ignore_change:
             return
-        
+
         self.update_chart()
 
     def flip_axis_changed(self, int):
-        #if self.ds_ops is not None:
+        # if self.ds_ops is not None:
         self.update_chart()
 
     def read_settings(self):
-        #self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
+        # self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
         self.plot_size = self.m_app.settings.value("PlotSize", self.plot_size)
         for i in range(len(self.color_list)):
-            self.color_list[i] = self.m_app.settings.value("DataPointColor/"+str(i), self.default_color_list[i])
+            self.color_list[i] = self.m_app.settings.value("DataPointColor/" + str(i), self.default_color_list[i])
         for i in range(len(self.marker_list)):
-            self.marker_list[i] = self.m_app.settings.value("DataPointMarker/"+str(i), self.marker_list[i])
+            self.marker_list[i] = self.m_app.settings.value("DataPointMarker/" + str(i), self.marker_list[i])
         self.bgcolor = self.m_app.settings.value("BackgroundColor", self.bgcolor)
         if self.m_app.remember_geometry is True:
-            #print('loading geometry', self.remember_geometry)
-            
+            # print('loading geometry', self.remember_geometry)
+
             is_maximized = mu.value_to_bool(self.m_app.settings.value("IsMaximized/DataExplorationWindow", False))
-            if is_maximized == True:
-                #print("maximized true. restoring maximized state")
-                #self.showMaximized()
+            if is_maximized:
+                # print("maximized true. restoring maximized state")
+                # self.showMaximized()
                 self.setWindowState(Qt.WindowMaximized)
             else:
-                self.setGeometry(self.m_app.settings.value("WindowGeometry/DataExplorationWindow", QRect(100, 100, 1400, 800)))
-                #self.setGeometry(self.m_app.settings.value("WindowGeometry/DataExplorationWindow", QRect(100, 100, 1400, 800)))
-                #print("maximized false")
-                #self.showNormal()
-                #pass
+                self.setGeometry(
+                    self.m_app.settings.value("WindowGeometry/DataExplorationWindow", QRect(100, 100, 1400, 800))
+                )
+                # self.setGeometry(self.m_app.settings.value("WindowGeometry/DataExplorationWindow", QRect(100, 100, 1400, 800)))
+                # print("maximized false")
+                # self.showNormal()
+                # pass
         else:
             self.setGeometry(QRect(100, 100, 1400, 800))
-            self.move(self.parent.pos()+QPoint(50,50))
+            self.move(self.parent.pos() + QPoint(50, 50))
 
     def write_settings(self):
-        self.m_app.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
+        self.m_app.remember_geometry = mu.value_to_bool(
+            self.m_app.settings.value("WindowGeometry/RememberGeometry", True)
+        )
         if self.m_app.remember_geometry is True:
-            #print("maximized:", self.isMaximized(), "geometry:", self.geometry())
-            
+            # print("maximized:", self.isMaximized(), "geometry:", self.geometry())
+
             if self.isMaximized():
                 self.m_app.settings.setValue("IsMaximized/DataExplorationWindow", True)
             else:
                 self.m_app.settings.setValue("IsMaximized/DataExplorationWindow", False)
                 self.m_app.settings.setValue("WindowGeometry/DataExplorationWindow", self.geometry())
-                #print("save maximized false")
+                # print("save maximized false")
 
     def closeEvent(self, event):
         self.write_settings()
-        #for shape_view in self.shape_view_list:
+        # for shape_view in self.shape_view_list:
         #    shape_view.close()
         for key in self.shape_grid.keys():
-            if self.shape_grid[key]['view']:
-                self.shape_grid[key]['view'].close()
-        #if self.analysis_dialog is not None:
+            if self.shape_grid[key]["view"]:
+                self.shape_grid[key]["view"].close()
+        # if self.analysis_dialog is not None:
         #    self.analysis_dialog.close()
         event.accept()
 
+    def store_rotation(self, x_rad, y_rad):
+        # print("store_rotation", x_rad, y_rad)
+        rotationXMatrix = np.array(
+            [[1, 0, 0, 0], [0, np.cos(y_rad), -np.sin(y_rad), 0], [0, np.sin(y_rad), np.cos(y_rad), 0], [0, 0, 0, 1]]
+        )
 
-
-    def store_rotation(self,x_rad, y_rad):
-        #print("store_rotation", x_rad, y_rad)
-        rotationXMatrix = np.array([
-            [1, 0, 0, 0],
-            [0, np.cos(y_rad), -np.sin(y_rad), 0],
-            [0, np.sin(y_rad), np.cos(y_rad), 0],
-            [0, 0, 0, 1]
-        ])
-
-        rotationYMatrix = np.array([
-            [np.cos(x_rad), 0, np.sin(x_rad), 0],
-            [0, 1, 0, 0],
-            [-np.sin(x_rad), 0, np.cos(x_rad), 0],
-            [0, 0, 0, 1]
-        ])
-        #print(rotationXMatrix)
-        #print(rotationYMatrix)
-        #print("rotation matrix before\n",self.rotation_matrix)
+        rotationYMatrix = np.array(
+            [[np.cos(x_rad), 0, np.sin(x_rad), 0], [0, 1, 0, 0], [-np.sin(x_rad), 0, np.cos(x_rad), 0], [0, 0, 0, 1]]
+        )
+        # print(rotationXMatrix)
+        # print(rotationYMatrix)
+        # print("rotation matrix before\n",self.rotation_matrix)
         new_rotation_matrix = np.dot(rotationXMatrix, rotationYMatrix)
         self.rotation_matrix = np.dot(new_rotation_matrix, self.rotation_matrix)
-        #print("rotation matrix after\n",self.rotation_matrix)
-
-
+        # print("rotation matrix after\n",self.rotation_matrix)
 
     def sync_rotation(self):
         if len(self.shape_view_list) > 0:
             temp_rotate_x = math.radians(self.shape_view_list[0].temp_rotate_x)
             temp_rotate_y = math.radians(self.shape_view_list[0].temp_rotate_y)
-            #(math.radians(self.rotate_x),math.radians(self.rotate_y),apply_rotation_to_vertex)
-            self.store_rotation(temp_rotate_x,temp_rotate_y)
+            # (math.radians(self.rotate_x),math.radians(self.rotate_y),apply_rotation_to_vertex)
+            self.store_rotation(temp_rotate_x, temp_rotate_y)
         for key in self.shape_grid.keys():
-            if self.shape_grid[key]['view']:
-                self.shape_grid[key]['view'].sync_rotation()
-                self.shape_grid[key]['view'].update()
+            if self.shape_grid[key]["view"]:
+                self.shape_grid[key]["view"].sync_rotation()
+                self.shape_grid[key]["view"].update()
 
         for sv in self.shape_view_list:
-            #self.temp_rotate_x = sv.temp_rotate_x
-            #self.temp_rotate_y = sv.temp_rotate_y
-            #sv.rotate_x = sv.temp_rotate_x
-            #sv.rotate_y = sv.temp_rotate_y
+            # self.temp_rotate_x = sv.temp_rotate_x
+            # self.temp_rotate_y = sv.temp_rotate_y
+            # sv.rotate_x = sv.temp_rotate_x
+            # sv.rotate_y = sv.temp_rotate_y
             sv.sync_rotation()
             sv.update()
-
 
     def sync_temp_pan(self, shape_view, temp_pan_x, temp_pan_y):
         for sv in self.shape_view_list:
             if sv != shape_view:
                 sv.temp_pan_x = temp_pan_x
                 sv.temp_pan_y = temp_pan_y
-                #sv.sync_zoom()
+                # sv.sync_zoom()
                 sv.update()
-
-
 
     def sync_pan(self, shape_view, pan_x, pan_y):
         if len(self.shape_view_list) > 0:
@@ -3658,114 +3671,114 @@ class DataExplorationDialog(QDialog):
             if sv != shape_view:
                 sv.pan_x = pan_x
                 sv.pan_y = pan_y
-                #sv.sync_zoom()
+                # sv.sync_zoom()
                 sv.update()
 
-
     def sync_zoom(self, shape_view, zoom_factor):
-        #print("sync_zoom", shape_view, zoom_factor)
+        # print("sync_zoom", shape_view, zoom_factor)
         is_2D = False
         if isinstance(shape_view, ObjectViewer2D):
             is_2D = True
-            
+
         if len(self.shape_view_list) > 0:
             if is_2D:
                 pass
-                #self.shape_view_dolly = self.shape_view_list[0].scale                
+                # self.shape_view_dolly = self.shape_view_list[0].scale
             else:
                 self.shape_view_dolly = self.shape_view_list[0].dolly
-                        
+
         for sv in self.shape_view_list:
             if sv != shape_view:
                 if is_2D:
                     sv.adjust_scale(zoom_factor, recurse=False)
                 else:
                     sv.dolly = zoom_factor
-                #sv.sync_zoom()
+                # sv.sync_zoom()
                 sv.update()
         for key in self.shape_grid.keys():
-            if self.shape_grid[key]['view']:
+            if self.shape_grid[key]["view"]:
                 if is_2D:
-                    self.shape_grid[key]['view'].adjust_scale(zoom_factor)
+                    self.shape_grid[key]["view"].adjust_scale(zoom_factor)
                 else:
-                    self.shape_grid[key]['view'].dolly = zoom_factor
-                self.shape_grid[key]['view'].update()
+                    self.shape_grid[key]["view"].dolly = zoom_factor
+                self.shape_grid[key]["view"].update()
 
     def sync_temp_zoom(self, shape_view, temp_dolly):
         for sv in self.shape_view_list:
             if sv != shape_view:
                 sv.temp_dolly = temp_dolly
-                #sv.sync_zoom()
+                # sv.sync_zoom()
                 sv.update()
         for key in self.shape_grid.keys():
-            if self.shape_grid[key]['view']:
-                self.shape_grid[key]['view'].temp_dolly = temp_dolly
-                self.shape_grid[key]['view'].update()
+            if self.shape_grid[key]["view"]:
+                self.shape_grid[key]["view"].temp_dolly = temp_dolly
+                self.shape_grid[key]["view"].update()
 
     def sync_temp_rotation(self, shape_view, temp_rotate_x, temp_rotate_y):
         for sv in self.shape_view_list:
             if sv != shape_view:
                 sv.temp_rotate_x = temp_rotate_x
                 sv.temp_rotate_y = temp_rotate_y
-                #sv.sync_rotation()
+                # sv.sync_rotation()
                 sv.update()
         for key in self.shape_grid.keys():
-            view = self.shape_grid[key]['view']
+            view = self.shape_grid[key]["view"]
             if view:
                 view.temp_rotate_x = temp_rotate_x
                 view.temp_rotate_y = temp_rotate_y
                 view.update()
 
-        #self.object_view_3d.sync_rotation(rotation_x, rotation_y)
+        # self.object_view_3d.sync_rotation(rotation_x, rotation_y)
+
     def moveEvent(self, event):
         self.reposition_shape_grid()
 
     def resizeEvent(self, event):
         for idx, shape_view in enumerate(self.shape_view_list):
             width = int(shape_view.width())
-            half_width = int(width/2)
-            y_pos=0
+            int(width / 2)
+            y_pos = 0
             x_pos = 0
             if self.mode == MODE_COMPARISON2:
-                y_pos = (idx)*32
+                y_pos = (idx) * 32
                 x_pos = 32
             if self.mode == MODE_COMPARISON:
                 x_pos = 32
-            #else:
+            # else:
             shape_label = self.shape_label_list[idx]
             font_metrics = QFontMetrics(shape_label.font())
             text_rect = font_metrics.boundingRect(shape_label.text())
 
             width = text_rect.width() + 10  # Add some padding for visual comfort
             height = shape_label.height()
-            #x, y = shape_label.pos().x(), shape_label.pos().y()  # Get current position
-            #shape_label.setGeometry(x, y, width, height) 
+            # x, y = shape_label.pos().x(), shape_label.pos().y()  # Get current position
+            # shape_label.setGeometry(x, y, width, height)
 
-            self.shape_label_list[idx].setGeometry(x_pos,y_pos,width,height)
+            self.shape_label_list[idx].setGeometry(x_pos, y_pos, width, height)
         for idx, button in enumerate(self.shape_button_list):
-            #button = self.shape_button_list[idx]
-            y_pos=0
+            # button = self.shape_button_list[idx]
+            y_pos = 0
             if self.mode == MODE_COMPARISON2:
-                y_pos = (idx)*32
-            button.setGeometry(0,y_pos,32,32)
+                y_pos = (idx) * 32
+            button.setGeometry(0, y_pos, 32, 32)
         self.reposition_shape_grid()
 
     def load_comboSelectgroup(self):
-        #print("load_comboSelectgroup", self.ignore_change)
-        #if self.comboRegressionBy.
-        propertyname_index = self.comboGroupBy.currentData()        
+        # print("load_comboSelectgroup", self.ignore_change)
+        # if self.comboRegressionBy.
+        propertyname_index = self.comboGroupBy.currentData()
         self.comboSelectGroup.clear()
         unique_groupname_list = []
-        for idx, obj in enumerate(self.object_info_list):
-            if 'variable_list' in obj.keys():
-                if propertyname_index > -1 and propertyname_index < len(obj['variable_list']):
-                    key_name = obj['variable_list'][self.scatter_variable_index]
+        for _idx, obj in enumerate(self.object_info_list):
+            if "variable_list" in obj.keys():
+                if propertyname_index > -1 and propertyname_index < len(obj["variable_list"]):
+                    key_name = obj["variable_list"][self.scatter_variable_index]
                     if key_name not in unique_groupname_list:
                         unique_groupname_list.append(key_name)
                         self.comboSelectGroup.addItem(key_name)
             else:
-                if propertyname_index > -1 and propertyname_index < len(obj['property_list']):
-                    key_name = obj['property_list'][self.scatter_variable_index]
+                if propertyname_index > -1 and propertyname_index < len(obj["property_list"]):
+                    key_name = obj["property_list"][self.scatter_variable_index]
                     if key_name not in unique_groupname_list:
                         unique_groupname_list.append(key_name)
                         self.comboSelectGroup.addItem(key_name)
@@ -3774,40 +3787,37 @@ class DataExplorationDialog(QDialog):
         for i in range(model.rowCount()):
             item = model.item(i)
             item.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
-            item.setCheckState(Qt.Checked)  # Initially unchecked                
-
+            item.setCheckState(Qt.Checked)  # Initially unchecked
 
     def comboGroupBy_changed(self):
-
-        if self.ignore_change == True:
+        if self.ignore_change:
             return
-        self.load_comboSelectgroup()            
+        self.load_comboSelectgroup()
         self.update_chart()
         self.prepare_shape_view()
         self.resizeEvent(None)
-            #shape_combo.setGeometry(150,0,150,20)
-        #self.prepare_scatter_data()
-        #self.calculate_fit()
-        #self.show_analysis_result()
+        # shape_combo.setGeometry(150,0,150,20)
+        # self.prepare_scatter_data()
+        # self.calculate_fit()
+        # self.show_analysis_result()
 
     def comboShapeview_changed(self):
         logger = logging.getLogger(__name__)
         logger.debug("shape_combo_changed")
-        #shape_view_index = self.shape_combo_list.index(combo)
-        #shape_view = self.shape_view_list[shape_view_index]
+        # shape_view_index = self.shape_combo_list.index(combo)
+        # shape_view = self.shape_view_list[shape_view_index]
 
         return
 
-
     def set_analysis(self, analysis, analysis_method, group_by):
         self.ignore_change = True
-        #print("set_analysis", analysis, analysis_method, group_by, self.ignore_change)
+        # print("set_analysis", analysis, analysis_method, group_by, self.ignore_change)
         self.analysis = analysis
         self.analysis_method = analysis_method
         self.edtAnalysisName.setText(analysis.analysis_name)
         self.edtSuperimposition.setText(analysis.superimposition_method)
         self.edtOrdination.setText(self.analysis_method)
-        #self.edtGroupBy.setText(analysis.group_by)
+        # self.edtGroupBy.setText(analysis.group_by)
         self.comboGroupBy.clear()
         self.comboGroupBy.addItem("Select property", -1)
         self.comboRegressionBasedOn.clear()
@@ -3820,47 +3830,47 @@ class DataExplorationDialog(QDialog):
             self.comboGroupBy.addItem(property, idx)
             self.comboRegressionBasedOn.addItem(property, idx)
 
-        #print("set_analysis 2", analysis, analysis_method, group_by, self.ignore_change)
-        if analysis_method == 'PCA':
-            #self.lblGroupBy.hide()
+        # print("set_analysis 2", analysis, analysis_method, group_by, self.ignore_change)
+        if analysis_method == "PCA":
+            # self.lblGroupBy.hide()
             self.comboGroupBy.setEnabled(True)
             self.comboRegressionBasedOn.setEnabled(True)
         else:
-            #self.lblGroupBy.show()
+            # self.lblGroupBy.show()
             self.comboGroupBy.setEnabled(False)
             self.comboRegressionBasedOn.setEnabled(False)
-        
+
         if group_by in analysis.dataset.get_variablename_list():
             self.comboGroupBy.setCurrentText(group_by)
             self.comboRegressionBasedOn.setCurrentText(group_by)
         else:
             self.comboGroupBy.setCurrentIndex(0)
             self.comboRegressionBasedOn.setCurrentIndex(0)
-        #print("going to set mode")
+        # print("going to set mode")
 
         obj = self.analysis.dataset.object_list[0]
         lm_list = obj.get_landmark_list()
         dim = self.analysis.dataset.dimension
-        analysis_dim = len(lm_list)*dim
-        #print("set_analysis 3", analysis, analysis_method, group_by, self.ignore_change)
+        analysis_dim = len(lm_list) * dim
+        # print("set_analysis 3", analysis, analysis_method, group_by, self.ignore_change)
 
         self.comboAxis1.clear()
         self.comboAxis2.clear()
         self.comboAxis3.clear()
 
-        self.comboAxis1.addItem(CENTROID_SIZE_TEXT,CENTROID_SIZE_VALUE)
+        self.comboAxis1.addItem(CENTROID_SIZE_TEXT, CENTROID_SIZE_VALUE)
         for i in range(analysis_dim):
-            self.comboAxis1.addItem("PC"+str(i+1),i)
-            self.comboAxis2.addItem("PC"+str(i+1),i)
-            self.comboAxis3.addItem("PC"+str(i+1),i)
-        #print("set_analysis 4", analysis, analysis_method, group_by, self.ignore_change)
+            self.comboAxis1.addItem("PC" + str(i + 1), i)
+            self.comboAxis2.addItem("PC" + str(i + 1), i)
+            self.comboAxis3.addItem("PC" + str(i + 1), i)
+        # print("set_analysis 4", analysis, analysis_method, group_by, self.ignore_change)
 
-        #print("set_analysis 5", analysis, analysis_method, group_by, self.ignore_change)
+        # print("set_analysis 5", analysis, analysis_method, group_by, self.ignore_change)
         self.object_info_list = json.loads(self.analysis.object_info_json)
         for obj in self.object_info_list:
-            if 'property_list' in obj.keys():
-                obj['variable_list'] = obj['property_list']
-        if self.analysis_method == 'PCA':
+            if "property_list" in obj.keys():
+                obj["variable_list"] = obj["property_list"]
+        if self.analysis_method == "PCA":
             self.analysis_result_list = json.loads(self.analysis.pca_analysis_result_json)
             # Load eigenvalues for displaying variance explained
             if self.analysis.pca_eigenvalues_json:
@@ -3873,10 +3883,10 @@ class DataExplorationDialog(QDialog):
                     self.eigen_value_percentages = []
             else:
                 self.eigen_value_percentages = []
-        elif self.analysis_method == 'CVA':
+        elif self.analysis_method == "CVA":
             self.analysis_result_list = json.loads(self.analysis.cva_analysis_result_json)
 
-        #print("set_analysis 6", analysis, analysis_method, group_by, self.ignore_change)
+        # print("set_analysis 6", analysis, analysis_method, group_by, self.ignore_change)
 
         scatter_variable_name = self.comboGroupBy.currentText()
         regression_variable_name = self.comboRegressionBasedOn.currentText()
@@ -3885,283 +3895,405 @@ class DataExplorationDialog(QDialog):
         else:
             # Fallback to dataset's variable names if analysis doesn't have them
             self.variablename_list = self.analysis.dataset.get_variablename_list()
-        self.scatter_variable_index = self.variablename_list.index(scatter_variable_name) if scatter_variable_name in self.variablename_list else -1
-        self.regression_variable_index = self.variablename_list.index(regression_variable_name) if regression_variable_name in self.variablename_list else -1
-        #self.scatter_variable_index = self.variablename_list.index(propertyname) if propertyname in self.variablename_list else -1
-        #print("set analysis load_comboselect", self.ignore_change)
+        self.scatter_variable_index = (
+            self.variablename_list.index(scatter_variable_name)
+            if scatter_variable_name in self.variablename_list
+            else -1
+        )
+        self.regression_variable_index = (
+            self.variablename_list.index(regression_variable_name)
+            if regression_variable_name in self.variablename_list
+            else -1
+        )
+        # self.scatter_variable_index = self.variablename_list.index(propertyname) if propertyname in self.variablename_list else -1
+        # print("set analysis load_comboselect", self.ignore_change)
         self.load_comboSelectgroup()
         self.set_mode(MODE_EXPLORATION)
         self.ignore_change = False
-
 
     def prepare_scatter_data(self):
         show_shape_grid = self.cbxShapeGrid.isChecked()
         show_convex_hull = self.cbxConvexHull.isChecked()
         show_confidence_ellipse = self.cbxConfidenceEllipse.isChecked()
-        regression_based_on = self.comboRegressionBasedOn.currentText()
-        #regression_by = self.comboRegressionBy.currentText()
-        regression_by = "By group"
-        show_regression = self.cbxRegression.isChecked()
+        self.comboRegressionBasedOn.currentText()
+        # regression_by = self.comboRegressionBy.currentText()
+        self.cbxRegression.isChecked()
 
         select_group_list = []
         for i in range(self.comboSelectGroup.count()):
             item = self.comboSelectGroup.model().item(i)
             if item.checkState() == Qt.Checked:
                 select_group_list.append(item.text())
-        #print("select_group_list", select_group_list)
+        # print("select_group_list", select_group_list)
 
-        #regression_by_group = self.rbByGroup.isChecked()
-        #regression_all_at_once = self.rbAllAtOnce.isChecked()
+        # regression_by_group = self.rbByGroup.isChecked()
+        # regression_all_at_once = self.rbAllAtOnce.isChecked()
 
         axis1 = self.comboAxis1.currentData()
         axis2 = self.comboAxis2.currentData()
         axis3 = self.comboAxis3.currentData()
-        flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
-        flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
-        flip_axis3 = -1.0 if self.cbxFlipAxis3.isChecked() == True else 1.0
+        flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() else 1.0
+        flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() else 1.0
+        flip_axis3 = -1.0 if self.cbxFlipAxis3.isChecked() else 1.0
 
         if self.analysis.propertyname_str:
             self.variablename_list = self.analysis.propertyname_str.split(",")
         else:
             # Fallback to dataset's variable names if analysis doesn't have them
             self.variablename_list = self.analysis.dataset.get_variablename_list()
-        symbol_candidate = ['o','s','^','x','+','d','v','<','>','p','h']
+        symbol_candidate = ["o", "s", "^", "x", "+", "d", "v", "<", ">", "p", "h"]
         symbol_candidate = self.marker_list[:]
-        color_candidate = ['blue','green','black','cyan','magenta','yellow','gray','red']
+        color_candidate = ["blue", "green", "black", "cyan", "magenta", "yellow", "gray", "red"]
         color_candidate = self.color_list[:]
-        #print("color list:", self.color_list, "marker list:", self.marker_list)
-        #print("color candidate:", color_candidate, "symbol candidate:", symbol_candidate)
+        # print("color list:", self.color_list, "marker list:", self.marker_list)
+        # print("color candidate:", color_candidate, "symbol candidate:", symbol_candidate)
 
         scatter_variable_name = self.comboGroupBy.currentText()
         regression_variable_name = self.comboRegressionBasedOn.currentText()
 
-        self.scatter_variable_index = self.variablename_list.index(scatter_variable_name) if scatter_variable_name in self.variablename_list else -1
-        self.regression_variable_index = self.variablename_list.index(regression_variable_name) if regression_variable_name in self.variablename_list else -1
+        self.scatter_variable_index = (
+            self.variablename_list.index(scatter_variable_name)
+            if scatter_variable_name in self.variablename_list
+            else -1
+        )
+        self.regression_variable_index = (
+            self.variablename_list.index(regression_variable_name)
+            if regression_variable_name in self.variablename_list
+            else -1
+        )
         self.scatter_data = {}
         self.scatter_result = {}
         self.average_shape = {}
         self.regression_data = {}
-        #self.regression_data = { 'x_val':[], 'y_val':[], 'z_val':[] }
-        #self.shape_grid = {}
-        self.data_range = { 'x_min':99999, 'x_max':-99999, 'y_min':99999, 'y_max':-99999, 'z_min':99999, 'z_max':-99999, 'x_sum': 0, 'y_sum': 0, 'z_sum': 0, 'x_avg': 0, 'y_avg': 0, 'z_avg': 0}
-        SCATTER_SMALL_SIZE = 30
+        # self.regression_data = { 'x_val':[], 'y_val':[], 'z_val':[] }
+        # self.shape_grid = {}
+        self.data_range = {
+            "x_min": 99999,
+            "x_max": -99999,
+            "y_min": 99999,
+            "y_max": -99999,
+            "z_min": 99999,
+            "z_max": -99999,
+            "x_sum": 0,
+            "y_sum": 0,
+            "z_sum": 0,
+            "x_avg": 0,
+            "y_avg": 0,
+            "z_avg": 0,
+        }
         SCATTER_MEDIUM_SIZE = 50
-        SCATTER_LARGE_SIZE = 60
         scatter_size = SCATTER_MEDIUM_SIZE
-        #if self.plot_size.lower() == 'small':
+        # if self.plot_size.lower() == 'small':
         #    scatter_size = SCATTER_SMALL_SIZE
-        #elif self.plot_size.lower() == 'medium':
+        # elif self.plot_size.lower() == 'medium':
         #    scatter_size = SCATTER_MEDIUM_SIZE
-        #elif self.plot_size.lower() == 'large':
+        # elif self.plot_size.lower() == 'large':
         #    scatter_size = SCATTER_LARGE_SIZE
-        
-        #print("removing shape grid")
+
+        # print("removing shape grid")
         for scatter_key_name in self.shape_grid.keys():
-            #print("removing shape grid", key_name)
-            if self.shape_grid[scatter_key_name]['view'] is not None:
-                self.shape_grid[scatter_key_name]['view'].hide()
-                self.shape_grid[scatter_key_name]['view'].deleteLater()
-                self.shape_grid[scatter_key_name]['view'] = None
+            # print("removing shape grid", key_name)
+            if self.shape_grid[scatter_key_name]["view"] is not None:
+                self.shape_grid[scatter_key_name]["view"].hide()
+                self.shape_grid[scatter_key_name]["view"].deleteLater()
+                self.shape_grid[scatter_key_name]["view"] = None
 
         key_list = []
-        key_list.append('__default__')
-        self.scatter_data['__default__'] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'hoverinfo':[], 'text':[], 'property':'', 'symbol':'o', 'color':color_candidate[0], 'size':scatter_size}
-        self.average_shape['__default__'] = { 'x_val':0, 'y_val':0, 'z_val':0, 'data':[], 'hoverinfo':[], 'text':[], 'property':'', 'symbol':'o', 'color':color_candidate[0], 'size':scatter_size}
-        self.regression_data['__default__'] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'hoverinfo':[], 'text':[], 'property':'', 'symbol':'o', 'color':color_candidate[0], 'size':scatter_size}
-        #regression_key_name = ''
-        #scatter_key_name = ''
+        key_list.append("__default__")
+        self.scatter_data["__default__"] = {
+            "x_val": [],
+            "y_val": [],
+            "z_val": [],
+            "data": [],
+            "hoverinfo": [],
+            "text": [],
+            "property": "",
+            "symbol": "o",
+            "color": color_candidate[0],
+            "size": scatter_size,
+        }
+        self.average_shape["__default__"] = {
+            "x_val": 0,
+            "y_val": 0,
+            "z_val": 0,
+            "data": [],
+            "hoverinfo": [],
+            "text": [],
+            "property": "",
+            "symbol": "o",
+            "color": color_candidate[0],
+            "size": scatter_size,
+        }
+        self.regression_data["__default__"] = {
+            "x_val": [],
+            "y_val": [],
+            "z_val": [],
+            "data": [],
+            "hoverinfo": [],
+            "text": [],
+            "property": "",
+            "symbol": "o",
+            "color": color_candidate[0],
+            "size": scatter_size,
+        }
+        # regression_key_name = ''
+        # scatter_key_name = ''
 
         for idx, obj in enumerate(self.object_info_list):
-            scatter_key_name = '__default__'
-            regression_key_name = '__default__'
+            scatter_key_name = "__default__"
+            regression_key_name = "__default__"
 
-            if 'variable_list' in obj.keys():  
-                if self.scatter_variable_index > -1 and self.scatter_variable_index < len(obj['variable_list']):
-                    scatter_key_name = obj['variable_list'][self.scatter_variable_index]
-                if self.regression_variable_index > -1 and self.regression_variable_index < len(obj['variable_list']):
-                    regression_key_name = obj['variable_list'][self.regression_variable_index]
+            if "variable_list" in obj.keys():
+                if self.scatter_variable_index > -1 and self.scatter_variable_index < len(obj["variable_list"]):
+                    scatter_key_name = obj["variable_list"][self.scatter_variable_index]
+                if self.regression_variable_index > -1 and self.regression_variable_index < len(obj["variable_list"]):
+                    regression_key_name = obj["variable_list"][self.regression_variable_index]
             else:
-                if self.scatter_variable_index > -1 and self.scatter_variable_index < len(obj['property_list']):
-                    scatter_key_name = obj['property_list'][self.scatter_variable_index]
+                if self.scatter_variable_index > -1 and self.scatter_variable_index < len(obj["property_list"]):
+                    scatter_key_name = obj["property_list"][self.scatter_variable_index]
 
             if scatter_key_name not in self.scatter_data.keys():
-                self.scatter_data[scatter_key_name] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'property':scatter_key_name, 'symbol':'', 'color':'', 'size':scatter_size}
-                self.average_shape[scatter_key_name] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'property':scatter_key_name, 'symbol':'', 'color':'', 'size':scatter_size}
-            
+                self.scatter_data[scatter_key_name] = {
+                    "x_val": [],
+                    "y_val": [],
+                    "z_val": [],
+                    "data": [],
+                    "property": scatter_key_name,
+                    "symbol": "",
+                    "color": "",
+                    "size": scatter_size,
+                }
+                self.average_shape[scatter_key_name] = {
+                    "x_val": [],
+                    "y_val": [],
+                    "z_val": [],
+                    "data": [],
+                    "property": scatter_key_name,
+                    "symbol": "",
+                    "color": "",
+                    "size": scatter_size,
+                }
+
             if regression_key_name not in self.regression_data.keys():
-                self.regression_data[regression_key_name] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'property':regression_key_name, 'symbol':'', 'color':'', 'size':scatter_size}
+                self.regression_data[regression_key_name] = {
+                    "x_val": [],
+                    "y_val": [],
+                    "z_val": [],
+                    "data": [],
+                    "property": regression_key_name,
+                    "symbol": "",
+                    "color": "",
+                    "size": scatter_size,
+                }
 
             if axis1 == CENTROID_SIZE_VALUE:
-                #print("obj:", obj)
-                self.scatter_data[scatter_key_name]['x_val'].append(obj['csize'])
-                self.regression_data[regression_key_name]['x_val'].append(obj['csize'])
-                #if regression_by == 'All' or ( regression_by == 'Select group' and scatter_key_name in select_group_list ):
+                # print("obj:", obj)
+                self.scatter_data[scatter_key_name]["x_val"].append(obj["csize"])
+                self.regression_data[regression_key_name]["x_val"].append(obj["csize"])
+                # if regression_by == 'All' or ( regression_by == 'Select group' and scatter_key_name in select_group_list ):
                 #    self.regression_data['x_val'].append(obj['csize'])
             else:
-                self.scatter_data[scatter_key_name]['x_val'].append(flip_axis1 * self.analysis_result_list[idx][axis1])
-                self.regression_data[regression_key_name]['x_val'].append(flip_axis1 * self.analysis_result_list[idx][axis1])
-                #if regression_by == 'All' or ( regression_by == 'Select group' and scatter_key_name in select_group_list ):
+                self.scatter_data[scatter_key_name]["x_val"].append(flip_axis1 * self.analysis_result_list[idx][axis1])
+                self.regression_data[regression_key_name]["x_val"].append(
+                    flip_axis1 * self.analysis_result_list[idx][axis1]
+                )
+                # if regression_by == 'All' or ( regression_by == 'Select group' and scatter_key_name in select_group_list ):
                 #    self.regression_data['x_val'].append(flip_axis1 * self.analysis_result_list[idx][axis1])
-            self.scatter_data[scatter_key_name]['y_val'].append(flip_axis2 * self.analysis_result_list[idx][axis2])
-            self.regression_data[regression_key_name]['y_val'].append(flip_axis2 * self.analysis_result_list[idx][axis2])
-            #if regression_by == 'All' or ( regression_by == 'Select group' and scatter_key_name in select_group_list ):
+            self.scatter_data[scatter_key_name]["y_val"].append(flip_axis2 * self.analysis_result_list[idx][axis2])
+            self.regression_data[regression_key_name]["y_val"].append(
+                flip_axis2 * self.analysis_result_list[idx][axis2]
+            )
+            # if regression_by == 'All' or ( regression_by == 'Select group' and scatter_key_name in select_group_list ):
             #    self.regression_data['y_val'].append(flip_axis2 * self.analysis_result_list[idx][axis2])
-            self.scatter_data[scatter_key_name]['z_val'].append(flip_axis3 * self.analysis_result_list[idx][axis3])
-            self.regression_data[regression_key_name]['z_val'].append(flip_axis3 * self.analysis_result_list[idx][axis3])
-            #if regression_by == 'All' or ( regression_by == 'Select group' and scatter_key_name in select_group_list ):
+            self.scatter_data[scatter_key_name]["z_val"].append(flip_axis3 * self.analysis_result_list[idx][axis3])
+            self.regression_data[regression_key_name]["z_val"].append(
+                flip_axis3 * self.analysis_result_list[idx][axis3]
+            )
+            # if regression_by == 'All' or ( regression_by == 'Select group' and scatter_key_name in select_group_list ):
             #    self.regression_data['z_val'].append(flip_axis3 * self.analysis_result_list[idx][axis3])
 
-            self.scatter_data[scatter_key_name]['data'].append(obj)
-            self.regression_data[regression_key_name]['data'].append(obj)
+            self.scatter_data[scatter_key_name]["data"].append(obj)
+            self.regression_data[regression_key_name]["data"].append(obj)
 
-            self.data_range['x_max'] = max(self.data_range['x_max'], self.scatter_data[scatter_key_name]['x_val'][-1])
-            self.data_range['x_min'] = min(self.data_range['x_min'], self.scatter_data[scatter_key_name]['x_val'][-1])
-            self.data_range['x_sum'] += self.scatter_data[scatter_key_name]['x_val'][-1]
-            self.data_range['y_max'] = max(self.data_range['y_max'], self.scatter_data[scatter_key_name]['y_val'][-1])
-            self.data_range['y_min'] = min(self.data_range['y_min'], self.scatter_data[scatter_key_name]['y_val'][-1])
-            self.data_range['y_sum'] += self.scatter_data[scatter_key_name]['y_val'][-1]
-            self.data_range['z_max'] = max(self.data_range['z_max'], self.scatter_data[scatter_key_name]['z_val'][-1])
-            self.data_range['z_min'] = min(self.data_range['z_min'], self.scatter_data[scatter_key_name]['z_val'][-1])
-            self.data_range['z_sum'] += self.scatter_data[scatter_key_name]['z_val'][-1]
-        
+            self.data_range["x_max"] = max(self.data_range["x_max"], self.scatter_data[scatter_key_name]["x_val"][-1])
+            self.data_range["x_min"] = min(self.data_range["x_min"], self.scatter_data[scatter_key_name]["x_val"][-1])
+            self.data_range["x_sum"] += self.scatter_data[scatter_key_name]["x_val"][-1]
+            self.data_range["y_max"] = max(self.data_range["y_max"], self.scatter_data[scatter_key_name]["y_val"][-1])
+            self.data_range["y_min"] = min(self.data_range["y_min"], self.scatter_data[scatter_key_name]["y_val"][-1])
+            self.data_range["y_sum"] += self.scatter_data[scatter_key_name]["y_val"][-1]
+            self.data_range["z_max"] = max(self.data_range["z_max"], self.scatter_data[scatter_key_name]["z_val"][-1])
+            self.data_range["z_min"] = min(self.data_range["z_min"], self.scatter_data[scatter_key_name]["z_val"][-1])
+            self.data_range["z_sum"] += self.scatter_data[scatter_key_name]["z_val"][-1]
+
         if show_shape_grid:
-            self.data_range['x_avg'] = self.data_range['x_sum'] / len(self.object_info_list)
-            self.data_range['y_avg'] = self.data_range['y_sum'] / len(self.object_info_list)
-            x_key_list = [ 'x_min', 'x_avg', 'x_max']
-            y_key_list = [ 'y_min', 'y_avg', 'y_max']
+            self.data_range["x_avg"] = self.data_range["x_sum"] / len(self.object_info_list)
+            self.data_range["y_avg"] = self.data_range["y_sum"] / len(self.object_info_list)
+            x_key_list = ["x_min", "x_avg", "x_max"]
+            y_key_list = ["y_min", "y_avg", "y_max"]
             for x_key in x_key_list:
                 for y_key in y_key_list:
-                    scatter_key_name = x_key+"_"+y_key
-                    self.shape_grid[scatter_key_name] = { 'x_val': self.data_range[x_key], 'y_val': self.data_range[y_key]}
+                    scatter_key_name = x_key + "_" + y_key
+                    self.shape_grid[scatter_key_name] = {
+                        "x_val": self.data_range[x_key],
+                        "y_val": self.data_range[y_key],
+                    }
                     if self.analysis.dataset.dimension == 3:
-                        self.shape_grid[scatter_key_name]['view'] = ObjectViewer3D(parent=None,transparent=True)
+                        self.shape_grid[scatter_key_name]["view"] = ObjectViewer3D(parent=None, transparent=True)
                     else:
-                        self.shape_grid[scatter_key_name]['view'] = ObjectViewer2D(parent=None,transparent=True)
-                        self.shape_grid[scatter_key_name]['view'].show_index = False
-                    self.shape_grid[scatter_key_name]['view'].set_object_name(scatter_key_name)
+                        self.shape_grid[scatter_key_name]["view"] = ObjectViewer2D(parent=None, transparent=True)
+                        self.shape_grid[scatter_key_name]["view"].show_index = False
+                    self.shape_grid[scatter_key_name]["view"].set_object_name(scatter_key_name)
 
         # remove empty group
-        if len(self.scatter_data['__default__']['x_val']) == 0:
-            del self.scatter_data['__default__']
-            del self.average_shape['__default__']
-            del self.regression_data['__default__']
+        if len(self.scatter_data["__default__"]["x_val"]) == 0:
+            del self.scatter_data["__default__"]
+            del self.average_shape["__default__"]
+            del self.regression_data["__default__"]
 
         for scatter_key_name in self.scatter_data.keys():
-            self.average_shape[scatter_key_name]['x_val'] = np.mean(self.scatter_data[scatter_key_name]['x_val'])
-            self.average_shape[scatter_key_name]['y_val'] = np.mean(self.scatter_data[scatter_key_name]['y_val'])
-            self.average_shape[scatter_key_name]['z_val'] = np.mean(self.scatter_data[scatter_key_name]['z_val'])
-            #group_hash[key_name]['text'].append(obj.object_name)
-            #group_hash[key_name]['hoverinfo'].append(obj.id)
+            self.average_shape[scatter_key_name]["x_val"] = np.mean(self.scatter_data[scatter_key_name]["x_val"])
+            self.average_shape[scatter_key_name]["y_val"] = np.mean(self.scatter_data[scatter_key_name]["y_val"])
+            self.average_shape[scatter_key_name]["z_val"] = np.mean(self.scatter_data[scatter_key_name]["z_val"])
+            # group_hash[key_name]['text'].append(obj.object_name)
+            # group_hash[key_name]['hoverinfo'].append(obj.id)
 
         if show_convex_hull:
             for scatter_key_name in self.scatter_data.keys():
-                if len(self.scatter_data[scatter_key_name]['x_val']) > 1:
-                    self.scatter_data[scatter_key_name]['points'] = np.array([self.scatter_data[scatter_key_name]['x_val'], self.scatter_data[scatter_key_name]['y_val']]).T
-                    hull = ConvexHull(self.scatter_data[scatter_key_name]['points'])
-                    self.scatter_data[scatter_key_name]['hull'] = hull
+                if len(self.scatter_data[scatter_key_name]["x_val"]) > 1:
+                    self.scatter_data[scatter_key_name]["points"] = np.array(
+                        [self.scatter_data[scatter_key_name]["x_val"], self.scatter_data[scatter_key_name]["y_val"]]
+                    ).T
+                    hull = ConvexHull(self.scatter_data[scatter_key_name]["points"])
+                    self.scatter_data[scatter_key_name]["hull"] = hull
 
         if show_confidence_ellipse:
             for scatter_key_name in self.scatter_data.keys():
-                if len(self.scatter_data[scatter_key_name]['x_val']) > 1:
-                    covariance = np.cov([self.scatter_data[scatter_key_name]['x_val'], self.scatter_data[scatter_key_name]['y_val']])
+                if len(self.scatter_data[scatter_key_name]["x_val"]) > 1:
+                    covariance = np.cov(
+                        [self.scatter_data[scatter_key_name]["x_val"], self.scatter_data[scatter_key_name]["y_val"]]
+                    )
                     confidence_level = 0.90  # For 95% confidence ellipse
                     alpha = 1 - confidence_level
                     n_std = stats.chi2.ppf(1 - alpha, df=2)  # Degrees of freedom = 2 for 2D ellipse
-                    width, height, angle = mu.get_ellipse_params(covariance, n_std) 
-                    self.scatter_data[scatter_key_name]['ellipse'] = (width, height, angle)
+                    width, height, angle = mu.get_ellipse_params(covariance, n_std)
+                    self.scatter_data[scatter_key_name]["ellipse"] = (width, height, angle)
 
         if len(self.scatter_data.keys()) == 0:
             return
 
         # assign color and symbol
-        #sc_idx = 0
+        # sc_idx = 0
         for sc_idx, scatter_key_name in enumerate(self.scatter_data.keys()):
-            if self.scatter_data[scatter_key_name]['color'] == '':
-                self.scatter_data[scatter_key_name]['color'] = color_candidate[sc_idx % len(color_candidate)]
-                self.scatter_data[scatter_key_name]['symbol'] = symbol_candidate[sc_idx % len(symbol_candidate)]
-                #sc_idx += 1
+            if self.scatter_data[scatter_key_name]["color"] == "":
+                self.scatter_data[scatter_key_name]["color"] = color_candidate[sc_idx % len(color_candidate)]
+                self.scatter_data[scatter_key_name]["symbol"] = symbol_candidate[sc_idx % len(symbol_candidate)]
+                # sc_idx += 1
 
-        #rg_idx = 0
+        # rg_idx = 0
         for rg_idx, regression_key_name in enumerate(self.regression_data.keys()):
-            if self.regression_data[regression_key_name]['color'] == '':
-                self.regression_data[regression_key_name]['color'] = color_candidate[rg_idx % len(color_candidate)]
-                self.regression_data[regression_key_name]['symbol'] = symbol_candidate[rg_idx % len(symbol_candidate)]
-                #sc_idx += 1
+            if self.regression_data[regression_key_name]["color"] == "":
+                self.regression_data[regression_key_name]["color"] = color_candidate[rg_idx % len(color_candidate)]
+                self.regression_data[regression_key_name]["symbol"] = symbol_candidate[rg_idx % len(symbol_candidate)]
+                # sc_idx += 1
 
     def calculate_fit(self):
-        #self.scatter_data[key_name]['y_val']
+        # self.scatter_data[key_name]['y_val']
         show_regression = self.cbxRegression.isChecked()
-        if show_regression == False:
+        if not show_regression:
             return
-        regression_by = "By group" #self.comboRegressionBy.currentText()
+        regression_by = "By group"  # self.comboRegressionBy.currentText()
 
         key_list = self.regression_data.keys()
-        #print("key list:", key_list)
+        # print("key list:", key_list)
         self.curve_list = []
-        #data_range = self.data_range
+        # data_range = self.data_range
         degree_text = self.sbxDegree.text()
         if degree_text == "":
             return
-        
+
         degree = int(degree_text)
         if regression_by == "By group":
-            for idx, key in enumerate(key_list):
-                x_vals = np.array(self.regression_data[key]['x_val'])
-                y_vals = np.array(self.regression_data[key]['y_val'])
+            for _idx, key in enumerate(key_list):
+                x_vals = np.array(self.regression_data[key]["x_val"])
+                y_vals = np.array(self.regression_data[key]["y_val"])
 
                 if len(x_vals) < 2:
-                    self.curve_list.append( None )
-                    #self.shape_view_list[idx].hide()
+                    self.curve_list.append(None)
+                    # self.shape_view_list[idx].hide()
                 else:
-                    #self.shape_view_list[idx].show()
-                    model = np.polyfit( x_vals, y_vals, degree)
-                    #model_list.append(model)
+                    # self.shape_view_list[idx].show()
+                    model = np.polyfit(x_vals, y_vals, degree)
+                    # model_list.append(model)
                     r_squared = self.calculate_r_squared(model, x_vals, y_vals)
-                    #print(key, model, r_squared)
-                    size_range = np.linspace(min(self.regression_data[key]['x_val']), max(self.regression_data[key]['x_val']), 100)
-                    size_range2 = np.linspace(self.data_range['x_min'], self.data_range['x_max'], 100)
+                    # print(key, model, r_squared)
+                    size_range = np.linspace(
+                        min(self.regression_data[key]["x_val"]), max(self.regression_data[key]["x_val"]), 100
+                    )
+                    size_range2 = np.linspace(self.data_range["x_min"], self.data_range["x_max"], 100)
                     curve = np.polyval(model, size_range)
                     curve2 = np.polyval(model, size_range2)
-                    self.curve_list.append( { 'key': key, 'model': model, 'size_range': size_range, 'size_range2': size_range2, 'curve': curve, 'curve2': curve2, 'r_squared': r_squared, 'color': self.regression_data[key]['color'] } )
+                    self.curve_list.append(
+                        {
+                            "key": key,
+                            "model": model,
+                            "size_range": size_range,
+                            "size_range2": size_range2,
+                            "curve": curve,
+                            "curve2": curve2,
+                            "r_squared": r_squared,
+                            "color": self.regression_data[key]["color"],
+                        }
+                    )
         else:
-            color_candidate = ['blue','green','black','cyan','magenta','yellow','gray','red']
+            color_candidate = ["blue", "green", "black", "cyan", "magenta", "yellow", "gray", "red"]
             color_candidate = self.color_list[:]
             color = color_candidate[len(self.scatter_data.keys())]
 
-            x_vals = np.array(self.regression_data['x_val'])
-            y_vals = np.array(self.regression_data['y_val'])
+            x_vals = np.array(self.regression_data["x_val"])
+            y_vals = np.array(self.regression_data["y_val"])
             if len(x_vals) < 2:
-                self.curve_list.append( None )
-                #self.shape_view_list[idx].hide()
+                self.curve_list.append(None)
+                # self.shape_view_list[idx].hide()
             else:
-                #self.shape_view_list[idx].show()
-                model = np.polyfit( x_vals, y_vals, degree)
+                # self.shape_view_list[idx].show()
+                model = np.polyfit(x_vals, y_vals, degree)
                 r_squared = self.calculate_r_squared(model, x_vals, y_vals)
-                size_range = np.linspace(min(self.regression_data['x_val']), max(self.regression_data['x_val']), 100)
-                size_range2 = np.linspace(self.data_range['x_min'], self.data_range['x_max'], 100)
+                size_range = np.linspace(min(self.regression_data["x_val"]), max(self.regression_data["x_val"]), 100)
+                size_range2 = np.linspace(self.data_range["x_min"], self.data_range["x_max"], 100)
                 curve = np.polyval(model, size_range)
                 curve2 = np.polyval(model, size_range2)
-                self.curve_list.append( { 'key': "All", 'model': model, 'size_range': size_range, 'size_range2': size_range2, 'curve': curve, 'curve2': curve2, 'r_squared': r_squared, 'color': color } )
+                self.curve_list.append(
+                    {
+                        "key": "All",
+                        "model": model,
+                        "size_range": size_range,
+                        "size_range2": size_range2,
+                        "curve": curve,
+                        "curve2": curve2,
+                        "r_squared": r_squared,
+                        "color": color,
+                    }
+                )
 
     def calculate_r_squared(self, model, x_vals, y_vals):
         y_mean = np.mean(y_vals)
-        ss_total = np.sum((y_vals - y_mean)**2)
-        ss_res = np.sum((y_vals - np.polyval(model, x_vals))**2)
-        r_squared = 1 - (ss_res/ss_total)
-        return r_squared    
+        ss_total = np.sum((y_vals - y_mean) ** 2)
+        ss_res = np.sum((y_vals - np.polyval(model, x_vals)) ** 2)
+        r_squared = 1 - (ss_res / ss_total)
+        return r_squared
 
     def show_analysis_result(self):
-        #print("show analysis result", datetime.datetime.now())
-        #self.plot_widget.clear()
+        # print("show analysis result", datetime.datetime.now())
+        # self.plot_widget.clear()
         self.ax2.clear()
 
         # get axis1 and axis2 value from comboAxis1 and 2 index
-        #depth_shade = False
+        # depth_shade = False
         show_average_shape = self.cbxAverage.isChecked()
         show_regression = self.cbxRegression.isChecked()
         show_annotation = self.cbxAnnotation.isChecked()
         show_legend = self.cbxLegend.isChecked()
-        show_variance = self.cbxShowVariance.isChecked() if hasattr(self, 'cbxShowVariance') else False
+        show_variance = self.cbxShowVariance.isChecked() if hasattr(self, "cbxShowVariance") else False
         show_convex_hull = self.cbxConvexHull.isChecked()
         show_confidence_ellipse = self.cbxConfidenceEllipse.isChecked()
         show_axis_label = True
@@ -4169,104 +4301,132 @@ class DataExplorationDialog(QDialog):
 
         axis1_title = self.comboAxis1.currentText()
         axis2_title = self.comboAxis2.currentText()
-        axis3_title = self.comboAxis3.currentText()
+        self.comboAxis3.currentText()
 
         if True:
             self.ax2.clear()
             for name in self.scatter_data.keys():
-                #print("name", name, "len(group_hash[name]['x_val'])", len(group_hash[name]['x_val']), group_hash[name]['symbol'])
+                # print("name", name, "len(group_hash[name]['x_val'])", len(group_hash[name]['x_val']), group_hash[name]['symbol'])
                 group = self.scatter_data[name]
-                if len(group['x_val']) > 0:
-                    self.scatter_result[name] = self.ax2.scatter(group['x_val'], group['y_val'], s=group['size'], marker=group['symbol'], color=group['color'], data=group['data'], picker=True, pickradius=5)
-                    #print("ret", ret)
-                if name == '__selected__':
-                    for idx, obj in enumerate(group['data']):
-                        self.ax2.annotate(obj.object_name, (group['x_val'][idx], group['y_val'][idx]))
-            
+                if len(group["x_val"]) > 0:
+                    self.scatter_result[name] = self.ax2.scatter(
+                        group["x_val"],
+                        group["y_val"],
+                        s=group["size"],
+                        marker=group["symbol"],
+                        color=group["color"],
+                        data=group["data"],
+                        picker=True,
+                        pickradius=5,
+                    )
+                    # print("ret", ret)
+                if name == "__selected__":
+                    for idx, obj in enumerate(group["data"]):
+                        self.ax2.annotate(obj.object_name, (group["x_val"][idx], group["y_val"][idx]))
+
                 if show_average_shape:
-                    self.ax2.scatter(self.average_shape[name]['x_val'], self.average_shape[name]['y_val'], s=group['size']*3, marker=group['symbol'], color=group['color'])
-
-
-
+                    self.ax2.scatter(
+                        self.average_shape[name]["x_val"],
+                        self.average_shape[name]["y_val"],
+                        s=group["size"] * 3,
+                        marker=group["symbol"],
+                        color=group["color"],
+                    )
 
             if show_regression:
                 if self.curve_list is not None and len(self.curve_list) > 0:
                     for curve in self.curve_list:
                         if curve is None:
                             continue
-                        self.ax2.plot(curve['size_range'], curve['curve'], label=curve['key'], color=curve['color']) 
+                        self.ax2.plot(curve["size_range"], curve["curve"], label=curve["key"], color=curve["color"])
                         if show_extraplolate:
-                            self.ax2.plot(curve['size_range2'], curve['curve2'], label=curve['key'], color=curve['color'], linestyle='dashed')
-                        degree = len(curve['model'])-1
+                            self.ax2.plot(
+                                curve["size_range2"],
+                                curve["curve2"],
+                                label=curve["key"],
+                                color=curve["color"],
+                                linestyle="dashed",
+                            )
+                        degree = len(curve["model"]) - 1
                         model_text = "Y="
-                        #superscript_list = ["⁰","¹","²","³","⁴","⁵","⁶","⁷","⁸","⁹"]
-                        for i in range(degree+1):
-                            coeff = round(curve['model'][i]*1000)/1000
+                        # superscript_list = ["⁰","¹","²","³","⁴","⁵","⁶","⁷","⁸","⁹"]
+                        for i in range(degree + 1):
+                            coeff = round(curve["model"][i] * 1000) / 1000
                             if coeff == 0.0:
                                 continue
-                            model_text += str(coeff) 
-                            
+                            model_text += str(coeff)
+
                             if degree != i:
                                 model_text += "X"
-                                model_text += "^"+str(degree-i) if degree-i > 1 else ""
-                                #model_text += str(superscript_list[degree-i]) if degree-i > 1 else ""
+                                model_text += "^" + str(degree - i) if degree - i > 1 else ""
+                                # model_text += str(superscript_list[degree-i]) if degree-i > 1 else ""
                             if i < degree:
                                 model_text += " + "
-                        r_squared_text = "R^2="+str(round(curve['r_squared']*1000)/1000)                    
-                        
-                        #self.ax2.annotate(str(curve['model'])+" "+str(curve['r_squared']), (curve['size_range'][50], curve['curve'][50]))
+                        r_squared_text = "R^2=" + str(round(curve["r_squared"] * 1000) / 1000)
+
+                        # self.ax2.annotate(str(curve['model'])+" "+str(curve['r_squared']), (curve['size_range'][50], curve['curve'][50]))
                         if show_annotation:
-                            annotation1 = self.ax2.annotate(rf"${model_text}$", (curve['size_range'][10], curve['curve'][10]),fontname='Times New Roman')
-                            annotation2 =self.ax2.annotate(rf"${r_squared_text}$", (curve['size_range'][90], curve['curve'][90]),fontname='Times New Roman')
-                            annotation1.set_bbox(dict(boxstyle="round", facecolor="white", edgecolor="none", alpha=0.7))
-                            annotation2.set_bbox(dict(boxstyle="round", facecolor="white", edgecolor="none", alpha=0.7))
+                            annotation1 = self.ax2.annotate(
+                                rf"${model_text}$",
+                                (curve["size_range"][10], curve["curve"][10]),
+                                fontname="Times New Roman",
+                            )
+                            annotation2 = self.ax2.annotate(
+                                rf"${r_squared_text}$",
+                                (curve["size_range"][90], curve["curve"][90]),
+                                fontname="Times New Roman",
+                            )
+                            annotation1.set_bbox(
+                                {"boxstyle": "round", "facecolor": "white", "edgecolor": "none", "alpha": 0.7}
+                            )
+                            annotation2.set_bbox(
+                                {"boxstyle": "round", "facecolor": "white", "edgecolor": "none", "alpha": 0.7}
+                            )
 
-
-                #self.ax2.plot(size_range, group_a_curve, label='Group A')
-            #print("show_legend:", show_legend)
+                # self.ax2.plot(size_range, group_a_curve, label='Group A')
+            # print("show_legend:", show_legend)
             if show_legend:
                 values = []
                 keys = []
                 for key in self.scatter_result.keys():
-                    #print("key", key)
-                    if key[0] == '_' or key == '':
+                    # print("key", key)
+                    if key[0] == "_" or key == "":
                         continue
                     else:
                         keys.append(key)
                         values.append(self.scatter_result[key])
-                scatter_legend = self.ax2.legend(values, keys, loc='upper right', bbox_to_anchor=(1.05, 1))
+                scatter_legend = self.ax2.legend(values, keys, loc="upper right", bbox_to_anchor=(1.05, 1))
                 self.ax2.add_artist(scatter_legend)
                 bbox = scatter_legend.get_window_extent()
                 # Convert to axis coordinates
-                bbox_axis = bbox.transformed(self.ax2.transAxes.inverted())
+                bbox.transformed(self.ax2.transAxes.inverted())
                 # Calculate the height of first legend in axis coordinates
-                scatter_legend_height = bbox_axis.height
 
                 if show_regression and self.regression_variable_index != self.scatter_variable_index:
                     values = []
                     keys = []
                     for curve in self.curve_list:
-                        #print("curve", curve)
+                        # print("curve", curve)
                         if curve:
-                            keys.append( curve['key'] )
-                            values.append( curve )
-                    regression_legend = self.ax2.legend(values,keys, loc='lower right', bbox_to_anchor=(1.05, 0))
+                            keys.append(curve["key"])
+                            values.append(curve)
+                    regression_legend = self.ax2.legend(values, keys, loc="lower right", bbox_to_anchor=(1.05, 0))
                     self.ax2.add_artist(regression_legend)
 
-            #print("show axis label:", show_axis_label)
+            # print("show axis label:", show_axis_label)
             if show_axis_label:
-                #print("show axis label true")
+                # print("show axis label true")
                 # Add variance explained to axis titles if enabled and analysis is PCA
-                if show_variance and self.analysis_method == 'PCA':
+                if show_variance and self.analysis_method == "PCA":
                     # Get axis indices from combo boxes
                     axis1_idx = self.comboAxis1.currentIndex()
                     axis2_idx = self.comboAxis2.currentIndex()
 
                     # Try to get eigenvalues from analysis_result or from stored values
                     var_explained = None
-                    if hasattr(self, 'analysis_result') and hasattr(self.analysis_result, 'eigen_value_percentages'):
+                    if hasattr(self, "analysis_result") and hasattr(self.analysis_result, "eigen_value_percentages"):
                         var_explained = self.analysis_result.eigen_value_percentages
-                    elif hasattr(self, 'eigen_value_percentages'):
+                    elif hasattr(self, "eigen_value_percentages"):
                         var_explained = self.eigen_value_percentages
 
                     if var_explained:
@@ -4276,60 +4436,77 @@ class DataExplorationDialog(QDialog):
                             if axis1_idx > 0:  # Skip if CSize is selected (index 0)
                                 pc_idx_1 = axis1_idx - 1
                                 if pc_idx_1 >= 0 and pc_idx_1 < len(var_explained):
-                                    axis1_title += f" ({var_explained[pc_idx_1]*100:.1f}%)"
+                                    axis1_title += f" ({var_explained[pc_idx_1] * 100:.1f}%)"
 
                             # Axis2: PC1 is at index 0, PC2 at index 1, etc.
                             # So the index directly corresponds to the PC number (0-based)
                             if axis2_idx >= 0 and axis2_idx < len(var_explained):
-                                axis2_title += f" ({var_explained[axis2_idx]*100:.1f}%)"
+                                axis2_title += f" ({var_explained[axis2_idx] * 100:.1f}%)"
                         except (IndexError, TypeError, ValueError) as e:
                             logger.debug(f"Could not add variance explained to axis labels: {e}")
                             pass  # Silently continue if there's any issue
-                ret_x = self.ax2.set_xlabel(axis1_title)
-                #print("ret_x", ret_x)
+                self.ax2.set_xlabel(axis1_title)
+                # print("ret_x", ret_x)
 
-                ret_y = self.ax2.set_ylabel(axis2_title)
-                #print("ret_y", ret_y)
+                self.ax2.set_ylabel(axis2_title)
+                # print("ret_y", ret_y)
 
-            #if self.vertical_line_xval is not None:
-                #self.ax2.axvline(x=self.vertical_line_xval, color='gray', linestyle=self.vertical_line_style)
+            # if self.vertical_line_xval is not None:
+            # self.ax2.axvline(x=self.vertical_line_xval, color='gray', linestyle=self.vertical_line_style)
 
             if show_convex_hull:
-                #print("showing convex hull")
+                # print("showing convex hull")
                 for key_name in self.scatter_data.keys():
-                    if 'hull' in self.scatter_data[key_name].keys():
-                        hull = self.scatter_data[key_name]['hull']
+                    if "hull" in self.scatter_data[key_name].keys():
+                        hull = self.scatter_data[key_name]["hull"]
                         for simplex in hull.simplices:
-                            self.ax2.plot(self.scatter_data[key_name]['points'][simplex, 0], self.scatter_data[key_name]['points'][simplex, 1], color=self.scatter_data[key_name]['color'])
+                            self.ax2.plot(
+                                self.scatter_data[key_name]["points"][simplex, 0],
+                                self.scatter_data[key_name]["points"][simplex, 1],
+                                color=self.scatter_data[key_name]["color"],
+                            )
 
-                        hull_vertices_x = self.scatter_data[key_name]['points'][hull.vertices, 0]
-                        hull_vertices_y = self.scatter_data[key_name]['points'][hull.vertices, 1]
+                        hull_vertices_x = self.scatter_data[key_name]["points"][hull.vertices, 0]
+                        hull_vertices_y = self.scatter_data[key_name]["points"][hull.vertices, 1]
                         hull_vertices_x = np.append(hull_vertices_x, hull_vertices_x[0])
                         hull_vertices_y = np.append(hull_vertices_y, hull_vertices_y[0])
-                        self.ax2.fill(hull_vertices_x, hull_vertices_y, color=self.scatter_data[key_name]['color'], alpha=0.5)
+                        self.ax2.fill(
+                            hull_vertices_x, hull_vertices_y, color=self.scatter_data[key_name]["color"], alpha=0.5
+                        )
 
             if show_confidence_ellipse:
                 for key_name in self.scatter_data.keys():
-                    if 'ellipse' in self.scatter_data[key_name].keys():
-                        width, height, angle = self.scatter_data[key_name]['ellipse']
-                        ellipse = matplotlib.patches.Ellipse(xy=(self.average_shape[key_name]['x_val'], self.average_shape[key_name]['y_val']), width=width, height=height, angle=angle, color=self.scatter_data[key_name]['color'], lw=2, alpha=0.3,fill=True)
-                        self.ax2.add_patch(ellipse) 
+                    if "ellipse" in self.scatter_data[key_name].keys():
+                        width, height, angle = self.scatter_data[key_name]["ellipse"]
+                        ellipse = matplotlib.patches.Ellipse(
+                            xy=(self.average_shape[key_name]["x_val"], self.average_shape[key_name]["y_val"]),
+                            width=width,
+                            height=height,
+                            angle=angle,
+                            color=self.scatter_data[key_name]["color"],
+                            lw=2,
+                            alpha=0.3,
+                            fill=True,
+                        )
+                        self.ax2.add_patch(ellipse)
 
-            #self.fig2.tight_layout()
+            # self.fig2.tight_layout()
             self.fig2.canvas.draw()
             self.fig2.canvas.flush_events()
 
-            ''' overlay shapes '''
+            """ overlay shapes """
             # shape grid
             show_shape_grid = self.cbxShapeGrid.isChecked()
             # get widget position
-            #print("fig_pos", fig_pos)
+            # print("fig_pos", fig_pos)
             if show_shape_grid:
                 for keyname in self.shape_grid.keys():
-                    shape = self.raw_chart_coords_to_shape(self.shape_grid[keyname]['x_val'], self.shape_grid[keyname]['y_val'])
+                    shape = self.raw_chart_coords_to_shape(
+                        self.shape_grid[keyname]["x_val"], self.shape_grid[keyname]["y_val"]
+                    )
                     obj = self.shape_to_object(shape)
-                    
-                    view = self.shape_grid[keyname]['view']
+
+                    view = self.shape_grid[keyname]["view"]
                     view.show()
                     view.set_object(obj)
                     view.apply_rotation(self.rotation_matrix)
@@ -4337,109 +4514,114 @@ class DataExplorationDialog(QDialog):
                 self.reposition_shape_grid()
 
     def reposition_shape_grid(self):
-        #check if self has fig2
+        # check if self has fig2
         if self.fig2 is None:
             return
 
         pos_x = self.fig2.canvas.mapToGlobal(QPoint(0, 0)).x()
         pos_y = self.fig2.canvas.mapToGlobal(QPoint(0, 0)).y()
-        #print("pos_x", pos_x, "pos_y", pos_y)
+        # print("pos_x", pos_x, "pos_y", pos_y)
         for keyname in self.shape_grid.keys():
-            view = self.shape_grid[keyname]['view']
+            view = self.shape_grid[keyname]["view"]
             if view:
-                #print("keyname", keyname, "x_val", self.shape_grid[keyname]['x_val'], "y_val", self.shape_grid[keyname]['y_val'])
+                # print("keyname", keyname, "x_val", self.shape_grid[keyname]['x_val'], "y_val", self.shape_grid[keyname]['y_val'])
                 transform = self.ax2.transData
-                display_coords =    transform.transform((self.shape_grid[keyname]['x_val'], self.shape_grid[keyname]['y_val']))
-                x_pixel, y_pixel = display_coords 
-                if sys.platform == 'darwin':
+                display_coords = transform.transform(
+                    (self.shape_grid[keyname]["x_val"], self.shape_grid[keyname]["y_val"])
+                )
+                x_pixel, y_pixel = display_coords
+                if sys.platform == "darwin":
                     x_pixel = x_pixel / 2
                     y_pixel = y_pixel / 2
-                #print("display_coords", display_coords, "x_pixel", x_pixel, "y_pixel", y_pixel)
+                # print("display_coords", display_coords, "x_pixel", x_pixel, "y_pixel", y_pixel)
                 fig_height = self.fig2.canvas.height()
                 fig_width = self.fig2.canvas.width()
-                view_height = int( fig_height / 4 )
-                view_width = int( fig_width / 4 )
-                x_pixel = int( x_pixel + pos_x )
-                y_pixel = int( fig_height - y_pixel + pos_y )
-                self.shape_grid[keyname]['x_pos'] = x_pixel
-                self.shape_grid[keyname]['y_pos'] = y_pixel
+                view_height = int(fig_height / 4)
+                view_width = int(fig_width / 4)
+                x_pixel = int(x_pixel + pos_x)
+                y_pixel = int(fig_height - y_pixel + pos_y)
+                self.shape_grid[keyname]["x_pos"] = x_pixel
+                self.shape_grid[keyname]["y_pos"] = y_pixel
                 w, h = view.width(), view.height()
-                #print("view size", w, h, "view pos", x_pixel, y_pixel, "fig_size", fig_width, fig_height)
+                # print("view size", w, h, "view pos", x_pixel, y_pixel, "fig_size", fig_width, fig_height)
                 w, h = 120, 90
                 w = max(w, view_width)
                 h = max(h, view_height)
-                #print("view size 2  ", w, h, "view pos", x_pixel, y_pixel, "fig_size", fig_width, fig_height)
+                # print("view size 2  ", w, h, "view pos", x_pixel, y_pixel, "fig_size", fig_width, fig_height)
 
-                view.setGeometry(self.shape_grid[keyname]['x_pos']-int(w/2), self.shape_grid[keyname]['y_pos']-int(h/2), w, h)
+                view.setGeometry(
+                    self.shape_grid[keyname]["x_pos"] - int(w / 2), self.shape_grid[keyname]["y_pos"] - int(h / 2), w, h
+                )
 
-
-    def on_hover_enter(self,event):
+    def on_hover_enter(self, event):
         return
         if event.inaxes == self.ax2:  # Check if mouse is over the axes
             self.fig2.canvas.setCursor(QCursor(Qt.CrossCursor))
 
-    def on_hover_leave(self,event):
+    def on_hover_leave(self, event):
         return
         self.fig2.canvas.setCursor(QCursor(Qt.ArrowCursor))
 
     def on_canvas_move(self, evt):
-        
         if evt.xdata is None or evt.ydata is None or self.mode == MODE_AVERAGE:
             return
 
         x_val = evt.xdata
         y_val = evt.ydata
-        if self.comboRegressionBy.currentText() == "By group" :
-            if x_val > self.data_range['x_max']:
-                x_val = self.data_range['x_max']
-            if x_val < self.data_range['x_min']:
-                x_val = self.data_range['x_min']
-            if y_val > self.data_range['y_max']:
-                y_val = self.data_range['y_max']
-            if y_val < self.data_range['y_min']:
-                y_val = self.data_range['y_min']
+        if self.comboRegressionBy.currentText() == "By group":
+            if x_val > self.data_range["x_max"]:
+                x_val = self.data_range["x_max"]
+            if x_val < self.data_range["x_min"]:
+                x_val = self.data_range["x_min"]
+            if y_val > self.data_range["y_max"]:
+                y_val = self.data_range["y_max"]
+            if y_val < self.data_range["y_min"]:
+                y_val = self.data_range["y_min"]
         else:
-            if x_val > max(self.regression_data['x_val']):
-                x_val = max(self.regression_data['x_val'])
-            if x_val < min(self.regression_data['x_val']):
-                x_val = min(self.regression_data['x_val'])
-            if y_val > max(self.regression_data['y_val']):
-                y_val = max(self.regression_data['y_val'])
-            if y_val < min(self.regression_data['y_val']):
-                y_val = min(self.regression_data['y_val'])
-
+            if x_val > max(self.regression_data["x_val"]):
+                x_val = max(self.regression_data["x_val"])
+            if x_val < min(self.regression_data["x_val"]):
+                x_val = min(self.regression_data["x_val"])
+            if y_val > max(self.regression_data["y_val"]):
+                y_val = max(self.regression_data["y_val"])
+            if y_val < min(self.regression_data["y_val"]):
+                y_val = min(self.regression_data["y_val"])
 
         if self.axvline is not None:
-            #print("remove axvline",self.axvline)
+            # print("remove axvline",self.axvline)
             safe_remove_artist(self.axvline, self.ax2)
             self.axvline = None
 
-        #print(evt.button, evt.xdata, evt.ydata)
-        if self.mode in [ MODE_REGRESSION]:
+        # print(evt.button, evt.xdata, evt.ydata)
+        if self.mode in [MODE_REGRESSION]:
             if evt.button is None:
                 self.vertical_line_xval = x_val
-                self.vertical_line_style = 'dashed'
-                self.axvline = self.ax2.axvline(x=self.vertical_line_xval, color='gray', linestyle=self.vertical_line_style)
+                self.vertical_line_style = "dashed"
+                self.axvline = self.ax2.axvline(
+                    x=self.vertical_line_xval, color="gray", linestyle=self.vertical_line_style
+                )
                 self.fig2.canvas.draw()
-                #self.ax2.axvline(x=evt.xdata, color='gray', linestyle='dashed')
-                #self.show_analysis_result()
+                # self.ax2.axvline(x=evt.xdata, color='gray', linestyle='dashed')
+                # self.show_analysis_result()
             elif evt.button == 1:
                 self.vertical_line_xval = x_val
-                self.vertical_line_style = 'solid'
-                #print("2-0:",datetime.datetime.now())
-                #self.show_analysis_result()
+                self.vertical_line_style = "solid"
+                # print("2-0:",datetime.datetime.now())
+                # self.show_analysis_result()
                 if self.axvline is not None:
                     safe_remove_artist(self.axvline, self.ax2)
                     self.axvline = None
-                self.axvline = self.ax2.axvline(x=self.vertical_line_xval, color='gray', linestyle=self.vertical_line_style)
+                self.axvline = self.ax2.axvline(
+                    x=self.vertical_line_xval, color="gray", linestyle=self.vertical_line_style
+                )
                 self.fig2.canvas.draw()
-                #print("2-1:",datetime.datetime.now())
-                #self.ax2.axvline(x=evt.xdata, color='gray', linestyle='solid')
-                #print("evt:", evt)
-                #self.vertical_line_xval = evt.xdata
-                #self.ax2.axvline(x=evt.xdata, color='gray', linestyle='solid')
+                # print("2-1:",datetime.datetime.now())
+                # self.ax2.axvline(x=evt.xdata, color='gray', linestyle='solid')
+                # print("evt:", evt)
+                # self.vertical_line_xval = evt.xdata
+                # self.ax2.axvline(x=evt.xdata, color='gray', linestyle='solid')
                 self.shape_regression(evt)
-        elif self.mode in [ MODE_COMPARISON, MODE_EXPLORATION, MODE_COMPARISON2 ]:
+        elif self.mode in [MODE_COMPARISON, MODE_EXPLORATION, MODE_COMPARISON2]:
             if evt.button == 1 and self.is_picking_shape:
                 self.pick_shape(x_val, y_val)
                 self.fig2.canvas.draw()
@@ -4462,10 +4644,10 @@ class DataExplorationDialog(QDialog):
                     self.pick_idx = 0
             else:
                 self.vertical_line_xval = evt.xdata
-                self.vertical_line_style = 'dashed'
+                self.vertical_line_style = "dashed"
         return
-        #print("button_release", evt)
-        if self.onpick_happened == True:
+        # print("button_release", evt)
+        if self.onpick_happened:
             self.onpick_happened = False
             return
         self.canvas_up_xy = (evt.x, evt.y)
@@ -4475,16 +4657,16 @@ class DataExplorationDialog(QDialog):
     def shape_to_object(self, shape):
         obj = MdObject()
         obj.dataset = self.analysis.dataset
-        #print("ds 1:", obj.dataset)
-        #ds = MdDataset()
-        #print("ds id", self.analysis.dataset_id)
-        ds = MdDataset.get(MdDataset.id==self.analysis.dataset_id)
-        #print("ds 2:", ds)
+        # print("ds 1:", obj.dataset)
+        # ds = MdDataset()
+        # print("ds id", self.analysis.dataset_id)
+        ds = MdDataset.get(MdDataset.id == self.analysis.dataset_id)
+        # print("ds 2:", ds)
         obj.dataset = ds
-        #print("dataset:", obj.dataset, obj.dataset_id, obj.dataset.polygon_list, obj.dataset.edge_list)
+        # print("dataset:", obj.dataset, obj.dataset_id, obj.dataset.polygon_list, obj.dataset.edge_list)
         obj.landmark_list = []
-        for i in range(0,len(shape),self.analysis.dimension):
-            landmark = shape[i:i+self.analysis.dimension]
+        for i in range(0, len(shape), self.analysis.dimension):
+            landmark = shape[i : i + self.analysis.dimension]
             obj.landmark_list.append(landmark)
         obj.pack_landmark()
         obj.unpack_landmark()
@@ -4495,7 +4677,6 @@ class DataExplorationDialog(QDialog):
 
         shape_view = self.shape_view_list[idx]
 
-        
         if self.mode == MODE_COMPARISON2:
             shape_view = self.shape_view_list[0]
             shape_view.show_average = False
@@ -4504,7 +4685,7 @@ class DataExplorationDialog(QDialog):
             shape_view.dataset = obj.dataset
             shape_view.polygon_list = obj.dataset.get_polygon_list()
             shape_view.edge_list = obj.dataset.get_edge_list()
-            #print("edge_list", obj.dataset.edge_list, "polygon_list:", obj.dataset.polygon_list, "show average:", shape_view.show_average, "show polygon:", shape_view.show_polygon, "show wireframe:", shape_view.show_wireframe)
+            # print("edge_list", obj.dataset.edge_list, "polygon_list:", obj.dataset.polygon_list, "show average:", shape_view.show_average, "show polygon:", shape_view.show_polygon, "show wireframe:", shape_view.show_wireframe)
 
             if idx == 0:
                 shape_view.set_source_shape(obj)
@@ -4526,7 +4707,7 @@ class DataExplorationDialog(QDialog):
         shape_view.update()
 
     def on_canvas_button_press(self, evt):
-        #print("button_press", evt)
+        # print("button_press", evt)
 
         if self.mode == MODE_AVERAGE:
             return
@@ -4535,31 +4716,32 @@ class DataExplorationDialog(QDialog):
         y_val = evt.ydata
         if x_val is None or y_val is None:
             return
-        if x_val > self.data_range['x_max']:
-            x_val = self.data_range['x_max']
-        if x_val < self.data_range['x_min']:
-            x_val = self.data_range['x_min']
-        if y_val > self.data_range['y_max']:
-            y_val = self.data_range['y_max']
-        if y_val < self.data_range['y_min']:
-            y_val = self.data_range['y_min']
+        if x_val > self.data_range["x_max"]:
+            x_val = self.data_range["x_max"]
+        if x_val < self.data_range["x_min"]:
+            x_val = self.data_range["x_min"]
+        if y_val > self.data_range["y_max"]:
+            y_val = self.data_range["y_max"]
+        if y_val < self.data_range["y_min"]:
+            y_val = self.data_range["y_min"]
 
-
-        if self.mode in [ MODE_REGRESSION ]:
-            if evt.button == 1 :
+        if self.mode in [MODE_REGRESSION]:
+            if evt.button == 1:
                 self.vertical_line_xval = x_val
-                self.vertical_line_style = 'solid'
-                #print("2-0:",datetime.datetime.now())
-                #self.show_analysis_result()
+                self.vertical_line_style = "solid"
+                # print("2-0:",datetime.datetime.now())
+                # self.show_analysis_result()
                 if self.axvline is not None:
                     safe_remove_artist(self.axvline, self.ax2)
                     self.axvline = None
                 if evt.xdata is not None:
-                #print("xdata", evt.xdata)
-                    self.axvline = self.ax2.axvline(x=self.vertical_line_xval, color='gray', linestyle=self.vertical_line_style)
+                    # print("xdata", evt.xdata)
+                    self.axvline = self.ax2.axvline(
+                        x=self.vertical_line_xval, color="gray", linestyle=self.vertical_line_style
+                    )
                     self.fig2.canvas.draw()
                     self.shape_regression(evt)
-        elif self.mode in [ MODE_COMPARISON, MODE_EXPLORATION, MODE_COMPARISON2 ]:
+        elif self.mode in [MODE_COMPARISON, MODE_EXPLORATION, MODE_COMPARISON2]:
             if evt.button == 1 and self.is_picking_shape:
                 self.plot_widget2.setCursor(QCursor(Qt.CrossCursor))
                 self.pick_shape(x_val, y_val)
@@ -4567,61 +4749,72 @@ class DataExplorationDialog(QDialog):
 
         return
         self.canvas_down_xy = (evt.x, evt.y)
-        #self.tableView.selectionModel().clearSelection()
+        # self.tableView.selectionModel().clearSelection()
 
     def pick_shape(self, x_val, y_val):
         if self.pick_idx == -1:
             return
-        
+
         # Set wait cursor while processing shape display
         QApplication.setOverrideCursor(Qt.WaitCursor)
         try:
-            #print("pick_shape", evt.xdata, evt.ydata, self.pick_idx)
+            # print("pick_shape", evt.xdata, evt.ydata, self.pick_idx)
             scatter_data_len = len(self.scatter_data.keys())
             marker_list = self.marker_list
-            while scatter_data_len+2 > len(marker_list):
+            while scatter_data_len + 2 > len(marker_list):
                 marker_list += self.marker_list
-            #print("scatter_data_len", scatter_data_len, self.marker_list, marker_list)
-            symbol_candidate = marker_list[scatter_data_len:scatter_data_len+2]
+            # print("scatter_data_len", scatter_data_len, self.marker_list, marker_list)
+            symbol_candidate = marker_list[scatter_data_len : scatter_data_len + 2]
             color_list = self.color_list
-            while scatter_data_len+2 > len(color_list):
+            while scatter_data_len + 2 > len(color_list):
                 color_list += self.color_list
-            color_candidate = color_list[scatter_data_len:scatter_data_len+2]
-            #print("pick_shape", evt.xdata, evt.ydata, self.pick_idx, scatter_data_len, symbol_candidate, color_candidate)
+            color_candidate = color_list[scatter_data_len : scatter_data_len + 2]
+            # print("pick_shape", evt.xdata, evt.ydata, self.pick_idx, scatter_data_len, symbol_candidate, color_candidate)
             shape = self.custom_shape_hash[self.pick_idx]
 
-            if shape['point'] is not None:
+            if shape["point"] is not None:
                 try:
-                    shape['point'].remove()
+                    shape["point"].remove()
                 except NotImplementedError:
                     # For scatter plots, we need to remove from the axes collection
-                    if shape['point'] in self.ax2.collections:
-                        self.ax2.collections.remove(shape['point'])
-                shape['point'] = None
-            if shape['label'] is not None:
+                    if shape["point"] in self.ax2.collections:
+                        self.ax2.collections.remove(shape["point"])
+                shape["point"] = None
+            if shape["label"] is not None:
                 try:
-                    shape['label'].remove()
+                    shape["label"].remove()
                 except NotImplementedError:
                     # For annotations, try removing from axes
-                    if shape['label'] in self.ax2.texts:
-                        self.ax2.texts.remove(shape['label'])
-                shape['label'] = None
+                    if shape["label"] in self.ax2.texts:
+                        self.ax2.texts.remove(shape["label"])
+                shape["label"] = None
 
-            ''' need to improve speed by using offset, not creating new annotation every time '''
-            #print("shape['name']", shape['name'], x_val, y_val, self.pick_idx, symbol_candidate, color_candidate)
-            shape['coords'] = [x_val, y_val]
-            shape['point'] = self.ax2.scatter([x_val],[y_val], s=150, marker=symbol_candidate[self.pick_idx], color=color_candidate[self.pick_idx] )
-            #print("shape['name']", shape['name'])
-            if shape['name'] != '':
-                shape['label'] = self.ax2.annotate(shape['name'], (x_val, y_val), xycoords='data',textcoords='offset pixels', xytext=(15,15), ha='center', fontsize=12, color='black')
-            #print("point:", self.custom_shape_hash[self.pick_idx]['point'])
-            #self.ax2.scatter(self.average_shape[name]['x_val'], self.average_shape[name]['y_val'], s=150, marker=group['symbol'], color=group['color'])
+            """ need to improve speed by using offset, not creating new annotation every time """
+            # print("shape['name']", shape['name'], x_val, y_val, self.pick_idx, symbol_candidate, color_candidate)
+            shape["coords"] = [x_val, y_val]
+            shape["point"] = self.ax2.scatter(
+                [x_val], [y_val], s=150, marker=symbol_candidate[self.pick_idx], color=color_candidate[self.pick_idx]
+            )
+            # print("shape['name']", shape['name'])
+            if shape["name"] != "":
+                shape["label"] = self.ax2.annotate(
+                    shape["name"],
+                    (x_val, y_val),
+                    xycoords="data",
+                    textcoords="offset pixels",
+                    xytext=(15, 15),
+                    ha="center",
+                    fontsize=12,
+                    color="black",
+                )
+            # print("point:", self.custom_shape_hash[self.pick_idx]['point'])
+            # self.ax2.scatter(self.average_shape[name]['x_val'], self.average_shape[name]['y_val'], s=150, marker=group['symbol'], color=group['color'])
 
             axis1 = self.comboAxis1.currentData()
             axis2 = self.comboAxis2.currentData()
-            flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
-            flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
-            shape_to_visualize = np.zeros((1,len(self.analysis_result_list[0])))
+            flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() else 1.0
+            flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() else 1.0
+            shape_to_visualize = np.zeros((1, len(self.analysis_result_list[0])))
             x_value = flip_axis1 * x_val
             y_value = flip_axis2 * y_val
             if axis1 != CENTROID_SIZE_VALUE:
@@ -4629,10 +4822,10 @@ class DataExplorationDialog(QDialog):
             if axis2 != CENTROID_SIZE_VALUE:
                 shape_to_visualize[0][axis2] = y_value
             unrotated_shape = self.unrotate_shape(shape_to_visualize)
-            #print("0-4:",datetime.datetime.now())
+            # print("0-4:",datetime.datetime.now())
             self.show_shape(unrotated_shape[0], self.pick_idx)
 
-            #self.axvline = self.ax2.axvline(x=self.vertical_line_xval, color='gray', linestyle=self.vertical_line_style)
+            # self.axvline = self.ax2.axvline(x=self.vertical_line_xval, color='gray', linestyle=self.vertical_line_style)
         finally:
             # Restore normal cursor after shape display
             QApplication.restoreOverrideCursor()
@@ -4640,13 +4833,13 @@ class DataExplorationDialog(QDialog):
     def raw_chart_coords_to_shape(self, x_val, y_val):
         axis1 = self.comboAxis1.currentData()
         axis2 = self.comboAxis2.currentData()
-        flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
-        flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
+        flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() else 1.0
+        flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() else 1.0
 
         x_value = flip_axis1 * x_val
         y_value = flip_axis2 * y_val
 
-        shape_to_visualize = np.zeros((1,len(self.analysis_result_list[0])))
+        shape_to_visualize = np.zeros((1, len(self.analysis_result_list[0])))
         if axis1 != CENTROID_SIZE_VALUE:
             shape_to_visualize[0][axis1] = x_value
         shape_to_visualize[0][axis2] = y_value
@@ -4655,54 +4848,53 @@ class DataExplorationDialog(QDialog):
         return unrotated_shape[0]
 
     def shape_regression(self, evt):
-        #self.scatter_data[key_name]['y_val']
-        #show_regression = self.cbxRegression.isChecked()
-        #if show_regression == False:
+        # self.scatter_data[key_name]['y_val']
+        # show_regression = self.cbxRegression.isChecked()
+        # if show_regression == False:
         #    return
         regression_by = self.comboRegressionBy.currentText()
 
-        #key_list = self.scatter_data.keys()
-        #self.curve_list = []
-        #data_range = self.data_range
-        #degree_text = self.sbxDegree.text()
-        #if degree_text == "":
+        # key_list = self.scatter_data.keys()
+        # self.curve_list = []
+        # data_range = self.data_range
+        # degree_text = self.sbxDegree.text()
+        # if degree_text == "":
         #    return
 
-        #degree = int(degree_text)
+        # degree = int(degree_text)
         if regression_by == "By group":
-
-            #print("shape regression", evt.xdata)
-            for idx, shape_view in enumerate(self.shape_view_list):
-                axis1 = self.comboAxis1.currentData()
-                axis2 = self.comboAxis2.currentData()
-                flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
-                flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
+            # print("shape regression", evt.xdata)
+            for idx, _shape_view in enumerate(self.shape_view_list):
+                self.comboAxis1.currentData()
+                self.comboAxis2.currentData()
+                -1.0 if self.cbxFlipAxis1.isChecked() else 1.0
+                -1.0 if self.cbxFlipAxis2.isChecked() else 1.0
 
                 x_value = evt.xdata
-                if x_value > self.data_range['x_max']:
-                    x_value = self.data_range['x_max']
-                if x_value < self.data_range['x_min']:
-                    x_value = self.data_range['x_min']
+                if x_value > self.data_range["x_max"]:
+                    x_value = self.data_range["x_max"]
+                if x_value < self.data_range["x_min"]:
+                    x_value = self.data_range["x_min"]
                 y_value = 0
 
                 # regress curve
                 curve = self.curve_list[idx]
                 if curve is None:
                     continue
-                if x_value >= min(curve['size_range2']) and x_value <= max(curve['size_range2']):
-                    y_value = np.polyval(curve['model'], x_value)
+                if x_value >= min(curve["size_range2"]) and x_value <= max(curve["size_range2"]):
+                    y_value = np.polyval(curve["model"], x_value)
 
                 shape = self.raw_chart_coords_to_shape(x_value, y_value)
                 self.show_shape(shape, idx)
         else:
-            axis1 = self.comboAxis1.currentData()
-            axis2 = self.comboAxis2.currentData()
-            flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
-            flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
+            self.comboAxis1.currentData()
+            self.comboAxis2.currentData()
+            -1.0 if self.cbxFlipAxis1.isChecked() else 1.0
+            -1.0 if self.cbxFlipAxis2.isChecked() else 1.0
 
             # regress curve
             idx = 0
-            #print("curve_list", self.curve_list)
+            # print("curve_list", self.curve_list)
             curve = self.curve_list[idx]
             if curve is None:
                 return
@@ -4710,93 +4902,91 @@ class DataExplorationDialog(QDialog):
             x_value = evt.xdata
             show_extrapolate = self.cbxExtrapolate.isChecked()
             if show_extrapolate:
-                if x_value > self.data_range['x_max']:
-                    x_value = self.data_range['x_max']
-                if x_value < self.data_range['x_min']:
-                    x_value = self.data_range['x_min']
+                if x_value > self.data_range["x_max"]:
+                    x_value = self.data_range["x_max"]
+                if x_value < self.data_range["x_min"]:
+                    x_value = self.data_range["x_min"]
             else:
-                if x_value > max(curve['size_range']):
-                    x_value = max(curve['size_range'])
-                if x_value < min(curve['size_range']):
-                    x_value = min(curve['size_range'])
-                
+                if x_value > max(curve["size_range"]):
+                    x_value = max(curve["size_range"])
+                if x_value < min(curve["size_range"]):
+                    x_value = min(curve["size_range"])
+
             y_value = 0
 
-
             if curve is not None:
-                y_value = np.polyval(curve['model'], x_value)
+                y_value = np.polyval(curve["model"], x_value)
 
             shape = self.raw_chart_coords_to_shape(x_value, y_value)
             self.show_shape(shape, idx)
 
-
-    def on_pick(self,evt):
-        #print("onpick", evt)
+    def on_pick(self, evt):
+        # print("onpick", evt)
         return
         self.onpick_happened = True
-        #print("evt", evt, evt.ind, evt.artist )
+        # print("evt", evt, evt.ind, evt.artist )
         selected_object_id_list = []
         for key_name in self.scatter_data.keys():
             if evt.artist == self.scatter_result[key_name]:
-                #print("key_name", key_name)
+                # print("key_name", key_name)
                 for idx in evt.ind:
-                    obj = self.scatter_data[key_name]['data'][idx]
-                    #print("obj", obj)
-                    selected_object_id_list.append(obj['id'])
-                    #self.ds_ops.select_object(obj.id)
+                    obj = self.scatter_data[key_name]["data"][idx]
+                    # print("obj", obj)
+                    selected_object_id_list.append(obj["id"])
+                    # self.ds_ops.select_object(obj.id)
 
-        #print("selected_object_id_list", selected_object_id_list)
+        # print("selected_object_id_list", selected_object_id_list)
         # select rows in tableView
-        #self.tableView.clearSelection()
-        #selectionModel = self.tableView.selectionModel()
+        # self.tableView.clearSelection()
+        # selectionModel = self.tableView.selectionModel()
 
-        #print("selected_object_id_list", selected_object_id_list)
+        # print("selected_object_id_list", selected_object_id_list)
         self.selection_changed_off = True
         for id in selected_object_id_list:
-            #item = self.object_model.findItems(str(id), Qt.MatchExactly, 0)
+            # item = self.object_model.findItems(str(id), Qt.MatchExactly, 0)
             item = self.object_hash[id]
-            self.tableView1.selectionModel().select(item.index(),QItemSelectionModel.Rows | QItemSelectionModel.Select)
+            self.tableView1.selectionModel().select(item.index(), QItemSelectionModel.Rows | QItemSelectionModel.Select)
         self.selection_changed_off = False
-        self.on_object_selection_changed([],[])
+        self.on_object_selection_changed([], [])
 
-        #for row in range(self.object_model.rowCount()):
+        # for row in range(self.object_model.rowCount()):
         #    if int(self.object_model.item(row,0).text()) in selected_object_id_list:
         #        self.tableView.selectionModel().select(self.object_model.item(row,0).index(),QItemSelectionModel.Rows | QItemSelectionModel.Select)
 
     def unrotate_shape(self, shape):
-        if self.analysis_method == 'PCA':
+        if self.analysis_method == "PCA":
             rotation_matrix = json.loads(self.analysis.pca_rotation_matrix_json)
-        elif self.analysis_method == 'CVA':
+        elif self.analysis_method == "CVA":
             rotation_matrix = json.loads(self.analysis.cva_rotation_matrix_json)
-        #rotation_matrix = json.loads(self.analysis.rotation_matrix_json)
-        
+        # rotation_matrix = json.loads(self.analysis.rotation_matrix_json)
+
         inverted_matrix = np.linalg.inv(rotation_matrix)
-        #print("inverted_matrix", inverted_matrix)
-        
+        # print("inverted_matrix", inverted_matrix)
+
         unrotated_shape = np.dot(shape, inverted_matrix)
-        
+
         all_shapes = np.array(json.loads(self.analysis.superimposed_landmark_json))
         # get average of all_shapes
         average_shape = np.mean(all_shapes, axis=0)
-        average_shape = average_shape.reshape(1,-1)
-        
+        average_shape = average_shape.reshape(1, -1)
+
         # For PCA/CVA space (144D) to original 3D space (216D) conversion
         if average_shape.shape[1] != unrotated_shape.shape[1]:
             # Instead of complex transformation, use the picked point from original space
             # The 'shape' parameter should correspond to original landmark data
             final_shape = average_shape  # For now, just return average shape
-            print(f"Note: Using average shape due to dimension mismatch ({unrotated_shape.shape[1]}D vs {average_shape.shape[1]}D)")
+            print(
+                f"Note: Using average shape due to dimension mismatch ({unrotated_shape.shape[1]}D vs {average_shape.shape[1]}D)"
+            )
         else:
             final_shape = average_shape + unrotated_shape
-        #print("final shape", final_shape.shape,final_shape)
-
+        # print("final shape", final_shape.shape,final_shape)
 
         return final_shape
 
 
-
 class DatasetAnalysisDialog(QDialog):
-    def __init__(self,parent,dataset):
+    def __init__(self, parent, dataset):
         super().__init__()
         self.setWindowTitle(self.tr("Modan2 - Dataset Analysis"))
         self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
@@ -4808,12 +4998,12 @@ class DatasetAnalysisDialog(QDialog):
         self.marker_list = mu.MARKER_LIST[:]
         self.plot_size = "medium"
         self.read_settings()
-        #self.setGeometry(QRect(100, 100, 1400, 800))
+        # self.setGeometry(QRect(100, 100, 1400, 800))
         self.ds_ops = None
         self.object_hash = {}
         self.shape_list = []
         self.shape_name_list = []
-        
+
         self.main_hsplitter = QSplitter(Qt.Horizontal)
 
         # 2d shape
@@ -4868,7 +5058,7 @@ class DatasetAnalysisDialog(QDialog):
         self.shape_vsplitter = QSplitter(Qt.Vertical)
         self.shape_vsplitter.addWidget(self.lblShape)
         self.shape_vsplitter.addWidget(self.cbx_widget)
-        self.shape_vsplitter.setSizes([800,20])
+        self.shape_vsplitter.setSizes([800, 20])
         self.shape_vsplitter.setStretchFactor(0, 1)
         self.shape_vsplitter.setStretchFactor(1, 0)
 
@@ -4909,20 +5099,18 @@ class DatasetAnalysisDialog(QDialog):
         self.table_control_layout.addWidget(self.btnSelectNone)
         self.table_control_layout.addWidget(self.btnSelectInvert)
         self.table_control_layout.addStretch(1)
-        
+
         self.table_layout.addWidget(self.table_control_widget)
 
-
-
         # plot widgets
-        self.plot_widget2 = FigureCanvas(Figure(figsize=(20, 16),dpi=100))
+        self.plot_widget2 = FigureCanvas(Figure(figsize=(20, 16), dpi=100))
         self.fig2 = self.plot_widget2.figure
         self.ax2 = self.fig2.add_subplot()
         self.toolbar2 = NavigationToolbar(self.plot_widget2, self)
-        self.plot_widget3 = FigureCanvas(Figure(figsize=(20, 16),dpi=100))
+        self.plot_widget3 = FigureCanvas(Figure(figsize=(20, 16), dpi=100))
         self.fig3 = self.plot_widget3.figure
-        self.ax3 = self.fig3.add_subplot(projection='3d')
-        self.toolbar3 = NavigationToolbar(self.plot_widget3, self)        
+        self.ax3 = self.fig3.add_subplot(projection="3d")
+        self.toolbar3 = NavigationToolbar(self.plot_widget3, self)
 
         self.plot_layout = QVBoxLayout()
         self.plot_control_layout1 = QHBoxLayout()
@@ -5031,12 +5219,11 @@ class DatasetAnalysisDialog(QDialog):
         self.plot_tab.addTab(self.eigenvalue_data, self.tr("Eigenvalues"))
         self.plot_tab.addTab(self.shapes_data, self.tr("Shapes"))
 
-
         self.plot_layout.addWidget(self.plot_tab)
-        #self.plot_layout.addWidget(self.toolbar2)
-        #self.plot_layout.addWidget(self.plot_widget2)
-        #self.plot_layout.addWidget(self.toolbar3)
-        #self.plot_layout.addWidget(self.plot_widget3)
+        # self.plot_layout.addWidget(self.toolbar2)
+        # self.plot_layout.addWidget(self.plot_widget2)
+        # self.plot_layout.addWidget(self.toolbar3)
+        # self.plot_layout.addWidget(self.plot_widget3)
         self.plot_layout.addWidget(self.plot_control_widget1)
         self.plot_layout.addWidget(self.plot_control_widget2)
         self.plot_layout.addWidget(self.btnChartOptions)
@@ -5045,10 +5232,10 @@ class DatasetAnalysisDialog(QDialog):
         self.plot_all_widget.setLayout(self.plot_layout)
 
         # set value 1 to 10 for axis
-        for i in range(1,11):
-            self.comboAxis1.addItem("PC"+str(i))
-            self.comboAxis2.addItem("PC"+str(i))
-            self.comboAxis3.addItem("PC"+str(i))
+        for i in range(1, 11):
+            self.comboAxis1.addItem("PC" + str(i))
+            self.comboAxis2.addItem("PC" + str(i))
+            self.comboAxis3.addItem("PC" + str(i))
         self.comboAxis1.addItem("CSize")
         self.comboAxis1.setCurrentIndex(0)
         self.comboAxis2.setCurrentIndex(1)
@@ -5061,7 +5248,7 @@ class DatasetAnalysisDialog(QDialog):
         self.main_hsplitter.addWidget(self.table_widget)
         self.main_hsplitter.addWidget(self.plot_all_widget)
 
-        self.main_hsplitter.setSizes([400,200,400])
+        self.main_hsplitter.setSizes([400, 200, 400])
         self.main_hsplitter.setStretchFactor(0, 1)
         self.main_hsplitter.setStretchFactor(1, 0)
         self.main_hsplitter.setStretchFactor(2, 1)
@@ -5148,13 +5335,12 @@ class DatasetAnalysisDialog(QDialog):
         self.selection_changed_off = False
         self.onpick_happened = False
 
-
         self.analysis_type = "PCA"
         self.analysis_done = False
 
         # data setting
         set_result = self.set_dataset(dataset)
-        #print("set dataset result: ", set_result)
+        # print("set dataset result: ", set_result)
         if set_result is False:
             self.close()
             return
@@ -5162,7 +5348,6 @@ class DatasetAnalysisDialog(QDialog):
             self.close()
             return
         else:
-
             self.reset_tableView()
             self.load_object()
             self.chart_options_clicked()
@@ -5176,15 +5361,17 @@ class DatasetAnalysisDialog(QDialog):
         self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
         self.plot_size = self.m_app.settings.value("PlotSize", self.plot_size)
         for i in range(len(self.color_list)):
-            self.color_list[i] = self.m_app.settings.value("DataPointColor/"+str(i), self.default_color_list[i])
+            self.color_list[i] = self.m_app.settings.value("DataPointColor/" + str(i), self.default_color_list[i])
         for i in range(len(self.marker_list)):
-            self.marker_list[i] = self.m_app.settings.value("DataPointMarker/"+str(i), self.marker_list[i])
+            self.marker_list[i] = self.m_app.settings.value("DataPointMarker/" + str(i), self.marker_list[i])
 
         if self.remember_geometry is True:
-            self.setGeometry(self.m_app.settings.value("WindowGeometry/DatasetAnalysisWindow", QRect(100, 100, 1400, 800)))
+            self.setGeometry(
+                self.m_app.settings.value("WindowGeometry/DatasetAnalysisWindow", QRect(100, 100, 1400, 800))
+            )
         else:
             self.setGeometry(QRect(100, 100, 1400, 800))
-            self.move(self.parent.pos()+QPoint(50,50))
+            self.move(self.parent.pos() + QPoint(50, 50))
 
     def write_settings(self):
         if self.remember_geometry is True:
@@ -5207,32 +5394,34 @@ class DatasetAnalysisDialog(QDialog):
         else:
             header = "CV"
 
-        for i in range(1,11):
-            self.comboAxis1.addItem(header+str(i))
-            self.comboAxis2.addItem(header+str(i))
-            self.comboAxis3.addItem(header+str(i))
+        for i in range(1, 11):
+            self.comboAxis1.addItem(header + str(i))
+            self.comboAxis2.addItem(header + str(i))
+            self.comboAxis3.addItem(header + str(i))
         self.comboAxis1.setCurrentIndex(axis1)
         self.comboAxis2.setCurrentIndex(axis2)
         self.comboAxis3.setCurrentIndex(axis3)
-        #self.reset_tableView()
-        #self.load_object()
-        #self.on_btn_analysis_clicked()
-        
+        # self.reset_tableView()
+        # self.load_object()
+        # self.on_btn_analysis_clicked()
+
     def select_all(self):
         pass
+
     def select_none(self):
         pass
+
     def select_invert(self):
         pass
 
     def chart_options_clicked(self):
         self.show_chart_options = not self.show_chart_options
         if self.show_chart_options:
-            #self.gbChartOptions.show()
+            # self.gbChartOptions.show()
             self.plot_control_widget1.show()
             self.plot_control_widget2.show()
         else:
-            #self.gbChartOptions.hide()
+            # self.gbChartOptions.hide()
             self.plot_control_widget1.hide()
             self.plot_control_widget2.hide()
 
@@ -5260,15 +5449,15 @@ class DatasetAnalysisDialog(QDialog):
             self.show_analysis_result()
 
     def set_dataset(self, dataset):
-        #print("dataset:", dataset)
+        # print("dataset:", dataset)
         self.dataset = dataset
         prev_lm_count = -1
         for obj in dataset.object_list:
             obj.unpack_landmark()
             obj.unpack_variable()
-            #print("property:", obj.variable_list)
+            # print("property:", obj.variable_list)
             lm_count = len(obj.landmark_list)
-            #print("prev_lm_count:", prev_lm_count, "lm_count:", lm_count)
+            # print("prev_lm_count:", prev_lm_count, "lm_count:", lm_count)
             if prev_lm_count != lm_count and prev_lm_count != -1:
                 # show messagebox and close the window
                 msg = QMessageBox()
@@ -5285,7 +5474,7 @@ class DatasetAnalysisDialog(QDialog):
         if len(self.dataset.variablename_list) > 0:
             for propertyname in self.dataset.variablename_list:
                 self.comboPropertyName.addItem(propertyname)
-                #self.comboAxis2.addItem(propertyname)
+                # self.comboAxis2.addItem(propertyname)
         self.comboPropertyName.setCurrentIndex(0)
         self.comboPropertyName.currentIndexChanged.connect(self.propertyname_changed)
         if self.dataset.dimension == 3:
@@ -5298,11 +5487,11 @@ class DatasetAnalysisDialog(QDialog):
         self.show_baseline_state_changed()
         self.show_average_state_changed()
         self.auto_rotate_state_changed
-        #self.cbxShowIndex.stateChanged.connect(self.show_index_state_changed)
-        #self.cbxShowWireframe.stateChanged.connect(self.show_wireframe_state_changed)
-        #self.cbxShowBaseline.stateChanged.connect(self.show_baseline_state_changed)
-        #self.cbxShowAverage.stateChanged.connect(self.show_average_state_changed)
-        #self.cbxAutoRotate.stateChanged.connect(self.auto_rotate_state_changed)
+        # self.cbxShowIndex.stateChanged.connect(self.show_index_state_changed)
+        # self.cbxShowWireframe.stateChanged.connect(self.show_wireframe_state_changed)
+        # self.cbxShowBaseline.stateChanged.connect(self.show_baseline_state_changed)
+        # self.cbxShowAverage.stateChanged.connect(self.show_average_state_changed)
+        # self.cbxAutoRotate.stateChanged.connect(self.auto_rotate_state_changed)
         return True
 
     def propertyname_changed(self):
@@ -5335,145 +5524,148 @@ class DatasetAnalysisDialog(QDialog):
         logger.debug("on_btnSuperimpose_clicked")
 
     def on_btnAnalyze_clicked(self):
-        #print("on_btnAnalyze_clicked")
+        # print("on_btnAnalyze_clicked")
         self.selected_object_id_list = []
         self.ds_ops.selected_object_id_list = self.selected_object_id_list
         self.load_object()
-        self.on_object_selection_changed([],[])
+        self.on_object_selection_changed([], [])
         self.show_analysis_result()
         self.show_object_shape()
-        
-    def on_btnSaveResults_clicked(self):
-        today = datetime. datetime. now()
-        date_str = today. strftime("%Y%m%d_%H%M%S")
 
-        filename_candidate = f'{self.ds_ops.dataset_name}_analysis_{date_str}.xlsx'
+    def on_btnSaveResults_clicked(self):
+        today = datetime.datetime.now()
+        date_str = today.strftime("%Y%m%d_%H%M%S")
+
+        filename_candidate = f"{self.ds_ops.dataset_name}_analysis_{date_str}.xlsx"
         filepath = os.path.join(mu.USER_PROFILE_DIRECTORY, filename_candidate)
-        #print("filepath:", filepath)
+        # print("filepath:", filepath)
         filename, _ = QFileDialog.getSaveFileName(self, self.tr("Save File As"), filepath, "Excel format (*.xlsx)")
         if filename:
-            #print("filename:", filename)
+            # print("filename:", filename)
             doc = xlsxwriter.Workbook(filename)
-            
+
             # PCA result
             property_count = len(self.ds_ops.variablename_list)
-            header = [ "object_name", * self.ds_ops.variablename_list ]
-            header.extend( [self.analysis_type[:2]+str(i+1) for i in range(len(self.analysis_result.rotated_matrix.tolist()[0]))] )
+            header = ["object_name", *self.ds_ops.variablename_list]
+            header.extend(
+                [
+                    self.analysis_type[:2] + str(i + 1)
+                    for i in range(len(self.analysis_result.rotated_matrix.tolist()[0]))
+                ]
+            )
             header.extend("CSize")
             worksheet = doc.add_worksheet("Result coordinates")
             row_index = 0
             column_index = 0
 
             for colname in header:
-                worksheet.write(row_index, column_index, colname )
-                column_index+=1
-            
+                worksheet.write(row_index, column_index, colname)
+                column_index += 1
+
             new_coords = self.analysis_result.rotated_matrix.tolist()
             for i, obj in enumerate(self.ds_ops.object_list):
-                worksheet.write(i+1, 0, obj.object_name )
-                #print(obj.variable_list)
+                worksheet.write(i + 1, 0, obj.object_name)
+                # print(obj.variable_list)
                 for j in range(property_count):
-                #for j, property in enumerate(obj.variable_list):
-                    worksheet.write(i+1, j+1, obj.variable_list[j] )
+                    # for j, property in enumerate(obj.variable_list):
+                    worksheet.write(i + 1, j + 1, obj.variable_list[j])
 
                 for k, val in enumerate(new_coords[i]):
-                    worksheet.write(i+1, k+property_count+1, val )
-                    #self.plot_data.setItem(i, j+1, QTableWidgetItem(str(int(val*10000)/10000.0)))
+                    worksheet.write(i + 1, k + property_count + 1, val)
+                    # self.plot_data.setItem(i, j+1, QTableWidgetItem(str(int(val*10000)/10000.0)))
                 obj = MdObject.get_by_id(obj.id)
-                worksheet.write(i+1, k+property_count+2, obj.get_centroid_size(True))
-                
+                worksheet.write(i + 1, k + property_count + 2, obj.get_centroid_size(True))
 
             worksheet = doc.add_worksheet("Rotation matrix")
             row_index = 0
             column_index = 0
             rotation_matrix = self.analysis_result.rotation_matrix.tolist()
-            #print("rotation_matrix[0][0]", [0][0], len(self.pca_result.rotation_matrix[0][0]))
+            # print("rotation_matrix[0][0]", [0][0], len(self.pca_result.rotation_matrix[0][0]))
             for i, row in enumerate(rotation_matrix):
                 for j, val in enumerate(row):
-                    worksheet.write(i, j, val )                  
+                    worksheet.write(i, j, val)
 
             worksheet = doc.add_worksheet("Eigenvalues")
             for i, val in enumerate(self.analysis_result.raw_eigen_values):
                 val2 = self.analysis_result.eigen_value_percentages[i]
-                worksheet.write(i, 0, val )
-                worksheet.write(i, 1, val2 )
-
+                worksheet.write(i, 0, val)
+                worksheet.write(i, 1, val2)
 
             # PCA result
-            #header = [ "object_name", *self.ds_ops.variablename_list ]
-            #header.extend( [self.analysis_type[:2]+str(i+1) for i in range(len(self.analysis_result.rotated_matrix.tolist()[0]))] )
+            # header = [ "object_name", *self.ds_ops.variablename_list ]
+            # header.extend( [self.analysis_type[:2]+str(i+1) for i in range(len(self.analysis_result.rotated_matrix.tolist()[0]))] )
             worksheet = doc.add_worksheet("Shapes")
             row_index = 0
             column_index = 0
             for i, colname in enumerate(self.shape_column_header_list):
-                worksheet.write(row_index, i, colname )
-                #column_index+=1
+                worksheet.write(row_index, i, colname)
+                # column_index+=1
 
             for i, shape in enumerate(self.shape_list.tolist()):
-                worksheet.write(i+1, 0, self.shape_name_list[i])
+                worksheet.write(i + 1, 0, self.shape_name_list[i])
                 for j, val in enumerate(shape):
-                    worksheet.write(i+1, j+1, val)
-                    #self.shapes_data.setItem(i, j+1, QTableWidgetItem(str(int(val*10000)/10000.0)))
+                    worksheet.write(i + 1, j + 1, val)
+                    # self.shapes_data.setItem(i, j+1, QTableWidgetItem(str(int(val*10000)/10000.0)))
 
             doc.close()
 
-        #print("on_btnSaveResults_clicked")
-        
+        # print("on_btnSaveResults_clicked")
+
     def show_index_state_changed(self):
         if self.cbxShowIndex.isChecked():
             self.lblShape.show_index = True
-            #print("show index CHECKED!")
+            # print("show index CHECKED!")
         else:
             self.lblShape.show_index = False
-            #print("show index UNCHECKED!")
+            # print("show index UNCHECKED!")
         self.lblShape.update()
 
     def show_average_state_changed(self):
         if self.cbxShowAverage.isChecked():
             self.lblShape.show_average = True
-            #print("show index CHECKED!")
+            # print("show index CHECKED!")
         else:
             self.lblShape.show_average = False
-            #print("show index UNCHECKED!")
+            # print("show index UNCHECKED!")
         self.lblShape.update()
 
     def auto_rotate_state_changed(self):
-        #print("auto_rotate_state_changed", self.cbxAutoRotate.isChecked())
+        # print("auto_rotate_state_changed", self.cbxAutoRotate.isChecked())
         if self.cbxAutoRotate.isChecked():
             self.lblShape.auto_rotate = True
-            #print("auto rotate CHECKED!")
+            # print("auto rotate CHECKED!")
         else:
             self.lblShape.auto_rotate = False
-            #print("auto rotate UNCHECKED!")
+            # print("auto rotate UNCHECKED!")
         self.lblShape.update()
 
     def show_wireframe_state_changed(self):
         if self.cbxShowWireframe.isChecked():
             self.lblShape.show_wireframe = True
-            #print("show index CHECKED!")
+            # print("show index CHECKED!")
         else:
             self.lblShape.show_wireframe = False
-            #print("show index UNCHECKED!")
+            # print("show index UNCHECKED!")
         self.lblShape.update()
 
     def show_baseline_state_changed(self):
         if self.cbxShowBaseline.isChecked():
             self.lblShape.show_baseline = True
-            #print("show index CHECKED!")
+            # print("show index CHECKED!")
         else:
             self.lblShape.show_baseline = False
-            #print("show index UNCHECKED!")
+            # print("show index UNCHECKED!")
         self.lblShape.update()
 
-        #connect 
-        #self.lblShape.sigPain
+        # connect
+        # self.lblShape.sigPain
 
     def show_object_shape(self):
         self.lblShape.set_ds_ops(self.ds_ops)
         self.lblShape.repaint()
 
     def on_btn_analysis_clicked(self):
-        #print("pca button clicked")
+        # print("pca button clicked")
         # set wait cursor
         QApplication.setOverrideCursor(Qt.WaitCursor)
         QApplication.processEvents()
@@ -5493,7 +5685,7 @@ class DatasetAnalysisDialog(QDialog):
 
         if self.dataset.object_list is None or len(self.dataset.object_list) < 5:
             logger = logging.getLogger(__name__)
-            logger.warning("too small number of objects for PCA analysis")            
+            logger.warning("too small number of objects for PCA analysis")
             return
 
         if self.analysis_type == "CVA":
@@ -5512,13 +5704,13 @@ class DatasetAnalysisDialog(QDialog):
         self.analysis_done = True
         QApplication.restoreOverrideCursor()
 
-        #print("pca_result.nVariable:",pca_result.nVariable)
-        #with open('pca_result.txt', 'w') as f:
+        # print("pca_result.nVariable:",pca_result.nVariable)
+        # with open('pca_result.txt', 'w') as f:
         #    for obj in ds_ops.object_list:
         #        f.write(obj.object_name + "\t" + "\t".join([str(x) for x in obj.pca_result]) + "\n")
 
     def show_analysis_result(self):
-        #self.plot_widget.clear()
+        # self.plot_widget.clear()
 
         self.show_result_table()
         # get axis1 and axis2 value from comboAxis1 and 2 index
@@ -5531,123 +5723,174 @@ class DatasetAnalysisDialog(QDialog):
         axis1_title = self.comboAxis1.currentText()
         axis2_title = self.comboAxis2.currentText()
         axis3_title = self.comboAxis3.currentText()
-        flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
-        flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
-        flip_axis3 = -1.0 if self.cbxFlipAxis3.isChecked() == True else 1.0
+        flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() else 1.0
+        flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() else 1.0
+        flip_axis3 = -1.0 if self.cbxFlipAxis3.isChecked() else 1.0
 
-        symbol_candidate = ['o','s','^','x','+','d','v','<','>','p','h']
-        color_candidate = ['blue','green','black','cyan','magenta','yellow','gray','red']
+        symbol_candidate = ["o", "s", "^", "x", "+", "d", "v", "<", ">", "p", "h"]
+        color_candidate = ["blue", "green", "black", "cyan", "magenta", "yellow", "gray", "red"]
         color_candidate = self.color_list[:]
         symbol_candidate = self.marker_list[:]
-        self.propertyname_index = self.comboPropertyName.currentIndex() -1
+        self.propertyname_index = self.comboPropertyName.currentIndex() - 1
         self.scatter_data = {}
         self.scatter_result = {}
         SCATTER_SMALL_SIZE = 30
         SCATTER_MEDIUM_SIZE = 50
         SCATTER_LARGE_SIZE = 60
-        if self.plot_size.lower() == 'small':
+        if self.plot_size.lower() == "small":
             scatter_size = SCATTER_SMALL_SIZE
-        elif self.plot_size.lower() == 'medium':
+        elif self.plot_size.lower() == "medium":
             scatter_size = SCATTER_MEDIUM_SIZE
-        elif self.plot_size.lower() == 'large':
+        elif self.plot_size.lower() == "large":
             scatter_size = SCATTER_LARGE_SIZE
 
         key_list = []
-        key_list.append('__default__')
-        self.scatter_data['__default__'] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'hoverinfo':[], 'text':[], 'property':'', 'symbol':'o', 'color':color_candidate[0], 'size':scatter_size}
+        key_list.append("__default__")
+        self.scatter_data["__default__"] = {
+            "x_val": [],
+            "y_val": [],
+            "z_val": [],
+            "data": [],
+            "hoverinfo": [],
+            "text": [],
+            "property": "",
+            "symbol": "o",
+            "color": color_candidate[0],
+            "size": scatter_size,
+        }
         if len(self.selected_object_id_list) > 0:
-            self.scatter_data['__selected__'] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'hoverinfo':[], 'text':[], 'property':'', 'symbol':'o', 'color':'red', 'size':SCATTER_LARGE_SIZE}
-            key_list.append('__selected__')
+            self.scatter_data["__selected__"] = {
+                "x_val": [],
+                "y_val": [],
+                "z_val": [],
+                "data": [],
+                "hoverinfo": [],
+                "text": [],
+                "property": "",
+                "symbol": "o",
+                "color": "red",
+                "size": SCATTER_LARGE_SIZE,
+            }
+            key_list.append("__selected__")
 
         for obj in self.ds_ops.object_list:
-            key_name = '__default__'
+            key_name = "__default__"
 
             if obj.id in self.selected_object_id_list:
-                key_name = '__selected__'
+                key_name = "__selected__"
             elif self.propertyname_index > -1 and self.propertyname_index < len(obj.variable_list):
                 key_name = obj.variable_list[self.propertyname_index]
 
             if key_name not in self.scatter_data.keys():
-                self.scatter_data[key_name] = { 'x_val':[], 'y_val':[], 'z_val':[], 'data':[], 'property':key_name, 'symbol':'', 'color':'', 'size':scatter_size}
+                self.scatter_data[key_name] = {
+                    "x_val": [],
+                    "y_val": [],
+                    "z_val": [],
+                    "data": [],
+                    "property": key_name,
+                    "symbol": "",
+                    "color": "",
+                    "size": scatter_size,
+                }
             if axis1 == 10:
                 mdobject = MdObject.get_by_id(obj.id)
-                csize = mdobject.get_centroid_size(True)
-                #print("obj:", mdobject.id, "csize:", csize)
-                self.scatter_data[key_name]['x_val'].append(flip_axis1 * mdobject.get_centroid_size(True))
+                mdobject.get_centroid_size(True)
+                # print("obj:", mdobject.id, "csize:", csize)
+                self.scatter_data[key_name]["x_val"].append(flip_axis1 * mdobject.get_centroid_size(True))
             else:
-                self.scatter_data[key_name]['x_val'].append(flip_axis1 * obj.analysis_result[axis1])
-            self.scatter_data[key_name]['y_val'].append(flip_axis2 * obj.analysis_result[axis2])
-            self.scatter_data[key_name]['z_val'].append(flip_axis3 * obj.analysis_result[axis3])
-            self.scatter_data[key_name]['data'].append(obj)
-            #group_hash[key_name]['text'].append(obj.object_name)
-            #group_hash[key_name]['hoverinfo'].append(obj.id)
+                self.scatter_data[key_name]["x_val"].append(flip_axis1 * obj.analysis_result[axis1])
+            self.scatter_data[key_name]["y_val"].append(flip_axis2 * obj.analysis_result[axis2])
+            self.scatter_data[key_name]["z_val"].append(flip_axis3 * obj.analysis_result[axis3])
+            self.scatter_data[key_name]["data"].append(obj)
+            # group_hash[key_name]['text'].append(obj.object_name)
+            # group_hash[key_name]['hoverinfo'].append(obj.id)
 
         # remove empty group
-        if len(self.scatter_data['__default__']['x_val']) == 0:
-            del self.scatter_data['__default__']
+        if len(self.scatter_data["__default__"]["x_val"]) == 0:
+            del self.scatter_data["__default__"]
 
         # assign color and symbol
         sc_idx = 0
         for key_name in self.scatter_data.keys():
-            if self.scatter_data[key_name]['color'] == '':
-                self.scatter_data[key_name]['color'] = color_candidate[sc_idx % len(color_candidate)]
-                self.scatter_data[key_name]['symbol'] = symbol_candidate[sc_idx % len(symbol_candidate)]
+            if self.scatter_data[key_name]["color"] == "":
+                self.scatter_data[key_name]["color"] = color_candidate[sc_idx % len(color_candidate)]
+                self.scatter_data[key_name]["symbol"] = symbol_candidate[sc_idx % len(symbol_candidate)]
                 sc_idx += 1
 
         if self.rb2DChartDim.isChecked():
             self.ax2.clear()
             for name in self.scatter_data.keys():
-                #print("name", name, "len(group_hash[name]['x_val'])", len(group_hash[name]['x_val']), group_hash[name]['symbol'])
+                # print("name", name, "len(group_hash[name]['x_val'])", len(group_hash[name]['x_val']), group_hash[name]['symbol'])
                 group = self.scatter_data[name]
-                if len(group['x_val']) > 0:
-                    self.scatter_result[name] = self.ax2.scatter(group['x_val'], group['y_val'], s=group['size'], marker=group['symbol'], color=group['color'], data=group['data'], picker=True, pickradius=5)
-                    #print("ret", ret)
-                if name == '__selected__':
-                    for idx, obj in enumerate(group['data']):
-                        self.ax2.annotate(obj.object_name, (group['x_val'][idx], group['y_val'][idx]))
+                if len(group["x_val"]) > 0:
+                    self.scatter_result[name] = self.ax2.scatter(
+                        group["x_val"],
+                        group["y_val"],
+                        s=group["size"],
+                        marker=group["symbol"],
+                        color=group["color"],
+                        data=group["data"],
+                        picker=True,
+                        pickradius=5,
+                    )
+                    # print("ret", ret)
+                if name == "__selected__":
+                    for idx, obj in enumerate(group["data"]):
+                        self.ax2.annotate(obj.object_name, (group["x_val"][idx], group["y_val"][idx]))
             if show_legend:
                 values = []
                 keys = []
                 for key in self.scatter_result.keys():
-                    #print("key", key)
-                    if key[0] == '_':
+                    # print("key", key)
+                    if key[0] == "_":
                         continue
                     else:
                         keys.append(key)
                         values.append(self.scatter_result[key])
-                self.ax2.legend(values, keys, loc='upper right', bbox_to_anchor=(1.05, 1))
+                self.ax2.legend(values, keys, loc="upper right", bbox_to_anchor=(1.05, 1))
             if show_axis_label:
                 self.ax2.set_xlabel(axis1_title)
                 self.ax2.set_ylabel(axis2_title)
             self.fig2.tight_layout()
             self.fig2.canvas.draw()
             self.fig2.canvas.flush_events()
-            self.fig2.canvas.mpl_connect('pick_event',self.on_pick)
-            self.fig2.canvas.mpl_connect('button_press_event', self.on_canvas_button_press)
-            self.fig2.canvas.mpl_connect('button_release_event', self.on_canvas_button_release)
+            self.fig2.canvas.mpl_connect("pick_event", self.on_pick)
+            self.fig2.canvas.mpl_connect("button_press_event", self.on_canvas_button_press)
+            self.fig2.canvas.mpl_connect("button_release_event", self.on_canvas_button_release)
         else:
             self.ax3.clear()
             for name in self.scatter_data.keys():
                 group = self.scatter_data[name]
-                #print("name", name, "len(group_hash[name]['x_val'])", len(group['x_val']), group['symbol'])
-                if len(self.scatter_data[name]['x_val']) > 0:
-                    self.scatter_result[name] = self.ax3.scatter(group['x_val'], group['y_val'], group['z_val'], s=group['size'], marker=group['symbol'], color=group['color'], data=group['data'],depthshade=depth_shade, picker=True, pickradius=5)
-                if name == '__selected__':
-                    for idx, obj in enumerate(group['data']):
-                        self.ax3.text(group['x_val'][idx], group['y_val'][idx], group['z_val'][idx],obj.object_name)
-                    #print("ret", ret)
+                # print("name", name, "len(group_hash[name]['x_val'])", len(group['x_val']), group['symbol'])
+                if len(self.scatter_data[name]["x_val"]) > 0:
+                    self.scatter_result[name] = self.ax3.scatter(
+                        group["x_val"],
+                        group["y_val"],
+                        group["z_val"],
+                        s=group["size"],
+                        marker=group["symbol"],
+                        color=group["color"],
+                        data=group["data"],
+                        depthshade=depth_shade,
+                        picker=True,
+                        pickradius=5,
+                    )
+                if name == "__selected__":
+                    for idx, obj in enumerate(group["data"]):
+                        self.ax3.text(group["x_val"][idx], group["y_val"][idx], group["z_val"][idx], obj.object_name)
+                    # print("ret", ret)
             if show_legend:
                 values = []
                 keys = []
                 for key in self.scatter_result.keys():
-                    #print("key", key)
-                    if key[0] == '_':
+                    # print("key", key)
+                    if key[0] == "_":
                         continue
                     else:
                         keys.append(key)
                         values.append(self.scatter_result[key])
-                self.ax3.legend(values, keys, loc='upper left', bbox_to_anchor=(1.05, 1))
-            #if show_legend:
+                self.ax3.legend(values, keys, loc="upper left", bbox_to_anchor=(1.05, 1))
+            # if show_legend:
             #    self.ax3.legend(self.scatter_result.values(), self.scatter_result.keys(), loc='upper left', bbox_to_anchor=(1.05, 1))
             if show_axis_label:
                 self.ax3.set_xlabel(axis1_title)
@@ -5656,93 +5899,91 @@ class DatasetAnalysisDialog(QDialog):
             self.fig3.tight_layout()
             self.fig3.canvas.draw()
             self.fig3.canvas.flush_events()
-            self.fig3.canvas.mpl_connect('pick_event',self.on_pick)
-            self.fig3.canvas.mpl_connect('button_press_event', self.on_canvas_button_press)
-            self.fig3.canvas.mpl_connect('button_release_event', self.on_canvas_button_release)
+            self.fig3.canvas.mpl_connect("pick_event", self.on_pick)
+            self.fig3.canvas.mpl_connect("button_press_event", self.on_canvas_button_press)
+            self.fig3.canvas.mpl_connect("button_release_event", self.on_canvas_button_release)
 
     def show_result_table(self):
-        
         self.plot_data.clear()
         self.rotation_matrix_data.clear()
 
         # PCA data
         # set header as "PC1", "PC2", "PC3", ... "PCn
         if self.rbCVA.isChecked():
-            header = ["CV"+str(i+1) for i in range(len(self.analysis_result.rotated_matrix.tolist()[0]))]
+            header = ["CV" + str(i + 1) for i in range(len(self.analysis_result.rotated_matrix.tolist()[0]))]
         else:
-            header = ["PC"+str(i+1) for i in range(len(self.analysis_result.rotated_matrix.tolist()[0]))]
+            header = ["PC" + str(i + 1) for i in range(len(self.analysis_result.rotated_matrix.tolist()[0]))]
         header.append("CSize")
-        #print("header", header)
-        self.plot_data.setColumnCount(len(header)+1)
+        # print("header", header)
+        self.plot_data.setColumnCount(len(header) + 1)
         self.plot_data.setHorizontalHeaderLabels(["Name"] + header)
 
         new_coords = self.analysis_result.rotated_matrix.tolist()
-        self.plot_data.setColumnCount(len(new_coords[0])+2)
+        self.plot_data.setColumnCount(len(new_coords[0]) + 2)
         for i, obj in enumerate(self.ds_ops.object_list):
             self.plot_data.insertRow(i)
             self.plot_data.setItem(i, 0, QTableWidgetItem(obj.object_name))
             for j, val in enumerate(new_coords[i]):
-                self.plot_data.setItem(i, j+1, QTableWidgetItem(str(int(val*10000)/10000.0)))
+                self.plot_data.setItem(i, j + 1, QTableWidgetItem(str(int(val * 10000) / 10000.0)))
             mdobject = MdObject.get_by_id(obj.id)
             csize = mdobject.get_centroid_size(True)
-            #print("obj:", mdobject.id, "csize:", csize)
-            self.plot_data.setItem(i, len(new_coords[0])+1, QTableWidgetItem(str(int(csize*10000)/10000.0)))
+            # print("obj:", mdobject.id, "csize:", csize)
+            self.plot_data.setItem(i, len(new_coords[0]) + 1, QTableWidgetItem(str(int(csize * 10000) / 10000.0)))
 
         # rotation matrix
         rotation_matrix = self.analysis_result.rotation_matrix.tolist()
-        #print("rotation_matrix[0][0]", [0][0], len(self.pca_result.rotation_matrix[0][0]))
+        # print("rotation_matrix[0][0]", [0][0], len(self.pca_result.rotation_matrix[0][0]))
         self.rotation_matrix_data.setColumnCount(len(rotation_matrix[0]))
         for i, row in enumerate(rotation_matrix):
             self.rotation_matrix_data.insertRow(i)
             for j, val in enumerate(row):
-                self.rotation_matrix_data.setItem(i, j, QTableWidgetItem(str(int(val*10000)/10000.0)))
-        
-        #self.analysis_result.rotated_matrix
+                self.rotation_matrix_data.setItem(i, j, QTableWidgetItem(str(int(val * 10000) / 10000.0)))
+
+        # self.analysis_result.rotated_matrix
 
         # eigen values
         self.eigenvalue_data.setColumnCount(2)
         for i, val in enumerate(self.analysis_result.raw_eigen_values):
             val2 = self.analysis_result.eigen_value_percentages[i]
             self.eigenvalue_data.insertRow(i)
-            self.eigenvalue_data.setItem(i, 0, QTableWidgetItem(str(int(val*10000)/10000.0)))
-            self.eigenvalue_data.setItem(i, 1, QTableWidgetItem(str(int(val2*10000)/10000.0)))
+            self.eigenvalue_data.setItem(i, 0, QTableWidgetItem(str(int(val * 10000) / 10000.0)))
+            self.eigenvalue_data.setItem(i, 1, QTableWidgetItem(str(int(val2 * 10000) / 10000.0)))
 
         # shapes tab
         min_vector = self.analysis_result.rotated_matrix.min(axis=0)
         max_vector = self.analysis_result.rotated_matrix.max(axis=0)
         avg_vector = self.analysis_result.rotated_matrix.mean(axis=0)
         # combine 3 vectors to 1 matrix
-        shapes = np.vstack((min_vector, avg_vector, max_vector))
+        np.vstack((min_vector, avg_vector, max_vector))
         self.shapes_data.clear()
-        self.shapes_data.setColumnCount(len(new_coords[0])+1)
-        axis1 = self.comboAxis1.currentIndex()
-        axis2 = self.comboAxis2.currentIndex()
-        axis3 = self.comboAxis3.currentIndex()
-        axis1_title = self.comboAxis1.currentText()
-        axis2_title = self.comboAxis2.currentText()
-        axis3_title = self.comboAxis3.currentText()
-        flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() == True else 1.0
-        flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() == True else 1.0
-        flip_axis3 = -1.0 if self.cbxFlipAxis3.isChecked() == True else 1.0
+        self.shapes_data.setColumnCount(len(new_coords[0]) + 1)
+        self.comboAxis1.currentIndex()
+        self.comboAxis2.currentIndex()
+        self.comboAxis3.currentIndex()
+        self.comboAxis1.currentText()
+        self.comboAxis2.currentText()
+        self.comboAxis3.currentText()
+        -1.0 if self.cbxFlipAxis1.isChecked() else 1.0
+        -1.0 if self.cbxFlipAxis2.isChecked() else 1.0
+        -1.0 if self.cbxFlipAxis3.isChecked() else 1.0
         new_coords = self.analysis_result.rotated_matrix.tolist()
         for i, obj in enumerate(self.ds_ops.object_list):
             obj.analysis_result = new_coords[i]
 
-        #print("shapes", shapes.shape)
-        row_header_list = []
+        # print("shapes", shapes.shape)
         dimension = self.ds_ops.dimension
         vector_length = len(self.analysis_result.rotated_matrix.tolist()[0])
         if dimension == 2:
-            axis_label = [ 'x', 'y' ]
+            axis_label = ["x", "y"]
         elif dimension == 3:
-            axis_label = [ 'x', 'y', 'z' ]
-        
+            axis_label = ["x", "y", "z"]
+
         column_header_list = ["name"]
         for i in range(vector_length):
-            column_header_list.append(axis_label[i%dimension] + str(int(i/dimension)+1))
-        #column_header_list.append("CSize")
+            column_header_list.append(axis_label[i % dimension] + str(int(i / dimension) + 1))
+        # column_header_list.append("CSize")
 
-        '''
+        """
         self.shapes_data.setHorizontalHeaderLabels(column_header_list)
         if self.rb2DChartDim.isChecked():
             dim = 2
@@ -5755,8 +5996,8 @@ class DatasetAnalysisDialog(QDialog):
                     row_idx1 = int(( i1 - 1 ) * flip_axis1 + 1)
                     row_idx2 = int(( i2 - 1 ) * flip_axis2 + 1)
                     #print("row_idx1", row_idx1, "row_idx2", row_idx2)
-                    shape_list[idx,axis1] = flip_axis1 * shapes[ row_idx1, axis1] 
-                    shape_list[idx,axis2] = flip_axis2 * shapes[ row_idx2, axis2] 
+                    shape_list[idx,axis1] = flip_axis1 * shapes[ row_idx1, axis1]
+                    shape_list[idx,axis2] = flip_axis2 * shapes[ row_idx2, axis2]
                     idx += 1
 
         elif self.rb3DChartDim.isChecked():
@@ -5782,7 +6023,7 @@ class DatasetAnalysisDialog(QDialog):
         average_shape = np.array(self.ds_ops.get_average_shape().landmark_list).reshape(1,-1)
         #print(average_shape)
 
-        
+
         inverted_matrix = np.linalg.inv(self.analysis_result.rotation_matrix)
         #print("inverted_matrix", inverted_matrix)
 
@@ -5797,98 +6038,95 @@ class DatasetAnalysisDialog(QDialog):
             self.shapes_data.setItem(i, 0, QTableWidgetItem(row_header_list[i]))
             for j, val in enumerate(shape):
                 self.shapes_data.setItem(i, j+1, QTableWidgetItem(str(int(val*10000)/10000.0)))
-        '''
-
+        """
 
     def on_canvas_button_press(self, evt):
-        #print("button_press", evt)
+        # print("button_press", evt)
         self.canvas_down_xy = (evt.x, evt.y)
-        #self.tableView.selectionModel().clearSelection()
+        # self.tableView.selectionModel().clearSelection()
 
     def on_canvas_button_release(self, evt):
-        #print("button_release", evt)
-        if self.onpick_happened == True:
+        # print("button_release", evt)
+        if self.onpick_happened:
             self.onpick_happened = False
             return
         self.canvas_up_xy = (evt.x, evt.y)
         if self.canvas_down_xy == self.canvas_up_xy:
             self.tableView1.selectionModel().clearSelection()
 
-
-    def on_pick(self,evt):
-        #print("onpick", evt)
+    def on_pick(self, evt):
+        # print("onpick", evt)
         self.onpick_happened = True
-        #print("evt", evt, evt.ind, evt.artist )
+        # print("evt", evt, evt.ind, evt.artist )
         selected_object_id_list = []
         for key_name in self.scatter_data.keys():
             if evt.artist == self.scatter_result[key_name]:
-                #print("key_name", key_name)
+                # print("key_name", key_name)
                 for idx in evt.ind:
-                    obj = self.scatter_data[key_name]['data'][idx]
-                    #print("obj", obj)
+                    obj = self.scatter_data[key_name]["data"][idx]
+                    # print("obj", obj)
                     selected_object_id_list.append(obj.id)
-                    #self.ds_ops.select_object(obj.id)
+                    # self.ds_ops.select_object(obj.id)
 
-        #print("selected_object_id_list", selected_object_id_list)
+        # print("selected_object_id_list", selected_object_id_list)
         # select rows in tableView
-        #self.tableView.clearSelection()
-        #selectionModel = self.tableView.selectionModel()
+        # self.tableView.clearSelection()
+        # selectionModel = self.tableView.selectionModel()
 
-        #print("selected_object_id_list", selected_object_id_list)
+        # print("selected_object_id_list", selected_object_id_list)
         self.selection_changed_off = True
         for id in selected_object_id_list:
-            #item = self.object_model.findItems(str(id), Qt.MatchExactly, 0)
+            # item = self.object_model.findItems(str(id), Qt.MatchExactly, 0)
             item = self.object_hash[id]
-            self.tableView1.selectionModel().select(item.index(),QItemSelectionModel.Rows | QItemSelectionModel.Select)
+            self.tableView1.selectionModel().select(item.index(), QItemSelectionModel.Rows | QItemSelectionModel.Select)
         self.selection_changed_off = False
-        self.on_object_selection_changed([],[])
+        self.on_object_selection_changed([], [])
 
-        #for row in range(self.object_model.rowCount()):
+        # for row in range(self.object_model.rowCount()):
         #    if int(self.object_model.item(row,0).text()) in selected_object_id_list:
         #        self.tableView.selectionModel().select(self.object_model.item(row,0).index(),QItemSelectionModel.Rows | QItemSelectionModel.Select)
 
-
     def on_mouse_clicked(self, event):
-        #print("mouse clicked:",event)
-        #if event.double():
+        # print("mouse clicked:",event)
+        # if event.double():
         #    print("double clicked")
-        #else:
+        # else:
         #    print("single clicked")
-        p = self.plot_widget.plotItem.vb.mapSceneToView(event.scenePos()) 
+        p = self.plot_widget.plotItem.vb.mapSceneToView(event.scenePos())
         self.status_bar.showMessage("scene pos:" + str(event.scenePos()) + ", data pos:" + str(p))
 
     def on_mouse_moved(self, pos):
-        p = self.plot_widget.plotItem.vb.mapSceneToView(pos)       
-        #print("plot widget:",self.plot_widget, "plotItem:",self.plot_widget.plotItem, "vb:",self.plot_widget.plotItem.vb, "mapSceneToView:",self.plot_widget.plotItem.vb.mapSceneToView(pos)) 
-        #print("pos:",pos, pos.x(), pos.y(), "p:",p, p.x(), p.y())
+        p = self.plot_widget.plotItem.vb.mapSceneToView(pos)
+        # print("plot widget:",self.plot_widget, "plotItem:",self.plot_widget.plotItem, "vb:",self.plot_widget.plotItem.vb, "mapSceneToView:",self.plot_widget.plotItem.vb.mapSceneToView(pos))
+        # print("pos:",pos, pos.x(), pos.y(), "p:",p, p.x(), p.y())
 
         self.status_bar.showMessage("x: %d, y: %d, x2: %f, y2: %f" % (pos.x(), pos.y(), p.x(), p.y()))
 
     def on_scatter_item_clicked(self, plot, points):
-        #print("scatter item clicked:",plot,points)
+        # print("scatter item clicked:",plot,points)
         self.selected_object_id_list = []
         for pt in points:
-            #print("points:",str(pt.data()))
+            # print("points:",str(pt.data()))
             self.selected_object_id_list.append(pt.data().id)
         # select rows in tableView
         for obj_id in self.selected_object_id_list:
             for row in range(self.object_model.rowCount()):
-                if int(self.object_model.item(row,0).text()) == obj_id:
+                if int(self.object_model.item(row, 0).text()) == obj_id:
                     self.tableView1.selectRow(row)
-                    #break
-            
-    def PerformCVA(self,dataset_ops):
+                    # break
+
+    def PerformCVA(self, dataset_ops):
         cva = MdCanonicalVariate()
 
-        property_index = self.comboPropertyName.currentIndex() -1
-        #print("property_index:",property_index)
+        property_index = self.comboPropertyName.currentIndex() - 1
+        # print("property_index:",property_index)
         if property_index < 0:
             QMessageBox.information(self, "Information", "Please select a property.")
             return
         datamatrix = []
         category_list = []
-        #obj = dataset_ops.object_list[0]
-        #print(obj, obj.variable_list, property_index)
+        # obj = dataset_ops.object_list[0]
+        # print(obj, obj.variable_list, property_index)
         for obj in dataset_ops.object_list:
             datum = []
             for lm in obj.landmark_list:
@@ -5900,41 +6138,38 @@ class DatasetAnalysisDialog(QDialog):
         cva.SetCategory(category_list)
         cva.Analyze()
 
-        number_of_axes = min(cva.nObservation, cva.nVariable)
-        cva_done = True
+        min(cva.nObservation, cva.nVariable)
 
         return cva
 
-    def PerformPCA(self,dataset_ops):
-
+    def PerformPCA(self, dataset_ops):
         pca = MdPrincipalComponent()
         datamatrix = []
         for obj in dataset_ops.object_list:
             datum = []
             for lm in obj.landmark_list:
-                datum.extend( lm )
+                datum.extend(lm)
             datamatrix.append(datum)
 
         pca.SetData(datamatrix)
         pca.Analyze()
 
-        number_of_axes = min(pca.nObservation, pca.nVariable)
-        pca_done = True
+        min(pca.nObservation, pca.nVariable)
 
         return pca
 
     def load_object(self):
         # load objects into tableView
-        #for object in self.dataset.object_list:
+        # for object in self.dataset.object_list:
         self.object_model.clear()
         self.property_model.clear()
         self.reset_tableView()
         if self.dataset is None:
             return
-        #objects = self.selected_dataset.objects
+        # objects = self.selected_dataset.objects
         self.object_hash = {}
 
-        self.propertyname_index = self.comboPropertyName.currentIndex() -1
+        self.propertyname_index = self.comboPropertyName.currentIndex() - 1
         self.propertyname = self.comboPropertyName.currentText()
 
         self.variable_list = []
@@ -5942,15 +6177,15 @@ class DatasetAnalysisDialog(QDialog):
             item0 = QStandardItem()
             item0.setCheckable(True)
             item0.setCheckState(Qt.Checked)
-            item0.setData(obj.id,Qt.DisplayRole)
+            item0.setData(obj.id, Qt.DisplayRole)
 
             item1 = QStandardItem()
-            item1.setData(obj.id,Qt.DisplayRole)
+            item1.setData(obj.id, Qt.DisplayRole)
             item2 = QStandardItem(obj.object_name)
             self.object_hash[obj.id] = item1
             if self.propertyname_index >= 0:
                 obj.unpack_variable()
-                #print(obj.variable_list)
+                # print(obj.variable_list)
                 item3 = QStandardItem(obj.variable_list[self.propertyname_index])
                 if obj.variable_list[self.propertyname_index] not in self.variable_list:
                     self.variable_list.append(obj.variable_list[self.propertyname_index])
@@ -5960,17 +6195,18 @@ class DatasetAnalysisDialog(QDialog):
                     p_item1 = QStandardItem()
                     p_item1.setCheckable(True)
                     p_item1.setCheckState(Qt.Checked)
-                    self.property_model.appendRow([p_item0,p_item1,QStandardItem(obj.variable_list[self.propertyname_index])])
-                #self.variable_list.append(obj.variable_list[self.propertyname_index])
-                self.object_model.appendRow([item0,item1,item2,item3] )
+                    self.property_model.appendRow(
+                        [p_item0, p_item1, QStandardItem(obj.variable_list[self.propertyname_index])]
+                    )
+                # self.variable_list.append(obj.variable_list[self.propertyname_index])
+                self.object_model.appendRow([item0, item1, item2, item3])
             else:
-                self.object_model.appendRow([item0,item1,item2] )
-        
+                self.object_model.appendRow([item0, item1, item2])
 
     def reset_tableView(self):
         self.property_model = QStandardItemModel()
         self.property_model.setColumnCount(3)
-        self.property_model.setHorizontalHeaderLabels(["Show","Avg","Group"])
+        self.property_model.setHorizontalHeaderLabels(["Show", "Avg", "Group"])
         self.tableView2.setModel(self.property_model)
 
         self.tableView2.setColumnWidth(0, 20)
@@ -5981,34 +6217,33 @@ class DatasetAnalysisDialog(QDialog):
         header2.setSectionResizeMode(1, QHeaderView.Fixed)
         header2.setSectionResizeMode(2, QHeaderView.Stretch)
 
-
         self.object_model = QStandardItemModel()
         self.proxy_model = QSortFilterProxyModel()
         self.proxy_model.setSourceModel(self.object_model)
-        self.propertyname_index = self.comboPropertyName.currentIndex() -1
+        self.propertyname_index = self.comboPropertyName.currentIndex() - 1
         self.propertyname = self.comboPropertyName.currentText()
         self.object_model.setColumnCount(3)
         self.object_model.setHorizontalHeaderLabels(["", "ID", "Name"])
         self.tableView1.setModel(self.proxy_model)
-        #self.tableView.setModel(self.object_model)
+        # self.tableView.setModel(self.object_model)
         self.tableView1.setColumnWidth(0, 20)
         self.tableView1.setColumnWidth(1, 50)
         self.tableView1.setColumnWidth(2, 150)
         self.tableView1.verticalHeader().setDefaultSectionSize(20)
         self.tableView1.verticalHeader().setVisible(False)
         self.tableView1.setSelectionBehavior(QTableView.SelectRows)
-        #self.tableView.clicked.connect(self.on_tableView_clicked)
+        # self.tableView.clicked.connect(self.on_tableView_clicked)
         self.object_selection_model = self.tableView1.selectionModel()
         self.object_selection_model.selectionChanged.connect(self.on_object_selection_changed)
         self.tableView1.setSortingEnabled(True)
         self.tableView1.sortByColumn(0, Qt.AscendingOrder)
         self.object_model.setSortRole(Qt.UserRole)
 
-        header = self.tableView1.horizontalHeader()   
+        header = self.tableView1.horizontalHeader()
         header.setSectionResizeMode(0, QHeaderView.Fixed)
         header.setSectionResizeMode(1, QHeaderView.Fixed)
         header.setSectionResizeMode(2, QHeaderView.Stretch)
-        header2 = self.tableView2.horizontalHeader()   
+        header2 = self.tableView2.horizontalHeader()
         header2.setSectionResizeMode(0, QHeaderView.Fixed)
         header2.setSectionResizeMode(1, QHeaderView.Fixed)
         header2.setSectionResizeMode(2, QHeaderView.Stretch)
@@ -6019,8 +6254,10 @@ class DatasetAnalysisDialog(QDialog):
             self.tableView1.setColumnWidth(3, 150)
             header.setSectionResizeMode(3, QHeaderView.Stretch)
             self.property_model.setHorizontalHeaderLabels(["Show", "Avg", self.propertyname])
-        
-        self.tableView1.setStyleSheet("QTreeView::item:selected{background-color: palette(highlight); color: palette(highlightedText);};")
+
+        self.tableView1.setStyleSheet(
+            "QTreeView::item:selected{background-color: palette(highlight); color: palette(highlightedText);};"
+        )
 
     def on_object_selection_changed(self, selected, deselected):
         if self.selection_changed_off:
@@ -6038,12 +6275,12 @@ class DatasetAnalysisDialog(QDialog):
 
         new_index_list = []
         model = selected_indexes[0].model()
-        if hasattr(model, 'mapToSource'):
+        if hasattr(model, "mapToSource"):
             for index in selected_indexes:
                 new_index = model.mapToSource(index)
                 new_index_list.append(new_index)
             selected_indexes = new_index_list
-        
+
         selected_object_id_list = []
         for index in selected_indexes:
             item = self.object_model.itemFromIndex(index)
@@ -6053,12 +6290,13 @@ class DatasetAnalysisDialog(QDialog):
 
         return selected_object_id_list
 
+
 class ExportDatasetDialog(QDialog):
-    def __init__(self,parent):
+    def __init__(self, parent):
         super().__init__()
         self.setWindowTitle(self.tr("Modan2 - Export"))
         self.parent = parent
-        #print(self.parent.pos())
+        # print(self.parent.pos())
         self.remember_geometry = True
         self.m_app = QApplication.instance()
         self.read_settings()
@@ -6099,8 +6337,8 @@ class ExportDatasetDialog(QDialog):
         self.rbX1Y1.setChecked(False)
         self.rbMorphologika = QRadioButton("Morphologika")
         self.rbMorphologika.clicked.connect(self.on_rbMorphologika_clicked)
-        #self.rbMorphologika.setEnabled(False)
-        #self.rbMorphologika.setChecked(False)
+        # self.rbMorphologika.setEnabled(False)
+        # self.rbMorphologika.setChecked(False)
 
         # JSON+ZIP option
         self.rbJSONZip = QRadioButton("JSON+ZIP")
@@ -6129,17 +6367,16 @@ class ExportDatasetDialog(QDialog):
         self.rbNone.setEnabled(True)
         self.rbNone.setChecked(False)
 
-
         self.form_layout = QGridLayout()
-        self.form_layout.addWidget(self.lblDatasetName,0,0)
-        self.form_layout.addWidget(self.edtDatasetName,0,1,1,2)
-        self.form_layout.addWidget(self.lblObjectList,1,0)
-        self.form_layout.addWidget(self.lstObjectList,2,0,2,1)
-        self.form_layout.addWidget(self.btnMoveRight,2,1)
-        self.form_layout.addWidget(self.btnMoveLeft,3,1)
-        self.form_layout.addWidget(self.lblExportList,1,2)
-        self.form_layout.addWidget(self.lstExportList,2,2,2,1)
-        
+        self.form_layout.addWidget(self.lblDatasetName, 0, 0)
+        self.form_layout.addWidget(self.edtDatasetName, 0, 1, 1, 2)
+        self.form_layout.addWidget(self.lblObjectList, 1, 0)
+        self.form_layout.addWidget(self.lstObjectList, 2, 0, 2, 1)
+        self.form_layout.addWidget(self.btnMoveRight, 2, 1)
+        self.form_layout.addWidget(self.btnMoveLeft, 3, 1)
+        self.form_layout.addWidget(self.lblExportList, 1, 2)
+        self.form_layout.addWidget(self.lstExportList, 2, 2, 2, 1)
+
         self.button_layout1 = QHBoxLayout()
         self.button_layout1.addWidget(self.btnExport)
         self.button_layout1.addWidget(self.btnCancel)
@@ -6170,7 +6407,6 @@ class ExportDatasetDialog(QDialog):
         self.button_group3.addButton(self.rbBookstein)
         self.button_group3.addButton(self.rbRFTRA)
 
-
         self.layout = QVBoxLayout()
         self.layout.addLayout(self.form_layout)
         self.layout.addLayout(self.button_layout2)
@@ -6185,7 +6421,7 @@ class ExportDatasetDialog(QDialog):
             self.setGeometry(self.m_app.settings.value("WindowGeometry/ExportDialog", QRect(100, 100, 600, 400)))
         else:
             self.setGeometry(QRect(100, 100, 600, 400))
-            self.move(self.parent.pos()+QPoint(50,50))
+            self.move(self.parent.pos() + QPoint(50, 50))
 
     def write_settings(self):
         if self.remember_geometry is True:
@@ -6195,63 +6431,74 @@ class ExportDatasetDialog(QDialog):
         self.write_settings()
         event.accept()
 
-    def set_dataset(self,dataset):
-
+    def set_dataset(self, dataset):
         self.dataset = dataset
         self.ds_ops = MdDatasetOps(dataset)
         self.edtDatasetName.setText(self.dataset.dataset_name)
         for object in self.dataset.object_list:
             self.lstExportList.addItem(object.object_name)
-        
+
     def on_rbProcrustes_clicked(self):
         pass
-    def on_rbBookstein_clicked(self):
 
+    def on_rbBookstein_clicked(self):
         pass
+
     def on_rbRFTRA_clicked(self):
         pass
+
     def on_rbNone_clicked(self):
         pass
 
     def on_rbTPS_clicked(self):
         pass
+
     def on_rbNTS_clicked(self):
         pass
+
     def on_rbX1Y1_clicked(self):
         pass
+
     def on_rbMorphologika_clicked(self):
         pass
+
     def on_rbJSONZip_clicked(self):
         # Enable include files option and update estimate
         self.chkIncludeFiles.setEnabled(True)
         self.update_estimated_size()
+
     def update_estimated_size(self):
         try:
             include_files = self.chkIncludeFiles.isChecked()
             size_bytes = mu.estimate_package_size(self.ds_ops.id, include_files=include_files)
+
             # Format human-readable
             def fmt(sz):
-                for unit in ['B','KB','MB','GB','TB']:
+                for unit in ["B", "KB", "MB", "GB", "TB"]:
                     if sz < 1024.0:
                         return f"{sz:3.1f} {unit}"
                     sz /= 1024.0
                 return f"{sz:.1f} PB"
+
             self.lblEstimatedSize.setText(self.tr("Estimated size: ") + fmt(size_bytes))
         except Exception:
             self.lblEstimatedSize.setText(self.tr("Estimated size: -"))
+
     def move_right(self):
         selected_items = self.lstObjectList.selectedItems()
         for item in selected_items:
             self.lstObjectList.takeItem(self.lstObjectList.row(item))
             self.lstExportList.addItem(item)
+
     def move_left(self):
         selected_items = self.lstExportList.selectedItems()
         for item in selected_items:
             self.lstExportList.takeItem(self.lstExportList.row(item))
             self.lstObjectList.addItem(item)
+
     def export_dataset(self):
         ##export_list = []
-        #for i in range(self.lstExportList.count()):
+        # for i in range(self.lstExportList.count()):
         ##    item = self.lstExportList.item(i)
         #    export_list.append(item.text())
         if self.rbProcrustes.isChecked():
@@ -6261,25 +6508,25 @@ class ExportDatasetDialog(QDialog):
         date_str = today.strftime("%Y%m%d_%H%M%S")
 
         if self.rbTPS.isChecked():
-            filename_candidate = f'{self.ds_ops.dataset_name}_{date_str}.tps'
+            filename_candidate = f"{self.ds_ops.dataset_name}_{date_str}.tps"
             filepath = os.path.join(mu.USER_PROFILE_DIRECTORY, filename_candidate)
             filename, _ = QFileDialog.getSaveFileName(self, "Save File As", filepath, "TPS format (*.tps)")
             if filename:
                 # open text file
-                with open(filename, 'w') as f:
+                with open(filename, "w") as f:
                     for object in object_list:
-                        f.write(f'LM={len(object.landmark_list)}\n')
+                        f.write(f"LM={len(object.landmark_list)}\n")
                         for lm in object.landmark_list:
                             if self.ds_ops.dimension == 2:
-                                f.write('{}\t{}\n'.format(*lm))
+                                f.write("{}\t{}\n".format(*lm))
                             else:
-                                f.write('{}\t{}\t{}\n'.format(*lm))
-                        #if object.has_image():
+                                f.write("{}\t{}\t{}\n".format(*lm))
+                        # if object.has_image():
                         #    f.write('IMAGE={}\n'.format(object.image_filename))
-                        f.write(f'ID={object.object_name}\n')
+                        f.write(f"ID={object.object_name}\n")
 
         elif self.rbMorphologika.isChecked():
-            filename_candidate = f'{self.ds_ops.dataset_name}_{date_str}.txt'
+            filename_candidate = f"{self.ds_ops.dataset_name}_{date_str}.txt"
             filepath = os.path.join(mu.USER_PROFILE_DIRECTORY, filename_candidate)
             filename, _ = QFileDialog.getSaveFileName(self, "Save File As", filepath, "Morphologika format (*.txt)")
             if filename:
@@ -6294,27 +6541,27 @@ class ExportDatasetDialog(QDialog):
                 ppmm_values = "[pixelspermm]" + NEWLINE
                 name_values = "[names]" + NEWLINE
                 for mo in self.ds_ops.object_list:
-                    label_values += '\t'.join(mo.variable_list).strip() + NEWLINE
+                    label_values += "\t".join(mo.variable_list).strip() + NEWLINE
                     name_values += mo.object_name + NEWLINE
-                    #print mo.objname
+                    # print mo.objname
                     rawpoint_values += "'#" + mo.object_name + NEWLINE
                     for lm in mo.landmark_list:
-                        rawpoint_values += '\t'.join([str(c) for c in lm])
+                        rawpoint_values += "\t".join([str(c) for c in lm])
                         rawpoint_values += NEWLINE
-                #print name_values
+                # print name_values
                 result_str += name_values + label_values + rawpoint_values
                 if len(self.dataset.edge_list) > 0:
                     result_str += "[wireframe]" + NEWLINE
                     self.dataset.unpack_wireframe()
                     for edge in self.dataset.edge_list:
-                        #print edge
-                        result_str += '\t'.join([str(v) for v in edge]) + NEWLINE
+                        # print edge
+                        result_str += "\t".join([str(v) for v in edge]) + NEWLINE
                 if len(self.dataset.polygon_list) > 0:
                     result_str += "[polygons]" + NEWLINE
                     self.dataset.unpack_polygons()
                     for polygon in self.dataset.polygon_list:
-                        #print edge
-                        result_str += '\t'.join([str(v) for v in polygon]) + NEWLINE
+                        # print edge
+                        result_str += "\t".join([str(v) for v in polygon]) + NEWLINE
                 for obj_ops in self.ds_ops.object_list:
                     obj = MdObject.get_by_id(obj_ops.id)
                     if obj.has_image():
@@ -6322,7 +6569,9 @@ class ExportDatasetDialog(QDialog):
                         image_values += obj.get_name() + "." + img.get_file_path().split(".")[-1] + NEWLINE
                         old_filepath = img.get_file_path()
                         # get filepath from filename
-                        new_image_path = os.path.join(os.path.dirname(filename), obj.get_name() + "." + img.get_file_path().split(".")[-1])
+                        new_image_path = os.path.join(
+                            os.path.dirname(filename), obj.get_name() + "." + img.get_file_path().split(".")[-1]
+                        )
                         shutil.copyfile(old_filepath, new_image_path)
 
                     else:
@@ -6334,12 +6583,12 @@ class ExportDatasetDialog(QDialog):
 
                 result_str += image_values
                 result_str += ppmm_values
-                #print("filename:", filename)
+                # print("filename:", filename)
                 # open text file
-                with open(filename, 'w') as f:
+                with open(filename, "w") as f:
                     f.write(result_str)
-        elif hasattr(self, 'rbJSONZip') and self.rbJSONZip.isChecked():
-            filename_candidate = f'{self.ds_ops.dataset_name}_{date_str}.zip'
+        elif hasattr(self, "rbJSONZip") and self.rbJSONZip.isChecked():
+            filename_candidate = f"{self.ds_ops.dataset_name}_{date_str}.zip"
             filepath = os.path.join(mu.USER_PROFILE_DIRECTORY, filename_candidate)
             filename, _ = QFileDialog.getSaveFileName(self, "Save File As", filepath, "ZIP archive (*.zip)")
             if filename:
@@ -6352,7 +6601,7 @@ class ExportDatasetDialog(QDialog):
 
                     def cb(curr, total):
                         try:
-                            val = int((curr/float(total))*100) if total else 0
+                            val = int((curr / float(total)) * 100) if total else 0
                         except Exception:
                             val = 0
                         progress.set_curr_value(val)
@@ -6369,18 +6618,19 @@ class ExportDatasetDialog(QDialog):
                     QMessageBox.critical(self, self.tr("Export"), self.tr("Export failed: ") + str(e))
         self.close()
 
+
 class ImportDatasetDialog(QDialog):
     # NewDatasetDialog shows new dataset dialog.
-    def __init__(self,parent):
+    def __init__(self, parent):
         super().__init__()
         self.setWindowTitle(self.tr("Modan2 - Import"))
         self.parent = parent
-        #print(self.parent.pos())
+        # print(self.parent.pos())
         self.remember_geometry = True
         self.m_app = QApplication.instance()
         self.read_settings()
-        #self.setGeometry(QRect(100, 100, 600, 400))
-        #self.move(self.parent.pos()+QPoint(100,100))
+        # self.setGeometry(QRect(100, 100, 600, 400))
+        # self.move(self.parent.pos()+QPoint(100,100))
 
         # add file open dialog
         self.filename_layout = QHBoxLayout()
@@ -6405,8 +6655,8 @@ class ImportDatasetDialog(QDialog):
         self.rbnX1Y1 = QRadioButton("X1Y1")
         self.rbnMorphologika = QRadioButton("Morphologika")
         self.rbnJSONZip = QRadioButton("JSON+ZIP")
-        #self.rbnX1Y1.setDisabled(True)
-        #self.rbnMorphologika.setDisabled(True)
+        # self.rbnX1Y1.setDisabled(True)
+        # self.rbnMorphologika.setDisabled(True)
         self.chkFileType.addButton(self.rbnTPS)
         self.chkFileType.addButton(self.rbnNTS)
         self.chkFileType.addButton(self.rbnX1Y1)
@@ -6426,7 +6676,7 @@ class ImportDatasetDialog(QDialog):
         self.gbxFileType.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.gbxFileType.setMaximumHeight(50)
         self.gbxFileType.setMinimumHeight(50)
-        #self.gbxFileType.setTitle("File Type")
+        # self.gbxFileType.setTitle("File Type")
 
         self.rb2D = QRadioButton("2D")
         self.rb3D = QRadioButton("3D")
@@ -6444,7 +6694,7 @@ class ImportDatasetDialog(QDialog):
         self.edtDatasetName.setMinimumWidth(400)
         self.edtDatasetName.setMaximumWidth(400)
         self.edtDatasetName.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-                
+
         # add object count edit
         self.edtObjectCount = QLineEdit()
         self.edtObjectCount.setReadOnly(True)
@@ -6464,12 +6714,12 @@ class ImportDatasetDialog(QDialog):
         self.prgImport.setMaximum(100)
         self.prgImport.setValue(0)
         self.prgImport.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        
+
         # add layout
         self.main_layout = QFormLayout()
         self.setLayout(self.main_layout)
         self.main_layout.addRow(self.tr("File"), self.filename_widget)
-        #self.main_layout.addRow("File Type", self.cbxFileType)
+        # self.main_layout.addRow("File Type", self.cbxFileType)
         self.main_layout.addRow(self.tr("File Type"), self.gbxFileType)
         self.main_layout.addRow(self.tr("Dataset Name"), self.edtDatasetName)
         self.main_layout.addRow(self.tr("Object Count"), self.edtObjectCount)
@@ -6484,7 +6734,7 @@ class ImportDatasetDialog(QDialog):
             self.setGeometry(self.m_app.settings.value("WindowGeometry/ImportDialog", QRect(100, 100, 500, 220)))
         else:
             self.setGeometry(QRect(100, 100, 500, 220))
-            self.move(self.parent.pos()+QPoint(50,50))
+            self.move(self.parent.pos() + QPoint(50, 50))
 
     def write_settings(self):
         if self.remember_geometry is True:
@@ -6527,20 +6777,20 @@ class ImportDatasetDialog(QDialog):
             self.file_type_changed()
             try:
                 data = mu.read_json_from_zip(filename)
-                ds_meta = data.get('dataset', {})
-                objs = data.get('objects', [])
+                ds_meta = data.get("dataset", {})
+                objs = data.get("objects", [])
                 # Suggest unique dataset name derived from package's dataset.json
-                base_name = ds_meta.get('name') or self.tr('Imported Dataset')
+                base_name = ds_meta.get("name") or self.tr("Imported Dataset")
                 self.edtDatasetName.setText(self.suggest_unique_dataset_name(base_name))
                 self.edtObjectCount.setText(str(len(objs)))
-                if int(ds_meta.get('dimension', 2)) == 2:
+                if int(ds_meta.get("dimension", 2)) == 2:
                     self.rb2D.setChecked(True)
                 else:
                     self.rb3D.setChecked(True)
                 import_data = SimpleNamespace(
                     nobjects=len(objs),
-                    dimension=int(ds_meta.get('dimension', 2)),
-                    object_name_list=[o.get('name') for o in objs]
+                    dimension=int(ds_meta.get("dimension", 2)),
+                    object_name_list=[o.get("name") for o in objs],
                 )
             except Exception as e:
                 QMessageBox.critical(self, self.tr("Import"), self.tr("Failed to read package: ") + str(e))
@@ -6550,7 +6800,7 @@ class ImportDatasetDialog(QDialog):
             self.rbnNTS.setChecked(False)
             self.rbnX1Y1.setChecked(False)
             self.rbnMorphologika.setChecked(False)
-            if hasattr(self, 'rbnJSONZip'):
+            if hasattr(self, "rbnJSONZip"):
                 self.rbnJSONZip.setChecked(False)
             self.btnImport.setEnabled(False)
             self.edtObjectCount.setText("")
@@ -6564,16 +6814,15 @@ class ImportDatasetDialog(QDialog):
             if import_data.dimension == 2:
                 self.rb2D.setChecked(True)
             else:
-                self.rb3D.setChecked(True)              
+                self.rb3D.setChecked(True)
 
     def open_file(self):
         filename, _ = QFileDialog.getOpenFileName(self, "Open File", mu.USER_PROFILE_DIRECTORY, "All Files (*.*)")
         if filename:
             self.open_file2(filename)
-      
-            
-            #else:
-    
+
+            # else:
+
     def file_type_changed(self):
         pass
 
@@ -6590,11 +6839,10 @@ class ImportDatasetDialog(QDialog):
             return base_name
 
     def import_file(self):
-
         filename = self.edtFilename.text()
         filetype = self.chkFileType.checkedButton().text()
         datasetname = self.suggest_unique_dataset_name(self.edtDatasetName.text())
-        objectcount = self.edtObjectCount.text()
+        self.edtObjectCount.text()
         invertY = self.cbxInvertY.isChecked()
         import_data = None
         if filetype == "TPS":
@@ -6608,20 +6856,24 @@ class ImportDatasetDialog(QDialog):
         elif filetype == "JSON+ZIP":
             # progress
             self.prgImport.setValue(0)
+
             def cb(curr, total):
                 try:
-                    val = int((curr/float(total))*100) if total else 0
+                    val = int((curr / float(total)) * 100) if total else 0
                 except Exception:
                     val = 0
                 self.prgImport.setValue(val)
                 self.prgImport.update()
+
             try:
                 new_ds_id = mu.import_dataset_from_zip(filename, progress_callback=cb)
                 self.prgImport.setValue(100)
-                QMessageBox.information(self, self.tr("Import"), self.tr("Import completed (Dataset ID: ") + str(new_ds_id) + ")")
+                QMessageBox.information(
+                    self, self.tr("Import"), self.tr("Import completed (Dataset ID: ") + str(new_ds_id) + ")"
+                )
                 # After the user closes the message box, close dialog and refresh tree
                 try:
-                    if hasattr(self.parent, 'load_dataset'):
+                    if hasattr(self.parent, "load_dataset"):
                         self.parent.load_dataset()
                 except Exception:
                     pass
@@ -6640,7 +6892,7 @@ class ImportDatasetDialog(QDialog):
         self.prgImport.repaint()
 
         self.edtObjectCount.setText(str(import_data.nobjects))
-        #print("objects:", tps.nobjects,tps.nlandmarks,tps.object_name_list)
+        # print("objects:", tps.nobjects,tps.nlandmarks,tps.object_name_list)
         # create dataset
         dataset = MdDataset()
         dataset.dataset_name = datasetname
@@ -6651,36 +6903,35 @@ class ImportDatasetDialog(QDialog):
         if len(import_data.edge_list) > 0:
             dataset.edge_list = import_data.edge_list
             dataset.wireframe = dataset.pack_wireframe()
-            #dataset.pack_edge_str()
+            # dataset.pack_edge_str()
         dataset.save()
         # add objects
         for i in range(import_data.nobjects):
             object = MdObject()
             object.object_name = import_data.object_name_list[i]
             # see if import_data.ppmm_list exist
-            if hasattr(import_data, 'ppmm_list') and len(import_data.ppmm_list) > 0:
+            if hasattr(import_data, "ppmm_list") and len(import_data.ppmm_list) > 0:
                 if mu.is_numeric(import_data.ppmm_list[i]):
                     object.pixels_per_mm = float(import_data.ppmm_list[i])
                 else:
                     object.pixels_per_mm = None
-            #print("object:", object.object_name)
+            # print("object:", object.object_name)
             object.dataset = dataset
             object.landmark_str = ""
             landmark_list = []
-            #print("object_name", object.object_name, import_data.landmark_data.keys())
-            #if object.object_name in import_data.landmark_data.keys():
+            # print("object_name", object.object_name, import_data.landmark_data.keys())
+            # if object.object_name in import_data.landmark_data.keys():
             #    print("key exist")
-            #else:
+            # else:
             #    print("key not exist")
             for landmark in import_data.landmark_data[object.object_name]:
-                landmark_list.append("\t".join([ str(x) for x in landmark]))
+                landmark_list.append("\t".join([str(x) for x in landmark]))
             object.landmark_str = "\n".join(landmark_list)
             if len(import_data.variablename_list) > 0:
                 object.variable_list = import_data.property_list_list[i]
                 object.pack_variable()
             if object.object_name in import_data.object_comment.keys():
                 object.object_desc = import_data.object_comment[import_data.object_name_list[i]]
-            
 
             object.save()
             if object.object_name in import_data.object_images.keys():
@@ -6695,34 +6946,34 @@ class ImportDatasetDialog(QDialog):
                     new_image = MdImage()
                     new_image.object = object
                     new_image.load_file_info(file_name)
-                    new_filepath = new_image.get_file_path( self.m_app.storage_directory)
+                    new_filepath = new_image.get_file_path(self.m_app.storage_directory)
                     if not os.path.exists(os.path.dirname(new_filepath)):
                         os.makedirs(os.path.dirname(new_filepath))
                     shutil.copyfile(file_name, new_filepath)
                     new_image.save()
 
-            val = int( float(i+1)*100.0 / float(import_data.nobjects) )
-            #print("progress:", i+1, tps.nobjects, val)
+            val = int(float(i + 1) * 100.0 / float(import_data.nobjects))
+            # print("progress:", i+1, tps.nobjects, val)
             self.update_progress(val)
-            #progress = int( (i / float(tps.nobjects)) * 100)
+            # progress = int( (i / float(tps.nobjects)) * 100)
 
-        #print("tps import done")
+        # print("tps import done")
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Information)
 
         msg.setText(self.tr(f"Finished importing a {filetype} file."))
         msg.setStandardButtons(QMessageBox.Ok)
-            
-        retval = msg.exec_()
+
+        msg.exec_()
         try:
-            if hasattr(self.parent, 'load_dataset'):
+            if hasattr(self.parent, "load_dataset"):
                 self.parent.load_dataset()
         except Exception:
             pass
         self.close()
         # add dataset to project
-        #self.parent.parent.project.datasets.append(dataset)
-        #self.parent.parent.project.current_dataset = dataset
+        # self.parent.parent.project.datasets.append(dataset)
+        # self.parent.parent.project.current_dataset = dataset
 
     def update_progress(self, value):
         self.prgImport.setValue(value)
@@ -6731,8 +6982,9 @@ class ImportDatasetDialog(QDialog):
         self.prgImport.repaint()
         QApplication.processEvents()
 
+
 class PreferencesDialog(QDialog):
-    '''
+    """
     PreferencesDialog shows preferences.
 
     Args:
@@ -6740,8 +6992,9 @@ class PreferencesDialog(QDialog):
 
     Attributes:
         well..
-    '''
-    def __init__(self,parent):
+    """
+
+    def __init__(self, parent):
         super().__init__()
         self.parent = parent
         self.m_app = QApplication.instance()
@@ -6753,22 +7006,24 @@ class PreferencesDialog(QDialog):
         self.m_app.plot_size = "medium"
 
         self.default_color_list = mu.VIVID_COLOR_LIST[:]
-        #['blue','green','black','cyan','magenta','yellow','gray','red']
+        # ['blue','green','black','cyan','magenta','yellow','gray','red']
         self.m_app.color_list = self.default_color_list[:]
         self.m_app.marker_list = mu.MARKER_LIST[:]
 
-        self.m_app.landmark_pref = {'2D':{'size':1,'color':'#0000FF'},'3D':{'size':1,'color':'#0000FF'}}
-        self.m_app.wireframe_pref = {'2D':{'thickness':1,'color':'#FFFF00'},'3D':{'thickness':1,'color':'#FFFF00'}}
-        self.m_app.index_pref = {'2D':{'size':1,'color':'#FFFFFF'},'3D':{'size':1,'color':'#FFFFFF'}}
-        self.m_app.bgcolor = '#AAAAAA'
-        #print("landmark_pref:", self.landmark_pref)
-        #print("wireframe_pref:", self.wireframe_pref)
+        self.m_app.landmark_pref = {"2D": {"size": 1, "color": "#0000FF"}, "3D": {"size": 1, "color": "#0000FF"}}
+        self.m_app.wireframe_pref = {
+            "2D": {"thickness": 1, "color": "#FFFF00"},
+            "3D": {"thickness": 1, "color": "#FFFF00"},
+        }
+        self.m_app.index_pref = {"2D": {"size": 1, "color": "#FFFFFF"}, "3D": {"size": 1, "color": "#FFFFFF"}}
+        self.m_app.bgcolor = "#AAAAAA"
+        # print("landmark_pref:", self.landmark_pref)
+        # print("wireframe_pref:", self.wireframe_pref)
 
-        
         self.setWindowTitle("Preferences")
-        #self.lbl_main_view.setMinimumSize(400, 300)
-        #print("landmark_pref:", self.landmark_pref)
-        #print("wireframe_pref:", self.wireframe_pref)
+        # self.lbl_main_view.setMinimumSize(400, 300)
+        # print("landmark_pref:", self.landmark_pref)
+        # print("wireframe_pref:", self.wireframe_pref)
 
         self.rbRememberGeometryYes = QRadioButton(self.tr("Yes"))
         self.rbRememberGeometryYes.setChecked(self.m_app.remember_geometry)
@@ -6782,7 +7037,6 @@ class PreferencesDialog(QDialog):
         self.gbRememberGeomegry.layout().addWidget(self.rbRememberGeometryYes)
         self.gbRememberGeomegry.layout().addWidget(self.rbRememberGeometryNo)
 
-        
         self.toolbar_icon_large = True if self.m_app.toolbar_icon_size.lower() == "large" else False
         self.rbToolbarIconLarge = QRadioButton(self.tr("Large"))
         self.rbToolbarIconLarge.setChecked(self.toolbar_icon_large)
@@ -6798,15 +7052,17 @@ class PreferencesDialog(QDialog):
         self.gb2DLandmarkPref.setLayout(QHBoxLayout())
         self.gb2DLandmarkPref.setTitle("2D")
         self.combo2DLandmarkSize = QComboBox()
-        self.combo2DLandmarkSize.addItems([self.tr("Small"),self.tr("Medium"),self.tr("Large")])
-        self.combo2DLandmarkSize.setCurrentIndex(int(self.m_app.landmark_pref['2D']['size']))
+        self.combo2DLandmarkSize.addItems([self.tr("Small"), self.tr("Medium"), self.tr("Large")])
+        self.combo2DLandmarkSize.setCurrentIndex(int(self.m_app.landmark_pref["2D"]["size"]))
         self.lbl2DLandmarkColor = QPushButton()
-        self.lbl2DLandmarkColor.setMinimumSize(20,20)
-        self.lbl2DLandmarkColor.setStyleSheet("background-color: " + self.m_app.landmark_pref['2D']['color'])
-        self.lbl2DLandmarkColor.setToolTip(self.m_app.landmark_pref['2D']['color'])
+        self.lbl2DLandmarkColor.setMinimumSize(20, 20)
+        self.lbl2DLandmarkColor.setStyleSheet("background-color: " + self.m_app.landmark_pref["2D"]["color"])
+        self.lbl2DLandmarkColor.setToolTip(self.m_app.landmark_pref["2D"]["color"])
         self.lbl2DLandmarkColor.setCursor(Qt.PointingHandCursor)
-        self.lbl2DLandmarkColor.mousePressEvent = lambda event, dim='2D': self.on_lblLmColor_clicked(event, '2D')
-        self.combo2DLandmarkSize.currentIndexChanged.connect(lambda event, dim='2D': self.on_comboLmSize_currentIndexChanged(event, '2D'))
+        self.lbl2DLandmarkColor.mousePressEvent = lambda event, dim="2D": self.on_lblLmColor_clicked(event, "2D")
+        self.combo2DLandmarkSize.currentIndexChanged.connect(
+            lambda event, dim="2D": self.on_comboLmSize_currentIndexChanged(event, "2D")
+        )
 
         self.gb2DLandmarkPref.layout().addWidget(self.combo2DLandmarkSize)
         self.gb2DLandmarkPref.layout().addWidget(self.lbl2DLandmarkColor)
@@ -6815,15 +7071,17 @@ class PreferencesDialog(QDialog):
         self.gb3DLandmarkPref.setLayout(QHBoxLayout())
         self.gb3DLandmarkPref.setTitle(self.tr("3D"))
         self.combo3DLandmarkSize = QComboBox()
-        self.combo3DLandmarkSize.addItems([self.tr("Small"),self.tr("Medium"),self.tr("Large")])
-        self.combo3DLandmarkSize.setCurrentIndex(int(self.m_app.landmark_pref['3D']['size']))
+        self.combo3DLandmarkSize.addItems([self.tr("Small"), self.tr("Medium"), self.tr("Large")])
+        self.combo3DLandmarkSize.setCurrentIndex(int(self.m_app.landmark_pref["3D"]["size"]))
         self.lbl3DLandmarkColor = QPushButton()
-        self.lbl3DLandmarkColor.setMinimumSize(20,20)
-        self.lbl3DLandmarkColor.setStyleSheet("background-color: " + self.m_app.landmark_pref['3D']['color'])
-        self.lbl3DLandmarkColor.setToolTip(self.m_app.landmark_pref['3D']['color'])
+        self.lbl3DLandmarkColor.setMinimumSize(20, 20)
+        self.lbl3DLandmarkColor.setStyleSheet("background-color: " + self.m_app.landmark_pref["3D"]["color"])
+        self.lbl3DLandmarkColor.setToolTip(self.m_app.landmark_pref["3D"]["color"])
         self.lbl3DLandmarkColor.setCursor(Qt.PointingHandCursor)
-        self.lbl3DLandmarkColor.mousePressEvent = lambda event, dim='3D': self.on_lblLmColor_clicked(event, '3D')
-        self.combo3DLandmarkSize.currentIndexChanged.connect(lambda event, dim='3D': self.on_comboLmSize_currentIndexChanged(event, '3D'))
+        self.lbl3DLandmarkColor.mousePressEvent = lambda event, dim="3D": self.on_lblLmColor_clicked(event, "3D")
+        self.combo3DLandmarkSize.currentIndexChanged.connect(
+            lambda event, dim="3D": self.on_comboLmSize_currentIndexChanged(event, "3D")
+        )
 
         self.gb3DLandmarkPref.layout().addWidget(self.combo3DLandmarkSize)
         self.gb3DLandmarkPref.layout().addWidget(self.lbl3DLandmarkColor)
@@ -6838,15 +7096,19 @@ class PreferencesDialog(QDialog):
         self.gb2DWireframePref.setLayout(QHBoxLayout())
         self.gb2DWireframePref.setTitle(self.tr("2D"))
         self.combo2DWireframeThickness = QComboBox()
-        self.combo2DWireframeThickness.addItems([self.tr("Thin"),self.tr("Medium"),self.tr("Thick")])
-        self.combo2DWireframeThickness.setCurrentIndex(int(self.m_app.wireframe_pref['2D']['thickness']))
+        self.combo2DWireframeThickness.addItems([self.tr("Thin"), self.tr("Medium"), self.tr("Thick")])
+        self.combo2DWireframeThickness.setCurrentIndex(int(self.m_app.wireframe_pref["2D"]["thickness"]))
         self.lbl2DWireframeColor = QPushButton()
-        self.lbl2DWireframeColor.setMinimumSize(20,20)
-        self.lbl2DWireframeColor.setStyleSheet("background-color: " + self.m_app.wireframe_pref['2D']['color'])
-        self.lbl2DWireframeColor.setToolTip(self.m_app.wireframe_pref['2D']['color'])
+        self.lbl2DWireframeColor.setMinimumSize(20, 20)
+        self.lbl2DWireframeColor.setStyleSheet("background-color: " + self.m_app.wireframe_pref["2D"]["color"])
+        self.lbl2DWireframeColor.setToolTip(self.m_app.wireframe_pref["2D"]["color"])
         self.lbl2DWireframeColor.setCursor(Qt.PointingHandCursor)
-        self.lbl2DWireframeColor.mousePressEvent = lambda event, dim='2D': self.on_lblWireframeColor_clicked(event, '2D')
-        self.combo2DWireframeThickness.currentIndexChanged.connect(lambda event, dim='2D': self.on_comboWireframeThickness_currentIndexChanged(event, '2D'))
+        self.lbl2DWireframeColor.mousePressEvent = lambda event, dim="2D": self.on_lblWireframeColor_clicked(
+            event, "2D"
+        )
+        self.combo2DWireframeThickness.currentIndexChanged.connect(
+            lambda event, dim="2D": self.on_comboWireframeThickness_currentIndexChanged(event, "2D")
+        )
 
         self.gb2DWireframePref.layout().addWidget(self.combo2DWireframeThickness)
         self.gb2DWireframePref.layout().addWidget(self.lbl2DWireframeColor)
@@ -6855,15 +7117,19 @@ class PreferencesDialog(QDialog):
         self.gb3DWireframePref.setLayout(QHBoxLayout())
         self.gb3DWireframePref.setTitle(self.tr("3D"))
         self.combo3DWireframeThickness = QComboBox()
-        self.combo3DWireframeThickness.addItems([self.tr("Thin"),self.tr("Medium"),self.tr("Thick")])
-        self.combo3DWireframeThickness.setCurrentIndex(int(self.m_app.wireframe_pref['3D']['thickness']))
+        self.combo3DWireframeThickness.addItems([self.tr("Thin"), self.tr("Medium"), self.tr("Thick")])
+        self.combo3DWireframeThickness.setCurrentIndex(int(self.m_app.wireframe_pref["3D"]["thickness"]))
         self.lbl3DWireframeColor = QPushButton()
-        self.lbl3DWireframeColor.setMinimumSize(20,20)
-        self.lbl3DWireframeColor.setStyleSheet("background-color: " + self.m_app.wireframe_pref['3D']['color'])
-        self.lbl3DWireframeColor.setToolTip(self.m_app.wireframe_pref['3D']['color'])
+        self.lbl3DWireframeColor.setMinimumSize(20, 20)
+        self.lbl3DWireframeColor.setStyleSheet("background-color: " + self.m_app.wireframe_pref["3D"]["color"])
+        self.lbl3DWireframeColor.setToolTip(self.m_app.wireframe_pref["3D"]["color"])
         self.lbl3DWireframeColor.setCursor(Qt.PointingHandCursor)
-        self.lbl3DWireframeColor.mousePressEvent = lambda event, dim='3D': self.on_lblWireframeColor_clicked(event, '3D')
-        self.combo3DWireframeThickness.currentIndexChanged.connect(lambda event, dim='3D': self.on_comboWireframeThickness_currentIndexChanged(event, '3D'))
+        self.lbl3DWireframeColor.mousePressEvent = lambda event, dim="3D": self.on_lblWireframeColor_clicked(
+            event, "3D"
+        )
+        self.combo3DWireframeThickness.currentIndexChanged.connect(
+            lambda event, dim="3D": self.on_comboWireframeThickness_currentIndexChanged(event, "3D")
+        )
 
         self.gb3DWireframePref.layout().addWidget(self.combo3DWireframeThickness)
         self.gb3DWireframePref.layout().addWidget(self.lbl3DWireframeColor)
@@ -6878,15 +7144,17 @@ class PreferencesDialog(QDialog):
         self.gb2DIndexPref.setLayout(QHBoxLayout())
         self.gb2DIndexPref.setTitle(self.tr("2D"))
         self.combo2DIndexSize = QComboBox()
-        self.combo2DIndexSize.addItems([self.tr("Small"),self.tr("Medium"),self.tr("Large")])
-        self.combo2DIndexSize.setCurrentIndex(int(self.m_app.index_pref['2D']['size']))
+        self.combo2DIndexSize.addItems([self.tr("Small"), self.tr("Medium"), self.tr("Large")])
+        self.combo2DIndexSize.setCurrentIndex(int(self.m_app.index_pref["2D"]["size"]))
         self.lbl2DIndexColor = QPushButton()
-        self.lbl2DIndexColor.setMinimumSize(20,20)
-        self.lbl2DIndexColor.setStyleSheet("background-color: " + self.m_app.index_pref['2D']['color'])
-        self.lbl2DIndexColor.setToolTip(self.m_app.index_pref['2D']['color'])
+        self.lbl2DIndexColor.setMinimumSize(20, 20)
+        self.lbl2DIndexColor.setStyleSheet("background-color: " + self.m_app.index_pref["2D"]["color"])
+        self.lbl2DIndexColor.setToolTip(self.m_app.index_pref["2D"]["color"])
         self.lbl2DIndexColor.setCursor(Qt.PointingHandCursor)
-        self.lbl2DIndexColor.mousePressEvent = lambda event, dim='2D': self.on_lblIndexColor_clicked(event, '2D')
-        self.combo2DIndexSize.currentIndexChanged.connect(lambda event, dim='2D': self.on_comboIndexSize_currentIndexChanged(event, '2D'))
+        self.lbl2DIndexColor.mousePressEvent = lambda event, dim="2D": self.on_lblIndexColor_clicked(event, "2D")
+        self.combo2DIndexSize.currentIndexChanged.connect(
+            lambda event, dim="2D": self.on_comboIndexSize_currentIndexChanged(event, "2D")
+        )
 
         self.gb2DIndexPref.layout().addWidget(self.combo2DIndexSize)
         self.gb2DIndexPref.layout().addWidget(self.lbl2DIndexColor)
@@ -6895,15 +7163,17 @@ class PreferencesDialog(QDialog):
         self.gb3DIndexPref.setLayout(QHBoxLayout())
         self.gb3DIndexPref.setTitle(self.tr("3D"))
         self.combo3DIndexSize = QComboBox()
-        self.combo3DIndexSize.addItems([self.tr("Small"),self.tr("Medium"),self.tr("Large")])
-        self.combo3DIndexSize.setCurrentIndex(int(self.m_app.index_pref['3D']['size']))
+        self.combo3DIndexSize.addItems([self.tr("Small"), self.tr("Medium"), self.tr("Large")])
+        self.combo3DIndexSize.setCurrentIndex(int(self.m_app.index_pref["3D"]["size"]))
         self.lbl3DIndexColor = QPushButton()
-        self.lbl3DIndexColor.setMinimumSize(20,20)
-        self.lbl3DIndexColor.setStyleSheet("background-color: " + self.m_app.index_pref['3D']['color'])
-        self.lbl3DIndexColor.setToolTip(self.m_app.index_pref['3D']['color'])
+        self.lbl3DIndexColor.setMinimumSize(20, 20)
+        self.lbl3DIndexColor.setStyleSheet("background-color: " + self.m_app.index_pref["3D"]["color"])
+        self.lbl3DIndexColor.setToolTip(self.m_app.index_pref["3D"]["color"])
         self.lbl3DIndexColor.setCursor(Qt.PointingHandCursor)
-        self.lbl3DIndexColor.mousePressEvent = lambda event, dim='3D': self.on_lblIndexColor_clicked(event, '3D')
-        self.combo3DIndexSize.currentIndexChanged.connect(lambda event, dim='3D': self.on_comboIndexSize_currentIndexChanged(event, '3D'))
+        self.lbl3DIndexColor.mousePressEvent = lambda event, dim="3D": self.on_lblIndexColor_clicked(event, "3D")
+        self.combo3DIndexSize.currentIndexChanged.connect(
+            lambda event, dim="3D": self.on_comboIndexSize_currentIndexChanged(event, "3D")
+        )
 
         self.gb3DIndexPref.layout().addWidget(self.combo3DIndexSize)
         self.gb3DIndexPref.layout().addWidget(self.lbl3DIndexColor)
@@ -6915,12 +7185,11 @@ class PreferencesDialog(QDialog):
         self.index_widget.setLayout(self.index_layout)
 
         self.lblBgcolor = QPushButton()
-        self.lblBgcolor.setMinimumSize(20,20)
+        self.lblBgcolor.setMinimumSize(20, 20)
         self.lblBgcolor.setStyleSheet("background-color: " + self.m_app.bgcolor)
         self.lblBgcolor.setToolTip(self.m_app.bgcolor)
         self.lblBgcolor.setCursor(Qt.PointingHandCursor)
         self.lblBgcolor.mousePressEvent = lambda event: self.on_lblBgcolor_clicked(event)
-
 
         self.gbToolbarIconSize = QGroupBox()
         self.gbToolbarIconSize.setLayout(QHBoxLayout())
@@ -6932,7 +7201,7 @@ class PreferencesDialog(QDialog):
         self.gbPlotColors.setLayout(QGridLayout())
         self.gbPlotMarkers = QGroupBox()
         self.gbPlotMarkers.setLayout(QHBoxLayout())
-        #symbol_candidate = ['o','s','^','x','+','d','v','<','>','p','h']
+        # symbol_candidate = ['o','s','^','x','+','d','v','<','>','p','h']
 
         self.rbPlotLarge = QRadioButton(self.tr("Large"))
         self.rbPlotLarge.setChecked(self.m_app.plot_size.lower() == "large")
@@ -6953,47 +7222,49 @@ class PreferencesDialog(QDialog):
         self.btnResetMarkers = QPushButton()
         self.btnResetMarkers.setText(self.tr("Reset"))
         self.btnResetMarkers.clicked.connect(self.on_btnResetMarkers_clicked)
-        self.btnResetMarkers.setMinimumSize(60,20)
-        self.btnResetMarkers.setMaximumSize(100,20)
+        self.btnResetMarkers.setMinimumSize(60, 20)
+        self.btnResetMarkers.setMaximumSize(100, 20)
 
         self.comboMarker_list = []
         for i in range(len(self.m_app.marker_list)):
             self.comboMarker_list.append(QComboBox())
             self.comboMarker_list[i].addItems(mu.MARKER_LIST)
             self.comboMarker_list[i].setCurrentIndex(mu.MARKER_LIST.index(self.m_app.marker_list[i]))
-            self.comboMarker_list[i].currentIndexChanged.connect(lambda event, index=i: self.on_comboMarker_currentIndexChanged(event, index))
+            self.comboMarker_list[i].currentIndexChanged.connect(
+                lambda event, index=i: self.on_comboMarker_currentIndexChanged(event, index)
+            )
             self.gbPlotMarkers.layout().addWidget(self.comboMarker_list[i])
         self.gbPlotMarkers.layout().addWidget(self.btnResetMarkers)
 
         self.btnResetVivid = QPushButton()
         self.btnResetVivid.setText(self.tr("Vivid"))
         self.btnResetVivid.clicked.connect(self.on_btnResetVivid_clicked)
-        self.btnResetVivid.setMinimumSize(60,20)
-        self.btnResetVivid.setMaximumSize(100,20)
+        self.btnResetVivid.setMinimumSize(60, 20)
+        self.btnResetVivid.setMaximumSize(100, 20)
         self.btnResetPastel = QPushButton()
         self.btnResetPastel.setText(self.tr("Pastel"))
         self.btnResetPastel.clicked.connect(self.on_btnResetPastel_clicked)
-        self.btnResetPastel.setMinimumSize(60,20)
-        self.btnResetPastel.setMaximumSize(100,20)
+        self.btnResetPastel.setMinimumSize(60, 20)
+        self.btnResetPastel.setMaximumSize(100, 20)
 
         self.lblColor_list = []
         for i in range(len(self.m_app.color_list)):
             self.lblColor_list.append(QPushButton())
-            self.lblColor_list[i].setMinimumSize(20,20)
-            #self.lblColor_list[i].setMaximumSize(20,20)
+            self.lblColor_list[i].setMinimumSize(20, 20)
+            # self.lblColor_list[i].setMaximumSize(20,20)
             self.lblColor_list[i].setStyleSheet("background-color: " + self.m_app.color_list[i])
             self.lblColor_list[i].setToolTip(self.m_app.color_list[i])
             self.lblColor_list[i].setCursor(Qt.PointingHandCursor)
-            self.lblColor_list[i].setText(str(i+1))
-            #self.lblColor_list[i].mousePressEvent = self.on_lblColor_clicked
+            self.lblColor_list[i].setText(str(i + 1))
+            # self.lblColor_list[i].mousePressEvent = self.on_lblColor_clicked
             self.lblColor_list[i].mousePressEvent = lambda event, index=i: self.on_lblColor_clicked(event, index)
-            #self.gbPlotColors.layout().addWidget(self.lblColor_list[i])
+            # self.gbPlotColors.layout().addWidget(self.lblColor_list[i])
             # put into layout in two rows
-            self.gbPlotColors.layout().addWidget(self.lblColor_list[i], i//10, i%10)
+            self.gbPlotColors.layout().addWidget(self.lblColor_list[i], i // 10, i % 10)
 
-        #self.gbPlotColors.layout().addWidget(self.rbToolbarIconSmall)
-        self.gbPlotColors.layout().addWidget(self.btnResetVivid,0,10)
-        self.gbPlotColors.layout().addWidget(self.btnResetPastel,1,10)
+        # self.gbPlotColors.layout().addWidget(self.rbToolbarIconSmall)
+        self.gbPlotColors.layout().addWidget(self.btnResetVivid, 0, 10)
+        self.gbPlotColors.layout().addWidget(self.btnResetPastel, 1, 10)
 
         self.lang_layout = QHBoxLayout()
         self.comboLang = QComboBox()
@@ -7007,7 +7278,6 @@ class PreferencesDialog(QDialog):
         self.lang_layout.addWidget(self.comboLang)
         self.lang_widget = QWidget()
         self.lang_widget.setLayout(self.lang_layout)
-
 
         self.btnOkay = QPushButton()
         self.btnOkay.setText(self.tr("Close"))
@@ -7052,7 +7322,7 @@ class PreferencesDialog(QDialog):
 
         if self.m_app.translator is not None:
             self.m_app.removeTranslator(self.m_app.translator)
-            #print("removed translator")
+            # print("removed translator")
             self.m_app.translator = None
         else:
             pass
@@ -7067,25 +7337,26 @@ class PreferencesDialog(QDialog):
 
         self.update_language()
 
-
     def on_comboMarker_currentIndexChanged(self, event, index):
         self.current_lblMarker = self.comboMarker_list[index]
-        self.m_app.marker_list[self.comboMarker_list.index(self.current_lblMarker)] = self.current_lblMarker.currentText()
-        #print(self.marker_list)
+        self.m_app.marker_list[self.comboMarker_list.index(self.current_lblMarker)] = (
+            self.current_lblMarker.currentText()
+        )
+        # print(self.marker_list)
 
-    def on_lblColor_clicked(self,event, index):
+    def on_lblColor_clicked(self, event, index):
         self.current_lblColor = self.lblColor_list[index]
-        #dialog = ColorPickerDialog(color=QColor(self.current_lblColor.toolTip()))
+        # dialog = ColorPickerDialog(color=QColor(self.current_lblColor.toolTip()))
         dialog = QColorDialog()
-        color = dialog.getColor(initial=QColor(self.current_lblColor.toolTip())) # return type is QColor
-        #print("color: ", color)
+        color = dialog.getColor(initial=QColor(self.current_lblColor.toolTip()))  # return type is QColor
+        # print("color: ", color)
         if color is not None:
             self.current_lblColor.setStyleSheet("background-color: " + color.name())
             self.current_lblColor.setToolTip(color.name())
             self.m_app.color_list[self.lblColor_list.index(self.current_lblColor)] = color.name()
-            #print(self.color_list)
+            # print(self.color_list)
 
-    def on_lblBgcolor_clicked(self,event):
+    def on_lblBgcolor_clicked(self, event):
         dialog = QColorDialog()
         color = dialog.getColor(initial=QColor(self.m_app.bgcolor))
         if color is not None:
@@ -7095,72 +7366,74 @@ class PreferencesDialog(QDialog):
         self.parent.update_settings()
 
     def on_comboLmSize_currentIndexChanged(self, event, dim):
-        if dim == '2D':
+        if dim == "2D":
             self.current_comboLmSize = self.combo2DLandmarkSize
-        elif dim == '3D':
+        elif dim == "3D":
             self.current_comboLmSize = self.combo3DLandmarkSize
-        self.m_app.landmark_pref[dim]['size'] = self.current_comboLmSize.currentIndex()
+        self.m_app.landmark_pref[dim]["size"] = self.current_comboLmSize.currentIndex()
         self.parent.update_settings()
 
-    def on_lblLmColor_clicked(self,event, dim):
-        if dim == '2D':
+    def on_lblLmColor_clicked(self, event, dim):
+        if dim == "2D":
             self.current_lblLmColor = self.lbl2DLandmarkColor
-        elif dim == '3D':
+        elif dim == "3D":
             self.current_lblLmColor = self.lbl3DLandmarkColor
         dialog = QColorDialog()
         color = dialog.getColor(initial=QColor(self.current_lblLmColor.toolTip()))
         if color is not None:
             self.current_lblLmColor.setStyleSheet("background-color: " + color.name())
             self.current_lblLmColor.setToolTip(color.name())
-            self.m_app.landmark_pref[dim]['color'] = color.name()
+            self.m_app.landmark_pref[dim]["color"] = color.name()
         self.parent.update_settings()
 
     def on_comboIndexSize_currentIndexChanged(self, event, dim):
-        if dim == '2D':
+        if dim == "2D":
             self.current_comboIndexSize = self.combo2DIndexSize
-        elif dim == '3D':
+        elif dim == "3D":
             self.current_comboIndexSize = self.combo3DIndexSize
-        self.m_app.index_pref[dim]['size'] = self.current_comboIndexSize.currentIndex()
+        self.m_app.index_pref[dim]["size"] = self.current_comboIndexSize.currentIndex()
         self.parent.update_settings()
 
-    def on_lblIndexColor_clicked(self,event, dim):
-        if dim == '2D':
+    def on_lblIndexColor_clicked(self, event, dim):
+        if dim == "2D":
             self.current_lblIndexColor = self.lbl2DIndexColor
-        elif dim == '3D':
+        elif dim == "3D":
             self.current_lblIndexColor = self.lbl3DIndexColor
         dialog = QColorDialog()
         color = dialog.getColor(initial=QColor(self.current_lblIndexColor.toolTip()))
         if color is not None:
             self.current_lblIndexColor.setStyleSheet("background-color: " + color.name())
             self.current_lblIndexColor.setToolTip(color.name())
-            self.m_app.index_pref[dim]['color'] = color.name()
+            self.m_app.index_pref[dim]["color"] = color.name()
         self.parent.update_settings()
 
     def on_comboWireframeThickness_currentIndexChanged(self, event, dim):
-        if dim == '2D':
+        if dim == "2D":
             self.current_comboWireframeThickness = self.combo2DWireframeThickness
-        elif dim == '3D':
+        elif dim == "3D":
             self.current_comboWireframeThickness = self.combo3DWireframeThickness
-        self.m_app.wireframe_pref[dim]['thickness'] = self.current_comboWireframeThickness.currentIndex()
+        self.m_app.wireframe_pref[dim]["thickness"] = self.current_comboWireframeThickness.currentIndex()
         self.parent.update_settings()
 
-    def on_lblWireframeColor_clicked(self,event, dim):
-        if dim == '2D':
+    def on_lblWireframeColor_clicked(self, event, dim):
+        if dim == "2D":
             self.current_lblWireframeColor = self.lbl2DWireframeColor
-        elif dim == '3D':
+        elif dim == "3D":
             self.current_lblWireframeColor = self.lbl3DWireframeColor
         dialog = QColorDialog()
         color = dialog.getColor(initial=QColor(self.current_lblWireframeColor.toolTip()))
         if color is not None:
             self.current_lblWireframeColor.setStyleSheet("background-color: " + color.name())
             self.current_lblWireframeColor.setToolTip(color.name())
-            self.m_app.wireframe_pref[dim]['color'] = color.name()
+            self.m_app.wireframe_pref[dim]["color"] = color.name()
         self.parent.update_settings()
 
     def read_settings(self):
-        self.m_app.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
+        self.m_app.remember_geometry = mu.value_to_bool(
+            self.m_app.settings.value("WindowGeometry/RememberGeometry", True)
+        )
         self.m_app.toolbar_icon_size = self.m_app.settings.value("ToolbarIconSize", "Medium")
-        #print("toolbar_icon_size:", self.m_app.toolbar_icon_size)
+        # print("toolbar_icon_size:", self.m_app.toolbar_icon_size)
         if self.m_app.toolbar_icon_size.lower() == "small":
             self.toolbar_icon_small = True
             self.toolbar_icon_large = False
@@ -7175,64 +7448,90 @@ class PreferencesDialog(QDialog):
             self.toolbar_icon_large = True
 
         for i in range(len(self.m_app.color_list)):
-            self.m_app.color_list[i] = self.m_app.settings.value("DataPointColor/"+str(i), self.default_color_list[i])
+            self.m_app.color_list[i] = self.m_app.settings.value("DataPointColor/" + str(i), self.default_color_list[i])
 
         for i in range(len(self.m_app.marker_list)):
-            self.m_app.marker_list[i] = self.m_app.settings.value("DataPointMarker/"+str(i), self.m_app.marker_list[i])
+            self.m_app.marker_list[i] = self.m_app.settings.value(
+                "DataPointMarker/" + str(i), self.m_app.marker_list[i]
+            )
         self.m_app.plot_size = self.m_app.settings.value("PlotSize", self.m_app.plot_size)
 
-        self.m_app.landmark_pref['2D']['size'] = self.m_app.settings.value("LandmarkSize/2D", self.m_app.landmark_pref['2D']['size'])
-        self.m_app.landmark_pref['2D']['color'] = self.m_app.settings.value("LandmarkColor/2D", self.m_app.landmark_pref['2D']['color'])
-        self.m_app.landmark_pref['3D']['size'] = self.m_app.settings.value("LandmarkSize/3D", self.m_app.landmark_pref['3D']['size'])
-        self.m_app.landmark_pref['3D']['color'] = self.m_app.settings.value("LandmarkColor/3D", self.m_app.landmark_pref['3D']['color'])
-        self.m_app.wireframe_pref['2D']['thickness'] = self.m_app.settings.value("WireframeThickness/2D", self.m_app.wireframe_pref['2D']['thickness'])
-        self.m_app.wireframe_pref['2D']['color'] = self.m_app.settings.value("WireframeColor/2D", self.m_app.wireframe_pref['2D']['color'])
-        self.m_app.wireframe_pref['3D']['thickness'] = self.m_app.settings.value("WireframeThickness/3D", self.m_app.wireframe_pref['3D']['thickness'])
-        self.m_app.wireframe_pref['3D']['color'] = self.m_app.settings.value("WireframeColor/3D", self.m_app.wireframe_pref['3D']['color'])
-        self.m_app.index_pref['2D']['size'] = self.m_app.settings.value("IndexSize/2D", self.m_app.index_pref['2D']['size'])
-        self.m_app.index_pref['2D']['color'] = self.m_app.settings.value("IndexColor/2D", self.m_app.index_pref['2D']['color'])
-        self.m_app.index_pref['3D']['size'] = self.m_app.settings.value("IndexSize/3D", self.m_app.index_pref['3D']['size'])
-        self.m_app.index_pref['3D']['color'] = self.m_app.settings.value("IndexColor/3D", self.m_app.index_pref['3D']['color'])
+        self.m_app.landmark_pref["2D"]["size"] = self.m_app.settings.value(
+            "LandmarkSize/2D", self.m_app.landmark_pref["2D"]["size"]
+        )
+        self.m_app.landmark_pref["2D"]["color"] = self.m_app.settings.value(
+            "LandmarkColor/2D", self.m_app.landmark_pref["2D"]["color"]
+        )
+        self.m_app.landmark_pref["3D"]["size"] = self.m_app.settings.value(
+            "LandmarkSize/3D", self.m_app.landmark_pref["3D"]["size"]
+        )
+        self.m_app.landmark_pref["3D"]["color"] = self.m_app.settings.value(
+            "LandmarkColor/3D", self.m_app.landmark_pref["3D"]["color"]
+        )
+        self.m_app.wireframe_pref["2D"]["thickness"] = self.m_app.settings.value(
+            "WireframeThickness/2D", self.m_app.wireframe_pref["2D"]["thickness"]
+        )
+        self.m_app.wireframe_pref["2D"]["color"] = self.m_app.settings.value(
+            "WireframeColor/2D", self.m_app.wireframe_pref["2D"]["color"]
+        )
+        self.m_app.wireframe_pref["3D"]["thickness"] = self.m_app.settings.value(
+            "WireframeThickness/3D", self.m_app.wireframe_pref["3D"]["thickness"]
+        )
+        self.m_app.wireframe_pref["3D"]["color"] = self.m_app.settings.value(
+            "WireframeColor/3D", self.m_app.wireframe_pref["3D"]["color"]
+        )
+        self.m_app.index_pref["2D"]["size"] = self.m_app.settings.value(
+            "IndexSize/2D", self.m_app.index_pref["2D"]["size"]
+        )
+        self.m_app.index_pref["2D"]["color"] = self.m_app.settings.value(
+            "IndexColor/2D", self.m_app.index_pref["2D"]["color"]
+        )
+        self.m_app.index_pref["3D"]["size"] = self.m_app.settings.value(
+            "IndexSize/3D", self.m_app.index_pref["3D"]["size"]
+        )
+        self.m_app.index_pref["3D"]["color"] = self.m_app.settings.value(
+            "IndexColor/3D", self.m_app.index_pref["3D"]["color"]
+        )
         self.m_app.bgcolor = self.m_app.settings.value("BackgroundColor", self.m_app.bgcolor)
         self.m_app.language = self.m_app.settings.value("Language", "en")
-        #print("read language:", self.m_app.language)
+        # print("read language:", self.m_app.language)
         self.update_language()
 
         if self.m_app.remember_geometry is True:
             self.setGeometry(self.m_app.settings.value("WindowGeometry/PreferencesDialog", QRect(100, 100, 600, 400)))
         else:
             self.setGeometry(QRect(100, 100, 600, 400))
-            self.move(self.parent.pos()+QPoint(100,100))
+            self.move(self.parent.pos() + QPoint(100, 100))
 
     def write_settings(self):
         self.m_app.settings.setValue("ToolbarIconSize", self.m_app.toolbar_icon_size)
         self.m_app.settings.setValue("PlotSize", self.m_app.plot_size)
         self.m_app.settings.setValue("WindowGeometry/RememberGeometry", self.m_app.remember_geometry)
-        #print(self.color_list)
+        # print(self.color_list)
         for i in range(len(self.m_app.marker_list)):
-            self.m_app.settings.setValue("DataPointMarker/"+str(i), self.m_app.marker_list[i])
+            self.m_app.settings.setValue("DataPointMarker/" + str(i), self.m_app.marker_list[i])
 
         for i in range(len(self.m_app.color_list)):
-            self.m_app.settings.setValue("DataPointColor/"+str(i), self.m_app.color_list[i])
+            self.m_app.settings.setValue("DataPointColor/" + str(i), self.m_app.color_list[i])
 
         if self.m_app.remember_geometry is True:
             self.m_app.settings.setValue("WindowGeometry/PreferencesDialog", self.geometry())
 
-        self.m_app.settings.setValue("LandmarkSize/2D", self.m_app.landmark_pref['2D']['size'])
-        self.m_app.settings.setValue("LandmarkColor/2D", self.m_app.landmark_pref['2D']['color'])
-        self.m_app.settings.setValue("LandmarkSize/3D", self.m_app.landmark_pref['3D']['size'])
-        self.m_app.settings.setValue("LandmarkColor/3D", self.m_app.landmark_pref['3D']['color'])
-        self.m_app.settings.setValue("WireframeThickness/2D", self.m_app.wireframe_pref['2D']['thickness'])
-        self.m_app.settings.setValue("WireframeColor/2D", self.m_app.wireframe_pref['2D']['color'])
-        self.m_app.settings.setValue("WireframeThickness/3D", self.m_app.wireframe_pref['3D']['thickness'])
-        self.m_app.settings.setValue("WireframeColor/3D", self.m_app.wireframe_pref['3D']['color'])
+        self.m_app.settings.setValue("LandmarkSize/2D", self.m_app.landmark_pref["2D"]["size"])
+        self.m_app.settings.setValue("LandmarkColor/2D", self.m_app.landmark_pref["2D"]["color"])
+        self.m_app.settings.setValue("LandmarkSize/3D", self.m_app.landmark_pref["3D"]["size"])
+        self.m_app.settings.setValue("LandmarkColor/3D", self.m_app.landmark_pref["3D"]["color"])
+        self.m_app.settings.setValue("WireframeThickness/2D", self.m_app.wireframe_pref["2D"]["thickness"])
+        self.m_app.settings.setValue("WireframeColor/2D", self.m_app.wireframe_pref["2D"]["color"])
+        self.m_app.settings.setValue("WireframeThickness/3D", self.m_app.wireframe_pref["3D"]["thickness"])
+        self.m_app.settings.setValue("WireframeColor/3D", self.m_app.wireframe_pref["3D"]["color"])
         self.m_app.settings.setValue("BackgroundColor", self.m_app.bgcolor)
-        self.m_app.settings.setValue("IndexSize/2D", self.m_app.index_pref['2D']['size'])
-        self.m_app.settings.setValue("IndexColor/2D", self.m_app.index_pref['2D']['color'])
-        self.m_app.settings.setValue("IndexSize/3D", self.m_app.index_pref['3D']['size'])
-        self.m_app.settings.setValue("IndexColor/3D", self.m_app.index_pref['3D']['color'])
+        self.m_app.settings.setValue("IndexSize/2D", self.m_app.index_pref["2D"]["size"])
+        self.m_app.settings.setValue("IndexColor/2D", self.m_app.index_pref["2D"]["color"])
+        self.m_app.settings.setValue("IndexSize/3D", self.m_app.index_pref["3D"]["size"])
+        self.m_app.settings.setValue("IndexColor/3D", self.m_app.index_pref["3D"]["color"])
         self.m_app.settings.setValue("Language", self.m_app.language)
-        #print("write language:", self.m_app.language)
+        # print("write language:", self.m_app.language)
 
     def update_language(self):
         """
@@ -7270,14 +7569,14 @@ class PreferencesDialog(QDialog):
         self.btnOkay.setText(self.tr("Okay"))
         self.btnCancel.setText(self.tr("Cancel"))
 
-        item_list = [ (self.tr("Small"), "Small" ), (self.tr("Medium"), "Medium"), (self.tr("Large"), "Large")]
+        item_list = [(self.tr("Small"), "Small"), (self.tr("Medium"), "Medium"), (self.tr("Large"), "Large")]
         for item in item_list:
             self.combo2DLandmarkSize.addItem(item[0], item[1])
             self.combo3DLandmarkSize.addItem(item[0], item[1])
             self.combo2DIndexSize.addItem(item[0], item[1])
             self.combo3DIndexSize.addItem(item[0], item[1])
 
-        item_list = [ (self.tr("Thin"), "Thin" ), (self.tr("Medium"), "Medium"), (self.tr("Thick"), "Thick")]
+        item_list = [(self.tr("Thin"), "Thin"), (self.tr("Medium"), "Medium"), (self.tr("Thick"), "Thick")]
         for item in item_list:
             self.combo2DWireframeThickness.addItem(item[0], item[1])
             self.combo3DWireframeThickness.addItem(item[0], item[1])
@@ -7297,7 +7596,7 @@ class PreferencesDialog(QDialog):
         for i in range(len(self.m_app.color_list)):
             self.lblColor_list[i].setStyleSheet("background-color: " + self.m_app.color_list[i])
             self.lblColor_list[i].setToolTip(self.m_app.color_list[i])
-            
+
     def on_btnResetVivid_clicked(self):
         self.m_app.color_list = mu.VIVID_COLOR_LIST[:]
         for i in range(len(self.m_app.color_list)):
@@ -7338,7 +7637,7 @@ class PreferencesDialog(QDialog):
         self.m_app.remember_geometry = True
 
     def on_rbRememberGeometryNo_clicked(self):
-        self.m_app.remember_geometry = False        
+        self.m_app.remember_geometry = False
 
     def Okay(self):
         self.write_settings()

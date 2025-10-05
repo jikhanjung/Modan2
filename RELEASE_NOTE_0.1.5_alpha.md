@@ -20,7 +20,7 @@ my_dataset.zip
 ├── dataset.json          # Complete metadata + landmarks + variables
 ├── images/              # Image files
 │   ├── 123.jpg
-│   └── 456.png  
+│   └── 456.png
 └── models/              # 3D model files
     ├── 123.obj
     └── 456.ply
@@ -60,7 +60,7 @@ Extended schema including complete dataset metadata:
   "format_version": "1.1",
   "dataset": {
     "wireframe": [[1,2], [2,3], ...],    // Wireframe information
-    "polygons": [[1,2,3], ...],          // Polygon information  
+    "polygons": [[1,2,3], ...],          // Polygon information
     "baseline": [1,2],                   // Baseline (2 or 3 points)
     "variables": ["Sex", "Age", ...]     // Variable list
   },
@@ -112,7 +112,7 @@ Download the appropriate version for your platform from the [Releases page](http
 3. Check **"Include image and model files"** (if needed)
 4. Choose save location and Export
 
-### Dataset Import  
+### Dataset Import
 1. Menu: **Dataset > Import Dataset**
 2. Select **"JSON+ZIP"** format
 3. Select ZIP file and Import

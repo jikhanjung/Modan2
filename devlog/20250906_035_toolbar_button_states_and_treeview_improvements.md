@@ -1,7 +1,7 @@
 # Toolbar Button States and TreeView Improvements
 
-**작업일**: 2025-09-06  
-**작업자**: Claude  
+**작업일**: 2025-09-06
+**작업자**: Claude
 **관련 파일**: `Modan2.py`, `ModanComponents.py`
 
 ## 작업 요약
@@ -16,7 +16,7 @@
 - **New Object 버튼**
   - Dataset 선택 시: 활성화
   - Dataset 미선택 시: 비활성화
-  
+
 - **Edit Object 버튼**
   - Dataset과 Object 모두 선택 시: 활성화
   - 그 외의 경우: 비활성화
@@ -90,7 +90,7 @@ class MdTreeView(QTreeView):
 
 ## 영향 범위
 
-- **사용자 경험 개선**: 
+- **사용자 경험 개선**:
   - 버튼이 적절한 상황에서만 활성화되어 사용자 혼란 방지
   - TreeView에서 직관적인 선택 해제 가능
   - 선택 해제 시 명확한 시각적 피드백

@@ -1,6 +1,7 @@
 """
 Tests for MdHelpers module - utility and helper functions.
 """
+
 import os
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -19,35 +20,35 @@ class TestMessageFunctions:
     def test_show_error(self, qtbot):
         """Test show_error function."""
         parent = Mock()
-        with patch.object(QMessageBox, 'critical') as mock_critical:
+        with patch.object(QMessageBox, "critical") as mock_critical:
             helpers.show_error(parent, "Test error")
             mock_critical.assert_called_once()
 
     def test_show_warning(self, qtbot):
         """Test show_warning function."""
         parent = Mock()
-        with patch.object(QMessageBox, 'warning') as mock_warning:
+        with patch.object(QMessageBox, "warning") as mock_warning:
             helpers.show_warning(parent, "Test warning")
             mock_warning.assert_called_once()
 
     def test_show_info(self, qtbot):
         """Test show_info function."""
         parent = Mock()
-        with patch.object(QMessageBox, 'information') as mock_info:
+        with patch.object(QMessageBox, "information") as mock_info:
             helpers.show_info(parent, "Test info")
             mock_info.assert_called_once()
 
     def test_confirm_action_yes(self, qtbot):
         """Test confirm_action returns True when Yes is clicked."""
         parent = Mock()
-        with patch.object(QMessageBox, 'question', return_value=QMessageBox.Yes):
+        with patch.object(QMessageBox, "question", return_value=QMessageBox.Yes):
             result = helpers.confirm_action(parent, "Confirm this?")
             assert result is True
 
     def test_confirm_action_no(self, qtbot):
         """Test confirm_action returns False when No is clicked."""
         parent = Mock()
-        with patch.object(QMessageBox, 'question', return_value=QMessageBox.No):
+        with patch.object(QMessageBox, "question", return_value=QMessageBox.No):
             result = helpers.confirm_action(parent, "Confirm this?")
             assert result is False
 
@@ -58,34 +59,30 @@ class TestFileDialogs:
     def test_get_open_file_name(self, qtbot):
         """Test get_open_file_name function."""
         parent = Mock()
-        with patch.object(QFileDialog, 'getOpenFileName',
-                         return_value=('/path/to/file.txt', 'Text Files (*.txt)')):
+        with patch.object(QFileDialog, "getOpenFileName", return_value=("/path/to/file.txt", "Text Files (*.txt)")):
             result = helpers.get_open_file_name(parent, "Open File", "*.txt")
-            assert result == '/path/to/file.txt'
+            assert result == "/path/to/file.txt"
 
     def test_get_open_file_name_cancelled(self, qtbot):
         """Test get_open_file_name when user cancels."""
         parent = Mock()
-        with patch.object(QFileDialog, 'getOpenFileName',
-                         return_value=('', '')):
+        with patch.object(QFileDialog, "getOpenFileName", return_value=("", "")):
             result = helpers.get_open_file_name(parent, "Open File", "*.txt")
             assert result is None
 
     def test_get_save_file_name(self, qtbot):
         """Test get_save_file_name function."""
         parent = Mock()
-        with patch.object(QFileDialog, 'getSaveFileName',
-                         return_value=('/path/to/save.txt', 'Text Files (*.txt)')):
+        with patch.object(QFileDialog, "getSaveFileName", return_value=("/path/to/save.txt", "Text Files (*.txt)")):
             result = helpers.get_save_file_name(parent, "Save File", "*.txt")
-            assert result == '/path/to/save.txt'
+            assert result == "/path/to/save.txt"
 
     def test_get_directory(self, qtbot):
         """Test get_directory function."""
         parent = Mock()
-        with patch.object(QFileDialog, 'getExistingDirectory',
-                         return_value='/path/to/directory'):
+        with patch.object(QFileDialog, "getExistingDirectory", return_value="/path/to/directory"):
             result = helpers.get_directory(parent, "Select Directory")
-            assert result == '/path/to/directory'
+            assert result == "/path/to/directory"
 
 
 class TestFileOperations:
@@ -105,7 +102,7 @@ class TestFileOperations:
         test_file = tmp_path / "test.txt"
         test_file.write_text("test content")
 
-        hash_value = helpers.calculate_file_hash(str(test_file), algorithm='sha256')
+        hash_value = helpers.calculate_file_hash(str(test_file), algorithm="sha256")
         assert len(hash_value) == 64  # SHA256 hash length
 
     def test_format_file_size_bytes(self):
@@ -164,7 +161,7 @@ class TestJSONOperations:
         helpers.save_json_file(str(json_file), test_data, indent=2)
 
         content = json_file.read_text()
-        assert '\n' in content  # Should be formatted with newlines
+        assert "\n" in content  # Should be formatted with newlines
 
     def test_load_json_file_not_found(self):
         """Test loading non-existent JSON file raises error."""
@@ -215,7 +212,7 @@ class TestTimestampFunctions:
         timestamp = helpers.get_timestamp_string()
         # Should match format: YYYYMMDD_HHMMSS
         assert len(timestamp) == 15
-        assert '_' in timestamp
+        assert "_" in timestamp
 
         # Should be valid datetime
         datetime.strptime(timestamp, "%Y%m%d_%H%M%S")
@@ -225,7 +222,7 @@ class TestTimestampFunctions:
         timestamp = helpers.get_timestamp_string(format_str="%Y-%m-%d")
         # Should match format: YYYY-MM-DD
         assert len(timestamp) == 10
-        assert timestamp.count('-') == 2
+        assert timestamp.count("-") == 2
 
         datetime.strptime(timestamp, "%Y-%m-%d")
 
@@ -296,7 +293,7 @@ class TestCleanupOperations:
         recent_file.write_text("recent")
 
         # Mock get_temp_dir to return our test directory
-        with patch('MdHelpers.get_temp_dir', return_value=tmp_path):
+        with patch("MdHelpers.get_temp_dir", return_value=tmp_path):
             helpers.cleanup_temp_files(older_than_days=7)
 
         # Old file should be deleted, recent file should remain
@@ -312,7 +309,7 @@ class TestEdgeCases:
         """Test hash calculation with nonexistent file."""
         # Implementation returns empty string instead of raising error
         result = helpers.calculate_file_hash("/nonexistent/file.txt")
-        assert result == ''
+        assert result == ""
 
     def test_get_file_size_nonexistent(self):
         """Test file size of nonexistent file."""
@@ -327,7 +324,7 @@ class TestEdgeCases:
 
         # Should handle gracefully or raise appropriate error
         # Behavior depends on implementation
-        result = helpers.ensure_directory(str(file_path))
+        helpers.ensure_directory(str(file_path))
         # May return False or raise error
 
 
@@ -365,12 +362,12 @@ class TestValidationFunctions:
             "Dataset<Name",
             "Dataset>Name",
             "Dataset:Name",
-            "Dataset\"Name",
+            'Dataset"Name',
             "Dataset/Name",
             "Dataset\\Name",
             "Dataset|Name",
             "Dataset?Name",
-            "Dataset*Name"
+            "Dataset*Name",
         ]
         for name in invalid_names:
             is_valid, message = helpers.validate_dataset_name(name)
@@ -431,6 +428,7 @@ class TestColorFunctions:
     def test_color_to_hex(self):
         """Test converting QColor to hex."""
         from PyQt5.QtGui import QColor
+
         color = QColor(255, 0, 0)
         hex_str = helpers.color_to_hex(color)
         assert hex_str.lower() == "#ff0000"
@@ -523,7 +521,7 @@ class TestPathFunctions:
         assert ".." not in path
         assert path == os.path.normpath("/path/to/../file.txt")
 
-    @pytest.mark.skipif(os.name != 'nt', reason="Windows path normalization only works on Windows")
+    @pytest.mark.skipif(os.name != "nt", reason="Windows path normalization only works on Windows")
     def test_normalize_path_windows(self):
         """Test path normalization with Windows paths."""
         path = helpers.normalize_path("C:\\path\\to\\..\\file.txt")
@@ -556,7 +554,7 @@ class TestFileBackup:
         original.write_text("test content")
 
         # Mock create_backup_filename to return predictable name
-        with patch('MdHelpers.create_backup_filename') as mock_backup:
+        with patch("MdHelpers.create_backup_filename") as mock_backup:
             backup_path = str(tmp_path / "original.txt.backup")
             mock_backup.return_value = backup_path
 
@@ -596,7 +594,7 @@ class TestFileFinding:
         files = helpers.find_files(str(tmp_path), pattern="*.txt", recursive=False)
 
         if files:
-            assert all(f.endswith('.txt') for f in files)
+            assert all(f.endswith(".txt") for f in files)
 
 
 class TestFileInfo:
@@ -611,7 +609,7 @@ class TestFileInfo:
 
         assert isinstance(info, dict)
         if info:
-            assert 'size' in info or 'name' in info or 'path' in info
+            assert "size" in info or "name" in info or "path" in info
 
 
 class TestURLFunctions:
@@ -625,6 +623,7 @@ class TestURLFunctions:
         url = helpers.create_url_from_path(str(test_file))
 
         from PyQt5.QtCore import QUrl
+
         assert isinstance(url, QUrl)
         assert url.isValid()
 
@@ -635,11 +634,14 @@ class TestFileDialogExtensions:
     def test_get_open_file_names(self, qtbot):
         """Test getting multiple file names."""
         parent = Mock()
-        with patch.object(QFileDialog, 'getOpenFileNames',
-                         return_value=(['/path/to/file1.txt', '/path/to/file2.txt'], 'Text Files (*.txt)')):
+        with patch.object(
+            QFileDialog,
+            "getOpenFileNames",
+            return_value=(["/path/to/file1.txt", "/path/to/file2.txt"], "Text Files (*.txt)"),
+        ):
             result = helpers.get_open_file_names(parent, "Open Files", "*.txt")
             assert len(result) == 2
-            assert '/path/to/file1.txt' in result
+            assert "/path/to/file1.txt" in result
 
 
 class TestIconCreation:
@@ -657,6 +659,7 @@ class TestIconCreation:
         # Create a simple pixmap file
         icon_path = str(tmp_path / "icon.png")
         from PyQt5.QtGui import QPixmap
+
         pixmap = QPixmap(32, 32)
         pixmap.save(icon_path)
 
@@ -675,6 +678,7 @@ class TestColorFunctions:
     def test_interpolate_color(self):
         """Test color interpolation."""
         from PyQt5.QtGui import QColor
+
         color1 = QColor(0, 0, 0)
         color2 = QColor(255, 255, 255)
 
@@ -687,6 +691,7 @@ class TestColorFunctions:
     def test_interpolate_color_clamping(self):
         """Test color interpolation clamping."""
         from PyQt5.QtGui import QColor
+
         color1 = QColor(0, 0, 0)
         color2 = QColor(255, 255, 255)
 
@@ -765,6 +770,7 @@ class TestMimeDataExtraction:
     def test_extract_urls_from_mime_no_urls(self):
         """Test extracting URLs from mime data without URLs."""
         from PyQt5.QtCore import QMimeData
+
         mime_data = QMimeData()
 
         result = helpers.extract_urls_from_mime(mime_data)
@@ -857,7 +863,7 @@ class TestThemeDetection:
 
     def test_is_dark_theme_no_app(self):
         """Test dark theme detection when no app is running."""
-        with patch('PyQt5.QtWidgets.QApplication.instance', return_value=None):
+        with patch("PyQt5.QtWidgets.QApplication.instance", return_value=None):
             result = helpers.is_dark_theme()
             assert result is False
 
@@ -868,12 +874,12 @@ class TestNumberFormatting:
     def test_format_number_scientific(self):
         """Test formatting number in scientific notation."""
         result = helpers.format_number(1234.5678, precision=2, scientific=True)
-        assert 'e' in result.lower()
+        assert "e" in result.lower()
 
     def test_format_number_regular(self):
         """Test formatting number in regular notation."""
         result = helpers.format_number(1234.5678, precision=2, scientific=False)
-        assert '1234.57' in result or '1234.56' in result
+        assert "1234.57" in result or "1234.56" in result
 
 
 class TestGeometryFunctions:
@@ -887,6 +893,7 @@ class TestGeometryFunctions:
     def test_calculate_distance_mismatch(self):
         """Test calculating distance with mismatched dimensions."""
         import pytest
+
         with pytest.raises(ValueError):
             helpers.calculate_distance([1, 2], [1, 2, 3])
 
@@ -923,9 +930,9 @@ class TestSystemInfo:
     def test_get_system_info(self):
         """Test getting system information."""
         result = helpers.get_system_info()
-        assert 'platform' in result
-        assert 'system' in result
-        assert 'python_version' in result
+        assert "platform" in result
+        assert "system" in result
+        assert "python_version" in result
 
     def test_log_system_info(self):
         """Test logging system information."""
@@ -940,10 +947,10 @@ class TestDependencyChecking:
         """Test checking dependencies."""
         result = helpers.check_dependencies()
         assert isinstance(result, dict)
-        assert 'PyQt5' in result
-        assert 'numpy' in result
+        assert "PyQt5" in result
+        assert "numpy" in result
         # PyQt5 should be available in test environment
-        assert result['PyQt5'] is True
+        assert result["PyQt5"] is True
 
 
 class TestMemoryFunctions:
@@ -966,7 +973,7 @@ class TestResourceCleanup:
 
     def test_cleanup_resources(self, tmp_path, monkeypatch):
         """Test cleanup resources."""
-        monkeypatch.setattr(helpers, 'get_temp_dir', lambda: tmp_path)
+        monkeypatch.setattr(helpers, "get_temp_dir", lambda: tmp_path)
         # Should not raise exception
         helpers.cleanup_resources()
 

@@ -54,4 +54,3 @@
 
 ## 문서화
 - `AGENTS.md`에 “Code Index & Search Tools” 섹션 추가: 포함/제외 범위, 타입 맵핑, wait cursor 스캔 동작을 명시
-

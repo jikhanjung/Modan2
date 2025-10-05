@@ -80,23 +80,23 @@ def fill_sequence(self):
     selected_cells = self.selectionModel().selectedIndexes()
     if len(selected_cells) == 0:
         return
-    
+
     # 컬럼 1(Sequence)에만 적용되는지 확인
     column_numbers = [cell.column() for cell in selected_cells]
     if len(set(column_numbers)) > 1 or column_numbers[0] != 1:
         return
-    
+
     # 사용자 입력 받기
-    sequence, ok = QInputDialog.getInt(self, "Fill Sequence", 
+    sequence, ok = QInputDialog.getInt(self, "Fill Sequence",
                                        "Enter starting sequence number", sequence)
     if not ok:
         return
-    
-    increment, ok = QInputDialog.getInt(self, "Fill Sequence", 
+
+    increment, ok = QInputDialog.getInt(self, "Fill Sequence",
                                         "Enter increment", 1)
     if not ok:
         return
-    
+
     # 선택된 셀들에 순차적으로 값 채우기
     for cell in selected_cells:
         row = cell.row()

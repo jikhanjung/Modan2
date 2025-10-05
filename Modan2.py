@@ -3,13 +3,13 @@ import sys
 
 # Fix for Anaconda Python sys.version parsing issue with pandas/platform module
 # This must be done before importing any module that uses platform.python_implementation()
-if hasattr(sys, 'version') and '| packaged by Anaconda' in sys.version:
+if hasattr(sys, "version") and "| packaged by Anaconda" in sys.version:
     # Remove the Anaconda-specific part from sys.version
     original_version = sys.version
-    parts = sys.version.split('|')
+    parts = sys.version.split("|")
     if len(parts) >= 3:
         # Keep only the first part (version) and last part (compiler info)
-        sys.version = parts[0].strip() + ' ' + parts[-1].strip()
+        sys.version = parts[0].strip() + " " + parts[-1].strip()
 
 import copy
 import logging
@@ -71,12 +71,11 @@ from ModanDialogs import (
 )
 
 # Configure matplotlib to avoid font warnings
-matplotlib.rcParams['font.family'] = ['DejaVu Sans', 'sans-serif']
-matplotlib.rcParams['font.serif'] = ['DejaVu Serif', 'serif']
-matplotlib.rcParams['font.sans-serif'] = ['DejaVu Sans', 'Arial', 'sans-serif']
+matplotlib.rcParams["font.family"] = ["DejaVu Sans", "sans-serif"]
+matplotlib.rcParams["font.serif"] = ["DejaVu Serif", "serif"]
+matplotlib.rcParams["font.sans-serif"] = ["DejaVu Sans", "Arial", "sans-serif"]
 
 logger = logging.getLogger(mu.PROGRAM_NAME)
-
 
 
 class ModanMainWindow(QMainWindow):
@@ -84,9 +83,9 @@ class ModanMainWindow(QMainWindow):
         super().__init__()
         self.config = config
         self.init_done = False
-        self.setWindowIcon(QIcon(ICON_CONSTANTS['app_icon_alt']))
+        self.setWindowIcon(QIcon(ICON_CONSTANTS["app_icon_alt"]))
         self.setWindowTitle("{} v{}".format(self.tr("Modan2"), mu.PROGRAM_VERSION))
-        
+
         # Initialize controller
         self.controller = ModanController()
 
@@ -94,26 +93,26 @@ class ModanMainWindow(QMainWindow):
         self.tableView = MdTableView()
         self.tableView.setItemDelegateForColumn(1, MdSequenceDelegate())
         self.treeView = MdTreeView()
-        
+
         # Setup connections after widgets are created
         self.setup_controller_connections()
 
         self.toolbar = QToolBar(self.tr("Main Toolbar"))
-        self.toolbar.setIconSize(QSize(32,32))
-        self.actionNewDataset = QAction(QIcon(ICON_CONSTANTS['new_dataset']), self.tr("New Dataset\tCtrl+N"), self)
+        self.toolbar.setIconSize(QSize(32, 32))
+        self.actionNewDataset = QAction(QIcon(ICON_CONSTANTS["new_dataset"]), self.tr("New Dataset\tCtrl+N"), self)
         self.actionNewDataset.triggered.connect(self.on_action_new_dataset_triggered)
         self.actionNewDataset.setShortcut(QKeySequence("Ctrl+N"))
 
-        self.actionCellSelection = QAction(QIcon(ICON_CONSTANTS['cell_selection']), self.tr("Cell selection"), self)
+        self.actionCellSelection = QAction(QIcon(ICON_CONSTANTS["cell_selection"]), self.tr("Cell selection"), self)
         self.actionCellSelection.triggered.connect(self.on_action_cell_selection_triggered)
         self.actionCellSelection.setCheckable(True)
         self.actionCellSelection.setChecked(True)
-        self.actionRowSelection = QAction(QIcon(ICON_CONSTANTS['row_selection']), self.tr("Row selection"), self)
+        self.actionRowSelection = QAction(QIcon(ICON_CONSTANTS["row_selection"]), self.tr("Row selection"), self)
         self.actionRowSelection.triggered.connect(self.on_action_row_selection_triggered)
         self.actionRowSelection.setCheckable(True)
-        self.actionAddVariable = QAction(QIcon(ICON_CONSTANTS['add_variable']), self.tr("Add variable"), self)
+        self.actionAddVariable = QAction(QIcon(ICON_CONSTANTS["add_variable"]), self.tr("Add variable"), self)
         self.actionAddVariable.triggered.connect(self.on_action_add_variable_triggered)
-        self.actionSaveChanges = QAction(QIcon(ICON_CONSTANTS['save_changes']), self.tr("Save changes\tCtrl+S"), self)
+        self.actionSaveChanges = QAction(QIcon(ICON_CONSTANTS["save_changes"]), self.tr("Save changes\tCtrl+S"), self)
         self.actionSaveChanges.triggered.connect(self.on_btnSaveChanges_clicked)
         self.actionSaveChanges.setShortcut(QKeySequence("Ctrl+S"))
 
@@ -122,27 +121,29 @@ class ModanMainWindow(QMainWindow):
         self.selection_mode_group.addAction(self.actionCellSelection)
         self.selection_mode_group.addAction(self.actionRowSelection)
 
-        self.actionNewObject = QAction(QIcon(ICON_CONSTANTS['new_object']), self.tr("New Object\tCtrl+Shift+N"), self)
+        self.actionNewObject = QAction(QIcon(ICON_CONSTANTS["new_object"]), self.tr("New Object\tCtrl+Shift+N"), self)
         self.actionNewObject.triggered.connect(self.on_action_new_object_triggered)
         self.actionNewObject.setShortcut(QKeySequence("Ctrl+Shift+N"))
-        self.actionEditObject = QAction(QIcon(ICON_CONSTANTS['edit_object']), self.tr("Edit Object\tCtrl+Shift+O"), self)
+        self.actionEditObject = QAction(
+            QIcon(ICON_CONSTANTS["edit_object"]), self.tr("Edit Object\tCtrl+Shift+O"), self
+        )
         self.actionEditObject.triggered.connect(self.on_tableView_doubleClicked)
         self.actionEditObject.setShortcut(QKeySequence("Ctrl+Shift+O"))
-        self.actionImport = QAction(QIcon(ICON_CONSTANTS['import']), self.tr("Import\tCtrl+I"), self)
+        self.actionImport = QAction(QIcon(ICON_CONSTANTS["import"]), self.tr("Import\tCtrl+I"), self)
         self.actionImport.triggered.connect(self.on_action_import_dataset_triggered)
         self.actionImport.setShortcut(QKeySequence("Ctrl+I"))
-        self.actionExport = QAction(QIcon(ICON_CONSTANTS['export']), self.tr("Export\tCtrl+E"), self)
+        self.actionExport = QAction(QIcon(ICON_CONSTANTS["export"]), self.tr("Export\tCtrl+E"), self)
         self.actionExport.triggered.connect(self.on_action_export_dataset_triggered)
         self.actionExport.setShortcut(QKeySequence("Ctrl+E"))
-        self.actionAnalyze = QAction(QIcon(ICON_CONSTANTS['analysis']), self.tr("Analyze\tCtrl+G"), self)
+        self.actionAnalyze = QAction(QIcon(ICON_CONSTANTS["analysis"]), self.tr("Analyze\tCtrl+G"), self)
         self.actionAnalyze.triggered.connect(self.on_action_analyze_dataset_triggered)
         self.actionAnalyze.setShortcut(QKeySequence("Ctrl+G"))
-        self.actionPreferences = QAction(QIcon(ICON_CONSTANTS['preferences']), self.tr("Preferences"), self)
+        self.actionPreferences = QAction(QIcon(ICON_CONSTANTS["preferences"]), self.tr("Preferences"), self)
         self.actionPreferences.triggered.connect(self.on_action_edit_preferences_triggered)
         self.actionExit = QAction(QIcon(), self.tr("Exit\tCtrl+W"), self)
         self.actionExit.triggered.connect(self.on_action_exit_triggered)
         self.actionExit.setShortcut(QKeySequence("Ctrl+W"))
-        self.actionAbout = QAction(QIcon(ICON_CONSTANTS['about']), self.tr("About\tF1"), self)
+        self.actionAbout = QAction(QIcon(ICON_CONSTANTS["about"]), self.tr("About\tF1"), self)
         self.actionAbout.triggered.connect(self.on_action_about_triggered)
         self.actionAbout.setShortcut(QKeySequence("F1"))
 
@@ -197,10 +198,10 @@ class ModanMainWindow(QMainWindow):
 
         self.read_settings()
         self.initUI()
-        
+
         self.selected_dataset = None
         self.selected_object = None
-        
+
         # Initialize button states - disabled until dataset/object is selected
         self.actionNewObject.setEnabled(False)
         self.actionEditObject.setEnabled(False)
@@ -209,7 +210,7 @@ class ModanMainWindow(QMainWindow):
         self.actionCellSelection.setEnabled(False)
         self.actionRowSelection.setEnabled(False)
         self.actionAddVariable.setEnabled(False)
-        
+
         self.reset_views()
         self.load_dataset()
 
@@ -221,7 +222,7 @@ class ModanMainWindow(QMainWindow):
 
         self.set_toolbar_icon_size(self.m_app.toolbar_icon_size)
         self.init_done = True
-    
+
     def set_splash(self, splash):
         """Set splash screen reference for progress updates"""
         self.splash = splash
@@ -294,7 +295,7 @@ class ModanMainWindow(QMainWindow):
         self.selected_analysis = analysis
         if analysis:
             logger.info(f"Analysis selected: {analysis.analysis_name}")
-            
+
             # Disable all dataset-related buttons when analysis is selected
             self.actionCellSelection.setEnabled(False)
             self.actionRowSelection.setEnabled(False)
@@ -303,16 +304,16 @@ class ModanMainWindow(QMainWindow):
             self.actionEditObject.setEnabled(False)
             self.actionExport.setEnabled(False)
             self.actionAnalyze.setEnabled(False)
-            
+
             # Switch to analysis view on right panel
-            if hasattr(self, 'hsplitter') and hasattr(self, 'analysis_view'):
+            if hasattr(self, "hsplitter") and hasattr(self, "analysis_view"):
                 logger.info(f"Switching to analysis view. Current widget: {self.hsplitter.widget(1)}")
                 if self.hsplitter.widget(1) != self.analysis_view:
                     self.hsplitter.replaceWidget(1, self.analysis_view)
                     logger.info("Switched to analysis view")
-            
+
             # Update analysis info widget
-            if hasattr(self, 'analysis_info_widget') and self.analysis_info_widget:
+            if hasattr(self, "analysis_info_widget") and self.analysis_info_widget:
                 logger.info("Setting analysis on analysis_info_widget")
                 self.analysis_info_widget.set_analysis(analysis)
                 self.analysis_info_widget.show_analysis_result()
@@ -336,12 +337,12 @@ class ModanMainWindow(QMainWindow):
         self.object_view_3d.read_settings()
 
     def set_toolbar_icon_size(self, size):
-        if size.lower() == 'small':
-            self.toolbar.setIconSize(QSize(24,24))
-        elif size.lower() == 'medium':
-            self.toolbar.setIconSize(QSize(32,32))
+        if size.lower() == "small":
+            self.toolbar.setIconSize(QSize(24, 24))
+        elif size.lower() == "medium":
+            self.toolbar.setIconSize(QSize(32, 32))
         else:
-            self.toolbar.setIconSize(QSize(48,48))
+            self.toolbar.setIconSize(QSize(48, 48))
 
     def on_action_open_db_triggered(self):
         pass
@@ -356,13 +357,14 @@ class ModanMainWindow(QMainWindow):
         """Read settings from config object"""
         if self.config is None:
             return
-            
+
         self.m_app = QApplication.instance()
         self.m_app.storage_directory = os.path.abspath(mu.DEFAULT_STORAGE_DIRECTORY)
         self.m_app.toolbar_icon_size = self.config.get("ui", {}).get("toolbar_icon_size", "Medium")
-        
+
         # Create a complete settings wrapper for compatibility
-        if not hasattr(self.m_app, 'settings'):
+        if not hasattr(self.m_app, "settings"):
+
             class SettingsWrapper:
                 def __init__(self, config, parent):
                     self.config = config
@@ -379,20 +381,16 @@ class ModanMainWindow(QMainWindow):
                         "WindowGeometry/ExportDialog": ("ui", "window_geometry", "export_dialog"),
                         "WindowGeometry/ImportDialog": ("ui", "window_geometry", "import_dialog"),
                         "WindowGeometry/PreferencesDialog": ("ui", "window_geometry", "preferences_dialog"),
-                        
                         # Maximized state
                         "IsMaximized/MainWindow": ("ui", "is_maximized", "main_window"),
                         "IsMaximized/DataExplorationWindow": ("ui", "is_maximized", "data_exploration_window"),
-                        
                         # Calibration
                         "Calibration/Unit": ("calibration", "unit"),
-                        
                         # UI settings
                         "ToolbarIconSize": ("ui", "toolbar_icon_size"),
                         "PlotSize": ("ui", "plot_size"),
                         "BackgroundColor": ("ui", "background_color"),
                         "Language": ("language",),
-                        
                         # 2D settings
                         "LandmarkSize/2D": ("ui", "landmark_size_2d"),
                         "LandmarkColor/2D": ("ui", "landmark_color_2d"),
@@ -400,7 +398,6 @@ class ModanMainWindow(QMainWindow):
                         "WireframeColor/2D": ("ui", "wireframe_color_2d"),
                         "IndexSize/2D": ("ui", "index_size_2d"),
                         "IndexColor/2D": ("ui", "index_color_2d"),
-                        
                         # 3D settings
                         "LandmarkSize/3D": ("ui", "landmark_size_3d"),
                         "LandmarkColor/3D": ("ui", "landmark_color_3d"),
@@ -409,12 +406,12 @@ class ModanMainWindow(QMainWindow):
                         "IndexSize/3D": ("ui", "index_size_3d"),
                         "IndexColor/3D": ("ui", "index_color_3d"),
                     }
-                    
+
                     # Data point colors and markers (dynamic)
                     for i in range(10):
                         self.key_map[f"DataPointColor/{i}"] = ("ui", "data_point_colors", str(i))
                         self.key_map[f"DataPointMarker/{i}"] = ("ui", "data_point_markers", str(i))
-                
+
                 def _get_nested_value(self, keys, default_value):
                     """Get a value from nested dictionary."""
                     try:
@@ -427,12 +424,12 @@ class ModanMainWindow(QMainWindow):
                         return value if value != {} else default_value
                     except (KeyError, TypeError, AttributeError):
                         return default_value
-                
+
                 def _set_nested_value(self, keys, value):
                     """Set a value in nested dictionary."""
                     if not keys:
                         return
-                    
+
                     # Ensure all parent dictionaries exist
                     current = self.config
                     for key in keys[:-1]:
@@ -441,10 +438,10 @@ class ModanMainWindow(QMainWindow):
                         elif not isinstance(current[key], dict):
                             current[key] = {}
                         current = current[key]
-                    
+
                     # Set the final value
                     current[keys[-1]] = value
-                
+
                 def value(self, key, default_value):
                     """Get a setting value (QSettings compatible)."""
                     if key in self.key_map:
@@ -453,50 +450,52 @@ class ModanMainWindow(QMainWindow):
                         if key.startswith("WindowGeometry/") and key != "WindowGeometry/RememberGeometry":
                             if isinstance(value, list) and len(value) == 4:
                                 from PyQt5.QtCore import QRect
+
                                 return QRect(*value)
-                            elif hasattr(default_value, 'x'):  # default_value is QRect
+                            elif hasattr(default_value, "x"):  # default_value is QRect
                                 return default_value
                         return value
                     return default_value
-                
+
                 def setValue(self, key, value):
                     """Set a setting value (QSettings compatible)."""
                     # Convert QRect to list for JSON serialization
-                    if hasattr(value, 'x'):  # QRect or similar
+                    if hasattr(value, "x"):  # QRect or similar
                         value = [value.x(), value.y(), value.width(), value.height()]
-                    
+
                     if key in self.key_map:
                         self._set_nested_value(self.key_map[key], value)
                         # Auto-save after each change
                         self.save()
-                
+
                 def save(self):
                     """Save settings to file."""
                     try:
                         import json
                         from pathlib import Path
-                        config_path = Path.home() / '.modan2' / 'config.json'
+
+                        config_path = Path.home() / ".modan2" / "config.json"
                         config_path.parent.mkdir(parents=True, exist_ok=True)
-                        with open(config_path, 'w', encoding='utf-8') as f:
+                        with open(config_path, "w", encoding="utf-8") as f:
                             json.dump(self.config, f, indent=2, ensure_ascii=False)
                     except Exception as e:
                         logger.error(f"Failed to save config: {e}")
-                
+
                 def sync(self):
                     """Force save settings to file (alias for save)."""
                     self.save()
-            
+
             self.m_app.settings = SettingsWrapper(self.config, self)
 
         if not self.init_done:
             self.m_app.remember_geometry = self.config.get("ui", {}).get("remember_geometry", True)
             logger = logging.getLogger(__name__)
             logger.debug(f"READ_SETTINGS - Remember geometry: {self.m_app.remember_geometry}")
-            
+
             if self.m_app.remember_geometry:
                 geometry_data = self.config.get("ui", {}).get("window_geometry", {})
                 logger.debug(f"READ_SETTINGS - Raw geometry data: {geometry_data}")
-                
+
                 # Handle both old list format and new dictionary format
                 if isinstance(geometry_data, dict):
                     geometry = geometry_data.get("main_window", [100, 100, 1400, 800])
@@ -504,64 +503,74 @@ class ModanMainWindow(QMainWindow):
                     geometry = geometry_data
                 else:
                     geometry = [100, 100, 1400, 800]
-                
+
                 logger.debug(f"READ_SETTINGS - Parsed geometry: {geometry}")
-                
+
                 # Ensure all values are integers
                 geometry = [int(x) if isinstance(x, (int, float, str)) and str(x).isdigit() else x for x in geometry]
-                
+
                 # Get multi-monitor info for debugging
                 from PyQt5.QtWidgets import QDesktopWidget
+
                 desktop = QDesktopWidget()
                 primary_screen = desktop.primaryScreen()
                 primary_rect = desktop.screenGeometry(primary_screen)
-                
-                logger.debug(f"READ_SETTINGS - Using saved geometry: x={geometry[0]}, y={geometry[1]}, w={geometry[2]}, h={geometry[3]}")
+
+                logger.debug(
+                    f"READ_SETTINGS - Using saved geometry: x={geometry[0]}, y={geometry[1]}, w={geometry[2]}, h={geometry[3]}"
+                )
                 logger.debug(f"READ_SETTINGS - Primary monitor size: {primary_rect.width()}x{primary_rect.height()}")
                 logger.debug(f"READ_SETTINGS - Number of screens: {desktop.screenCount()}")
-                
+
                 # Show all screen geometries for debugging
                 for i in range(desktop.screenCount()):
                     screen_geom = desktop.screenGeometry(i)
-                    logger.debug(f"READ_SETTINGS - Screen {i}: {screen_geom.width()}x{screen_geom.height()} at ({screen_geom.x()}, {screen_geom.y()})")
-                
+                    logger.debug(
+                        f"READ_SETTINGS - Screen {i}: {screen_geom.width()}x{screen_geom.height()} at ({screen_geom.x()}, {screen_geom.y()})"
+                    )
+
                 # Set geometry with window manager hints
                 from PyQt5.QtCore import Qt
-                
+
                 # Store desired position for later enforcement
                 self._desired_geometry = QRect(*geometry)
-                
+
                 # Set window flags to control positioning behavior
                 current_flags = self.windowFlags()
                 # Don't let window manager auto-position the window
                 self.setWindowFlags(current_flags & ~Qt.WindowContextHelpButtonHint)
-                
+
                 # Set geometry
                 self.setGeometry(QRect(*geometry))
-                logger.debug(f"SET_GEOMETRY - Requested: {geometry}, After setGeometry(): {[self.geometry().x(), self.geometry().y(), self.geometry().width(), self.geometry().height()]}")
-                
+                logger.debug(
+                    f"SET_GEOMETRY - Requested: {geometry}, After setGeometry(): {[self.geometry().x(), self.geometry().y(), self.geometry().width(), self.geometry().height()]}"
+                )
+
                 # Schedule position verification after window is fully shown
                 from PyQt5.QtCore import QTimer
+
                 def verify_position():
                     actual = self.geometry()
                     if abs(actual.x() - geometry[0]) > 10 or abs(actual.y() - geometry[1]) > 10:
-                        logger.debug(f"POSITION_DRIFT - Expected: ({geometry[0]}, {geometry[1]}), Got: ({actual.x()}, {actual.y()}), Correcting...")
+                        logger.debug(
+                            f"POSITION_DRIFT - Expected: ({geometry[0]}, {geometry[1]}), Got: ({actual.x()}, {actual.y()}), Correcting..."
+                        )
                         self.move(geometry[0], geometry[1])
                         # Final check
                         final = self.geometry()
                         logger.debug(f"POSITION_FINAL - After move(): ({final.x()}, {final.y()})")
-                
+
                 QTimer.singleShot(100, verify_position)  # Check sooner
-                
+
                 is_maximized_data = self.config.get("ui", {}).get("is_maximized", False)
                 # Handle both boolean and dict format
                 if isinstance(is_maximized_data, dict):
                     is_maximized = is_maximized_data.get("main_window", False)
                 else:
                     is_maximized = is_maximized_data
-                
+
                 logger.debug(f"READ_SETTINGS - Is maximized setting: {is_maximized}")
-                
+
                 if is_maximized:
                     logger.debug("READ_SETTINGS - Showing maximized window")
                     self.showMaximized()
@@ -575,25 +584,27 @@ class ModanMainWindow(QMainWindow):
         if self.init_done:
             self.update_language()
 
-        plt.rcParams["font.family"] = "serif" 
-        plt.rcParams["font.serif"] = ["Times New Roman"] 
-        plt.rcParams['mathtext.fontset'] = 'stix' 
-        plt.rcParams['font.size'] = 12
+        plt.rcParams["font.family"] = "serif"
+        plt.rcParams["font.serif"] = ["Times New Roman"]
+        plt.rcParams["mathtext.fontset"] = "stix"
+        plt.rcParams["font.size"] = 12
 
     def write_settings(self):
         """Write settings using SettingsWrapper for proper JSON storage"""
-        if not hasattr(self.m_app, 'settings') or not hasattr(self.m_app, 'remember_geometry'):
+        if not hasattr(self.m_app, "settings") or not hasattr(self.m_app, "remember_geometry"):
             return
-            
+
         # Save remember geometry setting
         self.m_app.settings.setValue("WindowGeometry/RememberGeometry", self.m_app.remember_geometry)
-        
+
         if self.m_app.remember_geometry:
             logger = logging.getLogger(__name__)
             current_geometry = self.geometry()
-            logger.debug(f"WRITE_SETTINGS - Current window geometry: x={current_geometry.x()}, y={current_geometry.y()}, w={current_geometry.width()}, h={current_geometry.height()}")
+            logger.debug(
+                f"WRITE_SETTINGS - Current window geometry: x={current_geometry.x()}, y={current_geometry.y()}, w={current_geometry.width()}, h={current_geometry.height()}"
+            )
             logger.debug(f"WRITE_SETTINGS - Is maximized: {self.isMaximized()}")
-            
+
             # Save maximized state
             if self.isMaximized():
                 self.m_app.settings.setValue("IsMaximized/MainWindow", True)
@@ -602,10 +613,12 @@ class ModanMainWindow(QMainWindow):
                 self.m_app.settings.setValue("IsMaximized/MainWindow", False)
                 # Save window geometry
                 self.m_app.settings.setValue("WindowGeometry/MainWindow", current_geometry)
-                logger.debug(f"WRITE_SETTINGS - Saved geometry: [{current_geometry.x()}, {current_geometry.y()}, {current_geometry.width()}, {current_geometry.height()}]")
-        
+                logger.debug(
+                    f"WRITE_SETTINGS - Saved geometry: [{current_geometry.x()}, {current_geometry.y()}, {current_geometry.width()}, {current_geometry.height()}]"
+                )
+
         # Save language setting
-        if hasattr(self.m_app, 'language'):
+        if hasattr(self.m_app, "language"):
             self.m_app.settings.setValue("Language", self.m_app.language)
 
     def update_language(self):
@@ -631,16 +644,15 @@ class ModanMainWindow(QMainWindow):
         self.btnEditObject.setText(self.tr("Edit Object"))
         self.btnAddObject.setText(self.tr("Add Object"))
         self.btnAddProperty.setText(self.tr("Add Variable"))
-        #self.btnSaveAnalysis.setText(self.tr("Save"))
+        # self.btnSaveAnalysis.setText(self.tr("Save"))
         self.btnAnalysisDetail.setText(self.tr("Analysis Details"))
         self.btnDataExploration.setText(self.tr("Data Exploration"))
-        #self.lblSelect.setText(self.tr("Select"))
-        #self.rbSelectCells.setText(self.tr("Cells"))
-        #self.rbSelectRows.setText(self.tr("Rows"))
+        # self.lblSelect.setText(self.tr("Select"))
+        # self.rbSelectCells.setText(self.tr("Cells"))
+        # self.rbSelectRows.setText(self.tr("Rows"))
         self.analysis_info_widget.update_language()
 
         return
-
 
     def closeEvent(self, event):
         self.write_settings()
@@ -650,9 +662,9 @@ class ModanMainWindow(QMainWindow):
 
     @pyqtSlot()
     def on_action_edit_preferences_triggered(self):
-        #print("edit preferences")
+        # print("edit preferences")
         self.preferences_dialog = PreferencesDialog(self)
-        #self.preferences_dialog.setWindowModality(Qt.ApplicationModal)
+        # self.preferences_dialog.setWindowModality(Qt.ApplicationModal)
         self.preferences_dialog.exec()
         self.read_settings()
 
@@ -660,7 +672,7 @@ class ModanMainWindow(QMainWindow):
     def on_action_exit_triggered(self):
         self.close()
 
-    @pyqtSlot() 
+    @pyqtSlot()
     def on_action_about_triggered(self):
         text = mu.PROGRAM_NAME + " v" + mu.PROGRAM_VERSION + "\n\n"
         text += "Morphometrics made easy\n\n"
@@ -669,9 +681,9 @@ class ModanMainWindow(QMainWindow):
 
         QMessageBox.about(self, "About", text)
 
-        license_text = f"""
+        f"""
 Modan2
-Copyright {mu.PROGRAM_COPYRIGHT.replace('©', '').strip()} 
+Copyright {mu.PROGRAM_COPYRIGHT.replace("©", "").strip()}
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
@@ -686,42 +698,41 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         if self.selected_dataset is None:
             show_warning(self, "No dataset selected")
             return
-        
+
         try:
             # Create and show analysis dialog
             # The dialog now handles validation, running analysis, and showing progress internally
             self.analysis_dialog = NewAnalysisDialog(self, self.selected_dataset)
             ret = self.analysis_dialog.exec_()
             logger.info("new analysis dialog return value %s", ret)
-            
+
             # Dialog returns 1 (accept) when analysis completes successfully
             # The analysis is already complete at this point, so we just need to refresh the UI
             if ret == QDialog.Accepted:
                 # Refresh the dataset tree to show the new analysis
                 self.load_dataset()
-                
+
         except Exception as e:
             show_error(self, f"Error opening analysis dialog: {str(e)}")
 
-
     def initUI(self):
         # add tableView and tableWidget to vertical layout
-        #self.object_view_2d = LandmarkEditor(self)
+        # self.object_view_2d = LandmarkEditor(self)
         self.object_view_2d = ObjectViewer2D(self)
-        self.object_view_2d.set_mode(MODE['VIEW'])
+        self.object_view_2d.set_mode(MODE["VIEW"])
         self.object_view_3d = ObjectViewer3D(self)
         self.object_view = self.object_view_2d
         self.object_view_3d.hide()
 
         dockable_object_view = False
 
-        if dockable_object_view :
+        if dockable_object_view:
             # Create dock widget for the viewer
             self.viewer_dock = QDockWidget(self.tr("Object Viewer"), self)
             self.viewer_dock.setAllowedAreas(Qt.AllDockWidgetAreas)
-            self.viewer_dock.setFeatures(QDockWidget.DockWidgetMovable | 
-                                    QDockWidget.DockWidgetFloatable |
-                                    QDockWidget.DockWidgetClosable)
+            self.viewer_dock.setFeatures(
+                QDockWidget.DockWidgetMovable | QDockWidget.DockWidgetFloatable | QDockWidget.DockWidgetClosable
+            )
 
             # Create container widget for both viewers
             self.viewer_container = QWidget()
@@ -732,7 +743,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
             # Set the container as the dock widget's content
             self.viewer_dock.setWidget(self.viewer_container)
-            
+
             # Add dock widget to main window
             self.addDockWidget(Qt.RightDockWidgetArea, self.viewer_dock)
 
@@ -742,32 +753,31 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.object_button_layout = QHBoxLayout()
         self.object_button_widget.setLayout(self.object_button_layout)
 
-        #self.lblSelect = QLabel(self.tr("Select"))
-        #self.rbSelectCells = QRadioButton(self.tr("Cells"))
-        #self.rbSelectCells.setChecked(True)
-        #self.rbSelectCells.clicked.connect(self.on_rbSelectCells_clicked)
-        #self.rbSelectRows = QRadioButton(self.tr("Rows"))
-        #self.rbSelectRows.clicked.connect(self.on_rbSelectRows_clicked)
-        #self.select_layout = QHBoxLayout()
-        #self.select_widget = QWidget()
-        #self.select_widget.setLayout(self.select_layout)
-        #self.select_layout.addWidget(self.lblSelect)
-        #self.select_layout.addWidget(self.rbSelectCells)
-        #self.select_layout.addWidget(self.rbSelectRows)
-
+        # self.lblSelect = QLabel(self.tr("Select"))
+        # self.rbSelectCells = QRadioButton(self.tr("Cells"))
+        # self.rbSelectCells.setChecked(True)
+        # self.rbSelectCells.clicked.connect(self.on_rbSelectCells_clicked)
+        # self.rbSelectRows = QRadioButton(self.tr("Rows"))
+        # self.rbSelectRows.clicked.connect(self.on_rbSelectRows_clicked)
+        # self.select_layout = QHBoxLayout()
+        # self.select_widget = QWidget()
+        # self.select_widget.setLayout(self.select_layout)
+        # self.select_layout.addWidget(self.lblSelect)
+        # self.select_layout.addWidget(self.rbSelectCells)
+        # self.select_layout.addWidget(self.rbSelectRows)
 
         self.btnSaveChanges = QPushButton(self.tr("Save Changes"))
         self.btnEditObject = QPushButton(self.tr("Edit Object"))
         self.btnAddObject = QPushButton(self.tr("Add Object"))
         self.btnAddProperty = QPushButton(self.tr("Add Variable"))
-        #self.object_button_layout.addWidget(self.select_widget)
+        # self.object_button_layout.addWidget(self.select_widget)
         self.object_button_layout.addWidget(self.btnAddObject)
         self.object_button_layout.addWidget(self.btnEditObject)
         self.object_button_layout.addWidget(self.btnAddProperty)
         self.object_button_layout.addWidget(self.btnSaveChanges)
 
         self.tableview_layout.addWidget(self.tableView)
-        #self.tableview_layout.addWidget(self.object_button_widget)
+        # self.tableview_layout.addWidget(self.object_button_widget)
         self.tableview_widget.setLayout(self.tableview_layout)
         self.btnSaveChanges.clicked.connect(self.on_btnSaveChanges_clicked)
         self.btnAddObject.clicked.connect(self.on_action_new_object_triggered)
@@ -775,23 +785,23 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.btnAddProperty.clicked.connect(self.on_action_add_variable_triggered)
 
         self.hsplitter = QSplitter(Qt.Horizontal)
-        
+
         # Create dataset view that contains table and overlay object viewer
         self.dataset_view = QWidget()
         self.dataset_view.setLayout(QVBoxLayout())
         self.dataset_view.layout().addWidget(self.tableview_widget)
         self.dataset_view.layout().setContentsMargins(0, 0, 0, 0)
-        
+
         # Create overlay container for object viewers (initially hidden)
         self.object_overlay = ResizableOverlayWidget(self.dataset_view)
         self.object_overlay.resize(400, 300)  # Initial size for overlay
         # Background and border are now handled by paintEvent in ResizableOverlayWidget
         self.object_overlay.hide()
-        
+
         # Layout for object viewers inside overlay
         overlay_layout = QVBoxLayout(self.object_overlay)
         overlay_layout.setContentsMargins(5, 5, 5, 5)
-        
+
         # Add close button to overlay
         close_button = QPushButton("×")
         close_button.setFixedSize(20, 20)
@@ -809,11 +819,11 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             }
         """)
         close_button.clicked.connect(self.hide_object_overlay)
-        
+
         # Header layout with title and close button
         header_layout = QHBoxLayout()
         header_layout.setContentsMargins(8, 5, 5, 5)  # Add some padding
-        
+
         # Title label for object name
         self.overlay_title_label = QLabel("Object")
         self.overlay_title_label.setStyleSheet("""
@@ -824,23 +834,23 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             }
         """)
         self.overlay_title_label.setAlignment(Qt.AlignCenter)
-        
+
         header_layout.addStretch()  # Push title to center
         header_layout.addWidget(self.overlay_title_label)
         header_layout.addStretch()  # Push close button to the right
         header_layout.addWidget(close_button)
         overlay_layout.addLayout(header_layout)
-        
+
         if not dockable_object_view:
             # Add object viewers to the overlay instead of vsplitter
             overlay_layout.addWidget(self.object_view_2d)
             overlay_layout.addWidget(self.object_view_3d)
 
-        #self.treeView = MyTreeView()
+        # self.treeView = MyTreeView()
         self.hsplitter.addWidget(self.treeView)
         self.hsplitter.addWidget(self.dataset_view)
         self.hsplitter.setSizes([300, 800])
-        
+
         # Create empty widget to show when nothing is selected
         self.empty_view = QWidget()
         empty_layout = QVBoxLayout()
@@ -849,7 +859,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         empty_label.setStyleSheet("QLabel { color: gray; font-size: 14px; }")
         empty_layout.addWidget(empty_label)
         self.empty_view.setLayout(empty_layout)
-        
+
         self.analysis_view = QWidget()
         self.analysis_view_layout = QVBoxLayout()
         self.analysis_view.setLayout(self.analysis_view_layout)
@@ -870,8 +880,6 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.analysis_button_widget.setLayout(self.analysis_button_layout)
         self.analysis_view_layout.addWidget(self.analysis_button_widget)
 
-
-
         self.setCentralWidget(self.hsplitter)
 
         self.treeView.doubleClicked.connect(self.on_treeView_doubleClicked)
@@ -889,25 +897,24 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         if self.actionRowSelection.isChecked():
             self.tableView.set_rows_selection_mode()
 
-    #def on_rbSelectCells_clicked(self):
+    # def on_rbSelectCells_clicked(self):
     #    self.tableView.set_cells_selection_mode()
-        
-    #def on_rbSelectRows_clicked(self):
-    #    self.tableView.set_rows_selection_mode()
-        
-    def btnAnalysisDetail_clicked(self):
-        #self.detail_dialog = DatasetAnalysisDialog(self.parent)
-        self.analysis_dialog = DatasetAnalysisDialog(self,self.analysis_info_widget.analysis.dataset)
-        self.analysis_dialog.show()
 
+    # def on_rbSelectRows_clicked(self):
+    #    self.tableView.set_rows_selection_mode()
+
+    def btnAnalysisDetail_clicked(self):
+        # self.detail_dialog = DatasetAnalysisDialog(self.parent)
+        self.analysis_dialog = DatasetAnalysisDialog(self, self.analysis_info_widget.analysis.dataset)
+        self.analysis_dialog.show()
 
     def btnSaveAnalysis_clicked(self):
         pass
 
     def btnDataExploration_clicked(self):
-        #print("btnExplore_clicked")
+        # print("btnExplore_clicked")
         self.exploration_dialog = DataExplorationDialog(self)
-        #print("exploration dialog created")
+        # print("exploration dialog created")
         # get tab text
         tab_text = self.analysis_info_widget.analysis_tab.tabText(self.analysis_info_widget.analysis_tab.currentIndex())
         if tab_text == "PCA":
@@ -917,19 +924,19 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         elif tab_text == "MANOVA":
             group_by = self.analysis_info_widget.comboManovaGroupBy.currentText()
 
-        #group_by = self.comboCvaGroupBy
-        #print("going to call set_analysis")
+        # group_by = self.comboCvaGroupBy
+        # print("going to call set_analysis")
         self.exploration_dialog.set_analysis(self.analysis_info_widget.analysis, tab_text, group_by)
-        #print("going to update chart")
-        #print("going to show")
+        # print("going to update chart")
+        # print("going to show")
         self.exploration_dialog.show()
         self.exploration_dialog.update_chart()
-        #self.exploration_dialog.activateWindow()
+        # self.exploration_dialog.activateWindow()
 
     def on_action_add_variable_triggered(self):
         if self.selected_dataset is None:
             return
-        text, ok = QInputDialog.getText(self, self.tr('Add Variable'), self.tr('Enter new variable name'), text="")
+        text, ok = QInputDialog.getText(self, self.tr("Add Variable"), self.tr("Enter new variable name"), text="")
         if ok:
             self.selected_dataset.add_variablename(text)
             ds = self.selected_dataset
@@ -945,14 +952,19 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.object_model.resetColors()
         self.data_changed = False
         self.btnSaveChanges.setEnabled(False)
-        #indexes = self.tableView.selectedIndexes()
+        # indexes = self.tableView.selectedIndexes()
 
     @pyqtSlot()
     def on_action_delete_object_triggered(self):
-        ret = QMessageBox.warning(self, self.tr("Warning"), self.tr("Are you sure to delete the selected object?"), QMessageBox.Yes | QMessageBox.No)
+        ret = QMessageBox.warning(
+            self,
+            self.tr("Warning"),
+            self.tr("Are you sure to delete the selected object?"),
+            QMessageBox.Yes | QMessageBox.No,
+        )
         if ret == QMessageBox.No:
             return
-        
+
         selected_object_list = self.get_selected_object_list()
         if selected_object_list:
             for object in selected_object_list:
@@ -966,8 +978,6 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     def open_treeview_menu(self, position):
         indexes = self.treeView.selectedIndexes()
         if len(indexes) > 0:
-
-            level = 0
             index = indexes[0]
             action_add_dataset = QAction(self.tr("Add child dataset"))
             action_add_dataset.triggered.connect(self.on_action_new_dataset_triggered)
@@ -994,14 +1004,19 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 menu.addAction(action_add_analysis)
                 menu.addAction(self.actionExport)
                 menu.addAction(action_refresh_tree)
-            elif isinstance(obj, MdAnalysis):                
-                #menu.addAction(action_explore_data)
+            elif isinstance(obj, MdAnalysis):
+                # menu.addAction(action_explore_data)
                 menu.addAction(action_delete_analysis)
                 menu.addAction(action_refresh_tree)
             menu.exec_(self.treeView.viewport().mapToGlobal(position))
 
     def on_action_delete_analysis_triggered(self):
-        ret = QMessageBox.warning(self, self.tr("Warning"), self.tr("Are you sure to delete the selected analysis?"), QMessageBox.Yes | QMessageBox.No)
+        ret = QMessageBox.warning(
+            self,
+            self.tr("Warning"),
+            self.tr("Are you sure to delete the selected analysis?"),
+            QMessageBox.Yes | QMessageBox.No,
+        )
         if ret == QMessageBox.No:
             return
         selected_indexes = self.treeView.selectionModel().selectedRows()
@@ -1024,7 +1039,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.dlg.setModal(True)
         self.dlg.setWindowModality(Qt.ApplicationModal)
         self.dlg.exec_()
-        # Controller signals will handle UI updates automatically        
+        # Controller signals will handle UI updates automatically
 
     @pyqtSlot()
     def on_action_export_dataset_triggered(self):
@@ -1061,11 +1076,10 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         else:
             self.dlg.set_parent_dataset(None)
 
-        ret = self.dlg.exec_()
+        self.dlg.exec_()
         # Controller signals will handle the UI updates automatically
         self.load_dataset()
         self.reset_tableView()
-
 
     def get_selected_dataset(self):
         selected_indexes = self.treeView.selectionModel().selectedRows()
@@ -1080,7 +1094,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             return selected_dataset_list[0]
 
     @pyqtSlot()
-    def on_treeView_clicked(self,event):
+    def on_treeView_clicked(self, event):
         event.accept()
         # The on_dataset_selection_changed handler will take care of button states
         # This handler is just for accepting the event
@@ -1090,21 +1104,21 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.dlg = DatasetDialog(self)
         self.dlg.setModal(True)
 
-        #print("wireframe 1:", self.selected_dataset.wireframe)
+        # print("wireframe 1:", self.selected_dataset.wireframe)
         self.selected_dataset = self.selected_dataset.get_by_id(self.selected_dataset.id)
-        #print("wireframe 2:", self.selected_dataset.wireframe)
+        # print("wireframe 2:", self.selected_dataset.wireframe)
         self.selected_dataset.unpack_wireframe()
 
-        self.dlg.set_dataset( self.selected_dataset )
+        self.dlg.set_dataset(self.selected_dataset)
         ret = self.dlg.exec_()
         if ret == 0:
             return
         elif ret == 1:
-            if self.selected_dataset is None: #deleted
+            if self.selected_dataset is None:  # deleted
                 self.load_dataset()
                 self.reset_tableView()
             else:
-                #self.dlg.set_parent_dataset( self.selected_dataset )
+                # self.dlg.set_parent_dataset( self.selected_dataset )
 
                 dataset = self.selected_dataset
                 self.reset_treeView()
@@ -1112,18 +1126,18 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 self.reset_tableView()
                 self.select_dataset(dataset)
 
-    def select_dataset(self,dataset,node=None):
+    def select_dataset(self, dataset, node=None):
         if dataset is None:
             return
         if node is None:
-            node = self.dataset_model.invisibleRootItem()   
+            node = self.dataset_model.invisibleRootItem()
 
         for i in range(node.rowCount()):
-            item = node.child(i,0)
+            item = node.child(i, 0)
             if item.data() == dataset:
                 self.treeView.setCurrentIndex(item.index())
                 break
-            self.select_dataset(dataset,node.child(i,0))
+            self.select_dataset(dataset, node.child(i, 0))
 
     @pyqtSlot()
     def on_action_new_object_triggered(self):
@@ -1142,16 +1156,16 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                     return
             else:
                 dataset = self.selected_dataset
-                
+
             logger.debug(f"dataset object = {dataset}")
-            
+
             # Ensure controller knows about selected dataset
             self.controller.set_current_dataset(dataset)
             new_object = self.controller.create_object()
             if new_object is None:
                 return  # Error already handled by controller
             logger.debug(f"new_object = {new_object}")
-            
+
             self.dlg = ObjectDialog(self)
             self.dlg.set_dataset(dataset)
             self.dlg.set_object(new_object)
@@ -1171,7 +1185,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.dlg = ObjectDialog(self)
         self.dlg.setModal(True)
         self.dlg.set_dataset(self.selected_dataset)
-        self.dlg.set_object( self.selected_object )
+        self.dlg.set_object(self.selected_object)
         self.dlg.set_tableview(self.tableView)
         ret = self.dlg.exec_()
         if ret == 0:
@@ -1198,7 +1212,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.treeView.setHeaderHidden(True)
         self.dataset_selection_model = self.treeView.selectionModel()
         self.dataset_selection_model.selectionChanged.connect(self.on_dataset_selection_changed)
-        header = self.treeView.header()
+        self.treeView.header()
         self.treeView.setSelectionBehavior(QTreeView.SelectRows)
 
         self.treeView.setDragEnabled(True)
@@ -1209,7 +1223,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.treeView.dragLeaveEvent = self.treeView_drag_leave_event
         self.treeView.dragMoveEvent = self.treeView_drag_move_event
 
-    #def treeView_drag_enter_event(self, event):
+    # def treeView_drag_enter_event(self, event):
     #    event.accept()
     def treeView_drag_enter_event(self, event):
         event.accept()
@@ -1227,7 +1241,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         target_item = self.dataset_model.itemFromIndex(target_index)
         if not target_item:
             return
-        target_dataset = target_item.data()
+        target_item.data()
         return
 
     def treeView_drag_move_event(self, event):
@@ -1236,7 +1250,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         target_item = self.dataset_model.itemFromIndex(target_index)
         if not target_item:
             return
-        target_dataset = target_item.data()
+        target_item.data()
 
         # Update cursor based on modifier keys
         if QApplication.keyboardModifiers() & Qt.ControlModifier:
@@ -1253,7 +1267,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
     def dropEvent(self, event):
         if event.source() == self.treeView:
-            target_index=self.treeView.indexAt(event.pos())
+            target_index = self.treeView.indexAt(event.pos())
             target_item = self.dataset_model.itemFromIndex(target_index)
             target_dataset = target_item.data()
 
@@ -1272,7 +1286,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             if modifiers == Qt.ShiftModifier:
                 shift_clicked = True
 
-            target_index=self.treeView.indexAt(event.pos())
+            target_index = self.treeView.indexAt(event.pos())
             target_item = self.dataset_model.itemFromIndex(target_index)
             target_dataset = target_item.data()
             selected_object_list = self.get_selected_object_list()
@@ -1290,11 +1304,10 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             self.progress_dialog.pb_progress.setValue(0)
             self.progress_dialog.show()
 
-
             for source_object in selected_object_list:
                 source_dataset = source_object.dataset
                 current_count += 1
-                self.progress_dialog.pb_progress.setValue(int((current_count/float(total_count))*100))
+                self.progress_dialog.pb_progress.setValue(int((current_count / float(total_count)) * 100))
                 self.progress_dialog.update()
                 QApplication.processEvents()
                 if self.progress_dialog.stop_progress:
@@ -1315,7 +1328,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                         elif source_object.has_threed_model():
                             new_model = source_object.get_threed_model().copy_threed_model(new_object)
                             new_model.save()
-                            
+
                 else:
                     QMessageBox.warning(self, self.tr("Warning"), self.tr("Dimension mismatch"))
                     break
@@ -1342,7 +1355,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
         new_index_list = []
         model = selected_indexes[0].model()
-        if hasattr(model, 'mapToSource'):
+        if hasattr(model, "mapToSource"):
             for index in selected_indexes:
                 new_index = model.mapToSource(index)
                 new_index_list.append(new_index)
@@ -1373,8 +1386,8 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         header_labels = ["ID", "Seq.", "Name", "Count", "CSize"]
         if self.selected_dataset is not None:
             self.selected_dataset.unpack_variablename_str()
-            if self.selected_dataset.variablename_list is not None and len( self.selected_dataset.variablename_list ) > 0:
-                header_labels.extend( self.selected_dataset.variablename_list )
+            if self.selected_dataset.variablename_list is not None and len(self.selected_dataset.variablename_list) > 0:
+                header_labels.extend(self.selected_dataset.variablename_list)
             if self.selected_dataset.dimension == 2:
                 self.object_view = self.object_view_2d
                 self.object_view_2d.show()
@@ -1383,12 +1396,12 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 self.object_view = self.object_view_3d
                 self.object_view_2d.hide()
                 self.object_view_3d.show()
-        self.object_model.setHorizontalHeader( header_labels )
+        self.object_model.setHorizontalHeader(header_labels)
         self.proxy_model = QSortFilterProxyModel()
         self.proxy_model.setSourceModel(self.object_model)
-        self.tableView.setModel(self.proxy_model)        
-        header = self.tableView.horizontalHeader()    
-        header.resizeSection(1,200)
+        self.tableView.setModel(self.proxy_model)
+        header = self.tableView.horizontalHeader()
+        header.resizeSection(1, 200)
         header.setDefaultSectionSize(15)
         self.object_selection_model = self.tableView.selectionModel()
         self.object_selection_model.selectionChanged.connect(self.on_object_selection_changed)
@@ -1408,7 +1421,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         logger.debug(f"tableview drop event: {event.mimeData().text()}")
         if self.selected_dataset is None:
             return
-        
+
         if event.mimeData().text() == "":
             return
         file_name_list = event.mimeData().text().strip().split("\n")
@@ -1432,13 +1445,13 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
         for file_name in file_name_list:
             current_count += 1
-            self.progress_dialog.pb_progress.setValue(int((current_count/float(total_count))*100))
+            self.progress_dialog.pb_progress.setValue(int((current_count / float(total_count)) * 100))
             self.progress_dialog.update()
             QApplication.processEvents()
 
             file_name = mu.process_dropped_file_name(file_name)
 
-            ext = file_name.split('.')[-1].lower()
+            ext = file_name.split(".")[-1].lower()
             if ext in mu.IMAGE_EXTENSION_LIST:
                 if self.selected_dataset.dimension != 2:
                     QMessageBox.warning(self, self.tr("Warning"), self.tr("Dimension mismatch."))
@@ -1458,10 +1471,10 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 mdl.save()
 
             elif os.path.isdir(file_name):
-                self.statusBar.showMessage(self.tr("Cannot process directory..."),2000)
+                self.statusBar.showMessage(self.tr("Cannot process directory..."), 2000)
 
             else:
-                self.statusBar.showMessage(self.tr("Nothing to import."),2000)
+                self.statusBar.showMessage(self.tr("Nothing to import."), 2000)
 
             self.load_object()
 
@@ -1481,42 +1494,43 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         logger.debug(f"drag enter: {event.mimeData().text()}")
         file_name_list = event.mimeData().text().strip().split("\n")
         logger.debug(f"file name list: {file_name_list}")
-        ext = file_name_list[0].split('.')[-1].lower()
+        ext = file_name_list[0].split(".")[-1].lower()
         logger.debug(f"ext: {ext}")
-        if ext in ['png', 'jpg', 'jpeg','bmp','gif','tif','tiff']:
+        if ext in ["png", "jpg", "jpeg", "bmp", "gif", "tif", "tiff"]:
             logger.debug("image file")
             logger.debug(f"source: {event.source()}")
             logger.debug(f"proposed action: {event.proposedAction()}")
             logger.debug(f"drop action: {event.dropAction()}")
             logger.debug(f"possible action: {int(event.possibleActions())}")
-            logger.debug(f"kinds of drop actions: {Qt.CopyAction}, {Qt.MoveAction}, {Qt.LinkAction}, {Qt.ActionMask}, {Qt.TargetMoveAction}")
-            #event.acceptProposedAction()
+            logger.debug(
+                f"kinds of drop actions: {Qt.CopyAction}, {Qt.MoveAction}, {Qt.LinkAction}, {Qt.ActionMask}, {Qt.TargetMoveAction}"
+            )
+            # event.acceptProposedAction()
             event.setDropAction(Qt.CopyAction)
             event.accept()
         else:
             event.ignore()
 
-
     def tableView_drag_move_event(self, event):
         self.copy_cursor = QCursor(Qt.DragCopyCursor)
         self.move_cursor = QCursor(Qt.DragMoveCursor)
-        #print("table view drag move event")
-        #print("drag move", event.mimeData().text())
+        # print("table view drag move event")
+        # print("drag move", event.mimeData().text())
 
         # Check if Shift is pressed
         modifiers = QApplication.queryKeyboardModifiers()
         if bool(modifiers & Qt.ShiftModifier):
             logger = logging.getLogger(__name__)
             logger.debug("copy cursor")
-            #QApplication.restoreOverrideCursor()
-            #QApplication.setOverrideCursor(Qt.CrossCursor) 
-            #QApplication.changeOverrideCursor(self.copy_cursor)
+            # QApplication.restoreOverrideCursor()
+            # QApplication.setOverrideCursor(Qt.CrossCursor)
+            # QApplication.changeOverrideCursor(self.copy_cursor)
         else:
             logger = logging.getLogger(__name__)
             logger.debug("move cursor")
-            #QApplication.restoreOverrideCursor()
-            #QApplication.setOverrideCursor(Qt.ClosedHandCursor) 
-            #QApplication.changeOverrideCursor(self.move_cursor)
+            # QApplication.restoreOverrideCursor()
+            # QApplication.setOverrideCursor(Qt.ClosedHandCursor)
+            # QApplication.changeOverrideCursor(self.move_cursor)
 
         event.accept()
 
@@ -1529,16 +1543,23 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         logger.debug(f"drag move: {event.mimeData().text()}")
         file_name_list = event.mimeData().text().strip().split("\n")
         logger.debug(f"file name list: {file_name_list}")
-        ext = file_name_list[0].split('.')[-1].lower()
+        ext = file_name_list[0].split(".")[-1].lower()
         logger.debug(f"ext: {ext}")
-        if ext in ['png', 'jpg', 'jpeg','bmp','gif','tif','tiff']:
+        if ext in ["png", "jpg", "jpeg", "bmp", "gif", "tif", "tiff"]:
             logger.debug("image file")
             logger.debug(f"source: {event.source()}")
             logger.debug(f"proposed action: {event.proposedAction()}")
             logger.debug(f"drop action: {event.dropAction()}")
             logger.debug(f"possible action: {int(event.possibleActions())}")
-            print("kinds of drop actions:", Qt.CopyAction, Qt.MoveAction, Qt.LinkAction, Qt.ActionMask, Qt.TargetMoveAction)
-            #event.acceptProposedAction()
+            print(
+                "kinds of drop actions:",
+                Qt.CopyAction,
+                Qt.MoveAction,
+                Qt.LinkAction,
+                Qt.ActionMask,
+                Qt.TargetMoveAction,
+            )
+            # event.acceptProposedAction()
             event.setDropAction(Qt.CopyAction)
             event.accept()
         else:
@@ -1547,7 +1568,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     def reset_views(self):
         self.reset_treeView()
         self.reset_tableView()
-    
+
     def load_dataset(self):
         self.dataset_model.clear()
         self.selected_dataset = None
@@ -1556,29 +1577,28 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             rec.unpack_wireframe()
             item1 = QStandardItem(rec.dataset_name + " (" + str(rec.object_list.count()) + ")")
             if rec.dimension == 2:
-                item1.setIcon(QIcon(ICON_CONSTANTS['dataset_2d']))
+                item1.setIcon(QIcon(ICON_CONSTANTS["dataset_2d"]))
             else:
-                item1.setIcon(QIcon(ICON_CONSTANTS['dataset_3d']))
+                item1.setIcon(QIcon(ICON_CONSTANTS["dataset_3d"]))
             item2 = QStandardItem(str(rec.id))
             item1.setData(rec)
-            
-            self.dataset_model.appendRow([item1,item2])
+
+            self.dataset_model.appendRow([item1, item2])
             if rec.analyses.count() > 0:
-                self.load_analysis(item1,rec)
+                self.load_analysis(item1, rec)
             if rec.children.count() > 0:
-                self.load_subdataset(item1,item1.data())
+                self.load_subdataset(item1, item1.data())
         self.treeView.expandAll()
         self.treeView.hideColumn(1)
-
 
     def load_analysis(self, parent_item, dataset):
         all_record = MdAnalysis.filter(dataset=dataset)
         for rec in all_record:
             item1 = QStandardItem(rec.analysis_name)
-            item1.setIcon(QIcon(ICON_CONSTANTS['analysis']))
+            item1.setIcon(QIcon(ICON_CONSTANTS["analysis"]))
             item2 = QStandardItem(str(rec.id))
             item1.setData(rec)
-            parent_item.appendRow([item1,item2])
+            parent_item.appendRow([item1, item2])
 
     def load_subdataset(self, parent_item, dataset):
         all_record = MdDataset.filter(parent=dataset)
@@ -1586,20 +1606,25 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             rec.unpack_wireframe()
             item1 = QStandardItem(rec.dataset_name + " (" + str(rec.object_list.count()) + ")")
             if rec.dimension == 2:
-                item1.setIcon(QIcon(ICON_CONSTANTS['dataset_2d'])) 
+                item1.setIcon(QIcon(ICON_CONSTANTS["dataset_2d"]))
             else:
-                item1.setIcon(QIcon(ICON_CONSTANTS['dataset_3d']))
+                item1.setIcon(QIcon(ICON_CONSTANTS["dataset_3d"]))
             item2 = QStandardItem(str(rec.id))
             item1.setData(rec)
-            parent_item.appendRow([item1,item2])#,item3] )
+            parent_item.appendRow([item1, item2])  # ,item3] )
             if rec.analyses.count() > 0:
-                self.load_analysis(item1,rec)
+                self.load_analysis(item1, rec)
             if rec.children.count() > 0:
-                self.load_subdataset(item1,item1.data())
+                self.load_subdataset(item1, item1.data())
 
     def on_dataset_selection_changed(self, selected, deselected):
         if self.data_changed:
-            ret = QMessageBox.warning(self, self.tr("Warning"), self.tr("Data has been changed. Do you want to save?"), QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
+            ret = QMessageBox.warning(
+                self,
+                self.tr("Warning"),
+                self.tr("Data has been changed. Do you want to save?"),
+                QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,
+            )
             if ret == QMessageBox.Yes:
                 self.on_btnSaveChanges_clicked()
             elif ret == QMessageBox.Cancel:
@@ -1611,17 +1636,17 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 return
             else:
                 self.data_changed = False
-            
+
         indexes = selected.indexes()
         if indexes:
             self.object_model.clear()
-            item1 =self.dataset_model.itemFromIndex(indexes[0])
+            item1 = self.dataset_model.itemFromIndex(indexes[0])
             obj = item1.data()
             if isinstance(obj, MdDataset):
                 self.selected_dataset = obj
                 self.load_object()
                 if self.hsplitter.widget(1) != self.dataset_view:
-                    self.hsplitter.replaceWidget(1, self.dataset_view)                
+                    self.hsplitter.replaceWidget(1, self.dataset_view)
                 self.actionAnalyze.setEnabled(True)
                 self.actionNewObject.setEnabled(True)
                 self.actionExport.setEnabled(True)
@@ -1634,7 +1659,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             elif isinstance(obj, MdAnalysis):
                 self.selected_analysis = obj
                 if self.hsplitter.widget(1) != self.analysis_view:
-                    self.hsplitter.replaceWidget(1,self.analysis_view)
+                    self.hsplitter.replaceWidget(1, self.analysis_view)
                 self.analysis_info_widget.set_analysis(self.selected_analysis)
                 self.analysis_info_widget.show_analysis_result()
                 # Disable column mode buttons for analysis
@@ -1651,16 +1676,16 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             self.selected_dataset = None
             self.selected_analysis = None
             self.selected_object = None
-            
+
             # Clear the right panel
             self.object_model.clear()
             self.reset_tableView()
             self.clear_object_view()
-            
+
             # Show empty view
             if self.hsplitter.widget(1) != self.empty_view:
                 self.hsplitter.replaceWidget(1, self.empty_view)
-            
+
             # Disable all dataset/analysis related buttons
             self.actionAnalyze.setEnabled(False)
             self.actionNewObject.setEnabled(False)
@@ -1676,7 +1701,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.clear_object_view()
         self.selected_object = None  # Clear selected object
         self.actionEditObject.setEnabled(False)  # Disable Edit Object button
-        
+
         if self.selected_dataset is None:
             return
 
@@ -1692,17 +1717,17 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 seq = idx + 1
                 obj.sequence = seq
                 obj.save()
-            row_data = [ obj.id, seq, obj.object_name, obj.count_landmarks(), obj.get_centroid_size()]
+            row_data = [obj.id, seq, obj.object_name, obj.count_landmarks(), obj.get_centroid_size()]
 
             if len(self.selected_dataset.variablename_list) > 0:
                 variable_list = obj.unpack_variable()
-                for idx,prop in enumerate(self.selected_dataset.variablename_list):
+                for idx, _prop in enumerate(self.selected_dataset.variablename_list):
                     if idx < len(variable_list):
                         item = variable_list[idx]
                     else:
-                        item = ''
+                        item = ""
                     row_data.append(item)
-            rowdata_list.append( row_data )
+            rowdata_list.append(row_data)
         self.object_model.appendRows(rowdata_list)
 
     def on_object_selection_changed(self, selected, deselected):
@@ -1712,10 +1737,10 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             self.actionEditObject.setEnabled(False)  # Disable Edit Object toolbar button
             self.selected_object = None
             # Reset overlay title when no object is selected
-            if hasattr(self, 'overlay_title_label'):
+            if hasattr(self, "overlay_title_label"):
                 self.overlay_title_label.setText("Object")
             # Clear selected object row highlighting
-            if hasattr(self, 'tableView'):
+            if hasattr(self, "tableView"):
                 self.tableView.setSelectedObjectRow(-1)
             # Hide overlay when no single object is selected
             self.hide_object_overlay()
@@ -1726,14 +1751,14 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         object_id = selected_object_list[0].id
         self.selected_object = MdObject.get_by_id(object_id)
         self.selected_object.unpack_landmark()
-        
+
         # Highlight the selected object row in the table
-        if hasattr(self, 'tableView') and self.tableView.selectionModel():
+        if hasattr(self, "tableView") and self.tableView.selectionModel():
             selected_indexes = self.tableView.selectionModel().selectedIndexes()
             if selected_indexes:
                 selected_row = selected_indexes[0].row()
                 self.tableView.setSelectedObjectRow(selected_row)
-        
+
         self.show_object(self.selected_object)
 
     def show_object(self, obj):
@@ -1742,11 +1767,11 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.object_view.set_object(obj)
         self.object_view.read_only = True
         self.object_view.update()
-        
+
         # Update overlay title with object name
-        if hasattr(self, 'overlay_title_label') and obj:
+        if hasattr(self, "overlay_title_label") and obj:
             self.overlay_title_label.setText(obj.object_name)
-        
+
         # Show the overlay when an object is selected
         self.show_object_overlay()
 
@@ -1754,41 +1779,41 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.object_view.clear_object()
         # Hide the overlay when no object is selected
         self.hide_object_overlay()
-        
+
     def position_object_overlay(self):
         """Position the object overlay in the bottom-right corner of the dataset view"""
-        if hasattr(self, 'object_overlay') and hasattr(self, 'dataset_view'):
+        if hasattr(self, "object_overlay") and hasattr(self, "dataset_view"):
             parent_size = self.dataset_view.size()
             overlay_size = self.object_overlay.size()
-            
+
             # Position in bottom-right corner with some margin
             margin = 10
             x = parent_size.width() - overlay_size.width() - margin
             y = parent_size.height() - overlay_size.height() - margin
-            
+
             self.object_overlay.move(x, y)
-    
+
     def show_object_overlay(self):
         """Show the object overlay and position it correctly"""
-        if hasattr(self, 'object_overlay'):
+        if hasattr(self, "object_overlay"):
             self.position_object_overlay()
             self.object_overlay.show()
             self.object_overlay.raise_()  # Bring to front
-    
+
     def hide_object_overlay(self):
         """Hide the object overlay"""
-        if hasattr(self, 'object_overlay'):
+        if hasattr(self, "object_overlay"):
             self.object_overlay.hide()
-    
+
     def resizeEvent(self, event):
         """Handle window resize to reposition overlay"""
         super().resizeEvent(event)
         # Reposition overlay when window is resized
-        if hasattr(self, 'object_overlay') and self.object_overlay.isVisible():
+        if hasattr(self, "object_overlay") and self.object_overlay.isVisible():
             QTimer.singleShot(0, self.position_object_overlay)  # Defer positioning to next event loop
 
 
-''' 
+"""
 How to make an exe file
 
 pyinstaller --name "Modan2_v0.1.4_20250828.exe" --onefile --noconsole --add-data "icons/*.png;icons" --add-data "translations/*.qm;translations" --add-data "migrations/*;migrations" --icon="icons/Modan2_2.png" Modan2.py
@@ -1804,4 +1829,4 @@ pylupdate5 Modan2.py ModanComponents.py ModanDialogs.py -ts translations/Modan2_
 pylupdate5 Modan2.py ModanComponents.py ModanDialogs.py -ts translations/Modan2_ja.ts
 
 linguist
-'''
+"""

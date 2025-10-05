@@ -1,7 +1,7 @@
 # 로깅 시스템 통합 및 개선
 
-**작성일**: 2025-09-12  
-**작성자**: Claude (with Jikhanjung)  
+**작성일**: 2025-09-12
+**작성자**: Claude (with Jikhanjung)
 **문서 번호**: 049
 
 ## 개요
@@ -73,19 +73,19 @@ main.py (logging.basicConfig with date)
 
 1. **main.py** (10 lines changed)
    - 날짜별 로그 파일명 생성 로직 추가
-   
+
 2. **MdStatistics.py** (4 lines changed)
    - MdLogger 의존성 제거
-   
+
 3. **ModanDialogs.py** (4 lines changed)
    - MdLogger 의존성 제거
-   
+
 4. **MdModel.py** (4 lines changed)
    - MdLogger 의존성 제거
-   
+
 5. **ModanComponents.py** (3 lines changed)
    - MdLogger 의존성 제거, import 정리
-   
+
 6. **Modan2.py** (4 lines changed)
    - MdLogger 의존성 제거
 

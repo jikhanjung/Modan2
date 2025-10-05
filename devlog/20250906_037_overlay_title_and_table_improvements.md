@@ -1,7 +1,7 @@
 # 오버레이 타이틀 및 테이블 UI 개선
 
-**작업일**: 2025-09-06  
-**작업자**: Claude  
+**작업일**: 2025-09-06
+**작업자**: Claude
 **관련 파일**: `Modan2.py`, `ModanComponents.py`
 
 ## 작업 요약
@@ -47,7 +47,7 @@ header_layout.addWidget(close_button)
 ```python
 def show_object(self, obj):
     # ... 기존 코드 ...
-    
+
     # Update overlay title with object name
     if hasattr(self, 'overlay_title_label') and obj:
         self.overlay_title_label.setText(obj.object_name)
@@ -84,7 +84,7 @@ def edit_selected_object(self):
     parent = self.parent()
     while parent and not hasattr(parent, 'actionEditObject'):
         parent = parent.parent()
-    
+
     if parent and hasattr(parent, 'actionEditObject'):
         parent.actionEditObject.trigger()
 ```
@@ -101,11 +101,11 @@ def edit_selected_object(self):
 def paintEvent(self, event):
     """Override paint event to draw row border for selected object"""
     super().paintEvent(event)
-    
+
     if self.selected_object_row >= 0 and self.model():
         painter = QPainter(self.viewport())
         painter.setRenderHint(QPainter.Antialiasing)
-        
+
         # Get the row geometry
         row_rect = QRect()
         for col in range(self.model().columnCount()):
@@ -115,7 +115,7 @@ def paintEvent(self, event):
                     row_rect = cell_rect
                 else:
                     row_rect = row_rect.united(cell_rect)
-        
+
         if not row_rect.isNull():
             # Draw the border around the entire row
             painter.setPen(QPen(QColor(0, 120, 212), 3))  # Blue border, 3px thick
@@ -141,7 +141,7 @@ def setSelectedObjectRow(self, row):
 ```python
 def on_object_selection_changed(self, selected, deselected):
     # ... 기존 코드 ...
-    
+
     # Highlight the selected object row in the table
     if hasattr(self, 'tableView') and self.tableView.selectionModel():
         selected_indexes = self.tableView.selectionModel().selectedIndexes()

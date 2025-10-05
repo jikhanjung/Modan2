@@ -1,4 +1,5 @@
 """Test Procrustes superimposition with missing landmarks."""
+
 import os
 import sys
 
@@ -13,7 +14,7 @@ import MdModel
 from MdModel import MdDataset, MdDatasetOps, MdObject
 
 # Initialize in-memory database for testing
-test_db = SqliteDatabase(':memory:')
+test_db = SqliteDatabase(":memory:")
 
 
 @pytest.fixture
@@ -30,24 +31,22 @@ def setup_database():
 def dataset_no_missing(setup_database):
     """Create dataset with complete landmarks (no missing)."""
     dataset = MdDataset.create(
-        dataset_name="Complete Dataset",
-        dataset_desc="Dataset with no missing landmarks",
-        dimension=2
+        dataset_name="Complete Dataset", dataset_desc="Dataset with no missing landmarks", dimension=2
     )
 
     # Create 3 objects with complete landmarks (simple square pattern)
     landmarks_complete = [
         [[0, 0], [1, 0], [1, 1], [0, 1]],  # Object 1
         [[0.1, 0.1], [1.1, 0.1], [1.1, 1.1], [0.1, 1.1]],  # Object 2 (slightly shifted)
-        [[-0.1, -0.1], [0.9, -0.1], [0.9, 0.9], [-0.1, 0.9]]  # Object 3 (slightly shifted other way)
+        [[-0.1, -0.1], [0.9, -0.1], [0.9, 0.9], [-0.1, 0.9]],  # Object 3 (slightly shifted other way)
     ]
 
     for i, lms in enumerate(landmarks_complete):
-        obj = MdObject.create(
+        MdObject.create(
             dataset=dataset,
-            object_name=f"Object_{i+1}",
-            sequence=i+1,
-            landmark_str="\n".join([f"{lm[0]}\t{lm[1]}" for lm in lms])
+            object_name=f"Object_{i + 1}",
+            sequence=i + 1,
+            landmark_str="\n".join([f"{lm[0]}\t{lm[1]}" for lm in lms]),
         )
 
     return dataset
@@ -57,9 +56,7 @@ def dataset_no_missing(setup_database):
 def dataset_with_missing(setup_database):
     """Create dataset with missing landmarks."""
     dataset = MdDataset.create(
-        dataset_name="Missing Dataset",
-        dataset_desc="Dataset with missing landmarks",
-        dimension=2
+        dataset_name="Missing Dataset", dataset_desc="Dataset with missing landmarks", dimension=2
     )
 
     # Create 3 objects with some missing landmarks
@@ -67,7 +64,7 @@ def dataset_with_missing(setup_database):
     landmarks_missing = [
         [[0, 0], [1, 0], [1, 1], [0, 1]],  # Object 1 - complete
         [["Missing", "Missing"], [1.1, 0.1], [1.1, 1.1], [0.1, 1.1]],  # Object 2 - missing first landmark
-        [[-0.1, -0.1], [0.9, -0.1], ["Missing", "Missing"], [-0.1, 0.9]]  # Object 3 - missing third landmark
+        [[-0.1, -0.1], [0.9, -0.1], ["Missing", "Missing"], [-0.1, 0.9]],  # Object 3 - missing third landmark
     ]
 
     for i, lms in enumerate(landmarks_missing):
@@ -77,11 +74,8 @@ def dataset_with_missing(setup_database):
             y_str = str(lm[1]) if lm[1] != "Missing" else "Missing"
             landmark_strs.append(f"{x_str}\t{y_str}")
 
-        obj = MdObject.create(
-            dataset=dataset,
-            object_name=f"Object_{i+1}",
-            sequence=i+1,
-            landmark_str="\n".join(landmark_strs)
+        MdObject.create(
+            dataset=dataset, object_name=f"Object_{i + 1}", sequence=i + 1, landmark_str="\n".join(landmark_strs)
         )
 
     return dataset
@@ -98,7 +92,7 @@ class TestProcrustesNoMissing:
         result = ds_ops.procrustes_superimposition()
 
         # Should succeed
-        assert result == True
+        assert result
 
         # Check that all objects have been centered and scaled
         for obj in ds_ops.object_list:
@@ -191,12 +185,9 @@ class TestProcrustesWithMissing:
 
         # Create rotation matrix (45 degrees)
         angle = np.pi / 4
-        rotation_matrix = np.array([
-            [np.cos(angle), -np.sin(angle), 0, 0],
-            [np.sin(angle), np.cos(angle), 0, 0],
-            [0, 0, 1, 0],
-            [0, 0, 0, 1]
-        ])
+        rotation_matrix = np.array(
+            [[np.cos(angle), -np.sin(angle), 0, 0], [np.sin(angle), np.cos(angle), 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+        )
 
         obj.apply_rotation_matrix(rotation_matrix)
 
@@ -219,7 +210,7 @@ class TestProcrustesImputation:
 
         # Run Procrustes with imputation
         result = ds_ops.procrustes_superimposition()
-        assert result == True
+        assert result
 
         # After Procrustes, missing landmarks should have been estimated
         # (This test assumes imputation is implemented)
@@ -234,14 +225,10 @@ class TestProcrustesImputation:
         ds_ops = MdDatasetOps(dataset_with_missing)
 
         # Store original missing positions
-        missing_positions = [
-            (1, 0),  # Object 2, landmark 1
-            (2, 2)   # Object 3, landmark 3
-        ]
 
         # Run Procrustes with imputation
         result = ds_ops.procrustes_superimposition()
-        assert result == True
+        assert result
 
         # Check imputed values are reasonable (within bounds of other landmarks)
         obj2_lm1 = ds_ops.object_list[1].landmark_list[0]

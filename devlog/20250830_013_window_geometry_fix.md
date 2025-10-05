@@ -45,10 +45,10 @@ def write_settings(self):
     """Write settings using SettingsWrapper for proper JSON storage"""
     if not hasattr(self.m_app, 'settings') or not hasattr(self.m_app, 'remember_geometry'):
         return
-        
+
     # Save remember geometry setting
     self.m_app.settings.setValue("WindowGeometry/RememberGeometry", self.m_app.remember_geometry)
-    
+
     if self.m_app.remember_geometry:
         # Save maximized state
         if self.isMaximized():
@@ -57,7 +57,7 @@ def write_settings(self):
             self.m_app.settings.setValue("IsMaximized/MainWindow", False)
             # Save window geometry
             self.m_app.settings.setValue("WindowGeometry/MainWindow", self.geometry())
-    
+
     # Save language setting
     if hasattr(self.m_app, 'language'):
         self.m_app.settings.setValue("Language", self.m_app.language)
@@ -71,7 +71,7 @@ def write_settings(self):
 print(f"🔍 READ_SETTINGS - Using saved geometry: x={geometry[0]}, y={geometry[1]}, w={geometry[2]}, h={geometry[3]}")
 print(f"🔍 READ_SETTINGS - Primary monitor size: {primary_rect.width()}x{primary_rect.height()}")
 
-# 쓰기 과정  
+# 쓰기 과정
 print(f"🔍 WRITE_SETTINGS - Current window geometry: x={current_geometry.x()}, y={current_geometry.y()}, w={current_geometry.width()}, h={current_geometry.height()}")
 ```
 
@@ -136,13 +136,13 @@ SettingsWrapper의 키 매핑:
 ```
 🔍 READ_SETTINGS - Using saved geometry: x=2322, y=889, w=1638, h=1101
 🔍 READ_SETTINGS - Screen 0: 3840x2160 at (1920, 0)
-🔍 READ_SETTINGS - Screen 1: 1920x1080 at (0, 416)  
+🔍 READ_SETTINGS - Screen 1: 1920x1080 at (0, 416)
 🔍 SET_GEOMETRY - Requested: [2322, 889, 1638, 1101], After setGeometry(): [2322, 889, 1638, 1101]
 ```
 
 ### 5.2 검증 완료 항목
 - ✅ 윈도우 크기 저장/복원
-- ✅ 윈도우 위치 저장/복원  
+- ✅ 윈도우 위치 저장/복원
 - ✅ 최대화 상태 저장/복원
 - ✅ 멀티모니터 환경 지원
 - ✅ JSON 파일에 올바른 구조로 저장

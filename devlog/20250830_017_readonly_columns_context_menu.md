@@ -1,8 +1,8 @@
 # Readonly Columns Context Menu Implementation
 
-**Date**: 2025-08-30  
-**Author**: Claude  
-**Type**: Feature Implementation  
+**Date**: 2025-08-30
+**Author**: Claude
+**Type**: Feature Implementation
 
 ## Overview
 
@@ -43,12 +43,12 @@ menu.addAction(self.copy_action)
 # Only add paste and other actions if not a read-only column
 if not is_readonly_column:
     menu.addAction(self.paste_action)
-    
+
     # Add Fill sequence for sequence column (column 1)
     if column == 1:
         if hasattr(self, 'fill_sequence_action'):
             menu.addAction(self.fill_sequence_action)
-    
+
     menu.addAction(self.fill_value_action)
     menu.addAction(self.clear_action)
 ```

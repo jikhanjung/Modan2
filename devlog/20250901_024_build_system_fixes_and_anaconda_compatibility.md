@@ -52,7 +52,7 @@ OutputBaseFilename=Modan2_v{#AppVersion}_build{#BuildNumber}_Installer
 ; 이전
 InnoSetup/Output/Modan2_v*_Installer.exe
 
-; 수정 후  
+; 수정 후
 InnoSetup/Output/Modan2_v*_build*_Installer.exe
 ```
 

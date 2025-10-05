@@ -29,6 +29,7 @@ class DragEventFilter(QObject):
                 self.drag_object.setDragCursor(self.move_cursor.pixmap(), Qt.MoveAction)
         return False
 
+
 class CustomTreeView(QTreeView):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -53,12 +54,13 @@ class CustomTreeView(QTreeView):
                 drag.setDragCursor(event_filter.move_cursor.pixmap(), Qt.MoveAction)
 
             # Execute drag operation
-            result = drag.exec_(Qt.CopyAction | Qt.MoveAction)
+            drag.exec_(Qt.CopyAction | Qt.MoveAction)
 
             # Remove the event filter after drag operation
             QApplication.instance().removeEventFilter(event_filter)
 
         super().mouseMoveEvent(event)
+
 
 class CustomTableView(QTableView):
     def __init__(self, parent=None):
@@ -77,6 +79,7 @@ class CustomTableView(QTableView):
         self.model().insertRow(row_count)
         self.model().setData(self.model().index(row_count, 0), text)
         event.accept()
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -99,24 +102,25 @@ class MainWindow(QMainWindow):
 
     def setup_tree_model(self):
         model = QStandardItemModel()
-        model.setHorizontalHeaderLabels(['Items'])
+        model.setHorizontalHeaderLabels(["Items"])
         root = model.invisibleRootItem()
         for i in range(5):
-            item = QStandardItem(f"Item {i+1}")
+            item = QStandardItem(f"Item {i + 1}")
             root.appendRow(item)
             for j in range(3):
-                child = QStandardItem(f"Child {i+1}.{j+1}")
+                child = QStandardItem(f"Child {i + 1}.{j + 1}")
                 item.appendRow(child)
         self.tree_view.setModel(model)
         self.tree_view.expandAll()
 
     def setup_table_model(self):
         model = QStandardItemModel(0, 1)
-        model.setHorizontalHeaderLabels(['Dropped Items'])
+        model.setHorizontalHeaderLabels(["Dropped Items"])
         self.table_view.setModel(model)
         self.table_view.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()

@@ -42,4 +42,3 @@
 
 ## 참고
 - 인덱싱/검색 도구 전반 사용법 및 주의사항은 `AGENTS.md`의 “Code Index & Search Tools” 섹션에 정리되어 있습니다.
-

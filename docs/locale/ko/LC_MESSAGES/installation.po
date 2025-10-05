@@ -409,4 +409,3 @@ msgstr "기여하려면 :doc:`developer_guide` 참조"
 #: ../../installation.rst:332
 msgid "Check the :doc:`changelog` for the latest updates"
 msgstr "최신 업데이트는 :doc:`changelog` 참조"
-

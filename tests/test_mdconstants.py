@@ -1,4 +1,5 @@
 """Tests for MdConstants module."""
+
 import os
 import sys
 from pathlib import Path
@@ -23,7 +24,7 @@ class TestConstants:
         """Test version information."""
         assert isinstance(mc.APP_VERSION, str)
         assert len(mc.APP_VERSION) > 0
-        assert mc.VERSION_INFO['full'] == mc.APP_VERSION
+        assert mc.VERSION_INFO["full"] == mc.APP_VERSION
 
 
 class TestPathConstants:
@@ -52,10 +53,10 @@ class TestIconMappings:
         assert len(mc.ICONS) > 0
 
         # Test some key icons exist
-        assert 'new_dataset' in mc.ICONS
-        assert 'import' in mc.ICONS
-        assert 'analysis' in mc.ICONS
-        assert 'app_icon' in mc.ICONS
+        assert "new_dataset" in mc.ICONS
+        assert "import" in mc.ICONS
+        assert "analysis" in mc.ICONS
+        assert "app_icon" in mc.ICONS
 
 
 class TestFileFilters:
@@ -66,14 +67,14 @@ class TestFileFilters:
         assert isinstance(mc.FILE_FILTERS, dict)
 
         # Test key filters exist
-        assert 'landmark' in mc.FILE_FILTERS
-        assert 'image' in mc.FILE_FILTERS
-        assert '3d_model' in mc.FILE_FILTERS
-        assert 'csv' in mc.FILE_FILTERS
+        assert "landmark" in mc.FILE_FILTERS
+        assert "image" in mc.FILE_FILTERS
+        assert "3d_model" in mc.FILE_FILTERS
+        assert "csv" in mc.FILE_FILTERS
 
     def test_filter_format(self):
         """Test filter strings are properly formatted."""
-        for filter_name, filter_str in mc.FILE_FILTERS.items():
+        for _filter_name, filter_str in mc.FILE_FILTERS.items():
             assert isinstance(filter_str, str)
             assert len(filter_str) > 0
 
@@ -87,15 +88,15 @@ class TestDefaultSettings:
         assert len(mc.DEFAULT_SETTINGS) > 0
 
         # Test critical settings exist
-        assert 'language' in mc.DEFAULT_SETTINGS
-        assert 'theme' in mc.DEFAULT_SETTINGS
-        assert 'auto_save' in mc.DEFAULT_SETTINGS
+        assert "language" in mc.DEFAULT_SETTINGS
+        assert "theme" in mc.DEFAULT_SETTINGS
+        assert "auto_save" in mc.DEFAULT_SETTINGS
 
     def test_setting_types(self):
         """Test default setting types."""
-        assert isinstance(mc.DEFAULT_SETTINGS['auto_save'], bool)
-        assert isinstance(mc.DEFAULT_SETTINGS['auto_save_interval'], int)
-        assert isinstance(mc.DEFAULT_SETTINGS['max_recent_files'], int)
+        assert isinstance(mc.DEFAULT_SETTINGS["auto_save"], bool)
+        assert isinstance(mc.DEFAULT_SETTINGS["auto_save_interval"], int)
+        assert isinstance(mc.DEFAULT_SETTINGS["max_recent_files"], int)
 
 
 class TestAnalysisTypes:
@@ -109,20 +110,20 @@ class TestAnalysisTypes:
     def test_analysis_type_structure(self):
         """Test each analysis type has required fields."""
         for analysis in mc.ANALYSIS_TYPES:
-            assert 'name' in analysis
-            assert 'display_name' in analysis
-            assert 'description' in analysis
-            assert 'min_objects' in analysis
-            assert 'supports_2d' in analysis
-            assert 'supports_3d' in analysis
+            assert "name" in analysis
+            assert "display_name" in analysis
+            assert "description" in analysis
+            assert "min_objects" in analysis
+            assert "supports_2d" in analysis
+            assert "supports_3d" in analysis
 
     def test_analysis_names(self):
         """Test expected analysis types exist."""
-        names = [a['name'] for a in mc.ANALYSIS_TYPES]
-        assert 'PCA' in names
-        assert 'CVA' in names
-        assert 'MANOVA' in names
-        assert 'PROCRUSTES' in names
+        names = [a["name"] for a in mc.ANALYSIS_TYPES]
+        assert "PCA" in names
+        assert "CVA" in names
+        assert "MANOVA" in names
+        assert "PROCRUSTES" in names
 
 
 class TestSupportedExtensions:
@@ -133,9 +134,9 @@ class TestSupportedExtensions:
         assert isinstance(mc.SUPPORTED_EXTENSIONS, dict)
 
         # Test categories exist
-        assert 'landmark' in mc.SUPPORTED_EXTENSIONS
-        assert 'image' in mc.SUPPORTED_EXTENSIONS
-        assert '3d_model' in mc.SUPPORTED_EXTENSIONS
+        assert "landmark" in mc.SUPPORTED_EXTENSIONS
+        assert "image" in mc.SUPPORTED_EXTENSIONS
+        assert "3d_model" in mc.SUPPORTED_EXTENSIONS
 
     def test_all_supported_extensions(self):
         """Test ALL_SUPPORTED_EXTENSIONS list."""
@@ -143,9 +144,9 @@ class TestSupportedExtensions:
         assert len(mc.ALL_SUPPORTED_EXTENSIONS) > 0
 
         # Test includes extensions from different categories
-        assert '.tps' in mc.ALL_SUPPORTED_EXTENSIONS
-        assert '.jpg' in mc.ALL_SUPPORTED_EXTENSIONS or '.jpeg' in mc.ALL_SUPPORTED_EXTENSIONS
-        assert '.obj' in mc.ALL_SUPPORTED_EXTENSIONS
+        assert ".tps" in mc.ALL_SUPPORTED_EXTENSIONS
+        assert ".jpg" in mc.ALL_SUPPORTED_EXTENSIONS or ".jpeg" in mc.ALL_SUPPORTED_EXTENSIONS
+        assert ".obj" in mc.ALL_SUPPORTED_EXTENSIONS
 
 
 class TestMessages:
@@ -155,20 +156,20 @@ class TestMessages:
         """Test ERROR_MESSAGES dictionary."""
         assert isinstance(mc.ERROR_MESSAGES, dict)
         assert len(mc.ERROR_MESSAGES) > 0
-        assert 'no_dataset' in mc.ERROR_MESSAGES
-        assert 'invalid_file' in mc.ERROR_MESSAGES
+        assert "no_dataset" in mc.ERROR_MESSAGES
+        assert "invalid_file" in mc.ERROR_MESSAGES
 
     def test_warning_messages(self):
         """Test WARNING_MESSAGES dictionary."""
         assert isinstance(mc.WARNING_MESSAGES, dict)
         assert len(mc.WARNING_MESSAGES) > 0
-        assert 'unsaved_changes' in mc.WARNING_MESSAGES
+        assert "unsaved_changes" in mc.WARNING_MESSAGES
 
     def test_info_messages(self):
         """Test INFO_MESSAGES dictionary."""
         assert isinstance(mc.INFO_MESSAGES, dict)
         assert len(mc.INFO_MESSAGES) > 0
-        assert 'dataset_created' in mc.INFO_MESSAGES
+        assert "dataset_created" in mc.INFO_MESSAGES
 
 
 class TestHelperFunctions:
@@ -177,87 +178,87 @@ class TestHelperFunctions:
     def test_get_icon_path(self):
         """Test get_icon_path function."""
         # Test valid icon
-        path = mc.get_icon_path('app_icon')
+        path = mc.get_icon_path("app_icon")
         assert isinstance(path, str)
         assert len(path) > 0
 
         # Test invalid icon
-        path = mc.get_icon_path('nonexistent_icon')
-        assert path == ''
+        path = mc.get_icon_path("nonexistent_icon")
+        assert path == ""
 
     def test_get_file_filter(self):
         """Test get_file_filter function."""
         # Test valid filter
-        filter_str = mc.get_file_filter('landmark')
+        filter_str = mc.get_file_filter("landmark")
         assert isinstance(filter_str, str)
         assert len(filter_str) > 0
-        assert 'tps' in filter_str.lower() or 'TPS' in filter_str
+        assert "tps" in filter_str.lower() or "TPS" in filter_str
 
         # Test invalid filter
-        filter_str = mc.get_file_filter('nonexistent_filter')
-        assert filter_str == 'All Files (*.*)'
+        filter_str = mc.get_file_filter("nonexistent_filter")
+        assert filter_str == "All Files (*.*)"
 
     def test_get_analysis_info(self):
         """Test get_analysis_info function."""
         # Test valid analysis
-        info = mc.get_analysis_info('PCA')
+        info = mc.get_analysis_info("PCA")
         assert isinstance(info, dict)
-        assert info['name'] == 'PCA'
-        assert 'display_name' in info
+        assert info["name"] == "PCA"
+        assert "display_name" in info
 
         # Test case insensitivity
-        info = mc.get_analysis_info('pca')
+        info = mc.get_analysis_info("pca")
         assert isinstance(info, dict)
-        assert info['name'] == 'PCA'
+        assert info["name"] == "PCA"
 
         # Test invalid analysis
-        info = mc.get_analysis_info('INVALID_ANALYSIS')
+        info = mc.get_analysis_info("INVALID_ANALYSIS")
         assert isinstance(info, dict)
         assert len(info) == 0
 
     def test_is_supported_file(self):
         """Test is_supported_file function."""
         # Test supported files
-        assert mc.is_supported_file('test.tps') == True
-        assert mc.is_supported_file('test.nts') == True
-        assert mc.is_supported_file('test.jpg') == True
-        assert mc.is_supported_file('test.obj') == True
+        assert mc.is_supported_file("test.tps")
+        assert mc.is_supported_file("test.nts")
+        assert mc.is_supported_file("test.jpg")
+        assert mc.is_supported_file("test.obj")
 
         # Test case insensitivity
-        assert mc.is_supported_file('TEST.TPS') == True
-        assert mc.is_supported_file('TEST.JPG') == True
+        assert mc.is_supported_file("TEST.TPS")
+        assert mc.is_supported_file("TEST.JPG")
 
         # Test unsupported files
-        assert mc.is_supported_file('test.xyz') == False
-        assert mc.is_supported_file('test.doc') == False
+        assert not mc.is_supported_file("test.xyz")
+        assert not mc.is_supported_file("test.doc")
 
         # Test with path
-        assert mc.is_supported_file('/path/to/file.tps') == True
-        assert mc.is_supported_file('/path/to/file.unknown') == False
+        assert mc.is_supported_file("/path/to/file.tps")
+        assert not mc.is_supported_file("/path/to/file.unknown")
 
     def test_get_file_category(self):
         """Test get_file_category function."""
         # Test landmark files
-        assert mc.get_file_category('test.tps') == 'landmark'
-        assert mc.get_file_category('test.nts') == 'landmark'
+        assert mc.get_file_category("test.tps") == "landmark"
+        assert mc.get_file_category("test.nts") == "landmark"
 
         # Test image files
-        category = mc.get_file_category('test.jpg')
-        assert category == 'image'
+        category = mc.get_file_category("test.jpg")
+        assert category == "image"
 
         # Test 3D model files
-        category = mc.get_file_category('test.obj')
-        assert category == '3d_model'
+        category = mc.get_file_category("test.obj")
+        assert category == "3d_model"
 
         # Test case insensitivity
-        assert mc.get_file_category('TEST.TPS') == 'landmark'
+        assert mc.get_file_category("TEST.TPS") == "landmark"
 
         # Test unknown files
-        assert mc.get_file_category('test.xyz') == 'unknown'
-        assert mc.get_file_category('test.doc') == 'unknown'
+        assert mc.get_file_category("test.xyz") == "unknown"
+        assert mc.get_file_category("test.doc") == "unknown"
 
         # Test with paths
-        assert mc.get_file_category('/path/to/file.tps') == 'landmark'
+        assert mc.get_file_category("/path/to/file.tps") == "landmark"
 
 
 class TestValidationConstants:
@@ -266,9 +267,9 @@ class TestValidationConstants:
     def test_validation_dict(self):
         """Test VALIDATION dictionary."""
         assert isinstance(mc.VALIDATION, dict)
-        assert mc.VALIDATION['min_landmarks'] >= 3
-        assert mc.VALIDATION['min_objects_for_pca'] >= 2
-        assert mc.VALIDATION['min_objects_for_cva'] >= 6
+        assert mc.VALIDATION["min_landmarks"] >= 3
+        assert mc.VALIDATION["min_objects_for_pca"] >= 2
+        assert mc.VALIDATION["min_objects_for_cva"] >= 6
 
 
 class TestDatabaseConstants:
@@ -277,8 +278,8 @@ class TestDatabaseConstants:
     def test_database_dict(self):
         """Test DATABASE dictionary."""
         assert isinstance(mc.DATABASE, dict)
-        assert 'default_name' in mc.DATABASE
-        assert mc.DATABASE['default_name'] == 'modan2.db'
+        assert "default_name" in mc.DATABASE
+        assert mc.DATABASE["default_name"] == "modan2.db"
 
 
 class TestExportFormats:
@@ -287,12 +288,12 @@ class TestExportFormats:
     def test_export_formats_dict(self):
         """Test EXPORT_FORMATS dictionary."""
         assert isinstance(mc.EXPORT_FORMATS, dict)
-        assert 'csv' in mc.EXPORT_FORMATS
-        assert 'excel' in mc.EXPORT_FORMATS
+        assert "csv" in mc.EXPORT_FORMATS
+        assert "excel" in mc.EXPORT_FORMATS
 
     def test_export_format_structure(self):
         """Test each export format has required fields."""
-        for format_name, format_info in mc.EXPORT_FORMATS.items():
-            assert 'name' in format_info
-            assert 'extension' in format_info
-            assert 'supports_landmarks' in format_info
+        for _format_name, format_info in mc.EXPORT_FORMATS.items():
+            assert "name" in format_info
+            assert "extension" in format_info
+            assert "supports_landmarks" in format_info

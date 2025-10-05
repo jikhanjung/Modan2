@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **새로운 API 함수들 (MdUtils.py)**
   - `serialize_dataset_to_json()` - 데이터셋을 JSON 구조로 직렬화
-  - `create_zip_package()` - 파일 수집 및 ZIP 패키징  
+  - `create_zip_package()` - 파일 수집 및 ZIP 패키징
   - `import_dataset_from_zip()` - 안전한 ZIP 기반 데이터셋 import
   - `collect_dataset_files()` - 데이터셋 관련 파일 경로 수집
   - `estimate_package_size()` - 패키지 크기 추정
@@ -43,7 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **기존 export 형식 유지**
   - TPS, NTS, Morphologika, CSV/Excel 형식 계속 지원
   - JSON+ZIP은 완전한 백업용 추가 옵션으로 제공
-  
+
 - **파일 명명 규칙 개선**
   - ZIP 내부 파일은 `<object_id>.<ext>` 형식으로 충돌 방지
   - 상대 경로 사용으로 플랫폼 독립성 확보

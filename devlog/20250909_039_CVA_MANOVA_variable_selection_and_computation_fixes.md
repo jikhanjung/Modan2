@@ -9,7 +9,7 @@ Claude
 ## 문제 상황
 
 ### 1. 변수 선택 버그
-**증상**: 
+**증상**:
 - 분석 대화상자에서 CVA/MANOVA를 위해 'prey' 변수를 선택했지만, 실제 분석은 'diet' 변수로 수행됨
 - 사용자가 선택한 변수가 무시되고 다른 변수가 사용되는 문제
 
@@ -69,23 +69,23 @@ analysis = MdModel.MdAnalysis.create(
 ```python
 def _run_manova(self, landmarks_data, params):
     pca_result = params.get('pca_result', None)
-    
+
     if pca_result and 'scores' in pca_result:
         # eigenvalue 기반으로 95% 분산을 설명하는 컴포넌트 선택
         eigenvalues = pca_result['explained_variance']
         total_variance = sum(eigenvalues)
         cumulative_variance = 0
-        
+
         for i, eigenvalue in enumerate(eigenvalues):
             cumulative_variance += eigenvalue
             if cumulative_variance / total_variance >= 0.95:
                 effective_components = i + 1
                 break
-        
+
         # 최대 20개로 제한 (계산 안정성)
         if effective_components > 20:
             effective_components = 20
-        
+
         # PCA 점수 추출 및 MANOVA 수행
         pca_scores = pca_result['scores']
         manova_data = [score[:effective_components] for score in pca_scores]
@@ -99,7 +99,7 @@ def _run_manova(self, landmarks_data, params):
 ```python
 if self.analysis.manova_analysis_result_json:
     manova_result_raw = json.loads(self.analysis.manova_analysis_result_json)
-    
+
     # stat_dict 포맷 확인 및 래핑
     if isinstance(manova_result_raw, dict):
         if 'stat_dict' in manova_result_raw:

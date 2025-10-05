@@ -51,7 +51,7 @@ def validate_version(version: str) -> bool:
     """
     Semantic Versioning 2.0.0 형식 검증
     https://semver.org/
-    
+
     Examples:
         - 0.1.4 (valid)
         - 1.0.0-alpha (valid)
@@ -61,7 +61,7 @@ def validate_version(version: str) -> bool:
     pattern = r'^(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)' \
               r'(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)' \
               r'(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?$'
-    
+
     if not re.match(pattern, version):
         raise ValueError(f"Invalid semantic version format: {version}")
     return True
@@ -69,17 +69,17 @@ def validate_version(version: str) -> bool:
 def parse_version(version: str) -> Tuple[int, int, int, Optional[str]]:
     """
     버전 문자열을 구성 요소로 분해
-    
+
     Returns:
         (major, minor, patch, prerelease)
     """
     validate_version(version)
-    
+
     match = re.match(r'^(\d+)\.(\d+)\.(\d+)(?:-(.+))?$', version)
     if match:
         major, minor, patch, prerelease = match.groups()
         return int(major), int(minor), int(patch), prerelease
-    
+
     raise ValueError(f"Unable to parse version: {version}")
 
 def compare_versions(v1: str, v2: str) -> int:
@@ -89,7 +89,7 @@ def compare_versions(v1: str, v2: str) -> int:
     """
     p1 = parse_version(v1)[:3]  # major, minor, patch only
     p2 = parse_version(v2)[:3]
-    
+
     if p1 < p2:
         return -1
     elif p1 > p2:
@@ -128,23 +128,23 @@ def update_version_file(new_version: str):
     """version.py 파일 업데이트"""
     version_file = Path("version.py")
     content = version_file.read_text()
-    
+
     # 버전 문자열 교체
     new_content = re.sub(
         r'__version__ = ".*?"',
         f'__version__ = "{new_version}"',
         content
     )
-    
+
     # 백업 생성
     backup_file = version_file.with_suffix('.py.bak')
     version_file.rename(backup_file)
-    
+
     try:
         # 새 파일 작성
         version_file.write_text(new_content)
         print(f"✅ Version updated to {new_version}")
-        
+
         # 백업 삭제
         backup_file.unlink()
     except Exception as e:
@@ -155,18 +155,18 @@ def update_version_file(new_version: str):
 def bump_version(bump_type: str = 'patch'):
     """
     버전 증가
-    
+
     Args:
         bump_type: 'major', 'minor', 'patch' 중 하나
     """
     current = get_current_version()
     parts = current.split('.')
-    
+
     if len(parts) != 3:
         raise ValueError(f"Invalid version format: {current}")
-    
+
     major, minor, patch = map(int, parts)
-    
+
     if bump_type == 'major':
         new_version = f"{major + 1}.0.0"
     elif bump_type == 'minor':
@@ -175,22 +175,22 @@ def bump_version(bump_type: str = 'patch'):
         new_version = f"{major}.{minor}.{patch + 1}"
     else:
         raise ValueError(f"Invalid bump type: {bump_type}")
-    
+
     print(f"Bumping version: {current} → {new_version}")
     return new_version
 
 def create_git_tag(version: str, message: Optional[str] = None):
     """Git 태그 생성"""
     tag_name = f"v{version}"
-    
+
     if message is None:
         message = f"Release version {version}"
-    
+
     try:
         # 태그 생성
         subprocess.run(['git', 'tag', '-a', tag_name, '-m', message], check=True)
         print(f"✅ Git tag created: {tag_name}")
-        
+
         # 태그 푸시 여부 확인
         response = input("Push tag to remote? (y/N): ")
         if response.lower() == 'y':
@@ -202,7 +202,7 @@ def create_git_tag(version: str, message: Optional[str] = None):
 def update_changelog(version: str):
     """CHANGELOG.md 자동 업데이트 (선택적)"""
     changelog_file = Path("CHANGELOG.md")
-    
+
     if not changelog_file.exists():
         # CHANGELOG.md가 없으면 생성
         content = f"""# Changelog
@@ -218,19 +218,19 @@ def update_changelog(version: str):
     else:
         # 기존 파일에 새 버전 섹션 추가
         content = changelog_file.read_text()
-        
+
         # 새 버전 섹션 생성
         new_section = f"""
 ## [{version}] - {datetime.now().strftime('%Y-%m-%d')}
 
 ### Added
-- 
+-
 
 ### Changed
-- 
+-
 
 ### Fixed
-- 
+-
 
 """
         # "# Changelog" 다음에 삽입
@@ -241,41 +241,41 @@ def update_changelog(version: str):
 def main():
     """메인 실행 함수"""
     bump_type = sys.argv[1] if len(sys.argv) > 1 else 'patch'
-    
+
     if bump_type not in ['major', 'minor', 'patch']:
         print("Usage: python bump_version.py [major|minor|patch]")
         sys.exit(1)
-    
+
     try:
         # 1. 버전 범프
         new_version = bump_version(bump_type)
-        
+
         # 2. 파일 업데이트
         update_version_file(new_version)
-        
+
         # 3. CHANGELOG 업데이트 (선택적)
         response = input("Update CHANGELOG.md? (y/N): ")
         if response.lower() == 'y':
             update_changelog(new_version)
-        
+
         # 4. Git 커밋
         response = input("Create git commit? (y/N): ")
         if response.lower() == 'y':
             subprocess.run(['git', 'add', 'version.py'], check=True)
             if Path("CHANGELOG.md").exists():
                 subprocess.run(['git', 'add', 'CHANGELOG.md'], check=True)
-            
+
             commit_message = f"chore: bump version to {new_version}"
             subprocess.run(['git', 'commit', '-m', commit_message], check=True)
             print(f"✅ Git commit created")
-            
+
             # 5. Git 태그 생성
             response = input("Create git tag? (y/N): ")
             if response.lower() == 'y':
                 create_git_tag(new_version)
-        
+
         print(f"\n🎉 Version {new_version} is ready!")
-        
+
     except Exception as e:
         print(f"❌ Error: {e}")
         sys.exit(1)
@@ -313,32 +313,32 @@ except ImportError:
 
 class BuildManager:
     """빌드 프로세스 관리 클래스"""
-    
+
     def __init__(self, version: str):
         self.version = version
         self.build_dir = Path("dist")
         self.temp_dir = Path(tempfile.mkdtemp())
-        
+
     def prepare_innosetup(self):
         """InnoSetup 스크립트 준비"""
         template_path = Path("InnoSetup/Modan2.iss.template")
         output_path = self.temp_dir / "Modan2.iss"
-        
+
         # 템플릿 읽기
         template_content = template_path.read_text()
-        
+
         # 버전 교체
         content = template_content.replace("{{VERSION}}", self.version)
-        
+
         # 임시 파일 생성
         output_path.write_text(content)
-        
+
         return output_path
-    
+
     def build_pyinstaller(self, platform: str):
         """PyInstaller 빌드 실행"""
         output_name = f"Modan2_v{self.version}_{platform}"
-        
+
         cmd = [
             "pyinstaller",
             "--name", output_name,
@@ -349,15 +349,15 @@ class BuildManager:
             "--add-data", f"icons{os.pathsep}icons",
             "Modan2.py"
         ]
-        
+
         import subprocess
         result = subprocess.run(cmd, capture_output=True, text=True)
-        
+
         if result.returncode != 0:
             raise RuntimeError(f"PyInstaller build failed: {result.stderr}")
-        
+
         return self.build_dir / output_name
-    
+
     def cleanup(self):
         """임시 파일 정리"""
         if self.temp_dir.exists():
@@ -385,33 +385,33 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.12'
-      
+
       - name: Check version consistency
         run: |
           python -c "
           import re
           from pathlib import Path
-          
+
           # Read version from version.py
           version_content = Path('version.py').read_text()
           version_match = re.search(r'__version__ = \"(.*?)\"', version_content)
           if not version_match:
               raise RuntimeError('Version not found in version.py')
-          
+
           version = version_match.group(1)
           print(f'Version found: {version}')
-          
+
           # Validate semantic versioning
           import re
           pattern = r'^\d+\.\d+\.\d+(-[a-zA-Z0-9]+)?$'
           if not re.match(pattern, version):
               raise ValueError(f'Invalid version format: {version}')
-          
+
           print('✅ Version format is valid')
           "
 ```

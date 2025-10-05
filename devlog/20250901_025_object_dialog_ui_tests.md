@@ -1,8 +1,8 @@
 # Object Dialog UI 테스트 구현 완료
 
-**날짜**: 2025-09-01  
-**작업자**: Claude  
-**브랜치**: main  
+**날짜**: 2025-09-01
+**작업자**: Claude
+**브랜치**: main
 
 ## 📋 작업 개요
 
@@ -18,7 +18,7 @@ Dataset Dialog 테스트에 이어서 Object Dialog UI 테스트를 완전히 �
    - Object Dialog 생성 및 기본 UI 요소 확인
    - 필수 컴포넌트 존재 여부 검증 (`edtObjectName`, `edtObjectDesc`, `edtSequence`)
 
-2. **`test_object_input_fields`**  
+2. **`test_object_input_fields`**
    - 입력 필드들(이름, 설명, 순서) 텍스트 설정 테스트
    - UI 상태 변경 검증
 
@@ -99,7 +99,7 @@ with patch('PyQt5.QtWidgets.QApplication.instance', return_value=mock_app):
 
 ### 전체 테스트 현황
 - **총 26개 테스트** 모두 통과 ✅
-- **15개**: 기존 Dataset + Object Controller 통합 테스트  
+- **15개**: 기존 Dataset + Object Controller 통합 테스트
 - **8개**: 새로운 Object Dialog UI 테스트 ⭐ (신규)
 - **3개**: 새로운 Dataset Dialog + Object Dialog 완전 통합 테스트 ⭐ (신규)
 
@@ -114,7 +114,7 @@ $ python -m pytest tests/test_dataset_dialog_direct.py --tb=short -q
 
 ### 1. 완전한 UI 워크플로우 커버리지
 - Dataset 생성 (DatasetDialog) ✅
-- Object 생성 (ObjectDialog) ✅  
+- Object 생성 (ObjectDialog) ✅
 - Dataset → Object 통합 워크플로우 ✅
 
 ### 2. 실제 사용자 시나리오 테스트
@@ -136,11 +136,11 @@ $ python -m pytest tests/test_dataset_dialog_direct.py --tb=short -q
 
 ### Dataset 저장 과정
 ```
-UI 입력 → DatasetDialog.Okay() → MdDataset 인스턴스 생성 
+UI 입력 → DatasetDialog.Okay() → MdDataset 인스턴스 생성
 → 필드 할당 → dataset.save() → SQLite INSERT
 ```
 
-### Object 저장 과정  
+### Object 저장 과정
 ```
 UI 입력 → ObjectDialog.save_object() → MdObject 인스턴스 생성
 → dataset_id 외래키 설정 → 필드 할당 → object.save() → SQLite INSERT
@@ -157,7 +157,7 @@ dataset_id INTEGER REFERENCES mddataset(id) ON DELETE CASCADE
 ### 수정된 파일
 - `tests/test_dataset_dialog_direct.py`
   - TestObjectDialogDirect 클래스 추가 (8개 테스트)
-  - TestDatasetObjectDialogIntegration 클래스 추가 (3개 테스트)  
+  - TestDatasetObjectDialogIntegration 클래스 추가 (3개 테스트)
   - object_dialog_with_dataset 픽스처 추가
   - 파일 docstring 업데이트
 

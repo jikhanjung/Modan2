@@ -50,17 +50,17 @@
 ---
 
 ## 4. 질의 워크플로우
-- 질의 → 벡터 검색(심볼 카드) → 정의/참조/호출 정보 보강 → 필요한 코드 스니펫만 첨부  
+- 질의 → 벡터 검색(심볼 카드) → 정의/참조/호출 정보 보강 → 필요한 코드 스니펫만 첨부
 - 원본 전체 파일 로딩 불필요
 
 ---
 
 ## 5. GitHub Actions 예시
-1. 이벤트: push, pull_request  
+1. 이벤트: push, pull_request
 2. 단계:
    - 환경 세팅
    - `make index` 실행
-   - 산출물 업로드: ctags.json, cards/*.json, vector.faiss  
+   - 산출물 업로드: ctags.json, cards/*.json, vector.faiss
 3. PR 코멘트: 변경된 심볼 및 영향 범위 보고
 
 ---

@@ -1,7 +1,7 @@
 # Reset Pose 버튼 문제 해결 계획
 
-**작업일**: 2025-09-05  
-**작업자**: Gemini  
+**작업일**: 2025-09-05
+**작업자**: Gemini
 **관련 문서**: `20250905_032_reset_pose_button_issues.md`
 
 ## 문제 분석 요약
@@ -27,14 +27,14 @@
 # To-Be: ObjectViewer3D.reset_pose
 def reset_pose(self):
     # ... 모든 pose 관련 변수 초기화 ...
-    
+
     self.align_object()
-    
+
     # GL display list가 있다면 무효화
     if hasattr(self, 'gl_list') and self.gl_list is not None:
         gl.glDeleteLists(self.gl_list, 1)
         self.gl_list = None
-    
+
     # 위젯 스스로 뷰 갱신을 예약
     self.update()
 ```

@@ -19,9 +19,9 @@ from pathlib import Path
 
 def run_command(cmd, description):
     """Run a shell command and print status."""
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"  {description}")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
     print(f"Running: {cmd}\n")
 
     result = subprocess.run(cmd, shell=True, capture_output=False, text=True)
@@ -33,14 +33,15 @@ def run_command(cmd, description):
     print(f"\n✅ Success: {description} completed")
     return result
 
+
 def main():
     # Get the docs directory
     docs_dir = Path(__file__).parent.resolve()
     os.chdir(docs_dir)
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("  Building Modan2 Documentation (English + Korean)")
-    print("="*60)
+    print("=" * 60)
 
     # Clean previous builds
     build_dir = docs_dir / "_build" / "html"
@@ -55,16 +56,10 @@ def main():
     ko_dir.mkdir(parents=True, exist_ok=True)
 
     # Build English documentation
-    run_command(
-        f'sphinx-build -b html -D language=en . {en_dir}',
-        "Building English documentation"
-    )
+    run_command(f"sphinx-build -b html -D language=en . {en_dir}", "Building English documentation")
 
     # Build Korean documentation
-    run_command(
-        f'sphinx-build -b html -D language=ko . {ko_dir}',
-        "Building Korean documentation"
-    )
+    run_command(f"sphinx-build -b html -D language=ko . {ko_dir}", "Building Korean documentation")
 
     # Create root index.html that redirects to English
     root_index = build_dir / "index.html"
@@ -89,9 +84,9 @@ def main():
         shutil.copy(nojekyll_src, nojekyll_dst)
         print("✅ Copied .nojekyll to build directory")
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("  ✅ Build Complete!")
-    print("="*60)
+    print("=" * 60)
     print(f"\nEnglish: {en_dir}/index.html")
     print(f"Korean:  {ko_dir}/index.html")
     print(f"Root:    {root_index}")
@@ -99,6 +94,7 @@ def main():
     print(f"  file://{en_dir}/index.html")
     print(f"  file://{ko_dir}/index.html")
     print()
+
 
 if __name__ == "__main__":
     main()

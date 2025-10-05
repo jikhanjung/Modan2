@@ -32,7 +32,7 @@ Modan2 프로젝트에 자동화된 CI/CD 파이프라인을 구축했습니다.
   - Codecov에 결과 업로드
   - Xvfb를 통한 headless GUI 테스트
 
-#### 🏗️ **build.yml - 빌드 자동화**  
+#### 🏗️ **build.yml - 빌드 자동화**
 - **트리거**: 태그 푸시 (`v*.*.*`) 또는 수동 실행
 - **실행 환경**: Windows, macOS, Ubuntu
 - **주요 작업**:
@@ -59,7 +59,7 @@ git add .github/
 git commit -m "Add GitHub Actions CI/CD pipeline
 
 - 테스트 자동화 (test.yml)
-- 크로스 플랫폼 빌드 자동화 (build.yml)  
+- 크로스 플랫폼 빌드 자동화 (build.yml)
 - 릴리즈 자동화 (release.yml)
 - PR 템플릿 및 Dependabot 설정
 
@@ -141,7 +141,7 @@ git tag v0.1.4
 git push origin v0.1.4
 ```
 
-#### 마이너 릴리즈 (새 기능)  
+#### 마이너 릴리즈 (새 기능)
 ```bash
 git tag v0.2.0
 git push origin v0.2.0
@@ -180,7 +180,7 @@ git push origin v1.0.0
 2. Modan2 저장소 추가
 3. 제공되는 토큰 복사
 4. GitHub 저장소 → **Settings** → **Secrets and variables** → **Actions**
-5. **New repository secret**: 
+5. **New repository secret**:
    - Name: `CODECOV_TOKEN`
    - Secret: 복사한 토큰 값
 
@@ -273,7 +273,7 @@ apt-get update && apt-get install -y python3 python3-pip git
 - [ ] 커버리지 추세 확인 (감소 시 테스트 추가)
 - [ ] Actions 사용량 확인 (GitHub 무료 할당량 2000분/월)
 
-#### 연간 체크리스트  
+#### 연간 체크리스트
 - [ ] Python 버전 매트릭스 업데이트
 - [ ] GitHub Actions 버전 업데이트 (v3 → v4 등)
 - [ ] 보안 취약점 점검

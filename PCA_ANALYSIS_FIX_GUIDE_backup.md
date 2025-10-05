@@ -77,11 +77,11 @@ for obj in ds_ops.object_list:  # ← 수정: 정렬된 객체 사용
 ```python
 def do_pca_analysis(landmarks_data, n_components=None):
     """Perform PCA analysis on landmark data.
-    
+
     Args:
         landmarks_data: List of landmark arrays
         n_components: Number of components (None for auto)
-        
+
     Returns:
         Dictionary with PCA results
     """
@@ -89,16 +89,16 @@ def do_pca_analysis(landmarks_data, n_components=None):
         import numpy as np
         import logging
         logger = logging.getLogger(__name__)
-        
+
         logger.info(f"PCA Analysis starting with {len(landmarks_data)} specimens")
         if landmarks_data:
             logger.info(f"First specimen has {len(landmarks_data[0])} landmarks")
             if landmarks_data[0]:
                 logger.info(f"Each landmark has {len(landmarks_data[0][0])} dimensions")
-        
+
         # Use MdPrincipalComponent class for consistency with Analysis Detail
         pca = MdPrincipalComponent()
-        
+
         # Flatten landmark data
         datamatrix = []
         for landmarks in landmarks_data:
@@ -106,23 +106,23 @@ def do_pca_analysis(landmarks_data, n_components=None):
             for lm in landmarks:
                 datum.extend(lm)  # Use all coordinates (X, Y, Z for 3D)
             datamatrix.append(datum)
-        
+
         # Perform PCA using the same method as Analysis Detail
         pca.SetData(datamatrix)
         pca.Analyze()
-        
+
         # Get number of components
         if n_components is None:
             n_components = min(pca.nObservation, pca.nVariable)
-        
+
         # Get scores (rotated matrix)
         scores = pca.rotated_matrix.tolist() if hasattr(pca, 'rotated_matrix') else []
-        
+
         # Calculate mean shape from the centered data
         mean_shape = []
         dim = len(landmarks_data[0][0]) if landmarks_data and landmarks_data[0] else 2
         n_landmarks = len(landmarks_data[0]) if landmarks_data else 0
-        
+
         # The mean is already calculated in pca.Analyze() during centering
         # We need to reconstruct it from the number of landmarks
         for i in range(n_landmarks):
@@ -130,25 +130,25 @@ def do_pca_analysis(landmarks_data, n_components=None):
                 mean_shape.append([0.0, 0.0])  # Already centered
             elif dim == 3:
                 mean_shape.append([0.0, 0.0, 0.0])  # Already centered
-        
+
         # Get eigenvalues and calculate variance ratios
         eigenvalues = pca.raw_eigen_values.tolist() if hasattr(pca, 'raw_eigen_values') else []
         explained_variance_ratio = pca.eigen_value_percentages if hasattr(pca, 'eigen_value_percentages') else []
-        
+
         # Calculate cumulative variance
         cumulative_variance = []
         cumul = 0
         for ratio in explained_variance_ratio:
             cumul += ratio
             cumulative_variance.append(cumul)
-        
+
         # Get rotation matrix (eigenvectors)
         rotation_matrix = pca.eigen_vectors.tolist() if hasattr(pca, 'eigen_vectors') else []
-        
+
         logger.info(f"PCA Analysis completed")
         logger.info(f"Number of components: {n_components}")
         logger.info(f"Scores shape: {len(scores)}x{len(scores[0]) if scores else 0}")
-        
+
         return {
             'n_components': n_components,
             'eigenvalues': eigenvalues[:n_components] if eigenvalues else [],
@@ -161,7 +161,7 @@ def do_pca_analysis(landmarks_data, n_components=None):
             'raw_eigen_values': eigenvalues,
             'eigen_value_percentages': explained_variance_ratio
         }
-        
+
     except Exception as e:
         import traceback
         logger.error(f"PCA analysis error: {traceback.format_exc()}")
@@ -206,7 +206,7 @@ predictions = lda.predict(data_matrix)
 - Key packages: PyQt5, numpy<2.0.0, pandas, scipy, opencv-python, peewee, trimesh
 - Maintain compatibility with numpy < 2.0.0
 
-# 변경 후  
+# 변경 후
 - Key packages: PyQt5, numpy>2.0.0, pandas, scipy, opencv-python, peewee, trimesh
 - Numpy > 2.0.0 is now supported (OpenGL issues resolved with pip installation)
 ```
@@ -221,7 +221,7 @@ predictions = lda.predict(data_matrix)
 ## 테스트 방법
 
 1. 동일한 dataset으로 Add Analysis 실행
-2. 같은 dataset으로 Analysis Detail 실행  
+2. 같은 dataset으로 Analysis Detail 실행
 3. 두 결과의 PCA scores, eigenvalues, explained variance 비교
 4. 결과가 일치하는지 확인
 
@@ -232,5 +232,5 @@ predictions = lda.predict(data_matrix)
 - 사용자 혼란 방지
 
 ---
-**작성일**: 2025-09-05  
+**작성일**: 2025-09-05
 **작성자**: Claude Code Assistant

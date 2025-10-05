@@ -21,6 +21,7 @@ class DragEventFilter(QObject):
                 print("Set Move Cursor")
         return False
 
+
 class CustomDrag(QDrag):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -30,18 +31,19 @@ class CustomDrag(QDrag):
     def exec_(self, supportedActions, defaultAction=Qt.IgnoreAction):
         event_filter = DragEventFilter(self)
         QApplication.instance().installEventFilter(event_filter)
-        
+
         # Set initial cursor
         modifiers = QApplication.keyboardModifiers()
         if modifiers & Qt.ControlModifier:
             self.setDragCursor(self.copy_cursor.pixmap(), Qt.CopyAction)
         else:
             self.setDragCursor(self.move_cursor.pixmap(), Qt.MoveAction)
-        
+
         result = super().exec_(supportedActions, defaultAction)
-        
+
         QApplication.instance().removeEventFilter(event_filter)
         return result
+
 
 class DraggableListWidget(QListWidget):
     def __init__(self, parent=None):
@@ -58,14 +60,15 @@ class DraggableListWidget(QListWidget):
                 drag.setMimeData(mimeData)
 
                 # Optional: Set a pixmap for the drag operation
-                #pixmap = QPixmap(self.viewport().size())
-                #self.viewport().render(pixmap)
-                #drag.setPixmap(pixmap)
+                # pixmap = QPixmap(self.viewport().size())
+                # self.viewport().render(pixmap)
+                # drag.setPixmap(pixmap)
 
                 result = drag.exec_(Qt.CopyAction | Qt.MoveAction)
-                
+
                 if result == Qt.MoveAction:
                     self.takeItem(self.row(item))
+
 
 class DropTextEdit(QTextEdit):
     def __init__(self, parent=None):
@@ -77,8 +80,9 @@ class DropTextEdit(QTextEdit):
             event.acceptProposedAction()
 
     def dropEvent(self, event):
-        self.insertPlainText(event.mimeData().text() + '\n')
+        self.insertPlainText(event.mimeData().text() + "\n")
         event.acceptProposedAction()
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -98,9 +102,10 @@ class MainWindow(QMainWindow):
 
         # Populate the list widget
         for i in range(10):
-            self.list_widget.addItem(QListWidgetItem(f"Item {i+1}"))
+            self.list_widget.addItem(QListWidgetItem(f"Item {i + 1}"))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()

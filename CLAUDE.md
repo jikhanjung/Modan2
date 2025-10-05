@@ -52,37 +52,78 @@ Modan2/
 ### Testing
 
 #### Current Testing Status
-- Transitioning from manual testing to automated testing with pytest
-- Legacy test scripts in `test_script/` directory (for reference)
+Automated testing with pytest is fully operational.
 
-#### Automated Testing Setup (In Progress)
-- **Framework**: pytest
+**Coverage Status** (as of 2025-10-05):
+- **Overall**: 500+ tests, 503 passed, 35 skipped
+- **MdStatistics.py**: 95% coverage ✅
+- **MdUtils.py**: 78% coverage
+- **MdModel.py**: 56% coverage
+- **Target**: Maintain >70% for new code, >50% overall
+
+#### Automated Testing Setup
+- **Framework**: pytest with pytest-qt, pytest-cov, pytest-mock
 - **Test directory**: `tests/`
+- **Configuration**: `pytest.ini`
 - **Install test dependencies**: `pip install -r config/requirements-dev.txt`
-- **Run all tests**: `pytest`
-- **Run with coverage**: `pytest --cov=. --cov-report=html`
-- **Run specific test file**: `pytest tests/test_mdutils.py`
-- **Run with verbose output**: `pytest -v`
+
+**Common Commands**:
+```bash
+# Run all tests
+pytest
+
+# Run with coverage report
+pytest --cov=. --cov-report=html
+
+# Run specific test file
+pytest tests/test_mdmodel.py
+
+# Run specific test class
+pytest tests/test_mdmodel.py::TestMdDataset
+
+# Run with verbose output
+pytest -v
+
+# Run and show print statements
+pytest -s
+
+# Run only failed tests from last run
+pytest --lf
+```
 
 #### Test Development Guidelines
 1. Write tests for new features before or during implementation
 2. Test file naming: `test_*.py` in `tests/` directory
 3. Use fixtures for common test data (in `tests/conftest.py`)
 4. Mock external dependencies when appropriate
-5. Aim for minimum 50% code coverage on core modules
+5. Aim for minimum 70% code coverage on new code
 
-#### Testing Priority (Planned)
-1. **Priority 1**: Utility functions (`MdUtils.py`) - Pure functions, easiest to test
-2. **Priority 2**: Data models (`MdModel.py`) - Database CRUD operations
-3. **Priority 3**: Statistical analysis (`MdStatistics.py`) - Core calculation logic
-4. **Priority 4**: Business logic (non-UI parts of `Modan2.py`)
-5. **Future**: UI components with `pytest-qt`
+#### Test Organization
+**Core Module Tests**:
+- `test_mdmodel.py` - Database models and operations (82 tests)
+- `test_mdutils.py` - Utility functions and helpers
+- `test_mdstatistics.py` - Statistical analysis functions
+- `test_mdhelpers.py` - Helper functions
+
+**Integration Tests**:
+- `test_controller.py` - Controller logic and workflows
+- `test_analysis_workflow.py` - Complete analysis workflows
+- `test_import.py` - File import operations
+
+**UI Tests** (pytest-qt):
+- `test_ui_basic.py` - Basic UI components
+- `test_ui_dialogs.py` - Dialog interactions
+- `test_dataset_dialog_direct.py` - Dataset creation workflows
+
+**Performance Tests**:
+- `test_performance.py` - Performance benchmarks (skipped by default)
 
 #### Before Committing
-1. Run the application: `python Modan2.py`
-2. Verify core features work (dataset loading, object viewing, analysis)
-3. Run automated tests: `pytest`
-4. Check test coverage: `pytest --cov=. --cov-report=term`
+1. Run automated tests: `pytest`
+2. Check test coverage: `pytest --cov=. --cov-report=term`
+3. Ensure no regressions: `pytest --lf` (re-run last failures)
+4. Run the application: `python Modan2.py`
+5. Verify core features work (dataset loading, object viewing, analysis)
 
 ### Database
 - SQLite database with Peewee ORM
@@ -113,16 +154,94 @@ Install GLUT libraries: `sudo apt-get install -y libglut-dev libglut3.12 python3
 - License: MIT
 
 ### Development Workflow
-1. Make changes to relevant Python files
-2. Test application launch: `python Modan2.py` (or `python fix_qt_import.py` on Linux)
-3. Verify core features work (dataset loading, object viewing, analysis)
-4. Run any relevant test scripts from `test_script/`
-5. Commit changes with descriptive messages
 
-### Linting and Type Checking
-Currently no automated linting or type checking configured. Consider adding:
-- `ruff` for Python linting
-- `mypy` for type checking (would require adding type hints)
+#### Quick Start
+1. Make changes to relevant Python files
+2. Run linter and formatter: `ruff check . && ruff format .`
+3. Run tests: `pytest`
+4. Test application launch: `python Modan2.py` (or `python fix_qt_import.py` on Linux)
+5. Verify core features work (dataset loading, object viewing, analysis)
+6. Commit changes with descriptive messages
+
+#### Code Quality Checks
+Before committing code, ensure:
+- All tests pass: `pytest`
+- Code is formatted: `ruff format .`
+- No linting errors: `ruff check .`
+- Coverage maintained: `pytest --cov=. --cov-report=term`
+
+### Code Quality Tools
+
+#### Ruff - Linter and Formatter
+Ruff is configured for fast Python linting and formatting.
+
+**Configuration**: `pyproject.toml`
+- Line length: 120
+- Target Python: 3.12
+- Enabled rules: pycodestyle (E), pyflakes (F), isort (I), pep8-naming (N), pyupgrade (UP), flake8-bugbear (B), flake8-comprehensions (C4)
+
+**Usage**:
+```bash
+# Format all code
+ruff format .
+
+# Check for linting issues
+ruff check .
+
+# Auto-fix linting issues
+ruff check --fix .
+
+# Check specific file
+ruff check MdModel.py
+```
+
+**Key Exceptions**:
+- E501: Line too long (handled by formatter)
+- E402: Module level import not at top (needed for sys.path manipulation)
+- N802/N803/N806: Qt methods use camelCase (PyQt5 convention)
+
+#### Pre-commit Hooks
+Pre-commit hooks are configured to run automatically before each commit.
+
+**Setup**:
+```bash
+# Install pre-commit
+pip install pre-commit
+
+# Install hooks
+pre-commit install
+
+# Run manually on all files
+pre-commit run --all-files
+```
+
+**Configured Hooks**:
+- Ruff linting and formatting
+- Trailing whitespace removal
+- End-of-file fixer
+- YAML validation
+- Large file check
+- Merge conflict detection
+
+#### Type Hints
+Core modules have type hints using Python 3.12+ syntax:
+- `MdStatistics.py` - Full type coverage
+- `MdUtils.py` - Core functions typed
+- Using modern syntax: `str | None` instead of `Optional[str]`
+
+**Type Checking** (optional):
+```bash
+# Install mypy
+pip install mypy
+
+# Check types in specific module
+mypy MdStatistics.py MdUtils.py
+```
+
+#### Import Organization
+- Wildcard imports removed from all modules
+- Import order: stdlib → third-party → local
+- Organized using isort (via Ruff)
 
 ## Code Navigation and Search Tools
 
@@ -239,7 +358,7 @@ python tools/generate_cards.py
 ### Performance Hotspots
 Methods with wait cursor (long operations):
 - `ModanDialogs.py:2402` - cbxShapeGrid_state_changed
-- `ModanDialogs.py:4072` - pick_shape  
+- `ModanDialogs.py:4072` - pick_shape
 - `ModanDialogs.py:1710` - NewAnalysisDialog.btnOK_clicked
 - `Modan2.py:659` - on_action_analyze_dataset_triggered
 

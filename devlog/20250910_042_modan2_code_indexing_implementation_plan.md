@@ -1,7 +1,7 @@
 # Modan2 코드 인덱싱 구현 계획
 
-**작성 날짜**: 2025-09-10  
-**작성자**: Claude (with Human Developer)  
+**작성 날짜**: 2025-09-10
+**작성자**: Claude (with Human Developer)
 **참조 문서**: `20250909_040_code_indexing_strategy.md`
 
 ## 개요
@@ -284,7 +284,7 @@ def analyze_method_performance(method_ast):
         'heavy_computation': 300,
         'ui_update_batch': 150
     }
-    
+
     estimated_ms = sum_indicators(method_ast, indicators)
     return {
         'requires_wait_cursor': estimated_ms > 100,

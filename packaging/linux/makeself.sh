@@ -462,7 +462,7 @@ gzip)
     GZIP_CMD="gzip -c$COMPRESS_LEVEL"
     GUNZIP_CMD="gzip -cd"
     ;;
-pigz) 
+pigz)
     GZIP_CMD="pigz -$COMPRESS_LEVEL"
     if test $THREADS -ne $DEFAULT_THREADS; then # Leave as the default if threads not indicated
         GZIP_CMD="$GZIP_CMD --processes $THREADS"
@@ -500,7 +500,7 @@ bzip2)
 xz)
     GZIP_CMD="xz -c$COMPRESS_LEVEL"
     # Must opt-in by specifying a value since not all versions of xz support threads
-    if test $THREADS -ne $DEFAULT_THREADS; then 
+    if test $THREADS -ne $DEFAULT_THREADS; then
         GZIP_CMD="$GZIP_CMD --threads=$THREADS"
     fi
     GUNZIP_CMD="xz -d"
@@ -541,10 +541,10 @@ if test x"$ENCRYPT" = x"openssl"; then
     if test x"$APPEND" = x"y"; then
         echo "Appending to existing archive is not compatible with OpenSSL encryption." >&2
     fi
-    
+
     ENCRYPT_CMD="openssl enc -aes-256-cbc -salt"
     DECRYPT_CMD="openssl enc -aes-256-cbc -d"
-    
+
     if test x"$OPENSSL_NO_MD" != x"y"; then
         ENCRYPT_CMD="$ENCRYPT_CMD -md sha256"
         DECRYPT_CMD="$DECRYPT_CMD -md sha256"
@@ -552,7 +552,7 @@ if test x"$ENCRYPT" = x"openssl"; then
 
     if test -n "$PASSWD_SRC"; then
         ENCRYPT_CMD="$ENCRYPT_CMD -pass $PASSWD_SRC"
-    elif test -n "$PASSWD"; then 
+    elif test -n "$PASSWD"; then
         ENCRYPT_CMD="$ENCRYPT_CMD -pass pass:$PASSWD"
     fi
 fi

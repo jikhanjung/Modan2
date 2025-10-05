@@ -32,7 +32,7 @@ begin
   // Create a specific Start Menu group
   if not DirExists(ExpandConstant('{userprograms}\PaleoBytes')) then
     CreateDir(ExpandConstant('{userprograms}\PaleoBytes'));
-  
+
   Result := True;
 end;
 

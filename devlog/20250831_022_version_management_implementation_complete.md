@@ -6,7 +6,7 @@
 
 #### version.py (✅ 완료)
 - 프로젝트 루트에 생성
-- `__version__ = "0.1.4"` 
+- `__version__ = "0.1.4"`
 - `__version_info__` 튜플 포함
 - Single Source of Truth로 작동
 

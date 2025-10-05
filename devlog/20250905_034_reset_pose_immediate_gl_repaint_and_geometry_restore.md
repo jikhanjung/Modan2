@@ -1,7 +1,7 @@
 # Reset Pose 즉시 반영 및 기하 복원 개선
 
-**작업일**: 2025-09-05  
-**작업자**: Codex CLI Assistant  
+**작업일**: 2025-09-05
+**작업자**: Codex CLI Assistant
 **관련 문서**: `20250905_032_reset_pose_button_issues.md`, `20250905_033_reset_pose_fix_plan.md`
 
 ## 문제 요약
@@ -68,4 +68,3 @@ self.updateGL()                   # 즉시 GL 리페인트 보장
 - 파일: `ModanComponents.py`
 - 메서드: `ObjectViewer3D.reset_pose`
 - 주요 변경: 기하 복원(`set_object(self.object)`), GL 즉시 리페인트(`updateGL()`), 예외시 `align_object()` 폴백 유지, GL 캐시 무효화 유지.
-

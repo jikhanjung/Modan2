@@ -917,4 +917,3 @@ msgid ""
 "<https://github.com/jikhanjung/Modan2/blob/main/LICENSE>`_ file for "
 "details."
 msgstr "자세한 내용은 `LICENSE <https://github.com/jikhanjung/Modan2/blob/main/LICENSE>`_ 파일을 참조하세요."
-

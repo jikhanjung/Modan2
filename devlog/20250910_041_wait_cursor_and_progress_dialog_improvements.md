@@ -1,8 +1,8 @@
 # Wait Cursor 및 Progress Dialog 개선 작업
 
-**작업 날짜**: 2025-09-10  
-**작업자**: Claude (with Human Developer)  
-**관련 파일**: 
+**작업 날짜**: 2025-09-10
+**작업자**: Claude (with Human Developer)
+**관련 파일**:
 - `Modan2.py`
 - `ModanDialogs.py`
 - `ModanController.py`
@@ -132,7 +132,7 @@ def cbxShapeGrid_state_changed(self):
 def pick_shape(self, x_val, y_val):
     if self.pick_idx == -1:
         return
-    
+
     QApplication.setOverrideCursor(Qt.WaitCursor)
     try:
         # 형태 계산 및 표시 로직

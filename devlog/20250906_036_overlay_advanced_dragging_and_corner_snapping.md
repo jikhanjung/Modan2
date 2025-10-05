@@ -1,7 +1,7 @@
 # 오버레이 고급 드래그 및 코너 스냅 기능 구현
 
-**작업일**: 2025-09-06  
-**작업자**: Claude  
+**작업일**: 2025-09-06
+**작업자**: Claude
 **관련 파일**: `ModanComponents.py`
 
 ## 작업 요약
@@ -52,11 +52,11 @@ else:
 def snap_to_corner(self):
     parent_center = parent_rect.center()
     current_center = current_rect.center()
-    
+
     # 사분면 판단
     is_right = current_center.x() > parent_center.x()
     is_bottom = current_center.y() > parent_center.y()
-    
+
     # 코너 결정
     if is_right and is_bottom:
         target_corner = 'bottom_right'
@@ -153,7 +153,7 @@ quadrant_corner_map = {
 
 ### 1. 닫기 버튼 커서 이슈
 - **문제**: 닫기 버튼 영역에서 커서가 화살표로 변경되지 않음
-- **시도한 해결책**: 
+- **시도한 해결책**:
   - `is_close_button_area()` 메서드로 영역 분리
   - `mouseMoveEvent`에서 우선순위 조정
 - **현재 상태**: 드래그는 차단되지만 커서 변경은 미작동

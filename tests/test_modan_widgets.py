@@ -1,4 +1,5 @@
 """Tests for ModanWidgets module - UI widgets."""
+
 from datetime import datetime
 from unittest.mock import Mock
 
@@ -20,12 +21,13 @@ def mock_dataset():
     dataset.analyses = []
     return dataset
 
+
 class TestDatasetTreeWidget:
     def test_init(self, qtbot):
         widget = mw.DatasetTreeWidget()
         qtbot.addWidget(widget)
         assert widget.columnCount() == 4
-    
+
     def test_add_dataset(self, qtbot, mock_dataset):
         widget = mw.DatasetTreeWidget()
         qtbot.addWidget(widget)

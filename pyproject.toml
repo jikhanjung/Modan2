@@ -41,6 +41,7 @@ ignore = [
     "N802",  # function name should be lowercase (Qt methods use camelCase)
     "N803",  # argument name should be lowercase (Qt arguments use camelCase)
     "N806",  # variable in function should be lowercase (Qt variables use camelCase)
+    "N812",  # lowercase imported as non-lowercase (APP_VERSION is intentional)
     "B905",  # zip without explicit strict parameter (not available in Python 3.9)
 ]
 
@@ -58,6 +59,20 @@ known-third-party = ["PyQt5", "peewee", "numpy", "pandas", "scipy", "matplotlib"
 [tool.ruff.lint.per-file-ignores]
 # Ignore specific rules for specific files
 "__init__.py" = ["F401"]  # Unused imports in __init__.py are often intentional
-"tests/*" = ["N802", "N803"]  # Allow non-lowercase function names in tests
-"build.py" = ["E402"]  # Allow imports after code in build script
-"migrate.py" = ["E402"]  # Allow imports after code in migration script
+"tests/*" = ["N802", "N803", "E712", "E722", "B017"]  # Allow non-lowercase function names, comparison to True/False, bare except, and generic exceptions in tests
+"build.py" = ["E402", "N813"]  # Allow imports after code and lowercase module imports
+"migrate.py" = ["E402", "N813", "N816"]  # Allow imports after code and naming conventions
+"MdHelpers.py" = ["F401"]  # Imports in try-except blocks for dependency checking
+"MdLogger.py" = ["N813"]  # Allow "import MdUtils as mu" convention
+"MdModel.py" = ["N813", "N816"]  # Allow "import MdUtils as mu" and gDatabase global
+"MdSplashScreen.py" = ["N813"]  # Allow "import MdUtils as mu" convention
+"Modan2.py" = ["N813", "F821", "F811"]  # Allow "import MdUtils as mu", undefined language variable, and duplicate functions
+"ModanController.py" = ["N813", "B904"]  # Allow "import MdUtils as mu" and raise without from
+"ModanComponents.py" = ["N811", "N813", "B007", "B008", "B018", "E741", "N815", "F811", "F821"]  # Allow OpenGL lowercase imports, loop control, Qt naming conventions, duplicate functions, and undefined names
+"ModanDialogs.py" = ["N813", "F811", "F821", "B007", "B018", "UP031"]  # Allow lowercase imports, duplicate functions, undefined names, loop control, useless expressions, and percent format
+"MdUtils.py" = ["F811", "B904"]  # Duplicate resource_path function and raise without from
+"modan_convert.py" = ["N813"]  # Allow "import MdModel as md2"
+"setup.py" = ["B904"]  # Allow raise without from
+"test_*.py" = ["N813", "F811"]  # Allow lowercase imports and class redefinitions in tests
+"ModanWidgets.py" = ["N813"]  # Allow "import ModanWidgets as mw"
+"objloader.py" = ["F403", "F405"]  # OpenGL star imports are standard practice

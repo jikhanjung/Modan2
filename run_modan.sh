@@ -6,7 +6,7 @@ echo "=== Modan2 Launcher ==="
 # Check if we're in WSL
 if grep -qEi "(Microsoft|WSL)" /proc/version &> /dev/null; then
     echo "WSL environment detected"
-    
+
     # Check if X server is running
     if ! xset q &>/dev/null; then
         echo "WARNING: X server not accessible"
@@ -29,7 +29,7 @@ if [ $? -ne 0 ]; then
     echo "XCB failed, trying Wayland..."
     export QT_QPA_PLATFORM=wayland
     python main.py "$@"
-    
+
     if [ $? -ne 0 ]; then
         echo "Wayland failed, trying minimal platform (no GUI)..."
         export QT_QPA_PLATFORM=minimal

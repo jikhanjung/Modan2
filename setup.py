@@ -9,6 +9,7 @@ def get_version():
     try:
         # Try importing first
         from version import __version__
+
         return __version__
     except ImportError:
         # Fallback to regex extraction
@@ -18,6 +19,7 @@ def get_version():
             if match:
                 return match.group(1)
         raise RuntimeError("Unable to find version string")
+
 
 # Dependencies are automatically detected, but it might need fine tuning.
 build_exe_options = {

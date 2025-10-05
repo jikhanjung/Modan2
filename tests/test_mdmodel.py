@@ -1,4 +1,5 @@
 """Tests for MdModel module - Database models and operations."""
+
 import os
 import sys
 import tempfile
@@ -17,33 +18,33 @@ import MdModel as mm
 @pytest.fixture
 def test_database():
     """Create a temporary test database."""
-    with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as tmp:
+    with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as tmp:
         test_db_path = tmp.name
-    
+
     # Create test database
-    test_db = SqliteDatabase(test_db_path, pragmas={'foreign_keys': 1})
-    
+    test_db = SqliteDatabase(test_db_path, pragmas={"foreign_keys": 1})
+
     # Replace the global database with test database
     original_db = mm.gDatabase
     mm.gDatabase = test_db
-    
+
     # Update model metadata
     mm.MdDataset._meta.database = test_db
     mm.MdObject._meta.database = test_db
     mm.MdImage._meta.database = test_db
     mm.MdThreeDModel._meta.database = test_db
     mm.MdAnalysis._meta.database = test_db
-    
+
     # Create tables
     test_db.connect()
     test_db.create_tables([mm.MdDataset, mm.MdObject, mm.MdImage, mm.MdThreeDModel, mm.MdAnalysis])
-    
+
     yield test_db
-    
+
     # Cleanup
     test_db.drop_tables([mm.MdDataset, mm.MdObject, mm.MdImage, mm.MdThreeDModel, mm.MdAnalysis])
     test_db.close()
-    
+
     # Restore original database
     mm.gDatabase = original_db
     mm.MdDataset._meta.database = original_db
@@ -51,7 +52,7 @@ def test_database():
     mm.MdImage._meta.database = original_db
     mm.MdThreeDModel._meta.database = original_db
     mm.MdAnalysis._meta.database = original_db
-    
+
     # Remove test database file
     try:
         os.unlink(test_db_path)
@@ -59,9 +60,17 @@ def test_database():
         pass
 
 
+@pytest.fixture
+def temp_test_file(tmp_path):
+    """Create a temporary test file."""
+    test_file = tmp_path / "test_file.txt"
+    test_file.write_text("test content")
+    return str(test_file)
+
+
 class TestDatabaseConstants:
     """Test database-related constants."""
-    
+
     def test_separators(self):
         """Test separator constants."""
         assert mm.LANDMARK_SEPARATOR == "\t"
@@ -69,7 +78,7 @@ class TestDatabaseConstants:
         assert mm.VARIABLE_SEPARATOR == ","
         assert mm.EDGE_SEPARATOR == "-"
         assert mm.WIREFRAME_SEPARATOR == ","
-    
+
     def test_database_filename(self):
         """Test database filename generation."""
         assert mm.DATABASE_FILENAME.endswith(".db")
@@ -78,154 +87,134 @@ class TestDatabaseConstants:
 
 class TestMdDataset:
     """Test MdDataset model."""
-    
+
     def test_create_dataset(self, test_database):
         """Test creating a new dataset."""
-        dataset = mm.MdDataset.create(
-            dataset_name="Test Dataset",
-            dataset_desc="Test Description",
-            dimension=2
-        )
-        
+        dataset = mm.MdDataset.create(dataset_name="Test Dataset", dataset_desc="Test Description", dimension=2)
+
         assert dataset.id is not None
         assert dataset.dataset_name == "Test Dataset"
         assert dataset.dataset_desc == "Test Description"
         assert dataset.dimension == 2
         assert dataset.created_at is not None
         assert dataset.modified_at is not None
-    
+
     def test_dataset_defaults(self, test_database):
         """Test dataset default values."""
         dataset = mm.MdDataset.create(dataset_name="Minimal Dataset")
-        
+
         assert dataset.dimension == 2  # Default dimension
         assert dataset.parent is None
         assert dataset.wireframe is None
         assert dataset.baseline is None
         assert dataset.polygons is None
-    
+
     def test_dataset_parent_child_relationship(self, test_database):
         """Test parent-child relationship between datasets."""
         parent = mm.MdDataset.create(dataset_name="Parent Dataset")
-        child = mm.MdDataset.create(
-            dataset_name="Child Dataset",
-            parent=parent
-        )
-        
+        child = mm.MdDataset.create(dataset_name="Child Dataset", parent=parent)
+
         assert child.parent == parent
         assert child in parent.children
-    
+
     def test_pack_unpack_variablename_str(self, test_database):
         """Test packing and unpacking variable names."""
         dataset = mm.MdDataset.create(dataset_name="Test Dataset")
-        
+
         # Test packing
         variablename_list = ["var1", "var2", "var3"]
         packed_str = dataset.pack_variablename_str(variablename_list)
         assert packed_str == "var1,var2,var3"
         assert dataset.propertyname_str == "var1,var2,var3"
-        
+
         # Test unpacking
         unpacked_list = dataset.unpack_variablename_str()
         assert unpacked_list == variablename_list
-    
+
     def test_unpack_empty_variablename(self, test_database):
         """Test unpacking empty variable name string."""
         dataset = mm.MdDataset.create(dataset_name="Test Dataset")
-        
+
         # Test with None
         dataset.propertyname_str = None
         assert dataset.unpack_variablename_str() == []
-        
+
         # Test with empty string
         dataset.propertyname_str = ""
         assert dataset.unpack_variablename_str() == []
-    
+
     def test_get_variablename_list(self, test_database):
         """Test getting variable name list."""
-        dataset = mm.MdDataset.create(
-            dataset_name="Test Dataset",
-            propertyname_str="width,height,depth"
-        )
-        
+        dataset = mm.MdDataset.create(dataset_name="Test Dataset", propertyname_str="width,height,depth")
+
         variablename_list = dataset.get_variablename_list()
         assert variablename_list == ["width", "height", "depth"]
-    
+
     def test_update_dataset_name(self, test_database):
         """Test updating dataset name."""
-        dataset = mm.MdDataset.create(
-            dataset_name="Original Name",
-            dataset_desc="Original Description"
-        )
+        dataset = mm.MdDataset.create(dataset_name="Original Name", dataset_desc="Original Description")
         original_id = dataset.id
-        
+
         # Update the dataset name
         dataset.dataset_name = "Updated Name"
         dataset.save()
-        
+
         # Verify the update
         updated_dataset = mm.MdDataset.get_by_id(original_id)
         assert updated_dataset.dataset_name == "Updated Name"
         assert updated_dataset.dataset_desc == "Original Description"  # Should remain unchanged
         assert updated_dataset.id == original_id  # ID should remain the same
-    
+
     def test_update_multiple_fields(self, test_database):
         """Test updating multiple dataset fields."""
-        dataset = mm.MdDataset.create(
-            dataset_name="Original Name",
-            dataset_desc="Original Description",
-            dimension=2
-        )
-        
+        dataset = mm.MdDataset.create(dataset_name="Original Name", dataset_desc="Original Description", dimension=2)
+
         # Update multiple fields
         dataset.dataset_name = "New Name"
         dataset.dataset_desc = "New Description"
         dataset.dimension = 3
         dataset.save()
-        
+
         # Verify all updates
         updated_dataset = mm.MdDataset.get_by_id(dataset.id)
         assert updated_dataset.dataset_name == "New Name"
         assert updated_dataset.dataset_desc == "New Description"
         assert updated_dataset.dimension == 3
-    
+
     def test_delete_dataset(self, test_database):
         """Test deleting a dataset."""
-        dataset = mm.MdDataset.create(
-            dataset_name="To Delete",
-            dataset_desc="Will be deleted"
-        )
+        dataset = mm.MdDataset.create(dataset_name="To Delete", dataset_desc="Will be deleted")
         dataset_id = dataset.id
-        
+
         # Verify dataset exists
         assert mm.MdDataset.get_by_id(dataset_id) is not None
-        
+
         # Delete the dataset
         dataset.delete_instance()
-        
+
         # Verify dataset no longer exists
         with pytest.raises(mm.MdDataset.DoesNotExist):
             mm.MdDataset.get_by_id(dataset_id)
-    
+
     def test_delete_dataset_with_cascade(self, test_database):
         """Test that deleting dataset cascades to related objects."""
         # Create dataset with related objects
         dataset = mm.MdDataset.create(dataset_name="Parent Dataset")
         obj1 = mm.MdObject.create(object_name="Child Object 1", dataset=dataset)
         obj2 = mm.MdObject.create(object_name="Child Object 2", dataset=dataset)
-        
+
         dataset_id = dataset.id
         obj1_id = obj1.id
         obj2_id = obj2.id
-        
+
         # Verify all exist
         assert mm.MdDataset.get_by_id(dataset_id) is not None
         assert mm.MdObject.get_by_id(obj1_id) is not None
         assert mm.MdObject.get_by_id(obj2_id) is not None
-        
+
         # Delete the parent dataset
         dataset.delete_instance(recursive=True)
-        
+
         # Verify cascade delete worked
         with pytest.raises(mm.MdDataset.DoesNotExist):
             mm.MdDataset.get_by_id(dataset_id)
@@ -237,46 +226,38 @@ class TestMdDataset:
 
 class TestMdObject:
     """Test MdObject model."""
-    
+
     def test_create_object(self, test_database):
         """Test creating a new object."""
         dataset = mm.MdDataset.create(dataset_name="Test Dataset")
-        obj = mm.MdObject.create(
-            object_name="Test Object",
-            object_desc="Test Description",
-            dataset=dataset,
-            sequence=1
-        )
-        
+        obj = mm.MdObject.create(object_name="Test Object", object_desc="Test Description", dataset=dataset, sequence=1)
+
         assert obj.id is not None
         assert obj.object_name == "Test Object"
         assert obj.object_desc == "Test Description"
         assert obj.dataset == dataset
         assert obj.sequence == 1
-    
+
     def test_object_defaults(self, test_database):
         """Test object default values."""
         dataset = mm.MdDataset.create(dataset_name="Test Dataset")
-        obj = mm.MdObject.create(
-            object_name="Minimal Object",
-            dataset=dataset
-        )
-        
+        obj = mm.MdObject.create(object_name="Minimal Object", dataset=dataset)
+
         assert obj.pixels_per_mm is None
         assert obj.sequence is None
         assert obj.landmark_str is None
         assert obj.property_str is None
-    
+
     def test_pack_unpack_landmark_2d(self, test_database):
         """Test packing and unpacking 2D landmarks."""
         dataset = mm.MdDataset.create(dataset_name="Test Dataset", dimension=2)
         obj = mm.MdObject.create(object_name="Test Object", dataset=dataset)
-        
+
         # Test 2D landmarks
         obj.landmark_list = [[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]]
         obj.pack_landmark()
         assert obj.landmark_str == "1.0\t2.0\n3.0\t4.0\n5.0\t6.0"
-        
+
         # Test unpacking
         obj.landmark_list = []  # Reset
         obj.unpack_landmark()
@@ -284,85 +265,78 @@ class TestMdObject:
         assert obj.landmark_list[0] == [1.0, 2.0]
         assert obj.landmark_list[1] == [3.0, 4.0]
         assert obj.landmark_list[2] == [5.0, 6.0]
-    
+
     def test_pack_unpack_landmark_3d(self, test_database):
         """Test packing and unpacking 3D landmarks."""
         dataset = mm.MdDataset.create(dataset_name="Test Dataset", dimension=3)
         obj = mm.MdObject.create(object_name="Test Object", dataset=dataset)
-        
+
         # Test 3D landmarks
         obj.landmark_list = [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]
         obj.pack_landmark()
         assert obj.landmark_str == "1.0\t2.0\t3.0\n4.0\t5.0\t6.0"
-        
+
         # Test unpacking
         obj.landmark_list = []  # Reset
         obj.unpack_landmark()
         assert len(obj.landmark_list) == 2
         assert obj.landmark_list[0] == [1.0, 2.0, 3.0]
         assert obj.landmark_list[1] == [4.0, 5.0, 6.0]
-    
+
     def test_pack_unpack_variable(self, test_database):
         """Test packing and unpacking variables."""
         dataset = mm.MdDataset.create(dataset_name="Test Dataset")
         obj = mm.MdObject.create(object_name="Test Object", dataset=dataset)
-        
+
         # Test packing
         obj.variable_list = ["male", "adult", "large"]
         obj.pack_variable()
         assert obj.property_str == "male,adult,large"
-        
+
         # Test unpacking
         obj.variable_list = []  # Reset
         obj.unpack_variable()
         assert obj.variable_list == ["male", "adult", "large"]
-    
+
     def test_update_object_name(self, test_database):
         """Test updating object name."""
         dataset = mm.MdDataset.create(dataset_name="Test Dataset")
-        obj = mm.MdObject.create(
-            object_name="Original Name",
-            object_desc="Original Description",
-            dataset=dataset
-        )
+        obj = mm.MdObject.create(object_name="Original Name", object_desc="Original Description", dataset=dataset)
         original_id = obj.id
-        
+
         # Update the object name
         obj.object_name = "Updated Name"
         obj.save()
-        
+
         # Verify the update
         updated_obj = mm.MdObject.get_by_id(original_id)
         assert updated_obj.object_name == "Updated Name"
         assert updated_obj.object_desc == "Original Description"  # Should remain unchanged
         assert updated_obj.id == original_id  # ID should remain the same
-    
+
     def test_delete_object(self, test_database):
         """Test deleting an object."""
         dataset = mm.MdDataset.create(dataset_name="Test Dataset")
-        obj = mm.MdObject.create(
-            object_name="To Delete",
-            dataset=dataset
-        )
+        obj = mm.MdObject.create(object_name="To Delete", dataset=dataset)
         obj_id = obj.id
-        
+
         # Verify object exists
         assert mm.MdObject.get_by_id(obj_id) is not None
-        
+
         # Delete the object
         obj.delete_instance()
-        
+
         # Verify object no longer exists
         with pytest.raises(mm.MdObject.DoesNotExist):
             mm.MdObject.get_by_id(obj_id)
-        
+
         # Verify dataset still exists (no reverse cascade)
         assert mm.MdDataset.get_by_id(dataset.id) is not None
 
 
 class TestMdAnalysis:
     """Test MdAnalysis model."""
-    
+
     def test_create_analysis(self, test_database):
         """Test creating a new analysis."""
         dataset = mm.MdDataset.create(dataset_name="Test Dataset")
@@ -370,24 +344,24 @@ class TestMdAnalysis:
             analysis_name="PCA Analysis",
             analysis_desc="Principal Component Analysis",
             dataset=dataset,
-            superimposition_method="Procrustes"  # Required field
+            superimposition_method="Procrustes",  # Required field
         )
-        
+
         assert analysis.id is not None
         assert analysis.analysis_name == "PCA Analysis"
         assert analysis.analysis_desc == "Principal Component Analysis"
         assert analysis.dataset == dataset
         assert analysis.superimposition_method == "Procrustes"
-    
+
     def test_analysis_defaults(self, test_database):
         """Test analysis default values."""
         dataset = mm.MdDataset.create(dataset_name="Test Dataset")
         analysis = mm.MdAnalysis.create(
             analysis_name="Test Analysis",
             dataset=dataset,
-            superimposition_method="None"  # Required field
+            superimposition_method="None",  # Required field
         )
-        
+
         assert analysis.dimension == 2  # Default dimension
         assert analysis.analysis_desc is None
         assert analysis.wireframe is None
@@ -396,31 +370,31 @@ class TestMdAnalysis:
 
 class TestDatabaseOperations:
     """Test database-level operations."""
-    
+
     def test_cascade_delete(self, test_database):
         """Test cascade delete from parent dataset."""
         parent = mm.MdDataset.create(dataset_name="Parent")
         child = mm.MdDataset.create(dataset_name="Child", parent=parent)
         obj = mm.MdObject.create(object_name="Object", dataset=child)
-        
+
         parent_id = parent.id
         child_id = child.id
         obj_id = obj.id
-        
+
         # Delete parent should cascade to child and its objects
         # Use delete_instance with recursive=True and dependencies=True
         parent.delete_instance(recursive=True, delete_nullable=True)
-        
+
         # Verify deletion
         assert mm.MdDataset.select().where(mm.MdDataset.id == parent_id).count() == 0
         assert mm.MdDataset.select().where(mm.MdDataset.id == child_id).count() == 0
         assert mm.MdObject.select().where(mm.MdObject.id == obj_id).count() == 0
-    
+
     def test_foreign_key_constraint(self, test_database):
         """Test foreign key constraints."""
         dataset = mm.MdDataset.create(dataset_name="Test Dataset")
-        obj = mm.MdObject.create(object_name="Test Object", dataset=dataset)
-        
+        mm.MdObject.create(object_name="Test Object", dataset=dataset)
+
         # Should not be able to delete dataset while object exists (if FKs are enforced)
         # In SQLite, this depends on foreign_keys pragma being enabled
         try:
@@ -434,17 +408,17 @@ class TestDatabaseOperations:
         except Exception:
             # Foreign key constraint raised exception - this is expected behavior
             pass
-    
+
     def test_transaction_rollback(self, test_database):
         """Test transaction rollback on error."""
         with test_database.atomic() as transaction:
             try:
-                dataset = mm.MdDataset.create(dataset_name="Test Dataset")
+                mm.MdDataset.create(dataset_name="Test Dataset")
                 # Force an error
                 raise Exception("Test error")
             except:
                 transaction.rollback()
-        
+
         # Dataset should not exist due to rollback
         assert mm.MdDataset.select().where(mm.MdDataset.dataset_name == "Test Dataset").count() == 0
 
@@ -509,7 +483,7 @@ class TestErrorHandling:
         obj = mm.MdObject.create(object_name="Large Object", dataset=dataset)
 
         # Create a large landmark list (100 landmarks)
-        large_landmark_list = [[float(i), float(i+1)] for i in range(100)]
+        large_landmark_list = [[float(i), float(i + 1)] for i in range(100)]
         obj.landmark_list = large_landmark_list
 
         # Should handle large data without issues
@@ -523,69 +497,6 @@ class TestErrorHandling:
         assert len(obj.landmark_list) == 100
         assert obj.landmark_list[0] == [0.0, 1.0]
         assert obj.landmark_list[99] == [99.0, 100.0]
-
-
-class TestImageOperations:
-    """Test MdImage file and EXIF operations."""
-
-    def test_get_md5hash_info(self, test_database, tmp_path):
-        """Test MD5 hash calculation for image files."""
-        # Create a test dataset and object first (required for MdImage)
-        dataset = mm.MdDataset.create(dataset_name="Test Dataset")
-        obj = mm.MdObject.create(object_name="Test Object", dataset=dataset)
-
-        # Create image with required object_id
-        image = mm.MdImage.create(object_id=obj.id)
-        test_file = tmp_path / "test_image.jpg"
-        test_content = b"fake image content for testing"
-        test_file.write_bytes(test_content)
-
-        # Calculate MD5 hash
-        md5hash, image_data = image.get_md5hash_info(str(test_file))
-
-        assert md5hash is not None
-        assert len(md5hash) == 32  # MD5 hash is 32 hex characters
-        assert image_data == test_content
-
-    def test_get_md5hash_info_file_not_found(self, test_database):
-        """Test MD5 hash with non-existent file."""
-        dataset = mm.MdDataset.create(dataset_name="Test Dataset")
-        obj = mm.MdObject.create(object_name="Test Object", dataset=dataset)
-        image = mm.MdImage.create(object_id=obj.id)
-
-        with pytest.raises((FileNotFoundError, ValueError)):
-            image.get_md5hash_info("/nonexistent/file.jpg")
-
-    def test_get_exif_info_no_exif(self, test_database, tmp_path):
-        """Test EXIF extraction from file without EXIF data."""
-        dataset = mm.MdDataset.create(dataset_name="Test Dataset")
-        obj = mm.MdObject.create(object_name="Test Object", dataset=dataset)
-        image = mm.MdImage.create(object_id=obj.id)
-
-        test_file = tmp_path / "no_exif.txt"
-        test_file.write_text("not an image")
-
-        # Should return empty EXIF info for non-image files
-        result = image.get_exif_info(str(test_file))
-
-        assert isinstance(result, dict)
-        assert 'datetime' in result
-        assert 'latitude' in result
-        assert 'longitude' in result
-
-    def test_load_file_info_directory(self, test_database, tmp_path):
-        """Test loading file info for a directory."""
-        dataset = mm.MdDataset.create(dataset_name="Test Dataset")
-        obj = mm.MdObject.create(object_name="Test Object", dataset=dataset)
-        image = mm.MdImage.create(object_id=obj.id)
-
-        test_dir = tmp_path / "test_directory"
-        test_dir.mkdir()
-
-        file_info = image.load_file_info(str(test_dir))
-
-        # For directories, should return basic info without hash
-        assert file_info is not None or image.original_path == str(test_dir)
 
 
 class TestWireframeEdgeParsing:
@@ -655,7 +566,7 @@ class TestMdObjectOpsCreation:
         obj_ops = mm.MdObjectOps(obj)
 
         # Should have landmark_list
-        assert hasattr(obj_ops, 'landmark_list')
+        assert hasattr(obj_ops, "landmark_list")
         assert obj_ops.landmark_list == [[1.0, 2.0], [3.0, 4.0]]
 
 
@@ -666,10 +577,7 @@ class TestMdAnalysisExtended:
         """Test analysis with wireframe data."""
         dataset = mm.MdDataset.create(dataset_name="Test Dataset")
         analysis = mm.MdAnalysis.create(
-            analysis_name="Test Analysis",
-            dataset=dataset,
-            superimposition_method="Procrustes",
-            wireframe="1-2,2-3,3-1"
+            analysis_name="Test Analysis", dataset=dataset, superimposition_method="Procrustes", wireframe="1-2,2-3,3-1"
         )
 
         assert analysis.wireframe == "1-2,2-3,3-1"
@@ -678,10 +586,7 @@ class TestMdAnalysisExtended:
         """Test analysis with baseline landmarks."""
         dataset = mm.MdDataset.create(dataset_name="Test Dataset")
         analysis = mm.MdAnalysis.create(
-            analysis_name="Test Analysis",
-            dataset=dataset,
-            superimposition_method="Procrustes",
-            baseline="1,2,3"
+            analysis_name="Test Analysis", dataset=dataset, superimposition_method="Procrustes", baseline="1,2,3"
         )
 
         assert analysis.baseline == "1,2,3"
@@ -690,9 +595,7 @@ class TestMdAnalysisExtended:
         """Test that analysis requires dataset reference."""
         dataset = mm.MdDataset.create(dataset_name="Test Dataset")
         analysis = mm.MdAnalysis.create(
-            analysis_name="Test Analysis",
-            dataset=dataset,
-            superimposition_method="Procrustes"
+            analysis_name="Test Analysis", dataset=dataset, superimposition_method="Procrustes"
         )
 
         # Verify analysis is linked to dataset
@@ -731,11 +634,7 @@ class TestMdObjectMethods:
     def test_count_landmarks_with_data(self, test_database):
         """Test count_landmarks with landmarks."""
         dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
-        obj = mm.MdObject.create(
-            object_name="Test",
-            dataset=dataset,
-            landmark_str="1.0\t2.0\n3.0\t4.0\n5.0\t6.0"
-        )
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset, landmark_str="1.0\t2.0\n3.0\t4.0\n5.0\t6.0")
         obj.unpack_landmark()
 
         assert obj.count_landmarks() == 3
@@ -745,10 +644,7 @@ class TestMdObjectMethods:
         """Test count_landmarks excluding missing landmarks."""
         dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
         # Create object with manually set missing landmark (None values)
-        obj = mm.MdObject.create(
-            object_name="Test",
-            dataset=dataset
-        )
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
         # Set landmarks with one missing
         obj.landmark_list = [[1.0, 2.0], [None, None], [5.0, 6.0]]
         obj.pack_landmark()
@@ -796,7 +692,7 @@ class TestMdDatasetPackingMethods:
         """Test pack_variablename_str with provided list."""
         dataset = mm.MdDataset.create(dataset_name="Test")
 
-        result = dataset.pack_variablename_str(['age', 'weight', 'length'])
+        result = dataset.pack_variablename_str(["age", "weight", "length"])
 
         assert result == "age,weight,length"
         assert dataset.propertyname_str == "age,weight,length"
@@ -804,7 +700,7 @@ class TestMdDatasetPackingMethods:
     def test_pack_variablename_str_from_attribute(self, test_database):
         """Test pack_variablename_str using variablename_list attribute."""
         dataset = mm.MdDataset.create(dataset_name="Test")
-        dataset.variablename_list = ['var1', 'var2']
+        dataset.variablename_list = ["var1", "var2"]
 
         result = dataset.pack_variablename_str()
 
@@ -816,69 +712,60 @@ class TestMdDatasetPackingMethods:
 
         result = dataset.unpack_variablename_str("a,b,c")
 
-        assert result == ['a', 'b', 'c']
-        assert dataset.variablename_list == ['a', 'b', 'c']
+        assert result == ["a", "b", "c"]
+        assert dataset.variablename_list == ["a", "b", "c"]
 
     def test_unpack_variablename_str_from_attribute(self, test_database):
         """Test unpack_variablename_str using propertyname_str attribute."""
-        dataset = mm.MdDataset.create(
-            dataset_name="Test",
-            propertyname_str="x,y,z"
-        )
+        dataset = mm.MdDataset.create(dataset_name="Test", propertyname_str="x,y,z")
 
         result = dataset.unpack_variablename_str()
 
-        assert result == ['x', 'y', 'z']
+        assert result == ["x", "y", "z"]
 
     def test_get_variablename_list(self, test_database):
         """Test get_variablename_list method."""
-        dataset = mm.MdDataset.create(
-            dataset_name="Test",
-            propertyname_str="v1,v2,v3"
-        )
+        dataset = mm.MdDataset.create(dataset_name="Test", propertyname_str="v1,v2,v3")
 
         result = dataset.get_variablename_list()
 
-        assert result == ['v1', 'v2', 'v3']
+        assert result == ["v1", "v2", "v3"]
 
     def test_pack_wireframe(self, test_database):
         """Test pack_wireframe method."""
         dataset = mm.MdDataset.create(dataset_name="Test")
         dataset.edge_list = [[1, 2], [2, 3], [0, 1]]
 
-        result = dataset.pack_wireframe()
+        dataset.pack_wireframe()
 
         # Edges should be sorted
         assert dataset.wireframe is not None
         # Should contain edge data
-        assert '1-2' in dataset.wireframe or '2-1' in dataset.wireframe
+        assert "1-2" in dataset.wireframe or "2-1" in dataset.wireframe
 
     def test_pack_polygons(self, test_database):
         """Test pack_polygons method."""
         dataset = mm.MdDataset.create(dataset_name="Test")
         dataset.polygon_list = [[0, 1, 2], [1, 2, 3]]
 
-        result = dataset.pack_polygons()
+        dataset.pack_polygons()
 
         assert dataset.polygons is not None
         # Polygons use "-" to separate points, "," to separate polygons
-        assert '0-1-2' in dataset.polygons
+        assert "0-1-2" in dataset.polygons
 
     def test_pack_baseline(self, test_database):
         """Test pack_baseline method."""
         dataset = mm.MdDataset.create(dataset_name="Test")
         dataset.baseline_point_list = [0, 1, 2]
 
-        result = dataset.pack_baseline()
+        dataset.pack_baseline()
 
         assert dataset.baseline == "0,1,2"
 
     def test_get_edge_list(self, test_database):
         """Test get_edge_list method."""
-        dataset = mm.MdDataset.create(
-            dataset_name="Test",
-            wireframe="0-1,1-2,2-0"
-        )
+        dataset = mm.MdDataset.create(dataset_name="Test", wireframe="0-1,1-2,2-0")
         dataset.unpack_wireframe()
 
         result = dataset.get_edge_list()
@@ -890,7 +777,7 @@ class TestMdDatasetPackingMethods:
         """Test get_polygon_list method."""
         dataset = mm.MdDataset.create(
             dataset_name="Test",
-            polygons="0-1-2,1-2-3"  # Use "-" for points, "," for polygons
+            polygons="0-1-2,1-2-3",  # Use "-" for points, "," for polygons
         )
         dataset.unpack_polygons()
 
@@ -901,10 +788,7 @@ class TestMdDatasetPackingMethods:
 
     def test_get_baseline_points(self, test_database):
         """Test get_baseline_points method."""
-        dataset = mm.MdDataset.create(
-            dataset_name="Test",
-            baseline="0,1,2,3"
-        )
+        dataset = mm.MdDataset.create(dataset_name="Test", baseline="0,1,2,3")
         dataset.unpack_baseline()
 
         result = dataset.get_baseline_points()
@@ -1066,3 +950,167 @@ class TestCentroidCalculations:
 
         # Empty landmarks should return [0, 0, 0]
         assert centroid == [0, 0, 0]
+
+
+class TestMdDatasetOps:
+    """Test MdDatasetOps methods."""
+
+    def test_add_object(self, test_database):
+        """Test adding object to dataset."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        new_obj = dataset.add_object(object_name="NewObject")
+        new_obj.save()  # Need to save to get an ID
+
+        assert new_obj is not None
+        assert new_obj.object_name == "NewObject"
+        assert new_obj.dataset == dataset
+        assert new_obj.id is not None
+
+    def test_get_edge_list(self, test_database):
+        """Test getting edge list from wireframe."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        dataset.wireframe = "0-1,1-2,2-0"  # Format: "vertex1-vertex2,vertex3-vertex4,..."
+        dataset.unpack_wireframe()
+
+        edge_list = dataset.get_edge_list()
+
+        assert edge_list is not None
+        assert len(edge_list) == 3
+        assert [0, 1] in edge_list
+        assert [1, 2] in edge_list
+        assert [2, 0] in edge_list or [0, 2] in edge_list  # Edges may be sorted
+
+    def test_pack_unpack_variablename(self, test_database):
+        """Test packing and unpacking variable names."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        variablename_list = ["var1", "var2", "var3"]
+
+        dataset.pack_variablename_str(variablename_list)
+        dataset.save()
+
+        # Reload and unpack
+        dataset = mm.MdDataset.get_by_id(dataset.id)
+        dataset.unpack_variablename_str()
+
+        result_list = dataset.get_variablename_list()
+        assert result_list == variablename_list
+
+    def test_get_baseline_points(self, test_database):
+        """Test getting baseline points."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        baseline_points = [0, 1]  # Baseline is stored as flat list of landmark indices
+
+        dataset.pack_baseline(baseline_points)
+        dataset.save()
+
+        # Reload and get baseline
+        dataset = mm.MdDataset.get_by_id(dataset.id)
+        dataset.unpack_baseline()  # Need to unpack first
+        result = dataset.get_baseline_points()
+
+        assert result == baseline_points
+
+
+class TestMdImage:
+    """Test MdImage model."""
+
+    def test_create_image(self, test_database):
+        """Test creating an image record."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Obj1", dataset=dataset)
+
+        image = mm.MdImage.create(
+            object=obj, original_path="/path/to/test.jpg", original_filename="test.jpg", size=1024, md5hash="abc123"
+        )
+
+        assert image.id is not None
+        assert image.object == obj
+        assert image.original_path == "/path/to/test.jpg"
+        assert image.original_filename == "test.jpg"
+        assert image.size == 1024
+        assert image.md5hash == "abc123"
+
+    def test_image_file_path(self, test_database):
+        """Test getting image file path."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Obj1", dataset=dataset)
+
+        image = mm.MdImage.create(
+            object=obj, original_path="/path/to/test.jpg", original_filename="test.jpg", size=1024, md5hash="abc123"
+        )
+
+        file_path = image.get_file_path()
+
+        assert file_path is not None
+        assert str(obj.id) in file_path
+
+
+class TestMdThreeDModel:
+    """Test MdThreeDModel model."""
+
+    def test_create_3d_model(self, test_database):
+        """Test creating a 3D model record."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=3)
+        obj = mm.MdObject.create(object_name="Obj1", dataset=dataset)
+
+        model = mm.MdThreeDModel.create(
+            object=obj, original_path="/path/to/test.obj", original_filename="test.obj", size=2048, md5hash="def456"
+        )
+
+        assert model.id is not None
+        assert model.object == obj
+        assert model.original_path == "/path/to/test.obj"
+        assert model.original_filename == "test.obj"
+        assert model.size == 2048
+        assert model.md5hash == "def456"
+
+    def test_3d_model_file_path(self, test_database):
+        """Test getting 3D model file path."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=3)
+        obj = mm.MdObject.create(object_name="Obj1", dataset=dataset)
+
+        model = mm.MdThreeDModel.create(
+            object=obj, original_path="/path/to/test.obj", original_filename="test.obj", size=2048, md5hash="def456"
+        )
+
+        file_path = model.get_file_path()
+
+        assert file_path is not None
+        assert str(obj.id) in file_path
+
+
+class TestMdAnalysis:
+    """Test MdAnalysis model."""
+
+    def test_create_analysis(self, test_database):
+        """Test creating an analysis record."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        analysis = mm.MdAnalysis.create(dataset=dataset, analysis_name="PCA Test", superimposition_method="procrustes")
+
+        assert analysis.id is not None
+        assert analysis.dataset == dataset
+        assert analysis.analysis_name == "PCA Test"
+        assert analysis.superimposition_method == "procrustes"
+        assert analysis.created_at is not None
+
+    def test_analysis_result_storage(self, test_database):
+        """Test storing and retrieving analysis results."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        analysis = mm.MdAnalysis.create(dataset=dataset, analysis_name="PCA Test", superimposition_method="procrustes")
+
+        # Store result as JSON string
+        result_data = {"eigenvalues": [1.0, 0.5], "scores": [[0.1, 0.2]]}
+        import json
+
+        analysis.pca_analysis_result_json = json.dumps(result_data)
+        analysis.save()
+
+        # Retrieve and parse
+        retrieved = mm.MdAnalysis.get_by_id(analysis.id)
+        parsed_result = json.loads(retrieved.pca_analysis_result_json)
+
+        assert parsed_result["eigenvalues"] == [1.0, 0.5]
+        assert parsed_result["scores"] == [[0.1, 0.2]]

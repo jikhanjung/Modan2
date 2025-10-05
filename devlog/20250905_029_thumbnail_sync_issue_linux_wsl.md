@@ -2,11 +2,11 @@
 
 ## 문제 현상
 
-**발생 환경**: WSL (Windows Subsystem for Linux) - WSL2 with WSLg  
-**정상 작동 환경**: Native Linux  
-**발생 일자**: 2025-09-05  
-**보고자**: 사용자  
-**확인 일자**: 2025-09-05 - Native Linux에서는 정상 작동 확인  
+**발생 환경**: WSL (Windows Subsystem for Linux) - WSL2 with WSLg
+**정상 작동 환경**: Native Linux
+**발생 일자**: 2025-09-05
+**보고자**: 사용자
+**확인 일자**: 2025-09-05 - Native Linux에서는 정상 작동 확인
 
 ### 증상 설명
 
@@ -15,7 +15,7 @@ Data Exploration 윈도우에서 3D 뷰를 회전할 때 썸네일 동기화에 
 1. **마우스 드래그 중 (회전 진행 중)**
    - 메인 3D 뷰는 정상적으로 회전
    - 썸네일들이 완전히 사라짐 (렌더링되지 않음)
-   
+
 2. **마우스 버튼 릴리즈 후**
    - 썸네일이 다시 나타나며 회전이 반영됨
    - 단, 마우스 커서가 matplotlib 그래프 영역 위에 있을 때만 즉시 업데이트
@@ -34,7 +34,7 @@ def mouseMoveEvent(self, event):
         if self.parent != None and callable(getattr(self.parent, 'sync_temp_rotation', None)):
             self.parent.sync_temp_rotation(self, self.temp_rotate_x, self.temp_rotate_y)
 
-# ModanDialogs.py - DataExplorationDialog  
+# ModanDialogs.py - DataExplorationDialog
 def sync_temp_rotation(self, shape_view, temp_rotate_x, temp_rotate_y):
     for sv in self.shape_view_list:
         if sv != shape_view:
@@ -137,7 +137,7 @@ else:
 - **WSL**: 썸네일 동기화 실패 (WSLg의 중간 레이어로 인한 렌더링 지연)
 - **Native Linux**: 정상 작동 (직접적인 X11/Wayland 및 GPU 드라이버 접근)
 
-이는 WSLg의 Windows-Linux 그래픽 브릿지 구조로 인한 문제로, WSL의 근본적인 한계입니다. 
+이는 WSLg의 Windows-Linux 그래픽 브릿지 구조로 인한 문제로, WSL의 근본적인 한계입니다.
 
 ### 권장사항
 1. **개발/테스트**: 그래픽 집약적 기능은 네이티브 Linux 또는 Windows에서 수행

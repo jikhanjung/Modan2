@@ -67,7 +67,8 @@ from ModanComponents import (
     ResizableOverlayWidget,
 )
 from ModanController import ModanController
-from ModanDialogs import MODE, DatasetAnalysisDialog
+from ModanDialogs import MODE
+from dialogs import DatasetAnalysisDialog
 
 # Configure matplotlib to avoid font warnings
 matplotlib.rcParams["font.family"] = ["DejaVu Sans", "sans-serif"]

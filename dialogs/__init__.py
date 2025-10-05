@@ -14,6 +14,7 @@ from dialogs.analysis_result_dialog import AnalysisResultDialog
 from dialogs.base_dialog import BaseDialog
 from dialogs.calibration_dialog import CalibrationDialog
 from dialogs.data_exploration_dialog import DataExplorationDialog
+from dialogs.dataset_analysis_dialog import DatasetAnalysisDialog
 from dialogs.dataset_dialog import DatasetDialog
 from dialogs.export_dialog import ExportDatasetDialog
 from dialogs.import_dialog import ImportDatasetDialog
@@ -21,11 +22,7 @@ from dialogs.object_dialog import ObjectDialog
 from dialogs.preferences_dialog import PreferencesDialog
 from dialogs.progress_dialog import ProgressDialog
 
-# TODO: Gradually migrate remaining dialogs from ModanDialogs.py
-# Temporary re-exports from original ModanDialogs.py until migration complete
-from ModanDialogs import (
-    DatasetAnalysisDialog,
-)
+# All dialogs have been migrated from ModanDialogs.py!
 
 __all__ = [
     # Base

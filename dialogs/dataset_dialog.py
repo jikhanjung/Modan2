@@ -47,7 +47,8 @@ class DatasetDialog(BaseDialog):
         Args:
             parent: Parent window
         """
-        super().__init__(parent, title=self.tr("Modan2 - Dataset Information"))
+        super().__init__(parent, title="Modan2 - Dataset Information")
+        self.setWindowTitle(self.tr("Modan2 - Dataset Information"))
         self.parent = parent
         self.remember_geometry = True
         self.m_app = QApplication.instance()

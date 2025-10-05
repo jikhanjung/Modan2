@@ -13,6 +13,7 @@ from dialogs.calibration_dialog import CalibrationDialog
 from dialogs.dataset_dialog import DatasetDialog
 from dialogs.export_dialog import ExportDatasetDialog
 from dialogs.import_dialog import ImportDatasetDialog
+from dialogs.preferences_dialog import PreferencesDialog
 from dialogs.progress_dialog import ProgressDialog
 
 # TODO: Gradually migrate remaining dialogs from ModanDialogs.py
@@ -23,7 +24,6 @@ from ModanDialogs import (
     DatasetAnalysisDialog,
     DatasetOpsViewer,
     ObjectDialog,
-    PreferencesDialog,
 )
 
 __all__ = [

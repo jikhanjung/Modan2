@@ -10,6 +10,8 @@ to individual module files.
 from dialogs.analysis_dialog import NewAnalysisDialog
 from dialogs.base_dialog import BaseDialog
 from dialogs.calibration_dialog import CalibrationDialog
+from dialogs.export_dialog import ExportDatasetDialog
+from dialogs.import_dialog import ImportDatasetDialog
 from dialogs.progress_dialog import ProgressDialog
 
 # TODO: Gradually migrate remaining dialogs from ModanDialogs.py
@@ -20,8 +22,6 @@ from ModanDialogs import (
     DatasetAnalysisDialog,
     DatasetDialog,
     DatasetOpsViewer,
-    ExportDatasetDialog,
-    ImportDatasetDialog,
     ObjectDialog,
     PreferencesDialog,
 )

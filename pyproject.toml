@@ -60,6 +60,7 @@ known-third-party = ["PyQt5", "peewee", "numpy", "pandas", "scipy", "matplotlib"
 # Ignore specific rules for specific files
 "__init__.py" = ["F401"]  # Unused imports in __init__.py are often intentional
 "tests/*" = ["N802", "N803", "E712", "E722", "B017"]  # Allow non-lowercase function names, comparison to True/False, bare except, and generic exceptions in tests
+"dialogs/*" = ["N813"]  # Allow "import MdUtils as mu" convention in dialogs
 "build.py" = ["E402", "N813"]  # Allow imports after code and lowercase module imports
 "migrate.py" = ["E402", "N813", "N816"]  # Allow imports after code and naming conventions
 "MdHelpers.py" = ["F401"]  # Imports in try-except blocks for dependency checking

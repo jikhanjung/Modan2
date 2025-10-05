@@ -36,7 +36,8 @@ class NewAnalysisDialog(BaseDialog):
             parent: Parent window with controller attribute
             dataset: MdDataset to analyze
         """
-        super().__init__(parent, title=self.tr("Modan2 - New Analysis"))
+        super().__init__(parent, title="Modan2 - New Analysis")
+        self.setWindowTitle(self.tr("Modan2 - New Analysis"))
         self.parent = parent
         self.setFixedSize(500, 450)
 

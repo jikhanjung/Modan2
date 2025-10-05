@@ -31,7 +31,8 @@ class AnalysisResultDialog(BaseDialog):
         Args:
             parent: Parent window
         """
-        super().__init__(parent, title=self.tr("Modan2 - Dataset Analysis"))
+        super().__init__(parent, title="Modan2 - Dataset Analysis")
+        self.setWindowTitle(self.tr("Modan2 - Dataset Analysis"))
         self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
 
         self.parent = parent

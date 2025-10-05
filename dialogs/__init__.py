@@ -17,6 +17,7 @@ from dialogs.data_exploration_dialog import DataExplorationDialog
 from dialogs.dataset_dialog import DatasetDialog
 from dialogs.export_dialog import ExportDatasetDialog
 from dialogs.import_dialog import ImportDatasetDialog
+from dialogs.object_dialog import ObjectDialog
 from dialogs.preferences_dialog import PreferencesDialog
 from dialogs.progress_dialog import ProgressDialog
 
@@ -24,7 +25,6 @@ from dialogs.progress_dialog import ProgressDialog
 # Temporary re-exports from original ModanDialogs.py until migration complete
 from ModanDialogs import (
     DatasetAnalysisDialog,
-    ObjectDialog,
 )
 
 __all__ = [

@@ -40,7 +40,7 @@ def dataset_dialog(qtbot):
 def object_dialog_with_dataset(qtbot):
     """Create an ObjectDialog with a test dataset."""
     import MdModel
-    from ModanDialogs import ObjectDialog
+    from dialogs import ObjectDialog
 
     # First create a test dataset
     test_dataset = MdModel.MdDataset.create(
@@ -674,7 +674,7 @@ class TestDatasetObjectDialogIntegration:
         import time
 
         import MdModel
-        from ModanDialogs import ObjectDialog
+        from dialogs import ObjectDialog
 
         # Step 1: Create Dataset via DatasetDialog
         dataset_name = f"Integration Dataset {int(time.time())}"
@@ -736,7 +736,7 @@ class TestDatasetObjectDialogIntegration:
         import time
 
         import MdModel
-        from ModanDialogs import ObjectDialog
+        from dialogs import ObjectDialog
 
         # Create dataset
         dataset_name = f"Multi Object Dataset {int(time.time())}"
@@ -809,7 +809,7 @@ class TestDatasetObjectDialogIntegration:
         import time
 
         import MdModel
-        from ModanDialogs import ObjectDialog
+        from dialogs import ObjectDialog
 
         # Create dataset first
         dataset_name = f"Error Test Dataset {int(time.time())}"

@@ -17,7 +17,7 @@ import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvas as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
-from PyQt5.QtCore import QEvent, QPoint, QRect, QSize, Qt, QTimer
+from PyQt5.QtCore import QEvent, QItemSelectionModel, QPoint, QRect, QSize, Qt, QTimer
 from PyQt5.QtGui import (
     QColor,
     QCursor,
@@ -38,7 +38,6 @@ from PyQt5.QtWidgets import (
     QGridLayout,
     QGroupBox,
     QHBoxLayout,
-    QItemSelectionModel,
     QLabel,
     QLineEdit,
     QPushButton,
@@ -55,10 +54,13 @@ from scipy.spatial import ConvexHull
 
 import MdUtils as mu
 from MdModel import MdDataset, MdObject
-from MdUtils import CENTROID_SIZE_TEXT, CENTROID_SIZE_VALUE, safe_remove_artist
 from ModanComponents import ObjectViewer2D, ObjectViewer3D, ShapePreference
 
 logger = logging.getLogger(__name__)
+
+# Centroid size constants
+CENTROID_SIZE_VALUE = 9999
+CENTROID_SIZE_TEXT = "CSize"
 
 # Mode constants
 MODE_EXPLORATION = 0
@@ -66,6 +68,26 @@ MODE_REGRESSION = 1
 MODE_AVERAGE = 2
 MODE_COMPARISON = 3
 MODE_COMPARISON2 = 4
+
+
+def safe_remove_artist(artist, ax=None):
+    """Safely remove matplotlib artist from plot"""
+    if artist is None:
+        return
+    try:
+        artist.remove()
+    except NotImplementedError:
+        # For scatter plots and other collections
+        if ax is not None:
+            if hasattr(ax, "collections") and artist in ax.collections:
+                ax.collections.remove(artist)
+            elif hasattr(ax, "texts") and artist in ax.texts:
+                ax.texts.remove(artist)
+            elif hasattr(ax, "lines") and artist in ax.lines:
+                ax.lines.remove(artist)
+    except Exception:
+        pass  # Silently ignore if already removed or other issues
+
 
 # Color constants
 COLOR = {

@@ -114,7 +114,7 @@ class TestObjectDialogEdgeCases:
 
     def test_object_dialog_with_none_dataset(self, qtbot):
         """Test ObjectDialog behavior with None dataset."""
-        from ModanDialogs import ObjectDialog
+        from dialogs import ObjectDialog
 
         mock_parent = Mock()
         mock_parent.pos.return_value = Mock()
@@ -131,7 +131,7 @@ class TestObjectDialogEdgeCases:
 
     def test_object_dialog_with_none_dataset_only(self, qtbot):
         """Test ObjectDialog behavior - simplified test without dataset parameter."""
-        from ModanDialogs import ObjectDialog
+        from dialogs import ObjectDialog
 
         mock_parent = Mock()
         mock_parent.pos.return_value = Mock()

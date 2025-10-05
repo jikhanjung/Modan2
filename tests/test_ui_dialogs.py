@@ -305,7 +305,7 @@ class TestEditObjectDialog:
     @patch("ModanDialogs.ObjectDialog.show")
     def test_edit_object_dialog_creation(self, mock_show, qtbot, main_window):
         """Test that edit object dialog can be created."""
-        from ModanDialogs import ObjectDialog
+        from dialogs import ObjectDialog
 
         # Create a mock object
         mock_object = Mock()
@@ -321,7 +321,7 @@ class TestEditObjectDialog:
     @patch("ModanDialogs.ObjectDialog.exec_")
     def test_edit_object_dialog_save(self, mock_exec, qtbot, main_window):
         """Test saving changes in edit object dialog."""
-        from ModanDialogs import ObjectDialog
+        from dialogs import ObjectDialog
 
         mock_exec.return_value = QDialog.Accepted
 

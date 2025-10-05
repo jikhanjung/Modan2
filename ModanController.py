@@ -657,8 +657,6 @@ class ModanController(QObject):
                 result = self._run_cva(landmarks_data, params)
             elif analysis_type.upper() == "MANOVA":
                 result = self._run_manova(landmarks_data, params)
-            elif analysis_type.upper() == "PROCRUSTES":
-                result = self._run_procrustes(landmarks_data, params)
             else:
                 raise ValueError(f"Unknown analysis type: {analysis_type}")
             
@@ -1000,38 +998,7 @@ class ModanController(QObject):
             
         except Exception as e:
             raise ValueError(f"MANOVA analysis failed: {str(e)}")
-    
-    def _run_procrustes(self, landmarks_data: List[List], params: Dict[str, Any]) -> Dict[str, Any]:
-        """Run Procrustes analysis.
-        
-        Args:
-            landmarks_data: List of landmark arrays
-            params: Procrustes parameters
-            
-        Returns:
-            Procrustes results dictionary
-        """
-        self.logger.debug("Running Procrustes analysis")
-        
-        try:
-            # Use existing Procrustes function
-            proc_result = MdStatistics.do_procrustes_analysis(
-                landmarks_data,
-                scaling=params.get('scaling', True),
-                reflection=params.get('reflection', True)
-            )
-            
-            return {
-                'analysis_type': 'Procrustes',
-                'aligned_shapes': proc_result.get('aligned_shapes', []),
-                'mean_shape': proc_result.get('mean_shape', []),
-                'centroid_sizes': proc_result.get('centroid_sizes', []),
-                'consensus_configuration': proc_result.get('consensus', [])
-            }
-            
-        except Exception as e:
-            raise ValueError(f"Procrustes analysis failed: {str(e)}")
-    
+
     def delete_analysis(self, analysis_id: int) -> bool:
         """Delete analysis result.
 

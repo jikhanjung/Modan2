@@ -708,3 +708,92 @@ class TestMANOVAOnPCA:
         """Test MANOVA on PCA error handling."""
         with pytest.raises(Exception):
             ms.do_manova_analysis_on_pca([], [])
+
+
+class TestDoManovaAnalysis:
+    """Test do_manova_analysis function (direct MANOVA on landmarks)."""
+
+    def test_do_manova_analysis_basic(self):
+        """Test basic MANOVA analysis on landmark data."""
+        np.random.seed(42)
+
+        # Create two groups of landmark data
+        landmarks_data = []
+        groups = []
+
+        # Group A: 5 specimens with 3 landmarks each
+        for i in range(5):
+            landmarks = [
+                [1.0 + np.random.randn() * 0.1, 2.0 + np.random.randn() * 0.1],
+                [3.0 + np.random.randn() * 0.1, 4.0 + np.random.randn() * 0.1],
+                [5.0 + np.random.randn() * 0.1, 6.0 + np.random.randn() * 0.1]
+            ]
+            landmarks_data.append(landmarks)
+            groups.append('A')
+
+        # Group B: 5 specimens with 3 landmarks each (shifted)
+        for i in range(5):
+            landmarks = [
+                [2.0 + np.random.randn() * 0.1, 3.0 + np.random.randn() * 0.1],
+                [4.0 + np.random.randn() * 0.1, 5.0 + np.random.randn() * 0.1],
+                [6.0 + np.random.randn() * 0.1, 7.0 + np.random.randn() * 0.1]
+            ]
+            landmarks_data.append(landmarks)
+            groups.append('B')
+
+        result = ms.do_manova_analysis(landmarks_data, groups)
+
+        assert result is not None
+        assert 'test_statistics' in result
+        assert len(result['test_statistics']) == 4  # Wilks, Pillai, Hotelling, Roy
+        assert 'group_means' in result
+        assert 'overall_mean' in result
+        assert result['n_groups'] == 2
+        assert len(result['group_sizes']) == 2
+
+        # Check test statistics
+        for test_stat in result['test_statistics']:
+            assert 'name' in test_stat
+            assert 'value' in test_stat
+            assert 'f_statistic' in test_stat
+            assert 'p_value' in test_stat
+            assert 'df_num' in test_stat
+            assert 'df_den' in test_stat
+
+    def test_do_manova_analysis_three_groups(self):
+        """Test MANOVA with three groups."""
+        np.random.seed(42)
+
+        landmarks_data = []
+        groups = []
+
+        # Three groups with different means
+        for group_idx, group_name in enumerate(['A', 'B', 'C']):
+            for i in range(4):
+                landmarks = [
+                    [group_idx * 2.0 + np.random.randn() * 0.1,
+                     group_idx * 2.0 + np.random.randn() * 0.1],
+                    [group_idx * 2.0 + 1.0 + np.random.randn() * 0.1,
+                     group_idx * 2.0 + 1.0 + np.random.randn() * 0.1]
+                ]
+                landmarks_data.append(landmarks)
+                groups.append(group_name)
+
+        result = ms.do_manova_analysis(landmarks_data, groups)
+
+        assert result is not None
+        assert result['n_groups'] == 3
+        assert len(result['group_sizes']) == 3
+        assert all(size == 4 for size in result['group_sizes'])
+
+    def test_do_manova_analysis_error_handling(self):
+        """Test MANOVA error handling."""
+        # Empty data
+        with pytest.raises(ValueError):
+            ms.do_manova_analysis([], [])
+
+        # Mismatched lengths
+        landmarks = [[[1, 2], [3, 4]]]
+        groups = ['A', 'B']  # More groups than landmarks
+        with pytest.raises(Exception):
+            ms.do_manova_analysis(landmarks, groups)

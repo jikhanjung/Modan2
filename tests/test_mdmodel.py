@@ -3326,3 +3326,155 @@ class TestMdDatasetGroupingOperations:
 
         # When no valid groups, should return all indices
         assert indices == [0]
+
+
+class TestMdDatasetOpsProcrustes:
+    """Tests for Procrustes superimposition workflow."""
+
+    def test_procrustes_simple_2d(self, test_database):
+        """Test basic Procrustes superimposition in 2D."""
+
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        # Create 3 objects with similar shapes but different positions/orientations
+        obj1 = mm.MdObject.create(object_name="Obj1", dataset=dataset, sequence=0)
+        obj1.landmark_list = [[0.0, 0.0], [1.0, 0.0], [0.5, 1.0]]
+        obj1.pack_landmark()
+        obj1.save()
+
+        obj2 = mm.MdObject.create(object_name="Obj2", dataset=dataset, sequence=1)
+        # Same shape, translated
+        obj2.landmark_list = [[2.0, 2.0], [3.0, 2.0], [2.5, 3.0]]
+        obj2.pack_landmark()
+        obj2.save()
+
+        obj3 = mm.MdObject.create(object_name="Obj3", dataset=dataset, sequence=2)
+        # Same shape, scaled
+        obj3.landmark_list = [[0.0, 0.0], [2.0, 0.0], [1.0, 2.0]]
+        obj3.pack_landmark()
+        obj3.save()
+
+        ds_ops = mm.MdDatasetOps(dataset)
+        result = ds_ops.procrustes_superimposition()
+
+        assert result is True
+        # After Procrustes, all shapes should be centered
+        for obj_ops in ds_ops.object_list:
+            centroid = obj_ops.get_centroid_coord()
+            assert abs(centroid[0]) < 0.01
+            assert abs(centroid[1]) < 0.01
+
+            # All shapes should have unit centroid size
+            cs = obj_ops.get_centroid_size(refresh=True)
+            assert abs(cs - 1.0) < 0.01
+
+    def test_procrustes_3d(self, test_database):
+        """Test Procrustes superimposition in 3D."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=3)
+
+        # Create objects with 3D landmarks
+        obj1 = mm.MdObject.create(object_name="Obj1", dataset=dataset, sequence=0)
+        obj1.landmark_list = [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+        obj1.pack_landmark()
+        obj1.save()
+
+        obj2 = mm.MdObject.create(object_name="Obj2", dataset=dataset, sequence=1)
+        # Same shape, translated and scaled
+        obj2.landmark_list = [[1.0, 1.0, 1.0], [3.0, 1.0, 1.0], [1.0, 3.0, 1.0], [1.0, 1.0, 3.0]]
+        obj2.pack_landmark()
+        obj2.save()
+
+        ds_ops = mm.MdDatasetOps(dataset)
+        result = ds_ops.procrustes_superimposition()
+
+        assert result is True
+        # All shapes should be centered and have unit size
+        for obj_ops in ds_ops.object_list:
+            centroid = obj_ops.get_centroid_coord()
+            assert abs(centroid[0]) < 0.01
+            assert abs(centroid[1]) < 0.01
+            assert abs(centroid[2]) < 0.01
+
+            cs = obj_ops.get_centroid_size(refresh=True)
+            assert abs(cs - 1.0) < 0.01
+
+    def test_is_same_shape(self, test_database):
+        """Test shape comparison for convergence detection."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj1 = mm.MdObject.create(object_name="Obj1", dataset=dataset)
+        obj1.landmark_list = [[0.0, 0.0], [1.0, 0.0], [0.5, 1.0]]
+        obj1.save()
+
+        obj2 = mm.MdObject.create(object_name="Obj2", dataset=dataset)
+        obj2.landmark_list = [[0.0, 0.0], [1.0, 0.0], [0.5, 1.0]]
+        obj2.save()
+
+        ds_ops = mm.MdDatasetOps(dataset)
+        shape1 = mm.MdObjectOps(obj1)
+        shape2 = mm.MdObjectOps(obj2)
+
+        # Identical shapes should be considered same
+        assert ds_ops.is_same_shape(shape1, shape2) is True
+
+    def test_is_same_shape_different(self, test_database):
+        """Test shape comparison with different shapes."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj1 = mm.MdObject.create(object_name="Obj1", dataset=dataset)
+        obj1.landmark_list = [[0.0, 0.0], [1.0, 0.0], [0.5, 1.0]]
+        obj1.save()
+
+        obj2 = mm.MdObject.create(object_name="Obj2", dataset=dataset)
+        obj2.landmark_list = [[0.0, 0.0], [2.0, 0.0], [1.0, 2.0]]  # Different shape
+        obj2.save()
+
+        ds_ops = mm.MdDatasetOps(dataset)
+        shape1 = mm.MdObjectOps(obj1)
+        shape2 = mm.MdObjectOps(obj2)
+
+        # Different shapes should not be considered same
+        assert ds_ops.is_same_shape(shape1, shape2) is False
+
+    def test_rotation_matrix_identity(self, test_database):
+        """Test rotation matrix for identical shapes."""
+        import numpy as np
+
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        ds_ops = mm.MdDatasetOps(dataset)
+
+        # Identical reference and target should give identity matrix
+        ref = np.array([[0.0, 0.0], [1.0, 0.0], [0.5, 1.0]])
+        target = np.array([[0.0, 0.0], [1.0, 0.0], [0.5, 1.0]])
+
+        rot_mx = ds_ops.rotation_matrix(ref, target)
+
+        # Should be close to identity matrix
+        expected = np.eye(2)
+        assert np.allclose(rot_mx, expected, atol=0.01)
+
+    def test_rotation_matrix_calculation(self, test_database):
+        """Test rotation matrix calculation using SVD."""
+        import numpy as np
+
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        ds_ops = mm.MdDatasetOps(dataset)
+
+        # Reference triangle
+        ref = np.array([[0.0, 0.0], [1.0, 0.0], [0.5, 1.0]])
+        # Target: same triangle rotated (exact values from actual rotation)
+        # This tests that rotation_matrix() produces a valid rotation matrix
+        target = np.array([[0.0, 0.0], [0.0, 1.0], [-1.0, 0.5]])
+
+        rot_mx = ds_ops.rotation_matrix(ref, target)
+
+        # Rotation matrix should be orthogonal (det = ±1)
+        det = np.linalg.det(rot_mx)
+        assert abs(abs(det) - 1.0) < 0.01
+
+        # Rotation matrix should preserve distances
+        # Apply rotation and verify shape is preserved
+        rotated = np.transpose(np.dot(rot_mx, np.transpose(ref)))
+
+        # Check that distances are preserved
+        ref_dist = np.linalg.norm(ref[1] - ref[0])
+        rot_dist = np.linalg.norm(rotated[1] - rotated[0])
+        assert abs(ref_dist - rot_dist) < 0.01

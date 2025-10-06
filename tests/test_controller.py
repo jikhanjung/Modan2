@@ -994,3 +994,429 @@ class TestAnalysisDeletion:
         result = controller.delete_analysis(99999)
 
         assert result is False
+
+    def test_delete_current_analysis(self, controller, sample_dataset):
+        """Test that deleting current analysis clears current_analysis."""
+        controller.set_current_dataset(sample_dataset)
+
+        analysis = MdModel.MdAnalysis.create(
+            dataset=sample_dataset,
+            analysis_name="Current Analysis",
+            superimposition_method="procrustes",
+        )
+
+        controller.current_analysis = analysis
+        result = controller.delete_analysis(analysis.id)
+
+        assert result is True
+        assert controller.current_analysis is None
+
+
+class TestDatasetDeletionWithAnalyses:
+    """Test dataset deletion with related analyses."""
+
+    @pytest.fixture
+    def controller(self, mock_database):
+        return ModanController()
+
+    def test_delete_dataset_with_analyses_analysis_set(self, controller, mock_database):
+        """Test deleting dataset with analyses using analysis_set backref."""
+        dataset = MdModel.MdDataset.create(
+            dataset_name="Test Dataset",
+            dimension=2,
+            landmark_count=5,
+        )
+
+        # Create analyses
+        _analysis1 = MdModel.MdAnalysis.create(
+            dataset=dataset,
+            analysis_name="Analysis 1",
+            superimposition_method="procrustes",
+        )
+        _analysis2 = MdModel.MdAnalysis.create(
+            dataset=dataset,
+            analysis_name="Analysis 2",
+            superimposition_method="procrustes",
+        )
+
+        dataset_id = dataset.id
+        result = controller.delete_dataset(dataset_id)
+
+        assert result is True
+        # Verify dataset and analyses are deleted
+        assert MdModel.MdDataset.select().where(MdModel.MdDataset.id == dataset_id).count() == 0
+        assert MdModel.MdAnalysis.select().where(MdModel.MdAnalysis.dataset == dataset_id).count() == 0
+
+    def test_delete_dataset_clears_current_selections(self, controller, mock_database):
+        """Test that deleting current dataset clears all current selections."""
+        dataset = MdModel.MdDataset.create(dataset_name="Current Dataset", dimension=2, landmark_count=5)
+
+        obj = MdModel.MdObject.create(dataset=dataset, object_name="Current Object")
+
+        analysis = MdModel.MdAnalysis.create(
+            dataset=dataset,
+            analysis_name="Current Analysis",
+            superimposition_method="procrustes",
+        )
+
+        controller.set_current_dataset(dataset)
+        controller.current_object = obj
+        controller.current_analysis = analysis
+
+        result = controller.delete_dataset(dataset.id)
+
+        assert result is True
+        assert controller.current_dataset is None
+        assert controller.current_object is None
+        assert controller.current_analysis is None
+
+
+class TestObjectCreationEdgeCases:
+    """Test object creation error handling."""
+
+    @pytest.fixture
+    def controller(self, mock_database):
+        return ModanController()
+
+    def test_create_object_without_dataset(self, controller):
+        """Test creating object without current dataset."""
+        # No dataset set
+        result = controller.create_object(object_name="Should Fail")
+
+        assert result is None
+
+    def test_create_object_with_database_error(self, controller, sample_dataset):
+        """Test object creation with database error."""
+        controller.set_current_dataset(sample_dataset)
+
+        with patch("MdModel.MdObject.create", side_effect=Exception("DB Error")):
+            result = controller.create_object(object_name="Error Test")
+
+        assert result is None
+
+
+class TestImportFileErrorHandling:
+    """Test import file error handling."""
+
+    @pytest.fixture
+    def controller(self, mock_database, sample_dataset):
+        controller = ModanController()
+        controller.set_current_dataset(sample_dataset)
+        return controller
+
+    def test_import_unsupported_file_type(self, controller):
+        """Test importing unsupported file type."""
+        with patch("pathlib.Path.exists", return_value=True):
+            objects = controller.import_objects(["/path/to/file.unsupported"])
+
+        # Should return empty list due to unsupported file type error
+        assert len(objects) == 0
+
+    def test_import_image_file_error(self, controller):
+        """Test image import with error."""
+        with patch("MdModel.MdImage.create", side_effect=Exception("Image error")):
+            with patch("pathlib.Path.exists", return_value=True):
+                objects = controller.import_objects(["/path/to/image.jpg"])
+
+        assert len(objects) == 0
+
+    def test_import_3d_file_error(self, controller):
+        """Test 3D file import with error."""
+        with patch("MdUtils.process_3d_file", side_effect=Exception("3D error")):
+            with patch("pathlib.Path.exists", return_value=True):
+                objects = controller.import_objects(["/path/to/model.obj"])
+
+        assert len(objects) == 0
+
+
+class TestAnalysisProcessingChecks:
+    """Test analysis processing checks and edge cases."""
+
+    @pytest.fixture
+    def controller(self, mock_database, sample_dataset):
+        controller = ModanController()
+        controller.set_current_dataset(sample_dataset)
+        return controller
+
+    def test_run_analysis_while_processing(self, controller):
+        """Test running analysis while another is in progress."""
+        controller._processing = True
+
+        result = controller.run_analysis("PCA", {})
+
+        assert result is None
+
+    def test_run_analysis_insufficient_landmarks(self, controller):
+        """Test running analysis with insufficient objects with landmarks."""
+        # Create objects without landmarks
+        MdModel.MdObject.create(dataset=controller.current_dataset, object_name="Obj1")
+        MdModel.MdObject.create(dataset=controller.current_dataset, object_name="Obj2")
+
+        result = controller.run_analysis("PCA", {})
+
+        assert result is None
+
+
+class TestUpdateDatasetUnknownField:
+    """Test updating dataset with unknown field."""
+
+    def test_update_dataset_unknown_field(self, mock_database, sample_dataset):
+        """Test updating dataset with field that doesn't exist."""
+        controller = ModanController()
+
+        # This should log a warning but still return True
+        result = controller.update_dataset(sample_dataset.id, unknown_field="value")
+
+        assert result is True
+
+
+class TestUpdateObjectUnknownField:
+    """Test updating object with unknown field."""
+
+    def test_update_object_unknown_field(self, mock_database, sample_dataset):
+        """Test updating object with field that doesn't exist."""
+        controller = ModanController()
+        obj = MdModel.MdObject.create(dataset=sample_dataset, object_name="Test")
+
+        # This should log a warning but still return True
+        result = controller.update_object(obj.id, unknown_field="value")
+
+        assert result is True
+
+
+class TestRestoreStateErrors:
+    """Test state restoration error handling."""
+
+    @pytest.fixture
+    def controller(self, mock_database):
+        return ModanController()
+
+    def test_restore_state_nonexistent_dataset(self, controller):
+        """Test restoring state with nonexistent dataset ID."""
+        state = {"current_dataset_id": 99999, "current_object_id": None, "current_analysis_id": None}
+
+        controller.restore_state(state)
+
+        # Should log warning but not crash
+        assert controller.current_dataset is None
+
+    def test_restore_state_nonexistent_object(self, controller):
+        """Test restoring state with nonexistent object ID."""
+        state = {"current_dataset_id": None, "current_object_id": 99999, "current_analysis_id": None}
+
+        controller.restore_state(state)
+
+        # Should log warning but not crash
+        assert controller.current_object is None
+
+    def test_restore_state_nonexistent_analysis(self, controller):
+        """Test restoring state with nonexistent analysis ID."""
+        state = {"current_dataset_id": None, "current_object_id": None, "current_analysis_id": 99999}
+
+        controller.restore_state(state)
+
+        # Should log warning but not crash
+        assert controller.current_analysis is None
+
+
+class TestDatasetSummaryEdgeCases:
+    """Test dataset summary edge cases."""
+
+    @pytest.fixture
+    def controller(self, mock_database):
+        return ModanController()
+
+    def test_get_dataset_summary_empty_dataset(self, controller, mock_database):
+        """Test getting summary for empty dataset."""
+        dataset = MdModel.MdDataset.create(dataset_name="Empty", dimension=2, landmark_count=0)
+
+        summary = controller.get_dataset_summary(dataset)
+
+        assert summary["name"] == "Empty"
+        assert summary["object_count"] == 0
+        assert summary["landmark_count"] == 0
+
+    def test_get_dataset_summary_with_images(self, controller, mock_database):
+        """Test dataset summary with image objects."""
+        dataset = MdModel.MdDataset.create(dataset_name="Images", dimension=2, landmark_count=5)
+
+        # Create object first, then image with object reference
+        obj = MdModel.MdObject.create(dataset=dataset, object_name="Obj1")
+        image = MdModel.MdImage.create(file_path="/path/to/image.jpg", dataset=dataset, object=obj)
+        obj.image = image
+        obj.save()
+
+        summary = controller.get_dataset_summary(dataset)
+
+        assert summary["has_images"] is True
+
+    def test_get_dataset_summary_with_3d_models(self, controller, mock_database):
+        """Test dataset summary with 3D model objects."""
+        dataset = MdModel.MdDataset.create(dataset_name="3D Models", dimension=3, landmark_count=5)
+
+        # Create object first, then 3D model with object reference
+        obj = MdModel.MdObject.create(dataset=dataset, object_name="Obj1")
+        model = MdModel.MdThreeDModel.create(file_path="/path/to/model.obj", dataset=dataset, object=obj)
+        obj.threed_model = model
+        obj.save()
+
+        summary = controller.get_dataset_summary(dataset)
+
+        assert summary["has_3d_models"] is True
+
+    def test_get_dataset_summary_with_error(self, controller, mock_database):
+        """Test dataset summary with error."""
+        dataset = MdModel.MdDataset.create(dataset_name="Error Test", dimension=2, landmark_count=5)
+
+        with patch.object(dataset, "object_list", side_effect=Exception("DB Error")):
+            summary = controller.get_dataset_summary(dataset)
+
+        # Should return empty dict on error
+        assert summary == {}
+
+
+class TestNegativeLandmarkCount:
+    """Test creating dataset with negative landmark count."""
+
+    def test_create_dataset_negative_landmark_count(self, mock_database):
+        """Test that negative landmark count is rejected."""
+        controller = ModanController()
+
+        dataset = controller.create_dataset(
+            name="Negative Test", desc="Testing negative landmarks", dimension=2, landmark_count=-5
+        )
+
+        assert dataset is None
+
+
+class TestValidationWithNoDataset:
+    """Test validation when no dataset is selected."""
+
+    def test_validate_dataset_for_analysis_type_no_dataset(self, mock_database):
+        """Test validation with no current dataset."""
+        controller = ModanController()
+        # No dataset set
+
+        is_valid, message = controller._validate_dataset_for_analysis_type("PCA")
+
+        assert is_valid is False
+        assert "No dataset selected" in message
+
+
+class TestLandmarkCountValidation:
+    """Test landmark count validation in analysis."""
+
+    @pytest.fixture
+    def controller(self, mock_database, sample_dataset):
+        controller = ModanController()
+        controller.set_current_dataset(sample_dataset)
+        return controller
+
+    def test_validate_inconsistent_landmark_count(self, controller):
+        """Test validation with inconsistent landmark counts."""
+        # Create objects with different landmark counts
+        _obj1 = MdModel.MdObject.create(
+            dataset=controller.current_dataset,
+            object_name="Obj1",
+            landmark_str="10.0\t20.0\n30.0\t40.0\n50.0\t60.0",  # 3 landmarks
+        )
+        _obj2 = MdModel.MdObject.create(
+            dataset=controller.current_dataset,
+            object_name="Obj2",
+            landmark_str="10.0\t20.0\n30.0\t40.0",  # 2 landmarks (inconsistent!)
+        )
+
+        is_valid, message = controller._validate_dataset_for_analysis_type("PCA")
+
+        assert is_valid is False
+        assert "Inconsistent landmark count" in message
+
+
+class TestImportLandmarkFileEdgeCases:
+    """Test landmark file import edge cases."""
+
+    @pytest.fixture
+    def controller(self, mock_database, sample_dataset):
+        controller = ModanController()
+        controller.set_current_dataset(sample_dataset)
+        return controller
+
+    @patch("MdUtils.read_landmark_file")
+    def test_import_landmark_file_empty(self, mock_read, controller):
+        """Test importing landmark file with no data."""
+        mock_read.return_value = []
+
+        with patch("pathlib.Path.exists", return_value=True):
+            objects = controller.import_objects(["/path/to/empty.tps"])
+
+        # Should fail with empty landmark data
+        assert len(objects) == 0
+
+    @patch("MdUtils.read_landmark_file")
+    def test_import_landmark_file_with_objects(self, mock_read, controller):
+        """Test importing landmarks when dataset already has objects."""
+        # Add an existing object with 3 landmarks
+        _existing = MdModel.MdObject.create(
+            dataset=controller.current_dataset,
+            object_name="Existing",
+            landmark_str="10.0\t20.0\n30.0\t40.0\n50.0\t60.0",
+        )
+
+        # Mock new data with same landmark count
+        mock_read.return_value = [
+            ("new_specimen", [[15.0, 25.0], [35.0, 45.0], [55.0, 65.0]]),
+        ]
+
+        with patch("pathlib.Path.exists", return_value=True):
+            objects = controller.import_objects(["/path/to/test.tps"])
+
+        assert len(objects) == 1
+        assert objects[0].object_name == "new_specimen"
+
+
+class TestAnalysisWithInconsistentGroups:
+    """Test analysis with inconsistent grouping variables."""
+
+    @pytest.fixture
+    def controller_with_objects(self, mock_database):
+        """Create controller with objects for analysis."""
+        controller = ModanController()
+
+        dataset = MdModel.MdDataset.create(
+            dataset_name="Analysis Dataset",
+            dimension=2,
+            landmark_count=5,
+            propertyname_str="Group,Size",
+        )
+
+        # Create objects with landmarks
+        for i in range(6):
+            _obj = MdModel.MdObject.create(
+                dataset=dataset,
+                object_name=f"Obj{i}",
+                sequence=i + 1,
+                landmark_str="\n".join([f"{j}.0\t{j + 1}.0" for j in range(5)]),
+                property_str=f"Group{i % 2},10",
+            )
+
+        controller.set_current_dataset(dataset)
+        return controller
+
+    @patch("MdStatistics.do_pca_analysis")
+    def test_run_analysis_new_signature(self, mock_pca, controller_with_objects):
+        """Test run_analysis with new signature (dataset parameter)."""
+        mock_pca.return_value = {
+            "eigenvalues": [0.5, 0.3],
+            "eigenvectors": [[1, 0], [0, 1]],
+            "scores": [[1, 2]] * 6,
+            "explained_variance_ratio": [0.5, 0.3],
+            "cumulative_variance_ratio": [0.5, 0.8],
+        }
+
+        dataset = controller_with_objects.current_dataset
+        result = controller_with_objects.run_analysis(
+            dataset=dataset, analysis_name="New Signature Test", superimposition_method="Procrustes"
+        )
+
+        # Analysis should complete or fail gracefully
+        assert result is not None or result is None

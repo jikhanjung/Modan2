@@ -3830,3 +3830,126 @@ class TestMdObjectOpsRotate:
         assert abs(obj_ops.landmark_list[2][0] - (-1.0)) < 0.01
         assert abs(obj_ops.landmark_list[2][1] - 0.0) < 0.01
         assert abs(obj_ops.landmark_list[2][2] - 0.0) < 0.01
+
+
+class TestMdObjectUtilityMethods:
+    """Tests for utility methods."""
+
+    def test_is_float_valid_number(self, test_database):
+        """Test is_float with valid numbers."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+
+        assert obj.is_float("1.5") is True
+        assert obj.is_float("10") is True
+        assert obj.is_float("-3.14") is True
+        assert obj.is_float("0") is True
+
+    def test_is_float_invalid_string(self, test_database):
+        """Test is_float with invalid strings."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+
+        assert obj.is_float("Missing") is False
+        assert obj.is_float("missing") is False
+        assert obj.is_float("") is False
+        assert obj.is_float("abc") is False
+
+    def test_get_name_with_object_name(self, test_database):
+        """Test get_name when object has a name."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="TestObject", dataset=dataset)
+
+        assert obj.get_name() == "TestObject"
+
+    def test_get_name_without_object_name(self, test_database):
+        """Test get_name when object has no name."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="", dataset=dataset)
+
+        # Should return string of ID
+        assert obj.get_name() == str(obj.id)
+
+    def test_str_method(self, test_database):
+        """Test __str__ method."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="MyObject", dataset=dataset)
+
+        assert str(obj) == "MyObject"
+
+    def test_str_method_empty_name(self, test_database):
+        """Test __str__ with empty name."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="", dataset=dataset)
+
+        # Empty name returns empty string
+        assert str(obj) == ""
+
+    def test_repr_method(self, test_database):
+        """Test __repr__ method."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="MyObject", dataset=dataset)
+
+        assert repr(obj) == "MyObject"
+
+    def test_get_landmark_list(self, test_database):
+        """Test get_landmark_list method."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+        obj.landmark_str = "0\t0\n1\t1\n2\t2"
+        obj.save()
+
+        landmarks = obj.get_landmark_list()
+
+        assert len(landmarks) == 3
+        assert landmarks[0] == [0.0, 0.0]
+        assert landmarks[2] == [2.0, 2.0]
+
+
+class TestMdObjectRefresh:
+    """Tests for refresh operations."""
+
+    def test_object_refresh(self, test_database):
+        """Test object refresh from database."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Original", dataset=dataset)
+        obj_id = obj.id
+
+        # Modify object in database directly
+        obj2 = mm.MdObject.get_by_id(obj_id)
+        obj2.object_name = "Modified"
+        obj2.save()
+
+        # Refresh original object
+        refreshed = obj.refresh()
+
+        assert refreshed.object_name == "Modified"
+
+    def test_dataset_refresh(self, test_database):
+        """Test dataset refresh from database."""
+        dataset = mm.MdDataset.create(dataset_name="Original", dimension=2)
+        dataset_id = dataset.id
+
+        # Modify dataset in database directly
+        ds2 = mm.MdDataset.get_by_id(dataset_id)
+        ds2.dataset_name = "Modified"
+        ds2.save()
+
+        # Refresh original dataset
+        refreshed = dataset.refresh()
+
+        assert refreshed.dataset_name == "Modified"
+
+
+class TestMdDatasetOpsResetPose:
+    """Tests for reset_pose operation."""
+
+    def test_reset_pose(self, test_database):
+        """Test reset_pose method (currently a no-op)."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        ds_ops = mm.MdDatasetOps(dataset)
+
+        # reset_pose is currently just 'pass', so just verify it doesn't crash
+        ds_ops.reset_pose()
+
+        # No assertion needed - just verify no exception

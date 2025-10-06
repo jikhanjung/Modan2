@@ -1,17 +1,17 @@
 {
-  "timestamp": "2025-10-06 15:18:51",
+  "timestamp": "2025-10-06 15:57:05",
   "benchmarks": [
     {
       "operation": "procrustes",
       "success": true,
-      "time_seconds": 0.04798373299854575,
+      "time_seconds": 0.021012097000493668,
       "n_objects": 10,
       "n_landmarks": 10
     },
     {
       "operation": "pca",
       "success": true,
-      "time_seconds": 0.0002558779997343663,
+      "time_seconds": 0.00047851999988779426,
       "n_samples": 10,
       "n_components": 20,
       "n_objects": 10,
@@ -20,7 +20,7 @@
     {
       "operation": "cva",
       "success": true,
-      "time_seconds": 0.13360995500261197,
+      "time_seconds": 0.12654259599730722,
       "n_samples": 10,
       "n_groups": 3,
       "n_objects": 10,
@@ -28,24 +28,24 @@
     },
     {
       "operation": "manova",
-      "success": false,
-      "time_seconds": 0.009281704002205515,
+      "success": true,
+      "time_seconds": 0.027887374999409076,
       "n_samples": 10,
-      "n_groups": null,
+      "n_groups": 3,
       "n_objects": 10,
       "n_landmarks": 10
     },
     {
       "operation": "procrustes",
       "success": true,
-      "time_seconds": 0.3145347550016595,
+      "time_seconds": 0.3081754919985542,
       "n_objects": 50,
       "n_landmarks": 20
     },
     {
       "operation": "pca",
       "success": true,
-      "time_seconds": 0.0017425890000595246,
+      "time_seconds": 0.0012808300016331486,
       "n_samples": 50,
       "n_components": 40,
       "n_objects": 50,
@@ -54,7 +54,7 @@
     {
       "operation": "cva",
       "success": true,
-      "time_seconds": 0.003618867001932813,
+      "time_seconds": 0.0028949970001121983,
       "n_samples": 50,
       "n_groups": 3,
       "n_objects": 50,
@@ -63,7 +63,7 @@
     {
       "operation": "manova",
       "success": true,
-      "time_seconds": 0.03529560099923401,
+      "time_seconds": 0.02592502400148078,
       "n_samples": 50,
       "n_groups": 3,
       "n_objects": 50,
@@ -72,14 +72,14 @@
     {
       "operation": "procrustes",
       "success": true,
-      "time_seconds": 0.6338815819981392,
+      "time_seconds": 0.7464594319972093,
       "n_objects": 100,
       "n_landmarks": 30
     },
     {
       "operation": "pca",
       "success": true,
-      "time_seconds": 0.006871699999464909,
+      "time_seconds": 0.05666932399981306,
       "n_samples": 100,
       "n_components": 60,
       "n_objects": 100,
@@ -88,7 +88,7 @@
     {
       "operation": "cva",
       "success": true,
-      "time_seconds": 0.07954636000067694,
+      "time_seconds": 0.1285771000002569,
       "n_samples": 100,
       "n_groups": 3,
       "n_objects": 100,
@@ -97,7 +97,7 @@
     {
       "operation": "manova",
       "success": true,
-      "time_seconds": 0.026542564999544993,
+      "time_seconds": 0.07124335600019549,
       "n_samples": 100,
       "n_groups": 3,
       "n_objects": 100,

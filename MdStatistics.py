@@ -572,11 +572,37 @@ def do_manova_analysis_on_procrustes(flattened_landmarks, groups):
 
         # Create column names for coordinates
         n_coords = len(flattened_landmarks[0]) if flattened_landmarks else 0
-        n_landmarks = n_coords // 3  # Assuming 3D coordinates
+
+        # Auto-detect dimension (2D or 3D)
+        # If n_coords is divisible by 2 but not by 3, it's 2D
+        # If n_coords is divisible by 3, it's 3D
+        # Otherwise, use general coordinate naming
+        if n_coords % 2 == 0 and n_coords % 3 != 0:
+            # 2D data
+            dimension = 2
+            n_landmarks = n_coords // 2
+            coord_labels = ["X", "Y"]
+        elif n_coords % 3 == 0:
+            # 3D data
+            dimension = 3
+            n_landmarks = n_coords // 3
+            coord_labels = ["X", "Y", "Z"]
+        else:
+            # Fallback: general coordinate naming
+            dimension = 1
+            n_landmarks = n_coords
+            coord_labels = [""]
+
+        # Generate column names
         column_names = []
         for i in range(n_landmarks):
-            column_names.extend([f"LM{i + 1}_X", f"LM{i + 1}_Y", f"LM{i + 1}_Z"])
-        column_names = column_names[:n_coords]  # Trim if needed
+            for label in coord_labels:
+                if label:
+                    column_names.append(f"LM{i + 1}_{label}")
+                else:
+                    column_names.append(f"Coord{i + 1}")
+
+        logger.debug(f"Detected {dimension}D data: {n_landmarks} landmarks, {n_coords} coordinates")
 
         # Limit to first 20 variables to avoid computational issues
         max_vars = 20

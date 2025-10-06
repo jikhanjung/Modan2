@@ -3664,3 +3664,169 @@ class TestMdObjectCountLandmarks:
 
         count = obj.count_landmarks(exclude_missing=False)
         assert count == 3
+
+
+class TestMdObjectOpsRescale:
+    """Tests for rescale operations."""
+
+    def test_rescale_factor_2d(self, test_database):
+        """Test rescale with specific factor in 2D."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+        obj.landmark_list = [[0.0, 0.0], [1.0, 0.0], [0.5, 1.0]]
+        obj.save()
+
+        obj_ops = mm.MdObjectOps(obj)
+        obj_ops.rescale(2.0)
+
+        # All coordinates should be doubled
+        assert abs(obj_ops.landmark_list[0][0] - 0.0) < 0.01
+        assert abs(obj_ops.landmark_list[0][1] - 0.0) < 0.01
+        assert abs(obj_ops.landmark_list[1][0] - 2.0) < 0.01
+        assert abs(obj_ops.landmark_list[1][1] - 0.0) < 0.01
+        assert abs(obj_ops.landmark_list[2][0] - 1.0) < 0.01
+        assert abs(obj_ops.landmark_list[2][1] - 2.0) < 0.01
+
+    def test_rescale_with_none_values(self, test_database):
+        """Test rescale preserves None values."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+        obj.landmark_list = [[1.0, 1.0], [None, None], [2.0, 2.0]]
+        obj.save()
+
+        obj_ops = mm.MdObjectOps(obj)
+        obj_ops.rescale(0.5)
+
+        # None values should remain None
+        assert obj_ops.landmark_list[1][0] is None
+        assert obj_ops.landmark_list[1][1] is None
+        # Valid values should be scaled
+        assert abs(obj_ops.landmark_list[0][0] - 0.5) < 0.01
+        assert abs(obj_ops.landmark_list[2][0] - 1.0) < 0.01
+
+    def test_rescale_to_unitsize_2d(self, test_database):
+        """Test rescale to unit centroid size in 2D."""
+
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+        # Triangle with known centroid size
+        obj.landmark_list = [[0.0, 0.0], [2.0, 0.0], [1.0, 2.0]]
+        obj.save()
+
+        obj_ops = mm.MdObjectOps(obj)
+        obj_ops.rescale_to_unitsize()
+
+        # After rescaling, centroid size should be 1.0
+        new_size = obj_ops.get_centroid_size(refresh=True)
+        assert abs(new_size - 1.0) < 0.01
+
+    def test_rescale_to_unitsize_3d(self, test_database):
+        """Test rescale to unit centroid size in 3D."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=3)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+        obj.landmark_list = [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+        obj.save()
+
+        obj_ops = mm.MdObjectOps(obj)
+        obj_ops.rescale_to_unitsize()
+
+        # Centroid size should be 1.0
+        size = obj_ops.get_centroid_size(refresh=True)
+        assert abs(size - 1.0) < 0.01
+
+
+class TestMdObjectOpsRotate:
+    """Tests for rotation operations."""
+
+    def test_rotate_2d_90_degrees(self, test_database):
+        """Test 2D rotation by 90 degrees."""
+        import math
+
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+        obj.landmark_list = [[1.0, 0.0], [0.0, 1.0]]
+        obj.save()
+
+        obj_ops = mm.MdObjectOps(obj)
+        # Rotate 90 degrees counter-clockwise
+        obj_ops.rotate_2d(math.pi / 2)
+
+        # [1,0] should become approximately [0,1]
+        # [0,1] should become approximately [-1,0]
+        assert abs(obj_ops.landmark_list[0][0] - 0.0) < 0.01
+        assert abs(obj_ops.landmark_list[0][1] - 1.0) < 0.01
+        assert abs(obj_ops.landmark_list[1][0] - (-1.0)) < 0.01
+        assert abs(obj_ops.landmark_list[1][1] - 0.0) < 0.01
+
+    def test_rotate_3d_z_axis(self, test_database):
+        """Test 3D rotation around Z axis."""
+        import math
+
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=3)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+        obj.landmark_list = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+        obj.save()
+
+        obj_ops = mm.MdObjectOps(obj)
+        # Rotate 90 degrees around Z axis
+        obj_ops.rotate_3d(math.pi / 2, "Z")
+
+        # [1,0,0] → [0,1,0], [0,1,0] → [-1,0,0], [0,0,1] → [0,0,1]
+        assert abs(obj_ops.landmark_list[0][0] - 0.0) < 0.01
+        assert abs(obj_ops.landmark_list[0][1] - 1.0) < 0.01
+        assert abs(obj_ops.landmark_list[0][2] - 0.0) < 0.01
+
+        assert abs(obj_ops.landmark_list[1][0] - (-1.0)) < 0.01
+        assert abs(obj_ops.landmark_list[1][1] - 0.0) < 0.01
+        assert abs(obj_ops.landmark_list[1][2] - 0.0) < 0.01
+
+        # Z coordinate unchanged
+        assert abs(obj_ops.landmark_list[2][2] - 1.0) < 0.01
+
+    def test_rotate_3d_x_axis(self, test_database):
+        """Test 3D rotation around X axis."""
+        import math
+
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=3)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+        obj.landmark_list = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+        obj.save()
+
+        obj_ops = mm.MdObjectOps(obj)
+        # Rotate 90 degrees around X axis
+        obj_ops.rotate_3d(math.pi / 2, "X")
+
+        # [1,0,0] unchanged, [0,1,0] → [0,0,1], [0,0,1] → [0,-1,0]
+        assert abs(obj_ops.landmark_list[0][0] - 1.0) < 0.01
+        assert abs(obj_ops.landmark_list[0][1] - 0.0) < 0.01
+        assert abs(obj_ops.landmark_list[0][2] - 0.0) < 0.01
+
+        assert abs(obj_ops.landmark_list[1][0] - 0.0) < 0.01
+        assert abs(obj_ops.landmark_list[1][1] - 0.0) < 0.01
+        assert abs(obj_ops.landmark_list[1][2] - 1.0) < 0.01
+
+    def test_rotate_3d_y_axis(self, test_database):
+        """Test 3D rotation around Y axis."""
+        import math
+
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=3)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+        obj.landmark_list = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+        obj.save()
+
+        obj_ops = mm.MdObjectOps(obj)
+        # Rotate 90 degrees around Y axis
+        obj_ops.rotate_3d(math.pi / 2, "Y")
+
+        # [1,0,0] → [0,0,1], [0,1,0] unchanged, [0,0,1] → [-1,0,0]
+        assert abs(obj_ops.landmark_list[0][0] - 0.0) < 0.01
+        assert abs(obj_ops.landmark_list[0][1] - 0.0) < 0.01
+        assert abs(obj_ops.landmark_list[0][2] - 1.0) < 0.01
+
+        assert abs(obj_ops.landmark_list[1][0] - 0.0) < 0.01
+        assert abs(obj_ops.landmark_list[1][1] - 1.0) < 0.01
+        assert abs(obj_ops.landmark_list[1][2] - 0.0) < 0.01
+
+        assert abs(obj_ops.landmark_list[2][0] - (-1.0)) < 0.01
+        assert abs(obj_ops.landmark_list[2][1] - 0.0) < 0.01
+        assert abs(obj_ops.landmark_list[2][2] - 0.0) < 0.01

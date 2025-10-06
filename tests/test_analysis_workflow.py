@@ -33,7 +33,7 @@ class TestAnalysisDialog:
     @pytest.fixture
     def sample_dataset_with_objects(self, qtbot):
         """Create a dataset with objects for analysis testing."""
-        from ModanDialogs import DatasetDialog, ObjectDialog
+        from dialogs import DatasetDialog, ObjectDialog
 
         # Setup QApplication settings mock
         app = QApplication.instance()
@@ -581,7 +581,7 @@ class TestAnalysisValidation:
         """Test analysis behavior with insufficient data."""
         from PyQt5.QtWidgets import QWidget
 
-        from ModanDialogs import DatasetDialog, ObjectDialog
+        from dialogs import DatasetDialog, ObjectDialog
 
         try:
             # Setup QApplication settings mock

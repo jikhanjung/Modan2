@@ -4,37 +4,49 @@ This module provides the DatasetAnalysisDialog class for displaying analysis res
 visualizing shapes, and managing dataset-level analysis options.
 """
 
+import datetime
 import logging
+import os
 
 import numpy as np
-from PyQt5.QtCore import Qt, QRect, QSize, QTimer
-from PyQt5.QtGui import QFont, QKeySequence
+import xlsxwriter
+from matplotlib.backends.backend_qt5agg import FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.figure import Figure
+from PyQt5.QtCore import QItemSelectionModel, QPoint, QRect, QSortFilterProxyModel, Qt
+from PyQt5.QtGui import QStandardItem, QStandardItemModel
 from PyQt5.QtWidgets import (
+    QAbstractItemView,
     QApplication,
     QCheckBox,
     QComboBox,
     QDialog,
-    QFormLayout,
+    QFileDialog,
     QGroupBox,
     QHBoxLayout,
-    QLabel,
+    QHeaderView,
+    QMessageBox,
     QPushButton,
-    QShortcut,
+    QRadioButton,
     QSizePolicy,
     QSplitter,
-    QTabWidget,
+    QStatusBar,
+    QTableView,
     QTableWidget,
     QTableWidgetItem,
+    QTabWidget,
     QVBoxLayout,
     QWidget,
 )
 
 import MdUtils as mu
 from components.widgets import DatasetOpsViewer
-from MdModel import MdDataset
+from MdModel import MdDatasetOps, MdObject
+from MdStatistics import MdCanonicalVariate, MdPrincipalComponent
 from ModanComponents import ObjectViewer3D
 
 logger = logging.getLogger(__name__)
+
 
 class DatasetAnalysisDialog(QDialog):
     def __init__(self, parent, dataset):
@@ -537,7 +549,7 @@ class DatasetAnalysisDialog(QDialog):
         self.show_wireframe_state_changed()
         self.show_baseline_state_changed()
         self.show_average_state_changed()
-        self.auto_rotate_state_changed
+        self.auto_rotate_state_changed()
         # self.cbxShowIndex.stateChanged.connect(self.show_index_state_changed)
         # self.cbxShowWireframe.stateChanged.connect(self.show_wireframe_state_changed)
         # self.cbxShowBaseline.stateChanged.connect(self.show_baseline_state_changed)
@@ -1151,7 +1163,7 @@ class DatasetAnalysisDialog(QDialog):
         # print("plot widget:",self.plot_widget, "plotItem:",self.plot_widget.plotItem, "vb:",self.plot_widget.plotItem.vb, "mapSceneToView:",self.plot_widget.plotItem.vb.mapSceneToView(pos))
         # print("pos:",pos, pos.x(), pos.y(), "p:",p, p.x(), p.y())
 
-        self.status_bar.showMessage("x: %d, y: %d, x2: %f, y2: %f" % (pos.x(), pos.y(), p.x(), p.y()))
+        self.status_bar.showMessage(f"x: {pos.x():.0f}, y: {pos.y():.0f}, x2: {p.x():.6f}, y2: {p.y():.6f}")
 
     def on_scatter_item_clicked(self, plot, points):
         # print("scatter item clicked:",plot,points)
@@ -1340,5 +1352,3 @@ class DatasetAnalysisDialog(QDialog):
             selected_object_id_list.append(object_id)
 
         return selected_object_id_list
-
-

@@ -1020,27 +1020,27 @@ class TestMdImage:
         dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
         obj = mm.MdObject.create(object_name="Obj1", dataset=dataset)
 
-        image = mm.MdImage.create(
+        _image = mm.MdImage.create(
             object=obj, original_path="/path/to/test.jpg", original_filename="test.jpg", size=1024, md5hash="abc123"
         )
 
-        assert image.id is not None
-        assert image.object == obj
-        assert image.original_path == "/path/to/test.jpg"
-        assert image.original_filename == "test.jpg"
-        assert image.size == 1024
-        assert image.md5hash == "abc123"
+        assert _image.id is not None
+        assert _image.object == obj
+        assert _image.original_path == "/path/to/test.jpg"
+        assert _image.original_filename == "test.jpg"
+        assert _image.size == 1024
+        assert _image.md5hash == "abc123"
 
     def test_image_file_path(self, test_database):
         """Test getting image file path."""
         dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
         obj = mm.MdObject.create(object_name="Obj1", dataset=dataset)
 
-        image = mm.MdImage.create(
+        _image = mm.MdImage.create(
             object=obj, original_path="/path/to/test.jpg", original_filename="test.jpg", size=1024, md5hash="abc123"
         )
 
-        file_path = image.get_file_path()
+        file_path = _image.get_file_path()
 
         assert file_path is not None
         assert str(obj.id) in file_path
@@ -1054,27 +1054,27 @@ class TestMdThreeDModel:
         dataset = mm.MdDataset.create(dataset_name="Test", dimension=3)
         obj = mm.MdObject.create(object_name="Obj1", dataset=dataset)
 
-        model = mm.MdThreeDModel.create(
+        _model = mm.MdThreeDModel.create(
             object=obj, original_path="/path/to/test.obj", original_filename="test.obj", size=2048, md5hash="def456"
         )
 
-        assert model.id is not None
-        assert model.object == obj
-        assert model.original_path == "/path/to/test.obj"
-        assert model.original_filename == "test.obj"
-        assert model.size == 2048
-        assert model.md5hash == "def456"
+        assert _model.id is not None
+        assert _model.object == obj
+        assert _model.original_path == "/path/to/test.obj"
+        assert _model.original_filename == "test.obj"
+        assert _model.size == 2048
+        assert _model.md5hash == "def456"
 
     def test_3d_model_file_path(self, test_database):
         """Test getting 3D model file path."""
         dataset = mm.MdDataset.create(dataset_name="Test", dimension=3)
         obj = mm.MdObject.create(object_name="Obj1", dataset=dataset)
 
-        model = mm.MdThreeDModel.create(
+        _model = mm.MdThreeDModel.create(
             object=obj, original_path="/path/to/test.obj", original_filename="test.obj", size=2048, md5hash="def456"
         )
 
-        file_path = model.get_file_path()
+        file_path = _model.get_file_path()
 
         assert file_path is not None
         assert str(obj.id) in file_path
@@ -1114,3 +1114,284 @@ class TestMdAnalysis:
 
         assert parsed_result["eigenvalues"] == [1.0, 0.5]
         assert parsed_result["scores"] == [[0.1, 0.2]]
+
+
+class TestMdDatasetGrouping:
+    """Test MdDataset grouping variable operations."""
+
+    def test_get_grouping_variable_with_multiple_groups(self, test_database):
+        """Test grouping variable identification with multiple distinct groups."""
+        dataset = mm.MdDataset.create(dataset_name="Grouping Test", dimension=2)
+        dataset.propertyname_str = "Species,Location,Age"
+        dataset.save()
+
+        # Create objects with grouping variables
+        for i in range(10):
+            obj = mm.MdObject.create(object_name=f"Obj{i}", dataset=dataset)
+            # Species: 3 groups, Location: 2 groups, Age: 10 unique (too many)
+            species = ["A", "B", "C"][i % 3]
+            location = ["North", "South"][i % 2]
+            age = str(20 + i)
+            obj.variablename_str = f"{species},{location},{age}"
+            obj.save()
+
+        # Get grouping variable indices
+        indices = dataset.get_grouping_variable_index_list()
+
+        # Species (index 0) and Location (index 1) should be included
+        # Age (index 2) has too many unique values (10 = 100% of objects)
+        assert 0 in indices  # Species
+        assert 1 in indices  # Location
+        # Age might or might not be included depending on threshold
+
+    def test_get_grouping_variable_with_few_groups(self, test_database):
+        """Test grouping with variables having few distinct values."""
+        dataset = mm.MdDataset.create(dataset_name="Few Groups", dimension=2)
+        dataset.propertyname_str = "Group,Subgroup"
+        dataset.save()
+
+        # Create 20 objects with only 2-3 unique values per variable
+        for i in range(20):
+            obj = mm.MdObject.create(object_name=f"Obj{i}", dataset=dataset)
+            group = ["A", "B"][i % 2]
+            subgroup = ["X", "Y", "Z"][i % 3]
+            obj.variablename_str = f"{group},{subgroup}"
+            obj.save()
+
+        indices = dataset.get_grouping_variable_index_list()
+
+        # Both should be valid grouping variables (<=10 unique values)
+        assert len(indices) == 2
+        assert 0 in indices
+        assert 1 in indices
+
+    def test_get_grouping_variable_empty_dataset(self, test_database):
+        """Test grouping variables with no objects."""
+        dataset = mm.MdDataset.create(dataset_name="Empty", dimension=2)
+        dataset.propertyname_str = "Var1,Var2"
+        dataset.save()
+
+        # No objects created
+        indices = dataset.get_grouping_variable_index_list()
+
+        # Should return all variables when dataset is empty
+        assert len(indices) == 2
+
+    def test_get_grouping_variable_no_variables(self, test_database):
+        """Test grouping when no variables are defined."""
+        dataset = mm.MdDataset.create(dataset_name="No Vars", dimension=2)
+        # No propertyname_str set
+
+        obj = mm.MdObject.create(object_name="Obj1", dataset=dataset)
+        obj.save()
+
+        indices = dataset.get_grouping_variable_index_list()
+
+        # Should return empty list
+        assert len(indices) == 0
+
+    def test_get_grouping_variable_all_unique(self, test_database):
+        """Test grouping when all values are unique (bad for grouping)."""
+        dataset = mm.MdDataset.create(dataset_name="All Unique", dimension=2)
+        dataset.propertyname_str = "ID"
+        dataset.save()
+
+        # Create 15 objects, each with unique ID
+        for i in range(15):
+            obj = mm.MdObject.create(object_name=f"Obj{i}", dataset=dataset)
+            obj.variablename_str = f"ID_{i}"
+            obj.save()
+
+        indices = dataset.get_grouping_variable_index_list()
+
+        # Should still return the variable (fallback behavior)
+        # When no valid grouping variables, returns all
+        assert len(indices) > 0
+
+
+class TestMdDatasetWireframePolygon:
+    """Test MdDataset wireframe and polygon operations."""
+
+    def test_pack_unpack_wireframe_complex(self, test_database):
+        """Test packing and unpacking complex wireframe data."""
+        dataset = mm.MdDataset.create(dataset_name="Wireframe Test", dimension=2)
+
+        # Create complex edge list
+        edge_list = [[0, 1], [1, 2], [2, 3], [3, 0], [0, 2]]
+        dataset.pack_wireframe(edge_list)
+        dataset.save()
+
+        # Unpack and verify
+        retrieved = mm.MdDataset.get_by_id(dataset.id)
+        unpacked_edges = retrieved.get_edge_list()
+
+        assert len(unpacked_edges) == 5
+        assert [0, 1] in unpacked_edges
+        assert [0, 2] in unpacked_edges
+
+    def test_pack_wireframe_with_sorting(self, test_database):
+        """Test that wireframe edges are sorted correctly."""
+        dataset = mm.MdDataset.create(dataset_name="Sort Test", dimension=2)
+
+        # Edges in random order with reversed pairs
+        edge_list = [[5, 3], [1, 0], [2, 1], [4, 2]]
+        dataset.pack_wireframe(edge_list)
+        dataset.save()
+
+        retrieved = mm.MdDataset.get_by_id(dataset.id)
+        unpacked_edges = retrieved.get_edge_list()
+
+        # Each edge should be sorted (smaller index first)
+        for edge in unpacked_edges:
+            assert edge[0] <= edge[1]
+
+    def test_get_edge_list_empty(self, test_database):
+        """Test getting edge list when no wireframe is set."""
+        dataset = mm.MdDataset.create(dataset_name="No Wireframe", dimension=2)
+
+        edges = dataset.get_edge_list()
+
+        assert edges == []
+
+    def test_pack_unpack_polygons(self, test_database):
+        """Test packing and unpacking polygon data."""
+        dataset = mm.MdDataset.create(dataset_name="Polygon Test", dimension=2)
+
+        # Create polygon list (triangle and square)
+        polygon_list = [[0, 1, 2], [3, 4, 5, 6]]
+        dataset.pack_polygons(polygon_list)
+        dataset.save()
+
+        retrieved = mm.MdDataset.get_by_id(dataset.id)
+        unpacked_polygons = retrieved.get_polygon_list()
+
+        assert len(unpacked_polygons) == 2
+        assert [0, 1, 2] in unpacked_polygons
+        assert [3, 4, 5, 6] in unpacked_polygons
+
+    def test_pack_unpack_baseline(self, test_database):
+        """Test packing and unpacking baseline points."""
+        dataset = mm.MdDataset.create(dataset_name="Baseline Test", dimension=2)
+
+        # Set baseline points
+        baseline_points = [0, 5]
+        dataset.pack_baseline(baseline_points)
+        dataset.save()
+
+        retrieved = mm.MdDataset.get_by_id(dataset.id)
+        retrieved.unpack_baseline()  # Need to unpack first
+        unpacked_baseline = retrieved.get_baseline_points()
+
+        assert len(unpacked_baseline) == 2
+        assert 0 in unpacked_baseline
+        assert 5 in unpacked_baseline
+
+    def test_get_polygon_list_empty(self, test_database):
+        """Test getting polygon list when none is set."""
+        dataset = mm.MdDataset.create(dataset_name="No Polygons", dimension=2)
+
+        polygons = dataset.get_polygon_list()
+
+        assert polygons == []
+
+    def test_get_baseline_points_empty(self, test_database):
+        """Test getting baseline points when none is set."""
+        dataset = mm.MdDataset.create(dataset_name="No Baseline", dimension=2)
+
+        baseline = dataset.get_baseline_points()
+
+        assert baseline == []
+
+
+class TestMdObjectImageOperations:
+    """Test MdObject image attachment and operations."""
+
+    def test_has_image_with_image(self, test_database):
+        """Test has_image returns True when image is attached."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Obj1", dataset=dataset)
+
+        # Attach an image
+        _img = mm.MdImage.create(
+            object=obj, original_path="/test/image.jpg", original_filename="image.jpg", size=1024, md5hash="abc123"
+        )
+
+        assert obj.has_image() is True
+
+    def test_has_image_without_image(self, test_database):
+        """Test has_image returns False when no image."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Obj1", dataset=dataset)
+
+        assert obj.has_image() is False
+
+    def test_get_image_path(self, test_database):
+        """Test getting image file path."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Obj1", dataset=dataset)
+
+        _img = mm.MdImage.create(
+            object=obj, original_path="/test/image.jpg", original_filename="image.jpg", size=1024, md5hash="abc123"
+        )
+
+        # Get the image object first, then get its path
+        image = obj.get_image()
+        path = image.get_file_path()
+
+        assert path is not None
+        assert str(obj.id) in path
+
+    def test_get_image_no_image(self, test_database):
+        """Test getting image when no image attached."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Obj1", dataset=dataset)
+
+        # Should return False for has_image
+        assert obj.has_image() is False
+
+
+class TestMdObject3DModelOperations:
+    """Test MdObject 3D model attachment and operations."""
+
+    def test_has_threed_model_with_model(self, test_database):
+        """Test has_threed_model returns True when model is attached."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=3)
+        obj = mm.MdObject.create(object_name="Obj1", dataset=dataset)
+
+        # Attach a 3D model
+        _model = mm.MdThreeDModel.create(
+            object=obj, original_path="/test/model.obj", original_filename="model.obj", size=2048, md5hash="def456"
+        )
+
+        assert obj.has_threed_model() is True
+
+    def test_has_threed_model_without_model(self, test_database):
+        """Test has_threed_model returns False when no model."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=3)
+        obj = mm.MdObject.create(object_name="Obj1", dataset=dataset)
+
+        assert obj.has_threed_model() is False
+
+    def test_get_threed_model_path(self, test_database):
+        """Test getting 3D model file path."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=3)
+        obj = mm.MdObject.create(object_name="Obj1", dataset=dataset)
+
+        _model = mm.MdThreeDModel.create(
+            object=obj, original_path="/test/model.obj", original_filename="model.obj", size=2048, md5hash="def456"
+        )
+
+        # Get the model object first, then get its path
+        threed_model = obj.get_threed_model()
+        path = threed_model.get_file_path()
+
+        assert path is not None
+        assert str(obj.id) in path
+
+    def test_get_threed_model_no_model(self, test_database):
+        """Test getting model when no model attached."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=3)
+        obj = mm.MdObject.create(object_name="Obj1", dataset=dataset)
+
+        # Should return False for has_threed_model
+        assert obj.has_threed_model() is False

@@ -37,11 +37,14 @@ ICONS = {
     # Tools
     "landmark": str(ICONS_DIR / "M2Landmark_2.png"),
     "landmark_hover": str(ICONS_DIR / "M2Landmark_2_hover.png"),
+    "landmark_down": str(ICONS_DIR / "M2Landmark_2_down.png"),
     "landmark_disabled": str(ICONS_DIR / "M2Landmark_2_disabled.png"),
     "wireframe": str(ICONS_DIR / "M2Wireframe_2.png"),
     "wireframe_hover": str(ICONS_DIR / "M2Wireframe_2_hover.png"),
+    "wireframe_down": str(ICONS_DIR / "M2Wireframe_2_down.png"),
     "calibration": str(ICONS_DIR / "M2Calibration_2.png"),
     "calibration_hover": str(ICONS_DIR / "M2Calibration_2_hover.png"),
+    "calibration_down": str(ICONS_DIR / "M2Calibration_2_down.png"),
     "calibration_disabled": str(ICONS_DIR / "M2Calibration_2_disabled.png"),
     # Data types
     "dataset_2d": str(ICONS_DIR / "M2Dataset2D_3.png"),

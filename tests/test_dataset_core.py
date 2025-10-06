@@ -12,7 +12,7 @@ import pytest
 from PyQt5.QtCore import QPoint
 
 import MdModel
-from ModanDialogs import DatasetDialog, ObjectDialog
+from dialogs import DatasetDialog, ObjectDialog
 
 
 class TestDatasetCore:

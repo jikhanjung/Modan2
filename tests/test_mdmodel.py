@@ -2292,3 +2292,304 @@ class TestMdObjectLandmarkEdgeCases:
         assert obj.landmark_list[0] == [1.0, 2.0]
         assert obj.landmark_list[1] == [3.0, 4.0]
         assert obj.landmark_list[2] == [5.0, 6.0]
+
+
+class TestMdImageOperations:
+    """Tests for MdImage model operations."""
+
+    def test_create_image_basic(self, test_database):
+        """Test creating an image with basic fields."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+
+        img = mm.MdImage.create(object=obj, name="test", original_path="test.jpg", original_filename="original.jpg")
+
+        assert img.name == "test"
+        assert img.original_filename == "original.jpg"
+        assert img.object == obj
+
+    def test_image_get_file_path(self, test_database):
+        """Test getting image file path."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+        img = mm.MdImage.create(object=obj, original_path="/path/to/test.jpg", original_filename="original.jpg")
+
+        path = img.get_file_path()
+
+        # Should return composed path with dataset/object id
+        assert path.endswith(".jpg")
+        assert str(dataset.id) in path
+        assert str(obj.id) in path
+
+    def test_image_with_exif_datetime(self, test_database):
+        """Test image with EXIF datetime."""
+        import datetime
+
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+
+        exif_dt = datetime.datetime(2024, 1, 1, 12, 0, 0)
+        img = mm.MdImage.create(object=obj, original_path="test.jpg", exifdatetime=exif_dt)
+
+        assert img.exifdatetime == exif_dt
+
+    def test_image_with_md5hash(self, test_database):
+        """Test image with md5 hash."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+
+        md5 = "abc123def456"
+        img = mm.MdImage.create(object=obj, original_path="test.jpg", md5hash=md5)
+
+        assert img.md5hash == md5
+
+    def test_image_find_by_object(self, test_database):
+        """Test finding image by object."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+        _img = mm.MdImage.create(object=obj, original_path="test.jpg", original_filename="original.jpg")
+
+        found = mm.MdImage.get_or_none(mm.MdImage.object == obj)
+
+        assert found is not None
+        assert found.original_filename == "original.jpg"
+
+
+class TestMdThreeDModelOperations:
+    """Tests for MdThreeDModel model operations."""
+
+    def test_create_threed_model_basic(self, test_database):
+        """Test creating a 3D model with basic fields."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=3)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+
+        model = mm.MdThreeDModel.create(
+            object=obj, name="test_model", original_path="model.obj", original_filename="original.obj"
+        )
+
+        assert model.name == "test_model"
+        assert model.original_filename == "original.obj"
+        assert model.object == obj
+
+    def test_threed_model_get_file_path(self, test_database):
+        """Test getting 3D model file path."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=3)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+        model = mm.MdThreeDModel.create(object=obj, original_path="/path/to/model.obj")
+
+        path = model.get_file_path()
+
+        # Should return composed path with dataset/object id
+        assert path.endswith(".obj")
+        assert str(dataset.id) in path
+        assert str(obj.id) in path
+
+    def test_threed_model_with_md5hash(self, test_database):
+        """Test 3D model with md5 hash."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=3)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+
+        md5 = "xyz789abc123"
+        model = mm.MdThreeDModel.create(object=obj, original_path="model.obj", md5hash=md5)
+
+        assert model.md5hash == md5
+
+    def test_threed_model_find_by_object(self, test_database):
+        """Test finding 3D model by object."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=3)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+        _model = mm.MdThreeDModel.create(object=obj, original_path="model.obj", original_filename="original.obj")
+
+        found = mm.MdThreeDModel.get_or_none(mm.MdThreeDModel.object == obj)
+
+        assert found is not None
+        assert found.original_filename == "original.obj"
+
+
+class TestMdDatasetWireframeOperations:
+    """Tests for dataset wireframe operations."""
+
+    def test_pack_wireframe_with_edges(self, test_database):
+        """Test packing wireframe from edge list."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        dataset.edge_list = [[1, 2], [2, 3], [3, 1]]
+
+        result = dataset.pack_wireframe()
+
+        # Edges should be sorted
+        assert result is not None
+        assert "1-2" in result
+        assert "2-3" in result
+        assert "1-3" in result
+
+    def test_unpack_wireframe_with_invalid_edge(self, test_database):
+        """Test unpacking wireframe with invalid edge."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        # Invalid edge with non-numeric value
+        dataset.wireframe = "1-2,invalid-3,4-5"
+        edges = dataset.unpack_wireframe()
+
+        # Should skip invalid edge
+        assert len(edges) == 2
+        assert [1, 2] in edges
+        assert [4, 5] in edges
+
+    def test_wireframe_roundtrip(self, test_database):
+        """Test packing and unpacking wireframe."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        original_edges = [[1, 2], [3, 4], [5, 6]]
+        dataset.edge_list = original_edges
+        wireframe_str = dataset.pack_wireframe()
+
+        # Unpack it back
+        dataset.wireframe = wireframe_str
+        result_edges = dataset.unpack_wireframe()
+
+        # Should match original (order may differ due to sorting)
+        assert len(result_edges) == len(original_edges)
+        for edge in original_edges:
+            assert edge in result_edges or [edge[1], edge[0]] in result_edges
+
+
+class TestMdDatasetPolygonOperations:
+    """Tests for dataset polygon operations."""
+
+    def test_pack_polygons_basic(self, test_database):
+        """Test packing polygons from polygon list."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        dataset.polygon_list = [[1, 2, 3], [4, 5, 6]]
+
+        result = dataset.pack_polygons()
+
+        assert result is not None
+        assert "1-2-3" in result
+        assert "4-5-6" in result
+
+    def test_unpack_polygons_basic(self, test_database):
+        """Test unpacking polygons from string."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        dataset.polygons = "1-2-3,4-5-6-7"
+        polygons = dataset.unpack_polygons()
+
+        assert len(polygons) == 2
+        assert [1, 2, 3] in polygons
+        assert [4, 5, 6, 7] in polygons
+
+    def test_polygon_roundtrip(self, test_database):
+        """Test packing and unpacking polygons."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        original_polygons = [[1, 2, 3, 4], [5, 6, 7]]
+        dataset.polygon_list = original_polygons
+        polygon_str = dataset.pack_polygons()
+
+        dataset.polygons = polygon_str
+        result_polygons = dataset.unpack_polygons()
+
+        assert len(result_polygons) == len(original_polygons)
+        for poly in original_polygons:
+            assert poly in result_polygons or sorted(poly) in [sorted(p) for p in result_polygons]
+
+
+class TestMdDatasetBaselineOperations:
+    """Tests for dataset baseline operations."""
+
+    def test_pack_baseline_with_two_points(self, test_database):
+        """Test packing baseline with 2 points."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        dataset.baseline_point_list = [1, 5]
+
+        result = dataset.pack_baseline()
+
+        assert result == "1,5"
+
+    def test_pack_baseline_with_three_points(self, test_database):
+        """Test packing baseline with 3 points."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=3)
+        dataset.baseline_point_list = [1, 5, 10]
+
+        result = dataset.pack_baseline()
+
+        assert result == "1,5,10"
+
+    def test_unpack_baseline_two_points(self, test_database):
+        """Test unpacking baseline with 2 points."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        dataset.baseline = "3,7"
+        points = dataset.unpack_baseline()
+
+        assert len(points) == 2
+        assert points == [3, 7]
+
+    def test_unpack_baseline_three_points(self, test_database):
+        """Test unpacking baseline with 3 points."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=3)
+
+        dataset.baseline = "2,8,15"
+        points = dataset.unpack_baseline()
+
+        assert len(points) == 3
+        assert points == [2, 8, 15]
+
+    def test_baseline_roundtrip(self, test_database):
+        """Test packing and unpacking baseline."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=3)
+
+        original_points = [1, 5, 10]
+        dataset.baseline_point_list = original_points
+        baseline_str = dataset.pack_baseline()
+
+        dataset.baseline = baseline_str
+        result_points = dataset.unpack_baseline()
+
+        assert result_points == original_points
+
+
+class TestMdDatasetVariablenameOperations:
+    """Tests for dataset variablename operations."""
+
+    def test_pack_variablename_str(self, test_database):
+        """Test packing variable names to string."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        dataset.variablename_list = ["Species", "Sex", "Age"]
+
+        result = dataset.pack_variablename_str()
+
+        assert result == "Species,Sex,Age"
+
+    def test_unpack_variablename_str(self, test_database):
+        """Test unpacking variable names from string."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        dataset.propertyname_str = "Species,Sex,Age"
+        variables = dataset.unpack_variablename_str()
+
+        assert len(variables) == 3
+        assert variables == ["Species", "Sex", "Age"]
+
+    def test_variablename_roundtrip(self, test_database):
+        """Test packing and unpacking variable names."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        original_vars = ["Color", "Size", "Weight"]
+        dataset.variablename_list = original_vars
+        var_str = dataset.pack_variablename_str()
+
+        dataset.propertyname_str = var_str
+        result_vars = dataset.unpack_variablename_str()
+
+        assert result_vars == original_vars
+
+    def test_get_variablename_list(self, test_database):
+        """Test getting variable name list."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        dataset.propertyname_str = "Var1,Var2,Var3"
+
+        variables = dataset.get_variablename_list()
+
+        assert len(variables) == 3
+        assert variables == ["Var1", "Var2", "Var3"]

@@ -1,29 +1,19 @@
 """
-ModanComponents - Modular refactoring
-
-This file now imports from the components/ package and re-exports everything
-for backward compatibility. All actual implementations have been moved to
-components/ subdirectories.
-
-Original file: 4,852 lines
-Refactored structure:
-  - components/viewers/: 2D and 3D object viewers (2,517 lines)
-  - components/widgets/: Custom PyQt5 widgets (1,734 lines)
-  - components/formats/: File format handlers (462 lines)
-  - Shared imports and constants: 179 lines
-
-For new code, prefer importing from components/ directly:
-  from components.viewers import ObjectViewer2D
-  from components.widgets import MdTableView
-  from components.formats import TPS
-
-For backward compatibility, old imports still work:
-  from ModanComponents import ObjectViewer2D  # Still works
+MdSequenceDelegate - Extracted from ModanComponents.py
+Part of modular refactoring effort.
 """
 
-# Import all shared modules and initialize GLUT (needed by components)
 import logging
 import sys
+
+from matplotlib.backends.backend_qt5agg import FigureCanvas as FigureCanvas
+from PyQt5.QtGui import (
+    QIntValidator,
+)
+from PyQt5.QtWidgets import (
+    QLineEdit,
+    QStyledItemDelegate,
+)
 
 # GLUT import conditional - causes crashes on Windows builds
 GLUT_AVAILABLE = False
@@ -49,11 +39,11 @@ if GLUT_AVAILABLE and glut:
         GLUT_AVAILABLE = False
         GLUT_INITIALIZED = False
 
+
 import MdUtils as mu
 
 logger = logging.getLogger(__name__)
 
-# Constants and mode definitions
 MODE = {}
 MODE["NONE"] = 0
 MODE["PAN"] = 12
@@ -65,12 +55,14 @@ MODE["PRE_WIRE_FROM"] = 5
 MODE["CALIBRATION"] = 6
 MODE["VIEW"] = 7
 
+
 MODE_EXPLORATION = 0
 MODE_REGRESSION = 1
 MODE_GROWTH_TRAJECTORY = 2
 MODE_AVERAGE = 3
 MODE_COMPARISON = 4
 MODE_COMPARISON2 = 5
+# MODE_GRID = 6
 
 BASE_LANDMARK_RADIUS = 2
 DISTANCE_THRESHOLD = BASE_LANDMARK_RADIUS * 3
@@ -86,7 +78,6 @@ ROTATE_MODE = 3
 ZOOM_MODE = 4
 LANDMARK_MODE = 1
 WIREFRAME_MODE = 2
-
 COLOR = {
     "RED": (1, 0, 0),
     "GREEN": (0, 1, 0),
@@ -127,75 +118,12 @@ ICON["calibration_disabled"] = mu.resource_path("icons/M2Calibration_2_disabled.
 
 NEWLINE = "\n"
 
-# Import all components from modular structure
-from components import (
-    NTS,
-    TPS,
-    X1Y1,
-    AnalysisInfoWidget,
-    CustomDrag,
-    DatasetOpsViewer,
-    DragEventFilter,
-    MdDrag,
-    MdSequenceDelegate,
-    MdTableModel,
-    MdTableView,
-    MdTreeView,
-    Morphologika,
-    ObjectViewer2D,
-    ObjectViewer3D,
-    PicButton,
-    ResizableOverlayWidget,
-    ShapePreference,
-)
 
-# Re-export for backward compatibility
-__all__ = [
-    # Constants
-    "MODE",
-    "MODE_EXPLORATION",
-    "MODE_REGRESSION",
-    "MODE_GROWTH_TRAJECTORY",
-    "MODE_AVERAGE",
-    "MODE_COMPARISON",
-    "MODE_COMPARISON2",
-    "BASE_LANDMARK_RADIUS",
-    "DISTANCE_THRESHOLD",
-    "CENTROID_SIZE_VALUE",
-    "CENTROID_SIZE_TEXT",
-    "OBJECT_MODE",
-    "DATASET_MODE",
-    "VIEW_MODE",
-    "PAN_MODE",
-    "ROTATE_MODE",
-    "ZOOM_MODE",
-    "LANDMARK_MODE",
-    "WIREFRAME_MODE",
-    "COLOR",
-    "ICON",
-    "NEWLINE",
-    "GLUT_AVAILABLE",
-    "GLUT_INITIALIZED",
-    "glut",
-    # Viewers
-    "ObjectViewer2D",
-    "ObjectViewer3D",
-    # Widgets
-    "AnalysisInfoWidget",
-    "DatasetOpsViewer",
-    "MdSequenceDelegate",
-    "CustomDrag",
-    "DragEventFilter",
-    "MdDrag",
-    "PicButton",
-    "ResizableOverlayWidget",
-    "ShapePreference",
-    "MdTableModel",
-    "MdTableView",
-    "MdTreeView",
-    # Formats
-    "Morphologika",
-    "NTS",
-    "TPS",
-    "X1Y1",
-]
+class MdSequenceDelegate(QStyledItemDelegate):
+    def createEditor(self, parent, option, index):
+        if index.column() == 1:  # Check if it's the sequence column
+            editor = QLineEdit(parent)
+            editor.setValidator(QIntValidator())
+            return editor
+        else:
+            return super().createEditor(parent, option, index)

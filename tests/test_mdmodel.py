@@ -1954,3 +1954,341 @@ class TestMdObjectSequenceOperations:
         assert objects[0].object_name == "First"
         assert objects[1].object_name == "Second"
         assert objects[2].object_name == "Third"
+
+
+class TestMdObjectCopyObject:
+    """Tests for MdObject copy_object operation."""
+
+    def test_copy_object_basic(self, test_database):
+        """Test copying object to another dataset."""
+        dataset1 = mm.MdDataset.create(dataset_name="Source", dimension=2)
+        dataset2 = mm.MdDataset.create(dataset_name="Target", dimension=2)
+
+        obj = mm.MdObject.create(object_name="Original", dataset=dataset1)
+        obj.landmark_str = "1\t2\n3\t4"
+        obj.property_str = "Species,Location"
+        obj.variablename_str = "Human,Africa"
+        obj.save()
+
+        # Copy to new dataset
+        new_obj = obj.copy_object(dataset2)
+        new_obj.save()
+
+        assert new_obj.object_name == obj.object_name
+        assert new_obj.dataset == dataset2
+        assert new_obj.landmark_str == obj.landmark_str
+        assert new_obj.id != obj.id  # Different ID
+
+
+class TestMdDatasetOpsRotationMatrix:
+    """Tests for MdDatasetOps rotation matrix operations."""
+
+    def test_rotation_matrix_2d(self, test_database):
+        """Test rotation matrix calculation for 2D."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        # Add objects with landmarks
+        for i in range(3):
+            obj = mm.MdObject.create(object_name=f"Obj{i}", dataset=dataset, landmark_str="0\t0\n1\t0\n0\t1")
+            obj.save()
+
+        ds_ops = mm.MdDatasetOps(dataset)
+
+        # Create reference and target shapes
+        import numpy as np
+
+        ref = np.array([[0, 0], [1, 0], [0, 1]])
+        target = np.array([[0, 0], [1, 0], [0, 1]])
+
+        rot_matrix = ds_ops.rotation_matrix(ref, target)
+
+        # Identity rotation (same shapes)
+        assert rot_matrix.shape == (2, 2)
+        # Check it's close to identity
+        assert abs(rot_matrix[0, 0] - 1.0) < 0.1
+
+    def test_set_reference_shape(self, test_database):
+        """Test setting reference shape."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        obj = mm.MdObject.create(object_name="Ref", dataset=dataset, landmark_str="0\t0\n1\t0\n0\t1")
+        obj.save()
+
+        ds_ops = mm.MdDatasetOps(dataset)
+        obj_ops = mm.MdObjectOps(obj)
+
+        ds_ops.set_reference_shape(obj_ops)
+
+        assert ds_ops.reference_shape == obj_ops
+
+
+class TestMdAnalysisOperations:
+    """Tests for MdAnalysis model operations."""
+
+    def test_create_analysis_with_all_fields(self, test_database):
+        """Test creating analysis with all fields."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        analysis = mm.MdAnalysis.create(
+            analysis_name="Full Analysis",
+            analysis_desc="Complete test",
+            dataset=dataset,
+            superimposition_method="Procrustes",
+            dimension=2,
+            wireframe="0-1,1-2",
+            baseline="0,1",
+        )
+
+        assert analysis.analysis_name == "Full Analysis"
+        assert analysis.superimposition_method == "Procrustes"
+        assert analysis.wireframe == "0-1,1-2"
+        assert analysis.baseline == "0,1"
+
+    def test_analysis_json_storage(self, test_database):
+        """Test storing JSON data in analysis."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        analysis = mm.MdAnalysis.create(analysis_name="PCA Test", dataset=dataset, superimposition_method="None")
+
+        import json
+
+        test_data = {"pc1": [1, 2, 3], "pc2": [4, 5, 6]}
+        analysis.pca_analysis_result_json = json.dumps(test_data)
+        analysis.save()
+
+        # Reload and verify
+        analysis2 = mm.MdAnalysis.get_by_id(analysis.id)
+        loaded_data = json.loads(analysis2.pca_analysis_result_json)
+
+        assert loaded_data["pc1"] == [1, 2, 3]
+        assert loaded_data["pc2"] == [4, 5, 6]
+
+
+class TestMdObjectCentroidEdgeCases:
+    """Tests for edge cases in centroid calculations."""
+
+    def test_centroid_with_all_missing_landmarks(self, test_database):
+        """Test centroid with all None landmarks."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+
+        obj.landmark_list = [[None, None], [None, None], [None, None]]
+        obj.pack_landmark()
+        obj.save()
+
+        centroid = obj.get_centroid_coord()
+        centroid_size = obj.get_centroid_size()
+
+        # Should handle gracefully
+        assert centroid == [0, 0, 0]
+        assert centroid_size == 0
+
+    def test_centroid_with_partial_missing(self, test_database):
+        """Test centroid with some missing coordinates."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+
+        obj.landmark_list = [[1.0, 2.0], [None, 4.0], [5.0, None]]
+        obj.pack_landmark()
+        obj.save()
+
+        centroid = obj.get_centroid_coord()
+
+        # Should average only valid coordinates
+        assert centroid[0] == 3.0  # (1 + 5) / 2
+        assert centroid[1] == 3.0  # (2 + 4) / 2
+
+    def test_centroid_size_refresh(self, test_database):
+        """Test centroid size recalculation with refresh."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+
+        obj.landmark_list = [[0, 0], [1, 0], [0, 1]]
+        obj.pack_landmark()
+        obj.save()
+
+        # First calculation
+        size1 = obj.get_centroid_size()
+
+        # Modify landmarks
+        obj.landmark_list = [[0, 0], [2, 0], [0, 2]]
+
+        # Without refresh, should return cached value
+        size2 = obj.get_centroid_size(refresh=False)
+
+        # With refresh, should recalculate
+        size3 = obj.get_centroid_size(refresh=True)
+
+        assert size1 == size2  # Cached
+        assert size3 > size1  # Recalculated and larger
+
+
+class TestMdObjectOpsEdgeCases:
+    """Tests for MdObjectOps edge cases."""
+
+    def test_move_with_missing_landmarks(self, test_database):
+        """Test moving object with missing landmarks."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+
+        obj.landmark_list = [[1.0, 2.0], [None, None], [3.0, 4.0]]
+        obj.save()
+
+        obj_ops = mm.MdObjectOps(obj)
+        obj_ops.move(10, 10)
+
+        # Valid landmarks should be moved
+        assert obj_ops.landmark_list[0] == [11.0, 12.0]
+        # Missing landmarks should stay None
+        assert obj_ops.landmark_list[1] == [None, None]
+        assert obj_ops.landmark_list[2] == [13.0, 14.0]
+
+    def test_rescale_with_missing_landmarks(self, test_database):
+        """Test rescaling with missing landmarks."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+
+        obj.landmark_list = [[2.0, 4.0], [None, None], [6.0, 8.0]]
+        obj.save()
+
+        obj_ops = mm.MdObjectOps(obj)
+        obj_ops.rescale(0.5)
+
+        # Valid landmarks should be scaled
+        assert obj_ops.landmark_list[0] == [1.0, 2.0]
+        # Missing should stay None
+        assert obj_ops.landmark_list[1] == [None, None]
+        assert obj_ops.landmark_list[2] == [3.0, 4.0]
+
+
+class TestMdDatasetUnpackOperations:
+    """Tests for dataset unpack operations."""
+
+    def test_unpack_wireframe_empty(self, test_database):
+        """Test unpacking empty wireframe."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        dataset.wireframe = ""
+
+        dataset.unpack_wireframe()
+
+        assert dataset.edge_list == []
+
+    def test_unpack_polygons_empty(self, test_database):
+        """Test unpacking empty polygons."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        dataset.polygons = ""
+
+        dataset.unpack_polygons()
+
+        assert dataset.polygon_list == []
+
+    def test_unpack_baseline_empty(self, test_database):
+        """Test unpacking empty baseline."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        dataset.baseline = ""
+
+        dataset.unpack_baseline()
+
+        assert dataset.baseline_point_list == []
+
+
+class TestMdObjectVariableEdgeCases:
+    """Tests for object variable edge cases."""
+
+    def test_pack_variable_empty_list(self, test_database):
+        """Test packing empty variable list."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+
+        obj.pack_variable([])
+
+        assert obj.property_str == ""
+
+    def test_unpack_variable_none(self, test_database):
+        """Test unpacking None property string."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+
+        obj.property_str = None
+        obj.unpack_variable()
+
+        assert obj.variable_list == []
+
+
+class TestMdDatasetMultipleObjects:
+    """Tests for dataset with multiple objects."""
+
+    def test_dataset_with_many_objects(self, test_database):
+        """Test dataset with many objects."""
+        dataset = mm.MdDataset.create(dataset_name="Large Dataset", dimension=2)
+
+        # Create 50 objects
+        for i in range(50):
+            obj = mm.MdObject.create(
+                object_name=f"Obj{i:03d}", dataset=dataset, sequence=i, landmark_str=f"{i}\t{i}\n{i + 1}\t{i + 1}"
+            )
+            obj.save()
+
+        # Verify all were created
+        assert dataset.object_list.count() == 50
+
+        # Verify ordering
+        objects = list(dataset.object_list.order_by(mm.MdObject.sequence))
+        assert objects[0].object_name == "Obj000"
+        assert objects[49].object_name == "Obj049"
+
+    def test_dataset_ops_with_many_objects(self, test_database):
+        """Test MdDatasetOps with many objects."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        # Create 10 objects
+        for i in range(10):
+            obj = mm.MdObject.create(
+                object_name=f"Obj{i}", dataset=dataset, landmark_str="0\t0\n1\t1\n2\t2", sequence=i
+            )
+            obj.save()
+
+        ds_ops = mm.MdDatasetOps(dataset)
+
+        assert len(ds_ops.object_list) == 10
+        # Objects should be ordered by sequence
+        assert ds_ops.object_list[0].object_name == "Obj0"
+        assert ds_ops.object_list[9].object_name == "Obj9"
+
+
+class TestMdObjectLandmarkEdgeCases:
+    """Tests for landmark edge cases."""
+
+    def test_landmark_empty_string(self, test_database):
+        """Test unpacking empty landmark string."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+
+        obj.landmark_str = ""
+        obj.unpack_landmark()
+
+        assert obj.landmark_list == []
+
+    def test_landmark_none(self, test_database):
+        """Test unpacking None landmark string."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+
+        obj.landmark_str = None
+        obj.unpack_landmark()
+
+        assert obj.landmark_list == []
+
+    def test_landmark_with_empty_lines(self, test_database):
+        """Test landmarks with empty lines."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+
+        obj.landmark_str = "1\t2\n\n3\t4\n\n5\t6"
+        obj.unpack_landmark()
+
+        # Should skip empty lines
+        assert len(obj.landmark_list) == 3
+        assert obj.landmark_list[0] == [1.0, 2.0]
+        assert obj.landmark_list[1] == [3.0, 4.0]
+        assert obj.landmark_list[2] == [5.0, 6.0]

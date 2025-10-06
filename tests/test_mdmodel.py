@@ -1659,3 +1659,298 @@ class TestMdDatasetOpsAdvanced:
         assert avg_shape.landmark_list[0] == [0.0, 0.0]
         assert avg_shape.landmark_list[1] == [10.0, 10.0]
         assert avg_shape.landmark_list[2] == [20.0, 20.0]
+
+
+class TestMdObjectCopyOperations:
+    """Tests for MdObject copy and change operations."""
+
+    def test_change_dataset(self, test_database):
+        """Test changing object's dataset (without image/model)."""
+        dataset1 = mm.MdDataset.create(dataset_name="Dataset1", dimension=2)
+        dataset2 = mm.MdDataset.create(dataset_name="Dataset2", dimension=2)
+
+        obj = mm.MdObject.create(object_name="Obj1", dataset=dataset1)
+        obj.landmark_str = "0\t0\n10\t10"
+        obj.save()
+
+        # Change to dataset2 (this will fail if object has image/model)
+        # So we just test that the dataset field changes
+        obj.dataset = dataset2
+        obj.save()
+
+        # Verify the change
+        obj_reloaded = mm.MdObject.get_by_id(obj.id)
+        assert obj_reloaded.dataset == dataset2
+        assert obj_reloaded.dataset.id == dataset2.id
+
+
+class TestMdDatasetAddOperations:
+    """Tests for MdDataset add operations."""
+
+    def test_add_object_basic(self, test_database):
+        """Test adding an object to dataset."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        # Add object using dataset method
+        obj = dataset.add_object(object_name="NewObj", object_desc="Test object")
+        obj.save()
+
+        assert obj.object_name == "NewObj"
+        assert obj.object_desc == "Test object"
+        assert obj.dataset == dataset
+
+    def test_add_object_with_landmarks(self, test_database):
+        """Test adding object with landmark data."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        landmark_str = "1\t2\n3\t4\n5\t6"
+        obj = dataset.add_object(object_name="ObjWithLandmarks", landmark_str=landmark_str)
+        obj.save()
+
+        assert obj.landmark_str == landmark_str
+
+    def test_add_variablename(self, test_database):
+        """Test adding a variable name to dataset."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        # Initialize variablename_list first
+        dataset.variablename_list = []
+
+        # Add a variable name
+        dataset.add_variablename("Species")
+
+        # Check it was added
+        var_list = dataset.get_variablename_list()
+        assert "Species" in var_list
+        assert len(var_list) == 1
+
+    def test_add_multiple_variablenames(self, test_database):
+        """Test adding multiple variable names."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        # Initialize variablename_list first
+        dataset.variablename_list = []
+
+        # Add multiple variables
+        dataset.add_variablename("Species")
+        dataset.add_variablename("Location")
+        dataset.add_variablename("Age")
+
+        var_list = dataset.get_variablename_list()
+        assert len(var_list) == 3
+        assert "Species" in var_list
+        assert "Location" in var_list
+        assert "Age" in var_list
+
+
+class TestMdObjectOpsAdvancedTransformations:
+    """Tests for advanced MdObjectOps transformations."""
+
+    def test_apply_scale(self, test_database):
+        """Test apply_scale method."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Obj1", dataset=dataset, pixels_per_mm=10.0)
+        obj.landmark_str = "0\t0\n10\t10\n20\t20"
+        obj.unpack_landmark()
+        obj.save()
+
+        obj_ops = mm.MdObjectOps(obj)
+        obj_ops.apply_scale()
+
+        # After scaling by pixels_per_mm (10.0), landmarks should be divided by 10
+        assert obj_ops.landmark_list[0] == [0.0, 0.0]
+        assert obj_ops.landmark_list[1] == [1.0, 1.0]
+        assert obj_ops.landmark_list[2] == [2.0, 2.0]
+        assert obj_ops.scale_applied is True
+
+    def test_rotate_2d(self, test_database):
+        """Test 2D rotation."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Obj1", dataset=dataset)
+        obj.landmark_str = "1\t0\n0\t1"
+        obj.unpack_landmark()
+        obj.save()
+
+        obj_ops = mm.MdObjectOps(obj)
+        # Rotate 90 degrees (pi/2 radians)
+        import math
+
+        obj_ops.rotate_2d(math.pi / 2)
+
+        # After 90 degree rotation, (1,0) → (0,1), (0,1) → (-1,0)
+        # Check that rotation occurred (values changed)
+        assert obj_ops.landmark_list[0][0] != 1.0 or obj_ops.landmark_list[0][1] != 0.0
+
+
+class TestMdDatasetRefresh:
+    """Tests for MdDataset refresh operation."""
+
+    def test_dataset_refresh(self, test_database):
+        """Test refreshing dataset from database."""
+        dataset = mm.MdDataset.create(dataset_name="Original", dimension=2)
+        original_id = dataset.id
+
+        # Modify dataset
+        dataset.dataset_name = "Modified"
+        dataset.save()
+
+        # Create new instance and refresh
+        dataset2 = mm.MdDataset.get_by_id(original_id)
+        dataset2.refresh()
+
+        assert dataset2.dataset_name == "Modified"
+
+
+class TestMdObjectRefresh:
+    """Tests for MdObject refresh operation."""
+
+    def test_object_refresh(self, test_database):
+        """Test refreshing object from database."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Original", dataset=dataset)
+        original_id = obj.id
+
+        # Modify object
+        obj.object_name = "Modified"
+        obj.save()
+
+        # Get object and refresh
+        obj2 = mm.MdObject.get_by_id(original_id)
+        obj2.refresh()
+
+        assert obj2.object_name == "Modified"
+
+
+class TestMdObjectIsFloat:
+    """Tests for MdObject is_float helper method."""
+
+    def test_is_float_valid_float(self, test_database):
+        """Test is_float with valid float string."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+
+        assert obj.is_float("3.14") is True
+        assert obj.is_float("10") is True
+        assert obj.is_float("-5.5") is True
+        assert obj.is_float("0.0") is True
+
+    def test_is_float_invalid_string(self, test_database):
+        """Test is_float with invalid string."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+
+        assert obj.is_float("abc") is False
+        assert obj.is_float("") is False
+        assert obj.is_float("3.14.15") is False
+
+    def test_is_float_missing_keyword(self, test_database):
+        """Test is_float with Missing keyword."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+
+        assert obj.is_float("Missing") is False
+
+
+class TestMdDatasetComplexOperations:
+    """Tests for complex MdDataset operations."""
+
+    def test_unpack_wireframe_with_spaces(self, test_database):
+        """Test unpacking wireframe with spaces."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        dataset.wireframe = " 0-1 , 1-2 , 2-0 "  # With spaces
+        dataset.unpack_wireframe()
+
+        edges = dataset.get_edge_list()
+        assert len(edges) > 0
+
+    def test_pack_wireframe_from_edge_list(self, test_database):
+        """Test packing wireframe from edge_list attribute."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        dataset.edge_list = [[0, 1], [1, 2], [2, 0]]
+
+        dataset.pack_wireframe()
+
+        assert dataset.wireframe is not None
+        assert "0" in dataset.wireframe
+        assert "1" in dataset.wireframe
+
+    def test_pack_polygons_from_list(self, test_database):
+        """Test packing polygons from polygon_list attribute."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        dataset.polygon_list = [[0, 1, 2], [3, 4, 5, 6]]
+
+        dataset.pack_polygons()
+
+        assert dataset.polygons is not None
+
+
+class TestMdObjectComplexLandmarks:
+    """Tests for complex landmark operations."""
+
+    def test_unpack_landmark_with_missing(self, test_database):
+        """Test unpacking landmarks with Missing values."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+
+        # Landmark string with "Missing" keyword
+        obj.landmark_str = "1\t2\nMissing\tMissing\n5\t6"
+        obj.unpack_landmark()
+
+        assert len(obj.landmark_list) == 3
+        assert obj.landmark_list[0] == [1.0, 2.0]
+        assert obj.landmark_list[1] == [None, None]
+        assert obj.landmark_list[2] == [5.0, 6.0]
+
+    def test_pack_landmark_with_missing(self, test_database):
+        """Test packing landmarks with None values."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+
+        obj.landmark_list = [[1.0, 2.0], [None, None], [5.0, 6.0]]
+        obj.pack_landmark()
+
+        assert "Missing" in obj.landmark_str
+
+    def test_landmark_with_comma_separator(self, test_database):
+        """Test unpacking landmarks with comma separator."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+
+        # Use comma as separator
+        obj.landmark_str = "1,2\n3,4\n5,6"
+        obj.unpack_landmark()
+
+        assert len(obj.landmark_list) == 3
+        assert obj.landmark_list[0] == [1.0, 2.0]
+
+    def test_landmark_with_space_separator(self, test_database):
+        """Test unpacking landmarks with space separator."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+
+        # Use multiple spaces as separator
+        obj.landmark_str = "1  2\n3  4\n5  6"
+        obj.unpack_landmark()
+
+        assert len(obj.landmark_list) == 3
+        assert obj.landmark_list[0] == [1.0, 2.0]
+
+
+class TestMdObjectSequenceOperations:
+    """Tests for object sequence operations."""
+
+    def test_object_sequence_ordering(self, test_database):
+        """Test that objects are ordered by sequence."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        # Create objects with specific sequences
+        _obj3 = mm.MdObject.create(object_name="Third", dataset=dataset, sequence=2)
+        _obj1 = mm.MdObject.create(object_name="First", dataset=dataset, sequence=0)
+        _obj2 = mm.MdObject.create(object_name="Second", dataset=dataset, sequence=1)
+
+        # Query ordered by sequence
+        objects = list(dataset.object_list.order_by(mm.MdObject.sequence))
+
+        assert objects[0].object_name == "First"
+        assert objects[1].object_name == "Second"
+        assert objects[2].object_name == "Third"

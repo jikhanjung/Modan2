@@ -19,12 +19,12 @@ class TestFileMenuActions:
         with patch("Modan2.PreferencesDialog") as mock_dialog:
             mock_instance = Mock()
             mock_dialog.return_value = mock_instance
-            mock_instance.exec_.return_value = False
+            mock_instance.exec.return_value = False
 
             main_window.on_action_edit_preferences_triggered()
 
             mock_dialog.assert_called_once()
-            mock_instance.exec_.assert_called_once()
+            mock_instance.exec.assert_called_once()
 
 
 class TestDatasetMenuActions:

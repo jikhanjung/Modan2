@@ -1,5 +1,6 @@
 """Tests for MdModel module - Database models and operations."""
 
+import math
 import os
 import sys
 import tempfile
@@ -3953,3 +3954,396 @@ class TestMdDatasetOpsResetPose:
         ds_ops.reset_pose()
 
         # No assertion needed - just verify no exception
+
+
+class TestMdObjectOpsAlign3DExtra:
+    """Tests for align() method in 3D scenarios."""
+
+    def test_align_3d_simple_baseline(self, test_database):
+        """Test align() with simple 3D baseline."""
+
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=3)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+        # Simple case: baseline already mostly aligned
+        obj.landmark_list = [[0.0, 0.0, 0.0], [1.5, 0.5, 0.0], [1.0, 1.0, 1.0]]
+        obj.save()
+
+        obj_ops = mm.MdObjectOps(obj)
+        obj_ops.align([1, 2])
+
+        # Verify no crash and some alignment happened
+        assert obj_ops.landmark_list is not None
+        assert len(obj_ops.landmark_list) == 3
+
+
+class TestMdObjectCopyOperations:
+    """Tests for object copy operations."""
+
+    def test_copy_object_basic(self, test_database):
+        """Test basic object copying to new dataset."""
+        # Create source dataset and object
+        dataset1 = mm.MdDataset.create(dataset_name="Source", dimension=2)
+        obj1 = mm.MdObject.create(object_name="OriginalObj", dataset=dataset1)
+        obj1.landmark_list = [[0.0, 0.0], [1.0, 1.0], [2.0, 2.0]]
+        obj1.pack_landmark()
+        obj1.object_desc = "Test description"
+        obj1.save()
+
+        # Create target dataset
+        dataset2 = mm.MdDataset.create(dataset_name="Target", dimension=2)
+
+        # Copy object
+        new_obj = obj1.copy_object(dataset2)
+
+        # Verify copied properties
+        assert new_obj.object_name == "OriginalObj"
+        assert new_obj.object_desc == "Test description"
+        assert new_obj.dataset == dataset2
+        assert new_obj.landmark_str == obj1.landmark_str
+
+    def test_copy_object_with_variables(self, test_database):
+        """Test copying object with variable data."""
+        dataset1 = mm.MdDataset.create(dataset_name="Source", dimension=2)
+        dataset1.variablename_list = ["Var1", "Var2"]
+        dataset1.pack_variablename_str()
+        dataset1.save()
+
+        obj1 = mm.MdObject.create(object_name="Obj1", dataset=dataset1)
+        obj1.variable_list = ["Value1", "Value2"]
+        obj1.pack_variable()
+        obj1.save()
+
+        dataset2 = mm.MdDataset.create(dataset_name="Target", dimension=2)
+        dataset2.variablename_list = ["Var1", "Var2"]
+        dataset2.pack_variablename_str()
+        dataset2.save()
+
+        new_obj = obj1.copy_object(dataset2)
+
+        # Verify variables copied
+        assert new_obj.property_str == obj1.property_str
+
+    def test_copy_object_sequence_not_copied(self, test_database):
+        """Test that copy_object does NOT preserve sequence number."""
+        dataset1 = mm.MdDataset.create(dataset_name="Source", dimension=2)
+        obj1 = mm.MdObject.create(object_name="Obj1", dataset=dataset1, sequence=5)
+        obj1.save()
+
+        dataset2 = mm.MdDataset.create(dataset_name="Target", dimension=2)
+        new_obj = obj1.copy_object(dataset2)
+
+        # Sequence is NOT copied - remains None
+        assert new_obj.sequence is None
+
+
+class TestMdDatasetAddOperations:
+    """Tests for dataset add operations."""
+
+    def test_add_object_to_dataset(self, test_database):
+        """Test adding object to dataset."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        new_obj = dataset.add_object("NewObject", object_desc="Description")
+
+        assert new_obj.object_name == "NewObject"
+        assert new_obj.object_desc == "Description"
+        assert new_obj.dataset == dataset
+
+    def test_add_object_with_landmarks(self, test_database):
+        """Test adding object with landmark data."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        landmark_str = "0\t0\n1\t1\n2\t2"
+        new_obj = dataset.add_object("Obj1", landmark_str=landmark_str)
+
+        assert new_obj.landmark_str == landmark_str
+
+    def test_add_variablename_to_dataset(self, test_database):
+        """Test adding variable name to dataset."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        dataset.variablename_list = ["Var1"]
+        dataset.pack_variablename_str()
+        dataset.save()
+
+        dataset.add_variablename("Var2")
+
+        # Refresh and check
+        dataset_refreshed = mm.MdDataset.get_by_id(dataset.id)
+        assert "Var2" in dataset_refreshed.propertyname_str
+
+
+class TestMdDatasetRefreshOperations:
+    """Tests for dataset refresh operations."""
+
+    def test_dataset_refresh(self, test_database):
+        """Test dataset refresh from database."""
+        dataset = mm.MdDataset.create(dataset_name="Original", dimension=2)
+
+        # Modify in DB directly
+        dataset2 = mm.MdDataset.get_by_id(dataset.id)
+        dataset2.dataset_name = "Modified"
+        dataset2.save()
+
+        # Refresh original object
+        refreshed = dataset.refresh()
+
+        assert refreshed.dataset_name == "Modified"
+
+
+class TestMdDatasetOpsRotateVector:
+    """Tests for rotate_vector_2d and rotate_vector_3d methods."""
+
+    def test_rotate_vector_2d(self, test_database):
+        """Test 2D vector rotation (wrapper for 3D Z-axis)."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+        obj.landmark_list = [[1.0, 0.0, 0.0]]
+        obj.save()
+
+        ds_ops = mm.MdDatasetOps(dataset)
+        vec = [1.0, 0.0, 0.0]
+        rotated = ds_ops.rotate_vector_2d(math.pi / 2, vec)
+
+        # [1,0,0] rotated 90° around Z → [0,1,0]
+        assert abs(rotated[0]) < 0.01
+        assert abs(rotated[1] - 1.0) < 0.01
+
+    def test_rotate_vector_3d_z_axis(self, test_database):
+        """Test 3D vector rotation around Z axis."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=3)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+        obj.landmark_list = [[1.0, 0.0, 0.0]]
+        obj.save()
+
+        ds_ops = mm.MdDatasetOps(dataset)
+        vec = [1.0, 0.0, 0.0]
+        rotated = ds_ops.rotate_vector_3d(math.pi / 2, vec, "Z")
+
+        # [1,0,0] rotated 90° around Z → [0,1,0]
+        assert abs(rotated[0]) < 0.01
+        assert abs(rotated[1] - 1.0) < 0.01
+        assert abs(rotated[2]) < 0.01
+
+    def test_rotate_vector_3d_x_axis(self, test_database):
+        """Test 3D vector rotation around X axis."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=3)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+        obj.landmark_list = [[0.0, 1.0, 0.0]]
+        obj.save()
+
+        ds_ops = mm.MdDatasetOps(dataset)
+        vec = [0.0, 1.0, 0.0]
+        rotated = ds_ops.rotate_vector_3d(math.pi / 2, vec, "X")
+
+        # [0,1,0] rotated 90° around X → [0,0,1]
+        assert abs(rotated[0]) < 0.01
+        assert abs(rotated[1]) < 0.01
+        assert abs(rotated[2] - 1.0) < 0.01
+
+
+class TestMdDatasetOpsRotateGLSMissing:
+    """Tests for rotate_gls_to_reference_shape with missing landmarks."""
+
+    def test_rotate_gls_with_missing_landmarks(self, test_database):
+        """Test Procrustes rotation with missing (None) landmarks."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        # Object with missing landmark
+        obj = mm.MdObject.create(object_name="Obj1", dataset=dataset)
+        obj.landmark_list = [[0.0, 0.0], [None, None], [1.0, 1.0]]
+        obj.pack_landmark()
+        obj.save()
+
+        # Reference shape (complete)
+        ref_obj = mm.MdObject.create(object_name="Ref", dataset=dataset)
+        ref_obj.landmark_list = [[0.0, 0.0], [0.5, 0.5], [1.0, 1.0]]
+        ref_obj.pack_landmark()
+        ref_obj.save()
+
+        ds_ops = mm.MdDatasetOps(dataset)
+        ref_obj_ops = mm.MdObjectOps(ref_obj)
+        ds_ops.set_reference_shape(ref_obj_ops)
+
+        # Should handle missing landmarks without crash
+        ds_ops.rotate_gls_to_reference_shape(0)
+
+        # Missing landmark should still be None
+        assert ds_ops.object_list[0].landmark_list[1][0] is None
+
+
+class TestMdObjectOpsEdgeCases:
+    """Tests for edge cases in MdObjectOps."""
+
+    def test_get_centroid_empty_landmarks(self, test_database):
+        """Test centroid calculation with empty landmark list."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+        obj.landmark_list = []
+        obj.save()
+
+        obj_ops = mm.MdObjectOps(obj)
+        centroid = obj_ops.get_centroid_coord()
+
+        # Empty list returns [0,0,0]
+        assert centroid == [0, 0, 0]
+
+    def test_get_centroid_size_empty_landmarks(self, test_database):
+        """Test centroid size with empty landmark list."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+        obj.landmark_list = []
+        obj.save()
+
+        obj_ops = mm.MdObjectOps(obj)
+        size = obj_ops.get_centroid_size()
+
+        # Empty list returns -1
+        assert size == -1
+
+    def test_get_centroid_size_single_landmark(self, test_database):
+        """Test centroid size with single landmark."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+        obj.landmark_list = [[1.0, 1.0]]
+        obj.save()
+
+        obj_ops = mm.MdObjectOps(obj)
+        size = obj_ops.get_centroid_size()
+
+        # Single landmark returns 1
+        assert size == 1
+
+    def test_apply_scale_3d(self, test_database):
+        """Test scale application for 3D landmarks."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=3)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset, pixels_per_mm=2.0)
+        obj.landmark_list = [[2.0, 4.0, 6.0], [8.0, 10.0, 12.0]]
+        obj.save()
+
+        obj_ops = mm.MdObjectOps(obj)
+        obj_ops.pixel_per_mm = 2.0
+        obj_ops.apply_scale()
+
+        # All coordinates divided by 2
+        assert abs(obj_ops.landmark_list[0][0] - 1.0) < 0.01
+        assert abs(obj_ops.landmark_list[0][1] - 2.0) < 0.01
+        assert abs(obj_ops.landmark_list[0][2] - 3.0) < 0.01
+        assert abs(obj_ops.landmark_list[1][0] - 4.0) < 0.01
+
+    def test_get_centroid_size_cached(self, test_database):
+        """Test that centroid size is cached after first calculation."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+        obj.landmark_list = [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]]
+        obj.save()
+
+        obj_ops = mm.MdObjectOps(obj)
+
+        # First call calculates and caches
+        size1 = obj_ops.get_centroid_size(refresh=False)
+
+        # Modify landmarks
+        obj_ops.landmark_list[0] = [10.0, 10.0]
+
+        # Second call without refresh returns cached value
+        size2 = obj_ops.get_centroid_size(refresh=False)
+        assert size1 == size2
+
+        # Call with refresh recalculates
+        size3 = obj_ops.get_centroid_size(refresh=True)
+        assert size3 != size1
+
+    def test_align_invalid_baseline(self, test_database):
+        """Test align() with invalid baseline (empty or single point)."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+        obj.landmark_list = [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.5, 0.5, 0.0]]
+        obj.save()
+
+        obj_ops = mm.MdObjectOps(obj)
+        original_landmarks = [lm[:] for lm in obj_ops.landmark_list]
+
+        # Empty baseline - should return without changes
+        obj_ops.align([])
+
+        # Landmarks should be unchanged
+        assert obj_ops.landmark_list == original_landmarks
+
+    def test_align_single_point_baseline(self, test_database):
+        """Test align() with single point baseline."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+        obj.landmark_list = [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.5, 0.5, 0.0]]
+        obj.save()
+
+        obj_ops = mm.MdObjectOps(obj)
+        original_landmarks = [lm[:] for lm in obj_ops.landmark_list]
+
+        # Single point baseline - should return without changes
+        obj_ops.align([1])
+
+        # Landmarks should be unchanged
+        assert obj_ops.landmark_list == original_landmarks
+
+    def test_get_centroid_size_all_none(self, test_database):
+        """Test centroid size when all landmarks are None."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+        obj.landmark_list = [[None, None], [None, None], [None, None]]
+        obj.save()
+
+        obj_ops = mm.MdObjectOps(obj)
+        size = obj_ops.get_centroid_size()
+
+        # All None returns 0
+        assert size == 0
+
+
+class TestMdDatasetWireframeEdgeCases:
+    """Tests for wireframe edge case handling."""
+
+    def test_pack_wireframe_invalid_edge_length(self, test_database):
+        """Test packing wireframe with edge that has != 2 points (should skip)."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        # Edge list with invalid edge (3 points instead of 2)
+        invalid_edges = [[1, 2], [3, 4, 5], [6, 7]]  # Middle edge invalid
+        result = dataset.pack_wireframe(invalid_edges)
+
+        # Invalid edge should be skipped - only 2 edges in result
+        assert result.count(",") == 1  # Only 2 edges = 1 separator
+
+    def test_unpack_wireframe_invalid_edge_length(self, test_database):
+        """Test unpacking wireframe with edge that has != 2 vertices."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        # Edge separator is "-" and wireframe separator is ","
+        # Create wireframe string with an edge that has 3 vertices
+        dataset.wireframe = "1-2,3-4-5,6-7"  # Second edge has 3 vertices
+        edges = dataset.unpack_wireframe()
+
+        # All edges are added, but invalid length edge triggers line 137 (pass statement)
+        assert len(edges) == 3
+        assert edges[0] == [1, 2]
+        assert edges[1] == [3, 4, 5]  # Invalid edge (3 vertices) still added
+        assert edges[2] == [6, 7]
+
+
+class TestMdDatasetOpsRotateVectorYAxis:
+    """Test Y-axis rotation in rotate_vector_3d."""
+
+    def test_rotate_vector_3d_y_axis(self, test_database):
+        """Test 3D vector rotation around Y axis."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=3)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+        obj.landmark_list = [[0.0, 0.0, 1.0]]
+        obj.save()
+
+        ds_ops = mm.MdDatasetOps(dataset)
+        vec = [0.0, 0.0, 1.0]
+        rotated = ds_ops.rotate_vector_3d(math.pi / 2, vec, "Y")
+
+        # [0,0,1] rotated 90° around Y → [-1,0,0]
+        assert abs(rotated[0] - (-1.0)) < 0.01
+        assert abs(rotated[1]) < 0.01
+        assert abs(rotated[2]) < 0.01

@@ -2593,3 +2593,245 @@ class TestMdDatasetVariablenameOperations:
 
         assert len(variables) == 3
         assert variables == ["Var1", "Var2", "Var3"]
+
+
+class TestMdDatasetOpsObjectList:
+    """Tests for MdDatasetOps object list operations."""
+
+    def test_check_object_list_consistent(self, test_database):
+        """Test check_object_list with consistent landmark counts."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        # Create objects with same number of landmarks
+        for i in range(3):
+            obj = mm.MdObject.create(object_name=f"Obj{i}", dataset=dataset, landmark_str="0\t0\n1\t1\n2\t2")
+            obj.save()
+
+        ds_ops = mm.MdDatasetOps(dataset)
+        result = ds_ops.check_object_list()
+
+        assert result is True
+
+    def test_check_object_list_inconsistent(self, test_database):
+        """Test check_object_list with inconsistent landmark counts."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        # Create objects with different numbers of landmarks
+        obj1 = mm.MdObject.create(object_name="Obj1", dataset=dataset, landmark_str="0\t0\n1\t1")
+        obj1.save()
+        obj2 = mm.MdObject.create(object_name="Obj2", dataset=dataset, landmark_str="0\t0\n1\t1\n2\t2")
+        obj2.save()
+
+        ds_ops = mm.MdDatasetOps(dataset)
+        result = ds_ops.check_object_list()
+
+        assert result is False
+
+    def test_check_object_list_empty(self, test_database):
+        """Test check_object_list with empty dataset."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        ds_ops = mm.MdDatasetOps(dataset)
+        result = ds_ops.check_object_list()
+
+        # Empty list should return True
+        assert result is True
+
+    def test_has_missing_landmarks_true(self, test_database):
+        """Test has_missing_landmarks returns True when missing data exists."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+        obj.landmark_str = "1\t2\nMissing\tMissing\n3\t4"
+        obj.unpack_landmark()
+        obj.save()
+
+        ds_ops = mm.MdDatasetOps(dataset)
+        result = ds_ops.has_missing_landmarks()
+
+        assert result is True
+
+    def test_has_missing_landmarks_false(self, test_database):
+        """Test has_missing_landmarks returns False when all data present."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+        obj.landmark_str = "1\t2\n3\t4\n5\t6"
+        obj.unpack_landmark()
+        obj.save()
+
+        ds_ops = mm.MdDatasetOps(dataset)
+        result = ds_ops.has_missing_landmarks()
+
+        assert result is False
+
+    def test_has_missing_landmarks_3d(self, test_database):
+        """Test has_missing_landmarks with 3D data."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=3)
+
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+        obj.landmark_list = [[1.0, 2.0, 3.0], [4.0, 5.0, None], [7.0, 8.0, 9.0]]
+        obj.pack_landmark()
+        obj.save()
+
+        ds_ops = mm.MdDatasetOps(dataset)
+        result = ds_ops.has_missing_landmarks()
+
+        assert result is True
+
+
+class TestMdDatasetOpsAverageShape:
+    """Tests for MdDatasetOps average shape operations."""
+
+    def test_get_average_shape_2d(self, test_database):
+        """Test getting average shape in 2D."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        # Create objects with simple landmarks
+        obj1 = mm.MdObject.create(object_name="Obj1", dataset=dataset)
+        obj1.landmark_list = [[0.0, 0.0], [2.0, 2.0]]
+        obj1.pack_landmark()
+        obj1.save()
+
+        obj2 = mm.MdObject.create(object_name="Obj2", dataset=dataset)
+        obj2.landmark_list = [[2.0, 2.0], [4.0, 4.0]]
+        obj2.pack_landmark()
+        obj2.save()
+
+        ds_ops = mm.MdDatasetOps(dataset)
+        avg_shape = ds_ops.get_average_shape()
+
+        # Average should be [[1, 1], [3, 3]]
+        assert len(avg_shape.landmark_list) == 2
+        assert avg_shape.landmark_list[0] == [1.0, 1.0]
+        assert avg_shape.landmark_list[1] == [3.0, 3.0]
+
+    def test_get_average_shape_with_missing(self, test_database):
+        """Test average shape with missing landmarks."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        obj1 = mm.MdObject.create(object_name="Obj1", dataset=dataset)
+        obj1.landmark_list = [[0.0, 0.0], [None, None]]
+        obj1.pack_landmark()
+        obj1.save()
+
+        obj2 = mm.MdObject.create(object_name="Obj2", dataset=dataset)
+        obj2.landmark_list = [[2.0, 2.0], [4.0, 4.0]]
+        obj2.pack_landmark()
+        obj2.save()
+
+        ds_ops = mm.MdDatasetOps(dataset)
+        avg_shape = ds_ops.get_average_shape()
+
+        # First landmark: average of (0,0) and (2,2) = (1,1)
+        # Second landmark: only (4,4) is valid
+        assert len(avg_shape.landmark_list) == 2
+        assert avg_shape.landmark_list[0] == [1.0, 1.0]
+        assert avg_shape.landmark_list[1] == [4.0, 4.0]
+
+    def test_get_average_shape_3d(self, test_database):
+        """Test average shape in 3D."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=3)
+
+        obj1 = mm.MdObject.create(object_name="Obj1", dataset=dataset)
+        obj1.landmark_list = [[0.0, 0.0, 0.0], [3.0, 3.0, 3.0]]
+        obj1.pack_landmark()
+        obj1.save()
+
+        obj2 = mm.MdObject.create(object_name="Obj2", dataset=dataset)
+        obj2.landmark_list = [[2.0, 2.0, 2.0], [5.0, 5.0, 5.0]]
+        obj2.pack_landmark()
+        obj2.save()
+
+        ds_ops = mm.MdDatasetOps(dataset)
+        avg_shape = ds_ops.get_average_shape()
+
+        assert len(avg_shape.landmark_list) == 2
+        assert avg_shape.landmark_list[0] == [1.0, 1.0, 1.0]
+        assert avg_shape.landmark_list[1] == [4.0, 4.0, 4.0]
+
+
+class TestMdDatasetOpsRotationMatrix:
+    """Tests for rotation matrix calculation."""
+
+    def test_rotation_matrix_identity_2d(self, test_database):
+        """Test rotation matrix for identical shapes (should be identity)."""
+        import numpy as np
+
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        # Create a simple reference shape
+        ref = np.array([[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]])
+        target = np.array([[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]])
+
+        ds_ops = mm.MdDatasetOps(dataset)
+        rot_mx = ds_ops.rotation_matrix(ref, target)
+
+        # Should be close to identity matrix
+        expected = np.eye(2)
+        assert np.allclose(rot_mx, expected, atol=0.01)
+
+    def test_rotation_matrix_90_degrees(self, test_database):
+        """Test rotation matrix for 90 degree rotation."""
+        import numpy as np
+
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        # Reference: points along x-axis
+        ref = np.array([[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]])
+        # Target: rotated 90 degrees counterclockwise
+        target = np.array([[0.0, 0.0], [0.0, 1.0], [-1.0, 0.0]])
+
+        ds_ops = mm.MdDatasetOps(dataset)
+        rot_mx = ds_ops.rotation_matrix(ref, target)
+
+        # Should be -90 degree rotation matrix (clockwise)
+        expected = np.array([[0.0, 1.0], [-1.0, 0.0]])
+        assert np.allclose(rot_mx, expected, atol=0.01)
+
+
+class TestMdDatasetOpsEstimateMissing:
+    """Tests for missing landmark estimation."""
+
+    def test_estimate_missing_landmarks(self, test_database):
+        """Test estimating missing landmarks from reference shape."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+        obj.landmark_list = [[1.0, 1.0], [None, None], [3.0, 3.0]]
+        obj.pack_landmark()
+        obj.save()
+
+        ds_ops = mm.MdDatasetOps(dataset)
+
+        # Create reference shape
+        ref_obj = mm.MdObject.create(object_name="Ref", dataset=dataset)
+        ref_obj.landmark_list = [[0.0, 0.0], [5.0, 5.0], [10.0, 10.0]]
+        ref_obj.pack_landmark()
+        ref_shape = mm.MdObjectOps(ref_obj)
+
+        # Estimate missing landmark
+        ds_ops.estimate_missing_landmarks(0, ref_shape)
+
+        # Second landmark should now be filled with reference value
+        assert ds_ops.object_list[0].landmark_list[1] == [5.0, 5.0]
+        # Other landmarks should remain unchanged
+        assert ds_ops.object_list[0].landmark_list[0] == [1.0, 1.0]
+        assert ds_ops.object_list[0].landmark_list[2] == [3.0, 3.0]
+
+    def test_estimate_missing_no_reference(self, test_database):
+        """Test estimate_missing_landmarks with None reference."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+        obj.landmark_list = [[1.0, 1.0], [None, None]]
+        obj.pack_landmark()
+        obj.save()
+
+        ds_ops = mm.MdDatasetOps(dataset)
+
+        # Should handle None reference gracefully
+        ds_ops.estimate_missing_landmarks(0, None)
+
+        # Landmarks should remain unchanged
+        assert ds_ops.object_list[0].landmark_list[1] == [None, None]

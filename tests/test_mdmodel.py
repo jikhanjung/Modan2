@@ -3478,3 +3478,189 @@ class TestMdDatasetOpsProcrustes:
         ref_dist = np.linalg.norm(ref[1] - ref[0])
         rot_dist = np.linalg.norm(rotated[1] - rotated[0])
         assert abs(ref_dist - rot_dist) < 0.01
+
+
+class TestMdObjectOpsMove:
+    """Tests for move() and transformation operations."""
+
+    def test_move_2d(self, test_database):
+        """Test move operation in 2D."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+        obj.landmark_list = [[0.0, 0.0], [1.0, 0.0], [0.5, 1.0]]
+        obj.save()
+
+        obj_ops = mm.MdObjectOps(obj)
+        obj_ops.move(10.0, 20.0)
+
+        # All landmarks should be shifted by (10, 20)
+        assert abs(obj_ops.landmark_list[0][0] - 10.0) < 0.01
+        assert abs(obj_ops.landmark_list[0][1] - 20.0) < 0.01
+        assert abs(obj_ops.landmark_list[1][0] - 11.0) < 0.01
+        assert abs(obj_ops.landmark_list[1][1] - 20.0) < 0.01
+
+    def test_move_3d(self, test_database):
+        """Test move operation in 3D."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=3)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+        obj.landmark_list = [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
+        obj.save()
+
+        obj_ops = mm.MdObjectOps(obj)
+        obj_ops.move(5.0, 10.0, 15.0)
+
+        # All landmarks should be shifted by (5, 10, 15)
+        assert abs(obj_ops.landmark_list[0][0] - 5.0) < 0.01
+        assert abs(obj_ops.landmark_list[0][1] - 10.0) < 0.01
+        assert abs(obj_ops.landmark_list[0][2] - 15.0) < 0.01
+
+    def test_move_with_none_values(self, test_database):
+        """Test move operation preserves None values."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+        obj.landmark_list = [[0.0, 0.0], [None, None], [1.0, 1.0]]
+        obj.save()
+
+        obj_ops = mm.MdObjectOps(obj)
+        obj_ops.move(10.0, 20.0)
+
+        # None values should remain None
+        assert obj_ops.landmark_list[1][0] is None
+        assert obj_ops.landmark_list[1][1] is None
+        # Valid values should be moved
+        assert abs(obj_ops.landmark_list[0][0] - 10.0) < 0.01
+        assert abs(obj_ops.landmark_list[2][0] - 11.0) < 0.01
+
+
+class TestMdDatasetOpsMissingLandmarks:
+    """Tests for missing landmark handling."""
+
+    def test_estimate_missing_landmarks_2d(self, test_database):
+        """Test missing landmark estimation in 2D."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        # Object with missing landmark
+        obj = mm.MdObject.create(object_name="Obj1", dataset=dataset, sequence=0)
+        obj.landmark_list = [[0.0, 0.0], [None, None], [1.0, 1.0]]
+        obj.pack_landmark()
+        obj.save()
+
+        ds_ops = mm.MdDatasetOps(dataset)
+
+        # Create reference shape for imputation
+        ref_shape = mm.MdObjectOps(mm.MdObject())
+        ref_shape.landmark_list = [[0.0, 0.0], [0.5, 0.5], [1.0, 1.0]]
+
+        # Estimate missing landmarks
+        ds_ops.estimate_missing_landmarks(0, ref_shape)
+
+        # Missing landmark should be replaced with reference
+        assert abs(ds_ops.object_list[0].landmark_list[1][0] - 0.5) < 0.01
+        assert abs(ds_ops.object_list[0].landmark_list[1][1] - 0.5) < 0.01
+
+    def test_estimate_missing_no_reference(self, test_database):
+        """Test estimate_missing_landmarks with None reference."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Obj1", dataset=dataset, sequence=0)
+        obj.landmark_list = [[0.0, 0.0], [None, None], [1.0, 1.0]]
+        obj.pack_landmark()
+        obj.save()
+
+        ds_ops = mm.MdDatasetOps(dataset)
+
+        # Should not crash with None reference
+        ds_ops.estimate_missing_landmarks(0, None)
+
+        # Landmarks should remain unchanged
+        assert ds_ops.object_list[0].landmark_list[1][0] is None
+
+    def test_procrustes_with_missing_landmarks(self, test_database):
+        """Test Procrustes superimposition with missing landmarks."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        # Create objects with missing landmarks
+        obj1 = mm.MdObject.create(object_name="Obj1", dataset=dataset, sequence=0)
+        obj1.landmark_list = [[0.0, 0.0], [1.0, 0.0], [0.5, 1.0]]
+        obj1.pack_landmark()
+        obj1.save()
+
+        obj2 = mm.MdObject.create(object_name="Obj2", dataset=dataset, sequence=1)
+        obj2.landmark_list = [[2.0, 2.0], [None, None], [2.5, 3.0]]  # Missing landmark
+        obj2.pack_landmark()
+        obj2.save()
+
+        ds_ops = mm.MdDatasetOps(dataset)
+        result = ds_ops.procrustes_superimposition()
+
+        # Should succeed despite missing landmarks
+        assert result is True
+
+    def test_check_object_list_inconsistent(self, test_database):
+        """Test check_object_list with inconsistent landmark counts."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj1 = mm.MdObject.create(object_name="Obj1", dataset=dataset, sequence=0)
+        obj1.landmark_list = [[0.0, 0.0], [1.0, 0.0], [0.5, 1.0]]  # 3 landmarks
+        obj1.pack_landmark()
+        obj1.save()
+
+        obj2 = mm.MdObject.create(object_name="Obj2", dataset=dataset, sequence=1)
+        obj2.landmark_list = [[0.0, 0.0], [1.0, 0.0]]  # 2 landmarks
+        obj2.pack_landmark()
+        obj2.save()
+
+        ds_ops = mm.MdDatasetOps(dataset)
+        result = ds_ops.check_object_list()
+
+        # Inconsistent landmarks should fail check
+        assert result is False
+
+    def test_check_object_list_valid(self, test_database):
+        """Test check_object_list with valid objects."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj1 = mm.MdObject.create(object_name="Obj1", dataset=dataset, sequence=0)
+        obj1.landmark_list = [[0.0, 0.0], [1.0, 0.0], [0.5, 1.0]]
+        obj1.pack_landmark()
+        obj1.save()
+
+        ds_ops = mm.MdDatasetOps(dataset)
+        result = ds_ops.check_object_list()
+
+        # Valid objects should pass check
+        assert result is True
+
+
+class TestMdObjectCountLandmarks:
+    """Tests for landmark counting."""
+
+    def test_count_landmarks_no_missing(self, test_database):
+        """Test count_landmarks with complete data."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+        obj.landmark_list = [[0.0, 0.0], [1.0, 0.0], [0.5, 1.0]]
+        obj.pack_landmark()
+        obj.save()
+
+        count = obj.count_landmarks()
+        assert count == 3
+
+    def test_count_landmarks_with_missing(self, test_database):
+        """Test count_landmarks excluding missing landmarks."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+        obj.landmark_list = [[0.0, 0.0], [None, None], [1.0, 1.0]]
+        obj.pack_landmark()
+        obj.save()
+
+        count = obj.count_landmarks(exclude_missing=True)
+        assert count == 2
+
+    def test_count_landmarks_include_missing(self, test_database):
+        """Test count_landmarks including missing landmarks."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+        obj = mm.MdObject.create(object_name="Test", dataset=dataset)
+        obj.landmark_list = [[0.0, 0.0], [None, None], [1.0, 1.0]]
+        obj.pack_landmark()
+        obj.save()
+
+        count = obj.count_landmarks(exclude_missing=False)
+        assert count == 3

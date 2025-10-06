@@ -1,0 +1,107 @@
+{
+  "timestamp": "2025-10-06 14:03:30",
+  "benchmarks": [
+    {
+      "operation": "procrustes",
+      "success": true,
+      "time_seconds": 0.03466072100127349,
+      "n_objects": 10,
+      "n_landmarks": 10
+    },
+    {
+      "operation": "pca",
+      "success": true,
+      "time_seconds": 0.00036218199966242537,
+      "n_samples": 10,
+      "n_components": 20,
+      "n_objects": 10,
+      "n_landmarks": 10
+    },
+    {
+      "operation": "cva",
+      "success": true,
+      "time_seconds": 0.17283031400074833,
+      "n_samples": 10,
+      "n_groups": 3,
+      "n_objects": 10,
+      "n_landmarks": 10
+    },
+    {
+      "operation": "manova",
+      "success": false,
+      "time_seconds": 0.07158156800142024,
+      "n_samples": 10,
+      "n_groups": null,
+      "n_objects": 10,
+      "n_landmarks": 10
+    },
+    {
+      "operation": "procrustes",
+      "success": true,
+      "time_seconds": 0.6545899839984486,
+      "n_objects": 50,
+      "n_landmarks": 20
+    },
+    {
+      "operation": "pca",
+      "success": true,
+      "time_seconds": 0.002316240999789443,
+      "n_samples": 50,
+      "n_components": 40,
+      "n_objects": 50,
+      "n_landmarks": 20
+    },
+    {
+      "operation": "cva",
+      "success": true,
+      "time_seconds": 0.005493361997650936,
+      "n_samples": 50,
+      "n_groups": 3,
+      "n_objects": 50,
+      "n_landmarks": 20
+    },
+    {
+      "operation": "manova",
+      "success": true,
+      "time_seconds": 0.032468481000250904,
+      "n_samples": 50,
+      "n_groups": 3,
+      "n_objects": 50,
+      "n_landmarks": 20
+    },
+    {
+      "operation": "procrustes",
+      "success": true,
+      "time_seconds": 1.204779403997236,
+      "n_objects": 100,
+      "n_landmarks": 30
+    },
+    {
+      "operation": "pca",
+      "success": true,
+      "time_seconds": 0.004810313002963085,
+      "n_samples": 100,
+      "n_components": 60,
+      "n_objects": 100,
+      "n_landmarks": 30
+    },
+    {
+      "operation": "cva",
+      "success": true,
+      "time_seconds": 0.13141248900137725,
+      "n_samples": 100,
+      "n_groups": 3,
+      "n_objects": 100,
+      "n_landmarks": 30
+    },
+    {
+      "operation": "manova",
+      "success": true,
+      "time_seconds": 0.02801419400202576,
+      "n_samples": 100,
+      "n_groups": 3,
+      "n_objects": 100,
+      "n_landmarks": 30
+    }
+  ]
+}

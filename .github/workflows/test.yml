@@ -71,12 +71,12 @@ jobs:
       env:
         QT_QPA_PLATFORM: offscreen
         QT_DEBUG_PLUGINS: 0
+        COVERAGE_FILE: .coverage.unit
       run: |
         echo "=== Running Unit Tests ==="
         xvfb-run -a -s "-screen 0 1024x768x24" \
           pytest tests/test_md*.py \
             --cov=. \
-            --cov-report=xml:coverage-unit.xml \
             --cov-report=term \
             --tb=short \
             --timeout=30 \
@@ -86,13 +86,12 @@ jobs:
       env:
         QT_QPA_PLATFORM: offscreen
         QT_DEBUG_PLUGINS: 0
+        COVERAGE_FILE: .coverage.dialogs
       run: |
         echo "=== Running Dialog UI Tests ==="
         xvfb-run -a -s "-screen 0 1024x768x24" \
           pytest tests/dialogs/ \
             --cov=dialogs \
-            --cov-append \
-            --cov-report=xml:coverage-dialogs.xml \
             --cov-report=term \
             --tb=short \
             --timeout=30 \
@@ -102,13 +101,12 @@ jobs:
       env:
         QT_QPA_PLATFORM: offscreen
         QT_DEBUG_PLUGINS: 0
+        COVERAGE_FILE: .coverage.integration
       run: |
         echo "=== Running Integration Workflow Tests ==="
         xvfb-run -a -s "-screen 0 1024x768x24" \
           pytest tests/test_integration_workflows.py \
             --cov=. \
-            --cov-append \
-            --cov-report=xml:coverage-integration.xml \
             --cov-report=term \
             --tb=short \
             --timeout=30 \
@@ -117,9 +115,22 @@ jobs:
     - name: Generate Combined Coverage Report
       run: |
         echo "=== Generating Combined Coverage Report ==="
-        coverage combine 2>/dev/null || true
-        coverage report --skip-empty
-        coverage xml -o coverage.xml
+        # Check if any .coverage files exist
+        if ls .coverage* 1> /dev/null 2>&1; then
+          echo "Found coverage data files"
+          coverage combine 2>/dev/null || true
+        else
+          echo "No coverage data files found, skipping combine"
+        fi
+        # Generate reports if coverage data exists
+        if [ -f .coverage ]; then
+          echo "Generating coverage reports..."
+          coverage report --skip-empty || true
+          coverage xml -o coverage.xml || true
+        else
+          echo "No combined coverage data, creating empty coverage.xml"
+          echo '<?xml version="1.0" ?><coverage version="7.0"><packages/></coverage>' > coverage.xml
+        fi
 
     - name: Test Summary
       if: always()

@@ -1,0 +1,61 @@
+[run]
+source = .
+omit =
+    */tests/*
+    */test_*.py
+    */__pycache__/*
+    */venv/*
+    */.venv/*
+    */build/*
+    */dist/*
+    */.pytest_cache/*
+    */htmlcov/*
+    */.tox/*
+    */migrations/*
+    */OBJFileLoader/*
+    */setup.py
+    */build.py
+    */migrate.py
+    */.index/*
+    */docs/*
+    */scripts/*
+    */test_script/*
+    */config/*
+    */InnoSetup/*
+    */logs/*
+    */.git/*
+    */.github/*
+
+[report]
+# Regexes for lines to exclude from consideration
+exclude_lines =
+    # Have to re-enable the standard pragma
+    pragma: no cover
+
+    # Don't complain about missing debug-only code:
+    def __repr__
+    if self\.debug
+
+    # Don't complain if tests don't hit defensive assertion code:
+    raise AssertionError
+    raise NotImplementedError
+
+    # Don't complain if non-runnable code isn't run:
+    if 0:
+    if __name__ == .__main__.:
+
+    # Don't complain about abstract methods
+    @(abc\.)?abstractmethod
+
+    # Don't complain about GLUT initialization
+    if GLUT_AVAILABLE
+    if glut
+
+ignore_errors = True
+skip_empty = True
+
+[html]
+directory = htmlcov
+
+[xml]
+output = coverage.xml

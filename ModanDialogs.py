@@ -5,17 +5,11 @@ import shutil
 from pathlib import Path
 from types import SimpleNamespace
 
-import numpy as np
-import xlsxwriter
 from matplotlib.backends.backend_qt5agg import FigureCanvas as FigureCanvas
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-from matplotlib.figure import Figure
 from PyQt5.QtCore import (
-    QItemSelectionModel,
     QPoint,
     QRect,
     QSize,
-    QSortFilterProxyModel,
     Qt,
     QTimer,
     QTranslator,
@@ -30,12 +24,9 @@ from PyQt5.QtGui import (
     QPainter,
     QPen,
     QPixmap,
-    QStandardItem,
-    QStandardItemModel,
 )
 from PyQt5.QtWidgets import (
     QAbstractButton,
-    QAbstractItemView,
     QApplication,
     QButtonGroup,
     QCheckBox,
@@ -47,7 +38,6 @@ from PyQt5.QtWidgets import (
     QGridLayout,
     QGroupBox,
     QHBoxLayout,
-    QHeaderView,
     QLabel,
     QLineEdit,
     QListWidget,
@@ -60,10 +50,6 @@ from PyQt5.QtWidgets import (
     QSizePolicy,
     QSplitter,
     QStatusBar,
-    QTableView,
-    QTableWidget,
-    QTableWidgetItem,
-    QTabWidget,
     QTextEdit,
     QVBoxLayout,
     QWidget,
@@ -71,9 +57,7 @@ from PyQt5.QtWidgets import (
 
 import MdUtils as mu
 from MdModel import MdDataset, MdDatasetOps, MdImage, MdObject
-from MdStatistics import MdCanonicalVariate, MdPrincipalComponent
-from ModanComponents import NTS, TPS, X1Y1, Morphologika, ObjectViewer3D
-from dialogs.dataset_analysis_dialog import DatasetAnalysisDialog
+from ModanComponents import NTS, TPS, X1Y1, Morphologika
 
 logger = logging.getLogger(__name__)
 

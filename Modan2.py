@@ -45,6 +45,7 @@ from PyQt5.QtWidgets import (
 import MdUtils as mu
 from dialogs import (
     DataExplorationDialog,
+    DatasetAnalysisDialog,
     DatasetDialog,
     ExportDatasetDialog,
     ImportDatasetDialog,
@@ -68,7 +69,6 @@ from ModanComponents import (
 )
 from ModanController import ModanController
 from ModanDialogs import MODE
-from dialogs import DatasetAnalysisDialog
 
 # Configure matplotlib to avoid font warnings
 matplotlib.rcParams["font.family"] = ["DejaVu Sans", "sans-serif"]

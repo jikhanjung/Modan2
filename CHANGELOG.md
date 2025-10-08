@@ -10,18 +10,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.5-beta.1] - 2025-10-08
 
-### Added
--
-
-### Changed
--
-
-### Fixed
--
-
-
-## [Unreleased] - 2025-10-08
-
 ### Added (Phase 7 - Performance Testing & Scalability)
 - **Comprehensive Performance Testing Infrastructure**
   - Large-scale benchmarking tool (`scripts/benchmark_large_scale.py`)

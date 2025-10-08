@@ -141,8 +141,68 @@ jobs:
       - name: Create macOS app bundle
         run: |
           if [ ! -d "dist/Modan2.app" ]; then
+            echo "Creating proper macOS app bundle..."
+
+            # Create bundle structure
             mkdir -p "dist/Modan2.app/Contents/MacOS"
-            cp -r dist/* "dist/Modan2.app/Contents/MacOS/" 2>/dev/null || true
+            mkdir -p "dist/Modan2.app/Contents/Resources"
+
+            # Copy executable
+            if [ -f "dist/Modan2" ]; then
+              cp "dist/Modan2" "dist/Modan2.app/Contents/MacOS/"
+              chmod +x "dist/Modan2.app/Contents/MacOS/Modan2"
+            else
+              echo "ERROR: dist/Modan2 executable not found"
+              ls -la dist/
+              exit 1
+            fi
+
+            # Copy icon if it exists
+            if [ -f "icons/Modan2_2.png" ]; then
+              cp "icons/Modan2_2.png" "dist/Modan2.app/Contents/Resources/Modan2.png"
+            fi
+
+            # Create Info.plist
+            cat > "dist/Modan2.app/Contents/Info.plist" << EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>CFBundleDevelopmentRegion</key>
+            <string>en</string>
+            <key>CFBundleExecutable</key>
+            <string>Modan2</string>
+            <key>CFBundleIdentifier</key>
+            <string>com.paleobytes.modan2</string>
+            <key>CFBundleInfoDictionaryVersion</key>
+            <string>6.0</string>
+            <key>CFBundleName</key>
+            <string>Modan2</string>
+            <key>CFBundleDisplayName</key>
+            <string>Modan2</string>
+            <key>CFBundlePackageType</key>
+            <string>APPL</string>
+            <key>CFBundleShortVersionString</key>
+            <string>${{ steps.get_version.outputs.VERSION }}</string>
+            <key>CFBundleVersion</key>
+            <string>${{ inputs.build_number }}</string>
+            <key>CFBundleIconFile</key>
+            <string>Modan2.png</string>
+            <key>LSMinimumSystemVersion</key>
+            <string>10.14</string>
+            <key>NSHighResolutionCapable</key>
+            <true/>
+            <key>NSPrincipalClass</key>
+            <string>NSApplication</string>
+          </dict>
+          </plist>
+          EOF
+
+            echo "App bundle created successfully"
+            ls -la "dist/Modan2.app/Contents/"
+            ls -la "dist/Modan2.app/Contents/MacOS/"
+          else
+            echo "dist/Modan2.app already exists, skipping bundle creation"
           fi
 
       - name: Create macOS DMG

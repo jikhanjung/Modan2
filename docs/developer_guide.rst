@@ -19,23 +19,79 @@ Modan2 is a Python desktop application for geometric morphometrics built with:
 .. code-block:: text
 
    Modan2/
-   ├── Modan2.py              # Main application entry point
-   ├── MdModel.py             # Database models (Peewee ORM)
-   ├── MdUtils.py             # Utility functions and constants
-   ├── MdStatistics.py        # Statistical analysis functions
-   ├── ModanDialogs.py        # PyQt5 dialog classes
-   ├── ModanComponents.py     # Custom PyQt5 widgets
-   ├── ModanController.py     # MVC controller
-   ├── MdHelpers.py           # Helper functions
-   ├── MdConstants.py         # Application constants
-   ├── build.py               # PyInstaller build script
-   ├── migrate.py             # Database migration tool
-   ├── requirements.txt       # Python dependencies
-   ├── tests/                 # Automated tests (pytest)
-   ├── devlog/                # Development documentation
-   ├── icons/                 # Application icons
-   ├── migrations/            # Database schema migrations
-   └── docs/                  # This documentation
+   ├── Modan2.py                    # Main application entry point
+   ├── MdModel.py                   # Database models (Peewee ORM)
+   ├── MdUtils.py                   # Utility functions and constants
+   ├── MdStatistics.py              # Statistical analysis functions
+   ├── MdHelpers.py                 # Helper functions
+   ├── MdConstants.py               # Application constants
+   ├── MdLogger.py                  # Logging utilities
+   ├── MdAppSetup.py                # Application initialization
+   ├── MdSplashScreen.py            # Splash screen widget
+   ├── ModanController.py           # MVC controller
+   ├── ModanDialogs.py              # Legacy dialogs (being phased out)
+   ├── ModanComponents.py           # Legacy components (being phased out)
+   ├── ModanWidgets.py              # Reusable widget utilities
+   ├── build.py                     # PyInstaller build script
+   ├── migrate.py                   # Database migration tool
+   ├── requirements.txt             # Python dependencies
+   │
+   ├── dialogs/                     # Dialog modules (Phase 2+ refactoring)
+   │   ├── __init__.py
+   │   ├── base_dialog.py           # Base dialog class
+   │   ├── analysis_dialog.py       # New analysis dialog
+   │   ├── analysis_result_dialog.py # Analysis results
+   │   ├── calibration_dialog.py    # Image calibration
+   │   ├── data_exploration_dialog.py # Data visualization & exploration
+   │   ├── dataset_analysis_dialog.py # Dataset analysis configuration
+   │   ├── dataset_dialog.py        # Dataset create/edit
+   │   ├── export_dialog.py         # Data export (TPS, Morphologika, JSON+ZIP)
+   │   ├── import_dialog.py         # Data import (TPS, NTS, X1Y1, etc.)
+   │   ├── object_dialog.py         # Object/specimen editor with landmarks
+   │   ├── preferences_dialog.py    # Application preferences
+   │   └── progress_dialog.py       # Progress tracking
+   │
+   ├── components/                  # Reusable components (Phase 3+ refactoring)
+   │   ├── __init__.py
+   │   ├── formats/                 # File format parsers
+   │   │   ├── tps.py              # TPS format support
+   │   │   ├── nts.py              # NTS format support
+   │   │   ├── x1y1.py             # X1Y1 format support
+   │   │   └── morphologika.py     # Morphologika format support
+   │   ├── viewers/                 # 2D/3D visualization widgets
+   │   │   ├── object_viewer_2d.py # 2D image viewer with landmarks
+   │   │   └── object_viewer_3d.py # 3D model viewer (OpenGL)
+   │   └── widgets/                 # UI widgets
+   │       ├── analysis_info.py     # Analysis info widget
+   │       ├── dataset_ops_viewer.py # Dataset operations viewer
+   │       ├── delegates.py         # Table/tree delegates
+   │       ├── drag_widgets.py      # Drag-and-drop widgets
+   │       ├── overlay_widget.py    # Overlay rendering widget
+   │       ├── pic_button.py        # Picture button widget
+   │       ├── shape_preference.py  # Shape visualization preferences
+   │       └── table_view.py        # Custom table view
+   │
+   ├── OBJFileLoader/               # 3D OBJ file loading
+   │   ├── objloader.py
+   │   └── objviewer.py
+   │
+   ├── tests/                       # Automated tests (pytest)
+   │   ├── conftest.py              # Test fixtures
+   │   ├── test_mdmodel.py          # Database model tests
+   │   ├── test_mdstatistics.py     # Statistical analysis tests
+   │   ├── test_mdutils.py          # Utility function tests
+   │   └── ...                      # Additional test modules
+   │
+   ├── devlog/                      # Development log (142+ sessions)
+   ├── docs/                        # Sphinx documentation
+   ├── icons/                       # Application icons
+   ├── migrations/                  # Database schema migrations
+   ├── benchmarks/                  # Performance benchmarks
+   ├── tools/                       # Development tools & scripts
+   ├── config/                      # Configuration files
+   │   ├── pytest.ini
+   │   └── requirements-dev.txt
+   └── translations/                # i18n translation files
 
 Architecture
 ------------
@@ -144,11 +200,12 @@ MVC Pattern in Modan2
 - Database queries and CRUD operations
 - Data validation
 
-**View** (``Modan2.py``, ``ModanDialogs.py``, ``ModanComponents.py``):
+**View** (``Modan2.py``, ``dialogs/``, ``components/``):
 
-- ``ModanMainWindow``: Main application window
-- ``ObjectDialog``, ``NewAnalysisDialog``, etc.: Dialog windows
-- ``ObjectViewer2D``, ``ObjectViewer3D``: Visualization widgets
+- ``ModanMainWindow`` (``Modan2.py``): Main application window with tree/table views
+- Dialog classes (``dialogs/*.py``): ``ObjectDialog``, ``NewAnalysisDialog``, ``DataExplorationDialog``, etc.
+- Viewer widgets (``components/viewers/``): ``ObjectViewer2D``, ``ObjectViewer3D``
+- Custom widgets (``components/widgets/``): UI components for analysis, data display, etc.
 - Qt signals emitted on user actions
 
 **Controller** (``ModanController.py``):
@@ -669,7 +726,7 @@ Advanced Topics
 Custom Widgets
 ~~~~~~~~~~~~~~
 
-Creating custom PyQt5 widgets (see ``ModanComponents.py``):
+Creating custom PyQt5 widgets (see ``components/widgets/`` for examples):
 
 .. code-block:: python
 
@@ -691,6 +748,13 @@ Creating custom PyQt5 widgets (see ``ModanComponents.py``):
        def setValue(self, value):
            # Custom logic
            self.valueChanged.emit(value)
+
+**Examples from codebase**:
+
+- ``components/widgets/pic_button.py``: Custom button with image support
+- ``components/widgets/drag_widgets.py``: Drag-and-drop list widgets
+- ``components/viewers/object_viewer_2d.py``: Complex 2D viewer with landmark editing
+- ``components/viewers/object_viewer_3d.py``: OpenGL-based 3D viewer
 
 Statistical Extensions
 ~~~~~~~~~~~~~~~~~~~~~~

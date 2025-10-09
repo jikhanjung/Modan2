@@ -65,14 +65,17 @@ For datasets with 1000+ objects:
 .. code-block:: python
 
    # Process multiple datasets programmatically
-   from MdModel import MdDataset
-   from MdStatistics import perform_pca
+   from MdModel import MdDataset, MdDatasetOps
+   from MdStatistics import PerformPCA
 
    datasets = MdDataset.select()
    for dataset in datasets:
-       if dataset.get_object_count() > 50:
-           results = perform_pca(dataset)
-           # Save results
+       obj_count = len(dataset.get_object_list())
+       if obj_count > 50:
+           dataset_ops = MdDatasetOps()
+           dataset_ops.read_from_dataset(dataset)
+           pca = PerformPCA(dataset_ops)
+           # Use pca results (pca.rotated_matrix, pca.eigen_value_percentages, etc.)
 
 **3. Memory Management:**
 
@@ -521,38 +524,42 @@ Use Modan2 modules in scripts:
    """
    Example: Batch PCA analysis
    """
-   from MdModel import MdDataset, database
-   from MdStatistics import perform_pca
+   from MdModel import MdDataset, MdDatasetOps
+   from MdStatistics import PerformPCA
    import json
 
-   # Connect to database
-   database.init('modan.db')
-
-   # Get all 2D datasets
-   datasets = MdDataset.select().where(
-       MdDataset.dimension == 2,
-       MdDataset.object_count > 50
-   )
+   # Get all 2D datasets with sufficient objects
+   datasets = MdDataset.select().where(MdDataset.dimension == 2)
 
    results = []
    for dataset in datasets:
-       print(f"Processing {dataset.name}...")
+       # Check object count
+       obj_count = len(dataset.get_object_list())
+       if obj_count < 50:
+           continue
 
-       # Perform PCA
-       pca_results = perform_pca(dataset)
+       print(f"Processing {dataset.dataset_name}...")
+
+       # Create dataset ops and perform PCA
+       dataset_ops = MdDatasetOps()
+       dataset_ops.read_from_dataset(dataset)
+
+       pca = PerformPCA(dataset_ops)
+       if pca is None:
+           continue
 
        # Save results
        results.append({
-           'dataset': dataset.name,
-           'variance_explained': pca_results['variance_explained'],
-           'n_components': len(pca_results['eigenvalues'])
+           'dataset': dataset.dataset_name,
+           'n_components': len(pca.eigen_value_percentages),
+           'variance_ratios': pca.eigen_value_percentages[:5]  # First 5 PCs
        })
 
    # Export summary
    with open('pca_summary.json', 'w') as f:
        json.dump(results, f, indent=2)
 
-   print(f"Processed {len(datasets)} datasets")
+   print(f"Processed {len(results)} datasets")
 
 Database Queries
 ~~~~~~~~~~~~~~~~
@@ -601,7 +608,7 @@ Export multiple datasets:
    Export all datasets as JSON+ZIP
    """
    from MdModel import MdDataset
-   from MdUtils import export_dataset_to_json_zip
+   from MdUtils import create_zip_package
    import os
 
    output_dir = "exports"
@@ -609,12 +616,12 @@ Export multiple datasets:
 
    datasets = MdDataset.select()
    for dataset in datasets:
-       filename = f"{dataset.name.replace(' ', '_')}.zip"
+       filename = f"{dataset.dataset_name.replace(' ', '_')}.zip"
        filepath = os.path.join(output_dir, filename)
 
-       print(f"Exporting {dataset.name}...")
-       export_dataset_to_json_zip(
-           dataset,
+       print(f"Exporting {dataset.dataset_name}...")
+       create_zip_package(
+           dataset.id,
            filepath,
            include_files=True
        )
@@ -632,17 +639,23 @@ Create custom plots from Modan2 data:
 .. code-block:: python
 
    import matplotlib.pyplot as plt
-   from MdModel import MdDataset
-   from MdStatistics import perform_pca
+   from MdModel import MdDataset, MdDatasetOps
+   from MdStatistics import PerformPCA
    import numpy as np
 
    # Load dataset and run PCA
    dataset = MdDataset.get_by_id(1)
-   pca_results = perform_pca(dataset)
+   dataset_ops = MdDatasetOps()
+   dataset_ops.read_from_dataset(dataset)
 
-   # Extract PC scores
-   scores = pca_results['scores']
-   variance = pca_results['variance_explained']
+   pca = PerformPCA(dataset_ops)
+   if pca is None:
+       print("PCA failed")
+       exit(1)
+
+   # Extract PC scores and variance
+   scores = np.array(pca.rotated_matrix)
+   variance = [v * 100 for v in pca.eigen_value_percentages]  # Convert to percentages
 
    # Create custom scatter plot
    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
@@ -655,7 +668,8 @@ Create custom plots from Modan2 data:
    ax1.grid(True, alpha=0.3)
 
    # Scree plot
-   ax2.bar(range(1, len(variance)+1), variance)
+   n_components = min(10, len(variance))  # Show first 10 components
+   ax2.bar(range(1, n_components+1), variance[:n_components])
    ax2.set_xlabel('Component')
    ax2.set_ylabel('Variance Explained (%)')
    ax2.set_title('Scree Plot')
@@ -667,37 +681,63 @@ Create custom plots from Modan2 data:
 Shape Deformation Grids
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Visualize shape changes:
+Visualize shape changes along PC axes:
 
 .. code-block:: python
 
-   from MdStatistics import calculate_mean_shape, \
-       calculate_shape_change
    import matplotlib.pyplot as plt
+   import numpy as np
+   from MdModel import MdDataset, MdDatasetOps
+   from MdStatistics import PerformPCA
 
-   # Get mean shape and PC shapes
-   mean_shape = calculate_mean_shape(dataset)
-   pc1_min = calculate_shape_change(pca_results, pc=1, value=-2)
-   pc1_max = calculate_shape_change(pca_results, pc=1, value=+2)
+   # Load dataset and run PCA
+   dataset = MdDataset.get_by_id(1)
+   dataset_ops = MdDatasetOps()
+   dataset_ops.read_from_dataset(dataset)
+
+   pca = PerformPCA(dataset_ops)
+   if pca is None:
+       print("PCA failed")
+       exit(1)
+
+   # Calculate mean shape (already centered in PCA)
+   n_landmarks = len(dataset_ops.object_list[0].landmark_list)
+   dimension = dataset.dimension
+
+   # Get PC1 loadings (rotation matrix column 0)
+   pc1_loadings = pca.rotation_matrix[:, 0]
+
+   # Reconstruct shapes at -2SD, mean (0), +2SD along PC1
+   sd = np.sqrt(pca.raw_eigen_values[0])
+   shapes = []
+   for multiplier in [-2, 0, 2]:
+       # Apply PC1 loadings scaled by SD
+       shape_vector = pc1_loadings * multiplier * sd
+       # Reshape to landmarks
+       shape = shape_vector.reshape(n_landmarks, dimension)
+       shapes.append(shape)
 
    # Plot deformation
    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+   wireframe = dataset.unpack_wireframe()
 
    for ax, shape, title in zip(
        axes,
-       [pc1_min, mean_shape, pc1_max],
-       ['PC1 Min', 'Mean', 'PC1 Max']
+       shapes,
+       ['PC1 -2SD', 'Mean', 'PC1 +2SD']
    ):
-       ax.scatter(shape[:, 0], shape[:, 1])
+       ax.scatter(shape[:, 0], shape[:, 1], c='red', s=50, zorder=2)
        # Add wireframe if defined
-       if dataset.wireframe:
-           for connection in dataset.wireframe:
+       if wireframe:
+           for connection in wireframe:
                idx1, idx2 = connection
                ax.plot([shape[idx1, 0], shape[idx2, 0]],
-                      [shape[idx1, 1], shape[idx2, 1]], 'b-')
+                      [shape[idx1, 1], shape[idx2, 1]], 'b-', alpha=0.6)
        ax.set_title(title)
        ax.set_aspect('equal')
+       ax.grid(True, alpha=0.3)
 
+   plt.tight_layout()
    plt.savefig('shape_deformation.png', dpi=300)
 
 Settings and Configuration

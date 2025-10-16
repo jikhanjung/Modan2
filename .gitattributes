@@ -23,10 +23,12 @@
 *.bat text eol=crlf
 *.cmd text eol=crlf
 
-# Data files - treat as binary to preserve original line endings
-*.nts binary
-*.tps binary
+# Data files - use auto detection for line endings
+*.nts text=auto
+*.tps text=auto
+*.txt text=auto
+
+# 3D model files - can be binary or text, treat as binary to be safe
 *.obj binary
 *.ply binary
 *.stl binary
-*.txt binary

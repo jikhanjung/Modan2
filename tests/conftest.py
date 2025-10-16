@@ -180,39 +180,56 @@ def mock_database(monkeypatch, temp_db):
 
 
 @pytest.fixture
-def main_window(qtbot, mock_database):
-    """Main window fixture with mocked database."""
+def main_window_factory(qtbot, mock_database):
+    """Factory fixture for creating main windows with custom configs."""
     from Modan2 import ModanMainWindow
 
-    # Create test config
-    test_config = {
-        "language": "en",
-        "ui": {
-            "toolbar_icon_size": "Medium",
-            "remember_geometry": False,
-            "window_geometry": [100, 100, 1400, 800],
-            "is_maximized": False,
-        },
-    }
+    windows = []
 
-    # Create window with config
-    window = ModanMainWindow(test_config)
-    qtbot.addWidget(window)
+    def _create_window(custom_config=None):
+        # Create test config
+        test_config = {
+            "language": "en",
+            "ui": {
+                "toolbar_icon_size": "Medium",
+                "remember_geometry": False,
+                "window_geometry": [100, 100, 1400, 800],
+                "is_maximized": False,
+            },
+        }
 
-    # Show window
-    window.show()
-    with qtbot.waitExposed(window):
-        pass
+        # Merge custom config if provided
+        if custom_config:
+            test_config.update(custom_config)
 
-    yield window
+        # Create window with config
+        window = ModanMainWindow(test_config)
+        qtbot.addWidget(window)
 
-    # Cleanup
-    window.close()
+        # Show window
+        window.show()
+        with qtbot.waitExposed(window):
+            pass
+
+        windows.append(window)
+        return window
+
+    yield _create_window
+
+    # Cleanup all created windows
+    for window in windows:
+        window.close()
+
+
+@pytest.fixture
+def main_window(main_window_factory):
+    """Main window fixture with mocked database."""
+    return main_window_factory()
 
 
 @pytest.fixture
 def sample_dataset(mock_database):
-    """Create a sample dataset for testing."""
+    """Create a sample dataset with test objects for testing."""
     import MdModel
 
     dataset = MdModel.MdDataset.create(
@@ -223,6 +240,18 @@ def sample_dataset(mock_database):
         object_name="Test Object",
         object_desc="Test Description",
     )
+
+    # Add test objects with landmarks to the dataset
+    for i in range(3):  # Create 3 objects for testing
+        obj = MdModel.MdObject.create(
+            dataset=dataset,
+            object_name=f"Test Object {i + 1}",
+            sequence=i + 1
+        )
+        # Add sample landmark data (10 landmarks with x,y coordinates)
+        landmark_str = "\n".join([f"{i + j * 10}.0\t{i + j * 10 + 5}.0" for j in range(10)])
+        obj.landmark_str = landmark_str
+        obj.save()
 
     return dataset
 

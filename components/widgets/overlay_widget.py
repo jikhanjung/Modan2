@@ -128,8 +128,9 @@ NEWLINE = "\n"
 class ResizableOverlayWidget(QWidget):
     """Custom widget with resize handles for overlay functionality"""
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, main_window=None):
         super().__init__(parent)
+        self.main_window = main_window  # Store reference to main window for callbacks
         self.setMinimumSize(200, 150)
         self.resize_margin = 20  # Margin for resize area (increased for easier grabbing)
         self.header_height = 30  # Height of draggable header area
@@ -187,12 +188,12 @@ class ResizableOverlayWidget(QWidget):
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
             if self.dragging:
-                # Try to snap to corner, revert if not snapped
-                original_position = self.drag_start_geometry.topLeft()
-                if not self.snap_to_corner():
-                    # Snap failed, revert to original position
-                    self.move(original_position)
+                # Snap to corner for easier positioning
+                self.snap_to_corner()
                 self.dragging = False
+                # Notify main window that overlay was moved
+                if self.main_window and hasattr(self.main_window, "on_overlay_moved"):
+                    self.main_window.on_overlay_moved()
             self.resizing = False
             self.resize_direction = self.RESIZE_NONE
         super().mouseReleaseEvent(event)
@@ -342,7 +343,8 @@ class ResizableOverlayWidget(QWidget):
 
         # Snap to the determined corner
         self.current_corner = target_corner
-        self.move(corners[target_corner])
+        target_pos = corners[target_corner]
+        self.move(target_pos)
 
         # Update parent to trigger resize handle repositioning if needed
         if hasattr(self.parent(), "update_overlay_position"):

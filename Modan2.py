@@ -18,7 +18,7 @@ from pathlib import Path
 import matplotlib
 import matplotlib.pyplot as plt
 from peewee import DoesNotExist
-from PyQt5.QtCore import QItemSelectionModel, QRect, QSize, QSortFilterProxyModel, Qt, QTimer, QTranslator, pyqtSlot
+from PyQt5.QtCore import QEvent, QItemSelectionModel, QRect, QSize, QSortFilterProxyModel, Qt, QTimer, QTranslator, pyqtSlot
 from PyQt5.QtGui import QCursor, QIcon, QKeySequence, QStandardItem, QStandardItemModel
 from PyQt5.QtWidgets import (
     QAbstractItemView,
@@ -146,6 +146,12 @@ class ModanMainWindow(QMainWindow):
         self.actionAbout = QAction(QIcon(ICON_CONSTANTS["about"]), self.tr("About\tF1"), self)
         self.actionAbout.triggered.connect(self.on_action_about_triggered)
         self.actionAbout.setShortcut(QKeySequence("F1"))
+        self.actionTogglePreview = QAction(QIcon(), self.tr("Preview"), self)
+        self.actionTogglePreview.triggered.connect(self.toggle_object_overlay_auto_show)
+        self.actionTogglePreview.setShortcut(QKeySequence("Ctrl+P"))
+        self.actionTogglePreview.setCheckable(True)
+        self.actionTogglePreview.setChecked(True)  # Default: auto-show ON
+        self.actionTogglePreview.setToolTip(self.tr("Toggle object preview overlay (Ctrl+P)"))
 
         self.toolbar.addAction(self.actionNewDataset)
         self.toolbar.addAction(self.actionNewObject)
@@ -157,6 +163,9 @@ class ModanMainWindow(QMainWindow):
         self.toolbar.addAction(self.actionImport)
         self.toolbar.addAction(self.actionExport)
         self.toolbar.addAction(self.actionAnalyze)
+        self.toolbar.addSeparator()  # Add separator before preview toggle
+        self.toolbar.addAction(self.actionTogglePreview)
+        self.toolbar.addSeparator()  # Add separator after preview toggle
         self.toolbar.addAction(self.actionPreferences)
         self.toolbar.addAction(self.actionAbout)
         self.addToolBar(self.toolbar)
@@ -182,6 +191,8 @@ class ModanMainWindow(QMainWindow):
         self.file_menu.addAction(self.actionExit)
         self.edit_menu = self.main_menu.addMenu(self.tr("Edit"))
         self.edit_menu.addAction(self.actionPreferences)
+        self.view_menu = self.main_menu.addMenu(self.tr("View"))
+        self.view_menu.addAction(self.actionTogglePreview)
         self.data_menu = self.main_menu.addMenu(self.tr("Data"))
         self.data_menu.addAction(self.actionNewDataset)
         self.data_menu.addAction(self.actionNewObject)
@@ -405,6 +416,9 @@ class ModanMainWindow(QMainWindow):
                         "WireframeColor/3D": ("ui", "wireframe_color_3d"),
                         "IndexSize/3D": ("ui", "index_size_3d"),
                         "IndexColor/3D": ("ui", "index_color_3d"),
+                        # Object overlay settings
+                        "ObjectOverlay/AutoShow": ("ui", "object_overlay_auto_show"),
+                        "ObjectOverlay/Position": ("ui", "object_overlay_position"),
                     }
 
                     # Data point colors and markers (dynamic)
@@ -489,8 +503,18 @@ class ModanMainWindow(QMainWindow):
 
         if not self.init_done:
             self.m_app.remember_geometry = self.config.get("ui", {}).get("remember_geometry", True)
+            # Read object overlay auto-show preference (defaults to True)
+            self.object_overlay_auto_show = self.config.get("ui", {}).get("object_overlay_auto_show", True)
+            # Read object overlay position (None means use default bottom-right)
+            self.object_overlay_position = self.config.get("ui", {}).get("object_overlay_position", None)
+
+            # Update toolbar button state to match loaded config
+            if hasattr(self, "actionTogglePreview"):
+                self.actionTogglePreview.setChecked(self.object_overlay_auto_show)
+
             logger = logging.getLogger(__name__)
             logger.debug(f"READ_SETTINGS - Remember geometry: {self.m_app.remember_geometry}")
+            logger.debug(f"READ_SETTINGS - Object overlay auto-show: {self.object_overlay_auto_show}")
 
             if self.m_app.remember_geometry:
                 geometry_data = self.config.get("ui", {}).get("window_geometry", {})
@@ -620,6 +644,14 @@ class ModanMainWindow(QMainWindow):
         # Save language setting
         if hasattr(self.m_app, "language"):
             self.m_app.settings.setValue("Language", self.m_app.language)
+
+        # Save object overlay auto-show preference
+        if hasattr(self, "object_overlay_auto_show"):
+            self.m_app.settings.setValue("ObjectOverlay/AutoShow", self.object_overlay_auto_show)
+
+        # Save object overlay position
+        if hasattr(self, "object_overlay_position") and self.object_overlay_position is not None:
+            self.m_app.settings.setValue("ObjectOverlay/Position", self.object_overlay_position)
 
     def update_language(self):
         if False:
@@ -793,32 +825,63 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.dataset_view.layout().setContentsMargins(0, 0, 0, 0)
 
         # Create overlay container for object viewers (initially hidden)
-        self.object_overlay = ResizableOverlayWidget(self.dataset_view)
+        self.object_overlay = ResizableOverlayWidget(self.dataset_view, main_window=self)
         self.object_overlay.resize(400, 300)  # Initial size for overlay
         # Background and border are now handled by paintEvent in ResizableOverlayWidget
         self.object_overlay.hide()
+
+        # Initialize overlay auto-show state (if not already set from config)
+        if not hasattr(self, "object_overlay_auto_show"):
+            self.object_overlay_auto_show = True
+
+        # Initialize overlay position (if not already set from config)
+        if not hasattr(self, "object_overlay_position"):
+            self.object_overlay_position = None
 
         # Layout for object viewers inside overlay
         overlay_layout = QVBoxLayout(self.object_overlay)
         overlay_layout.setContentsMargins(5, 5, 5, 5)
 
-        # Add close button to overlay
-        close_button = QPushButton("×")
-        close_button.setFixedSize(20, 20)
-        close_button.setStyleSheet("""
-            QPushButton {
-                background-color: #ff6b6b;
-                color: white;
-                border: none;
-                border-radius: 10px;
-                font-weight: bold;
-                font-size: 14px;
-            }
-            QPushButton:hover {
-                background-color: #ff5252;
-            }
-        """)
-        close_button.clicked.connect(self.hide_object_overlay)
+        # Add toggle button to overlay (replaces close button)
+        self.overlay_toggle_button = QPushButton()
+        self.overlay_toggle_button.setFixedSize(20, 20)
+        # Set initial button appearance based on auto-show state
+        if self.object_overlay_auto_show:
+            self.overlay_toggle_button.setText("×")
+            self.overlay_toggle_button.setStyleSheet("""
+                QPushButton {
+                    background-color: #ff6b6b;
+                    color: white;
+                    border: none;
+                    border-radius: 10px;
+                    font-weight: bold;
+                    font-size: 14px;
+                }
+                QPushButton:hover {
+                    background-color: #ff5252;
+                }
+            """)
+        else:
+            self.overlay_toggle_button.setText("👁")
+            self.overlay_toggle_button.setStyleSheet("""
+                QPushButton {
+                    background-color: #4CAF50;
+                    color: white;
+                    border: none;
+                    border-radius: 10px;
+                    font-weight: bold;
+                    font-size: 12px;
+                }
+                QPushButton:hover {
+                    background-color: #45a049;
+                }
+            """)
+        self.overlay_toggle_button.setToolTip(
+            "Click to toggle automatic preview\n"
+            "× = Auto-show ON (click to turn OFF)\n"
+            "👁 = Auto-show OFF (click to turn ON)"
+        )
+        self.overlay_toggle_button.clicked.connect(self.toggle_object_overlay_auto_show)
 
         # Header layout with title and close button
         header_layout = QHBoxLayout()
@@ -837,8 +900,8 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
         header_layout.addStretch()  # Push title to center
         header_layout.addWidget(self.overlay_title_label)
-        header_layout.addStretch()  # Push close button to the right
-        header_layout.addWidget(close_button)
+        header_layout.addStretch()  # Push toggle button to the right
+        header_layout.addWidget(self.overlay_toggle_button)
         overlay_layout.addLayout(header_layout)
 
         if not dockable_object_view:
@@ -1772,8 +1835,9 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         if hasattr(self, "overlay_title_label") and obj:
             self.overlay_title_label.setText(obj.object_name)
 
-        # Show the overlay when an object is selected
-        self.show_object_overlay()
+        # Show the overlay only if auto-show is enabled
+        if getattr(self, "object_overlay_auto_show", True):
+            self.show_object_overlay()
 
     def clear_object_view(self):
         self.object_view.clear_object()
@@ -1781,8 +1845,16 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.hide_object_overlay()
 
     def position_object_overlay(self):
-        """Position the object overlay in the bottom-right corner of the dataset view"""
+        """Position the object overlay - use saved position if available, otherwise bottom-right"""
         if hasattr(self, "object_overlay") and hasattr(self, "dataset_view"):
+            # Check if we have a saved position
+            if hasattr(self, "object_overlay_position") and self.object_overlay_position is not None:
+                # Use saved position (as [x, y])
+                if isinstance(self.object_overlay_position, list) and len(self.object_overlay_position) == 2:
+                    self.object_overlay.move(self.object_overlay_position[0], self.object_overlay_position[1])
+                    return
+
+            # No saved position - use default bottom-right corner
             parent_size = self.dataset_view.size()
             overlay_size = self.object_overlay.size()
 
@@ -1796,6 +1868,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     def show_object_overlay(self):
         """Show the object overlay and position it correctly"""
         if hasattr(self, "object_overlay"):
+            # Always position using saved position or default
             self.position_object_overlay()
             self.object_overlay.show()
             self.object_overlay.raise_()  # Bring to front
@@ -1805,12 +1878,71 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         if hasattr(self, "object_overlay"):
             self.object_overlay.hide()
 
+    def toggle_object_overlay_auto_show(self):
+        """Toggle auto-show behavior of object overlay"""
+        self.object_overlay_auto_show = not self.object_overlay_auto_show
+
+        # Update toolbar button check state
+        if hasattr(self, "actionTogglePreview"):
+            self.actionTogglePreview.setChecked(self.object_overlay_auto_show)
+
+        # Save the preference to config
+        if hasattr(self, "m_app") and hasattr(self.m_app, "settings"):
+            self.m_app.settings.setValue("ObjectOverlay/AutoShow", self.object_overlay_auto_show)
+
+        if self.object_overlay_auto_show:
+            # Auto-show mode enabled - show overlay if object is selected
+            if self.selected_object:
+                self.show_object_overlay()
+            # Change button icon to × (close/hide button)
+            self.overlay_toggle_button.setText("×")
+            self.overlay_toggle_button.setStyleSheet("""
+                QPushButton {
+                    background-color: #ff6b6b;
+                    color: white;
+                    border: none;
+                    border-radius: 10px;
+                    font-weight: bold;
+                    font-size: 14px;
+                }
+                QPushButton:hover {
+                    background-color: #ff5252;
+                }
+            """)
+        else:
+            # Manual mode - hide overlay
+            self.hide_object_overlay()
+            # Change button icon to 👁 (eye/show button)
+            self.overlay_toggle_button.setText("👁")
+            self.overlay_toggle_button.setStyleSheet("""
+                QPushButton {
+                    background-color: #4CAF50;
+                    color: white;
+                    border: none;
+                    border-radius: 10px;
+                    font-weight: bold;
+                    font-size: 12px;
+                }
+                QPushButton:hover {
+                    background-color: #45a049;
+                }
+            """)
+
+    def on_overlay_moved(self):
+        """Called by ResizableOverlayWidget when user finishes dragging"""
+        # Save the new position when overlay is moved
+        pos = self.object_overlay.pos()
+        self.object_overlay_position = [pos.x(), pos.y()]
+
+        # Save to config immediately
+        if hasattr(self, "m_app") and hasattr(self.m_app, "settings"):
+            self.m_app.settings.setValue("ObjectOverlay/Position", self.object_overlay_position)
+
     def resizeEvent(self, event):
-        """Handle window resize to reposition overlay"""
+        """Handle window resize - don't reposition overlay, it should stay where user put it"""
         super().resizeEvent(event)
-        # Reposition overlay when window is resized
-        if hasattr(self, "object_overlay") and self.object_overlay.isVisible():
-            QTimer.singleShot(0, self.position_object_overlay)  # Defer positioning to next event loop
+        # Don't reposition overlay on window resize
+        # The overlay position should persist where the user placed it
 
 
 """

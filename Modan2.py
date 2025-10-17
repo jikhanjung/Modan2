@@ -146,7 +146,7 @@ class ModanMainWindow(QMainWindow):
         self.actionAbout = QAction(QIcon(ICON_CONSTANTS["about"]), self.tr("About\tF1"), self)
         self.actionAbout.triggered.connect(self.on_action_about_triggered)
         self.actionAbout.setShortcut(QKeySequence("F1"))
-        self.actionTogglePreview = QAction(QIcon(), self.tr("Preview"), self)
+        self.actionTogglePreview = QAction(QIcon(ICON_CONSTANTS["preview"]), self.tr("Preview"), self)
         self.actionTogglePreview.triggered.connect(self.toggle_object_overlay_auto_show)
         self.actionTogglePreview.setShortcut(QKeySequence("Ctrl+P"))
         self.actionTogglePreview.setCheckable(True)
@@ -221,6 +221,7 @@ class ModanMainWindow(QMainWindow):
         self.actionCellSelection.setEnabled(False)
         self.actionRowSelection.setEnabled(False)
         self.actionAddVariable.setEnabled(False)
+        self.actionTogglePreview.setEnabled(False)
 
         self.reset_views()
         self.load_dataset()
@@ -290,6 +291,7 @@ class ModanMainWindow(QMainWindow):
             self.actionCellSelection.setEnabled(False)
             self.actionRowSelection.setEnabled(False)
             self.actionAddVariable.setEnabled(False)
+            self.actionTogglePreview.setEnabled(False)
         else:
             self.actionNewObject.setEnabled(True)
             self.actionEditObject.setEnabled(False)  # Start with disabled until object is selected
@@ -298,6 +300,7 @@ class ModanMainWindow(QMainWindow):
             self.actionCellSelection.setEnabled(True)
             self.actionRowSelection.setEnabled(True)
             self.actionAddVariable.setEnabled(True)
+            self.actionTogglePreview.setEnabled(True)
             self.load_object()
 
     def on_analysis_selected_from_tree(self, analysis):
@@ -311,6 +314,7 @@ class ModanMainWindow(QMainWindow):
             self.actionCellSelection.setEnabled(False)
             self.actionRowSelection.setEnabled(False)
             self.actionAddVariable.setEnabled(False)
+            self.actionTogglePreview.setEnabled(False)
             self.actionNewObject.setEnabled(False)
             self.actionEditObject.setEnabled(False)
             self.actionExport.setEnabled(False)
@@ -1717,6 +1721,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 self.actionCellSelection.setEnabled(True)
                 self.actionRowSelection.setEnabled(True)
                 self.actionAddVariable.setEnabled(True)
+                self.actionTogglePreview.setEnabled(True)
                 # Edit Object starts disabled until object is selected
                 self.actionEditObject.setEnabled(False)
             elif isinstance(obj, MdAnalysis):
@@ -1729,6 +1734,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 self.actionCellSelection.setEnabled(False)
                 self.actionRowSelection.setEnabled(False)
                 self.actionAddVariable.setEnabled(False)
+                self.actionTogglePreview.setEnabled(False)
                 # Also disable object-related and dataset-related buttons
                 self.actionNewObject.setEnabled(False)
                 self.actionEditObject.setEnabled(False)
@@ -1757,6 +1763,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             self.actionCellSelection.setEnabled(False)
             self.actionRowSelection.setEnabled(False)
             self.actionAddVariable.setEnabled(False)
+            self.actionTogglePreview.setEnabled(False)
 
     def load_object(self):
         self.object_model.clear()

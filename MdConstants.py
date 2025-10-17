@@ -59,6 +59,8 @@ ICONS = {
     # Selection types
     "cell_selection": str(ICONS_DIR / "cell_selection.png"),
     "row_selection": str(ICONS_DIR / "row_selection.png"),
+    # Preview
+    "preview": str(ICONS_DIR / "Preview.png"),
 }
 
 # ========== File Filters ==========

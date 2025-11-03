@@ -171,6 +171,7 @@ class MdTableView(QTableView):
         self.selection_mode = "Cells"
         self.drag_start_position = None
         self.is_dragging = False
+        self.drag_message_shown = False  # Flag to show status message only once
 
     def set_cells_selection_mode(self):
         self.selection_mode = "Cells"
@@ -185,6 +186,7 @@ class MdTableView(QTableView):
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.drag_start_position = event.pos()
+            self.drag_message_shown = False  # Reset flag on new press
             index = self.indexAt(event.pos())
             self.was_cell_selected = index in self.selectionModel().selectedIndexes()
 
@@ -200,6 +202,15 @@ class MdTableView(QTableView):
                 QApplication.setOverrideCursor(Qt.ClosedHandCursor)  # Move cursor (or Qt.SizeAllCursor)
 
         if self.selection_mode != "Rows":
+            # Check if user is trying to drag in Cells mode
+            if (event.buttons() & Qt.LeftButton) and self.drag_start_position is not None:
+                if (event.pos() - self.drag_start_position).manhattanLength() >= QApplication.startDragDistance():
+                    # User is trying to drag in cell mode - show message once
+                    if not self.drag_message_shown:
+                        self.show_status_message(
+                            self.tr("Please switch to Row Selection mode to drag objects between datasets")
+                        )
+                        self.drag_message_shown = True
             super().mouseMoveEvent(event)
             return
 
@@ -530,6 +541,16 @@ class MdTableView(QTableView):
 
     def isPersistentEditorOpen(self, index):
         return self.indexWidget(index) is not None
+
+    def show_status_message(self, message, timeout=3000):
+        """Show a message in the main window's status bar"""
+        # Find the main window by traversing up the parent hierarchy
+        parent = self.parent()
+        while parent and not hasattr(parent, "statusBar"):
+            parent = parent.parent()
+
+        if parent and hasattr(parent, "statusBar"):
+            parent.statusBar().showMessage(message, timeout)
 
     def resizeEvent(self, event):
         super().resizeEvent(event)

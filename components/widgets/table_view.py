@@ -32,6 +32,7 @@ from PyQt5.QtWidgets import (
 )
 
 from MdModel import MdObject
+from .drag_widgets import CustomDrag
 
 # GLUT import conditional - causes crashes on Windows builds
 GLUT_AVAILABLE = False
@@ -237,6 +238,10 @@ class MdTableView(QTableView):
         drag.exec_(Qt.CopyAction | Qt.MoveAction)
         self.is_dragging = False
 
+        # Restore cursor after drag ends
+        while QApplication.overrideCursor():
+            QApplication.restoreOverrideCursor()
+
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
             if self.is_dragging:
@@ -246,6 +251,10 @@ class MdTableView(QTableView):
                     self.model().index(row, 0), QItemSelectionModel.Select | QItemSelectionModel.Rows
                 )
                 self.is_dragging = False
+
+                # Restore cursor after drag ends
+                while QApplication.overrideCursor():
+                    QApplication.restoreOverrideCursor()
             else:
                 super().mouseReleaseEvent(event)
 

@@ -8,6 +8,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+
+## [0.1.5-beta.2] - 2025-11-03
+
+### Added
+- **Object Preview Enhancements**
+  - Preview toolbar button icon (icons/Preview.png)
+  - Smart button activation (enabled only when dataset is selected)
+  - Consistent UI behavior with other dataset-related actions
+
+### Changed
+- **UI Consistency Improvements**
+  - Preview button now follows same activation pattern as New Object, Export, and Analyze buttons
+  - Preview button disabled when analysis is selected or no dataset loaded
+  - Improved visual feedback with proper icon display
+
+### Fixed
+- **Object Drag and Drop**
+  - Fixed `NameError: name 'CustomDrag' is not defined` when dragging objects between datasets
+  - Added missing `CustomDrag` import in `components/widgets/table_view.py`
+  - Fixed cursor not restoring to normal after drag operation completes
+  - Implemented proper cursor stack cleanup using `QApplication.restoreOverrideCursor()`
+  - Cursor now correctly reverts to arrow cursor after both successful and cancelled drag operations
+
+### Technical
+- **Code Quality**
+  - Added cursor restoration in both `startDrag()` and `mouseReleaseEvent()` methods
+  - Used while loop to clear all override cursors from Qt's cursor stack
+  - Improved drag operation robustness with proper cleanup
+  - All drag widget tests passing (3/3)
+  - Overall test coverage maintained at 99.6% (230/231 tests passing)
+
+
 ## [0.1.5-beta.1] - 2025-10-08
 
 ### Added (Phase 7 - Performance Testing & Scalability)

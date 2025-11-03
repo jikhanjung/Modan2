@@ -549,8 +549,16 @@ class MdTableView(QTableView):
         while parent and not hasattr(parent, "statusBar"):
             parent = parent.parent()
 
-        if parent and hasattr(parent, "statusBar"):
-            parent.statusBar().showMessage(message, timeout)
+        if parent:
+            # Get status bar - it might be a method or a property
+            status_bar = getattr(parent, "statusBar", None)
+            if status_bar:
+                # If it's a method, call it to get the QStatusBar instance
+                if callable(status_bar):
+                    status_bar = status_bar()
+                # Now show the message
+                if status_bar:
+                    status_bar.showMessage(message, timeout)
 
     def resizeEvent(self, event):
         super().resizeEvent(event)

@@ -102,7 +102,7 @@ class TestObjectOverlayPersistence:
         assert main_window.object_overlay.isVisible()
 
     def test_keyboard_shortcut_toggles_overlay(self, qtbot, main_window, sample_dataset):
-        """Test that Ctrl+P keyboard shortcut toggles the overlay"""
+        """Test that the Ctrl+P toggle action toggles the overlay"""
         # Setup
         main_window.selected_dataset = sample_dataset
         main_window.load_object()
@@ -115,18 +115,23 @@ class TestObjectOverlayPersistence:
         main_window.show_object(first_object)
         qtbot.wait(50)
 
+        # The toggle action is bound to the Ctrl+P shortcut
+        assert main_window.actionTogglePreview.shortcut().toString() == "Ctrl+P"
+
         # Initial state: auto-show ON, overlay visible
         assert main_window.object_overlay_auto_show is True
         assert main_window.object_overlay.isVisible()
 
-        # Press Ctrl+P to toggle OFF
-        QTest.keyPress(main_window, Qt.Key_P, Qt.ControlModifier)
+        # Trigger the action to toggle OFF. QTest.keyPress does not reliably
+        # deliver QAction shortcuts under the offscreen platform, so trigger the
+        # action directly (the shortcut binding is asserted above).
+        main_window.actionTogglePreview.trigger()
         qtbot.wait(50)
         assert main_window.object_overlay_auto_show is False
         assert not main_window.object_overlay.isVisible()
 
-        # Press Ctrl+P again to toggle ON
-        QTest.keyPress(main_window, Qt.Key_P, Qt.ControlModifier)
+        # Trigger again to toggle ON
+        main_window.actionTogglePreview.trigger()
         qtbot.wait(50)
         assert main_window.object_overlay_auto_show is True
         assert main_window.object_overlay.isVisible()

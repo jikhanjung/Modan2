@@ -11,6 +11,37 @@ import pytest
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
+@pytest.fixture(autouse=True)
+def _restore_qt_translation_state():
+    """Prevent a QTranslator installed mid-test from leaking into later tests.
+
+    PreferencesDialog.comboLangIndexChanged installs a QTranslator on the shared
+    QApplication singleton (and sets ``app.language``). Without cleanup, a test
+    that switches the language to Korean makes every subsequent UI test observe
+    Korean strings instead of English, causing order-dependent failures.
+    """
+    try:
+        from PyQt5.QtWidgets import QApplication
+    except ImportError:
+        yield
+        return
+
+    app = QApplication.instance()
+    saved_translator = getattr(app, "translator", None) if app is not None else None
+    saved_language = getattr(app, "language", None) if app is not None else None
+
+    yield
+
+    app = QApplication.instance()
+    if app is None:
+        return
+    current = getattr(app, "translator", None)
+    if current is not None and current is not saved_translator:
+        app.removeTranslator(current)
+        app.translator = saved_translator
+    app.language = saved_language if saved_language is not None else "en"
+
+
 @pytest.fixture
 def temp_dir():
     """Create a temporary directory for test files."""

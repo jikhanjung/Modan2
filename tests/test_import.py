@@ -15,8 +15,8 @@ from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QApplication, QMessageBox, QWidget
 
 import MdModel
-from ModanComponents import TPS
 from dialogs import ImportDatasetDialog
+from ModanComponents import TPS
 
 
 class TestSampleDataCreation:

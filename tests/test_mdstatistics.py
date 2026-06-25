@@ -205,6 +205,7 @@ class TestMdCanonicalVariate:
         Groups are constructed to be identical in X and Y and to differ only in Z,
         so dropping Z (the old landmark[:2]) leaves them inseparable.
         """
+
         # 2 landmarks per specimen, each [x, y, z]. X/Y are constant across all
         # specimens; only Z carries the group signal (group A ~0, group B ~10).
         def specimen(z):

@@ -274,11 +274,7 @@ def sample_dataset(mock_database):
 
     # Add test objects with landmarks to the dataset
     for i in range(3):  # Create 3 objects for testing
-        obj = MdModel.MdObject.create(
-            dataset=dataset,
-            object_name=f"Test Object {i + 1}",
-            sequence=i + 1
-        )
+        obj = MdModel.MdObject.create(dataset=dataset, object_name=f"Test Object {i + 1}", sequence=i + 1)
         # Add sample landmark data (10 landmarks with x,y coordinates)
         landmark_str = "\n".join([f"{i + j * 10}.0\t{i + j * 10 + 5}.0" for j in range(10)])
         obj.landmark_str = landmark_str

@@ -90,9 +90,7 @@ class ModanController(QObject):
 
             # Create dataset. (landmark_count is validated/logged above but is not
             # a stored field — the count is derived from the dataset's objects.)
-            dataset = MdModel.MdDataset.create(
-                dataset_name=name, dataset_desc=desc, dimension=dimension, **kwargs
-            )
+            dataset = MdModel.MdDataset.create(dataset_name=name, dataset_desc=desc, dimension=dimension, **kwargs)
 
             self.dataset_created.emit(dataset)
             self.info_message.emit(f"Dataset '{name}' created successfully")
@@ -388,9 +386,7 @@ class ModanController(QObject):
                     object_name=Path(file_path).stem,
                     object_desc=f"Image imported from {Path(file_path).name}",
                 )
-                MdModel.MdImage.create(
-                    object=obj, original_path=file_path, original_filename=Path(file_path).name
-                )
+                MdModel.MdImage.create(object=obj, original_path=file_path, original_filename=Path(file_path).name)
 
             self.object_added.emit(obj)
             return obj
@@ -420,9 +416,7 @@ class ModanController(QObject):
                     object_name=Path(file_path).stem,
                     object_desc=f"3D model imported from {Path(file_path).name}",
                 )
-                MdModel.MdThreeDModel.create(
-                    object=obj, original_path=obj_path, original_filename=Path(file_path).name
-                )
+                MdModel.MdThreeDModel.create(object=obj, original_path=obj_path, original_filename=Path(file_path).name)
 
             self.object_added.emit(obj)
             return obj

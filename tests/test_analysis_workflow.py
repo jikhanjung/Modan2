@@ -18,8 +18,8 @@ from PyQt5.QtCore import QRect, QTimer
 from PyQt5.QtWidgets import QApplication, QMessageBox, QWidget
 
 import MdModel
-from Modan2 import ModanMainWindow
 from dialogs import ImportDatasetDialog, NewAnalysisDialog
+from Modan2 import ModanMainWindow
 
 
 class TestAnalysisDialog:

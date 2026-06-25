@@ -467,9 +467,7 @@ class TestStateManagement:
 
         # Add some objects
         for i in range(3):
-            obj = MdModel.MdObject.create(
-                dataset=dataset, object_name=f"Summary_Object_{i + 1}", sequence=i + 1
-            )
+            obj = MdModel.MdObject.create(dataset=dataset, object_name=f"Summary_Object_{i + 1}", sequence=i + 1)
             # Set landmarks properly
             landmark_str = "\n".join([f"{i + j}.0\t{i + j + 1}.0" for j in range(5)])
             obj.landmark_str = landmark_str

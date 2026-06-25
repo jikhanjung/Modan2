@@ -18,7 +18,14 @@ from pathlib import Path
 import matplotlib
 import matplotlib.pyplot as plt
 from peewee import DoesNotExist
-from PyQt5.QtCore import QEvent, QItemSelectionModel, QRect, QSize, QSortFilterProxyModel, Qt, QTimer, QTranslator, pyqtSlot
+from PyQt5.QtCore import (
+    QItemSelectionModel,
+    QRect,
+    QSize,
+    QSortFilterProxyModel,
+    Qt,
+    pyqtSlot,
+)
 from PyQt5.QtGui import QCursor, QIcon, QKeySequence, QStandardItem, QStandardItemModel
 from PyQt5.QtWidgets import (
     QAbstractItemView,
@@ -55,6 +62,7 @@ from dialogs import (
     ProgressDialog,
 )
 from MdConstants import ICONS as ICON_CONSTANTS
+from MdConstants import MODE
 from MdHelpers import show_error, show_info, show_warning
 from MdModel import MdAnalysis, MdDataset, MdObject
 from ModanComponents import (
@@ -67,7 +75,6 @@ from ModanComponents import (
     ObjectViewer3D,
     ResizableOverlayWidget,
 )
-from MdConstants import MODE
 from ModanController import ModanController
 
 # Configure matplotlib to avoid font warnings

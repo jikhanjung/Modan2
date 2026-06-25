@@ -4,10 +4,12 @@ Tests for object overlay persistence feature (Issue #14).
 This test file verifies that the object preview overlay visibility
 preference persists across object selections and application restarts.
 """
+
 import pytest
 from PyQt5.QtCore import Qt
 from PyQt5.QtTest import QTest
-from MdModel import MdDataset, MdObject
+
+from MdModel import MdDataset
 
 
 class TestObjectOverlayPersistence:
@@ -143,19 +145,14 @@ class TestObjectOverlayPersistence:
         main_window.toggle_object_overlay_auto_show()  # Toggles to ON and saves
 
         # Verify it was saved
-        if hasattr(main_window.m_app, 'settings'):
+        if hasattr(main_window.m_app, "settings"):
             saved_value = main_window.m_app.settings.value("ObjectOverlay/AutoShow", True)
             assert saved_value is True
 
     def test_preference_loads_from_config(self, qtbot, main_window_factory):
         """Test that preference is loaded from config on startup"""
         # Create a config with auto-show disabled
-        config = {
-            "ui": {
-                "object_overlay_auto_show": False,
-                "remember_geometry": False
-            }
-        }
+        config = {"ui": {"object_overlay_auto_show": False, "remember_geometry": False}}
 
         # Create main window with this config
         window = main_window_factory(config)
@@ -196,10 +193,7 @@ class TestObjectOverlayPersistence:
     def test_dataset_switch_preserves_preference(self, qtbot, main_window, sample_dataset):
         """Test that overlay preference persists when switching datasets"""
         # Create a second dataset
-        dataset2 = MdDataset.create(
-            dataset_name="Test Dataset 2",
-            dimension=2
-        )
+        dataset2 = MdDataset.create(dataset_name="Test Dataset 2", dimension=2)
 
         try:
             # Disable auto-show
@@ -285,7 +279,7 @@ class TestObjectOverlayPersistence:
             "ui": {
                 "object_overlay_auto_show": True,
                 "object_overlay_position": custom_position,
-                "remember_geometry": False
+                "remember_geometry": False,
             }
         }
 

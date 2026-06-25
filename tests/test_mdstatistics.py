@@ -172,6 +172,33 @@ class TestMdCanonicalVariate:
         # ... but raw itself is NOT normalized (the bug made the two identical).
         assert not np.allclose(raw, pct)
 
+    def test_cva_handles_singular_within_covariance(self):
+        """CVA succeeds on a rank-deficient within-group covariance (R01 inv->pinv).
+
+        With more variables than within-group degrees of freedom (the morphometric
+        norm), the within-group covariance is singular. inv() raised LinAlgError
+        and aborted; pinv() handles the rank-deficient case.
+        """
+        # 2 groups x 2 observations = 4 obs, 3 variables -> within-group dof = 2,
+        # so the 3x3 within covariance is singular. Every variable still varies
+        # within each group (no zero-variance column gets dropped).
+        data = [
+            [1.0, 2.0, 3.0],
+            [2.0, 3.0, 5.0],
+            [10.0, 11.0, 13.0],
+            [11.0, 13.0, 16.0],
+        ]
+        categories = ["A", "A", "B", "B"]
+
+        cva = ms.MdCanonicalVariate()
+        cva.SetData(data)
+        cva.SetCategory(categories)
+
+        # Old inv()-based code returned False / raised here.
+        assert cva.Analyze() is True
+        assert hasattr(cva, "rotated_matrix")
+        assert cva.rotated_matrix.shape[0] == 4
+
 
 class TestPerformFunctions:
     """Test the standalone perform functions."""

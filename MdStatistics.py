@@ -209,11 +209,14 @@ class MdCanonicalVariate:
         b = numpy.array(between_cov)
 
         try:
-            wi = numpy.linalg.inv(w)
+            # Pseudo-inverse, not inv(): the within-group covariance is routinely
+            # singular in morphometrics (variables >> observations), where inv()
+            # raised LinAlgError and aborted CVA entirely. pinv() handles the
+            # rank-deficient case (consistent with do_manova_analysis below). The
+            # try/except now only guards the rare SVD-non-convergence.
+            wi = numpy.linalg.pinv(w)
         except numpy.linalg.LinAlgError:
-            # print "Singular matrix: ", e
             return False
-        # print "wi", wi
         x = numpy.dot(wi, b)
 
         u, s, v = numpy.linalg.svd(x)

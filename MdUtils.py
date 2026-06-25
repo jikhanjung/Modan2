@@ -67,7 +67,7 @@ def get_build_info():
 BUILD_INFO = get_build_info()
 
 # Copyright with build-time year
-from datetime import datetime
+from datetime import UTC, datetime
 
 
 # Get build year from build_info.json, fallback to current year for development
@@ -279,7 +279,8 @@ def is_numeric(value):
     try:
         float(value)
         return True
-    except ValueError:
+    except (ValueError, TypeError):
+        # TypeError covers None and other non-stringifiable inputs.
         return False
 
 
@@ -588,7 +589,7 @@ def serialize_dataset_to_json(dataset_id: int, include_files: bool = True, stora
 
     export_info = {
         "exported_by": f"{PROGRAM_NAME} v{BUILD_INFO.get('version', PROGRAM_VERSION)}",
-        "export_date": datetime.utcnow().isoformat() + "Z",
+        "export_date": datetime.now(UTC).replace(tzinfo=None).isoformat() + "Z",
         "export_format": "JSON+ZIP",
         "include_files": bool(include_files),
     }

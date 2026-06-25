@@ -297,3 +297,29 @@ class TestExportFormats:
             assert "name" in format_info
             assert "extension" in format_info
             assert "supports_landmarks" in format_info
+
+
+class TestRegexPatterns:
+    """Test REGEX_PATTERNS validation patterns (R01: double-backslash bug)."""
+
+    def test_patterns_match_intended_inputs(self):
+        """Patterns must match real inputs, not literal-backslash strings."""
+        import re
+
+        p = mc.REGEX_PATTERNS
+        # file_extension matches the trailing ".ext"; use search (not anchored at start).
+        assert re.search(p["file_extension"], "scan.obj").group(1) == "obj"
+        assert re.match(p["landmark_line"], "1.5  -2.0")
+        assert re.match(p["number"], "-3.14")
+        assert re.match(p["number"], "42")
+        assert re.match(p["integer"], "-17")
+        assert re.match(p["positive_integer"], "7")
+
+    def test_patterns_reject_invalid_inputs(self):
+        """Patterns reject non-matching inputs (would always fail with the old \\\\ bug)."""
+        import re
+
+        p = mc.REGEX_PATTERNS
+        assert not re.match(p["integer"], "3.5")
+        assert not re.match(p["positive_integer"], "0")
+        assert not re.match(p["number"], "abc")

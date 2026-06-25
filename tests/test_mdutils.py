@@ -163,6 +163,10 @@ class TestUtilityFunctions:
         assert not mu.is_numeric("abc")
         assert not mu.is_numeric("")
         assert not mu.is_numeric("12.34.56")
+        # None (and other non-stringifiable values) raise TypeError from float();
+        # is_numeric must return False, not propagate (R01).
+        assert not mu.is_numeric(None)
+        assert not mu.is_numeric([1, 2])
 
     def test_process_dropped_file_name_windows(self):
         """Test process_dropped_file_name on Windows."""

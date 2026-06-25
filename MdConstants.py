@@ -596,11 +596,11 @@ LOGGING = {
 REGEX_PATTERNS = {
     "dataset_name": r"^[a-zA-Z0-9_\-\s]{1,100}$",
     "object_name": r"^[a-zA-Z0-9_\-\s\.]{1,100}$",
-    "file_extension": r"\\.([a-zA-Z0-9]+)$",
-    "landmark_line": r"^\\s*([+-]?\\d*\\.?\\d+)\\s+([+-]?\\d*\\.?\\d+)\\s*$",
-    "number": r"^[+-]?\\d*\\.?\\d+$",
-    "integer": r"^[+-]?\\d+$",
-    "positive_integer": r"^[1-9]\\d*$",
+    "file_extension": r"\.([a-zA-Z0-9]+)$",
+    "landmark_line": r"^\s*([+-]?\d*\.?\d+)\s+([+-]?\d*\.?\d+)\s*$",
+    "number": r"^[+-]?\d*\.?\d+$",
+    "integer": r"^[+-]?\d+$",
+    "positive_integer": r"^[1-9]\d*$",
 }
 
 # ========== Units ==========

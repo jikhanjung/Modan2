@@ -239,6 +239,34 @@ class TestMdObject:
         assert obj.dataset == dataset
         assert obj.sequence == 1
 
+    def test_scratch_lists_are_per_instance(self, test_database):
+        """Mutating one object's landmark_list must not leak into another (R01 C2)."""
+        dataset = mm.MdDataset.create(dataset_name="Test Dataset")
+        obj1 = mm.MdObject.create(object_name="A", dataset=dataset)
+        obj2 = mm.MdObject.create(object_name="B", dataset=dataset)
+
+        # Both start with their own empty lists, not a shared class-level one.
+        assert obj1.landmark_list == [] and obj2.landmark_list == []
+        assert obj1.landmark_list is not obj2.landmark_list
+
+        # In-place mutation of one instance does not affect the other.
+        obj1.landmark_list.append([1.0, 2.0])
+        obj1.variable_list.append("x")
+        assert obj2.landmark_list == []
+        assert obj2.variable_list == []
+        assert obj1.centroid_size == -1 and obj2.centroid_size == -1
+
+    def test_dataset_scratch_lists_are_per_instance(self, test_database):
+        """MdDataset scratch lists are per-instance too (R01 C2)."""
+        ds1 = mm.MdDataset.create(dataset_name="DS1")
+        ds2 = mm.MdDataset.create(dataset_name="DS2")
+
+        assert ds1.edge_list is not ds2.edge_list
+        ds1.edge_list.append([0, 1])
+        ds1.variablename_list.append("var")
+        assert ds2.edge_list == []
+        assert ds2.variablename_list == []
+
     def test_object_defaults(self, test_database):
         """Test object default values."""
         dataset = mm.MdDataset.create(dataset_name="Test Dataset")

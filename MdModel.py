@@ -44,13 +44,20 @@ class MdDataset(Model):
     created_at = DateTimeField(default=datetime.datetime.now)
     modified_at = DateTimeField(default=datetime.datetime.now)
     propertyname_str = CharField(null=True)
-    baseline_point_list = []
-    edge_list = []
-    polygon_list = []
-    variablename_list = []
 
     class Meta:
         database = gDatabase
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Per-instance scratch state populated by the unpack_*/pack_* helpers.
+        # These are NOT DB fields; they were previously class-level mutable
+        # defaults shared across every instance (R01 C2), which leaked data
+        # between datasets when mutated in place.
+        self.baseline_point_list = []
+        self.edge_list = []
+        self.polygon_list = []
+        self.variablename_list = []
 
     def get_grouping_variable_index_list(self):
         variablename_list = self.get_variablename_list()
@@ -228,13 +235,19 @@ class MdObject(Model):
     created_at = DateTimeField(default=datetime.datetime.now)
     modified_at = DateTimeField(default=datetime.datetime.now)
     property_str = CharField(null=True)
-    landmark_list = []
-    variable_list = []
-    centroid_size = -1
     sequence = IntegerField(null=True)
 
     class Meta:
         database = gDatabase
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Per-instance scratch state (not DB fields). Previously class-level
+        # mutable defaults shared across all instances (R01 C2). centroid_size
+        # is a cache sentinel: get_centroid_size() recomputes while it is <= 0.
+        self.landmark_list = []
+        self.variable_list = []
+        self.centroid_size = -1
 
     def copy_object(self, new_dataset):
         new_object = MdObject()

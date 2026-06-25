@@ -191,15 +191,6 @@ def as_gl_color(color):
     return qcolor.redF(), qcolor.greenF(), qcolor.blueF()
 
 
-def resource_path(relative_path):
-    try:
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath(".")
-
-    return os.path.join(base_path, relative_path)
-
-
 def value_to_bool(value):
     return value.lower() == "true" if isinstance(value, str) else bool(value)
 

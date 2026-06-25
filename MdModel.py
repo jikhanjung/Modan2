@@ -2034,7 +2034,6 @@ class MdAnalysis(Model):
     superimposed_landmark_json = CharField(null=True)  # superimposed landmark info in list of list format
 
     """ PCA result """
-    cva_group_by = CharField(null=True)
     pca_analysis_result_json = CharField(null=True)  # PCA result in list of list format
     pca_rotation_matrix_json = CharField(null=True)  # rotation matrix from PCA
     pca_eigenvalues_json = CharField(null=True)  # PCA eigenvalues and percentages of variance explained

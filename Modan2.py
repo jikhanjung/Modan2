@@ -658,18 +658,6 @@ class ModanMainWindow(QMainWindow):
             self.m_app.settings.setValue("ObjectOverlay/Position", self.object_overlay_position)
 
     def update_language(self):
-        if False:
-            if self.m_app.translator is not None:
-                self.m_app.removeTranslator(self.m_app.translator)
-                self.m_app.translator = None
-
-            translator = QTranslator()
-            translator_path = mu.resource_path(f"translations/Modan2_{language}.qm")
-            if os.path.exists(translator_path):
-                translator.load(translator_path)
-                self.m_app.installTranslator(translator)
-                self.m_app.translator = translator
-
         self.setWindowTitle(f"{self.tr(mu.PROGRAM_NAME)} v{mu.PROGRAM_VERSION}")
 
         self.file_menu.setTitle(self.tr("File"))
@@ -1309,15 +1297,6 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         if not target_item:
             return
         target_item.data()
-        return
-
-    def treeView_drag_move_event(self, event):
-        event.accept()
-        target_index = self.treeView.indexAt(event.pos())
-        target_item = self.dataset_model.itemFromIndex(target_index)
-        if not target_item:
-            return
-        target_item.data()
 
         # Update cursor based on modifier keys
         if QApplication.keyboardModifiers() & Qt.ControlModifier:
@@ -1556,27 +1535,6 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
     def tableView_drag_enter_event(self, event):
         event.accept()
-        return
-        logger = logging.getLogger(__name__)
-        logger.debug(f"drag enter: {event.mimeData().text()}")
-        file_name_list = event.mimeData().text().strip().split("\n")
-        logger.debug(f"file name list: {file_name_list}")
-        ext = file_name_list[0].split(".")[-1].lower()
-        logger.debug(f"ext: {ext}")
-        if ext in ["png", "jpg", "jpeg", "bmp", "gif", "tif", "tiff"]:
-            logger.debug("image file")
-            logger.debug(f"source: {event.source()}")
-            logger.debug(f"proposed action: {event.proposedAction()}")
-            logger.debug(f"drop action: {event.dropAction()}")
-            logger.debug(f"possible action: {int(event.possibleActions())}")
-            logger.debug(
-                f"kinds of drop actions: {Qt.CopyAction}, {Qt.MoveAction}, {Qt.LinkAction}, {Qt.ActionMask}, {Qt.TargetMoveAction}"
-            )
-            # event.acceptProposedAction()
-            event.setDropAction(Qt.CopyAction)
-            event.accept()
-        else:
-            event.ignore()
 
     def tableView_drag_move_event(self, event):
         self.copy_cursor = QCursor(Qt.DragCopyCursor)
@@ -1600,37 +1558,6 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             # QApplication.changeOverrideCursor(self.move_cursor)
 
         event.accept()
-
-    def _tableView_drag_move_event(self, event):
-        logger = logging.getLogger(__name__)
-        logger.debug("table view drag move event")
-        logger.debug(f"drag move: {event.mimeData().text()}")
-        event.accept()
-        return
-        logger.debug(f"drag move: {event.mimeData().text()}")
-        file_name_list = event.mimeData().text().strip().split("\n")
-        logger.debug(f"file name list: {file_name_list}")
-        ext = file_name_list[0].split(".")[-1].lower()
-        logger.debug(f"ext: {ext}")
-        if ext in ["png", "jpg", "jpeg", "bmp", "gif", "tif", "tiff"]:
-            logger.debug("image file")
-            logger.debug(f"source: {event.source()}")
-            logger.debug(f"proposed action: {event.proposedAction()}")
-            logger.debug(f"drop action: {event.dropAction()}")
-            logger.debug(f"possible action: {int(event.possibleActions())}")
-            print(
-                "kinds of drop actions:",
-                Qt.CopyAction,
-                Qt.MoveAction,
-                Qt.LinkAction,
-                Qt.ActionMask,
-                Qt.TargetMoveAction,
-            )
-            # event.acceptProposedAction()
-            event.setDropAction(Qt.CopyAction)
-            event.accept()
-        else:
-            event.ignore()
 
     def reset_views(self):
         self.reset_treeView()

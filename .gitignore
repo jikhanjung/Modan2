@@ -17,6 +17,10 @@ translations/desktop.ini
 logs/
 .claude/settings.local.json
 
+# IDE / Editor
+.vscode/
+.idea/
+
 # Test coverage files
 .coverage
 .coverage.*

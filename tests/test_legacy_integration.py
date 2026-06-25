@@ -12,6 +12,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 from PyQt5.QtCore import QPoint, QRect
+from PyQt5.QtWidgets import QWidget
 
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -20,7 +21,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 @pytest.fixture
 def dataset_dialog(qtbot):
     """Create a DatasetDialog with mocked QApplication settings."""
-    from ModanDialogs import DatasetDialog
+    from dialogs import DatasetDialog
 
     # Mock the QApplication settings with proper return values
     mock_settings = Mock()
@@ -35,12 +36,13 @@ def dataset_dialog(qtbot):
     mock_app = Mock()
     mock_app.settings = mock_settings
 
-    mock_parent = Mock()
-    mock_parent.pos.return_value = Mock()
-    mock_parent.pos.return_value.__add__ = Mock(return_value=Mock())
+    # The migrated dialogs forward the parent to QDialog and may call
+    # parent.pos(), so a real QWidget parent is required (a Mock is rejected).
+    parent = QWidget()
+    qtbot.addWidget(parent)
 
     with patch("PyQt5.QtWidgets.QApplication.instance", return_value=mock_app):
-        dialog = DatasetDialog(parent=mock_parent)
+        dialog = DatasetDialog(parent=parent)
         qtbot.addWidget(dialog)
         yield dialog
 
@@ -55,7 +57,7 @@ class TestDatasetDialogEdgeCases:
 
     def test_dialog_geometry_handling(self, qtbot):
         """Test dialog geometry handling with various settings."""
-        from ModanDialogs import DatasetDialog
+        from dialogs import DatasetDialog
 
         # Test with None geometry
         mock_settings = Mock()
@@ -63,33 +65,30 @@ class TestDatasetDialogEdgeCases:
         mock_app = Mock()
         mock_app.settings = mock_settings
 
-        mock_parent = Mock()
-        mock_parent.pos.return_value = Mock()
-        mock_parent.pos.return_value.__add__ = Mock(return_value=QPoint(200, 200))
+        parent = QWidget()
+        qtbot.addWidget(parent)
 
         with patch("PyQt5.QtWidgets.QApplication.instance", return_value=mock_app):
-            dialog = DatasetDialog(parent=mock_parent)
+            dialog = DatasetDialog(parent=parent)
             qtbot.addWidget(dialog)
 
             assert dialog is not None
             # Dialog should handle None geometry gracefully
 
     def test_dialog_with_invalid_parent(self, qtbot):
-        """Test dialog creation with invalid parent."""
-        from ModanDialogs import DatasetDialog
+        """Test dialog creation with a real parent and saved geometry."""
+        from dialogs import DatasetDialog
 
         mock_settings = Mock()
         mock_settings.value.return_value = QRect(100, 100, 600, 400)
         mock_app = Mock()
         mock_app.settings = mock_settings
 
-        # Parent that raises exception on pos()
-        mock_parent = Mock()
-        mock_parent.pos.side_effect = Exception("Parent error")
+        parent = QWidget()
+        qtbot.addWidget(parent)
 
         with patch("PyQt5.QtWidgets.QApplication.instance", return_value=mock_app):
-            # Should handle parent errors gracefully
-            dialog = DatasetDialog(parent=mock_parent)
+            dialog = DatasetDialog(parent=parent)
             qtbot.addWidget(dialog)
 
             assert dialog is not None
@@ -158,11 +157,10 @@ class TestImportEdgeCasesLegacy:
         """Test import handling of filenames with special characters."""
         from unittest.mock import Mock, patch
 
-        from ModanDialogs import ImportDatasetDialog
+        from dialogs import ImportDatasetDialog
 
-        mock_parent = Mock()
-        mock_parent.pos.return_value = Mock()
-        mock_parent.pos.return_value.__add__ = Mock(return_value=QPoint(200, 200))
+        parent = QWidget()
+        qtbot.addWidget(parent)
 
         def mock_value(key, default=None):
             if key == "width_scale":
@@ -177,7 +175,7 @@ class TestImportEdgeCasesLegacy:
         mock_app.settings = mock_settings
 
         with patch("PyQt5.QtWidgets.QApplication.instance", return_value=mock_app):
-            dialog = ImportDatasetDialog(parent=mock_parent)
+            dialog = ImportDatasetDialog(parent=parent)
             qtbot.addWidget(dialog)
 
             # Test filename with special characters
@@ -191,11 +189,10 @@ class TestImportEdgeCasesLegacy:
         """Test UI state consistency in ImportDatasetDialog."""
         from unittest.mock import Mock, patch
 
-        from ModanDialogs import ImportDatasetDialog
+        from dialogs import ImportDatasetDialog
 
-        mock_parent = Mock()
-        mock_parent.pos.return_value = Mock()
-        mock_parent.pos.return_value.__add__ = Mock(return_value=QPoint(200, 200))
+        parent = QWidget()
+        qtbot.addWidget(parent)
 
         def mock_value(key, default=None):
             if key == "width_scale":
@@ -210,7 +207,7 @@ class TestImportEdgeCasesLegacy:
         mock_app.settings = mock_settings
 
         with patch("PyQt5.QtWidgets.QApplication.instance", return_value=mock_app):
-            dialog = ImportDatasetDialog(parent=mock_parent)
+            dialog = ImportDatasetDialog(parent=parent)
             qtbot.addWidget(dialog)
 
             # Test initial UI state

@@ -12,11 +12,11 @@ from unittest.mock import Mock, patch
 
 import pytest
 from PyQt5.QtCore import QTimer
-from PyQt5.QtWidgets import QApplication, QMessageBox
+from PyQt5.QtWidgets import QApplication, QMessageBox, QWidget
 
 import MdModel
 from ModanComponents import TPS
-from ModanDialogs import ImportDatasetDialog
+from dialogs import ImportDatasetDialog
 
 
 class TestSampleDataCreation:
@@ -69,9 +69,8 @@ class TestImportDatasetDialog:
 
     def test_import_dialog_creation(self, qtbot):
         """Test that ImportDatasetDialog can be created and displays correctly."""
-        mock_parent = Mock()
-        mock_parent.pos.return_value = Mock()
-        mock_parent.pos.return_value.__add__ = Mock(return_value=Mock())
+        parent = QWidget()
+        qtbot.addWidget(parent)
 
         def mock_value(key, default=None):
             if key == "width_scale":
@@ -86,7 +85,7 @@ class TestImportDatasetDialog:
         mock_app.settings = mock_settings
 
         with patch("PyQt5.QtWidgets.QApplication.instance", return_value=mock_app):
-            dialog = ImportDatasetDialog(parent=mock_parent)
+            dialog = ImportDatasetDialog(parent=parent)
             qtbot.addWidget(dialog)
 
             assert dialog is not None
@@ -98,9 +97,8 @@ class TestImportDatasetDialog:
 
     def test_file_type_auto_detection(self, qtbot):
         """Test automatic file type detection based on extension."""
-        mock_parent = Mock()
-        mock_parent.pos.return_value = Mock()
-        mock_parent.pos.return_value.__add__ = Mock(return_value=Mock())
+        parent = QWidget()
+        qtbot.addWidget(parent)
 
         def mock_value(key, default=None):
             if key == "width_scale":
@@ -115,7 +113,7 @@ class TestImportDatasetDialog:
         mock_app.settings = mock_settings
 
         with patch("PyQt5.QtWidgets.QApplication.instance", return_value=mock_app):
-            dialog = ImportDatasetDialog(parent=mock_parent)
+            dialog = ImportDatasetDialog(parent=parent)
             qtbot.addWidget(dialog)
 
             # Test TPS file detection
@@ -158,9 +156,8 @@ class TestTpsImport:
 
     def test_import_dialog_file_loading_only(self, qtbot):
         """Test import dialog file loading without executing import."""
-        mock_parent = Mock()
-        mock_parent.pos.return_value = Mock()
-        mock_parent.pos.return_value.__add__ = Mock(return_value=Mock())
+        parent = QWidget()
+        qtbot.addWidget(parent)
 
         def mock_value(key, default=None):
             if key == "width_scale":
@@ -175,7 +172,7 @@ class TestTpsImport:
         mock_app.settings = mock_settings
 
         with patch("PyQt5.QtWidgets.QApplication.instance", return_value=mock_app):
-            dialog = ImportDatasetDialog(parent=mock_parent)
+            dialog = ImportDatasetDialog(parent=parent)
             qtbot.addWidget(dialog)
 
             # Load file and configure UI
@@ -266,9 +263,8 @@ class TestImportWithMessageBoxHandling:
 
     def test_import_small_sample_with_auto_click(self, qtbot):
         """Test importing small sample TPS file with automatic QMessageBox handling."""
-        mock_parent = Mock()
-        mock_parent.pos.return_value = Mock()
-        mock_parent.pos.return_value.__add__ = Mock(return_value=Mock())
+        parent = QWidget()
+        qtbot.addWidget(parent)
 
         def mock_value(key, default=None):
             if key == "width_scale":
@@ -292,7 +288,7 @@ class TestImportWithMessageBoxHandling:
                 patch("PyQt5.QtWidgets.QApplication.instance", return_value=mock_app),
                 patch("PyQt5.QtWidgets.QMessageBox.exec_", return_value=1),
             ):  # Suppress import completion messagebox
-                dialog = ImportDatasetDialog(parent=mock_parent)
+                dialog = ImportDatasetDialog(parent=parent)
                 qtbot.addWidget(dialog)
 
                 # Load and import file
@@ -317,9 +313,8 @@ class TestImportWithMessageBoxHandling:
 
     def test_import_large_dataset_with_auto_click(self, qtbot):
         """Test importing large Thylacine dataset with automatic QMessageBox handling."""
-        mock_parent = Mock()
-        mock_parent.pos.return_value = Mock()
-        mock_parent.pos.return_value.__add__ = Mock(return_value=Mock())
+        parent = QWidget()
+        qtbot.addWidget(parent)
 
         def mock_value(key, default=None):
             if key == "width_scale":
@@ -343,7 +338,7 @@ class TestImportWithMessageBoxHandling:
                 patch("PyQt5.QtWidgets.QApplication.instance", return_value=mock_app),
                 patch("PyQt5.QtWidgets.QMessageBox.exec_", return_value=1),
             ):  # Suppress import completion messagebox
-                dialog = ImportDatasetDialog(parent=mock_parent)
+                dialog = ImportDatasetDialog(parent=parent)
                 qtbot.addWidget(dialog)
 
                 # Load and import Thylacine file
@@ -379,9 +374,8 @@ class TestImportEdgeCases:
 
     def test_import_nonexistent_file(self, qtbot):
         """Test handling of non-existent file import."""
-        mock_parent = Mock()
-        mock_parent.pos.return_value = Mock()
-        mock_parent.pos.return_value.__add__ = Mock(return_value=Mock())
+        parent = QWidget()
+        qtbot.addWidget(parent)
 
         def mock_value(key, default=None):
             if key == "width_scale":
@@ -396,7 +390,7 @@ class TestImportEdgeCases:
         mock_app.settings = mock_settings
 
         with patch("PyQt5.QtWidgets.QApplication.instance", return_value=mock_app):
-            dialog = ImportDatasetDialog(parent=mock_parent)
+            dialog = ImportDatasetDialog(parent=parent)
             qtbot.addWidget(dialog)
 
             # Try to load non-existent file
@@ -418,9 +412,8 @@ class TestImportEdgeCases:
 
     def test_import_empty_dataset_name(self, qtbot):
         """Test handling of empty dataset name."""
-        mock_parent = Mock()
-        mock_parent.pos.return_value = Mock()
-        mock_parent.pos.return_value.__add__ = Mock(return_value=Mock())
+        parent = QWidget()
+        qtbot.addWidget(parent)
 
         def mock_value(key, default=None):
             if key == "width_scale":
@@ -435,7 +428,7 @@ class TestImportEdgeCases:
         mock_app.settings = mock_settings
 
         with patch("PyQt5.QtWidgets.QApplication.instance", return_value=mock_app):
-            dialog = ImportDatasetDialog(parent=mock_parent)
+            dialog = ImportDatasetDialog(parent=parent)
             qtbot.addWidget(dialog)
 
             # Load file but clear dataset name

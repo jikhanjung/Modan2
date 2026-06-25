@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 @pytest.fixture
 def dataset_dialog(qtbot):
     """Create a DatasetDialog with mocked QApplication settings."""
-    from ModanDialogs import DatasetDialog
+    from dialogs import DatasetDialog
 
     # Mock the QApplication settings with proper return values
     mock_settings = Mock()

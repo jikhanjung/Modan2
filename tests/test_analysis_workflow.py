@@ -15,11 +15,11 @@ from unittest.mock import Mock, patch
 
 import pytest
 from PyQt5.QtCore import QRect, QTimer
-from PyQt5.QtWidgets import QApplication, QMessageBox
+from PyQt5.QtWidgets import QApplication, QMessageBox, QWidget
 
 import MdModel
 from Modan2 import ModanMainWindow
-from ModanDialogs import ImportDatasetDialog, NewAnalysisDialog
+from dialogs import ImportDatasetDialog, NewAnalysisDialog
 
 
 class TestAnalysisDialog:
@@ -226,9 +226,8 @@ class TestMainWindowAnalysis:
 
         # Import a dataset first
         print("🚀 Step 1: Import dataset for analysis")
-        mock_parent = Mock()
-        mock_parent.pos.return_value = Mock()
-        mock_parent.pos.return_value.__add__ = Mock(return_value=Mock())
+        parent = QWidget()
+        qtbot.addWidget(parent)
 
         def mock_value(key, default=None):
             if key == "width_scale":
@@ -251,7 +250,7 @@ class TestMainWindowAnalysis:
                 patch("PyQt5.QtWidgets.QApplication.instance", return_value=mock_app),
                 patch("PyQt5.QtWidgets.QMessageBox.exec_", return_value=1),
             ):  # Suppress import completion messagebox
-                import_dialog = ImportDatasetDialog(parent=mock_parent)
+                import_dialog = ImportDatasetDialog(parent=parent)
                 qtbot.addWidget(import_dialog)
 
                 # Import small sample
@@ -387,9 +386,8 @@ class TestCompleteWorkflows:
             mock_app = Mock()
             mock_app.settings = mock_settings
 
-            mock_parent = Mock()
-            mock_parent.pos.return_value = Mock()
-            mock_parent.pos.return_value.__add__ = Mock(return_value=Mock())
+            parent = QWidget()
+            qtbot.addWidget(parent)
 
             MdModel.MdDataset.select().count()
             imported_dataset = None
@@ -398,7 +396,7 @@ class TestCompleteWorkflows:
                 patch("PyQt5.QtWidgets.QApplication.instance", return_value=mock_app),
                 patch("PyQt5.QtWidgets.QMessageBox.exec_", return_value=1),
             ):  # Suppress import completion messagebox
-                import_dialog = ImportDatasetDialog(parent=mock_parent)
+                import_dialog = ImportDatasetDialog(parent=parent)
                 qtbot.addWidget(import_dialog)
 
                 file_path = "tests/sample_data/small_sample.tps"
@@ -527,15 +525,14 @@ class TestCompleteWorkflows:
             mock_app = Mock()
             mock_app.settings = mock_settings
 
-            mock_parent = Mock()
-            mock_parent.pos.return_value = Mock()
-            mock_parent.pos.return_value.__add__ = Mock(return_value=Mock())
+            parent = QWidget()
+            qtbot.addWidget(parent)
 
             with (
                 patch("PyQt5.QtWidgets.QApplication.instance", return_value=mock_app),
                 patch("PyQt5.QtWidgets.QMessageBox.exec_", return_value=1),
             ):  # Suppress import completion messagebox
-                import_dialog = ImportDatasetDialog(parent=mock_parent)
+                import_dialog = ImportDatasetDialog(parent=parent)
                 qtbot.addWidget(import_dialog)
 
                 file_path = "tests/sample_data/Thylacine2020_NeuroGM.txt"

@@ -24,6 +24,22 @@ TRANSLATIONS_DIR = BASE_DIR / "translations"
 CONFIG_DIR = Path.home() / ".modan2"
 TEMP_DIR = BASE_DIR / "temp"
 
+# ========== UI Interaction Modes ==========
+# Landmark-editing interaction modes shared by the object viewers and the main
+# window. (Historically duplicated across many UI modules; this is the canonical
+# definition consumed by Modan2.py.)
+MODE = {
+    "NONE": 0,
+    "EDIT_LANDMARK": 1,
+    "WIREFRAME": 2,
+    "READY_MOVE_LANDMARK": 3,
+    "MOVE_LANDMARK": 4,
+    "PRE_WIRE_FROM": 5,
+    "CALIBRATION": 6,
+    "VIEW": 7,
+    "PAN": 12,
+}
+
 # ========== Icon Mappings ==========
 ICONS = {
     # Main actions

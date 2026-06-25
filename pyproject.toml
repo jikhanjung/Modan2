@@ -53,7 +53,7 @@ line-ending = "auto"
 
 [tool.ruff.lint.isort]
 # Import sorting
-known-first-party = ["MdModel", "MdUtils", "MdStatistics", "MdHelpers", "MdConstants", "ModanController", "ModanDialogs", "ModanComponents", "ModanWidgets"]
+known-first-party = ["MdModel", "MdUtils", "MdStatistics", "MdHelpers", "MdConstants", "ModanController", "ModanComponents", "ModanWidgets"]
 known-third-party = ["PyQt5", "peewee", "numpy", "pandas", "scipy", "matplotlib", "cv2", "PIL"]
 
 [tool.ruff.lint.per-file-ignores]
@@ -71,7 +71,6 @@ known-third-party = ["PyQt5", "peewee", "numpy", "pandas", "scipy", "matplotlib"
 "Modan2.py" = ["N813", "F821", "F811"]  # Allow "import MdUtils as mu", undefined language variable, and duplicate functions
 "ModanController.py" = ["N813", "B904"]  # Allow "import MdUtils as mu" and raise without from
 "ModanComponents.py" = ["N811", "N813", "B007", "B008", "B018", "E741", "N815", "F811", "F821"]  # Allow OpenGL lowercase imports, loop control, Qt naming conventions, duplicate functions, and undefined names
-"ModanDialogs.py" = ["N813", "F811", "F821", "B007", "B018", "UP031"]  # Allow lowercase imports, duplicate functions, undefined names, loop control, useless expressions, and percent format
 "MdUtils.py" = ["F811", "B904"]  # Duplicate resource_path function and raise without from
 "modan_convert.py" = ["N813"]  # Allow "import MdModel as md2"
 "setup.py" = ["B904"]  # Allow raise without from

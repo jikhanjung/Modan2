@@ -15,10 +15,10 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 class TestNewDatasetDialog:
     """Test New Dataset dialog."""
 
-    @patch("ModanDialogs.DatasetDialog.show")
+    @patch("dialogs.DatasetDialog.show")
     def test_new_dataset_dialog_creation(self, mock_show, qtbot, main_window):
         """Test that new dataset dialog can be created."""
-        from ModanDialogs import DatasetDialog
+        from dialogs import DatasetDialog
 
         dialog = DatasetDialog(main_window)
         qtbot.addWidget(dialog)
@@ -26,10 +26,10 @@ class TestNewDatasetDialog:
         assert dialog is not None
         assert isinstance(dialog, QDialog)
 
-    @patch("ModanDialogs.DatasetDialog.exec_")
+    @patch("dialogs.DatasetDialog.exec_")
     def test_new_dataset_dialog_accept(self, mock_exec, qtbot, main_window):
         """Test accepting new dataset dialog with valid data."""
-        from ModanDialogs import DatasetDialog
+        from dialogs import DatasetDialog
 
         mock_exec.return_value = QDialog.Accepted
 
@@ -49,10 +49,10 @@ class TestNewDatasetDialog:
         assert dialog.edit_dataset_name.text() == "Test Dataset"
         assert dialog.spinbox_no_landmark.value() == 10
 
-    @patch("ModanDialogs.DatasetDialog.exec_")
+    @patch("dialogs.DatasetDialog.exec_")
     def test_new_dataset_dialog_cancel(self, mock_exec, qtbot, main_window):
         """Test canceling new dataset dialog."""
-        from ModanDialogs import DatasetDialog
+        from dialogs import DatasetDialog
 
         mock_exec.return_value = QDialog.Rejected
 
@@ -64,7 +64,7 @@ class TestNewDatasetDialog:
 
     def test_new_dataset_dialog_validation(self, qtbot, main_window):
         """Test new dataset dialog input validation."""
-        from ModanDialogs import DatasetDialog
+        from dialogs import DatasetDialog
 
         dialog = DatasetDialog(main_window)
         qtbot.addWidget(dialog)
@@ -82,10 +82,10 @@ class TestNewDatasetDialog:
 class TestPreferencesDialog:
     """Test Preferences dialog."""
 
-    @patch("ModanDialogs.PreferencesDialog.show")
+    @patch("dialogs.PreferencesDialog.show")
     def test_preferences_dialog_creation(self, mock_show, qtbot, main_window):
         """Test that preferences dialog can be created."""
-        from ModanDialogs import PreferencesDialog
+        from dialogs import PreferencesDialog
 
         dialog = PreferencesDialog(main_window)
         qtbot.addWidget(dialog)
@@ -93,10 +93,10 @@ class TestPreferencesDialog:
         assert dialog is not None
         assert isinstance(dialog, QDialog)
 
-    @patch("ModanDialogs.PreferencesDialog.exec_")
+    @patch("dialogs.PreferencesDialog.exec_")
     def test_preferences_dialog_settings(self, mock_exec, qtbot, main_window):
         """Test changing settings in preferences dialog."""
-        from ModanDialogs import PreferencesDialog
+        from dialogs import PreferencesDialog
 
         mock_exec.return_value = QDialog.Accepted
 
@@ -119,7 +119,7 @@ class TestPreferencesDialog:
 
     def test_preferences_dialog_color_selection(self, qtbot, main_window):
         """Test color selection in preferences dialog."""
-        from ModanDialogs import PreferencesDialog
+        from dialogs import PreferencesDialog
 
         dialog = PreferencesDialog(main_window)
         qtbot.addWidget(dialog)
@@ -140,10 +140,10 @@ class TestPreferencesDialog:
 class TestAnalysisDialog:
     """Test Analysis dialog."""
 
-    @patch("ModanDialogs.NewAnalysisDialog.show")
+    @patch("dialogs.NewAnalysisDialog.show")
     def test_analysis_dialog_creation(self, mock_show, qtbot, main_window, sample_dataset):
         """Test that analysis dialog can be created."""
-        from ModanDialogs import NewAnalysisDialog
+        from dialogs import NewAnalysisDialog
 
         main_window.m_dataset = sample_dataset
 
@@ -153,10 +153,10 @@ class TestAnalysisDialog:
         assert dialog is not None
         assert isinstance(dialog, QDialog)
 
-    @patch("ModanDialogs.NewAnalysisDialog.exec_")
+    @patch("dialogs.NewAnalysisDialog.exec_")
     def test_analysis_dialog_pca_selection(self, mock_exec, qtbot, main_window, sample_dataset):
         """Test selecting PCA analysis."""
-        from ModanDialogs import NewAnalysisDialog
+        from dialogs import NewAnalysisDialog
 
         mock_exec.return_value = QDialog.Accepted
         main_window.m_dataset = sample_dataset
@@ -173,10 +173,10 @@ class TestAnalysisDialog:
         assert result == QDialog.Accepted
         assert dialog.get_analysis_type() == "PCA"
 
-    @patch("ModanDialogs.NewAnalysisDialog.exec_")
+    @patch("dialogs.NewAnalysisDialog.exec_")
     def test_analysis_dialog_cva_selection(self, mock_exec, qtbot, main_window, sample_dataset):
         """Test selecting CVA analysis."""
-        from ModanDialogs import NewAnalysisDialog
+        from dialogs import NewAnalysisDialog
 
         mock_exec.return_value = QDialog.Accepted
         main_window.m_dataset = sample_dataset
@@ -302,7 +302,7 @@ class TestMessageBoxes:
 class TestEditObjectDialog:
     """Test Edit Object dialog."""
 
-    @patch("ModanDialogs.ObjectDialog.show")
+    @patch("dialogs.ObjectDialog.show")
     def test_edit_object_dialog_creation(self, mock_show, qtbot, main_window):
         """Test that edit object dialog can be created."""
         from dialogs import ObjectDialog
@@ -318,7 +318,7 @@ class TestEditObjectDialog:
         assert dialog is not None
         assert isinstance(dialog, QDialog)
 
-    @patch("ModanDialogs.ObjectDialog.exec_")
+    @patch("dialogs.ObjectDialog.exec_")
     def test_edit_object_dialog_save(self, mock_exec, qtbot, main_window):
         """Test saving changes in edit object dialog."""
         from dialogs import ObjectDialog

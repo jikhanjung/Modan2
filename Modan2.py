@@ -67,8 +67,8 @@ from ModanComponents import (
     ObjectViewer3D,
     ResizableOverlayWidget,
 )
+from MdConstants import MODE
 from ModanController import ModanController
-from ModanDialogs import MODE
 
 # Configure matplotlib to avoid font warnings
 matplotlib.rcParams["font.family"] = ["DejaVu Sans", "sans-serif"]
@@ -1890,9 +1890,9 @@ for MacOS
 pyinstaller --onefile --noconsole --add-data "icons/*.png:icons" --add-data "translations/*.qm:translations" --add-data "migrations/*:migrations" --icon="icons/Modan2_2.png" Modan2.py
 pyinstaller --onedir --noconsole --add-data "icons/*.png:icons" --add-data "translations/*.qm:translations" --add-data "migrations/*:migrations" --icon="icons/Modan2_2.png" --noconfirm Modan2.py
 
-pylupdate5 Modan2.py ModanComponents.py ModanDialogs.py -ts translations/Modan2_en.ts
-pylupdate5 Modan2.py ModanComponents.py ModanDialogs.py -ts translations/Modan2_ko.ts
-pylupdate5 Modan2.py ModanComponents.py ModanDialogs.py -ts translations/Modan2_ja.ts
+pylupdate5 Modan2.py ModanComponents.py dialogs/*.py components/**/*.py -ts translations/Modan2_en.ts
+pylupdate5 Modan2.py ModanComponents.py dialogs/*.py components/**/*.py -ts translations/Modan2_ko.ts
+pylupdate5 Modan2.py ModanComponents.py dialogs/*.py components/**/*.py -ts translations/Modan2_ja.ts
 
 linguist
 """

@@ -602,6 +602,13 @@ class ModanController(QObject):
                 cva_result = None
                 manova_result = None
 
+                # Build an id -> object map once so the CVA/MANOVA group-extraction
+                # loops below don't issue one query per object (was an N+1 over the
+                # dataset's objects, run for both CVA and MANOVA).
+                objects_by_id = {}
+                if cva_group_by is not None or manova_group_by is not None:
+                    objects_by_id = {o.id: o for o in self.current_dataset.object_list}
+
                 self.logger.info(f"CVA group_by parameter: {cva_group_by}")
                 if cva_group_by is not None:
                     try:
@@ -614,9 +621,7 @@ class ModanController(QObject):
                         if isinstance(cva_group_by, int) and 0 <= cva_group_by < len(variable_names):
                             # cva_group_by is an index
                             for obj in ds_ops.object_list:  # Use superimposed objects from ds_ops
-                                obj_model = self.current_dataset.object_list.where(
-                                    MdModel.MdObject.id == obj.id
-                                ).first()
+                                obj_model = objects_by_id.get(obj.id)
                                 if obj_model:
                                     variable_list = obj_model.get_variable_list()
                                     if cva_group_by < len(variable_list):
@@ -654,9 +659,7 @@ class ModanController(QObject):
                         if isinstance(manova_group_by, int) and 0 <= manova_group_by < len(variable_names):
                             # manova_group_by is an index
                             for obj in ds_ops.object_list:  # Use superimposed objects from ds_ops
-                                obj_model = self.current_dataset.object_list.where(
-                                    MdModel.MdObject.id == obj.id
-                                ).first()
+                                obj_model = objects_by_id.get(obj.id)
                                 if obj_model:
                                     variable_list = obj_model.get_variable_list()
                                     if manova_group_by < len(variable_list):

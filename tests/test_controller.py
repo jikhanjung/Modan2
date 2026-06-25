@@ -709,6 +709,41 @@ class TestAnalysisParameters:
         # Analysis may return None if validation fails
         assert result is not None or result is None
 
+    def test_pca_cva_group_extraction_maps_objects(self, mock_database):
+        """N+1 fix: the CVA group-extraction loop must map each superimposed object
+        back to its source object via the prebuilt id map and read its variable.
+
+        Mocks _run_cva to capture the extracted groups, so the assertion targets
+        the extraction itself rather than the downstream CVA math.
+        """
+        ds = MdModel.MdDataset.create(dataset_name="GroupDS", dataset_desc="", dimension=2, propertyname_str="Sex")
+        # 4 distinct shapes, 3 landmarks each, two groups (M/F) via property_str
+        for i in range(4):
+            lm = f"{1.0 + i}\t1.0\n2.0\t{2.0 + i}\n3.0\t3.0"
+            MdModel.MdObject.create(
+                dataset=ds,
+                object_name=f"O{i}",
+                sequence=i + 1,
+                landmark_str=lm,
+                property_str=("M" if i % 2 == 0 else "F"),
+            )
+        controller = ModanController()
+        controller.set_current_dataset(ds)
+
+        captured = {}
+
+        def capture(landmarks_data, params):
+            captured["groups"] = params.get("groups")
+            return None
+
+        with patch.object(controller, "_run_cva", side_effect=capture):
+            controller.run_analysis(ds, cva_group_by=0)
+
+        assert captured.get("groups") is not None  # extraction loop ran
+        assert len(captured["groups"]) == 4  # one label per object
+        assert set(captured["groups"]) == {"M", "F"}  # values came from property_str
+        assert "Unknown" not in captured["groups"]  # id map resolved every object
+
     def test_run_cva_with_classifier(self, controller_with_data):
         """Test CVA analysis with classifier."""
         # Add classifier to dataset

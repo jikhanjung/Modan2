@@ -487,12 +487,10 @@ class MdObject(Model):
         # print centroid_size
         try:
             if centroid_size < 0:
-                logger = logging.getLogger(__name__)
                 logger.warning(f"Negative centroid size value: {centroid_size}")
                 centroid_size = 0
             centroid_size = math.sqrt(centroid_size)
         except (ValueError, OverflowError) as e:
-            logger = logging.getLogger(__name__)
             logger.error(f"Math error calculating centroid size: {e}")
             centroid_size = 0
 
@@ -501,7 +499,6 @@ class MdObject(Model):
             try:
                 centroid_size = centroid_size / self.pixels_per_mm
             except ZeroDivisionError:
-                logger = logging.getLogger(__name__)
                 logger.error("Division by zero: pixels_per_mm is 0")
                 centroid_size = 0
         # centroid_size = float( int(  * 100 ) ) / 100
@@ -589,7 +586,6 @@ class MdImage(Model):
                 if not os.path.exists(os.path.dirname(new_filepath)):
                     os.makedirs(os.path.dirname(new_filepath))
             except OSError as e:
-                logger = logging.getLogger(__name__)
                 logger.error(f"Failed to create directory for {new_filepath}: {e}")
                 raise ValueError(f"Cannot create directory for file storage: {e}") from e
 
@@ -597,12 +593,10 @@ class MdImage(Model):
             try:
                 shutil.copyfile(file_name, new_filepath)
             except (OSError, shutil.Error) as e:
-                logger = logging.getLogger(__name__)
                 logger.error(f"Failed to copy file from {file_name} to {new_filepath}: {e}")
                 raise ValueError(f"Cannot copy file: {e}") from e
 
         except Exception as e:
-            logger = logging.getLogger(__name__)
             logger.error(f"Failed to add file {file_name}: {e}")
             raise
 
@@ -661,11 +655,9 @@ class MdImage(Model):
             md5hash = hasher.hexdigest()
             return md5hash, image_data
         except (FileNotFoundError, PermissionError, OSError) as e:
-            logger = logging.getLogger(__name__)
             logger.error(f"Cannot read file for MD5 hash {filepath}: {e}")
             raise
         except Exception as e:
-            logger = logging.getLogger(__name__)
             logger.error(f"Unexpected error calculating MD5 for {filepath}: {e}")
             raise ValueError(f"Cannot calculate MD5 hash for {filepath}: {e}") from e
 
@@ -680,11 +672,9 @@ class MdImage(Model):
             else:
                 img = Image.open(fullpath)
         except (FileNotFoundError, PermissionError) as e:
-            logger = logging.getLogger(__name__)
             logger.error(f"Cannot open image file {fullpath}: {e}")
             raise
         except Exception as e:
-            logger = logging.getLogger(__name__)
             logger.warning(f"Cannot process image {fullpath}: {e}")
             # Return empty info if image cannot be processed
             return {"datetime": "", "latitude": "", "longitude": "", "map_datum": ""}
@@ -822,11 +812,9 @@ class MdThreeDModel(Model):
             md5hash = hasher.hexdigest()
             return md5hash, image_data
         except (FileNotFoundError, PermissionError, OSError) as e:
-            logger = logging.getLogger(__name__)
             logger.error(f"Cannot read file for MD5 hash {filepath}: {e}")
             raise
         except Exception as e:
-            logger = logging.getLogger(__name__)
             logger.error(f"Unexpected error calculating MD5 for {filepath}: {e}")
             raise ValueError(f"Cannot calculate MD5 hash for {filepath}: {e}") from e
 

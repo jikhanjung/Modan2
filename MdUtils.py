@@ -15,6 +15,8 @@ import trimesh
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QMessageBox
 
+logger = logging.getLogger(__name__)
+
 # Import version from centralized version file
 try:
     from version import __version__ as PROGRAM_VERSION
@@ -241,14 +243,12 @@ def process_3d_file(file_name):
         try:
             tri_mesh.export(new_file_name, file_type="obj")
         except Exception as e:
-            logger = logging.getLogger(__name__)
             logger.error(f"Failed to export STL mesh to {new_file_name}: {e}")
             raise ValueError(f"Cannot export to OBJ file {new_file_name}: {e}") from e
     elif file_extension == "ply":
         try:
             ply_mesh = trimesh.load(file_name)
         except Exception as e:
-            logger = logging.getLogger(__name__)
             logger.error(f"Failed to load PLY mesh from {file_name}: {e}")
             raise ValueError(f"Cannot load PLY file {file_name}: {e}") from e
         # print("ply_mesh shape:", ply_mesh.vertices.shape)
@@ -257,7 +257,6 @@ def process_3d_file(file_name):
         try:
             ply_mesh.export(new_file_name, file_type="obj")
         except Exception as e:
-            logger = logging.getLogger(__name__)
             logger.error(f"Failed to export PLY mesh to {new_file_name}: {e}")
             raise ValueError(f"Cannot export to OBJ file {new_file_name}: {e}") from e
     return new_file_name
@@ -324,11 +323,9 @@ def read_landmark_file(file_path):
                 elif "DIM=" in first_line:
                     return read_nts_file(file_path)
         except (FileNotFoundError, PermissionError) as e:
-            logger = logging.getLogger(__name__)
             logger.error(f"Cannot read landmark file {file_path}: {e}")
             raise
         except UnicodeDecodeError as e:
-            logger = logging.getLogger(__name__)
             logger.error(f"Encoding error reading {file_path}: {e}")
             raise ValueError(f"Cannot decode file {file_path}. Please check file encoding.") from e
 
@@ -361,7 +358,6 @@ def read_tps_file(file_path):
                     try:
                         int(line.split("=")[1])
                     except (ValueError, IndexError) as e:
-                        logger = logging.getLogger(__name__)
                         logger.error(f"Invalid LM line in {file_path}: {line}")
                         raise ValueError(f"Malformed TPS file: invalid LM line '{line}'") from e
                     current_landmarks = []
@@ -371,7 +367,6 @@ def read_tps_file(file_path):
                     try:
                         current_name = line.split("=")[1].strip()
                     except IndexError:
-                        logger = logging.getLogger(__name__)
                         logger.warning(f"Invalid ID line in {file_path}: {line}")
                         current_name = "Unknown"
 
@@ -391,15 +386,12 @@ def read_tps_file(file_path):
             specimens.append((f"specimen_{len(specimens) + 1}", current_landmarks))
 
     except (FileNotFoundError, PermissionError) as e:
-        logger = logging.getLogger(__name__)
         logger.error(f"Cannot read TPS file {file_path}: {e}")
         raise
     except UnicodeDecodeError as e:
-        logger = logging.getLogger(__name__)
         logger.error(f"Encoding error reading TPS file {file_path}: {e}")
         raise ValueError(f"Cannot decode TPS file {file_path}. Please check file encoding.") from e
     except Exception as e:
-        logger = logging.getLogger(__name__)
         logger.error(f"Unexpected error reading TPS file {file_path}: {e}")
         raise ValueError(f"Failed to read TPS file {file_path}: {e}") from e
 
@@ -421,11 +413,9 @@ def read_nts_file(file_path):
         with open(file_path, encoding="utf-8") as f:
             lines = f.readlines()
     except (FileNotFoundError, PermissionError) as e:
-        logger = logging.getLogger(__name__)
         logger.error(f"Cannot read NTS file {file_path}: {e}")
         raise
     except UnicodeDecodeError as e:
-        logger = logging.getLogger(__name__)
         logger.error(f"Encoding error reading NTS file {file_path}: {e}")
         raise ValueError(f"Cannot decode NTS file {file_path}. Please check file encoding.") from e
 
@@ -442,7 +432,6 @@ def read_nts_file(file_path):
                     n_landmarks = int(parts[1])
                     int(parts[2])
                 except (ValueError, IndexError) as e:
-                    logger = logging.getLogger(__name__)
                     logger.error(f"Invalid NTS header in {file_path}: {line}")
                     raise ValueError(f"Malformed NTS file: invalid header '{line}'") from e
 
@@ -473,7 +462,6 @@ def read_nts_file(file_path):
             i += 1
 
     except Exception as e:
-        logger = logging.getLogger(__name__)
         logger.error(f"Error parsing NTS file {file_path}: {e}")
         raise ValueError(f"Failed to parse NTS file {file_path}: {e}") from e
 
@@ -708,7 +696,6 @@ def create_zip_package(
                 dst.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(str(src), str(dst))
             except Exception as e:
-                logger = logging.getLogger(__name__)
                 logger.warning(f"Failed to include file {src}: {e}")
             curr += 1
             if progress_callback:

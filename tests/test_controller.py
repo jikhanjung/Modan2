@@ -154,6 +154,35 @@ class TestObjectOperations:
         assert objects[1].object_name == "specimen_002"
         mock_read_landmarks.assert_called_once_with("/path/to/test.tps")
 
+    @patch("MdUtils.read_landmark_file")
+    def test_import_tps_persists_landmarks(self, mock_read_landmarks, controller):
+        """C1 regression: imported landmarks must be saved to landmark_str.
+
+        Before the fix the controller passed landmarks= (not a model field), which
+        Peewee silently dropped, leaving imported objects with no landmark data.
+        """
+        mock_read_landmarks.return_value = [("sp1", [[10.0, 20.0], [30.0, 40.0], [50.0, 60.0]])]
+
+        with patch("pathlib.Path.exists", return_value=True):
+            objects = controller.import_objects(["/path/to/test.tps"])
+
+        assert len(objects) == 1
+        reloaded = MdModel.MdObject.get_by_id(objects[0].id)  # read back from DB
+        assert reloaded.landmark_str  # non-empty -> landmarks were actually persisted
+        reloaded.unpack_landmark()
+        assert reloaded.count_landmarks() == 3
+
+    def test_import_image_links_to_object(self, controller):
+        """C1 regression: the image must link to its object via the FK and store
+        original_path (was MdImage.create(file_path=, dataset=) — neither a field)."""
+        with patch("pathlib.Path.exists", return_value=True):
+            objects = controller.import_objects(["/path/to/photo.jpg"])
+
+        assert len(objects) == 1
+        reloaded = MdModel.MdObject.get_by_id(objects[0].id)
+        assert reloaded.image.count() == 1
+        assert reloaded.image[0].original_path == "/path/to/photo.jpg"
+
     @patch("MdModel.MdImage.create")
     def test_import_image_file(self, mock_image_create, controller):
         """Test importing image file."""

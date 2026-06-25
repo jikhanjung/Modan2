@@ -88,9 +88,10 @@ class ModanController(QObject):
             if existing.exists():
                 raise ValueError(f"Dataset with name '{name}' already exists")
 
-            # Create dataset
+            # Create dataset. (landmark_count is validated/logged above but is not
+            # a stored field — the count is derived from the dataset's objects.)
             dataset = MdModel.MdDataset.create(
-                dataset_name=name, dataset_desc=desc, dimension=dimension, landmark_count=landmark_count, **kwargs
+                dataset_name=name, dataset_desc=desc, dimension=dimension, **kwargs
             )
 
             self.dataset_created.emit(dataset)
@@ -346,13 +347,16 @@ class ModanController(QObject):
                             f"expected {expected_landmark_count}, got {len(landmarks)}"
                         )
 
-                    # Create object
+                    # Create object, then store the landmarks in the real
+                    # `landmark_str` field via the model's packing helper.
                     obj = MdModel.MdObject.create(
                         dataset=self.current_dataset,
                         object_name=specimen_name or f"{Path(file_path).stem}_{idx + 1}",
                         object_desc=f"Imported from {Path(file_path).name}",
-                        landmarks=landmarks,
                     )
+                    obj.landmark_list = landmarks
+                    obj.pack_landmark()
+                    obj.save()
 
                     objects.append(obj)
 
@@ -375,15 +379,17 @@ class ModanController(QObject):
             Created object
         """
         try:
-            # Create the image record and its object together so a failure cannot
-            # leave an orphan image row.
+            # Create the object first, then its image record (MdImage belongs to an
+            # MdObject via the `object` FK — there is no `image` field on MdObject).
+            # Wrapped in a transaction so a failure cannot orphan either row.
             with MdModel.gDatabase.atomic():
-                image = MdModel.MdImage.create(file_path=file_path, dataset=self.current_dataset)
                 obj = MdModel.MdObject.create(
                     dataset=self.current_dataset,
                     object_name=Path(file_path).stem,
                     object_desc=f"Image imported from {Path(file_path).name}",
-                    image=image,
+                )
+                MdModel.MdImage.create(
+                    object=obj, original_path=file_path, original_filename=Path(file_path).name
                 )
 
             self.object_added.emit(obj)
@@ -405,15 +411,17 @@ class ModanController(QObject):
             # Convert to OBJ format if needed (filesystem op, kept out of the txn)
             obj_path = mu.process_3d_file(file_path)
 
-            # Create the 3D-model record and its object together so a failure
-            # cannot leave an orphan model row.
+            # Create the object first, then its 3D-model record (MdThreeDModel
+            # belongs to an MdObject via the `object` FK — there is no `model_3d`
+            # field on MdObject). Wrapped in a transaction against orphan rows.
             with MdModel.gDatabase.atomic():
-                model_3d = MdModel.MdThreeDModel.create(file_path=obj_path, dataset=self.current_dataset)
                 obj = MdModel.MdObject.create(
                     dataset=self.current_dataset,
                     object_name=Path(file_path).stem,
                     object_desc=f"3D model imported from {Path(file_path).name}",
-                    model_3d=model_3d,
+                )
+                MdModel.MdThreeDModel.create(
+                    object=obj, original_path=obj_path, original_filename=Path(file_path).name
                 )
 
             self.object_added.emit(obj)

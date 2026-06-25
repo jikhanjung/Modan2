@@ -708,6 +708,31 @@ class TestMANOVAOnProcrustes:
 
         assert result is not None
         assert result["n_variables"] == 20  # Limited to 20
+        # Truncation must be surfaced, not silent (R01).
+        assert result["n_variables_total"] == n_coords  # 45 before truncation
+        assert result["n_variables_used"] == 20
+        assert result["truncated"] is True
+
+    def test_manova_on_procrustes_not_truncated(self):
+        """Below the cap, MANOVA reports truncated=False and uses every variable."""
+        import numpy as np
+
+        np.random.seed(42)
+        n_coords = 6  # 3 landmarks x 2D, well under MANOVA_MAX_VARIABLES
+        flattened_landmarks = []
+        groups = []
+        for offset, label in ((0.0, "A"), (5.0, "B")):
+            for _ in range(5):
+                base = [float(offset) for _ in range(n_coords)]
+                noise = np.random.randn(n_coords) * 0.3
+                flattened_landmarks.append([b + n for b, n in zip(base, noise)])
+                groups.append(label)
+
+        result = ms.do_manova_analysis_on_procrustes(flattened_landmarks, groups)
+
+        assert result["truncated"] is False
+        assert result["n_variables_total"] == n_coords
+        assert result["n_variables_used"] == n_coords
 
     def test_manova_on_procrustes_error(self):
         """Test MANOVA error handling."""

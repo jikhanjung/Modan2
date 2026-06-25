@@ -6,6 +6,14 @@ from statsmodels.multivariate.manova import MANOVA
 
 logger = logging.getLogger(__name__)
 
+# Upper bound on dependent variables fed to the Procrustes MANOVA. statsmodels'
+# MANOVA needs the residual covariance to be invertible (roughly: observations >
+# variables + groups), which fails for high landmark counts. When the data
+# exceeds this, the analysis is run on a subset and the result reports the
+# truncation (n_variables_total / n_variables_used / truncated) so callers can
+# surface it rather than silently presenting a partial result.
+MANOVA_MAX_VARIABLES = 20
+
 
 class MdPrincipalComponent:
     """Legacy Principal Component Analysis class.
@@ -612,12 +620,18 @@ def do_manova_analysis_on_procrustes(flattened_landmarks, groups):
 
         logger.debug(f"Detected {dimension}D data: {n_landmarks} landmarks, {n_coords} coordinates")
 
-        # Limit to first 20 variables to avoid computational issues
-        max_vars = 20
-        if len(column_names) > max_vars:
-            logger.warning(f"Too many variables ({len(column_names)}), limiting to first {max_vars}")
-            flattened_landmarks = [row[:max_vars] for row in flattened_landmarks]
-            column_names = column_names[:max_vars]
+        # Cap the dependent variables so the MANOVA stays well-posed (see
+        # MANOVA_MAX_VARIABLES). The truncation is reported in the result dict
+        # below so it is never silent.
+        n_variables_total = len(column_names)
+        truncated = n_variables_total > MANOVA_MAX_VARIABLES
+        if truncated:
+            logger.warning(
+                f"MANOVA received {n_variables_total} variables; using the first "
+                f"{MANOVA_MAX_VARIABLES} (result will report truncated=True)"
+            )
+            flattened_landmarks = [row[:MANOVA_MAX_VARIABLES] for row in flattened_landmarks]
+            column_names = column_names[:MANOVA_MAX_VARIABLES]
 
         # Create DataFrame for MANOVA
         df = pd.DataFrame(flattened_landmarks, columns=column_names)
@@ -658,6 +672,9 @@ def do_manova_analysis_on_procrustes(flattened_landmarks, groups):
             "n_groups": len(np.unique(groups)),
             "n_observations": len(flattened_landmarks),
             "n_variables": len(column_names),
+            "n_variables_total": n_variables_total,
+            "n_variables_used": len(column_names),
+            "truncated": truncated,
         }
 
     except Exception as e:

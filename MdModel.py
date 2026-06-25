@@ -1060,8 +1060,8 @@ class MdObjectOps:
 
         for i, lm in enumerate(self.landmark_list):
             coords = [0, 0, 0]
-            for j in range(len(lm)):
-                coords[j] = lm[j]
+            for j, value in enumerate(lm):
+                coords[j] = value
             x_rotated = coords[0] * r_mx[0][0] + coords[1] * r_mx[1][0] + coords[2] * r_mx[2][0]
             y_rotated = coords[0] * r_mx[0][1] + coords[1] * r_mx[1][1] + coords[2] * r_mx[2][1]
             z_rotated = coords[0] * r_mx[0][2] + coords[1] * r_mx[1][2] + coords[2] * r_mx[2][2]
@@ -1690,25 +1690,15 @@ class MdDatasetOps:
             return False
         sum_coord = 0
         valid_count = 0
-        for i in range(len(shape1.landmark_list)):
+        for lm1, lm2 in zip(shape1.landmark_list, shape2.landmark_list, strict=False):
             # Only compare landmarks that are valid in both shapes
-            if (
-                shape1.landmark_list[i][0] is not None
-                and shape2.landmark_list[i][0] is not None
-                and shape1.landmark_list[i][1] is not None
-                and shape2.landmark_list[i][1] is not None
-            ):
-                sum_coord += (shape1.landmark_list[i][0] - shape2.landmark_list[i][0]) ** 2
-                sum_coord += (shape1.landmark_list[i][1] - shape2.landmark_list[i][1]) ** 2
+            if lm1[0] is not None and lm2[0] is not None and lm1[1] is not None and lm2[1] is not None:
+                sum_coord += (lm1[0] - lm2[0]) ** 2
+                sum_coord += (lm1[1] - lm2[1]) ** 2
                 valid_count += 1
                 if self.dimension == 3:
-                    if (
-                        len(shape1.landmark_list[i]) > 2
-                        and len(shape2.landmark_list[i]) > 2
-                        and shape1.landmark_list[i][2] is not None
-                        and shape2.landmark_list[i][2] is not None
-                    ):
-                        sum_coord += (shape1.landmark_list[i][2] - shape2.landmark_list[i][2]) ** 2
+                    if len(lm1) > 2 and len(lm2) > 2 and lm1[2] is not None and lm2[2] is not None:
+                        sum_coord += (lm1[2] - lm2[2]) ** 2
         # shape1.print_landmarks("shape1")
         # shape2.print_landmarks("shape2")
         if valid_count == 0:
@@ -2086,8 +2076,9 @@ def prepare_database():
         backup_list = [f for f in backup_list if f.startswith(DATABASE_FILENAME)]
         backup_list.sort()
         if len(backup_list) > 10:
-            for i in range(len(backup_list) - 10):
-                os.remove(os.path.join(mu.DB_BACKUP_DIRECTORY, backup_list[i]))
+            # Keep the 10 most recent backups; remove the rest.
+            for old_backup in backup_list[:-10]:
+                os.remove(os.path.join(mu.DB_BACKUP_DIRECTORY, old_backup))
 
     gDatabase.connect()
     router = Router(gDatabase, migrate_dir=migrations_path)

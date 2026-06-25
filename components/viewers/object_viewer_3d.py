@@ -59,17 +59,7 @@ import MdUtils as mu
 
 logger = logging.getLogger(__name__)
 
-MODE = {}
-MODE["NONE"] = 0
-MODE["PAN"] = 12
-MODE["EDIT_LANDMARK"] = 1
-MODE["WIREFRAME"] = 2
-MODE["READY_MOVE_LANDMARK"] = 3
-MODE["MOVE_LANDMARK"] = 4
-MODE["PRE_WIRE_FROM"] = 5
-MODE["CALIBRATION"] = 6
-MODE["VIEW"] = 7
-
+from MdConstants import MODE
 
 MODE_EXPLORATION = 0
 MODE_REGRESSION = 1

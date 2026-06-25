@@ -52,16 +52,7 @@ from ModanComponents import ObjectViewer2D, ObjectViewer3D
 logger = logging.getLogger(__name__)
 
 # Mode constants used by ObjectDialog
-MODE = {}
-MODE["NONE"] = 0
-MODE["PAN"] = 12
-MODE["EDIT_LANDMARK"] = 1
-MODE["WIREFRAME"] = 2
-MODE["READY_MOVE_LANDMARK"] = 3
-MODE["MOVE_LANDMARK"] = 4
-MODE["PRE_WIRE_FROM"] = 5
-MODE["CALIBRATION"] = 6
-MODE["VIEW"] = 7
+from MdConstants import MODE
 
 
 class ObjectDialog(QDialog):

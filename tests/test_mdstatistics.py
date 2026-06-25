@@ -151,6 +151,27 @@ class TestMdCanonicalVariate:
         min(2 - 1, 2)  # 2 groups, 2 variables
         assert cva.rotated_matrix.shape[1] <= 2
 
+    def test_cva_raw_eigenvalues_not_normalized(self, grouped_data):
+        """raw_eigen_values must stay unnormalized, independent of percentages (R01 C3).
+
+        The old `raw = s[:]; s /= sum(s)` aliased a numpy view, so raw_eigen_values
+        was silently overwritten with the normalized percentages.
+        """
+        data, categories = grouped_data
+        cva = ms.MdCanonicalVariate()
+        cva.SetData(data)
+        cva.SetCategory(categories)
+        assert cva.Analyze()
+
+        raw = np.asarray(cva.raw_eigen_values, dtype=float)
+        pct = np.asarray(cva.eigen_value_percentages, dtype=float)
+
+        # Percentages are the normalized raw values and sum to 1.
+        assert pytest.approx(pct.sum(), rel=1e-6) == 1.0
+        assert np.allclose(pct, raw / raw.sum())
+        # ... but raw itself is NOT normalized (the bug made the two identical).
+        assert not np.allclose(raw, pct)
+
 
 class TestPerformFunctions:
     """Test the standalone perform functions."""

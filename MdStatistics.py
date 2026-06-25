@@ -218,9 +218,12 @@ class MdCanonicalVariate:
 
         u, s, v = numpy.linalg.svd(x)
 
-        self.raw_eigen_values = s[:]
-        s /= sum(s)
-        self.eigen_value_percentages = s[:]
+        # s.copy() / explicit division: s[:] is a numpy *view*, so the old
+        # `raw = s[:]; s /= sum(s)` overwrote raw_eigen_values with the
+        # normalized percentages (both columns showed the same values in the
+        # CVA detail eigenvalue table). Keep raw and percentages independent.
+        self.raw_eigen_values = s.copy()
+        self.eigen_value_percentages = s / s.sum()
 
         rotation_matrix = numpy.zeros((self.nVariable, self.nVariable))
 

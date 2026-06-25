@@ -261,9 +261,20 @@ class TestAnalysisOperations:
 
         assert result is None
 
-    def test_run_analysis_insufficient_objects(self, controller, sample_dataset):
+    def test_run_analysis_insufficient_objects(self, controller):
         """Test running analysis with insufficient objects."""
-        controller.set_current_dataset(sample_dataset)
+        # The guard requires >= 2 objects with landmarks, so build a dataset
+        # with a single object to exercise the insufficient-data path.
+        sparse_dataset = MdModel.MdDataset.create(
+            dataset_name="Sparse Dataset", dataset_desc="Too few objects", dimension=2, landmark_count=5
+        )
+        MdModel.MdObject.create(
+            dataset=sparse_dataset,
+            object_name="Lonely Object",
+            sequence=1,
+            landmark_str="\n".join([f"{j}.0\t{j + 1}.0" for j in range(5)]),
+        )
+        controller.set_current_dataset(sparse_dataset)
 
         result = controller.run_analysis("PCA", {})
 
@@ -422,20 +433,23 @@ class TestStateManagement:
 
     def test_get_dataset_summary(self, controller):
         """Test getting dataset summary."""
+        dataset = controller.current_dataset
+        initial_count = dataset.object_list.count()
+
         # Add some objects
         for i in range(3):
             obj = MdModel.MdObject.create(
-                dataset=controller.current_dataset, object_name=f"Summary_Object_{i + 1}", sequence=i + 1
+                dataset=dataset, object_name=f"Summary_Object_{i + 1}", sequence=i + 1
             )
             # Set landmarks properly
             landmark_str = "\n".join([f"{i + j}.0\t{i + j + 1}.0" for j in range(5)])
             obj.landmark_str = landmark_str
             obj.save()
 
-        summary = controller.get_dataset_summary(controller.current_dataset)
+        summary = controller.get_dataset_summary(dataset)
 
-        assert summary["name"] == controller.current_dataset.dataset_name
-        assert summary["object_count"] == 3
+        assert summary["name"] == dataset.dataset_name
+        assert summary["object_count"] == initial_count + 3
         assert summary["has_landmarks"] is True
 
 

@@ -6,7 +6,7 @@ Modan2 is a desktop GUI application for morphometric analysis, supporting 2D/3D 
 ## Key Information
 
 ### Main Entry Point
-- **Run application**: `python Modan2.py`
+- **Run application**: `python main.py` (the real entry point; supports `--debug`, `--db`, `--lang`, `--no-splash`). `Modan2.py` is a module (`ModanMainWindow`) imported by `main.py`, not a runnable script.
 - **Linux/WSL users**: Use `python fix_qt_import.py` if Qt plugin conflicts occur
 
 ### Development Environment Setup
@@ -122,7 +122,7 @@ pytest --lf
 1. Run automated tests: `pytest`
 2. Check test coverage: `pytest --cov=. --cov-report=term`
 3. Ensure no regressions: `pytest --lf` (re-run last failures)
-4. Run the application: `python Modan2.py`
+4. Run the application: `python main.py`
 5. Verify core features work (dataset loading, object viewing, analysis)
 
 ### Database
@@ -134,7 +134,7 @@ pytest --lf
 
 #### Qt Platform Plugin Error (Linux/WSL)
 If you encounter "could not load the Qt platform plugin" error:
-1. Run with: `python fix_qt_import.py` instead of `python Modan2.py`
+1. Run with: `python fix_qt_import.py` instead of `python main.py`
 2. Or set environment: `export QT_QPA_PLATFORM_PLUGIN_PATH=/usr/lib/x86_64-linux-gnu/qt5/plugins/platforms`
 
 #### OpenGL/GLUT Error
@@ -159,7 +159,7 @@ Install GLUT libraries: `sudo apt-get install -y libglut-dev libglut3.12 python3
 1. Make changes to relevant Python files
 2. Run linter and formatter: `ruff check . && ruff format .`
 3. Run tests: `pytest`
-4. Test application launch: `python Modan2.py` (or `python fix_qt_import.py` on Linux)
+4. Test application launch: `python main.py` (or `python fix_qt_import.py` on Linux)
 5. Verify core features work (dataset loading, object viewing, analysis)
 6. Commit changes with descriptive messages
 

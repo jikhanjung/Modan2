@@ -9,6 +9,7 @@ import os
 # from MdUtils import *
 import shutil
 import time
+import warnings
 from pathlib import Path
 
 import numpy as np
@@ -326,18 +327,24 @@ class MdObject(Model):
         return self.threed_model[0]
 
     def change_dataset(self, dataset):
-        if self.has_image():
-            source_path = self.get_image().get_file_path()
-        if self.has_threed_model():
-            source_path = self.get_threed_model().get_file_path()
+        # Fetch any linked media once. Previously this issued up to four queries
+        # (has_image/has_threed_model COUNTs + get_image/get_threed_model indexed
+        # fetches) before the save and four more after it.
+        media = self.image.first() or self.threed_model.first()
+        source_path = media.get_file_path() if media is not None else None
 
         self.dataset = dataset
         self.save()
 
-        if self.has_image():
-            target_path = self.get_image().get_file_path()
-        if self.has_threed_model():
-            target_path = self.get_threed_model().get_file_path()
+        if media is None:
+            # No image or 3D file to relocate (e.g. a landmark-only object).
+            return
+
+        # get_file_path() resolves the storage dir via media.object.dataset; that
+        # relation is cached on `media` and still points at the old dataset, so
+        # re-attach the just-saved object before computing the destination.
+        media.object = self
+        target_path = media.get_file_path()
 
         if os.path.exists(source_path):
             if not os.path.exists(os.path.dirname(target_path)):
@@ -1456,54 +1463,42 @@ class MdDatasetOps:
         return rot_mx
 
     def get_average_shape(self):
-        len(self.object_list)
-
         average_shape = MdObjectOps(MdObject())
         average_shape.landmark_list = []
 
-        sum_x = []
-        sum_y = []
-        sum_z = []
-        count_x = []  # Count of valid values for each landmark
-        count_y = []
-        count_z = []
+        n_dim = 3 if self.dimension == 3 else 2
+        # Landmark counts may differ between objects; pad ragged objects to the
+        # maximum count seen so they can be stacked into one array.
+        n_landmarks = max((len(mo.landmark_list) for mo in self.object_list), default=0)
 
-        for mo in self.object_list:
-            i = 0
-            for lm in mo.landmark_list:
-                # Initialize arrays if needed
-                if len(sum_x) <= i:
-                    sum_x.append(0)
-                    sum_y.append(0)
-                    sum_z.append(0)
-                    count_x.append(0)
-                    count_y.append(0)
-                    count_z.append(0)
+        if n_landmarks > 0 and self.object_list:
 
-                # Only add non-None values
-                if lm[0] is not None:
-                    sum_x[i] += lm[0]
-                    count_x[i] += 1
-                if lm[1] is not None:
-                    sum_y[i] += lm[1]
-                    count_y[i] += 1
-                if self.dimension == 3 and len(lm) > 2 and lm[2] is not None:
-                    sum_z[i] += lm[2]
-                    count_z[i] += 1
-                i += 1
+            def _coord(lm, d):
+                return float(lm[d]) if d < len(lm) and lm[d] is not None else np.nan
 
-        for i in range(len(sum_x)):
-            if self.dimension == 2:
-                # Calculate average only from valid values
-                x_avg = float(sum_x[i]) / count_x[i] if count_x[i] > 0 else None
-                y_avg = float(sum_y[i]) / count_y[i] if count_y[i] > 0 else None
-                lm = [x_avg, y_avg]
-            else:
-                x_avg = float(sum_x[i]) / count_x[i] if count_x[i] > 0 else None
-                y_avg = float(sum_y[i]) / count_y[i] if count_y[i] > 0 else None
-                z_avg = float(sum_z[i]) / count_z[i] if count_z[i] > 0 else None
-                lm = [x_avg, y_avg, z_avg]
-            average_shape.landmark_list.append(lm)
+            # (n_objects, n_landmarks, n_dim); missing/None coords become NaN.
+            stacked = np.array(
+                [
+                    [
+                        [_coord(mo.landmark_list[i], d) for d in range(n_dim)]
+                        if i < len(mo.landmark_list)
+                        else [np.nan] * n_dim
+                        for i in range(n_landmarks)
+                    ]
+                    for mo in self.object_list
+                ],
+                dtype=float,
+            )
+
+            # Per-coordinate mean ignoring missing values. A coordinate that is
+            # missing in every object yields NaN (-> None below); suppress the
+            # all-NaN-slice warning numpy raises for that case.
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", category=RuntimeWarning)
+                means = np.nanmean(stacked, axis=0)
+
+            average_shape.landmark_list = [[None if np.isnan(v) else float(v) for v in row] for row in means]
+
         if self.id:
             average_shape.dataset_id = self.id
         return average_shape

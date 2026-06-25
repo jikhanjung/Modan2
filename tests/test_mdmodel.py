@@ -1666,7 +1666,7 @@ class TestMdObjectCopyOperations:
     """Tests for MdObject copy and change operations."""
 
     def test_change_dataset(self, test_database):
-        """Test changing object's dataset (without image/model)."""
+        """Landmark-only objects relocate without an image/model file present."""
         dataset1 = mm.MdDataset.create(dataset_name="Dataset1", dimension=2)
         dataset2 = mm.MdDataset.create(dataset_name="Dataset2", dimension=2)
 
@@ -1674,15 +1674,45 @@ class TestMdObjectCopyOperations:
         obj.landmark_str = "0\t0\n10\t10"
         obj.save()
 
-        # Change to dataset2 (this will fail if object has image/model)
-        # So we just test that the dataset field changes
-        obj.dataset = dataset2
-        obj.save()
+        # change_dataset() used to NameError here (source_path was never assigned
+        # when there is no linked media); it must now no-op the file move and just
+        # persist the new dataset.
+        obj.change_dataset(dataset2)
 
-        # Verify the change
         obj_reloaded = mm.MdObject.get_by_id(obj.id)
-        assert obj_reloaded.dataset == dataset2
         assert obj_reloaded.dataset.id == dataset2.id
+
+    def test_change_dataset_moves_media_file(self, test_database):
+        """change_dataset relocates the linked file into the new dataset's dir."""
+        import os
+
+        dataset1 = mm.MdDataset.create(dataset_name="Src", dimension=2)
+        dataset2 = mm.MdDataset.create(dataset_name="Dst", dimension=2)
+        obj = mm.MdObject.create(object_name="Obj1", dataset=dataset1)
+        image = mm.MdImage.create(
+            object=obj, original_path="photo.jpg", original_filename="photo.jpg", size=1, md5hash="x"
+        )
+
+        source_path = image.get_file_path()  # base/<dataset1.id>/<obj.id>.jpg
+        base = os.path.dirname(os.path.dirname(source_path))
+        target_path = os.path.join(base, str(dataset2.id), f"{obj.id}.jpg")
+
+        os.makedirs(os.path.dirname(source_path), exist_ok=True)
+        with open(source_path, "w") as f:
+            f.write("pixels")
+
+        try:
+            obj.change_dataset(dataset2)
+
+            assert mm.MdObject.get_by_id(obj.id).dataset.id == dataset2.id
+            # File must land under the *new* dataset id. The previous stale-relation
+            # bug would have computed the target from the old dataset and no-op'd.
+            assert os.path.exists(target_path)
+            assert not os.path.exists(source_path)
+        finally:
+            for p in (source_path, target_path):
+                if os.path.exists(p):
+                    os.remove(p)
 
 
 class TestMdDatasetAddOperations:
@@ -2750,6 +2780,47 @@ class TestMdDatasetOpsAverageShape:
         assert len(avg_shape.landmark_list) == 2
         assert avg_shape.landmark_list[0] == [1.0, 1.0, 1.0]
         assert avg_shape.landmark_list[1] == [4.0, 4.0, 4.0]
+
+    def test_get_average_shape_ragged_counts(self, test_database):
+        """Objects with different landmark counts pad to the maximum count."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        obj1 = mm.MdObject.create(object_name="Obj1", dataset=dataset)
+        obj1.landmark_list = [[0.0, 0.0], [2.0, 2.0], [10.0, 10.0]]
+        obj1.pack_landmark()
+        obj1.save()
+
+        obj2 = mm.MdObject.create(object_name="Obj2", dataset=dataset)
+        obj2.landmark_list = [[2.0, 2.0], [4.0, 4.0]]  # no third landmark
+        obj2.pack_landmark()
+        obj2.save()
+
+        ds_ops = mm.MdDatasetOps(dataset)
+        avg_shape = ds_ops.get_average_shape()
+
+        # Result is sized to the largest object; the third landmark averages only
+        # the one object that has it.
+        assert len(avg_shape.landmark_list) == 3
+        assert avg_shape.landmark_list[0] == [1.0, 1.0]
+        assert avg_shape.landmark_list[1] == [3.0, 3.0]
+        assert avg_shape.landmark_list[2] == [10.0, 10.0]
+
+    def test_get_average_shape_all_missing_coordinate(self, test_database):
+        """A coordinate missing in every object averages to None, not a crash."""
+        dataset = mm.MdDataset.create(dataset_name="Test", dimension=2)
+
+        for name in ("Obj1", "Obj2"):
+            obj = mm.MdObject.create(object_name=name, dataset=dataset)
+            obj.landmark_list = [[1.0, 1.0], [None, None]]
+            obj.pack_landmark()
+            obj.save()
+
+        ds_ops = mm.MdDatasetOps(dataset)
+        avg_shape = ds_ops.get_average_shape()
+
+        assert len(avg_shape.landmark_list) == 2
+        assert avg_shape.landmark_list[0] == [1.0, 1.0]
+        assert avg_shape.landmark_list[1] == [None, None]
 
 
 class TestMdDatasetOpsRotationMatrix:

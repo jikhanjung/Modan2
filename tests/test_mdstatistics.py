@@ -199,6 +199,28 @@ class TestMdCanonicalVariate:
         assert hasattr(cva, "rotated_matrix")
         assert cva.rotated_matrix.shape[0] == 4
 
+    def test_cva_uses_z_coordinate_for_3d(self):
+        """do_cva_analysis must use the Z axis for 3D data (R01 landmark[:2] drop).
+
+        Groups are constructed to be identical in X and Y and to differ only in Z,
+        so dropping Z (the old landmark[:2]) leaves them inseparable.
+        """
+        # 2 landmarks per specimen, each [x, y, z]. X/Y are constant across all
+        # specimens; only Z carries the group signal (group A ~0, group B ~10).
+        def specimen(z):
+            return [[1.0, 2.0, z], [3.0, 4.0, z]]
+
+        group_a = [specimen(z) for z in (0.0, 0.1, 0.2, 0.3, 0.4)]
+        group_b = [specimen(z) for z in (10.0, 10.1, 10.2, 10.3, 10.4)]
+        data = group_a + group_b
+        groups = ["A"] * 5 + ["B"] * 5
+
+        result = ms.do_cva_analysis(data, groups)
+
+        # With Z included the groups separate perfectly; with landmark[:2] every
+        # feature is constant and the groups are indistinguishable.
+        assert result["accuracy"] >= 99.0
+
 
 class TestPerformFunctions:
     """Test the standalone perform functions."""

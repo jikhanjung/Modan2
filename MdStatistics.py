@@ -507,12 +507,14 @@ def do_cva_analysis(landmarks_data, groups):
         from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
         from sklearn.metrics import accuracy_score
 
-        # Flatten landmark data
+        # Flatten landmark data. Use all coordinates (X, Y, Z) — slicing to
+        # landmark[:2] silently dropped the Z axis for 3D datasets, inconsistent
+        # with do_pca_analysis (which keeps every coordinate).
         flattened_data = []
         for landmarks in landmarks_data:
             flat_coords = []
             for landmark in landmarks:
-                flat_coords.extend(landmark[:2])
+                flat_coords.extend(landmark)
             flattened_data.append(flat_coords)
 
         data_matrix = np.array(flattened_data)
@@ -756,12 +758,13 @@ def do_manova_analysis(landmarks_data, groups):
         import numpy as np
         from scipy import stats
 
-        # Flatten landmark data
+        # Flatten landmark data. Use all coordinates (X, Y, Z); landmark[:2]
+        # dropped the Z axis for 3D datasets.
         flattened_data = []
         for landmarks in landmarks_data:
             flat_coords = []
             for landmark in landmarks:
-                flat_coords.extend(landmark[:2])
+                flat_coords.extend(landmark)
             flattened_data.append(flat_coords)
 
         data_matrix = np.array(flattened_data)

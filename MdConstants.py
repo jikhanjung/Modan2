@@ -40,6 +40,52 @@ MODE = {
     "PAN": 12,
 }
 
+# ========== Object Viewer Constants ==========
+# Rendering and interaction constants shared by ObjectViewer2D / ObjectViewer3D.
+# (Historically duplicated across many UI modules; this is the canonical home.)
+
+# Top-level viewer context
+OBJECT_MODE = 1
+DATASET_MODE = 2
+
+# 3D navigation sub-modes
+VIEW_MODE = 1
+PAN_MODE = 2
+ROTATE_MODE = 3
+ZOOM_MODE = 4
+
+# Editing sub-mode
+WIREFRAME_MODE = 2
+
+# Landmark hit-testing geometry (pixels)
+BASE_LANDMARK_RADIUS = 2
+DISTANCE_THRESHOLD = BASE_LANDMARK_RADIUS * 3
+
+# RGB triplets (0..1) used by the OpenGL / matplotlib viewers
+COLOR = {
+    "RED": (1, 0, 0),
+    "GREEN": (0, 1, 0),
+    "BLUE": (0, 0, 1),
+    "YELLOW": (1, 1, 0),
+    "CYAN": (0, 1, 1),
+    "MAGENTA": (1, 0, 1),
+    "WHITE": (1, 1, 1),
+    "LIGHT_GRAY": (0.8, 0.8, 0.8),
+    "GRAY": (0.5, 0.5, 0.5),
+    "DARK_GRAY": (0.3, 0.3, 0.3),
+    "BLACK": (0, 0, 0),
+}
+COLOR["SINGLE_SHAPE"] = COLOR["GREEN"]
+COLOR["AVERAGE_SHAPE"] = COLOR["LIGHT_GRAY"]
+COLOR["NORMAL_SHAPE"] = COLOR["BLUE"]
+COLOR["NORMAL_TEXT"] = COLOR["WHITE"]
+COLOR["SELECTED_SHAPE"] = COLOR["RED"]
+COLOR["SELECTED_TEXT"] = COLOR["RED"]
+COLOR["SELECTED_LANDMARK"] = COLOR["RED"]
+COLOR["WIREFRAME"] = COLOR["YELLOW"]
+COLOR["SELECTED_EDGE"] = COLOR["RED"]
+COLOR["BACKGROUND"] = COLOR["DARK_GRAY"]
+
 # ========== Icon Mappings ==========
 ICONS = {
     # Main actions

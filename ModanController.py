@@ -534,7 +534,9 @@ class ModanController(QObject):
             analysis_name = params.get("name", f"{analysis_type}_Analysis")
             dataset = self.current_dataset
         else:
-            # New signature from UI
+            # New signature from UI: always the comprehensive PCA run (which also
+            # performs CVA and MANOVA when grouping is requested).
+            analysis_type = "PCA"
             if dataset:
                 self.set_current_dataset(dataset)
             # Initialize params for new signature
@@ -550,8 +552,6 @@ class ModanController(QObject):
         self._processing = True
 
         try:
-            if "analysis_type" not in locals():
-                analysis_type = "PCA"  # Default
             self.logger.info(f"Starting {analysis_type} analysis")
             self.analysis_started.emit(analysis_type)
 
@@ -593,14 +593,16 @@ class ModanController(QObject):
             # Run analysis based on type
             self.analysis_progress.emit(25)
 
+            # CVA/MANOVA results are only produced by the comprehensive PCA path;
+            # initialize here so the save section below can test them directly
+            # (the CVA-only / MANOVA-only branches never assign them).
+            cva_result = None
+            manova_result = None
+
             # Run comprehensive analysis (PCA includes all three: PCA, CVA, MANOVA)
             if analysis_type.upper() == "PCA":
                 pca_result = self._run_pca(landmarks_data, params)
                 result = pca_result  # Primary result for compatibility
-
-                # Also run CVA and MANOVA as part of comprehensive analysis
-                cva_result = None
-                manova_result = None
 
                 # Build an id -> object map once so the CVA/MANOVA group-extraction
                 # loops below don't issue one query per object (was an N+1 over the
@@ -786,7 +788,7 @@ class ModanController(QObject):
                         analysis.pca_eigenvalues_json = json.dumps(eigenvalues_list)
 
                     # Save CVA results if available (from comprehensive analysis)
-                    if "cva_result" in locals() and cva_result:
+                    if cva_result:
                         self.logger.debug(f"Saving CVA results: keys={list(cva_result.keys())}")
                         # CVA uses 'canonical_variables' instead of 'scores'
                         if "canonical_variables" in cva_result:
@@ -826,7 +828,7 @@ class ModanController(QObject):
                         self.logger.warning("CVA result not available for saving")
 
                     # Save MANOVA results if available (from comprehensive analysis)
-                    if "manova_result" in locals() and manova_result:
+                    if manova_result:
                         self.logger.info("Saving MANOVA results...")
                         self.logger.info(f"MANOVA result available: {type(manova_result)}")
                         # MANOVA results need to be in the correct format for UI

@@ -146,26 +146,29 @@ class ModanController(QObject):
 
             self.logger.info(f"Deleting dataset: {dataset_name}")
 
-            # Delete all related objects first
             objects_deleted = 0
-            for obj in dataset.object_list:
-                obj.delete_instance(recursive=True)
-                objects_deleted += 1
-
-            # Delete all related analyses
             analyses_deleted = 0
-            # Check if dataset has analyses (backref may be 'analysis_set' or similar)
-            if hasattr(dataset, "analysis_set"):
-                for analysis in dataset.analysis_set:
-                    analysis.delete_instance()
-                    analyses_deleted += 1
-            elif hasattr(dataset, "analyses"):
-                for analysis in dataset.analyses:
-                    analysis.delete_instance()
-                    analyses_deleted += 1
+            # Delete the dataset and all its children as a single transaction so a
+            # mid-way failure cannot leave the database half-deleted.
+            with MdModel.gDatabase.atomic():
+                # Delete all related objects first
+                for obj in dataset.object_list:
+                    obj.delete_instance(recursive=True)
+                    objects_deleted += 1
 
-            # Delete the dataset itself
-            dataset.delete_instance()
+                # Delete all related analyses
+                # Check if dataset has analyses (backref may be 'analysis_set' or similar)
+                if hasattr(dataset, "analysis_set"):
+                    for analysis in dataset.analysis_set:
+                        analysis.delete_instance()
+                        analyses_deleted += 1
+                elif hasattr(dataset, "analyses"):
+                    for analysis in dataset.analyses:
+                        analysis.delete_instance()
+                        analyses_deleted += 1
+
+                # Delete the dataset itself
+                dataset.delete_instance()
 
             # Clear current selection if it was the deleted dataset
             if self.current_dataset and self.current_dataset.id == dataset_id:
@@ -324,29 +327,37 @@ class ModanController(QObject):
                 raise ValueError("No landmarks found in file")
 
             objects = []
-            for idx, (specimen_name, landmarks) in enumerate(landmarks_data):
-                # Get expected landmark count from first object
-                first_obj = (
-                    self.current_dataset.object_list.first() if self.current_dataset.object_list.count() > 0 else None
-                )
-                expected_landmark_count = first_obj.count_landmarks() if first_obj else len(landmarks)
+            # Import all specimens from this file as one transaction so a failure
+            # part-way through does not leave the file half-imported.
+            with MdModel.gDatabase.atomic():
+                for idx, (specimen_name, landmarks) in enumerate(landmarks_data):
+                    # Get expected landmark count from first object
+                    first_obj = (
+                        self.current_dataset.object_list.first()
+                        if self.current_dataset.object_list.count() > 0
+                        else None
+                    )
+                    expected_landmark_count = first_obj.count_landmarks() if first_obj else len(landmarks)
 
-                # Validate landmark count
-                if len(landmarks) != expected_landmark_count:
-                    self.logger.warning(
-                        f"Landmark count mismatch for {specimen_name}: "
-                        f"expected {expected_landmark_count}, got {len(landmarks)}"
+                    # Validate landmark count
+                    if len(landmarks) != expected_landmark_count:
+                        self.logger.warning(
+                            f"Landmark count mismatch for {specimen_name}: "
+                            f"expected {expected_landmark_count}, got {len(landmarks)}"
+                        )
+
+                    # Create object
+                    obj = MdModel.MdObject.create(
+                        dataset=self.current_dataset,
+                        object_name=specimen_name or f"{Path(file_path).stem}_{idx + 1}",
+                        object_desc=f"Imported from {Path(file_path).name}",
+                        landmarks=landmarks,
                     )
 
-                # Create object
-                obj = MdModel.MdObject.create(
-                    dataset=self.current_dataset,
-                    object_name=specimen_name or f"{Path(file_path).stem}_{idx + 1}",
-                    object_desc=f"Imported from {Path(file_path).name}",
-                    landmarks=landmarks,
-                )
+                    objects.append(obj)
 
-                objects.append(obj)
+            # Notify observers only after the transaction has committed.
+            for obj in objects:
                 self.object_added.emit(obj)
 
             return objects
@@ -364,16 +375,16 @@ class ModanController(QObject):
             Created object
         """
         try:
-            # Create image record
-            image = MdModel.MdImage.create(file_path=file_path, dataset=self.current_dataset)
-
-            # Create object
-            obj = MdModel.MdObject.create(
-                dataset=self.current_dataset,
-                object_name=Path(file_path).stem,
-                object_desc=f"Image imported from {Path(file_path).name}",
-                image=image,
-            )
+            # Create the image record and its object together so a failure cannot
+            # leave an orphan image row.
+            with MdModel.gDatabase.atomic():
+                image = MdModel.MdImage.create(file_path=file_path, dataset=self.current_dataset)
+                obj = MdModel.MdObject.create(
+                    dataset=self.current_dataset,
+                    object_name=Path(file_path).stem,
+                    object_desc=f"Image imported from {Path(file_path).name}",
+                    image=image,
+                )
 
             self.object_added.emit(obj)
             return obj
@@ -391,19 +402,19 @@ class ModanController(QObject):
             Created object
         """
         try:
-            # Convert to OBJ format if needed
+            # Convert to OBJ format if needed (filesystem op, kept out of the txn)
             obj_path = mu.process_3d_file(file_path)
 
-            # Create 3D model record
-            model_3d = MdModel.MdThreeDModel.create(file_path=obj_path, dataset=self.current_dataset)
-
-            # Create object
-            obj = MdModel.MdObject.create(
-                dataset=self.current_dataset,
-                object_name=Path(file_path).stem,
-                object_desc=f"3D model imported from {Path(file_path).name}",
-                model_3d=model_3d,
-            )
+            # Create the 3D-model record and its object together so a failure
+            # cannot leave an orphan model row.
+            with MdModel.gDatabase.atomic():
+                model_3d = MdModel.MdThreeDModel.create(file_path=obj_path, dataset=self.current_dataset)
+                obj = MdModel.MdObject.create(
+                    dataset=self.current_dataset,
+                    object_name=Path(file_path).stem,
+                    object_desc=f"3D model imported from {Path(file_path).name}",
+                    model_3d=model_3d,
+                )
 
             self.object_added.emit(obj)
             return obj
@@ -452,7 +463,10 @@ class ModanController(QObject):
             obj = MdModel.MdObject.get_by_id(object_id)
             obj_name = obj.object_name
 
-            obj.delete_instance(recursive=True)
+            # recursive delete spans the object plus its image / 3D-model rows;
+            # keep it atomic so a failure cannot orphan child records.
+            with MdModel.gDatabase.atomic():
+                obj.delete_instance(recursive=True)
 
             # Clear current selection if it was the deleted object
             if self.current_object and self.current_object.id == object_id:

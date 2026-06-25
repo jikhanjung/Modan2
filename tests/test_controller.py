@@ -925,6 +925,26 @@ class TestDeleteOperations:
         # Verify dataset is deleted
         assert MdModel.MdDataset.select().where(MdModel.MdDataset.id == dataset_id).count() == 0
 
+    def test_delete_dataset_rolls_back_on_failure(self, controller, mock_database, sample_dataset):
+        """A failure part-way through deletion must roll back everything.
+
+        Objects are deleted in a loop before the dataset itself; because
+        delete_dataset wraps the work in a transaction, a failure on the final
+        dataset delete restores the already-deleted objects.
+        """
+        dataset_id = sample_dataset.id
+        obj_count_before = MdModel.MdObject.select().where(MdModel.MdObject.dataset == dataset_id).count()
+        assert obj_count_before > 0
+
+        # Fail on the final dataset delete, after the object loop has already run.
+        with patch.object(MdModel.MdDataset, "delete_instance", side_effect=Exception("boom")):
+            result = controller.delete_dataset(dataset_id)
+
+        assert result is False
+        # Transaction rolled back: the dataset and all its objects still exist.
+        assert MdModel.MdDataset.select().where(MdModel.MdDataset.id == dataset_id).count() == 1
+        assert MdModel.MdObject.select().where(MdModel.MdObject.dataset == dataset_id).count() == obj_count_before
+
     def test_delete_object_updates_current(self, controller, mock_database, sample_dataset):
         """Test that deleting current object clears current_object."""
         controller.set_current_dataset(sample_dataset)

@@ -222,6 +222,34 @@ class TestMdCanonicalVariate:
         # feature is constant and the groups are indistinguishable.
         assert result["accuracy"] >= 99.0
 
+    def test_cva_drops_zero_variance_column(self):
+        """A constant (zero-variance) variable is excluded from the covariance,
+        and the rotation matrix is zero in that variable's row/column.
+
+        Exercises the vectorized covariance path's `kept`-mask handling.
+        """
+        # 3 variables; the middle one is constant across all observations.
+        rng = np.random.RandomState(0)
+        data, categories = [], []
+        for offset, label in ((0.0, "A"), (8.0, "B")):
+            for _ in range(5):
+                data.append([offset + rng.randn() * 0.2, 7.0, offset * 2 + rng.randn() * 0.2])
+                categories.append(label)
+
+        cva = ms.MdCanonicalVariate()
+        cva.SetData(data)
+        cva.SetCategory(categories)
+        assert cva.Analyze() is True
+
+        rot = np.asarray(cva.rotation_matrix)
+        assert rot.shape == (3, 3)
+        # The constant variable (index 1) contributes nothing: its row and column
+        # in the rotation matrix are all zero.
+        assert np.allclose(rot[1, :], 0.0)
+        assert np.allclose(rot[:, 1], 0.0)
+        # The varying variables still carry the discriminant loading.
+        assert not np.allclose(rot[np.ix_([0, 2], [0, 2])], 0.0)
+
 
 class TestPerformFunctions:
     """Test the standalone perform functions."""

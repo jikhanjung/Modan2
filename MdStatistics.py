@@ -107,114 +107,41 @@ class MdCanonicalVariate:
 
     def Analyze(self):
         """analyze"""
-        actual_data = self.data
-        category_data = self.category_list
-        category_set = set(category_data)
-        len(category_set)
+        category_set = set(self.category_list)
+        n_cat = len(category_set)
 
-        variances = [0.0 for x in range(self.nVariable)]
-        total_avg = [0.0 for x in range(self.nVariable)]
-        total_sum = [0.0 for x in range(self.nVariable)]
+        X = numpy.asarray(self.data, dtype=float)  # (nObservation, nVariable)
         total_count = self.nObservation
+        cat_arr = numpy.asarray(self.category_list)
 
-        avg_by_category = {}
-        sum_by_category = {}
-        count_by_category = {}
-        # print "analyze"
-        for k in list(category_set):
-            count_by_category[k] = 0
-            sum_by_category[k] = [0.0 for x in range(self.nVariable)]
-            avg_by_category[k] = [0.0 for x in range(self.nVariable)]
+        total_avg = X.mean(axis=0)  # == total_sum / total_count
 
-        for i in range(total_count):
-            k = category_data[i]
-            count_by_category[k] += 1
-            for j in range(self.nVariable):
-                sum_by_category[k][j] += float(actual_data[i][j])
-                total_sum[j] += float(actual_data[i][j])
+        # Per-category sizes and means.
+        counts = {k: int((cat_arr == k).sum()) for k in category_set}
+        group_means = {k: X[cat_arr == k].mean(axis=0) for k in category_set}
 
-        for k in list(category_set):
-            for i in range(self.nVariable):
-                avg_by_category[k][i] = sum_by_category[k][i] / count_by_category[k]
-                # print k, sum_by_category[k], avg_by_category[k]
+        # Variables with zero total variance are dropped from the covariance
+        # matrices (and later zeroed in the rotation matrix), exactly as the
+        # original per-element loops did.
+        variances = ((X - total_avg) ** 2).sum(axis=0)
+        kept = variances != 0
+        kept_idx = numpy.where(kept)[0]
 
-        for i in range(self.nVariable):
-            total_avg[i] = total_sum[i] * 1.0 / total_count
-        # print total_sum, total_avg
+        # Within-group covariance: center each observation on its own group mean,
+        # then S^T S / (n - groups).  (Vectorizes the old idx*p*q triple loop.)
+        group_mean_per_obs = numpy.array([group_means[c] for c in cat_arr])  # (nObs, nVar)
+        within_dev = X - group_mean_per_obs
+        within_full = (within_dev.T @ within_dev) / (total_count - n_cat)
 
-        """ check zero variance variables """
-        for p in range(self.nVariable):
-            for idx in range(self.nObservation):
-                variances[p] += (float(actual_data[idx][p]) - total_avg[p]) ** 2
+        # Between-group covariance: group-mean deviations weighted by group size,
+        # summed over categories and divided by the number of categories.
+        dev = numpy.array([group_means[k] - total_avg for k in category_set])  # (n_cat, nVar)
+        weights = numpy.array([counts[k] for k in category_set], dtype=float)  # (n_cat,)
+        between_full = (dev.T * weights) @ dev / n_cat
 
-        covariance_matrix_size = 0
-        for p in range(self.nVariable):
-            if variances[p] == 0:
-                pass
-                # print "variance = 0 for ", p, "th variable"
-            else:
-                covariance_matrix_size += 1
-        # print "covariance_matrix_size", covariance_matrix_size
-
-        covariance_matrix = [[0.0 for x in range(covariance_matrix_size)] for y in range(covariance_matrix_size)]
-        p_ = 0
-        for p in range(self.nVariable):
-            if variances[p] == 0:
-                continue
-            q_ = 0
-            for q in range(self.nVariable):
-                if variances[q] == 0:
-                    continue
-                for idx in range(self.nObservation):
-                    diff_p = float(actual_data[idx][p]) - total_avg[p]
-                    diff_q = float(actual_data[idx][q]) - total_avg[q]
-                    # print p_, q_
-                    covariance_matrix[p_][q_] += diff_p * diff_q / (total_count - 1)
-                q_ += 1
-            p_ += 1
-
-        within_cov = [[0.0 for x in range(covariance_matrix_size)] for y in range(covariance_matrix_size)]
-        between_cov = [[0.0 for x in range(covariance_matrix_size)] for y in range(covariance_matrix_size)]
-
-        within_by_category = {}
-        between_by_category = {}
-        for key in list(category_set):
-            within_by_category[key] = [0.0 for x in range(covariance_matrix_size)]
-            between_by_category[key] = [0.0 for x in range(covariance_matrix_size)]
-
-        p_ = 0
-        for p in range(self.nVariable):
-            if variances[p] == 0:
-                continue
-            q_ = 0
-            for q in range(self.nVariable):
-                if variances[q] == 0:
-                    continue
-                for idx in range(self.nObservation):
-                    key = category_data[idx]
-                    diff_p = float(actual_data[idx][p]) - avg_by_category[key][p]
-                    diff_q = float(actual_data[idx][q]) - avg_by_category[key][q]
-                    within_cov[p_][q_] += diff_p * diff_q / (total_count - len(category_set))
-                q_ += 1
-            p_ += 1
-
-        p_ = 0
-        for p in range(self.nVariable):
-            if variances[p] == 0:
-                continue
-            q_ = 0
-            for q in range(self.nVariable):
-                if variances[q] == 0:
-                    continue
-                for key in list(category_set):
-                    diff_p = avg_by_category[key][p] - total_avg[p]
-                    diff_q = avg_by_category[key][q] - total_avg[q]
-                    between_cov[p_][q_] += diff_p * diff_q * count_by_category[key] / len(category_set)
-                q_ += 1
-            p_ += 1
-
-        w = numpy.array(within_cov)
-        b = numpy.array(between_cov)
+        # Restrict both to the kept (non-zero-variance) variables.
+        w = within_full[numpy.ix_(kept, kept)]
+        b = between_full[numpy.ix_(kept, kept)]
 
         try:
             # Pseudo-inverse, not inv(): the within-group covariance is routinely
@@ -236,28 +163,13 @@ class MdCanonicalVariate:
         self.raw_eigen_values = s.copy()
         self.eigen_value_percentages = s / s.sum()
 
+        # Scatter the kept-variable singular vectors back into the full-size
+        # rotation matrix; zero-variance variables stay at zero.
         rotation_matrix = numpy.zeros((self.nVariable, self.nVariable))
-
-        p_ = 0
-        for p in range(self.nVariable):
-            q_ = 0
-            for q in range(self.nVariable):
-                if variances[p] == 0 or variances[q] == 0:
-                    rotation_matrix[p, q] = 0.0
-                else:
-                    rotation_matrix[p, q] = u[p_, q_]
-                if variances[q] != 0:
-                    q_ += 1
-            if variances[p] != 0:
-                p_ += 1
-
-        np_data = numpy.zeros((self.nObservation, self.nVariable))
-        for p in range(self.nObservation):
-            for q in range(self.nVariable):
-                np_data[p, q] = float(actual_data[p][q])
+        rotation_matrix[numpy.ix_(kept_idx, kept_idx)] = u
 
         self.rotation_matrix = rotation_matrix
-        self.rotated_matrix = numpy.dot(np_data, rotation_matrix)
+        self.rotated_matrix = numpy.dot(X, rotation_matrix)
         self.loading = rotation_matrix
         return True
 

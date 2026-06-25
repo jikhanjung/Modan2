@@ -245,7 +245,7 @@ class ImportDatasetDialog(BaseDialog):
             else:
                 self.rb3D.setChecked(True)
         except Exception as e:
-            QMessageBox.critical(self, self.tr("Import"), self.tr("Failed to read package: ") + str(e))
+            QMessageBox.critical(self, self.tr("Import"), self.tr("Failed to read package: {}").format(e))
 
     def _handle_unsupported_file(self):
         """Handle unsupported file type."""
@@ -353,13 +353,13 @@ class ImportDatasetDialog(BaseDialog):
             new_ds_id = mu.import_dataset_from_zip(filename, progress_callback=progress_callback)
             self.prgImport.setValue(100)
             QMessageBox.information(
-                self, self.tr("Import"), self.tr("Import completed (Dataset ID: ") + str(new_ds_id) + ")"
+                self, self.tr("Import"), self.tr("Import completed (Dataset ID: {})").format(new_ds_id)
             )
             if hasattr(self.parent, "load_dataset"):
                 self.parent.load_dataset()
             self.close()
         except Exception as e:
-            QMessageBox.critical(self, self.tr("Import"), self.tr("Import failed: ") + str(e))
+            QMessageBox.critical(self, self.tr("Import"), self.tr("Import failed: {}").format(e))
 
     def _execute_import(self, import_data, datasetname, filetype):
         """Execute import from parsed data.
@@ -394,7 +394,7 @@ class ImportDatasetDialog(BaseDialog):
             self.update_progress(int(float(i + 1) * 100.0 / float(import_data.nobjects)))
 
         # Show completion message
-        QMessageBox.information(self, self.tr("Import"), self.tr(f"Finished importing a {filetype} file."))
+        QMessageBox.information(self, self.tr("Import"), self.tr("Finished importing a {} file.").format(filetype))
         if hasattr(self.parent, "load_dataset"):
             self.parent.load_dataset()
         self.close()
@@ -468,7 +468,7 @@ class ImportDatasetDialog(BaseDialog):
             value: Progress value (0-100)
         """
         self.prgImport.setValue(value)
-        self.prgImport.setFormat(self.tr(f"Importing...{value}%"))
+        self.prgImport.setFormat(self.tr("Importing...{}%").format(value))
         self.prgImport.update()
         self.prgImport.repaint()
         QApplication.processEvents()

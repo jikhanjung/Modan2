@@ -243,14 +243,14 @@ def process_3d_file(file_name):
         except Exception as e:
             logger = logging.getLogger(__name__)
             logger.error(f"Failed to export STL mesh to {new_file_name}: {e}")
-            raise ValueError(f"Cannot export to OBJ file {new_file_name}: {e}")
+            raise ValueError(f"Cannot export to OBJ file {new_file_name}: {e}") from e
     elif file_extension == "ply":
         try:
             ply_mesh = trimesh.load(file_name)
         except Exception as e:
             logger = logging.getLogger(__name__)
             logger.error(f"Failed to load PLY mesh from {file_name}: {e}")
-            raise ValueError(f"Cannot load PLY file {file_name}: {e}")
+            raise ValueError(f"Cannot load PLY file {file_name}: {e}") from e
         # print("ply_mesh shape:", ply_mesh.vertices.shape)
         # print("ply_mesh vertices:", ply_mesh.vertices[0:5,:])
         # print("ply_mesh faces:", ply_mesh.faces[0:5,:])
@@ -259,7 +259,7 @@ def process_3d_file(file_name):
         except Exception as e:
             logger = logging.getLogger(__name__)
             logger.error(f"Failed to export PLY mesh to {new_file_name}: {e}")
-            raise ValueError(f"Cannot export to OBJ file {new_file_name}: {e}")
+            raise ValueError(f"Cannot export to OBJ file {new_file_name}: {e}") from e
     return new_file_name
 
 
@@ -330,7 +330,7 @@ def read_landmark_file(file_path):
         except UnicodeDecodeError as e:
             logger = logging.getLogger(__name__)
             logger.error(f"Encoding error reading {file_path}: {e}")
-            raise ValueError(f"Cannot decode file {file_path}. Please check file encoding.")
+            raise ValueError(f"Cannot decode file {file_path}. Please check file encoding.") from e
 
     raise ValueError(f"Unsupported landmark file format: {file_ext}")
 
@@ -360,10 +360,10 @@ def read_tps_file(file_path):
 
                     try:
                         int(line.split("=")[1])
-                    except (ValueError, IndexError):
+                    except (ValueError, IndexError) as e:
                         logger = logging.getLogger(__name__)
                         logger.error(f"Invalid LM line in {file_path}: {line}")
-                        raise ValueError(f"Malformed TPS file: invalid LM line '{line}'")
+                        raise ValueError(f"Malformed TPS file: invalid LM line '{line}'") from e
                     current_landmarks = []
                     current_name = ""
 
@@ -397,11 +397,11 @@ def read_tps_file(file_path):
     except UnicodeDecodeError as e:
         logger = logging.getLogger(__name__)
         logger.error(f"Encoding error reading TPS file {file_path}: {e}")
-        raise ValueError(f"Cannot decode TPS file {file_path}. Please check file encoding.")
+        raise ValueError(f"Cannot decode TPS file {file_path}. Please check file encoding.") from e
     except Exception as e:
         logger = logging.getLogger(__name__)
         logger.error(f"Unexpected error reading TPS file {file_path}: {e}")
-        raise ValueError(f"Failed to read TPS file {file_path}: {e}")
+        raise ValueError(f"Failed to read TPS file {file_path}: {e}") from e
 
     return specimens
 
@@ -427,7 +427,7 @@ def read_nts_file(file_path):
     except UnicodeDecodeError as e:
         logger = logging.getLogger(__name__)
         logger.error(f"Encoding error reading NTS file {file_path}: {e}")
-        raise ValueError(f"Cannot decode NTS file {file_path}. Please check file encoding.")
+        raise ValueError(f"Cannot decode NTS file {file_path}. Please check file encoding.") from e
 
     try:
         i = 0
@@ -441,10 +441,10 @@ def read_nts_file(file_path):
                     n_specimens = int(parts[0])
                     n_landmarks = int(parts[1])
                     int(parts[2])
-                except (ValueError, IndexError):
+                except (ValueError, IndexError) as e:
                     logger = logging.getLogger(__name__)
                     logger.error(f"Invalid NTS header in {file_path}: {line}")
-                    raise ValueError(f"Malformed NTS file: invalid header '{line}'")
+                    raise ValueError(f"Malformed NTS file: invalid header '{line}'") from e
 
                 for _spec_idx in range(n_specimens):
                     i += 1
@@ -475,7 +475,7 @@ def read_nts_file(file_path):
     except Exception as e:
         logger = logging.getLogger(__name__)
         logger.error(f"Error parsing NTS file {file_path}: {e}")
-        raise ValueError(f"Failed to parse NTS file {file_path}: {e}")
+        raise ValueError(f"Failed to parse NTS file {file_path}: {e}") from e
 
     return specimens
 

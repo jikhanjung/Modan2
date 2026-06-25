@@ -367,7 +367,7 @@ class ModanController(QObject):
             return objects
 
         except Exception as e:
-            raise ValueError(f"Failed to read landmark file: {str(e)}")
+            raise ValueError(f"Failed to read landmark file: {str(e)}") from e
 
     def _import_image_file(self, file_path: str) -> MdModel.MdObject:
         """Import image file.
@@ -396,7 +396,7 @@ class ModanController(QObject):
             return obj
 
         except Exception as e:
-            raise ValueError(f"Failed to import image: {str(e)}")
+            raise ValueError(f"Failed to import image: {str(e)}") from e
 
     def _import_3d_file(self, file_path: str) -> MdModel.MdObject:
         """Import 3D model file.
@@ -428,7 +428,7 @@ class ModanController(QObject):
             return obj
 
         except Exception as e:
-            raise ValueError(f"Failed to import 3D model: {str(e)}")
+            raise ValueError(f"Failed to import 3D model: {str(e)}") from e
 
     def update_object(self, object_id: int, **updates) -> bool:
         """Update object properties.
@@ -903,7 +903,7 @@ class ModanController(QObject):
             return result
 
         except Exception as e:
-            raise ValueError(f"PCA analysis failed: {str(e)}")
+            raise ValueError(f"PCA analysis failed: {str(e)}") from e
 
     def _run_cva(self, landmarks_data: list[list], params: dict[str, Any]) -> dict[str, Any]:
         """Run CVA analysis.
@@ -939,7 +939,7 @@ class ModanController(QObject):
             }
 
         except Exception as e:
-            raise ValueError(f"CVA analysis failed: {str(e)}")
+            raise ValueError(f"CVA analysis failed: {str(e)}") from e
 
     def _run_manova(self, landmarks_data: list[list], params: dict[str, Any]) -> dict[str, Any]:
         """Run MANOVA analysis.
@@ -1046,7 +1046,7 @@ class ModanController(QObject):
             return final_result
 
         except Exception as e:
-            raise ValueError(f"MANOVA analysis failed: {str(e)}")
+            raise ValueError(f"MANOVA analysis failed: {str(e)}") from e
 
     def delete_analysis(self, analysis_id: int) -> bool:
         """Delete analysis result.

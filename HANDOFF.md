@@ -1,20 +1,30 @@
 # Handoff
 
-## ▶ Next up: Batch C (structural refactor)
+## ▶ Next up: Batch C is DONE — remaining is deferred MEDIUM / LOW
 
-The remaining R01 work is **Batch C — the structural refactor**, which has not
-been started. It is large and multi-file, so tackle it **one item at a time**,
-each on its own commit + devlog, keeping `pytest` green and `ruff check .` clean.
+**Batch C (structural refactor) is complete** (devlog 176–193, on `main`). All four
+items landed one-at-a-time, each with a matching devlog, `pytest` green
+(**1219 passed, 74 skipped**) and `ruff` clean:
 
-See **`TODOs.md`** for the full checklist (Batch C items, deferred MEDIUM, LOW).
+1. **God-methods decomposed** — `run_analysis` (176–178, clears the type-overloaded
+   return), `prepare_scatter_data` (179–180), `read_settings` (185–186),
+   `DatasetAnalysisDialog.__init__` (187), `ObjectDialog.__init__` (188).
+2. **Shared scatter helpers** (181–184) — `build_scatter_group` + `build_scatter_legend`
+   in `dialogs/scatter_utils.py`. The monolithic "shared builder" in the old TODO was
+   deliberately **not** built (divergent data sources/semantics — see devlog 181).
+3. **Dialog DB/file I/O → `ModanController`** (189–191) — `save_object`,
+   `delete_object_with_files`, `import_dataset`.
+4. **read_settings / color-marker hoist** (192–193) — `BaseDialog._restore_geometry`
+   + module-level `load_color_marker_lists`.
 
-Batch C at a glance:
-1. Decompose god-methods (`run_analysis`, `read_settings`, the big dialog
-   `__init__`s, `prepare_scatter_data`) — `run_analysis` also clears the
-   type-overloaded-return smell.
-2. Extract a shared scatter-plot builder (dataset_analysis ↔ data_exploration).
-3. Move DB/file I/O out of dialogs into `ModanController`.
-4. Hoist duplicated `read_settings`/color-marker loading into `BaseDialog`.
+New test coverage added for previously-untested areas (golden-master for
+`prepare_scatter_data`, smoke test for `DatasetAnalysisDialog.show_analysis_result`,
+`SettingsWrapper`, controller object/import I/O).
+
+**What's left** (see `TODOs.md`): only the deliberately-deferred **MEDIUM** and
+**LOW** items, plus the latent bugs surfaced during Batch C that were intentionally
+left for a separate **R02** fix pass (e.g. the `analysis_type == "PCA"` vs `.upper()`
+inconsistency, the triple min-object validation thresholds). Next devlog number: **194**.
 
 ---
 
@@ -23,12 +33,12 @@ Batch C at a glance:
 - **Entry point**: `python main.py` (not `Modan2.py`, which is an imported module
   with no `__main__`). On Linux/WSL use `python fix_qt_import.py` for Qt plugin
   issues.
-- **Before committing**: `pytest` (currently **1196 passed, 74 skipped**),
+- **Before committing**: `pytest` (currently **1219 passed, 74 skipped**),
   `ruff check .` + `ruff format .` (clean repo-wide).
 - **Review source of truth**:
   `devlog/20260625_R01_code_review_legacy_and_db_patterns.md`.
 - **Convention**: one logical change per commit, each with a matching
-  implementation devlog `devlog/YYYYMMDD_NNN_title.md` (next number: **176**).
+  implementation devlog `devlog/YYYYMMDD_NNN_title.md` (next number: **194**).
   Doc types: `P##` plan, `NNN` implementation, `R##` review.
 
 ## What was completed on 2026-06-25 (R01 cleanup)

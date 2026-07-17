@@ -1637,45 +1637,59 @@ class DataExplorationDialog(QDialog):
         self.ignore_change = False
 
     def prepare_scatter_data(self):
-        show_shape_grid = self.cbxShapeGrid.isChecked()
-        show_convex_hull = self.cbxConvexHull.isChecked()
-        show_confidence_ellipse = self.cbxConfidenceEllipse.isChecked()
-        self.comboRegressionBasedOn.currentText()
-        # regression_by = self.comboRegressionBy.currentText()
-        self.cbxRegression.isChecked()
+        """Build the scatter/regression/average-shape data structures for the plot.
 
+        Orchestrates the phase helpers below; each mutates the ``self.scatter_data``
+        / ``average_shape`` / ``regression_data`` / ``data_range`` / ``shape_grid``
+        state in place. See ``tests/dialogs/test_data_exploration_scatter.py`` for
+        the golden-master pinning this output.
+        """
+        opts = self._read_scatter_options()
+
+        self._resolve_scatter_variables()
+        color_candidate = self.color_list[:]
+        symbol_candidate = self.marker_list[:]
+        scatter_size = 50  # SCATTER_MEDIUM_SIZE
+
+        self._init_scatter_containers(scatter_size, color_candidate[0])
+        self._populate_scatter_groups(opts, scatter_size)
+
+        if opts["show_shape_grid"]:
+            self._build_shape_grid()
+
+        self._finalize_scatter_groups(opts, color_candidate, symbol_candidate)
+
+    def _read_scatter_options(self):
+        """Read the plot option widgets (checkboxes, axes, flips) into a dict."""
         select_group_list = []
         for i in range(self.comboSelectGroup.count()):
             item = self.comboSelectGroup.model().item(i)
             if item.checkState() == Qt.Checked:
                 select_group_list.append(item.text())
-        # print("select_group_list", select_group_list)
 
-        # regression_by_group = self.rbByGroup.isChecked()
-        # regression_all_at_once = self.rbAllAtOnce.isChecked()
+        return {
+            "show_shape_grid": self.cbxShapeGrid.isChecked(),
+            "show_convex_hull": self.cbxConvexHull.isChecked(),
+            "show_confidence_ellipse": self.cbxConfidenceEllipse.isChecked(),
+            "select_group_list": select_group_list,
+            "axis1": self.comboAxis1.currentData(),
+            "axis2": self.comboAxis2.currentData(),
+            "axis3": self.comboAxis3.currentData(),
+            "flip_axis1": -1.0 if self.cbxFlipAxis1.isChecked() else 1.0,
+            "flip_axis2": -1.0 if self.cbxFlipAxis2.isChecked() else 1.0,
+            "flip_axis3": -1.0 if self.cbxFlipAxis3.isChecked() else 1.0,
+        }
 
-        axis1 = self.comboAxis1.currentData()
-        axis2 = self.comboAxis2.currentData()
-        axis3 = self.comboAxis3.currentData()
-        flip_axis1 = -1.0 if self.cbxFlipAxis1.isChecked() else 1.0
-        flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() else 1.0
-        flip_axis3 = -1.0 if self.cbxFlipAxis3.isChecked() else 1.0
-
+    def _resolve_scatter_variables(self):
+        """Resolve the grouping/regression variable names to column indices."""
         if self.analysis.propertyname_str:
             self.variablename_list = self.analysis.propertyname_str.split(",")
         else:
             # Fallback to dataset's variable names if analysis doesn't have them
             self.variablename_list = self.analysis.dataset.get_variablename_list()
-        symbol_candidate = ["o", "s", "^", "x", "+", "d", "v", "<", ">", "p", "h"]
-        symbol_candidate = self.marker_list[:]
-        color_candidate = ["blue", "green", "black", "cyan", "magenta", "yellow", "gray", "red"]
-        color_candidate = self.color_list[:]
-        # print("color list:", self.color_list, "marker list:", self.marker_list)
-        # print("color candidate:", color_candidate, "symbol candidate:", symbol_candidate)
 
         scatter_variable_name = self.comboGroupBy.currentText()
         regression_variable_name = self.comboRegressionBasedOn.currentText()
-
         self.scatter_variable_index = (
             self.variablename_list.index(scatter_variable_name)
             if scatter_variable_name in self.variablename_list
@@ -1686,12 +1700,13 @@ class DataExplorationDialog(QDialog):
             if regression_variable_name in self.variablename_list
             else -1
         )
+
+    def _init_scatter_containers(self, scatter_size, default_color):
+        """Reset the scatter/average/regression stores and seed ``__default__``."""
         self.scatter_data = {}
         self.scatter_result = {}
         self.average_shape = {}
         self.regression_data = {}
-        # self.regression_data = { 'x_val':[], 'y_val':[], 'z_val':[] }
-        # self.shape_grid = {}
         self.data_range = {
             "x_min": 99999,
             "x_max": -99999,
@@ -1706,25 +1721,14 @@ class DataExplorationDialog(QDialog):
             "y_avg": 0,
             "z_avg": 0,
         }
-        SCATTER_MEDIUM_SIZE = 50
-        scatter_size = SCATTER_MEDIUM_SIZE
-        # if self.plot_size.lower() == 'small':
-        #    scatter_size = SCATTER_SMALL_SIZE
-        # elif self.plot_size.lower() == 'medium':
-        #    scatter_size = SCATTER_MEDIUM_SIZE
-        # elif self.plot_size.lower() == 'large':
-        #    scatter_size = SCATTER_LARGE_SIZE
 
-        # print("removing shape grid")
+        # Drop any existing shape-grid views before they get rebuilt.
         for scatter_key_name in self.shape_grid.keys():
-            # print("removing shape grid", key_name)
             if self.shape_grid[scatter_key_name]["view"] is not None:
                 self.shape_grid[scatter_key_name]["view"].hide()
                 self.shape_grid[scatter_key_name]["view"].deleteLater()
                 self.shape_grid[scatter_key_name]["view"] = None
 
-        key_list = []
-        key_list.append("__default__")
         self.scatter_data["__default__"] = {
             "x_val": [],
             "y_val": [],
@@ -1734,7 +1738,7 @@ class DataExplorationDialog(QDialog):
             "text": [],
             "property": "",
             "symbol": "o",
-            "color": color_candidate[0],
+            "color": default_color,
             "size": scatter_size,
         }
         self.average_shape["__default__"] = {
@@ -1746,7 +1750,7 @@ class DataExplorationDialog(QDialog):
             "text": [],
             "property": "",
             "symbol": "o",
-            "color": color_candidate[0],
+            "color": default_color,
             "size": scatter_size,
         }
         self.regression_data["__default__"] = {
@@ -1758,11 +1762,19 @@ class DataExplorationDialog(QDialog):
             "text": [],
             "property": "",
             "symbol": "o",
-            "color": color_candidate[0],
+            "color": default_color,
             "size": scatter_size,
         }
-        # regression_key_name = ''
-        # scatter_key_name = ''
+
+    def _populate_scatter_groups(self, opts, scatter_size):
+        """Distribute each object into its scatter/regression group and accumulate
+        the x/y/z values and running data range."""
+        axis1 = opts["axis1"]
+        axis2 = opts["axis2"]
+        axis3 = opts["axis3"]
+        flip_axis1 = opts["flip_axis1"]
+        flip_axis2 = opts["flip_axis2"]
+        flip_axis3 = opts["flip_axis3"]
 
         for idx, obj in enumerate(self.object_info_list):
             scatter_key_name = "__default__"
@@ -1812,30 +1824,21 @@ class DataExplorationDialog(QDialog):
                 }
 
             if axis1 == CENTROID_SIZE_VALUE:
-                # print("obj:", obj)
                 self.scatter_data[scatter_key_name]["x_val"].append(obj["csize"])
                 self.regression_data[regression_key_name]["x_val"].append(obj["csize"])
-                # if regression_by == 'All' or ( regression_by == 'Select group' and scatter_key_name in select_group_list ):
-                #    self.regression_data['x_val'].append(obj['csize'])
             else:
                 self.scatter_data[scatter_key_name]["x_val"].append(flip_axis1 * self.analysis_result_list[idx][axis1])
                 self.regression_data[regression_key_name]["x_val"].append(
                     flip_axis1 * self.analysis_result_list[idx][axis1]
                 )
-                # if regression_by == 'All' or ( regression_by == 'Select group' and scatter_key_name in select_group_list ):
-                #    self.regression_data['x_val'].append(flip_axis1 * self.analysis_result_list[idx][axis1])
             self.scatter_data[scatter_key_name]["y_val"].append(flip_axis2 * self.analysis_result_list[idx][axis2])
             self.regression_data[regression_key_name]["y_val"].append(
                 flip_axis2 * self.analysis_result_list[idx][axis2]
             )
-            # if regression_by == 'All' or ( regression_by == 'Select group' and scatter_key_name in select_group_list ):
-            #    self.regression_data['y_val'].append(flip_axis2 * self.analysis_result_list[idx][axis2])
             self.scatter_data[scatter_key_name]["z_val"].append(flip_axis3 * self.analysis_result_list[idx][axis3])
             self.regression_data[regression_key_name]["z_val"].append(
                 flip_axis3 * self.analysis_result_list[idx][axis3]
             )
-            # if regression_by == 'All' or ( regression_by == 'Select group' and scatter_key_name in select_group_list ):
-            #    self.regression_data['z_val'].append(flip_axis3 * self.analysis_result_list[idx][axis3])
 
             self.scatter_data[scatter_key_name]["data"].append(obj)
             self.regression_data[regression_key_name]["data"].append(obj)
@@ -1850,25 +1853,29 @@ class DataExplorationDialog(QDialog):
             self.data_range["z_min"] = min(self.data_range["z_min"], self.scatter_data[scatter_key_name]["z_val"][-1])
             self.data_range["z_sum"] += self.scatter_data[scatter_key_name]["z_val"][-1]
 
-        if show_shape_grid:
-            self.data_range["x_avg"] = self.data_range["x_sum"] / len(self.object_info_list)
-            self.data_range["y_avg"] = self.data_range["y_sum"] / len(self.object_info_list)
-            x_key_list = ["x_min", "x_avg", "x_max"]
-            y_key_list = ["y_min", "y_avg", "y_max"]
-            for x_key in x_key_list:
-                for y_key in y_key_list:
-                    scatter_key_name = x_key + "_" + y_key
-                    self.shape_grid[scatter_key_name] = {
-                        "x_val": self.data_range[x_key],
-                        "y_val": self.data_range[y_key],
-                    }
-                    if self.analysis.dataset.dimension == 3:
-                        self.shape_grid[scatter_key_name]["view"] = ObjectViewer3D(parent=None, transparent=True)
-                    else:
-                        self.shape_grid[scatter_key_name]["view"] = ObjectViewer2D(parent=None, transparent=True)
-                        self.shape_grid[scatter_key_name]["view"].show_index = False
-                    self.shape_grid[scatter_key_name]["view"].set_object_name(scatter_key_name)
+    def _build_shape_grid(self):
+        """Build the 3x3 min/avg/max shape-grid views over the current data range."""
+        self.data_range["x_avg"] = self.data_range["x_sum"] / len(self.object_info_list)
+        self.data_range["y_avg"] = self.data_range["y_sum"] / len(self.object_info_list)
+        x_key_list = ["x_min", "x_avg", "x_max"]
+        y_key_list = ["y_min", "y_avg", "y_max"]
+        for x_key in x_key_list:
+            for y_key in y_key_list:
+                scatter_key_name = x_key + "_" + y_key
+                self.shape_grid[scatter_key_name] = {
+                    "x_val": self.data_range[x_key],
+                    "y_val": self.data_range[y_key],
+                }
+                if self.analysis.dataset.dimension == 3:
+                    self.shape_grid[scatter_key_name]["view"] = ObjectViewer3D(parent=None, transparent=True)
+                else:
+                    self.shape_grid[scatter_key_name]["view"] = ObjectViewer2D(parent=None, transparent=True)
+                    self.shape_grid[scatter_key_name]["view"].show_index = False
+                self.shape_grid[scatter_key_name]["view"].set_object_name(scatter_key_name)
 
+    def _finalize_scatter_groups(self, opts, color_candidate, symbol_candidate):
+        """Drop the empty default group, compute average shapes, optional convex
+        hull / confidence ellipse, and assign colours + symbols per group."""
         # remove empty group
         if len(self.scatter_data["__default__"]["x_val"]) == 0:
             del self.scatter_data["__default__"]
@@ -1879,10 +1886,8 @@ class DataExplorationDialog(QDialog):
             self.average_shape[scatter_key_name]["x_val"] = np.mean(self.scatter_data[scatter_key_name]["x_val"])
             self.average_shape[scatter_key_name]["y_val"] = np.mean(self.scatter_data[scatter_key_name]["y_val"])
             self.average_shape[scatter_key_name]["z_val"] = np.mean(self.scatter_data[scatter_key_name]["z_val"])
-            # group_hash[key_name]['text'].append(obj.object_name)
-            # group_hash[key_name]['hoverinfo'].append(obj.id)
 
-        if show_convex_hull:
+        if opts["show_convex_hull"]:
             for scatter_key_name in self.scatter_data.keys():
                 if len(self.scatter_data[scatter_key_name]["x_val"]) > 1:
                     self.scatter_data[scatter_key_name]["points"] = np.array(
@@ -1891,7 +1896,7 @@ class DataExplorationDialog(QDialog):
                     hull = ConvexHull(self.scatter_data[scatter_key_name]["points"])
                     self.scatter_data[scatter_key_name]["hull"] = hull
 
-        if show_confidence_ellipse:
+        if opts["show_confidence_ellipse"]:
             for scatter_key_name in self.scatter_data.keys():
                 if len(self.scatter_data[scatter_key_name]["x_val"]) > 1:
                     covariance = np.cov(
@@ -1907,19 +1912,15 @@ class DataExplorationDialog(QDialog):
             return
 
         # assign color and symbol
-        # sc_idx = 0
         for sc_idx, scatter_key_name in enumerate(self.scatter_data.keys()):
             if self.scatter_data[scatter_key_name]["color"] == "":
                 self.scatter_data[scatter_key_name]["color"] = color_candidate[sc_idx % len(color_candidate)]
                 self.scatter_data[scatter_key_name]["symbol"] = symbol_candidate[sc_idx % len(symbol_candidate)]
-                # sc_idx += 1
 
-        # rg_idx = 0
         for rg_idx, regression_key_name in enumerate(self.regression_data.keys()):
             if self.regression_data[regression_key_name]["color"] == "":
                 self.regression_data[regression_key_name]["color"] = color_candidate[rg_idx % len(color_candidate)]
                 self.regression_data[regression_key_name]["symbol"] = symbol_candidate[rg_idx % len(symbol_candidate)]
-                # sc_idx += 1
 
     def calculate_fit(self):
         # self.scatter_data[key_name]['y_val']

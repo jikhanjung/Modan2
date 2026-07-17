@@ -620,163 +620,17 @@ class ModanController(QObject):
 
             self.analysis_progress.emit(75)
 
-            # Convert group_by indices to variable names for storage
-            variablename_list = self.current_dataset.get_variablename_list()
-            cva_group_by_name = None
-            manova_group_by_name = None
-
-            if cva_group_by is not None and isinstance(cva_group_by, int):
-                if 0 <= cva_group_by < len(variablename_list):
-                    cva_group_by_name = variablename_list[cva_group_by]
-                    self.logger.info(f"CVA group_by: index {cva_group_by} -> variable '{cva_group_by_name}'")
-            elif cva_group_by is not None:
-                # If it's already a string, use it directly
-                cva_group_by_name = str(cva_group_by)
-
-            if manova_group_by is not None and isinstance(manova_group_by, int):
-                if 0 <= manova_group_by < len(variablename_list):
-                    manova_group_by_name = variablename_list[manova_group_by]
-                    self.logger.info(f"MANOVA group_by: index {manova_group_by} -> variable '{manova_group_by_name}'")
-            elif manova_group_by is not None:
-                # If it's already a string, use it directly
-                manova_group_by_name = str(manova_group_by)
-
-            # Create analysis record with JSON data
-            analysis = MdModel.MdAnalysis.create(
-                dataset=self.current_dataset,
-                analysis_name=analysis_name or f"{analysis_type}_Analysis",
-                superimposition_method=superimposition_method or "Procrustes",
-                cva_group_by=cva_group_by_name,
-                manova_group_by=manova_group_by_name,
-                propertyname_str=self.current_dataset.propertyname_str,
-                dimension=self.current_dataset.dimension,
-                wireframe=self.current_dataset.wireframe,
-                baseline=self.current_dataset.baseline,
-                polygons=self.current_dataset.polygons,
+            analysis = self._persist_analysis_results(
+                analysis_type=analysis_type,
+                analysis_name=analysis_name,
+                superimposition_method=superimposition_method,
+                cva_group_by=cva_group_by,
+                manova_group_by=manova_group_by,
+                result=result,
+                cva_result=cva_result,
+                manova_result=manova_result,
+                ds_ops=ds_ops,
             )
-
-            # Generate and save JSON data for analysis results
-            try:
-                import json
-
-                # Generate object info JSON
-                object_info_list = []
-                raw_landmark_list = []
-                property_len = len(self.current_dataset.get_variablename_list()) or 0
-                object_list = self.current_dataset.object_list.order_by(MdModel.MdObject.sequence)
-
-                for obj in object_list:
-                    raw_landmark_list.append(obj.get_landmark_list())
-                    object_info_list.append(
-                        {
-                            "id": obj.id,
-                            "name": obj.object_name,
-                            "sequence": obj.sequence,
-                            "csize": obj.get_centroid_size(),
-                            "variable_list": obj.get_variable_list()[:property_len],
-                        }
-                    )
-
-                analysis.raw_landmark_json = json.dumps(raw_landmark_list)
-                analysis.object_info_json = json.dumps(object_info_list)
-
-                # Save superimposed landmark data (using current landmarks)
-                superimposed_landmark_list = []
-                for obj in ds_ops.object_list:  # Use superimposed objects from ds_ops
-                    superimposed_landmark_list.append(obj.landmark_list)
-                analysis.superimposed_landmark_json = json.dumps(superimposed_landmark_list)
-
-                # Save analysis results based on type
-                if analysis_type == "PCA" and result:
-                    self.logger.debug(f"PCA result keys: {list(result.keys())}")
-                    if "scores" in result:
-                        scores_shape = f"{len(result['scores'])}x{len(result['scores'][0]) if result['scores'] and len(result['scores']) > 0 else 0}"
-                        self.logger.debug(f"Saving PCA scores shape: {scores_shape}")
-                        analysis.pca_analysis_result_json = json.dumps(result["scores"])
-                    if "rotation_matrix" in result:
-                        analysis.pca_rotation_matrix_json = json.dumps(result["rotation_matrix"])
-                    elif "eigenvectors" in result:
-                        # Fallback to eigenvectors if rotation_matrix not available
-                        analysis.pca_rotation_matrix_json = json.dumps(result["eigenvectors"])
-                    if "eigenvalues" in result and "explained_variance_ratio" in result:
-                        eigenvalues_list = []
-                        for i, val in enumerate(result["eigenvalues"]):
-                            variance_ratio = (
-                                result["explained_variance_ratio"][i]
-                                if i < len(result["explained_variance_ratio"])
-                                else 0
-                            )
-                            eigenvalues_list.append([val, variance_ratio])
-                        analysis.pca_eigenvalues_json = json.dumps(eigenvalues_list)
-
-                    # Save CVA results if available (from comprehensive analysis)
-                    if cva_result:
-                        self.logger.debug(f"Saving CVA results: keys={list(cva_result.keys())}")
-                        # CVA uses 'canonical_variables' instead of 'scores'
-                        if "canonical_variables" in cva_result:
-                            analysis.cva_analysis_result_json = json.dumps(cva_result["canonical_variables"])
-                            self.logger.debug(
-                                f"CVA canonical variables saved: {len(cva_result['canonical_variables'])} objects"
-                            )
-                        elif "scores" in cva_result:
-                            analysis.cva_analysis_result_json = json.dumps(cva_result["scores"])
-                            self.logger.debug(f"CVA scores saved: {len(cva_result['scores'])} objects")
-
-                        if "eigenvectors" in cva_result:
-                            analysis.cva_rotation_matrix_json = json.dumps(cva_result["eigenvectors"])
-
-                        if "eigenvalues" in cva_result:
-                            # CVA eigenvalues format might be different
-                            if isinstance(cva_result["eigenvalues"], list):
-                                # Simple eigenvalues list
-                                eigenvalues_list = [
-                                    [val, 0] for val in cva_result["eigenvalues"]
-                                ]  # No variance ratio for CVA
-                                analysis.cva_eigenvalues_json = json.dumps(eigenvalues_list)
-                            elif (
-                                isinstance(cva_result["eigenvalues"], dict) and "explained_variance_ratio" in cva_result
-                            ):
-                                # Format with variance ratios
-                                cva_eigenvalues_list = []
-                                for i, val in enumerate(cva_result["eigenvalues"]):
-                                    cva_variance_ratio = (
-                                        cva_result["explained_variance_ratio"][i]
-                                        if i < len(cva_result["explained_variance_ratio"])
-                                        else 0
-                                    )
-                                    cva_eigenvalues_list.append([val, cva_variance_ratio])
-                                analysis.cva_eigenvalues_json = json.dumps(cva_eigenvalues_list)
-                    else:
-                        self.logger.warning("CVA result not available for saving")
-
-                    # Save MANOVA results if available (from comprehensive analysis)
-                    if manova_result:
-                        self.logger.info("Saving MANOVA results...")
-                        self.logger.info(f"MANOVA result available: {type(manova_result)}")
-                        # MANOVA results need to be in the correct format for UI
-                        # The UI expects the stat_dict directly (not wrapped)
-                        if isinstance(manova_result, dict) and "stat_dict" in manova_result:
-                            # Extract just the stat_dict
-                            manova_json = json.dumps(manova_result["stat_dict"])
-                            analysis.manova_analysis_result_json = manova_json
-                            self.logger.info("MANOVA results saved to JSON (stat_dict format)")
-                            self.logger.info(f"MANOVA JSON length: {len(manova_json)}")
-                        else:
-                            # Save as-is if it's not in expected format
-                            manova_json = json.dumps(manova_result)
-                            analysis.manova_analysis_result_json = manova_json
-                            self.logger.warning("MANOVA results saved in unexpected format")
-                            self.logger.info(f"MANOVA JSON length: {len(manova_json)}")
-                    else:
-                        self.logger.warning("No MANOVA result to save")
-
-                # Save the analysis with JSON data
-                analysis.save()
-                self.logger.debug("Analysis results saved with JSON data")
-
-            except Exception as e:
-                self.logger.warning(f"Failed to generate JSON data for analysis: {e}")
-                # Analysis record is still saved without JSON data
 
             self.analysis_progress.emit(100)
             self.analysis_completed.emit(analysis)
@@ -792,6 +646,184 @@ class ModanController(QObject):
 
         finally:
             self._processing = False
+
+    def _persist_analysis_results(
+        self,
+        analysis_type,
+        analysis_name,
+        superimposition_method,
+        cva_group_by,
+        manova_group_by,
+        result,
+        cva_result,
+        manova_result,
+        ds_ops,
+    ):
+        """Create the MdAnalysis record for this run and serialize results to JSON.
+
+        Resolves group-by indices to variable names, creates the MdAnalysis row,
+        then best-effort serializes object info, raw/superimposed landmarks, and
+        PCA/CVA/MANOVA results into the record's JSON columns. A serialization
+        failure is logged and swallowed so the record still persists.
+
+        Returns:
+            The saved MdAnalysis instance.
+        """
+        # Convert group_by indices to variable names for storage
+        variablename_list = self.current_dataset.get_variablename_list()
+        cva_group_by_name = None
+        manova_group_by_name = None
+
+        if cva_group_by is not None and isinstance(cva_group_by, int):
+            if 0 <= cva_group_by < len(variablename_list):
+                cva_group_by_name = variablename_list[cva_group_by]
+                self.logger.info(f"CVA group_by: index {cva_group_by} -> variable '{cva_group_by_name}'")
+        elif cva_group_by is not None:
+            # If it's already a string, use it directly
+            cva_group_by_name = str(cva_group_by)
+
+        if manova_group_by is not None and isinstance(manova_group_by, int):
+            if 0 <= manova_group_by < len(variablename_list):
+                manova_group_by_name = variablename_list[manova_group_by]
+                self.logger.info(f"MANOVA group_by: index {manova_group_by} -> variable '{manova_group_by_name}'")
+        elif manova_group_by is not None:
+            # If it's already a string, use it directly
+            manova_group_by_name = str(manova_group_by)
+
+        # Create analysis record with JSON data
+        analysis = MdModel.MdAnalysis.create(
+            dataset=self.current_dataset,
+            analysis_name=analysis_name or f"{analysis_type}_Analysis",
+            superimposition_method=superimposition_method or "Procrustes",
+            cva_group_by=cva_group_by_name,
+            manova_group_by=manova_group_by_name,
+            propertyname_str=self.current_dataset.propertyname_str,
+            dimension=self.current_dataset.dimension,
+            wireframe=self.current_dataset.wireframe,
+            baseline=self.current_dataset.baseline,
+            polygons=self.current_dataset.polygons,
+        )
+
+        # Generate and save JSON data for analysis results
+        try:
+            import json
+
+            # Generate object info JSON
+            object_info_list = []
+            raw_landmark_list = []
+            property_len = len(self.current_dataset.get_variablename_list()) or 0
+            object_list = self.current_dataset.object_list.order_by(MdModel.MdObject.sequence)
+
+            for obj in object_list:
+                raw_landmark_list.append(obj.get_landmark_list())
+                object_info_list.append(
+                    {
+                        "id": obj.id,
+                        "name": obj.object_name,
+                        "sequence": obj.sequence,
+                        "csize": obj.get_centroid_size(),
+                        "variable_list": obj.get_variable_list()[:property_len],
+                    }
+                )
+
+            analysis.raw_landmark_json = json.dumps(raw_landmark_list)
+            analysis.object_info_json = json.dumps(object_info_list)
+
+            # Save superimposed landmark data (using current landmarks)
+            superimposed_landmark_list = []
+            for obj in ds_ops.object_list:  # Use superimposed objects from ds_ops
+                superimposed_landmark_list.append(obj.landmark_list)
+            analysis.superimposed_landmark_json = json.dumps(superimposed_landmark_list)
+
+            # Save analysis results based on type
+            if analysis_type == "PCA" and result:
+                self.logger.debug(f"PCA result keys: {list(result.keys())}")
+                if "scores" in result:
+                    scores_shape = f"{len(result['scores'])}x{len(result['scores'][0]) if result['scores'] and len(result['scores']) > 0 else 0}"
+                    self.logger.debug(f"Saving PCA scores shape: {scores_shape}")
+                    analysis.pca_analysis_result_json = json.dumps(result["scores"])
+                if "rotation_matrix" in result:
+                    analysis.pca_rotation_matrix_json = json.dumps(result["rotation_matrix"])
+                elif "eigenvectors" in result:
+                    # Fallback to eigenvectors if rotation_matrix not available
+                    analysis.pca_rotation_matrix_json = json.dumps(result["eigenvectors"])
+                if "eigenvalues" in result and "explained_variance_ratio" in result:
+                    eigenvalues_list = []
+                    for i, val in enumerate(result["eigenvalues"]):
+                        variance_ratio = (
+                            result["explained_variance_ratio"][i] if i < len(result["explained_variance_ratio"]) else 0
+                        )
+                        eigenvalues_list.append([val, variance_ratio])
+                    analysis.pca_eigenvalues_json = json.dumps(eigenvalues_list)
+
+                # Save CVA results if available (from comprehensive analysis)
+                if cva_result:
+                    self.logger.debug(f"Saving CVA results: keys={list(cva_result.keys())}")
+                    # CVA uses 'canonical_variables' instead of 'scores'
+                    if "canonical_variables" in cva_result:
+                        analysis.cva_analysis_result_json = json.dumps(cva_result["canonical_variables"])
+                        self.logger.debug(
+                            f"CVA canonical variables saved: {len(cva_result['canonical_variables'])} objects"
+                        )
+                    elif "scores" in cva_result:
+                        analysis.cva_analysis_result_json = json.dumps(cva_result["scores"])
+                        self.logger.debug(f"CVA scores saved: {len(cva_result['scores'])} objects")
+
+                    if "eigenvectors" in cva_result:
+                        analysis.cva_rotation_matrix_json = json.dumps(cva_result["eigenvectors"])
+
+                    if "eigenvalues" in cva_result:
+                        # CVA eigenvalues format might be different
+                        if isinstance(cva_result["eigenvalues"], list):
+                            # Simple eigenvalues list
+                            eigenvalues_list = [
+                                [val, 0] for val in cva_result["eigenvalues"]
+                            ]  # No variance ratio for CVA
+                            analysis.cva_eigenvalues_json = json.dumps(eigenvalues_list)
+                        elif isinstance(cva_result["eigenvalues"], dict) and "explained_variance_ratio" in cva_result:
+                            # Format with variance ratios
+                            cva_eigenvalues_list = []
+                            for i, val in enumerate(cva_result["eigenvalues"]):
+                                cva_variance_ratio = (
+                                    cva_result["explained_variance_ratio"][i]
+                                    if i < len(cva_result["explained_variance_ratio"])
+                                    else 0
+                                )
+                                cva_eigenvalues_list.append([val, cva_variance_ratio])
+                            analysis.cva_eigenvalues_json = json.dumps(cva_eigenvalues_list)
+                else:
+                    self.logger.warning("CVA result not available for saving")
+
+                # Save MANOVA results if available (from comprehensive analysis)
+                if manova_result:
+                    self.logger.info("Saving MANOVA results...")
+                    self.logger.info(f"MANOVA result available: {type(manova_result)}")
+                    # MANOVA results need to be in the correct format for UI
+                    # The UI expects the stat_dict directly (not wrapped)
+                    if isinstance(manova_result, dict) and "stat_dict" in manova_result:
+                        # Extract just the stat_dict
+                        manova_json = json.dumps(manova_result["stat_dict"])
+                        analysis.manova_analysis_result_json = manova_json
+                        self.logger.info("MANOVA results saved to JSON (stat_dict format)")
+                        self.logger.info(f"MANOVA JSON length: {len(manova_json)}")
+                    else:
+                        # Save as-is if it's not in expected format
+                        manova_json = json.dumps(manova_result)
+                        analysis.manova_analysis_result_json = manova_json
+                        self.logger.warning("MANOVA results saved in unexpected format")
+                        self.logger.info(f"MANOVA JSON length: {len(manova_json)}")
+                else:
+                    self.logger.warning("No MANOVA result to save")
+
+            # Save the analysis with JSON data
+            analysis.save()
+            self.logger.debug("Analysis results saved with JSON data")
+
+        except Exception as e:
+            self.logger.warning(f"Failed to generate JSON data for analysis: {e}")
+            # Analysis record is still saved without JSON data
+
+        return analysis
 
     def _prepare_landmarks(self):
         """Collect landmark-bearing objects, run Procrustes, and return the

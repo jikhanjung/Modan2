@@ -126,6 +126,64 @@ class DatasetAnalysisDialog(QDialog):
         self.shape_vsplitter.setStretchFactor(0, 1)
         self.shape_vsplitter.setStretchFactor(1, 0)
 
+        self._init_object_table()
+
+        self._init_plot_area()
+
+        self.main_hsplitter.addWidget(self.shape_vsplitter)
+        self.main_hsplitter.addWidget(self.table_widget)
+        self.main_hsplitter.addWidget(self.plot_all_widget)
+
+        self.main_hsplitter.setSizes([400, 200, 400])
+        self.main_hsplitter.setStretchFactor(0, 1)
+        self.main_hsplitter.setStretchFactor(1, 0)
+        self.main_hsplitter.setStretchFactor(2, 1)
+
+        self._init_bottom_controls()
+
+        # final layout done
+        self.main_layout = QVBoxLayout()
+        self.sub_layout = QHBoxLayout()
+        self.main_layout.addWidget(self.main_hsplitter)
+        self.main_layout.addLayout(self.bottom_layout)
+        self.main_layout.addWidget(self.status_bar)
+        self.setLayout(self.main_layout)
+
+        # initialization
+        self.pca_result = None
+        self.selected_object_list = []
+        self.selected_object_id_list = []
+        self.scatter_result = {}
+        self.scatter_data = {}
+
+        self.show_chart_options = True
+        self.selection_changed_off = False
+        self.onpick_happened = False
+
+        self.analysis_type = "PCA"
+        self.analysis_done = False
+
+        # data setting
+        set_result = self.set_dataset(dataset)
+        # print("set dataset result: ", set_result)
+        if set_result is False:
+            self.close()
+            return
+        elif set_result is None:
+            self.close()
+            return
+        else:
+            self.reset_tableView()
+            self.load_object()
+            self.chart_options_clicked()
+            self.rb3DChartDim.setChecked(True)
+            self.on_chart_dim_changed()
+            self.on_btn_analysis_clicked()
+
+            self.btnSaveResults.setFocus()
+
+    def _init_object_table(self):
+        """Build the object/group table tab and its select-all/none/invert controls."""
         self.table_widget = QWidget()
         self.table_layout = QVBoxLayout()
         self.table_widget.setLayout(self.table_layout)
@@ -166,6 +224,9 @@ class DatasetAnalysisDialog(QDialog):
 
         self.table_layout.addWidget(self.table_control_widget)
 
+    def _init_plot_area(self):
+        """Build the plot tab (2D/3D canvases), axis/chart-option controls, and
+        result tables, assembled into ``self.plot_all_widget``."""
         # plot widgets
         self.plot_widget2 = FigureCanvas(Figure(figsize=(20, 16), dpi=100))
         self.fig2 = self.plot_widget2.figure
@@ -308,15 +369,9 @@ class DatasetAnalysisDialog(QDialog):
         self.comboAxis2.currentIndexChanged.connect(self.axis_changed)
         self.comboAxis3.currentIndexChanged.connect(self.axis_changed)
 
-        self.main_hsplitter.addWidget(self.shape_vsplitter)
-        self.main_hsplitter.addWidget(self.table_widget)
-        self.main_hsplitter.addWidget(self.plot_all_widget)
-
-        self.main_hsplitter.setSizes([400, 200, 400])
-        self.main_hsplitter.setStretchFactor(0, 1)
-        self.main_hsplitter.setStretchFactor(1, 0)
-        self.main_hsplitter.setStretchFactor(2, 1)
-
+    def _init_bottom_controls(self):
+        """Build the bottom row: superimposition / analysis-type / save-results
+        controls, assembled into ``self.bottom_layout`` and ``self.status_bar``."""
         # bottom layout
         rbbox_height = 50
 
@@ -379,47 +434,6 @@ class DatasetAnalysisDialog(QDialog):
 
         self.status_bar = QStatusBar()
         self.status_bar.setMaximumHeight(20)
-
-        # final layout done
-        self.main_layout = QVBoxLayout()
-        self.sub_layout = QHBoxLayout()
-        self.main_layout.addWidget(self.main_hsplitter)
-        self.main_layout.addLayout(self.bottom_layout)
-        self.main_layout.addWidget(self.status_bar)
-        self.setLayout(self.main_layout)
-
-        # initialization
-        self.pca_result = None
-        self.selected_object_list = []
-        self.selected_object_id_list = []
-        self.scatter_result = {}
-        self.scatter_data = {}
-
-        self.show_chart_options = True
-        self.selection_changed_off = False
-        self.onpick_happened = False
-
-        self.analysis_type = "PCA"
-        self.analysis_done = False
-
-        # data setting
-        set_result = self.set_dataset(dataset)
-        # print("set dataset result: ", set_result)
-        if set_result is False:
-            self.close()
-            return
-        elif set_result is None:
-            self.close()
-            return
-        else:
-            self.reset_tableView()
-            self.load_object()
-            self.chart_options_clicked()
-            self.rb3DChartDim.setChecked(True)
-            self.on_chart_dim_changed()
-            self.on_btn_analysis_clicked()
-
-            self.btnSaveResults.setFocus()
 
     def read_settings(self):
         self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))

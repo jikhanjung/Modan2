@@ -2,6 +2,7 @@
 Helper functions and utilities for Modan2 application.
 """
 
+import functools
 import hashlib
 import json
 import logging
@@ -15,6 +16,40 @@ from PyQt5.QtGui import QColor, QIcon, QPixmap
 from PyQt5.QtWidgets import QApplication, QFileDialog, QMessageBox
 
 logger = logging.getLogger(__name__)
+
+
+def guard_slot(user_message: str = "An unexpected error occurred"):
+    """Decorator for Qt signal handlers (slots): catch any exception, log it with a
+    traceback, pop any leftover wait cursor, and show an error dialog — so a failure
+    surfaces instead of silently killing the window.
+
+    Use on user-triggered handlers that do file / database / parsing / numpy work.
+    The wrapped method must be an instance method (``self`` is used as the dialog
+    parent for the message box). On error the wrapper returns ``None``.
+    """
+
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(self, *args, **kwargs):
+            try:
+                return func(self, *args, **kwargs)
+            except Exception as e:
+                logger.error(f"{func.__qualname__} failed: {e}", exc_info=True)
+                # Pop any override cursor(s) the handler set before it raised.
+                try:
+                    while QApplication.overrideCursor() is not None:
+                        QApplication.restoreOverrideCursor()
+                except Exception:
+                    pass
+                try:
+                    QMessageBox.critical(self, "Error", f"{user_message}:\n{e}")
+                except Exception:
+                    pass
+                return None
+
+        return wrapper
+
+    return decorator
 
 
 def show_message(parent, title: str, message: str, message_type: str = "info") -> int | None:

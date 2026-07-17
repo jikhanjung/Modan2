@@ -63,7 +63,7 @@ from dialogs import (
 )
 from MdConstants import ICONS as ICON_CONSTANTS
 from MdConstants import MODE
-from MdHelpers import show_error, show_info, show_warning
+from MdHelpers import guard_slot, show_error, show_info, show_warning
 from MdModel import MdAnalysis, MdDataset, MdObject
 from ModanComponents import (
     AnalysisInfoWidget,
@@ -1011,6 +1011,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.exploration_dialog.update_chart()
         # self.exploration_dialog.activateWindow()
 
+    @guard_slot("Failed to add variable")
     def on_action_add_variable_triggered(self):
         if self.selected_dataset is None:
             return
@@ -1023,6 +1024,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             self.select_dataset(ds)
             self.load_object()
 
+    @guard_slot("Failed to save changes")
     def on_btnSaveChanges_clicked(self):
         # save object info
         # get object info from tableview
@@ -1033,6 +1035,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         # indexes = self.tableView.selectedIndexes()
 
     @pyqtSlot()
+    @guard_slot("Failed to delete object")
     def on_action_delete_object_triggered(self):
         ret = QMessageBox.warning(
             self,
@@ -1088,6 +1091,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 menu.addAction(action_refresh_tree)
             menu.exec_(self.treeView.viewport().mapToGlobal(position))
 
+    @guard_slot("Failed to delete analysis")
     def on_action_delete_analysis_triggered(self):
         ret = QMessageBox.warning(
             self,
@@ -1178,6 +1182,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         # This handler is just for accepting the event
 
     @pyqtSlot()
+    @guard_slot("Failed to open dataset")
     def on_treeView_doubleClicked(self):
         self.dlg = DatasetDialog(self)
         self.dlg.setModal(True)
@@ -1255,6 +1260,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             show_error(self, f"Error creating new object: {str(e)}")
 
     @pyqtSlot()
+    @guard_slot("Failed to open object")
     def on_tableView_doubleClicked(self):
         if self.selected_object is None:
             logger = logging.getLogger(__name__)
@@ -1334,6 +1340,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         else:
             QApplication.setOverrideCursor(Qt.ClosedHandCursor)
 
+    @guard_slot("Failed to import dropped item")
     def dropEvent(self, event):
         if event.source() == self.treeView:
             target_index = self.treeView.indexAt(event.pos())
@@ -1485,6 +1492,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.tableView.sortByColumn(1, Qt.AscendingOrder)
         self.clear_object_view()
 
+    @guard_slot("Failed to import dropped file")
     def tableView_drop_event(self, event):
         logger = logging.getLogger(__name__)
         logger.debug(f"tableview drop event: {event.mimeData().text()}")
@@ -1586,6 +1594,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.reset_treeView()
         self.reset_tableView()
 
+    @guard_slot("Failed to load dataset list")
     def load_dataset(self):
         self.dataset_model.clear()
         self.selected_dataset = None

@@ -874,8 +874,10 @@ class ModanController(QObject):
                 superimposed_landmark_list.append(obj.landmark_list)
             analysis.superimposed_landmark_json = json.dumps(superimposed_landmark_list)
 
-            # Save analysis results based on type
-            if analysis_type == "PCA" and result:
+            # Save analysis results based on type. Use .upper() to match the
+            # dispatch check above; a case-sensitive "PCA" here previously dropped
+            # results for old-signature lowercase calls (R02).
+            if analysis_type.upper() == "PCA" and result:
                 self.logger.debug(f"PCA result keys: {list(result.keys())}")
                 if "scores" in result:
                     scores_shape = f"{len(result['scores'])}x{len(result['scores'][0]) if result['scores'] and len(result['scores']) > 0 else 0}"

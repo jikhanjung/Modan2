@@ -53,6 +53,7 @@ from scipy import stats
 from scipy.spatial import ConvexHull
 
 import MdUtils as mu
+from dialogs.scatter_utils import build_scatter_group
 from MdModel import MdDataset, MdObject
 from ModanComponents import ObjectViewer2D, ObjectViewer3D, ShapePreference
 
@@ -1729,42 +1730,13 @@ class DataExplorationDialog(QDialog):
                 self.shape_grid[scatter_key_name]["view"].deleteLater()
                 self.shape_grid[scatter_key_name]["view"] = None
 
-        self.scatter_data["__default__"] = {
-            "x_val": [],
-            "y_val": [],
-            "z_val": [],
-            "data": [],
-            "hoverinfo": [],
-            "text": [],
-            "property": "",
-            "symbol": "o",
-            "color": default_color,
-            "size": scatter_size,
-        }
-        self.average_shape["__default__"] = {
-            "x_val": 0,
-            "y_val": 0,
-            "z_val": 0,
-            "data": [],
-            "hoverinfo": [],
-            "text": [],
-            "property": "",
-            "symbol": "o",
-            "color": default_color,
-            "size": scatter_size,
-        }
-        self.regression_data["__default__"] = {
-            "x_val": [],
-            "y_val": [],
-            "z_val": [],
-            "data": [],
-            "hoverinfo": [],
-            "text": [],
-            "property": "",
-            "symbol": "o",
-            "color": default_color,
-            "size": scatter_size,
-        }
+        self.scatter_data["__default__"] = build_scatter_group(scatter_size, symbol="o", color=default_color, meta=True)
+        self.average_shape["__default__"] = build_scatter_group(
+            scatter_size, symbol="o", color=default_color, meta=True, empty=0
+        )
+        self.regression_data["__default__"] = build_scatter_group(
+            scatter_size, symbol="o", color=default_color, meta=True
+        )
 
     def _populate_scatter_groups(self, opts, scatter_size):
         """Distribute each object into its scatter/regression group and accumulate
@@ -1790,38 +1762,13 @@ class DataExplorationDialog(QDialog):
                     scatter_key_name = obj["property_list"][self.scatter_variable_index]
 
             if scatter_key_name not in self.scatter_data.keys():
-                self.scatter_data[scatter_key_name] = {
-                    "x_val": [],
-                    "y_val": [],
-                    "z_val": [],
-                    "data": [],
-                    "property": scatter_key_name,
-                    "symbol": "",
-                    "color": "",
-                    "size": scatter_size,
-                }
-                self.average_shape[scatter_key_name] = {
-                    "x_val": [],
-                    "y_val": [],
-                    "z_val": [],
-                    "data": [],
-                    "property": scatter_key_name,
-                    "symbol": "",
-                    "color": "",
-                    "size": scatter_size,
-                }
+                self.scatter_data[scatter_key_name] = build_scatter_group(scatter_size, property_name=scatter_key_name)
+                self.average_shape[scatter_key_name] = build_scatter_group(scatter_size, property_name=scatter_key_name)
 
             if regression_key_name not in self.regression_data.keys():
-                self.regression_data[regression_key_name] = {
-                    "x_val": [],
-                    "y_val": [],
-                    "z_val": [],
-                    "data": [],
-                    "property": regression_key_name,
-                    "symbol": "",
-                    "color": "",
-                    "size": scatter_size,
-                }
+                self.regression_data[regression_key_name] = build_scatter_group(
+                    scatter_size, property_name=regression_key_name
+                )
 
             if axis1 == CENTROID_SIZE_VALUE:
                 self.scatter_data[scatter_key_name]["x_val"].append(obj["csize"])

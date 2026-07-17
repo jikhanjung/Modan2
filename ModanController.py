@@ -549,40 +549,7 @@ class ModanController(QObject):
             self.logger.info(f"Starting {analysis_type} analysis")
             self.analysis_started.emit(analysis_type)
 
-            # Get objects with landmarks
-            objects = list(self.current_dataset.object_list)
-            objects_with_landmarks = []
-            for obj in objects:
-                obj.unpack_landmark()
-                if obj.landmark_str and obj.landmark_list:
-                    objects_with_landmarks.append(obj)
-
-            if len(objects_with_landmarks) < 2:
-                raise ValueError(
-                    f"At least 2 objects with landmarks are required for analysis (found {len(objects_with_landmarks)} objects with landmarks out of {len(objects)} total objects)"
-                )
-
-            self.logger.info(f"Found {len(objects_with_landmarks)} objects with landmarks before Procrustes")
-
-            # Perform Procrustes superimposition before analysis
-            self.logger.info("Performing Procrustes superimposition")
-            from MdModel import MdDatasetOps
-
-            ds_ops = MdDatasetOps(self.current_dataset)
-            if not ds_ops.procrustes_superimposition():
-                raise ValueError("Procrustes superimposition failed")
-
-            self.logger.info(f"Procrustes completed - now have {len(ds_ops.object_list)} objects")
-
-            # Extract landmarks from the superimposed objects
-            landmarks_data = []
-            object_names = []
-            for obj in ds_ops.object_list:  # Use superimposed objects from ds_ops
-                landmarks_data.append(obj.landmark_list)
-                object_names.append(obj.object_name)
-
-            if not landmarks_data:
-                raise ValueError("No objects with landmarks found")
+            ds_ops, landmarks_data = self._prepare_landmarks()
 
             # Run analysis based on type
             self.analysis_progress.emit(25)
@@ -825,6 +792,51 @@ class ModanController(QObject):
 
         finally:
             self._processing = False
+
+    def _prepare_landmarks(self):
+        """Collect landmark-bearing objects, run Procrustes, and return the
+        superimposed dataset ops together with the superimposed landmark arrays.
+
+        Returns:
+            (ds_ops, landmarks_data): the ``MdDatasetOps`` holding the
+            superimposed objects, and the list of superimposed landmark lists.
+
+        Raises:
+            ValueError: if fewer than 2 objects have landmarks, if Procrustes
+                superimposition fails, or if no landmark data results.
+        """
+        # Get objects with landmarks
+        objects = list(self.current_dataset.object_list)
+        objects_with_landmarks = []
+        for obj in objects:
+            obj.unpack_landmark()
+            if obj.landmark_str and obj.landmark_list:
+                objects_with_landmarks.append(obj)
+
+        if len(objects_with_landmarks) < 2:
+            raise ValueError(
+                f"At least 2 objects with landmarks are required for analysis (found {len(objects_with_landmarks)} objects with landmarks out of {len(objects)} total objects)"
+            )
+
+        self.logger.info(f"Found {len(objects_with_landmarks)} objects with landmarks before Procrustes")
+
+        # Perform Procrustes superimposition before analysis
+        self.logger.info("Performing Procrustes superimposition")
+        from MdModel import MdDatasetOps
+
+        ds_ops = MdDatasetOps(self.current_dataset)
+        if not ds_ops.procrustes_superimposition():
+            raise ValueError("Procrustes superimposition failed")
+
+        self.logger.info(f"Procrustes completed - now have {len(ds_ops.object_list)} objects")
+
+        # Extract landmarks from the superimposed objects
+        landmarks_data = [obj.landmark_list for obj in ds_ops.object_list]
+
+        if not landmarks_data:
+            raise ValueError("No objects with landmarks found")
+
+        return ds_ops, landmarks_data
 
     def _extract_group_values(self, group_by, ds_ops, objects_by_id, label):
         """Resolve per-object group values for a CVA/MANOVA run.

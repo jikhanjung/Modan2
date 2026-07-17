@@ -534,93 +534,7 @@ class ModanMainWindow(QMainWindow):
             logger.debug(f"READ_SETTINGS - Remember geometry: {self.m_app.remember_geometry}")
             logger.debug(f"READ_SETTINGS - Object overlay auto-show: {self.object_overlay_auto_show}")
 
-            if self.m_app.remember_geometry:
-                geometry_data = self.config.get("ui", {}).get("window_geometry", {})
-                logger.debug(f"READ_SETTINGS - Raw geometry data: {geometry_data}")
-
-                # Handle both old list format and new dictionary format
-                if isinstance(geometry_data, dict):
-                    geometry = geometry_data.get("main_window", [100, 100, 1400, 800])
-                elif isinstance(geometry_data, list):
-                    geometry = geometry_data
-                else:
-                    geometry = [100, 100, 1400, 800]
-
-                logger.debug(f"READ_SETTINGS - Parsed geometry: {geometry}")
-
-                # Ensure all values are integers
-                geometry = [int(x) if isinstance(x, (int, float, str)) and str(x).isdigit() else x for x in geometry]
-
-                # Get multi-monitor info for debugging
-                from PyQt5.QtWidgets import QDesktopWidget
-
-                desktop = QDesktopWidget()
-                primary_screen = desktop.primaryScreen()
-                primary_rect = desktop.screenGeometry(primary_screen)
-
-                logger.debug(
-                    f"READ_SETTINGS - Using saved geometry: x={geometry[0]}, y={geometry[1]}, w={geometry[2]}, h={geometry[3]}"
-                )
-                logger.debug(f"READ_SETTINGS - Primary monitor size: {primary_rect.width()}x{primary_rect.height()}")
-                logger.debug(f"READ_SETTINGS - Number of screens: {desktop.screenCount()}")
-
-                # Show all screen geometries for debugging
-                for i in range(desktop.screenCount()):
-                    screen_geom = desktop.screenGeometry(i)
-                    logger.debug(
-                        f"READ_SETTINGS - Screen {i}: {screen_geom.width()}x{screen_geom.height()} at ({screen_geom.x()}, {screen_geom.y()})"
-                    )
-
-                # Set geometry with window manager hints
-                from PyQt5.QtCore import Qt
-
-                # Store desired position for later enforcement
-                self._desired_geometry = QRect(*geometry)
-
-                # Set window flags to control positioning behavior
-                current_flags = self.windowFlags()
-                # Don't let window manager auto-position the window
-                self.setWindowFlags(current_flags & ~Qt.WindowContextHelpButtonHint)
-
-                # Set geometry
-                self.setGeometry(QRect(*geometry))
-                logger.debug(
-                    f"SET_GEOMETRY - Requested: {geometry}, After setGeometry(): {[self.geometry().x(), self.geometry().y(), self.geometry().width(), self.geometry().height()]}"
-                )
-
-                # Schedule position verification after window is fully shown
-                from PyQt5.QtCore import QTimer
-
-                def verify_position():
-                    actual = self.geometry()
-                    if abs(actual.x() - geometry[0]) > 10 or abs(actual.y() - geometry[1]) > 10:
-                        logger.debug(
-                            f"POSITION_DRIFT - Expected: ({geometry[0]}, {geometry[1]}), Got: ({actual.x()}, {actual.y()}), Correcting..."
-                        )
-                        self.move(geometry[0], geometry[1])
-                        # Final check
-                        final = self.geometry()
-                        logger.debug(f"POSITION_FINAL - After move(): ({final.x()}, {final.y()})")
-
-                QTimer.singleShot(100, verify_position)  # Check sooner
-
-                is_maximized_data = self.config.get("ui", {}).get("is_maximized", False)
-                # Handle both boolean and dict format
-                if isinstance(is_maximized_data, dict):
-                    is_maximized = is_maximized_data.get("main_window", False)
-                else:
-                    is_maximized = is_maximized_data
-
-                logger.debug(f"READ_SETTINGS - Is maximized setting: {is_maximized}")
-
-                if is_maximized:
-                    logger.debug("READ_SETTINGS - Showing maximized window")
-                    self.showMaximized()
-                else:
-                    logger.debug("READ_SETTINGS - Showing normal window")
-            else:
-                logger.debug("READ_SETTINGS - Remember geometry disabled, using default")
-                self.setGeometry(QRect(100, 100, 1400, 800))
+            self._restore_main_window_geometry()
 
         self.m_app.language = self.config.get("language", "en")
         if self.init_done:
@@ -630,6 +544,101 @@ class ModanMainWindow(QMainWindow):
         plt.rcParams["font.serif"] = ["Times New Roman"]
         plt.rcParams["mathtext.fontset"] = "stix"
         plt.rcParams["font.size"] = 12
+
+    def _restore_main_window_geometry(self):
+        """Restore the main window geometry / maximized state from config.
+
+        Extracted from ``read_settings``; runs only on the initial (pre-``init_done``)
+        pass when ``remember_geometry`` handling applies.
+        """
+        logger = logging.getLogger(__name__)
+        if self.m_app.remember_geometry:
+            geometry_data = self.config.get("ui", {}).get("window_geometry", {})
+            logger.debug(f"READ_SETTINGS - Raw geometry data: {geometry_data}")
+
+            # Handle both old list format and new dictionary format
+            if isinstance(geometry_data, dict):
+                geometry = geometry_data.get("main_window", [100, 100, 1400, 800])
+            elif isinstance(geometry_data, list):
+                geometry = geometry_data
+            else:
+                geometry = [100, 100, 1400, 800]
+
+            logger.debug(f"READ_SETTINGS - Parsed geometry: {geometry}")
+
+            # Ensure all values are integers
+            geometry = [int(x) if isinstance(x, (int, float, str)) and str(x).isdigit() else x for x in geometry]
+
+            # Get multi-monitor info for debugging
+            from PyQt5.QtWidgets import QDesktopWidget
+
+            desktop = QDesktopWidget()
+            primary_screen = desktop.primaryScreen()
+            primary_rect = desktop.screenGeometry(primary_screen)
+
+            logger.debug(
+                f"READ_SETTINGS - Using saved geometry: x={geometry[0]}, y={geometry[1]}, w={geometry[2]}, h={geometry[3]}"
+            )
+            logger.debug(f"READ_SETTINGS - Primary monitor size: {primary_rect.width()}x{primary_rect.height()}")
+            logger.debug(f"READ_SETTINGS - Number of screens: {desktop.screenCount()}")
+
+            # Show all screen geometries for debugging
+            for i in range(desktop.screenCount()):
+                screen_geom = desktop.screenGeometry(i)
+                logger.debug(
+                    f"READ_SETTINGS - Screen {i}: {screen_geom.width()}x{screen_geom.height()} at ({screen_geom.x()}, {screen_geom.y()})"
+                )
+
+            # Set geometry with window manager hints
+            from PyQt5.QtCore import Qt
+
+            # Store desired position for later enforcement
+            self._desired_geometry = QRect(*geometry)
+
+            # Set window flags to control positioning behavior
+            current_flags = self.windowFlags()
+            # Don't let window manager auto-position the window
+            self.setWindowFlags(current_flags & ~Qt.WindowContextHelpButtonHint)
+
+            # Set geometry
+            self.setGeometry(QRect(*geometry))
+            logger.debug(
+                f"SET_GEOMETRY - Requested: {geometry}, After setGeometry(): {[self.geometry().x(), self.geometry().y(), self.geometry().width(), self.geometry().height()]}"
+            )
+
+            # Schedule position verification after window is fully shown
+            from PyQt5.QtCore import QTimer
+
+            def verify_position():
+                actual = self.geometry()
+                if abs(actual.x() - geometry[0]) > 10 or abs(actual.y() - geometry[1]) > 10:
+                    logger.debug(
+                        f"POSITION_DRIFT - Expected: ({geometry[0]}, {geometry[1]}), Got: ({actual.x()}, {actual.y()}), Correcting..."
+                    )
+                    self.move(geometry[0], geometry[1])
+                    # Final check
+                    final = self.geometry()
+                    logger.debug(f"POSITION_FINAL - After move(): ({final.x()}, {final.y()})")
+
+            QTimer.singleShot(100, verify_position)  # Check sooner
+
+            is_maximized_data = self.config.get("ui", {}).get("is_maximized", False)
+            # Handle both boolean and dict format
+            if isinstance(is_maximized_data, dict):
+                is_maximized = is_maximized_data.get("main_window", False)
+            else:
+                is_maximized = is_maximized_data
+
+            logger.debug(f"READ_SETTINGS - Is maximized setting: {is_maximized}")
+
+            if is_maximized:
+                logger.debug("READ_SETTINGS - Showing maximized window")
+                self.showMaximized()
+            else:
+                logger.debug("READ_SETTINGS - Showing normal window")
+        else:
+            logger.debug("READ_SETTINGS - Remember geometry disabled, using default")
+            self.setGeometry(QRect(100, 100, 1400, 800))
 
     def write_settings(self):
         """Write settings using SettingsWrapper for proper JSON storage"""

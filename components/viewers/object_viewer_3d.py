@@ -56,6 +56,7 @@ import numpy as np
 from PyQt5.QtOpenGL import QGLFormat, QGLWidget
 
 import MdUtils as mu
+from MdHelpers import guard_slot
 
 logger = logging.getLogger(__name__)
 
@@ -641,6 +642,7 @@ class ObjectViewer3D(QGLWidget):
         else:
             event.ignore()
 
+    @guard_slot("Failed to load dropped 3D model")
     def dropEvent(self, event):
         if self.object_dialog is None:
             return
@@ -656,9 +658,19 @@ class ObjectViewer3D(QGLWidget):
             self.object_dialog.enable_landmark_edit()
 
     def set_threed_model(self, file_path):
-        if file_path.split(".")[-1].lower() == "obj":
-            self.threed_model = OBJ(file_path)
-            self.fullpath = file_path
+        ext = file_path.split(".")[-1].lower()
+        if ext == "obj":
+            try:
+                self.threed_model = OBJ(file_path)
+                self.fullpath = file_path
+            except Exception as e:
+                logger.error(f"Failed to load 3D model '{file_path}': {e}")
+                raise ValueError(f"Cannot load 3D model: {e}") from e
+        else:
+            # Real flows convert stl/ply -> obj via mu.process_3d_file first; a
+            # non-obj path reaching here loads no model — log instead of silently
+            # doing nothing.
+            logger.warning(f"set_threed_model: unsupported 3D format '.{ext}' for {file_path}; no model loaded")
         self.updateGL()
 
     def initializeGL(self):

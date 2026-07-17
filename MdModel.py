@@ -770,12 +770,30 @@ class MdThreeDModel(Model):
         return new_model
 
     def add_file(self, file_name):
-        file_name = mu.process_3d_file(file_name)
-        self.load_file_info(file_name)
-        new_filepath = self.get_file_path()
-        if not os.path.exists(os.path.dirname(new_filepath)):
-            os.makedirs(os.path.dirname(new_filepath))
-        shutil.copyfile(file_name, new_filepath)
+        # Mirror MdImage.add_file: log + raise typed errors so a failure surfaces
+        # instead of leaving a 3D-model row without its file (data loss).
+        try:
+            file_name = mu.process_3d_file(file_name)
+            self.load_file_info(file_name)
+            new_filepath = self.get_file_path()
+
+            try:
+                if not os.path.exists(os.path.dirname(new_filepath)):
+                    os.makedirs(os.path.dirname(new_filepath))
+            except OSError as e:
+                logger.error(f"Failed to create directory for {new_filepath}: {e}")
+                raise ValueError(f"Cannot create directory for file storage: {e}") from e
+
+            try:
+                shutil.copyfile(file_name, new_filepath)
+            except (OSError, shutil.Error) as e:
+                logger.error(f"Failed to copy file from {file_name} to {new_filepath}: {e}")
+                raise ValueError(f"Cannot copy file: {e}") from e
+
+        except Exception as e:
+            logger.error(f"Failed to add 3D model file {file_name}: {e}")
+            raise
+
         return self
 
     def get_file_path(self, base_path=mu.DEFAULT_STORAGE_DIRECTORY):

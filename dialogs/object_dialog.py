@@ -45,6 +45,7 @@ import MdUtils as mu
 from components.widgets import PicButton
 from dialogs.calibration_dialog import CalibrationDialog
 from MdConstants import ICONS as ICON
+from MdHelpers import guard_slot
 from MdModel import MdDataset, MdObject, MdObjectOps
 from ModanComponents import ObjectViewer2D, ObjectViewer3D
 
@@ -381,6 +382,7 @@ class ObjectDialog(QDialog):
         self.write_settings()
         event.accept()
 
+    @guard_slot("Failed to load file")
     def btnAddFile_clicked(self):
         # open file dialog
         # print("btnAddFile_clicked")

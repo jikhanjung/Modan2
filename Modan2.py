@@ -981,6 +981,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     # def on_rbSelectRows_clicked(self):
     #    self.tableView.set_rows_selection_mode()
 
+    @guard_slot("Failed to open analysis detail")
     def btnAnalysisDetail_clicked(self):
         # self.detail_dialog = DatasetAnalysisDialog(self.parent)
         self.analysis_dialog = DatasetAnalysisDialog(self, self.analysis_info_widget.analysis.dataset)
@@ -989,12 +990,14 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     def btnSaveAnalysis_clicked(self):
         pass
 
+    @guard_slot("Failed to open data exploration")
     def btnDataExploration_clicked(self):
         # print("btnExplore_clicked")
         self.exploration_dialog = DataExplorationDialog(self)
         # print("exploration dialog created")
         # get tab text
         tab_text = self.analysis_info_widget.analysis_tab.tabText(self.analysis_info_widget.analysis_tab.currentIndex())
+        group_by = ""
         if tab_text == "PCA":
             group_by = self.analysis_info_widget.comboPcaGroupBy.currentText()
         elif tab_text == "CVA":
@@ -1056,6 +1059,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             self.reset_tableView()
             self.select_dataset(dataset)
 
+    @guard_slot("Failed to open menu")
     def open_treeview_menu(self, position):
         indexes = self.treeView.selectedIndexes()
         if len(indexes) > 0:
@@ -1075,6 +1079,8 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
             # get item
             item = self.dataset_model.itemFromIndex(index)
+            if item is None:
+                return
             obj = item.data()
 
             menu = QMenu()
@@ -1109,6 +1115,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         analysis.delete_instance()
         self.load_dataset()
 
+    @guard_slot("Failed to explore data")
     def on_action_explore_data_triggered(self):
         self.exploration_dialog = DataExplorationDialog(self)
         self.exploration_dialog.set_analysis(self.selected_analysis)
@@ -1439,10 +1446,12 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
         selected_object_list = []
         for index in selected_indexes:
-            object_id = self.object_model._data[index.row()][0]["value"]
-
-            object_id = int(object_id)
-            object = MdObject.get_by_id(object_id)
+            try:
+                object_id = int(self.object_model._data[index.row()][0]["value"])
+                object = MdObject.get_by_id(object_id)
+            except (IndexError, KeyError, ValueError, TypeError, DoesNotExist) as e:
+                logger.warning(f"Skipping unreadable table row {index.row()}: {e}")
+                continue
             if object is not None and object not in selected_object_list:
                 selected_object_list.append(object)
 
@@ -1643,6 +1652,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             if rec.children.count() > 0:
                 self.load_subdataset(item1, item1.data())
 
+    @guard_slot("Failed to change dataset selection")
     def on_dataset_selection_changed(self, selected, deselected):
         if self.data_changed:
             ret = QMessageBox.warning(
@@ -1769,6 +1779,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 continue
         self.object_model.appendRows(rowdata_list)
 
+    @guard_slot("Failed to change object selection")
     def on_object_selection_changed(self, selected, deselected):
         selected_object_list = self.get_selected_object_list()
         if selected_object_list is None or len(selected_object_list) != 1:

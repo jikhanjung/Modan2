@@ -96,19 +96,24 @@ def test_show_analysis_result_3d_path(qtbot, mock_database):
 
 
 def test_save_results_writes_xlsx(qtbot, mock_database, tmp_path, monkeypatch):
-    """on_btnSaveResults_clicked exports an .xlsx without crashing (success path).
+    """on_btnSaveResults_clicked exports an .xlsx via the *success* path.
 
-    show_analysis_result -> show_result_table populated shape_list / eigenvalues, so
-    the full export path (previously untested and prone to silent death) runs."""
-    from PyQt5.QtWidgets import QFileDialog
+    Regression for the real silent-crash root cause: show_result_table's shape
+    computation is disabled (commented out), so shape_column_header_list is never set;
+    accessing it in the export raised AttributeError. The Shapes sheet is now skipped
+    when unavailable, so the export completes without hitting the error path."""
+    from PyQt5.QtWidgets import QFileDialog, QMessageBox
 
     dialog = _run_show_analysis_result(qtbot, chart_2d=True)
     out = str(tmp_path / "analysis.xlsx")
     monkeypatch.setattr(QFileDialog, "getSaveFileName", lambda *a, **k: (out, ""))
+    crit = Mock()
+    monkeypatch.setattr(QMessageBox, "critical", crit)
 
     dialog.on_btnSaveResults_clicked()
 
-    assert os.path.exists(out)  # exported end-to-end, no crash
+    assert os.path.exists(out) and os.path.getsize(out) > 0
+    crit.assert_not_called()  # genuine success, not the caught-error path
 
 
 def test_save_results_surfaces_error_instead_of_crashing(qtbot, mock_database, tmp_path, monkeypatch):

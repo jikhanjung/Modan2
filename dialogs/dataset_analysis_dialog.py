@@ -669,16 +669,22 @@ class DatasetAnalysisDialog(QDialog):
                 worksheet.write(i, 0, val)
                 worksheet.write(i, 1, val2)
 
-            worksheet = doc.add_worksheet("Shapes")
-            for i, colname in enumerate(self.shape_column_header_list):
-                worksheet.write(0, i, colname)
-
-            # shape_list may be a numpy array or a plain list
-            shape_rows = self.shape_list.tolist() if hasattr(self.shape_list, "tolist") else self.shape_list
-            for i, shape in enumerate(shape_rows):
-                worksheet.write(i + 1, 0, self.shape_name_list[i])
-                for j, val in enumerate(shape):
-                    worksheet.write(i + 1, j + 1, val)
+            # Shapes sheet — only when shape data was actually computed. The shape
+            # computation in show_result_table is currently disabled (commented out),
+            # so shape_column_header_list is never set; accessing it here was the
+            # AttributeError that silently killed the save for both PCA and CVA.
+            shape_headers = getattr(self, "shape_column_header_list", None)
+            shape_rows_src = getattr(self, "shape_list", None)
+            if shape_headers and shape_rows_src is not None and len(shape_rows_src) > 0:
+                worksheet = doc.add_worksheet("Shapes")
+                for i, colname in enumerate(shape_headers):
+                    worksheet.write(0, i, colname)
+                # shape_list may be a numpy array or a plain list
+                shape_rows = shape_rows_src.tolist() if hasattr(shape_rows_src, "tolist") else shape_rows_src
+                for i, shape in enumerate(shape_rows):
+                    worksheet.write(i + 1, 0, self.shape_name_list[i])
+                    for j, val in enumerate(shape):
+                        worksheet.write(i + 1, j + 1, val)
 
             doc.close()
             doc = None

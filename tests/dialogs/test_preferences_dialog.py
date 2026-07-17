@@ -59,6 +59,17 @@ class TestPreferencesDialogInitialization:
         assert isinstance(dialog, QDialog)
         assert dialog.windowTitle() == "Preferences"
 
+    def test_preferences_are_scrollable(self, dialog):
+        """The form lives in a resizable QScrollArea (usable on low-res monitors),
+        with the Save button pinned outside it so it stays reachable."""
+        from PyQt5.QtWidgets import QScrollArea, QVBoxLayout
+
+        assert isinstance(dialog.scroll_area, QScrollArea)
+        assert dialog.scroll_area.widgetResizable()
+        assert isinstance(dialog.layout(), QVBoxLayout)
+        # Save button must not be inside the scrolled form widget.
+        assert dialog.btnOkay.parent() is not dialog.scroll_area.widget()
+
     def test_ui_elements_present(self, dialog):
         """Test that all UI elements are created."""
         # Geometry widgets

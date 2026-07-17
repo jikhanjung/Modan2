@@ -18,6 +18,9 @@ from PyQt5.QtWidgets import (
     QLabel,
     QPushButton,
     QRadioButton,
+    QScrollArea,
+    QVBoxLayout,
+    QWidget,
 )
 
 import MdUtils as mu
@@ -59,6 +62,13 @@ class PreferencesDialog(BaseDialog):
 
         # Load current settings
         self.read_settings()
+
+        # Open at a size that fits the screen; anything taller scrolls (important on
+        # low-resolution monitors where the full form would otherwise be clipped).
+        screen = self.m_app.primaryScreen() if hasattr(self.m_app, "primaryScreen") else None
+        avail_h = screen.availableGeometry().height() if screen is not None else 900
+        self.setMinimumWidth(480)
+        self.resize(560, min(760, int(avail_h * 0.9)))
 
     def _init_defaults(self):
         """Initialize default preference values."""
@@ -314,9 +324,13 @@ class PreferencesDialog(BaseDialog):
         self.btnCancel = QPushButton(self.tr("Cancel"))
 
     def _create_layout(self):
-        """Create dialog layout."""
+        """Create dialog layout.
+
+        The preference rows live inside a QScrollArea so the dialog stays usable on
+        low-resolution monitors (the content scrolls instead of being clipped); the
+        Save button is pinned below the scroll area so it's always reachable.
+        """
         self.main_layout = QFormLayout()
-        self.setLayout(self.main_layout)
 
         # Labels
         self.lblGeometry = QLabel(self.tr("Remember Geometry"))
@@ -338,8 +352,6 @@ class PreferencesDialog(BaseDialog):
         self.main_layout.addRow(self.lblPlotMarkers, self.gbPlotMarkers)
 
         # Create container widgets for landmark, wireframe, index
-        from PyQt5.QtWidgets import QWidget
-
         landmark_widget = QWidget()
         landmark_widget.setLayout(self.landmark_layout)
         wireframe_widget = QWidget()
@@ -354,7 +366,21 @@ class PreferencesDialog(BaseDialog):
         self.main_layout.addRow(self.lblIndex, index_widget)
         self.main_layout.addRow(self.lblBgcolorLabel, self.lblBgcolor)
         self.main_layout.addRow(self.lblLang, lang_widget)
-        self.main_layout.addRow("", self.btnOkay)
+
+        # Wrap the form in a scroll area (usable on low-res monitors); pin the Save
+        # button below it so it's always visible.
+        form_widget = QWidget()
+        form_widget.setLayout(self.main_layout)
+
+        self.scroll_area = QScrollArea()
+        self.scroll_area.setWidgetResizable(True)
+        self.scroll_area.setWidget(form_widget)
+        self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
+        outer_layout = QVBoxLayout()
+        outer_layout.addWidget(self.scroll_area)
+        outer_layout.addWidget(self.btnOkay)
+        self.setLayout(outer_layout)
 
     def _connect_signals(self):
         """Connect widget signals to handlers."""

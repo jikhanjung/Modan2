@@ -5,6 +5,7 @@ Handles business logic and coordinates between View and Model.
 
 import logging
 import os
+import shutil
 from pathlib import Path
 from typing import Any
 
@@ -544,6 +545,82 @@ class ModanController(QObject):
             if os.path.exists(image_path):
                 os.remove(image_path)
         obj.delete_instance()
+
+    def import_dataset(self, import_data, dataset_name, storage_directory, progress_callback=None):
+        """Persist a parsed import (dataset + objects + images) to the database.
+
+        Moved out of ``ImportDatasetDialog`` so the dialog no longer performs DB/file
+        I/O directly. ``progress_callback(done, total)`` is invoked after each object
+        (for progress-bar updates). Returns the created dataset.
+        """
+        dataset = MdModel.MdDataset()
+        dataset.dataset_name = dataset_name
+        dataset.dimension = import_data.dimension
+        if len(import_data.variablename_list) > 0:
+            dataset.variablename_list = import_data.variablename_list
+            dataset.pack_variablename_str()
+        if len(import_data.edge_list) > 0:
+            dataset.edge_list = import_data.edge_list
+            dataset.wireframe = dataset.pack_wireframe()
+        dataset.save()
+
+        for i in range(import_data.nobjects):
+            self._import_object(import_data, dataset, i, storage_directory)
+            if progress_callback is not None:
+                progress_callback(i + 1, import_data.nobjects)
+
+        return dataset
+
+    def _import_object(self, import_data, dataset, index, storage_directory):
+        """Create and persist a single imported object (and its image, if any)."""
+        obj = MdModel.MdObject()
+        obj.object_name = import_data.object_name_list[index]
+
+        # Set pixels per mm if available
+        if hasattr(import_data, "ppmm_list") and len(import_data.ppmm_list) > 0:
+            if mu.is_numeric(import_data.ppmm_list[index]):
+                obj.pixels_per_mm = float(import_data.ppmm_list[index])
+
+        obj.dataset = dataset
+
+        # Set landmarks
+        landmark_list = []
+        for landmark in import_data.landmark_data[obj.object_name]:
+            landmark_list.append("\t".join([str(x) for x in landmark]))
+        obj.landmark_str = "\n".join(landmark_list)
+
+        # Set variables
+        if len(import_data.variablename_list) > 0:
+            obj.variable_list = import_data.property_list_list[index]
+            obj.pack_variable()
+
+        # Set description
+        if obj.object_name in import_data.object_comment.keys():
+            obj.object_desc = import_data.object_comment[import_data.object_name_list[index]]
+
+        obj.save()
+
+        # Import image if available
+        if obj.object_name in import_data.object_images.keys():
+            self._import_object_image(obj, import_data, storage_directory)
+
+    def _import_object_image(self, obj, import_data, storage_directory):
+        """Copy an imported object's image into storage and persist the record."""
+        file_name = import_data.object_images[obj.object_name]
+        if not os.path.exists(file_name):
+            file_name = os.path.join(import_data.dirname, file_name)
+        if not os.path.exists(file_name):
+            self.logger.error(f"File not found: {file_name}")
+            return
+
+        new_image = MdModel.MdImage()
+        new_image.object = obj
+        new_image.load_file_info(file_name)
+        new_filepath = new_image.get_file_path(storage_directory)
+        if not os.path.exists(os.path.dirname(new_filepath)):
+            os.makedirs(os.path.dirname(new_filepath))
+        shutil.copyfile(file_name, new_filepath)
+        new_image.save()
 
     def set_current_object(self, obj: MdModel.MdObject | None):
         """Set currently selected object.

@@ -34,11 +34,13 @@ commit + devlog, keeping the suite green. Recommended order is roughly top-down.
       `dialogs/scatter_utils.py`: `build_scatter_group` (group-dict factory) and
       `build_scatter_legend`, applied in both dialogs. Guarded by unit tests + the
       exploration golden-master + a dataset-analysis smoke test.
-- [ ] **Move DB/file I/O out of dialogs into `ModanController`**
-      (mirror how `analysis_dialog.py` already delegates)
-  - [ ] `dialogs/object_dialog.py` `save_object()`, `Delete()` (`os.remove` +
-        `delete_instance`)
-  - [ ] `dialogs/import_dialog.py` direct DB writes
+- [x] **Move DB/file I/O out of dialogs into `ModanController`** — done (devlog 189–191)
+  - [x] `dialogs/object_dialog.py` `save_object()` → `ModanController.save_object` (189);
+        `Delete()` → `ModanController.delete_object_with_files` (190)
+  - [x] `dialogs/import_dialog.py` direct DB writes → `ModanController.import_dataset`
+        (+ `_import_object` / `_import_object_image`) (191)
+  - Controller injected into both dialogs via `parent.controller` with an
+    `isinstance(ModanController)` guard + standalone fallback for Mock/parentless tests.
 - [ ] **Hoist `read_settings` / color-marker loading** copy-pasted across ~9
       dialogs into `BaseDialog` or a settings mixin
 

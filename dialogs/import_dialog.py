@@ -1,8 +1,6 @@
 """Import Dataset Dialog for importing datasets from various formats."""
 
 import logging
-import os
-import shutil
 from pathlib import Path
 
 from PyQt5.QtCore import QPoint, QRect
@@ -25,7 +23,7 @@ from PyQt5.QtWidgets import (
 
 import MdUtils as mu
 from dialogs.base_dialog import BaseDialog
-from MdModel import MdDataset, MdImage, MdObject
+from MdModel import MdDataset
 from ModanComponents import NTS, TPS, X1Y1, Morphologika
 
 logger = logging.getLogger(__name__)
@@ -58,6 +56,14 @@ class ImportDatasetDialog(BaseDialog):
         self.parent = parent
         self.remember_geometry = True
         self.m_app = QApplication.instance()
+        # Controller for DB/file persistence (delegated out of the dialog). Falls
+        # back to a standalone controller when there is no real parent controller
+        # (e.g. tests), so persistence still targets the active database. isinstance
+        # guards against Mock parents whose .controller auto-creates a truthy attr.
+        from ModanController import ModanController
+
+        parent_controller = getattr(parent, "controller", None)
+        self.controller = parent_controller if isinstance(parent_controller, ModanController) else ModanController()
         self.read_settings()
 
         self._create_widgets()
@@ -376,90 +382,17 @@ class ImportDatasetDialog(BaseDialog):
 
         self.edtObjectCount.setText(str(import_data.nobjects))
 
-        # Create dataset
-        dataset = MdDataset()
-        dataset.dataset_name = datasetname
-        dataset.dimension = import_data.dimension
-        if len(import_data.variablename_list) > 0:
-            dataset.variablename_list = import_data.variablename_list
-            dataset.pack_variablename_str()
-        if len(import_data.edge_list) > 0:
-            dataset.edge_list = import_data.edge_list
-            dataset.wireframe = dataset.pack_wireframe()
-        dataset.save()
+        def progress_callback(done, total):
+            self.update_progress(int(float(done) * 100.0 / float(total)))
 
-        # Add objects
-        for i in range(import_data.nobjects):
-            self._import_object(import_data, dataset, i)
-            self.update_progress(int(float(i + 1) * 100.0 / float(import_data.nobjects)))
+        # Persistence (dataset + objects + images) is delegated to the controller.
+        self.controller.import_dataset(import_data, datasetname, self.m_app.storage_directory, progress_callback)
 
         # Show completion message
         QMessageBox.information(self, self.tr("Import"), self.tr("Finished importing a {} file.").format(filetype))
         if hasattr(self.parent, "load_dataset"):
             self.parent.load_dataset()
         self.close()
-
-    def _import_object(self, import_data, dataset, index):
-        """Import single object.
-
-        Args:
-            import_data: Parsed import data
-            dataset: Target dataset
-            index: Object index in import data
-        """
-        obj = MdObject()
-        obj.object_name = import_data.object_name_list[index]
-
-        # Set pixels per mm if available
-        if hasattr(import_data, "ppmm_list") and len(import_data.ppmm_list) > 0:
-            if mu.is_numeric(import_data.ppmm_list[index]):
-                obj.pixels_per_mm = float(import_data.ppmm_list[index])
-
-        obj.dataset = dataset
-
-        # Set landmarks
-        landmark_list = []
-        for landmark in import_data.landmark_data[obj.object_name]:
-            landmark_list.append("\t".join([str(x) for x in landmark]))
-        obj.landmark_str = "\n".join(landmark_list)
-
-        # Set variables
-        if len(import_data.variablename_list) > 0:
-            obj.variable_list = import_data.property_list_list[index]
-            obj.pack_variable()
-
-        # Set description
-        if obj.object_name in import_data.object_comment.keys():
-            obj.object_desc = import_data.object_comment[import_data.object_name_list[index]]
-
-        obj.save()
-
-        # Import image if available
-        if obj.object_name in import_data.object_images.keys():
-            self._import_object_image(obj, import_data)
-
-    def _import_object_image(self, obj, import_data):
-        """Import image for object.
-
-        Args:
-            obj: MdObject to attach image to
-            import_data: Import data containing image info
-        """
-        file_name = import_data.object_images[obj.object_name]
-        if not os.path.exists(file_name):
-            file_name = os.path.join(import_data.dirname, file_name)
-        if not os.path.exists(file_name):
-            logger.error(f"File not found: {file_name}")
-            return
-
-        new_image = MdImage()
-        new_image.object = obj
-        new_image.load_file_info(file_name)
-        new_filepath = new_image.get_file_path(self.m_app.storage_directory)
-        if not os.path.exists(os.path.dirname(new_filepath)):
-            os.makedirs(os.path.dirname(new_filepath))
-        shutil.copyfile(file_name, new_filepath)
-        new_image.save()
 
     def update_progress(self, value):
         """Update progress bar.

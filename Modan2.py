@@ -85,6 +85,137 @@ matplotlib.rcParams["font.sans-serif"] = ["DejaVu Sans", "Arial", "sans-serif"]
 logger = logging.getLogger(mu.PROGRAM_NAME)
 
 
+class SettingsWrapper:
+    """QSettings-compatible wrapper backed by the JSON config dict.
+
+    Maps QSettings-style keys (e.g. ``"WindowGeometry/MainWindow"``) to nested
+    paths in the config dict and persists changes to ``~/.modan2/config.json``.
+    Hoisted out of ``ModanMainWindow.read_settings`` (was an inline nested class).
+    """
+
+    def __init__(self, config, parent):
+        self.config = config
+        self.parent = parent  # ModanMainWindow instance for save_config
+        # Complete key mapping for all settings
+        self.key_map = {
+            # Window geometry
+            "WindowGeometry/RememberGeometry": ("ui", "remember_geometry"),
+            "WindowGeometry/MainWindow": ("ui", "window_geometry", "main_window"),
+            "WindowGeometry/ObjectDialog": ("ui", "window_geometry", "object_dialog"),
+            "WindowGeometry/DatasetDialog": ("ui", "window_geometry", "dataset_dialog"),
+            "WindowGeometry/DataExplorationWindow": ("ui", "window_geometry", "data_exploration_window"),
+            "WindowGeometry/DatasetAnalysisWindow": ("ui", "window_geometry", "dataset_analysis_window"),
+            "WindowGeometry/ExportDialog": ("ui", "window_geometry", "export_dialog"),
+            "WindowGeometry/ImportDialog": ("ui", "window_geometry", "import_dialog"),
+            "WindowGeometry/PreferencesDialog": ("ui", "window_geometry", "preferences_dialog"),
+            # Maximized state
+            "IsMaximized/MainWindow": ("ui", "is_maximized", "main_window"),
+            "IsMaximized/DataExplorationWindow": ("ui", "is_maximized", "data_exploration_window"),
+            # Calibration
+            "Calibration/Unit": ("calibration", "unit"),
+            # UI settings
+            "ToolbarIconSize": ("ui", "toolbar_icon_size"),
+            "PlotSize": ("ui", "plot_size"),
+            "BackgroundColor": ("ui", "background_color"),
+            "Language": ("language",),
+            # 2D settings
+            "LandmarkSize/2D": ("ui", "landmark_size_2d"),
+            "LandmarkColor/2D": ("ui", "landmark_color_2d"),
+            "WireframeThickness/2D": ("ui", "wireframe_thickness_2d"),
+            "WireframeColor/2D": ("ui", "wireframe_color_2d"),
+            "IndexSize/2D": ("ui", "index_size_2d"),
+            "IndexColor/2D": ("ui", "index_color_2d"),
+            # 3D settings
+            "LandmarkSize/3D": ("ui", "landmark_size_3d"),
+            "LandmarkColor/3D": ("ui", "landmark_color_3d"),
+            "WireframeThickness/3D": ("ui", "wireframe_thickness_3d"),
+            "WireframeColor/3D": ("ui", "wireframe_color_3d"),
+            "IndexSize/3D": ("ui", "index_size_3d"),
+            "IndexColor/3D": ("ui", "index_color_3d"),
+            # Object overlay settings
+            "ObjectOverlay/AutoShow": ("ui", "object_overlay_auto_show"),
+            "ObjectOverlay/Position": ("ui", "object_overlay_position"),
+        }
+
+        # Data point colors and markers (dynamic)
+        for i in range(10):
+            self.key_map[f"DataPointColor/{i}"] = ("ui", "data_point_colors", str(i))
+            self.key_map[f"DataPointMarker/{i}"] = ("ui", "data_point_markers", str(i))
+
+    def _get_nested_value(self, keys, default_value):
+        """Get a value from nested dictionary."""
+        try:
+            value = self.config
+            for k in keys:
+                if isinstance(value, dict):
+                    value = value.get(k, {})
+                else:
+                    return default_value
+            return value if value != {} else default_value
+        except (KeyError, TypeError, AttributeError):
+            return default_value
+
+    def _set_nested_value(self, keys, value):
+        """Set a value in nested dictionary."""
+        if not keys:
+            return
+
+        # Ensure all parent dictionaries exist
+        current = self.config
+        for key in keys[:-1]:
+            if key not in current:
+                current[key] = {}
+            elif not isinstance(current[key], dict):
+                current[key] = {}
+            current = current[key]
+
+        # Set the final value
+        current[keys[-1]] = value
+
+    def value(self, key, default_value):
+        """Get a setting value (QSettings compatible)."""
+        if key in self.key_map:
+            value = self._get_nested_value(self.key_map[key], default_value)
+            # Handle WindowGeometry keys that should return QRect
+            if key.startswith("WindowGeometry/") and key != "WindowGeometry/RememberGeometry":
+                if isinstance(value, list) and len(value) == 4:
+                    from PyQt5.QtCore import QRect
+
+                    return QRect(*value)
+                elif hasattr(default_value, "x"):  # default_value is QRect
+                    return default_value
+            return value
+        return default_value
+
+    def setValue(self, key, value):
+        """Set a setting value (QSettings compatible)."""
+        # Convert QRect to list for JSON serialization
+        if hasattr(value, "x"):  # QRect or similar
+            value = [value.x(), value.y(), value.width(), value.height()]
+
+        if key in self.key_map:
+            self._set_nested_value(self.key_map[key], value)
+            # Auto-save after each change
+            self.save()
+
+    def save(self):
+        """Save settings to file."""
+        try:
+            import json
+            from pathlib import Path
+
+            config_path = Path.home() / ".modan2" / "config.json"
+            config_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(config_path, "w", encoding="utf-8") as f:
+                json.dump(self.config, f, indent=2, ensure_ascii=False)
+        except Exception as e:
+            logger.error(f"Failed to save config: {e}")
+
+    def sync(self):
+        """Force save settings to file (alias for save)."""
+        self.save()
+
+
 class ModanMainWindow(QMainWindow):
     def __init__(self, config=None):
         super().__init__()
@@ -386,130 +517,6 @@ class ModanMainWindow(QMainWindow):
 
         # Create a complete settings wrapper for compatibility
         if not hasattr(self.m_app, "settings"):
-
-            class SettingsWrapper:
-                def __init__(self, config, parent):
-                    self.config = config
-                    self.parent = parent  # ModanMainWindow instance for save_config
-                    # Complete key mapping for all settings
-                    self.key_map = {
-                        # Window geometry
-                        "WindowGeometry/RememberGeometry": ("ui", "remember_geometry"),
-                        "WindowGeometry/MainWindow": ("ui", "window_geometry", "main_window"),
-                        "WindowGeometry/ObjectDialog": ("ui", "window_geometry", "object_dialog"),
-                        "WindowGeometry/DatasetDialog": ("ui", "window_geometry", "dataset_dialog"),
-                        "WindowGeometry/DataExplorationWindow": ("ui", "window_geometry", "data_exploration_window"),
-                        "WindowGeometry/DatasetAnalysisWindow": ("ui", "window_geometry", "dataset_analysis_window"),
-                        "WindowGeometry/ExportDialog": ("ui", "window_geometry", "export_dialog"),
-                        "WindowGeometry/ImportDialog": ("ui", "window_geometry", "import_dialog"),
-                        "WindowGeometry/PreferencesDialog": ("ui", "window_geometry", "preferences_dialog"),
-                        # Maximized state
-                        "IsMaximized/MainWindow": ("ui", "is_maximized", "main_window"),
-                        "IsMaximized/DataExplorationWindow": ("ui", "is_maximized", "data_exploration_window"),
-                        # Calibration
-                        "Calibration/Unit": ("calibration", "unit"),
-                        # UI settings
-                        "ToolbarIconSize": ("ui", "toolbar_icon_size"),
-                        "PlotSize": ("ui", "plot_size"),
-                        "BackgroundColor": ("ui", "background_color"),
-                        "Language": ("language",),
-                        # 2D settings
-                        "LandmarkSize/2D": ("ui", "landmark_size_2d"),
-                        "LandmarkColor/2D": ("ui", "landmark_color_2d"),
-                        "WireframeThickness/2D": ("ui", "wireframe_thickness_2d"),
-                        "WireframeColor/2D": ("ui", "wireframe_color_2d"),
-                        "IndexSize/2D": ("ui", "index_size_2d"),
-                        "IndexColor/2D": ("ui", "index_color_2d"),
-                        # 3D settings
-                        "LandmarkSize/3D": ("ui", "landmark_size_3d"),
-                        "LandmarkColor/3D": ("ui", "landmark_color_3d"),
-                        "WireframeThickness/3D": ("ui", "wireframe_thickness_3d"),
-                        "WireframeColor/3D": ("ui", "wireframe_color_3d"),
-                        "IndexSize/3D": ("ui", "index_size_3d"),
-                        "IndexColor/3D": ("ui", "index_color_3d"),
-                        # Object overlay settings
-                        "ObjectOverlay/AutoShow": ("ui", "object_overlay_auto_show"),
-                        "ObjectOverlay/Position": ("ui", "object_overlay_position"),
-                    }
-
-                    # Data point colors and markers (dynamic)
-                    for i in range(10):
-                        self.key_map[f"DataPointColor/{i}"] = ("ui", "data_point_colors", str(i))
-                        self.key_map[f"DataPointMarker/{i}"] = ("ui", "data_point_markers", str(i))
-
-                def _get_nested_value(self, keys, default_value):
-                    """Get a value from nested dictionary."""
-                    try:
-                        value = self.config
-                        for k in keys:
-                            if isinstance(value, dict):
-                                value = value.get(k, {})
-                            else:
-                                return default_value
-                        return value if value != {} else default_value
-                    except (KeyError, TypeError, AttributeError):
-                        return default_value
-
-                def _set_nested_value(self, keys, value):
-                    """Set a value in nested dictionary."""
-                    if not keys:
-                        return
-
-                    # Ensure all parent dictionaries exist
-                    current = self.config
-                    for key in keys[:-1]:
-                        if key not in current:
-                            current[key] = {}
-                        elif not isinstance(current[key], dict):
-                            current[key] = {}
-                        current = current[key]
-
-                    # Set the final value
-                    current[keys[-1]] = value
-
-                def value(self, key, default_value):
-                    """Get a setting value (QSettings compatible)."""
-                    if key in self.key_map:
-                        value = self._get_nested_value(self.key_map[key], default_value)
-                        # Handle WindowGeometry keys that should return QRect
-                        if key.startswith("WindowGeometry/") and key != "WindowGeometry/RememberGeometry":
-                            if isinstance(value, list) and len(value) == 4:
-                                from PyQt5.QtCore import QRect
-
-                                return QRect(*value)
-                            elif hasattr(default_value, "x"):  # default_value is QRect
-                                return default_value
-                        return value
-                    return default_value
-
-                def setValue(self, key, value):
-                    """Set a setting value (QSettings compatible)."""
-                    # Convert QRect to list for JSON serialization
-                    if hasattr(value, "x"):  # QRect or similar
-                        value = [value.x(), value.y(), value.width(), value.height()]
-
-                    if key in self.key_map:
-                        self._set_nested_value(self.key_map[key], value)
-                        # Auto-save after each change
-                        self.save()
-
-                def save(self):
-                    """Save settings to file."""
-                    try:
-                        import json
-                        from pathlib import Path
-
-                        config_path = Path.home() / ".modan2" / "config.json"
-                        config_path.parent.mkdir(parents=True, exist_ok=True)
-                        with open(config_path, "w", encoding="utf-8") as f:
-                            json.dump(self.config, f, indent=2, ensure_ascii=False)
-                    except Exception as e:
-                        logger.error(f"Failed to save config: {e}")
-
-                def sync(self):
-                    """Force save settings to file (alias for save)."""
-                    self.save()
-
             self.m_app.settings = SettingsWrapper(self.config, self)
 
         if not self.init_done:

@@ -88,6 +88,26 @@ def setup_logging(debug: bool = False):
     logging.getLogger("matplotlib.font_manager").setLevel(logging.ERROR)
 
 
+def _patch_frozen_dependency_versions():
+    """Restore ``pytz.__version__`` when it goes missing in a frozen build.
+
+    In a PyInstaller-frozen app pandas' hard dependency pytz can end up without
+    its ``__version__`` attribute; pandas then aborts its own import with
+    "Can't determine version for pytz" (pandas/compat/_optional.py). pytz always
+    keeps its numeric version in the ``VERSION`` constant, so fall back to that.
+    This is a no-op in a normal environment where ``__version__`` is present, and
+    must run before anything imports pandas.
+    """
+    try:
+        import pytz
+
+        if not getattr(pytz, "__version__", None):
+            pytz.__version__ = getattr(pytz, "VERSION", None) or getattr(pytz, "OLSON_VERSION", "unknown")
+    except Exception:
+        # The shim must never be the thing that breaks startup.
+        pass
+
+
 def main():
     """Main application entry point."""
     args = parse_arguments()
@@ -95,6 +115,10 @@ def main():
     # Setup logging first
     setup_logging(debug=args.debug)
     logger = logging.getLogger(__name__)
+
+    # Guard against frozen-build dependency-version quirks before any heavy
+    # (pandas-pulling) imports happen below.
+    _patch_frozen_dependency_versions()
 
     logger.info("Starting Modan2 application...")
     logger.debug(f"Command line arguments: {vars(args)}")

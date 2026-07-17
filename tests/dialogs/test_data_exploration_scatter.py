@@ -201,6 +201,16 @@ def test_prepare_scatter_data_golden(qtbot, mock_database):
     _assert_close(snap, GOLDEN)
 
 
+def test_show_analysis_result_runs_with_legend(qtbot, mock_database):
+    """Drive the exploration plotting method (incl. the shared legend builder)
+    after prepare_scatter_data; it must render without error and build the legend."""
+    dialog = _prepared_dialog(qtbot)
+    dialog.cbxLegend.setChecked(True)
+    dialog.show_analysis_result()
+    # scatter handles created for the M/F groups
+    assert set(dialog.scatter_result.keys()) >= {"M", "F"}
+
+
 def test_prepare_scatter_data_with_overlays(qtbot, mock_database):
     """Convex hull + confidence ellipse populate per-group geometry keys."""
     dialog = _prepared_dialog(qtbot, checks={"convex_hull": True, "confidence_ellipse": True})

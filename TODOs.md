@@ -15,15 +15,21 @@ Large, multi-file, higher-risk. Do **one item at a time**, each on its own
 commit + devlog, keeping the suite green. Recommended order is roughly top-down.
 
 - [ ] **Decompose god-methods**
-  - [ ] `ModanController.run_analysis` (~360 lines) → split prep / run / persist;
-        also resolves the *type-overloaded return* smell (returns differ per branch)
+  - [x] `ModanController.run_analysis` (~360 lines) → done (devlog 176–178): split
+        into `_extract_group_values` / `_prepare_landmarks` / `_persist_analysis_results`;
+        type-overloaded return smell resolved
   - [ ] `Modan2.py` `read_settings` (~250 lines, contains an inline nested class)
   - [ ] `dialogs/dataset_analysis_dialog.py` `__init__` (371 lines)
   - [ ] `dialogs/object_dialog.py` `__init__` (283 lines)
-  - [ ] `dialogs/data_exploration_dialog.py` `prepare_scatter_data` (285 lines)
-- [ ] **Extract shared scatter-plot builder** — hundreds of near-identical lines
-      between `dataset_analysis_dialog.py:~775` and
-      `data_exploration_dialog.py:~1639/~2010` → a shared builder/mixin
+  - [x] `dialogs/data_exploration_dialog.py` `prepare_scatter_data` (285 lines) →
+        done (devlog 179–180): golden-master net + split into 6 phase helpers
+- [x] **Extract shared scatter-plot builder** — *rescoped & done* (devlog 181–184).
+      The two sites are **not** a monolithic near-duplicate (different data sources,
+      output structures, centroid/colour semantics), so a single builder was
+      deliberately not built. Extracted the genuinely-shared seams into
+      `dialogs/scatter_utils.py`: `build_scatter_group` (group-dict factory) and
+      `build_scatter_legend`, applied in both dialogs. Guarded by unit tests + the
+      exploration golden-master + a dataset-analysis smoke test.
 - [ ] **Move DB/file I/O out of dialogs into `ModanController`**
       (mirror how `analysis_dialog.py` already delegates)
   - [ ] `dialogs/object_dialog.py` `save_object()`, `Delete()` (`os.remove` +

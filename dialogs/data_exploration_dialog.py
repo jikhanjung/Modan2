@@ -53,7 +53,7 @@ from scipy import stats
 from scipy.spatial import ConvexHull
 
 import MdUtils as mu
-from dialogs.scatter_utils import build_scatter_group
+from dialogs.scatter_utils import build_scatter_group, build_scatter_legend
 from MdModel import MdDataset, MdObject
 from ModanComponents import ObjectViewer2D, ObjectViewer3D, ShapePreference
 
@@ -2059,16 +2059,7 @@ class DataExplorationDialog(QDialog):
                 # self.ax2.plot(size_range, group_a_curve, label='Group A')
             # print("show_legend:", show_legend)
             if show_legend:
-                values = []
-                keys = []
-                for key in self.scatter_result.keys():
-                    # print("key", key)
-                    if key[0] == "_" or key == "":
-                        continue
-                    else:
-                        keys.append(key)
-                        values.append(self.scatter_result[key])
-                scatter_legend = self.ax2.legend(values, keys, loc="upper right", bbox_to_anchor=(1.05, 1))
+                scatter_legend = build_scatter_legend(self.ax2, self.scatter_result, loc="upper right")
                 self.ax2.add_artist(scatter_legend)
                 bbox = scatter_legend.get_window_extent()
                 # Convert to axis coordinates

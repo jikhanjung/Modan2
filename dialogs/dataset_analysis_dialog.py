@@ -41,7 +41,7 @@ from PyQt5.QtWidgets import (
 
 import MdUtils as mu
 from components.widgets import DatasetOpsViewer
-from dialogs.scatter_utils import build_scatter_group
+from dialogs.scatter_utils import build_scatter_group, build_scatter_legend
 from MdModel import MdDatasetOps, MdObject
 from MdStatistics import MdCanonicalVariate, MdPrincipalComponent
 from ModanComponents import ObjectViewer3D
@@ -875,16 +875,7 @@ class DatasetAnalysisDialog(QDialog):
                     for idx, obj in enumerate(group["data"]):
                         self.ax2.annotate(obj.object_name, (group["x_val"][idx], group["y_val"][idx]))
             if show_legend:
-                values = []
-                keys = []
-                for key in self.scatter_result.keys():
-                    # print("key", key)
-                    if key[0] == "_":
-                        continue
-                    else:
-                        keys.append(key)
-                        values.append(self.scatter_result[key])
-                self.ax2.legend(values, keys, loc="upper right", bbox_to_anchor=(1.05, 1))
+                build_scatter_legend(self.ax2, self.scatter_result, loc="upper right")
             if show_axis_label:
                 self.ax2.set_xlabel(axis1_title)
                 self.ax2.set_ylabel(axis2_title)
@@ -917,16 +908,7 @@ class DatasetAnalysisDialog(QDialog):
                         self.ax3.text(group["x_val"][idx], group["y_val"][idx], group["z_val"][idx], obj.object_name)
                     # print("ret", ret)
             if show_legend:
-                values = []
-                keys = []
-                for key in self.scatter_result.keys():
-                    # print("key", key)
-                    if key[0] == "_":
-                        continue
-                    else:
-                        keys.append(key)
-                        values.append(self.scatter_result[key])
-                self.ax3.legend(values, keys, loc="upper left", bbox_to_anchor=(1.05, 1))
+                build_scatter_legend(self.ax3, self.scatter_result, loc="upper left")
             # if show_legend:
             #    self.ax3.legend(self.scatter_result.values(), self.scatter_result.keys(), loc='upper left', bbox_to_anchor=(1.05, 1))
             if show_axis_label:

@@ -40,6 +40,7 @@ from PyQt5.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QLineEdit,
+    QMessageBox,
     QPushButton,
     QRadioButton,
     QScrollArea,
@@ -850,25 +851,37 @@ class DataExplorationDialog(QDialog):
                 return
             # print("video_name", video_name)
 
-            video = cv2.VideoWriter(video_name, fourcc, 20.0, (width, height))
+            video = None
+            try:
+                video = cv2.VideoWriter(video_name, fourcc, 20.0, (width, height))
+                for image in images:
+                    video.write(cv2.imread(image))
+            except Exception as e:
+                # cv2 codec/encode failure: don't let it escape this QTimer
+                # callback (which would abort silently and leave the cursor stuck).
+                logger.error(f"Failed to write video {video_name}: {e}", exc_info=True)
+                QMessageBox.warning(self, self.tr("Error"), self.tr(f"Failed to save video:\n{e}"))
+            finally:
+                if video is not None:
+                    video.release()
+                cv2.destroyAllWindows()
 
-            for image in images:
-                video.write(cv2.imread(image))
-
-            cv2.destroyAllWindows()
-            video.release()
-
+    @guard_slot("Failed to animate shape")
     def animate_shape(self):
         if self.mode not in [
             MODE_COMPARISON,
         ]:  # or self.comboRegressionBy.currentText() == "By group":
             return
 
+        try:
+            self.total_frame = int(self.edtNumFrames.text())
+        except (ValueError, TypeError):
+            logger.warning(f"Invalid frame count {self.edtNumFrames.text()!r}; defaulting to 60")
+            self.total_frame = 60
         QApplication.setOverrideCursor(Qt.WaitCursor)
         self.pause_frame = 15
         self.toolbar_widget.hide()
         self.shape_option_widget.hide()
-        self.total_frame = int(self.edtNumFrames.text())
         self.half_frame = int(self.total_frame / 2)
 
         if self.mode in [MODE_COMPARISON]:

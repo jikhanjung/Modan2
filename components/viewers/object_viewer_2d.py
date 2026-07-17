@@ -1070,6 +1070,10 @@ class ObjectViewer2D(QLabel):
 
         self.fullpath = file_path
         self.curr_pixmap = self.orig_pixmap = QPixmap(file_path)
+        if self.curr_pixmap.isNull():
+            # QPixmap fails silently on a missing/corrupt/unsupported image,
+            # leaving the viewer blank with no hint why. Log it at least.
+            logger.warning(f"set_image: could not load image (blank pixmap): {file_path}")
         self.setPixmap(self.curr_pixmap)
 
     def clear_object(self):

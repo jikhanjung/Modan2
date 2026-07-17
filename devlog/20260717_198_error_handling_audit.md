@@ -121,3 +121,30 @@ Suggested order: A + F + G (broad coverage) → B/C/D/E (per-slot) → Med → L
 ## Status
 
 Audit only — **no code changed** in this devlog. Pick a batch to implement next.
+
+---
+
+## Remediation complete (2026-07-18)
+
+All actionable items above were implemented across ten batches:
+
+**High** — parsers + main-window/dialog slots + 3D I/O
+- batch 1 (199, `ff00021`) — main-window High slots via `guard_slot`
+- batch 2 (200, `05a6d21`) — external file parsers hardened
+- batch 3 (201, `8ce21b8`) — 3D-model file I/O (`MdThreeDModel`, viewer)
+- batch 4 (202, `5a7774a`) — remaining dialog High slots + `guard_slot` arg fix
+
+**Med**
+- batch 5 (203, `88ccfbf`) — Modan2 Med slots + defensive selection parsing
+- batch 6 (204, `8013ab3`) — data-exploration (update_chart, ConvexHull, unrotate)
+- batch 7 (205, `b3d662e`) — analysis/object dialogs (show_analysis_result, x_changed)
+- batch 8 (206, `23a4b27`) — MdModel (change_dataset move-before-save, svd, rescale)
+- batch 9 (207, `b0500f7`) — zip import (orphan cleanup, manifest guards)
+
+**Low**
+- batch 10 (208, `5eb220d`) — viewer/animation (set_image, video, animate_shape)
+
+Deliberately left as-is (documented in 208): `Modan2.closeEvent`/preferences/import
+outer slots (mostly guarded internally; guarding `closeEvent` risks the
+accept/ignore handshake) and `MdImage.load_file_info` (only reached via the guarded
+`add_file`).

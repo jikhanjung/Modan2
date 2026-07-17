@@ -346,26 +346,31 @@ class MdObject(Model):
         media = self.image.first() or self.threed_model.first()
         source_path = media.get_file_path() if media is not None else None
 
-        self.dataset = dataset
-        self.save()
-
         if media is None:
             # No image or 3D file to relocate (e.g. a landmark-only object).
+            self.dataset = dataset
+            self.save()
             return
 
-        # get_file_path() resolves the storage dir via media.object.dataset; that
-        # relation is cached on `media` and still points at the old dataset, so
-        # re-attach the just-saved object before computing the destination.
+        # Reassign the dataset in memory (NOT yet persisted) so get_file_path()
+        # resolves the new destination, then move the file *before* saving. If the
+        # move fails, save() is never reached and the DB still points at the old
+        # dataset -- the media stays consistent with the row instead of being
+        # orphaned. get_file_path() resolves via media.object.dataset, so re-attach
+        # this object first.
+        self.dataset = dataset
         media.object = self
         target_path = media.get_file_path()
 
-        if os.path.exists(source_path):
+        if source_path and os.path.exists(source_path):
             if not os.path.exists(os.path.dirname(target_path)):
                 os.makedirs(os.path.dirname(target_path))
 
             if os.path.exists(target_path):
                 os.remove(target_path)
             os.rename(source_path, target_path)
+
+        self.save()
 
     def pack_landmark(self):
         # error check - modified to handle None values as "Missing"
@@ -1011,6 +1016,11 @@ class MdObjectOps:
     def rescale_to_unitsize(self):
         centroid_size = self.get_centroid_size(True)
 
+        if not centroid_size:
+            # A single coincident-point (or empty) shape has zero centroid size;
+            # scaling by 1/0 would raise ZeroDivisionError. Leave it unscaled.
+            logger.warning("rescale_to_unitsize: centroid size is 0; skipping rescale")
+            return
         self.rescale(1 / centroid_size)
 
     def apply_rotation_matrix(self, rotation_matrix):
@@ -1473,7 +1483,15 @@ class MdDatasetOps:
         # assert( ref.shape == target.shape )
 
         correlation_matrix = np.dot(np.transpose(ref), target)
-        v, s, w = np.linalg.svd(correlation_matrix)
+        try:
+            v, s, w = np.linalg.svd(correlation_matrix)
+        except np.linalg.LinAlgError as e:
+            # Degenerate / non-finite landmark data (e.g. missing coords -> NaN)
+            # makes the SVD fail to converge. Surface a clear cause.
+            raise ValueError(
+                "Cannot compute alignment rotation: landmark data is degenerate "
+                f"or contains missing/invalid values ({e})"
+            ) from e
         is_reflection = (np.linalg.det(v) * np.linalg.det(w)) < 0.0
         if is_reflection:
             v[-1, :] = -v[-1, :]

@@ -610,29 +610,7 @@ class ModanController(QObject):
                     try:
                         self.logger.info("Running CVA analysis alongside PCA")
 
-                        # Extract group values from objects based on cva_group_by index
-                        group_values = []
-                        variable_names = self.current_dataset.get_variablename_list()
-
-                        if isinstance(cva_group_by, int) and 0 <= cva_group_by < len(variable_names):
-                            # cva_group_by is an index
-                            for obj in ds_ops.object_list:  # Use superimposed objects from ds_ops
-                                obj_model = objects_by_id.get(obj.id)
-                                if obj_model:
-                                    variable_list = obj_model.get_variable_list()
-                                    if cva_group_by < len(variable_list):
-                                        group_values.append(variable_list[cva_group_by])
-                                    else:
-                                        group_values.append("Unknown")
-                                else:
-                                    group_values.append("Unknown")
-                        else:
-                            # cva_group_by might be a string or direct group list
-                            if isinstance(cva_group_by, str):
-                                self.logger.warning(f"CVA group_by is string: {cva_group_by}")
-                            group_values = cva_group_by
-
-                        self.logger.debug(f"CVA groups extracted: {group_values[:5]}...")  # Show first 5
+                        group_values = self._extract_group_values(cva_group_by, ds_ops, objects_by_id, "CVA")
                         cva_params = {"groups": group_values}
                         cva_result = self._run_cva(landmarks_data, cva_params)
                         self.logger.info("CVA analysis completed successfully")
@@ -648,26 +626,9 @@ class ModanController(QObject):
                     try:
                         self.logger.info("Running MANOVA analysis alongside PCA")
 
-                        # Extract group values for MANOVA (same logic as CVA)
-                        manova_group_values = []
-                        variable_names = self.current_dataset.get_variablename_list()
-
-                        if isinstance(manova_group_by, int) and 0 <= manova_group_by < len(variable_names):
-                            # manova_group_by is an index
-                            for obj in ds_ops.object_list:  # Use superimposed objects from ds_ops
-                                obj_model = objects_by_id.get(obj.id)
-                                if obj_model:
-                                    variable_list = obj_model.get_variable_list()
-                                    if manova_group_by < len(variable_list):
-                                        manova_group_values.append(variable_list[manova_group_by])
-                                    else:
-                                        manova_group_values.append("Unknown")
-                                else:
-                                    manova_group_values.append("Unknown")
-                        else:
-                            manova_group_values = manova_group_by
-
-                        self.logger.debug(f"MANOVA groups extracted: {manova_group_values[:5]}...")
+                        manova_group_values = self._extract_group_values(
+                            manova_group_by, ds_ops, objects_by_id, "MANOVA"
+                        )
 
                         # MANOVA should use PCA scores, not raw landmarks
                         # Pass the PCA result for proper eigenvalue-based component selection
@@ -864,6 +825,39 @@ class ModanController(QObject):
 
         finally:
             self._processing = False
+
+    def _extract_group_values(self, group_by, ds_ops, objects_by_id, label):
+        """Resolve per-object group values for a CVA/MANOVA run.
+
+        If ``group_by`` is a valid variable index, read that variable from each
+        superimposed object (falling back to ``"Unknown"`` when the object or
+        variable is missing). Otherwise ``group_by`` is treated as a ready-made
+        group list (or string) and returned unchanged.
+
+        ``label`` ("CVA"/"MANOVA") is used only for log messages so the two runs
+        stay distinguishable in the logs.
+        """
+        variable_names = self.current_dataset.get_variablename_list()
+
+        if isinstance(group_by, int) and 0 <= group_by < len(variable_names):
+            group_values = []
+            for obj in ds_ops.object_list:  # Use superimposed objects from ds_ops
+                obj_model = objects_by_id.get(obj.id)
+                if obj_model:
+                    variable_list = obj_model.get_variable_list()
+                    if group_by < len(variable_list):
+                        group_values.append(variable_list[group_by])
+                    else:
+                        group_values.append("Unknown")
+                else:
+                    group_values.append("Unknown")
+        else:
+            if isinstance(group_by, str):
+                self.logger.warning(f"{label} group_by is string: {group_by}")
+            group_values = group_by
+
+        self.logger.debug(f"{label} groups extracted: {group_values[:5]}...")
+        return group_values
 
     def _run_pca(self, landmarks_data: list[list], params: dict[str, Any]) -> dict[str, Any]:
         """Run PCA analysis.

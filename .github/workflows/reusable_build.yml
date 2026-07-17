@@ -35,7 +35,10 @@ jobs:
       - name: Download and Install Inno Setup
         shell: pwsh
         run: |
-          $inno_url = "https://files.jrsoftware.org/is/6/innosetup-6.2.2.exe"
+          # jrsoftware.org only keeps the latest 6.x at /is/6/, so pinned point
+          # releases (e.g. innosetup-6.2.2.exe) start returning 404. GitHub release
+          # assets are permanent, so pin the installer there instead.
+          $inno_url = "https://github.com/jrsoftware/issrc/releases/download/is-6_7_3/innosetup-6.7.3.exe"
           $inno_installer = "innosetup-installer.exe"
           Invoke-WebRequest -Uri $inno_url -OutFile $inno_installer
           Start-Process -FilePath $inno_installer -ArgumentList "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART" -Wait

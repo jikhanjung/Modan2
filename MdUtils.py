@@ -756,9 +756,16 @@ def import_dataset_from_zip(zip_path: str, progress_callback: Callable[[int, int
     """Import dataset from a JSON+ZIP package. Returns new dataset id."""
     from MdModel import MdDataset, MdImage, MdObject, MdThreeDModel, gDatabase
 
+    # Media copied into permanent storage; removed if the transaction rolls back
+    # so a failed import doesn't leave orphaned files behind.
+    copied_files: list[str] = []
+
     with tempfile.TemporaryDirectory() as tmpdir:
-        root = safe_extract_zip(zip_path, tmpdir)
-        data = read_json_from_zip(zip_path)
+        try:
+            root = safe_extract_zip(zip_path, tmpdir)
+            data = read_json_from_zip(zip_path)
+        except (zipfile.BadZipFile, KeyError, json.JSONDecodeError) as e:
+            raise ValueError(f"Corrupt or invalid dataset package: {e}") from e
         ok, errs = validate_json_schema(data)
         if not ok:
             raise ValueError("Invalid dataset.json: " + "; ".join(errs))
@@ -771,92 +778,112 @@ def import_dataset_from_zip(zip_path: str, progress_callback: Callable[[int, int
         if progress_callback:
             progress_callback(curr, total)
 
-        with gDatabase.atomic():
-            # Create dataset
-            ds = MdDataset()
-            # Ensure unique dataset name by appending (1), (2), ... if needed
-            base_name = ds_meta.get("name") or "Imported Dataset"
-            candidate = base_name
-            suffix = 1
-            while MdDataset.select().where(MdDataset.dataset_name == candidate).exists():
-                candidate = f"{base_name} ({suffix})"
-                suffix += 1
-            ds.dataset_name = candidate
-            ds.dataset_desc = ds_meta.get("description")
-            ds.dimension = int(ds_meta.get("dimension") or 2)
-            # variables
-            ds.variablename_list = ds_meta.get("variables") or []
-            ds.pack_variablename_str()
-            # geometry
-            ds.edge_list = ds_meta.get("wireframe") or []
-            ds.pack_wireframe()
-            ds.polygon_list = ds_meta.get("polygons") or []
-            ds.pack_polygons()
-            baseline = ds_meta.get("baseline") or []
-            if baseline:
-                ds.baseline_point_list = baseline
-                ds.pack_baseline()
-            ds.save()
+        try:
+            with gDatabase.atomic():
+                # Create dataset
+                ds = MdDataset()
+                # Ensure unique dataset name by appending (1), (2), ... if needed
+                base_name = ds_meta.get("name") or "Imported Dataset"
+                candidate = base_name
+                suffix = 1
+                while MdDataset.select().where(MdDataset.dataset_name == candidate).exists():
+                    candidate = f"{base_name} ({suffix})"
+                    suffix += 1
+                ds.dataset_name = candidate
+                ds.dataset_desc = ds_meta.get("description")
+                try:
+                    ds.dimension = int(ds_meta.get("dimension") or 2)
+                except (ValueError, TypeError) as e:
+                    raise ValueError(f"Invalid dimension in manifest: {ds_meta.get('dimension')!r}") from e
+                # variables
+                ds.variablename_list = ds_meta.get("variables") or []
+                ds.pack_variablename_str()
+                # geometry
+                ds.edge_list = ds_meta.get("wireframe") or []
+                ds.pack_wireframe()
+                ds.polygon_list = ds_meta.get("polygons") or []
+                ds.pack_polygons()
+                baseline = ds_meta.get("baseline") or []
+                if baseline:
+                    ds.baseline_point_list = baseline
+                    ds.pack_baseline()
+                ds.save()
 
-            storage_base = _get_storage_dir()
+                storage_base = _get_storage_dir()
 
-            for o in objs:
-                mo = MdObject()
-                mo.object_name = o.get("name") or str(o.get("id"))
-                mo.object_desc = None
-                ppm = o.get("pixels_per_mm")
-                mo.pixels_per_mm = float(ppm) if ppm is not None else None
-                mo.sequence = o.get("sequence")
-                # landmarks -> landmark_str
-                lm_lines = []
-                for lm in o.get("landmarks") or []:
-                    if lm is None:
-                        continue
-                    lm_str = "\t".join([str(x) for x in lm[: ds.dimension]])
-                    lm_lines.append(lm_str)
-                mo.landmark_str = "\n".join(lm_lines)
-                # variables -> property_str
-                varmap = o.get("variables") or {}
-                varvals = [varmap.get(n) if varmap.get(n) is not None else "" for n in ds.variablename_list]
-                mo.variable_list = varvals
-                mo.pack_variable()
-                mo.dataset = ds
-                mo.save()
+                for o in objs:
+                    mo = MdObject()
+                    mo.object_name = o.get("name") or str(o.get("id"))
+                    mo.object_desc = None
+                    ppm = o.get("pixels_per_mm")
+                    try:
+                        mo.pixels_per_mm = float(ppm) if ppm is not None else None
+                    except (ValueError, TypeError):
+                        logger.warning(f"Invalid pixels_per_mm {ppm!r}; leaving unset")
+                        mo.pixels_per_mm = None
+                    mo.sequence = o.get("sequence")
+                    # landmarks -> landmark_str
+                    lm_lines = []
+                    for lm in o.get("landmarks") or []:
+                        if lm is None:
+                            continue
+                        lm_str = "\t".join([str(x) for x in lm[: ds.dimension]])
+                        lm_lines.append(lm_str)
+                    mo.landmark_str = "\n".join(lm_lines)
+                    # variables -> property_str
+                    varmap = o.get("variables") or {}
+                    varvals = [varmap.get(n) if varmap.get(n) is not None else "" for n in ds.variablename_list]
+                    mo.variable_list = varvals
+                    mo.pack_variable()
+                    mo.dataset = ds
+                    mo.save()
 
-                curr += 1
-                if progress_callback:
-                    progress_callback(curr, total)
+                    curr += 1
+                    if progress_callback:
+                        progress_callback(curr, total)
 
-                # files
-                files = o.get("files") or {}
-                # image
-                img_meta = files.get("image") if isinstance(files, dict) else None
-                if img_meta and img_meta.get("path"):
-                    src = Path(root) / img_meta["path"]
-                    if src.exists():
-                        new_image = MdImage()
-                        new_image.object = mo
-                        new_image.load_file_info(str(src))
-                        new_fp = new_image.get_file_path(storage_base)
-                        Path(new_fp).parent.mkdir(parents=True, exist_ok=True)
-                        shutil.copy2(str(src), str(new_fp))
-                        new_image.save()
+                    # files
+                    files = o.get("files") or {}
+                    # image
+                    img_meta = files.get("image") if isinstance(files, dict) else None
+                    if img_meta and img_meta.get("path"):
+                        src = Path(root) / img_meta["path"]
+                        if src.exists():
+                            new_image = MdImage()
+                            new_image.object = mo
+                            new_image.load_file_info(str(src))
+                            new_fp = new_image.get_file_path(storage_base)
+                            Path(new_fp).parent.mkdir(parents=True, exist_ok=True)
+                            shutil.copy2(str(src), str(new_fp))
+                            copied_files.append(str(new_fp))
+                            new_image.save()
 
-                # model
-                mdl_meta = files.get("model") if isinstance(files, dict) else None
-                if mdl_meta and mdl_meta.get("path"):
-                    src = Path(root) / mdl_meta["path"]
-                    if src.exists():
-                        new_model = MdThreeDModel()
-                        new_model.object = mo
-                        new_model.load_file_info(str(src))
-                        new_fp = new_model.get_file_path(storage_base)
-                        Path(new_fp).parent.mkdir(parents=True, exist_ok=True)
-                        shutil.copy2(str(src), str(new_fp))
-                        new_model.save()
+                    # model
+                    mdl_meta = files.get("model") if isinstance(files, dict) else None
+                    if mdl_meta and mdl_meta.get("path"):
+                        src = Path(root) / mdl_meta["path"]
+                        if src.exists():
+                            new_model = MdThreeDModel()
+                            new_model.object = mo
+                            new_model.load_file_info(str(src))
+                            new_fp = new_model.get_file_path(storage_base)
+                            Path(new_fp).parent.mkdir(parents=True, exist_ok=True)
+                            shutil.copy2(str(src), str(new_fp))
+                            copied_files.append(str(new_fp))
+                            new_model.save()
 
-                curr += 2
-                if progress_callback:
-                    progress_callback(curr, total)
+                    curr += 2
+                    if progress_callback:
+                        progress_callback(curr, total)
 
-        return ds.id
+            return ds.id
+        except Exception:
+            # atomic() rolled back the DB; remove any media already copied into
+            # permanent storage so a failed import leaves nothing orphaned behind.
+            for fp in copied_files:
+                try:
+                    if os.path.exists(fp):
+                        os.remove(fp)
+                except OSError as e:
+                    logger.warning(f"Failed to clean up orphaned import file {fp}: {e}")
+            raise

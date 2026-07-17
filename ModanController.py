@@ -4,6 +4,7 @@ Handles business logic and coordinates between View and Model.
 """
 
 import logging
+import os
 from pathlib import Path
 from typing import Any
 
@@ -529,6 +530,20 @@ class ModanController(QObject):
             obj.add_threed_model(model_path).save()
 
         return obj
+
+    def delete_object_with_files(self, obj, storage_directory):
+        """Delete an object and its on-disk image file (if any).
+
+        Moved out of ``ObjectDialog.Delete``: removes the first image's file from
+        ``storage_directory`` (when it exists) then deletes the object row. This is
+        a non-recursive delete (matching the original dialog behavior); see
+        ``delete_object`` for the recursive variant used elsewhere.
+        """
+        if obj.image.count() > 0:
+            image_path = obj.image[0].get_file_path(storage_directory)
+            if os.path.exists(image_path):
+                os.remove(image_path)
+        obj.delete_instance()
 
     def set_current_object(self, obj: MdModel.MdObject | None):
         """Set currently selected object.

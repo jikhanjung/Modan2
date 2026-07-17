@@ -6,7 +6,6 @@ morphometric objects with their associated landmarks and metadata.
 
 import copy
 import logging
-import os
 from pathlib import Path
 
 import numpy as np
@@ -1117,11 +1116,7 @@ class ObjectDialog(QDialog):
             self, "", self.tr("Are you sure to delete this object?"), QMessageBox.Yes | QMessageBox.No, QMessageBox.No
         )
         if ret == QMessageBox.Yes:
-            if self.object.image.count() > 0:
-                image_path = self.object.image[0].get_file_path(self.m_app.storage_directory)
-                if os.path.exists(image_path):
-                    os.remove(image_path)
-            self.object.delete_instance()
+            self.controller.delete_object_with_files(self.object, self.m_app.storage_directory)
         # self.delete_dataset()
         self.object_deleted = True
         self.accept()

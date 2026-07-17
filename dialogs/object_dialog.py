@@ -64,6 +64,15 @@ class ObjectDialog(QDialog):
         # print(self.parent.pos())
         self.remember_geometry = True
         self.m_app = QApplication.instance()
+        # Controller for DB/file persistence (delegated out of the dialog). Falls
+        # back to a standalone controller when constructed without a real parent
+        # window (e.g. tests using a Mock parent), so persistence still targets the
+        # active database. isinstance guards against Mock parents whose .controller
+        # auto-creates a truthy Mock attribute.
+        from ModanController import ModanController
+
+        parent_controller = getattr(parent, "controller", None)
+        self.controller = parent_controller if isinstance(parent_controller, ModanController) else ModanController()
         self.read_settings()
         # self.move(self.parent.pos()+QPoint(50,50))
         close_shortcut = QShortcut(QKeySequence("Ctrl+W"), self)
@@ -1064,34 +1073,23 @@ class ObjectDialog(QDialog):
                 self.edtLandmarkStr.setItem(idx, 2, item_z)
 
     def save_object(self):
-        # print("save object")
-
-        if self.object is None:
-            self.object = MdObject()
-        self.object.dataset_id = self.dataset.id
-        self.object.object_name = self.edtObjectName.text()
-        self.object.sequence = int(self.edtSequence.text())
-        self.object.object_desc = self.edtObjectDesc.toPlainText()
-        # self.object.landmark_str = self.edtLandmarkStr.text()
-        self.object.landmark_str = self.make_landmark_str()
-        # print("scale:", self.object.pixels_per_mm)
+        # Gather UI values here; the controller performs the DB/file persistence.
+        property_str = None
         if self.dataset.propertyname_str is not None and self.dataset.propertyname_str != "":
-            self.object.property_str = ",".join([edt.text() for edt in self.edtPropertyList])
+            property_str = ",".join([edt.text() for edt in self.edtPropertyList])
 
-        self.object.save()
-        # print("object_view_2d.fullpath in save_object:", self.object_view_2d.fullpath, "has image", self.object.has_image(), "image changed", self.object_view_2d.image_changed)
-        if self.object_view_2d.fullpath is not None:
-            if not self.object.has_image():
-                img = self.object.add_image(self.object_view_2d.fullpath)
-                img.save()
-            elif self.object_view_2d.image_changed is True:
-                img = self.object.update_image(self.object_view_2d.fullpath)
-                img.save()
-            # print("img:", img)
-
-        elif self.object_view_3d.fullpath is not None and not self.object.has_threed_model():
-            mdl = self.object.add_threed_model(self.object_view_3d.fullpath)
-            mdl.save()
+        self.object = self.controller.save_object(
+            self.object,
+            self.dataset,
+            object_name=self.edtObjectName.text(),
+            sequence=int(self.edtSequence.text()),
+            object_desc=self.edtObjectDesc.toPlainText(),
+            landmark_str=self.make_landmark_str(),
+            property_str=property_str,
+            image_path=self.object_view_2d.fullpath,
+            image_changed=self.object_view_2d.image_changed,
+            model_path=self.object_view_3d.fullpath,
+        )
 
     def make_landmark_str(self):
         # from table, make landmark_str

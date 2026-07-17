@@ -483,6 +483,53 @@ class ModanController(QObject):
             self.error_occurred.emit(f"Failed to delete object: {str(e)}")
             return False
 
+    def save_object(
+        self,
+        obj,
+        dataset,
+        *,
+        object_name,
+        sequence,
+        object_desc,
+        landmark_str,
+        property_str=None,
+        image_path=None,
+        image_changed=False,
+        model_path=None,
+    ):
+        """Persist an object and its optional image / 3D model to the database.
+
+        Moved out of ``ObjectDialog.save_object`` so the dialog no longer performs
+        DB/file I/O directly. ``property_str=None`` leaves that field untouched
+        (matches the dialog only setting it when the dataset defines variables).
+        An ``image_path`` is added (or updated when ``image_changed``) only if the
+        object has no image; otherwise a ``model_path`` is added when the object has
+        no 3D model — mirroring the original precedence.
+
+        Returns the saved object.
+        """
+        if obj is None:
+            obj = MdModel.MdObject()
+        obj.dataset_id = dataset.id
+        obj.object_name = object_name
+        obj.sequence = sequence
+        obj.object_desc = object_desc
+        obj.landmark_str = landmark_str
+        if property_str is not None:
+            obj.property_str = property_str
+
+        obj.save()
+
+        if image_path is not None:
+            if not obj.has_image():
+                obj.add_image(image_path).save()
+            elif image_changed:
+                obj.update_image(image_path).save()
+        elif model_path is not None and not obj.has_threed_model():
+            obj.add_threed_model(model_path).save()
+
+        return obj
+
     def set_current_object(self, obj: MdModel.MdObject | None):
         """Set currently selected object.
 

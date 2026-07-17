@@ -41,6 +41,7 @@ from PyQt5.QtWidgets import (
 
 import MdUtils as mu
 from components.widgets import DatasetOpsViewer
+from dialogs.scatter_utils import build_scatter_group
 from MdModel import MdDatasetOps, MdObject
 from MdStatistics import MdCanonicalVariate, MdPrincipalComponent
 from ModanComponents import ObjectViewer3D
@@ -809,31 +810,13 @@ class DatasetAnalysisDialog(QDialog):
 
         key_list = []
         key_list.append("__default__")
-        self.scatter_data["__default__"] = {
-            "x_val": [],
-            "y_val": [],
-            "z_val": [],
-            "data": [],
-            "hoverinfo": [],
-            "text": [],
-            "property": "",
-            "symbol": "o",
-            "color": color_candidate[0],
-            "size": scatter_size,
-        }
+        self.scatter_data["__default__"] = build_scatter_group(
+            scatter_size, symbol="o", color=color_candidate[0], meta=True
+        )
         if len(self.selected_object_id_list) > 0:
-            self.scatter_data["__selected__"] = {
-                "x_val": [],
-                "y_val": [],
-                "z_val": [],
-                "data": [],
-                "hoverinfo": [],
-                "text": [],
-                "property": "",
-                "symbol": "o",
-                "color": "red",
-                "size": SCATTER_LARGE_SIZE,
-            }
+            self.scatter_data["__selected__"] = build_scatter_group(
+                SCATTER_LARGE_SIZE, symbol="o", color="red", meta=True
+            )
             key_list.append("__selected__")
 
         for obj in self.ds_ops.object_list:
@@ -845,16 +828,7 @@ class DatasetAnalysisDialog(QDialog):
                 key_name = obj.variable_list[self.propertyname_index]
 
             if key_name not in self.scatter_data.keys():
-                self.scatter_data[key_name] = {
-                    "x_val": [],
-                    "y_val": [],
-                    "z_val": [],
-                    "data": [],
-                    "property": key_name,
-                    "symbol": "",
-                    "color": "",
-                    "size": scatter_size,
-                }
+                self.scatter_data[key_name] = build_scatter_group(scatter_size, property_name=key_name)
             if axis1 == 10:
                 mdobject = MdObject.get_by_id(obj.id)
                 mdobject.get_centroid_size(True)

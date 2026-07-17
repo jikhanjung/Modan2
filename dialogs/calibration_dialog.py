@@ -14,6 +14,7 @@ from PyQt5.QtWidgets import (
 )
 
 from dialogs.base_dialog import BaseDialog
+from MdHelpers import guard_slot
 
 
 class CalibrationDialog(BaseDialog):
@@ -99,6 +100,7 @@ class CalibrationDialog(BaseDialog):
         self.lblText2.setText(f"{self.pixel_number:.2f} pixels are equivalent to:")
         self.edtLength.selectAll()
 
+    @guard_slot("Calibration failed")
     def btnOK_clicked(self):
         """Handle OK button click - apply calibration."""
         self.parent.set_object_calibration(

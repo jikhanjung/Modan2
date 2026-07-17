@@ -24,6 +24,7 @@ from PyQt5.QtWidgets import (
 )
 
 from dialogs.base_dialog import BaseDialog
+from MdHelpers import guard_slot
 from MdModel import MdDataset
 
 logger = logging.getLogger(__name__)
@@ -352,6 +353,7 @@ class DatasetDialog(BaseDialog):
             logger.error("Failed to save dataset: %s", str(e))
             QMessageBox.critical(self, "Error", f"Failed to save dataset: {str(e)}")
 
+    @guard_slot("Failed to delete dataset")
     def Delete(self):
         """Delete dataset after confirmation."""
         ret = QMessageBox.question(

@@ -43,6 +43,7 @@ import MdUtils as mu
 from components.widgets import DatasetOpsViewer
 from dialogs.base_dialog import load_color_marker_lists
 from dialogs.scatter_utils import build_scatter_group, build_scatter_legend
+from MdHelpers import guard_slot
 from MdModel import MdDatasetOps, MdObject
 from MdStatistics import MdCanonicalVariate, MdPrincipalComponent
 from ModanComponents import ObjectViewer3D
@@ -754,6 +755,7 @@ class DatasetAnalysisDialog(QDialog):
         self.lblShape.set_ds_ops(self.ds_ops)
         self.lblShape.repaint()
 
+    @guard_slot("Analysis failed")
     def on_btn_analysis_clicked(self):
         # print("pca button clicked")
         # set wait cursor

@@ -4,6 +4,7 @@ Helper functions and utilities for Modan2 application.
 
 import functools
 import hashlib
+import inspect
 import json
 import logging
 import os
@@ -29,10 +30,24 @@ def guard_slot(user_message: str = "An unexpected error occurred"):
     """
 
     def decorator(func):
+        # Replicate PyQt's leniency: a slot defined with fewer params than the
+        # signal emits (e.g. `def on_click(self)` on a `clicked(bool)` signal) must
+        # still work. The variadic wrapper below makes PyQt pass every signal arg,
+        # so truncate extras to what `func` actually accepts.
+        try:
+            params = inspect.signature(func).parameters.values()
+            has_varargs = any(p.kind == p.VAR_POSITIONAL for p in params)
+            n_positional = sum(
+                1 for p in params if p.name != "self" and p.kind in (p.POSITIONAL_ONLY, p.POSITIONAL_OR_KEYWORD)
+            )
+        except (TypeError, ValueError):
+            has_varargs, n_positional = True, None
+
         @functools.wraps(func)
         def wrapper(self, *args, **kwargs):
+            call_args = args if has_varargs or n_positional is None else args[:n_positional]
             try:
-                return func(self, *args, **kwargs)
+                return func(self, *call_args, **kwargs)
             except Exception as e:
                 logger.error(f"{func.__qualname__} failed: {e}", exc_info=True)
                 # Pop any override cursor(s) the handler set before it raised.

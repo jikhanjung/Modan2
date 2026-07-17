@@ -24,6 +24,7 @@ from PyQt5.QtWidgets import (
 import MdUtils as mu
 from dialogs.base_dialog import BaseDialog
 from dialogs.progress_dialog import ProgressDialog
+from MdHelpers import guard_slot
 from MdModel import MdDatasetOps, MdObject
 
 NEWLINE = "\n"
@@ -275,6 +276,7 @@ class ExportDatasetDialog(BaseDialog):
             self.lstExportList.takeItem(self.lstExportList.row(item))
             self.lstObjectList.addItem(item)
 
+    @guard_slot("Failed to export dataset")
     def export_dataset(self):
         """Export dataset to selected format."""
         # Apply superimposition if selected

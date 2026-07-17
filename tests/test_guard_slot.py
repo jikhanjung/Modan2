@@ -28,6 +28,10 @@ class _FakeDialog:
         QApplication.setOverrideCursor(Qt.WaitCursor)
         raise RuntimeError("mid-work failure")
 
+    @guard_slot("with arg")
+    def takes_one(self, value):
+        return value
+
 
 def test_guard_slot_passes_through_on_success(qtbot, monkeypatch):
     import MdHelpers
@@ -51,6 +55,21 @@ def test_guard_slot_catches_and_shows_dialog(qtbot, monkeypatch):
 
     assert result is None
     crit.assert_called_once()
+
+
+def test_guard_slot_truncates_extra_signal_args(qtbot, monkeypatch):
+    """PyQt passes signal args (e.g. clicked(bool)) to the variadic wrapper; a slot
+    with fewer params must still work, and one that wants the arg must receive it."""
+    import MdHelpers
+
+    monkeypatch.setattr(MdHelpers.QMessageBox, "critical", Mock())
+    d = _FakeDialog()
+
+    # no-arg slot called with an extra bool (as clicked/triggered would) -> truncated
+    assert d.ok(True) == 42
+    # one-arg slot still receives its value, and drops a second extra arg
+    assert d.takes_one(5) == 5
+    assert d.takes_one(5, "extra") == 5
 
 
 def test_guard_slot_restores_override_cursor(qtbot, monkeypatch):

@@ -10,7 +10,21 @@ from collections.abc import Callable
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication, QDialog, QHBoxLayout, QMessageBox, QProgressBar, QPushButton
 
+import MdUtils as mu
+
 logger = logging.getLogger(__name__)
+
+
+def load_color_marker_lists(settings, color_list, default_color_list, marker_list):
+    """Load per-index data-point colours and markers from settings, in place.
+
+    Shared by the QDialog-based plot dialogs (DataExploration / DatasetAnalysis) that
+    can't inherit BaseDialog's methods but still duplicated these two loops.
+    """
+    for i in range(len(color_list)):
+        color_list[i] = settings.value("DataPointColor/" + str(i), default_color_list[i])
+    for i in range(len(marker_list)):
+        marker_list[i] = settings.value("DataPointMarker/" + str(i), marker_list[i])
 
 
 class BaseDialog(QDialog):
@@ -34,6 +48,22 @@ class BaseDialog(QDialog):
         if title:
             self.setWindowTitle(title)
         self.progress_bar: QProgressBar | None = None
+
+    def _restore_geometry(self, geometry_key, default_rect, move_offset=None):
+        """Restore window geometry from settings (shared read_settings helper).
+
+        Sets ``self.remember_geometry`` from ``WindowGeometry/RememberGeometry``, then
+        either restores the saved geometry for ``geometry_key`` or falls back to
+        ``default_rect`` — moved by ``move_offset`` (a QPoint) relative to the parent
+        when given.
+        """
+        self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
+        if self.remember_geometry:
+            self.setGeometry(self.m_app.settings.value(geometry_key, default_rect))
+        else:
+            self.setGeometry(default_rect)
+            if move_offset is not None:
+                self.move(self.parent.pos() + move_offset)
 
     def show_error(self, message: str, title: str = "Error") -> None:
         """Display error message dialog.

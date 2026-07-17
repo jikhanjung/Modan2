@@ -23,7 +23,6 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
-import MdUtils as mu
 from dialogs.base_dialog import BaseDialog
 from MdModel import MdDataset
 
@@ -186,12 +185,7 @@ class DatasetDialog(BaseDialog):
 
     def read_settings(self):
         """Read window geometry from settings."""
-        self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
-        if self.remember_geometry:
-            self.setGeometry(self.m_app.settings.value("WindowGeometry/DatasetDialog", QRect(100, 100, 600, 400)))
-        else:
-            self.setGeometry(QRect(100, 100, 600, 400))
-            self.move(self.parent.pos() + QPoint(100, 100))
+        self._restore_geometry("WindowGeometry/DatasetDialog", QRect(100, 100, 600, 400), QPoint(100, 100))
 
     def write_settings(self):
         """Save window geometry to settings."""

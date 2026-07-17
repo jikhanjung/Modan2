@@ -70,15 +70,7 @@ class AnalysisResultDialog(BaseDialog):
     def read_settings(self):
         """Read dialog settings from application settings."""
         if hasattr(self.m_app, "settings"):
-            self.remember_geometry = mu.value_to_bool(
-                self.m_app.settings.value("WindowGeometry/RememberGeometry", True)
-            )
-            if self.remember_geometry:
-                self.setGeometry(
-                    self.m_app.settings.value("WindowGeometry/AnalysisResultDialog", QRect(100, 100, 1400, 800))
-                )
-            else:
-                self.setGeometry(QRect(100, 100, 1400, 800))
+            self._restore_geometry("WindowGeometry/AnalysisResultDialog", QRect(100, 100, 1400, 800))
 
     def write_settings(self):
         """Save dialog settings to application settings."""

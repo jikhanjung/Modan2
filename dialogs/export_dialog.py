@@ -177,12 +177,7 @@ class ExportDatasetDialog(BaseDialog):
 
     def read_settings(self):
         """Read window geometry from settings."""
-        self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
-        if self.remember_geometry:
-            self.setGeometry(self.m_app.settings.value("WindowGeometry/ExportDialog", QRect(100, 100, 600, 400)))
-        else:
-            self.setGeometry(QRect(100, 100, 600, 400))
-            self.move(self.parent.pos() + QPoint(50, 50))
+        self._restore_geometry("WindowGeometry/ExportDialog", QRect(100, 100, 600, 400), QPoint(50, 50))
 
     def write_settings(self):
         """Save window geometry to settings."""

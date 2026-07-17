@@ -12,6 +12,9 @@ It intentionally reproduces the core of ``on_btn_analysis_clicked`` while skippi
 want to exercise.
 """
 
+import os
+from unittest.mock import Mock
+
 import MdModel
 from dialogs.dataset_analysis_dialog import DatasetAnalysisDialog
 from MdModel import MdDatasetOps
@@ -90,3 +93,36 @@ def test_show_analysis_result_3d_path(qtbot, mock_database):
     assert "M" in dialog.scatter_data
     assert "F" in dialog.scatter_data
     assert set(dialog.scatter_result.keys()) >= {"M", "F"}
+
+
+def test_save_results_writes_xlsx(qtbot, mock_database, tmp_path, monkeypatch):
+    """on_btnSaveResults_clicked exports an .xlsx without crashing (success path).
+
+    show_analysis_result -> show_result_table populated shape_list / eigenvalues, so
+    the full export path (previously untested and prone to silent death) runs."""
+    from PyQt5.QtWidgets import QFileDialog
+
+    dialog = _run_show_analysis_result(qtbot, chart_2d=True)
+    out = str(tmp_path / "analysis.xlsx")
+    monkeypatch.setattr(QFileDialog, "getSaveFileName", lambda *a, **k: (out, ""))
+
+    dialog.on_btnSaveResults_clicked()
+
+    assert os.path.exists(out)  # exported end-to-end, no crash
+
+
+def test_save_results_surfaces_error_instead_of_crashing(qtbot, mock_database, tmp_path, monkeypatch):
+    """A failure mid-export must show a message box, not silently kill the dialog."""
+    from PyQt5.QtWidgets import QFileDialog, QMessageBox
+
+    dialog = _run_show_analysis_result(qtbot, chart_2d=True)
+    out = str(tmp_path / "analysis.xlsx")
+    monkeypatch.setattr(QFileDialog, "getSaveFileName", lambda *a, **k: (out, ""))
+    # Break the export partway so it raises inside the try/except.
+    dialog.analysis_result = None
+    crit = Mock()
+    monkeypatch.setattr(QMessageBox, "critical", crit)
+
+    dialog.on_btnSaveResults_clicked()  # must not raise
+
+    crit.assert_called_once()

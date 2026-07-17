@@ -616,8 +616,15 @@ class DatasetAnalysisDialog(QDialog):
         filepath = os.path.join(mu.USER_PROFILE_DIRECTORY, filename_candidate)
         # print("filepath:", filepath)
         filename, _ = QFileDialog.getSaveFileName(self, self.tr("Save File As"), filepath, "Excel format (*.xlsx)")
-        if filename:
-            # print("filename:", filename)
+        if not filename:
+            return
+
+        # Wrap the whole export: any failure here (missing eigenvalue attrs on
+        # CVA results, a list-vs-ndarray shape_list, an object with fewer variables
+        # than expected, xlsxwriter errors) used to escape this Qt slot and kill the
+        # window with no message. Surface it instead.
+        doc = None
+        try:
             doc = xlsxwriter.Workbook(filename)
 
             # PCA result
@@ -629,7 +636,7 @@ class DatasetAnalysisDialog(QDialog):
                     for i in range(len(self.analysis_result.rotated_matrix.tolist()[0]))
                 ]
             )
-            header.extend("CSize")
+            header.append("CSize")
             worksheet = doc.add_worksheet("Result coordinates")
             row_index = 0
             column_index = 0
@@ -641,22 +648,17 @@ class DatasetAnalysisDialog(QDialog):
             new_coords = self.analysis_result.rotated_matrix.tolist()
             for i, obj in enumerate(self.ds_ops.object_list):
                 worksheet.write(i + 1, 0, obj.object_name)
-                # print(obj.variable_list)
+                variable_list = obj.variable_list or []
                 for j in range(property_count):
-                    # for j, property in enumerate(obj.variable_list):
-                    worksheet.write(i + 1, j + 1, obj.variable_list[j])
+                    worksheet.write(i + 1, j + 1, variable_list[j] if j < len(variable_list) else "")
 
                 for k, val in enumerate(new_coords[i]):
                     worksheet.write(i + 1, k + property_count + 1, val)
-                    # self.plot_data.setItem(i, j+1, QTableWidgetItem(str(int(val*10000)/10000.0)))
                 obj = MdObject.get_by_id(obj.id)
-                worksheet.write(i + 1, k + property_count + 2, obj.get_centroid_size(True))
+                worksheet.write(i + 1, len(new_coords[i]) + property_count + 1, obj.get_centroid_size(True))
 
             worksheet = doc.add_worksheet("Rotation matrix")
-            row_index = 0
-            column_index = 0
             rotation_matrix = self.analysis_result.rotation_matrix.tolist()
-            # print("rotation_matrix[0][0]", [0][0], len(self.pca_result.rotation_matrix[0][0]))
             for i, row in enumerate(rotation_matrix):
                 for j, val in enumerate(row):
                     worksheet.write(i, j, val)
@@ -667,25 +669,31 @@ class DatasetAnalysisDialog(QDialog):
                 worksheet.write(i, 0, val)
                 worksheet.write(i, 1, val2)
 
-            # PCA result
-            # header = [ "object_name", *self.ds_ops.variablename_list ]
-            # header.extend( [self.analysis_type[:2]+str(i+1) for i in range(len(self.analysis_result.rotated_matrix.tolist()[0]))] )
             worksheet = doc.add_worksheet("Shapes")
-            row_index = 0
-            column_index = 0
             for i, colname in enumerate(self.shape_column_header_list):
-                worksheet.write(row_index, i, colname)
-                # column_index+=1
+                worksheet.write(0, i, colname)
 
-            for i, shape in enumerate(self.shape_list.tolist()):
+            # shape_list may be a numpy array or a plain list
+            shape_rows = self.shape_list.tolist() if hasattr(self.shape_list, "tolist") else self.shape_list
+            for i, shape in enumerate(shape_rows):
                 worksheet.write(i + 1, 0, self.shape_name_list[i])
                 for j, val in enumerate(shape):
                     worksheet.write(i + 1, j + 1, val)
-                    # self.shapes_data.setItem(i, j+1, QTableWidgetItem(str(int(val*10000)/10000.0)))
 
             doc.close()
-
-        # print("on_btnSaveResults_clicked")
+            doc = None
+        except Exception as e:
+            logger.error(f"Failed to save analysis results to '{filename}': {e}", exc_info=True)
+            if doc is not None:
+                try:
+                    doc.close()
+                except Exception:
+                    pass
+            QMessageBox.critical(
+                self,
+                self.tr("Save Results"),
+                self.tr("Failed to save analysis results:\n{}").format(e),
+            )
 
     def show_index_state_changed(self):
         if self.cbxShowIndex.isChecked():

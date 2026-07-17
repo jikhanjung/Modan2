@@ -1732,22 +1732,32 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
         rowdata_list = []
         for idx, obj in enumerate(self.selected_dataset.object_list):
-            seq = obj.sequence
-            if seq is None:
-                seq = idx + 1
-                obj.sequence = seq
-                obj.save()
-            row_data = [obj.id, seq, obj.object_name, obj.count_landmarks(), obj.get_centroid_size()]
+            # Guard each object so one row with malformed landmark/variable data
+            # can't silently kill the whole dataset load (a Qt slot swallows the
+            # exception and the window appears to die on click).
+            try:
+                seq = obj.sequence
+                if seq is None:
+                    seq = idx + 1
+                    obj.sequence = seq
+                    obj.save()
+                row_data = [obj.id, seq, obj.object_name, obj.count_landmarks(), obj.get_centroid_size()]
 
-            if len(self.selected_dataset.variablename_list) > 0:
-                variable_list = obj.unpack_variable()
-                for idx, _prop in enumerate(self.selected_dataset.variablename_list):
-                    if idx < len(variable_list):
-                        item = variable_list[idx]
-                    else:
-                        item = ""
-                    row_data.append(item)
-            rowdata_list.append(row_data)
+                if len(self.selected_dataset.variablename_list) > 0:
+                    variable_list = obj.unpack_variable()
+                    for var_idx, _prop in enumerate(self.selected_dataset.variablename_list):
+                        if var_idx < len(variable_list):
+                            item = variable_list[var_idx]
+                        else:
+                            item = ""
+                        row_data.append(item)
+                rowdata_list.append(row_data)
+            except Exception as e:
+                logger.error(
+                    f"Failed to load object id={getattr(obj, 'id', '?')} "
+                    f"('{getattr(obj, 'object_name', '?')}') into the table: {e}"
+                )
+                continue
         self.object_model.appendRows(rowdata_list)
 
     def on_object_selection_changed(self, selected, deselected):

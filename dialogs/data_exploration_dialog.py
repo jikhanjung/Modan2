@@ -55,6 +55,7 @@ from scipy.spatial import ConvexHull
 import MdUtils as mu
 from dialogs.base_dialog import load_color_marker_lists
 from dialogs.scatter_utils import build_scatter_group, build_scatter_legend
+from MdHelpers import guard_slot
 from MdModel import MdDataset, MdObject
 from ModanComponents import ObjectViewer2D, ObjectViewer3D, ShapePreference
 
@@ -1276,6 +1277,7 @@ class DataExplorationDialog(QDialog):
 
         # self.shape_view_list[idx].show()
 
+    @guard_slot("Failed to update chart")
     def update_chart(self):
         # if self.ds_ops is not None and self.analysis_done is True:
         self.prepare_scatter_data()
@@ -1838,8 +1840,12 @@ class DataExplorationDialog(QDialog):
                     self.scatter_data[scatter_key_name]["points"] = np.array(
                         [self.scatter_data[scatter_key_name]["x_val"], self.scatter_data[scatter_key_name]["y_val"]]
                     ).T
-                    hull = ConvexHull(self.scatter_data[scatter_key_name]["points"])
-                    self.scatter_data[scatter_key_name]["hull"] = hull
+                    try:
+                        hull = ConvexHull(self.scatter_data[scatter_key_name]["points"])
+                        self.scatter_data[scatter_key_name]["hull"] = hull
+                    except Exception as e:
+                        # Collinear / degenerate group -> no hull for this group, keep the rest.
+                        logger.warning(f"Convex hull skipped for group '{scatter_key_name}': {e}")
 
         if opts["show_confidence_ellipse"]:
             for scatter_key_name in self.scatter_data.keys():
@@ -2547,6 +2553,8 @@ class DataExplorationDialog(QDialog):
             rotation_matrix = json.loads(self.analysis.pca_rotation_matrix_json)
         elif self.analysis_method == "CVA":
             rotation_matrix = json.loads(self.analysis.cva_rotation_matrix_json)
+        else:
+            raise ValueError(f"unrotate_shape: unsupported analysis method '{self.analysis_method}'")
         # rotation_matrix = json.loads(self.analysis.rotation_matrix_json)
 
         inverted_matrix = np.linalg.inv(rotation_matrix)

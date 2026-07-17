@@ -87,54 +87,7 @@ class ObjectDialog(QDialog):
         # self.hsplitter.addWidget(self.treeView)
         # self.hsplitter.addWidget(self.vsplitter)
 
-        # Create two-row layout for coordinate input
-        self.inputWidget = QWidget()
-        self.inputMainLayout = QVBoxLayout()
-        self.inputWidget.setLayout(self.inputMainLayout)
-        self.inputMainLayout.setContentsMargins(0, 0, 0, 0)
-        self.inputMainLayout.setSpacing(2)
-
-        # First row: coordinate inputs
-        self.inputCoordsLayout = QHBoxLayout()
-        self.inputX = QLineEdit()
-        self.inputY = QLineEdit()
-        self.inputZ = QLineEdit()
-        self.inputX.setPlaceholderText("X")
-        self.inputY.setPlaceholderText("Y")
-        self.inputZ.setPlaceholderText("Z")
-
-        self.inputCoordsLayout.addWidget(self.inputX)
-        self.inputCoordsLayout.addWidget(self.inputY)
-        self.inputCoordsLayout.addWidget(self.inputZ)
-
-        # Second row: buttons
-        self.inputButtonLayout = QHBoxLayout()
-        self.btnAddInput = QPushButton()
-        self.btnAddInput.setText(self.tr("Add"))
-        self.btnUpdateInput = QPushButton()
-        self.btnUpdateInput.setText(self.tr("Update"))
-        self.btnUpdateInput.setEnabled(False)
-        self.btnDeleteInput = QPushButton()
-        self.btnDeleteInput.setText(self.tr("Delete"))
-        self.btnDeleteInput.setEnabled(False)
-
-        self.inputButtonLayout.addWidget(self.btnAddInput)
-        self.inputButtonLayout.addWidget(self.btnUpdateInput)
-        self.inputButtonLayout.addWidget(self.btnDeleteInput)
-
-        self.inputMainLayout.addLayout(self.inputCoordsLayout)
-        self.inputMainLayout.addLayout(self.inputButtonLayout)
-
-        # Keep track of selected landmark
-        self.selected_landmark_index = -1
-
-        self.inputX.returnPressed.connect(self.input_coords_process)
-        self.inputY.returnPressed.connect(self.input_coords_process)
-        self.inputZ.returnPressed.connect(self.input_coords_process)
-        self.inputX.textChanged[str].connect(self.x_changed)
-        self.btnAddInput.clicked.connect(self.btnAddInput_clicked)
-        self.btnUpdateInput.clicked.connect(self.btnUpdateInput_clicked)
-        self.btnDeleteInput.clicked.connect(self.btnDeleteInput_clicked)
+        self._init_coord_input()
 
         self.edtObjectName = QLineEdit()
         self.edtSequence = QLineEdit()
@@ -179,72 +132,9 @@ class ObjectDialog(QDialog):
         self.form_layout.addRow(self.lblLandmarkStr, self.edtLandmarkStr)
         self.form_layout.addRow("", self.inputWidget)
 
-        self.btnGroup = QButtonGroup()
-        self.btnLandmark = PicButton(
-            QPixmap(ICON["landmark"]),
-            QPixmap(ICON["landmark_hover"]),
-            QPixmap(ICON["landmark_down"]),
-            QPixmap(ICON["landmark_disabled"]),
-        )
-        self.btnWireframe = PicButton(
-            QPixmap(ICON["wireframe"]), QPixmap(ICON["wireframe_hover"]), QPixmap(ICON["wireframe_down"])
-        )
-        self.btnCalibration = PicButton(
-            QPixmap(ICON["calibration"]),
-            QPixmap(ICON["calibration_hover"]),
-            QPixmap(ICON["calibration_down"]),
-            QPixmap(ICON["calibration_disabled"]),
-        )
-        self.btnGroup.addButton(self.btnLandmark)
-        self.btnGroup.addButton(self.btnWireframe)
-        self.btnGroup.addButton(self.btnCalibration)
-        self.btnLandmark.setCheckable(True)
-        self.btnWireframe.setCheckable(True)
-        self.btnCalibration.setCheckable(True)
-        self.btnLandmark.setChecked(True)
-        self.btnWireframe.setChecked(False)
-        self.btnCalibration.setChecked(False)
-        self.btnLandmark.setAutoExclusive(True)
-        self.btnWireframe.setAutoExclusive(True)
-        self.btnCalibration.setAutoExclusive(True)
-        self.btnLandmark.clicked.connect(self.btnLandmark_clicked)
-        self.btnWireframe.clicked.connect(self.btnWireframe_clicked)
-        self.btnCalibration.clicked.connect(self.btnCalibration_clicked)
-        BUTTON_SIZE = 48
-        self.btnLandmark.setFixedSize(BUTTON_SIZE, BUTTON_SIZE)
-        self.btnWireframe.setFixedSize(BUTTON_SIZE, BUTTON_SIZE)
-        self.btnCalibration.setFixedSize(BUTTON_SIZE, BUTTON_SIZE)
-        self.btn_layout2 = QGridLayout()
-        self.btn_layout2.addWidget(self.btnLandmark, 0, 0)
-        self.btn_layout2.addWidget(self.btnWireframe, 0, 1)
-        self.btn_layout2.addWidget(self.btnCalibration, 1, 0)
+        self._init_tool_buttons()
 
-        self.cbxShowIndex = QCheckBox()
-        self.cbxShowIndex.setText(self.tr("Index"))
-        self.cbxShowIndex.setChecked(True)
-        self.cbxShowWireframe = QCheckBox()
-        self.cbxShowWireframe.setText(self.tr("Wireframe"))
-        self.cbxShowWireframe.setChecked(True)
-        self.cbxShowPolygon = QCheckBox()
-        self.cbxShowPolygon.setText(self.tr("Polygon"))
-        self.cbxShowPolygon.setChecked(True)
-        self.cbxShowEstimated = QCheckBox()
-        self.cbxShowEstimated.setText(self.tr("Show Estimated"))
-        self.cbxShowEstimated.setChecked(True)
-        self.cbxShowEstimated.stateChanged.connect(self.toggle_estimation)
-        self.cbxShowBaseline = QCheckBox()
-        self.cbxShowBaseline.setText(self.tr("Baseline"))
-        self.cbxShowBaseline.setChecked(True)
-        self.cbxShowBaseline.hide()
-        self.cbxAutoRotate = QCheckBox()
-        self.cbxAutoRotate.setText(self.tr("Rotate"))
-        self.cbxAutoRotate.setChecked(False)
-        self.cbxShowModel = QCheckBox()
-        self.cbxShowModel.setText(self.tr("3D Model"))
-        self.cbxShowModel.setChecked(False)
-        self.btnAddFile = QPushButton()
-        self.btnAddFile.setText(self.tr("Load Image"))
-        self.btnAddFile.clicked.connect(self.btnAddFile_clicked)
+        self._init_option_checkboxes()
 
         # self.btnFBO = QPushButton()
         # self.btnFBO.setText("FBO")
@@ -296,6 +186,148 @@ class ObjectDialog(QDialog):
         self.hsplitter.setStretchFactor(1, 1)
         self.hsplitter.setStretchFactor(2, 0)
 
+        self._init_action_buttons()
+
+        self.dataset = None
+        self.object = None
+        self.edtPropertyList = []
+        self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
+
+        self.cbxShowIndex.stateChanged.connect(self.show_index_state_changed)
+        self.cbxShowWireframe.stateChanged.connect(self.show_wireframe_state_changed)
+        self.cbxShowPolygon.stateChanged.connect(self.show_polygon_state_changed)
+        self.cbxShowBaseline.stateChanged.connect(self.show_baseline_state_changed)
+        self.cbxAutoRotate.stateChanged.connect(self.auto_rotate_state_changed)
+        self.cbxShowModel.stateChanged.connect(self.show_model_state_changed)
+        self.object_deleted = False
+
+        # self.show_index_state_changed()
+
+    def _init_coord_input(self):
+        """Build the two-row coordinate-input panel (X/Y/Z + Add/Update/Delete)."""
+        # Create two-row layout for coordinate input
+        self.inputWidget = QWidget()
+        self.inputMainLayout = QVBoxLayout()
+        self.inputWidget.setLayout(self.inputMainLayout)
+        self.inputMainLayout.setContentsMargins(0, 0, 0, 0)
+        self.inputMainLayout.setSpacing(2)
+
+        # First row: coordinate inputs
+        self.inputCoordsLayout = QHBoxLayout()
+        self.inputX = QLineEdit()
+        self.inputY = QLineEdit()
+        self.inputZ = QLineEdit()
+        self.inputX.setPlaceholderText("X")
+        self.inputY.setPlaceholderText("Y")
+        self.inputZ.setPlaceholderText("Z")
+
+        self.inputCoordsLayout.addWidget(self.inputX)
+        self.inputCoordsLayout.addWidget(self.inputY)
+        self.inputCoordsLayout.addWidget(self.inputZ)
+
+        # Second row: buttons
+        self.inputButtonLayout = QHBoxLayout()
+        self.btnAddInput = QPushButton()
+        self.btnAddInput.setText(self.tr("Add"))
+        self.btnUpdateInput = QPushButton()
+        self.btnUpdateInput.setText(self.tr("Update"))
+        self.btnUpdateInput.setEnabled(False)
+        self.btnDeleteInput = QPushButton()
+        self.btnDeleteInput.setText(self.tr("Delete"))
+        self.btnDeleteInput.setEnabled(False)
+
+        self.inputButtonLayout.addWidget(self.btnAddInput)
+        self.inputButtonLayout.addWidget(self.btnUpdateInput)
+        self.inputButtonLayout.addWidget(self.btnDeleteInput)
+
+        self.inputMainLayout.addLayout(self.inputCoordsLayout)
+        self.inputMainLayout.addLayout(self.inputButtonLayout)
+
+        # Keep track of selected landmark
+        self.selected_landmark_index = -1
+
+        self.inputX.returnPressed.connect(self.input_coords_process)
+        self.inputY.returnPressed.connect(self.input_coords_process)
+        self.inputZ.returnPressed.connect(self.input_coords_process)
+        self.inputX.textChanged[str].connect(self.x_changed)
+        self.btnAddInput.clicked.connect(self.btnAddInput_clicked)
+        self.btnUpdateInput.clicked.connect(self.btnUpdateInput_clicked)
+        self.btnDeleteInput.clicked.connect(self.btnDeleteInput_clicked)
+
+    def _init_tool_buttons(self):
+        """Build the landmark / wireframe / calibration exclusive tool-button group."""
+        self.btnGroup = QButtonGroup()
+        self.btnLandmark = PicButton(
+            QPixmap(ICON["landmark"]),
+            QPixmap(ICON["landmark_hover"]),
+            QPixmap(ICON["landmark_down"]),
+            QPixmap(ICON["landmark_disabled"]),
+        )
+        self.btnWireframe = PicButton(
+            QPixmap(ICON["wireframe"]), QPixmap(ICON["wireframe_hover"]), QPixmap(ICON["wireframe_down"])
+        )
+        self.btnCalibration = PicButton(
+            QPixmap(ICON["calibration"]),
+            QPixmap(ICON["calibration_hover"]),
+            QPixmap(ICON["calibration_down"]),
+            QPixmap(ICON["calibration_disabled"]),
+        )
+        self.btnGroup.addButton(self.btnLandmark)
+        self.btnGroup.addButton(self.btnWireframe)
+        self.btnGroup.addButton(self.btnCalibration)
+        self.btnLandmark.setCheckable(True)
+        self.btnWireframe.setCheckable(True)
+        self.btnCalibration.setCheckable(True)
+        self.btnLandmark.setChecked(True)
+        self.btnWireframe.setChecked(False)
+        self.btnCalibration.setChecked(False)
+        self.btnLandmark.setAutoExclusive(True)
+        self.btnWireframe.setAutoExclusive(True)
+        self.btnCalibration.setAutoExclusive(True)
+        self.btnLandmark.clicked.connect(self.btnLandmark_clicked)
+        self.btnWireframe.clicked.connect(self.btnWireframe_clicked)
+        self.btnCalibration.clicked.connect(self.btnCalibration_clicked)
+        BUTTON_SIZE = 48
+        self.btnLandmark.setFixedSize(BUTTON_SIZE, BUTTON_SIZE)
+        self.btnWireframe.setFixedSize(BUTTON_SIZE, BUTTON_SIZE)
+        self.btnCalibration.setFixedSize(BUTTON_SIZE, BUTTON_SIZE)
+        self.btn_layout2 = QGridLayout()
+        self.btn_layout2.addWidget(self.btnLandmark, 0, 0)
+        self.btn_layout2.addWidget(self.btnWireframe, 0, 1)
+        self.btn_layout2.addWidget(self.btnCalibration, 1, 0)
+
+    def _init_option_checkboxes(self):
+        """Build the view-option checkboxes (index/wireframe/polygon/estimated/…)
+        and the Load-Image button."""
+        self.cbxShowIndex = QCheckBox()
+        self.cbxShowIndex.setText(self.tr("Index"))
+        self.cbxShowIndex.setChecked(True)
+        self.cbxShowWireframe = QCheckBox()
+        self.cbxShowWireframe.setText(self.tr("Wireframe"))
+        self.cbxShowWireframe.setChecked(True)
+        self.cbxShowPolygon = QCheckBox()
+        self.cbxShowPolygon.setText(self.tr("Polygon"))
+        self.cbxShowPolygon.setChecked(True)
+        self.cbxShowEstimated = QCheckBox()
+        self.cbxShowEstimated.setText(self.tr("Show Estimated"))
+        self.cbxShowEstimated.setChecked(True)
+        self.cbxShowEstimated.stateChanged.connect(self.toggle_estimation)
+        self.cbxShowBaseline = QCheckBox()
+        self.cbxShowBaseline.setText(self.tr("Baseline"))
+        self.cbxShowBaseline.setChecked(True)
+        self.cbxShowBaseline.hide()
+        self.cbxAutoRotate = QCheckBox()
+        self.cbxAutoRotate.setText(self.tr("Rotate"))
+        self.cbxAutoRotate.setChecked(False)
+        self.cbxShowModel = QCheckBox()
+        self.cbxShowModel.setText(self.tr("3D Model"))
+        self.cbxShowModel.setChecked(False)
+        self.btnAddFile = QPushButton()
+        self.btnAddFile.setText(self.tr("Load Image"))
+        self.btnAddFile.clicked.connect(self.btnAddFile_clicked)
+
+    def _init_action_buttons(self):
+        """Build the Previous/Save/Delete/Cancel/Next row and assemble the main layout."""
         self.btnPrevious = QPushButton()
         self.btnPrevious.setText(self.tr("Previous"))
         self.btnPrevious.clicked.connect(self.Previous)
@@ -324,21 +356,6 @@ class ObjectDialog(QDialog):
         self.main_layout.addWidget(self.hsplitter)
         self.main_layout.addLayout(btn_layout)
         self.main_layout.addWidget(self.status_bar)
-
-        self.dataset = None
-        self.object = None
-        self.edtPropertyList = []
-        self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
-
-        self.cbxShowIndex.stateChanged.connect(self.show_index_state_changed)
-        self.cbxShowWireframe.stateChanged.connect(self.show_wireframe_state_changed)
-        self.cbxShowPolygon.stateChanged.connect(self.show_polygon_state_changed)
-        self.cbxShowBaseline.stateChanged.connect(self.show_baseline_state_changed)
-        self.cbxAutoRotate.stateChanged.connect(self.auto_rotate_state_changed)
-        self.cbxShowModel.stateChanged.connect(self.show_model_state_changed)
-        self.object_deleted = False
-
-        # self.show_index_state_changed()
 
     def read_settings(self):
         self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))

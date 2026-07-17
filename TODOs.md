@@ -14,13 +14,17 @@ As of **2026-06-25**, all CRITICAL/HIGH **correctness** items and the HIGH
 Large, multi-file, higher-risk. Do **one item at a time**, each on its own
 commit + devlog, keeping the suite green. Recommended order is roughly top-down.
 
-- [ ] **Decompose god-methods**
+- [x] **Decompose god-methods** — all done
   - [x] `ModanController.run_analysis` (~360 lines) → done (devlog 176–178): split
         into `_extract_group_values` / `_prepare_landmarks` / `_persist_analysis_results`;
         type-overloaded return smell resolved
-  - [ ] `Modan2.py` `read_settings` (~250 lines, contains an inline nested class)
-  - [ ] `dialogs/dataset_analysis_dialog.py` `__init__` (371 lines)
-  - [ ] `dialogs/object_dialog.py` `__init__` (283 lines)
+  - [x] `Modan2.py` `read_settings` (~250 lines) → done (devlog 185–186): `SettingsWrapper`
+        hoisted to module level (+ unit tests) and `_restore_main_window_geometry` extracted;
+        247 → 39 lines
+  - [x] `dialogs/dataset_analysis_dialog.py` `__init__` (371 → 132 lines) → done (devlog 187):
+        `_init_object_table` / `_init_plot_area` / `_init_bottom_controls`
+  - [x] `dialogs/object_dialog.py` `__init__` (283 → 146 lines) → done (devlog 188):
+        `_init_coord_input` / `_init_tool_buttons` / `_init_option_checkboxes` / `_init_action_buttons`
   - [x] `dialogs/data_exploration_dialog.py` `prepare_scatter_data` (285 lines) →
         done (devlog 179–180): golden-master net + split into 6 phase helpers
 - [x] **Extract shared scatter-plot builder** — *rescoped & done* (devlog 181–184).

@@ -258,16 +258,6 @@ elif platform.system() == "Darwin":  # macOS
 elif platform.system() == "Windows":
     platform_suffix = ""  # Windows already has .exe extension
 
-# Force-collect dependencies whose version metadata / attributes PyInstaller's
-# default hooks miss. pandas checks pytz.__version__ on import and aborts with
-# "Can't determine version for pytz" if pytz isn't fully bundled; collect-all
-# pulls its full package + data, and copy-metadata bundles its dist-info.
-dependency_args = [
-    "--collect-all=pytz",
-    "--copy-metadata=pytz",
-    "--copy-metadata=pandas",
-]
-
 onefile_args = [
     f"--name={NAME}_v{VERSION}_build{BUILD_NUMBER}{platform_suffix}{exe_extension}",
     "--onefile",
@@ -276,7 +266,6 @@ onefile_args = [
     f"--add-data=translations/*.qm{data_separator}translations",
     f"--add-data=migrations/*{data_separator}migrations",
     f"--add-data=build_info.json{data_separator}.",
-    *dependency_args,
     f"--icon={ICON}",
     "--noupx",  # Don't use UPX compression (reduces false positives)
     "--clean",  # Clean PyInstaller cache before building
@@ -300,7 +289,6 @@ onedir_args = [
     f"--add-data=translations/*.qm{data_separator}translations",
     f"--add-data=migrations/*{data_separator}migrations",
     f"--add-data=build_info.json{data_separator}.",
-    *dependency_args,
     f"--icon={ICON}",
     "--noupx",  # Don't use UPX compression (reduces false positives)
     "--clean",  # Clean PyInstaller cache before building

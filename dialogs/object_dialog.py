@@ -850,6 +850,7 @@ class ObjectDialog(QDialog):
         self.object_view.set_mode(MODE["VIEW"])
 
     @pyqtSlot(str)
+    @guard_slot("Failed to parse pasted landmarks")
     def x_changed(self, text):
         # if text is multiline and tab separated, add to table
         # print("x_changed called with", text)
@@ -867,11 +868,15 @@ class ObjectDialog(QDialog):
                 # print(line)
                 if "\t" in line:
                     coords = line.split("\t")
-                    # add landmarks using add_landmark method
-                    if self.dataset.dimension == 2 and len(coords) == 2:
-                        self.add_landmark(coords[0], coords[1])
-                    elif self.dataset.dimension == 3 and len(coords) == 3:
-                        self.add_landmark(coords[0], coords[1], coords[2])
+                    # add landmarks using add_landmark method; skip non-numeric rows
+                    # (e.g. a pasted header line) rather than aborting the whole paste.
+                    try:
+                        if self.dataset.dimension == 2 and len(coords) == 2:
+                            self.add_landmark(coords[0], coords[1])
+                        elif self.dataset.dimension == 3 and len(coords) == 3:
+                            self.add_landmark(coords[0], coords[1], coords[2])
+                    except (ValueError, TypeError) as e:
+                        logger.warning(f"Skipping unparseable landmark line '{line}': {e}")
             self.inputX.setText("")
             self.inputY.setText("")
             self.inputZ.setText("")

@@ -801,6 +801,7 @@ class DatasetAnalysisDialog(QDialog):
         #    for obj in ds_ops.object_list:
         #        f.write(obj.object_name + "\t" + "\t".join([str(x) for x in obj.pca_result]) + "\n")
 
+    @guard_slot("Failed to display analysis result")
     def show_analysis_result(self):
         # self.plot_widget.clear()
 

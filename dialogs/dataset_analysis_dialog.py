@@ -41,6 +41,7 @@ from PyQt5.QtWidgets import (
 
 import MdUtils as mu
 from components.widgets import DatasetOpsViewer
+from dialogs.base_dialog import load_color_marker_lists
 from dialogs.scatter_utils import build_scatter_group, build_scatter_legend
 from MdModel import MdDatasetOps, MdObject
 from MdStatistics import MdCanonicalVariate, MdPrincipalComponent
@@ -438,10 +439,7 @@ class DatasetAnalysisDialog(QDialog):
     def read_settings(self):
         self.remember_geometry = mu.value_to_bool(self.m_app.settings.value("WindowGeometry/RememberGeometry", True))
         self.plot_size = self.m_app.settings.value("PlotSize", self.plot_size)
-        for i in range(len(self.color_list)):
-            self.color_list[i] = self.m_app.settings.value("DataPointColor/" + str(i), self.default_color_list[i])
-        for i in range(len(self.marker_list)):
-            self.marker_list[i] = self.m_app.settings.value("DataPointMarker/" + str(i), self.marker_list[i])
+        load_color_marker_lists(self.m_app.settings, self.color_list, self.default_color_list, self.marker_list)
 
         if self.remember_geometry is True:
             self.setGeometry(

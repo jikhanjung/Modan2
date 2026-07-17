@@ -9,10 +9,11 @@ As of **2026-06-25**, all CRITICAL/HIGH **correctness** items and the HIGH
 
 ---
 
-## 🔴 Batch C — Structural refactor (HIGH, not started)
+## ✅ Batch C — Structural refactor (HIGH) — **COMPLETE** (devlog 176–193)
 
-Large, multi-file, higher-risk. Do **one item at a time**, each on its own
-commit + devlog, keeping the suite green. Recommended order is roughly top-down.
+All four items done (god-method decomposition, shared scatter helpers, dialog I/O →
+controller, read_settings/color-marker hoist), each on its own commit + devlog with
+the suite kept green. Kept as a record below.
 
 - [x] **Decompose god-methods** — all done
   - [x] `ModanController.run_analysis` (~360 lines) → done (devlog 176–178): split
@@ -41,8 +42,12 @@ commit + devlog, keeping the suite green. Recommended order is roughly top-down.
         (+ `_import_object` / `_import_object_image`) (191)
   - Controller injected into both dialogs via `parent.controller` with an
     `isinstance(ModanController)` guard + standalone fallback for Mock/parentless tests.
-- [ ] **Hoist `read_settings` / color-marker loading** copy-pasted across ~9
-      dialogs into `BaseDialog` or a settings mixin
+- [x] **Hoist `read_settings` / color-marker loading** — done (devlog 192–193)
+  - [x] `BaseDialog._restore_geometry(key, default_rect, move_offset)` — applied in
+        `DatasetDialog` / `ExportDatasetDialog` / `AnalysisResultDialog` (192)
+  - [x] module-level `load_color_marker_lists` — applied in `DataExplorationDialog` /
+        `DatasetAnalysisDialog` (both `QDialog`, so a free function not a BaseDialog
+        method) (193)
 
 ---
 

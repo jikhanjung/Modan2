@@ -58,9 +58,8 @@ class Morphologika:
         self.read()
 
     def read(self):
-        f = open(self.filename)
-        morphologika_data = f.read()
-        f.close()
+        with open(self.filename) as f:
+            morphologika_data = f.read()
 
         object_count = -1
         landmark_count = -1

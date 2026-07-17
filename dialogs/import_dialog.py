@@ -23,6 +23,7 @@ from PyQt5.QtWidgets import (
 
 import MdUtils as mu
 from dialogs.base_dialog import BaseDialog
+from MdHelpers import guard_slot
 from MdModel import MdDataset
 from ModanComponents import NTS, TPS, X1Y1, Morphologika
 
@@ -185,6 +186,7 @@ class ImportDatasetDialog(BaseDialog):
         self.write_settings()
         event.accept()
 
+    @guard_slot("Failed to open file")
     def open_file2(self, filename):
         """Process selected file and auto-detect format.
 
@@ -297,6 +299,7 @@ class ImportDatasetDialog(BaseDialog):
         except Exception:
             return base_name
 
+    @guard_slot("Failed to import file")
     def import_file(self):
         """Import dataset from selected file."""
         filename = self.edtFilename.text()

@@ -199,15 +199,36 @@ class SettingsWrapper:
             self.save()
 
     def save(self):
-        """Save settings to file."""
+        """Save settings to file atomically.
+
+        Writes to a temp file in the same directory and ``os.replace``s it into
+        place, so an interrupted or failing write can never leave a truncated /
+        corrupt ``config.json`` behind. A corrupt file would make the next launch
+        fall back to defaults in ``_load_settings`` — i.e. silently reset every
+        preference — which is the intermittent "settings didn't reload" failure.
+        """
         try:
             import json
+            import os
+            import tempfile
             from pathlib import Path
 
             config_path = Path.home() / ".modan2" / "config.json"
             config_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(config_path, "w", encoding="utf-8") as f:
-                json.dump(self.config, f, indent=2, ensure_ascii=False)
+
+            fd, tmp_path = tempfile.mkstemp(dir=str(config_path.parent), prefix=".config-", suffix=".tmp")
+            try:
+                with os.fdopen(fd, "w", encoding="utf-8") as f:
+                    json.dump(self.config, f, indent=2, ensure_ascii=False)
+                    f.flush()
+                    os.fsync(f.fileno())
+                os.replace(tmp_path, config_path)
+            except Exception:
+                try:
+                    os.unlink(tmp_path)
+                except OSError:
+                    pass
+                raise
         except Exception as e:
             logger.error(f"Failed to save config: {e}")
 

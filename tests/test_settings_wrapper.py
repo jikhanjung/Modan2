@@ -1,8 +1,11 @@
 """Unit tests for the module-level ``SettingsWrapper`` (hoisted from
 ``ModanMainWindow.read_settings``)."""
 
+import json
+
 from PyQt5.QtCore import QRect
 
+import Modan2
 from Modan2 import SettingsWrapper
 
 
@@ -58,3 +61,34 @@ def test_setvalue_ignores_unmapped_key(monkeypatch):
     monkeypatch.setattr(sw, "save", lambda: None)
     sw.setValue("UnmappedKey", "v")
     assert config == {}
+
+
+def test_save_writes_atomically_no_temp_leftover(tmp_path, monkeypatch):
+    """save() persists the config and leaves no temp file behind."""
+    monkeypatch.setattr(Modan2.Path, "home", staticmethod(lambda: tmp_path))
+    sw = SettingsWrapper({"language": "en"}, None)
+    sw.setValue("PlotSize", "Large")
+
+    cfg = tmp_path / ".modan2" / "config.json"
+    assert cfg.exists()
+    assert json.loads(cfg.read_text())["ui"]["plot_size"] == "Large"
+    # only config.json, no .config-*.tmp left around
+    assert [p.name for p in (tmp_path / ".modan2").iterdir()] == ["config.json"]
+
+
+def test_save_failure_preserves_existing_config(tmp_path, monkeypatch):
+    """A failing write (non-serializable value) must NOT corrupt or delete the
+    existing config.json — the whole point of the atomic temp+replace."""
+    monkeypatch.setattr(Modan2.Path, "home", staticmethod(lambda: tmp_path))
+
+    good = SettingsWrapper({"language": "en"}, None)
+    good.setValue("PlotSize", "Large")
+    cfg = tmp_path / ".modan2" / "config.json"
+    before = cfg.read_text()
+
+    # Inject a value json can't serialize, then attempt to save.
+    bad = SettingsWrapper({"language": "en", "bad": {1, 2, 3}}, None)
+    bad.save()  # logs error, must not raise, must not touch the good file
+
+    assert cfg.read_text() == before  # untouched
+    assert [p.name for p in (tmp_path / ".modan2").iterdir()] == ["config.json"]  # no temp leftover

@@ -106,7 +106,16 @@ class ApplicationSetup:
                     self.config = json.load(f)
                 self.logger.debug("Settings loaded successfully")
             except (OSError, json.JSONDecodeError) as e:
-                self.logger.warning(f"Failed to load settings: {e}, using defaults")
+                # A corrupt config would otherwise be silently replaced with
+                # defaults (every preference reset). Preserve it as .bak for
+                # recovery/diagnosis and make the failure loud in the log.
+                self.logger.error(f"Failed to load settings: {e}; using defaults and backing up the corrupt file")
+                try:
+                    backup = Path(self.config_path).with_suffix(".json.bak")
+                    Path(self.config_path).replace(backup)
+                    self.logger.error(f"Corrupt config backed up to: {backup}")
+                except OSError as backup_err:
+                    self.logger.warning(f"Could not back up corrupt config: {backup_err}")
                 self.config = self._get_default_config()
         else:
             self.logger.debug("Settings file not found, using defaults")

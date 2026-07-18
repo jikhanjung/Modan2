@@ -9,12 +9,14 @@ import sys
 from matplotlib.backends.backend_qt5agg import FigureCanvas as FigureCanvas
 from PyQt5.QtCore import (
     QPointF,
+    QSize,
     Qt,
 )
 from PyQt5.QtGui import (
     QBrush,
     QColor,
     QFont,
+    QImageReader,
     QMouseEvent,
     QPainter,
     QPen,
@@ -61,6 +63,19 @@ import numpy as np
 import MdUtils as mu
 
 logger = logging.getLogger(__name__)
+
+# Oversized images (e.g. 20 MB / 24 MP photos) make the viewer sluggish: every
+# decode and every zoom re-scales the full-resolution pixmap. Images whose longer
+# side exceeds this cap are decoded to a downscaled render source instead, while
+# the TRUE pixel dimensions are kept for all landmark coordinate math (landmarks
+# are stored in original-image pixels, so their mapping is unaffected).
+#
+# 2560 is chosen so JPEG decoding hits libjpeg's fast DCT downscaling (~2.6x
+# faster decode, ~5.5x less memory for a 24 MP source) while staying >= typical
+# display widths, so fit-to-window and moderate zoom remain sharp. Extreme zoom on
+# a huge image is softer than before — an intentional speed/quality trade — but
+# landmark coordinates are unchanged. Smaller images are loaded untouched.
+MAX_RENDER_DIM = 2560
 
 from MdConstants import BASE_LANDMARK_RADIUS, COLOR, DATASET_MODE, DISTANCE_THRESHOLD, MODE, OBJECT_MODE
 
@@ -458,7 +473,7 @@ class ObjectViewer2D(QLabel):
                     return
                 img_x = self._2imgx(self.mouse_curr_x)
                 img_y = self._2imgy(self.mouse_curr_y)
-                if img_x < 0 or img_x > self.orig_pixmap.width() or img_y < 0 or img_y > self.orig_pixmap.height():
+                if img_x < 0 or img_x > self.orig_width or img_y < 0 or img_y > self.orig_height:
                     return
                 self.object_dialog.add_landmark(img_x, img_y)
             elif self.edit_mode == MODE["READY_MOVE_LANDMARK"]:
@@ -557,9 +572,11 @@ class ObjectViewer2D(QLabel):
         self.scale = round(self.scale * 10) / 10
 
         if self.orig_pixmap is not None:
+            # Target display size is derived from the TRUE image dimensions (the
+            # render source may be downscaled); Qt scales the source to fit.
             self.curr_pixmap = self.orig_pixmap.scaled(
-                int(self.orig_pixmap.width() * self.scale / self.image_canvas_ratio),
-                int(self.orig_pixmap.height() * self.scale / self.image_canvas_ratio),
+                int(self.orig_width * self.scale / self.image_canvas_ratio),
+                int(self.orig_height * self.scale / self.image_canvas_ratio),
             )
 
         self.repaint()
@@ -984,8 +1001,12 @@ class ObjectViewer2D(QLabel):
 
     def calculate_resize(self):
         if self.orig_pixmap is not None:
-            self.orig_width = self.orig_pixmap.width()
-            self.orig_height = self.orig_pixmap.height()
+            # orig_width/height are the TRUE image dimensions set in set_image; the
+            # render source (orig_pixmap) may be downscaled, so don't read dims off
+            # it. Fall back to the pixmap only if they were never populated.
+            if self.orig_width <= 0 or self.orig_height <= 0:
+                self.orig_width = self.orig_pixmap.width()
+                self.orig_height = self.orig_pixmap.height()
             image_wh_ratio = self.orig_width / self.orig_height
             label_wh_ratio = self.width() / self.height()
             if image_wh_ratio > label_wh_ratio:
@@ -1069,12 +1090,46 @@ class ObjectViewer2D(QLabel):
             self.image_changed = True
 
         self.fullpath = file_path
-        self.curr_pixmap = self.orig_pixmap = QPixmap(file_path)
-        if self.curr_pixmap.isNull():
+        self.orig_pixmap = self._load_render_pixmap(file_path)
+        self.curr_pixmap = self.orig_pixmap
+        if self.orig_pixmap.isNull():
             # QPixmap fails silently on a missing/corrupt/unsupported image,
             # leaving the viewer blank with no hint why. Log it at least.
             logger.warning(f"set_image: could not load image (blank pixmap): {file_path}")
+            self.orig_width = self.orig_height = -1
         self.setPixmap(self.curr_pixmap)
+
+    def _load_render_pixmap(self, file_path):
+        """Load ``file_path`` as the render-source pixmap.
+
+        Records the TRUE image dimensions in ``self.orig_width/height`` (used by
+        all landmark coordinate math), but for oversized images decodes a
+        downscaled pixmap — capped at ``MAX_RENDER_DIM`` on the longer side — so
+        decode + repeated zoom scaling stay cheap. Landmarks are stored in
+        original-image pixels, so downscaling the *display* source does not move
+        them. Falls back to a full ``QPixmap`` load when the size can't be read.
+        """
+        reader = QImageReader(file_path)
+        size = reader.size()  # header-only read; no full decode yet
+        ow, oh = size.width(), size.height()
+
+        if ow > 0 and oh > 0:
+            self.orig_width = ow
+            self.orig_height = oh
+            longer = max(ow, oh)
+            if longer > MAX_RENDER_DIM:
+                factor = MAX_RENDER_DIM / longer
+                reader.setScaledSize(QSize(max(1, round(ow * factor)), max(1, round(oh * factor))))
+            image = reader.read()
+            if not image.isNull():
+                return QPixmap.fromImage(image)
+            logger.warning(f"set_image: QImageReader failed ({reader.errorString()}); falling back to QPixmap")
+
+        # Size unknown / read failed: fall back to a plain full-resolution load.
+        pixmap = QPixmap(file_path)
+        self.orig_width = pixmap.width()
+        self.orig_height = pixmap.height()
+        return pixmap
 
     def clear_object(self):
         # print("object view clear object")

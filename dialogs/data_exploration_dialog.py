@@ -295,6 +295,10 @@ class DataExplorationDialog(QDialog):
         self.cbxDataPointLabels.setText(self.tr("Show labels"))
         self.cbxDataPointLabels.setChecked(False)
         self.cbxDataPointLabels.toggled.connect(self.update_chart)
+        self.cbxSnapToPoints = QCheckBox()
+        self.cbxSnapToPoints.setText(self.tr("Snap to points"))
+        self.cbxSnapToPoints.setChecked(True)
+        # Interaction-only toggle (affects click-drag shape preview); no redraw.
         self.gbChartBasics.layout().addWidget(self.lblGroupBy)
         self.gbChartBasics.layout().addWidget(self.comboGroupBy)
         self.gbChartBasics.layout().addWidget(spacer1)
@@ -304,6 +308,7 @@ class DataExplorationDialog(QDialog):
         self.gbChartBasics.layout().addWidget(self.cbxLegend)
         self.gbChartBasics.layout().addWidget(self.cbxShowVariance)
         self.gbChartBasics.layout().addWidget(self.cbxDataPointLabels)
+        self.gbChartBasics.layout().addWidget(self.cbxSnapToPoints)
         self.gbChartBasics.layout().addWidget(spacer2)
         # self.axis_option_layout.addWidget(self.gbChartBasics)
 
@@ -2496,13 +2501,15 @@ class DataExplorationDialog(QDialog):
         # Set wait cursor while processing shape display
         QApplication.setOverrideCursor(Qt.WaitCursor)
         try:
-            # Snap to an existing data point when the cursor is near one, so the
-            # previewed shape lands exactly on a real specimen instead of an
-            # interpolated position between points.
+            # Snap to an existing data point when the cursor is near one (and the
+            # option is on), so the previewed shape lands exactly on a real
+            # specimen instead of an interpolated position between points.
             snapped_obj = None
-            nearest = self._find_nearest_data_point(x_val, y_val)
-            if nearest is not None:
-                x_val, y_val, snapped_obj = nearest
+            snap_on = self.cbxSnapToPoints.isChecked() if hasattr(self, "cbxSnapToPoints") else True
+            if snap_on:
+                nearest = self._find_nearest_data_point(x_val, y_val)
+                if nearest is not None:
+                    x_val, y_val, snapped_obj = nearest
 
             # print("pick_shape", evt.xdata, evt.ydata, self.pick_idx)
             scatter_data_len = len(self.scatter_data.keys())

@@ -270,3 +270,10 @@ def test_find_nearest_data_point_snaps_and_misses(qtbot, mock_database):
 
     # Cursor far outside the data cloud -> no snap.
     assert dialog._find_nearest_data_point(1000.0, 1000.0) is None
+
+
+def test_snap_toggle_defaults_on(qtbot, mock_database):
+    """The snap-to-points option exists and defaults on (preserves the behavior
+    users asked for; can be turned off for free-position previews)."""
+    dialog = _prepared_dialog(qtbot)
+    assert dialog.cbxSnapToPoints.isChecked() is True

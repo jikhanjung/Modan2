@@ -8,7 +8,11 @@ matplotlib
 scipy
 opencv-python-headless
 xlsxwriter
-pandas
+# Pin to 2.x: the app is developed/tested on pandas 2.x. pandas 3.0 dropped its
+# pytz dependency (migrated to tzdata), which broke the frozen Windows build with
+# "Can't determine version for pytz". Staying on 2.x keeps CI matching dev and
+# ships a pytz that has proper metadata + __version__.
+pandas>=2.0,<3.0
 peewee-migrate
 scikit-learn
 statsmodels

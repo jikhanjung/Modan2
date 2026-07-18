@@ -291,6 +291,10 @@ class DataExplorationDialog(QDialog):
         self.cbxShowVariance.setText(self.tr("Show var. explained"))
         self.cbxShowVariance.setChecked(False)
         self.cbxShowVariance.toggled.connect(self.update_chart)
+        self.cbxDataPointLabels = QCheckBox()
+        self.cbxDataPointLabels.setText(self.tr("Show labels"))
+        self.cbxDataPointLabels.setChecked(False)
+        self.cbxDataPointLabels.toggled.connect(self.update_chart)
         self.gbChartBasics.layout().addWidget(self.lblGroupBy)
         self.gbChartBasics.layout().addWidget(self.comboGroupBy)
         self.gbChartBasics.layout().addWidget(spacer1)
@@ -299,6 +303,7 @@ class DataExplorationDialog(QDialog):
         # self.gbChartBasics.layout().addWidget(self.rb3DChartDim)
         self.gbChartBasics.layout().addWidget(self.cbxLegend)
         self.gbChartBasics.layout().addWidget(self.cbxShowVariance)
+        self.gbChartBasics.layout().addWidget(self.cbxDataPointLabels)
         self.gbChartBasics.layout().addWidget(spacer2)
         # self.axis_option_layout.addWidget(self.gbChartBasics)
 
@@ -1982,6 +1987,7 @@ class DataExplorationDialog(QDialog):
         show_average_shape = self.cbxAverage.isChecked()
         show_regression = self.cbxRegression.isChecked()
         show_annotation = self.cbxAnnotation.isChecked()
+        show_data_labels = self.cbxDataPointLabels.isChecked() if hasattr(self, "cbxDataPointLabels") else False
         show_legend = self.cbxLegend.isChecked()
         show_variance = self.cbxShowVariance.isChecked() if hasattr(self, "cbxShowVariance") else False
         show_convex_hull = self.cbxConvexHull.isChecked()
@@ -2013,6 +2019,18 @@ class DataExplorationDialog(QDialog):
                 if name == "__selected__":
                     for idx, obj in enumerate(group["data"]):
                         self.ax2.annotate(obj.object_name, (group["x_val"][idx], group["y_val"][idx]))
+                elif show_data_labels:
+                    for idx in range(len(group["x_val"])):
+                        label = self._data_point_label(group["data"][idx]) if idx < len(group["data"]) else ""
+                        if label:
+                            self.ax2.annotate(
+                                label,
+                                (group["x_val"][idx], group["y_val"][idx]),
+                                textcoords="offset pixels",
+                                xytext=(6, 6),
+                                fontsize=8,
+                                color="dimgray",
+                            )
 
                 if show_average_shape:
                     self.ax2.scatter(
@@ -2243,6 +2261,45 @@ class DataExplorationDialog(QDialog):
         return
         self.fig2.canvas.setCursor(QCursor(Qt.ArrowCursor))
 
+    @staticmethod
+    def _data_point_label(obj):
+        """Object name for a plotted data point. Regular scatter groups hold
+        object_info dicts (``{"name": ...}``); the ``__selected__`` overlay holds
+        MdObject instances (``.object_name``). Tolerate both."""
+        if isinstance(obj, dict):
+            return obj.get("name", "") or ""
+        return getattr(obj, "object_name", "") or ""
+
+    def _find_nearest_data_point(self, x_val, y_val, threshold_px=15):
+        """Return ``(x, y, obj)`` of the plotted data point closest to
+        ``(x_val, y_val)`` within ``threshold_px`` screen pixels, or ``None``.
+
+        Distance is measured in display pixels (via the data transform) so the
+        snap feels consistent regardless of axis scale or zoom.
+        """
+        try:
+            trans = self.ax2.transData
+            cursor_px = trans.transform((x_val, y_val))
+        except Exception:
+            return None
+
+        best = None
+        best_dist = float(threshold_px)
+        for group in self.scatter_data.values():
+            xs = group.get("x_val", [])
+            ys = group.get("y_val", [])
+            data = group.get("data", [])
+            for idx in range(min(len(xs), len(ys), len(data))):
+                try:
+                    px = trans.transform((xs[idx], ys[idx]))
+                except Exception:
+                    continue
+                dist = ((px[0] - cursor_px[0]) ** 2 + (px[1] - cursor_px[1]) ** 2) ** 0.5
+                if dist <= best_dist:
+                    best_dist = dist
+                    best = (xs[idx], ys[idx], data[idx])
+        return best
+
     def on_canvas_move(self, evt):
         if evt.xdata is None or evt.ydata is None or self.mode == MODE_AVERAGE:
             return
@@ -2439,6 +2496,14 @@ class DataExplorationDialog(QDialog):
         # Set wait cursor while processing shape display
         QApplication.setOverrideCursor(Qt.WaitCursor)
         try:
+            # Snap to an existing data point when the cursor is near one, so the
+            # previewed shape lands exactly on a real specimen instead of an
+            # interpolated position between points.
+            snapped_obj = None
+            nearest = self._find_nearest_data_point(x_val, y_val)
+            if nearest is not None:
+                x_val, y_val, snapped_obj = nearest
+
             # print("pick_shape", evt.xdata, evt.ydata, self.pick_idx)
             scatter_data_len = len(self.scatter_data.keys())
             marker_list = self.marker_list
@@ -2477,9 +2542,14 @@ class DataExplorationDialog(QDialog):
                 [x_val], [y_val], s=150, marker=symbol_candidate[self.pick_idx], color=color_candidate[self.pick_idx]
             )
             # print("shape['name']", shape['name'])
-            if shape["name"] != "":
+            # When snapped to a real specimen, label the preview with that
+            # specimen's name; otherwise fall back to the custom shape name.
+            label_text = self._data_point_label(snapped_obj) if snapped_obj is not None else ""
+            if not label_text:
+                label_text = shape["name"]
+            if label_text != "":
                 shape["label"] = self.ax2.annotate(
-                    shape["name"],
+                    label_text,
                     (x_val, y_val),
                     xycoords="data",
                     textcoords="offset pixels",

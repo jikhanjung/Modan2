@@ -220,3 +220,53 @@ def test_prepare_scatter_data_with_overlays(qtbot, mock_database):
         assert "hull" in grp
         assert "ellipse" in grp
         assert len(grp["ellipse"]) == 3
+
+
+def test_data_point_labels_annotate_each_point(qtbot, mock_database):
+    """With 'Show labels' on, every plotted point gets its object-name annotation."""
+    dialog = _prepared_dialog(qtbot)
+    dialog.cbxDataPointLabels.setChecked(True)
+    dialog.show_analysis_result()
+    texts = {t.get_text() for t in dialog.ax2.texts}
+    # 6 objects O0..O5 across the two groups
+    assert {f"O{i}" for i in range(6)} <= texts
+
+
+def test_data_point_labels_off_by_default(qtbot, mock_database):
+    """Without the option, object-name labels are not drawn."""
+    dialog = _prepared_dialog(qtbot)
+    assert dialog.cbxDataPointLabels.isChecked() is False
+    dialog.show_analysis_result()
+    texts = {t.get_text() for t in dialog.ax2.texts}
+    assert not ({f"O{i}" for i in range(6)} & texts)
+
+
+def test_data_point_label_helper_handles_dict_and_object():
+    """The label helper reads dict 'name' and object .object_name, tolerating both."""
+    assert DataExplorationDialog._data_point_label({"name": "spec-1"}) == "spec-1"
+    assert DataExplorationDialog._data_point_label({}) == ""
+
+    class _Obj:
+        object_name = "spec-2"
+
+    assert DataExplorationDialog._data_point_label(_Obj()) == "spec-2"
+
+
+def test_find_nearest_data_point_snaps_and_misses(qtbot, mock_database):
+    """Snapping returns the closest plotted point for a coincident cursor and
+    None when the cursor is far from any point."""
+    dialog = _prepared_dialog(qtbot)
+    dialog.show_analysis_result()  # draw so ax2.transData is valid
+
+    grp = dialog.scatter_data["M"]
+    px, py = grp["x_val"][0], grp["y_val"][0]
+
+    # Cursor exactly on a data point -> snaps to it (0px distance).
+    nearest = dialog._find_nearest_data_point(px, py)
+    assert nearest is not None
+    sx, sy, obj = nearest
+    assert (sx, sy) == (px, py)
+    assert dialog._data_point_label(obj) == obj["name"]
+
+    # Cursor far outside the data cloud -> no snap.
+    assert dialog._find_nearest_data_point(1000.0, 1000.0) is None

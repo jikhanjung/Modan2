@@ -21,13 +21,28 @@ permissions:
   contents: write
 
 jobs:
+  # Same commit-count build number as build.yml, so manually-released builds
+  # carry a number consistent with CI/CD builds (github.run_number is per-workflow
+  # and would otherwise diverge). Needs full history.
+  compute-build-number:
+    runs-on: ubuntu-latest
+    outputs:
+      build_number: ${{ steps.bn.outputs.build_number }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: bn
+        run: echo "build_number=$(git rev-list --count HEAD)" >> "$GITHUB_OUTPUT"
+
   call-build-workflow:
+    needs: compute-build-number
     uses: ./.github/workflows/reusable_build.yml
     with:
-      build_number: ${{ github.run_number }}
+      build_number: ${{ needs.compute-build-number.outputs.build_number }}
 
   create-release:
-    needs: call-build-workflow
+    needs: [compute-build-number, call-build-workflow]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -41,13 +56,13 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event.inputs.version_tag }}-build.${{ github.run_number }}
-          name: Modan2 ${{ github.event.inputs.version_tag }} (Build ${{ github.run_number }})
+          tag_name: ${{ github.event.inputs.version_tag }}-build.${{ needs.compute-build-number.outputs.build_number }}
+          name: Modan2 ${{ github.event.inputs.version_tag }} (Build ${{ needs.compute-build-number.outputs.build_number }})
           body: |
             🚀 Modan2 ${{ github.event.inputs.version_tag }} Release
 
             Built from commit: ${{ github.sha }}
-            Build number: ${{ github.run_number }}
+            Build number: ${{ needs.compute-build-number.outputs.build_number }}
 
             ${{ github.event.inputs.release_notes }}
           prerelease: ${{ github.event.inputs.prerelease }}

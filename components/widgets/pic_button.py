@@ -53,24 +53,28 @@ class PicButton(QAbstractButton):
         self.pressed.connect(self.update)
         self.released.connect(self.update)
 
+    def _current_pixmap(self):
+        """Pick the pixmap for the current state (priority: disabled > pressed/
+        checked > hover > normal).
+
+        ``isChecked()`` keeps a checkable (toggle) button showing its pressed
+        pixmap while selected; non-checkable buttons always report False here, so
+        their behavior is unchanged.
+        """
+        if not self.isEnabled() and self.pixmap_disabled is not None:
+            return self.pixmap_disabled
+        if self.isDown() or self.isChecked():
+            return self.pixmap_pressed
+        return self.pixmap_hover if self.underMouse() else self.pixmap
+
     def paintEvent(self, event):
         """Paint the button with appropriate pixmap based on state.
 
         Args:
             event: QPaintEvent
         """
-        # Select pixmap based on button state
-        pix = self.pixmap_hover if self.underMouse() else self.pixmap
-
-        if self.isDown():
-            pix = self.pixmap_pressed
-
-        if not self.isEnabled() and self.pixmap_disabled is not None:
-            pix = self.pixmap_disabled
-
-        # Draw pixmap
         painter = QPainter(self)
-        painter.drawPixmap(self.rect(), pix)
+        painter.drawPixmap(self.rect(), self._current_pixmap())
 
     def enterEvent(self, event):
         """Handle mouse enter event.

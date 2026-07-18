@@ -284,6 +284,10 @@ class ObjectDialog(QDialog):
         self.btnGroup.addButton(self.btnLandmark)
         self.btnGroup.addButton(self.btnWireframe)
         self.btnGroup.addButton(self.btnCalibration)
+        # Exclusive group: exactly one of landmark/wireframe/calibration is always
+        # selected (clicking the active one can't deselect it), and Landmark is the
+        # default below.
+        self.btnGroup.setExclusive(True)
         self.btnLandmark.setCheckable(True)
         self.btnWireframe.setCheckable(True)
         self.btnCalibration.setCheckable(True)
@@ -520,8 +524,12 @@ class ObjectDialog(QDialog):
         logger.debug(f"calibrate dialog created - edit_mode: {self.object_view.edit_mode}")
         self.calibrate_dlg.setModal(True)
         logger.debug(f"calibrate before exec - edit_mode: {self.object_view.edit_mode}")
-        self.calibrate_dlg.exec_()
+        result = self.calibrate_dlg.exec_()
         logger.debug(f"calibrate after exec - edit_mode: {self.object_view.edit_mode}")
+        # After a confirmed calibration, drop straight into landmark input mode so
+        # the user can start digitizing without an extra click.
+        if result == QDialog.Accepted:
+            self.btnLandmark_clicked()
 
     def btnWireframe_clicked(self):
         # self.edit_mode = MODE_ADD_LANDMARK

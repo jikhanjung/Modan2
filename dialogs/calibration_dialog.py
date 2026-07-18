@@ -108,8 +108,8 @@ class CalibrationDialog(BaseDialog):
         )
         self.last_calibration_unit = self.comboUnit.currentText()
         self.write_settings()
-        self.close()
+        self.accept()
 
     def btnCancel_clicked(self):
         """Handle Cancel button click."""
-        self.close()
+        self.reject()

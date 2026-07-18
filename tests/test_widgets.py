@@ -136,6 +136,34 @@ class TestPicButton:
         assert size.width() == 200
         assert size.height() == 200
 
+    def test_pic_button_checked_shows_pressed_pixmap(self, qtbot, sample_pixmaps):
+        """A checkable button shows its pressed pixmap while checked (persistent
+        selection), and its normal pixmap when unchecked."""
+        button = PicButton(
+            sample_pixmaps["normal"], sample_pixmaps["hover"], sample_pixmaps["pressed"], sample_pixmaps["disabled"]
+        )
+        qtbot.addWidget(button)
+        button.setCheckable(True)
+
+        button.setChecked(False)
+        assert button._current_pixmap() is button.pixmap
+
+        button.setChecked(True)
+        assert button._current_pixmap() is button.pixmap_pressed
+
+        # Disabled still wins over checked.
+        button.setEnabled(False)
+        assert button._current_pixmap() is button.pixmap_disabled
+
+    def test_pic_button_noncheckable_unaffected_by_checked_logic(self, qtbot, sample_pixmaps):
+        """Non-checkable buttons report isChecked()==False, so at rest they show
+        the normal pixmap regardless of the checked-rendering path."""
+        button = PicButton(
+            sample_pixmaps["normal"], sample_pixmaps["hover"], sample_pixmaps["pressed"], sample_pixmaps["disabled"]
+        )
+        qtbot.addWidget(button)
+        assert button._current_pixmap() is button.pixmap
+
     def test_pic_button_enabled_state(self, qtbot, sample_pixmaps):
         """Test button enabled state"""
         button = PicButton(

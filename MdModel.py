@@ -65,6 +65,45 @@ def find_landmark_count_mismatch(objects):
     return None
 
 
+def find_unimputable_landmarks(objects):
+    """Landmark positions that *no* object records.
+
+    Procrustes fills a missing coordinate from the per-coordinate mean of the
+    other objects. When every object is missing the same coordinate that mean is
+    undefined (``nanmean`` of an all-NaN slice), the ``None`` survives
+    superimposition and only surfaces much later, in the analysis matrix, as
+    ``float() argument must be a string or a real number, not 'NoneType'``.
+
+    Detection is per *coordinate* — a landmark whose X is everywhere present but
+    whose Y is everywhere missing is just as unimputable — while the result is
+    reported per landmark, which is what the user sees in the table.
+
+    Returns:
+        Sorted 0-based landmark indices with at least one such coordinate.
+    """
+    objects = list(objects)
+    if not objects:
+        return []
+
+    for obj in objects:
+        landmark_position_count(obj)  # force unpack
+
+    row_count = max((len(obj.landmark_list) for obj in objects), default=0)
+    unimputable = []
+    for row in range(row_count):
+        width = max((len(obj.landmark_list[row]) for obj in objects if row < len(obj.landmark_list)), default=0)
+        for col in range(width):
+            if all(
+                row >= len(obj.landmark_list)
+                or col >= len(obj.landmark_list[row])
+                or obj.landmark_list[row][col] is None
+                for obj in objects
+            ):
+                unimputable.append(row)
+                break
+    return unimputable
+
+
 database_path = os.path.join(mu.DEFAULT_DB_DIRECTORY, DATABASE_FILENAME)
 
 gDatabase = SqliteDatabase(database_path, pragmas={"foreign_keys": 1})

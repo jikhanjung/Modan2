@@ -31,6 +31,26 @@ def landmark_mismatch_message(obj, expected, found):
     )
 
 
+def unimputable_landmarks_message(indices):
+    """Explain landmarks that no object records, and how to resolve them.
+
+    Shares one wording across every gate, like ``landmark_mismatch_message``.
+    Landmark numbers are 1-based to match the object dialog's table.
+    """
+    numbers = ", ".join(str(i + 1) for i in indices)
+    if len(indices) == 1:
+        return (
+            f"Landmark {numbers} is missing in every object, so there is nothing to "
+            f"estimate it from. Record it in at least one object, or remove that "
+            f"landmark from the dataset."
+        )
+    return (
+        f"Landmarks {numbers} are missing in every object, so there is nothing to "
+        f"estimate them from. Record each in at least one object, or remove those "
+        f"landmarks from the dataset."
+    )
+
+
 class ModanController(QObject):
     """Main controller - handles business logic."""
 
@@ -1024,6 +1044,12 @@ class ModanController(QObject):
         if mismatch is not None:
             raise ValueError(landmark_mismatch_message(*mismatch))
 
+        # Bail out here rather than let an unimputable None reach the analysis
+        # matrix, where it surfaces as an opaque float()/NoneType error.
+        unimputable = MdModel.find_unimputable_landmarks(objects_with_landmarks)
+        if unimputable:
+            raise ValueError(unimputable_landmarks_message(unimputable))
+
         ds_ops = MdDatasetOps(self.current_dataset)
         if not ds_ops.procrustes_superimposition():
             raise ValueError("Procrustes superimposition failed")
@@ -1428,6 +1454,10 @@ class ModanController(QObject):
         if mismatch is not None:
             return False, landmark_mismatch_message(*mismatch)
 
+        unimputable = MdModel.find_unimputable_landmarks(objects_with_landmarks)
+        if unimputable:
+            return False, unimputable_landmarks_message(unimputable)
+
         return True, "Dataset is valid for analysis"
 
     def _validate_dataset_for_general_analysis(self, dataset) -> bool:
@@ -1473,6 +1503,11 @@ class ModanController(QObject):
         mismatch = MdModel.find_landmark_count_mismatch(objects_with_landmarks)
         if mismatch is not None:
             show_warning(None, landmark_mismatch_message(*mismatch))
+            return False
+
+        unimputable = MdModel.find_unimputable_landmarks(objects_with_landmarks)
+        if unimputable:
+            show_warning(None, unimputable_landmarks_message(unimputable))
             return False
 
         return True

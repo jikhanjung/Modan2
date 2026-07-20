@@ -4,7 +4,7 @@
 
 **v0.1.5 final released** (tag `v0.1.5`, commit `8f97494`, 2026-07-18). Working tree
 clean on `main`, no commits after the release tag. Suite verified 2026-07-20:
-**1388 passed, 75 skipped** (`pytest`, ~4.5 min).
+**1404 passed, 75 skipped** (`pytest`, ~4.5 min).
 
 Everything below the line is **done and closed**:
 
@@ -63,7 +63,12 @@ Since the release (2026-07-20, devlog 209–210):
   and use \"Insert Missing\"…", shared by all three gates, instead of a bare
   `"Procrustes superimposition failed"`.
 
-**Next devlog number: 218.**
+- **Unimputable landmarks rejected** (218) — a landmark missing in *every*
+  object has nothing to estimate it from; it is now named up front instead of
+  surfacing as a `NoneType` error from inside PCA. Detection is per coordinate
+  (an axis missing throughout crashed identically).
+
+**Next devlog number: 219.**
 
 ### What's left (all deliberately deferred — see `TODOs.md`)
 
@@ -78,11 +83,9 @@ Since the release (2026-07-20, devlog 209–210):
 - ~~Missing-landmark follow-ups from devlog 209~~ — **all closed** (cell
   validator + `make_landmark_str` guard in 211, `-999` import handling in 213,
   insert-at-position in 214).
-- **Missing-landmark PCA**: works today whenever landmark *positions* line up.
-  One gap remains — a landmark missing in *every* object leaves `None` in the
-  matrix (`float() argument must be … not 'NoneType'`), because the per-coordinate
-  mean has nothing to impute from. A short object is now rejected with an
-  actionable message (217).
+- ~~Missing-landmark PCA gaps~~ — **all closed**. Positions that disagree are
+  rejected with an actionable message (217); landmarks nothing can impute are
+  named and declined (218).
 - Housekeeping: 6 open dependabot PRs (numpy, pytest family); stale local
   branches `feature/missing-landmark`, `feature/pyqt6-quick-test`.
 
@@ -139,7 +142,7 @@ points are revived. If you revive them, fix the persistence at the same time.
 - **Entry point**: `python main.py` (not `Modan2.py`, which is an imported
   module with no `__main__`). On Linux/WSL use `python fix_qt_import.py` for
   Qt plugin issues.
-- **Before committing**: `pytest` (currently **1388 passed, 75 skipped**),
+- **Before committing**: `pytest` (currently **1404 passed, 75 skipped**),
   `ruff check .` + `ruff format .` (clean repo-wide; note `ruff` may need
   `pip install ruff` in a fresh shell).
 - **Review sources of truth**:

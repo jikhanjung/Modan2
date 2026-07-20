@@ -1425,7 +1425,10 @@ class TestLandmarkCountValidation:
         is_valid, message = controller._validate_dataset_for_analysis_type("PCA")
 
         assert is_valid is False
-        assert "Inconsistent landmark count" in message
+        # The message names the offending object and the remedy rather than just
+        # reporting that something is inconsistent.
+        assert "Obj1" in message
+        assert "Insert Missing" in message
 
 
 class TestImportLandmarkFileEdgeCases:

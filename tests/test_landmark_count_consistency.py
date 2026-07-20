@@ -147,3 +147,61 @@ class TestGatesAgree:
         assert MdDatasetOps(ds).check_object_list() is True
         ok, _ = self._controller(ds)._validate_dataset_for_analysis_type("PCA")
         assert ok is True
+
+
+class TestMismatchMessageIsActionable:
+    """A rejected dataset must say how to fix it, not just that it is wrong."""
+
+    @staticmethod
+    def _short_dataset(setup_database):
+        rows = [list(r) for r in COMPLETE]
+        rows[2] = rows[2][:3]
+        return _dataset(setup_database, rows)
+
+    def test_message_names_object_and_both_counts(self, setup_database):
+        from ModanController import landmark_mismatch_message
+
+        ds = self._short_dataset(setup_database)
+        message = landmark_mismatch_message(*find_landmark_count_mismatch(list(ds.object_list)))
+        assert "O2" in message
+        assert "3" in message and "4" in message
+
+    def test_message_points_at_insert_missing(self, setup_database):
+        from ModanController import landmark_mismatch_message
+
+        ds = self._short_dataset(setup_database)
+        message = landmark_mismatch_message(*find_landmark_count_mismatch(list(ds.object_list)))
+        assert "Insert Missing" in message
+
+    def test_validation_uses_the_actionable_message(self, setup_database, qapp):
+        import ModanController
+
+        ModanController.show_warning = lambda *a, **k: None
+        controller = ModanController.ModanController()
+        ds = self._short_dataset(setup_database)
+        controller.current_dataset = ds
+        ok, message = controller._validate_dataset_for_analysis_type("PCA")
+        assert ok is False
+        assert "Insert Missing" in message
+
+    def test_analysis_path_uses_the_actionable_message(self, setup_database, qapp):
+        """_prepare_landmarks used to raise a bare "Procrustes superimposition
+        failed", which named neither the object nor the remedy."""
+        import ModanController
+
+        ModanController.show_warning = lambda *a, **k: None
+        controller = ModanController.ModanController()
+        controller.current_dataset = self._short_dataset(setup_database)
+        with pytest.raises(ValueError) as excinfo:
+            controller._prepare_landmarks()
+        assert "Insert Missing" in str(excinfo.value)
+        assert "O2" in str(excinfo.value)
+
+    def test_generic_failure_message_still_available(self, setup_database, qapp):
+        """A consistent dataset that still fails Procrustes keeps the old message."""
+        import ModanController
+
+        controller = ModanController.ModanController()
+        controller.current_dataset = _dataset(setup_database, COMPLETE)
+        # Consistent counts, so the mismatch pre-check must not fire.
+        assert find_landmark_count_mismatch(list(controller.current_dataset.object_list)) is None

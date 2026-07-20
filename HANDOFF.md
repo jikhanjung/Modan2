@@ -4,7 +4,7 @@
 
 **v0.1.5 final released** (tag `v0.1.5`, commit `8f97494`, 2026-07-18). Working tree
 clean on `main`, no commits after the release tag. Suite verified 2026-07-20:
-**1383 passed, 75 skipped** (`pytest`, ~4.5 min).
+**1388 passed, 75 skipped** (`pytest`, ~4.5 min).
 
 Everything below the line is **done and closed**:
 
@@ -58,7 +58,12 @@ Since the release (2026-07-20, devlog 209–210):
   `9 (1)`. Uncovered and fixed a pre-existing segfault: item delegates were set
   **unparented**, so Qt kept a pointer to a garbage-collected object.
 
-**Next devlog number: 217.**
+- **Actionable count-mismatch message** (217) — a short object is now rejected
+  with "Object 'O2' has 3 landmarks but this dataset expects 4. Open the object
+  and use \"Insert Missing\"…", shared by all three gates, instead of a bare
+  `"Procrustes superimposition failed"`.
+
+**Next devlog number: 218.**
 
 ### What's left (all deliberately deferred — see `TODOs.md`)
 
@@ -74,10 +79,10 @@ Since the release (2026-07-20, devlog 209–210):
   validator + `make_landmark_str` guard in 211, `-999` import handling in 213,
   insert-at-position in 214).
 - **Missing-landmark PCA**: works today whenever landmark *positions* line up.
-  Two gaps remain — a landmark missing in *every* object leaves `None` in the
-  matrix (`float() argument must be … not 'NoneType'`), and a genuinely short
-  object still fails `check_object_list` with the unhelpful
-  `"Procrustes superimposition failed"` instead of pointing at "Insert Missing".
+  One gap remains — a landmark missing in *every* object leaves `None` in the
+  matrix (`float() argument must be … not 'NoneType'`), because the per-coordinate
+  mean has nothing to impute from. A short object is now rejected with an
+  actionable message (217).
 - Housekeeping: 6 open dependabot PRs (numpy, pytest family); stale local
   branches `feature/missing-landmark`, `feature/pyqt6-quick-test`.
 
@@ -134,7 +139,7 @@ points are revived. If you revive them, fix the persistence at the same time.
 - **Entry point**: `python main.py` (not `Modan2.py`, which is an imported
   module with no `__main__`). On Linux/WSL use `python fix_qt_import.py` for
   Qt plugin issues.
-- **Before committing**: `pytest` (currently **1383 passed, 75 skipped**),
+- **Before committing**: `pytest` (currently **1388 passed, 75 skipped**),
   `ruff check .` + `ruff format .` (clean repo-wide; note `ruff` may need
   `pip install ruff` in a fresh shell).
 - **Review sources of truth**:

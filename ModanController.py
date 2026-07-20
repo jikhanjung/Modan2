@@ -16,6 +16,21 @@ import MdStatistics
 import MdUtils as mu
 
 
+def landmark_mismatch_message(obj, expected, found):
+    """Explain a landmark-count mismatch and how to fix it.
+
+    Every gate that can reject a dataset for this reason shares this wording, so
+    the user is told the remedy — the "Insert Missing" button places a
+    placeholder at a chosen position — rather than just that something is wrong.
+    """
+    return (
+        f"Object '{getattr(obj, 'object_name', '?')}' has {found} landmarks "
+        f"but this dataset expects {expected}. "
+        f'Open the object and use "Insert Missing" to add a placeholder at each '
+        f"position that was not recorded."
+    )
+
+
 class ModanController(QObject):
     """Main controller - handles business logic."""
 
@@ -1003,6 +1018,12 @@ class ModanController(QObject):
         self.logger.info("Performing Procrustes superimposition")
         from MdModel import MdDatasetOps
 
+        # Diagnose the one failure mode the user can actually act on before
+        # falling back to the generic message.
+        mismatch = MdModel.find_landmark_count_mismatch(objects_with_landmarks)
+        if mismatch is not None:
+            raise ValueError(landmark_mismatch_message(*mismatch))
+
         ds_ops = MdDatasetOps(self.current_dataset)
         if not ds_ops.procrustes_superimposition():
             raise ValueError("Procrustes superimposition failed")
@@ -1405,10 +1426,7 @@ class ModanController(QObject):
 
         mismatch = MdModel.find_landmark_count_mismatch(objects_with_landmarks)
         if mismatch is not None:
-            obj, expected, found = mismatch
-            return False, (
-                f"Inconsistent landmark count in object '{obj.object_name}': expected {expected}, found {found}"
-            )
+            return False, landmark_mismatch_message(*mismatch)
 
         return True, "Dataset is valid for analysis"
 
@@ -1454,11 +1472,7 @@ class ModanController(QObject):
 
         mismatch = MdModel.find_landmark_count_mismatch(objects_with_landmarks)
         if mismatch is not None:
-            obj, expected, found = mismatch
-            show_warning(
-                None,
-                f"Inconsistent landmark count in object '{obj.object_name}'. Expected {expected}, found {found}.",
-            )
+            show_warning(None, landmark_mismatch_message(*mismatch))
             return False
 
         return True

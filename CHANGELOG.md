@@ -9,6 +9,70 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [0.1.6] - 2026-07-20
+
+Focused on making **missing landmarks** work end to end — from import, through
+editing and display, to analysis — and on the crashes found along the way.
+
+### Added
+- **Missing landmark handling on import**
+  - Import detects the `-999` morphometrics placeholder and asks whether to treat
+    those coordinates as missing landmarks (defaults to yes)
+  - "Always treat -999 as a missing landmark" checkbox remembers the answer
+  - Correctly handles the invert-Y option, which negates a `-999` in the Y column
+    to `+999` before the scan runs
+- **Insert a missing landmark at a chosen position**
+  - "Add Missing" now inserts before the selected row instead of only appending,
+    so a gap can be placed where it actually belongs
+  - The button reads "Insert Missing" or "Add Missing" depending on whether a row
+    is selected
+- **Missing landmarks visible in the object list** — the Landmarks column shows
+  the recorded count with the missing tally beside it in red, e.g. `9 (1)`.
+  The column still sorts numerically.
+- **Italic legend labels** — a grouping value wrapped in asterisks renders italic
+  in plot legends, so taxon names typeset correctly (`*Eurekia*` → *Eurekia*).
+  Works for any script, including Hangul.
+
+### Changed
+- **Landmark table cells are validated when an edit is committed.** A cell accepts
+  a number, or `MISSING` (a blank cell counts as missing); anything else reverts
+  to the stored value with an explanatory tooltip. Previously any typo silently
+  turned the landmark into a missing one.
+- **Edits to the landmark table now update the viewer immediately** rather than
+  only at save time.
+- **Analysis errors say what to do.** A landmark-count mismatch names the object,
+  both counts, and points at "Insert Missing"; a landmark missing in every object
+  is named up front instead of failing deep inside PCA.
+
+### Fixed
+- **Clearing a landmark cell no longer breaks the dataset.** A blank tab/comma
+  field produced a short landmark row, crashing `count_landmarks`,
+  `has_missing_landmarks` and Procrustes superimposition with `IndexError` and
+  taking the whole dataset's analysis with it.
+- **Clearing only the X coordinate no longer shifts Y into X's slot** — a silent
+  coordinate corruption that produced no error at all.
+- **Landmark-count consistency used two conflicting definitions**, so an object
+  with a missing landmark could be rejected against its own count while the
+  Procrustes gate accepted the same dataset.
+- **Analysis on a landmark missing in every object** no longer fails with
+  `float() argument must be a string or a real number, not 'NoneType'`.
+- **Fixed a segmentation fault** caused by item delegates being registered
+  without a parent, leaving Qt holding a pointer to a garbage-collected object.
+- **Fixed a circular import** that broke `import ModanComponents` in a fresh
+  interpreter.
+
+### Technical
+- Test suite grew from 1242 to **1404 passing** (75 skipped)
+- New regression suites: import cycles (checked in a fresh subprocess, since
+  in-process module caching hides them), landmark parsing, cell validation,
+  sentinel import, count consistency, unimputable landmarks, count display
+- Single implementations for landmark counting (`landmark_position_count`,
+  `find_landmark_count_mismatch`) shared by every gate that can reject a dataset
+- `pre-commit` installed and configured; `AppDir/` excluded from the whitespace
+  hooks, which corrupted git symlinks on filesystems without symlink support
+- Ruff pinned in `.pre-commit-config.yaml` to match the installed version
+
+
 ## [0.1.5-beta.2] - 2025-11-03
 
 ### Added

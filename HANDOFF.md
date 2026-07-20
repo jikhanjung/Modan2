@@ -152,7 +152,8 @@ points are revived. If you revive them, fix the persistence at the same time.
   `devlog/YYYYMMDD_NNN_title.md` (next number: **209**). Doc types: `P##`
   plan, `NNN` implementation, `R##` review.
 - **Release flow**: version lives in `version.py` (single source of truth,
-  currently `0.1.5`); CI build numbers are commit-count based; Windows
+  currently `0.1.6`); each release bumps the patch version by one. CI build
+  numbers are commit-count based; Windows
   installer via `InnoSetup/Modan2.iss` (Inno Setup pinned 6.7.3).
 
 ## Historical record

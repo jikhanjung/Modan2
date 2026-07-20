@@ -66,8 +66,8 @@ from MdConstants import MODE
 from MdHelpers import guard_slot, show_error, show_info, show_warning
 from MdModel import MdAnalysis, MdDataset, MdObject, landmark_position_count
 from ModanComponents import (
-    AnalysisInfoWidget,
     MISSING_COUNT_ROLE,
+    AnalysisInfoWidget,
     MdLandmarkCountDelegate,
     MdSequenceDelegate,
     MdTableModel,

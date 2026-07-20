@@ -28,6 +28,7 @@ EDGE_SEPARATOR = "-"
 WIREFRAME_SEPARATOR = ","
 DATABASE_FILENAME = mu.PROGRAM_NAME + ".db"
 
+
 def landmark_position_count(obj):
     """Number of landmark *positions* on an object, missing ones included.
 

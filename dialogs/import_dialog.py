@@ -369,9 +369,7 @@ class ImportDatasetDialog(BaseDialog):
         box = QMessageBox(self)
         box.setIcon(QMessageBox.Question)
         box.setWindowTitle(self.tr("Missing landmarks"))
-        box.setText(
-            self.tr("Found {} coordinate(s) with the value {}.").format(count, int(mu.MISSING_SENTINEL))
-        )
+        box.setText(self.tr("Found {} coordinate(s) with the value {}.").format(count, int(mu.MISSING_SENTINEL)))
         box.setInformativeText(
             self.tr(
                 "{} is the usual placeholder for a landmark that was not recorded. "

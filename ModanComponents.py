@@ -55,6 +55,7 @@ logger = logging.getLogger(__name__)
 # Constants and mode definitions
 # Import all components from modular structure
 from components import (
+    MISSING_COUNT_ROLE,
     NTS,
     TPS,
     X1Y1,
@@ -63,7 +64,6 @@ from components import (
     DatasetOpsViewer,
     DragEventFilter,
     MdDrag,
-    MISSING_COUNT_ROLE,
     MdLandmarkCountDelegate,
     MdSequenceDelegate,
     MdTableModel,

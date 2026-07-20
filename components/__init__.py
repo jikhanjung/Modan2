@@ -17,12 +17,12 @@ so existing code using `from ModanComponents import X` will continue to work.
 from .formats import NTS, TPS, X1Y1, Morphologika
 from .viewers import ObjectViewer2D, ObjectViewer3D
 from .widgets import (
+    MISSING_COUNT_ROLE,
     AnalysisInfoWidget,
     CustomDrag,
     DatasetOpsViewer,
     DragEventFilter,
     MdDrag,
-    MISSING_COUNT_ROLE,
     MdLandmarkCountDelegate,
     MdSequenceDelegate,
     MdTableModel,

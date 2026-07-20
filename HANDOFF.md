@@ -86,6 +86,11 @@ Since the release (2026-07-20, devlog 209–210):
 - ~~Missing-landmark PCA gaps~~ — **all closed**. Positions that disagree are
   rejected with an actionable message (217); landmarks nothing can impute are
   named and declined (218).
+- **Delete `RELEASE_NOTES.md`** (deferred 2026-07-20, do it next session). It is
+  420 stale lines still describing itself as "Version: 0.1.5-alpha.1 / Status:
+  Pre-release / Alpha". Nothing reads it any more — `release.yml` now builds the
+  release body from the tag's `CHANGELOG.md` section — so it is dead weight that
+  reads like current release documentation.
 - Housekeeping: 6 open dependabot PRs (numpy, pytest family); stale local
   branches `feature/missing-landmark`, `feature/pyqt6-quick-test`.
 

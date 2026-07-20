@@ -44,7 +44,11 @@ Since the release (2026-07-20, devlog 209–210):
   stored in `Import/TreatSentinelAsMissing`). Note the readers apply invert-Y
   *before* the scan, so a Y sentinel reads as `+999`.
 
-**Next devlog number: 214.**
+- **"Add Missing" inserts at position** (214) — was always appending, which is
+  wrong for a positional landmark list. Also fixed stale coordinate inputs after
+  an insert (`selectRow` emits nothing when the row was already selected).
+
+**Next devlog number: 215.**
 
 ### What's left (all deliberately deferred — see `TODOs.md`)
 
@@ -56,10 +60,9 @@ Since the release (2026-07-20, devlog 209–210):
   dead branch in `object_dialog.py:~936`.
 - **Deferred R02 gap** (see below): CVA-only / MANOVA-only persist gap on
   UI-dead paths.
-- **Missing-landmark follow-ups** (surfaced in devlog 209; the cell validator
-  and `make_landmark_str` guard landed in 211, `-999` import handling in 213):
-  only insert-at-position for "Add Missing" remains — it appends to the end, so
-  marking landmark 3 of 5 missing needs the select-row → clear-X/Y route.
+- ~~Missing-landmark follow-ups from devlog 209~~ — **all closed** (cell
+  validator + `make_landmark_str` guard in 211, `-999` import handling in 213,
+  insert-at-position in 214).
 - **Missing-landmark PCA**: works today when rows carry `Missing` markers so
   landmark *counts* match. Two gaps remain — a landmark missing in *every*
   object leaves `None` in the matrix (`float() argument must be … not

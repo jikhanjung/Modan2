@@ -174,6 +174,9 @@ class ObjectDialog(QDialog):
         self.right_middle_layout.addWidget(self.btnAddFile)
         self.btnAddMissing = QPushButton()
         self.btnAddMissing.setText(self.tr("Add Missing"))
+        self.btnAddMissing.setToolTip(
+            self.tr("Insert a missing landmark before the selected row (appends if no row is selected)")
+        )
         self.btnAddMissing.clicked.connect(self.btnAddMissing_clicked)
         self.right_middle_layout.addWidget(self.btnAddMissing)
         # self.right_middle_layout.addWidget(self.btnFBO)
@@ -448,25 +451,39 @@ class ObjectDialog(QDialog):
     # def btnFBO_clicked(self):
     #    self.object_view_3d.show_picker_buffer()
 
+    @guard_slot("Failed to add missing landmark")
     def btnAddMissing_clicked(self):
-        """Add a missing landmark placeholder to the current object"""
+        """Insert a missing-landmark placeholder at the selected row.
+
+        Landmark identity is positional — landmark 3 of a file is row 3 here — so
+        a placeholder is only useful if it can go *where* the gap is. Inserts
+        before the selected row (spreadsheet convention, so the new row takes the
+        selected row's number) and appends when nothing is selected.
+        """
         if self.dataset is None:
             return
 
-        if self.dataset.dimension == 2:
-            self.landmark_list.append([None, None])
-        elif self.dataset.dimension == 3:
-            self.landmark_list.append([None, None, None])
+        blank = [None] * (3 if self.dataset.dimension == 3 else 2)
+
+        index = self.selected_landmark_index
+        if 0 <= index < len(self.landmark_list):
+            self.landmark_list.insert(index, blank)
+        else:
+            self.landmark_list.append(blank)
+            index = len(self.landmark_list) - 1
 
         self.show_landmarks()
+        self._refresh_landmark_views()
 
-        # Update the viewers
-        if self.object_view_2d:
-            self.object_view_2d.landmark_list = self.landmark_list
-            self.object_view_2d.update()
-        if self.object_view_3d:
-            self.object_view_3d.landmark_list = self.landmark_list
-            self.object_view_3d.update()
+        # Keep the new row selected: consecutive clicks then stack placeholders
+        # in order rather than walking backwards through the list.
+        self.selected_landmark_index = index
+        self.edtLandmarkStr.selectRow(index)
+        # selectRow is a no-op signal-wise when that row was already selected, so
+        # the coordinate inputs would keep showing the *previous* landmark's
+        # values — and Update would then write them into the new blank row. Sync
+        # them explicitly.
+        self.on_landmark_selected()
 
     def show_index_state_changed(self):
         self.object_view.show_index = self.cbxShowIndex.isChecked()

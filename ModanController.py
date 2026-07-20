@@ -338,7 +338,11 @@ class ModanController(QObject):
                         if self.current_dataset.object_list.count() > 0
                         else None
                     )
-                    expected_landmark_count = first_obj.count_landmarks() if first_obj else len(landmarks)
+                    # Positions, not recorded values — `landmarks` includes the
+                    # missing ones, so the comparison must too.
+                    expected_landmark_count = (
+                        MdModel.landmark_position_count(first_obj) if first_obj else len(landmarks)
+                    )
 
                     # Validate landmark count
                     if len(landmarks) != expected_landmark_count:
@@ -1330,7 +1334,9 @@ class ModanController(QObject):
 
             # Get landmark count from first object
             first_obj = dataset.object_list.first() if dataset.object_list.count() > 0 else None
-            landmark_count = first_obj.count_landmarks() if first_obj else 0
+            # The dataset's landmark count is how many positions a shape has, so
+            # a specimen with a gap must not shrink the reported number.
+            landmark_count = MdModel.landmark_position_count(first_obj) if first_obj else 0
 
             return {
                 "name": dataset.dataset_name,
@@ -1397,15 +1403,12 @@ class ModanController(QObject):
         if len(objects_with_landmarks) < required:
             return False, f"At least {required} objects with landmarks required for {analysis_type}"
 
-        # Check landmark consistency
-        if objects_with_landmarks:
-            # Get expected landmark count from first object
-            first_obj = objects_with_landmarks[0]
-            expected_count = first_obj.count_landmarks()
-            for obj in objects_with_landmarks:
-                obj.unpack_landmark()
-                if len(obj.landmark_list) != expected_count:
-                    return False, f"Inconsistent landmark count in object '{obj.object_name}'"
+        mismatch = MdModel.find_landmark_count_mismatch(objects_with_landmarks)
+        if mismatch is not None:
+            obj, expected, found = mismatch
+            return False, (
+                f"Inconsistent landmark count in object '{obj.object_name}': expected {expected}, found {found}"
+            )
 
         return True, "Dataset is valid for analysis"
 
@@ -1449,19 +1452,14 @@ class ModanController(QObject):
             )
             return False
 
-        # Check landmark consistency
-        if objects_with_landmarks:
-            # Get expected landmark count from first object
-            first_obj = objects_with_landmarks[0]
-            expected_count = first_obj.count_landmarks()
-            for obj in objects_with_landmarks:
-                obj.unpack_landmark()
-                if len(obj.landmark_list) != expected_count:
-                    show_warning(
-                        None,
-                        f"Inconsistent landmark count in object '{obj.object_name}'. Expected {expected_count}, found {len(obj.landmark_list)}.",
-                    )
-                    return False
+        mismatch = MdModel.find_landmark_count_mismatch(objects_with_landmarks)
+        if mismatch is not None:
+            obj, expected, found = mismatch
+            show_warning(
+                None,
+                f"Inconsistent landmark count in object '{obj.object_name}'. Expected {expected}, found {found}.",
+            )
+            return False
 
         return True
 

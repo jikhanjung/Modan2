@@ -28,6 +28,43 @@ EDGE_SEPARATOR = "-"
 WIREFRAME_SEPARATOR = ","
 DATABASE_FILENAME = mu.PROGRAM_NAME + ".db"
 
+def landmark_position_count(obj):
+    """Number of landmark *positions* on an object, missing ones included.
+
+    A missing landmark still occupies a position — Procrustes imputes it — so
+    this, not ``count_landmarks()``, is the measure for consistency checks.
+    Works for both ``MdObject`` (unpacking on demand) and ``MdObjectOps``.
+    """
+    if not getattr(obj, "landmark_list", None) and hasattr(obj, "unpack_landmark"):
+        obj.unpack_landmark()
+    return len(getattr(obj, "landmark_list", None) or [])
+
+
+def find_landmark_count_mismatch(objects):
+    """Find the first object whose landmark-position count differs from the first's.
+
+    The single implementation of "do these objects agree on landmark count",
+    shared by ``MdDatasetOps.check_object_list`` (the Procrustes gate) and the
+    controller's pre-analysis validation. They used to answer this question
+    separately, and disagreed: the controller compared a missing-*excluding*
+    expected count against missing-*including* actuals, so any object with a
+    missing landmark failed against itself.
+
+    Returns:
+        ``(object, expected, found)`` for the first offender, or ``None`` when
+        the counts agree (including when there is nothing to compare).
+    """
+    objects = list(objects)
+    if not objects:
+        return None
+    expected = landmark_position_count(objects[0])
+    for obj in objects:
+        found = landmark_position_count(obj)
+        if found != expected:
+            return obj, expected, found
+    return None
+
+
 database_path = os.path.join(mu.DEFAULT_DB_DIRECTORY, DATABASE_FILENAME)
 
 gDatabase = SqliteDatabase(database_path, pragmas={"foreign_keys": 1})
@@ -273,6 +310,12 @@ class MdObject(Model):
 
     def count_landmarks(self, exclude_missing=True):
         """Count landmarks.
+
+        Note:
+            This counts *recorded* landmarks by default, which is what the object
+            table shows the user. It is the wrong measure for landmark-count
+            consistency — use :func:`find_landmark_count_mismatch`, which counts
+            positions.
 
         Args:
             exclude_missing: If True, exclude landmarks with None values (default: True)
@@ -1585,21 +1628,18 @@ class MdDatasetOps:
         return average_shape
 
     def check_object_list(self):
-        min_number_of_landmarks = 999999
-        max_number_of_landmarks = -999999
-        sum_val = 0
-        for mo in self.object_list:
-            number_of_landmarks = len(mo.landmark_list)
-            # print number_of_landmarks
-            sum_val += number_of_landmarks
-            min_number_of_landmarks = min(min_number_of_landmarks, number_of_landmarks)
-            max_number_of_landmarks = max(max_number_of_landmarks, number_of_landmarks)
-        # average_number_of_landmarks = float( sum_val ) / len( self.objects )
-        # print min_number_of_landmarks, max_number_of_landmarks
-        if sum_val > 0 and min_number_of_landmarks != max_number_of_landmarks:
-            print("Inconsistent number of landmarks", min_number_of_landmarks, max_number_of_landmarks)
-            return False
-        return True
+        """True when every object has the same number of landmark positions."""
+        mismatch = find_landmark_count_mismatch(self.object_list)
+        if mismatch is None:
+            return True
+        obj, expected, found = mismatch
+        logger.warning(
+            "Inconsistent number of landmarks in '%s': expected %d, found %d",
+            getattr(obj, "object_name", "?"),
+            expected,
+            found,
+        )
+        return False
 
     def estimate_missing_landmarks(self, obj_index, reference_shape):
         """Estimate missing landmarks for an object using the reference shape.

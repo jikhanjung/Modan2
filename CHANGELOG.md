@@ -73,6 +73,70 @@ editing and display, to analysis — and on the crashes found along the way.
 - Ruff pinned in `.pre-commit-config.yaml` to match the installed version
 
 
+## [0.1.5] - 2026-07-18
+
+Stabilisation release. A full code review (R01) corrected several **statistical
+results**, a structural refactor removed the last god-methods and dead modules,
+and an error-handling audit closed the paths where a failure could kill a window
+silently.
+
+> **Note for existing analyses:** the CVA and MANOVA fixes below change numeric
+> output. Analyses saved before 0.1.5 may differ if re-run.
+
+### Added
+- **Data Exploration plot**
+  - Optional data-point labels
+  - Snap-to-point when picking shapes
+  - Shape-preview snapping is now toggleable ("Snap to points")
+- **Object editing** — landmark mode is entered automatically after calibration,
+  and exactly one tool mode stays selected
+
+### Fixed
+- **Statistics correctness**
+  - CVA: use pseudo-inverse for a singular within-group covariance matrix
+    instead of failing or producing garbage
+  - CVA: raw eigenvalues no longer overwritten by their percentages
+  - CVA/MANOVA: the Z coordinate of 3D landmarks is no longer dropped when
+    flattening shapes
+  - MANOVA: variable truncation is surfaced instead of silently capping
+- **Crashes and silent failures**
+  - Clicking the dataset tree and exporting an analysis to Excel could kill the
+    window with no message; the export crash was traced to the Shapes sheet
+  - Frozen (packaged) builds failed at startup with
+    "Can't determine version for pytz"
+  - Preferences were intermittently reset — settings are now written atomically
+  - Error-handling audit: 40+ user-triggered handlers across the main window,
+    dialogs, file parsers, 3D model I/O and zip import now report failures
+    instead of dying quietly
+- **Data integrity**
+  - Multi-row database operations are wrapped in transactions, so a failure
+    part-way through no longer leaves a half-written dataset
+  - Corrected model field names in controller create/import paths
+  - Class-level mutable attributes were shared between instances
+  - Analysis results were silently not persisted when the analysis type was
+    passed in lowercase
+- **Interface**
+  - The Preferences dialog is scrollable, so it is usable on low-resolution
+    monitors
+
+### Changed
+- **Performance** — eliminated N+1 queries in CVA/MANOVA group extraction and in
+  dataset switching; vectorised average-shape and CVA covariance computation
+
+### Technical
+- Removed dead code: `ModanDialogs.py` (2,539 lines) migrated to the `dialogs/`
+  package, plus 6 unused modules and 8 stale build specs
+- De-duplicated the `MODE` dictionary (15 copies → 1) and object-viewer constants
+  into `MdConstants`
+- Decomposed god-methods: `run_analysis`, `prepare_scatter_data`, `read_settings`,
+  and two dialog `__init__`s; moved dialog database/file I/O into
+  `ModanController`
+- Added the `guard_slot` decorator for Qt signal handlers
+- Repo-wide ruff lint/format clean; numpy pins reconciled to `>=2.0.0,<3.0.0`
+- CI: build numbers derived from commit count across all build workflows;
+  Inno Setup pinned to 6.7.3
+
+
 ## [0.1.5-beta.2] - 2025-11-03
 
 ### Added

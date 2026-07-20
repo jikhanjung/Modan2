@@ -51,42 +51,49 @@ jobs:
           echo "=== Generated Checksums ==="
           cat SHA256SUMS.txt
 
+      # The release body is the tag's own CHANGELOG section, extracted verbatim.
+      # Previously this pasted RELEASE_NOTES.md, a separate hand-maintained file
+      # that drifted: it still described 0.1.5-alpha.1 long after that release.
+      # Sourcing the changelog means there is one place to keep current.
       - name: Prepare release body
         id: release_body
         run: |
-          if [ -f RELEASE_NOTES.md ]; then
-            echo "Found RELEASE_NOTES.md"
-            {
-              echo 'RELEASE_BODY<<EOF'
-              cat RELEASE_NOTES.md
+          VERSION="${GITHUB_REF_NAME#v}"
+          NOTES=$(awk -v hdr="## [$VERSION]" '
+            index($0, hdr) == 1 { found=1; next }
+            found && /^## \[/   { exit }
+            found               { print }
+          ' CHANGELOG.md | sed -e '/./,$!d' | tac | sed -e '/./,$!d' | tac)
+
+          if [ -n "$NOTES" ]; then
+            echo "Using CHANGELOG.md section for $VERSION"
+            HEADER="## What's changed"
+          else
+            echo "::warning::No CHANGELOG.md section found for $VERSION; publishing checksums only"
+            HEADER=""
+          fi
+
+          {
+            echo 'RELEASE_BODY<<GH_EOF'
+            echo "🚀 Modan2 ${GITHUB_REF_NAME} Release"
+            echo ""
+            if [ -n "$NOTES" ]; then
+              echo "$HEADER"
+              echo ""
+              echo "$NOTES"
               echo ""
               echo "---"
               echo ""
-              echo "## SHA256 Checksums"
-              echo ""
-              echo '```'
-              cat SHA256SUMS.txt
-              echo '```'
-              echo ""
-              echo "Built from commit: ${{ github.sha }}"
-              echo 'EOF'
-            } >> $GITHUB_OUTPUT
-          else
-            echo "RELEASE_NOTES.md not found, using default body"
-            {
-              echo 'RELEASE_BODY<<EOF'
-              echo "🚀 Modan2 ${{ github.ref_name }} Release"
-              echo ""
-              echo "## SHA256 Checksums"
-              echo ""
-              echo '```'
-              cat SHA256SUMS.txt
-              echo '```'
-              echo ""
-              echo "Built from commit: ${{ github.sha }}"
-              echo 'EOF'
-            } >> $GITHUB_OUTPUT
-          fi
+            fi
+            echo "## SHA256 Checksums"
+            echo ""
+            echo '```'
+            cat SHA256SUMS.txt
+            echo '```'
+            echo ""
+            echo "Built from commit: ${{ github.sha }}"
+            echo 'GH_EOF'
+          } >> "$GITHUB_OUTPUT"
 
       - name: Create Release
         uses: softprops/action-gh-release@v2

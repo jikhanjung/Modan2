@@ -386,6 +386,17 @@ class MdObject(Model):
         self.landmark_str = LINE_SEPARATOR.join(landmark_strs)
 
     def unpack_landmark(self):
+        """Parse ``landmark_str`` into ``landmark_list``, blanks included.
+
+        A field that is empty or non-numeric ("Missing", "NA", …) becomes
+        ``None``. Blank fields delimited by tab/comma **keep their position**:
+        clearing the Y cell of a landmark yields ``[x, None]``, not a short
+        ``[x]``. Callers index ``lm[0]``/``lm[1]`` unconditionally, so a short
+        row raises ``IndexError`` and takes the whole dataset's analysis down
+        (``has_missing_landmarks``, ``procrustes_superimposition``,
+        ``count_landmarks``). Runs of whitespace are padding, not position, so
+        the blanks they produce are still dropped.
+        """
         self.landmark_list = []
         # print "[", self.landmark_str,"]"
         if self.landmark_str is None or self.landmark_str == "":
@@ -395,6 +406,7 @@ class MdObject(Model):
             if lm != "":
                 # Try to detect the separator used
                 # Priority: tab > comma > multiple spaces > single space
+                positional = True
                 if "\t" in lm:
                     separator = "\t"
                 elif "," in lm:
@@ -406,15 +418,47 @@ class MdObject(Model):
                     continue
                 elif " " in lm:
                     separator = " "
+                    positional = False
                 else:
                     # Single value or unknown format
                     separator = LANDMARK_SEPARATOR
 
-                coords = lm.split(separator)
-                # Filter out empty strings (can happen with multiple spaces)
-                coords = [x.strip() for x in coords if x.strip()]
+                coords = [x.strip() for x in lm.split(separator)]
+                if not positional:
+                    # Space-separated: an empty field is just extra spacing.
+                    coords = [x for x in coords if x]
                 self.landmark_list.append([float(x) if self.is_float(x) else None for x in coords])
+        self._normalize_landmark_widths()
         return self.landmark_list
+
+    def _normalize_landmark_widths(self):
+        """Give every landmark row one slot per dimension, padding with ``None``.
+
+        Guards the ``lm[0]``/``lm[1]``/``lm[2]`` indexing that the rest of the
+        codebase does unconditionally. Only *trailing* ``None``s are trimmed, so
+        a row carrying more real numbers than the dataset's dimension keeps them
+        rather than silently losing data.
+        """
+        if not self.landmark_list:
+            return
+
+        width = None
+        try:
+            if self.dataset is not None:
+                width = self.dataset.dimension
+        except Exception:
+            # Unsaved/detached object: fall back to the widest row present.
+            width = None
+        if not width:
+            width = max(len(lm) for lm in self.landmark_list)
+        # Every landmark needs at least X and Y.
+        width = max(width, 2)
+
+        for lm in self.landmark_list:
+            if len(lm) < width:
+                lm.extend([None] * (width - len(lm)))
+            while len(lm) > width and lm[-1] is None:
+                lm.pop()
 
     def is_float(self, s):
         # Check for "Missing" text specifically

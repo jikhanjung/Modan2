@@ -2,9 +2,14 @@
 
 ## ▶ Current state (updated 2026-07-20)
 
-**v0.1.5 final released** (tag `v0.1.5`, commit `8f97494`, 2026-07-18). Working tree
-clean on `main`, no commits after the release tag. Suite verified 2026-07-20:
-**1404 passed, 75 skipped** (`pytest`, ~4.5 min).
+**v0.1.6 released** (tag `v0.1.6`, commit `b4fd1a2`, 2026-07-20). Suite verified
+2026-07-20: **1404 passed, 75 skipped** (`pytest`, ~4.5 min), coverage **59%**.
+
+Release convention from 2026-07-20: **each release bumps the patch version by
+one**, no prerelease suffixes. Edit `version.py` only — everything else reads
+from it (`MdUtils.PROGRAM_VERSION`, `MdConstants.APP_VERSION` and `main.py`'s
+strings are `ImportError` fallbacks). The GitHub release body is now the tag's
+own `CHANGELOG.md` section, extracted by `release.yml`.
 
 Everything below the line is **done and closed**:
 
@@ -24,7 +29,8 @@ Everything below the line is **done and closed**:
   Inno Setup download pinned to 6.7.3, commit-count build numbers across CI
   workflows, atomic preferences persistence (settings-reset fix).
 
-Since the release (2026-07-20, devlog 209–210):
+Shipped in 0.1.6 (2026-07-20, devlog 209–218) — the missing-landmark path end to
+end, plus the crashes found along the way:
 
 - **Blank-cell landmark parsing fixed** (209) — clearing a cell in the
   ObjectDialog landmark table produced a short row and crashed
@@ -68,7 +74,34 @@ Since the release (2026-07-20, devlog 209–210):
   surfacing as a `NoneType` error from inside PCA. Detection is per coordinate
   (an axis missing throughout crashed identically).
 
+Also on 2026-07-20, after the release (no devlog — CI/tooling only):
+`pre-commit` installed (and stopped from corrupting `AppDir/` symlinks), ruff
+pinned to match, all GitHub Actions bumped to Node 24 runtimes, and the Codecov
+upload dropped.
+
 **Next devlog number: 219.**
+
+### ▶ Next up (2026-07-21)
+
+Two gaps found in the 2026-07-20 coverage run (**59% overall**; `MdModel` is up
+from 56% → 71% since the figure quoted in `CLAUDE.md`):
+
+1. **`ModanWidgets.py` (555 statements, 21%) looks like dead code.** Its five
+   classes — `DatasetTreeWidget`, `ObjectTableWidget`, `LandmarkViewer2D`,
+   `AnalysisResultWidget`, `ProgressIndicator` — are imported by **nothing in
+   production**. The only references are a logging-config string key in
+   `MdConstants.py:591` and `tests/test_modan_widgets.py`, i.e. the module is
+   kept alive solely by its own test. The live UI uses `components/widgets/`.
+   Same shape as the `ModanDialogs.py` removal in 0.1.5 (2,539 lines). **Verify
+   once more before deleting** — check for dynamic/late imports.
+2. **`components/formats/x1y1.py` is at 18%.** Its sibling parsers are far
+   better covered (`tps` 91%, `morphologika` 88%, `nts` 62%). Pure parsing
+   logic, so it is cheap to test, and importing an X1Y1 file currently exercises
+   a barely-verified path. `nts.py` at 62% is a smaller version of the same gap.
+
+Low coverage elsewhere is expected and not worth chasing: the OpenGL/Qt viewers
+(`object_viewer_3d` 20%, `object_viewer_2d` 39%) and the entry-point scripts
+(`main.py`, `MdAppSetup.py`, `MdSplashScreen.py`, `manage_version.py` at 0%).
 
 ### What's left (all deliberately deferred — see `TODOs.md`)
 

@@ -112,6 +112,9 @@ class ObjectViewer2D(QLabel):
         self.scale = 1.0
         self.prev_scale = 1.0
         self.fullpath = None
+        # True while orig_pixmap is a downscaled render source; the full-resolution
+        # image is loaded lazily once the zoom would otherwise upscale it.
+        self._render_downscaled = False
         self.image_changed = False
         self.pan_mode = MODE["NONE"]
         self.edit_mode = MODE["NONE"]
@@ -572,8 +575,10 @@ class ObjectViewer2D(QLabel):
         self.scale = round(self.scale * 10) / 10
 
         if self.orig_pixmap is not None:
-            # Target display size is derived from the TRUE image dimensions (the
-            # render source may be downscaled); Qt scales the source to fit.
+            # Upgrade to full resolution if this zoom would upscale a downscaled
+            # render source, then scale. Target display size is derived from the
+            # TRUE image dimensions; Qt scales the source to fit.
+            self._ensure_render_resolution()
             self.curr_pixmap = self.orig_pixmap.scaled(
                 int(self.orig_width * self.scale / self.image_canvas_ratio),
                 int(self.orig_height * self.scale / self.image_canvas_ratio),
@@ -1109,6 +1114,7 @@ class ObjectViewer2D(QLabel):
         original-image pixels, so downscaling the *display* source does not move
         them. Falls back to a full ``QPixmap`` load when the size can't be read.
         """
+        self._render_downscaled = False
         reader = QImageReader(file_path)
         size = reader.size()  # header-only read; no full decode yet
         ow, oh = size.width(), size.height()
@@ -1120,6 +1126,7 @@ class ObjectViewer2D(QLabel):
             if longer > MAX_RENDER_DIM:
                 factor = MAX_RENDER_DIM / longer
                 reader.setScaledSize(QSize(max(1, round(ow * factor)), max(1, round(oh * factor))))
+                self._render_downscaled = True
             image = reader.read()
             if not image.isNull():
                 return QPixmap.fromImage(image)
@@ -1130,6 +1137,25 @@ class ObjectViewer2D(QLabel):
         self.orig_width = pixmap.width()
         self.orig_height = pixmap.height()
         return pixmap
+
+    def _ensure_render_resolution(self):
+        """Lazily swap in the full-resolution image once the zoom would upscale
+        the downscaled render source, so digitizing stays sharp when zoomed in.
+
+        The display size is derived from the true dimensions either way, so this
+        only sharpens the source — coordinates are unaffected. Once loaded, the
+        full image is kept (zooming back out still renders fine from it)."""
+        if not self._render_downscaled or self.orig_pixmap is None or not self.fullpath:
+            return
+        # Displayed width (in px) the full image would occupy at the current zoom.
+        target_full_w = self.orig_width * self.scale / self.image_canvas_ratio
+        if target_full_w <= self.orig_pixmap.width():
+            return  # render source still has enough pixels; no upscaling yet
+        full = QPixmap(self.fullpath)
+        if not full.isNull():
+            self.orig_pixmap = full
+            self._render_downscaled = False
+            logger.debug(f"Loaded full-resolution image for high-zoom digitizing: {self.fullpath}")
 
     def clear_object(self):
         # print("object view clear object")

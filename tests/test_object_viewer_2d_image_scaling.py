@@ -69,6 +69,44 @@ def test_downscaled_image_coordinate_mapping_uses_true_dims(qtbot, tmp_path, mon
     assert abs(viewer._2imgx(canvas_x) - 400) <= 1
 
 
+def test_zoom_in_loads_full_resolution(qtbot, tmp_path, monkeypatch):
+    """Zooming in far enough to upscale the downscaled source swaps in the
+    full-resolution image; coordinate math (true dims) is unchanged."""
+    monkeypatch.setattr(ov2d, "MAX_RENDER_DIM", 100)
+    viewer = ObjectViewer2D()
+    qtbot.addWidget(viewer)
+    viewer.resize(200, 200)
+    viewer.set_image(_write_png(tmp_path / "big.png", 800, 400))
+    viewer.calculate_resize()
+
+    assert viewer._render_downscaled is True
+    assert viewer.orig_pixmap.width() == 100  # downscaled render source
+    true_w, true_h = viewer.orig_width, viewer.orig_height
+
+    # Zoom in a lot so the display width exceeds the 100px render source.
+    for _ in range(60):
+        viewer.adjust_scale(0.2, recurse=False)
+
+    assert viewer._render_downscaled is False
+    assert viewer.orig_pixmap.width() == 800  # full-resolution now loaded
+    # true dims (coordinate reference) untouched by the swap
+    assert (viewer.orig_width, viewer.orig_height) == (true_w, true_h)
+
+
+def test_zoom_stays_downscaled_when_not_upscaling(qtbot, tmp_path, monkeypatch):
+    """At low zoom the downscaled source is enough; no full-res load happens."""
+    monkeypatch.setattr(ov2d, "MAX_RENDER_DIM", 100)
+    viewer = ObjectViewer2D()
+    qtbot.addWidget(viewer)
+    viewer.resize(200, 200)
+    viewer.set_image(_write_png(tmp_path / "big.png", 800, 400))
+    viewer.calculate_resize()
+
+    viewer._ensure_render_resolution()  # at fit, no upscale needed
+    assert viewer._render_downscaled is True
+    assert viewer.orig_pixmap.width() == 100
+
+
 def test_null_image_sets_sentinel_dims(qtbot, tmp_path):
     """A missing/corrupt image doesn't crash and marks dims invalid."""
     viewer = ObjectViewer2D()

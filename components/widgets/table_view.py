@@ -532,6 +532,12 @@ class MdTableView(QTableView):
                 header.resizeSection(i, width)
 
 
+#: Per-cell count of missing landmarks, read by ``MdLandmarkCountDelegate``.
+#: Kept out of DisplayRole so the displayed value stays an int and the column
+#: still sorts numerically.
+MISSING_COUNT_ROLE = Qt.UserRole + 1
+
+
 class MdTableModel(QAbstractTableModel):
     dataChangedCustomSignal = pyqtSignal()
 
@@ -570,6 +576,8 @@ class MdTableModel(QAbstractTableModel):
                 return None
             elif isinstance(d, dict) and d.get("changed", False):
                 return QColor("yellow")
+        if role == MISSING_COUNT_ROLE:
+            return d.get("missing", 0) if isinstance(d, dict) else 0
         if role == Qt.ToolTipRole:
             return f"Tooltip for cell ({index.row()}, {index.column()})"
         if role == Qt.TextAlignmentRole:
@@ -665,7 +673,14 @@ class MdTableModel(QAbstractTableModel):
         self.layoutAboutToBeChanged.emit()
         self.beginInsertRows(QModelIndex(), self.rowCount(), self.rowCount() + len(rows) - 1)
         for row_data in rows:
-            row = [{"value": col_data, "changed": False} for col_data in row_data]
+            row = []
+            for col_data in row_data:
+                # A caller may hand in a ready-made cell dict to carry extras
+                # (e.g. "missing"); keep those keys instead of nesting them.
+                if isinstance(col_data, dict):
+                    row.append({"changed": False, **col_data})
+                else:
+                    row.append({"value": col_data, "changed": False})
             self._data.append(row)
         self.endInsertRows()
         self.layoutChanged.emit()

@@ -64,9 +64,11 @@ from dialogs import (
 from MdConstants import ICONS as ICON_CONSTANTS
 from MdConstants import MODE
 from MdHelpers import guard_slot, show_error, show_info, show_warning
-from MdModel import MdAnalysis, MdDataset, MdObject
+from MdModel import MdAnalysis, MdDataset, MdObject, landmark_position_count
 from ModanComponents import (
     AnalysisInfoWidget,
+    MISSING_COUNT_ROLE,
+    MdLandmarkCountDelegate,
     MdSequenceDelegate,
     MdTableModel,
     MdTableView,
@@ -250,7 +252,13 @@ class ModanMainWindow(QMainWindow):
 
         # Initialize widgets (temporary compatibility)
         self.tableView = MdTableView()
-        self.tableView.setItemDelegateForColumn(1, MdSequenceDelegate())
+        # Item delegates must be parented (or otherwise referenced): Qt holds a
+        # raw pointer, so an unparented delegate is garbage-collected out from
+        # under it and the next paint of that column segfaults.
+        self.sequence_delegate = MdSequenceDelegate(self.tableView)
+        self.tableView.setItemDelegateForColumn(1, self.sequence_delegate)
+        self.landmark_count_delegate = MdLandmarkCountDelegate(MISSING_COUNT_ROLE, self.tableView)
+        self.tableView.setItemDelegateForColumn(3, self.landmark_count_delegate)
         self.treeView = MdTreeView()
 
         # Setup connections after widgets are created
@@ -1781,7 +1789,18 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                     seq = idx + 1
                     obj.sequence = seq
                     obj.save()
-                row_data = [obj.id, seq, obj.object_name, obj.count_landmarks(), obj.get_centroid_size()]
+                # Show recorded landmarks as the count; the delegate appends the
+                # missing tally in red so a gap is visible without distorting
+                # the number or the column's numeric sort.
+                recorded = obj.count_landmarks()
+                missing = landmark_position_count(obj) - recorded
+                row_data = [
+                    obj.id,
+                    seq,
+                    obj.object_name,
+                    {"value": recorded, "missing": max(0, missing)},
+                    obj.get_centroid_size(),
+                ]
 
                 if len(self.selected_dataset.variablename_list) > 0:
                     variable_list = obj.unpack_variable()

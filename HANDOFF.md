@@ -4,7 +4,7 @@
 
 **v0.1.5 final released** (tag `v0.1.5`, commit `8f97494`, 2026-07-18). Working tree
 clean on `main`, no commits after the release tag. Suite verified 2026-07-20:
-**1242 passed, 75 skipped** (`pytest`, ~5.5 min).
+**1383 passed, 75 skipped** (`pytest`, ~4.5 min).
 
 Everything below the line is **done and closed**:
 
@@ -48,7 +48,17 @@ Since the release (2026-07-20, devlog 209–210):
   wrong for a positional landmark list. Also fixed stale coordinate inputs after
   an insert (`selectRow` emits nothing when the row was already selected).
 
-**Next devlog number: 215.**
+- **"Insert Missing" label** (follow-up to 214) — the button says Insert vs Add
+  depending on whether a row is selected.
+- **One landmark-count definition** (215) — the controller compared a
+  missing-*excluding* expected count against missing-*including* actuals, so an
+  object with a missing landmark failed against itself while `check_object_list`
+  passed it. Both now use `MdModel.find_landmark_count_mismatch`.
+- **Missing shown as red `(N)`** (216) — object-list Landmarks column reads
+  `9 (1)`. Uncovered and fixed a pre-existing segfault: item delegates were set
+  **unparented**, so Qt kept a pointer to a garbage-collected object.
+
+**Next devlog number: 217.**
 
 ### What's left (all deliberately deferred — see `TODOs.md`)
 
@@ -63,12 +73,11 @@ Since the release (2026-07-20, devlog 209–210):
 - ~~Missing-landmark follow-ups from devlog 209~~ — **all closed** (cell
   validator + `make_landmark_str` guard in 211, `-999` import handling in 213,
   insert-at-position in 214).
-- **Missing-landmark PCA**: works today when rows carry `Missing` markers so
-  landmark *counts* match. Two gaps remain — a landmark missing in *every*
-  object leaves `None` in the matrix (`float() argument must be … not
-  'NoneType'`), and differing landmark counts fail `check_object_list` with the
-  unhelpful `"Procrustes superimposition failed"`. Only `Missing`/`NA`/
-  non-numeric tokens are detected as missing; `-999` parses as a coordinate.
+- **Missing-landmark PCA**: works today whenever landmark *positions* line up.
+  Two gaps remain — a landmark missing in *every* object leaves `None` in the
+  matrix (`float() argument must be … not 'NoneType'`), and a genuinely short
+  object still fails `check_object_list` with the unhelpful
+  `"Procrustes superimposition failed"` instead of pointing at "Insert Missing".
 - Housekeeping: 6 open dependabot PRs (numpy, pytest family); stale local
   branches `feature/missing-landmark`, `feature/pyqt6-quick-test`.
 
@@ -125,7 +134,7 @@ points are revived. If you revive them, fix the persistence at the same time.
 - **Entry point**: `python main.py` (not `Modan2.py`, which is an imported
   module with no `__main__`). On Linux/WSL use `python fix_qt_import.py` for
   Qt plugin issues.
-- **Before committing**: `pytest` (currently **1242 passed, 75 skipped**),
+- **Before committing**: `pytest` (currently **1383 passed, 75 skipped**),
   `ruff check .` + `ruff format .` (clean repo-wide; note `ruff` may need
   `pip install ruff` in a fresh shell).
 - **Review sources of truth**:

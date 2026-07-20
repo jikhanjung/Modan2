@@ -22,6 +22,8 @@ from .widgets import (
     DatasetOpsViewer,
     DragEventFilter,
     MdDrag,
+    MISSING_COUNT_ROLE,
+    MdLandmarkCountDelegate,
     MdSequenceDelegate,
     MdTableModel,
     MdTableView,
@@ -38,6 +40,8 @@ __all__ = [
     # Widgets
     "AnalysisInfoWidget",
     "DatasetOpsViewer",
+    "MISSING_COUNT_ROLE",
+    "MdLandmarkCountDelegate",
     "MdSequenceDelegate",
     "CustomDrag",
     "DragEventFilter",

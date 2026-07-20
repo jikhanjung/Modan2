@@ -143,14 +143,6 @@ jobs:
         echo ""
         echo "Check individual test outputs above for details"
 
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v4
-      with:
-        file: ./coverage.xml
-        flags: unittests
-        name: codecov-umbrella
-        fail_ci_if_error: false
-
     - name: Upload test results
       uses: actions/upload-artifact@v7
       if: always()

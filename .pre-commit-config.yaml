@@ -6,7 +6,7 @@
 repos:
   # Ruff - Fast Python linter and formatter
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.13.3
+    rev: v0.15.22
     hooks:
       # Run the linter
       - id: ruff
@@ -29,12 +29,17 @@ repos:
       - id: check-case-conflict
       # Check for merge conflict strings
       - id: check-merge-conflict
-      # Ensure files end with newline
+      # Ensure files end with newline.
+      # AppDir/ is excluded because it holds git symlinks (mode 120000). On a
+      # filesystem without symlink support (WSL on /mnt/*, Windows without
+      # developer mode) git materialises those as plain files containing the
+      # target path, so this hook appends a newline to the *link target* and git
+      # commits it — producing a dangling symlink for everyone else.
       - id: end-of-file-fixer
-        exclude: \.qm$|\.png$|\.jpg$|\.ico$|\.db$
-      # Trim trailing whitespace
+        exclude: ^AppDir/|\.qm$|\.png$|\.jpg$|\.ico$|\.db$
+      # Trim trailing whitespace (same symlink caveat as above)
       - id: trailing-whitespace
-        exclude: \.qm$|\.png$|\.jpg$|\.ico$|\.db$
+        exclude: ^AppDir/|\.qm$|\.png$|\.jpg$|\.ico$|\.db$
 
   # Type checking with mypy (optional - disabled by default due to lack of type hints)
   # Uncomment when ready to enforce type checking

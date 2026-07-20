@@ -86,6 +86,14 @@ Since the release (2026-07-20, devlog 209–210):
 - ~~Missing-landmark PCA gaps~~ — **all closed**. Positions that disagree are
   rejected with an actionable message (217); landmarks nothing can impute are
   named and declined (218).
+- **`codecov/codecov-action` still on v4** — the only action left targeting
+  Node 20. **Deadline: 2026-09-16**, when Node 20 is removed from the runners
+  (until then it is forced onto Node 24 with a warning). Upgrading to v7 needs
+  two changes: rename the `file:` input to `files:`, and add
+  `token: ${{ secrets.CODECOV_TOKEN }}` — v5+ dropped tokenless uploading even
+  for public repos. Because `fail_ci_if_error: false`, skipping this does not
+  break CI; coverage upload would just stop silently. Alternatives: drop the
+  coverage upload, or leave it until September.
 - **Delete `RELEASE_NOTES.md`** (deferred 2026-07-20, do it next session). It is
   420 stale lines still describing itself as "Version: 0.1.5-alpha.1 / Status:
   Pre-release / Alpha". Nothing reads it any more — `release.yml` now builds the

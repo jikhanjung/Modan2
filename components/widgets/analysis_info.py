@@ -51,6 +51,7 @@ import json
 import os
 
 import MdUtils as mu
+from dialogs.scatter_utils import apply_legend_italics, format_legend_label
 
 logger = logging.getLogger(__name__)
 
@@ -599,12 +600,14 @@ class AnalysisInfoWidget(QWidget):
                 if True:
                     if "__default__" in scatter_result_list[idx].keys():
                         del scatter_result_list[idx]["__default__"]
-                    ax_list[idx].legend(
+                    legend_keys = list(scatter_result_list[idx].keys())
+                    legend = ax_list[idx].legend(
                         scatter_result_list[idx].values(),
-                        scatter_result_list[idx].keys(),
+                        [format_legend_label(key)[0] for key in legend_keys],
                         loc="upper right",
                         bbox_to_anchor=(1.05, 1),
                     )
+                    apply_legend_italics(legend, legend_keys)
                 if True:
                     ax_list[idx].set_xlabel(axis1_title)
                     ax_list[idx].set_ylabel(axis2_title)

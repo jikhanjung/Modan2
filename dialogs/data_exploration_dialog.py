@@ -55,7 +55,12 @@ from scipy.spatial import ConvexHull
 
 import MdUtils as mu
 from dialogs.base_dialog import load_color_marker_lists
-from dialogs.scatter_utils import build_scatter_group, build_scatter_legend
+from dialogs.scatter_utils import (
+    apply_legend_italics,
+    build_scatter_group,
+    build_scatter_legend,
+    format_legend_label,
+)
 from MdHelpers import guard_slot
 from MdModel import MdDataset, MdObject
 from ModanComponents import ObjectViewer2D, ObjectViewer3D, ShapePreference
@@ -2114,7 +2119,13 @@ class DataExplorationDialog(QDialog):
                         if curve:
                             keys.append(curve["key"])
                             values.append(curve)
-                    regression_legend = self.ax2.legend(values, keys, loc="lower right", bbox_to_anchor=(1.05, 0))
+                    regression_legend = self.ax2.legend(
+                        values,
+                        [format_legend_label(key)[0] for key in keys],
+                        loc="lower right",
+                        bbox_to_anchor=(1.05, 0),
+                    )
+                    apply_legend_italics(regression_legend, keys)
                     self.ax2.add_artist(regression_legend)
 
             # print("show axis label:", show_axis_label)

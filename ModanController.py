@@ -586,7 +586,9 @@ class ModanController(QObject):
         # Set landmarks
         landmark_list = []
         for landmark in import_data.landmark_data[obj.object_name]:
-            landmark_list.append("\t".join([str(x) for x in landmark]))
+            # None means "not recorded" (e.g. a -999 sentinel the import resolved);
+            # store the marker unpack_landmark expects, not the string "None".
+            landmark_list.append("\t".join(["Missing" if x is None else str(x) for x in landmark]))
         obj.landmark_str = "\n".join(landmark_list)
 
         # Set variables

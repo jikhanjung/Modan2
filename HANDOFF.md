@@ -35,7 +35,16 @@ Since the release (2026-07-20, devlog 209–210):
   `MISSING` and revert anything else; previously a typo silently became a
   missing landmark. Edits now also sync to `landmark_list`/the viewers.
 
-**Next devlog number: 212.**
+- **Circular import fix** (212) — 210's module-level `dialogs.scatter_utils`
+  import in `analysis_info` broke `import ModanComponents` in a fresh
+  interpreter; the suite missed it because `sys.modules` is process-global.
+  `tests/test_import_cycles.py` now imports each entry point in a subprocess.
+- **`-999` on import** (213) — the import asks whether the morphometrics
+  sentinel means "missing landmark" (default yes, with an "always" checkbox
+  stored in `Import/TreatSentinelAsMissing`). Note the readers apply invert-Y
+  *before* the scan, so a Y sentinel reads as `+999`.
+
+**Next devlog number: 214.**
 
 ### What's left (all deliberately deferred — see `TODOs.md`)
 
@@ -48,9 +57,9 @@ Since the release (2026-07-20, devlog 209–210):
 - **Deferred R02 gap** (see below): CVA-only / MANOVA-only persist gap on
   UI-dead paths.
 - **Missing-landmark follow-ups** (surfaced in devlog 209; the cell validator
-  and the `make_landmark_str` guard landed in 211): recognise the `-999`
-  convention as missing on import; insert-at-position for "Add Missing" (it
-  only appends).
+  and `make_landmark_str` guard landed in 211, `-999` import handling in 213):
+  only insert-at-position for "Add Missing" remains — it appends to the end, so
+  marking landmark 3 of 5 missing needs the select-row → clear-X/Y route.
 - **Missing-landmark PCA**: works today when rows carry `Missing` markers so
   landmark *counts* match. Two gaps remain — a landmark missing in *every*
   object leaves `None` in the matrix (`float() argument must be … not

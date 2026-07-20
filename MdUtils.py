@@ -283,6 +283,49 @@ def is_numeric(value):
         return False
 
 
+# Morphometrics convention for "this coordinate was not recorded". Files using it
+# parse as a real coordinate unless it is recognised, so an unnoticed sentinel
+# silently drags every shape toward (-999, -999).
+MISSING_SENTINEL = -999.0
+
+
+def find_missing_sentinels(landmark_data, inverted_y=False, sentinel=MISSING_SENTINEL):
+    """Locate sentinel coordinates in parsed import data.
+
+    Args:
+        landmark_data: ``{object_name: [[x, y[, z]], …]}`` as produced by the
+            format readers.
+        inverted_y: pass the import's invert-Y flag. The readers negate Y
+            *before* this runs, so a sentinel in the Y column now reads as
+            ``+999`` and would otherwise be missed.
+        sentinel: the value to treat as missing.
+
+    Returns:
+        List of ``(object_name, row, col)`` triples, in iteration order.
+    """
+    hits = []
+    for object_name, landmarks in landmark_data.items():
+        for row, landmark in enumerate(landmarks):
+            for col, value in enumerate(landmark):
+                if not is_numeric(value):
+                    continue
+                target = -sentinel if (inverted_y and col == 1) else sentinel
+                if float(value) == target:
+                    hits.append((object_name, row, col))
+    return hits
+
+
+def replace_missing_sentinels(landmark_data, hits):
+    """Blank out the coordinates named by ``hits`` (from ``find_missing_sentinels``).
+
+    Mutates ``landmark_data`` in place, setting each hit to ``None`` — the
+    representation the rest of the pipeline already treats as missing.
+    """
+    for object_name, row, col in hits:
+        landmark_data[object_name][row][col] = None
+    return landmark_data
+
+
 def get_ellipse_params(covariance, n_std):
     # Covariance matrices are symmetric, so use eigh: it returns real
     # eigenvalues/eigenvectors (eig can yield a complex dtype that breaks

@@ -29,6 +29,10 @@ from ModanComponents import NTS, TPS, X1Y1, Morphologika
 
 logger = logging.getLogger(__name__)
 
+# Remembers the answer to "is -999 a missing landmark?" when the user ticks
+# "always". Unset means ask again.
+SENTINEL_SETTING_KEY = "Import/TreatSentinelAsMissing"
+
 
 class ImportDatasetDialog(BaseDialog):
     """Dialog for importing datasets from various file formats.
@@ -317,7 +321,73 @@ class ImportDatasetDialog(BaseDialog):
         if import_data is None:
             return
 
+        if not self._resolve_missing_sentinels(import_data, invertY):
+            return
+
         self._execute_import(import_data, datasetname, filetype)
+
+    def _resolve_missing_sentinels(self, import_data, invertY):
+        """Offer to convert ``-999`` placeholders into missing landmarks.
+
+        The morphometrics convention for "not recorded" is a ``-999`` coordinate,
+        which otherwise imports as a real point and drags the shape toward
+        (-999, -999). Asking rather than converting silently matters because a
+        dataset *could* legitimately contain -999.
+
+        Returns False if the user cancelled the import.
+        """
+        landmark_data = getattr(import_data, "landmark_data", None)
+        if not landmark_data:
+            return True
+
+        hits = mu.find_missing_sentinels(landmark_data, inverted_y=invertY)
+        if not hits:
+            return True
+
+        remembered = self.m_app.settings.value(SENTINEL_SETTING_KEY, None)
+        if remembered is None:
+            answer, always = self._ask_about_sentinels(len(hits))
+            if answer is None:
+                return False
+            if always:
+                self.m_app.settings.setValue(SENTINEL_SETTING_KEY, answer)
+        else:
+            answer = mu.value_to_bool(remembered)
+
+        if answer:
+            mu.replace_missing_sentinels(landmark_data, hits)
+            logger.info("Converted %d sentinel coordinate(s) to missing landmarks", len(hits))
+        else:
+            logger.info("Kept %d sentinel coordinate(s) as literal values", len(hits))
+        return True
+
+    def _ask_about_sentinels(self, count):
+        """Ask whether ``-999`` means missing. Returns ``(answer, always)``.
+
+        ``answer`` is None when the user cancelled.
+        """
+        box = QMessageBox(self)
+        box.setIcon(QMessageBox.Question)
+        box.setWindowTitle(self.tr("Missing landmarks"))
+        box.setText(
+            self.tr("Found {} coordinate(s) with the value {}.").format(count, int(mu.MISSING_SENTINEL))
+        )
+        box.setInformativeText(
+            self.tr(
+                "{} is the usual placeholder for a landmark that was not recorded. "
+                "Treat these as missing landmarks?\n\n"
+                "If you keep them, they are imported as real coordinates."
+            ).format(int(mu.MISSING_SENTINEL))
+        )
+        box.setStandardButtons(QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
+        box.setDefaultButton(QMessageBox.Yes)
+        checkbox = QCheckBox(self.tr("Always treat {} as a missing landmark").format(int(mu.MISSING_SENTINEL)))
+        box.setCheckBox(checkbox)
+
+        result = box.exec_()
+        if result == QMessageBox.Cancel:
+            return None, False
+        return result == QMessageBox.Yes, checkbox.isChecked()
 
     def _get_import_data(self, filetype, filename, datasetname, invertY):
         """Get import data object based on file type.

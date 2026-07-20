@@ -31,8 +31,11 @@ Since the release (2026-07-20, devlog 209–210):
   `count_landmarks` / `has_missing_landmarks` / `procrustes_superimposition`
   with `IndexError`; a cleared X also silently shifted Y into X's slot.
 - **Legend italics** (210) — `*Eurekia*` in a grouping value renders italic.
+- **Landmark cell validation** (211) — hand-edited cells accept a number or
+  `MISSING` and revert anything else; previously a typo silently became a
+  missing landmark. Edits now also sync to `landmark_list`/the viewers.
 
-**Next devlog number: 211.**
+**Next devlog number: 212.**
 
 ### What's left (all deliberately deferred — see `TODOs.md`)
 
@@ -44,11 +47,10 @@ Since the release (2026-07-20, devlog 209–210):
   dead branch in `object_dialog.py:~936`.
 - **Deferred R02 gap** (see below): CVA-only / MANOVA-only persist gap on
   UI-dead paths.
-- **Missing-landmark follow-ups** (surfaced in devlog 209, in priority order):
-  landmark-table cell validator (number or `MISSING` only — today any typo
-  silently becomes a missing landmark); `None`-item guard in
-  `make_landmark_str`; recognise the `-999` convention as missing on import;
-  insert-at-position for "Add Missing" (it only appends).
+- **Missing-landmark follow-ups** (surfaced in devlog 209; the cell validator
+  and the `make_landmark_str` guard landed in 211): recognise the `-999`
+  convention as missing on import; insert-at-position for "Add Missing" (it
+  only appends).
 - **Missing-landmark PCA**: works today when rows carry `Missing` markers so
   landmark *counts* match. Two gaps remain — a landmark missing in *every*
   object leaves `None` in the matrix (`float() argument must be … not

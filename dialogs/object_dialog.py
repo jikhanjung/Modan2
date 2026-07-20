@@ -37,6 +37,7 @@ from PyQt5.QtWidgets import (
     QTableWidget,
     QTableWidgetItem,
     QTextEdit,
+    QToolTip,
     QVBoxLayout,
     QWidget,
 )
@@ -53,6 +54,10 @@ logger = logging.getLogger(__name__)
 
 # Mode constants used by ObjectDialog
 from MdConstants import MODE
+
+# Marker shown in the landmark table for a coordinate that has no value. Also the
+# literal a user may type to mark one missing by hand.
+MISSING_TEXT = "MISSING"
 
 
 class ObjectDialog(QDialog):
@@ -80,6 +85,9 @@ class ObjectDialog(QDialog):
 
         self.status_bar = QStatusBar()
         self.landmark_list = []
+        # Set while show_landmarks() repopulates the table, so the cell validator
+        # ignores the itemChanged storm that causes.
+        self._populating_landmark_table = False
 
         # Missing landmark estimation support
         self.original_landmark_list = []
@@ -1046,45 +1054,104 @@ class ObjectDialog(QDialog):
             pass
         self.edtLandmarkStr.itemSelectionChanged.connect(self.on_landmark_selected)
 
-        for idx, lm in enumerate(self.landmark_list):
-            # print(idx, lm)
+        try:
+            self.edtLandmarkStr.itemChanged.disconnect()
+        except TypeError:
+            # No connections exist yet
+            pass
+        self.edtLandmarkStr.itemChanged.connect(self.on_landmark_cell_changed)
 
-            # Handle X coordinate
-            if lm[0] is None:
-                item_x = QTableWidgetItem("MISSING")
-                item_x.setForeground(Qt.red)
-                font = QFont()
-                font.setBold(True)
-                item_x.setFont(font)
-            else:
-                item_x = QTableWidgetItem(str(float(lm[0]) * 1.0))
-            item_x.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
-            self.edtLandmarkStr.setItem(idx, 0, item_x)
+        column_count = 3 if self.dataset.dimension == 3 else 2
+        # Repopulating emits itemChanged for every cell; suppress the validator so
+        # it only reacts to genuine user edits.
+        self._populating_landmark_table = True
+        try:
+            for idx, lm in enumerate(self.landmark_list):
+                for col in range(column_count):
+                    value = lm[col] if col < len(lm) else None
+                    self.edtLandmarkStr.setItem(idx, col, self._make_landmark_item(value))
+        finally:
+            self._populating_landmark_table = False
 
-            # Handle Y coordinate
-            if lm[1] is None:
-                item_y = QTableWidgetItem("MISSING")
-                item_y.setForeground(Qt.red)
-                font = QFont()
-                font.setBold(True)
-                item_y.setFont(font)
-            else:
-                item_y = QTableWidgetItem(str(float(lm[1]) * 1.0))
-            item_y.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
-            self.edtLandmarkStr.setItem(idx, 1, item_y)
+    def _make_landmark_item(self, value):
+        """Build one landmark cell: a number, or a red bold ``MISSING`` marker."""
+        if value is None:
+            item = QTableWidgetItem(MISSING_TEXT)
+            item.setForeground(Qt.red)
+            font = QFont()
+            font.setBold(True)
+            item.setFont(font)
+        else:
+            item = QTableWidgetItem(str(float(value) * 1.0))
+        item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        return item
 
-            # Handle Z coordinate for 3D
-            if self.dataset.dimension == 3:
-                if len(lm) > 2 and lm[2] is not None:
-                    item_z = QTableWidgetItem(str(float(lm[2]) * 1.0))
-                else:
-                    item_z = QTableWidgetItem("MISSING")
-                    item_z.setForeground(Qt.red)
-                    font = QFont()
-                    font.setBold(True)
-                    item_z.setFont(font)
-                item_z.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
-                self.edtLandmarkStr.setItem(idx, 2, item_z)
+    def _set_landmark_cell(self, row, col, value):
+        """Replace a cell without tripping the validator."""
+        self._populating_landmark_table = True
+        try:
+            self.edtLandmarkStr.setItem(row, col, self._make_landmark_item(value))
+        finally:
+            self._populating_landmark_table = False
+
+    @guard_slot("Failed to update landmark")
+    def on_landmark_cell_changed(self, item):
+        """Validate a hand-edited landmark cell when the edit is committed.
+
+        Accepts a number, or ``MISSING`` (any case; a blank cell counts as
+        missing since clearing one reads as "no value"). Anything else is
+        reverted to the stored value and reported via a tooltip.
+
+        Without this, ``unpack_landmark`` maps *every* non-numeric token to
+        ``None``, so a typo like ``12.5o`` would silently turn the landmark into
+        a missing one — no error, no warning, just a hole in the data.
+        """
+        if self._populating_landmark_table:
+            return
+
+        row, col = item.row(), item.column()
+        if row >= len(self.landmark_list):
+            return
+        lm = self.landmark_list[row]
+        if col >= len(lm):
+            return
+
+        text = item.text().strip()
+        if text == "" or text.upper() == MISSING_TEXT:
+            new_value = None
+        else:
+            try:
+                new_value = float(text)
+            except ValueError:
+                self._reject_landmark_edit(item, lm[col], text)
+                return
+
+        lm[col] = new_value
+        # Re-render so MISSING picks up its styling and a number its canonical
+        # formatting.
+        self._set_landmark_cell(row, col, new_value)
+        self._refresh_landmark_views()
+
+    def _reject_landmark_edit(self, item, previous_value, rejected_text):
+        """Restore ``previous_value`` and tell the user why the edit bounced."""
+        row, col = item.row(), item.column()
+        # Resolve the position before replacing the item: Qt deletes the old one,
+        # and visualItemRect on a dead item is a crash.
+        pos = self.edtLandmarkStr.viewport().mapToGlobal(self.edtLandmarkStr.visualItemRect(item).center())
+        logger.warning("Rejected landmark cell edit at (%d, %d): %r is not a number", row, col, rejected_text)
+        self._set_landmark_cell(row, col, previous_value)
+        QToolTip.showText(
+            pos,
+            self.tr("'{}' is not a number. Enter a number or {}.").format(rejected_text, MISSING_TEXT),
+            self.edtLandmarkStr,
+        )
+
+    def _refresh_landmark_views(self):
+        """Push the edited landmark list back into both viewers."""
+        for view in (self.object_view_2d, self.object_view_3d):
+            if view is not None:
+                view.landmark_list = self.landmark_list
+                view.update()
 
     def save_object(self):
         # Gather UI values here; the controller performs the DB/file persistence.
@@ -1111,9 +1178,12 @@ class ObjectDialog(QDialog):
         landmark_str = ""
         for row in range(self.edtLandmarkStr.rowCount()):
             for col in range(self.edtLandmarkStr.columnCount()):
-                cell_text = self.edtLandmarkStr.item(row, col).text()
+                cell = self.edtLandmarkStr.item(row, col)
+                # An unpopulated cell has no item at all; treat it as missing
+                # rather than raising AttributeError on None.
+                cell_text = cell.text() if cell is not None else MISSING_TEXT
                 # Keep "MISSING" as "Missing" for storage
-                if cell_text == "MISSING":
+                if cell_text == MISSING_TEXT:
                     landmark_str += "Missing"
                 else:
                     landmark_str += cell_text

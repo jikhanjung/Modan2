@@ -174,9 +174,6 @@ class ObjectDialog(QDialog):
         self.right_middle_layout.addWidget(self.btnAddFile)
         self.btnAddMissing = QPushButton()
         self.btnAddMissing.setText(self.tr("Add Missing"))
-        self.btnAddMissing.setToolTip(
-            self.tr("Insert a missing landmark before the selected row (appends if no row is selected)")
-        )
         self.btnAddMissing.clicked.connect(self.btnAddMissing_clicked)
         self.right_middle_layout.addWidget(self.btnAddMissing)
         # self.right_middle_layout.addWidget(self.btnFBO)
@@ -450,6 +447,20 @@ class ObjectDialog(QDialog):
 
     # def btnFBO_clicked(self):
     #    self.object_view_3d.show_picker_buffer()
+
+    def _update_missing_button_text(self):
+        """Say which of the two things the button will do.
+
+        The action depends on whether a row is selected, and "Add Missing" reads
+        as append-only — so the label follows the selection instead of leaving
+        the insert behaviour undiscoverable.
+        """
+        if 0 <= self.selected_landmark_index < len(self.landmark_list):
+            self.btnAddMissing.setText(self.tr("Insert Missing"))
+            self.btnAddMissing.setToolTip(self.tr("Insert a missing landmark before the selected row"))
+        else:
+            self.btnAddMissing.setText(self.tr("Add Missing"))
+            self.btnAddMissing.setToolTip(self.tr("Append a missing landmark (select a row to insert instead)"))
 
     @guard_slot("Failed to add missing landmark")
     def btnAddMissing_clicked(self):
@@ -974,6 +985,8 @@ class ObjectDialog(QDialog):
             self.btnUpdateInput.setEnabled(False)
             self.btnDeleteInput.setEnabled(False)
             self.btnAddInput.setEnabled(True)
+
+        self._update_missing_button_text()
 
     def btnAddInput_clicked(self):
         """Handle Add button click"""

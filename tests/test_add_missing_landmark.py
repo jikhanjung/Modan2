@@ -50,6 +50,9 @@ def _build(qtbot, dimension=2, landmarks=None):
 
     # on_landmark_selected touches the coordinate input widgets; stub it out so
     # these tests stay focused on list mutation.
+    from PyQt5.QtWidgets import QPushButton
+
+    dlg.btnAddMissing = QPushButton()
     dlg.on_landmark_selected = lambda: None
     dlg.show_landmarks()
     return dlg
@@ -159,7 +162,7 @@ class TestCoordinateInputsAreSynced:
         dlg.edtLandmarkStr = table
         for name in ("inputX", "inputY", "inputZ"):
             setattr(dlg, name, QLineEdit())
-        for name in ("btnUpdateInput", "btnDeleteInput", "btnAddInput"):
+        for name in ("btnUpdateInput", "btnDeleteInput", "btnAddInput", "btnAddMissing"):
             setattr(dlg, name, QPushButton())
 
         dlg.show_landmarks()
@@ -181,6 +184,66 @@ class TestCoordinateInputsAreSynced:
         dialog.selected_landmark_index = -1
         dialog.btnAddMissing_clicked()
         assert dialog.inputX.text() == ""
+
+
+class TestButtonLabelFollowsSelection:
+    """The action depends on the selection, so the label must say which one."""
+
+    @pytest.fixture
+    def dialog(self, qtbot):
+        from PyQt5.QtWidgets import QLineEdit, QPushButton
+
+        dlg = ObjectDialog.__new__(ObjectDialog)
+        QDialog.__init__(dlg)
+        dlg.remember_geometry = False
+        qtbot.addWidget(dlg)
+
+        dlg.dataset = _Dataset(2)
+        dlg.landmark_list = [[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]]
+        dlg._populating_landmark_table = False
+        dlg.selected_landmark_index = -1
+        dlg.object_view_2d = _View()
+        dlg.object_view_3d = _View()
+
+        table = QTableWidget()
+        qtbot.addWidget(table)
+        table.setColumnCount(2)
+        dlg.edtLandmarkStr = table
+        for name in ("inputX", "inputY", "inputZ"):
+            setattr(dlg, name, QLineEdit())
+        for name in ("btnUpdateInput", "btnDeleteInput", "btnAddInput", "btnAddMissing"):
+            setattr(dlg, name, QPushButton())
+
+        dlg.show_landmarks()
+        return dlg
+
+    def test_says_add_when_nothing_selected(self, dialog):
+        dialog._update_missing_button_text()
+        assert dialog.btnAddMissing.text() == "Add Missing"
+
+    def test_says_insert_once_a_row_is_selected(self, dialog):
+        dialog.edtLandmarkStr.selectRow(1)
+        assert dialog.btnAddMissing.text() == "Insert Missing"
+
+    def test_reverts_to_add_when_selection_is_cleared(self, dialog):
+        dialog.edtLandmarkStr.selectRow(1)
+        assert dialog.btnAddMissing.text() == "Insert Missing"
+        dialog.edtLandmarkStr.clearSelection()
+        dialog.on_landmark_selected()
+        assert dialog.btnAddMissing.text() == "Add Missing"
+
+    def test_tooltip_tracks_the_label(self, dialog):
+        dialog.edtLandmarkStr.selectRow(0)
+        assert "Insert" in dialog.btnAddMissing.toolTip()
+        dialog.edtLandmarkStr.clearSelection()
+        dialog.on_landmark_selected()
+        assert "Append" in dialog.btnAddMissing.toolTip()
+
+    def test_stays_insert_after_an_insert(self, dialog):
+        dialog.edtLandmarkStr.selectRow(1)
+        dialog.btnAddMissing_clicked()
+        # The new blank row stays selected, so another click still inserts.
+        assert dialog.btnAddMissing.text() == "Insert Missing"
 
 
 class TestTableAndViewers:

@@ -72,6 +72,12 @@ from MdConstants import (
     ZOOM_MODE,
 )
 
+# Tessellation of the shared landmark-sphere display list. Landmark spheres
+# are a few pixels across, so 8x6 is visually identical to the old 10x10
+# glutSolidSphere at roughly half the triangle count.
+SPHERE_SLICES = 8
+SPHERE_STACKS = 6
+
 
 class ObjectViewer3D(QGLWidget):
     def __init__(self, parent=None, transparent=False):
@@ -145,6 +151,7 @@ class ObjectViewer3D(QGLWidget):
         self.lm_idx_to_color = {}
         self.picker_buffer = None
         self.gl_list = None
+        self.sphere_list = None
         self.temp_edge = []
         self.object = None
         self.polygon_list = []
@@ -674,6 +681,8 @@ class ObjectViewer3D(QGLWidget):
         self.updateGL()
 
     def initializeGL(self):
+        # Display lists don't survive context re-creation; recompile lazily.
+        self.sphere_list = None
         self.initialize_frame_buffer()
         self.picker_buffer = self.create_picker_buffer()
         self.initialize_frame_buffer(self.picker_buffer)
@@ -691,6 +700,9 @@ class ObjectViewer3D(QGLWidget):
 
         gl.glEnable(gl.GL_LIGHTING)
         gl.glEnable(gl.GL_LIGHT0)
+        # Landmark spheres are drawn as a scaled unit-sphere display list;
+        # keep normals unit-length under that scale.
+        gl.glEnable(gl.GL_NORMALIZE)
 
         gl.glMatrixMode(gl.GL_PROJECTION)
         gl.glLoadIdentity()
@@ -940,15 +952,7 @@ class ObjectViewer3D(QGLWidget):
                     key = "lm_" + str(i)
                     color = self.lm_idx_to_color[key]
                     gl.glColor3f(*[c * 1.0 / 255 for c in color])
-                if GLUT_AVAILABLE and GLUT_INITIALIZED and glut:
-                    try:
-                        glut.glutSolidSphere(0.02 * (int(self.landmark_size) + 1), 10, 10)
-                    except (OSError, AttributeError):
-                        # Fallback if GLUT call fails
-                        self.draw_sphere(0.02 * (int(self.landmark_size) + 1))
-                else:
-                    # Fallback: use GLU sphere or point
-                    self.draw_sphere(0.02 * (int(self.landmark_size) + 1))
+                self.draw_sphere(0.02 * (int(self.landmark_size) + 1))
                 if current_buffer == self.picker_buffer and self.object_dialog is not None:
                     gl.glEnable(gl.GL_LIGHTING)
                 gl.glPopMatrix()
@@ -994,15 +998,7 @@ class ObjectViewer3D(QGLWidget):
                 gl.glPushMatrix()
                 gl.glTranslate(*lm)
                 gl.glColor3f(*COLOR["SELECTED_LANDMARK"])
-                if GLUT_AVAILABLE and GLUT_INITIALIZED and glut:
-                    try:
-                        glut.glutSolidSphere(0.03, 10, 10)
-                    except (OSError, AttributeError):
-                        # Fallback if GLUT call fails
-                        self.draw_sphere(0.03)
-                else:
-                    # Fallback: use GLU sphere or point
-                    self.draw_sphere(0.03)
+                self.draw_sphere(0.03)
                 gl.glPopMatrix()
             return
 
@@ -1431,13 +1427,35 @@ class ObjectViewer3D(QGLWidget):
             gl.glVertex3f(0.02 * math.cos(angle2), 0.02 * math.sin(angle2), 0)
         gl.glEnd()
 
-    def draw_sphere(self, radius):
-        """Draw a sphere using GLU as fallback for glutSolidSphere."""
-        if not hasattr(self, "glu_quadric"):
-            self.glu_quadric = glu.gluNewQuadric()
+    def _sphere_display_list(self):
+        """Compile a unit sphere into a display list, once per GL context.
 
-        if self.glu_quadric:
-            glu.gluSphere(self.glu_quadric, radius, 10, 10)
+        Returns the list id, or 0 if a display list could not be created
+        (caller then falls back to drawing the quadric directly).
+        """
+        if self.sphere_list is None:
+            if getattr(self, "glu_quadric", None) is None:
+                self.glu_quadric = glu.gluNewQuadric()
+            list_id = gl.glGenLists(1)
+            if list_id and self.glu_quadric:
+                gl.glNewList(list_id, gl.GL_COMPILE)
+                glu.gluSphere(self.glu_quadric, 1.0, SPHERE_SLICES, SPHERE_STACKS)
+                gl.glEndList()
+            self.sphere_list = list_id
+        return self.sphere_list
+
+    def draw_sphere(self, radius):
+        """Draw a landmark sphere at the current origin.
+
+        Replays a cached unit-sphere display list scaled to ``radius`` instead
+        of re-tessellating a sphere every call. Callers wrap this in
+        glPushMatrix/glPopMatrix, so the glScalef doesn't leak.
+        """
+        gl.glScalef(radius, radius, radius)
+        if self._sphere_display_list():
+            gl.glCallList(self.sphere_list)
+        elif self.glu_quadric:
+            glu.gluSphere(self.glu_quadric, 1.0, SPHERE_SLICES, SPHERE_STACKS)
         else:
             # Ultimate fallback: draw a point
             gl.glPointSize(radius * 100)

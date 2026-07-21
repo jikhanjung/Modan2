@@ -94,6 +94,10 @@ class ObjectViewer2D(QLabel):
         self.object = None
         self.orig_pixmap = None
         self.curr_pixmap = None
+        # Optional full-resolution render source ("Show Original"): sharpens
+        # what curr_pixmap is resampled from, while orig_pixmap (the stored
+        # working copy) keeps defining the landmark coordinate space.
+        self.fullres_pixmap = None
         self.scale = 1.0
         self.prev_scale = 1.0
         self.fullpath = None
@@ -557,7 +561,7 @@ class ObjectViewer2D(QLabel):
         self.scale = round(self.scale * 10) / 10
 
         if self.orig_pixmap is not None:
-            self.curr_pixmap = self.orig_pixmap.scaled(
+            self.curr_pixmap = self._render_source().scaled(
                 int(self.orig_pixmap.width() * self.scale / self.image_canvas_ratio),
                 int(self.orig_pixmap.height() * self.scale / self.image_canvas_ratio),
             )
@@ -992,7 +996,7 @@ class ObjectViewer2D(QLabel):
                 self.image_canvas_ratio = self.orig_width / self.width()
             else:
                 self.image_canvas_ratio = self.orig_height / self.height()
-            self.curr_pixmap = self.orig_pixmap.scaled(
+            self.curr_pixmap = self._render_source().scaled(
                 int(self.orig_width * self.scale / self.image_canvas_ratio),
                 int(self.orig_width * self.scale / self.image_canvas_ratio),
                 Qt.KeepAspectRatio,
@@ -1069,6 +1073,7 @@ class ObjectViewer2D(QLabel):
             self.image_changed = True
 
         self.fullpath = file_path
+        self.fullres_pixmap = None
         self.curr_pixmap = self.orig_pixmap = QPixmap(file_path)
         if self.curr_pixmap.isNull():
             # QPixmap fails silently on a missing/corrupt/unsupported image,
@@ -1076,12 +1081,38 @@ class ObjectViewer2D(QLabel):
             logger.warning(f"set_image: could not load image (blank pixmap): {file_path}")
         self.setPixmap(self.curr_pixmap)
 
+    def set_fullres_source(self, file_path):
+        """Render from a full-resolution image without changing coordinates.
+
+        The working copy loaded via set_image stays the coordinate reference
+        (orig_pixmap's dimensions keep driving image_canvas_ratio and all
+        landmark math); only the source that curr_pixmap is resampled from
+        changes, so zooming shows the original's detail. Pass None to go back
+        to rendering from the working copy.
+        """
+        if file_path is None:
+            self.fullres_pixmap = None
+        else:
+            pixmap = QPixmap(file_path)
+            if pixmap.isNull():
+                logger.warning(f"set_fullres_source: could not load image: {file_path}")
+                self.fullres_pixmap = None
+            else:
+                self.fullres_pixmap = pixmap
+        self.calculate_resize()
+        self.repaint()
+
+    def _render_source(self):
+        """Pixmap to resample curr_pixmap from (never defines coordinates)."""
+        return self.fullres_pixmap if self.fullres_pixmap is not None else self.orig_pixmap
+
     def clear_object(self):
         # print("object view clear object")
         self.landmark_list = []
         self.edge_list = []
         self.orig_pixmap = None
         self.curr_pixmap = None
+        self.fullres_pixmap = None
         self.object = None
         self.ds_ops = None
         self.pan_x = 0

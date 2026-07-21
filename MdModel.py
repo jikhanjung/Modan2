@@ -680,6 +680,16 @@ class MdObject(Model):
         return self.get_by_id(self.id)
 
 
+# Attached images whose longer side exceeds this are stored as a downscaled
+# working copy (the pristine original is archived under originals/ next to it).
+# Landmarks are digitized on the working copy, so it must never be regenerated
+# with different parameters once landmarks exist. 2560 keeps fit-to-window and
+# moderate zoom sharp on typical displays while cutting a 24 MP photo's decode
+# cost and memory roughly 5x.
+IMAGE_MAX_DIM = 2560
+IMAGE_JPEG_QUALITY = 90
+
+
 class MdImage(Model):
     original_path = CharField(null=True)
     original_filename = CharField(null=True)
@@ -705,13 +715,21 @@ class MdImage(Model):
         new_image.file_created = self.file_created
         new_image.file_modified = self.file_modified
         new_image.add_file(self.get_file_path())
+
+        # The working copy above is already downscaled (if the original was
+        # oversized), so carry the archived pristine original along with it.
+        source_original = self.get_original_file_path()
+        if os.path.exists(source_original):
+            target_original = new_image.get_original_file_path()
+            os.makedirs(os.path.dirname(target_original), exist_ok=True)
+            shutil.copyfile(source_original, target_original)
         return new_image
 
-    def add_file(self, file_name):
+    def add_file(self, file_name, base_path=mu.DEFAULT_STORAGE_DIRECTORY):
         # print("add file:", file_name)
         try:
             self.load_file_info(file_name)
-            new_filepath = self.get_file_path()
+            new_filepath = self.get_file_path(base_path)
 
             # Create directory if it doesn't exist
             try:
@@ -721,12 +739,23 @@ class MdImage(Model):
                 logger.error(f"Failed to create directory for {new_filepath}: {e}")
                 raise ValueError(f"Cannot create directory for file storage: {e}") from e
 
-            # Copy file
-            try:
-                shutil.copyfile(file_name, new_filepath)
-            except (OSError, shutil.Error) as e:
-                logger.error(f"Failed to copy file from {file_name} to {new_filepath}: {e}")
-                raise ValueError(f"Cannot copy file: {e}") from e
+            if self._try_downscale(file_name, new_filepath):
+                # Working copy is downscaled: archive the pristine original
+                # alongside it so nothing is lost.
+                original_filepath = self.get_original_file_path(base_path)
+                try:
+                    os.makedirs(os.path.dirname(original_filepath), exist_ok=True)
+                    shutil.copyfile(file_name, original_filepath)
+                except (OSError, shutil.Error) as e:
+                    logger.error(f"Failed to archive original {file_name} to {original_filepath}: {e}")
+                    raise ValueError(f"Cannot archive original file: {e}") from e
+            else:
+                # Small enough (or not downscalable): store verbatim
+                try:
+                    shutil.copyfile(file_name, new_filepath)
+                except (OSError, shutil.Error) as e:
+                    logger.error(f"Failed to copy file from {file_name} to {new_filepath}: {e}")
+                    raise ValueError(f"Cannot copy file: {e}") from e
 
         except Exception as e:
             logger.error(f"Failed to add file {file_name}: {e}")
@@ -734,10 +763,56 @@ class MdImage(Model):
 
         return self
 
+    def _try_downscale(self, source_path, target_path):
+        """Write a downscaled working copy of ``source_path`` to ``target_path``.
+
+        Returns True only when the source is oversized (longer side above
+        ``IMAGE_MAX_DIM``) and the downscaled copy was written successfully.
+        Returns False when no downscale is needed OR on any failure, so the
+        caller falls back to copying the original verbatim — an attach must
+        never fail or lose data because downscaling did.
+        """
+        try:
+            with Image.open(source_path) as img:
+                if max(img.size) <= IMAGE_MAX_DIM:
+                    return False
+                exif = img.info.get("exif")
+                img.thumbnail((IMAGE_MAX_DIM, IMAGE_MAX_DIM), Image.LANCZOS)
+                save_kwargs = {}
+                if target_path.split(".")[-1].lower() in ("jpg", "jpeg"):
+                    if img.mode not in ("RGB", "L", "CMYK"):
+                        img = img.convert("RGB")
+                    save_kwargs["quality"] = IMAGE_JPEG_QUALITY
+                    save_kwargs["optimize"] = True
+                    if exif:
+                        save_kwargs["exif"] = exif
+                img.save(target_path, **save_kwargs)
+                logger.info(f"Stored downscaled working copy {img.size} of {source_path}")
+                return True
+        except Exception as e:
+            logger.warning(f"Downscale of {source_path} failed, storing original verbatim: {e}")
+            return False
+
     def get_file_path(self, base_path=mu.DEFAULT_STORAGE_DIRECTORY):
         return os.path.join(
             base_path, str(self.object.dataset.id), str(self.object.id) + "." + self.original_path.split(".")[-1]
         )
+
+    def get_original_file_path(self, base_path=mu.DEFAULT_STORAGE_DIRECTORY):
+        """Path of the archived pristine original for this image.
+
+        Only oversized attachments are archived (small ones are stored verbatim
+        as the working copy), so this path may not exist.
+        """
+        return os.path.join(
+            base_path,
+            str(self.object.dataset.id),
+            "originals",
+            str(self.object.id) + "." + self.original_path.split(".")[-1],
+        )
+
+    def has_archived_original(self, base_path=mu.DEFAULT_STORAGE_DIRECTORY):
+        return os.path.exists(self.get_original_file_path(base_path))
 
     class Meta:
         database = gDatabase

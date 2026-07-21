@@ -5,7 +5,6 @@ Handles business logic and coordinates between View and Model.
 
 import logging
 import os
-import shutil
 from pathlib import Path
 from typing import Any
 
@@ -580,9 +579,13 @@ class ModanController(QObject):
         ``delete_object`` for the recursive variant used elsewhere.
         """
         if obj.image.count() > 0:
-            image_path = obj.image[0].get_file_path(storage_directory)
+            image = obj.image[0]
+            image_path = image.get_file_path(storage_directory)
             if os.path.exists(image_path):
                 os.remove(image_path)
+            original_path = image.get_original_file_path(storage_directory)
+            if os.path.exists(original_path):
+                os.remove(original_path)
         obj.delete_instance()
 
     def import_dataset(self, import_data, dataset_name, storage_directory, progress_callback=None):
@@ -656,11 +659,9 @@ class ModanController(QObject):
 
         new_image = MdModel.MdImage()
         new_image.object = obj
-        new_image.load_file_info(file_name)
-        new_filepath = new_image.get_file_path(storage_directory)
-        if not os.path.exists(os.path.dirname(new_filepath)):
-            os.makedirs(os.path.dirname(new_filepath))
-        shutil.copyfile(file_name, new_filepath)
+        # add_file handles storage-dir creation plus the oversized-image routine
+        # (downscaled working copy + archived original)
+        new_image.add_file(file_name, base_path=storage_directory)
         new_image.save()
 
     def set_current_object(self, obj: MdModel.MdObject | None):

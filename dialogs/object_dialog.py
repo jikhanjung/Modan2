@@ -173,6 +173,7 @@ class ObjectDialog(QDialog):
         self.right_middle_layout.addWidget(self.cbxShowModel)
         self.right_middle_layout.addWidget(self.cbxAutoRotate)
         self.right_middle_layout.addWidget(self.btnAddFile)
+        self.right_middle_layout.addWidget(self.cbxUseOriginal)
         self.btnAddMissing = QPushButton()
         self.btnAddMissing.setText(self.tr("Add Missing"))
         self.btnAddMissing.clicked.connect(self.btnAddMissing_clicked)
@@ -347,6 +348,15 @@ class ObjectDialog(QDialog):
         self.btnAddFile = QPushButton()
         self.btnAddFile.setText(self.tr("Load Image"))
         self.btnAddFile.clicked.connect(self.btnAddFile_clicked)
+        # Shown only when the attached image has an archived pristine original
+        # (oversized attachments are stored as a downscaled working copy).
+        # Checking it renders the viewer from the original for extra detail
+        # while digitizing; coordinates stay in working-copy pixels.
+        self.cbxUseOriginal = QCheckBox()
+        self.cbxUseOriginal.setText(self.tr("Show Original"))
+        self.cbxUseOriginal.setChecked(False)
+        self.cbxUseOriginal.stateChanged.connect(self.cbxUseOriginal_state_changed)
+        self.cbxUseOriginal.hide()
 
     def _init_action_buttons(self):
         """Build the Previous/Save/Delete/Cancel/Next row and assemble the main layout."""
@@ -529,6 +539,21 @@ class ObjectDialog(QDialog):
     def show_polygon_state_changed(self, int):
         self.object_view.show_polygon = self.cbxShowPolygon.isChecked()
         self.object_view.update()
+
+    def cbxUseOriginal_state_changed(self, state):
+        """Render the 2D image from the archived full-resolution original.
+
+        Display only: the working copy stays the landmark coordinate space, so
+        this just gives the viewer more detail to resample from while
+        digitizing.
+        """
+        if self.object is None or self.object.image.count() == 0:
+            return
+        if state == Qt.Checked:
+            storage_dir = getattr(self.m_app, "storage_directory", mu.DEFAULT_STORAGE_DIRECTORY)
+            self.object_view_2d.set_fullres_source(self.object.image[0].get_original_file_path(storage_dir))
+        else:
+            self.object_view_2d.set_fullres_source(None)
 
     def btnLandmark_clicked(self):
         # self.edit_mode = MODE_ADD_LANDMARK
@@ -839,6 +864,7 @@ class ObjectDialog(QDialog):
             self.cbxAutoRotate.show()
             self.cbxShowModel.show()
             self.cbxShowPolygon.show()
+            self.cbxUseOriginal.hide()
             # self.cbxShowModel.setEnabled(True)
             self.btnAddFile.setText(self.tr("Load 3D Model"))
             # print("set_object 3d 3")
@@ -881,6 +907,18 @@ class ObjectDialog(QDialog):
                 else:
                     self.btnCalibration.setDisabled(True)
                     self.disable_landmark_edit()
+                # Offer "Show Original" only when this image has an archived
+                # pristine original. Reset to the working copy on every object
+                # switch (set_image drops the full-res source anyway).
+                has_original = (
+                    object.image is not None
+                    and len(object.image) > 0
+                    and object.image[0].has_archived_original(
+                        getattr(self.m_app, "storage_directory", mu.DEFAULT_STORAGE_DIRECTORY)
+                    )
+                )
+                self.cbxUseOriginal.setChecked(False)
+                self.cbxUseOriginal.setVisible(has_original)
                 # elif len(self.landmark_list) > 0:
                 # print("objectdialog self.landmark_list in set object 2d", self.landmark_list)
                 self.object_view.clear_object()

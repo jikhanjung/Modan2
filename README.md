@@ -34,6 +34,8 @@ Get the latest version from our [releases page](https://github.com/jikhanjung/Mo
 - **Hierarchical Data Management:** Organize data into nested datasets with a clear structure.
 - **2D & 3D Visualization:** Integrated viewers for 2D images and 3D models with landmark plotting.
 - **Statistical Analysis:** Perform Principal Component Analysis (PCA), Canonical Variate Analysis (CVA), and MANOVA.
+- **Missing Landmarks:** Record landmarks that could not be digitized, see them estimated from the
+  aligned mean shape while you work, and include those specimens in analysis.
 - **Data Import/Export:** Supports various file types and drag-and-drop for easy data handling.
 - **Persistent Storage:** All data and analyses are saved in a local database, managed by Peewee ORM.
 
@@ -44,6 +46,7 @@ Get the latest version from our [releases page](https://github.com/jikhanjung/Mo
 - **Core Libraries:**
     - **Database ORM:** Peewee
     - **Numerical/Scientific:** NumPy, SciPy, Pandas, Statsmodels
+    - **Plotting:** Matplotlib
     - **3D Graphics & Image Processing:** PyOpenGL, Trimesh, Pillow, OpenCV
 
 ## Installation and Usage (from Source)
@@ -52,13 +55,13 @@ Follow these instructions to run Modan2 from the source code.
 
 ### Prerequisites
 
-- Python 3.10 or newer
+- Python 3.11 or newer (CI runs the test suite on 3.11 and 3.12)
 - Git
 
 ### 1. Clone the Repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/jikhanjung/Modan2.git
 cd Modan2
 ```
 
@@ -77,8 +80,12 @@ sudo apt-get update && sudo apt-get install -y \
   libxcb-xinerama0 libxcb-icccm4 libxcb-image0 \
   libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 \
   libxcb-xfixes0 libxcb-shape0 libxcb-cursor0 \
-  qt5-qmake qtbase5-dev libqt5gui5 libqt5core5a libqt5widgets5
+  qt5-qmake qtbase5-dev libqt5gui5 libqt5core5a libqt5widgets5 \
+  libglut-dev python3-opengl
 ```
+
+The last line provides GLUT, which the 3D viewer needs; without it 3D models
+fail to render.
 
 ### 3. Run the Application
 

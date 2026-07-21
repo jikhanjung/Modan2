@@ -9,6 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [0.1.7] - 2026-07-21
+
+A small maintenance release: one crash fix and a 3D rendering speedup.
+
+### Changed
+- **3D landmark spheres render much faster.** Spheres are now drawn from a
+  sphere shape compiled once and reused, instead of being rebuilt
+  triangle-by-triangle for every landmark on every frame. Rotating and
+  dragging 3D views with many landmarks is noticeably smoother, especially
+  in landmark-edit mode, which draws the scene twice.
+
+### Fixed
+- **Chart no longer fails with "string index out of range"** when the
+  selected grouping variable is blank for some objects. Those objects now
+  appear in the legend as an unlabeled group instead of breaking the plot.
+
 ## [0.1.6] - 2026-07-20
 
 Focused on making **missing landmarks** work end to end — from import, through

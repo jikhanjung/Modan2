@@ -64,6 +64,14 @@ logger = logging.getLogger(__name__)
 
 from MdConstants import BASE_LANDMARK_RADIUS, COLOR, DATASET_MODE, DISTANCE_THRESHOLD, MODE, OBJECT_MODE
 
+# Cap on the scaled render pixmap's longer side. adjust_scale allocates a
+# pixmap proportional to the zoom scale, and the scale itself grows
+# near-exponentially under repeated zoom-in (scale += floor(scale) * ratio), so
+# without a cap a burst of wheel events could request a multi-GB allocation and
+# take the process down (kernel OOM — devlog 220). 8192 px on the longer side
+# (~256 MB RGBA worst case) is far beyond any useful landmarking zoom.
+MAX_SCALED_PIXMAP_DIM = 8192
+
 
 class ObjectViewer2D(QLabel):
     def __init__(self, parent=None, transparent=False):
@@ -561,6 +569,13 @@ class ObjectViewer2D(QLabel):
         self.scale = round(self.scale * 10) / 10
 
         if self.orig_pixmap is not None:
+            longer_side = max(self.orig_pixmap.width(), self.orig_pixmap.height())
+            if longer_side > 0 and self.image_canvas_ratio > 0:
+                max_scale = MAX_SCALED_PIXMAP_DIM * self.image_canvas_ratio / longer_side
+                # Keep the 0.1 rounding grid; never clamp below fit-to-canvas.
+                max_scale = max(1.0, math.floor(max_scale * 10) / 10)
+                if self.scale > max_scale:
+                    self.scale = max_scale
             self.curr_pixmap = self._render_source().scaled(
                 int(self.orig_pixmap.width() * self.scale / self.image_canvas_ratio),
                 int(self.orig_pixmap.height() * self.scale / self.image_canvas_ratio),

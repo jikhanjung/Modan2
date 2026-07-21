@@ -1,5 +1,6 @@
 """Pytest configuration and shared fixtures."""
 
+import gc
 import os
 import sys
 import tempfile
@@ -9,6 +10,34 @@ import pytest
 
 # Add project root to Python path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+
+def pytest_runtest_logfinish(nodeid, location):
+    """Actually delete widgets that pytest-qt scheduled for deletion.
+
+    qtbot.addWidget teardown calls close() + deleteLater(), but DeferredDelete
+    events are only delivered by a returning event loop or an explicit
+    sendPostedEvents(None, DeferredDelete) — plain processEvents() skips them.
+    No event loop runs between tests, so every qtbot-registered widget tree
+    (dialogs with ~13 MB matplotlib Agg canvases included) survived the whole
+    session: RSS climbed to ~800 MB and QApplication.allWidgets() to ~5000
+    entries by the end of the suite. This hook runs after pytest-qt's teardown
+    (logfinish follows the teardown phase), so the deletes are pending now.
+    """
+    try:
+        from PyQt5.QtCore import QEvent
+        from PyQt5.QtWidgets import QApplication
+    except ImportError:
+        return
+    app = QApplication.instance()
+    if app is None:
+        return
+    for _ in range(3):  # a delivered delete can schedule further deletes
+        app.sendPostedEvents(None, QEvent.DeferredDelete)
+        app.processEvents()
+    # Young-generation collect breaks the fresh matplotlib Figure/canvas cycles
+    # cheaply; a full gc.collect() here roughly doubled suite runtime.
+    gc.collect(0)
 
 
 @pytest.fixture(autouse=True)

@@ -86,3 +86,48 @@ UI는 `dialogs/legend_order_dialog.py`의 작은 모달: `QListWidget`
   하면 된다).
 - 새 문구 5개(`Movable`, `Order...`, `Legend Order` 등)는 다음 번역 주기에
   반영 필요 — 절차는 devlog 229.
+
+## 후속: 드래그 위치 저장이 범례를 날려버린 문제 (0.1.9 신고)
+
+사용자 신고: `Var. explained`를 누르니 오류가 뜨고(아래) **그 뒤로 범례가
+보이지 않게 됐다**. 드래그 자체는 잘 됐다고 함.
+
+```
+_set_transform(): incompatible function arguments ...
+Invoked with: <matplotlib.ft2font.FT2Font object ...>, array([[65536, 0], [0, 65536]]),
+[170963420737, 61716190414]
+```
+
+### 원인
+
+`set_draggable(True, update="bbox")`로 드래그를 끝내면 matplotlib이 이렇게 한다:
+
+```python
+def _update_bbox_to_anchor(self, loc_in_canvas):
+    loc_in_bbox = self.legend.axes.transAxes.transform(loc_in_canvas)  # 이미 캔버스 좌표
+    self.legend.set_bbox_to_anchor(loc_in_bbox)                        # 2-tuple -> 점
+```
+
+캔버스 좌표에 `transAxes`를 한 번 더 적용하므로 앵커가 **거대한 값의 크기 0인
+점**이 된다(측정값: `(248080, 110932, 0, 0)`). 내 코드가 그걸 읽어 저장했고,
+다음 렌더링에서 그대로 다시 적용하니 범례가 화면 밖 천문학적 좌표로 날아갔다.
+텍스트를 그 위치에 그리려다 FT2Font 변환이 터진 것이 신고된 오류이고, 범례가
+사라진 것도 같은 이유다. 세 증상(드래그는 정상 → 다음 갱신에서 오류 → 범례
+소실)이 모두 여기서 설명된다.
+
+### 수정
+
+- **`update="loc"`으로 변경.** 이 경로는 정규화된 axes 분수 위치를 남기고
+  (측정값: `(0.847, 0.669)`), 퇴화된 앵커도 스스로 리셋한다. 저장은 2-tuple,
+  복원은 범례 생성 시 `loc=` 로 넘긴다 (`legend_placement_kwargs`).
+- **실제 드래그가 끝났을 때만 저장.** 이전에는 캔버스 `button_release_event`에
+  물려 있어 평범한 클릭에도 위치를 덮어썼다. 이제 `finalize_offset`을 감싼다.
+- **읽을 때·쓸 때 모두 검증** (`_is_sane_placement`: 2개 값, 유한, ±3 이내).
+  0.1.9가 저장한 4개짜리 값은 형식부터 어긋나 자동으로 폐기되므로, 이미 범례가
+  사라진 사용자도 다음 실행에서 기본 위치로 복구된다.
+
+### 테스트
+
+`tests/dialogs/test_legend_arrangement.py` 28개로 확대. 핵심은 matplotlib의
+드래그 종료 동작(`_update_loc`)을 직접 호출해 **저장 가능한 값이 나오는지**
+확인하는 것과, 0.1.9가 남긴 값이 폐기되고 범례가 다시 그려지는지 확인하는 것.

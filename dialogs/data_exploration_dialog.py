@@ -73,6 +73,12 @@ logger = logging.getLogger(__name__)
 CENTROID_SIZE_VALUE = 9999
 CENTROID_SIZE_TEXT = "CSize"
 
+# How far outside the axes a saved legend position may sit, in axes fractions.
+# The default anchor is already at 1.05, and a legend parked a little beyond the
+# axes is normal; anything past this is a corrupt value that would put the
+# legend somewhere the user can never see or drag it back from.
+PLACEMENT_LIMIT = 3.0
+
 # Mode constants
 MODE_EXPLORATION = 0
 MODE_REGRESSION = 1
@@ -178,10 +184,6 @@ class DataExplorationDialog(QDialog):
         self.read_settings()
         self.mode = MODE_EXPLORATION
         self.ignore_change = False
-        # Set while a draggable legend is on screen, so the release handler
-        # knows which artist to read the new position from.
-        self._legend_being_dragged = None
-        self._legend_drag_cid = None
         self.init_UI()
 
     def init_UI(self):
@@ -1598,37 +1600,70 @@ class DataExplorationDialog(QDialog):
         analysis.save()
 
     def apply_legend_placement(self, legend):
-        """Restore a dragged legend position and, if enabled, allow dragging.
+        """Let the user drag the legend, saving where they leave it.
 
-        The chart is rebuilt from scratch on every option change, so a position
-        the user dragged to would be lost each time unless it is saved and
-        re-applied here.
+        The chart is rebuilt from scratch on every option change, so the
+        position has to be stored and fed back in through
+        :meth:`legend_placement_kwargs` when the legend is created.
         """
-        placement = self.get_legend_placement()
-        if placement:
-            legend.set_bbox_to_anchor(tuple(placement), transform=self.ax2.transAxes)
-
         if not self.cbxLegendDraggable.isChecked():
             return
-        draggable = legend.set_draggable(True, update="bbox")
-        # matplotlib offers no drag-finished signal, so read the position back
-        # off the canvas when the mouse is released.
-        if draggable is not None:
-            self._legend_being_dragged = legend
-            canvas = getattr(self.fig2, "canvas", None)
-            if canvas is not None and self._legend_drag_cid is None:
-                self._legend_drag_cid = canvas.mpl_connect("button_release_event", self._on_legend_drag_release)
 
-    def _on_legend_drag_release(self, _event):
-        legend = getattr(self, "_legend_being_dragged", None)
-        if legend is None:
+        # update="loc" rather than "bbox". Ending a "bbox" drag runs
+        # _update_bbox_to_anchor, which applies transAxes to a value already in
+        # canvas coordinates and stores the result as the anchor -- a zero-size
+        # point holding enormous numbers. Persisting that put the legend far off
+        # the canvas on the next redraw: an FT2Font "_set_transform" error, and
+        # then no legend at all. "loc" keeps a normalised axes-fraction position
+        # and resets a degenerate anchor itself.
+        draggable = legend.set_draggable(True, update="loc")
+        if draggable is None:
             return
+
+        # Save only once a drag actually finishes. Watching button releases on
+        # the canvas instead would also fire for ordinary clicks, storing a
+        # position nobody asked for.
+        finalize = draggable.finalize_offset
+
+        def finalize_and_save():
+            finalize()
+            self.save_legend_placement(self._legend_placement_of(legend))
+
+        draggable.finalize_offset = finalize_and_save
+
+    def _legend_placement_of(self, legend):
+        """Where the legend sits, as an axes-fraction (x, y), or None.
+
+        This is the lower-left corner of the drawn legend, which is exactly what
+        matplotlib's ``loc`` means when given as a pair -- so it round-trips
+        through :meth:`legend_placement_kwargs`.
+        """
         try:
-            bbox = legend.get_bbox_to_anchor().transformed(self.ax2.transAxes.inverted())
+            bbox = legend.get_window_extent().transformed(self.ax2.transAxes.inverted())
+            values = (float(bbox.x0), float(bbox.y0))
         except Exception as e:  # pragma: no cover - defensive, cosmetics only
             logger.debug("Could not read legend position: %s", e)
-            return
-        self.save_legend_placement((bbox.x0, bbox.y0, bbox.width, bbox.height))
+            return None
+        return values if self._is_sane_placement(values) else None
+
+    @staticmethod
+    def _is_sane_placement(values):
+        """A placement that cannot put the legend somewhere unreachable."""
+        if values is None or len(values) != 2:
+            return False
+        if not all(isinstance(v, (int, float)) and math.isfinite(v) for v in values):
+            return False
+        # Axes fractions: a little outside the axes is normal (the default anchor
+        # sits at 1.05), far outside is a corrupt value.
+        return all(-PLACEMENT_LIMIT <= v <= PLACEMENT_LIMIT for v in values)
+
+    def legend_placement_kwargs(self):
+        """Where to put the legend: the saved spot, or the default corner."""
+        placement = self.get_legend_placement()
+        if placement:
+            # An explicit position replaces the anchor entirely.
+            return {"loc": tuple(placement), "bbox_to_anchor": None}
+        return {"loc": "upper right", "bbox_to_anchor": (1.05, 1)}
 
     def get_legend_placement(self):
         analysis = getattr(self, "analysis", None)
@@ -1636,11 +1671,15 @@ class DataExplorationDialog(QDialog):
             return None
         placement = analysis.get_chart_settings().get("legend_placement", {})
         value = placement.get(self.current_group_by_key())
-        return value if isinstance(value, list) and len(value) == 4 else None
+        if not isinstance(value, list):
+            return None
+        # Checked on the way out too, so a placement stored by an earlier
+        # version corrects itself instead of hiding the legend forever.
+        return value if self._is_sane_placement(value) else None
 
     def save_legend_placement(self, bounds):
         analysis = getattr(self, "analysis", None)
-        if analysis is None:
+        if analysis is None or not self._is_sane_placement(bounds):
             return
         settings = analysis.get_chart_settings()
         settings.setdefault("legend_placement", {})[self.current_group_by_key()] = [float(v) for v in bounds]
@@ -2224,7 +2263,7 @@ class DataExplorationDialog(QDialog):
             # print("show_legend:", show_legend)
             if show_legend:
                 scatter_legend = build_scatter_legend(
-                    self.ax2, self.scatter_result, loc="upper right", order=self.get_legend_order()
+                    self.ax2, self.scatter_result, order=self.get_legend_order(), **self.legend_placement_kwargs()
                 )
                 self.ax2.add_artist(scatter_legend)
                 self.apply_legend_placement(scatter_legend)

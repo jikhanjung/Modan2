@@ -126,14 +126,41 @@ class TestLegendOrderInDialog:
 
 class TestLegendPlacement:
     def test_placement_round_trips(self, dialog):
-        dialog.save_legend_placement((0.1, 0.2, 0.3, 0.4))
-        assert dialog.get_legend_placement() == [0.1, 0.2, 0.3, 0.4]
+        dialog.save_legend_placement((0.6, 0.7))
+        assert dialog.get_legend_placement() == [0.6, 0.7]
 
     def test_malformed_placement_is_ignored(self, dialog):
         settings = dialog.analysis.get_chart_settings()
-        settings["legend_placement"] = {"Sex": [1, 2]}
+        settings["legend_placement"] = {"Sex": [1]}
         dialog.analysis.set_chart_settings(settings)
         assert dialog.get_legend_placement() is None
+
+    def test_saved_position_is_used_when_building_the_legend(self, dialog):
+        dialog.save_legend_placement((0.6, 0.7))
+
+        kwargs = dialog.legend_placement_kwargs()
+
+        assert kwargs["loc"] == (0.6, 0.7)
+        # The default anchor must go, or it would fight the explicit position.
+        assert kwargs["bbox_to_anchor"] is None
+
+    def test_default_position_without_a_saved_one(self, dialog):
+        assert dialog.legend_placement_kwargs() == {"loc": "upper right", "bbox_to_anchor": (1.05, 1)}
+
+    def test_a_dragged_position_survives_a_redraw(self, dialog):
+        """The point of saving it at all."""
+        dialog.cbxLegendDraggable.setChecked(True)
+        dialog.update_chart()
+        dialog.save_legend_placement((0.55, 0.62))
+
+        dialog.update_chart()
+
+        legend = dialog.ax2.get_legend()
+        assert legend is not None
+        placed = dialog._legend_placement_of(legend)
+        assert placed is not None
+        assert placed[0] == pytest.approx(0.55, abs=0.02)
+        assert placed[1] == pytest.approx(0.62, abs=0.02)
 
     def test_companion_controls_follow_the_legend_checkbox(self, dialog):
         dialog.cbxLegend.setChecked(False)
@@ -149,6 +176,59 @@ class TestLegendPlacement:
         dialog.cbxLegendDraggable.setChecked(True)
         dialog.update_chart()
         assert dialog.legend_group_keys()
+
+    def test_position_read_after_a_drag_is_usable(self, dialog):
+        """Ending a drag must leave a position that can be stored and reused.
+
+        With update="bbox" it did not: _update_bbox_to_anchor applies transAxes
+        to a value already in canvas coordinates and stores the result as the
+        anchor, a zero-size point holding enormous numbers. Saving that and
+        applying it on the next redraw threw the legend off the canvas — an
+        FT2Font "_set_transform" error, then no legend at all.
+        """
+        dialog.cbxLegendDraggable.setChecked(True)
+        dialog.update_chart()
+        legend = dialog.ax2.get_legend()
+        draggable = legend.set_draggable(True, update="loc")
+
+        # Exactly what finalize_offset does at the end of a drag.
+        draggable._update_loc((500.0, 300.0))
+
+        placement = dialog._legend_placement_of(legend)
+        assert placement is not None, "a finished drag must yield a usable position"
+        assert dialog._is_sane_placement(placement)
+
+        dialog.save_legend_placement(placement)
+        dialog.update_chart()  # the redraw that used to fail
+        assert dialog.ax2.get_legend() is not None
+
+    def test_a_corrupt_stored_position_is_discarded(self, dialog):
+        """Anyone already carrying a bad value from 0.1.9 gets their legend back."""
+        settings = dialog.analysis.get_chart_settings()
+        settings["legend_placement"] = {"Sex": [170963420737.0, 61716190414.0, 0.0, 0.0]}
+        dialog.analysis.set_chart_settings(settings)
+
+        assert dialog.get_legend_placement() is None
+        dialog.update_chart()
+        assert dialog.ax2.get_legend() is not None
+
+    def test_the_0_1_9_shape_is_rejected(self, dialog):
+        """0.1.9 stored a four-number box; only a two-number point is valid now."""
+        assert not dialog._is_sane_placement([1.05, 1.0, 0.0, 0.0])
+
+    def test_non_finite_positions_are_rejected(self, dialog):
+        assert not dialog._is_sane_placement([float("nan"), 0.2])
+        assert not dialog._is_sane_placement([float("inf"), 0.2])
+
+    def test_far_off_canvas_positions_are_rejected(self, dialog):
+        assert not dialog._is_sane_placement([170963420737.0, 61716190414.0])
+
+    def test_a_normal_position_is_accepted(self, dialog):
+        assert dialog._is_sane_placement([0.6, 0.7])
+
+    def test_saving_refuses_a_corrupt_position(self, dialog):
+        dialog.save_legend_placement([170963420737.0, 61716190414.0])
+        assert dialog.get_legend_placement() is None
 
 
 class TestLegendOrderDialog:

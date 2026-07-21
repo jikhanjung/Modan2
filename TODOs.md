@@ -103,7 +103,14 @@ Post-0.1.8 review items, in priority order:
       repo. Also fixed `tools/build_index.py`, whose case-sensitive filename
       check meant `--dialog` searches had silently returned nothing since the
       dialogs moved into `dialogs/` (0 → 83 indexed).
-- [ ] **6. Triage 75 skipped tests** (LOW) — classify env-skips vs rot.
+- [x] **6. Triage skipped tests** — DONE 2026-07-21 (devlog 233). Only one skip
+      was a genuine environment constraint; the largest group (37) was the main
+      window's menu/toolbar/tree suites, switched off because a real
+      `QDialog.exec_()` hangs a headless test. One autouse fixture in conftest
+      now suppresses modal dialogs, and the stale expectations behind them were
+      corrected. Skips 74 → 37, passing 1482 → 1516. Still skipped:
+      `test_ui_dialogs.py` (19) needs rewriting against current widget names,
+      plus workflow/performance/manual leftovers.
 
 ---
 

@@ -203,6 +203,27 @@ def suppress_message_boxes(monkeypatch):
     monkeypatch.setattr("PyQt5.QtWidgets.QMessageBox.question", lambda *args, **kwargs: 1)
 
 
+@pytest.fixture(autouse=True)
+def suppress_modal_dialogs(monkeypatch):
+    """Stop any modal dialog from blocking the test run.
+
+    ``QDialog.exec_`` spins its own event loop and only returns when something
+    closes the dialog — which nothing does in a headless test, so a slot that
+    opens one hangs forever. That is what kept the main-window menu, toolbar and
+    tree-interaction suites switched off ("needs dialog mocking refactor"):
+    patching it here fixes the whole category at once instead of per test.
+
+    Returning ``Rejected`` means code proceeds down the "user cancelled" branch,
+    which does nothing rather than committing changes. A test that wants the
+    accepted path patches the dialog class itself, as these suites already do.
+    """
+    from PyQt5.QtWidgets import QDialog
+
+    monkeypatch.setattr("PyQt5.QtWidgets.QDialog.exec_", lambda self: QDialog.Rejected)
+    monkeypatch.setattr("PyQt5.QtWidgets.QDialog.exec", lambda self: QDialog.Rejected)
+    monkeypatch.setattr("PyQt5.QtWidgets.QDialog.open", lambda self: None)
+
+
 @pytest.fixture
 def mock_database(monkeypatch, temp_db):
     """Mock database operations."""

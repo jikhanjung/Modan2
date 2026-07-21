@@ -2,11 +2,9 @@
 
 from unittest.mock import Mock, patch
 
-import pytest
 from PyQt5.QtWidgets import QAbstractItemView
 
 
-@pytest.mark.skip(reason="Toolbar action tests cause dialog exec_() blocking - needs dialog mocking refactor")
 class TestToolbarActions:
     """Test toolbar button actions."""
 
@@ -105,10 +103,14 @@ class TestToolbarActions:
             mock_instance.exec.assert_called_once()
 
     def test_toolbar_about_action(self, qtbot, main_window):
-        """Test About toolbar button."""
-        with patch("Modan2.QMessageBox.about") as mock_about:
+        """Test About toolbar button.
+
+        The box is built rather than shown via QMessageBox.about, so that the
+        project URL can be a live link.
+        """
+        with patch.object(main_window, "build_about_message") as mock_build:
             main_window.actionAbout.trigger()
-            mock_about.assert_called_once()
+            mock_build.assert_called_once()
 
     def test_toolbar_cell_selection_action(self, qtbot, main_window):
         """Test Cell Selection toolbar button."""

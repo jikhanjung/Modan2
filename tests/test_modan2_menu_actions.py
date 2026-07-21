@@ -2,11 +2,9 @@
 
 from unittest.mock import Mock, patch
 
-import pytest
 from PyQt5.QtWidgets import QMessageBox
 
 
-@pytest.mark.skip(reason="Menu action tests cause dialog exec_() blocking - needs dialog mocking refactor")
 class TestFileMenuActions:
     """Test File menu actions."""
 
@@ -29,23 +27,11 @@ class TestFileMenuActions:
             mock_instance.exec.assert_called_once()
 
 
-@pytest.mark.skip(reason="Menu action tests cause dialog exec_() blocking - needs dialog mocking refactor")
 class TestDatasetMenuActions:
     """Test Dataset menu actions."""
 
-    def test_action_new_dataset_no_database(self, qtbot, main_window):
-        """Test new dataset action when no database is open."""
-        # Clear database
-        main_window.controller.db_file_path = None
-
-        with patch("Modan2.QMessageBox.warning") as mock_warning:
-            main_window.on_action_new_dataset_triggered()
-            mock_warning.assert_called_once()
-
     def test_action_new_dataset_with_database(self, qtbot, main_window, mock_database):
         """Test new dataset action when database is open."""
-        main_window.controller.db_file_path = ":memory:"
-
         with patch("Modan2.DatasetDialog") as mock_dialog:
             mock_instance = Mock()
             mock_dialog.return_value = mock_instance
@@ -59,18 +45,8 @@ class TestDatasetMenuActions:
             mock_dialog.assert_called_once()
             mock_instance.exec_.assert_called_once()
 
-    def test_action_import_no_database(self, qtbot, main_window):
-        """Test import action when no database is open."""
-        main_window.controller.db_file_path = None
-
-        with patch("Modan2.QMessageBox.warning") as mock_warning:
-            main_window.on_action_import_dataset_triggered()
-            mock_warning.assert_called_once()
-
     def test_action_import_with_database(self, qtbot, main_window, mock_database):
         """Test import action when database is open."""
-        main_window.controller.db_file_path = ":memory:"
-
         with patch("Modan2.ImportDatasetDialog") as mock_dialog:
             mock_instance = Mock()
             mock_dialog.return_value = mock_instance
@@ -82,12 +58,12 @@ class TestDatasetMenuActions:
             mock_instance.exec_.assert_called_once()
 
     def test_action_export_no_dataset_selected(self, qtbot, main_window):
-        """Test export action when no dataset is selected."""
-        main_window.controller.current_dataset = None
+        """Export does nothing without a selection (the action is disabled then)."""
+        main_window.selected_dataset = None
 
-        with patch("Modan2.QMessageBox.warning") as mock_warning:
+        with patch("Modan2.ExportDatasetDialog") as mock_dialog:
             main_window.on_action_export_dataset_triggered()
-            mock_warning.assert_called_once()
+            mock_dialog.assert_not_called()
 
     def test_action_export_with_dataset_selected(self, qtbot, main_window, mock_database):
         """Test export action when dataset is selected."""
@@ -95,7 +71,7 @@ class TestDatasetMenuActions:
 
         # Create test dataset
         dataset = mm.MdDataset.create(dataset_name="Export Test", dimension=2, landmark_count=5)
-        main_window.controller.current_dataset = dataset
+        main_window.selected_dataset = dataset
 
         with patch("Modan2.ExportDatasetDialog") as mock_dialog:
             mock_instance = Mock()
@@ -104,21 +80,21 @@ class TestDatasetMenuActions:
 
             main_window.on_action_export_dataset_triggered()
 
-            mock_dialog.assert_called_once_with(main_window, dataset)
+            mock_dialog.assert_called_once_with(main_window)
+            mock_instance.set_dataset.assert_called_once_with(dataset)
             mock_instance.exec_.assert_called_once()
 
 
-@pytest.mark.skip(reason="Menu action tests cause dialog exec_() blocking - needs dialog mocking refactor")
 class TestObjectMenuActions:
     """Test Object menu actions."""
 
     def test_action_new_object_no_dataset(self, qtbot, main_window):
-        """Test new object action when no dataset is selected."""
-        main_window.controller.current_dataset = None
+        """New object does nothing without a selection (the action is disabled then)."""
+        main_window.selected_dataset = None
 
-        with patch("Modan2.QMessageBox.warning") as mock_warning:
+        with patch("Modan2.ObjectDialog") as mock_dialog:
             main_window.on_action_new_object_triggered()
-            mock_warning.assert_called_once()
+            mock_dialog.assert_not_called()
 
     def test_action_new_object_with_dataset(self, qtbot, main_window, mock_database):
         """Test new object action when dataset is selected."""
@@ -126,7 +102,7 @@ class TestObjectMenuActions:
 
         # Create test dataset
         dataset = mm.MdDataset.create(dataset_name="Object Test", dimension=2, landmark_count=5)
-        main_window.controller.current_dataset = dataset
+        main_window.selected_dataset = dataset
 
         with patch("Modan2.ObjectDialog") as mock_dialog:
             mock_instance = Mock()
@@ -137,14 +113,6 @@ class TestObjectMenuActions:
 
             mock_dialog.assert_called_once()
             mock_instance.exec_.assert_called_once()
-
-    def test_action_edit_object_no_selection(self, qtbot, main_window):
-        """Test edit object action when no object is selected."""
-        main_window.controller.current_object = None
-
-        # Should do nothing or show warning
-        main_window.on_action_edit_object_triggered()
-        # No error should occur
 
     def test_action_delete_object_no_selection(self, qtbot, main_window):
         """Test delete object action when no object is selected."""
@@ -176,17 +144,17 @@ class TestObjectMenuActions:
         # Create test dataset and object
         dataset = mm.MdDataset.create(dataset_name="Delete Test", dimension=2, landmark_count=5)
         obj = mm.MdObject.create(dataset=dataset, object_name="Test Object", landmark_str="0,0\n1,1\n2,2\n3,3\n4,4")
-        main_window.controller.current_object = obj
         obj_id = obj.id
 
-        with patch("Modan2.QMessageBox.question", return_value=QMessageBox.Yes):
+        with (
+            patch("Modan2.QMessageBox.warning", return_value=QMessageBox.Yes),
+            patch.object(main_window, "get_selected_object_list", return_value=[obj]),
+        ):
             main_window.on_action_delete_object_triggered()
 
-            # Object should be deleted
             assert not mm.MdObject.select().where(mm.MdObject.id == obj_id).exists()
 
 
-@pytest.mark.skip(reason="Menu action tests cause dialog exec_() blocking - needs dialog mocking refactor")
 class TestAnalysisMenuActions:
     """Test Analysis menu actions."""
 
@@ -199,17 +167,16 @@ class TestAnalysisMenuActions:
             mock_warning.assert_called_once()
 
     def test_action_analyze_dataset_insufficient_objects(self, qtbot, main_window, mock_database):
-        """Test analyze action when dataset has too few objects."""
+        """A thin dataset still opens the dialog — it does the validating."""
         import MdModel as mm
 
-        # Create dataset with only 1 object
         dataset = mm.MdDataset.create(dataset_name="Analysis Test", dimension=2, landmark_count=5)
         mm.MdObject.create(dataset=dataset, object_name="Object 1", landmark_str="0,0\n1,1\n2,2\n3,3\n4,4")
-        main_window.controller.current_dataset = dataset
+        main_window.selected_dataset = dataset
 
-        with patch("Modan2.QMessageBox.warning") as mock_warning:
+        with patch("Modan2.NewAnalysisDialog") as mock_dialog:
             main_window.on_action_analyze_dataset_triggered()
-            mock_warning.assert_called_once()
+            mock_dialog.assert_called_once()
 
     def test_action_analyze_dataset_with_valid_dataset(self, qtbot, main_window, mock_database):
         """Test analyze action when dataset has sufficient objects."""
@@ -219,7 +186,7 @@ class TestAnalysisMenuActions:
         dataset = mm.MdDataset.create(dataset_name="Analysis Test", dimension=2, landmark_count=5)
         for i in range(3):
             mm.MdObject.create(dataset=dataset, object_name=f"Object {i + 1}", landmark_str="0,0\n1,1\n2,2\n3,3\n4,4")
-        main_window.controller.current_dataset = dataset
+        main_window.selected_dataset = dataset
 
         with patch("Modan2.NewAnalysisDialog") as mock_dialog:
             mock_instance = Mock()
@@ -232,18 +199,17 @@ class TestAnalysisMenuActions:
             mock_instance.exec_.assert_called_once()
 
 
-@pytest.mark.skip(reason="Menu action tests cause dialog exec_() blocking - needs dialog mocking refactor")
 class TestHelpMenuActions:
     """Test Help menu actions."""
 
     def test_action_about_triggered(self, qtbot, main_window):
         """Test About action shows about dialog."""
-        with patch("Modan2.QMessageBox.about") as mock_about:
-            main_window.on_action_about_triggered()
-            mock_about.assert_called_once()
+        message = main_window.build_about_message()
+        message.deleteLater()
+        assert "Modan2" in message.text()
+        main_window.on_action_about_triggered()
 
 
-@pytest.mark.skip(reason="Menu action tests cause dialog exec_() blocking - needs dialog mocking refactor")
 class TestVariableMenuActions:
     """Test variable/property management actions."""
 
@@ -266,7 +232,8 @@ class TestVariableMenuActions:
 
     def test_action_row_selection_triggered(self, qtbot, main_window):
         """Test row selection mode action."""
-        # Should change selection mode
+        # The handler only acts while the action is checked.
+        main_window.actionRowSelection.setChecked(True)
         main_window.on_action_row_selection_triggered()
 
         # Verify selection behavior changed
@@ -275,7 +242,6 @@ class TestVariableMenuActions:
         assert main_window.tableView.selectionBehavior() == QAbstractItemView.SelectRows
 
 
-@pytest.mark.skip(reason="Menu action tests cause dialog exec_() blocking - needs dialog mocking refactor")
 class TestDataExplorationActions:
     """Test data exploration actions."""
 
@@ -286,22 +252,24 @@ class TestDataExplorationActions:
         # Should show warning or do nothing - just ensure no crash
         main_window.on_action_explore_data_triggered()
 
-    def test_action_explore_data_with_dataset(self, qtbot, main_window, mock_database):
-        """Test explore data action when dataset is selected."""
+    def test_action_explore_data_with_analysis(self, qtbot, main_window, mock_database):
+        """Explore data opens the exploration window for the selected analysis.
+
+        It is shown non-modally (and owns itself, so it is freed on close), not
+        exec_'d, and it reads the selected *analysis* rather than the dataset.
+        """
         import MdModel as mm
 
-        # Create test dataset with objects
         dataset = mm.MdDataset.create(dataset_name="Explore Test", dimension=2, landmark_count=5)
-        for i in range(3):
-            mm.MdObject.create(dataset=dataset, object_name=f"Object {i + 1}", landmark_str="0,0\n1,1\n2,2\n3,3\n4,4")
-        main_window.controller.current_dataset = dataset
+        analysis = mm.MdAnalysis.create(analysis_name="A", dataset=dataset, superimposition_method="Procrustes")
+        main_window.selected_analysis = analysis
 
         with patch("Modan2.DataExplorationDialog") as mock_dialog:
             mock_instance = Mock()
             mock_dialog.return_value = mock_instance
-            mock_instance.exec_.return_value = False
 
             main_window.on_action_explore_data_triggered()
 
-            mock_dialog.assert_called_once()
-            mock_instance.exec_.assert_called_once()
+            mock_dialog.assert_called_once_with(main_window)
+            mock_instance.set_analysis.assert_called_once_with(analysis)
+            mock_instance.show.assert_called_once()

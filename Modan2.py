@@ -379,6 +379,9 @@ class ModanMainWindow(QMainWindow):
 
         self.selected_dataset = None
         self.selected_object = None
+        # Only ever assigned when something is picked in the tree, so anything
+        # reading it before then hit an AttributeError rather than seeing None.
+        self.selected_analysis = None
 
         # Initialize button states - disabled until dataset/object is selected
         self.actionNewObject.setEnabled(False)

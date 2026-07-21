@@ -55,11 +55,13 @@ from scipy.spatial import ConvexHull
 
 import MdUtils as mu
 from dialogs.base_dialog import load_color_marker_lists
+from dialogs.legend_order_dialog import LegendOrderDialog
 from dialogs.scatter_utils import (
     apply_legend_italics,
     build_scatter_group,
     build_scatter_legend,
     format_legend_label,
+    order_legend_keys,
 )
 from MdHelpers import guard_slot
 from MdModel import MdDataset, MdObject
@@ -176,6 +178,10 @@ class DataExplorationDialog(QDialog):
         self.read_settings()
         self.mode = MODE_EXPLORATION
         self.ignore_change = False
+        # Set while a draggable legend is on screen, so the release handler
+        # knows which artist to read the new position from.
+        self._legend_being_dragged = None
+        self._legend_drag_cid = None
         self.init_UI()
 
     def init_UI(self):
@@ -291,7 +297,17 @@ class DataExplorationDialog(QDialog):
         self.cbxLegend = QCheckBox()
         self.cbxLegend.setText(self.tr("Legend"))
         self.cbxLegend.setChecked(True)
-        self.cbxLegend.toggled.connect(self.update_chart)
+        self.cbxLegend.toggled.connect(self.on_legend_toggled)
+        # Only meaningful while the legend is shown, so these follow its state.
+        self.cbxLegendDraggable = QCheckBox()
+        self.cbxLegendDraggable.setText(self.tr("Movable"))
+        self.cbxLegendDraggable.setToolTip(self.tr("Drag the legend to reposition it"))
+        self.cbxLegendDraggable.setChecked(False)
+        self.cbxLegendDraggable.toggled.connect(self.update_chart)
+        self.btnLegendOrder = QPushButton()
+        self.btnLegendOrder.setText(self.tr("Order..."))
+        self.btnLegendOrder.setToolTip(self.tr("Choose the order of legend entries"))
+        self.btnLegendOrder.clicked.connect(self.btnLegendOrder_clicked)
         self.cbxShowVariance = QCheckBox()
         self.cbxShowVariance.setText(self.tr("Var. explained"))
         self.cbxShowVariance.setChecked(False)
@@ -311,6 +327,8 @@ class DataExplorationDialog(QDialog):
         # self.gbChartBasics.layout().addWidget(self.rb2DChartDim)
         # self.gbChartBasics.layout().addWidget(self.rb3DChartDim)
         self.gbChartBasics.layout().addWidget(self.cbxLegend)
+        self.gbChartBasics.layout().addWidget(self.cbxLegendDraggable)
+        self.gbChartBasics.layout().addWidget(self.btnLegendOrder)
         self.gbChartBasics.layout().addWidget(self.cbxShowVariance)
         self.gbChartBasics.layout().addWidget(self.cbxDataPointLabels)
         self.gbChartBasics.layout().addWidget(self.cbxSnapToPoints)
@@ -1543,6 +1561,107 @@ class DataExplorationDialog(QDialog):
             item.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
             item.setCheckState(Qt.Checked)  # Initially unchecked
 
+    def on_legend_toggled(self, checked):
+        """Keep the legend's companion controls in step with it."""
+        self.cbxLegendDraggable.setEnabled(checked)
+        self.btnLegendOrder.setEnabled(checked)
+        self.update_chart()
+
+    def current_group_by_key(self):
+        """Which grouping variable the saved legend order belongs to.
+
+        Orders are stored per variable: switching from, say, Sex to Locality
+        gives a different set of groups entirely.
+        """
+        return self.comboGroupBy.currentText() or ""
+
+    def legend_group_keys(self):
+        """Group keys currently drawn, in the order the legend would list them."""
+        keys = [key for key in getattr(self, "scatter_result", {}) if not key.startswith("_")]
+        return order_legend_keys(keys, self.get_legend_order())
+
+    def get_legend_order(self):
+        """The saved entry order for the current grouping variable, if any."""
+        analysis = getattr(self, "analysis", None)
+        if analysis is None:
+            return []
+        order = analysis.get_chart_settings().get("legend_order", {})
+        return order.get(self.current_group_by_key(), [])
+
+    def save_legend_order(self, keys):
+        analysis = getattr(self, "analysis", None)
+        if analysis is None:
+            return
+        settings = analysis.get_chart_settings()
+        settings.setdefault("legend_order", {})[self.current_group_by_key()] = list(keys)
+        analysis.set_chart_settings(settings)
+        analysis.save()
+
+    def apply_legend_placement(self, legend):
+        """Restore a dragged legend position and, if enabled, allow dragging.
+
+        The chart is rebuilt from scratch on every option change, so a position
+        the user dragged to would be lost each time unless it is saved and
+        re-applied here.
+        """
+        placement = self.get_legend_placement()
+        if placement:
+            legend.set_bbox_to_anchor(tuple(placement), transform=self.ax2.transAxes)
+
+        if not self.cbxLegendDraggable.isChecked():
+            return
+        draggable = legend.set_draggable(True, update="bbox")
+        # matplotlib offers no drag-finished signal, so read the position back
+        # off the canvas when the mouse is released.
+        if draggable is not None:
+            self._legend_being_dragged = legend
+            canvas = getattr(self.fig2, "canvas", None)
+            if canvas is not None and self._legend_drag_cid is None:
+                self._legend_drag_cid = canvas.mpl_connect("button_release_event", self._on_legend_drag_release)
+
+    def _on_legend_drag_release(self, _event):
+        legend = getattr(self, "_legend_being_dragged", None)
+        if legend is None:
+            return
+        try:
+            bbox = legend.get_bbox_to_anchor().transformed(self.ax2.transAxes.inverted())
+        except Exception as e:  # pragma: no cover - defensive, cosmetics only
+            logger.debug("Could not read legend position: %s", e)
+            return
+        self.save_legend_placement((bbox.x0, bbox.y0, bbox.width, bbox.height))
+
+    def get_legend_placement(self):
+        analysis = getattr(self, "analysis", None)
+        if analysis is None:
+            return None
+        placement = analysis.get_chart_settings().get("legend_placement", {})
+        value = placement.get(self.current_group_by_key())
+        return value if isinstance(value, list) and len(value) == 4 else None
+
+    def save_legend_placement(self, bounds):
+        analysis = getattr(self, "analysis", None)
+        if analysis is None:
+            return
+        settings = analysis.get_chart_settings()
+        settings.setdefault("legend_placement", {})[self.current_group_by_key()] = [float(v) for v in bounds]
+        analysis.set_chart_settings(settings)
+        analysis.save()
+
+    @guard_slot("Failed to reorder legend")
+    def btnLegendOrder_clicked(self):
+        keys = self.legend_group_keys()
+        if not keys:
+            QMessageBox.information(
+                self, self.tr("Legend Order"), self.tr("There are no legend entries to arrange yet.")
+            )
+            return
+
+        dialog = LegendOrderDialog(self, keys)
+        if dialog.exec_() == QDialog.Accepted:
+            self.save_legend_order(dialog.ordered_keys())
+            self.update_chart()
+        dialog.deleteLater()
+
     def comboGroupBy_changed(self):
         if self.ignore_change:
             return
@@ -2104,8 +2223,11 @@ class DataExplorationDialog(QDialog):
                 # self.ax2.plot(size_range, group_a_curve, label='Group A')
             # print("show_legend:", show_legend)
             if show_legend:
-                scatter_legend = build_scatter_legend(self.ax2, self.scatter_result, loc="upper right")
+                scatter_legend = build_scatter_legend(
+                    self.ax2, self.scatter_result, loc="upper right", order=self.get_legend_order()
+                )
                 self.ax2.add_artist(scatter_legend)
+                self.apply_legend_placement(scatter_legend)
                 bbox = scatter_legend.get_window_extent()
                 # Convert to axis coordinates
                 bbox.transformed(self.ax2.transAxes.inverted())

@@ -113,19 +113,36 @@ def build_scatter_group(size, *, property_name="", symbol="", color="", meta=Fal
     return group
 
 
-def build_scatter_legend(ax, scatter_result, *, loc, bbox_to_anchor=(1.05, 1)):
+def order_legend_keys(keys, order):
+    """Arrange ``keys`` to follow ``order``, keeping the rest where they were.
+
+    Group keys otherwise appear in whatever order specimens happened to be
+    encountered in the dataset, which is arbitrary to the reader. ``order`` is a
+    saved preference and may be stale: entries it names that no longer exist are
+    dropped, and groups it does not mention keep their relative order at the end,
+    so a renamed group or a switch of grouping variable degrades quietly.
+    """
+    if not order:
+        return list(keys)
+    remaining = list(keys)
+    arranged = []
+    for key in order:
+        if key in remaining:
+            remaining.remove(key)
+            arranged.append(key)
+    return arranged + remaining
+
+
+def build_scatter_legend(ax, scatter_result, *, loc, bbox_to_anchor=(1.05, 1), order=None):
     """Build a legend from a ``scatter_result`` mapping, skipping internal groups.
 
     Groups whose key starts with ``"_"`` (``__default__``/``__selected__``) are
-    omitted. Returns the matplotlib legend so callers can post-process it.
+    omitted. ``order`` optionally arranges the entries (see
+    :func:`order_legend_keys`). Returns the matplotlib legend so callers can
+    post-process it.
     """
-    values = []
-    keys = []
-    for key in scatter_result.keys():
-        if key.startswith("_"):
-            continue
-        keys.append(key)
-        values.append(scatter_result[key])
+    keys = order_legend_keys([key for key in scatter_result if not key.startswith("_")], order)
+    values = [scatter_result[key] for key in keys]
     labels = [format_legend_label(key)[0] for key in keys]
     legend = ax.legend(values, labels, loc=loc, bbox_to_anchor=bbox_to_anchor)
     return apply_legend_italics(legend, keys)

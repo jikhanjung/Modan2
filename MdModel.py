@@ -2,6 +2,7 @@ import copy
 import datetime
 import hashlib
 import io
+import json
 import logging
 import math
 import os
@@ -2429,10 +2430,34 @@ class MdAnalysis(Model):
     manova_group_by = CharField(null=True)
     manova_analysis_result_json = CharField(null=True)  # MANOVA results
 
+    # How the user arranged the chart for this analysis (legend entry order and
+    # dragged legend position, keyed by grouping variable). Presentation only —
+    # nothing here feeds back into the numbers.
+    chart_settings_json = CharField(null=True)
+
     # virtual_specimens_json = CharField(null=True) # list of virtual specimens
 
     created_at = DateTimeField(default=datetime.datetime.now)
     modified_at = DateTimeField(default=datetime.datetime.now)
+
+    def get_chart_settings(self):
+        """Chart presentation settings as a dict, ``{}`` when unset or unreadable.
+
+        Never raises: these are cosmetics, and a corrupt blob must not stop an
+        analysis from opening.
+        """
+        if not self.chart_settings_json:
+            return {}
+        try:
+            settings = json.loads(self.chart_settings_json)
+        except (ValueError, TypeError) as e:
+            logger.warning("Ignoring unreadable chart settings for analysis %s: %s", self.id, e)
+            return {}
+        return settings if isinstance(settings, dict) else {}
+
+    def set_chart_settings(self, settings):
+        """Store chart presentation settings (see :meth:`get_chart_settings`)."""
+        self.chart_settings_json = json.dumps(settings) if settings else None
 
     class Meta:
         database = gDatabase

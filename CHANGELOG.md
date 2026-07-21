@@ -23,6 +23,8 @@ and fixes for memory that was never released.
   exists, you can render the 2D view from the full-resolution image for extra
   detail while placing landmarks. This affects display only — landmark
   coordinates stay in the working-copy pixel space.
+- **The About box links to the project page**, so you can open it in your
+  browser with a click.
 
 ### Changed
 - **Missing landmarks are estimated far more accurately.** Both the "show
@@ -47,6 +49,10 @@ and fixes for memory that was never released.
 - **Replacing an object's image no longer leaves the old files behind.** When
   the new image had a different file extension, the previous image (and its
   archived original) stayed on disk forever.
+- **Deleting a dataset or an object now deletes its files too.** Images, their
+  archived originals and 3D models were left on disk indefinitely — for a
+  dataset, its entire storage folder — so deleted data kept taking up space.
+  Files already orphaned by earlier versions are not cleaned up automatically.
 
 ## [0.1.7] - 2026-07-21
 

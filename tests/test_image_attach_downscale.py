@@ -118,6 +118,59 @@ def test_copy_image_carries_archived_original(dataset, obj, tmp_path, monkeypatc
     assert _md5(copied.get_original_file_path()) == _md5(src)
 
 
+def _redirect_storage(monkeypatch, storage):
+    """Point MdImage's path helpers at a tmp storage dir.
+
+    The default base_path is bound at import time, so update_image (which uses
+    the defaults) can only be tested by patching the helpers themselves.
+    """
+    orig_gfp = MdModel.MdImage.get_file_path
+    orig_gofp = MdModel.MdImage.get_original_file_path
+    monkeypatch.setattr(MdModel.MdImage, "get_file_path", lambda self, base_path=None: orig_gfp(self, str(storage)))
+    monkeypatch.setattr(
+        MdModel.MdImage, "get_original_file_path", lambda self, base_path=None: orig_gofp(self, str(storage))
+    )
+
+
+def test_update_image_removes_replaced_files(obj, tmp_path, monkeypatch):
+    """Replacing an image with a different extension must not orphan the old
+    working copy or its archived original on disk."""
+    monkeypatch.setattr(MdModel, "IMAGE_MAX_DIM", 100)
+    storage = tmp_path / "storage"
+    _redirect_storage(monkeypatch, storage)
+
+    old = obj.add_image(_write_jpeg(tmp_path / "big.jpg", 400, 200))
+    old.save()
+    old_working = old.get_file_path()
+    old_archive = old.get_original_file_path()
+    assert os.path.exists(old_working) and os.path.exists(old_archive)
+
+    src = tmp_path / "small.png"
+    Image.new("RGB", (50, 30), (10, 20, 30)).save(str(src))
+    new = obj.update_image(str(src))
+    new.save()
+
+    assert not os.path.exists(old_working)
+    assert not os.path.exists(old_archive)
+    new_working = new.get_file_path()
+    assert new_working.endswith(".png") and os.path.exists(new_working)
+    assert not os.path.exists(new.get_original_file_path())  # small: no archive
+
+
+def test_update_image_same_extension_overwrites(obj, tmp_path, monkeypatch):
+    storage = tmp_path / "storage"
+    _redirect_storage(monkeypatch, storage)
+
+    first = obj.add_image(_write_jpeg(tmp_path / "a.jpg", 60, 40))
+    first.save()
+    second = obj.update_image(_write_jpeg(tmp_path / "b.jpg", 80, 20))
+    second.save()
+
+    with Image.open(second.get_file_path()) as img:
+        assert img.size == (80, 20)
+    assert MdModel.MdImage.select().where(MdModel.MdImage.object == obj).count() == 1
+
+
 def test_delete_object_with_files_removes_archive(obj, tmp_path, monkeypatch, controller):
     monkeypatch.setattr(MdModel, "IMAGE_MAX_DIM", 100)
     src = _write_jpeg(tmp_path / "big.jpg", 400, 200)

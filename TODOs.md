@@ -72,11 +72,10 @@ non-modal show() dialogs, deleteLater() after every exec_() site) — devlog 225
 
 Post-0.1.8 review items, in priority order:
 
-- [ ] **1. Orphaned files on image replacement** (HIGH, real bug) —
-      `MdObject.update_image` deletes only the DB row; a replacement with a
-      different extension leaves the old working copy AND its `originals/`
-      archive on disk. Fix: remove both old files before writing the new ones.
-      Related: dataset deletion also orphans the whole `<storage>/<ds.id>/` dir.
+- [x] **1. Orphaned files on image replacement** — DONE 2026-07-21 (devlog
+      226): `update_image` now removes the old working copy and `originals/`
+      archive before writing the replacement. Still open (related): dataset
+      deletion orphans the whole `<storage>/<ds.id>/` dir.
 - [ ] **2. Unify display-estimate vs analysis-imputation** (MEDIUM, changes
       analysis output — needs real-data validation): dialog preview now does
       rotation-fit (devlog 221) but `procrustes_superimposition_with_imputation`

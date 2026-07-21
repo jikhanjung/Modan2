@@ -397,6 +397,15 @@ class MdObject(Model):
             img = MdImage()
             # img.object = self
         else:
+            # Files live at <storage>/<ds.id>/<obj.id>.<ext>: a replacement
+            # with a different extension would not overwrite them, leaving the
+            # old working copy and its originals/ archive orphaned on disk.
+            for old_path in (img.get_file_path(), img.get_original_file_path()):
+                try:
+                    if os.path.exists(old_path):
+                        os.remove(old_path)
+                except OSError as e:
+                    logger.warning(f"Could not remove replaced image file {old_path}: {e}")
             img.delete_instance()
             img = MdImage()
         img.object = self

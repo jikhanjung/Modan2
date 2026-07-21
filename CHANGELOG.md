@@ -22,6 +22,8 @@ Fixes for the legend arrangement added in 0.1.9.
 - **Dragging the legend no longer acts on the plot underneath it.** The same
   click used to reach the chart as well, picking a shape or dropping a
   regression line where the legend happened to sit.
+- **`--db` now opens the database you name.** The option was accepted and then
+  ignored, so the default database was always used.
 
 ## [0.1.10] - 2026-07-21
 

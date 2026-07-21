@@ -196,6 +196,29 @@ database_path = os.path.join(mu.DEFAULT_DB_DIRECTORY, DATABASE_FILENAME)
 gDatabase = SqliteDatabase(database_path, pragmas={"foreign_keys": 1})
 
 
+def set_database_path(path):
+    """Point the application at a different database file.
+
+    Every model binds to ``gDatabase`` at import time, so the file cannot be
+    changed by reassigning ``database_path`` alone -- peewee has to be told, via
+    ``init``, to reuse the same Database object against another file. Call this
+    before anything queries the database (``--db`` does, at startup).
+    """
+    global database_path
+
+    path = os.path.abspath(os.path.expanduser(path))
+    directory = os.path.dirname(path)
+    if directory:
+        os.makedirs(directory, exist_ok=True)
+
+    if not gDatabase.is_closed():
+        gDatabase.close()
+    gDatabase.init(path, pragmas={"foreign_keys": 1})
+    database_path = path
+    logger.info("database path set to %s", path)
+    return path
+
+
 class MdDataset(Model):
     dataset_name = CharField()
     dataset_desc = CharField(null=True)
@@ -2473,15 +2496,18 @@ def prepare_database():
     now = datetime.datetime.now()
     date_str = now.strftime("%Y%m%d")
 
-    # backup database file to backup directory
-    backup_path = os.path.join(mu.DB_BACKUP_DIRECTORY, DATABASE_FILENAME + "." + date_str)
+    # backup database file to backup directory. Name the backup after the file
+    # actually in use, so a database chosen with --db does not overwrite the
+    # backups of the default one.
+    database_filename = os.path.basename(database_path)
+    backup_path = os.path.join(mu.DB_BACKUP_DIRECTORY, database_filename + "." + date_str)
     if not os.path.exists(backup_path) and os.path.exists(database_path):
         shutil.copy2(database_path, backup_path)
         logger.info("backup database to %s", backup_path)
         # read backup directory and delete old backups
         backup_list = os.listdir(mu.DB_BACKUP_DIRECTORY)
         # filter out non-backup files
-        backup_list = [f for f in backup_list if f.startswith(DATABASE_FILENAME)]
+        backup_list = [f for f in backup_list if f.startswith(database_filename)]
         backup_list.sort()
         if len(backup_list) > 10:
             # Keep the 10 most recent backups; remove the rest.

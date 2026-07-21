@@ -79,22 +79,13 @@ class ApplicationSetup:
         """Initialize database and run migrations."""
         self.logger.debug(f"Preparing database at: {self.db_path}")
 
-        # Set database path in model
-        MdModel.DATABASE_PATH = self.db_path
+        # Point the models at this file. Assigning MdModel.DATABASE_PATH, as
+        # this used to, set an attribute nothing reads -- so --db was silently
+        # ignored and the default database was always used.
+        MdModel.set_database_path(self.db_path)
 
-        # Initialize database
+        # Runs the migrations too.
         MdModel.prepare_database()
-
-        # Run migrations if needed
-        try:
-            from migrate import run_migrations
-
-            run_migrations()
-            self.logger.debug("Database migrations completed")
-        except ImportError:
-            self.logger.warning("Migration module not found, skipping migrations")
-        except Exception as e:
-            self.logger.warning(f"Migration failed: {e}")
 
     def _load_settings(self):
         """Load application settings from file."""

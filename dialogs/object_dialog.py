@@ -6,10 +6,8 @@ morphometric objects with their associated landmarks and metadata.
 
 import copy
 import logging
-import math
 from pathlib import Path
 
-import numpy as np
 from PyQt5.QtCore import QPoint, QRect, Qt, pyqtSlot
 from PyQt5.QtGui import (
     QFont,
@@ -48,7 +46,7 @@ from components.widgets import PicButton
 from dialogs.calibration_dialog import CalibrationDialog
 from MdConstants import ICONS as ICON
 from MdHelpers import guard_slot
-from MdModel import MdDataset, MdObject, MdObjectOps
+from MdModel import MdDataset, MdObject, MdObjectOps, impute_missing_landmarks
 from ModanComponents import ObjectViewer2D, ObjectViewer3D
 
 logger = logging.getLogger(__name__)
@@ -686,85 +684,13 @@ class ObjectDialog(QDialog):
             logger.warning("Cannot compute aligned mean - insufficient complete specimens")
             return obj.landmark_list
 
-        # Extract landmarks valid in BOTH the object and the mean shape, as
-        # index-aligned pairs (pairing them independently skewed the fit when
-        # the two sets disagreed on which indices are valid).
-        valid_indices = []
-        current_valid = []
-        mean_valid = []
-
-        for lm_idx in range(min(len(obj.landmark_list), len(mean_shape.landmark_list))):
-            lm = obj.landmark_list[lm_idx]
-            mean_lm = mean_shape.landmark_list[lm_idx]
-            if lm[0] is None or lm[1] is None:
-                continue
-            if mean_lm[0] is None or mean_lm[1] is None:
-                continue
-            valid_indices.append(lm_idx)
-            current_valid.append([lm[0], lm[1]])
-            mean_valid.append([mean_lm[0], mean_lm[1]])
-
-        if len(valid_indices) < 2:
-            logger.warning(f"Not enough valid landmarks to estimate scale/position ({len(valid_indices)} found)")
-            return obj.landmark_list
-
-        # Calculate similarity transformation (rotation + scale + translation)
-        # mean shape → current object, fitted on the shared valid landmarks.
-        current_valid = np.array(current_valid)
-        mean_valid = np.array(mean_valid)
-
-        # Compute centroids
-        current_centroid = np.mean(current_valid, axis=0)
-        mean_centroid = np.mean(mean_valid, axis=0)
-
-        # Compute centroid sizes (scale)
-        current_centered = current_valid - current_centroid
-        mean_centered = mean_valid - mean_centroid
-
-        current_size = np.sqrt(np.sum(current_centered**2))
-        mean_size = np.sqrt(np.sum(mean_centered**2))
-
-        scale_factor = current_size / mean_size if mean_size > 0 else 1.0
-
-        # Rotation via Kabsch (orthogonal Procrustes, reflection excluded). The
-        # mean shape lives in the Procrustes-aligned frame while the object is in
-        # image coordinates; matching centroid and scale alone put estimates in
-        # the wrong place whenever the specimen was photographed at an angle.
-        rotation = np.eye(2)
-        if mean_size > 0 and current_size > 0:
-            h = mean_centered.T @ current_centered
-            u, _, vt = np.linalg.svd(h)
-            d = np.sign(np.linalg.det(vt.T @ u.T))
-            rotation = vt.T @ np.diag([1.0, d]) @ u.T
-
-        angle_deg = math.degrees(math.atan2(rotation[1, 0], rotation[0, 0]))
-        logger.info(
-            f"Transformation: scale={scale_factor:.4f}, rotation={angle_deg:.2f} deg, "
-            f"centroid_shift={current_centroid - mean_centroid}"
-        )
-
-        # Create result with estimated missing landmarks
-        import copy
-
-        result_landmarks = copy.deepcopy(obj.landmark_list)
-        imputed_count = 0
-
-        for lm_idx in range(len(result_landmarks)):
-            lm = result_landmarks[lm_idx]
-            if lm[0] is None or lm[1] is None:
-                # Get mean shape landmark
-                if lm_idx < len(mean_shape.landmark_list):
-                    mean_lm = mean_shape.landmark_list[lm_idx]
-                    if mean_lm[0] is not None and mean_lm[1] is not None:
-                        # Transform: R @ (mean_lm - mean_centroid) * scale + current_centroid
-                        mean_point = np.array([mean_lm[0], mean_lm[1]])
-                        transformed = rotation @ (mean_point - mean_centroid) * scale_factor + current_centroid
-
-                        result_landmarks[lm_idx] = [float(transformed[0]), float(transformed[1])]
-                        imputed_count += 1
-
-        logger.info(f"Imputed {imputed_count} missing landmarks for object {obj.object_name}")
-        return result_landmarks
+        # One shared implementation with Procrustes imputation: fit the mean
+        # onto the observed landmarks (rotation + scale + translation) and take
+        # the gaps from the fitted mean. Without the rotation term, a specimen
+        # photographed at an angle got its estimates rotated away from the
+        # right spot.
+        # The mean shape carries its own dimensionality, so no dataset lookup.
+        return impute_missing_landmarks(obj.landmark_list, mean_shape.landmark_list)
 
     def set_dataset(self, dataset):
         # print("object dialog set_dataset", dataset.dataset_name)

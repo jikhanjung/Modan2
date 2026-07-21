@@ -2913,8 +2913,12 @@ class TestMdDatasetOpsEstimateMissing:
         # Estimate missing landmark
         ds_ops.estimate_missing_landmarks(0, ref_shape)
 
-        # Second landmark should now be filled with reference value
-        assert ds_ops.object_list[0].landmark_list[1] == [5.0, 5.0]
+        # The reference is fitted onto the observed landmarks before its
+        # coordinates are borrowed, so the estimate lands at the object's own
+        # scale and position: the reference spans (0,0)-(10,10) with its middle
+        # landmark at (5,5), the object spans (1,1)-(3,3), so the middle goes to
+        # (2,2). Copying (5,5) across would put it outside the object entirely.
+        assert ds_ops.object_list[0].landmark_list[1] == [2.0, 2.0]
         # Other landmarks should remain unchanged
         assert ds_ops.object_list[0].landmark_list[0] == [1.0, 1.0]
         assert ds_ops.object_list[0].landmark_list[2] == [3.0, 3.0]

@@ -76,10 +76,14 @@ Post-0.1.8 review items, in priority order:
       226): `update_image` now removes the old working copy and `originals/`
       archive before writing the replacement. Still open (related): dataset
       deletion orphans the whole `<storage>/<ds.id>/` dir.
-- [ ] **2. Unify display-estimate vs analysis-imputation** (MEDIUM, changes
-      analysis output — needs real-data validation): dialog preview now does
-      rotation-fit (devlog 221) but `procrustes_superimposition_with_imputation`
-      still substitutes mean-shape coordinates directly.
+- [x] **2. Unify display-estimate vs analysis-imputation** — DONE 2026-07-21
+      (devlog 227). Both paths now share `MdModel.impute_missing_landmarks`
+      (fit the mean onto the observed landmarks, then borrow the gaps). The
+      analysis path turned out to be badly wrong, not merely different: it
+      imputed before the first rotation and never revisited the value, giving
+      61% of centroid size error on noise-free synthetic data. Rebuilt as EM
+      refinement — now 0.0%. Worth a sanity check on a real dataset, since
+      analysis output changes for datasets with missing landmarks.
 - [ ] **3. Qt.SmoothTransformation for viewer pixmap scaling** (MEDIUM) —
       currently nearest-neighbor; tune together with Show Original performance.
 - [ ] **4. Korean translation update** (MEDIUM) — 0.1.8 strings ("Show

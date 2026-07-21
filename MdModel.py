@@ -66,6 +66,91 @@ def find_landmark_count_mismatch(objects):
     return None
 
 
+# How many times Procrustes imputation may re-estimate the gaps. Each round
+# re-aligns the (now complete) objects and re-fits the estimates to the improved
+# mean; on synthetic data the estimates stop moving after two or three.
+MAX_IMPUTATION_REFINEMENTS = 5
+
+
+def impute_missing_landmarks(landmark_list, reference_landmarks, dimension=None):
+    """Fill missing landmarks from a reference shape fitted onto the observed ones.
+
+    The reference (normally a Procrustes mean) is mapped onto ``landmark_list``
+    with a similarity transform — rotation via Kabsch with reflection excluded,
+    plus scale and translation — fitted on the landmarks present in both, and
+    the gaps are filled from the transformed reference.
+
+    Fitting rather than copying the reference's coordinates straight across is
+    what makes the estimate land in the right place whenever the object is not
+    already sitting in the reference's frame. Two callers need exactly this:
+    the object dialog's preview, where the specimen is in image coordinates and
+    may have been photographed at any angle, and Procrustes imputation, where an
+    object with gaps was centred and scaled on its observed subset while the
+    mean comes from whole configurations.
+
+    ``dimension`` defaults to the reference shape's own dimensionality, so a
+    caller that has no dataset at hand does not have to guess.
+
+    Returns a new landmark list. The input is returned (copied) unchanged when
+    the reference is missing or too few landmarks are shared to fit.
+    """
+    result = [list(lm) for lm in (landmark_list or [])]
+    if not result or not reference_landmarks:
+        return result
+
+    if dimension is None:
+        dimension = max((len(lm) for lm in reference_landmarks if lm), default=2)
+        dimension = min(max(dimension, 2), 3)
+
+    def _complete(lm):
+        return len(lm) >= dimension and all(c is not None for c in lm[:dimension])
+
+    shared = [
+        i
+        for i in range(min(len(result), len(reference_landmarks)))
+        if _complete(result[i]) and _complete(reference_landmarks[i])
+    ]
+    if len(shared) < dimension:
+        logger.warning("Cannot fit reference shape: %d shared landmarks, need %d", len(shared), dimension)
+        return result
+
+    target = np.array([result[i][:dimension] for i in shared], dtype=float)
+    source = np.array([reference_landmarks[i][:dimension] for i in shared], dtype=float)
+
+    target_centroid = target.mean(axis=0)
+    source_centroid = source.mean(axis=0)
+    target_centered = target - target_centroid
+    source_centered = source - source_centroid
+
+    target_size = np.sqrt((target_centered**2).sum())
+    source_size = np.sqrt((source_centered**2).sum())
+    scale = target_size / source_size if source_size > 0 else 1.0
+
+    rotation = np.eye(dimension)
+    if source_size > 0 and target_size > 0:
+        u, _, vt = np.linalg.svd(source_centered.T @ target_centered)
+        reflection = np.sign(np.linalg.det(vt.T @ u.T)) or 1.0
+        diagonal = np.ones(dimension)
+        diagonal[-1] = reflection
+        rotation = vt.T @ np.diag(diagonal) @ u.T
+
+    filled = 0
+    for i in range(len(result)):
+        if _complete(result[i]):
+            continue
+        if i >= len(reference_landmarks) or not _complete(reference_landmarks[i]):
+            continue  # nothing to estimate from (landmark absent everywhere)
+        point = np.array(reference_landmarks[i][:dimension], dtype=float)
+        transformed = rotation @ (point - source_centroid) * scale + target_centroid
+        for d in range(dimension):
+            if d < len(result[i]):
+                result[i][d] = float(transformed[d])
+        filled += 1
+
+    logger.debug("Imputed %d landmark(s); fit scale=%.4f", filled, scale)
+    return result
+
+
 def find_unimputable_landmarks(objects):
     """Landmark positions that *no* object records.
 
@@ -1768,9 +1853,12 @@ class MdDatasetOps:
     def estimate_missing_landmarks(self, obj_index, reference_shape):
         """Estimate missing landmarks for an object using the reference shape.
 
-        This implements a simple imputation strategy where missing landmarks
-        are replaced with the corresponding landmarks from the reference shape
-        (typically the average shape).
+        The reference (usually the average shape) is fitted onto the object's
+        observed landmarks before its coordinates are borrowed — see
+        :func:`impute_missing_landmarks`. An object with gaps was centred and
+        scaled on its observed subset only, so it does not share the mean's
+        normalisation exactly, and copying coordinates straight across left the
+        estimate off by that mismatch.
 
         Args:
             obj_index: Index of the object in object_list
@@ -1780,19 +1868,7 @@ class MdDatasetOps:
             return
 
         obj = self.object_list[obj_index]
-
-        # Check each landmark
-        for lm_idx in range(len(obj.landmark_list)):
-            # If any coordinate is missing, replace with reference
-            if obj.landmark_list[lm_idx][0] is None or obj.landmark_list[lm_idx][1] is None:
-                # Replace with reference shape landmark
-                if lm_idx < len(reference_shape.landmark_list):
-                    ref_lm = reference_shape.landmark_list[lm_idx]
-                    if ref_lm[0] is not None and ref_lm[1] is not None:
-                        obj.landmark_list[lm_idx][0] = ref_lm[0]
-                        obj.landmark_list[lm_idx][1] = ref_lm[1]
-                        if len(obj.landmark_list[lm_idx]) == 3 and len(ref_lm) == 3:
-                            obj.landmark_list[lm_idx][2] = ref_lm[2] if ref_lm[2] is not None else 0
+        obj.landmark_list = impute_missing_landmarks(obj.landmark_list, reference_shape.landmark_list, self.dimension)
 
     def has_missing_landmarks(self):
         """Check if any object in the dataset has missing landmarks."""
@@ -1807,55 +1883,130 @@ class MdDatasetOps:
     def procrustes_superimposition_with_imputation(self):
         """Procrustes superimposition with missing landmark imputation.
 
-        This implements an iterative imputation strategy similar to geomorph:
-        1. Initial alignment using only observed landmarks
-        2. Estimate missing landmarks from average shape
-        3. Iteratively refine estimates during Procrustes iterations
+        Expectation-maximisation around the ordinary Procrustes alignment:
+        align with the gaps left open, estimate them from the mean shape, then
+        re-align now that every object is complete and re-estimate, until the
+        estimates stop moving. Estimates are always fitted onto an object's
+        genuinely observed landmarks (:func:`impute_missing_landmarks`), never
+        onto an earlier estimate.
+
+        Both halves matter, measured against ground truth on noise-free
+        synthetic data (devlog 227), as error in percent of centroid size:
+
+        * 61% — the previous version, which imputed inside the alignment loop
+          *before* the first rotation, so estimates were off by the object's
+          arbitrary starting orientation. Worse, a filled-in value was no longer
+          ``None``, so it was never revisited (the "iterative refinement" the
+          docstring claimed never happened) and entered the alignment as if it
+          were observed data.
+        * 13% — imputing after the alignment converges, but copying the mean's
+          coordinates across directly.
+        * 1.9% — fitting the mean onto the observed landmarks first. The
+          remainder is the gapped object skewing the mean: it was centred and
+          scaled on its observed subset while the others use whole
+          configurations.
+        * 0.0% — with the refinement rounds below, which re-align and
+          re-estimate once the objects are complete.
+
+        The object dialog's preview fits the mean the same way and for the same
+        reason (devlog 221), only there the object sits in image coordinates
+        instead of being aligned by GPA.
         """
         if not self.check_object_list():
             print("check_object_list failed")
             return False
 
-        has_missing = self.has_missing_landmarks()
+        if not self.has_missing_landmarks():
+            self._align_to_mean_shape()
+            return True
 
-        # Store original missing positions for restoration if needed
-        missing_positions = []
-        if has_missing:
-            for _obj_idx, obj in enumerate(self.object_list):
-                obj_missing = []
-                for lm_idx, lm in enumerate(obj.landmark_list):
-                    if lm[0] is None or lm[1] is None:
-                        obj_missing.append(lm_idx)
-                missing_positions.append(obj_missing)
+        # Where the gaps are, before anything fills them in. Every refinement
+        # re-opens exactly these positions so each new estimate is fitted on
+        # genuinely observed landmarks and never on a previous estimate.
+        gaps = [
+            [idx for idx, lm in enumerate(obj.landmark_list) if any(c is None for c in lm[: self.dimension])]
+            for obj in self.object_list
+        ]
 
-        # Initial centering and scaling
+        average_shape = self._align_to_mean_shape()
+        previous_estimates = None
+
+        for _ in range(MAX_IMPUTATION_REFINEMENTS):
+            if average_shape is None:
+                break
+
+            for obj_idx, positions in enumerate(gaps):
+                landmark_list = self.object_list[obj_idx].landmark_list
+                for idx in positions:
+                    for d in range(min(self.dimension, len(landmark_list[idx]))):
+                        landmark_list[idx][d] = None
+                self.estimate_missing_landmarks(obj_idx, average_shape)
+
+            estimates = [
+                self.object_list[obj_idx].landmark_list[idx][: self.dimension]
+                for obj_idx, positions in enumerate(gaps)
+                for idx in positions
+            ]
+            if previous_estimates is not None and self._estimates_converged(previous_estimates, estimates):
+                break
+            previous_estimates = estimates
+
+            # The objects are complete now, so re-normalising puts the ones that
+            # had gaps on the same footing as the rest: they were centred and
+            # scaled on their observed subset only, which skewed their
+            # contribution to the mean and, through it, their own estimates.
+            average_shape = self._align_to_mean_shape()
+
+        return True
+
+    def _align_to_mean_shape(self, max_iterations=100):
+        """Centre, scale and iteratively rotate every object onto the mean shape.
+
+        Returns the mean shape the objects ended up aligned to. Landmarks that
+        are still missing are simply left out: the mean is a per-coordinate
+        nanmean and rotation uses the landmarks an object actually has.
+        """
         for mo in self.object_list:
             mo.move_to_center()
             mo.rescale_to_unitsize()
 
         average_shape = None
         previous_average_shape = None
-        i = 0
-        max_iterations = 100
-
-        while i < max_iterations:
-            i += 1
+        for _ in range(max_iterations):
             previous_average_shape = average_shape
             average_shape = self.get_average_shape()
 
-            # If we have missing landmarks, impute them using average shape
-            if has_missing and average_shape is not None:
-                for obj_idx in range(len(self.object_list)):
-                    self.estimate_missing_landmarks(obj_idx, average_shape)
-
-            # Check for convergence
-            if self.is_same_shape(previous_average_shape, average_shape) and previous_average_shape is not None:
+            if previous_average_shape is not None and self.is_same_shape(previous_average_shape, average_shape):
                 break
 
             self.set_reference_shape(average_shape)
             for j in range(len(self.object_list)):
                 self.rotate_gls_to_reference_shape(j)
 
+        # The loop breaks before rotating onto the average it just accepted.
+        if average_shape is not None:
+            self.set_reference_shape(average_shape)
+            for j in range(len(self.object_list)):
+                self.rotate_gls_to_reference_shape(j)
+        return average_shape
+
+    @staticmethod
+    def _estimates_converged(previous, current, threshold=1e-8):
+        """Have the estimates stopped moving between refinement rounds?
+
+        A coordinate stays ``None`` when no object records that landmark, so
+        there is nothing to estimate it from; treat that as settled rather than
+        trying to subtract it.
+        """
+        if len(previous) != len(current):
+            return False
+        for prev_lm, curr_lm in zip(previous, current):
+            for p, c in zip(prev_lm, curr_lm):
+                if p is None or c is None:
+                    if p is not c:
+                        return False
+                elif abs(p - c) > threshold:
+                    return False
         return True
 
     def procrustes_superimposition(self, max_iterations=100, convergence_threshold=1e-6):

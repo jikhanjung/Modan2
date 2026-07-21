@@ -68,6 +68,29 @@ non-modal show() dialogs, deleteLater() after every exec_() site) — devlog 225
 
 ---
 
+## 🟠 R03 improvement review (2026-07-21) — see `devlog/20260721_R03_improvement_review.md`
+
+Post-0.1.8 review items, in priority order:
+
+- [ ] **1. Orphaned files on image replacement** (HIGH, real bug) —
+      `MdObject.update_image` deletes only the DB row; a replacement with a
+      different extension leaves the old working copy AND its `originals/`
+      archive on disk. Fix: remove both old files before writing the new ones.
+      Related: dataset deletion also orphans the whole `<storage>/<ds.id>/` dir.
+- [ ] **2. Unify display-estimate vs analysis-imputation** (MEDIUM, changes
+      analysis output — needs real-data validation): dialog preview now does
+      rotation-fit (devlog 221) but `procrustes_superimposition_with_imputation`
+      still substitutes mean-shape coordinates directly.
+- [ ] **3. Qt.SmoothTransformation for viewer pixmap scaling** (MEDIUM) —
+      currently nearest-neighbor; tune together with Show Original performance.
+- [ ] **4. Korean translation update** (MEDIUM) — 0.1.8 strings ("Show
+      Original" etc.) missing from ts/qm; run lupdate → translate → lrelease.
+- [ ] **5. Refresh CLAUDE.md + `.index/`** (LOW) — stale version/structure/test
+      counts mislead future sessions.
+- [ ] **6. Triage 75 skipped tests** (LOW) — classify env-skips vs rot.
+
+---
+
 ## 🟡 MEDIUM — deliberately deferred (low value / higher risk)
 
 Skipped on purpose during the 2026-06-25 pass; revisit only if desired.

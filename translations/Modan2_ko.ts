@@ -30,37 +30,37 @@
 <context>
     <name>DataExplorationDialog</name>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="128"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="130"/>
         <source>Modan2 - Data Exploration</source>
         <translation>모단2 - 데이터 탐색</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="200"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="206"/>
         <source>Analysis name</source>
         <translation>분석 제목</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="204"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="210"/>
         <source>Superimposition method</source>
         <translation>중첩정렬방식</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="208"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="214"/>
         <source>Ordination method</source>
         <translation>분석 방식</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="212"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="218"/>
         <source>Shape view</source>
         <translation>형태 보기</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="276"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="282"/>
         <source>Grouping variable</source>
         <translation>그룹 변수</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="281"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="287"/>
         <source>Chart dimension:</source>
         <translation>차원</translation>
     </message>
@@ -70,166 +70,196 @@
         <translation type="obsolete">범례 보기</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="372"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="390"/>
         <source>Overlay settings</source>
         <translation>오버레이 세팅</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="376"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="394"/>
         <source>Depth shade</source>
         <translation>Depth shade</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="381"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="399"/>
         <source>Group average</source>
         <translation>그룹 평균</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="385"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="403"/>
         <source>Convex hull</source>
         <translation>컨벡스 헐</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="389"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="407"/>
         <source>Confidence ellipse</source>
         <translation>신뢰 타원</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="393"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="411"/>
         <source>Shape grid</source>
         <translation>형태 격자</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="404"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="422"/>
         <source>Show arrow</source>
         <translation>화살표 보이기</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="407"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="425"/>
         <source>Arrow color</source>
         <translation>화살표 색</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="429"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="447"/>
         <source>Group by</source>
         <translation>그룹 변수</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="447"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="465"/>
         <source>Degree</source>
         <translation>회귀 차수</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="452"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="470"/>
         <source>Annotation</source>
         <translation>주석</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="457"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="475"/>
         <source>Regression settings</source>
         <translation>회귀분석 세팅</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="215"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="221"/>
         <source>Exploration</source>
         <translation>탐색</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="216"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="222"/>
         <source>Regression</source>
         <translation>회귀분석</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="217"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="223"/>
         <source>Average</source>
         <translation>평균</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="218"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="224"/>
         <source>Comparison</source>
         <translation>비교</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="219"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="225"/>
         <source>Comparison (overlap)</source>
         <translation>비교 (중첩)</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="333"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="351"/>
         <source>Flip</source>
         <translation>축 반전</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="426"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="444"/>
         <source>Show regression</source>
         <translation>회귀선 보기</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="444"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="462"/>
         <source>Extrapolate</source>
         <translation>외삽</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="510"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="528"/>
         <source>Reset Pose</source>
         <translation>원래대로</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="512"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="530"/>
         <source>Animate</source>
         <translation>애니메이션</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="515"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="533"/>
         <source>Record</source>
         <translation>영상 저장</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="486"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="504"/>
         <source>Export Chart</source>
         <translation>차트 내보내기</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="1145"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="1163"/>
         <source>Source shape</source>
         <translation>기준 형태</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="1149"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="1167"/>
         <source>Target shape</source>
         <translation>비교할 형태</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="292"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="298"/>
         <source>Legend</source>
         <translation>범례</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="296"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="312"/>
         <source>Var. explained</source>
         <translation>설명된 분산</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="300"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="316"/>
         <source>Labels</source>
         <translation>레이블</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="304"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="320"/>
         <source>Snap</source>
         <translation>스냅</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="878"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="896"/>
         <source>Error</source>
         <translation>오류</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="878"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="896"/>
         <source>Failed to save video:
 {e}</source>
         <translation>동영상 저장에 실패했습니다:
 {e}</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/data_exploration_dialog.py" line="303"/>
+        <source>Movable</source>
+        <translation>이동 가능</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/data_exploration_dialog.py" line="304"/>
+        <source>Drag the legend to reposition it</source>
+        <translation>범례를 끌어서 위치를 옮깁니다</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/data_exploration_dialog.py" line="308"/>
+        <source>Order...</source>
+        <translation>순서...</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/data_exploration_dialog.py" line="309"/>
+        <source>Choose the order of legend entries</source>
+        <translation>범례 항목의 순서를 지정합니다</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/data_exploration_dialog.py" line="1654"/>
+        <source>Legend Order</source>
+        <translation>범례 순서</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/data_exploration_dialog.py" line="1654"/>
+        <source>There are no legend entries to arrange yet.</source>
+        <translation>아직 정렬할 범례 항목이 없습니다.</translation>
     </message>
 </context>
 <context>
@@ -706,6 +736,39 @@ If you keep them, they are imported as real coordinates.</source>
     </message>
 </context>
 <context>
+    <name>LegendOrderDialog</name>
+    <message>
+        <location filename="../dialogs/legend_order_dialog.py" line="26"/>
+        <source>Legend Order</source>
+        <translation>범례 순서</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/legend_order_dialog.py" line="29"/>
+        <source>Drag entries into the order you want:</source>
+        <translation>항목을 원하는 순서로 끌어 놓으세요:</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/legend_order_dialog.py" line="38"/>
+        <source>Sort A→Z</source>
+        <translation type="obsolete">가나다순</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/legend_order_dialog.py" line="40"/>
+        <source>Sort Z→A</source>
+        <translation type="obsolete">역순</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/legend_order_dialog.py" line="38"/>
+        <source>Sort A-Z</source>
+        <translation>가나다순</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/legend_order_dialog.py" line="40"/>
+        <source>Sort Z-A</source>
+        <translation>역순</translation>
+    </message>
+</context>
+<context>
     <name>MdTableView</name>
     <message>
         <location filename="../components/widgets/table_view.py" line="77"/>
@@ -791,27 +854,27 @@ If you keep them, they are imported as real coordinates.</source>
         <translation>도움말	F1</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="715"/>
+        <location filename="../Modan2.py" line="718"/>
         <source>File</source>
         <translation>파일</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="716"/>
+        <location filename="../Modan2.py" line="719"/>
         <source>Edit</source>
         <translation>편집</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="717"/>
+        <location filename="../Modan2.py" line="720"/>
         <source>Data</source>
         <translation>데이터</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="718"/>
+        <location filename="../Modan2.py" line="721"/>
         <source>Help</source>
         <translation>도움말</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1720"/>
+        <location filename="../Modan2.py" line="1723"/>
         <source>Warning</source>
         <translation>경고</translation>
     </message>
@@ -846,117 +909,117 @@ If you keep them, they are imported as real coordinates.</source>
         <translation type="obsolete">주성분분석에 실패했습니다</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="858"/>
+        <location filename="../Modan2.py" line="861"/>
         <source>Save Changes</source>
         <translation>변경사항 저장</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="859"/>
+        <location filename="../Modan2.py" line="862"/>
         <source>Edit Object</source>
         <translation>개체 편집</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="860"/>
+        <location filename="../Modan2.py" line="863"/>
         <source>Add Object</source>
         <translation>개체 추가</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1067"/>
+        <location filename="../Modan2.py" line="1070"/>
         <source>Add Variable</source>
         <translation>변수 추가</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="989"/>
+        <location filename="../Modan2.py" line="992"/>
         <source>Save</source>
         <translation>저장</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="991"/>
+        <location filename="../Modan2.py" line="994"/>
         <source>Analysis Details</source>
         <translation>분석 세부사항</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="993"/>
+        <location filename="../Modan2.py" line="996"/>
         <source>Data Exploration</source>
         <translation>데이터 탐색</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1067"/>
+        <location filename="../Modan2.py" line="1070"/>
         <source>Enter new variable name</source>
         <translation>새 변수 이름을 입력하세요</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1089"/>
+        <location filename="../Modan2.py" line="1092"/>
         <source>Are you sure to delete the selected object?</source>
         <translation>선택한 개체들을 삭제하시겠습니까?</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1117"/>
+        <location filename="../Modan2.py" line="1120"/>
         <source>Add child dataset</source>
         <translation>하위 데이터셋 추가</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1119"/>
+        <location filename="../Modan2.py" line="1122"/>
         <source>Add object</source>
         <translation>개체 추가</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1121"/>
+        <location filename="../Modan2.py" line="1124"/>
         <source>Add analysis</source>
         <translation>새 분석</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1123"/>
+        <location filename="../Modan2.py" line="1126"/>
         <source>Explore data</source>
         <translation>데이터 탐색</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1125"/>
+        <location filename="../Modan2.py" line="1128"/>
         <source>Delete analysis</source>
         <translation>분석결과 삭제</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1127"/>
+        <location filename="../Modan2.py" line="1130"/>
         <source>Reload</source>
         <translation>새로고침</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1152"/>
+        <location filename="../Modan2.py" line="1155"/>
         <source>Are you sure to delete the selected analysis?</source>
         <translation>선택한 분석결과를 삭제하시겠습니까?</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1475"/>
+        <location filename="../Modan2.py" line="1478"/>
         <source>Dimension mismatch</source>
         <translation>차원 불일치</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1586"/>
+        <location filename="../Modan2.py" line="1589"/>
         <source>Importing 3d model files...</source>
         <translation>3D 모델 파일 불러오는 중...</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1588"/>
+        <location filename="../Modan2.py" line="1591"/>
         <source>Importing image files...</source>
         <translation>이미지 파일 불러오는 중...</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1613"/>
+        <location filename="../Modan2.py" line="1616"/>
         <source>Dimension mismatch.</source>
         <translation>차원 불일치</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1621"/>
+        <location filename="../Modan2.py" line="1624"/>
         <source>Cannot process directory...</source>
         <translation>디렉토리에서 데이터를 불러올 수 없습니다.</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1624"/>
+        <location filename="../Modan2.py" line="1627"/>
         <source>Nothing to import.</source>
         <translation>불러올 데이터가 없습니다.</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1720"/>
+        <location filename="../Modan2.py" line="1723"/>
         <source>Data has been changed. Do you want to save?</source>
         <translation>데이터가 수정되었습니다. 저장하시겠습니까?</translation>
     </message>
@@ -981,7 +1044,7 @@ If you keep them, they are imported as real coordinates.</source>
         <translation type="obsolete">디렉토리 열기</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="767"/>
+        <location filename="../Modan2.py" line="770"/>
         <source>About</source>
         <translation>정보</translation>
     </message>
@@ -1026,7 +1089,7 @@ If you keep them, they are imported as real coordinates.</source>
         <translation>개체 편집	Ctrl+Shift+O</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="820"/>
+        <location filename="../Modan2.py" line="823"/>
         <source>Object Viewer</source>
         <translation>개체 보기</translation>
     </message>
@@ -1046,7 +1109,7 @@ If you keep them, they are imported as real coordinates.</source>
         <translation>보기</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="977"/>
+        <location filename="../Modan2.py" line="980"/>
         <source>No dataset or analysis selected</source>
         <translation>데이터셋 또는 분석이 선택되지 않았습니다</translation>
     </message>

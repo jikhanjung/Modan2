@@ -83,3 +83,16 @@ lrelease translations/Modan2_ko.ts   # 276 finished, 0 unfinished
 3. **번역문이 있는데 `type="unfinished"`인 항목의 플래그 제거** (3번 항목)
 4. `lrelease translations/Modan2_ko.ts`
 5. `QTranslator`로 표본 검증
+
+## 후속 (2026-07-21, 범례 기능 추가분)
+
+범례 순서/이동 기능(devlog 232)의 신규 문구 10개를 같은 절차로 번역했다
+(메시지 290 → 302, 미번역 0). 소스 목록에 `dialogs/legend_order_dialog.py`가
+추가된다.
+
+한 가지 더 배운 것: 소스 문자열에 비ASCII를 쓰면 안 된다. 처음엔 버튼 문구를
+`Sort A→Z`로 두었는데, `tr()` 자체는 정상 동작하지만
+`QCoreApplication.translate(context, source)`는 PyQt5에서 source 인자를 ASCII로
+인코딩해 `UnicodeEncodeError`가 난다 — 번역 검증 도구가 그 문자열을 조회할 수
+없다는 뜻이다. `Sort A-Z` / `Sort Z-A`로 바꿨다 (한국어 번역은 '가나다순' /
+'역순'이라 화살표가 애초에 필요 없었다).

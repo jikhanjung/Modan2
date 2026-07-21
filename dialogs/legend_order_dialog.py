@@ -35,9 +35,9 @@ class LegendOrderDialog(QDialog):
         self.listWidget.addItems(list(keys))
         layout.addWidget(self.listWidget)
 
-        self.btnSortAsc = QPushButton(self.tr("Sort A→Z"))
+        self.btnSortAsc = QPushButton(self.tr("Sort A-Z"))
         self.btnSortAsc.clicked.connect(lambda: self.sort_entries(reverse=False))
-        self.btnSortDesc = QPushButton(self.tr("Sort Z→A"))
+        self.btnSortDesc = QPushButton(self.tr("Sort Z-A"))
         self.btnSortDesc.clicked.connect(lambda: self.sort_entries(reverse=True))
         shortcut_row = QHBoxLayout()
         shortcut_row.addWidget(self.btnSortAsc)

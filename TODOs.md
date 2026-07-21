@@ -93,8 +93,8 @@ Post-0.1.8 review items, in priority order:
       QTranslator. Note the pylupdate5 trap documented there: entries that
       carry a translation but keep `type="unfinished"` are dropped by lrelease.
       Left alone: `translations/Modan2_en.ts` (empty translations fall back to
-      the source, which is already correct) and the stale root-level
-      `Modan2_ko.ts`/`.qm`, which nothing references — a trap worth deleting.
+      the source, which is already correct). The stale root-level
+      `Modan2_ko.ts`/`.qm` that nothing referenced were deleted.
 - [ ] **5. Refresh CLAUDE.md + `.index/`** (LOW) — stale version/structure/test
       counts mislead future sessions.
 - [ ] **6. Triage 75 skipped tests** (LOW) — classify env-skips vs rot.

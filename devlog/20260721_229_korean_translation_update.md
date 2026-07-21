@@ -68,11 +68,13 @@ lrelease translations/Modan2_ko.ts   # 276 finished, 0 unfinished
 - **`translations/Modan2_en.ts`**: 173개 중 171개가 빈 번역이다. 영어는 원문이
   곧 번역이라 빈 항목이 그대로 원문으로 폴백되므로 동작이 이미 정확하다.
   재생성해도 동작 변화 없이 diff만 커져서 두었다.
-- **저장소 루트의 `Modan2_ko.ts` / `Modan2_ko.qm`**: 메시지 1개짜리 낡은
-  잔재로, 코드·빌드(`build.py`, `Modan2.spec`)·인스톨러 어디서도 참조하지
-  않는다 (실제 로딩 경로는 `translations/Modan2_ko.qm`). 실수로 이쪽을 고치고
-  왜 반영이 안 되는지 헤맬 수 있는 함정이라 정리 대상이나, 이번 작업 범위
-  밖이라 남겨두고 보고만 했다.
+
+## 루트의 낡은 번역 파일 삭제
+
+메시지 1개짜리 잔재로, 코드·빌드(`build.py`, `Modan2.spec`)·인스톨러 어디서도
+참조하지 않았다 (실제 로딩 경로는 `translations/Modan2_ko.qm`). 실수로 이쪽을
+고치고 왜 반영이 안 되는지 헤맬 수 있는 함정이라 삭제했다. devlog 172에서도
+같은 파일을 "never used"로 짚은 적이 있다.
 
 ## 다음에 번역을 갱신할 때
 

@@ -118,6 +118,15 @@ Post-0.1.8 review items, in priority order:
 
 ### Noted while triaging (not acted on)
 
+- [ ] Landmark-file readers in `components/formats/` (`tps.py`, `nts.py`,
+      `x1y1.py`, `morphologika.py`) call `open(self.filename)` with no
+      encoding, so they decode with the platform default. On Windows outside a
+      UTF-8 locale a file containing non-ASCII specimen names fails to import.
+      Same class of bug as the 0.1.9 startup failure (devlog 234);
+      `MdUtils.read_landmark_file` already handles this and can serve as the
+      model. Needs a decision on the fallback chain, so not folded into the
+      0.1.10 hotfix.
+
 - [ ] `ModanController` emits `warning_occurred` (2 sites) and `info_message`
       (7 sites), but `Modan2.py` connects neither, so those messages are
       dropped. Simply connecting them would double up with the messages

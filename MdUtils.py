@@ -48,9 +48,14 @@ def get_build_info():
     for path in search_paths:
         if path and path.exists():
             try:
-                with open(path) as f:
+                # Read as UTF-8 rather than the platform default: this runs at
+                # import time, so a byte the locale cannot decode (cp949 on
+                # Korean Windows, say) would stop the application before it
+                # opens. UnicodeDecodeError is a ValueError, which the old
+                # except clause did not cover either.
+                with open(path, encoding="utf-8") as f:
                     return json.load(f)
-            except (json.JSONDecodeError, OSError):
+            except (ValueError, OSError):
                 pass
 
     # Return default values if build_info.json not found

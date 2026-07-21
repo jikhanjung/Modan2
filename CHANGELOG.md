@@ -9,6 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [0.1.10] - 2026-07-21
+
+An urgent fix for 0.1.9, which could not start at all on some systems.
+
+### Fixed
+- **0.1.9 would not start**, stopping at the splash screen on
+  "Initializing configuration...". A database upgrade step introduced in 0.1.9
+  could not be read on Windows systems whose language is not set to a
+  UTF-8 locale — Korean Windows among them — so the application quit before it
+  opened. Your data is unaffected: the upgrade never ran. Anyone on 0.1.9
+  should update.
+- **A failure during startup now says what went wrong.** The error was being
+  reported behind the splash screen, which stays on top, so all you could see
+  was a splash frozen on the step that failed. The splash now closes first and
+  the message points at the log file.
+
 ## [0.1.9] - 2026-07-21
 
 Arrange the chart legend the way you want it, plus a sharper 2D viewer and a

@@ -95,8 +95,12 @@ Post-0.1.8 review items, in priority order:
       Left alone: `translations/Modan2_en.ts` (empty translations fall back to
       the source, which is already correct). The stale root-level
       `Modan2_ko.ts`/`.qm` that nothing referenced were deleted.
-- [ ] **5. Refresh CLAUDE.md + `.index/`** (LOW) — stale version/structure/test
-      counts mislead future sessions.
+- [x] **5. Refresh CLAUDE.md + `.index/`** — DONE 2026-07-21 (devlog 230):
+      version, structure (dialogs//components/), test counts, pytest.ini
+      location, key-file table, hotspots and stats all corrected against the
+      repo. Also fixed `tools/build_index.py`, whose case-sensitive filename
+      check meant `--dialog` searches had silently returned nothing since the
+      dialogs moved into `dialogs/` (0 → 83 indexed).
 - [ ] **6. Triage 75 skipped tests** (LOW) — classify env-skips vs rot.
 
 ---

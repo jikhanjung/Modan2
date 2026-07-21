@@ -2,7 +2,7 @@
   "MdDataset": {
     "name": "MdDataset",
     "file": "MdModel.py",
-    "line": 37,
+    "line": 198,
     "fields": [
       {
         "name": "dataset_name",
@@ -52,7 +52,7 @@
   "MdObject": {
     "name": "MdObject",
     "file": "MdModel.py",
-    "line": 223,
+    "line": 391,
     "fields": [
       {
         "name": "object_name",
@@ -98,7 +98,7 @@
   "MdImage": {
     "name": "MdImage",
     "file": "MdModel.py",
-    "line": 457,
+    "line": 787,
     "fields": [
       {
         "name": "original_path",
@@ -152,7 +152,7 @@
   "MdThreeDModel": {
     "name": "MdThreeDModel",
     "file": "MdModel.py",
-    "line": 656,
+    "line": 1045,
     "fields": [
       {
         "name": "original_path",
@@ -202,7 +202,7 @@
   "MdAnalysis": {
     "name": "MdAnalysis",
     "file": "MdModel.py",
-    "line": 1683,
+    "line": 2399,
     "fields": [
       {
         "name": "analysis_name",
@@ -250,10 +250,6 @@
       },
       {
         "name": "superimposed_landmark_json",
-        "type": "CharField"
-      },
-      {
-        "name": "cva_group_by",
         "type": "CharField"
       },
       {

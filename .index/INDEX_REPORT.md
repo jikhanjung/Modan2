@@ -1,35 +1,107 @@
 # Modan2 Code Index Report
 
-**Generated**: 2025-09-10  
+**Generated**: 2026-07-21  
 **Index Version**: 1.1
 
 ## Project Statistics
 
 | Metric | Count |
 |--------|-------|
-| Total Files | 86 |
-| Total Lines | 35303 |
-| Classes | 194 |
-| Functions | 1541 |
-| Dialogs | 11 |
+| Total Files | 146 |
+| Total Lines | 58855 |
+| Classes | 547 |
+| Functions | 3098 |
+| Dialogs | 83 |
 | Database Models | 5 |
-| Qt Signal Definitions | 26 |
-| Qt Connections | 281 |
+| Qt Signal Definitions | 27 |
+| Qt Connections | 241 |
 
 ## Key Components Indexed
 
-### 1. Dialog Classes (11)
-- `ProgressDialog`
-- `CalibrationDialog`
-- `DatasetDialog`
-- `ObjectDialog`
+### 1. Dialog Classes (83)
 - `NewAnalysisDialog`
 - `AnalysisResultDialog`
-- `DataExplorationDialog`
+- `BaseDialog`
+- `CalibrationDialog`
 - `DatasetAnalysisDialog`
+- `DatasetDialog`
+- `DataExplorationDialog`
 - `ExportDatasetDialog`
 - `ImportDatasetDialog`
+- `ObjectDialog`
 - `PreferencesDialog`
+- `ProgressDialog`
+- `TestDatasetDialogDirect`
+- `TestDatasetDialogEdgeCases`
+- `TestObjectDialogDirect`
+- `TestDatasetObjectDialogIntegration`
+- `TestNewDatasetDialog`
+- `TestPreferencesDialog`
+- `TestAnalysisDialog`
+- `TestAboutDialog`
+- `TestFileDialogs`
+- `TestEditObjectDialog`
+- `TestNewAnalysisDialogInitialization`
+- `TestNewAnalysisDialogValidation`
+- `TestNewAnalysisDialogUserInteractions`
+- `TestNewAnalysisDialogProgress`
+- `TestNewAnalysisDialogCompletion`
+- `TestNewAnalysisDialogHelpers`
+- `TestNewAnalysisDialogIntegration`
+- `TestAnalysisResultDialogInitialization`
+- `TestAnalysisResultDialogPreferences`
+- `TestAnalysisResultDialogDataStructures`
+- `TestAnalysisResultDialogSettings`
+- `TestAnalysisResultDialogCloseEvent`
+- `TestAnalysisResultDialogIntegration`
+- `TestBaseDialogInitialization`
+- `TestBaseDialogMessageBoxes`
+- `TestBaseDialogProgressBar`
+- `TestBaseDialogWaitCursor`
+- `TestBaseDialogButtonBox`
+- `TestBaseDialogIntegration`
+- `CustomDialog`
+- `TestCalibrationDialogInitialization`
+- `TestCalibrationDialogInput`
+- `TestCalibrationDialogActions`
+- `TestCalibrationDialogPixelNumber`
+- `TestCalibrationDialogSettings`
+- `TestCalibrationDialogIntegration`
+- `TestDatasetDialogInitialization`
+- `TestDatasetDialogDimensionSelection`
+- `TestDatasetDialogBasicInput`
+- `TestDatasetDialogVariableManagement`
+- `TestDatasetDialogSettings`
+- `TestDatasetDialogIntegration`
+- `TestExportDatasetDialogInitialization`
+- `TestExportDatasetDialogObjectSelection`
+- `TestExportDatasetDialogFormatSelection`
+- `TestExportDatasetDialogSuperimposition`
+- `TestExportDatasetDialogJSONZipOptions`
+- `TestExportDatasetDialogExport`
+- `TestExportDatasetDialogButtons`
+- `TestExportDatasetDialogSettings`
+- `TestExportDatasetDialogIntegration`
+- `TestImportDatasetDialogInitialization`
+- `TestImportDatasetDialogFileSelection`
+- `TestImportDatasetDialogDatasetNaming`
+- `TestImportDatasetDialogFileTypes`
+- `TestImportDatasetDialogOptions`
+- `TestImportDatasetDialogValidation`
+- `TestImportDatasetDialogProgress`
+- `TestImportDatasetDialogIntegration`
+- `TestPreferencesDialogInitialization`
+- `TestPreferencesDialogGeometry`
+- `TestPreferencesDialogToolbar`
+- `TestPreferencesDialogPlot`
+- `TestPreferencesDialogLandmarks`
+- `TestPreferencesDialogWireframe`
+- `TestPreferencesDialogIndex`
+- `TestPreferencesDialogLanguage`
+- `TestPreferencesDialogButtons`
+- `TestPreferencesDialogSettingsPersistence`
+- `TestPreferencesDialogColorPickers`
+- `TestPreferencesDialogIntegration`
 
 ### 2. Database Models (5)
 - `MdDataset`
@@ -40,23 +112,23 @@
 
 ## Qt Signal/Slot Analysis
 
-- Signal definitions: 26
-- Connections: 281
+- Signal definitions: 27
+- Connections: 241
 
 ## Code Complexity Metrics
 
 ### Largest Files (by lines)
-1. `ModanDialogs.py` - 6,724 lines
-1. `ModanComponents.py` - 4,528 lines
-1. `Modan2.py` - 1,782 lines
-1. `MdModel.py` - 1,752 lines
-1. `Modan2_original.py` - 1,501 lines
+1. `test_mdmodel.py` - 4,452 lines
+1. `data_exploration_dialog.py` - 2,683 lines
+1. `MdModel.py` - 2,469 lines
+1. `Modan2.py` - 2,024 lines
+1. `ModanController.py` - 1,567 lines
 
 ### Most Complex Classes (by method count)
-1. `ModanMainWindow` - 74 methods (Modan2.py:57)
-1. `DataExplorationDialog` - 68 methods (ModanDialogs.py:1931)
-1. `ObjectViewer3D` - 62 methods (ModanComponents.py:1132)
-1. `ModanMainWindow` - 60 methods (Modan2_original.py:51)
+1. `DataExplorationDialog` - 83 methods (data_exploration_dialog.py:122)
+1. `ModanMainWindow` - 76 methods (Modan2.py:242)
+1. `ObjectViewer3D` - 63 methods (object_viewer_3d.py:82)
+1. `ObjectViewer2D` - 57 methods (object_viewer_2d.py:76)
 
 ## Recommendations
 

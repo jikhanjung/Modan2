@@ -26,36 +26,50 @@ sudo apt-get install -y libxcb-xinerama0 libxcb-icccm4 libxcb-image0 libxcb-keys
 ### Project Structure
 ```
 Modan2/
-├── Modan2.py             # Main application entry point
-├── MdModel.py            # Database models (Peewee ORM)
-├── MdUtils.py            # Utility functions and constants
-├── ModanDialogs.py       # PyQt5 dialog classes (uses cv2)
-├── ModanComponents.py    # Custom PyQt5 widgets (uses cv2)
+├── main.py               # Entry point (--debug, --db, --lang, --no-splash)
+├── Modan2.py             # ModanMainWindow (imported by main.py)
+├── ModanController.py    # Controller layer: DB/file I/O, analysis runs
+├── MdModel.py            # Database models (Peewee ORM) + Procrustes ops
 ├── MdStatistics.py       # Statistical analysis (PCA, CVA, MANOVA)
+├── MdUtils.py            # Utility functions and constants
+├── MdHelpers.py          # Shared helpers (guard_slot, geometry, …)
+├── MdConstants.py        # Shared constants (MODE, COLOR, …)
+├── dialogs/              # One module per dialog
+│   ├── object_dialog.py, dataset_dialog.py, analysis_dialog.py
+│   ├── data_exploration_dialog.py, dataset_analysis_dialog.py
+│   ├── import_dialog.py, export_dialog.py, preferences_dialog.py
+│   └── base_dialog.py, calibration_dialog.py, scatter_utils.py
+├── components/           # Custom PyQt5 widgets
+│   ├── viewers/          # object_viewer_2d.py, object_viewer_3d.py
+│   ├── widgets/          # table_view, tree_view, analysis_info, …
+│   └── formats/          # TPS / NTS / X1Y1 / Morphologika readers
+├── ModanComponents.py    # Backward-compat shim re-exporting components/
 ├── build.py              # PyInstaller build script
 ├── migrate.py            # Database migration tool
+├── pytest.ini            # Pytest configuration (the one pytest uses)
+├── translations/         # Modan2_{ko,en}.ts / .qm
 ├── logs/                 # Application log files
-├── config/               # Configuration files
-│   ├── pytest.ini       # Pytest configuration
-│   └── requirements-dev.txt # Development dependencies
+├── config/               # requirements-dev.txt, requirements-ci.txt
 ├── tests/                # Automated test suite (pytest)
-├── devlog/              # Development documentation and logs
-├── scripts/             # Utility scripts and tools
-└── test_script/         # Legacy test scripts (for reference)
+├── devlog/               # Development documentation and logs
+└── tools/                # Code index builder and search
 ```
+
+Note: `ModanDialogs.py` no longer exists — dialogs live in `dialogs/`. Import
+from `dialogs.<module>` and `components.<subpackage>` in new code.
 
 ### Build and Deployment
 - **Build executable**: `python build.py`
 - **Database migrations**: `python migrate.py`
-- **Windows installer**: InnoSetup configuration in `InnoSetup/Modan2.iss`
+- **Windows installer**: InnoSetup config generated from `InnoSetup/Modan2.iss.template`
 
 ### Testing
 
 #### Current Testing Status
 Automated testing with pytest is fully operational.
 
-**Coverage Status** (as of 2025-10-05):
-- **Overall**: 500+ tests, 503 passed, 35 skipped
+**Coverage Status** (as of 2026-07-21):
+- **Overall**: 1538 tests collected — 1463 passed, 75 skipped
 - **MdStatistics.py**: 95% coverage ✅
 - **MdUtils.py**: 78% coverage
 - **MdModel.py**: 56% coverage
@@ -64,7 +78,7 @@ Automated testing with pytest is fully operational.
 #### Automated Testing Setup
 - **Framework**: pytest with pytest-qt, pytest-cov, pytest-mock
 - **Test directory**: `tests/`
-- **Configuration**: `pytest.ini`
+- **Configuration**: `pytest.ini` (repo root; `config/pytest.ini` is an unused older copy)
 - **Install test dependencies**: `pip install -r config/requirements-dev.txt`
 
 **Common Commands**:
@@ -144,13 +158,13 @@ Install GLUT libraries: `sudo apt-get install -y libglut-dev libglut3.12 python3
 - Follow existing PyQt5 patterns in the codebase
 - Use Peewee ORM for all database operations
 - Numpy > 2.0.0 is now supported (OpenGL issues resolved with pip installation)
-- OpenCV (cv2) is used in ModanDialogs.py and ModanComponents.py
+- OpenCV (cv2) is used in `dialogs/data_exploration_dialog.py` (video export) and probed for availability in `MdHelpers.py`
 
 ### Important Notes
 - Cross-platform application (Windows, macOS, Linux)
 - Supports various file formats: TPS, NTS, OBJ, PLY, STL, image formats
 - Core functionality: 2D/3D landmark analysis, statistical shape analysis
-- Version: 0.1.4
+- Version: see `version.py` (0.1.8 as of 2026-07-21)
 - License: MIT
 
 ### Development Workflow
@@ -290,7 +304,7 @@ python tools/search_index.py -m "MdAnalysis"
 #### 5. Get File Information
 ```bash
 # Get statistics about a specific file
-python tools/search_index.py --file "ModanDialogs.py"
+python tools/search_index.py --file "object_dialog.py"
 python tools/search_index.py -f "Modan2.py"
 ```
 
@@ -347,26 +361,32 @@ python tools/generate_cards.py
 
 | Component | File | Key Classes/Functions |
 |-----------|------|----------------------|
-| Main Window | `Modan2.py` | ModanMainWindow (80+ methods) |
-| Dialogs | `ModanDialogs.py` (6,511 lines) | NewAnalysisDialog, DataExplorationDialog, etc. |
-| Custom Widgets | `ModanComponents.py` (4,359 lines) | ObjectViewer2D, ObjectViewer3D |
-| Database | `MdModel.py` | MdDataset, MdObject, MdAnalysis |
+| Main Window | `Modan2.py` (2,024 lines) | ModanMainWindow |
+| Controller | `ModanController.py` (1,567 lines) | ModanController — DB/file I/O, analysis |
+| Database + Procrustes | `MdModel.py` (2,469 lines) | MdDataset, MdObject, MdDatasetOps |
 | Statistics | `MdStatistics.py` | PCA, CVA, MANOVA functions |
-| Controller | `ModanController.py` | ModanController (35+ methods) |
-| Utilities | `MdUtils.py` | Helper functions, constants |
+| Data exploration | `dialogs/data_exploration_dialog.py` (2,683 lines) | DataExplorationDialog |
+| Object editing | `dialogs/object_dialog.py` (1,337 lines) | ObjectDialog |
+| Dataset analysis | `dialogs/dataset_analysis_dialog.py` (1,339 lines) | DatasetAnalysisDialog |
+| Viewers | `components/viewers/` | ObjectViewer2D, ObjectViewer3D |
+| Utilities | `MdUtils.py`, `MdHelpers.py`, `MdConstants.py` | Helpers, constants |
 
 ### Performance Hotspots
-Methods with wait cursor (long operations):
-- `ModanDialogs.py:2402` - cbxShapeGrid_state_changed
-- `ModanDialogs.py:4072` - pick_shape
-- `ModanDialogs.py:1710` - NewAnalysisDialog.btnOK_clicked
-- `Modan2.py:659` - on_action_analyze_dataset_triggered
+Methods that show a wait cursor (long operations):
+- `dialogs/data_exploration_dialog.py:615` - cbxShapeGrid_state_changed
+- `dialogs/data_exploration_dialog.py:885` - animate_shape
+- `dialogs/dataset_analysis_dialog.py:759` - on_btn_analysis_clicked
+- `dialogs/analysis_dialog.py:181` - btnOK_clicked
+- `Modan2.py:1566` - tableView_drop_event
+- `dialogs/base_dialog.py:109` - `with_wait_cursor` (the shared wrapper)
 
-### Quick Stats (as of last index)
-- **Total Files**: 27
-- **Total Lines**: 24,145
-- **Classes**: 63
-- **Functions**: 960
-- **Dialogs**: 11
+### Quick Stats (index rebuilt 2026-07-21, includes `tests/`)
+- **Total Files**: 146
+- **Total Lines**: 58,855
+- **Classes**: 547
+- **Functions**: 3,098
+- **Dialog classes**: 83
 - **Database Models**: 5
-- **Qt Connections**: 257
+- **Qt Connections**: 241
+
+Application code alone (excluding `tests/`) is ~32,800 lines.

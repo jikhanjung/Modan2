@@ -1,445 +1,745 @@
 {
-  "generated": "2025-09-10T14:33:25.429331",
+  "generated": "2026-07-21T15:05:26.022857",
   "statistics": {
-    "files": 86,
-    "classes": 194,
-    "functions": 1541,
-    "dialogs": 11,
+    "files": 146,
+    "classes": 547,
+    "functions": 3098,
+    "dialogs": 83,
     "db_models": 5,
-    "qt_signals": 26,
-    "qt_connections": 281,
-    "total_lines": 35303
+    "qt_signals": 27,
+    "qt_connections": 241,
+    "total_lines": 58855
   },
   "files": {
     "build.py": {
-      "lines": 231,
-      "size": 8152,
-      "modified": "2025-09-09T10:53:16.601093"
-    },
-    "debug_landmark.py": {
-      "lines": 47,
-      "size": 1132,
-      "modified": "2025-09-03T12:19:09.657328"
+      "lines": 319,
+      "size": 11417,
+      "modified": "2025-10-16T14:45:55.572184"
     },
     "fix_qt_import.py": {
-      "lines": 113,
-      "size": 3141,
-      "modified": "2025-09-04T16:20:04.485089"
+      "lines": 119,
+      "size": 3036,
+      "modified": "2025-10-16T14:45:57.983586"
     },
     "main.py": {
-      "lines": 217,
-      "size": 6849,
-      "modified": "2025-09-05T11:55:50.439422"
+      "lines": 240,
+      "size": 8298,
+      "modified": "2026-07-20T16:48:25.462363"
     },
     "manage_version.py": {
-      "lines": 265,
-      "size": 9298,
-      "modified": "2025-09-08T09:38:43.886419"
-    },
-    "manova_test.py": {
-      "lines": 73,
-      "size": 2437,
-      "modified": "2025-09-03T12:19:11.073099"
+      "lines": 270,
+      "size": 9216,
+      "modified": "2025-10-16T14:45:58.404445"
     },
     "MdAppSetup.py": {
-      "lines": 364,
-      "size": 12995,
-      "modified": "2025-09-04T16:20:04.101085"
+      "lines": 376,
+      "size": 13054,
+      "modified": "2026-07-20T16:48:24.504366"
     },
     "MdConstants.py": {
-      "lines": 684,
-      "size": 21127,
-      "modified": "2025-09-03T12:19:11.109501"
+      "lines": 713,
+      "size": 22830,
+      "modified": "2026-07-20T16:48:24.519156"
     },
     "MdHelpers.py": {
-      "lines": 1193,
-      "size": 30063,
-      "modified": "2025-09-04T16:20:04.107465"
-    },
-    "MdLogger.py": {
-      "lines": 24,
-      "size": 731,
-      "modified": "2025-09-03T12:19:11.142441"
+      "lines": 1242,
+      "size": 31019,
+      "modified": "2026-07-20T16:48:24.529026"
     },
     "MdModel.py": {
-      "lines": 1752,
-      "size": 69881,
-      "modified": "2025-09-03T12:19:11.173730"
-    },
-    "MdModel1.py": {
-      "lines": 46,
-      "size": 1267,
-      "modified": "2025-09-03T12:19:11.187666"
+      "lines": 2469,
+      "size": 101194,
+      "modified": "2026-07-21T13:38:12.483697"
     },
     "MdSplashScreen.py": {
-      "lines": 190,
-      "size": 7045,
-      "modified": "2025-09-05T13:04:23.999095"
+      "lines": 197,
+      "size": 6813,
+      "modified": "2025-10-16T14:45:54.202043"
     },
     "MdStatistics.py": {
-      "lines": 916,
-      "size": 33431,
-      "modified": "2025-09-09T17:31:33.357385"
+      "lines": 856,
+      "size": 30702,
+      "modified": "2026-07-20T16:48:24.543566"
     },
     "MdUtils.py": {
-      "lines": 619,
-      "size": 21578,
-      "modified": "2025-09-09T10:54:04.376949"
+      "lines": 933,
+      "size": 33880,
+      "modified": "2026-07-21T14:15:30.252786"
     },
     "migrate.py": {
-      "lines": 35,
-      "size": 1168,
-      "modified": "2025-09-04T18:01:33.117773"
+      "lines": 37,
+      "size": 1205,
+      "modified": "2025-10-16T14:45:58.415951"
     },
     "Modan2.py": {
-      "lines": 1782,
-      "size": 82155,
-      "modified": "2025-09-10T08:59:20.154856"
-    },
-    "Modan2_original.py": {
-      "lines": 1501,
-      "size": 67555,
-      "modified": "2025-09-04T16:20:04.156101"
+      "lines": 2024,
+      "size": 88770,
+      "modified": "2026-07-21T14:15:43.221558"
     },
     "ModanComponents.py": {
-      "lines": 4528,
-      "size": 196527,
-      "modified": "2025-09-09T17:26:59.852249"
+      "lines": 133,
+      "size": 3092,
+      "modified": "2026-07-20T20:18:00.629840"
     },
     "ModanController.py": {
-      "lines": 1309,
-      "size": 57680,
-      "modified": "2025-09-09T17:35:00.095342"
-    },
-    "ModanDialogs.py": {
-      "lines": 6724,
-      "size": 307230,
-      "modified": "2025-09-10T09:09:21.862922"
+      "lines": 1567,
+      "size": 65603,
+      "modified": "2026-07-21T13:53:53.129133"
     },
     "ModanWidgets.py": {
-      "lines": 1008,
-      "size": 34843,
-      "modified": "2025-09-04T16:20:04.198951"
-    },
-    "modan_convert.py": {
-      "lines": 57,
-      "size": 1807,
-      "modified": "2025-09-03T12:19:11.542175"
+      "lines": 1019,
+      "size": 33647,
+      "modified": "2025-10-16T14:45:54.325699"
     },
     "objloader.py": {
       "lines": 123,
       "size": 4413,
-      "modified": "2025-09-03T12:19:11.564620"
+      "modified": "2025-10-16T14:45:55.270774"
     },
     "setup.py": {
-      "lines": 35,
+      "lines": 39,
       "size": 1079,
-      "modified": "2025-09-04T16:20:04.542099"
+      "modified": "2025-10-16T14:45:58.968695"
     },
     "version.py": {
-      "lines": 11,
-      "size": 254,
-      "modified": "2025-09-08T09:38:43.902646"
+      "lines": 12,
+      "size": 249,
+      "modified": "2026-07-21T12:38:24.447292"
     },
-    "version_utils.py": {
-      "lines": 142,
-      "size": 3920,
-      "modified": "2025-09-03T12:19:12.357377"
+    "__init__.py": {
+      "lines": 1,
+      "size": 31,
+      "modified": "2025-10-16T14:45:59.012536"
+    },
+    "analysis_dialog.py": {
+      "lines": 389,
+      "size": 13573,
+      "modified": "2025-10-16T14:45:57.449706"
+    },
+    "analysis_result_dialog.py": {
+      "lines": 87,
+      "size": 2713,
+      "modified": "2026-07-20T16:48:25.295182"
+    },
+    "base_dialog.py": {
+      "lines": 146,
+      "size": 4802,
+      "modified": "2026-07-20T16:48:25.311951"
+    },
+    "calibration_dialog.py": {
+      "lines": 115,
+      "size": 4085,
+      "modified": "2026-07-20T16:48:25.327396"
+    },
+    "dataset_analysis_dialog.py": {
+      "lines": 1339,
+      "size": 58354,
+      "modified": "2026-07-20T16:48:25.382382"
+    },
+    "dataset_dialog.py": {
+      "lines": 380,
+      "size": 14253,
+      "modified": "2026-07-21T13:55:49.126777"
+    },
+    "data_exploration_dialog.py": {
+      "lines": 2683,
+      "size": 122752,
+      "modified": "2026-07-20T18:28:46.403167"
+    },
+    "export_dialog.py": {
+      "lines": 428,
+      "size": 16465,
+      "modified": "2026-07-20T16:48:25.411654"
+    },
+    "import_dialog.py": {
+      "lines": 478,
+      "size": 18479,
+      "modified": "2026-07-20T20:18:00.839887"
+    },
+    "object_dialog.py": {
+      "lines": 1337,
+      "size": 56431,
+      "modified": "2026-07-21T13:32:45.188598"
+    },
+    "preferences_dialog.py": {
+      "lines": 869,
+      "size": 38805,
+      "modified": "2026-07-20T16:48:25.447882"
+    },
+    "progress_dialog.py": {
+      "lines": 74,
+      "size": 2263,
+      "modified": "2025-10-16T14:45:57.574604"
+    },
+    "scatter_utils.py": {
+      "lines": 131,
+      "size": 4614,
+      "modified": "2026-07-21T10:27:23.915277"
+    },
+    "build_all.py": {
+      "lines": 100,
+      "size": 2755,
+      "modified": "2025-10-16T14:45:57.707899"
+    },
+    "conf.py": {
+      "lines": 96,
+      "size": 2778,
+      "modified": "2025-10-16T14:45:57.733217"
     },
     "drag_test.py": {
-      "lines": 104,
-      "size": 3652,
-      "modified": "2025-09-04T16:20:04.405267"
+      "lines": 117,
+      "size": 3653,
+      "modified": "2025-10-16T14:45:57.914218"
     },
     "drag_test2.py": {
-      "lines": 106,
-      "size": 3716,
-      "modified": "2025-09-04T16:20:04.409599"
+      "lines": 119,
+      "size": 3676,
+      "modified": "2025-10-16T14:45:57.921814"
     },
     "drag_test3.py": {
-      "lines": 114,
-      "size": 4050,
-      "modified": "2025-09-04T16:20:04.421325"
+      "lines": 127,
+      "size": 4042,
+      "modified": "2025-10-16T14:45:57.929799"
     },
     "drag_test4.py": {
-      "lines": 121,
-      "size": 4292,
-      "modified": "2025-09-04T16:20:04.431540"
+      "lines": 136,
+      "size": 4318,
+      "modified": "2025-10-16T14:45:57.938959"
     },
     "drag_test5.py": {
-      "lines": 118,
-      "size": 4225,
-      "modified": "2025-09-04T16:20:04.446256"
+      "lines": 133,
+      "size": 4249,
+      "modified": "2025-10-16T14:45:57.948641"
     },
     "drag_test6.py": {
-      "lines": 122,
-      "size": 4252,
-      "modified": "2025-09-04T16:20:04.455325"
+      "lines": 137,
+      "size": 4276,
+      "modified": "2025-10-16T14:45:57.956364"
     },
     "drag_test7.py": {
-      "lines": 129,
-      "size": 4709,
-      "modified": "2025-09-04T16:20:04.464782"
+      "lines": 144,
+      "size": 4733,
+      "modified": "2025-10-16T14:45:57.964241"
     },
     "drag_test8.py": {
-      "lines": 106,
-      "size": 3778,
-      "modified": "2025-09-04T16:20:04.476563"
+      "lines": 112,
+      "size": 3710,
+      "modified": "2025-10-16T14:45:57.971938"
     },
     "001_20240305.py": {
       "lines": 117,
       "size": 4792,
-      "modified": "2025-09-03T12:19:11.269550"
+      "modified": "2025-10-16T14:45:58.426476"
     },
     "002_20240319.py": {
       "lines": 71,
       "size": 3165,
-      "modified": "2025-09-03T12:19:11.281739"
+      "modified": "2025-10-16T14:45:58.436718"
     },
     "003_20240409.py": {
       "lines": 69,
       "size": 3261,
-      "modified": "2025-09-03T12:19:11.293288"
+      "modified": "2025-10-16T14:45:58.447526"
     },
     "004_20240604.py": {
       "lines": 120,
       "size": 5311,
-      "modified": "2025-09-03T12:19:11.306822"
+      "modified": "2025-10-16T14:45:58.460381"
     },
     "005_20240609.py": {
       "lines": 49,
       "size": 1842,
-      "modified": "2025-09-03T12:19:11.323680"
+      "modified": "2025-10-16T14:45:58.467870"
     },
     "objviewer.py": {
       "lines": 81,
       "size": 2153,
-      "modified": "2025-09-03T12:19:11.577874"
+      "modified": "2025-10-16T14:45:55.279665"
     },
-    "__init__.py": {
-      "lines": 0,
-      "size": 0,
-      "modified": "2025-09-03T12:19:11.934233"
+    "benchmark_analysis.py": {
+      "lines": 231,
+      "size": 7075,
+      "modified": "2025-10-16T14:45:58.879729"
+    },
+    "benchmark_large_scale.py": {
+      "lines": 375,
+      "size": 11646,
+      "modified": "2025-10-16T14:45:58.897250"
     },
     "check_sys_version.py": {
-      "lines": 31,
-      "size": 1100,
-      "modified": "2025-09-03T12:19:11.632357"
+      "lines": 34,
+      "size": 1104,
+      "modified": "2025-10-16T14:45:58.911603"
+    },
+    "profile_cva.py": {
+      "lines": 268,
+      "size": 8255,
+      "modified": "2025-10-16T14:45:58.924138"
+    },
+    "profile_detailed.py": {
+      "lines": 236,
+      "size": 6814,
+      "modified": "2025-10-16T14:45:58.934505"
+    },
+    "profile_memory.py": {
+      "lines": 368,
+      "size": 10904,
+      "modified": "2025-10-16T14:45:58.941710"
+    },
+    "profile_procrustes.py": {
+      "lines": 77,
+      "size": 2120,
+      "modified": "2025-10-16T14:45:58.951001"
+    },
+    "test_ui_responsiveness.py": {
+      "lines": 545,
+      "size": 17214,
+      "modified": "2025-10-16T14:45:58.960381"
     },
     "conftest.py": {
-      "lines": 267,
-      "size": 7500,
-      "modified": "2025-09-04T16:20:04.705872"
+      "lines": 353,
+      "size": 10724,
+      "modified": "2026-07-21T12:52:47.762589"
+    },
+    "test_about_dialog.py": {
+      "lines": 51,
+      "size": 1488,
+      "modified": "2026-07-21T14:15:52.347532"
+    },
+    "test_add_missing_landmark.py": {
+      "lines": 261,
+      "size": 9195,
+      "modified": "2026-07-20T19:40:33.203283"
+    },
+    "test_analysis_info_widget.py": {
+      "lines": 363,
+      "size": 12483,
+      "modified": "2025-10-16T14:45:59.305931"
     },
     "test_analysis_workflow.py": {
-      "lines": 605,
-      "size": 26561,
-      "modified": "2025-09-10T14:24:12.064703"
+      "lines": 651,
+      "size": 26702,
+      "modified": "2026-07-20T16:48:25.566881"
     },
     "test_controller.py": {
-      "lines": 642,
-      "size": 23188,
-      "modified": "2025-09-05T12:55:38.433914"
+      "lines": 1521,
+      "size": 57445,
+      "modified": "2026-07-20T20:01:29.056815"
+    },
+    "test_controller_object_io.py": {
+      "lines": 76,
+      "size": 2469,
+      "modified": "2026-07-20T16:48:25.586083"
+    },
+    "test_controller_r02.py": {
+      "lines": 46,
+      "size": 1684,
+      "modified": "2026-07-20T16:48:25.596528"
     },
     "test_dataset_core.py": {
-      "lines": 281,
-      "size": 10383,
-      "modified": "2025-09-04T16:20:04.730557"
+      "lines": 247,
+      "size": 8816,
+      "modified": "2025-10-16T14:45:59.388758"
     },
     "test_dataset_dialog_direct.py": {
-      "lines": 854,
-      "size": 35337,
-      "modified": "2025-09-04T16:20:04.739196"
+      "lines": 858,
+      "size": 33838,
+      "modified": "2026-07-20T16:48:25.609136"
+    },
+    "test_dataset_lifecycle.py": {
+      "lines": 401,
+      "size": 15757,
+      "modified": "2025-10-16T14:45:59.414189"
+    },
+    "test_dataset_ops_viewer.py": {
+      "lines": 328,
+      "size": 10115,
+      "modified": "2025-10-16T14:45:59.424314"
+    },
+    "test_delegates.py": {
+      "lines": 161,
+      "size": 5525,
+      "modified": "2025-10-16T14:45:59.435496"
+    },
+    "test_delete_file_cleanup.py": {
+      "lines": 162,
+      "size": 6320,
+      "modified": "2026-07-21T14:01:31.793051"
+    },
+    "test_error_recovery_workflow.py": {
+      "lines": 453,
+      "size": 15512,
+      "modified": "2025-10-16T14:45:59.444759"
+    },
+    "test_estimate_missing_landmarks.py": {
+      "lines": 127,
+      "size": 4461,
+      "modified": "2026-07-21T12:10:08.803559"
+    },
+    "test_format_handlers.py": {
+      "lines": 402,
+      "size": 10672,
+      "modified": "2025-10-16T14:45:59.454534"
+    },
+    "test_guard_slot.py": {
+      "lines": 84,
+      "size": 2323,
+      "modified": "2026-07-20T16:48:25.611158"
+    },
+    "test_image_attach_downscale.py": {
+      "lines": 187,
+      "size": 6767,
+      "modified": "2026-07-21T13:10:14.767067"
     },
     "test_import.py": {
-      "lines": 450,
-      "size": 17296,
-      "modified": "2025-09-04T16:20:04.748739"
+      "lines": 449,
+      "size": 15891,
+      "modified": "2026-07-20T16:48:25.627270"
+    },
+    "test_import_cycles.py": {
+      "lines": 42,
+      "size": 1183,
+      "modified": "2026-07-20T18:30:38.764264"
+    },
+    "test_import_error_handling.py": {
+      "lines": 48,
+      "size": 1698,
+      "modified": "2026-07-20T16:48:25.638474"
+    },
+    "test_imputation_accuracy.py": {
+      "lines": 228,
+      "size": 8438,
+      "modified": "2026-07-21T13:36:13.970180"
+    },
+    "test_integration_workflows.py": {
+      "lines": 479,
+      "size": 15826,
+      "modified": "2025-10-16T14:45:59.476908"
+    },
+    "test_landmark_cell_validation.py": {
+      "lines": 161,
+      "size": 5815,
+      "modified": "2026-07-20T18:28:46.448593"
+    },
+    "test_landmark_count_consistency.py": {
+      "lines": 207,
+      "size": 8168,
+      "modified": "2026-07-20T19:51:43.399728"
+    },
+    "test_landmark_count_display.py": {
+      "lines": 106,
+      "size": 3865,
+      "modified": "2026-07-20T19:40:33.486679"
+    },
+    "test_landmark_parsing.py": {
+      "lines": 139,
+      "size": 5078,
+      "modified": "2026-07-20T17:45:25.955498"
     },
     "test_legacy_integration.py": {
-      "lines": 339,
-      "size": 12579,
-      "modified": "2025-09-04T16:20:04.758858"
+      "lines": 322,
+      "size": 11445,
+      "modified": "2026-07-20T16:48:25.649670"
+    },
+    "test_legend_italics.py": {
+      "lines": 116,
+      "size": 4113,
+      "modified": "2026-07-21T10:28:36.047534"
+    },
+    "test_mdconstants.py": {
+      "lines": 325,
+      "size": 10942,
+      "modified": "2026-07-20T16:48:25.664845"
+    },
+    "test_mdhelpers.py": {
+      "lines": 1041,
+      "size": 36092,
+      "modified": "2025-10-16T14:45:59.502226"
     },
     "test_mdmodel.py": {
-      "lines": 525,
-      "size": 20014,
-      "modified": "2025-09-03T12:19:11.828515"
+      "lines": 4452,
+      "size": 170309,
+      "modified": "2026-07-21T13:33:49.017555"
     },
     "test_mdstatistics.py": {
-      "lines": 249,
-      "size": 9127,
-      "modified": "2025-09-03T12:19:11.843624"
+      "lines": 923,
+      "size": 33953,
+      "modified": "2026-07-20T16:48:25.698627"
     },
     "test_mdutils.py": {
-      "lines": 362,
-      "size": 13830,
-      "modified": "2025-09-04T16:20:04.765865"
+      "lines": 1236,
+      "size": 43033,
+      "modified": "2026-07-20T16:48:25.712188"
+    },
+    "test_missing_sentinel_import.py": {
+      "lines": 263,
+      "size": 10104,
+      "modified": "2026-07-20T18:30:38.779030"
+    },
+    "test_modan2_menu_actions.py": {
+      "lines": 307,
+      "size": 13229,
+      "modified": "2025-10-16T14:45:59.541903"
+    },
+    "test_modan2_toolbar_actions.py": {
+      "lines": 347,
+      "size": 14498,
+      "modified": "2025-10-16T14:45:59.552441"
+    },
+    "test_modan2_tree_interactions.py": {
+      "lines": 318,
+      "size": 12314,
+      "modified": "2025-10-16T14:45:59.564971"
+    },
+    "test_modan_widgets.py": {
+      "lines": 36,
+      "size": 982,
+      "modified": "2025-10-16T14:45:59.575175"
+    },
+    "test_multi_analysis_workflow.py": {
+      "lines": 455,
+      "size": 17223,
+      "modified": "2025-10-16T14:45:59.585384"
+    },
+    "test_object_overlay_persistence.py": {
+      "lines": 363,
+      "size": 14411,
+      "modified": "2026-07-20T16:48:25.722019"
+    },
+    "test_object_viewer_2d.py": {
+      "lines": 469,
+      "size": 15838,
+      "modified": "2025-10-16T14:45:59.594909"
+    },
+    "test_object_workflows.py": {
+      "lines": 385,
+      "size": 13555,
+      "modified": "2025-10-16T14:45:59.618087"
     },
     "test_performance.py": {
-      "lines": 216,
-      "size": 7917,
-      "modified": "2025-09-03T12:19:11.878625"
+      "lines": 213,
+      "size": 7487,
+      "modified": "2025-10-16T14:45:59.628239"
+    },
+    "test_procrustes_missing.py": {
+      "lines": 260,
+      "size": 9459,
+      "modified": "2025-10-16T14:45:59.637491"
+    },
+    "test_settings_wrapper.py": {
+      "lines": 94,
+      "size": 3509,
+      "modified": "2026-07-20T16:48:25.729954"
+    },
+    "test_shape_preference.py": {
+      "lines": 415,
+      "size": 12812,
+      "modified": "2025-10-16T14:45:59.646584"
+    },
+    "test_table_view.py": {
+      "lines": 266,
+      "size": 8230,
+      "modified": "2025-10-16T14:45:59.654171"
+    },
+    "test_threed_model_io.py": {
+      "lines": 21,
+      "size": 682,
+      "modified": "2026-07-20T16:48:25.738000"
     },
     "test_ui_basic.py": {
-      "lines": 236,
-      "size": 9047,
-      "modified": "2025-09-04T16:20:04.775061"
+      "lines": 219,
+      "size": 8180,
+      "modified": "2025-10-16T14:45:59.661793"
     },
     "test_ui_dialogs.py": {
-      "lines": 344,
-      "size": 12717,
-      "modified": "2025-09-04T16:20:04.783653"
+      "lines": 346,
+      "size": 11876,
+      "modified": "2026-07-21T14:19:02.238503"
+    },
+    "test_unimputable_landmarks.py": {
+      "lines": 161,
+      "size": 5920,
+      "modified": "2026-07-20T20:10:22.799436"
+    },
+    "test_viewer_fullres_source.py": {
+      "lines": 68,
+      "size": 2591,
+      "modified": "2026-07-21T12:28:58.186124"
+    },
+    "test_viewer_zoom_clamp.py": {
+      "lines": 59,
+      "size": 2105,
+      "modified": "2026-07-21T12:20:59.743289"
+    },
+    "test_widgets.py": {
+      "lines": 365,
+      "size": 12291,
+      "modified": "2026-07-20T16:48:25.759423"
     },
     "test_workflows.py": {
-      "lines": 435,
-      "size": 15720,
-      "modified": "2025-09-04T16:20:04.791482"
-    },
-    "3Dtest.py": {
-      "lines": 127,
-      "size": 4374,
-      "modified": "2025-09-04T16:20:04.555058"
-    },
-    "3Dtest2.py": {
-      "lines": 28,
-      "size": 835,
-      "modified": "2025-09-04T16:20:04.562551"
-    },
-    "3Dtest3.py": {
-      "lines": 28,
-      "size": 623,
-      "modified": "2025-09-03T12:19:12.056125"
-    },
-    "3Dtest4.py": {
-      "lines": 63,
-      "size": 1817,
-      "modified": "2025-09-04T16:20:04.570994"
-    },
-    "3Dtest5.py": {
-      "lines": 94,
-      "size": 2633,
-      "modified": "2025-09-03T12:19:12.088483"
-    },
-    "3dtest6.py": {
-      "lines": 188,
-      "size": 5014,
-      "modified": "2025-09-03T12:19:12.102489"
-    },
-    "hog_test1.py": {
-      "lines": 32,
-      "size": 743,
-      "modified": "2025-09-03T12:19:12.113133"
-    },
-    "orb_test1.py": {
-      "lines": 21,
-      "size": 707,
-      "modified": "2025-09-03T12:19:12.123223"
-    },
-    "overlay_test.py": {
-      "lines": 280,
-      "size": 8866,
-      "modified": "2025-09-08T09:38:43.901393"
-    },
-    "sift_test1.py": {
-      "lines": 20,
-      "size": 632,
-      "modified": "2025-09-03T12:19:12.154371"
-    },
-    "test_action_trigger.py": {
-      "lines": 60,
-      "size": 1892,
-      "modified": "2025-09-04T16:20:04.581008"
-    },
-    "test_context_menu.py": {
-      "lines": 83,
-      "size": 2705,
-      "modified": "2025-09-04T16:20:04.589863"
-    },
-    "test_context_menu_conditional.py": {
-      "lines": 174,
-      "size": 6352,
-      "modified": "2025-09-04T16:20:04.595228"
-    },
-    "test_error_handling.py": {
-      "lines": 170,
-      "size": 5559,
-      "modified": "2025-09-03T12:19:12.196270"
-    },
-    "test_fill_sequence.py": {
-      "lines": 85,
-      "size": 2823,
-      "modified": "2025-09-04T16:20:04.602747"
-    },
-    "test_fill_sequence_simple.py": {
-      "lines": 100,
-      "size": 3212,
-      "modified": "2025-09-04T16:20:04.618310"
-    },
-    "test_geometry_debug.py": {
-      "lines": 89,
-      "size": 2563,
-      "modified": "2025-09-04T16:20:04.628433"
-    },
-    "test_geometry_save.py": {
-      "lines": 110,
-      "size": 3548,
-      "modified": "2025-09-04T16:20:04.638278"
-    },
-    "test_preferences.py": {
-      "lines": 77,
-      "size": 2426,
-      "modified": "2025-09-04T16:20:04.646548"
-    },
-    "test_readonly_columns.py": {
-      "lines": 165,
-      "size": 6414,
-      "modified": "2025-09-04T16:20:04.654913"
-    },
-    "test_settings_migration.py": {
-      "lines": 124,
-      "size": 4370,
-      "modified": "2025-09-04T16:20:04.662293"
-    },
-    "test_splash.py": {
-      "lines": 64,
-      "size": 2011,
-      "modified": "2025-09-04T16:20:04.669676"
-    },
-    "tps_test.py": {
-      "lines": 221,
-      "size": 7986,
-      "modified": "2025-09-03T12:19:12.269978"
-    },
-    "tps_test2.py": {
-      "lines": 411,
-      "size": 15867,
-      "modified": "2025-09-04T16:20:04.681003"
-    },
-    "transparent_test.py": {
-      "lines": 70,
-      "size": 2785,
-      "modified": "2025-09-04T16:20:04.693806"
+      "lines": 399,
+      "size": 14507,
+      "modified": "2025-10-16T14:45:59.687119"
     },
     "build_index.py": {
-      "lines": 415,
-      "size": 17609,
-      "modified": "2025-09-10T14:32:51.412188"
+      "lines": 390,
+      "size": 16779,
+      "modified": "2026-07-21T15:04:48.545841"
     },
     "generate_cards.py": {
-      "lines": 294,
-      "size": 10666,
-      "modified": "2025-09-10T10:16:07.858361"
+      "lines": 275,
+      "size": 9976,
+      "modified": "2025-10-16T14:45:59.711391"
     },
     "generate_report.py": {
-      "lines": 135,
-      "size": 4793,
-      "modified": "2025-09-10T14:33:02.354369"
+      "lines": 134,
+      "size": 4792,
+      "modified": "2025-10-16T14:45:59.720496"
     },
     "search_index.py": {
-      "lines": 323,
-      "size": 12753,
-      "modified": "2025-09-10T12:20:48.842827"
+      "lines": 317,
+      "size": 12442,
+      "modified": "2025-10-16T14:45:59.728689"
+    },
+    "visualize_index.py": {
+      "lines": 382,
+      "size": 12856,
+      "modified": "2025-10-16T14:45:59.735212"
+    },
+    "morphologika.py": {
+      "lines": 155,
+      "size": 5037,
+      "modified": "2026-07-20T16:48:24.624957"
+    },
+    "nts.py": {
+      "lines": 160,
+      "size": 5890,
+      "modified": "2026-07-20T16:48:24.637905"
+    },
+    "tps.py": {
+      "lines": 172,
+      "size": 6267,
+      "modified": "2026-07-20T16:48:24.649391"
+    },
+    "x1y1.py": {
+      "lines": 120,
+      "size": 3792,
+      "modified": "2026-07-20T16:48:24.658965"
+    },
+    "object_viewer_2d.py": {
+      "lines": 1270,
+      "size": 52956,
+      "modified": "2026-07-21T12:34:33.670897"
+    },
+    "object_viewer_3d.py": {
+      "lines": 1464,
+      "size": 60892,
+      "modified": "2026-07-21T10:40:12.004557"
+    },
+    "analysis_info.py": {
+      "lines": 620,
+      "size": 29281,
+      "modified": "2026-07-20T18:31:10.012427"
+    },
+    "dataset_ops_viewer.py": {
+      "lines": 225,
+      "size": 6859,
+      "modified": "2025-10-16T14:45:55.729651"
+    },
+    "delegates.py": {
+      "lines": 129,
+      "size": 4225,
+      "modified": "2026-07-20T19:40:33.124147"
+    },
+    "drag_widgets.py": {
+      "lines": 119,
+      "size": 3697,
+      "modified": "2026-07-20T16:48:24.748255"
+    },
+    "overlay_widget.py": {
+      "lines": 292,
+      "size": 11270,
+      "modified": "2026-07-20T16:48:24.765588"
+    },
+    "pic_button.py": {
+      "lines": 101,
+      "size": 3128,
+      "modified": "2026-07-20T16:48:24.780346"
+    },
+    "shape_preference.py": {
+      "lines": 259,
+      "size": 9074,
+      "modified": "2026-07-20T16:48:24.791871"
+    },
+    "table_view.py": {
+      "lines": 705,
+      "size": 28270,
+      "modified": "2026-07-20T19:40:54.090195"
+    },
+    "tree_view.py": {
+      "lines": 62,
+      "size": 1694,
+      "modified": "2026-07-20T16:48:24.823383"
+    },
+    "test_analysis_dialog.py": {
+      "lines": 539,
+      "size": 19231,
+      "modified": "2025-10-16T14:45:59.025786"
+    },
+    "test_analysis_result_dialog.py": {
+      "lines": 282,
+      "size": 9627,
+      "modified": "2025-10-16T14:45:59.035325"
+    },
+    "test_base_dialog.py": {
+      "lines": 318,
+      "size": 11126,
+      "modified": "2025-10-16T14:45:59.044645"
+    },
+    "test_calibration_dialog.py": {
+      "lines": 301,
+      "size": 10209,
+      "modified": "2025-10-16T14:45:59.055753"
+    },
+    "test_dataset_analysis_scatter.py": {
+      "lines": 133,
+      "size": 5326,
+      "modified": "2026-07-20T16:48:25.520190"
+    },
+    "test_dataset_dialog.py": {
+      "lines": 367,
+      "size": 12243,
+      "modified": "2025-10-16T14:45:59.066323"
+    },
+    "test_data_exploration_scatter.py": {
+      "lines": 279,
+      "size": 11061,
+      "modified": "2026-07-20T16:48:25.515621"
+    },
+    "test_export_dialog.py": {
+      "lines": 472,
+      "size": 16609,
+      "modified": "2025-10-16T14:45:59.076623"
+    },
+    "test_import_dialog.py": {
+      "lines": 401,
+      "size": 12551,
+      "modified": "2025-10-16T14:45:59.087708"
+    },
+    "test_object_dialog_modes.py": {
+      "lines": 79,
+      "size": 2405,
+      "modified": "2026-07-20T16:48:25.532642"
+    },
+    "test_preferences_dialog.py": {
+      "lines": 436,
+      "size": 17393,
+      "modified": "2026-07-20T16:48:25.547867"
+    },
+    "test_scatter_utils.py": {
+      "lines": 55,
+      "size": 1420,
+      "modified": "2026-07-20T16:48:25.555220"
     }
   }
 }

@@ -76,7 +76,11 @@ class Modan2Indexer:
             # Special processing for known files
             if filepath.name == "MdModel.py":
                 self.extract_db_models(tree, filepath)
-            elif "Dialog" in filepath.name:
+            elif "dialog" in filepath.name.lower() or filepath.parent.name == "dialogs":
+                # Matched "ModanDialogs.py" by name until the dialogs were split
+                # into the dialogs/ package, whose files are lower_snake_case —
+                # so this quietly indexed nothing and --dialog searches came back
+                # empty.
                 self.extract_dialog_info(tree, source, filepath)
 
         except Exception as e:

@@ -29,19 +29,16 @@ class ApplicationSetup:
             language: UI language (en/ko)
         """
         self.debug = debug
-        self.db_path = db_path or self._get_default_db_path()
+        # Only what was asked for on the command line. There is no default to
+        # substitute here: the application's database lives where MdModel says
+        # it does, and inventing a path sends it at an empty file.
+        self.db_path = db_path
         self.config_path = config_path or self._get_default_config_path()
         self.language = language or "en"
         self.config: dict[str, Any] = {}
 
         # Setup logging
         self.logger = logging.getLogger(__name__)
-
-    def _get_default_db_path(self) -> str:
-        """Get default database file path."""
-        app_dir = Path.home() / ".modan2"
-        app_dir.mkdir(exist_ok=True)
-        return str(app_dir / "modan2.db")
 
     def _get_default_config_path(self) -> str:
         """Get default configuration file path."""
@@ -77,12 +74,16 @@ class ApplicationSetup:
 
     def _prepare_database(self):
         """Initialize database and run migrations."""
+        # Redirect only when --db named a file. Overriding unconditionally
+        # pointed every normal start at ~/.modan2/modan2.db -- not where the
+        # database has ever lived -- so the app came up empty and migrated a
+        # fresh file from scratch, while the real data sat untouched under
+        # PaleoBytes/Modan2/.
+        if self.db_path:
+            MdModel.set_database_path(self.db_path)
+        else:
+            self.db_path = MdModel.database_path
         self.logger.debug(f"Preparing database at: {self.db_path}")
-
-        # Point the models at this file. Assigning MdModel.DATABASE_PATH, as
-        # this used to, set an attribute nothing reads -- so --db was silently
-        # ignored and the default database was always used.
-        MdModel.set_database_path(self.db_path)
 
         # Runs the migrations too.
         MdModel.prepare_database()

@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [0.1.12] - 2026-07-21
+
+An urgent fix for 0.1.11, which opened the wrong database.
+
+### Fixed
+- **0.1.11 started up empty, as though all your data had been deleted.** It was
+  not: 0.1.11 looked for the database in a location the application has never
+  used, found nothing there, and created a blank one. Your datasets, objects and
+  analyses were untouched the whole time, and this release goes back to reading
+  them. Anyone on 0.1.11 should update.
+
 ## [0.1.11] - 2026-07-21
 
 Fixes for the legend arrangement added in 0.1.9.

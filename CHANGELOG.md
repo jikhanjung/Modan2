@@ -9,6 +9,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [0.1.8] - 2026-07-21
+
+Better handling of large images, a more accurate missing-landmark preview, and a
+zoom-related stability fix.
+
+### Added
+- **Oversized images are downscaled when attached.** Photos whose longer side
+  exceeds 2560 px are stored as a smaller working copy (used for landmarking),
+  while the pristine original is archived alongside it. Digitizing and viewing
+  large photos is faster and lighter on memory, and no image data is lost.
+- **"Show Original" checkbox in the object dialog.** When an archived original
+  exists, you can render the 2D view from the full-resolution image for extra
+  detail while placing landmarks. This affects display only — landmark
+  coordinates stay in the working-copy pixel space.
+
+### Changed
+- **Estimated missing landmarks now account for rotation.** The "show estimate"
+  preview fits the mean shape to the specimen with a full rotation + scale +
+  position match, so estimates land in the right place even when the specimen
+  was photographed at an angle.
+
+### Fixed
+- **Zooming far into a 2D image no longer risks exhausting memory.** The zoom
+  scale is capped so the rendered image can always be allocated.
+
 ## [0.1.7] - 2026-07-21
 
 A small maintenance release: one crash fix and a 3D rendering speedup.

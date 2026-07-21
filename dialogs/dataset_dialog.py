@@ -52,6 +52,13 @@ class DatasetDialog(BaseDialog):
         self.parent = parent
         self.remember_geometry = True
         self.m_app = QApplication.instance()
+        # Controller for DB/file persistence, same pattern as ObjectDialog: fall
+        # back to a standalone one when there is no real parent window (tests
+        # with a Mock parent), so deletes still target the active database.
+        from ModanController import ModanController
+
+        parent_controller = getattr(parent, "controller", None)
+        self.controller = parent_controller if isinstance(parent_controller, ModanController) else ModanController()
         self.read_settings()
 
         # Keyboard shortcut
@@ -360,7 +367,11 @@ class DatasetDialog(BaseDialog):
             self, "", self.tr("Are you sure to delete this dataset?"), QMessageBox.Yes | QMessageBox.No, QMessageBox.No
         )
         if ret == QMessageBox.Yes:
-            self.dataset.delete_instance()
+            # Through the controller so the dataset's stored images, archived
+            # originals and 3D models go with it; deleting the row alone left
+            # the whole <storage>/<dataset_id>/ tree behind (devlog 228).
+            storage_directory = getattr(self.m_app, "storage_directory", None)
+            self.controller.delete_dataset(self.dataset.id, storage_directory)
             self.parent.selected_dataset = None
         self.accept()
 

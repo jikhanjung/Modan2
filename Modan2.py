@@ -1094,8 +1094,12 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
         selected_object_list = self.get_selected_object_list()
         if selected_object_list:
+            # Through the controller so each object's image, archived original
+            # and 3D model are removed too; deleting the row alone left them on
+            # disk forever (devlog 228).
+            storage_directory = getattr(self.m_app, "storage_directory", None)
             for object in selected_object_list:
-                object.delete_instance()
+                self.controller.delete_object(object.id, storage_directory)
             dataset = self.selected_dataset
             self.reset_treeView()
             self.load_dataset()

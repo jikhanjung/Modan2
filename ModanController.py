@@ -5,6 +5,7 @@ Handles business logic and coordinates between View and Model.
 
 import logging
 import os
+import shutil
 from pathlib import Path
 from typing import Any
 
@@ -166,11 +167,12 @@ class ModanController(QObject):
             self.error_occurred.emit(f"Failed to update dataset: {str(e)}")
             return False
 
-    def delete_dataset(self, dataset_id: int) -> bool:
-        """Delete dataset and all its objects.
+    def delete_dataset(self, dataset_id: int, storage_directory: str | None = None) -> bool:
+        """Delete dataset, all its objects, and their files.
 
         Args:
             dataset_id: ID of dataset to delete
+            storage_directory: File storage root; defaults to the app's own
 
         Returns:
             True if successful, False otherwise
@@ -204,6 +206,12 @@ class ModanController(QObject):
 
                 # Delete the dataset itself
                 dataset.delete_instance()
+
+            # Every file of every object in this dataset lives under one
+            # directory named after the dataset id, so the whole tree goes —
+            # including the originals/ archive. Deleting the rows alone left it
+            # on disk forever.
+            self._remove_dataset_directory(dataset_id, storage_directory)
 
             # Clear current selection if it was the deleted dataset
             if self.current_dataset and self.current_dataset.id == dataset_id:
@@ -492,11 +500,12 @@ class ModanController(QObject):
             self.error_occurred.emit(f"Failed to update object: {str(e)}")
             return False
 
-    def delete_object(self, object_id: int) -> bool:
-        """Delete object.
+    def delete_object(self, object_id: int, storage_directory: str | None = None) -> bool:
+        """Delete object and the files it owns.
 
         Args:
             object_id: ID of object to delete
+            storage_directory: File storage root; defaults to the app's own
 
         Returns:
             True if successful, False otherwise
@@ -504,11 +513,15 @@ class ModanController(QObject):
         try:
             obj = MdModel.MdObject.get_by_id(object_id)
             obj_name = obj.object_name
+            # Derived from the row, so read them while it still exists.
+            file_paths = self.object_file_paths(obj, storage_directory)
 
             # recursive delete spans the object plus its image / 3D-model rows;
             # keep it atomic so a failure cannot orphan child records.
             with MdModel.gDatabase.atomic():
                 obj.delete_instance(recursive=True)
+
+            self._remove_files(file_paths)
 
             # Clear current selection if it was the deleted object
             if self.current_object and self.current_object.id == object_id:
@@ -570,23 +583,59 @@ class ModanController(QObject):
 
         return obj
 
-    def delete_object_with_files(self, obj, storage_directory):
-        """Delete an object and its on-disk image file (if any).
+    @staticmethod
+    def object_file_paths(obj, storage_directory=None):
+        """Every file on disk that belongs to ``obj``.
 
-        Moved out of ``ObjectDialog.Delete``: removes the first image's file from
-        ``storage_directory`` (when it exists) then deletes the object row. This is
-        a non-recursive delete (matching the original dialog behavior); see
-        ``delete_object`` for the recursive variant used elsewhere.
+        An object owns its image (a downscaled working copy since devlog 222,
+        which archives the untouched original beside it) and its 3D model. The
+        paths are derived from the object's row, so collect them *before*
+        deleting it.
         """
-        if obj.image.count() > 0:
-            image = obj.image[0]
-            image_path = image.get_file_path(storage_directory)
-            if os.path.exists(image_path):
-                os.remove(image_path)
-            original_path = image.get_original_file_path(storage_directory)
-            if os.path.exists(original_path):
-                os.remove(original_path)
+        storage_directory = storage_directory or mu.DEFAULT_STORAGE_DIRECTORY
+        paths = []
+        for image in obj.image:
+            paths.append(image.get_file_path(storage_directory))
+            paths.append(image.get_original_file_path(storage_directory))
+        for model in obj.threed_model:
+            paths.append(model.get_file_path(storage_directory))
+        return paths
+
+    def _remove_dataset_directory(self, dataset_id, storage_directory=None):
+        """Remove the storage directory holding a dataset's files, if any."""
+        storage_directory = storage_directory or mu.DEFAULT_STORAGE_DIRECTORY
+        directory = os.path.join(storage_directory, str(dataset_id))
+        try:
+            if os.path.isdir(directory):
+                shutil.rmtree(directory)
+                self.logger.info(f"Removed dataset storage directory {directory}")
+        except OSError as e:
+            self.logger.warning(f"Could not remove dataset storage directory {directory}: {e}")
+
+    def _remove_files(self, paths):
+        """Delete files best-effort; a failure is logged, never raised.
+
+        Called after the database change has committed, so a file that cannot
+        be removed leaves a harmless orphan rather than a row pointing at a
+        file that is already gone.
+        """
+        for path in paths:
+            try:
+                if os.path.exists(path):
+                    os.remove(path)
+            except OSError as e:
+                self.logger.warning(f"Could not remove {path}: {e}")
+
+    def delete_object_with_files(self, obj, storage_directory):
+        """Delete an object and the files it owns.
+
+        Moved out of ``ObjectDialog.Delete``. This is a non-recursive delete
+        (matching the original dialog behavior); see ``delete_object`` for the
+        recursive variant used elsewhere.
+        """
+        paths = self.object_file_paths(obj, storage_directory)
         obj.delete_instance()
+        self._remove_files(paths)
 
     def import_dataset(self, import_data, dataset_name, storage_directory, progress_callback=None):
         """Persist a parsed import (dataset + objects + images) to the database.

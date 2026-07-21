@@ -74,8 +74,10 @@ Post-0.1.8 review items, in priority order:
 
 - [x] **1. Orphaned files on image replacement** — DONE 2026-07-21 (devlog
       226): `update_image` now removes the old working copy and `originals/`
-      archive before writing the replacement. Still open (related): dataset
-      deletion orphans the whole `<storage>/<ds.id>/` dir.
+      archive before writing the replacement. The related deletion gap is done
+      too (devlog 228): dataset deletion removes `<storage>/<ds.id>/`, object
+      deletion removes the object's files, and both UI paths now go through the
+      controller instead of calling `delete_instance()` directly.
 - [x] **2. Unify display-estimate vs analysis-imputation** — DONE 2026-07-21
       (devlog 227). Both paths now share `MdModel.impute_missing_landmarks`
       (fit the mean onto the observed landmarks, then borrow the gaps). The

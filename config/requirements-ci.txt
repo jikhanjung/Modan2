@@ -9,7 +9,7 @@
 -r ../requirements.txt
 
 # Core Testing Framework
-pytest>=8.4.0,<9.0              # Core testing framework
+pytest>=8.4.0,<10.0              # Core testing framework
 pytest-cov>=7.0.0,<8.0          # Code coverage measurement
 pytest-mock>=3.14.0,<4.0        # Enhanced mocking capabilities
 pytest-qt>=4.5.0,<5.0           # PyQt5 UI testing support

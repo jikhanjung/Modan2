@@ -733,7 +733,12 @@ class ModanMainWindow(QMainWindow):
     def closeEvent(self, event):
         self.write_settings()
         if self.analysis_dialog is not None:
-            self.analysis_dialog.close()
+            try:
+                self.analysis_dialog.close()
+            except RuntimeError:
+                # Already deleted (WA_DeleteOnClose / deleteLater); the Python
+                # wrapper outlives the C++ widget.
+                pass
         event.accept()
 
     @pyqtSlot()
@@ -742,6 +747,10 @@ class ModanMainWindow(QMainWindow):
         self.preferences_dialog = PreferencesDialog(self)
         # self.preferences_dialog.setWindowModality(Qt.ApplicationModal)
         self.preferences_dialog.exec()
+        # Parented dialogs survive close (the parent owns them), so every
+        # opened dialog accumulated as a hidden child of the main window for
+        # the life of the app. Same pattern at every exec_() site below.
+        self.preferences_dialog.deleteLater()
         self.read_settings()
 
     @pyqtSlot()
@@ -780,6 +789,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             # The dialog now handles validation, running analysis, and showing progress internally
             self.analysis_dialog = NewAnalysisDialog(self, self.selected_dataset)
             ret = self.analysis_dialog.exec_()
+            self.analysis_dialog.deleteLater()
             logger.info("new analysis dialog return value %s", ret)
 
             # Dialog returns 1 (accept) when analysis completes successfully
@@ -1014,6 +1024,9 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     def btnAnalysisDetail_clicked(self):
         # self.detail_dialog = DatasetAnalysisDialog(self.parent)
         self.analysis_dialog = DatasetAnalysisDialog(self, self.analysis_info_widget.analysis.dataset)
+        # Non-modal and parented: without this, every opened dialog (with its
+        # large matplotlib canvases) would outlive its close until app exit.
+        self.analysis_dialog.setAttribute(Qt.WA_DeleteOnClose)
         self.analysis_dialog.show()
 
     def btnSaveAnalysis_clicked(self):
@@ -1023,6 +1036,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     def btnDataExploration_clicked(self):
         # print("btnExplore_clicked")
         self.exploration_dialog = DataExplorationDialog(self)
+        self.exploration_dialog.setAttribute(Qt.WA_DeleteOnClose)
         # print("exploration dialog created")
         # get tab text
         tab_text = self.analysis_info_widget.analysis_tab.tabText(self.analysis_info_widget.analysis_tab.currentIndex())
@@ -1147,6 +1161,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     @guard_slot("Failed to explore data")
     def on_action_explore_data_triggered(self):
         self.exploration_dialog = DataExplorationDialog(self)
+        self.exploration_dialog.setAttribute(Qt.WA_DeleteOnClose)
         self.exploration_dialog.set_analysis(self.selected_analysis)
         self.exploration_dialog.show()
 
@@ -1157,6 +1172,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.dlg.setModal(True)
         self.dlg.setWindowModality(Qt.ApplicationModal)
         self.dlg.exec_()
+        self.dlg.deleteLater()
         # Controller signals will handle UI updates automatically
 
     @pyqtSlot()
@@ -1170,6 +1186,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             self.dlg.set_dataset(self.selected_dataset)
             self.dlg.setWindowModality(Qt.ApplicationModal)
             self.dlg.exec_()
+            self.dlg.deleteLater()
         except Exception as e:
             show_error(self, f"Error exporting dataset: {str(e)}")
 
@@ -1195,6 +1212,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             self.dlg.set_parent_dataset(None)
 
         self.dlg.exec_()
+        self.dlg.deleteLater()
         # Controller signals will handle the UI updates automatically
         self.load_dataset()
         self.reset_tableView()
@@ -1230,6 +1248,8 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
         self.dlg.set_dataset(self.selected_dataset)
         ret = self.dlg.exec_()
+        # Deferred: actual deletion happens after this slot returns
+        self.dlg.deleteLater()
         if ret == 0:
             return
         elif ret == 1:
@@ -1289,6 +1309,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             self.dlg.set_dataset(dataset)
             self.dlg.set_object(new_object)
             ret = self.dlg.exec_()
+            self.dlg.deleteLater()
             if ret != 0:
                 # Object was saved in dialog, UI will update via signals
                 pass
@@ -1308,6 +1329,8 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         self.dlg.set_object(self.selected_object)
         self.dlg.set_tableview(self.tableView)
         ret = self.dlg.exec_()
+        # Deferred: object_deleted below is still readable this slot
+        self.dlg.deleteLater()
         if ret == 0:
             return
         elif ret == 1:
@@ -1445,6 +1468,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                     QMessageBox.warning(self, self.tr("Warning"), self.tr("Dimension mismatch"))
                     break
             self.progress_dialog.close()
+            self.progress_dialog.deleteLater()
 
             if source_dataset is not None:
                 self.load_dataset()
@@ -1458,6 +1482,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             self.import_dialog.setWindowModality(Qt.ApplicationModal)
             self.import_dialog.open_file2(file_path)
             self.import_dialog.exec_()
+            self.import_dialog.deleteLater()
             self.load_dataset()
 
     def get_selected_object_list(self):
@@ -1594,6 +1619,7 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             self.load_object()
 
         self.progress_dialog.close()
+        self.progress_dialog.deleteLater()
 
         dataset = self.selected_dataset
         self.load_dataset()

@@ -51,40 +51,20 @@ the suite kept green. Kept as a record below.
 
 ---
 
-## 🟠 Test infra — dialog-test memory accumulation (2026-07-21)
+## ✅ Test infra — dialog-test memory accumulation — **RESOLVED 2026-07-21**
 
-Full-suite RSS climbs monotonically to ~800 MB and never comes back down; nearly
-all of the growth is in dialog-heavy test files. Not the WSL OOM cause (that was
-the removed image-scaling zoom test — devlog 220), but worth fixing before the
-suite grows further. Per-file RSS deltas measured with a per-test VmRSS logger
-(methodology in devlog 220):
+Investigated and fixed (devlog 224/225). Root cause was NOT a Python-side leak:
+pytest-qt's teardown calls `deleteLater()`, but `DeferredDelete` events are never
+delivered without an event loop, so every qtbot-registered widget tree survived
+the session (~5000 live widgets, RSS to ~825 MB). Fixed with a
+`pytest_runtest_logfinish` hook in `tests/conftest.py` that delivers the pending
+deletes (`sendPostedEvents(None, DeferredDelete)` + `gc.collect(0)`). Peak RSS
+825 → 531 MB, surviving widgets 0 per test.
 
-| file | RSS growth |
-|---|---|
-| `tests/dialogs/test_data_exploration_scatter.py` | +110 MB |
-| `tests/dialogs/test_export_dialog.py` | +69 MB |
-| `tests/dialogs/test_preferences_dialog.py` | +58 MB |
-| `tests/dialogs/test_dataset_analysis_scatter.py` | +53 MB |
-| `tests/dialogs/test_object_dialog_modes.py` | +39 MB |
-| `tests/test_analysis_workflow.py` | +33 MB |
-| `tests/dialogs/test_analysis_dialog.py` | +31 MB |
-| individual tests | +15–46 MB each, never released |
-
-- [ ] **Investigate**: after each dialog test, run `gc.collect()` +
-      `processEvents()` and count surviving `QDialog` / `FigureCanvas` /
-      `ObjectViewer3D` instances (`gc.get_objects()` or objgraph) to separate
-      "Python refs keep dialogs alive" from "freed but RSS not returned to OS".
-- [ ] Prime suspects to check:
-      - `Figure(figsize=(20, 16), dpi=100)` canvases in
-        `data_exploration_dialog.py` / `dataset_analysis_dialog.py` — 2000×1600 px
-        ⇒ ~12.8 MB Agg buffer each, 2–3 per dialog instance
-      - parentless `ObjectViewer3D(parent=None, transparent=True)` stored in
-        `shape_grid` (`data_exploration_dialog.py:1845`) — top-level widgets not
-        destroyed with the dialog (`closeEvent` only calls `.close()`)
-      - `QGLWidget` GL contexts per viewer (llvmpipe arenas under WSL)
-      - PyQt reference cycles that need an explicit `gc.collect()` to break
-- [ ] **Fix**: an autouse fixture (gc + deferred-delete flush) and/or explicit
-      `deleteLater()` for shape-grid views; re-measure and record the new peak.
+The investigation also exposed a REAL app leak with the same symptom: parented
+dialogs are never deleted on close, so every dialog ever opened accumulated as a
+hidden child of the main window. Fixed in `Modan2.py` (WA_DeleteOnClose for
+non-modal show() dialogs, deleteLater() after every exec_() site) — devlog 225.
 
 ---
 

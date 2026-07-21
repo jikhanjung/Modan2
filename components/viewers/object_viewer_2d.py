@@ -579,6 +579,8 @@ class ObjectViewer2D(QLabel):
             self.curr_pixmap = self._render_source().scaled(
                 int(self.orig_pixmap.width() * self.scale / self.image_canvas_ratio),
                 int(self.orig_pixmap.height() * self.scale / self.image_canvas_ratio),
+                Qt.IgnoreAspectRatio,  # the target box already carries the source's aspect
+                Qt.SmoothTransformation,
             )
 
         self.repaint()
@@ -1015,6 +1017,7 @@ class ObjectViewer2D(QLabel):
                 int(self.orig_width * self.scale / self.image_canvas_ratio),
                 int(self.orig_width * self.scale / self.image_canvas_ratio),
                 Qt.KeepAspectRatio,
+                Qt.SmoothTransformation,
             )
         else:
             if len(self.landmark_list) < 2:

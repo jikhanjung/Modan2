@@ -86,8 +86,10 @@ Post-0.1.8 review items, in priority order:
       61% of centroid size error on noise-free synthetic data. Rebuilt as EM
       refinement — now 0.0%. Worth a sanity check on a real dataset, since
       analysis output changes for datasets with missing landmarks.
-- [ ] **3. Qt.SmoothTransformation for viewer pixmap scaling** (MEDIUM) —
-      currently nearest-neighbor; tune together with Show Original performance.
+- [x] **3. Qt.SmoothTransformation for viewer pixmap scaling** — DONE
+      2026-07-21 (devlog 231). Benchmarking settled the cost worry: smooth is
+      1.4–2.8x slower when downscaling but only 5–14 ms absolute, and ~3x
+      *faster* when upscaling, so it was applied to both call sites.
 - [x] **4. Korean translation update** — DONE 2026-07-21 (devlog 229): 237 →
       290 messages, 54 translated, 0 unfinished, `.qm` rebuilt and verified via
       QTranslator. Note the pylupdate5 trap documented there: entries that

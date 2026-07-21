@@ -6,6 +6,7 @@ morphometric objects with their associated landmarks and metadata.
 
 import copy
 import logging
+import math
 from pathlib import Path
 
 import numpy as np
@@ -660,26 +661,30 @@ class ObjectDialog(QDialog):
             logger.warning("Cannot compute aligned mean - insufficient complete specimens")
             return obj.landmark_list
 
-        # Extract valid (non-missing) landmarks from current object
+        # Extract landmarks valid in BOTH the object and the mean shape, as
+        # index-aligned pairs (pairing them independently skewed the fit when
+        # the two sets disagreed on which indices are valid).
         valid_indices = []
         current_valid = []
         mean_valid = []
 
-        for lm_idx in range(len(obj.landmark_list)):
+        for lm_idx in range(min(len(obj.landmark_list), len(mean_shape.landmark_list))):
             lm = obj.landmark_list[lm_idx]
-            if lm[0] is not None and lm[1] is not None:
-                valid_indices.append(lm_idx)
-                current_valid.append([lm[0], lm[1]])
-                if lm_idx < len(mean_shape.landmark_list):
-                    mean_lm = mean_shape.landmark_list[lm_idx]
-                    if mean_lm[0] is not None and mean_lm[1] is not None:
-                        mean_valid.append([mean_lm[0], mean_lm[1]])
+            mean_lm = mean_shape.landmark_list[lm_idx]
+            if lm[0] is None or lm[1] is None:
+                continue
+            if mean_lm[0] is None or mean_lm[1] is None:
+                continue
+            valid_indices.append(lm_idx)
+            current_valid.append([lm[0], lm[1]])
+            mean_valid.append([mean_lm[0], mean_lm[1]])
 
         if len(valid_indices) < 2:
             logger.warning(f"Not enough valid landmarks to estimate scale/position ({len(valid_indices)} found)")
             return obj.landmark_list
 
-        # Calculate transformation: mean shape → current object
+        # Calculate similarity transformation (rotation + scale + translation)
+        # mean shape → current object, fitted on the shared valid landmarks.
         current_valid = np.array(current_valid)
         mean_valid = np.array(mean_valid)
 
@@ -696,7 +701,22 @@ class ObjectDialog(QDialog):
 
         scale_factor = current_size / mean_size if mean_size > 0 else 1.0
 
-        logger.info(f"Transformation: scale={scale_factor:.4f}, centroid_shift={current_centroid - mean_centroid}")
+        # Rotation via Kabsch (orthogonal Procrustes, reflection excluded). The
+        # mean shape lives in the Procrustes-aligned frame while the object is in
+        # image coordinates; matching centroid and scale alone put estimates in
+        # the wrong place whenever the specimen was photographed at an angle.
+        rotation = np.eye(2)
+        if mean_size > 0 and current_size > 0:
+            h = mean_centered.T @ current_centered
+            u, _, vt = np.linalg.svd(h)
+            d = np.sign(np.linalg.det(vt.T @ u.T))
+            rotation = vt.T @ np.diag([1.0, d]) @ u.T
+
+        angle_deg = math.degrees(math.atan2(rotation[1, 0], rotation[0, 0]))
+        logger.info(
+            f"Transformation: scale={scale_factor:.4f}, rotation={angle_deg:.2f} deg, "
+            f"centroid_shift={current_centroid - mean_centroid}"
+        )
 
         # Create result with estimated missing landmarks
         import copy
@@ -711,9 +731,9 @@ class ObjectDialog(QDialog):
                 if lm_idx < len(mean_shape.landmark_list):
                     mean_lm = mean_shape.landmark_list[lm_idx]
                     if mean_lm[0] is not None and mean_lm[1] is not None:
-                        # Transform: (mean_lm - mean_centroid) * scale + current_centroid
+                        # Transform: R @ (mean_lm - mean_centroid) * scale + current_centroid
                         mean_point = np.array([mean_lm[0], mean_lm[1]])
-                        transformed = (mean_point - mean_centroid) * scale_factor + current_centroid
+                        transformed = rotation @ (mean_point - mean_centroid) * scale_factor + current_centroid
 
                         result_landmarks[lm_idx] = [float(transformed[0]), float(transformed[1])]
                         imputed_count += 1

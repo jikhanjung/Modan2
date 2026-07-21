@@ -122,7 +122,7 @@ def build_scatter_legend(ax, scatter_result, *, loc, bbox_to_anchor=(1.05, 1)):
     values = []
     keys = []
     for key in scatter_result.keys():
-        if key[0] == "_":
+        if key.startswith("_"):
             continue
         keys.append(key)
         values.append(scatter_result[key])

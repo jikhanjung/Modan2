@@ -5,7 +5,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from dialogs.scatter_utils import apply_legend_italics, format_legend_label
+from dialogs.scatter_utils import apply_legend_italics, build_scatter_legend, format_legend_label
 
 
 class TestFormatLegendLabel:
@@ -90,3 +90,27 @@ class TestApplyLegendItalics:
         legend = _FakeLegend(1)
         apply_legend_italics(legend, ["*A*", "*B*"])
         assert legend.get_texts()[0].fontstyle == "italic"
+
+
+class _FakeAxes:
+    def __init__(self):
+        self.legend_args = None
+
+    def legend(self, values, labels, *, loc, bbox_to_anchor):
+        self.legend_args = (values, labels)
+        return _FakeLegend(len(labels))
+
+
+class TestBuildScatterLegend:
+    def test_skips_internal_groups(self):
+        ax = _FakeAxes()
+        build_scatter_legend(ax, {"__default__": 0, "__selected__": 1, "A": 2}, loc="upper right")
+        assert ax.legend_args == ([2], ["A"])
+
+    def test_empty_string_group_key(self):
+        # Objects with no value for the grouping variable produce a "" key;
+        # it must reach the legend instead of raising IndexError (issue seen
+        # as "Failed to update chart: string index out of range").
+        ax = _FakeAxes()
+        build_scatter_legend(ax, {"__default__": 0, "": 1, "A": 2}, loc="upper right")
+        assert ax.legend_args == ([1, 2], ["", "A"])

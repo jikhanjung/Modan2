@@ -9,6 +9,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [0.1.9] - 2026-07-21
+
+Arrange the chart legend the way you want it, plus a sharper 2D viewer and a
+complete Korean translation.
+
+### Added
+- **Arrange the legend in Data Exploration.** With the legend shown, a
+  **Movable** checkbox lets you drag it wherever it suits the plot, and
+  **Order...** opens a list you can drag entries into the order you want (with
+  A-Z / Z-A shortcuts). Entries used to appear in whatever order specimens
+  happened to sit in the dataset. Both the order and the position are
+  remembered per grouping variable and restored the next time you open the
+  analysis.
+
+### Changed
+- **The 2D viewer scales images more smoothly**, so zooming and fitting no
+  longer show the jagged edges that made fine detail harder to read while
+  placing landmarks.
+- **The Korean interface is fully translated.** Strings added over several
+  releases had never been picked up, so parts of the UI stayed in English —
+  including some that had a translation but were being skipped when the
+  translation file was built.
+
 ## [0.1.8] - 2026-07-21
 
 Better handling of large images, much more accurate missing-landmark estimation,

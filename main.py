@@ -133,6 +133,10 @@ def main():
     logger.info("Starting Modan2 application...")
     logger.debug(f"Command line arguments: {vars(args)}")
 
+    # Bound before the try so the error handler can always close it, whatever
+    # step failed.
+    splash = None
+
     try:
         # Qt application setup - minimal imports for splash screen
         from PyQt5.QtCore import Qt
@@ -163,7 +167,6 @@ def main():
             app.setWindowIcon(QIcon(str(icon_path)))
 
         # Show splash screen FIRST, before any heavy imports
-        splash = None
         if not args.no_splash:
             from MdSplashScreen import create_splash_screen
 
@@ -224,12 +227,27 @@ def main():
     except Exception as e:
         logger.error(f"Application failed to start: {e}", exc_info=True)
 
+        # Close the splash screen first. It is WindowStaysOnTopHint, so the
+        # error dialog below opens *behind* it — leaving the user staring at a
+        # splash frozen on whatever step failed, with no way to see why.
+        if splash is not None:
+            try:
+                splash.close()
+            except Exception:
+                pass
+
         # Try to show error dialog if Qt is available
         try:
             from PyQt5.QtWidgets import QApplication, QMessageBox
 
             if QApplication.instance():
-                QMessageBox.critical(None, "Modan2 Error", f"Application failed to start:\n\n{str(e)}")
+                from MdUtils import DEFAULT_LOG_DIRECTORY
+
+                QMessageBox.critical(
+                    None,
+                    "Modan2 Error",
+                    f"Application failed to start:\n\n{e}\n\nDetails are in the log:\n{DEFAULT_LOG_DIRECTORY}",
+                )
         except Exception:
             pass
 

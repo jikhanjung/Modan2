@@ -4,6 +4,13 @@
 **Audience**: Developers and release managers
 **Last Updated**: 2025-10-08
 
+> **⚠️ Partially outdated (2026-07-21).** The current process is simpler than
+> described below: each release bumps the **patch** version by one (no
+> prerelease suffixes), `version.py` is the only file to edit, and the GitHub
+> release body is extracted from the tag's own `CHANGELOG.md` section by
+> `release.yml`. `RELEASE_NOTES.md` no longer exists — ignore every step below
+> that creates or updates it.
+
 ---
 
 ## Overview

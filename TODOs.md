@@ -88,8 +88,13 @@ Post-0.1.8 review items, in priority order:
       analysis output changes for datasets with missing landmarks.
 - [ ] **3. Qt.SmoothTransformation for viewer pixmap scaling** (MEDIUM) —
       currently nearest-neighbor; tune together with Show Original performance.
-- [ ] **4. Korean translation update** (MEDIUM) — 0.1.8 strings ("Show
-      Original" etc.) missing from ts/qm; run lupdate → translate → lrelease.
+- [x] **4. Korean translation update** — DONE 2026-07-21 (devlog 229): 237 →
+      290 messages, 54 translated, 0 unfinished, `.qm` rebuilt and verified via
+      QTranslator. Note the pylupdate5 trap documented there: entries that
+      carry a translation but keep `type="unfinished"` are dropped by lrelease.
+      Left alone: `translations/Modan2_en.ts` (empty translations fall back to
+      the source, which is already correct) and the stale root-level
+      `Modan2_ko.ts`/`.qm`, which nothing references — a trap worth deleting.
 - [ ] **5. Refresh CLAUDE.md + `.index/`** (LOW) — stale version/structure/test
       counts mislead future sessions.
 - [ ] **6. Triage 75 skipped tests** (LOW) — classify env-skips vs rot.

@@ -11,8 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.8] - 2026-07-21
 
-Better handling of large images, a more accurate missing-landmark preview, and a
-zoom-related stability fix.
+Better handling of large images, much more accurate missing-landmark estimation,
+and fixes for memory that was never released.
 
 ### Added
 - **Oversized images are downscaled when attached.** Photos whose longer side
@@ -25,14 +25,28 @@ zoom-related stability fix.
   coordinates stay in the working-copy pixel space.
 
 ### Changed
-- **Estimated missing landmarks now account for rotation.** The "show estimate"
-  preview fits the mean shape to the specimen with a full rotation + scale +
-  position match, so estimates land in the right place even when the specimen
-  was photographed at an angle.
+- **Missing landmarks are estimated far more accurately.** Both the "show
+  estimate" preview and the estimation used in analysis now fit the mean shape
+  onto the landmarks a specimen actually has — matching rotation, scale and
+  position — before filling the gaps, and analysis repeats the estimate as the
+  alignment settles. Estimates previously landed in the wrong place whenever a
+  specimen was photographed at an angle; in analysis they were also computed
+  before the specimens were aligned and then never revisited, so they were off
+  by a large margin and that error fed into the results. On test shapes where
+  the right answer is known, the error went from 61% of specimen size to
+  essentially zero. Analysis results change for datasets with missing
+  landmarks; datasets without them are unaffected.
 
 ### Fixed
 - **Zooming far into a 2D image no longer risks exhausting memory.** The zoom
   scale is capped so the rendered image can always be allocated.
+- **Dialogs are now released when closed.** Every dialog that was opened stayed
+  in memory for the rest of the session, so memory grew steadily as you worked
+  — noticeably with the data exploration and analysis windows, which hold large
+  plots. They are now freed on close.
+- **Replacing an object's image no longer leaves the old files behind.** When
+  the new image had a different file extension, the previous image (and its
+  archived original) stayed on disk forever.
 
 ## [0.1.7] - 2026-07-21
 

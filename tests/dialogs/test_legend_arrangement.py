@@ -246,3 +246,71 @@ class TestLegendOrderDialog:
 
         dlg.sort_entries(reverse=True)
         assert dlg.ordered_keys() == ["C", "b", "a"]
+
+
+class TestLegendDragDoesNotReachThePlot:
+    """A press that grabs the legend belongs to the drag, not to the chart.
+
+    Without this the same click also acted on the plot underneath — picking a
+    shape, or dropping a regression line where the legend happened to sit.
+    """
+
+    @staticmethod
+    def _press_at(dialog, x, y):
+        from matplotlib.backend_bases import MouseButton, MouseEvent
+
+        return MouseEvent("button_press_event", dialog.fig2.canvas, x, y, MouseButton.LEFT)
+
+    @staticmethod
+    def _legend_centre(dialog):
+        box = dialog.ax2.get_legend().get_window_extent()
+        return (box.x0 + box.x1) / 2, (box.y0 + box.y1) / 2
+
+    def test_press_on_the_legend_is_taken_by_the_drag(self, dialog):
+        dialog.cbxLegendDraggable.setChecked(True)
+        dialog.update_chart()
+        x, y = self._legend_centre(dialog)
+
+        dialog.on_canvas_button_press(self._press_at(dialog, x, y))
+
+        assert dialog._legend_grabbed
+
+    def test_press_elsewhere_reaches_the_chart(self, dialog):
+        dialog.cbxLegendDraggable.setChecked(True)
+        dialog.update_chart()
+
+        dialog.on_canvas_button_press(self._press_at(dialog, 5, 5))
+
+        assert not dialog._legend_grabbed
+
+    def test_the_legend_is_only_grabbed_while_movable_is_on(self, dialog):
+        dialog.cbxLegendDraggable.setChecked(False)
+        dialog.update_chart()
+        x, y = self._legend_centre(dialog)
+
+        dialog.on_canvas_button_press(self._press_at(dialog, x, y))
+
+        assert not dialog._legend_grabbed
+
+    def test_release_ends_the_grab(self, dialog):
+        dialog.cbxLegendDraggable.setChecked(True)
+        dialog.update_chart()
+        x, y = self._legend_centre(dialog)
+        dialog.on_canvas_button_press(self._press_at(dialog, x, y))
+        assert dialog._legend_grabbed
+
+        dialog.on_canvas_button_release(self._press_at(dialog, x, y))
+
+        assert not dialog._legend_grabbed, "a later click must reach the chart again"
+
+    def test_dragging_does_not_start_shape_picking(self, dialog):
+        """The visible symptom: the drag also grabbed a shape from the plot."""
+        dialog.cbxLegendDraggable.setChecked(True)
+        dialog.update_chart()
+        dialog.is_picking_shape = False
+        x, y = self._legend_centre(dialog)
+
+        dialog.on_canvas_button_press(self._press_at(dialog, x, y))
+        dialog.on_canvas_move(self._press_at(dialog, x + 20, y + 20))
+
+        assert not dialog.is_picking_shape

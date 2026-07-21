@@ -184,6 +184,9 @@ class DataExplorationDialog(QDialog):
         self.read_settings()
         self.mode = MODE_EXPLORATION
         self.ignore_change = False
+        # Set while a press that landed on the legend is still being handled, so
+        # the drag does not also act on the plot underneath.
+        self._legend_grabbed = False
         self.init_UI()
 
     def init_UI(self):
@@ -1631,6 +1634,18 @@ class DataExplorationDialog(QDialog):
 
         draggable.finalize_offset = finalize_and_save
 
+    def _event_grabs_legend(self, evt):
+        """Is this press the start of a legend drag?"""
+        if not self.cbxLegendDraggable.isChecked():
+            return False
+        legend = self.ax2.get_legend() if self.ax2 is not None else None
+        if legend is None or not legend.get_draggable():
+            return False
+        try:
+            return bool(legend.contains(evt)[0])
+        except Exception:  # pragma: no cover - defensive
+            return False
+
     def _legend_placement_of(self, legend):
         """Where the legend sits, as an axes-fraction (x, y), or None.
 
@@ -2478,6 +2493,9 @@ class DataExplorationDialog(QDialog):
         return best
 
     def on_canvas_move(self, evt):
+        if self._legend_grabbed:
+            return
+
         if evt.xdata is None or evt.ydata is None or self.mode == MODE_AVERAGE:
             return
 
@@ -2543,6 +2561,10 @@ class DataExplorationDialog(QDialog):
         return
 
     def on_canvas_button_release(self, evt):
+        if self._legend_grabbed:
+            self._legend_grabbed = False
+            return
+
         if self.mode == MODE_AVERAGE:
             return
 
@@ -2623,6 +2645,15 @@ class DataExplorationDialog(QDialog):
 
     def on_canvas_button_press(self, evt):
         # print("button_press", evt)
+
+        # A press that grabs the legend belongs to the drag, not to the plot:
+        # without this it also picks a shape or drops a regression line under
+        # the legend. Decided here rather than by asking the draggable whether a
+        # drag is running, because these handlers are connected before it is and
+        # so run first.
+        self._legend_grabbed = self._event_grabs_legend(evt)
+        if self._legend_grabbed:
+            return
 
         if self.mode == MODE_AVERAGE:
             return

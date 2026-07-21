@@ -131,3 +131,17 @@ def _update_bbox_to_anchor(self, loc_in_canvas):
 `tests/dialogs/test_legend_arrangement.py` 28개로 확대. 핵심은 matplotlib의
 드래그 종료 동작(`_update_loc`)을 직접 호출해 **저장 가능한 값이 나오는지**
 확인하는 것과, 0.1.9가 남긴 값이 폐기되고 범례가 다시 그려지는지 확인하는 것.
+
+## 후속 2: 드래그 클릭이 그래프로 전파되던 문제
+
+범례를 끄는 클릭이 아래 차트 핸들러에도 전달돼, 드래그하면서 형태를 집거나
+회귀선을 떨어뜨렸다.
+
+캔버스 핸들러(`on_canvas_button_press` / `_move` / `_release`)에 가드를 넣었다.
+판정은 **press 시점에** `legend.contains(evt)`로 하고 `_legend_grabbed`에
+기록한다. draggable에게 "지금 드래그 중이냐"고 묻지 않는 이유는, 이 핸들러들이
+`__init__`에서 먼저 연결되어 matplotlib의 draggable보다 **앞서 실행**되기
+때문이다 — 그 시점엔 아직 드래그가 시작되지 않은 것으로 보인다.
+
+`Movable`이 켜져 있고 실제로 범례 위를 눌렀을 때만 가드가 걸리므로, 나머지
+클릭 동작은 그대로다.

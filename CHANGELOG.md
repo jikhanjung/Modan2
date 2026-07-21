@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [0.1.11] - 2026-07-21
+
+Fixes for the legend arrangement added in 0.1.9.
+
+### Fixed
+- **The legend no longer disappears after you move it.** Dragging worked, but
+  the position was being stored in a form that sent the legend far off the
+  chart the next time it was drawn, so the next change to the plot raised an
+  error and left no legend at all. Positions saved by the earlier version are
+  discarded, so an affected chart returns to the default position on its own.
+- **Dragging the legend no longer acts on the plot underneath it.** The same
+  click used to reach the chart as well, picking a shape or dropping a
+  regression line where the legend happened to sit.
+
 ## [0.1.10] - 2026-07-21
 
 An urgent fix for 0.1.9, which could not start at all on some systems.

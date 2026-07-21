@@ -202,16 +202,17 @@ class TestAboutDialog:
     """Test About dialog."""
 
     def test_about_dialog_shows(self, qtbot, main_window):
-        """Test that about dialog shows information."""
-        with patch.object(QMessageBox, "about") as mock_about:
-            main_window.on_action_about_triggered()
+        """Test that about dialog shows information.
 
-            # Check that about dialog was shown
-            mock_about.assert_called_once()
+        The box is built rather than shown through QMessageBox.about, so that
+        the project URL can be a live link; see tests/test_about_dialog.py.
+        """
+        message = main_window.build_about_message()
+        message.deleteLater()
+        assert "Modan2" in message.text()
 
-            # Check that it contains app name
-            args = mock_about.call_args[0]
-            assert "Modan2" in args[1] or "Modan2" in args[2]
+        # The action itself still runs (exec_ is stubbed out for tests).
+        main_window.on_action_about_triggered()
 
 
 @pytest.mark.skip(reason="Dialog tests causing CI timeout - needs refactoring")

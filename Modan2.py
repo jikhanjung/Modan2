@@ -757,25 +757,28 @@ class ModanMainWindow(QMainWindow):
     def on_action_exit_triggered(self):
         self.close()
 
+    def build_about_message(self):
+        """The About box, as rich text so the project link is clickable.
+
+        QMessageBox's label opens external links itself, so an anchor is all
+        that is needed for the URL to reach the browser.
+        """
+        msg = QMessageBox(self)
+        msg.setWindowTitle(self.tr("About"))
+        msg.setIcon(QMessageBox.Information)
+        msg.setTextFormat(Qt.RichText)
+        msg.setText(
+            f"<b>{mu.PROGRAM_NAME}</b> v{mu.PROGRAM_VERSION}<br><br>"
+            "Morphometrics made easy<br><br>"
+            f'<a href="{mu.PROGRAM_HOMEPAGE}">{mu.PROGRAM_HOMEPAGE}</a><br><br>'
+            "This software is distributed under the terms of the MIT License.<br><br>"
+            f"{mu.PROGRAM_COPYRIGHT}"
+        )
+        return msg
+
     @pyqtSlot()
     def on_action_about_triggered(self):
-        text = mu.PROGRAM_NAME + " v" + mu.PROGRAM_VERSION + "\n\n"
-        text += "Morphometrics made easy\n\n"
-        text += "This software is distributed under the terms of the MIT License.\n\n"
-        text += mu.PROGRAM_COPYRIGHT + "\n"
-
-        QMessageBox.about(self, "About", text)
-
-        f"""
-Modan2
-Copyright {mu.PROGRAM_COPYRIGHT.replace("©", "").strip()}
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-"""
+        self.build_about_message().exec_()
 
     @pyqtSlot()
     def on_action_analyze_dataset_triggered(self):

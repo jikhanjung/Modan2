@@ -83,6 +83,7 @@ def get_copyright_year():
 
 COPYRIGHT_YEAR = get_copyright_year()
 PROGRAM_COPYRIGHT = f"© 2023-{COPYRIGHT_YEAR} Jikhan Jung"
+PROGRAM_HOMEPAGE = "https://github.com/jikhanjung/Modan2"
 PROGRAM_BUILD_NUMBER = BUILD_INFO.get("build_number", "local")
 PROGRAM_BUILD_DATE = BUILD_INFO.get("build_date", "unknown")
 

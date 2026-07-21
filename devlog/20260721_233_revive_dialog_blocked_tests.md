@@ -63,10 +63,39 @@
 - 스킵 **74개 → 37개**, 통과 1482 → **1516개**.
 - 되살린 58개(메뉴 24 · 툴바 22 · 트리 16)가 모두 통과.
 
-## 남은 스킵 37개
+## 2차: 나머지 스킵 정리
 
-- `test_ui_dialogs.py` 19개 — "CI timeout" 사유이나 실제로는 위젯 이름
-  (`edit_dataset_name` 등)이 현재 다이얼로그와 맞지 않는 더 낡은 테스트들이라
-  되살리려면 다시 작성해야 한다.
-- `test_workflows.py` 10개, `test_performance.py` 3개(픽스처 리팩토링),
-  수동 조작 필요 2개, 변수 삭제/재정렬 "조사 필요" 2개, Windows 전용 1개.
+남은 37개 중 29개("CI timeout" 사유)를 조사한 결과, 타임아웃이 아니라
+**존재한 적 없는 API를 대상으로 쓰인 가공의 테스트**였다. 스킵 처리되어 있어
+실패할 기회조차 없었다:
+
+- `test_ui_dialogs.py` (19개): `dialog.edit_dataset_name`(실제는
+  `edtDatasetName`), `dialog.slider_landmark_size`,
+  `main_window.on_action_open_image`, 인자 2개짜리 `ObjectDialog(parent, obj)`
+  (실제 생성자는 parent만) 등.
+- `test_workflows.py` (10개): 오래전 삭제된 `ModanDialogs` 모듈 import,
+  `MdTreeView.addTopLevelItem`(QTreeView인데 QTreeWidget API), 존재하지 않는
+  `on_action_export` / `on_action_analysis` / `on_action_import_3d`.
+
+삭제해도 커버리지 손실이 없다 — 각 대상마다 실제로 도는 스위트가 이미 있다:
+다이얼로그는 `tests/dialogs/` (dataset 21 · preferences 38 · analysis 34 +
+import/export/object-mode/calibration), 워크플로는
+`test_integration_workflows` / `test_analysis_workflow` / `test_object_workflows`
+/ `test_multi_analysis_workflow` / `test_error_recovery_workflow` /
+`test_dataset_lifecycle` 합계 61개(통과 확인).
+
+그래서 `test_workflows.py`는 파일째 삭제하고, `test_ui_dialogs.py`는 실제
+메서드에 대응하는 것만 남겼다 — About 박스, 그리고 컨트롤러 오류/분석 실패가
+사용자에게 표시되는지 검증하는 `TestControllerMessages`.
+
+## 결과 (최종)
+
+스킵 **74개 → 8개**, 통과 **1482 → 1518개**. 남은 8개는 모두 정당하다:
+성능 픽스처 3, 수동 UI 조작 2, 변수 삭제/재정렬 조사 필요 2, Windows 전용 1.
+
+## 곁가지 발견 (미수정)
+
+`ModanController`는 `warning_occurred`(2곳)와 `info_message`(7곳)를 emit하지만
+**메인 윈도우가 두 시그널을 연결하지 않는다** — 해당 메시지는 조용히 버려진다.
+그냥 연결하면 `on_dataset_created`가 이미 직접 띄우는 메시지와 중복되므로,
+사용자 메시지를 어느 계층이 책임질지 정하는 설계 판단이 먼저 필요해 남겨 둔다.

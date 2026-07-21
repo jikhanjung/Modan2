@@ -108,9 +108,21 @@ Post-0.1.8 review items, in priority order:
       window's menu/toolbar/tree suites, switched off because a real
       `QDialog.exec_()` hangs a headless test. One autouse fixture in conftest
       now suppresses modal dialogs, and the stale expectations behind them were
-      corrected. Skips 74 → 37, passing 1482 → 1516. Still skipped:
-      `test_ui_dialogs.py` (19) needs rewriting against current widget names,
-      plus workflow/performance/manual leftovers.
+      corrected. A second pass found the remaining "CI timeout" skips (29) were
+      not timeouts either but tests written against APIs that never existed
+      (`ModanDialogs`, `edit_dataset_name`, `on_action_export`); they were
+      deleted, since `tests/dialogs/` and the six real workflow suites already
+      cover those paths. Skips 74 → 8 (all legitimate), passing 1482 → 1518.
+
+---
+
+### Noted while triaging (not acted on)
+
+- [ ] `ModanController` emits `warning_occurred` (2 sites) and `info_message`
+      (7 sites), but `Modan2.py` connects neither, so those messages are
+      dropped. Simply connecting them would double up with the messages
+      `on_dataset_created` and friends already show directly — decide which
+      layer owns user-facing messaging first.
 
 ---
 

@@ -11,51 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.12] - 2026-07-21
 
-An urgent fix for 0.1.11, which opened the wrong database.
-
-### Fixed
-- **0.1.11 started up empty, as though all your data had been deleted.** It was
-  not: 0.1.11 looked for the database in a location the application has never
-  used, found nothing there, and created a blank one. Your datasets, objects and
-  analyses were untouched the whole time, and this release goes back to reading
-  them. Anyone on 0.1.11 should update.
-
-## [0.1.11] - 2026-07-21
-
-Fixes for the legend arrangement added in 0.1.9.
-
-### Fixed
-- **The legend no longer disappears after you move it.** Dragging worked, but
-  the position was being stored in a form that sent the legend far off the
-  chart the next time it was drawn, so the next change to the plot raised an
-  error and left no legend at all. Positions saved by the earlier version are
-  discarded, so an affected chart returns to the default position on its own.
-- **Dragging the legend no longer acts on the plot underneath it.** The same
-  click used to reach the chart as well, picking a shape or dropping a
-  regression line where the legend happened to sit.
-- **`--db` now opens the database you name.** The option was accepted and then
-  ignored, so the default database was always used.
-
-## [0.1.10] - 2026-07-21
-
-An urgent fix for 0.1.9, which could not start at all on some systems.
-
-### Fixed
-- **0.1.9 would not start**, stopping at the splash screen on
-  "Initializing configuration...". A database upgrade step introduced in 0.1.9
-  could not be read on Windows systems whose language is not set to a
-  UTF-8 locale — Korean Windows among them — so the application quit before it
-  opened. Your data is unaffected: the upgrade never ran. Anyone on 0.1.9
-  should update.
-- **A failure during startup now says what went wrong.** The error was being
-  reported behind the splash screen, which stays on top, so all you could see
-  was a splash frozen on the step that failed. The splash now closes first and
-  the message points at the log file.
-
-## [0.1.9] - 2026-07-21
-
-Arrange the chart legend the way you want it, plus a sharper 2D viewer and a
-complete Korean translation.
+Legend arrangement in Data Exploration, a sharper 2D viewer, and a complete
+Korean interface.
 
 ### Added
 - **Arrange the legend in Data Exploration.** With the legend shown, a
@@ -74,6 +31,14 @@ complete Korean translation.
   releases had never been picked up, so parts of the UI stayed in English —
   including some that had a translation but were being skipped when the
   translation file was built.
+
+### Fixed
+- **A failure during startup now says what went wrong.** The error was being
+  reported behind the splash screen, which stays on top, so all you could see
+  was a splash frozen on the step that failed. The splash now closes first and
+  the message points at the log file.
+- **`--db` now opens the database you name.** The option was accepted and then
+  ignored, so the default database was always used.
 
 ## [0.1.8] - 2026-07-21
 

@@ -653,6 +653,19 @@ class ModanController(QObject):
         if len(import_data.edge_list) > 0:
             dataset.edge_list = import_data.edge_list
             dataset.wireframe = dataset.pack_wireframe()
+        # Semi-landmark curve configuration (TPS CURVES=). The curve points
+        # become semi-landmarks appended after the fixed landmarks, so record
+        # where each curve's block starts and how many points it has. Taken from
+        # the first object that carries curves (all objects share the layout).
+        curve_data = getattr(import_data, "curve_data", {}) or {}
+        canonical_curves = next((curves for curves in curve_data.values() if curves), None)
+        if canonical_curves:
+            config = []
+            start = import_data.nlandmarks
+            for i, curve in enumerate(canonical_curves):
+                config.append({"id": f"curve{i + 1}", "n": len(curve), "method": "equidistant", "start": start})
+                start += len(curve)
+            dataset.set_curve_config(config)
         dataset.save()
 
         for i in range(import_data.nobjects):
@@ -674,13 +687,22 @@ class ModanController(QObject):
 
         obj.dataset = dataset
 
-        # Set landmarks
+        # Set landmarks. Semi-landmark curve points (TPS CURVES=) are appended
+        # after the fixed landmarks and stored as ordinary landmarks, matching
+        # the layout build_landmarks_with_curves produces; the raw traces are
+        # kept on the object so the curves can be re-resampled later.
+        curves = getattr(import_data, "curve_data", {}).get(obj.object_name, [])
+        all_points = list(import_data.landmark_data[obj.object_name])
+        for curve in curves:
+            all_points.extend(curve)
         landmark_list = []
-        for landmark in import_data.landmark_data[obj.object_name]:
+        for landmark in all_points:
             # None means "not recorded" (e.g. a -999 sentinel the import resolved);
             # store the marker unpack_landmark expects, not the string "None".
             landmark_list.append("\t".join(["Missing" if x is None else str(x) for x in landmark]))
         obj.landmark_str = "\n".join(landmark_list)
+        if curves:
+            obj.set_curve_raw({f"curve{i + 1}": curve for i, curve in enumerate(curves)})
 
         # Set variables
         if len(import_data.variablename_list) > 0:

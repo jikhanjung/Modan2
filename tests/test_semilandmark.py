@@ -246,3 +246,102 @@ class TestAnalysisCurveConfigSnapshot:
         ds = mm.MdDataset.create(dataset_name="DS", dimension=2)
         analysis = mm.MdAnalysis.create(dataset=ds, analysis_name="A", superimposition_method="procrustes")
         assert analysis.get_curve_config() == []
+
+
+# --------------------------------------------------------------------------- #
+# TPS curve import
+# --------------------------------------------------------------------------- #
+
+from ModanComponents import TPS  # noqa: E402
+from ModanController import ModanController  # noqa: E402
+
+TPS_WITH_CURVE = """LM=3
+0 0
+1 0
+2 0
+CURVES=1
+POINTS=4
+0 1
+0 2
+0 3
+0 4
+ID=obj1
+LM=3
+10 10
+11 10
+12 10
+CURVES=1
+POINTS=4
+10 11
+10 12
+10 13
+10 14
+ID=obj2
+"""
+
+TPS_NO_CURVE = """LM=3
+0 0
+1 0
+2 0
+ID=a
+LM=3
+5 5
+6 5
+7 5
+ID=b
+"""
+
+
+def _write_tps(tmp_path, content, name="in.tps"):
+    path = tmp_path / name
+    path.write_text(content)
+    return str(path)
+
+
+class TestTpsCurveParsing:
+    def test_curve_points_kept_out_of_landmarks(self, tmp_path):
+        tps = TPS(_write_tps(tmp_path, TPS_WITH_CURVE), "ds")
+        # Landmarks are only the 3 fixed points, not the 4 curve points.
+        assert tps.nlandmarks == 3
+        assert len(tps.landmark_data["obj1"]) == 3
+        assert tps.landmark_data["obj1"] == [[0, 0], [1, 0], [2, 0]]
+
+    def test_curves_captured_per_object(self, tmp_path):
+        tps = TPS(_write_tps(tmp_path, TPS_WITH_CURVE), "ds")
+        assert list(tps.curve_data.keys()) == ["obj1", "obj2"]
+        assert tps.curve_data["obj1"] == [[[0, 1], [0, 2], [0, 3], [0, 4]]]
+        assert tps.curve_data["obj2"] == [[[10, 11], [10, 12], [10, 13], [10, 14]]]
+
+    def test_landmark_only_file_has_no_curves(self, tmp_path):
+        tps = TPS(_write_tps(tmp_path, TPS_NO_CURVE), "ds")
+        assert tps.curve_data == {}
+        assert len(tps.landmark_data["a"]) == 3
+
+    def test_inverty_applies_to_curve_points(self, tmp_path):
+        tps = TPS(_write_tps(tmp_path, TPS_WITH_CURVE), "ds", invertY=True)
+        assert tps.curve_data["obj1"][0][0] == [0, -1]
+
+
+class TestTpsCurveImport:
+    def test_import_appends_semilandmarks_and_config(self, test_database, tmp_path):
+        tps = TPS(_write_tps(tmp_path, TPS_WITH_CURVE), "ds")
+        controller = ModanController()
+        dataset = controller.import_dataset(tps, "Imported", str(tmp_path))
+
+        # Dataset records one curve of 4 points starting after the 3 fixed ones.
+        assert dataset.get_curve_config() == [{"id": "curve1", "n": 4, "method": "equidistant", "start": 3}]
+
+        obj = dataset.object_list.order_by(mm.MdObject.id).first()
+        obj.unpack_landmark()
+        # 3 fixed + 4 semi-landmarks appended.
+        assert len(obj.landmark_list) == 7
+        assert obj.landmark_list[3] == [0, 1]
+        assert obj.get_curve_raw() == {"curve1": [[0, 1], [0, 2], [0, 3], [0, 4]]}
+
+    def test_import_without_curves_leaves_config_empty(self, test_database, tmp_path):
+        tps = TPS(_write_tps(tmp_path, TPS_NO_CURVE), "ds")
+        controller = ModanController()
+        dataset = controller.import_dataset(tps, "Plain", str(tmp_path))
+        assert dataset.get_curve_config() == []
+        obj = dataset.object_list.first()
+        assert obj.get_curve_raw() == {}

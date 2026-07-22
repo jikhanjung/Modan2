@@ -53,6 +53,10 @@ class TPS:
         self.property_list_list = []
         self.object_comment = {}
         self.landmark_data = {}
+        # Per-object semi-landmark curves parsed from CURVES=/POINTS= blocks:
+        # object key -> list of curves, each a list of [x, y(, z)] points. Empty
+        # for the common landmark-only TPS file.
+        self.curve_data = {}
         self.invertY = invertY
         self.read()
 
@@ -82,6 +86,16 @@ class TPS:
             object_comment_1 = ""
             object_comment_2 = ""
 
+            # Semi-landmark curve parsing state. A TPS object may follow its LM
+            # block with CURVES=<k> then k x (POINTS=<m> + m coordinate lines).
+            # Those coordinate lines must go to curves, not into `data` (which
+            # would corrupt the landmark list).
+            curve_data = {}
+            current_curves = []
+            current_curve = []
+            curve_points_remaining = 0
+            reading_curves = False
+
             for line in tps_lines:
                 line = line.strip()
                 if line == "":
@@ -107,12 +121,18 @@ class TPS:
                             object_comment[key] = " ".join([object_comment_1, object_comment_2]).strip()
                             if object_image_path != "":
                                 object_images[key] = object_image_path
+                            if current_curves:
+                                curve_data[key] = current_curves
                             # print("data:", data)
                             data = []
                             object_id = ""
                             object_comment_1 = ""
                             object_comment_2 = ""
                             object_image_path = ""
+                            current_curves = []
+                            current_curve = []
+                            curve_points_remaining = 0
+                            reading_curves = False
                         landmark_count, object_comment_1 = int(headerline.group(1)), headerline.group(2).strip()
                         object_count += 1
                     else:
@@ -126,7 +146,15 @@ class TPS:
                             threed += 1
                         else:
                             twod += 1
-                        if len(point) > 1:
+                        if reading_curves and curve_points_remaining > 0:
+                            # Coordinate line belonging to the current curve, not
+                            # a landmark.
+                            current_curve.append(point)
+                            curve_points_remaining -= 1
+                            if curve_points_remaining == 0:
+                                current_curves.append(current_curve)
+                                current_curve = []
+                        elif len(point) > 1:
                             data.append(point)
                     elif dataline.group(1).lower() == "image":
                         object_image_path = dataline.group(2)
@@ -135,6 +163,11 @@ class TPS:
                     elif dataline.group(1).lower() == "id":
                         object_id = dataline.group(2)
                         pass
+                    elif dataline.group(1).lower() == "curves":
+                        reading_curves = True
+                    elif dataline.group(1).lower() == "points":
+                        curve_points_remaining = int(dataline.group(2))
+                        current_curve = []
 
             if len(data) > 0:
                 if object_id != "":
@@ -149,6 +182,8 @@ class TPS:
                 object_comment[key] = " ".join([object_comment_1, object_comment_2]).strip()
                 if object_image_path != "":
                     object_images[key] = object_image_path
+                if current_curves:
+                    curve_data[key] = current_curves
 
             if object_count == 0 and landmark_count == 0:
                 return None
@@ -163,9 +198,16 @@ class TPS:
                     for idx in range(len(objects[key])):
                         objects[key][idx][1] = -1 * objects[key][idx][1]
 
+            if self.dimension == 2 and self.invertY:
+                for key in curve_data:
+                    for curve in curve_data[key]:
+                        for point in curve:
+                            point[1] = -1 * point[1]
+
             self.nobjects = len(object_name_list)
             self.nlandmarks = landmark_count
             self.landmark_data = objects
+            self.curve_data = curve_data
             self.object_name_list = object_name_list
             self.object_comment = object_comment
             self.object_images = object_images

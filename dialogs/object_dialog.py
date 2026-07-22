@@ -123,6 +123,7 @@ class ObjectDialog(QDialog):
         self.curveTable.setMaximumHeight(150)
         self._populating_curve_table = False
         self.curveTable.itemChanged.connect(self.on_curve_cell_changed)
+        self.curveTable.itemSelectionChanged.connect(self.on_curve_selected)
         self.lblDataset = QLabel()
 
         self.main_layout = QVBoxLayout()
@@ -615,6 +616,8 @@ class ObjectDialog(QDialog):
         self.btnCurve.setChecked(False)
 
     def btnCurve_clicked(self):
+        # Entering trace mode: no curve selected, so a new curve is drawn.
+        self.object_view.selected_curve_id = None
         self.object_view.set_mode(MODE["EDIT_CURVE"])
         self.object_view.update()
         self.btnCurve.setDown(True)
@@ -1072,6 +1075,23 @@ class ObjectDialog(QDialog):
                 self.curveTable.setItem(row, 3, QTableWidgetItem(str(curve.get("n", 0))))
         finally:
             self._populating_curve_table = False
+
+    def on_curve_selected(self):
+        """Selecting a curve row makes its traced points editable in the viewer."""
+        if self._populating_curve_table or self.dataset is None:
+            return
+        items = self.curveTable.selectedItems()
+        if not items:
+            return
+        row = self.curveTable.row(items[0])
+        config = self.dataset.get_curve_config()
+        if row >= len(config):
+            return
+        view = self.object_view if self.object_view is not None else self.object_view_2d
+        if view is not None:
+            view.set_mode(MODE["EDIT_CURVE"])
+            view.selected_curve_id = config[row]["id"]
+            view.update()
 
     def on_curve_cell_changed(self, item):
         """Editing the N column changes the semi-landmark count dataset-wide."""

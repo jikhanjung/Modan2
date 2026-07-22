@@ -403,6 +403,11 @@ class _FakeDataset:
 class _FakeView:
     def __init__(self):
         self.landmark_list = None
+        self.selected_curve_id = None
+        self.edit_mode = None
+
+    def set_mode(self, mode):
+        self.edit_mode = mode
 
     def update(self):
         pass
@@ -430,6 +435,8 @@ def _build_dialog(qtbot, landmarks=None):
     dlg.curveTable = curve_table
     dlg._populating_curve_table = False
     curve_table.itemChanged.connect(dlg.on_curve_cell_changed)
+    curve_table.itemSelectionChanged.connect(dlg.on_curve_selected)
+    dlg.object_view = dlg.object_view_2d
     dlg.on_landmark_selected = lambda: None
     dlg.show_landmarks()
     return dlg
@@ -582,3 +589,67 @@ class TestDatasetDialogCurveScheme:
         dlg = self._dlg(qtbot)
         dlg.edtNumCurves.setText("")
         assert dlg._build_curve_config() == []
+
+
+# --------------------------------------------------------------------------- #
+# Curve point editing (viewer hit-testing + row selection)
+# --------------------------------------------------------------------------- #
+
+from ModanComponents import ObjectViewer2D  # noqa: E402
+
+
+class _RawDlg:
+    def __init__(self, raw_map):
+        self.curve_raw_map = raw_map
+        self.curves_refreshed = 0
+
+    def show_curves(self):
+        self.curves_refreshed += 1
+
+
+class TestCurvePointEditingHelpers:
+    def _viewer(self, qtbot, raw):
+        v = ObjectViewer2D()
+        qtbot.addWidget(v)
+        v.scale = 1.0
+        v.pan_x = v.pan_y = v.temp_pan_x = v.temp_pan_y = 0
+        v.image_canvas_ratio = 1.0
+        v.object_dialog = _RawDlg({"curve1": raw})
+        v.selected_curve_id = "curve1"
+        return v
+
+    def test_point_hit_test(self, qtbot):
+        v = self._viewer(qtbot, [[0, 0], [10, 0], [20, 0]])
+        assert v._curve_point_within_threshold([10, 0]) == 1
+        assert v._curve_point_within_threshold([50, 50]) == -1
+
+    def test_segment_hit_test(self, qtbot):
+        v = self._viewer(qtbot, [[0, 0], [20, 0]])
+        assert v._curve_segment_within_threshold([10, 0]) == 0
+        assert v._curve_segment_within_threshold([10, 50]) == -1
+
+    def test_selected_raw_is_the_live_list(self, qtbot):
+        raw = [[0, 0], [10, 0]]
+        v = self._viewer(qtbot, raw)
+        assert v._selected_curve_raw() is raw
+
+    def test_point_segment_distance(self):
+        assert ObjectViewer2D._point_segment_distance([5, 3], [0, 0], [10, 0]) == pytest.approx(3.0)
+        assert ObjectViewer2D._point_segment_distance([15, 0], [0, 0], [10, 0]) == pytest.approx(5.0)
+
+
+class TestCurveRowSelection:
+    def test_selecting_row_enables_curve_editing(self, qtbot):
+        dlg = _build_dialog(qtbot)
+        dlg.dataset._config = [dict(c) for c in SCHEME]
+        dlg.curve_raw_map = {"curve1": [[0, 0], [1, 1]]}
+        dlg.show_curves()
+        dlg.curveTable.selectRow(1)
+        assert dlg.object_view.selected_curve_id == "curve2"
+        assert dlg.object_view.edit_mode == mm_mode_edit_curve()
+
+
+def mm_mode_edit_curve():
+    from MdConstants import MODE
+
+    return MODE["EDIT_CURVE"]

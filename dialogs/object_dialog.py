@@ -30,6 +30,7 @@ from PyQt5.QtWidgets import (
     QLineEdit,
     QMessageBox,
     QPushButton,
+    QRadioButton,
     QShortcut,
     QSizePolicy,
     QSplitter,
@@ -189,8 +190,12 @@ class ObjectDialog(QDialog):
         self.right_top_widget.setLayout(self.btn_layout2)
         self.right_middle_widget = QWidget()
         self.right_middle_layout = QVBoxLayout()
-        self.right_middle_layout.addWidget(self.cbxShowIndex)
-        self.right_middle_layout.addWidget(self.cbxShowName)
+        label_mode_layout = QHBoxLayout()
+        label_mode_layout.addWidget(self.cbxShowIndex)
+        label_mode_layout.addWidget(self.rbShowIndex)
+        label_mode_layout.addWidget(self.rbShowName)
+        label_mode_layout.addStretch()
+        self.right_middle_layout.addLayout(label_mode_layout)
         self.right_middle_layout.addWidget(self.cbxShowWireframe)
         self.right_middle_layout.addWidget(self.cbxShowPolygon)
         self.right_middle_layout.addWidget(self.cbxShowEstimated)
@@ -364,14 +369,17 @@ class ObjectDialog(QDialog):
     def _init_option_checkboxes(self):
         """Build the view-option checkboxes (index/wireframe/polygon/estimated/…)
         and the Load-Image button."""
+        # "Show" toggles landmark labels; the Index/Name radios pick which label.
         self.cbxShowIndex = QCheckBox()
-        self.cbxShowIndex.setText(self.tr("Index"))
+        self.cbxShowIndex.setText(self.tr("Show"))
         self.cbxShowIndex.setChecked(True)
-        # Show the landmark name/abbreviation instead of its index number.
-        self.cbxShowName = QCheckBox()
-        self.cbxShowName.setText(self.tr("Name"))
-        self.cbxShowName.setChecked(False)
-        self.cbxShowName.stateChanged.connect(self.show_name_state_changed)
+        self.rbShowIndex = QRadioButton(self.tr("Index"))
+        self.rbShowIndex.setChecked(True)
+        self.rbShowName = QRadioButton(self.tr("Name"))
+        self.labelModeGroup = QButtonGroup(self)
+        self.labelModeGroup.addButton(self.rbShowIndex)
+        self.labelModeGroup.addButton(self.rbShowName)
+        self.rbShowName.toggled.connect(self.show_name_state_changed)
         # Opens the dataset-wide landmark name/description editor.
         self.btnEditLandmarkNames = QPushButton(self.tr("Landmark Names"))
         self.btnEditLandmarkNames.clicked.connect(self.btnEditLandmarkNames_clicked)
@@ -610,12 +618,11 @@ class ObjectDialog(QDialog):
             self.show_landmarks()
             self.object_view.update()
 
-    def show_name_state_changed(self, state):
-        """Toggle drawing the landmark name/abbreviation instead of the index."""
-        show_name = state == Qt.Checked
+    def show_name_state_changed(self, checked):
+        """Label mode radio: draw the landmark name (checked) or the index."""
         for view in (self.object_view_2d, self.object_view_3d):
             if view is not None:
-                view.show_landmark_name = show_name
+                view.show_landmark_name = checked
         if self.object_view is not None:
             self.object_view.update()
 

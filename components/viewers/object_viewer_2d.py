@@ -403,6 +403,20 @@ class ObjectViewer2D(QLabel):
                 return name
         return str(idx + 1)
 
+    def _update_landmark_tooltip(self, curr_pos, global_pos):
+        """Show a hovered landmark's description (or name) as a tooltip."""
+        from PyQt5.QtWidgets import QToolTip
+
+        near = self.get_landmark_index_within_threshold(curr_pos, DISTANCE_THRESHOLD)
+        names = self._landmark_names()
+        if 0 <= near < len(names):
+            entry = names[near]
+            text = entry.get("desc") or entry.get("name")
+            if text:
+                QToolTip.showText(global_pos, text, self)
+                return
+        QToolTip.hideText()
+
     def _curve_config(self):
         """Curve scheme, preferring the object dialog's in-memory copy.
 
@@ -591,6 +605,7 @@ class ObjectViewer2D(QLabel):
         self.mouse_curr_x = me.x()
         self.mouse_curr_y = me.y()
         curr_pos = [self.mouse_curr_x, self.mouse_curr_y]
+        self._update_landmark_tooltip(curr_pos, me.globalPos())
 
         if self.pan_mode == MODE["PAN"]:
             self.temp_pan_x = int(self.mouse_curr_x - self.mouse_down_x)
@@ -1206,7 +1221,7 @@ class ObjectViewer2D(QLabel):
             painter.drawEllipse(
                 int(self._2canx(landmark[0]) - radius), int(self._2cany(landmark[1])) - radius, radius * 2, radius * 2
             )
-            if self.show_index or self.show_landmark_name:
+            if self.show_index:
                 idx_color = QColor(self.index_color)
                 painter.setPen(QPen(idx_color, 2))
                 painter.setBrush(QBrush(idx_color))

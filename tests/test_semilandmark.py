@@ -377,8 +377,6 @@ class TestTpsCurveImport:
 # ObjectDialog curve tracing (finish_curve)
 # --------------------------------------------------------------------------- #
 
-from unittest.mock import patch  # noqa: E402
-
 from PyQt5.QtWidgets import QDialog, QTableWidget  # noqa: E402
 
 from dialogs.object_dialog import ObjectDialog  # noqa: E402
@@ -464,19 +462,21 @@ class TestObjectDialogFinishCurve:
         assert set(dlg.curve_raw_map.keys()) == {"curve1", "curve2"}
         assert len(dlg.landmark_list) == 2
 
-    def test_no_scheme_is_noop(self, qtbot):
-        dlg = _build_dialog(qtbot)  # empty curve config
-        with patch("dialogs.object_dialog.QMessageBox.information"):
-            dlg.finish_curve([[0, 0], [1, 0]])
-        assert dlg.curve_raw_map == {}
+    def test_empty_scheme_creates_first_curve(self, qtbot):
+        dlg = _build_dialog(qtbot)  # empty curve config, 2 fixed landmarks
+        dlg.finish_curve([[0, 0], [1, 0]])
+        config = dlg.dataset.get_curve_config()
+        assert [c["id"] for c in config] == ["curve1"]
+        assert config[0]["start"] == 2  # after the 2 fixed landmarks
+        assert "curve1" in dlg.curve_raw_map
 
-    def test_all_traced_is_noop(self, qtbot):
-        dlg = self._dlg(qtbot, [SCHEME[0]])
-        dlg.finish_curve([[0, 0], [1, 0]])  # fills curve1 (the only one)
-        with patch("dialogs.object_dialog.QMessageBox.information") as m:
-            dlg.finish_curve([[2, 2], [3, 3]])
-        assert list(dlg.curve_raw_map.keys()) == ["curve1"]
-        m.assert_called_once()
+    def test_trace_beyond_scheme_grows_it(self, qtbot):
+        dlg = self._dlg(qtbot, [SCHEME[0]])  # one defined curve
+        dlg.finish_curve([[0, 0], [1, 0]])  # fills curve1
+        dlg.finish_curve([[2, 2], [3, 3]])  # grows scheme -> curve2
+        config = dlg.dataset.get_curve_config()
+        assert [c["id"] for c in config] == ["curve1", "curve2"]
+        assert set(dlg.curve_raw_map.keys()) == {"curve1", "curve2"}
 
     def test_too_few_points_is_noop(self, qtbot):
         dlg = self._dlg(qtbot, SCHEME)

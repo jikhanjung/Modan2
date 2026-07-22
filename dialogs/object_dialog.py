@@ -1008,21 +1008,25 @@ class ObjectDialog(QDialog):
         if raw_points is None or len(raw_points) < 2:
             return
         config = self.dataset.get_curve_config()
-        if not config:
-            QMessageBox.information(
-                self,
-                self.tr("Semi-landmarks"),
-                self.tr("Define the semi-landmark curves for this dataset first (dataset properties)."),
-            )
-            return
+        # Fill the next un-traced curve in the scheme; if every defined curve is
+        # already traced (or none are defined), grow the scheme by one curve.
+        # Adding a curve is a dataset-level change -- it applies to every specimen
+        # -- and its N defaults to the previous curve's (editable in the table).
         target = next((c for c in config if c.get("id") not in self.curve_raw_map), None)
         if target is None:
-            QMessageBox.information(
-                self,
-                self.tr("Semi-landmarks"),
-                self.tr("All curves in the dataset scheme are already traced."),
-            )
-            return
+            if config:
+                fixed_count = config[0].get("start", len(self.landmark_list))
+                counts = [c.get("n", 0) for c in config]
+                default_n = counts[-1] if counts else 10
+            else:
+                fixed_count = len(self.landmark_list)
+                counts = []
+                default_n = 10
+            counts.append(default_n)
+            config = mu.build_curve_config(fixed_count, counts)
+            self.dataset.set_curve_config(config)
+            self.dataset.save()
+            target = config[-1]
         self.curve_raw_map[target["id"]] = [list(p) for p in raw_points]
         # Repaint so the derived semi-landmarks appear; nothing is stored in the
         # landmark list or table.

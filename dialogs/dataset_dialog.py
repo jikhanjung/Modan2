@@ -22,6 +22,7 @@ from PyQt5.QtWidgets import (
     QShortcut,
     QTableWidget,
     QTableWidgetItem,
+    QTabWidget,
     QTextEdit,
     QVBoxLayout,
     QWidget,
@@ -162,9 +163,6 @@ class DatasetDialog(BaseDialog):
         self.variable_layout.addWidget(self.lstVariableName)
         self.variable_layout.addWidget(self.variable_button_widget)
 
-        # Main form layout
-        self.main_layout = QFormLayout()
-        self.setLayout(self.main_layout)
         self.lblParent = QLabel(self.tr("Parent"))
         self.lblDatasetName = QLabel(self.tr("Dataset Name"))
         self.lblDatasetDesc = QLabel(self.tr("Description"))
@@ -176,24 +174,48 @@ class DatasetDialog(BaseDialog):
         self.lblCurves = QLabel(self.tr("Curves"))
         self.lblLandmarkNames = QLabel(self.tr("Landmark Names"))
         self.lblVariableNameStr = QLabel(self.tr("Variable Names"))
-        self.main_layout.addRow(self.lblParent, self.cbxParent)
-        self.main_layout.addRow(self.lblDatasetName, self.edtDatasetName)
-        self.main_layout.addRow(self.lblDatasetDesc, self.edtDatasetDesc)
-        self.main_layout.addRow(self.lblDimension, dim_layout)
-        self.main_layout.addRow(self.lblWireframe, self.edtWireframe)
-        self.main_layout.addRow(self.lblFixedCount, self.edtFixedCount)
-        self.main_layout.addRow(self.lblCurves, self.curveTable)
-        self.main_layout.addRow(self.lblLandmarkNames, self.landmarkNameTable)
-        self.main_layout.addRow(self.lblBaseline, self.edtBaseline)
-        self.main_layout.addRow(self.lblPolygons, self.edtPolygons)
-        self.main_layout.addRow(self.lblVariableNameStr, self.variable_widget)
+
+        # Tabbed layout: group related inputs so the dialog isn't one long form.
+        self.tabs = QTabWidget()
+
+        general_tab = QWidget()
+        general_form = QFormLayout(general_tab)
+        general_form.addRow(self.lblParent, self.cbxParent)
+        general_form.addRow(self.lblDatasetName, self.edtDatasetName)
+        general_form.addRow(self.lblDatasetDesc, self.edtDatasetDesc)
+        general_form.addRow(self.lblDimension, dim_layout)
+        self.tabs.addTab(general_tab, self.tr("General"))
+
+        landmark_tab = QWidget()
+        landmark_form = QFormLayout(landmark_tab)
+        landmark_form.addRow(self.lblWireframe, self.edtWireframe)
+        landmark_form.addRow(self.lblBaseline, self.edtBaseline)
+        landmark_form.addRow(self.lblPolygons, self.edtPolygons)
+        landmark_form.addRow(self.lblLandmarkNames, self.landmarkNameTable)
+        self.tabs.addTab(landmark_tab, self.tr("Landmarks"))
+
+        curve_tab = QWidget()
+        curve_form = QFormLayout(curve_tab)
+        curve_form.addRow(self.lblFixedCount, self.edtFixedCount)
+        curve_form.addRow(self.lblCurves, self.curveTable)
+        self.tabs.addTab(curve_tab, self.tr("Curves"))
+
+        variable_tab = QWidget()
+        variable_tab_layout = QVBoxLayout(variable_tab)
+        variable_tab_layout.addWidget(self.lblVariableNameStr)
+        variable_tab_layout.addWidget(self.variable_widget)
+        self.tabs.addTab(variable_tab, self.tr("Variables"))
 
         # Button layout
         btn_layout = QHBoxLayout()
         btn_layout.addWidget(self.btnOkay)
         btn_layout.addWidget(self.btnDelete)
         btn_layout.addWidget(self.btnCancel)
-        self.main_layout.addRow(btn_layout)
+
+        self.main_layout = QVBoxLayout()
+        self.main_layout.addWidget(self.tabs)
+        self.main_layout.addLayout(btn_layout)
+        self.setLayout(self.main_layout)
 
     def addVariable(self):
         """Add new variable to the list."""

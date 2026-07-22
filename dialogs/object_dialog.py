@@ -1044,12 +1044,31 @@ class ObjectDialog(QDialog):
             self.dataset.save()
             target = config[-1]
         self.curve_raw_map[target["id"]] = [list(p) for p in raw_points]
-        # Repaint so the derived semi-landmarks appear; nothing is stored in the
-        # landmark list or table.
+        self.curve_trace_changed()
+        # The N prompt ran a nested event loop; force an immediate repaint so the
+        # new curve shows without waiting for the next event.
+        if self.object_view is not None:
+            self.object_view.repaint()
+
+    def curve_trace_changed(self):
+        """A curve's raw trace changed: refresh the table, persist, and repaint."""
+        self.show_curves()
+        self._persist_curves()
         for view in (self.object_view_2d, self.object_view_3d):
             if view is not None:
                 view.update()
-        self.show_curves()
+
+    def _persist_curves(self):
+        """Save the raw curve traces immediately (like the wireframe), so they
+        survive closing the dialog even without pressing Save. Writes only the
+        curve column, leaving landmark edits to the normal Save path.
+
+        A brand-new object has no id yet; its traces are persisted by save_object
+        once the object is created.
+        """
+        if self.object is not None and getattr(self.object, "id", None):
+            self.object.set_curve_raw(self.curve_raw_map)
+            self.object.save(only=[MdObject.curve_raw_json])
 
     def show_curves(self):
         """Populate the curve table from the dataset scheme and this object's traces."""

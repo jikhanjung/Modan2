@@ -409,6 +409,9 @@ class _FakeView:
     def set_mode(self, mode):
         self.edit_mode = mode
 
+    def repaint(self):
+        pass
+
     def update(self):
         pass
 
@@ -419,6 +422,7 @@ def _build_dialog(qtbot, landmarks=None):
     dlg.remember_geometry = False
     qtbot.addWidget(dlg)
     dlg.dataset = _FakeDataset(2)
+    dlg.object = None  # _persist_curves() skips when there is no saved object
     dlg.landmark_list = landmarks if landmarks is not None else [[1.0, 2.0], [3.0, 4.0]]
     dlg.curve_raw_map = {}
     dlg._populating_landmark_table = False
@@ -653,3 +657,18 @@ def mm_mode_edit_curve():
     from MdConstants import MODE
 
     return MODE["EDIT_CURVE"]
+
+
+class TestCurveRawPersistence:
+    def test_finish_curve_persists_raw_immediately(self, qtbot, test_database):
+        ds = mm.MdDataset.create(dataset_name="D", dimension=2)
+        obj = mm.MdObject.create(object_name="o", dataset=ds, landmark_str="1\t1\n2\t2")
+        dlg = _build_dialog(qtbot)
+        dlg.dataset = ds
+        dlg.object = obj
+        dlg.curve_raw_map = {}
+        with patch("dialogs.object_dialog.QInputDialog.getInt", return_value=(4, True)):
+            dlg.finish_curve([[10, 10], [20, 10], [30, 10]])
+        # Reload without going through Save/OK -- the trace must already be stored.
+        reloaded = mm.MdObject.get_by_id(obj.id)
+        assert reloaded.get_curve_raw() == {"curve1": [[10, 10], [20, 10], [30, 10]]}

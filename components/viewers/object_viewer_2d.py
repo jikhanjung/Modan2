@@ -410,9 +410,13 @@ class ObjectViewer2D(QLabel):
         return dlg.curve_raw_map.get(self.selected_curve_id)
 
     def _notify_curve_edited(self):
-        """Tell the object dialog a curve's raw trace changed (refresh its table)."""
+        """Tell the object dialog a curve's raw trace changed (refresh + persist)."""
         dlg = getattr(self, "object_dialog", None)
-        if dlg is not None and hasattr(dlg, "show_curves"):
+        if dlg is None:
+            return
+        if hasattr(dlg, "curve_trace_changed"):
+            dlg.curve_trace_changed()
+        elif hasattr(dlg, "show_curves"):
             dlg.show_curves()
 
     def _curve_point_within_threshold(self, pos, threshold=DISTANCE_THRESHOLD):

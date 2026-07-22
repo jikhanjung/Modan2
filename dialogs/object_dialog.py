@@ -1092,6 +1092,13 @@ class ObjectDialog(QDialog):
         finally:
             self._populating_curve_table = False
 
+    def select_curve_row(self, curve_id):
+        """Select the curve's row in the table (which enables editing it)."""
+        for row, curve in enumerate(self.curve_config):
+            if curve.get("id") == curve_id:
+                self.curveTable.selectRow(row)
+                return
+
     def on_curve_selected(self):
         """Selecting a curve row makes its traced points editable in the viewer."""
         if self._populating_curve_table or self.dataset is None:

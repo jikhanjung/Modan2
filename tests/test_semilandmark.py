@@ -607,6 +607,7 @@ from ModanComponents import ObjectViewer2D  # noqa: E402
 class _RawDlg:
     def __init__(self, raw_map):
         self.curve_raw_map = raw_map
+        self.curve_config = [{"id": cid, "n": 5, "method": "equidistant", "start": 0} for cid in raw_map]
         self.curves_refreshed = 0
 
     def show_curves(self):
@@ -642,6 +643,12 @@ class TestCurvePointEditingHelpers:
     def test_point_segment_distance(self):
         assert ObjectViewer2D._point_segment_distance([5, 3], [0, 0], [10, 0]) == pytest.approx(3.0)
         assert ObjectViewer2D._point_segment_distance([15, 0], [0, 0], [10, 0]) == pytest.approx(5.0)
+
+    def test_curve_at_position_finds_nearby_curve(self, qtbot):
+        v = self._viewer(qtbot, [[0, 0], [10, 0], [20, 0]])
+        v.selected_curve_id = None  # trace mode: still finds the curve to select
+        assert v._curve_at_position([10, 0]) == "curve1"
+        assert v._curve_at_position([10, 50]) is None
 
 
 class TestCurveRowSelection:

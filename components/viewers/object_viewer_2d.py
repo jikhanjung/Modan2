@@ -451,6 +451,23 @@ class ObjectViewer2D(QLabel):
                 return i
         return -1
 
+    def _curve_at_position(self, pos, threshold=DISTANCE_THRESHOLD):
+        """Id of a curve whose raw trace passes near ``pos`` (screen), or None."""
+        raw_map = self._curve_raw_map()
+        for curve in self._curve_config():
+            raw = raw_map.get(curve.get("id"))
+            if not raw:
+                continue
+            for pt in raw:
+                if self.get_distance(pos, [self._2canx(pt[0]), self._2cany(pt[1])]) <= threshold:
+                    return curve.get("id")
+            for i in range(len(raw) - 1):
+                a = [self._2canx(raw[i][0]), self._2cany(raw[i][1])]
+                b = [self._2canx(raw[i + 1][0]), self._2cany(raw[i + 1][1])]
+                if self._point_segment_distance(pos, a, b) <= threshold:
+                    return curve.get("id")
+        return None
+
     @staticmethod
     def _point_segment_distance(p, a, b):
         """Distance from screen point ``p`` to the segment a-b."""
@@ -627,7 +644,18 @@ class ObjectViewer2D(QLabel):
                             raw.insert(seg_idx + 1, [self._2imgx(self.mouse_curr_x), self._2imgy(self.mouse_curr_y)])
                             self.moving_curve_point_index = seg_idx + 1
                 else:
-                    # Tracing a new curve: add a point.
+                    # Not tracing yet: a click near an existing curve selects it
+                    # for editing instead of starting a new trace.
+                    if not self.current_curve_points:
+                        near_id = self._curve_at_position([self.mouse_curr_x, self.mouse_curr_y])
+                        if near_id is not None:
+                            if self.object_dialog is not None and hasattr(self.object_dialog, "select_curve_row"):
+                                self.object_dialog.select_curve_row(near_id)
+                            else:
+                                self.selected_curve_id = near_id
+                            self.repaint()
+                            return
+                    # Otherwise add a point to the new curve being traced.
                     img_x = self._2imgx(self.mouse_curr_x)
                     img_y = self._2imgy(self.mouse_curr_y)
                     if img_x < 0 or img_x > self.orig_pixmap.width() or img_y < 0 or img_y > self.orig_pixmap.height():

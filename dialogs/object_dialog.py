@@ -133,6 +133,11 @@ class ObjectDialog(QDialog):
         self.curveTable = QTableWidget()
         self.curveTable.setColumnCount(3)
         self.curveTable.setHorizontalHeaderLabels([self.tr("Name"), self.tr("N"), self.tr("Traced")])
+        # Name takes the free space; N and Traced only as wide as their contents.
+        _curve_header = self.curveTable.horizontalHeader()
+        _curve_header.setSectionResizeMode(0, QHeaderView.Stretch)
+        _curve_header.setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        _curve_header.setSectionResizeMode(2, QHeaderView.ResizeToContents)
         self.curveTable.setMaximumHeight(150)
         self._populating_curve_table = False
         self.curveTable.itemChanged.connect(self.on_curve_cell_changed)
@@ -175,8 +180,10 @@ class ObjectDialog(QDialog):
         self.form_layout.addRow(self.lblSequence, self.edtSequence)
         self.form_layout.addRow(self.lblObjectDesc, self.edtObjectDesc)
         self.form_layout.addRow(self.lblLandmarkStr, self.edtLandmarkStr)
-        self.form_layout.addRow(self.lblCurves, self.curveTable)
+        # Landmark coordinate input + Add/Update/Delete sit between the landmark
+        # and curve tables.
         self.form_layout.addRow("", self.inputWidget)
+        self.form_layout.addRow(self.lblCurves, self.curveTable)
 
         self._init_tool_buttons()
 

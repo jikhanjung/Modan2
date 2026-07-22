@@ -332,7 +332,7 @@ class ObjectDialog(QDialog):
         )
         # Curve (semi-landmark) tracing. No dedicated icon yet, so a short text
         # button; it joins the same exclusive group as the other tools.
-        self.btnCurve = QPushButton("Cv")
+        self.btnCurve = QPushButton(self.tr("Curve"))
         self.btnCurve.setToolTip(self.tr("Trace a curve (semi-landmarks)"))
         # Flat by default so its background matches the flat icon tool buttons; a
         # subtle fill shows when it is the active tool.

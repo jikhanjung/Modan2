@@ -85,9 +85,16 @@ class ObjectDialog(QDialog):
 
         self.status_bar = QStatusBar()
         self.landmark_list = []
-        # Raw traced curve points per curve id (kept so curves can be re-resampled
-        # later); the resampled semi-landmarks live in self.landmark_list.
+        # Semi-landmark curves are edited in memory and written to the database
+        # only on Save (like the landmarks). curve_config is the dataset-wide
+        # scheme [{id, n, method, start}]; curve_raw_map is this object's raw
+        # traces {id: [[x, y], ...]}. This dialog is their single source of truth
+        # while open, so the viewer reads them from here (avoids a stale copy on a
+        # separately-fetched dataset instance).
+        self.curve_config = []
         self.curve_raw_map = {}
+        self._orig_curve_config = []
+        self._orig_curve_raw = {}
         # Set while show_landmarks() repopulates the table, so the cell validator
         # ignores the itemChanged storm that causes.
         self._populating_landmark_table = False
@@ -833,8 +840,12 @@ class ObjectDialog(QDialog):
             # Always use original for table display (keep "MISSING" text)
             # Estimated values are only used for visualization in viewer
             self.landmark_list = self.original_landmark_list
-            # Load any stored raw curve traces so further curves append to them.
+            # Load the curve scheme (dataset) and this object's raw traces into the
+            # dialog's working copies; snapshot them to detect unsaved edits.
+            self.curve_config = self.dataset.get_curve_config() if self.dataset is not None else []
             self.curve_raw_map = object.get_curve_raw()
+            self._orig_curve_config = copy.deepcopy(self.curve_config)
+            self._orig_curve_raw = copy.deepcopy(self.curve_raw_map)
             self.show_curves()
             # Use object's dataset if self.dataset is None
             dataset_to_use = self.dataset if self.dataset is not None else object.dataset
@@ -1011,11 +1022,11 @@ class ObjectDialog(QDialog):
         """
         if raw_points is None or len(raw_points) < 2:
             return
-        config = self.dataset.get_curve_config()
+        config = self.curve_config
         # Fill the next un-traced curve in the scheme; if every defined curve is
         # already traced (or none are defined), grow the scheme by one curve.
-        # Adding a curve is a dataset-level change -- it applies to every specimen
-        # -- and its N defaults to the previous curve's (editable in the table).
+        # Held in memory until Save; N defaults to the previous curve's (editable
+        # in the table).
         target = next((c for c in config if c.get("id") not in self.curve_raw_map), None)
         if target is None:
             # A brand-new curve: ask how many semi-landmarks it carries (this
@@ -1039,10 +1050,8 @@ class ObjectDialog(QDialog):
             if not ok:
                 return
             counts.append(n)
-            config = mu.build_curve_config(fixed_count, counts)
-            self.dataset.set_curve_config(config)
-            self.dataset.save()
-            target = config[-1]
+            self.curve_config = mu.build_curve_config(fixed_count, counts)
+            target = self.curve_config[-1]
         self.curve_raw_map[target["id"]] = [list(p) for p in raw_points]
         self.curve_trace_changed()
         # The N prompt ran a nested event loop; force an immediate repaint so the
@@ -1051,28 +1060,16 @@ class ObjectDialog(QDialog):
             self.object_view.repaint()
 
     def curve_trace_changed(self):
-        """A curve's raw trace changed: refresh the table, persist, and repaint."""
+        """A curve's raw trace changed: refresh the table and repaint. Curves are
+        held in memory and written to the database only on Save."""
         self.show_curves()
-        self._persist_curves()
         for view in (self.object_view_2d, self.object_view_3d):
             if view is not None:
                 view.update()
 
-    def _persist_curves(self):
-        """Save the raw curve traces immediately (like the wireframe), so they
-        survive closing the dialog even without pressing Save. Writes only the
-        curve column, leaving landmark edits to the normal Save path.
-
-        A brand-new object has no id yet; its traces are persisted by save_object
-        once the object is created.
-        """
-        if self.object is not None and getattr(self.object, "id", None):
-            self.object.set_curve_raw(self.curve_raw_map)
-            self.object.save(only=[MdObject.curve_raw_json])
-
     def show_curves(self):
-        """Populate the curve table from the dataset scheme and this object's traces."""
-        config = self.dataset.get_curve_config() if self.dataset is not None else []
+        """Populate the curve table from the in-memory scheme and traces."""
+        config = self.curve_config
         self._populating_curve_table = True
         try:
             self.curveTable.setRowCount(len(config))
@@ -1103,7 +1100,7 @@ class ObjectDialog(QDialog):
         if not items:
             return
         row = self.curveTable.row(items[0])
-        config = self.dataset.get_curve_config()
+        config = self.curve_config
         if row >= len(config):
             return
         view = self.object_view if self.object_view is not None else self.object_view_2d
@@ -1113,10 +1110,10 @@ class ObjectDialog(QDialog):
             view.update()
 
     def on_curve_cell_changed(self, item):
-        """Editing the N column changes the semi-landmark count dataset-wide."""
+        """Editing the N column changes the semi-landmark count (held in memory)."""
         if self._populating_curve_table or item.column() != 3 or self.dataset is None:
             return
-        config = self.dataset.get_curve_config()
+        config = self.curve_config
         row = item.row()
         if row >= len(config):
             return
@@ -1129,12 +1126,12 @@ class ObjectDialog(QDialog):
             self.show_curves()
             return
         # Rebuild the scheme with the new count; start indices shift for every
-        # following curve. This is a dataset-level change (all specimens share it).
+        # following curve. This is a dataset-level change (all specimens share it),
+        # applied to the database on Save.
         fixed_count = config[0].get("start", 0)
         counts = [c.get("n", 0) for c in config]
         counts[row] = new_n
-        self.dataset.set_curve_config(mu.build_curve_config(fixed_count, counts))
-        self.dataset.save()
+        self.curve_config = mu.build_curve_config(fixed_count, counts)
         self.show_curves()
         for view in (self.object_view_2d, self.object_view_3d):
             if view is not None:
@@ -1395,11 +1392,16 @@ class ObjectDialog(QDialog):
             image_changed=self.object_view_2d.image_changed,
             model_path=self.object_view_3d.fullpath,
         )
-        # Persist raw curve traces (the controller's save_object does not handle
-        # them). Semi-landmarks themselves are saved via landmark_str above.
-        if self.object is not None and self.curve_raw_map:
+        # Persist the semi-landmark curves, held in memory until now: the scheme
+        # goes on the dataset (dataset-wide) and the raw traces on the object.
+        if self.dataset is not None:
+            self.dataset.set_curve_config(self.curve_config)
+            self.dataset.save()
+        if self.object is not None:
             self.object.set_curve_raw(self.curve_raw_map)
             self.object.save()
+        self._orig_curve_config = copy.deepcopy(self.curve_config)
+        self._orig_curve_raw = copy.deepcopy(self.curve_raw_map)
 
     def make_landmark_str(self):
         # from table, make landmark_str
@@ -1541,7 +1543,24 @@ class ObjectDialog(QDialog):
         self.object_deleted = False
         self.accept()
 
+    def _has_unsaved_curve_changes(self):
+        return self.curve_config != self._orig_curve_config or self.curve_raw_map != self._orig_curve_raw
+
     def Cancel(self):
+        if self._has_unsaved_curve_changes():
+            answer = QMessageBox.question(
+                self,
+                self.tr("Unsaved changes"),
+                self.tr("You have unsaved curve changes. Save them before closing?"),
+                QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel,
+                QMessageBox.Save,
+            )
+            if answer == QMessageBox.Cancel:
+                return  # stay in the dialog
+            if answer == QMessageBox.Save:
+                self.Okay()
+                return
+            # Discard: fall through and close without saving.
         self.reject()
 
     def resizeEvent(self, event):

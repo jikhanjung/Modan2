@@ -380,18 +380,28 @@ class ObjectViewer2D(QLabel):
             return self.object.get_curve_raw()
         return {}
 
+    def _curve_config(self):
+        """Curve scheme, preferring the object dialog's in-memory copy.
+
+        While the object dialog is open it is the single source of truth for the
+        (unsaved) curve scheme; reading it here keeps display in sync with edits
+        that have not been written to the database yet.
+        """
+        dlg = getattr(self, "object_dialog", None)
+        if dlg is not None and hasattr(dlg, "curve_config"):
+            return dlg.curve_config
+        dataset = getattr(self, "dataset", None)
+        return dataset.get_curve_config() if dataset is not None else []
+
     def _derived_semi_landmarks(self):
         """Semi-landmarks resampled from the raw curve traces for display.
 
         These are never stored on the object (merge-at-analysis model); they are
-        derived from the raw traces and the dataset's curve scheme each paint.
+        derived from the raw traces and the curve scheme each paint.
         """
-        dataset = getattr(self, "dataset", None)
-        if dataset is None:
-            return []
         raw_map = self._curve_raw_map()
         semis = []
-        for curve in dataset.get_curve_config():
+        for curve in self._curve_config():
             raw = raw_map.get(curve.get("id"))
             if raw and len(raw) >= 2:
                 try:
@@ -1111,13 +1121,13 @@ class ObjectViewer2D(QLabel):
                 int(self._2canx(start_lm[0])), int(self._2cany(start_lm[1])), self.mouse_curr_x, self.mouse_curr_y
             )
 
-        # draw committed raw curve traces (polyline), the curve number, and, for
-        # the selected curve, editable point handles
+        # draw each curve: its raw trace (polyline), the derived semi-landmarks
+        # (labelled C<curve>-<semi-landmark> when indices are shown), and, for the
+        # selected curve, editable point handles
         raw_map = self._curve_raw_map()
         if raw_map:
-            dataset = getattr(self, "dataset", None)
-            config = dataset.get_curve_config() if dataset is not None else []
-            for num, curve in enumerate(config, start=1):
+            semi_color = mu.as_qt_color(COLOR["SEMI_LANDMARK"])
+            for num, curve in enumerate(self._curve_config(), start=1):
                 raw = raw_map.get(curve.get("id"))
                 if not raw:
                     continue
@@ -1127,11 +1137,18 @@ class ObjectViewer2D(QLabel):
                     painter.setBrush(Qt.NoBrush)
                     for j in range(len(canvas_pts) - 1):
                         painter.drawLine(*canvas_pts[j], *canvas_pts[j + 1])
-                if self.show_index:
-                    xs = [c[0] for c in canvas_pts]
-                    ys = [c[1] for c in canvas_pts]
-                    painter.setPen(QPen(mu.as_qt_color(COLOR["CURVE"]), 2))
-                    painter.drawText(max(xs) + 6, min(ys), f"C{num}")
+                if self.show_semi_landmark and len(raw) >= 2:
+                    try:
+                        semis = mu.resample_polyline(raw, curve.get("n", 0))
+                    except ValueError:
+                        semis = []
+                    for i, pt in enumerate(semis, start=1):
+                        sx, sy = int(self._2canx(pt[0])), int(self._2cany(pt[1]))
+                        painter.setPen(QPen(semi_color, 2))
+                        painter.setBrush(QBrush(semi_color))
+                        painter.drawEllipse(sx - radius, sy - radius, radius * 2, radius * 2)
+                        if self.show_index:
+                            painter.drawText(sx + 6, sy, f"C{num}-{i}")
                 if curve.get("id") == self.selected_curve_id:
                     for j, (cx, cy) in enumerate(canvas_pts):
                         if j in (self.hover_curve_point_index, self.moving_curve_point_index):
@@ -1141,15 +1158,6 @@ class ObjectViewer2D(QLabel):
                             painter.setPen(QPen(mu.as_qt_color(COLOR["CURVE"]), 2))
                             painter.setBrush(Qt.NoBrush)
                         painter.drawEllipse(cx - 3, cy - 3, 6, 6)
-
-        # draw derived semi-landmarks (resampled from the raw traces)
-        if self.show_semi_landmark:
-            painter.setPen(QPen(mu.as_qt_color(COLOR["SEMI_LANDMARK"]), 2))
-            painter.setBrush(QBrush(mu.as_qt_color(COLOR["SEMI_LANDMARK"])))
-            for pt in self._derived_semi_landmarks():
-                painter.drawEllipse(
-                    int(self._2canx(pt[0]) - radius), int(self._2cany(pt[1])) - radius, radius * 2, radius * 2
-                )
 
         # draw the curve currently being traced (EDIT_CURVE mode)
         if self.current_curve_points:

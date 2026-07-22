@@ -422,9 +422,12 @@ def _build_dialog(qtbot, landmarks=None):
     dlg.remember_geometry = False
     qtbot.addWidget(dlg)
     dlg.dataset = _FakeDataset(2)
-    dlg.object = None  # _persist_curves() skips when there is no saved object
+    dlg.object = None
     dlg.landmark_list = landmarks if landmarks is not None else [[1.0, 2.0], [3.0, 4.0]]
+    dlg.curve_config = []
     dlg.curve_raw_map = {}
+    dlg._orig_curve_config = []
+    dlg._orig_curve_raw = {}
     dlg._populating_landmark_table = False
     dlg.selected_landmark_index = -1
     dlg.object_view_2d = _FakeView()
@@ -457,7 +460,7 @@ class TestObjectDialogFinishCurve:
 
     def _dlg(self, qtbot, scheme):
         dlg = _build_dialog(qtbot)  # 2 fixed landmarks
-        dlg.dataset._config = [dict(c) for c in scheme]
+        dlg.curve_config = [dict(c) for c in scheme]
         return dlg
 
     def test_stores_raw_for_next_curve_without_touching_landmarks(self, qtbot):
@@ -479,7 +482,7 @@ class TestObjectDialogFinishCurve:
         dlg = _build_dialog(qtbot)  # empty curve config, 2 fixed landmarks
         with patch("dialogs.object_dialog.QInputDialog.getInt", return_value=(15, True)):
             dlg.finish_curve([[0, 0], [1, 0]])
-        config = dlg.dataset.get_curve_config()
+        config = dlg.curve_config
         assert [c["id"] for c in config] == ["curve1"]
         assert config[0]["n"] == 15  # count from the prompt
         assert config[0]["start"] == 2  # after the 2 fixed landmarks
@@ -490,14 +493,14 @@ class TestObjectDialogFinishCurve:
         with patch("dialogs.object_dialog.QInputDialog.getInt", return_value=(0, False)):
             dlg.finish_curve([[0, 0], [1, 0]])
         assert dlg.curve_raw_map == {}
-        assert dlg.dataset.get_curve_config() == []
+        assert dlg.curve_config == []
 
     def test_trace_beyond_scheme_grows_it(self, qtbot):
         dlg = self._dlg(qtbot, [SCHEME[0]])  # one defined curve
         dlg.finish_curve([[0, 0], [1, 0]])  # fills curve1 (existing, no prompt)
         with patch("dialogs.object_dialog.QInputDialog.getInt", return_value=(6, True)):
             dlg.finish_curve([[2, 2], [3, 3]])  # new curve -> prompt
-        config = dlg.dataset.get_curve_config()
+        config = dlg.curve_config
         assert [c["id"] for c in config] == ["curve1", "curve2"]
         assert config[1]["n"] == 6
         assert set(dlg.curve_raw_map.keys()) == {"curve1", "curve2"}
@@ -511,7 +514,7 @@ class TestObjectDialogFinishCurve:
 class TestObjectDialogCurveTable:
     def _dlg(self, qtbot, scheme):
         dlg = _build_dialog(qtbot)
-        dlg.dataset._config = [dict(c) for c in scheme]
+        dlg.curve_config = [dict(c) for c in scheme]
         return dlg
 
     def test_show_curves_lists_scheme_with_traced_endpoints(self, qtbot):
@@ -531,18 +534,17 @@ class TestObjectDialogCurveTable:
         dlg.show_curves()
         # Simulate the user editing curve1's N from 10 to 15.
         dlg.curveTable.item(0, 3).setText("15")
-        config = dlg.dataset.get_curve_config()
+        config = dlg.curve_config
         assert config[0]["n"] == 15
         # Following curve's start index shifts accordingly (2 + 15).
         assert config[1]["start"] == 17
-        assert dlg.dataset.saved >= 1
 
     def test_editing_n_to_invalid_reverts(self, qtbot):
         dlg = self._dlg(qtbot, SCHEME)
         dlg.show_curves()
         dlg.curveTable.item(0, 3).setText("abc")
         # Config unchanged.
-        assert dlg.dataset.get_curve_config()[0]["n"] == 10
+        assert dlg.curve_config[0]["n"] == 10
 
 
 # --------------------------------------------------------------------------- #
@@ -645,7 +647,7 @@ class TestCurvePointEditingHelpers:
 class TestCurveRowSelection:
     def test_selecting_row_enables_curve_editing(self, qtbot):
         dlg = _build_dialog(qtbot)
-        dlg.dataset._config = [dict(c) for c in SCHEME]
+        dlg.curve_config = [dict(c) for c in SCHEME]
         dlg.curve_raw_map = {"curve1": [[0, 0], [1, 1]]}
         dlg.show_curves()
         dlg.curveTable.selectRow(1)
@@ -659,16 +661,26 @@ def mm_mode_edit_curve():
     return MODE["EDIT_CURVE"]
 
 
-class TestCurveRawPersistence:
-    def test_finish_curve_persists_raw_immediately(self, qtbot, test_database):
+class TestCurveEditingHeldInMemory:
+    def test_finish_curve_does_not_persist_until_save(self, qtbot, test_database):
         ds = mm.MdDataset.create(dataset_name="D", dimension=2)
         obj = mm.MdObject.create(object_name="o", dataset=ds, landmark_str="1\t1\n2\t2")
         dlg = _build_dialog(qtbot)
         dlg.dataset = ds
         dlg.object = obj
-        dlg.curve_raw_map = {}
         with patch("dialogs.object_dialog.QInputDialog.getInt", return_value=(4, True)):
             dlg.finish_curve([[10, 10], [20, 10], [30, 10]])
-        # Reload without going through Save/OK -- the trace must already be stored.
-        reloaded = mm.MdObject.get_by_id(obj.id)
-        assert reloaded.get_curve_raw() == {"curve1": [[10, 10], [20, 10], [30, 10]]}
+        # Held in the dialog's working copies...
+        assert "curve1" in dlg.curve_raw_map
+        assert dlg.curve_config[0]["n"] == 4
+        # ...but not written to the database until Save.
+        assert mm.MdObject.get_by_id(obj.id).get_curve_raw() == {}
+        assert mm.MdDataset.get_by_id(ds.id).get_curve_config() == []
+
+    def test_cancel_detects_unsaved_curve_edits(self, qtbot):
+        dlg = _build_dialog(qtbot)
+        dlg._orig_curve_raw = {}
+        dlg._orig_curve_config = []
+        assert dlg._has_unsaved_curve_changes() is False
+        dlg.curve_raw_map = {"curve1": [[0, 0], [1, 1]]}
+        assert dlg._has_unsaved_curve_changes() is True

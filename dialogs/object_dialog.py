@@ -25,6 +25,7 @@ from PyQt5.QtWidgets import (
     QGridLayout,
     QHBoxLayout,
     QHeaderView,
+    QInputDialog,
     QLabel,
     QLineEdit,
     QMessageBox,
@@ -1014,6 +1015,8 @@ class ObjectDialog(QDialog):
         # -- and its N defaults to the previous curve's (editable in the table).
         target = next((c for c in config if c.get("id") not in self.curve_raw_map), None)
         if target is None:
+            # A brand-new curve: ask how many semi-landmarks it carries (this
+            # count is dataset-wide and can be changed later in the curve table).
             if config:
                 fixed_count = config[0].get("start", len(self.landmark_list))
                 counts = [c.get("n", 0) for c in config]
@@ -1022,7 +1025,17 @@ class ObjectDialog(QDialog):
                 fixed_count = len(self.landmark_list)
                 counts = []
                 default_n = 10
-            counts.append(default_n)
+            n, ok = QInputDialog.getInt(
+                self,
+                self.tr("Semi-landmarks"),
+                self.tr("Number of semi-landmarks on this curve:"),
+                default_n,
+                2,
+                1000,
+            )
+            if not ok:
+                return
+            counts.append(n)
             config = mu.build_curve_config(fixed_count, counts)
             self.dataset.set_curve_config(config)
             self.dataset.save()

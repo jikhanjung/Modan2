@@ -169,6 +169,17 @@ class DatasetDialog(BaseDialog):
         self.main_layout.addRow(self.lblFixedCount, self.edtFixedCount)
         self.main_layout.addRow(self.lblNumCurves, self.edtNumCurves)
         self.main_layout.addRow(self.lblSemiPerCurve, self.edtSemiPerCurve)
+        # Curves are now defined and edited entirely in the object dialog (trace a
+        # curve, then adjust its count in the curve table), so hide these here.
+        for _w in (
+            self.lblFixedCount,
+            self.edtFixedCount,
+            self.lblNumCurves,
+            self.edtNumCurves,
+            self.lblSemiPerCurve,
+            self.edtSemiPerCurve,
+        ):
+            _w.hide()
         self.main_layout.addRow(self.lblBaseline, self.edtBaseline)
         self.main_layout.addRow(self.lblPolygons, self.edtPolygons)
         self.main_layout.addRow(self.lblVariableNameStr, self.variable_widget)
@@ -368,9 +379,8 @@ class DatasetDialog(BaseDialog):
             self.dataset.wireframe = self.edtWireframe.toPlainText()
             self.dataset.baseline = self.edtBaseline.text()
             self.dataset.polygons = self.edtPolygons.toPlainText()
-
-            # Semi-landmark scheme -> curve config (dataset-level, shared layout).
-            self.dataset.set_curve_config(self._build_curve_config())
+            # Curve config is managed in the object dialog now, so it is left
+            # untouched here (see _build_curve_config, kept for the hidden fields).
             logger.info(
                 "Wireframe: %s, Baseline: %s, Polygons: %s",
                 self.dataset.wireframe,

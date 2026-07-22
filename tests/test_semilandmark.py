@@ -377,6 +377,8 @@ class TestTpsCurveImport:
 # ObjectDialog curve tracing (finish_curve)
 # --------------------------------------------------------------------------- #
 
+from unittest.mock import patch  # noqa: E402
+
 from PyQt5.QtWidgets import QDialog, QTableWidget  # noqa: E402
 
 from dialogs.object_dialog import ObjectDialog  # noqa: E402
@@ -462,20 +464,31 @@ class TestObjectDialogFinishCurve:
         assert set(dlg.curve_raw_map.keys()) == {"curve1", "curve2"}
         assert len(dlg.landmark_list) == 2
 
-    def test_empty_scheme_creates_first_curve(self, qtbot):
+    def test_empty_scheme_creates_first_curve_and_asks_n(self, qtbot):
         dlg = _build_dialog(qtbot)  # empty curve config, 2 fixed landmarks
-        dlg.finish_curve([[0, 0], [1, 0]])
+        with patch("dialogs.object_dialog.QInputDialog.getInt", return_value=(15, True)):
+            dlg.finish_curve([[0, 0], [1, 0]])
         config = dlg.dataset.get_curve_config()
         assert [c["id"] for c in config] == ["curve1"]
+        assert config[0]["n"] == 15  # count from the prompt
         assert config[0]["start"] == 2  # after the 2 fixed landmarks
         assert "curve1" in dlg.curve_raw_map
 
+    def test_new_curve_prompt_cancelled_is_noop(self, qtbot):
+        dlg = _build_dialog(qtbot)
+        with patch("dialogs.object_dialog.QInputDialog.getInt", return_value=(0, False)):
+            dlg.finish_curve([[0, 0], [1, 0]])
+        assert dlg.curve_raw_map == {}
+        assert dlg.dataset.get_curve_config() == []
+
     def test_trace_beyond_scheme_grows_it(self, qtbot):
         dlg = self._dlg(qtbot, [SCHEME[0]])  # one defined curve
-        dlg.finish_curve([[0, 0], [1, 0]])  # fills curve1
-        dlg.finish_curve([[2, 2], [3, 3]])  # grows scheme -> curve2
+        dlg.finish_curve([[0, 0], [1, 0]])  # fills curve1 (existing, no prompt)
+        with patch("dialogs.object_dialog.QInputDialog.getInt", return_value=(6, True)):
+            dlg.finish_curve([[2, 2], [3, 3]])  # new curve -> prompt
         config = dlg.dataset.get_curve_config()
         assert [c["id"] for c in config] == ["curve1", "curve2"]
+        assert config[1]["n"] == 6
         assert set(dlg.curve_raw_map.keys()) == {"curve1", "curve2"}
 
     def test_too_few_points_is_noop(self, qtbot):

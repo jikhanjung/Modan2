@@ -213,9 +213,8 @@ class TestObjectOverlayPersistence:
             # Cleanup
             dataset2.delete_instance(recursive=True)
 
-    def test_overlay_position_persists_across_selections(self, qtbot, main_window, sample_dataset):
-        """Test that overlay position persists when switching between objects"""
-        # Setup: Select dataset and ensure we have at least 2 objects
+    def test_overlay_corner_persists_across_selections(self, qtbot, main_window, sample_dataset):
+        """The overlay snaps flush to its saved corner, whatever object is shown."""
         main_window.selected_dataset = sample_dataset
         main_window.load_object()
 
@@ -225,32 +224,22 @@ class TestObjectOverlayPersistence:
         first_object = list(sample_dataset.object_list)[0]
         second_object = list(sample_dataset.object_list)[1]
 
-        # Select first object - overlay should show
         main_window.selected_object = first_object
         main_window.show_object(first_object)
         qtbot.wait(50)
 
-        # Move overlay to a custom position
-        custom_x, custom_y = 100, 100
-        main_window.object_overlay.move(custom_x, custom_y)
-        qtbot.wait(10)
+        # Pin to the top-left corner (flush position is always (0, 0)).
+        main_window.object_overlay_corner = "top_left"
+        main_window.position_object_overlay()
+        pos = main_window.object_overlay.pos()
+        assert (pos.x(), pos.y()) == (0, 0)
 
-        # Trigger the save callback (simulating user drag completion)
-        main_window.on_overlay_moved()
-        qtbot.wait(10)
-
-        # Verify position was saved
-        assert main_window.object_overlay_position == [custom_x, custom_y]
-
-        # Select second object
+        # Selecting another object keeps it flush in the same corner.
         main_window.selected_object = second_object
         main_window.show_object(second_object)
         qtbot.wait(50)
-
-        # Verify overlay is at the same custom position
         pos = main_window.object_overlay.pos()
-        assert pos.x() == custom_x
-        assert pos.y() == custom_y
+        assert (pos.x(), pos.y()) == (0, 0)
 
     def test_overlay_position_saved_to_config(self, qtbot, main_window):
         """Test that overlay position is saved to config file"""
@@ -271,25 +260,19 @@ class TestObjectOverlayPersistence:
             # Check that setValue was called with the correct arguments
             main_window.m_app.settings.setValue.assert_any_call("ObjectOverlay/Position", [custom_x, custom_y])
 
-    def test_overlay_position_loaded_from_config(self, qtbot, main_window_factory, sample_dataset):
-        """Test that overlay position is loaded from config on startup"""
-        # Create a config with custom position
-        custom_position = [250, 300]
+    def test_overlay_corner_loaded_from_config(self, qtbot, main_window_factory, sample_dataset):
+        """The overlay corner is loaded from config and positions the overlay flush."""
         config = {
             "ui": {
                 "object_overlay_auto_show": True,
-                "object_overlay_position": custom_position,
+                "object_overlay_corner": "top_left",
                 "remember_geometry": False,
             }
         }
 
-        # Create main window with this config
         window = main_window_factory(config)
+        assert window.object_overlay_corner == "top_left"
 
-        # Verify the position was loaded
-        assert window.object_overlay_position == custom_position
-
-        # Setup and show an object
         window.selected_dataset = sample_dataset
         window.load_object()
 
@@ -301,10 +284,9 @@ class TestObjectOverlayPersistence:
         window.show_object(first_object)
         qtbot.wait(50)
 
-        # Verify overlay is at the loaded position
+        # Flush against the top-left corner.
         pos = window.object_overlay.pos()
-        assert pos.x() == custom_position[0]
-        assert pos.y() == custom_position[1]
+        assert (pos.x(), pos.y()) == (0, 0)
 
     def test_overlay_uses_default_position_on_first_run(self, qtbot, main_window, sample_dataset):
         """Test that overlay uses default bottom-right position when no saved position exists"""

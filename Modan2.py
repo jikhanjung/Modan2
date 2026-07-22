@@ -137,6 +137,7 @@ class SettingsWrapper:
             # Object overlay settings
             "ObjectOverlay/AutoShow": ("ui", "object_overlay_auto_show"),
             "ObjectOverlay/Position": ("ui", "object_overlay_position"),
+            "ObjectOverlay/Corner": ("ui", "object_overlay_corner"),
         }
 
         # Data point colors and markers (dynamic)
@@ -557,6 +558,8 @@ class ModanMainWindow(QMainWindow):
             self.object_overlay_auto_show = self.config.get("ui", {}).get("object_overlay_auto_show", True)
             # Read object overlay position (None means use default bottom-right)
             self.object_overlay_position = self.config.get("ui", {}).get("object_overlay_position", None)
+            # Corner the overlay snaps to (None -> default bottom-right)
+            self.object_overlay_corner = self.config.get("ui", {}).get("object_overlay_corner", None)
 
             # Update toolbar button state to match loaded config
             if hasattr(self, "actionTogglePreview"):
@@ -711,6 +714,8 @@ class ModanMainWindow(QMainWindow):
         # Save object overlay position
         if hasattr(self, "object_overlay_position") and self.object_overlay_position is not None:
             self.m_app.settings.setValue("ObjectOverlay/Position", self.object_overlay_position)
+        if getattr(self, "object_overlay_corner", None):
+            self.m_app.settings.setValue("ObjectOverlay/Corner", self.object_overlay_corner)
 
     def update_language(self):
         self.setWindowTitle(f"{self.tr(mu.PROGRAM_NAME)} v{mu.PROGRAM_VERSION}")
@@ -897,6 +902,8 @@ class ModanMainWindow(QMainWindow):
         # Initialize overlay position (if not already set from config)
         if not hasattr(self, "object_overlay_position"):
             self.object_overlay_position = None
+        if not hasattr(self, "object_overlay_corner"):
+            self.object_overlay_corner = None
 
         # Layout for object viewers inside overlay
         overlay_layout = QVBoxLayout(self.object_overlay)
@@ -1907,25 +1914,30 @@ class ModanMainWindow(QMainWindow):
         # Hide the overlay when no object is selected
         self.hide_object_overlay()
 
-    def position_object_overlay(self):
-        """Position the object overlay - use saved position if available, otherwise bottom-right"""
-        if hasattr(self, "object_overlay") and hasattr(self, "dataset_view"):
-            # Check if we have a saved position
-            if hasattr(self, "object_overlay_position") and self.object_overlay_position is not None:
-                # Use saved position (as [x, y])
-                if isinstance(self.object_overlay_position, list) and len(self.object_overlay_position) == 2:
-                    self.object_overlay.move(self.object_overlay_position[0], self.object_overlay_position[1])
-                    return
+    def _overlay_corner_pos(self, corner, parent_size, overlay_size):
+        """Flush position of the overlay against ``corner`` of the parent."""
+        right = parent_size.width() - overlay_size.width()
+        bottom = parent_size.height() - overlay_size.height()
+        return {
+            "top_left": (0, 0),
+            "top_right": (right, 0),
+            "bottom_left": (0, bottom),
+            "bottom_right": (right, bottom),
+        }.get(corner, (right, bottom))
 
-            # No saved position - use default bottom-right corner
+    def position_object_overlay(self):
+        """Snap the object overlay flush to its saved corner.
+
+        Positioning by corner (not an absolute point) keeps the overlay stuck to
+        the corner whatever its current size is; a saved absolute top-left went
+        stale as soon as the overlay was resized.
+        """
+        if hasattr(self, "object_overlay") and hasattr(self, "dataset_view"):
+            corner = getattr(self, "object_overlay_corner", None) or "bottom_right"
             parent_size = self.dataset_view.size()
             overlay_size = self.object_overlay.size()
-
-            # Position in bottom-right corner with some margin
-            margin = 10
-            x = parent_size.width() - overlay_size.width() - margin
-            y = parent_size.height() - overlay_size.height() - margin
-
+            x, y = self._overlay_corner_pos(corner, parent_size, overlay_size)
+            self.object_overlay.current_corner = corner
             self.object_overlay.move(x, y)
 
     def show_object_overlay(self):
@@ -1992,14 +2004,17 @@ class ModanMainWindow(QMainWindow):
             """)
 
     def on_overlay_moved(self):
-        """Called by ResizableOverlayWidget when user finishes dragging"""
-        # Save the new position when overlay is moved
+        """Called by ResizableOverlayWidget after dragging or resizing finishes."""
+        # Persist the corner the overlay snapped to; position is derived from it
+        # (plus the current size) so it stays flush to the corner after resizes.
         pos = self.object_overlay.pos()
         self.object_overlay_position = [pos.x(), pos.y()]
+        self.object_overlay_corner = getattr(self.object_overlay, "current_corner", "bottom_right")
 
         # Save to config immediately
         if hasattr(self, "m_app") and hasattr(self.m_app, "settings"):
             self.m_app.settings.setValue("ObjectOverlay/Position", self.object_overlay_position)
+            self.m_app.settings.setValue("ObjectOverlay/Corner", self.object_overlay_corner)
 
     def resizeEvent(self, event):
         """Handle window resize - don't reposition overlay, it should stay where user put it"""

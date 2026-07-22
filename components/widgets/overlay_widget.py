@@ -111,13 +111,15 @@ class ResizableOverlayWidget(QWidget):
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
-            if self.dragging:
-                # Snap to corner for easier positioning
+            if self.dragging or self.resizing:
+                # Re-snap flush to a corner after dragging OR resizing, then let
+                # the main window persist the new corner. Without this a resize
+                # left the overlay pinned by a stale absolute position, so it no
+                # longer sat in the corner once the size changed.
                 self.snap_to_corner()
-                self.dragging = False
-                # Notify main window that overlay was moved
                 if self.main_window and hasattr(self.main_window, "on_overlay_moved"):
                     self.main_window.on_overlay_moved()
+            self.dragging = False
             self.resizing = False
             self.resize_direction = self.RESIZE_NONE
         super().mouseReleaseEvent(event)

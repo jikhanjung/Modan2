@@ -114,6 +114,14 @@ class ObjectDialog(QDialog):
         self.edtObjectDesc = QTextEdit()
         self.edtObjectDesc.setMaximumHeight(100)
         self.edtLandmarkStr = QTableWidget()
+        # Semi-landmark curves for this object: id, traced start/end point, and
+        # the dataset-wide semi-landmark count N (the only editable column).
+        self.curveTable = QTableWidget()
+        self.curveTable.setColumnCount(4)
+        self.curveTable.setHorizontalHeaderLabels([self.tr("Curve"), self.tr("Start"), self.tr("End"), self.tr("N")])
+        self.curveTable.setMaximumHeight(150)
+        self._populating_curve_table = False
+        self.curveTable.itemChanged.connect(self.on_curve_cell_changed)
         self.lblDataset = QLabel()
 
         self.main_layout = QVBoxLayout()
@@ -144,11 +152,13 @@ class ObjectDialog(QDialog):
         self.lblSequence = QLabel(self.tr("Sequence"))
         self.lblObjectDesc = QLabel(self.tr("Description"))
         self.lblLandmarkStr = QLabel(self.tr("Landmarks"))
+        self.lblCurves = QLabel(self.tr("Curves"))
         self.form_layout.addRow(self.lblDatasetName, self.lblDataset)
         self.form_layout.addRow(self.lblObjectName, self.edtObjectName)
         self.form_layout.addRow(self.lblSequence, self.edtSequence)
         self.form_layout.addRow(self.lblObjectDesc, self.edtObjectDesc)
         self.form_layout.addRow(self.lblLandmarkStr, self.edtLandmarkStr)
+        self.form_layout.addRow(self.lblCurves, self.curveTable)
         self.form_layout.addRow("", self.inputWidget)
 
         self._init_tool_buttons()
@@ -821,6 +831,7 @@ class ObjectDialog(QDialog):
             self.landmark_list = self.original_landmark_list
             # Load any stored raw curve traces so further curves append to them.
             self.curve_raw_map = object.get_curve_raw()
+            self.show_curves()
             # Use object's dataset if self.dataset is None
             dataset_to_use = self.dataset if self.dataset is not None else object.dataset
             if dataset_to_use is not None:
@@ -1015,6 +1026,60 @@ class ObjectDialog(QDialog):
         self.curve_raw_map[target["id"]] = [list(p) for p in raw_points]
         # Repaint so the derived semi-landmarks appear; nothing is stored in the
         # landmark list or table.
+        for view in (self.object_view_2d, self.object_view_3d):
+            if view is not None:
+                view.update()
+        self.show_curves()
+
+    def show_curves(self):
+        """Populate the curve table from the dataset scheme and this object's traces."""
+        config = self.dataset.get_curve_config() if self.dataset is not None else []
+        self._populating_curve_table = True
+        try:
+            self.curveTable.setRowCount(len(config))
+            for row, curve in enumerate(config):
+                raw = self.curve_raw_map.get(curve.get("id"))
+                start_txt = end_txt = ""
+                if raw:
+                    start_txt = f"({raw[0][0]:.1f}, {raw[0][1]:.1f})"
+                    end_txt = f"({raw[-1][0]:.1f}, {raw[-1][1]:.1f})"
+                id_item = QTableWidgetItem(str(curve.get("id", "")))
+                start_item = QTableWidgetItem(start_txt)
+                end_item = QTableWidgetItem(end_txt)
+                # Only N is editable.
+                for item in (id_item, start_item, end_item):
+                    item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+                self.curveTable.setItem(row, 0, id_item)
+                self.curveTable.setItem(row, 1, start_item)
+                self.curveTable.setItem(row, 2, end_item)
+                self.curveTable.setItem(row, 3, QTableWidgetItem(str(curve.get("n", 0))))
+        finally:
+            self._populating_curve_table = False
+
+    def on_curve_cell_changed(self, item):
+        """Editing the N column changes the semi-landmark count dataset-wide."""
+        if self._populating_curve_table or item.column() != 3 or self.dataset is None:
+            return
+        config = self.dataset.get_curve_config()
+        row = item.row()
+        if row >= len(config):
+            return
+        try:
+            new_n = int(item.text())
+        except (ValueError, TypeError):
+            self.show_curves()  # revert the bad edit
+            return
+        if new_n < 2:
+            self.show_curves()
+            return
+        # Rebuild the scheme with the new count; start indices shift for every
+        # following curve. This is a dataset-level change (all specimens share it).
+        fixed_count = config[0].get("start", 0)
+        counts = [c.get("n", 0) for c in config]
+        counts[row] = new_n
+        self.dataset.set_curve_config(mu.build_curve_config(fixed_count, counts))
+        self.dataset.save()
+        self.show_curves()
         for view in (self.object_view_2d, self.object_view_3d):
             if view is not None:
                 view.update()

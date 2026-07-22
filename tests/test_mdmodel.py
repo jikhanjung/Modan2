@@ -4450,3 +4450,244 @@ class TestMdDatasetOpsRotateVectorYAxis:
         assert abs(rotated[0] - (-1.0)) < 0.01
         assert abs(rotated[1]) < 0.01
         assert abs(rotated[2]) < 0.01
+
+
+@pytest.fixture
+def storage_dir(tmp_path, monkeypatch):
+    """Redirect MdImage/MdThreeDModel file storage into a temp directory.
+
+    ``add_file``/``get_file_path``/``copy_*`` default ``base_path`` to
+    ``mu.DEFAULT_STORAGE_DIRECTORY`` (a real per-user dir). That default is bound
+    into each function's ``__defaults__`` at import, so patching ``mu`` is not
+    enough -- rebind the defaults themselves for the duration of the test.
+    """
+    d = str(tmp_path / "storage")
+    os.makedirs(d, exist_ok=True)
+    for fn in (
+        mm.MdImage.add_file,
+        mm.MdImage.get_file_path,
+        mm.MdImage.get_original_file_path,
+        mm.MdImage.has_archived_original,
+        mm.MdThreeDModel.get_file_path,
+    ):
+        monkeypatch.setattr(fn, "__defaults__", (d,))
+    return d
+
+
+def _make_png(path, size=(50, 40), color=(120, 60, 30)):
+    from PIL import Image
+
+    Image.new("RGB", size, color).save(str(path))
+    return str(path)
+
+
+class TestMdImageFileLifecycle:
+    """MdImage file attachment, hashing, downscaling and copying."""
+
+    def _object(self):
+        dataset = mm.MdDataset.create(dataset_name="DS", dimension=2)
+        obj = mm.MdObject.create(object_name="Obj", dataset=dataset)
+        return obj
+
+    def test_add_small_image_stored_verbatim(self, test_database, storage_dir, tmp_path):
+        obj = self._object()
+        src = _make_png(tmp_path / "small.png")
+
+        img = mm.MdImage(object=obj)
+        img.add_file(src)
+
+        stored = img.get_file_path()
+        assert os.path.exists(stored)
+        # Small image: not downscaled, so no archived original.
+        assert not img.has_archived_original()
+        # load_file_info populated the metadata fields.
+        assert img.md5hash and len(img.md5hash) == 32
+        assert img.size == os.path.getsize(src)
+        assert img.original_filename == "small.png"
+
+    def test_add_oversized_image_downscaled_and_archived(self, test_database, storage_dir, tmp_path):
+        obj = self._object()
+        # Longer side above IMAGE_MAX_DIM (2560) triggers the downscale path.
+        src = _make_png(tmp_path / "big.png", size=(mm.IMAGE_MAX_DIM + 400, 30))
+
+        img = mm.MdImage(object=obj)
+        img.add_file(src)
+
+        assert os.path.exists(img.get_file_path())
+        # The pristine original is archived alongside the downscaled working copy.
+        assert img.has_archived_original()
+        assert os.path.exists(img.get_original_file_path())
+
+    def test_try_downscale_returns_false_for_small_image(self, test_database, storage_dir, tmp_path):
+        obj = self._object()
+        img = mm.MdImage(object=obj)
+        img.original_path = "x.png"
+        src = _make_png(tmp_path / "s.png", size=(10, 10))
+        target = str(tmp_path / "t.png")
+        assert img._try_downscale(src, target) is False
+
+    def test_get_md5hash_info_matches_hashlib(self, test_database, storage_dir, tmp_path):
+        import hashlib
+
+        obj = self._object()
+        src = _make_png(tmp_path / "h.png")
+        img = mm.MdImage(object=obj)
+        md5, data = img.get_md5hash_info(src)
+        assert md5 == hashlib.md5(data).hexdigest()
+
+    def test_get_md5hash_info_missing_file_raises(self, test_database, tmp_path):
+        obj = self._object()
+        img = mm.MdImage(object=obj)
+        with pytest.raises((FileNotFoundError, OSError)):
+            img.get_md5hash_info(str(tmp_path / "nope.png"))
+
+    def test_add_file_missing_source_raises(self, test_database, storage_dir, tmp_path):
+        obj = self._object()
+        img = mm.MdImage(object=obj)
+        with pytest.raises(Exception):
+            img.add_file(str(tmp_path / "missing.png"))
+
+    def test_get_exif_info_falls_back_to_mtime(self, test_database, storage_dir, tmp_path):
+        obj = self._object()
+        src = _make_png(tmp_path / "noexif.png")
+        img = mm.MdImage(object=obj)
+        info = img.get_exif_info(src)
+        # A plain PNG has no EXIF: date/time come from the file mtime, non-empty.
+        assert info["datetime"].strip() != ""
+        assert info["latitude"] == "" and info["longitude"] == ""
+
+    def test_copy_image_duplicates_file(self, test_database, storage_dir, tmp_path):
+        obj = self._object()
+        src = _make_png(tmp_path / "orig.png")
+        img = mm.MdImage(object=obj)
+        img.add_file(src)
+
+        other = mm.MdObject.create(object_name="Obj2", dataset=obj.dataset)
+        new_img = img.copy_image(other)
+
+        assert new_img.md5hash == img.md5hash
+        assert os.path.exists(new_img.get_file_path())
+        assert new_img.get_file_path() != img.get_file_path()
+
+
+def _make_obj(path):
+    path = str(path)
+    with open(path, "w") as f:
+        f.write("v 0 0 0\nv 1 0 0\nv 0 1 0\nf 1 2 3\n")
+    return path
+
+
+class TestMdThreeDModelFileLifecycle:
+    """MdThreeDModel file attachment, hashing and copying."""
+
+    def _object(self):
+        dataset = mm.MdDataset.create(dataset_name="DS3D", dimension=3)
+        obj = mm.MdObject.create(object_name="Obj3D", dataset=dataset)
+        return obj
+
+    def test_add_obj_file(self, test_database, storage_dir, tmp_path):
+        obj = self._object()
+        src = _make_obj(tmp_path / "mesh.obj")
+
+        model = mm.MdThreeDModel(object=obj)
+        model.add_file(src)
+
+        assert os.path.exists(model.get_file_path())
+        assert model.md5hash and len(model.md5hash) == 32
+        assert model.size == os.path.getsize(src)
+        assert model.original_filename == "mesh.obj"
+
+    def test_load_file_info_populates_fields(self, test_database, storage_dir, tmp_path):
+        obj = self._object()
+        src = _make_obj(tmp_path / "m2.obj")
+        model = mm.MdThreeDModel(object=obj)
+        model.load_file_info(src)
+        assert model.original_path == src
+        assert model.file_created is not None
+        assert model.file_modified is not None
+
+    def test_get_md5hash_info_missing_raises(self, test_database, tmp_path):
+        obj = self._object()
+        model = mm.MdThreeDModel(object=obj)
+        with pytest.raises((FileNotFoundError, OSError)):
+            model.get_md5hash_info(str(tmp_path / "gone.obj"))
+
+    def test_copy_threed_model_duplicates_file(self, test_database, storage_dir, tmp_path):
+        obj = self._object()
+        src = _make_obj(tmp_path / "src.obj")
+        model = mm.MdThreeDModel(object=obj)
+        model.add_file(src)
+
+        other = mm.MdObject.create(object_name="Obj3D-2", dataset=obj.dataset)
+        new_model = model.copy_threed_model(other)
+
+        assert new_model.md5hash == model.md5hash
+        assert os.path.exists(new_model.get_file_path())
+
+
+class TestMdObjectOpsGeometryExtras:
+    """Smaller MdObjectOps paths not covered elsewhere."""
+
+    def _ops(self, landmarks, dimension=2):
+        dataset = mm.MdDataset.create(dataset_name="DS", dimension=dimension)
+        obj = mm.MdObject.create(object_name="O", dataset=dataset)
+        obj.landmark_list = landmarks
+        return mm.MdObjectOps(obj)
+
+    def test_align_2d_baseline_to_x_axis(self, test_database):
+        # Baseline vector points along +y; align should rotate it onto the x-axis
+        # (the two baseline points end up sharing a y-coordinate).
+        ops = self._ops([[0.0, 0.0], [0.0, 2.0], [1.0, 1.0]])
+        ops.align([1, 2])  # 1-indexed baseline points
+        p1, p2 = ops.landmark_list[0], ops.landmark_list[1]
+        assert abs(p1[1] - p2[1]) < 1e-6
+
+    def test_align_already_aligned_2d_is_noop(self, test_database):
+        original = [[0.0, 0.0], [3.0, 0.0]]
+        ops = self._ops([list(p) for p in original])
+        ops.align([1, 2])  # already on the x-axis
+        assert ops.landmark_list == original
+
+    def test_align_short_baseline_returns_without_change(self, test_database):
+        original = [[0.0, 0.0], [1.0, 1.0]]
+        ops = self._ops([list(p) for p in original])
+        ops.align([1])  # fewer than 2 points -> no-op
+        assert ops.landmark_list == original
+
+    def test_rescale_to_unitsize_zero_centroid_skips(self, test_database):
+        # Two coincident points -> centroid size 0 -> rescale is skipped, not a crash.
+        ops = self._ops([[0.0, 0.0], [0.0, 0.0]])
+        ops.rescale_to_unitsize()
+        assert ops.landmark_list == [[0.0, 0.0], [0.0, 0.0]]
+
+    def test_trim_decimal_runs(self, test_database):
+        ops = self._ops([[1.23456789, 2.3456789]])
+        ops.trim_decimal(3)  # exercises the code path without error
+
+    def test_print_landmarks_runs(self, test_database, capsys):
+        ops = self._ops([[1.0, 2.0], [3.0, 4.0]])
+        ops.print_landmarks("label")
+        assert "label" in capsys.readouterr().out
+
+
+class TestResistantFitSuperimposition:
+    """Smoke-test the 3D resistant-fit superimposition end to end."""
+
+    @pytest.mark.timeout(30)
+    def test_resistant_fit_runs_and_converges(self, test_database):
+        dataset = mm.MdDataset.create(dataset_name="RF", dimension=3)
+        base = [[0.0, 0.0, 0.0], [2.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 2.0]]
+        for k in range(3):
+            obj = mm.MdObject.create(object_name=f"o{k}", dataset=dataset)
+            # Perturb each object slightly so distances stay non-degenerate.
+            obj.landmark_list = [[c + 0.1 * k for c in lm] for lm in base]
+            # MdDatasetOps re-reads objects from the DB, so the landmarks must be
+            # persisted as landmark_str (landmark_list alone does not survive).
+            obj.pack_landmark()
+            obj.save()
+
+        ds_ops = mm.MdDatasetOps(dataset)
+        ds_ops.resistant_fit_superimposition()
+
+        # Converged to a reference shape with the expected landmark count.
+        assert len(ds_ops.reference_shape.landmark_list) == 4

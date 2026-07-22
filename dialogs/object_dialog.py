@@ -25,6 +25,7 @@ from PyQt5.QtWidgets import (
     QGridLayout,
     QHBoxLayout,
     QHeaderView,
+    QInputDialog,
     QLabel,
     QLineEdit,
     QMessageBox,
@@ -84,6 +85,9 @@ class ObjectDialog(QDialog):
 
         self.status_bar = QStatusBar()
         self.landmark_list = []
+        # Raw traced curve points per curve id (kept so curves can be re-resampled
+        # later); the resampled semi-landmarks live in self.landmark_list.
+        self.curve_raw_map = {}
         # Set while show_landmarks() repopulates the table, so the cell validator
         # ignores the itemChanged storm that causes.
         self._populating_landmark_table = False
@@ -289,9 +293,14 @@ class ObjectDialog(QDialog):
             QPixmap(ICON["calibration_down"]),
             QPixmap(ICON["calibration_disabled"]),
         )
+        # Curve (semi-landmark) tracing. No dedicated icon yet, so a short text
+        # button; it joins the same exclusive group as the other tools.
+        self.btnCurve = QPushButton("Cv")
+        self.btnCurve.setToolTip(self.tr("Trace a curve (semi-landmarks)"))
         self.btnGroup.addButton(self.btnLandmark)
         self.btnGroup.addButton(self.btnWireframe)
         self.btnGroup.addButton(self.btnCalibration)
+        self.btnGroup.addButton(self.btnCurve)
         # Exclusive group: exactly one of landmark/wireframe/calibration is always
         # selected (clicking the active one can't deselect it), and Landmark is the
         # default below.
@@ -302,20 +311,26 @@ class ObjectDialog(QDialog):
         self.btnLandmark.setChecked(True)
         self.btnWireframe.setChecked(False)
         self.btnCalibration.setChecked(False)
+        self.btnCurve.setCheckable(True)
+        self.btnCurve.setChecked(False)
         self.btnLandmark.setAutoExclusive(True)
         self.btnWireframe.setAutoExclusive(True)
         self.btnCalibration.setAutoExclusive(True)
+        self.btnCurve.setAutoExclusive(True)
         self.btnLandmark.clicked.connect(self.btnLandmark_clicked)
         self.btnWireframe.clicked.connect(self.btnWireframe_clicked)
         self.btnCalibration.clicked.connect(self.btnCalibration_clicked)
+        self.btnCurve.clicked.connect(self.btnCurve_clicked)
         BUTTON_SIZE = 48
         self.btnLandmark.setFixedSize(BUTTON_SIZE, BUTTON_SIZE)
         self.btnWireframe.setFixedSize(BUTTON_SIZE, BUTTON_SIZE)
         self.btnCalibration.setFixedSize(BUTTON_SIZE, BUTTON_SIZE)
+        self.btnCurve.setFixedSize(BUTTON_SIZE, BUTTON_SIZE)
         self.btn_layout2 = QGridLayout()
         self.btn_layout2.addWidget(self.btnLandmark, 0, 0)
         self.btn_layout2.addWidget(self.btnWireframe, 0, 1)
         self.btn_layout2.addWidget(self.btnCalibration, 1, 0)
+        self.btn_layout2.addWidget(self.btnCurve, 1, 1)
 
     def _init_option_checkboxes(self):
         """Build the view-option checkboxes (index/wireframe/polygon/estimated/…)
@@ -565,6 +580,20 @@ class ObjectDialog(QDialog):
         self.btnWireframe.setChecked(False)
         self.btnCalibration.setDown(False)
         self.btnCalibration.setChecked(False)
+        self.btnCurve.setDown(False)
+        self.btnCurve.setChecked(False)
+
+    def btnCurve_clicked(self):
+        self.object_view.set_mode(MODE["EDIT_CURVE"])
+        self.object_view.update()
+        self.btnCurve.setDown(True)
+        self.btnCurve.setChecked(True)
+        self.btnLandmark.setDown(False)
+        self.btnLandmark.setChecked(False)
+        self.btnWireframe.setDown(False)
+        self.btnWireframe.setChecked(False)
+        self.btnCalibration.setDown(False)
+        self.btnCalibration.setChecked(False)
 
     def btnCalibration_clicked(self):
         # self.edit_mode = MODE_ADD_LANDMARK
@@ -576,6 +605,8 @@ class ObjectDialog(QDialog):
         self.btnLandmark.setChecked(False)
         self.btnWireframe.setDown(False)
         self.btnWireframe.setChecked(False)
+        self.btnCurve.setDown(False)
+        self.btnCurve.setChecked(False)
 
     def calibrate(self, dist):
         logger = logging.getLogger(__name__)
@@ -601,6 +632,8 @@ class ObjectDialog(QDialog):
         self.btnLandmark.setChecked(False)
         self.btnCalibration.setDown(False)
         self.btnCalibration.setChecked(False)
+        self.btnCurve.setDown(False)
+        self.btnCurve.setChecked(False)
 
     def set_object_name(self, name):
         # print("set_object_name", self.edtObjectName.text(), name)
@@ -766,6 +799,8 @@ class ObjectDialog(QDialog):
             # Always use original for table display (keep "MISSING" text)
             # Estimated values are only used for visualization in viewer
             self.landmark_list = self.original_landmark_list
+            # Load any stored raw curve traces so further curves append to them.
+            self.curve_raw_map = object.get_curve_raw()
             # Use object's dataset if self.dataset is None
             dataset_to_use = self.dataset if self.dataset is not None else object.dataset
             if dataset_to_use is not None:
@@ -929,6 +964,50 @@ class ObjectDialog(QDialog):
         # print("delete_landmark", idx)
         self.landmark_list.pop(idx)
         self.show_landmarks()
+
+    def finish_curve(self, raw_points):
+        """Commit a traced curve as evenly-spaced semi-landmarks.
+
+        The resampled points are appended to the landmark list as ordinary
+        landmarks (so they persist and analyze normally); the curve is recorded
+        in the dataset config, and the raw trace is kept so it can be
+        re-resampled later. 2D only (the 2D viewer is the only one that traces).
+        """
+        if raw_points is None or len(raw_points) < 2:
+            return
+        n, ok = QInputDialog.getInt(
+            self,
+            self.tr("Semi-landmarks"),
+            self.tr("Number of semi-landmarks on this curve:"),
+            10,
+            3,
+            1000,
+        )
+        if not ok:
+            return
+        try:
+            resampled = mu.resample_polyline(raw_points, n)
+        except ValueError as e:
+            logger.warning(f"Could not resample traced curve: {e}")
+            return
+
+        config = self.dataset.get_curve_config()
+        existing_ids = {c.get("id") for c in config}
+        i = 1
+        while f"curve{i}" in existing_ids:
+            i += 1
+        curve_id = f"curve{i}"
+
+        start = len(self.landmark_list)
+        for pt in resampled:
+            self.landmark_list.append([float(pt[0]), float(pt[1])])
+        config.append({"id": curve_id, "n": n, "method": "equidistant", "start": start})
+        self.dataset.set_curve_config(config)
+        self.dataset.save()
+        self.curve_raw_map[curve_id] = [list(p) for p in raw_points]
+
+        self.show_landmarks()
+        self._refresh_landmark_views()
 
     def on_landmark_selected(self):
         """Handle landmark selection in table"""
@@ -1185,6 +1264,11 @@ class ObjectDialog(QDialog):
             image_changed=self.object_view_2d.image_changed,
             model_path=self.object_view_3d.fullpath,
         )
+        # Persist raw curve traces (the controller's save_object does not handle
+        # them). Semi-landmarks themselves are saved via landmark_str above.
+        if self.object is not None and self.curve_raw_map:
+            self.object.set_curve_raw(self.curve_raw_map)
+            self.object.save()
 
     def make_landmark_str(self):
         # from table, make landmark_str

@@ -37,6 +37,7 @@ MODE = {
     "PRE_WIRE_FROM": 5,
     "CALIBRATION": 6,
     "VIEW": 7,
+    "EDIT_CURVE": 8,
     "PAN": 12,
 }
 
@@ -85,6 +86,9 @@ COLOR["SELECTED_LANDMARK"] = COLOR["RED"]
 COLOR["WIREFRAME"] = COLOR["YELLOW"]
 COLOR["SELECTED_EDGE"] = COLOR["RED"]
 COLOR["BACKGROUND"] = COLOR["DARK_GRAY"]
+# Semi-landmark points (resampled from a curve) and the raw curve being traced.
+COLOR["SEMI_LANDMARK"] = COLOR["CYAN"]
+COLOR["CURVE"] = COLOR["MAGENTA"]
 
 # ========== Icon Mappings ==========
 ICONS = {

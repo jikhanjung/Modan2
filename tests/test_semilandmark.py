@@ -345,3 +345,101 @@ class TestTpsCurveImport:
         assert dataset.get_curve_config() == []
         obj = dataset.object_list.first()
         assert obj.get_curve_raw() == {}
+
+
+# --------------------------------------------------------------------------- #
+# ObjectDialog curve tracing (finish_curve)
+# --------------------------------------------------------------------------- #
+
+from unittest.mock import patch  # noqa: E402
+
+from PyQt5.QtWidgets import QDialog, QTableWidget  # noqa: E402
+
+from dialogs.object_dialog import ObjectDialog  # noqa: E402
+
+
+class _FakeDataset:
+    def __init__(self, dimension=2):
+        self.dimension = dimension
+        self._config = []
+        self.saved = 0
+
+    def get_curve_config(self):
+        return list(self._config)
+
+    def set_curve_config(self, cfg):
+        self._config = cfg
+
+    def save(self):
+        self.saved += 1
+
+
+class _FakeView:
+    def __init__(self):
+        self.landmark_list = None
+
+    def update(self):
+        pass
+
+
+def _build_dialog(qtbot, landmarks=None):
+    dlg = ObjectDialog.__new__(ObjectDialog)
+    QDialog.__init__(dlg)
+    dlg.remember_geometry = False
+    qtbot.addWidget(dlg)
+    dlg.dataset = _FakeDataset(2)
+    dlg.landmark_list = landmarks if landmarks is not None else [[1.0, 2.0], [3.0, 4.0]]
+    dlg.curve_raw_map = {}
+    dlg._populating_landmark_table = False
+    dlg.selected_landmark_index = -1
+    dlg.object_view_2d = _FakeView()
+    dlg.object_view_3d = _FakeView()
+    table = QTableWidget()
+    qtbot.addWidget(table)
+    table.setColumnCount(2)
+    dlg.edtLandmarkStr = table
+    dlg.on_landmark_selected = lambda: None
+    dlg.show_landmarks()
+    return dlg
+
+
+class TestObjectDialogFinishCurve:
+    def test_appends_semilandmarks_and_records_config(self, qtbot):
+        dlg = _build_dialog(qtbot)  # 2 fixed landmarks
+        raw = [[0, 0], [10, 0], [10, 10]]
+        with patch("dialogs.object_dialog.QInputDialog.getInt", return_value=(5, True)):
+            dlg.finish_curve(raw)
+
+        assert len(dlg.landmark_list) == 2 + 5
+        assert dlg.dataset.get_curve_config() == [{"id": "curve1", "n": 5, "method": "equidistant", "start": 2}]
+        assert dlg.curve_raw_map["curve1"] == raw
+        assert dlg.dataset.saved == 1
+        # Semi-landmarks pushed to the viewer.
+        assert dlg.object_view_2d.landmark_list is dlg.landmark_list
+
+    def test_second_curve_appends_with_unique_id(self, qtbot):
+        dlg = _build_dialog(qtbot)
+        with patch("dialogs.object_dialog.QInputDialog.getInt", return_value=(4, True)):
+            dlg.finish_curve([[0, 0], [4, 0]])
+            dlg.finish_curve([[0, 5], [0, 9]])
+
+        config = dlg.dataset.get_curve_config()
+        assert [c["id"] for c in config] == ["curve1", "curve2"]
+        assert [c["start"] for c in config] == [2, 6]
+        assert len(dlg.landmark_list) == 2 + 4 + 4
+
+    def test_too_few_points_is_noop(self, qtbot):
+        dlg = _build_dialog(qtbot)
+        with patch("dialogs.object_dialog.QInputDialog.getInt", return_value=(5, True)) as m:
+            dlg.finish_curve([[0, 0]])
+        assert len(dlg.landmark_list) == 2
+        assert dlg.dataset.get_curve_config() == []
+        m.assert_not_called()
+
+    def test_cancel_prompt_is_noop(self, qtbot):
+        dlg = _build_dialog(qtbot)
+        with patch("dialogs.object_dialog.QInputDialog.getInt", return_value=(0, False)):
+            dlg.finish_curve([[0, 0], [10, 0]])
+        assert len(dlg.landmark_list) == 2
+        assert dlg.dataset.get_curve_config() == []
+        assert dlg.curve_raw_map == {}

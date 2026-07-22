@@ -180,9 +180,23 @@ CharField(TEXT, 길이 무제한)로 충분하며 정말 커지면 `MdCurve` 별
 - 세미랜드마크를 뷰어에서 구분 표시(색/모양), 원시 곡선 오버레이 그리기.
 - 데이터셋 대화상자에 곡선 설정 노출(선택). 3D 곡선은 후속.
 
+**구현 상태(2026-07-22)**: 2D 완료. `MODE["EDIT_CURVE"]` 추가, ObjectDialog에
+곡선 툴버튼(`btnCurve`)+슬롯. 뷰어에서 좌클릭으로 점 추가·더블클릭으로 확정,
+우클릭 취소, 진행 중 곡선 오버레이 렌더링(`COLOR["CURVE"]`), 세미랜드마크는
+`COLOR["SEMI_LANDMARK"]`(dataset config의 인덱스 구간으로 식별)로 구분 표시.
+확정 시 `finish_curve`가 N을 `QInputDialog`로 물어 `resample_polyline`으로
+리샘플→`landmark_list`에 append, dataset `curve_config` 즉시 저장(와이어프레임
+패턴), 원시 추적점은 `curve_raw_map`에 모아 OK 시 `object.curve_raw_json`으로
+저장. 테스트: `finish_curve` 로직(추가/2번째 곡선/무점/취소).
+남은 것: 데이터셋 대화상자 곡선 설정 노출(선택), **3D 뷰어 곡선 모드**,
+곡선 삭제/편집 UI(현재는 추가만). 곡선 자동 감지는 TODO 항목 1(live-wire).
+
 ### 3단계 (선택, 후속) — 임포트/익스포트
 - `tps.py:read()` 에 `CURVES=` 브랜치 추가하여 곡선 설정으로 변환. 익스포트 대칭.
   (임포트된 데이터는 원시점이 없을 수 있음 → `curve_raw_json` 부재 허용.)
+
+**구현 상태(2026-07-22)**: TPS `CURVES=` import 완료 (커밋 b821c24). 익스포트는
+후속.
 
 ## 구현 범위에서 제외 (기록 보존)
 

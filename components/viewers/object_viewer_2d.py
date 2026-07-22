@@ -134,6 +134,9 @@ class ObjectViewer2D(QLabel):
 
         self.landmark_list = []
         self.edge_list = []
+        # Raw points of the curve currently being traced in EDIT_CURVE mode
+        # (image coordinates). Committed to semi-landmarks on double-click.
+        self.current_curve_points = []
         self.image_canvas_ratio = 1.0
         self.selected_landmark_index = -1
         self.selected_edge_index = -1
@@ -343,8 +346,27 @@ class ObjectViewer2D(QLabel):
         elif self.edit_mode == MODE["CALIBRATION"]:
             self.setCursor(Qt.CrossCursor)
             self.show_message(self.tr("Click on image to calibrate"))
+        elif self.edit_mode == MODE["EDIT_CURVE"]:
+            self.setCursor(Qt.CrossCursor)
+            self.current_curve_points = []
+            self.show_message(self.tr("Click to trace a curve; double-click to finish"))
         else:
             self.setCursor(Qt.ArrowCursor)
+
+    def _semi_landmark_indices(self):
+        """Set of landmark indices that are semi-landmarks (from a curve).
+
+        Read from the dataset's curve config so the viewer can colour them
+        distinctly. Empty when there is no dataset or no curve config.
+        """
+        dataset = getattr(self, "dataset", None)
+        if dataset is None:
+            return set()
+        indices = set()
+        for curve in dataset.get_curve_config():
+            start = curve.get("start", 0)
+            indices.update(range(start, start + curve.get("n", 0)))
+        return indices
 
     def get_landmark_index_within_threshold(self, curr_pos, threshold=DISTANCE_THRESHOLD):
         for index, landmark in enumerate(self.landmark_list):
@@ -483,9 +505,20 @@ class ObjectViewer2D(QLabel):
             elif self.edit_mode == MODE["CALIBRATION"]:
                 self.calibration_from_img_x = self._2imgx(self.mouse_curr_x)
                 self.calibration_from_img_y = self._2imgy(self.mouse_curr_y)
+            elif self.edit_mode == MODE["EDIT_CURVE"]:
+                if self.orig_pixmap is None:
+                    return
+                img_x = self._2imgx(self.mouse_curr_x)
+                img_y = self._2imgy(self.mouse_curr_y)
+                if img_x < 0 or img_x > self.orig_pixmap.width() or img_y < 0 or img_y > self.orig_pixmap.height():
+                    return
+                self.current_curve_points.append([img_x, img_y])
 
         elif me.button() == Qt.RightButton:
-            if self.edit_mode == MODE["WIREFRAME"]:
+            if self.edit_mode == MODE["EDIT_CURVE"]:
+                # Cancel the curve in progress rather than starting a pan.
+                self.current_curve_points = []
+            elif self.edit_mode == MODE["WIREFRAME"]:
                 if self.wire_start_index >= 0:
                     self.wire_start_index = -1
                     self.wire_hover_index = -1
@@ -535,6 +568,18 @@ class ObjectViewer2D(QLabel):
 
         self.repaint()
         return super().mouseReleaseEvent(ev)
+
+    def mouseDoubleClickEvent(self, event):
+        # Finish tracing a curve: the double-click's first press already added the
+        # end point, so commit the collected points as semi-landmarks.
+        if self.edit_mode == MODE["EDIT_CURVE"] and self.object_dialog is not None:
+            points = self.current_curve_points
+            self.current_curve_points = []
+            if len(points) >= 2:
+                self.object_dialog.finish_curve(points)
+            self.repaint()
+            return
+        return super().mouseDoubleClickEvent(event)
 
     def wheelEvent(self, event):
         we = QWheelEvent(event)
@@ -891,6 +936,7 @@ class ObjectViewer2D(QLabel):
                 painter.drawLine(x1, y1, x2, y2)
 
         painter.setFont(QFont("Helvetica", 10 + int(self.index_size) * 3))
+        semi_indices = self._semi_landmark_indices()
         for idx, landmark in enumerate(self.landmark_list):
             # Check for missing landmarks
             if landmark[0] is None or landmark[1] is None:
@@ -919,6 +965,9 @@ class ObjectViewer2D(QLabel):
             elif idx == self.selected_landmark_index:
                 painter.setPen(QPen(mu.as_qt_color(COLOR["SELECTED_LANDMARK"]), 2))
                 painter.setBrush(QBrush(mu.as_qt_color(COLOR["SELECTED_LANDMARK"])))
+            elif idx in semi_indices:
+                painter.setPen(QPen(mu.as_qt_color(COLOR["SEMI_LANDMARK"]), 2))
+                painter.setBrush(QBrush(mu.as_qt_color(COLOR["SEMI_LANDMARK"])))
             else:
                 if self.obj_ops.landmark_color:
                     color = QColor(self.obj_ops.landmark_color)
@@ -943,6 +992,20 @@ class ObjectViewer2D(QLabel):
             painter.drawLine(
                 int(self._2canx(start_lm[0])), int(self._2cany(start_lm[1])), self.mouse_curr_x, self.mouse_curr_y
             )
+
+        # draw the curve currently being traced (EDIT_CURVE mode)
+        if self.current_curve_points:
+            painter.setPen(QPen(mu.as_qt_color(COLOR["CURVE"]), 2))
+            painter.setBrush(QBrush(mu.as_qt_color(COLOR["CURVE"])))
+            prev = None
+            for pt in self.current_curve_points:
+                cx, cy = int(self._2canx(pt[0])), int(self._2cany(pt[1]))
+                painter.drawEllipse(cx - 2, cy - 2, 4, 4)
+                if prev is not None:
+                    painter.drawLine(prev[0], prev[1], cx, cy)
+                prev = (cx, cy)
+            # rubber-band segment from the last point to the cursor
+            painter.drawLine(prev[0], prev[1], self.mouse_curr_x, self.mouse_curr_y)
 
         if self.object.pixels_per_mm is not None and self.object.pixels_per_mm > 0:
             pixels_per_mm = self.object.pixels_per_mm

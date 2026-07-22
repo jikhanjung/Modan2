@@ -1513,6 +1513,11 @@ class ObjectDialog(QDialog):
         self._orig_curve_config = copy.deepcopy(self.curve_config)
         self._orig_curve_raw = copy.deepcopy(self.curve_raw_map)
 
+        # Refresh this object's row in the main window's list (landmark count may
+        # have changed) without disturbing its selection.
+        if self.parent is not None and hasattr(self.parent, "update_object_in_table"):
+            self.parent.update_object_in_table(self.object)
+
     def make_landmark_str(self):
         # from table, make landmark_str
         # Modified to handle MISSING values - store as "Missing" text

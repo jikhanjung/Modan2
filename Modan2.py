@@ -1347,11 +1347,13 @@ class ModanMainWindow(QMainWindow):
         self.dlg.set_tableview(self.tableView)
         ret = self.dlg.exec_()
         # Deferred: object_deleted below is still readable this slot
+        edited_object_id = self.dlg.object.id if getattr(self.dlg, "object", None) is not None else None
+        object_deleted = self.dlg.object_deleted
         self.dlg.deleteLater()
         if ret == 0:
             return
         elif ret == 1:
-            if self.dlg.object_deleted:
+            if object_deleted:
                 dataset = self.selected_dataset
                 self.load_dataset()
                 self.reset_tableView()
@@ -1364,7 +1366,12 @@ class ModanMainWindow(QMainWindow):
         self.reset_tableView()
         self.select_dataset(dataset)
         self.load_object()
-        self.object_view.clear_object()
+        # Keep the edited object selected across the rebuild (selecting it also
+        # re-shows it); only clear the viewer if we cannot restore the selection.
+        if edited_object_id is not None:
+            self.select_object_in_table(edited_object_id)
+        else:
+            self.object_view.clear_object()
 
     def reset_treeView(self):
         self.dataset_model = QStandardItemModel()
@@ -1861,6 +1868,47 @@ class ModanMainWindow(QMainWindow):
                 )
                 continue
         self.object_model.appendRows(rowdata_list)
+
+    def update_object_in_table(self, obj):
+        """Refresh one object's row (landmark count, centroid) in place.
+
+        Called after the object dialog saves (Save/Next/Previous) so a changed
+        landmark count shows in the list immediately, without rebuilding the
+        table or disturbing the current row selection.
+        """
+        if obj is None or not hasattr(self, "object_model"):
+            return
+        obj.unpack_landmark()
+        for row in range(len(self.object_model._data)):
+            try:
+                row_id = int(self.object_model._data[row][0]["value"])
+            except (KeyError, ValueError, TypeError, IndexError):
+                continue
+            if row_id != obj.id:
+                continue
+            recorded = obj.count_landmarks()
+            missing = landmark_position_count(obj) - recorded
+            self.object_model._data[row][3] = {"value": recorded, "missing": max(0, missing), "changed": False}
+            self.object_model._data[row][4] = {"value": obj.get_centroid_size(), "changed": False}
+            top_left = self.object_model.index(row, 0)
+            bottom_right = self.object_model.index(row, self.object_model.columnCount() - 1)
+            self.object_model.dataChanged.emit(top_left, bottom_right)
+            return
+
+    def select_object_in_table(self, object_id):
+        """Select the row for ``object_id`` in the object table (through the proxy)."""
+        if object_id is None or not hasattr(self, "object_model"):
+            return
+        for row in range(len(self.object_model._data)):
+            try:
+                row_id = int(self.object_model._data[row][0]["value"])
+            except (KeyError, ValueError, TypeError, IndexError):
+                continue
+            if row_id == object_id:
+                proxy_index = self.proxy_model.mapFromSource(self.object_model.index(row, 0))
+                self.tableView.selectRow(proxy_index.row())
+                self.tableView.scrollTo(proxy_index)
+                return
 
     @guard_slot("Failed to change object selection")
     def on_object_selection_changed(self, selected, deselected):

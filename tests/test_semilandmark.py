@@ -758,3 +758,33 @@ class TestExpectedFromLongerSpecimens:
         assert len(dlg.expected_landmark_list) == 7  # reference length
         # The 7th landmark (index 6), which the current specimen lacks, is predicted.
         assert all(v is not None for v in dlg.expected_landmark_list[6])
+
+
+class TestDeleteCurve:
+    def test_delete_curve_removes_and_renumbers(self, qtbot):
+        dlg = _build_dialog(qtbot)
+        dlg.curve_config = [
+            {"id": "curve1", "n": 5, "method": "equidistant", "start": 2},
+            {"id": "curve2", "n": 8, "method": "equidistant", "start": 7},
+            {"id": "curve3", "n": 4, "method": "equidistant", "start": 15},
+        ]
+        dlg.curve_raw_map = {
+            "curve1": [[0, 0], [1, 1]],
+            "curve2": [[2, 2], [3, 3]],
+            "curve3": [[4, 4], [5, 5]],
+        }
+        dlg.delete_curve("curve2")
+        # curve3 is renumbered to curve2; start indices recomputed after removal.
+        assert [c["id"] for c in dlg.curve_config] == ["curve1", "curve2"]
+        assert [c["n"] for c in dlg.curve_config] == [5, 4]
+        assert [c["start"] for c in dlg.curve_config] == [2, 7]
+        # Raw traces remapped to the new ids.
+        assert dlg.curve_raw_map == {"curve1": [[0, 0], [1, 1]], "curve2": [[4, 4], [5, 5]]}
+
+    def test_delete_unknown_curve_is_noop(self, qtbot):
+        dlg = _build_dialog(qtbot)
+        dlg.curve_config = [{"id": "curve1", "n": 5, "method": "equidistant", "start": 2}]
+        dlg.curve_raw_map = {"curve1": [[0, 0], [1, 1]]}
+        dlg.delete_curve("curveX")
+        assert [c["id"] for c in dlg.curve_config] == ["curve1"]
+        assert dlg.curve_raw_map == {"curve1": [[0, 0], [1, 1]]}

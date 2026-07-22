@@ -148,6 +148,9 @@ class ObjectViewer2D(QLabel):
         self.selected_curve_id = None
         self.moving_curve_point_index = -1
         self.hover_curve_point_index = -1
+        # Curve currently under the cursor (highlighted like a selection) in
+        # landmark or curve mode.
+        self.hover_curve_id = None
         self.image_canvas_ratio = 1.0
         self.selected_landmark_index = -1
         self.selected_edge_index = -1
@@ -421,6 +424,35 @@ class ObjectViewer2D(QLabel):
             return None
         return dlg.curve_raw_map.get(self.selected_curve_id)
 
+    def _show_curve_context_menu(self, global_pos):
+        """Right-click menu in curve mode: delete a point and/or the curve."""
+        from PyQt5.QtWidgets import QMenu
+
+        curr_pos = [self.mouse_curr_x, self.mouse_curr_y]
+        target_id = self._curve_at_position(curr_pos) or self.selected_curve_id
+        if target_id is None:
+            # Nothing under the cursor: cancel any in-progress trace.
+            self.current_curve_points = []
+            self.repaint()
+            return
+
+        point_idx = self._curve_point_within_threshold(curr_pos) if target_id == self.selected_curve_id else -1
+        menu = QMenu(self)
+        del_point_action = menu.addAction(self.tr("Delete Point")) if point_idx >= 0 else None
+        del_curve_action = menu.addAction(self.tr("Delete Curve"))
+        action = menu.exec_(global_pos)
+        if action is None:
+            return
+        if action is del_point_action:
+            raw = self._selected_curve_raw()
+            if raw is not None and len(raw) > 2:
+                raw.pop(point_idx)
+                self._notify_curve_edited()
+        elif action is del_curve_action:
+            if self.object_dialog is not None and hasattr(self.object_dialog, "delete_curve"):
+                self.object_dialog.delete_curve(target_id)
+        self.repaint()
+
     def _notify_curve_edited(self):
         """Tell the object dialog a curve's raw trace changed (refresh + persist)."""
         dlg = getattr(self, "object_dialog", None)
@@ -554,6 +586,10 @@ class ObjectViewer2D(QLabel):
             if near_idx >= 0:
                 self.set_mode(MODE["READY_MOVE_LANDMARK"])
                 self.selected_landmark_index = near_idx
+                self.hover_curve_id = None
+            else:
+                # Highlight a curve under the cursor (a click would select it).
+                self.hover_curve_id = self._curve_at_position(curr_pos)
 
         elif self.edit_mode == MODE["WIREFRAME"]:
             near_idx = self.get_landmark_index_within_threshold(curr_pos, DISTANCE_THRESHOLD)
@@ -596,14 +632,19 @@ class ObjectViewer2D(QLabel):
                 self.set_mode(MODE["EDIT_LANDMARK"])
                 self.selected_landmark_index = -1
 
-        elif self.edit_mode == MODE["EDIT_CURVE"] and self.selected_curve_id is not None:
-            raw = self._selected_curve_raw()
-            if raw is not None and self.moving_curve_point_index >= 0:
-                # Drag the grabbed raw point.
-                raw[self.moving_curve_point_index] = [self._2imgx(self.mouse_curr_x), self._2imgy(self.mouse_curr_y)]
-            elif raw is not None:
-                # Hover highlight for the point under the cursor.
-                self.hover_curve_point_index = self._curve_point_within_threshold(curr_pos)
+        elif self.edit_mode == MODE["EDIT_CURVE"]:
+            self.hover_curve_id = self._curve_at_position(curr_pos)
+            if self.selected_curve_id is not None:
+                raw = self._selected_curve_raw()
+                if raw is not None and self.moving_curve_point_index >= 0:
+                    # Drag the grabbed raw point.
+                    raw[self.moving_curve_point_index] = [
+                        self._2imgx(self.mouse_curr_x),
+                        self._2imgy(self.mouse_curr_y),
+                    ]
+                elif raw is not None:
+                    # Hover highlight for the point under the cursor.
+                    self.hover_curve_point_index = self._curve_point_within_threshold(curr_pos)
 
         self.repaint()
         QLabel.mouseMoveEvent(self, event)
@@ -613,6 +654,17 @@ class ObjectViewer2D(QLabel):
         if me.button() == Qt.LeftButton:
             if self.edit_mode == MODE["EDIT_LANDMARK"]:
                 if self.orig_pixmap is None:
+                    return
+                # A click near an existing curve selects it and switches to curve
+                # mode, instead of placing a landmark.
+                near_id = self._curve_at_position([self.mouse_curr_x, self.mouse_curr_y])
+                if (
+                    near_id is not None
+                    and self.object_dialog is not None
+                    and hasattr(self.object_dialog, "enter_curve_mode")
+                ):
+                    self.object_dialog.enter_curve_mode(near_id)
+                    self.repaint()
                     return
                 img_x = self._2imgx(self.mouse_curr_x)
                 img_y = self._2imgy(self.mouse_curr_y)
@@ -632,32 +684,33 @@ class ObjectViewer2D(QLabel):
             elif self.edit_mode == MODE["EDIT_CURVE"]:
                 if self.orig_pixmap is None:
                     return
+                curr_pos = [self.mouse_curr_x, self.mouse_curr_y]
+                # 1) Editing the selected curve: grab a point or insert one.
                 if self.selected_curve_id is not None:
-                    # Editing an existing curve: grab a point, or insert one on a
-                    # segment.
-                    curr_pos = [self.mouse_curr_x, self.mouse_curr_y]
                     pt_idx = self._curve_point_within_threshold(curr_pos)
                     if pt_idx >= 0:
                         self.moving_curve_point_index = pt_idx
-                    else:
-                        seg_idx = self._curve_segment_within_threshold(curr_pos)
-                        if seg_idx >= 0:
-                            raw = self._selected_curve_raw()
-                            raw.insert(seg_idx + 1, [self._2imgx(self.mouse_curr_x), self._2imgy(self.mouse_curr_y)])
-                            self.moving_curve_point_index = seg_idx + 1
-                else:
-                    # Not tracing yet: a click near an existing curve selects it
-                    # for editing instead of starting a new trace.
-                    if not self.current_curve_points:
-                        near_id = self._curve_at_position([self.mouse_curr_x, self.mouse_curr_y])
-                        if near_id is not None:
-                            if self.object_dialog is not None and hasattr(self.object_dialog, "select_curve_row"):
-                                self.object_dialog.select_curve_row(near_id)
-                            else:
-                                self.selected_curve_id = near_id
-                            self.repaint()
-                            return
-                    # Otherwise add a point to the new curve being traced.
+                        self.repaint()
+                        return
+                    seg_idx = self._curve_segment_within_threshold(curr_pos)
+                    if seg_idx >= 0:
+                        raw = self._selected_curve_raw()
+                        raw.insert(seg_idx + 1, [self._2imgx(self.mouse_curr_x), self._2imgy(self.mouse_curr_y)])
+                        self.moving_curve_point_index = seg_idx + 1
+                        self.repaint()
+                        return
+                # 2) A click near any curve selects it (unless mid-trace).
+                if not self.current_curve_points:
+                    near_id = self._curve_at_position(curr_pos)
+                    if near_id is not None:
+                        if self.object_dialog is not None and hasattr(self.object_dialog, "select_curve_row"):
+                            self.object_dialog.select_curve_row(near_id)
+                        else:
+                            self.selected_curve_id = near_id
+                        self.repaint()
+                        return
+                # 3) Otherwise, with no curve selected, add a point to the trace.
+                if self.selected_curve_id is None:
                     img_x = self._2imgx(self.mouse_curr_x)
                     img_y = self._2imgy(self.mouse_curr_y)
                     if img_x < 0 or img_x > self.orig_pixmap.width() or img_y < 0 or img_y > self.orig_pixmap.height():
@@ -666,16 +719,7 @@ class ObjectViewer2D(QLabel):
 
         elif me.button() == Qt.RightButton:
             if self.edit_mode == MODE["EDIT_CURVE"]:
-                if self.selected_curve_id is not None:
-                    # Delete the raw point under the cursor (keep at least 2).
-                    raw = self._selected_curve_raw()
-                    idx = self._curve_point_within_threshold([self.mouse_curr_x, self.mouse_curr_y])
-                    if raw is not None and idx >= 0 and len(raw) > 2:
-                        raw.pop(idx)
-                        self._notify_curve_edited()
-                else:
-                    # Cancel the curve in progress rather than starting a pan.
-                    self.current_curve_points = []
+                self._show_curve_context_menu(me.globalPos())
             elif self.edit_mode == MODE["WIREFRAME"]:
                 if self.wire_start_index >= 0:
                     self.wire_start_index = -1
@@ -1188,9 +1232,10 @@ class ObjectViewer2D(QLabel):
                         painter.drawEllipse(sx - radius, sy - radius, radius * 2, radius * 2)
                         if self.show_index:
                             painter.drawText(sx + 6, sy, f"C{num}-{i}")
-                if curve.get("id") == self.selected_curve_id:
+                if curve.get("id") in (self.selected_curve_id, self.hover_curve_id):
                     for j, (cx, cy) in enumerate(canvas_pts):
-                        if j in (self.hover_curve_point_index, self.moving_curve_point_index):
+                        is_selected = curve.get("id") == self.selected_curve_id
+                        if is_selected and j in (self.hover_curve_point_index, self.moving_curve_point_index):
                             painter.setPen(QPen(mu.as_qt_color(COLOR["SELECTED_LANDMARK"]), 2))
                             painter.setBrush(QBrush(mu.as_qt_color(COLOR["SELECTED_LANDMARK"])))
                         else:

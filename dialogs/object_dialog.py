@@ -1202,6 +1202,38 @@ class ObjectDialog(QDialog):
                 self.curveTable.selectRow(row)
                 return
 
+    def enter_curve_mode(self, curve_id):
+        """Switch to curve mode and select a curve (e.g. clicked in landmark mode)."""
+        self.btnCurve_clicked()
+        self.select_curve_row(curve_id)
+
+    def delete_curve(self, curve_id):
+        """Delete a curve (scheme entry + raw trace), held in memory until Save.
+
+        Remaining curves keep their order but are renumbered (curve1, curve2, ...)
+        and their start indices recomputed; the raw traces are remapped to match.
+        """
+        if not any(c.get("id") == curve_id for c in self.curve_config):
+            return
+        remaining_ids = [c["id"] for c in self.curve_config if c.get("id") != curve_id]
+        counts = [c["n"] for c in self.curve_config if c.get("id") != curve_id]
+        fixed = self.curve_config[0].get("start", 0) if self.curve_config else 0
+        new_config = mu.build_curve_config(fixed, counts)
+        self.curve_raw_map = {
+            new_c["id"]: self.curve_raw_map[old_id]
+            for old_id, new_c in zip(remaining_ids, new_config)
+            if old_id in self.curve_raw_map
+        }
+        self.curve_config = new_config
+        for view in (self.object_view_2d, self.object_view_3d):
+            if view is not None:
+                view.selected_curve_id = None
+                view.hover_curve_id = None
+        self.show_curves()
+        for view in (self.object_view_2d, self.object_view_3d):
+            if view is not None:
+                view.update()
+
     def on_curve_selected(self):
         """Selecting a curve row makes its traced points editable in the viewer."""
         if self._populating_curve_table or self.dataset is None:

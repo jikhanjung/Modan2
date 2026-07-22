@@ -546,7 +546,10 @@ class MdTableModel(QAbstractTableModel):
         self._data = data or []  # Initialize with provided data or an empty list
         self._vheader_data = []
         self._hheader_data = []
-        self._uneditable_columns = [0, 2, 3, 4]
+        # Object table layout: ID, Seq(editable), Name, LM Count, Curve, CSize,
+        # then variable columns (editable). Everything but Seq and the variables
+        # is read-only.
+        self._uneditable_columns = [0, 2, 3, 4, 5]
 
     def set_columns_uneditable(self, columns):
         self._uneditable_columns = columns

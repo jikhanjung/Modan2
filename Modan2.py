@@ -1546,7 +1546,7 @@ class ModanMainWindow(QMainWindow):
         self.btnEditObject.setEnabled(False)
         self.object_model = MdTableModel()
         self.object_model.dataChangedCustomSignal.connect(self.on_object_data_changed)
-        header_labels = ["ID", "Seq.", "Name", "Count", "CSize"]
+        header_labels = ["ID", "Seq.", "Name", "LM Count", "Curve", "CSize"]
         if self.selected_dataset is not None:
             self.selected_dataset.unpack_variablename_str()
             if self.selected_dataset.variablename_list is not None and len(self.selected_dataset.variablename_list) > 0:
@@ -1849,6 +1849,7 @@ class ModanMainWindow(QMainWindow):
                     seq,
                     obj.object_name,
                     {"value": recorded, "missing": max(0, missing)},
+                    len(obj.get_curve_raw()),
                     obj.get_centroid_size(),
                 ]
 
@@ -1889,7 +1890,8 @@ class ModanMainWindow(QMainWindow):
             recorded = obj.count_landmarks()
             missing = landmark_position_count(obj) - recorded
             self.object_model._data[row][3] = {"value": recorded, "missing": max(0, missing), "changed": False}
-            self.object_model._data[row][4] = {"value": obj.get_centroid_size(), "changed": False}
+            self.object_model._data[row][4] = {"value": len(obj.get_curve_raw()), "changed": False}
+            self.object_model._data[row][5] = {"value": obj.get_centroid_size(), "changed": False}
             top_left = self.object_model.index(row, 0)
             bottom_right = self.object_model.index(row, self.object_model.columnCount() - 1)
             self.object_model.dataChanged.emit(top_left, bottom_right)

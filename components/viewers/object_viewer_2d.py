@@ -431,9 +431,6 @@ class ObjectViewer2D(QLabel):
         curr_pos = [self.mouse_curr_x, self.mouse_curr_y]
         target_id = self._curve_at_position(curr_pos) or self.selected_curve_id
         if target_id is None:
-            # Nothing under the cursor: cancel any in-progress trace.
-            self.current_curve_points = []
-            self.repaint()
             return
 
         point_idx = self._curve_point_within_threshold(curr_pos) if target_id == self.selected_curve_id else -1
@@ -719,7 +716,17 @@ class ObjectViewer2D(QLabel):
 
         elif me.button() == Qt.RightButton:
             if self.edit_mode == MODE["EDIT_CURVE"]:
-                self._show_curve_context_menu(me.globalPos())
+                if self.current_curve_points:
+                    # Cancel the curve being traced.
+                    self.current_curve_points = []
+                elif self._curve_at_position([self.mouse_curr_x, self.mouse_curr_y]) is not None:
+                    # Near a curve: context menu (delete point / curve).
+                    self._show_curve_context_menu(me.globalPos())
+                else:
+                    # Empty space: right-drag pans, like the other modes.
+                    self.pan_mode = MODE["PAN"]
+                    self.mouse_down_x = me.x()
+                    self.mouse_down_y = me.y()
             elif self.edit_mode == MODE["WIREFRAME"]:
                 if self.wire_start_index >= 0:
                     self.wire_start_index = -1

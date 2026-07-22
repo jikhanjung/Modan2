@@ -135,6 +135,37 @@ Post-0.1.8 review items, in priority order:
 
 ---
 
+## 🔵 Semi-landmarks & assisted digitizing (future features)
+
+Feature work building on the semi-landmark support planned in
+`devlog/20260722_237_semilandmark_support_plan.md`.
+
+Semi-landmark status (2026-07-22): step 1 (data model + `resample_polyline` +
+migration 007), the `build_landmarks_with_curves` core, and step 3 (TPS
+`CURVES=` import) are done and tested. Remaining from that plan: the viewer
+curve-drawing UI (step 2) and the dataset-dialog N input.
+
+- [ ] **1. Auto-detect the curve between anchor points.** In the semi-landmark
+      curve tool, let the user drop just 2-3 anchor points and detect the curve
+      running between them automatically from the image (edge following), or
+      approximate it with a parametric curve (spline/Bezier). The detected curve
+      becomes the raw trace that `resample_polyline` then turns into evenly
+      spaced semi-landmarks, so it slots straight into the existing pipeline —
+      it only replaces the manual point-by-point tracing. 2D first.
+
+- [ ] **2. Assisted landmark suggestion (longer-term).** Given the landmarks
+      already placed on other specimens in the dataset, analyze the current
+      specimen's image (2D first) to estimate and propose landmark positions for
+      it, so digitizing a new specimen starts from a suggested configuration the
+      user only corrects. Larger effort: image analysis / registration or a
+      learned predictor trained on the dataset's existing landmark+image pairs.
+      Note the app already has a *geometric* estimator for missing landmarks
+      (`MdModel.impute_missing_landmarks`, devlog 227) — that fills gaps from
+      shape alone and does not look at the image; this item is the
+      image-driven counterpart.
+
+---
+
 ## 🟡 MEDIUM — deliberately deferred (low value / higher risk)
 
 Skipped on purpose during the 2026-06-25 pass; revisit only if desired.

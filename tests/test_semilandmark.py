@@ -761,30 +761,46 @@ class TestExpectedFromLongerSpecimens:
 
 
 class TestDeleteCurve:
-    def test_delete_curve_removes_and_renumbers(self, qtbot):
+    SCHEME3 = [
+        {"id": "curve1", "n": 5, "method": "equidistant", "start": 2},
+        {"id": "curve2", "n": 8, "method": "equidistant", "start": 7},
+        {"id": "curve3", "n": 4, "method": "equidistant", "start": 15},
+    ]
+
+    def test_delete_curve_clears_trace_keeps_scheme(self, qtbot):
         dlg = _build_dialog(qtbot)
-        dlg.curve_config = [
-            {"id": "curve1", "n": 5, "method": "equidistant", "start": 2},
-            {"id": "curve2", "n": 8, "method": "equidistant", "start": 7},
-            {"id": "curve3", "n": 4, "method": "equidistant", "start": 15},
-        ]
+        dlg.curve_config = [dict(c) for c in self.SCHEME3]
         dlg.curve_raw_map = {
             "curve1": [[0, 0], [1, 1]],
             "curve2": [[2, 2], [3, 3]],
             "curve3": [[4, 4], [5, 5]],
         }
         dlg.delete_curve("curve2")
-        # curve3 is renumbered to curve2; start indices recomputed after removal.
-        assert [c["id"] for c in dlg.curve_config] == ["curve1", "curve2"]
-        assert [c["n"] for c in dlg.curve_config] == [5, 4]
-        assert [c["start"] for c in dlg.curve_config] == [2, 7]
-        # Raw traces remapped to the new ids.
-        assert dlg.curve_raw_map == {"curve1": [[0, 0], [1, 1]], "curve2": [[4, 4], [5, 5]]}
+        # Scheme (dataset-wide numbering + counts) is untouched -- only this
+        # object's curve2 trace is cleared, leaving an empty slot.
+        assert [c["id"] for c in dlg.curve_config] == ["curve1", "curve2", "curve3"]
+        assert set(dlg.curve_raw_map.keys()) == {"curve1", "curve3"}
 
-    def test_delete_unknown_curve_is_noop(self, qtbot):
+    def test_retrace_refills_the_emptied_slot_without_prompt(self, qtbot):
+        dlg = _build_dialog(qtbot)
+        dlg.curve_config = [dict(c) for c in self.SCHEME3]
+        dlg.curve_raw_map = {
+            "curve1": [[0, 0], [1, 1]],
+            "curve2": [[2, 2], [3, 3]],
+            "curve3": [[4, 4], [5, 5]],
+        }
+        dlg.delete_curve("curve2")
+        # Re-tracing fills the emptied curve2 slot; no QInputDialog prompt because
+        # the curve already exists in the scheme (its count is dataset-wide).
+        with patch("dialogs.object_dialog.QInputDialog.getInt") as prompt:
+            dlg.finish_curve([[9, 9], [8, 8]])
+        prompt.assert_not_called()
+        assert dlg.curve_raw_map["curve2"] == [[9, 9], [8, 8]]
+        assert set(dlg.curve_raw_map.keys()) == {"curve1", "curve2", "curve3"}
+
+    def test_delete_untraced_curve_is_noop(self, qtbot):
         dlg = _build_dialog(qtbot)
         dlg.curve_config = [{"id": "curve1", "n": 5, "method": "equidistant", "start": 2}]
         dlg.curve_raw_map = {"curve1": [[0, 0], [1, 1]]}
-        dlg.delete_curve("curveX")
-        assert [c["id"] for c in dlg.curve_config] == ["curve1"]
+        dlg.delete_curve("curve2")  # not traced on this object
         assert dlg.curve_raw_map == {"curve1": [[0, 0], [1, 1]]}

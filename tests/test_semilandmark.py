@@ -112,6 +112,55 @@ class TestResampleValidation:
             mu.resample_polyline([[0, 0], [1, 1]], 1)
 
 
+class TestBuildLandmarksWithCurves:
+    def test_fixed_landmarks_come_first_unchanged(self):
+        fixed = [[0.0, 0.0], [1.0, 1.0]]
+        curves = [{"id": "A", "n": 3, "raw": [[0, 0], [10, 0]]}]
+        lms, config = mu.build_landmarks_with_curves(fixed, curves)
+        assert lms[:2] == fixed
+        assert len(lms) == 2 + 3
+
+    def test_config_start_indices(self):
+        fixed = [[0.0, 0.0], [1.0, 1.0]]
+        curves = [
+            {"id": "A", "n": 4, "raw": [[0, 0], [4, 0]]},
+            {"id": "B", "n": 3, "raw": [[0, 5], [0, 8]]},
+        ]
+        lms, config = mu.build_landmarks_with_curves(fixed, curves)
+        assert [c["start"] for c in config] == [2, 6]
+        assert [c["n"] for c in config] == [4, 3]
+        assert [c["id"] for c in config] == ["A", "B"]
+        assert len(lms) == 2 + 4 + 3
+        # Curve A occupies indices 2..5, curve B 6..8.
+        assert lms[2] == pytest.approx([0, 0])
+        assert lms[6] == pytest.approx([0, 5])
+
+    def test_no_fixed_landmarks(self):
+        curves = [{"id": "A", "n": 3, "raw": [[0, 0], [2, 0]]}]
+        lms, config = mu.build_landmarks_with_curves([], curves)
+        assert config[0]["start"] == 0
+        assert len(lms) == 3
+
+    def test_no_curves_returns_fixed_only(self):
+        fixed = [[0.0, 0.0], [1.0, 1.0]]
+        lms, config = mu.build_landmarks_with_curves(fixed, [])
+        assert lms == fixed
+        assert config == []
+
+    def test_3d_curves(self):
+        fixed = [[0.0, 0.0, 0.0]]
+        curves = [{"id": "A", "n": 3, "raw": [[0, 0, 0], [0, 0, 2]]}]
+        lms, config = mu.build_landmarks_with_curves(fixed, curves)
+        assert all(len(p) == 3 for p in lms)
+        assert lms[-1] == pytest.approx([0, 0, 2])
+
+    def test_closed_curve_flag_passed_through(self):
+        curves = [{"id": "A", "n": 4, "raw": [[0, 0], [1, 0], [1, 1], [0, 1]], "closed": True}]
+        lms, config = mu.build_landmarks_with_curves([], curves)
+        assert len(lms) == 4
+        assert lms[0] != lms[-1]  # closed loop, no duplicated end
+
+
 # --------------------------------------------------------------------------- #
 # Model JSON accessors
 # --------------------------------------------------------------------------- #

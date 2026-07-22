@@ -993,3 +993,36 @@ def resample_polyline(points, n, closed=False):
         frac = 0.0 if seg == 0 else (t - cum[idx]) / seg
         out.append((pts[idx] + frac * (pts[idx + 1] - pts[idx])).tolist())
     return out
+
+
+def build_landmarks_with_curves(fixed_landmarks, curves):
+    """Assemble a landmark list and its curve configuration.
+
+    Layout: the fixed (anatomical) landmarks first, unchanged, then each curve's
+    evenly-spaced semi-landmarks appended in order. Keeping fixed landmarks first
+    means their indices never move when curves are added, changed or removed, so
+    wireframe/baseline references to them stay valid (see devlog 237).
+
+    Args:
+        fixed_landmarks: ordered ``[x, y(, z)]`` anatomical landmarks, kept as-is.
+        curves: ordered list of dicts, one per curve:
+            ``{"id": str, "n": int, "raw": [[x, y(, z)], ...], "closed": bool?}``
+            -- the curve id, target semi-landmark count, the raw traced polyline,
+            and whether it is a closed loop (default False).
+
+    Returns:
+        ``(landmark_list, config)`` where ``config`` is a list of
+        ``{"id", "n", "method", "start"}`` with 0-based ``start`` indices into
+        ``landmark_list`` marking where each curve's semi-landmarks begin.
+
+    Raises:
+        ValueError: propagated from :func:`resample_polyline` for a bad curve.
+    """
+    landmark_list = [list(p) for p in fixed_landmarks]
+    config = []
+    for curve in curves:
+        start = len(landmark_list)
+        points = resample_polyline(curve["raw"], curve["n"], closed=curve.get("closed", False))
+        landmark_list.extend(points)
+        config.append({"id": curve["id"], "n": curve["n"], "method": "equidistant", "start": start})
+    return landmark_list, config

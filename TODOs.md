@@ -164,6 +164,26 @@ curve-drawing UI (step 2) and the dataset-dialog N input.
       shape alone and does not look at the image; this item is the
       image-driven counterpart.
 
+  - [ ] **2a. Pre-analyze images for salient geometric features (supports 1 &
+        2).** Landmarks are usually placed at geometrically distinctive spots,
+        so pre-extract those from each image as landmark candidates: corners /
+        line intersections, straight edges, contours/curves, and curvature
+        extrema (극점). Cache the result per image so suggestion (item 2) and
+        curve auto-detect (item 1) both draw on a ready feature set instead of
+        re-analyzing on demand. Candidate tooling: OpenCV (already a dependency)
+        — Canny/Hough for edges and lines, Harris/Shi-Tomasi for corners,
+        contour extraction + curvature for curves and extrema.
+
+  - [ ] **2b. Image-recognition engine — longer term, has upstream
+        dependencies.** A learned recognition engine (beyond the classical CV of
+        2a) is attractive but gated on prior data work done elsewhere:
+        collecting and analyzing object detection / instance detection /
+        segmentation datasets, especially for **fossils**. That upstream
+        modeling has to exist before Modan2 can consume it downstream for
+        landmark suggestion, so treat this as a later phase depending on those
+        datasets/models being ready — not something to build inside Modan2 from
+        scratch.
+
 ---
 
 ## 🟡 MEDIUM — deliberately deferred (low value / higher risk)

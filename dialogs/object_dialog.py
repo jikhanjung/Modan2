@@ -97,6 +97,10 @@ class ObjectDialog(QDialog):
         self.curve_raw_map = {}
         self._orig_curve_config = []
         self._orig_curve_raw = {}
+        # Snapshot of the full savable state (name/sequence/desc/landmarks/
+        # variables/curves) taken once the object is loaded, so Cancel can detect
+        # any unsaved edit, not just curve edits.
+        self._saved_snapshot = None
         # Set while show_landmarks() repopulates the table, so the cell validator
         # ignores the itemChanged storm that causes.
         self._populating_landmark_table = False
@@ -346,7 +350,8 @@ class ObjectDialog(QDialog):
         self.btnCurve.setFlat(True)
         self.btnCurve.setStyleSheet(
             "QPushButton { border: none; background: transparent; }"
-            "QPushButton:checked { background: rgba(0, 0, 0, 40); border-radius: 4px; }"
+            "QPushButton:hover { background: #e6f3ff; border: 1px solid #3399ff; border-radius: 4px; }"
+            "QPushButton:checked { background: #cce6ff; border: 1px solid #3399ff; border-radius: 4px; }"
         )
         self.btnGroup.addButton(self.btnLandmark)
         self.btnGroup.addButton(self.btnWireframe)
@@ -1090,6 +1095,9 @@ class ObjectDialog(QDialog):
         self.show_index_state_changed()
         self.object_view.align_object()
         self.show_landmarks()
+        # Baseline for Cancel's unsaved-change check (table + property fields are
+        # now populated).
+        self._saved_snapshot = self._snapshot_state()
 
     def enable_landmark_edit(self):
         self.btnLandmark.setEnabled(True)
@@ -1630,6 +1638,7 @@ class ObjectDialog(QDialog):
             self.object.save()
         self._orig_curve_config = copy.deepcopy(self.curve_config)
         self._orig_curve_raw = copy.deepcopy(self.curve_raw_map)
+        self._saved_snapshot = self._snapshot_state()
 
         # Refresh this object's row in the main window's list (landmark count may
         # have changed) without disturbing its selection.
@@ -1779,12 +1788,30 @@ class ObjectDialog(QDialog):
     def _has_unsaved_curve_changes(self):
         return self.curve_config != self._orig_curve_config or self.curve_raw_map != self._orig_curve_raw
 
+    def _snapshot_state(self):
+        # Everything save_object() would persist, so Cancel can tell whether any
+        # real data (name/sequence/description/landmarks/variables/curves) changed.
+        return {
+            "name": self.edtObjectName.text(),
+            "sequence": self.edtSequence.text(),
+            "desc": self.edtObjectDesc.toPlainText(),
+            "landmarks": self.make_landmark_str(),
+            "variables": [edt.text() for edt in self.edtPropertyList],
+            "curve_config": copy.deepcopy(self.curve_config),
+            "curve_raw": copy.deepcopy(self.curve_raw_map),
+        }
+
+    def _has_unsaved_changes(self):
+        if self._saved_snapshot is None:
+            return self._has_unsaved_curve_changes()
+        return self._snapshot_state() != self._saved_snapshot
+
     def Cancel(self):
-        if self._has_unsaved_curve_changes():
+        if self._has_unsaved_changes():
             answer = QMessageBox.question(
                 self,
                 self.tr("Unsaved changes"),
-                self.tr("You have unsaved curve changes. Save them before closing?"),
+                self.tr("You have unsaved changes. Save them before closing?"),
                 QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel,
                 QMessageBox.Save,
             )

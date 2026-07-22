@@ -689,6 +689,30 @@ class TestCurveEditingHeldInMemory:
         dlg.curve_raw_map = {"curve1": [[0, 0], [1, 1]]}
         assert dlg._has_unsaved_curve_changes() is True
 
+    def test_cancel_detects_landmark_and_variable_edits(self, qtbot):
+        from PyQt5.QtWidgets import QLineEdit, QTableWidgetItem, QTextEdit
+
+        dlg = _build_dialog(qtbot)
+        dlg.edtObjectName = QLineEdit("obj")
+        dlg.edtSequence = QLineEdit("1")
+        dlg.edtObjectDesc = QTextEdit("")
+        dlg.edtPropertyList = [QLineEdit("a")]
+        for w in (dlg.edtObjectName, dlg.edtSequence, dlg.edtObjectDesc, dlg.edtPropertyList[0]):
+            qtbot.addWidget(w)
+
+        dlg._saved_snapshot = dlg._snapshot_state()
+        assert dlg._has_unsaved_changes() is False
+
+        # A landmark-coordinate edit is now detected, not just curve edits.
+        dlg.edtLandmarkStr.setItem(0, 0, QTableWidgetItem("99.0"))
+        assert dlg._has_unsaved_changes() is True
+
+        # Re-baseline, then a variable edit is likewise detected.
+        dlg._saved_snapshot = dlg._snapshot_state()
+        assert dlg._has_unsaved_changes() is False
+        dlg.edtPropertyList[0].setText("b")
+        assert dlg._has_unsaved_changes() is True
+
 
 class TestExpectedLandmarks:
     def test_expected_filled_after_two_placed(self, qtbot, test_database):

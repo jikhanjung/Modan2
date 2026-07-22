@@ -2624,7 +2624,9 @@ def delete_curve_from_dataset(dataset, curve_index):
     remaining = [c for i, c in enumerate(config) if i != curve_index]
     remaining_ids = [c["id"] for c in remaining]
     fixed = config[0].get("start", 0)
-    new_config = mu.build_curve_config(fixed, [{"n": c.get("n", 0), "name": c.get("name", "")} for c in remaining])
+    new_config = mu.build_curve_config(
+        fixed, [{"n": c.get("n", 0), "name": c.get("name", ""), "desc": c.get("desc", "")} for c in remaining]
+    )
     id_map = {old: new["id"] for old, new in zip(remaining_ids, new_config)}
 
     dataset.set_curve_config(new_config)

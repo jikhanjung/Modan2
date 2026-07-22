@@ -415,6 +415,16 @@ class ObjectViewer2D(QLabel):
             if text:
                 QToolTip.showText(global_pos, text, self)
                 return
+        # Fall back to a curve description/name when hovering a curve.
+        curve_id = self._curve_at_position(curr_pos)
+        if curve_id is not None:
+            for curve in self._curve_config():
+                if curve.get("id") == curve_id:
+                    text = curve.get("desc") or curve.get("name")
+                    if text:
+                        QToolTip.showText(global_pos, text, self)
+                        return
+                    break
         QToolTip.hideText()
 
     def _curve_config(self):

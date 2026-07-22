@@ -131,9 +131,9 @@ class ObjectDialog(QDialog):
         # Semi-landmark curves for this object: id, editable name, traced
         # start/end point, and the dataset-wide semi-landmark count N (editable).
         self.curveTable = QTableWidget()
-        self.curveTable.setColumnCount(5)
+        self.curveTable.setColumnCount(6)
         self.curveTable.setHorizontalHeaderLabels(
-            [self.tr("Curve"), self.tr("Name"), self.tr("Start"), self.tr("End"), self.tr("N")]
+            [self.tr("Curve"), self.tr("Name"), self.tr("Description"), self.tr("Start"), self.tr("End"), self.tr("N")]
         )
         self.curveTable.setMaximumHeight(150)
         self._populating_curve_table = False
@@ -1224,14 +1224,16 @@ class ObjectDialog(QDialog):
                 id_item = QTableWidgetItem(str(curve.get("id", "")))
                 start_item = QTableWidgetItem(start_txt)
                 end_item = QTableWidgetItem(end_txt)
-                # Id / start / end are read-only; Name (col 1) and N (col 4) edit.
+                # Id / start / end are read-only; Name (1), Description (2) and
+                # N (5) are editable.
                 for item in (id_item, start_item, end_item):
                     item.setFlags(item.flags() & ~Qt.ItemIsEditable)
                 self.curveTable.setItem(row, 0, id_item)
                 self.curveTable.setItem(row, 1, QTableWidgetItem(curve.get("name", "")))
-                self.curveTable.setItem(row, 2, start_item)
-                self.curveTable.setItem(row, 3, end_item)
-                self.curveTable.setItem(row, 4, QTableWidgetItem(str(curve.get("n", 0))))
+                self.curveTable.setItem(row, 2, QTableWidgetItem(curve.get("desc", "")))
+                self.curveTable.setItem(row, 3, start_item)
+                self.curveTable.setItem(row, 4, end_item)
+                self.curveTable.setItem(row, 5, QTableWidgetItem(str(curve.get("n", 0))))
         finally:
             self._populating_curve_table = False
 
@@ -1329,7 +1331,7 @@ class ObjectDialog(QDialog):
             view.update()
 
     def on_curve_cell_changed(self, item):
-        """Editing Name (col 1) or the count N (col 4), held in memory until Save."""
+        """Editing Name (1), Description (2) or the count N (5); held in memory."""
         if self._populating_curve_table or self.dataset is None:
             return
         config = self.curve_config
@@ -1340,7 +1342,10 @@ class ObjectDialog(QDialog):
         if item.column() == 1:  # curve name
             config[row]["name"] = item.text().strip()
             return
-        if item.column() != 4:
+        if item.column() == 2:  # curve description
+            config[row]["desc"] = item.text().strip()
+            return
+        if item.column() != 5:
             return
         try:
             new_n = int(item.text())
@@ -1352,9 +1357,9 @@ class ObjectDialog(QDialog):
             return
         # Rebuild the scheme with the new count; start indices shift for every
         # following curve. This is a dataset-level change (all specimens share it),
-        # applied to the database on Save. Names are preserved.
+        # applied to the database on Save. Names/descriptions are preserved.
         fixed_count = config[0].get("start", 0)
-        curves = [{"n": c.get("n", 0), "name": c.get("name", "")} for c in config]
+        curves = [{"n": c.get("n", 0), "name": c.get("name", ""), "desc": c.get("desc", "")} for c in config]
         curves[row]["n"] = new_n
         self.curve_config = mu.build_curve_config(fixed_count, curves)
         self.show_curves()

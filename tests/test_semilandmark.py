@@ -165,8 +165,8 @@ class TestBuildCurveConfig:
     def test_start_indices_from_fixed_count(self):
         config = mu.build_curve_config(5, [20, 12])
         assert config == [
-            {"id": "curve1", "n": 20, "method": "equidistant", "start": 5, "name": ""},
-            {"id": "curve2", "n": 12, "method": "equidistant", "start": 25, "name": ""},
+            {"id": "curve1", "n": 20, "method": "equidistant", "start": 5, "name": "", "desc": ""},
+            {"id": "curve2", "n": 12, "method": "equidistant", "start": 25, "name": "", "desc": ""},
         ]
 
     def test_preserves_name_from_dict_entries(self):
@@ -350,7 +350,9 @@ class TestTpsCurveImport:
         dataset = controller.import_dataset(tps, "Imported", str(tmp_path))
 
         # Dataset records one curve of 4 points starting after the 3 fixed ones.
-        assert dataset.get_curve_config() == [{"id": "curve1", "n": 4, "method": "equidistant", "start": 3, "name": ""}]
+        assert dataset.get_curve_config() == [
+            {"id": "curve1", "n": 4, "method": "equidistant", "start": 3, "name": "", "desc": ""}
+        ]
 
         obj = dataset.object_list.order_by(mm.MdObject.id).first()
         obj.unpack_landmark()
@@ -443,7 +445,7 @@ def _build_dialog(qtbot, landmarks=None):
     dlg.edtLandmarkStr = table
     curve_table = QTableWidget()
     qtbot.addWidget(curve_table)
-    curve_table.setColumnCount(5)
+    curve_table.setColumnCount(6)
     dlg.curveTable = curve_table
     dlg._populating_curve_table = False
     curve_table.itemChanged.connect(dlg.on_curve_cell_changed)
@@ -528,17 +530,17 @@ class TestObjectDialogCurveTable:
         dlg.show_curves()
         assert dlg.curveTable.rowCount() == 2
         assert dlg.curveTable.item(0, 0).text() == "curve1"
-        assert dlg.curveTable.item(0, 4).text() == "10"  # N
-        assert dlg.curveTable.item(0, 2).text() == "(0.0, 0.0)"  # start
-        assert dlg.curveTable.item(0, 3).text() == "(10.0, 2.0)"  # end
+        assert dlg.curveTable.item(0, 5).text() == "10"  # N
+        assert dlg.curveTable.item(0, 3).text() == "(0.0, 0.0)"  # start
+        assert dlg.curveTable.item(0, 4).text() == "(10.0, 2.0)"  # end
         # Untraced curve has blank endpoints.
-        assert dlg.curveTable.item(1, 2).text() == ""  # untraced start
+        assert dlg.curveTable.item(1, 3).text() == ""  # untraced start
 
     def test_editing_n_updates_config_dataset_wide(self, qtbot):
         dlg = self._dlg(qtbot, SCHEME)
         dlg.show_curves()
         # Simulate the user editing curve1's N from 10 to 15.
-        dlg.curveTable.item(0, 4).setText("15")
+        dlg.curveTable.item(0, 5).setText("15")
         config = dlg.curve_config
         assert config[0]["n"] == 15
         # Following curve's start index shifts accordingly (2 + 15).
@@ -547,7 +549,7 @@ class TestObjectDialogCurveTable:
     def test_editing_n_to_invalid_reverts(self, qtbot):
         dlg = self._dlg(qtbot, SCHEME)
         dlg.show_curves()
-        dlg.curveTable.item(0, 4).setText("abc")
+        dlg.curveTable.item(0, 5).setText("abc")
         # Config unchanged.
         assert dlg.curve_config[0]["n"] == 10
 
@@ -565,7 +567,7 @@ class TestDatasetDialogCurveScheme:
     def _dlg(self, qtbot, rows=()):
         dlg = DatasetDialog.__new__(DatasetDialog)
         dlg.edtFixedCount = QLineEdit()
-        dlg.curveTable = QTableWidget(0, 3)
+        dlg.curveTable = QTableWidget(0, 4)
         qtbot.addWidget(dlg.edtFixedCount)
         qtbot.addWidget(dlg.curveTable)
         dlg.dataset = _FakeDataset(2)
@@ -573,7 +575,7 @@ class TestDatasetDialogCurveScheme:
         for i, (name, n) in enumerate(rows):
             dlg.curveTable.setItem(i, 0, QTableWidgetItem(f"curve{i + 1}"))
             dlg.curveTable.setItem(i, 1, QTableWidgetItem(name))
-            dlg.curveTable.setItem(i, 2, QTableWidgetItem(str(n)))
+            dlg.curveTable.setItem(i, 3, QTableWidgetItem(str(n)))
         return dlg
 
     def test_build_from_table_preserves_name_and_count(self, qtbot):

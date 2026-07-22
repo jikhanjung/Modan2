@@ -102,8 +102,10 @@ class DatasetDialog(BaseDialog):
         self.edtFixedCount.setPlaceholderText(self.tr("number of fixed landmarks, e.g. 5"))
         # Curve list: id, editable name, editable semi-landmark count N.
         # Right-click a row to delete the curve from the whole dataset.
-        self.curveTable = QTableWidget(0, 3)
-        self.curveTable.setHorizontalHeaderLabels([self.tr("Curve"), self.tr("Name"), self.tr("N")])
+        self.curveTable = QTableWidget(0, 4)
+        self.curveTable.setHorizontalHeaderLabels(
+            [self.tr("Curve"), self.tr("Name"), self.tr("Description"), self.tr("N")]
+        )
         self.curveTable.setMaximumHeight(140)
         self.curveTable.verticalHeader().hide()
         self.curveTable.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -349,8 +351,9 @@ class DatasetDialog(BaseDialog):
             id_item.setFlags(id_item.flags() & ~Qt.ItemIsEditable)
             self.curveTable.setItem(row, 0, id_item)
             self.curveTable.setItem(row, 1, QTableWidgetItem(curve.get("name", "")))
-            self.curveTable.setItem(row, 2, QTableWidgetItem(str(curve.get("n", 0))))
-        self.curveTable.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+            self.curveTable.setItem(row, 2, QTableWidgetItem(curve.get("desc", "")))
+            self.curveTable.setItem(row, 3, QTableWidgetItem(str(curve.get("n", 0))))
+        self.curveTable.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
 
     def _populate_landmark_name_table(self):
         existing = self.dataset.get_landmark_names() if self.dataset is not None else []
@@ -377,11 +380,13 @@ class DatasetDialog(BaseDialog):
         curves = []
         for row in range(self.curveTable.rowCount()):
             name_item = self.curveTable.item(row, 1)
-            n_item = self.curveTable.item(row, 2)
+            desc_item = self.curveTable.item(row, 2)
+            n_item = self.curveTable.item(row, 3)
             curves.append(
                 {
                     "n": max(2, self._int(n_item.text() if n_item else "", 2)),
                     "name": name_item.text().strip() if name_item else "",
+                    "desc": desc_item.text().strip() if desc_item else "",
                 }
             )
         return mu.build_curve_config(fixed_count, curves)

@@ -1053,9 +1053,13 @@ def build_curve_config(fixed_count, curves):
         if isinstance(curve, dict):
             n = int(curve.get("n", 0))
             name = curve.get("name", "")
+            desc = curve.get("desc", "")
         else:
             n = int(curve)
             name = ""
-        config.append({"id": f"curve{i + 1}", "n": n, "method": "equidistant", "start": start, "name": name})
+            desc = ""
+        config.append(
+            {"id": f"curve{i + 1}", "n": n, "method": "equidistant", "start": start, "name": name, "desc": desc}
+        )
         start += n
     return config

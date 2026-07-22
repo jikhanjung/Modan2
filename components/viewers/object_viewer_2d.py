@@ -115,6 +115,8 @@ class ObjectViewer2D(QLabel):
         self.data_mode = OBJECT_MODE
 
         self.show_index = False
+        # Draw the dataset landmark name/abbreviation instead of the index number.
+        self.show_landmark_name = False
         self.show_wireframe = True
         self.show_polygon = True
         # Toggle the raw traced curves and the derived semi-landmarks (both are
@@ -384,6 +386,22 @@ class ObjectViewer2D(QLabel):
         if self.object is not None:
             return self.object.get_curve_raw()
         return {}
+
+    def _landmark_names(self):
+        """Dataset-wide per-landmark names, preferring the dialog's dataset."""
+        dlg = getattr(self, "object_dialog", None)
+        dataset = getattr(dlg, "dataset", None) if dlg is not None else None
+        if dataset is None:
+            dataset = getattr(self, "dataset", None)
+        return dataset.get_landmark_names() if dataset is not None else []
+
+    def _landmark_label(self, idx, names):
+        """Text drawn by a landmark: its name when enabled and set, else index."""
+        if self.show_landmark_name and idx < len(names):
+            name = names[idx].get("name")
+            if name:
+                return name
+        return str(idx + 1)
 
     def _curve_config(self):
         """Curve scheme, preferring the object dialog's in-memory copy.
@@ -1149,6 +1167,7 @@ class ObjectViewer2D(QLabel):
                 painter.drawLine(x1, y1, x2, y2)
 
         painter.setFont(QFont("Helvetica", 10 + int(self.index_size) * 3))
+        landmark_names = self._landmark_names() if self.show_landmark_name else []
         for idx, landmark in enumerate(self.landmark_list):
             # Check for missing landmarks
             if landmark[0] is None or landmark[1] is None:
@@ -1187,11 +1206,15 @@ class ObjectViewer2D(QLabel):
             painter.drawEllipse(
                 int(self._2canx(landmark[0]) - radius), int(self._2cany(landmark[1])) - radius, radius * 2, radius * 2
             )
-            if self.show_index:
+            if self.show_index or self.show_landmark_name:
                 idx_color = QColor(self.index_color)
                 painter.setPen(QPen(idx_color, 2))
                 painter.setBrush(QBrush(idx_color))
-                painter.drawText(int(self._2canx(landmark[0]) + 10), int(self._2cany(landmark[1])) + 10, str(idx + 1))
+                painter.drawText(
+                    int(self._2canx(landmark[0]) + 10),
+                    int(self._2cany(landmark[1])) + 10,
+                    self._landmark_label(idx, landmark_names),
+                )
 
         # draw expected positions of the not-yet-placed landmarks (digitizing aid)
         if self.show_expected and self.object_dialog is not None:

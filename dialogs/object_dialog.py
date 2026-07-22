@@ -190,6 +190,7 @@ class ObjectDialog(QDialog):
         self.right_middle_widget = QWidget()
         self.right_middle_layout = QVBoxLayout()
         self.right_middle_layout.addWidget(self.cbxShowIndex)
+        self.right_middle_layout.addWidget(self.cbxShowName)
         self.right_middle_layout.addWidget(self.cbxShowWireframe)
         self.right_middle_layout.addWidget(self.cbxShowPolygon)
         self.right_middle_layout.addWidget(self.cbxShowEstimated)
@@ -205,6 +206,7 @@ class ObjectDialog(QDialog):
         self.btnAddMissing.setText(self.tr("Add Missing"))
         self.btnAddMissing.clicked.connect(self.btnAddMissing_clicked)
         self.right_middle_layout.addWidget(self.btnAddMissing)
+        self.right_middle_layout.addWidget(self.btnEditLandmarkNames)
         # self.right_middle_layout.addWidget(self.btnFBO)
         self.right_middle_widget.setLayout(self.right_middle_layout)
         self.right_bottom_widget = QWidget()
@@ -365,6 +367,14 @@ class ObjectDialog(QDialog):
         self.cbxShowIndex = QCheckBox()
         self.cbxShowIndex.setText(self.tr("Index"))
         self.cbxShowIndex.setChecked(True)
+        # Show the landmark name/abbreviation instead of its index number.
+        self.cbxShowName = QCheckBox()
+        self.cbxShowName.setText(self.tr("Name"))
+        self.cbxShowName.setChecked(False)
+        self.cbxShowName.stateChanged.connect(self.show_name_state_changed)
+        # Opens the dataset-wide landmark name/description editor.
+        self.btnEditLandmarkNames = QPushButton(self.tr("Landmark Names"))
+        self.btnEditLandmarkNames.clicked.connect(self.btnEditLandmarkNames_clicked)
         self.cbxShowWireframe = QCheckBox()
         self.cbxShowWireframe.setText(self.tr("Wireframe"))
         self.cbxShowWireframe.setChecked(True)
@@ -598,6 +608,23 @@ class ObjectDialog(QDialog):
         if self.object is not None:
             self.set_object(self.object)
             self.show_landmarks()
+            self.object_view.update()
+
+    def show_name_state_changed(self, state):
+        """Toggle drawing the landmark name/abbreviation instead of the index."""
+        show_name = state == Qt.Checked
+        for view in (self.object_view_2d, self.object_view_3d):
+            if view is not None:
+                view.show_landmark_name = show_name
+        if self.object_view is not None:
+            self.object_view.update()
+
+    def btnEditLandmarkNames_clicked(self):
+        """Open the dataset-wide landmark name/description editor."""
+        from dialogs.landmark_name_dialog import LandmarkNameDialog
+
+        dialog = LandmarkNameDialog(self, self.dataset, len(self.landmark_list))
+        if dialog.exec_() and self.object_view is not None:
             self.object_view.update()
 
     def show_expected_state_changed(self, state):

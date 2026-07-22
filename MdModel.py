@@ -233,6 +233,9 @@ class MdDataset(Model):
     # Semi-landmark curve configuration (JSON). See get_curve_config(). Nullable,
     # so datasets without curves simply have none.
     curve_config_json = CharField(null=True)
+    # Per-landmark name/abbreviation and description (JSON). See
+    # get_landmark_names(). Dataset-wide, indexed by landmark position. Nullable.
+    landmark_name_json = CharField(null=True)
 
     class Meta:
         database = gDatabase
@@ -270,6 +273,34 @@ class MdDataset(Model):
     def set_curve_config(self, config):
         """Store semi-landmark curve configuration (see :meth:`get_curve_config`)."""
         self.curve_config_json = json.dumps(config) if config else None
+
+    def get_landmark_names(self):
+        """Per-landmark names as a list, ``[]`` when unset or unreadable.
+
+        Each entry is ``{"name": str, "desc": str}`` for the landmark at that
+        index (an abbreviation like ``CR1`` plus a longer description). The list
+        may be shorter than the landmark count; missing entries are unnamed.
+        Never raises.
+        """
+        if not self.landmark_name_json:
+            return []
+        try:
+            names = json.loads(self.landmark_name_json)
+        except (ValueError, TypeError) as e:
+            logger.warning("Ignoring unreadable landmark names for dataset %s: %s", self.id, e)
+            return []
+        return names if isinstance(names, list) else []
+
+    def set_landmark_names(self, names):
+        """Store per-landmark names (see :meth:`get_landmark_names`).
+
+        Trailing fully-empty entries are dropped so an all-blank list clears the
+        field rather than persisting noise.
+        """
+        trimmed = list(names or [])
+        while trimmed and not (trimmed[-1].get("name") or trimmed[-1].get("desc")):
+            trimmed.pop()
+        self.landmark_name_json = json.dumps(trimmed) if trimmed else None
 
     def get_grouping_variable_index_list(self):
         variablename_list = self.get_variablename_list()

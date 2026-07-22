@@ -23,6 +23,7 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
+import MdUtils as mu
 from dialogs.base_dialog import BaseDialog
 from MdHelpers import guard_slot
 from MdModel import MdDataset
@@ -89,6 +90,15 @@ class DatasetDialog(BaseDialog):
         self.edtPolygons = QTextEdit()
         self.edtVariableNameStr = QTextEdit()
 
+        # Semi-landmark scheme (dataset-level, shared by every specimen): how many
+        # fixed landmarks come first, and the per-curve semi-landmark counts. This
+        # fixes an unambiguous layout so "where do the semi-landmarks start" is the
+        # same for all objects (see devlog 237).
+        self.edtFixedCount = QLineEdit()
+        self.edtFixedCount.setPlaceholderText(self.tr("e.g. 5 (leave blank if no curves)"))
+        self.edtCurves = QLineEdit()
+        self.edtCurves.setPlaceholderText(self.tr("semi-landmark counts per curve, e.g. 20, 12"))
+
         # Variable management
         self.lstVariableName = QListWidget()
         self.lstVariableName.setEditTriggers(
@@ -145,12 +155,16 @@ class DatasetDialog(BaseDialog):
         self.lblWireframe = QLabel(self.tr("Wireframe"))
         self.lblBaseline = QLabel(self.tr("Baseline"))
         self.lblPolygons = QLabel(self.tr("Polygons"))
+        self.lblFixedCount = QLabel(self.tr("Fixed Landmarks"))
+        self.lblCurves = QLabel(self.tr("Semi-landmark Curves"))
         self.lblVariableNameStr = QLabel(self.tr("Variable Names"))
         self.main_layout.addRow(self.lblParent, self.cbxParent)
         self.main_layout.addRow(self.lblDatasetName, self.edtDatasetName)
         self.main_layout.addRow(self.lblDatasetDesc, self.edtDatasetDesc)
         self.main_layout.addRow(self.lblDimension, dim_layout)
         self.main_layout.addRow(self.lblWireframe, self.edtWireframe)
+        self.main_layout.addRow(self.lblFixedCount, self.edtFixedCount)
+        self.main_layout.addRow(self.lblCurves, self.edtCurves)
         self.main_layout.addRow(self.lblBaseline, self.edtBaseline)
         self.main_layout.addRow(self.lblPolygons, self.edtPolygons)
         self.main_layout.addRow(self.lblVariableNameStr, self.variable_widget)
@@ -265,6 +279,16 @@ class DatasetDialog(BaseDialog):
         self.edtBaseline.setText(dataset.baseline)
         self.edtPolygons.setText(dataset.polygons)
 
+        # Semi-landmark scheme: fixed count is where the first curve starts, and
+        # the curves field lists each curve's semi-landmark count.
+        curve_config = dataset.get_curve_config()
+        if curve_config:
+            self.edtFixedCount.setText(str(curve_config[0].get("start", 0)))
+            self.edtCurves.setText(", ".join(str(c.get("n", 0)) for c in curve_config))
+        else:
+            self.edtFixedCount.setText("")
+            self.edtCurves.setText("")
+
         # Load variable names
         variable_name_list = dataset.get_variablename_list()
         for idx, variable_name in enumerate(variable_name_list):
@@ -287,6 +311,31 @@ class DatasetDialog(BaseDialog):
                 self.rbtn2D.setChecked(True)
             elif parent_dataset.dimension == 3:
                 self.rbtn3D.setChecked(True)
+
+    def _build_curve_config(self):
+        """Parse the fixed-count and curves fields into a semi-landmark config.
+
+        Fixed count is the number of anatomical landmarks that precede the
+        curves; the curves field is a comma-separated list of each curve's
+        semi-landmark count (e.g. ``20, 12``). Empty curves field -> no config.
+        """
+        curves_text = self.edtCurves.text().strip()
+        if not curves_text:
+            return []
+        try:
+            fixed_count = int(self.edtFixedCount.text().strip() or 0)
+        except ValueError:
+            fixed_count = 0
+        counts = []
+        for token in curves_text.replace(";", ",").split(","):
+            token = token.strip()
+            if not token:
+                continue
+            try:
+                counts.append(int(token))
+            except ValueError:
+                continue
+        return mu.build_curve_config(fixed_count, counts)
 
     def Okay(self):
         """Save dataset and close dialog."""
@@ -313,6 +362,9 @@ class DatasetDialog(BaseDialog):
             self.dataset.wireframe = self.edtWireframe.toPlainText()
             self.dataset.baseline = self.edtBaseline.text()
             self.dataset.polygons = self.edtPolygons.toPlainText()
+
+            # Semi-landmark scheme -> curve config (dataset-level, shared layout).
+            self.dataset.set_curve_config(self._build_curve_config())
             logger.info(
                 "Wireframe: %s, Baseline: %s, Polygons: %s",
                 self.dataset.wireframe,

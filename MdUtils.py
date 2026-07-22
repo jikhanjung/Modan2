@@ -1026,3 +1026,28 @@ def build_landmarks_with_curves(fixed_landmarks, curves):
         landmark_list.extend(points)
         config.append({"id": curve["id"], "n": curve["n"], "method": "equidistant", "start": start})
     return landmark_list, config
+
+
+def build_curve_config(fixed_count, curve_point_counts):
+    """Build a semi-landmark curve config from a dataset-level scheme.
+
+    The scheme fixes, for the whole dataset, how many fixed (anatomical)
+    landmarks come first and how many semi-landmarks each curve contributes, so
+    every specimen shares one unambiguous layout (see devlog 237). Curves are
+    laid out after the fixed landmarks in order; each curve's ``start`` index is
+    derived from the fixed count plus the preceding curves' counts.
+
+    Args:
+        fixed_count: number of fixed landmarks that precede the curves (K).
+        curve_point_counts: ordered per-curve semi-landmark counts.
+
+    Returns:
+        list of ``{"id", "n", "method", "start"}`` (empty if no curves).
+    """
+    config = []
+    start = int(fixed_count)
+    for i, n in enumerate(curve_point_counts):
+        n = int(n)
+        config.append({"id": f"curve{i + 1}", "n": n, "method": "equidistant", "start": start})
+        start += n
+    return config

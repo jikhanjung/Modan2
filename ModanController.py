@@ -687,20 +687,16 @@ class ModanController(QObject):
 
         obj.dataset = dataset
 
-        # Set landmarks. Semi-landmark curve points (TPS CURVES=) are appended
-        # after the fixed landmarks and stored as ordinary landmarks, matching
-        # the layout build_landmarks_with_curves produces; the raw traces are
-        # kept on the object so the curves can be re-resampled later.
-        curves = getattr(import_data, "curve_data", {}).get(obj.object_name, [])
-        all_points = list(import_data.landmark_data[obj.object_name])
-        for curve in curves:
-            all_points.extend(curve)
+        # Set landmarks. Only the fixed landmarks go into landmark_str; TPS
+        # CURVES= points are kept as raw curve traces (merge-at-analysis model)
+        # and expanded into semi-landmarks at analysis time.
         landmark_list = []
-        for landmark in all_points:
+        for landmark in import_data.landmark_data[obj.object_name]:
             # None means "not recorded" (e.g. a -999 sentinel the import resolved);
             # store the marker unpack_landmark expects, not the string "None".
             landmark_list.append("\t".join(["Missing" if x is None else str(x) for x in landmark]))
         obj.landmark_str = "\n".join(landmark_list)
+        curves = getattr(import_data, "curve_data", {}).get(obj.object_name, [])
         if curves:
             obj.set_curve_raw({f"curve{i + 1}": curve for i, curve in enumerate(curves)})
 

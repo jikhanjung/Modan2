@@ -1727,10 +1727,27 @@ class MdDatasetOps:
         self.selected_object_id_list = []
         self.edge_list = []
         object_list = dataset.object_list.order_by(MdObject.sequence)
+        # Semi-landmark curves are stored per object as raw traces, not as
+        # landmarks (merge-at-analysis model). Expand them here so analysis sees
+        # each shape as fixed landmarks followed by the resampled semi-landmarks.
+        curve_config = dataset.get_curve_config()
+        n_dim = 3 if dataset.dimension == 3 else 2
         for mo in object_list:
             # self.object_list.append(mo.copy())
             # print(mo.id, mo.sequence)
-            self.object_list.append(MdObjectOps(mo))
+            ops = MdObjectOps(mo)
+            if curve_config:
+                raw_map = mo.get_curve_raw()
+                for curve in curve_config:
+                    n = curve.get("n", 0)
+                    raw = raw_map.get(curve.get("id"))
+                    if raw and len(raw) >= 2:
+                        ops.landmark_list.extend([list(p) for p in mu.resample_polyline(raw, n)])
+                    else:
+                        # Curve not traced on this object: keep the layout aligned
+                        # with a block of missing landmarks for the imputation path.
+                        ops.landmark_list.extend([[None] * n_dim for _ in range(n)])
+            self.object_list.append(ops)
 
         if dataset.wireframe is not None and dataset.wireframe != "":
             dataset.unpack_wireframe()

@@ -161,6 +161,22 @@ class TestBuildLandmarksWithCurves:
         assert lms[0] != lms[-1]  # closed loop, no duplicated end
 
 
+class TestBuildCurveConfig:
+    def test_start_indices_from_fixed_count(self):
+        config = mu.build_curve_config(5, [20, 12])
+        assert config == [
+            {"id": "curve1", "n": 20, "method": "equidistant", "start": 5},
+            {"id": "curve2", "n": 12, "method": "equidistant", "start": 25},
+        ]
+
+    def test_no_curves(self):
+        assert mu.build_curve_config(5, []) == []
+
+    def test_zero_fixed_count(self):
+        config = mu.build_curve_config(0, [8])
+        assert config[0]["start"] == 0
+
+
 # --------------------------------------------------------------------------- #
 # Model JSON accessors
 # --------------------------------------------------------------------------- #
@@ -323,7 +339,7 @@ class TestTpsCurveParsing:
 
 
 class TestTpsCurveImport:
-    def test_import_appends_semilandmarks_and_config(self, test_database, tmp_path):
+    def test_import_keeps_curves_as_raw_only(self, test_database, tmp_path):
         tps = TPS(_write_tps(tmp_path, TPS_WITH_CURVE), "ds")
         controller = ModanController()
         dataset = controller.import_dataset(tps, "Imported", str(tmp_path))
@@ -333,10 +349,20 @@ class TestTpsCurveImport:
 
         obj = dataset.object_list.order_by(mm.MdObject.id).first()
         obj.unpack_landmark()
-        # 3 fixed + 4 semi-landmarks appended.
-        assert len(obj.landmark_list) == 7
-        assert obj.landmark_list[3] == [0, 1]
+        # landmark_str holds only the 3 fixed landmarks (merge-at-analysis model).
+        assert len(obj.landmark_list) == 3
+        # Curve points are kept as a raw trace instead.
         assert obj.get_curve_raw() == {"curve1": [[0, 1], [0, 2], [0, 3], [0, 4]]}
+
+    def test_datasetops_merges_curves_into_landmarks(self, test_database, tmp_path):
+        tps = TPS(_write_tps(tmp_path, TPS_WITH_CURVE), "ds")
+        controller = ModanController()
+        dataset = controller.import_dataset(tps, "Imported", str(tmp_path))
+
+        ds_ops = mm.MdDatasetOps(dataset)
+        # Analysis view: 3 fixed + 4 resampled semi-landmarks.
+        for ops in ds_ops.object_list:
+            assert len(ops.landmark_list) == 7
 
     def test_import_without_curves_leaves_config_empty(self, test_database, tmp_path):
         tps = TPS(_write_tps(tmp_path, TPS_NO_CURVE), "ds")
@@ -403,43 +429,50 @@ def _build_dialog(qtbot, landmarks=None):
     return dlg
 
 
+SCHEME = [
+    {"id": "curve1", "n": 10, "method": "equidistant", "start": 2},
+    {"id": "curve2", "n": 8, "method": "equidistant", "start": 12},
+]
+
+
 class TestObjectDialogFinishCurve:
-    def test_appends_semilandmarks_and_records_config(self, qtbot):
+    """Merge-at-analysis model: finish_curve stores only the raw trace."""
+
+    def _dlg(self, qtbot, scheme):
         dlg = _build_dialog(qtbot)  # 2 fixed landmarks
+        dlg.dataset._config = [dict(c) for c in scheme]
+        return dlg
+
+    def test_stores_raw_for_next_curve_without_touching_landmarks(self, qtbot):
+        dlg = self._dlg(qtbot, SCHEME)
         raw = [[0, 0], [10, 0], [10, 10]]
-        with patch("dialogs.object_dialog.QInputDialog.getInt", return_value=(5, True)):
-            dlg.finish_curve(raw)
+        dlg.finish_curve(raw)
+        assert dlg.curve_raw_map == {"curve1": raw}
+        # Landmark list (fixed only) is untouched -- semis are not stored.
+        assert len(dlg.landmark_list) == 2
 
-        assert len(dlg.landmark_list) == 2 + 5
-        assert dlg.dataset.get_curve_config() == [{"id": "curve1", "n": 5, "method": "equidistant", "start": 2}]
-        assert dlg.curve_raw_map["curve1"] == raw
-        assert dlg.dataset.saved == 1
-        # Semi-landmarks pushed to the viewer.
-        assert dlg.object_view_2d.landmark_list is dlg.landmark_list
+    def test_second_trace_fills_second_curve(self, qtbot):
+        dlg = self._dlg(qtbot, SCHEME)
+        dlg.finish_curve([[0, 0], [4, 0]])
+        dlg.finish_curve([[0, 5], [0, 9]])
+        assert set(dlg.curve_raw_map.keys()) == {"curve1", "curve2"}
+        assert len(dlg.landmark_list) == 2
 
-    def test_second_curve_appends_with_unique_id(self, qtbot):
-        dlg = _build_dialog(qtbot)
-        with patch("dialogs.object_dialog.QInputDialog.getInt", return_value=(4, True)):
-            dlg.finish_curve([[0, 0], [4, 0]])
-            dlg.finish_curve([[0, 5], [0, 9]])
+    def test_no_scheme_is_noop(self, qtbot):
+        dlg = _build_dialog(qtbot)  # empty curve config
+        with patch("dialogs.object_dialog.QMessageBox.information"):
+            dlg.finish_curve([[0, 0], [1, 0]])
+        assert dlg.curve_raw_map == {}
 
-        config = dlg.dataset.get_curve_config()
-        assert [c["id"] for c in config] == ["curve1", "curve2"]
-        assert [c["start"] for c in config] == [2, 6]
-        assert len(dlg.landmark_list) == 2 + 4 + 4
+    def test_all_traced_is_noop(self, qtbot):
+        dlg = self._dlg(qtbot, [SCHEME[0]])
+        dlg.finish_curve([[0, 0], [1, 0]])  # fills curve1 (the only one)
+        with patch("dialogs.object_dialog.QMessageBox.information") as m:
+            dlg.finish_curve([[2, 2], [3, 3]])
+        assert list(dlg.curve_raw_map.keys()) == ["curve1"]
+        m.assert_called_once()
 
     def test_too_few_points_is_noop(self, qtbot):
-        dlg = _build_dialog(qtbot)
-        with patch("dialogs.object_dialog.QInputDialog.getInt", return_value=(5, True)) as m:
-            dlg.finish_curve([[0, 0]])
-        assert len(dlg.landmark_list) == 2
-        assert dlg.dataset.get_curve_config() == []
-        m.assert_not_called()
-
-    def test_cancel_prompt_is_noop(self, qtbot):
-        dlg = _build_dialog(qtbot)
-        with patch("dialogs.object_dialog.QInputDialog.getInt", return_value=(0, False)):
-            dlg.finish_curve([[0, 0], [10, 0]])
-        assert len(dlg.landmark_list) == 2
-        assert dlg.dataset.get_curve_config() == []
+        dlg = self._dlg(qtbot, SCHEME)
+        dlg.finish_curve([[0, 0]])
         assert dlg.curve_raw_map == {}

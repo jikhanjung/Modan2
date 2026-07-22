@@ -25,7 +25,6 @@ from PyQt5.QtWidgets import (
     QGridLayout,
     QHBoxLayout,
     QHeaderView,
-    QInputDialog,
     QLabel,
     QLineEdit,
     QMessageBox,
@@ -173,6 +172,8 @@ class ObjectDialog(QDialog):
         self.right_middle_layout.addWidget(self.cbxShowEstimated)
         self.right_middle_layout.addWidget(self.cbxShowBaseline)
         self.right_middle_layout.addWidget(self.cbxShowModel)
+        self.right_middle_layout.addWidget(self.cbxShowCurve)
+        self.right_middle_layout.addWidget(self.cbxShowSemiLandmark)
         self.right_middle_layout.addWidget(self.cbxAutoRotate)
         self.right_middle_layout.addWidget(self.btnAddFile)
         self.right_middle_layout.addWidget(self.cbxUseOriginal)
@@ -220,6 +221,8 @@ class ObjectDialog(QDialog):
         self.cbxShowBaseline.stateChanged.connect(self.show_baseline_state_changed)
         self.cbxAutoRotate.stateChanged.connect(self.auto_rotate_state_changed)
         self.cbxShowModel.stateChanged.connect(self.show_model_state_changed)
+        self.cbxShowCurve.stateChanged.connect(self.show_curve_state_changed)
+        self.cbxShowSemiLandmark.stateChanged.connect(self.show_semi_landmark_state_changed)
         self.object_deleted = False
 
         # self.show_index_state_changed()
@@ -358,6 +361,15 @@ class ObjectDialog(QDialog):
         self.cbxShowModel = QCheckBox()
         self.cbxShowModel.setText(self.tr("3D Model"))
         self.cbxShowModel.setChecked(False)
+        # Show the raw traced curves and/or the derived semi-landmarks. Both are
+        # display-only (merge-at-analysis model); toggling neither stores nor
+        # loses anything.
+        self.cbxShowCurve = QCheckBox()
+        self.cbxShowCurve.setText(self.tr("Curve"))
+        self.cbxShowCurve.setChecked(True)
+        self.cbxShowSemiLandmark = QCheckBox()
+        self.cbxShowSemiLandmark.setText(self.tr("Semi-LM"))
+        self.cbxShowSemiLandmark.setChecked(True)
         self.btnAddFile = QPushButton()
         self.btnAddFile.setText(self.tr("Load Image"))
         self.btnAddFile.clicked.connect(self.btnAddFile_clicked)
@@ -537,6 +549,14 @@ class ObjectDialog(QDialog):
 
     def show_wireframe_state_changed(self, int):
         self.object_view.show_wireframe = self.cbxShowWireframe.isChecked()
+        self.object_view.update()
+
+    def show_curve_state_changed(self, int):
+        self.object_view.show_curve = self.cbxShowCurve.isChecked()
+        self.object_view.update()
+
+    def show_semi_landmark_state_changed(self, int):
+        self.object_view.show_semi_landmark = self.cbxShowSemiLandmark.isChecked()
         self.object_view.update()
 
     def toggle_estimation(self, state):
@@ -966,48 +986,38 @@ class ObjectDialog(QDialog):
         self.show_landmarks()
 
     def finish_curve(self, raw_points):
-        """Commit a traced curve as evenly-spaced semi-landmarks.
+        """Store a traced curve as its raw polyline.
 
-        The resampled points are appended to the landmark list as ordinary
-        landmarks (so they persist and analyze normally); the curve is recorded
-        in the dataset config, and the raw trace is kept so it can be
-        re-resampled later. 2D only (the 2D viewer is the only one that traces).
+        Merge-at-analysis model: the semi-landmarks are NOT written into the
+        landmark list. Only the raw trace is kept on the object; the dataset's
+        curve scheme says how many semi-landmarks it resamples to, and display
+        and analysis derive them on demand. The trace fills the next un-traced
+        curve in the dataset scheme, in order. 2D only (the 2D viewer traces).
         """
         if raw_points is None or len(raw_points) < 2:
             return
-        n, ok = QInputDialog.getInt(
-            self,
-            self.tr("Semi-landmarks"),
-            self.tr("Number of semi-landmarks on this curve:"),
-            10,
-            3,
-            1000,
-        )
-        if not ok:
-            return
-        try:
-            resampled = mu.resample_polyline(raw_points, n)
-        except ValueError as e:
-            logger.warning(f"Could not resample traced curve: {e}")
-            return
-
         config = self.dataset.get_curve_config()
-        existing_ids = {c.get("id") for c in config}
-        i = 1
-        while f"curve{i}" in existing_ids:
-            i += 1
-        curve_id = f"curve{i}"
-
-        start = len(self.landmark_list)
-        for pt in resampled:
-            self.landmark_list.append([float(pt[0]), float(pt[1])])
-        config.append({"id": curve_id, "n": n, "method": "equidistant", "start": start})
-        self.dataset.set_curve_config(config)
-        self.dataset.save()
-        self.curve_raw_map[curve_id] = [list(p) for p in raw_points]
-
-        self.show_landmarks()
-        self._refresh_landmark_views()
+        if not config:
+            QMessageBox.information(
+                self,
+                self.tr("Semi-landmarks"),
+                self.tr("Define the semi-landmark curves for this dataset first (dataset properties)."),
+            )
+            return
+        target = next((c for c in config if c.get("id") not in self.curve_raw_map), None)
+        if target is None:
+            QMessageBox.information(
+                self,
+                self.tr("Semi-landmarks"),
+                self.tr("All curves in the dataset scheme are already traced."),
+            )
+            return
+        self.curve_raw_map[target["id"]] = [list(p) for p in raw_points]
+        # Repaint so the derived semi-landmarks appear; nothing is stored in the
+        # landmark list or table.
+        for view in (self.object_view_2d, self.object_view_3d):
+            if view is not None:
+                view.update()
 
     def on_landmark_selected(self):
         """Handle landmark selection in table"""

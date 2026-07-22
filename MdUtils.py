@@ -936,3 +936,60 @@ def import_dataset_from_zip(zip_path: str, progress_callback: Callable[[int, int
                 except OSError as e:
                     logger.warning(f"Failed to clean up orphaned import file {fp}: {e}")
             raise
+
+
+def resample_polyline(points, n, closed=False):
+    """Resample an ordered curve (polyline) to exactly ``n`` equidistant points.
+
+    Points are spaced by arc length: this is the general, robust choice for
+    semi-landmarks. Equal-angle spacing is deliberately not offered -- it only
+    holds for curves single-valued in angle about a centre (a star-convex
+    outline) and breaks on open curves, inflection points and non-convex shapes.
+
+    This turns a densely traced curve into evenly-spaced semi-landmarks. The raw
+    trace is preserved separately (MdObject.curve_raw_json); this only computes
+    the resampled points that become ordinary landmarks.
+
+    Args:
+        points: ordered sequence of ``[x, y]`` (2D) or ``[x, y, z]`` (3D) coords
+            tracing the curve.
+        n: number of output points, ``>= 2``.
+        closed: treat the polyline as a closed loop (last point joins the first).
+            An open curve preserves both endpoints (points at ``i*L/(n-1)``); a
+            closed one spreads ``n`` points over the loop with no duplicated end.
+
+    Returns:
+        list of ``n`` ``[x, y(, z)]`` points.
+
+    Raises:
+        ValueError: fewer than 2 input points, or ``n < 2``.
+    """
+    pts = np.asarray(points, dtype=float)
+    if pts.ndim != 2 or pts.shape[0] < 2:
+        raise ValueError("resample_polyline needs at least 2 input points")
+    if n < 2:
+        raise ValueError("resample_polyline needs n >= 2")
+
+    if closed:
+        pts = np.vstack([pts, pts[0]])
+
+    deltas = np.diff(pts, axis=0)
+    seg_len = np.sqrt((deltas**2).sum(axis=1))
+    cum = np.concatenate([[0.0], np.cumsum(seg_len)])
+    total = cum[-1]
+
+    if total == 0:
+        # Every point coincides -- nothing to space out.
+        return [pts[0].tolist() for _ in range(n)]
+
+    # Closed loops omit the duplicated end point; open curves keep both ends.
+    targets = np.linspace(0.0, total, n, endpoint=not closed)
+
+    out = []
+    for t in targets:
+        idx = int(np.searchsorted(cum, t, side="right") - 1)
+        idx = min(max(idx, 0), len(seg_len) - 1)
+        seg = seg_len[idx]
+        frac = 0.0 if seg == 0 else (t - cum[idx]) / seg
+        out.append((pts[idx] + frac * (pts[idx + 1] - pts[idx])).tolist())
+    return out

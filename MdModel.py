@@ -230,6 +230,9 @@ class MdDataset(Model):
     created_at = DateTimeField(default=datetime.datetime.now)
     modified_at = DateTimeField(default=datetime.datetime.now)
     propertyname_str = CharField(null=True)
+    # Semi-landmark curve configuration (JSON). See get_curve_config(). Nullable,
+    # so datasets without curves simply have none.
+    curve_config_json = CharField(null=True)
 
     class Meta:
         database = gDatabase
@@ -244,6 +247,29 @@ class MdDataset(Model):
         self.edge_list = []
         self.polygon_list = []
         self.variablename_list = []
+
+    def get_curve_config(self):
+        """Semi-landmark curve configuration as a list, ``[]`` when unset or unreadable.
+
+        Each entry describes one curve whose evenly-spaced semi-landmarks are
+        appended to every object's landmark list:
+        ``{"id": str, "n": int, "method": "equidistant"|"equal_angle", "start": int}``
+        -- the target semi-landmark count, the resampling method, and the 0-based
+        index in ``landmark_list`` where this curve's points begin. Never raises:
+        a corrupt blob must not stop a dataset from opening.
+        """
+        if not self.curve_config_json:
+            return []
+        try:
+            config = json.loads(self.curve_config_json)
+        except (ValueError, TypeError) as e:
+            logger.warning("Ignoring unreadable curve config for dataset %s: %s", self.id, e)
+            return []
+        return config if isinstance(config, list) else []
+
+    def set_curve_config(self, config):
+        """Store semi-landmark curve configuration (see :meth:`get_curve_config`)."""
+        self.curve_config_json = json.dumps(config) if config else None
 
     def get_grouping_variable_index_list(self):
         variablename_list = self.get_variablename_list()
@@ -422,6 +448,9 @@ class MdObject(Model):
     modified_at = DateTimeField(default=datetime.datetime.now)
     property_str = CharField(null=True)
     sequence = IntegerField(null=True)
+    # Raw digitized curve traces (JSON). See get_curve_raw(). Nullable and
+    # optional -- absent for landmark-only or imported objects.
+    curve_raw_json = CharField(null=True)
 
     class Meta:
         database = gDatabase
@@ -435,6 +464,28 @@ class MdObject(Model):
         self.variable_list = []
         self.centroid_size = -1
 
+    def get_curve_raw(self):
+        """Raw digitized curve traces as a dict, ``{}`` when unset or unreadable.
+
+        Keyed by curve id -> list of ``[x, y(, z)]`` points: the dense polyline a
+        user traced before it was resampled to evenly-spaced semi-landmarks
+        (which live in ``landmark_list`` as ordinary landmarks). Optional --
+        absent for imported/legacy objects, which then cannot be re-resampled but
+        still analyze fine. Never raises.
+        """
+        if not self.curve_raw_json:
+            return {}
+        try:
+            raw = json.loads(self.curve_raw_json)
+        except (ValueError, TypeError) as e:
+            logger.warning("Ignoring unreadable curve traces for object %s: %s", self.id, e)
+            return {}
+        return raw if isinstance(raw, dict) else {}
+
+    def set_curve_raw(self, raw):
+        """Store raw digitized curve traces (see :meth:`get_curve_raw`)."""
+        self.curve_raw_json = json.dumps(raw) if raw else None
+
     def copy_object(self, new_dataset):
         new_object = MdObject()
         new_object.object_name = self.object_name
@@ -443,6 +494,7 @@ class MdObject(Model):
         new_object.landmark_str = self.landmark_str
         new_object.dataset = new_dataset
         new_object.property_str = self.property_str
+        new_object.curve_raw_json = self.curve_raw_json
         # new_object.save()
         return new_object
 
@@ -2458,10 +2510,33 @@ class MdAnalysis(Model):
     # nothing here feeds back into the numbers.
     chart_settings_json = CharField(null=True)
 
+    # Snapshot of the dataset's semi-landmark curve configuration at analysis
+    # time, so the analysis stays reproducible if the dataset's curves change
+    # later. See MdDataset.get_curve_config() for the format.
+    curve_config_json = CharField(null=True)
+
     # virtual_specimens_json = CharField(null=True) # list of virtual specimens
 
     created_at = DateTimeField(default=datetime.datetime.now)
     modified_at = DateTimeField(default=datetime.datetime.now)
+
+    def get_curve_config(self):
+        """Snapshotted semi-landmark curve configuration as a list, ``[]`` when unset.
+
+        Mirrors :meth:`MdDataset.get_curve_config`. Never raises.
+        """
+        if not self.curve_config_json:
+            return []
+        try:
+            config = json.loads(self.curve_config_json)
+        except (ValueError, TypeError) as e:
+            logger.warning("Ignoring unreadable curve config for analysis %s: %s", self.id, e)
+            return []
+        return config if isinstance(config, list) else []
+
+    def set_curve_config(self, config):
+        """Store the snapshotted semi-landmark curve configuration."""
+        self.curve_config_json = json.dumps(config) if config else None
 
     def get_chart_settings(self):
         """Chart presentation settings as a dict, ``{}`` when unset or unreadable.

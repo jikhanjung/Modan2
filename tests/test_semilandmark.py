@@ -556,50 +556,43 @@ class TestObjectDialogCurveTable:
 # DatasetDialog curve scheme (number of curves vs semi-landmarks per curve)
 # --------------------------------------------------------------------------- #
 
-from PyQt5.QtWidgets import QLineEdit  # noqa: E402
+from PyQt5.QtWidgets import QLineEdit, QTableWidget, QTableWidgetItem  # noqa: E402
 
 from dialogs.dataset_dialog import DatasetDialog  # noqa: E402
 
 
 class TestDatasetDialogCurveScheme:
-    def _dlg(self, qtbot, existing=None):
+    def _dlg(self, qtbot, rows=()):
         dlg = DatasetDialog.__new__(DatasetDialog)
         dlg.edtFixedCount = QLineEdit()
-        dlg.edtNumCurves = QLineEdit()
-        dlg.edtSemiPerCurve = QLineEdit()
-        for edt in (dlg.edtFixedCount, dlg.edtNumCurves, dlg.edtSemiPerCurve):
-            qtbot.addWidget(edt)
+        dlg.curveTable = QTableWidget(0, 3)
+        qtbot.addWidget(dlg.edtFixedCount)
+        qtbot.addWidget(dlg.curveTable)
         dlg.dataset = _FakeDataset(2)
-        if existing:
-            dlg.dataset._config = existing
+        dlg.curveTable.setRowCount(len(rows))
+        for i, (name, n) in enumerate(rows):
+            dlg.curveTable.setItem(i, 0, QTableWidgetItem(f"curve{i + 1}"))
+            dlg.curveTable.setItem(i, 1, QTableWidgetItem(name))
+            dlg.curveTable.setItem(i, 2, QTableWidgetItem(str(n)))
         return dlg
 
-    def test_number_of_curves_and_uniform_default(self, qtbot):
-        dlg = self._dlg(qtbot)
+    def test_build_from_table_preserves_name_and_count(self, qtbot):
+        dlg = self._dlg(qtbot, rows=[("margin", 20), ("suture", 12)])
         dlg.edtFixedCount.setText("5")
-        dlg.edtNumCurves.setText("2")
-        dlg.edtSemiPerCurve.setText("20")
         config = dlg._build_curve_config()
-        assert [c["n"] for c in config] == [20, 20]
+        assert [c["n"] for c in config] == [20, 12]
+        assert [c["name"] for c in config] == ["margin", "suture"]
         assert [c["start"] for c in config] == [5, 25]
 
-    def test_preserves_existing_per_curve_counts(self, qtbot):
-        existing = [
-            {"id": "curve1", "n": 20, "method": "equidistant", "start": 5},
-            {"id": "curve2", "n": 12, "method": "equidistant", "start": 25},
-        ]
-        dlg = self._dlg(qtbot, existing)
-        dlg.edtFixedCount.setText("5")
-        dlg.edtNumCurves.setText("3")  # add one curve
-        dlg.edtSemiPerCurve.setText("8")  # default for the new curve only
-        config = dlg._build_curve_config()
-        # Existing per-curve counts kept; only the new (3rd) curve uses the default.
-        assert [c["n"] for c in config] == [20, 12, 8]
-
-    def test_zero_curves_clears_config(self, qtbot):
+    def test_empty_table_no_curves(self, qtbot):
         dlg = self._dlg(qtbot)
-        dlg.edtNumCurves.setText("")
+        dlg.edtFixedCount.setText("5")
         assert dlg._build_curve_config() == []
+
+    def test_count_clamped_to_two(self, qtbot):
+        dlg = self._dlg(qtbot, rows=[("", 1)])
+        dlg.edtFixedCount.setText("0")
+        assert dlg._build_curve_config()[0]["n"] == 2
 
 
 # --------------------------------------------------------------------------- #

@@ -10,14 +10,18 @@ from PyQt5.QtWidgets import (
     QComboBox,
     QFormLayout,
     QHBoxLayout,
+    QHeaderView,
     QLabel,
     QLineEdit,
     QListWidget,
     QListWidgetItem,
+    QMenu,
     QMessageBox,
     QPushButton,
     QRadioButton,
     QShortcut,
+    QTableWidget,
+    QTableWidgetItem,
     QTextEdit,
     QVBoxLayout,
     QWidget,
@@ -26,7 +30,7 @@ from PyQt5.QtWidgets import (
 import MdUtils as mu
 from dialogs.base_dialog import BaseDialog
 from MdHelpers import guard_slot
-from MdModel import MdDataset
+from MdModel import MdDataset, delete_curve_from_dataset
 
 logger = logging.getLogger(__name__)
 
@@ -96,10 +100,19 @@ class DatasetDialog(BaseDialog):
         # same for all objects (see devlog 237).
         self.edtFixedCount = QLineEdit()
         self.edtFixedCount.setPlaceholderText(self.tr("number of fixed landmarks, e.g. 5"))
-        self.edtNumCurves = QLineEdit()
-        self.edtNumCurves.setPlaceholderText(self.tr("number of curves, e.g. 2 (blank if none)"))
-        self.edtSemiPerCurve = QLineEdit()
-        self.edtSemiPerCurve.setPlaceholderText(self.tr("semi-landmarks per new curve, e.g. 20"))
+        # Curve list: id, editable name, editable semi-landmark count N.
+        # Right-click a row to delete the curve from the whole dataset.
+        self.curveTable = QTableWidget(0, 3)
+        self.curveTable.setHorizontalHeaderLabels([self.tr("Curve"), self.tr("Name"), self.tr("N")])
+        self.curveTable.setMaximumHeight(140)
+        self.curveTable.verticalHeader().hide()
+        self.curveTable.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.curveTable.customContextMenuRequested.connect(self.on_curve_table_context_menu)
+        # Per-landmark name/abbreviation and description (dataset-wide).
+        self.landmarkNameTable = QTableWidget(0, 3)
+        self.landmarkNameTable.setHorizontalHeaderLabels([self.tr("#"), self.tr("Name"), self.tr("Description")])
+        self.landmarkNameTable.setMaximumHeight(200)
+        self.landmarkNameTable.verticalHeader().hide()
 
         # Variable management
         self.lstVariableName = QListWidget()
@@ -158,8 +171,8 @@ class DatasetDialog(BaseDialog):
         self.lblBaseline = QLabel(self.tr("Baseline"))
         self.lblPolygons = QLabel(self.tr("Polygons"))
         self.lblFixedCount = QLabel(self.tr("Fixed Landmarks"))
-        self.lblNumCurves = QLabel(self.tr("Number of Curves"))
-        self.lblSemiPerCurve = QLabel(self.tr("Semi-landmarks / Curve"))
+        self.lblCurves = QLabel(self.tr("Curves"))
+        self.lblLandmarkNames = QLabel(self.tr("Landmark Names"))
         self.lblVariableNameStr = QLabel(self.tr("Variable Names"))
         self.main_layout.addRow(self.lblParent, self.cbxParent)
         self.main_layout.addRow(self.lblDatasetName, self.edtDatasetName)
@@ -167,19 +180,8 @@ class DatasetDialog(BaseDialog):
         self.main_layout.addRow(self.lblDimension, dim_layout)
         self.main_layout.addRow(self.lblWireframe, self.edtWireframe)
         self.main_layout.addRow(self.lblFixedCount, self.edtFixedCount)
-        self.main_layout.addRow(self.lblNumCurves, self.edtNumCurves)
-        self.main_layout.addRow(self.lblSemiPerCurve, self.edtSemiPerCurve)
-        # Curves are now defined and edited entirely in the object dialog (trace a
-        # curve, then adjust its count in the curve table), so hide these here.
-        for _w in (
-            self.lblFixedCount,
-            self.edtFixedCount,
-            self.lblNumCurves,
-            self.edtNumCurves,
-            self.lblSemiPerCurve,
-            self.edtSemiPerCurve,
-        ):
-            _w.hide()
+        self.main_layout.addRow(self.lblCurves, self.curveTable)
+        self.main_layout.addRow(self.lblLandmarkNames, self.landmarkNameTable)
         self.main_layout.addRow(self.lblBaseline, self.edtBaseline)
         self.main_layout.addRow(self.lblPolygons, self.edtPolygons)
         self.main_layout.addRow(self.lblVariableNameStr, self.variable_widget)
@@ -294,17 +296,11 @@ class DatasetDialog(BaseDialog):
         self.edtBaseline.setText(dataset.baseline)
         self.edtPolygons.setText(dataset.polygons)
 
-        # Semi-landmark scheme: fixed count is where the first curve starts, and
-        # the curves field lists each curve's semi-landmark count.
+        # Semi-landmark scheme + landmark names (both dataset-wide).
         curve_config = dataset.get_curve_config()
-        if curve_config:
-            self.edtFixedCount.setText(str(curve_config[0].get("start", 0)))
-            self.edtNumCurves.setText(str(len(curve_config)))
-            self.edtSemiPerCurve.setText(str(curve_config[-1].get("n", 10)))
-        else:
-            self.edtFixedCount.setText("")
-            self.edtNumCurves.setText("")
-            self.edtSemiPerCurve.setText("")
+        self.edtFixedCount.setText(str(curve_config[0].get("start", 0)) if curve_config else "")
+        self._populate_curve_table(curve_config)
+        self._populate_landmark_name_table()
 
         # Load variable names
         variable_name_list = dataset.get_variablename_list()
@@ -329,30 +325,95 @@ class DatasetDialog(BaseDialog):
             elif parent_dataset.dimension == 3:
                 self.rbtn3D.setChecked(True)
 
+    @staticmethod
+    def _int(text, default):
+        try:
+            return int((text or "").strip() or default)
+        except (ValueError, AttributeError):
+            return default
+
+    def _dataset_landmark_count(self):
+        """Largest landmark count across the dataset's objects (0 if none)."""
+        if self.dataset is None:
+            return 0
+        counts = []
+        for obj in self.dataset.object_list:
+            obj.unpack_landmark()
+            counts.append(len(obj.landmark_list))
+        return max(counts) if counts else 0
+
+    def _populate_curve_table(self, config):
+        self.curveTable.setRowCount(len(config))
+        for row, curve in enumerate(config):
+            id_item = QTableWidgetItem(str(curve.get("id", "")))
+            id_item.setFlags(id_item.flags() & ~Qt.ItemIsEditable)
+            self.curveTable.setItem(row, 0, id_item)
+            self.curveTable.setItem(row, 1, QTableWidgetItem(curve.get("name", "")))
+            self.curveTable.setItem(row, 2, QTableWidgetItem(str(curve.get("n", 0))))
+        self.curveTable.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+
+    def _populate_landmark_name_table(self):
+        existing = self.dataset.get_landmark_names() if self.dataset is not None else []
+        rows = max(self._dataset_landmark_count(), len(existing))
+        self.landmarkNameTable.setRowCount(rows)
+        for i in range(rows):
+            index_item = QTableWidgetItem(str(i + 1))
+            index_item.setFlags(index_item.flags() & ~Qt.ItemIsEditable)
+            self.landmarkNameTable.setItem(i, 0, index_item)
+            entry = existing[i] if i < len(existing) else {}
+            self.landmarkNameTable.setItem(i, 1, QTableWidgetItem(entry.get("name", "")))
+            self.landmarkNameTable.setItem(i, 2, QTableWidgetItem(entry.get("desc", "")))
+        header = self.landmarkNameTable.horizontalHeader()
+        header.resizeSection(0, 40)
+        header.setSectionResizeMode(2, QHeaderView.Stretch)
+
     def _build_curve_config(self):
-        """Build the semi-landmark config from the fixed count, curve count and
-        per-curve default.
+        """Rebuild the curve config from the fixed count and the curve table.
 
-        Two distinct inputs: how many curves the dataset has, and how many
-        semi-landmarks a curve carries. Existing per-curve counts (edited in the
-        object dialog's curve table) are preserved; the "semi-landmarks / curve"
-        value only sets the count for newly-added curves. No curves -> no config.
+        Each table row is one curve; ids renumber positionally while the edited
+        name and count travel with it. Counts are clamped to a minimum of 2.
         """
+        fixed_count = self._int(self.edtFixedCount.text(), 0)
+        curves = []
+        for row in range(self.curveTable.rowCount()):
+            name_item = self.curveTable.item(row, 1)
+            n_item = self.curveTable.item(row, 2)
+            curves.append(
+                {
+                    "n": max(2, self._int(n_item.text() if n_item else "", 2)),
+                    "name": name_item.text().strip() if name_item else "",
+                }
+            )
+        return mu.build_curve_config(fixed_count, curves)
 
-        def _int(text, default):
-            try:
-                return int(text.strip() or default)
-            except (ValueError, AttributeError):
-                return default
+    def _landmark_names_from_table(self):
+        names = []
+        for i in range(self.landmarkNameTable.rowCount()):
+            name_item = self.landmarkNameTable.item(i, 1)
+            desc_item = self.landmarkNameTable.item(i, 2)
+            names.append(
+                {
+                    "name": name_item.text().strip() if name_item else "",
+                    "desc": desc_item.text().strip() if desc_item else "",
+                }
+            )
+        return names
 
-        num_curves = _int(self.edtNumCurves.text(), 0)
-        if num_curves <= 0:
-            return []
-        fixed_count = _int(self.edtFixedCount.text(), 0)
-        default_n = max(2, _int(self.edtSemiPerCurve.text(), 10))
-        existing = self.dataset.get_curve_config() if self.dataset is not None else []
-        counts = [existing[i].get("n", default_n) if i < len(existing) else default_n for i in range(num_curves)]
-        return mu.build_curve_config(fixed_count, counts)
+    def on_curve_table_context_menu(self, pos):
+        """Right-click a curve row to delete it from the whole dataset."""
+        if self.dataset is None:
+            return
+        row = self.curveTable.rowAt(pos.y())
+        if row < 0 or row >= self.curveTable.rowCount():
+            return
+        menu = QMenu(self)
+        del_action = menu.addAction(self.tr("Delete Curve (all specimens)"))
+        if menu.exec_(self.curveTable.viewport().mapToGlobal(pos)) is del_action:
+            # Commit current table edits, then remove the curve dataset-wide.
+            self.dataset.set_curve_config(self._build_curve_config())
+            self.dataset.save()
+            delete_curve_from_dataset(self.dataset, row)
+            self._populate_curve_table(self.dataset.get_curve_config())
 
     def Okay(self):
         """Save dataset and close dialog."""
@@ -379,8 +440,9 @@ class DatasetDialog(BaseDialog):
             self.dataset.wireframe = self.edtWireframe.toPlainText()
             self.dataset.baseline = self.edtBaseline.text()
             self.dataset.polygons = self.edtPolygons.toPlainText()
-            # Curve config is managed in the object dialog now, so it is left
-            # untouched here (see _build_curve_config, kept for the hidden fields).
+            # Semi-landmark curve scheme (name/count) and landmark names.
+            self.dataset.set_curve_config(self._build_curve_config())
+            self.dataset.set_landmark_names(self._landmark_names_from_table())
             logger.info(
                 "Wireframe: %s, Baseline: %s, Polygons: %s",
                 self.dataset.wireframe,

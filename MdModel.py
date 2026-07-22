@@ -2609,6 +2609,35 @@ class MdAnalysis(Model):
         database = gDatabase
 
 
+def delete_curve_from_dataset(dataset, curve_index):
+    """Remove a curve from the dataset scheme (dataset-wide) and pull the rest
+    forward.
+
+    Deleting the curve at ``curve_index`` renumbers the remaining curves
+    (``curve1``, ``curve2``, ...), recomputes their start indices, and remaps
+    every object's raw traces to the new ids (dropping the deleted one). Persists
+    the dataset and every affected object. No-op for an out-of-range index.
+    """
+    config = dataset.get_curve_config()
+    if curve_index < 0 or curve_index >= len(config):
+        return
+    remaining = [c for i, c in enumerate(config) if i != curve_index]
+    remaining_ids = [c["id"] for c in remaining]
+    fixed = config[0].get("start", 0)
+    new_config = mu.build_curve_config(fixed, [{"n": c.get("n", 0), "name": c.get("name", "")} for c in remaining])
+    id_map = {old: new["id"] for old, new in zip(remaining_ids, new_config)}
+
+    dataset.set_curve_config(new_config)
+    dataset.save()
+    for obj in dataset.object_list:
+        raw = obj.get_curve_raw()
+        if not raw:
+            continue
+        new_raw = {id_map[old_id]: pts for old_id, pts in raw.items() if old_id in id_map}
+        obj.set_curve_raw(new_raw)
+        obj.save()
+
+
 def prepare_database():
     """Prepare the database by running migrations and backups"""
     from peewee_migrate import Router

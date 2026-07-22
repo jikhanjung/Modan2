@@ -165,9 +165,14 @@ class TestBuildCurveConfig:
     def test_start_indices_from_fixed_count(self):
         config = mu.build_curve_config(5, [20, 12])
         assert config == [
-            {"id": "curve1", "n": 20, "method": "equidistant", "start": 5},
-            {"id": "curve2", "n": 12, "method": "equidistant", "start": 25},
+            {"id": "curve1", "n": 20, "method": "equidistant", "start": 5, "name": ""},
+            {"id": "curve2", "n": 12, "method": "equidistant", "start": 25, "name": ""},
         ]
+
+    def test_preserves_name_from_dict_entries(self):
+        config = mu.build_curve_config(0, [{"n": 5, "name": "margin"}, {"n": 3, "name": "suture"}])
+        assert [c["name"] for c in config] == ["margin", "suture"]
+        assert [c["id"] for c in config] == ["curve1", "curve2"]
 
     def test_no_curves(self):
         assert mu.build_curve_config(5, []) == []
@@ -345,7 +350,7 @@ class TestTpsCurveImport:
         dataset = controller.import_dataset(tps, "Imported", str(tmp_path))
 
         # Dataset records one curve of 4 points starting after the 3 fixed ones.
-        assert dataset.get_curve_config() == [{"id": "curve1", "n": 4, "method": "equidistant", "start": 3}]
+        assert dataset.get_curve_config() == [{"id": "curve1", "n": 4, "method": "equidistant", "start": 3, "name": ""}]
 
         obj = dataset.object_list.order_by(mm.MdObject.id).first()
         obj.unpack_landmark()
@@ -804,3 +809,40 @@ class TestDeleteCurve:
         dlg.curve_raw_map = {"curve1": [[0, 0], [1, 1]]}
         dlg.delete_curve("curve2")  # not traced on this object
         assert dlg.curve_raw_map == {"curve1": [[0, 0], [1, 1]]}
+
+
+class TestDeleteCurveFromDataset:
+    def test_removes_slot_renumbers_and_remaps_all_objects(self, test_database):
+        ds = mm.MdDataset.create(dataset_name="D", dimension=2)
+        ds.set_curve_config(
+            [
+                {"id": "curve1", "n": 5, "method": "equidistant", "start": 2, "name": "a"},
+                {"id": "curve2", "n": 8, "method": "equidistant", "start": 7, "name": "b"},
+                {"id": "curve3", "n": 4, "method": "equidistant", "start": 15, "name": "c"},
+            ]
+        )
+        ds.save()
+        o1 = mm.MdObject.create(object_name="o1", dataset=ds, landmark_str="0\t0\n1\t1")
+        o1.set_curve_raw({"curve1": [[0, 0]], "curve2": [[2, 2]], "curve3": [[3, 3]]})
+        o1.save()
+        o2 = mm.MdObject.create(object_name="o2", dataset=ds, landmark_str="0\t0\n1\t1")
+        o2.set_curve_raw({"curve3": [[9, 9]]})  # only traced curve3
+        o2.save()
+
+        mm.delete_curve_from_dataset(ds, 1)  # delete curve2 (index 1)
+
+        cfg = mm.MdDataset.get_by_id(ds.id).get_curve_config()
+        assert [c["id"] for c in cfg] == ["curve1", "curve2"]
+        assert [c["name"] for c in cfg] == ["a", "c"]  # names travel; b removed
+        assert [c["start"] for c in cfg] == [2, 7]
+        # o1: curve2 dropped, curve3 -> curve2.
+        assert mm.MdObject.get_by_id(o1.id).get_curve_raw() == {"curve1": [[0, 0]], "curve2": [[3, 3]]}
+        # o2: its curve3 -> curve2.
+        assert mm.MdObject.get_by_id(o2.id).get_curve_raw() == {"curve2": [[9, 9]]}
+
+    def test_out_of_range_is_noop(self, test_database):
+        ds = mm.MdDataset.create(dataset_name="D", dimension=2)
+        ds.set_curve_config([{"id": "curve1", "n": 5, "method": "equidistant", "start": 2, "name": ""}])
+        ds.save()
+        mm.delete_curve_from_dataset(ds, 5)
+        assert len(mm.MdDataset.get_by_id(ds.id).get_curve_config()) == 1

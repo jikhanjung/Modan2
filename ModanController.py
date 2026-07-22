@@ -660,11 +660,7 @@ class ModanController(QObject):
         curve_data = getattr(import_data, "curve_data", {}) or {}
         canonical_curves = next((curves for curves in curve_data.values() if curves), None)
         if canonical_curves:
-            config = []
-            start = import_data.nlandmarks
-            for i, curve in enumerate(canonical_curves):
-                config.append({"id": f"curve{i + 1}", "n": len(curve), "method": "equidistant", "start": start})
-                start += len(curve)
+            config = mu.build_curve_config(import_data.nlandmarks, [len(curve) for curve in canonical_curves])
             dataset.set_curve_config(config)
         dataset.save()
 

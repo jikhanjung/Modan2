@@ -519,3 +519,53 @@ class TestObjectDialogCurveTable:
         dlg.curveTable.item(0, 3).setText("abc")
         # Config unchanged.
         assert dlg.dataset.get_curve_config()[0]["n"] == 10
+
+
+# --------------------------------------------------------------------------- #
+# DatasetDialog curve scheme (number of curves vs semi-landmarks per curve)
+# --------------------------------------------------------------------------- #
+
+from PyQt5.QtWidgets import QLineEdit  # noqa: E402
+
+from dialogs.dataset_dialog import DatasetDialog  # noqa: E402
+
+
+class TestDatasetDialogCurveScheme:
+    def _dlg(self, qtbot, existing=None):
+        dlg = DatasetDialog.__new__(DatasetDialog)
+        dlg.edtFixedCount = QLineEdit()
+        dlg.edtNumCurves = QLineEdit()
+        dlg.edtSemiPerCurve = QLineEdit()
+        for edt in (dlg.edtFixedCount, dlg.edtNumCurves, dlg.edtSemiPerCurve):
+            qtbot.addWidget(edt)
+        dlg.dataset = _FakeDataset(2)
+        if existing:
+            dlg.dataset._config = existing
+        return dlg
+
+    def test_number_of_curves_and_uniform_default(self, qtbot):
+        dlg = self._dlg(qtbot)
+        dlg.edtFixedCount.setText("5")
+        dlg.edtNumCurves.setText("2")
+        dlg.edtSemiPerCurve.setText("20")
+        config = dlg._build_curve_config()
+        assert [c["n"] for c in config] == [20, 20]
+        assert [c["start"] for c in config] == [5, 25]
+
+    def test_preserves_existing_per_curve_counts(self, qtbot):
+        existing = [
+            {"id": "curve1", "n": 20, "method": "equidistant", "start": 5},
+            {"id": "curve2", "n": 12, "method": "equidistant", "start": 25},
+        ]
+        dlg = self._dlg(qtbot, existing)
+        dlg.edtFixedCount.setText("5")
+        dlg.edtNumCurves.setText("3")  # add one curve
+        dlg.edtSemiPerCurve.setText("8")  # default for the new curve only
+        config = dlg._build_curve_config()
+        # Existing per-curve counts kept; only the new (3rd) curve uses the default.
+        assert [c["n"] for c in config] == [20, 12, 8]
+
+    def test_zero_curves_clears_config(self, qtbot):
+        dlg = self._dlg(qtbot)
+        dlg.edtNumCurves.setText("")
+        assert dlg._build_curve_config() == []

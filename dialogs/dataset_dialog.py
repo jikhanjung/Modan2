@@ -95,9 +95,11 @@ class DatasetDialog(BaseDialog):
         # fixes an unambiguous layout so "where do the semi-landmarks start" is the
         # same for all objects (see devlog 237).
         self.edtFixedCount = QLineEdit()
-        self.edtFixedCount.setPlaceholderText(self.tr("e.g. 5 (leave blank if no curves)"))
-        self.edtCurves = QLineEdit()
-        self.edtCurves.setPlaceholderText(self.tr("semi-landmark counts per curve, e.g. 20, 12"))
+        self.edtFixedCount.setPlaceholderText(self.tr("number of fixed landmarks, e.g. 5"))
+        self.edtNumCurves = QLineEdit()
+        self.edtNumCurves.setPlaceholderText(self.tr("number of curves, e.g. 2 (blank if none)"))
+        self.edtSemiPerCurve = QLineEdit()
+        self.edtSemiPerCurve.setPlaceholderText(self.tr("semi-landmarks per new curve, e.g. 20"))
 
         # Variable management
         self.lstVariableName = QListWidget()
@@ -156,7 +158,8 @@ class DatasetDialog(BaseDialog):
         self.lblBaseline = QLabel(self.tr("Baseline"))
         self.lblPolygons = QLabel(self.tr("Polygons"))
         self.lblFixedCount = QLabel(self.tr("Fixed Landmarks"))
-        self.lblCurves = QLabel(self.tr("Semi-landmark Curves"))
+        self.lblNumCurves = QLabel(self.tr("Number of Curves"))
+        self.lblSemiPerCurve = QLabel(self.tr("Semi-landmarks / Curve"))
         self.lblVariableNameStr = QLabel(self.tr("Variable Names"))
         self.main_layout.addRow(self.lblParent, self.cbxParent)
         self.main_layout.addRow(self.lblDatasetName, self.edtDatasetName)
@@ -164,7 +167,8 @@ class DatasetDialog(BaseDialog):
         self.main_layout.addRow(self.lblDimension, dim_layout)
         self.main_layout.addRow(self.lblWireframe, self.edtWireframe)
         self.main_layout.addRow(self.lblFixedCount, self.edtFixedCount)
-        self.main_layout.addRow(self.lblCurves, self.edtCurves)
+        self.main_layout.addRow(self.lblNumCurves, self.edtNumCurves)
+        self.main_layout.addRow(self.lblSemiPerCurve, self.edtSemiPerCurve)
         self.main_layout.addRow(self.lblBaseline, self.edtBaseline)
         self.main_layout.addRow(self.lblPolygons, self.edtPolygons)
         self.main_layout.addRow(self.lblVariableNameStr, self.variable_widget)
@@ -284,10 +288,12 @@ class DatasetDialog(BaseDialog):
         curve_config = dataset.get_curve_config()
         if curve_config:
             self.edtFixedCount.setText(str(curve_config[0].get("start", 0)))
-            self.edtCurves.setText(", ".join(str(c.get("n", 0)) for c in curve_config))
+            self.edtNumCurves.setText(str(len(curve_config)))
+            self.edtSemiPerCurve.setText(str(curve_config[-1].get("n", 10)))
         else:
             self.edtFixedCount.setText("")
-            self.edtCurves.setText("")
+            self.edtNumCurves.setText("")
+            self.edtSemiPerCurve.setText("")
 
         # Load variable names
         variable_name_list = dataset.get_variablename_list()
@@ -313,28 +319,28 @@ class DatasetDialog(BaseDialog):
                 self.rbtn3D.setChecked(True)
 
     def _build_curve_config(self):
-        """Parse the fixed-count and curves fields into a semi-landmark config.
+        """Build the semi-landmark config from the fixed count, curve count and
+        per-curve default.
 
-        Fixed count is the number of anatomical landmarks that precede the
-        curves; the curves field is a comma-separated list of each curve's
-        semi-landmark count (e.g. ``20, 12``). Empty curves field -> no config.
+        Two distinct inputs: how many curves the dataset has, and how many
+        semi-landmarks a curve carries. Existing per-curve counts (edited in the
+        object dialog's curve table) are preserved; the "semi-landmarks / curve"
+        value only sets the count for newly-added curves. No curves -> no config.
         """
-        curves_text = self.edtCurves.text().strip()
-        if not curves_text:
-            return []
-        try:
-            fixed_count = int(self.edtFixedCount.text().strip() or 0)
-        except ValueError:
-            fixed_count = 0
-        counts = []
-        for token in curves_text.replace(";", ",").split(","):
-            token = token.strip()
-            if not token:
-                continue
+
+        def _int(text, default):
             try:
-                counts.append(int(token))
-            except ValueError:
-                continue
+                return int(text.strip() or default)
+            except (ValueError, AttributeError):
+                return default
+
+        num_curves = _int(self.edtNumCurves.text(), 0)
+        if num_curves <= 0:
+            return []
+        fixed_count = _int(self.edtFixedCount.text(), 0)
+        default_n = max(2, _int(self.edtSemiPerCurve.text(), 10))
+        existing = self.dataset.get_curve_config() if self.dataset is not None else []
+        counts = [existing[i].get("n", default_n) if i < len(existing) else default_n for i in range(num_curves)]
         return mu.build_curve_config(fixed_count, counts)
 
     def Okay(self):

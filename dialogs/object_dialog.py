@@ -107,6 +107,7 @@ class ObjectDialog(QDialog):
         # Expected positions of not-yet-placed landmarks on a new specimen.
         self.expected_landmark_list = None
         self.show_expected = False
+        self._expected_reference_cache = None
 
         self.hsplitter = QSplitter(Qt.Horizontal)
         self.vsplitter = QSplitter(Qt.Vertical)
@@ -624,11 +625,11 @@ class ObjectDialog(QDialog):
         placed = [lm for lm in self.landmark_list if lm and lm[0] is not None and lm[1] is not None]
         if len(placed) < 2:
             return
-        mean = self.compute_aligned_mean()
-        if mean is None or len(placed) >= len(mean.landmark_list):
+        reference = self._expected_reference()
+        if reference is None or len(placed) >= len(reference.landmark_list):
             return
-        padded = [list(p) for p in placed] + [[None, None]] * (len(mean.landmark_list) - len(placed))
-        self.expected_landmark_list = impute_missing_landmarks(padded, mean.landmark_list)
+        padded = [list(p) for p in placed] + [[None, None]] * (len(reference.landmark_list) - len(placed))
+        self.expected_landmark_list = impute_missing_landmarks(padded, reference.landmark_list)
 
     def show_polygon_state_changed(self, int):
         self.object_view.show_polygon = self.cbxShowPolygon.isChecked()
@@ -808,6 +809,48 @@ class ObjectDialog(QDialog):
         # The mean shape carries its own dimensionality, so no dataset lookup.
         return impute_missing_landmarks(obj.landmark_list, mean_shape.landmark_list)
 
+    def _expected_reference(self):
+        """Mean shape of the dataset's longest complete specimens (other than the
+        current one), used to predict landmarks the current specimen does not yet
+        have. Its length is the maximum landmark count, so it can carry a
+        landmark (e.g. a new 7th) that shorter specimens lack. None if there is
+        no usable reference.
+        """
+        if getattr(self, "_expected_reference_cache", None) is not None:
+            return self._expected_reference_cache
+        if self.dataset is None:
+            return None
+
+        candidates = []
+        max_count = 0
+        for obj in self.dataset.object_list:
+            if self.object is not None and getattr(obj, "id", None) == getattr(self.object, "id", None):
+                continue  # skip the specimen being digitized
+            obj.unpack_landmark()
+            if not obj.landmark_list or any(lm[0] is None or lm[1] is None for lm in obj.landmark_list):
+                continue
+            count = len(obj.landmark_list)
+            if count > max_count:
+                max_count, candidates = count, [obj]
+            elif count == max_count:
+                candidates.append(obj)
+
+        if not candidates or max_count == 0:
+            return None
+
+        from MdModel import MdDatasetOps
+
+        temp_dataset = MdDataset()
+        temp_dataset.dimension = self.dataset.dimension
+        temp_dataset.id = self.dataset.id
+        temp_ds_ops = MdDatasetOps(temp_dataset)
+        temp_ds_ops.object_list = [MdObjectOps(obj) for obj in candidates]
+        temp_ds_ops.dimension = self.dataset.dimension
+        if not temp_ds_ops.procrustes_superimposition():
+            return None
+        self._expected_reference_cache = temp_ds_ops.get_average_shape()
+        return self._expected_reference_cache
+
     def set_dataset(self, dataset):
         # print("object dialog set_dataset", dataset.dataset_name)
         if dataset is None:
@@ -890,7 +933,8 @@ class ObjectDialog(QDialog):
             self._orig_curve_raw = copy.deepcopy(self.curve_raw_map)
             self.show_curves()
             # Expected-landmark digitizing aid (2D): mirror the flag onto the
-            # viewers and recompute for this object.
+            # viewers and recompute for this object (reference excludes it).
+            self._expected_reference_cache = None
             for view in (self.object_view_2d, self.object_view_3d):
                 if view is not None:
                     view.show_expected = self.show_expected

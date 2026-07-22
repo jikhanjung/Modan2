@@ -734,3 +734,27 @@ class TestExpectedLandmarks:
         dlg.landmark_list = [[0.0, 0.0], [1.0, 0.0]]
         dlg.update_expected_landmarks()
         assert dlg.expected_landmark_list is None
+
+
+class TestExpectedFromLongerSpecimens:
+    def test_predicts_landmark_that_only_longer_specimens_have(self, qtbot, test_database):
+        ds = mm.MdDataset.create(dataset_name="D", dimension=2)
+        # Two 7-landmark reference specimens; the current one (below) has only 6.
+        mm.MdObject.create(
+            object_name="l1", dataset=ds, landmark_str="0\t0\n1\t0\n1\t1\n0\t1\n0.5\t0.5\n0.2\t0.8\n0.9\t0.2"
+        )
+        mm.MdObject.create(
+            object_name="l2", dataset=ds, landmark_str="0\t0\n1.1\t0\n1\t1.1\n0\t1\n0.5\t0.5\n0.2\t0.8\n0.9\t0.2"
+        )
+        dlg = _build_dialog(qtbot)
+        dlg.dataset = ds
+        dlg.object = None
+        dlg._expected_reference_cache = None
+        dlg.show_expected = True
+        # Current specimen has 6 landmarks (matching the first 6 of the references).
+        dlg.landmark_list = [[0, 0], [1, 0], [1, 1], [0, 1], [0.5, 0.5], [0.2, 0.8]]
+        dlg.update_expected_landmarks()
+        assert dlg.expected_landmark_list is not None
+        assert len(dlg.expected_landmark_list) == 7  # reference length
+        # The 7th landmark (index 6), which the current specimen lacks, is predicted.
+        assert all(v is not None for v in dlg.expected_landmark_list[6])

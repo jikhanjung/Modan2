@@ -691,3 +691,46 @@ class TestCurveEditingHeldInMemory:
         assert dlg._has_unsaved_curve_changes() is False
         dlg.curve_raw_map = {"curve1": [[0, 0], [1, 1]]}
         assert dlg._has_unsaved_curve_changes() is True
+
+
+class TestExpectedLandmarks:
+    def test_expected_filled_after_two_placed(self, qtbot, test_database):
+        ds = mm.MdDataset.create(dataset_name="D", dimension=2)
+        # Two complete 4-landmark specimens so a mean shape can be computed.
+        mm.MdObject.create(object_name="a", dataset=ds, landmark_str="0\t0\n1\t0\n1\t1\n0\t1")
+        mm.MdObject.create(object_name="b", dataset=ds, landmark_str="0.1\t0\n1.1\t0\n1\t1\n0\t1.1")
+        dlg = _build_dialog(qtbot)
+        dlg.dataset = ds
+        dlg._aligned_mean_cache = None
+        dlg.show_expected = True
+        dlg.landmark_list = [[0.0, 0.0], [1.0, 0.0]]  # two placed on a new specimen
+        dlg.update_expected_landmarks()
+        # Full-length list; the two unplaced positions are filled in.
+        assert dlg.expected_landmark_list is not None
+        assert len(dlg.expected_landmark_list) == 4
+        assert all(v is not None for v in dlg.expected_landmark_list[2])
+        assert all(v is not None for v in dlg.expected_landmark_list[3])
+
+    def test_no_expected_with_fewer_than_two_placed(self, qtbot, test_database):
+        ds = mm.MdDataset.create(dataset_name="D", dimension=2)
+        mm.MdObject.create(object_name="a", dataset=ds, landmark_str="0\t0\n1\t0\n1\t1\n0\t1")
+        mm.MdObject.create(object_name="b", dataset=ds, landmark_str="0.1\t0\n1.1\t0\n1\t1\n0\t1.1")
+        dlg = _build_dialog(qtbot)
+        dlg.dataset = ds
+        dlg._aligned_mean_cache = None
+        dlg.show_expected = True
+        dlg.landmark_list = [[0.0, 0.0]]  # only one placed
+        dlg.update_expected_landmarks()
+        assert dlg.expected_landmark_list is None
+
+    def test_no_expected_when_disabled(self, qtbot, test_database):
+        ds = mm.MdDataset.create(dataset_name="D", dimension=2)
+        mm.MdObject.create(object_name="a", dataset=ds, landmark_str="0\t0\n1\t0\n1\t1\n0\t1")
+        mm.MdObject.create(object_name="b", dataset=ds, landmark_str="0.1\t0\n1.1\t0\n1\t1\n0\t1.1")
+        dlg = _build_dialog(qtbot)
+        dlg.dataset = ds
+        dlg._aligned_mean_cache = None
+        dlg.show_expected = False
+        dlg.landmark_list = [[0.0, 0.0], [1.0, 0.0]]
+        dlg.update_expected_landmarks()
+        assert dlg.expected_landmark_list is None

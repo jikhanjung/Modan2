@@ -121,6 +121,8 @@ class ObjectViewer2D(QLabel):
         # display-only in the merge-at-analysis model).
         self.show_curve = True
         self.show_semi_landmark = True
+        # Show expected positions of not-yet-placed landmarks while digitizing (2D).
+        self.show_expected = False
         self.show_baseline = False
         self.read_only = False
         self.show_model = False
@@ -1139,6 +1141,15 @@ class ObjectViewer2D(QLabel):
                 painter.setPen(QPen(idx_color, 2))
                 painter.setBrush(QBrush(idx_color))
                 painter.drawText(int(self._2canx(landmark[0]) + 10), int(self._2cany(landmark[1])) + 10, str(idx + 1))
+
+        # draw expected positions of the not-yet-placed landmarks (digitizing aid)
+        if self.show_expected and self.object_dialog is not None:
+            expected = getattr(self.object_dialog, "expected_landmark_list", None)
+            if expected is not None:
+                for idx in range(len(self.landmark_list), len(expected)):
+                    lm = expected[idx]
+                    if lm and lm[0] is not None and lm[1] is not None:
+                        self.draw_estimated_landmark(painter, lm[0], lm[1], idx)
 
         # draw wireframe being edited
         if self.wire_start_index >= 0:

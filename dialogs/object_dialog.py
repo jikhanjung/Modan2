@@ -104,6 +104,9 @@ class ObjectDialog(QDialog):
         self.estimated_landmark_list = None
         self._aligned_mean_cache = None
         self.show_estimated = True
+        # Expected positions of not-yet-placed landmarks on a new specimen.
+        self.expected_landmark_list = None
+        self.show_expected = False
 
         self.hsplitter = QSplitter(Qt.Horizontal)
         self.vsplitter = QSplitter(Qt.Vertical)
@@ -189,6 +192,7 @@ class ObjectDialog(QDialog):
         self.right_middle_layout.addWidget(self.cbxShowWireframe)
         self.right_middle_layout.addWidget(self.cbxShowPolygon)
         self.right_middle_layout.addWidget(self.cbxShowEstimated)
+        self.right_middle_layout.addWidget(self.cbxShowExpected)
         self.right_middle_layout.addWidget(self.cbxShowBaseline)
         self.right_middle_layout.addWidget(self.cbxShowModel)
         self.right_middle_layout.addWidget(self.cbxShowCurve)
@@ -370,6 +374,13 @@ class ObjectDialog(QDialog):
         self.cbxShowEstimated.setText(self.tr("Show Estimated"))
         self.cbxShowEstimated.setChecked(True)
         self.cbxShowEstimated.stateChanged.connect(self.toggle_estimation)
+        # 2D digitizing aid: once a few landmarks are placed on a new specimen,
+        # show where the remaining ones are expected (mean shape fitted onto the
+        # placed landmarks), drawn like estimated/missing landmarks.
+        self.cbxShowExpected = QCheckBox()
+        self.cbxShowExpected.setText(self.tr("Show Expected"))
+        self.cbxShowExpected.setChecked(False)
+        self.cbxShowExpected.stateChanged.connect(self.show_expected_state_changed)
         self.cbxShowBaseline = QCheckBox()
         self.cbxShowBaseline.setText(self.tr("Baseline"))
         self.cbxShowBaseline.setChecked(True)
@@ -587,6 +598,37 @@ class ObjectDialog(QDialog):
             self.set_object(self.object)
             self.show_landmarks()
             self.object_view.update()
+
+    def show_expected_state_changed(self, state):
+        """Toggle the expected-landmark digitizing aid (2D)."""
+        self.show_expected = state == Qt.Checked
+        for view in (self.object_view_2d, self.object_view_3d):
+            if view is not None:
+                view.show_expected = self.show_expected
+        self.update_expected_landmarks()
+        if self.object_view is not None:
+            self.object_view.update()
+
+    def update_expected_landmarks(self):
+        """Estimate where the not-yet-placed landmarks are expected to go.
+
+        Once at least two landmarks are placed on a new (incomplete) 2D specimen,
+        fit the dataset mean shape onto them and take the remaining positions from
+        the fitted mean -- the same imputation used for missing landmarks. Result
+        is a full-length list; the viewer draws only the entries beyond the placed
+        ones. ``None`` when the aid is off or cannot be computed.
+        """
+        self.expected_landmark_list = None
+        if not self.show_expected or self.dataset is None or self.dataset.dimension != 2:
+            return
+        placed = [lm for lm in self.landmark_list if lm and lm[0] is not None and lm[1] is not None]
+        if len(placed) < 2:
+            return
+        mean = self.compute_aligned_mean()
+        if mean is None or len(placed) >= len(mean.landmark_list):
+            return
+        padded = [list(p) for p in placed] + [[None, None]] * (len(mean.landmark_list) - len(placed))
+        self.expected_landmark_list = impute_missing_landmarks(padded, mean.landmark_list)
 
     def show_polygon_state_changed(self, int):
         self.object_view.show_polygon = self.cbxShowPolygon.isChecked()
@@ -847,6 +889,12 @@ class ObjectDialog(QDialog):
             self._orig_curve_config = copy.deepcopy(self.curve_config)
             self._orig_curve_raw = copy.deepcopy(self.curve_raw_map)
             self.show_curves()
+            # Expected-landmark digitizing aid (2D): mirror the flag onto the
+            # viewers and recompute for this object.
+            for view in (self.object_view_2d, self.object_view_3d):
+                if view is not None:
+                    view.show_expected = self.show_expected
+            self.update_expected_landmarks()
             # Use object's dataset if self.dataset is None
             dataset_to_use = self.dataset if self.dataset is not None else object.dataset
             if dataset_to_use is not None:
@@ -996,6 +1044,7 @@ class ObjectDialog(QDialog):
         elif self.dataset.dimension == 3:
             self.landmark_list[idx] = [x, y, z]
         self.show_landmarks()
+        self._refresh_expected()
 
     def add_landmark(self, x, y, z=None):
         # print("adding landmark", x, y, z, self.landmark_list)
@@ -1004,12 +1053,22 @@ class ObjectDialog(QDialog):
         elif self.dataset.dimension == 3:
             self.landmark_list.append([float(x), float(y), float(z)])
         self.show_landmarks()
+        self._refresh_expected()
         # self.object_view.calculate_resize()
 
     def delete_landmark(self, idx):
         # print("delete_landmark", idx)
         self.landmark_list.pop(idx)
         self.show_landmarks()
+        self._refresh_expected()
+
+    def _refresh_expected(self):
+        """Recompute the expected landmarks and repaint (no-op when the aid is off)."""
+        if not self.show_expected:
+            return
+        self.update_expected_landmarks()
+        if self.object_view is not None:
+            self.object_view.update()
 
     def finish_curve(self, raw_points):
         """Store a traced curve as its raw polyline.

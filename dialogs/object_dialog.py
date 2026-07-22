@@ -28,6 +28,7 @@ from PyQt5.QtWidgets import (
     QInputDialog,
     QLabel,
     QLineEdit,
+    QMenu,
     QMessageBox,
     QPushButton,
     QRadioButton,
@@ -127,15 +128,19 @@ class ObjectDialog(QDialog):
         self.edtObjectDesc = QTextEdit()
         self.edtObjectDesc.setMaximumHeight(100)
         self.edtLandmarkStr = QTableWidget()
-        # Semi-landmark curves for this object: id, traced start/end point, and
-        # the dataset-wide semi-landmark count N (the only editable column).
+        # Semi-landmark curves for this object: id, editable name, traced
+        # start/end point, and the dataset-wide semi-landmark count N (editable).
         self.curveTable = QTableWidget()
-        self.curveTable.setColumnCount(4)
-        self.curveTable.setHorizontalHeaderLabels([self.tr("Curve"), self.tr("Start"), self.tr("End"), self.tr("N")])
+        self.curveTable.setColumnCount(5)
+        self.curveTable.setHorizontalHeaderLabels(
+            [self.tr("Curve"), self.tr("Name"), self.tr("Start"), self.tr("End"), self.tr("N")]
+        )
         self.curveTable.setMaximumHeight(150)
         self._populating_curve_table = False
         self.curveTable.itemChanged.connect(self.on_curve_cell_changed)
         self.curveTable.itemSelectionChanged.connect(self.on_curve_selected)
+        self.curveTable.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.curveTable.customContextMenuRequested.connect(self.on_curve_table_context_menu)
         self.lblDataset = QLabel()
 
         self.main_layout = QVBoxLayout()
@@ -1219,13 +1224,14 @@ class ObjectDialog(QDialog):
                 id_item = QTableWidgetItem(str(curve.get("id", "")))
                 start_item = QTableWidgetItem(start_txt)
                 end_item = QTableWidgetItem(end_txt)
-                # Only N is editable.
+                # Id / start / end are read-only; Name (col 1) and N (col 4) edit.
                 for item in (id_item, start_item, end_item):
                     item.setFlags(item.flags() & ~Qt.ItemIsEditable)
                 self.curveTable.setItem(row, 0, id_item)
-                self.curveTable.setItem(row, 1, start_item)
-                self.curveTable.setItem(row, 2, end_item)
-                self.curveTable.setItem(row, 3, QTableWidgetItem(str(curve.get("n", 0))))
+                self.curveTable.setItem(row, 1, QTableWidgetItem(curve.get("name", "")))
+                self.curveTable.setItem(row, 2, start_item)
+                self.curveTable.setItem(row, 3, end_item)
+                self.curveTable.setItem(row, 4, QTableWidgetItem(str(curve.get("n", 0))))
         finally:
             self._populating_curve_table = False
 
@@ -1262,6 +1268,49 @@ class ObjectDialog(QDialog):
             if view is not None:
                 view.update()
 
+    def on_curve_table_context_menu(self, pos):
+        """Right-click a curve row to delete it from the whole dataset."""
+        row = self.curveTable.rowAt(pos.y())
+        if row < 0 or row >= len(self.curve_config):
+            return
+        menu = QMenu(self)
+        del_action = menu.addAction(self.tr("Delete Curve (all specimens)"))
+        if menu.exec_(self.curveTable.viewport().mapToGlobal(pos)) is del_action:
+            self.delete_curve_dataset_wide(row)
+
+    def delete_curve_dataset_wide(self, row):
+        """Remove a curve from the whole dataset (every specimen).
+
+        Restructures the dataset in the database, so the current object's curve
+        edits are committed first; the rest are renumbered and every object's raw
+        traces remapped by delete_curve_from_dataset.
+        """
+        from MdModel import delete_curve_from_dataset
+
+        if self.dataset is None or row < 0 or row >= len(self.curve_config):
+            return
+        self.dataset.set_curve_config(self.curve_config)
+        self.dataset.save()
+        if self.object is not None:
+            self.object.set_curve_raw(self.curve_raw_map)
+            self.object.save()
+        delete_curve_from_dataset(self.dataset, row)
+        # Re-sync in-memory copies from the updated database.
+        self.curve_config = self.dataset.get_curve_config()
+        if self.object is not None:
+            self.object.curve_raw_json = MdObject.get_by_id(self.object.id).curve_raw_json
+            self.curve_raw_map = self.object.get_curve_raw()
+        self._orig_curve_config = copy.deepcopy(self.curve_config)
+        self._orig_curve_raw = copy.deepcopy(self.curve_raw_map)
+        for view in (self.object_view_2d, self.object_view_3d):
+            if view is not None:
+                view.selected_curve_id = None
+                view.hover_curve_id = None
+        self.show_curves()
+        for view in (self.object_view_2d, self.object_view_3d):
+            if view is not None:
+                view.update()
+
     def on_curve_selected(self):
         """Selecting a curve row makes its traced points editable in the viewer."""
         if self._populating_curve_table or self.dataset is None:
@@ -1280,12 +1329,18 @@ class ObjectDialog(QDialog):
             view.update()
 
     def on_curve_cell_changed(self, item):
-        """Editing the N column changes the semi-landmark count (held in memory)."""
-        if self._populating_curve_table or item.column() != 3 or self.dataset is None:
+        """Editing Name (col 1) or the count N (col 4), held in memory until Save."""
+        if self._populating_curve_table or self.dataset is None:
             return
         config = self.curve_config
         row = item.row()
         if row >= len(config):
+            return
+
+        if item.column() == 1:  # curve name
+            config[row]["name"] = item.text().strip()
+            return
+        if item.column() != 4:
             return
         try:
             new_n = int(item.text())
@@ -1297,11 +1352,11 @@ class ObjectDialog(QDialog):
             return
         # Rebuild the scheme with the new count; start indices shift for every
         # following curve. This is a dataset-level change (all specimens share it),
-        # applied to the database on Save.
+        # applied to the database on Save. Names are preserved.
         fixed_count = config[0].get("start", 0)
-        counts = [c.get("n", 0) for c in config]
-        counts[row] = new_n
-        self.curve_config = mu.build_curve_config(fixed_count, counts)
+        curves = [{"n": c.get("n", 0), "name": c.get("name", "")} for c in config]
+        curves[row]["n"] = new_n
+        self.curve_config = mu.build_curve_config(fixed_count, curves)
         self.show_curves()
         for view in (self.object_view_2d, self.object_view_3d):
             if view is not None:

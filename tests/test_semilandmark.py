@@ -443,7 +443,7 @@ def _build_dialog(qtbot, landmarks=None):
     dlg.edtLandmarkStr = table
     curve_table = QTableWidget()
     qtbot.addWidget(curve_table)
-    curve_table.setColumnCount(4)
+    curve_table.setColumnCount(5)
     dlg.curveTable = curve_table
     dlg._populating_curve_table = False
     curve_table.itemChanged.connect(dlg.on_curve_cell_changed)
@@ -528,17 +528,17 @@ class TestObjectDialogCurveTable:
         dlg.show_curves()
         assert dlg.curveTable.rowCount() == 2
         assert dlg.curveTable.item(0, 0).text() == "curve1"
-        assert dlg.curveTable.item(0, 3).text() == "10"  # N
-        assert dlg.curveTable.item(0, 1).text() == "(0.0, 0.0)"  # start
-        assert dlg.curveTable.item(0, 2).text() == "(10.0, 2.0)"  # end
+        assert dlg.curveTable.item(0, 4).text() == "10"  # N
+        assert dlg.curveTable.item(0, 2).text() == "(0.0, 0.0)"  # start
+        assert dlg.curveTable.item(0, 3).text() == "(10.0, 2.0)"  # end
         # Untraced curve has blank endpoints.
-        assert dlg.curveTable.item(1, 1).text() == ""
+        assert dlg.curveTable.item(1, 2).text() == ""  # untraced start
 
     def test_editing_n_updates_config_dataset_wide(self, qtbot):
         dlg = self._dlg(qtbot, SCHEME)
         dlg.show_curves()
         # Simulate the user editing curve1's N from 10 to 15.
-        dlg.curveTable.item(0, 3).setText("15")
+        dlg.curveTable.item(0, 4).setText("15")
         config = dlg.curve_config
         assert config[0]["n"] == 15
         # Following curve's start index shifts accordingly (2 + 15).
@@ -547,7 +547,7 @@ class TestObjectDialogCurveTable:
     def test_editing_n_to_invalid_reverts(self, qtbot):
         dlg = self._dlg(qtbot, SCHEME)
         dlg.show_curves()
-        dlg.curveTable.item(0, 3).setText("abc")
+        dlg.curveTable.item(0, 4).setText("abc")
         # Config unchanged.
         assert dlg.curve_config[0]["n"] == 10
 
@@ -846,3 +846,38 @@ class TestDeleteCurveFromDataset:
         ds.save()
         mm.delete_curve_from_dataset(ds, 5)
         assert len(mm.MdDataset.get_by_id(ds.id).get_curve_config()) == 1
+
+
+class TestObjectDialogCurveNameAndDelete:
+    SCHEME2 = [
+        {"id": "curve1", "n": 5, "method": "equidistant", "start": 2, "name": ""},
+        {"id": "curve2", "n": 8, "method": "equidistant", "start": 7, "name": ""},
+    ]
+
+    def test_editing_curve_name(self, qtbot):
+        dlg = _build_dialog(qtbot)
+        dlg.curve_config = [dict(c) for c in self.SCHEME2]
+        dlg.show_curves()
+        dlg.curveTable.item(0, 1).setText("margin")  # Name column
+        assert dlg.curve_config[0]["name"] == "margin"
+
+    def test_table_delete_is_dataset_wide(self, qtbot, test_database):
+        ds = mm.MdDataset.create(dataset_name="D", dimension=2)
+        o1 = mm.MdObject.create(object_name="o1", dataset=ds, landmark_str="0\t0\n1\t1")
+        o2 = mm.MdObject.create(object_name="o2", dataset=ds, landmark_str="0\t0\n1\t1")
+        o2.set_curve_raw({"curve2": [[9, 9]]})
+        o2.save()
+        dlg = _build_dialog(qtbot)
+        dlg.dataset = ds
+        dlg.object = o1
+        dlg.curve_config = [dict(c) for c in self.SCHEME2]
+        dlg.curve_raw_map = {"curve1": [[0, 0]]}
+        dlg._orig_curve_config = []
+        dlg._orig_curve_raw = {}
+        dlg.delete_curve_dataset_wide(0)  # delete curve1 dataset-wide
+        # Dataset scheme now has one curve (old curve2 renumbered to curve1).
+        assert [c["id"] for c in mm.MdDataset.get_by_id(ds.id).get_curve_config()] == ["curve1"]
+        # o2's curve2 trace was remapped to curve1.
+        assert mm.MdObject.get_by_id(o2.id).get_curve_raw() == {"curve1": [[9, 9]]}
+        # Dialog's in-memory copy re-synced.
+        assert [c["id"] for c in dlg.curve_config] == ["curve1"]

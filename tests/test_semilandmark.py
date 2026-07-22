@@ -445,7 +445,7 @@ def _build_dialog(qtbot, landmarks=None):
     dlg.edtLandmarkStr = table
     curve_table = QTableWidget()
     qtbot.addWidget(curve_table)
-    curve_table.setColumnCount(6)
+    curve_table.setColumnCount(3)
     dlg.curveTable = curve_table
     dlg._populating_curve_table = False
     curve_table.itemChanged.connect(dlg.on_curve_cell_changed)
@@ -524,23 +524,20 @@ class TestObjectDialogCurveTable:
         dlg.curve_config = [dict(c) for c in scheme]
         return dlg
 
-    def test_show_curves_lists_scheme_with_traced_endpoints(self, qtbot):
+    def test_show_curves_lists_name_count_and_traced(self, qtbot):
         dlg = self._dlg(qtbot, SCHEME)
         dlg.curve_raw_map = {"curve1": [[0.0, 0.0], [5.0, 1.0], [10.0, 2.0]]}
         dlg.show_curves()
         assert dlg.curveTable.rowCount() == 2
-        assert dlg.curveTable.item(0, 0).text() == "curve1"
-        assert dlg.curveTable.item(0, 5).text() == "10"  # N
-        assert dlg.curveTable.item(0, 3).text() == "(0.0, 0.0)"  # start
-        assert dlg.curveTable.item(0, 4).text() == "(10.0, 2.0)"  # end
-        # Untraced curve has blank endpoints.
-        assert dlg.curveTable.item(1, 3).text() == ""  # untraced start
+        assert dlg.curveTable.item(0, 1).text() == "10"  # N
+        assert dlg.curveTable.item(0, 2).text() == "✓"  # curve1 traced
+        assert dlg.curveTable.item(1, 2).text() == ""  # curve2 not traced
 
     def test_editing_n_updates_config_dataset_wide(self, qtbot):
         dlg = self._dlg(qtbot, SCHEME)
         dlg.show_curves()
-        # Simulate the user editing curve1's N from 10 to 15.
-        dlg.curveTable.item(0, 5).setText("15")
+        # Simulate the user editing curve1's N (col 1) from 10 to 15.
+        dlg.curveTable.item(0, 1).setText("15")
         config = dlg.curve_config
         assert config[0]["n"] == 15
         # Following curve's start index shifts accordingly (2 + 15).
@@ -549,7 +546,7 @@ class TestObjectDialogCurveTable:
     def test_editing_n_to_invalid_reverts(self, qtbot):
         dlg = self._dlg(qtbot, SCHEME)
         dlg.show_curves()
-        dlg.curveTable.item(0, 5).setText("abc")
+        dlg.curveTable.item(0, 1).setText("abc")
         # Config unchanged.
         assert dlg.curve_config[0]["n"] == 10
 
@@ -853,7 +850,7 @@ class TestObjectDialogCurveNameAndDelete:
         dlg = _build_dialog(qtbot)
         dlg.curve_config = [dict(c) for c in self.SCHEME2]
         dlg.show_curves()
-        dlg.curveTable.item(0, 1).setText("margin")  # Name column
+        dlg.curveTable.item(0, 0).setText("margin")  # Name column
         assert dlg.curve_config[0]["name"] == "margin"
 
     def test_table_delete_is_dataset_wide(self, qtbot, test_database):

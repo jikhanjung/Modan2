@@ -131,10 +131,8 @@ class ObjectDialog(QDialog):
         # Semi-landmark curves for this object: id, editable name, traced
         # start/end point, and the dataset-wide semi-landmark count N (editable).
         self.curveTable = QTableWidget()
-        self.curveTable.setColumnCount(6)
-        self.curveTable.setHorizontalHeaderLabels(
-            [self.tr("Curve"), self.tr("Name"), self.tr("Description"), self.tr("Start"), self.tr("End"), self.tr("N")]
-        )
+        self.curveTable.setColumnCount(3)
+        self.curveTable.setHorizontalHeaderLabels([self.tr("Name"), self.tr("N"), self.tr("Traced")])
         self.curveTable.setMaximumHeight(150)
         self._populating_curve_table = False
         self.curveTable.itemChanged.connect(self.on_curve_cell_changed)
@@ -336,6 +334,13 @@ class ObjectDialog(QDialog):
         # button; it joins the same exclusive group as the other tools.
         self.btnCurve = QPushButton("Cv")
         self.btnCurve.setToolTip(self.tr("Trace a curve (semi-landmarks)"))
+        # Flat by default so its background matches the flat icon tool buttons; a
+        # subtle fill shows when it is the active tool.
+        self.btnCurve.setFlat(True)
+        self.btnCurve.setStyleSheet(
+            "QPushButton { border: none; background: transparent; }"
+            "QPushButton:checked { background: rgba(0, 0, 0, 40); border-radius: 4px; }"
+        )
         self.btnGroup.addButton(self.btnLandmark)
         self.btnGroup.addButton(self.btnWireframe)
         self.btnGroup.addButton(self.btnCalibration)
@@ -1216,24 +1221,13 @@ class ObjectDialog(QDialog):
         try:
             self.curveTable.setRowCount(len(config))
             for row, curve in enumerate(config):
-                raw = self.curve_raw_map.get(curve.get("id"))
-                start_txt = end_txt = ""
-                if raw:
-                    start_txt = f"({raw[0][0]:.1f}, {raw[0][1]:.1f})"
-                    end_txt = f"({raw[-1][0]:.1f}, {raw[-1][1]:.1f})"
-                id_item = QTableWidgetItem(str(curve.get("id", "")))
-                start_item = QTableWidgetItem(start_txt)
-                end_item = QTableWidgetItem(end_txt)
-                # Id / start / end are read-only; Name (1), Description (2) and
-                # N (5) are editable.
-                for item in (id_item, start_item, end_item):
-                    item.setFlags(item.flags() & ~Qt.ItemIsEditable)
-                self.curveTable.setItem(row, 0, id_item)
-                self.curveTable.setItem(row, 1, QTableWidgetItem(curve.get("name", "")))
-                self.curveTable.setItem(row, 2, QTableWidgetItem(curve.get("desc", "")))
-                self.curveTable.setItem(row, 3, start_item)
-                self.curveTable.setItem(row, 4, end_item)
-                self.curveTable.setItem(row, 5, QTableWidgetItem(str(curve.get("n", 0))))
+                traced = curve.get("id") in self.curve_raw_map
+                # Name (0) and N (1) are editable; Traced (2) is a read-only mark.
+                self.curveTable.setItem(row, 0, QTableWidgetItem(curve.get("name", "")))
+                self.curveTable.setItem(row, 1, QTableWidgetItem(str(curve.get("n", 0))))
+                traced_item = QTableWidgetItem("✓" if traced else "")
+                traced_item.setFlags(traced_item.flags() & ~Qt.ItemIsEditable)
+                self.curveTable.setItem(row, 2, traced_item)
         finally:
             self._populating_curve_table = False
 
@@ -1331,7 +1325,7 @@ class ObjectDialog(QDialog):
             view.update()
 
     def on_curve_cell_changed(self, item):
-        """Editing Name (1), Description (2) or the count N (5); held in memory."""
+        """Editing the Name (col 0) or the count N (col 1); held in memory."""
         if self._populating_curve_table or self.dataset is None:
             return
         config = self.curve_config
@@ -1339,13 +1333,10 @@ class ObjectDialog(QDialog):
         if row >= len(config):
             return
 
-        if item.column() == 1:  # curve name
+        if item.column() == 0:  # curve name
             config[row]["name"] = item.text().strip()
             return
-        if item.column() == 2:  # curve description
-            config[row]["desc"] = item.text().strip()
-            return
-        if item.column() != 5:
+        if item.column() != 1:
             return
         try:
             new_n = int(item.text())

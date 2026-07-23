@@ -140,7 +140,26 @@ release.yml이 이 워크플로를 workflow_call로 호출 — lint/Linux 실패
 > **사용자 관찰 필요:** push 후 실제 CI에서 Windows/macOS 레그가 드러내는 실패를
 > 보고 조정(경로 구분자·DB 경로·OpenGL 등 예상). 안정화되면 gating 승격.
 
-### 나머지 항목(3-DTZ, 4, 6~10)
-DTZ(28, 케이스별 판단) → warnings-as-error → 커버리지 게이트 → 의존성 스캔 →
-타입체크 → 죽은코드/복잡도 → 퍼즈. [[docs/CODE_QUALITY_GUIDE.md]] Appendix A를
-로드맵으로 사용.
+### 항목 1·2 완결 — 크로스플랫폼 CI가 실제 버그 4건 포착
+
+CI가 첫 라운드부터 **Linux-only였다면 영영 못 잡았을 문제들**을 드러냄:
+- 골든 테스트 허용오차 `1e-6` → BLAS/LAPACK별 FP 변동(~1e-5)으로 실패 → `1e-4`로 완화(`9bde299`)
+- Windows 경로-가정 테스트 3건(`test_normalize_path_unix`/`extract_urls`/
+  `directory_constants`) → 플랫폼 무관하게 수정(`5ef8b47`)
+- CI 디스플레이 이슈 2건(xvfb XIO teardown, glutInit 세그폴트) → detached Xvfb +
+  offscreen으로 해결(`d080b11`)
+
+→ 전 플랫폼 green 확인 후 **Windows/macOS를 gating 승격**(`experimental:false`).
+(단, PR 머지 강제는 GitHub Branch protection에서 체크를 Required로 지정해야 완성 —
+UI 설정, trunk 워크플로면 선택사항.)
+
+### 항목 4·6 착수
+
+- **warnings-as-error(4, 부분):** pytest.ini에 `error:Glyph.*missing from font`
+  추가 — 한글 두부(devlog 241) 회귀를 테스트 에러로. 현재 트리거 0건. 브로드
+  DeprecationWarning-as-error는 서드파티 노이즈라 보류(기존 ignore 유지).
+- **의존성 스캔(6):** `security.yml`에 pip-audit(push/PR + 주간 cron, 현재 CVE
+  0). Dependabot에 `github-actions` 생태계 추가.
+
+### 나머지(3-DTZ, 7-커버리지게이트/타입체크, 8-죽은코드/복잡도, 9-퍼즈, 10-렌더회귀)
+진행 중/예정. [[docs/CODE_QUALITY_GUIDE.md]] Appendix A를 로드맵으로 사용.

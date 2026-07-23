@@ -8,6 +8,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+## [0.2.0-alpha.1] - 2026-07-23
+
+Semi-landmark curves: trace a curve on a specimen and have it resampled into
+evenly-spaced semi-landmarks for analysis, with edge-snapping auto-detection.
+First alpha of the 0.2 series.
+
+### Added
+- **Semi-landmark curves.** Define curves for a dataset — how many
+  semi-landmarks each carries — then trace them on each specimen. The traced
+  curve is resampled into evenly-spaced points along its length, and analysis
+  treats those points like ordinary landmarks. Fixed (anatomical) landmarks
+  keep their positions and indices; the semi-landmarks follow after them. The
+  raw trace is kept with the specimen, so you can re-trace or change the count
+  at any time. A dataset can be analyzed with only semi-landmarks (no fixed
+  landmarks) as well.
+- **Snap to curve — edge auto-detection.** While tracing, the curve snaps to
+  the strongest image edge between your clicks (a "live-wire"), so a clean
+  outline needs only a few clicks: start and end for a gentle curve, a couple of
+  points in between for a sharp one. On by default in curve mode; uncheck **Snap
+  to curve** for a plain hand trace. Enter accepts the trace, Esc cancels.
+- **Smooth curve.** Snapped traces are smoothed to remove the pixel staircase so
+  the semi-landmarks sit on a clean curve, while the points you clicked stay
+  put. Toggle it with the **Smooth curve** checkbox.
+- **Edit a traced curve.** Select a curve to adjust it — drag a point, click the
+  line to add one, and right-click to delete a point or the whole curve
+  (deleting a curve also works by right-clicking it in landmark mode). Snapped
+  curves are edited by their clicked anchors and re-snap to the edge live as you
+  drag. The selected curve is drawn thicker with square anchor handles.
+- **Dataset-wide landmark names.** Give each landmark a name/abbreviation and a
+  description at the dataset level; the viewer shows the name instead of the
+  index while digitizing, with the description as a tooltip.
+- **"Show Expected" digitizing aid (2D).** Once two landmarks are placed on a
+  new specimen, the remaining positions are predicted from the dataset mean
+  shape and shown as a guide so you know roughly where each one goes.
+- **Import curves from TPS.** `CURVES=` blocks in TPS files are read in as
+  semi-landmark curves.
+
+### Changed
+- **The dataset dialog is organized into tabs**, and gains tables for
+  dataset-wide landmark names and the curve scheme.
+- **The object list shows an "LM Count" column and a "Curve" column**, and
+  refreshes on Save/Next/Previous while keeping your selection.
+
+
 
 ## [0.1.12] - 2026-07-21
 

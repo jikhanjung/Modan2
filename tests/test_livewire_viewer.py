@@ -207,6 +207,35 @@ class TestSnapAnchorsEditable:
         idx = v._anchor_insert_index(dense, v.object_dialog.curve_anchor_map["curve1"], img_mid)
         assert idx == 1
 
+    def test_insert_editpoint_near_click_on_dense_line(self, qtbot):
+        # Exercises the full click-to-insert path (regression: it used to call a
+        # renamed helper and crash). Identity view transforms so screen == image.
+        v = self._snap_viewer(qtbot)
+        v.scale = 1.0
+        v.pan_x = v.pan_y = 0
+        v.temp_pan_x = v.temp_pan_y = 0
+        v.image_canvas_ratio = 1.0
+        dense = [[10, 0], [16, 5], [18, 10], [16, 15], [10, 20]]
+        v.object_dialog.curve_raw_map = {"curve1": dense}
+        v.object_dialog.curve_anchor_map = {"curve1": [[10, 0], [10, 20]]}
+        v.selected_curve_id = "curve1"
+        v.mouse_curr_x, v.mouse_curr_y = 18, 10  # on the bulge, mid-curve
+        idx = v._insert_editpoint_near([18, 10])
+        assert idx == 1
+        assert v.object_dialog.curve_anchor_map["curve1"] == [[10, 0], [18, 10], [10, 20]]
+
+    def test_insert_editpoint_near_misses_off_curve(self, qtbot):
+        v = self._snap_viewer(qtbot)
+        v.scale = 1.0
+        v.pan_x = v.pan_y = 0
+        v.temp_pan_x = v.temp_pan_y = 0
+        v.image_canvas_ratio = 1.0
+        v.object_dialog.curve_raw_map = {"curve1": [[10, 0], [10, 20]]}
+        v.object_dialog.curve_anchor_map = {"curve1": [[10, 0], [10, 20]]}
+        v.selected_curve_id = "curve1"
+        v.mouse_curr_x, v.mouse_curr_y = 100, 100  # far from the curve
+        assert v._insert_editpoint_near([100, 100]) == -1
+
     def test_dragging_anchor_resnaps_live(self, qtbot):
         v = self._snap_viewer(qtbot)
         v.object_dialog.curve_raw_map = {"curve1": [[21, 2], [21, 20], [21, 38]]}

@@ -645,7 +645,7 @@ class ObjectViewer2D(QLabel):
         falls back to the raw-segment hit-test. Returns the new point's index in
         the edit list, or -1 if the click missed the curve.
         """
-        edit = self._selected_curve_editpoints()
+        edit = self._selected_curve_raw()
         if not edit:
             return -1
         img_point = [self._2imgx(self.mouse_curr_x), self._2imgy(self.mouse_curr_y)]

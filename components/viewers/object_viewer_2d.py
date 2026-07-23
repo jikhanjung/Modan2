@@ -165,6 +165,9 @@ class ObjectViewer2D(QLabel):
         # livewire_preview holds the snapped path from the last point to the
         # cursor for painting.
         self.livewire_enabled = False
+        # Smooth the snapped trace (remove the live-wire pixel staircase) before
+        # it becomes semi-landmarks. Endpoints/anchors stay pinned.
+        self.smooth_curves = True
         self._livewire = None
         self._livewire_path = None
         self.livewire_preview = []
@@ -414,6 +417,15 @@ class ObjectViewer2D(QLabel):
             self.show_message(self._curve_hint())
         self.repaint()
 
+    def set_smooth_curves(self, enabled):
+        """Toggle smoothing of snapped traces; re-snap the selected curve so the
+        change shows immediately."""
+        self.smooth_curves = bool(enabled)
+        if self.selected_curve_id is not None:
+            self._resnap_selected_curve()
+            self._notify_curve_edited()
+        self.repaint()
+
     def _reset_livewire(self):
         """Forget the cached cost map (e.g. after the image changes)."""
         self._livewire = None
@@ -450,6 +462,12 @@ class ObjectViewer2D(QLabel):
         self._livewire = MdLiveWire.build_livewire(gray)
         return self._livewire
 
+    def _maybe_smooth(self, path):
+        """Smooth a snapped path (pinning its endpoints) when smoothing is on."""
+        if self.smooth_curves and len(path) >= 3:
+            return mu.smooth_polyline(path)
+        return path
+
     def _livewire_segment(self, start_img, end_img):
         """Snapped path between two image-space points, endpoints included.
 
@@ -458,7 +476,7 @@ class ObjectViewer2D(QLabel):
         wire = self._ensure_livewire()
         if wire is None:
             return [list(start_img), list(end_img)]
-        return wire.find_path(start_img, end_img)
+        return self._maybe_smooth(wire.find_path(start_img, end_img))
 
     def _curve_raw_map(self):
         """The object's raw curve traces (id -> polyline).
@@ -579,10 +597,11 @@ class ObjectViewer2D(QLabel):
         if wire is None:
             return [list(a), list(b)]
         if seed_a:
-            return wire.find_path(a, b)
-        path = wire.find_path(b, a)
-        path.reverse()
-        return path
+            path = wire.find_path(a, b)
+        else:
+            path = wire.find_path(b, a)
+            path.reverse()
+        return self._maybe_smooth(path)
 
     def _resnap_selected_curve(self, moving_index=None):
         """Rebuild the selected snap-curve's dense trace from its edited anchors.

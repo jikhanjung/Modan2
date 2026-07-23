@@ -995,6 +995,37 @@ def resample_polyline(points, n, closed=False):
     return out
 
 
+def smooth_polyline(points, iterations=2, pin_ends=True):
+    """Smooth a polyline with a 3-point moving average (Laplacian smoothing).
+
+    Live-wire traces follow image edges pixel-by-pixel, so they carry a fine
+    staircase jitter. Averaging each interior point with its two neighbours
+    removes that jitter while keeping the overall shape; a few light iterations
+    are enough. Endpoints are pinned by default so a snapped segment stays
+    anchored to its clicked endpoints (the semi-landmark curve's control points).
+
+    Args:
+        points: ordered ``[x, y(, z)]`` polyline points.
+        iterations: how many averaging passes; more means smoother/looser.
+        pin_ends: keep the first and last points fixed (default True).
+
+    Returns:
+        list of ``[x, y(, z)]`` points, same length as the input. Inputs shorter
+        than 3 points are returned unchanged (nothing to smooth).
+    """
+    pts = np.asarray(points, dtype=float)
+    if pts.ndim != 2 or pts.shape[0] < 3 or iterations < 1:
+        return [list(p) for p in np.asarray(points, dtype=float)]
+    for _ in range(iterations):
+        averaged = pts.copy()
+        averaged[1:-1] = (pts[:-2] + pts[1:-1] + pts[2:]) / 3.0
+        if pin_ends:
+            averaged[0] = pts[0]
+            averaged[-1] = pts[-1]
+        pts = averaged
+    return [p.tolist() for p in pts]
+
+
 def build_landmarks_with_curves(fixed_landmarks, curves):
     """Assemble a landmark list and its curve configuration.
 

@@ -127,6 +127,18 @@
   앵커를 seed**로 잡아 캐시 적중시킴(`_snap_segment(seed_a)`). 결과: 드래그 재스냅
   0.3ms로 실시간.
 
+### 곡선 스무딩
+라이브와이어 경로는 에지를 픽셀 단위로 따라가 계단(staircase) 지터가 남는다.
+스냅 경로를 스무딩해 세미랜드마크가 매끄러운 곡선에 놓이게 한다:
+- `mu.smooth_polyline(points, iterations=2, pin_ends=True)` — 3점 이동평균
+  (라플라시안). 엔드포인트 고정이라 세그먼트별로 적용하면 **앵커가 고정**된다.
+- 뷰어 `smooth_curves` 플래그(기본 켬). `_maybe_smooth`가 스냅 세그먼트
+  (`_livewire_segment`/`_snap_segment`)에 적용 → 저장되는 dense raw가 스무딩됨
+  (merge-at-analysis 일관: 분석도 같은 곡선 사용). `set_smooth_curves`는 선택 곡선
+  즉시 재스냅.
+- 대화상자 **"Smooth curve" 체크박스**(기본 켬, 곡선 모드에서만 활성) → snap과
+  같은 방식으로 뷰어에 전달.
+
 ## 남은 것 / 한계
 
 - **곡선 추종 품질은 합성 이미지로만 검증**했다. 실제 표본 사진(질감·조명

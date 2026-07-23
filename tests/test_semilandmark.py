@@ -112,6 +112,34 @@ class TestResampleValidation:
             mu.resample_polyline([[0, 0], [1, 1]], 1)
 
 
+class TestSmoothPolyline:
+    def test_pins_endpoints(self):
+        pts = [[0, 0], [1, 5], [2, 0], [3, 5], [4, 0]]
+        out = mu.smooth_polyline(pts, iterations=3)
+        assert out[0] == [0, 0]
+        assert out[-1] == [4, 0]
+        assert len(out) == len(pts)
+
+    def test_reduces_jitter(self):
+        # A straight line with one spike -- smoothing pulls the spike toward line.
+        pts = [[0, 0], [1, 0], [2, 10], [3, 0], [4, 0]]
+        out = mu.smooth_polyline(pts, iterations=2)
+        assert abs(out[2][1]) < 10  # the spike is damped
+
+    def test_short_input_unchanged(self):
+        assert mu.smooth_polyline([[0, 0], [1, 1]]) == [[0.0, 0.0], [1.0, 1.0]]
+
+    def test_zero_iterations_unchanged(self):
+        pts = [[0, 0], [1, 5], [2, 0]]
+        assert mu.smooth_polyline(pts, iterations=0) == [[0.0, 0.0], [1.0, 5.0], [2.0, 0.0]]
+
+    def test_3d(self):
+        pts = [[0, 0, 0], [1, 5, 1], [2, 0, 2], [3, 5, 3], [4, 0, 4]]
+        out = mu.smooth_polyline(pts)
+        assert len(out) == 5
+        assert len(out[0]) == 3
+
+
 class TestBuildLandmarksWithCurves:
     def test_fixed_landmarks_come_first_unchanged(self):
         fixed = [[0.0, 0.0], [1.0, 1.0]]

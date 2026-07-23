@@ -252,6 +252,45 @@ class TestSnapAnchorsEditable:
         assert after[0] == [21, 2] and after[-1] == [21, 38]
 
 
+class TestSmoothing:
+    def _viewer(self, qtbot):
+        v = ObjectViewer2D()
+        qtbot.addWidget(v)
+        v.orig_pixmap = _bar_pixmap(w=40, h=40, bar_x=20)
+        v.set_mode(MODE["EDIT_CURVE"])
+        v.object_dialog = Mock()
+        v.object_dialog.curve_raw_map = {}
+        v.object_dialog.curve_anchor_map = {}
+        return v
+
+    def test_snapped_segment_endpoints_preserved_when_smoothing(self, qtbot):
+        v = self._viewer(qtbot)
+        v.smooth_curves = True
+        seg = v._livewire_segment([21, 2], [21, 37])
+        assert seg[0] == [21, 2]  # endpoints (anchors) pinned
+        assert seg[-1] == [21, 37]
+
+    def test_smoothing_off_leaves_path_raw(self, qtbot):
+        v = self._viewer(qtbot)
+        v.smooth_curves = False
+        raw = v._livewire_segment([21, 2], [21, 37])
+        v.smooth_curves = True
+        smoothed = v._livewire_segment([21, 2], [21, 37])
+        # Same endpoints, but smoothing changes interior points (unless already
+        # perfectly straight); at minimum it must not error and keep endpoints.
+        assert raw[0] == smoothed[0] and raw[-1] == smoothed[-1]
+
+    def test_toggle_resnaps_selected_curve(self, qtbot):
+        v = self._viewer(qtbot)
+        v.object_dialog.curve_raw_map = {"c1": [[21, 2], [21, 37]]}
+        v.object_dialog.curve_anchor_map = {"c1": [[21, 2], [21, 37]]}
+        v.selected_curve_id = "c1"
+        v.set_smooth_curves(False)
+        # Re-snapped: dense trace rebuilt, endpoints still the anchors.
+        dense = v.object_dialog.curve_raw_map["c1"]
+        assert dense[0] == [21, 2] and dense[-1] == [21, 37]
+
+
 class TestCurveHint:
     def test_hint_mentions_enter_and_esc(self, qtbot):
         v = ObjectViewer2D()
@@ -279,7 +318,9 @@ class TestDialogSnapCheckbox:
         dlg.object_view = ObjectViewer2D()
         qtbot.addWidget(dlg.object_view)
         dlg.cbxSnapToCurve = QCheckBox()
+        dlg.cbxSmoothCurve = QCheckBox()
         qtbot.addWidget(dlg.cbxSnapToCurve)
+        qtbot.addWidget(dlg.cbxSmoothCurve)
         return dlg
 
     def test_checkbox_forwards_to_viewer(self, qtbot):
@@ -291,12 +332,23 @@ class TestDialogSnapCheckbox:
         dlg._apply_snap()
         assert dlg.object_view.livewire_enabled is False
 
-    def test_snap_enabled_only_in_curve_mode(self, qtbot):
+    def test_smooth_checkbox_forwards_to_viewer(self, qtbot):
+        dlg = self._dlg(qtbot)
+        dlg.cbxSmoothCurve.setChecked(False)
+        dlg._apply_smooth()
+        assert dlg.object_view.smooth_curves is False
+        dlg.cbxSmoothCurve.setChecked(True)
+        dlg._apply_smooth()
+        assert dlg.object_view.smooth_curves is True
+
+    def test_snap_and_smooth_enabled_only_in_curve_mode(self, qtbot):
         dlg = self._dlg(qtbot)
         dlg._set_snap_available(True)
         assert dlg.cbxSnapToCurve.isEnabled() is True
+        assert dlg.cbxSmoothCurve.isEnabled() is True
         dlg._set_snap_available(False)
         assert dlg.cbxSnapToCurve.isEnabled() is False
+        assert dlg.cbxSmoothCurve.isEnabled() is False
 
     def test_entering_curve_mode_applies_checkbox_state(self, qtbot):
         dlg = self._dlg(qtbot)

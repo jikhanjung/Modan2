@@ -225,6 +225,7 @@ class ObjectDialog(QDialog):
         self.right_middle_layout.addWidget(self.cbxShowCurve)
         self.right_middle_layout.addWidget(self.cbxShowSemiLandmark)
         self.right_middle_layout.addWidget(self.cbxSnapToCurve)
+        self.right_middle_layout.addWidget(self.cbxSmoothCurve)
         self.right_middle_layout.addWidget(self.cbxAutoRotate)
         self.right_middle_layout.addWidget(self.btnAddFile)
         self.right_middle_layout.addWidget(self.cbxUseOriginal)
@@ -457,6 +458,14 @@ class ObjectDialog(QDialog):
         self.cbxSnapToCurve.setChecked(True)
         self.cbxSnapToCurve.setEnabled(False)
         self.cbxSnapToCurve.stateChanged.connect(self.snap_to_curve_state_changed)
+        # Smooth the snapped trace (drop the pixel staircase) before it becomes
+        # semi-landmarks. Like snapping, only meaningful/enabled in curve mode.
+        self.cbxSmoothCurve = QCheckBox()
+        self.cbxSmoothCurve.setText(self.tr("Smooth curve"))
+        self.cbxSmoothCurve.setToolTip(self.tr("Smooth the traced curve (keeps the clicked anchors)"))
+        self.cbxSmoothCurve.setChecked(True)
+        self.cbxSmoothCurve.setEnabled(False)
+        self.cbxSmoothCurve.stateChanged.connect(self.smooth_curve_state_changed)
         self.btnAddFile = QPushButton()
         self.btnAddFile.setText(self.tr("Load Image"))
         self.btnAddFile.clicked.connect(self.btnAddFile_clicked)
@@ -723,25 +732,35 @@ class ObjectDialog(QDialog):
             self.object_view_2d.set_fullres_source(None)
 
     def _set_snap_available(self, available):
-        """Enable the Snap-to-curve checkbox only in curve mode; apply its state.
+        """Enable the Snap/Smooth curve checkboxes only in curve mode; apply state.
 
-        Live-wire snapping is only used while tracing, so the checkbox is greyed
-        out in the other modes. Entering curve mode pushes the checkbox's current
-        state to the viewer so re-entering restores the last choice.
+        Both are only used while tracing, so they are greyed out in the other
+        modes. Entering curve mode pushes their current state to the viewer so
+        re-entering restores the last choice.
         """
         if not hasattr(self, "cbxSnapToCurve"):
             return
         self.cbxSnapToCurve.setEnabled(available)
+        self.cbxSmoothCurve.setEnabled(available)
         if available:
             self._apply_snap()
+            self._apply_smooth()
 
     def _apply_snap(self):
         """Forward the Snap checkbox state to the 2D viewer's live-wire."""
         if hasattr(self.object_view, "set_livewire_enabled"):
             self.object_view.set_livewire_enabled(self.cbxSnapToCurve.isChecked())
 
+    def _apply_smooth(self):
+        """Forward the Smooth checkbox state to the 2D viewer."""
+        if hasattr(self.object_view, "set_smooth_curves"):
+            self.object_view.set_smooth_curves(self.cbxSmoothCurve.isChecked())
+
     def snap_to_curve_state_changed(self, _state):
         self._apply_snap()
+
+    def smooth_curve_state_changed(self, _state):
+        self._apply_smooth()
 
     def btnLandmark_clicked(self):
         # self.edit_mode = MODE_ADD_LANDMARK

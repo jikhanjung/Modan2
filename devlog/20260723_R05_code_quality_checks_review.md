@@ -177,5 +177,38 @@ DTZ 28건을 검토: 대부분 `datetime.now()`/`fromtimestamp()`가 **파일명
 28개 noqa는 저가치 churn. 또한 시발점이던 `datetime.UTC`는 import 호환 문제라 DTZ가
 잡지도 못함. → **미채택**이 올바른 판단. (측정→합리적 제외도 하나의 결론.)
 
-### 나머지(8-죽은코드/복잡도, 9-퍼즈, 10-렌더회귀)
-예정. [[docs/CODE_QUALITY_GUIDE.md]] Appendix A를 로드맵으로 사용.
+### 항목 8·9·10 완료
+
+- **10. 렌더 회귀 테스트(i18n):** 폰트 폴백 로직을 순수 헬퍼
+  `MdHelpers.resolve_matplotlib_font_family()`로 추출(Modan2.py에서 사용).
+  `tests/test_font_rendering.py` — 한글 렌더 시 missing-glyph 경고 0 단언(폴백
+  깨지면 실패, 이빨 확인). CI에 `fonts-nanum` 설치해 실제 실행, 로컬은 CJK 폰트
+  없으면 skip. → devlog 241 버그의 재발 방지 완결.
+- **9. 퍼즈(hypothesis):** `tests/test_fuzz_resample.py` — `resample_polyline`
+  (semi-landmark 코어)에 200+ 무작위 입력. 형태/엔드포인트/에러 계약 검증. 버그
+  없음(R04 판단 재확인). hypothesis를 dev/ci requirements에 추가.
+- **8. 복잡도 리포트:** CI 비게이팅 스텝으로 복잡도 15 초과 함수(25개) 로그 리포트
+  (`--exit-zero`). vulture 죽은코드는 Qt 슬롯 오탐이 많아 게이트로 미채택(수동
+  스윕 유지) — `F401/F841`만 신뢰 자동화.
+
+---
+
+## 로드맵 최종 요약
+
+| # | 항목 | 결과 |
+|---|------|------|
+| 1 | 크로스플랫폼 CI + 스모크 | ✅ 실제 버그 4건 포착·수정 |
+| 2 | Gating | ✅ lint 분리, 실패 삼킴 제거, Win/mac 승격 |
+| 3 | Ruff 룰셋 확대 | ✅ LOG·RUF012 / ⛔ DTZ(로컬시간 의도라 미채택) |
+| 4 | warnings-as-error | ✅ missing-glyph 가드(브로드 deprecation 보류) |
+| 5 | Import 스모크 | ✅ |
+| 6 | 의존성 스캔 | ✅ pip-audit(주간) + Dependabot github-actions |
+| 7 | 커버리지 게이트 + 타입체크 | ✅ cov-fail-under=60(현 64%) + mypy 점진 |
+| 8 | 죽은코드/복잡도 | ✅ 복잡도 리포트 / ⛔ vulture 미채택 |
+| 9 | 퍼즈 | ✅ resample_polyline property test |
+| 10 | 렌더 회귀(i18n) | ✅ 헬퍼 추출 + 한글 렌더 테스트 + CI 폰트 |
+
+상시 게이트: **ruff check/format · mypy(코어) · pip-audit · coverage 60% · 테스트
+매트릭스(3 OS)**. 리포트: **복잡도**. 남은 강화는 필요시 — mypy 모듈 확장, 커버리지
+하한 상향, 복잡도 핫스팟 리팩토링, 파서 퍼즈 확대. 최종 강제는 GitHub Branch
+protection에서 체크 Required 지정(선택).

@@ -104,6 +104,21 @@ class TestLiveWirePath:
         assert p1[0] == [7, 0] and p2[0] == [7, 0]
         assert p1[-1] == [7, 14] and p2[-1] == [7, 10]
 
+    def test_seed_cache_holds_multiple_seeds(self):
+        cost = _channel_cost(15, 15, channel_col=7)
+        wire = lw.LiveWire(cost)
+        wire.set_seed((7, 0))
+        wire.set_seed((7, 14))  # a different seed
+        # Both predecessor trees are cached (drives fast live drag re-snap).
+        assert 0 * wire.width + 7 in wire._pred_cache
+        assert 14 * wire.width + 7 in wire._pred_cache
+
+    def test_seed_cache_is_capped(self):
+        wire = lw.LiveWire(np.ones((6, 6)))
+        for x in range(wire._SEED_CACHE_CAP + 5):
+            wire.set_seed((x % 6, x // 6))
+        assert len(wire._pred_cache) <= wire._SEED_CACHE_CAP
+
     def test_path_without_seed_returns_target_only(self):
         wire = lw.LiveWire(np.ones((5, 5)))
         assert wire.path_to((3, 3)) == [[3, 3]]

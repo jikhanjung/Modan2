@@ -194,6 +194,34 @@ class TestSnapAnchorsEditable:
         v._resnap_selected_curve()
         assert v.object_dialog.curve_raw_map["curve1"] == raw  # untouched
 
+    def test_insert_anchor_orders_by_position_along_dense_trace(self, qtbot):
+        v = self._snap_viewer(qtbot)
+        # A curved dense trace bulging right, with anchors at its two ends.
+        dense = [[10, 0], [16, 5], [18, 10], [16, 15], [10, 20]]
+        v.object_dialog.curve_raw_map = {"curve1": dense}
+        v.object_dialog.curve_anchor_map = {"curve1": [[10, 0], [10, 20]]}
+        v.selected_curve_id = "curve1"
+        # Click on the bulge (mid-curve). The new anchor must land *between* the
+        # two existing anchors, not appended at the end.
+        img_mid = [18, 10]
+        idx = v._anchor_insert_index(dense, v.object_dialog.curve_anchor_map["curve1"], img_mid)
+        assert idx == 1
+
+    def test_dragging_anchor_resnaps_live(self, qtbot):
+        v = self._snap_viewer(qtbot)
+        v.object_dialog.curve_raw_map = {"curve1": [[21, 2], [21, 20], [21, 38]]}
+        v.object_dialog.curve_anchor_map = {"curve1": [[21, 2], [21, 20], [21, 38]]}
+        v.selected_curve_id = "curve1"
+        before = [list(p) for p in v.object_dialog.curve_raw_map["curve1"]]
+        # Simulate a drag step of the middle anchor with a live re-snap.
+        v.moving_curve_point_index = 1
+        v.object_dialog.curve_anchor_map["curve1"][1] = [21, 25]
+        v._resnap_selected_curve(moving_index=1)
+        after = v.object_dialog.curve_raw_map["curve1"]
+        # The dense trace updated immediately (not only on release).
+        assert after != before
+        assert after[0] == [21, 2] and after[-1] == [21, 38]
+
 
 class TestCurveHint:
     def test_hint_mentions_enter_and_esc(self, qtbot):

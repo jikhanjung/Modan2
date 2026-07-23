@@ -568,13 +568,31 @@ class ObjectViewer2D(QLabel):
         """
         return self._curve_editpoints(self.selected_curve_id)
 
-    def _resnap_selected_curve(self):
+    def _snap_segment(self, a, b, seed_a=True):
+        """Snapped path a->b, seeding whichever endpoint is fixed during a drag.
+
+        The live-wire caches predecessor trees per seed, so seeding the stationary
+        endpoint keeps re-snapping cheap while the other end is dragged. Falls
+        back to a straight segment when no image is available.
+        """
+        wire = self._ensure_livewire()
+        if wire is None:
+            return [list(a), list(b)]
+        if seed_a:
+            return wire.find_path(a, b)
+        path = wire.find_path(b, a)
+        path.reverse()
+        return path
+
+    def _resnap_selected_curve(self, moving_index=None):
         """Rebuild the selected snap-curve's dense trace from its edited anchors.
 
         No-op for a hand-traced curve (no anchors -- its raw points were edited
         directly). Snaps between consecutive anchors when an image is available,
         falling back to straight segments otherwise, and writes the result back
         to the dialog's raw map so resampling and rendering stay in sync.
+        ``moving_index`` (the anchor being dragged) seeds each segment from its
+        fixed endpoint so live re-snapping stays responsive.
         """
         curve_id = self.selected_curve_id
         anchors = self._curve_anchor_map().get(curve_id)
@@ -585,9 +603,65 @@ class ObjectViewer2D(QLabel):
             dlg.curve_raw_map[curve_id] = [list(p) for p in anchors]
             return
         dense = [list(anchors[0])]
-        for a, b in zip(anchors, anchors[1:]):
-            dense.extend(self._livewire_segment(a, b)[1:])
+        for i in range(len(anchors) - 1):
+            # Seed the endpoint that is not the one being dragged.
+            seed_a = i != moving_index
+            dense.extend(self._snap_segment(anchors[i], anchors[i + 1], seed_a=seed_a)[1:])
         dlg.curve_raw_map[curve_id] = dense
+
+    def _point_on_polyline_index(self, pos, polyline, threshold=DISTANCE_THRESHOLD):
+        """Index i of a polyline segment (i, i+1) under screen ``pos``, or -1."""
+        for i in range(len(polyline) - 1):
+            a = [self._2canx(polyline[i][0]), self._2cany(polyline[i][1])]
+            b = [self._2canx(polyline[i + 1][0]), self._2cany(polyline[i + 1][1])]
+            if self._point_segment_distance(pos, a, b) <= threshold:
+                return i
+        return -1
+
+    def _anchor_insert_index(self, dense, anchors, img_point):
+        """Ordinal slot among ``anchors`` for a new point clicked on ``dense``.
+
+        Anchors sit on the dense trace, so ordering by nearest dense vertex keeps
+        the anchor list in curve order when a new one is inserted mid-curve.
+        """
+
+        def nearest(pt):
+            best_i, best_d = 0, None
+            for i, q in enumerate(dense):
+                d = (q[0] - pt[0]) ** 2 + (q[1] - pt[1]) ** 2
+                if best_d is None or d < best_d:
+                    best_d, best_i = d, i
+            return best_i
+
+        click_at = nearest(img_point)
+        return sum(1 for a in anchors if nearest(a) < click_at)
+
+    def _insert_editpoint_near(self, pos):
+        """Insert a new edit point where the user clicked on the selected curve.
+
+        For a snap curve the click is tested against the *visible dense trace*
+        (not the sparse anchor chord) and the new anchor is slotted into the
+        anchor list by its position along that trace. For a hand-traced curve it
+        falls back to the raw-segment hit-test. Returns the new point's index in
+        the edit list, or -1 if the click missed the curve.
+        """
+        edit = self._selected_curve_editpoints()
+        if not edit:
+            return -1
+        img_point = [self._2imgx(self.mouse_curr_x), self._2imgy(self.mouse_curr_y)]
+        anchors = self._curve_anchor_map().get(self.selected_curve_id)
+        if anchors:
+            dense = self._curve_raw_map().get(self.selected_curve_id)
+            if not dense or self._point_on_polyline_index(pos, dense) < 0:
+                return -1
+            idx = self._anchor_insert_index(dense, anchors, img_point)
+            anchors.insert(idx, img_point)
+            return idx
+        seg_idx = self._curve_segment_within_threshold(pos)
+        if seg_idx < 0:
+            return -1
+        edit.insert(seg_idx + 1, img_point)
+        return seg_idx + 1
 
     def _show_curve_context_menu(self, global_pos):
         """Right-click menu in curve mode: delete a point and/or the curve."""
@@ -801,11 +875,13 @@ class ObjectViewer2D(QLabel):
             if self.selected_curve_id is not None:
                 raw = self._selected_curve_raw()
                 if raw is not None and self.moving_curve_point_index >= 0:
-                    # Drag the grabbed raw point.
+                    # Drag the grabbed point (an anchor for a snap curve). Re-snap
+                    # live so the dense trace follows the anchor as it moves.
                     raw[self.moving_curve_point_index] = [
                         self._2imgx(self.mouse_curr_x),
                         self._2imgy(self.mouse_curr_y),
                     ]
+                    self._resnap_selected_curve(moving_index=self.moving_curve_point_index)
                 elif raw is not None:
                     # Hover highlight for the point under the cursor.
                     self.hover_curve_point_index = self._curve_point_within_threshold(curr_pos)
@@ -862,14 +938,12 @@ class ObjectViewer2D(QLabel):
                         self.moving_curve_point_index = pt_idx
                         self.repaint()
                         return
-                    seg_idx = self._curve_segment_within_threshold(curr_pos)
-                    if seg_idx >= 0:
-                        raw = self._selected_curve_raw()
-                        raw.insert(seg_idx + 1, [self._2imgx(self.mouse_curr_x), self._2imgy(self.mouse_curr_y)])
-                        self.moving_curve_point_index = seg_idx + 1
+                    ins_idx = self._insert_editpoint_near(curr_pos)
+                    if ins_idx >= 0:
+                        self.moving_curve_point_index = ins_idx
                         # For a snap curve the inserted point is a new anchor;
-                        # re-snap so the dense trace follows it (drag re-snaps
-                        # again on release).
+                        # re-snap so the dense trace runs through it (a following
+                        # drag re-snaps live).
                         self._resnap_selected_curve()
                         self.repaint()
                         return

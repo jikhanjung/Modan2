@@ -102,6 +102,8 @@ class LiveWire:
     # Laplacian term we omit; without it these two are renormalised).
     _W_MAGNITUDE = 0.6
     _W_DIRECTION = 0.4
+    # How many seed predecessor trees to keep (one per curve anchor is plenty).
+    _SEED_CACHE_CAP = 16
 
     def __init__(self, cost, scale=1.0, gradient=None):
         """Build the traversal graph once from ``cost``.
@@ -125,6 +127,11 @@ class LiveWire:
         self._graph = self._build_graph()
         self._seed_index = None
         self._predecessors = None
+        # Predecessor trees keyed by seed pixel index. Dragging one anchor of a
+        # multi-anchor curve re-snaps the segments to its fixed neighbours every
+        # mouse move; caching those neighbours' trees turns all but the first
+        # move into cheap back-traces instead of a fresh Dijkstra each time.
+        self._pred_cache = {}
 
     # -- graph construction -------------------------------------------------- #
     def _unit_edge_direction(self, gradient):
@@ -214,7 +221,13 @@ class LiveWire:
         index = cy * self.width + cx
         if index == self._seed_index and self._predecessors is not None:
             return
-        _dist, predecessors = dijkstra(self._graph, directed=True, indices=index, return_predecessors=True)
+        predecessors = self._pred_cache.get(index)
+        if predecessors is None:
+            _dist, predecessors = dijkstra(self._graph, directed=True, indices=index, return_predecessors=True)
+            self._pred_cache[index] = predecessors
+            if len(self._pred_cache) > self._SEED_CACHE_CAP:
+                # dict preserves insertion order -> drop the oldest seed.
+                self._pred_cache.pop(next(iter(self._pred_cache)))
         self._seed_index = index
         self._predecessors = predecessors
 

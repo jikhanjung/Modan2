@@ -291,6 +291,34 @@ class TestSmoothing:
         assert dense[0] == [21, 2] and dense[-1] == [21, 37]
 
 
+class TestCurveRawSource:
+    def test_empty_dialog_map_hides_deleted_curve(self, qtbot):
+        # After deleting the last curve the dialog's map is empty; the viewer must
+        # honour that and not fall back to the object's saved (stale) traces.
+        v = ObjectViewer2D()
+        qtbot.addWidget(v)
+        v.object_dialog = Mock()
+        v.object_dialog.curve_raw_map = {}  # all curves deleted in-memory
+        v.object = Mock()
+        v.object.get_curve_raw = lambda: {"curve1": [[0, 0], [1, 1]]}  # still in DB
+        assert v._curve_raw_map() == {}
+
+    def test_dialog_map_used_when_present(self, qtbot):
+        v = ObjectViewer2D()
+        qtbot.addWidget(v)
+        v.object_dialog = Mock()
+        v.object_dialog.curve_raw_map = {"c1": [[1, 1], [2, 2]]}
+        assert v._curve_raw_map() == {"c1": [[1, 1], [2, 2]]}
+
+    def test_falls_back_to_object_without_dialog(self, qtbot):
+        v = ObjectViewer2D()
+        qtbot.addWidget(v)
+        v.object_dialog = None
+        v.object = Mock()
+        v.object.get_curve_raw = lambda: {"c1": [[3, 3]]}
+        assert v._curve_raw_map() == {"c1": [[3, 3]]}
+
+
 class TestCurveHint:
     def test_hint_mentions_enter_and_esc(self, qtbot):
         v = ObjectViewer2D()

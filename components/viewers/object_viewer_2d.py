@@ -482,10 +482,12 @@ class ObjectViewer2D(QLabel):
         """The object's raw curve traces (id -> polyline).
 
         Prefer the live map being edited in the object dialog, falling back to
-        the object's saved traces for read-only viewing.
+        the object's saved traces for read-only viewing. The dialog is the
+        authority whenever it holds the map -- even when empty (every curve
+        deleted), so a just-deleted curve does not reappear from the saved copy.
         """
         dlg = getattr(self, "object_dialog", None)
-        if dlg is not None and getattr(dlg, "curve_raw_map", None):
+        if dlg is not None and hasattr(dlg, "curve_raw_map"):
             return dlg.curve_raw_map
         if self.object is not None:
             return self.object.get_curve_raw()

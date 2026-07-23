@@ -319,6 +319,43 @@ class TestCurveRawSource:
         assert v._curve_raw_map() == {"c1": [[3, 3]]}
 
 
+class TestLandmarkModeCurveMenu:
+    def _viewer_with_curve(self, qtbot):
+        from PyQt5.QtWidgets import QCheckBox  # noqa: F401  (kept parallel to others)
+
+        v = ObjectViewer2D()
+        qtbot.addWidget(v)
+        v.set_mode(MODE["EDIT_LANDMARK"])
+        v.scale = 1.0
+        v.pan_x = v.pan_y = 0
+        v.temp_pan_x = v.temp_pan_y = 0
+        v.image_canvas_ratio = 1.0
+        v.object_dialog = Mock()
+        v.object_dialog.curve_raw_map = {"c1": [[10, 10], [20, 10]]}
+        v.object_dialog.curve_config = [{"id": "c1", "n": 5, "start": 0}]
+        v._show_curve_context_menu = Mock()
+        return v
+
+    def _right_click(self, v, x, y):
+        from PyQt5.QtCore import QPoint, Qt
+        from PyQt5.QtGui import QMouseEvent
+
+        v.mouse_curr_x, v.mouse_curr_y = x, y
+        ev = QMouseEvent(QMouseEvent.MouseButtonPress, QPoint(x, y), Qt.RightButton, Qt.RightButton, Qt.NoModifier)
+        v.mousePressEvent(ev)
+
+    def test_right_click_on_curve_shows_menu(self, qtbot):
+        v = self._viewer_with_curve(qtbot)
+        self._right_click(v, 15, 10)  # on the curve
+        v._show_curve_context_menu.assert_called_once()
+
+    def test_right_click_off_curve_pans(self, qtbot):
+        v = self._viewer_with_curve(qtbot)
+        self._right_click(v, 200, 200)  # far from the curve
+        v._show_curve_context_menu.assert_not_called()
+        assert v.pan_mode == MODE["PAN"]
+
+
 class TestCurveHint:
     def test_hint_mentions_enter_and_esc(self, qtbot):
         v = ObjectViewer2D()

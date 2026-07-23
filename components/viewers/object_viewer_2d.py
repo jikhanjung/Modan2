@@ -1027,6 +1027,13 @@ class ObjectViewer2D(QLabel):
                     self.object_dialog.delete_landmark(self.selected_landmark_index)
                     self.selected_landmark_index = -1
                     self.set_mode(MODE["EDIT_LANDMARK"])
+            elif (
+                self.edit_mode == MODE["EDIT_LANDMARK"]
+                and self._curve_at_position([self.mouse_curr_x, self.mouse_curr_y]) is not None
+            ):
+                # Right-click a highlighted curve in landmark mode: offer to delete
+                # it (no curve is selected here, so only "Delete Curve" shows).
+                self._show_curve_context_menu(me.globalPos())
             else:
                 self.pan_mode = MODE["PAN"]
                 self.mouse_down_x = me.x()

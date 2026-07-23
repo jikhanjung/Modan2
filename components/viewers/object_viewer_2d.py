@@ -15,6 +15,7 @@ from PyQt5.QtGui import (
     QBrush,
     QColor,
     QFont,
+    QImage,
     QMouseEvent,
     QPainter,
     QPen,
@@ -58,6 +59,7 @@ from pathlib import Path
 
 import numpy as np
 
+import MdLiveWire
 import MdUtils as mu
 
 logger = logging.getLogger(__name__)
@@ -153,6 +155,15 @@ class ObjectViewer2D(QLabel):
         # Curve currently under the cursor (highlighted like a selection) in
         # landmark or curve mode.
         self.hover_curve_id = None
+        # Live-wire (intelligent scissors) curve auto-detection. When enabled,
+        # tracing snaps to the strongest image edge between clicks. The LiveWire
+        # is built lazily from the current image and rebuilt when it changes;
+        # livewire_preview holds the snapped path from the last point to the
+        # cursor for painting.
+        self.livewire_enabled = False
+        self._livewire = None
+        self._livewire_path = None
+        self.livewire_preview = []
         self.image_canvas_ratio = 1.0
         self.selected_landmark_index = -1
         self.selected_edge_index = -1
@@ -355,6 +366,7 @@ class ObjectViewer2D(QLabel):
             self.selected_curve_id = None
             self.moving_curve_point_index = -1
             self.hover_curve_point_index = -1
+            self.livewire_preview = []
         if self.edit_mode == MODE["EDIT_LANDMARK"]:
             self.setCursor(Qt.CrossCursor)
             self.show_message(self.tr("Click on image to add landmark"))
@@ -373,6 +385,63 @@ class ObjectViewer2D(QLabel):
             self.show_message(self.tr("Click to trace a curve; double-click to finish"))
         else:
             self.setCursor(Qt.ArrowCursor)
+
+    def set_livewire_enabled(self, enabled):
+        """Toggle live-wire snapping for curve tracing.
+
+        Enabling it lazily builds the cost map from the current image the first
+        time a snap is needed. Disabling drops any in-progress preview.
+        """
+        self.livewire_enabled = bool(enabled)
+        if not self.livewire_enabled:
+            self.livewire_preview = []
+        self.repaint()
+
+    def _reset_livewire(self):
+        """Forget the cached cost map (e.g. after the image changes)."""
+        self._livewire = None
+        self._livewire_path = None
+        self.livewire_preview = []
+
+    def _pixmap_to_gray(self, pixmap):
+        """A QPixmap as a 2D uint8 grayscale numpy array (rows=y, cols=x)."""
+        image = pixmap.toImage().convertToFormat(QImage.Format_Grayscale8)
+        w, h = image.width(), image.height()
+        if w == 0 or h == 0:
+            return None
+        ptr = image.constBits()
+        ptr.setsize(image.sizeInBytes())
+        # Rows are padded to a 4-byte boundary; slice off the padding.
+        stride = image.bytesPerLine()
+        buf = np.frombuffer(ptr, dtype=np.uint8).reshape(h, stride)
+        return buf[:, :w].copy()
+
+    def _ensure_livewire(self):
+        """Build the live-wire cost map from orig_pixmap on first use; cache it.
+
+        The cost map lives in orig_pixmap pixel space, which is exactly the
+        coordinate space of the traced curve points (via _2imgx/_2imgy), so no
+        extra transform is needed. Returns the LiveWire or None if unavailable.
+        """
+        if self._livewire is not None:
+            return self._livewire
+        if self.orig_pixmap is None or self.orig_pixmap.isNull():
+            return None
+        gray = self._pixmap_to_gray(self.orig_pixmap)
+        if gray is None:
+            return None
+        self._livewire = MdLiveWire.build_livewire(gray)
+        return self._livewire
+
+    def _livewire_segment(self, start_img, end_img):
+        """Snapped path between two image-space points, endpoints included.
+
+        Falls back to a straight two-point segment when live-wire is unavailable.
+        """
+        wire = self._ensure_livewire()
+        if wire is None:
+            return [list(start_img), list(end_img)]
+        return wire.find_path(start_img, end_img)
 
     def _curve_raw_map(self):
         """The object's raw curve traces (id -> polyline).
@@ -685,6 +754,12 @@ class ObjectViewer2D(QLabel):
                 elif raw is not None:
                     # Hover highlight for the point under the cursor.
                     self.hover_curve_point_index = self._curve_point_within_threshold(curr_pos)
+            elif self.livewire_enabled and self.current_curve_points:
+                # Live preview: snap the last point to the cursor along edges.
+                self.livewire_preview = self._livewire_segment(
+                    self.current_curve_points[-1],
+                    [self._2imgx(self.mouse_curr_x), self._2imgy(self.mouse_curr_y)],
+                )
 
         self.repaint()
         QLabel.mouseMoveEvent(self, event)
@@ -755,13 +830,22 @@ class ObjectViewer2D(QLabel):
                     img_y = self._2imgy(self.mouse_curr_y)
                     if img_x < 0 or img_x > self.orig_pixmap.width() or img_y < 0 or img_y > self.orig_pixmap.height():
                         return
-                    self.current_curve_points.append([img_x, img_y])
+                    if self.livewire_enabled and self.current_curve_points:
+                        # Snap from the last point to the click along the strongest
+                        # edge, appending the intermediate points (skip index 0,
+                        # which repeats the point already in the trace).
+                        segment = self._livewire_segment(self.current_curve_points[-1], [img_x, img_y])
+                        self.current_curve_points.extend(segment[1:])
+                    else:
+                        self.current_curve_points.append([img_x, img_y])
+                    self.livewire_preview = []
 
         elif me.button() == Qt.RightButton:
             if self.edit_mode == MODE["EDIT_CURVE"]:
                 if self.current_curve_points:
                     # Cancel the curve being traced.
                     self.current_curve_points = []
+                    self.livewire_preview = []
                 elif self._curve_at_position([self.mouse_curr_x, self.mouse_curr_y]) is not None:
                     # Near a curve: context menu (delete point / curve).
                     self._show_curve_context_menu(me.globalPos())
@@ -831,6 +915,7 @@ class ObjectViewer2D(QLabel):
         if self.edit_mode == MODE["EDIT_CURVE"] and self.selected_curve_id is None and self.object_dialog is not None:
             points = self.current_curve_points
             self.current_curve_points = []
+            self.livewire_preview = []
             if len(points) >= 2:
                 self.object_dialog.finish_curve(points)
             self.repaint()
@@ -1309,8 +1394,18 @@ class ObjectViewer2D(QLabel):
                 if prev is not None:
                     painter.drawLine(prev[0], prev[1], cx, cy)
                 prev = (cx, cy)
-            # rubber-band segment from the last point to the cursor
-            painter.drawLine(prev[0], prev[1], self.mouse_curr_x, self.mouse_curr_y)
+            if self.livewire_enabled and self.livewire_preview:
+                # Snapped rubber-band: draw the live-wire path to the cursor.
+                pen = QPen(mu.as_qt_color(COLOR["CURVE"]), 2, Qt.DashLine)
+                painter.setPen(pen)
+                pv_prev = prev
+                for pt in self.livewire_preview:
+                    px, py = int(self._2canx(pt[0])), int(self._2cany(pt[1]))
+                    painter.drawLine(pv_prev[0], pv_prev[1], px, py)
+                    pv_prev = (px, py)
+            else:
+                # Straight rubber-band segment from the last point to the cursor.
+                painter.drawLine(prev[0], prev[1], self.mouse_curr_x, self.mouse_curr_y)
 
         if self.object.pixels_per_mm is not None and self.object.pixels_per_mm > 0:
             pixels_per_mm = self.object.pixels_per_mm
@@ -1460,6 +1555,7 @@ class ObjectViewer2D(QLabel):
 
         self.fullpath = file_path
         self.fullres_pixmap = None
+        self._reset_livewire()
         self.curr_pixmap = self.orig_pixmap = QPixmap(file_path)
         if self.curr_pixmap.isNull():
             # QPixmap fails silently on a missing/corrupt/unsupported image,

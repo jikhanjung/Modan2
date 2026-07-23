@@ -382,11 +382,28 @@ class ObjectDialog(QDialog):
         self.btnWireframe.setFixedSize(BUTTON_SIZE, BUTTON_SIZE)
         self.btnCalibration.setFixedSize(BUTTON_SIZE, BUTTON_SIZE)
         self.btnCurve.setFixedSize(BUTTON_SIZE, BUTTON_SIZE)
+        # Live-wire snapping toggle: when on, curve tracing follows the strongest
+        # image edge between clicks (auto-detection) instead of straight
+        # segments. A modifier for curve mode, not a tool, so it stays out of the
+        # exclusive group and can be on or off independently.
+        self.btnCurveSnap = QPushButton(self.tr("Snap"))
+        self.btnCurveSnap.setToolTip(self.tr("Auto-detect: snap the curve to image edges (live-wire)"))
+        self.btnCurveSnap.setFlat(True)
+        self.btnCurveSnap.setStyleSheet(
+            "QPushButton { border: none; background: transparent; }"
+            "QPushButton:hover { background: #e6f3ff; border: 1px solid #3399ff; border-radius: 4px; }"
+            "QPushButton:checked { background: #cce6ff; border: 1px solid #3399ff; border-radius: 4px; }"
+        )
+        self.btnCurveSnap.setCheckable(True)
+        self.btnCurveSnap.setChecked(False)
+        self.btnCurveSnap.clicked.connect(self.btnCurveSnap_clicked)
+        self.btnCurveSnap.setFixedSize(BUTTON_SIZE, BUTTON_SIZE)
         self.btn_layout2 = QGridLayout()
         self.btn_layout2.addWidget(self.btnLandmark, 0, 0)
         self.btn_layout2.addWidget(self.btnWireframe, 0, 1)
         self.btn_layout2.addWidget(self.btnCalibration, 1, 0)
         self.btn_layout2.addWidget(self.btnCurve, 1, 1)
+        self.btn_layout2.addWidget(self.btnCurveSnap, 2, 1)
 
     def _init_option_checkboxes(self):
         """Build the view-option checkboxes (index/wireframe/polygon/estimated/…)
@@ -734,6 +751,15 @@ class ObjectDialog(QDialog):
         self.btnWireframe.setChecked(False)
         self.btnCalibration.setDown(False)
         self.btnCalibration.setChecked(False)
+
+    def btnCurveSnap_clicked(self):
+        # Toggle live-wire edge snapping for curve tracing. Switching it on also
+        # enters curve mode so the effect is immediately usable.
+        enabled = self.btnCurveSnap.isChecked()
+        self.object_view.set_livewire_enabled(enabled)
+        if enabled and self.object_view.edit_mode != MODE["EDIT_CURVE"]:
+            self.btnCurve.setChecked(True)
+            self.btnCurve_clicked()
 
     def btnCalibration_clicked(self):
         # self.edit_mode = MODE_ADD_LANDMARK

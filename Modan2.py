@@ -576,7 +576,18 @@ class ModanMainWindow(QMainWindow):
             self.update_language()
 
         plt.rcParams["font.family"] = "serif"
-        plt.rcParams["font.serif"] = ["Times New Roman"]
+        # Times New Roman first (Latin), then cross-platform CJK fonts so Korean
+        # group/label text falls back per-glyph instead of warning "Glyph ...
+        # missing from font(s) Times New Roman" and rendering as tofu. Matplotlib
+        # (>=3.6) walks this list per character; unavailable names are skipped.
+        plt.rcParams["font.serif"] = [
+            "Times New Roman",
+            "Malgun Gothic",  # Windows Korean
+            "AppleGothic",  # macOS Korean
+            "NanumGothic",  # Linux Korean
+            "DejaVu Serif",
+            "serif",
+        ]
         plt.rcParams["mathtext.fontset"] = "stix"
         plt.rcParams["font.size"] = 12
 

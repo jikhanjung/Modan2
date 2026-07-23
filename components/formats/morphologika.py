@@ -34,6 +34,8 @@ if GLUT_AVAILABLE and glut:
 import os
 import re
 
+from ._encoding import open_text
+
 logger = logging.getLogger(__name__)
 
 
@@ -58,7 +60,7 @@ class Morphologika:
         self.read()
 
     def read(self):
-        with open(self.filename) as f:
+        with open_text(self.filename) as f:
             morphologika_data = f.read()
 
         object_count = -1

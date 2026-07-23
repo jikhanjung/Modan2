@@ -118,14 +118,15 @@ Post-0.1.8 review items, in priority order:
 
 ### Noted while triaging (not acted on)
 
-- [ ] Landmark-file readers in `components/formats/` (`tps.py`, `nts.py`,
+- [x] Landmark-file readers in `components/formats/` (`tps.py`, `nts.py`,
       `x1y1.py`, `morphologika.py`) call `open(self.filename)` with no
       encoding, so they decode with the platform default. On Windows outside a
       UTF-8 locale a file containing non-ASCII specimen names fails to import.
-      Same class of bug as the 0.1.9 startup failure (devlog 234);
-      `MdUtils.read_landmark_file` already handles this and can serve as the
-      model. Needs a decision on the fallback chain, so not folded into the
-      0.1.10 hotfix.
+      **DONE 2026-07-23**: added `components/formats/_encoding.py::open_text`
+      (decode UTF-8 first, then the platform preferred encoding, then latin-1
+      which never fails), swapped into all four readers. Tests in
+      `tests/test_format_encoding.py` (utf-8 / cp949 / arbitrary bytes / BOM,
+      plus TPS round-trip with a non-ASCII specimen name).
 
 - [ ] `ModanController` emits `warning_occurred` (2 sites) and `info_message`
       (7 sites), but `Modan2.py` connects neither, so those messages are
@@ -145,13 +146,12 @@ migration 007), the `build_landmarks_with_curves` core, and step 3 (TPS
 `CURVES=` import) are done and tested. Remaining from that plan: the viewer
 curve-drawing UI (step 2) and the dataset-dialog N input.
 
-- [ ] **1. Auto-detect the curve between anchor points.** In the semi-landmark
-      curve tool, let the user drop just 2-3 anchor points and detect the curve
-      running between them automatically from the image (edge following), or
-      approximate it with a parametric curve (spline/Bezier). The detected curve
-      becomes the raw trace that `resample_polyline` then turns into evenly
-      spaced semi-landmarks, so it slots straight into the existing pipeline —
-      it only replaces the manual point-by-point tracing. 2D first.
+- [x] **1. Auto-detect the curve between anchor points.** **DONE 2026-07-23**
+      (live-wire; devlog 240). "Snap to curve" follows the strongest image edge
+      between clicks (Dijkstra on a gradient cost field + gradient-direction
+      term), with smoothing and anchor-based editing/re-snap. The snapped trace
+      is the raw curve that `resample_polyline` turns into semi-landmarks, so it
+      slots straight into the existing pipeline. 2D only; 3D still open.
 
 - [ ] **2. Assisted landmark suggestion (longer-term).** Given the landmarks
       already placed on other specimens in the dataset, analyze the current

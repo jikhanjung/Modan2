@@ -33,6 +33,8 @@ if GLUT_AVAILABLE and glut:
         GLUT_INITIALIZED = False
 import re
 
+from ._encoding import open_text
+
 logger = logging.getLogger(__name__)
 
 
@@ -62,7 +64,7 @@ class NTS:
             return False
 
     def read(self):
-        with open(self.filename) as f:
+        with open_text(self.filename) as f:
             nts_lines = f.readlines()
 
             dataset = {}

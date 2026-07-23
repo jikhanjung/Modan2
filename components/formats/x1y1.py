@@ -33,6 +33,8 @@ if GLUT_AVAILABLE and glut:
         GLUT_INITIALIZED = False
 import os
 
+from ._encoding import open_text
+
 logger = logging.getLogger(__name__)
 
 
@@ -64,7 +66,7 @@ class X1Y1:
             return False
 
     def read(self):
-        with open(self.filename) as f:
+        with open_text(self.filename) as f:
             lines = f.readlines()
             dataset = {}
             landmark_count = 0

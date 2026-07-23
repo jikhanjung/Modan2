@@ -34,6 +34,8 @@ if GLUT_AVAILABLE and glut:
 import os
 import re
 
+from ._encoding import open_text
+
 logger = logging.getLogger(__name__)
 
 
@@ -68,7 +70,7 @@ class TPS:
             return False
 
     def read(self):
-        with open(self.filename) as f:
+        with open_text(self.filename) as f:
             tps_lines = f.readlines()
             dataset = {}
             object_count = 0

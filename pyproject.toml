@@ -78,3 +78,12 @@ known-third-party = ["PyQt5", "peewee", "numpy", "pandas", "scipy", "matplotlib"
 "test_*.py" = ["N813", "F811"]  # Allow lowercase imports and class redefinitions in tests
 "ModanWidgets.py" = ["N813"]  # Allow "import ModanWidgets as mw"
 "objloader.py" = ["F403", "F405"]  # OpenGL star imports are standard practice
+
+[tool.mypy]
+python_version = "3.12"
+# Third-party stubs are spotty for the scientific/Qt stack; don't fail on them.
+ignore_missing_imports = true
+# Type checking is adopted incrementally: only the modules passed to mypy in CI
+# (see .github/workflows/test.yml `mypy ...`) are gated today — currently the
+# already-clean typed core (MdStatistics.py, MdConstants.py). Expand that list as
+# each further module is brought to zero mypy errors (e.g. MdUtils.py has ~44).

@@ -35,6 +35,15 @@ jobs:
       - name: ruff format --check
         run: ruff format --check .
 
+      - name: Install mypy
+        run: pip install mypy
+
+      # Type checking is incremental: gate only the modules already at zero mypy
+      # errors. Expand this list as more modules are cleaned (config in
+      # pyproject.toml [tool.mypy]).
+      - name: mypy (typed core modules)
+        run: mypy MdStatistics.py MdConstants.py
+
   # ---------------------------------------------------------------------------
   # Tests — cross-platform matrix. All legs are gating: Linux (3.11 + 3.12) and
   # Windows / macOS (3.12). Windows/macOS were introduced as `experimental`

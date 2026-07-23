@@ -161,5 +161,21 @@ UI 설정, trunk 워크플로면 선택사항.)
 - **의존성 스캔(6):** `security.yml`에 pip-audit(push/PR + 주간 cron, 현재 CVE
   0). Dependabot에 `github-actions` 생태계 추가.
 
-### 나머지(3-DTZ, 7-커버리지게이트/타입체크, 8-죽은코드/복잡도, 9-퍼즈, 10-렌더회귀)
-진행 중/예정. [[docs/CODE_QUALITY_GUIDE.md]] Appendix A를 로드맵으로 사용.
+### 항목 7 착수 — 커버리지 게이트 + 타입 체크
+
+- **커버리지 게이트:** 전체 커버리지 측정 **64%** → CI Linux에 `--cov-fail-under=60`
+  (버퍼 4%p, 큰 하락 차단). ratchet — 커버리지 늘면 하한 상향.
+- **타입 체크(mypy, 점진 도입):** `[tool.mypy]`(pyproject) + CI `lint` job에 mypy
+  스텝. **클린 모듈만 게이팅** — MdStatistics.py·MdConstants.py는 mypy 0 에러 확인.
+  MdUtils(~44), 기타는 정리되는 대로 목록 확장. 가이드 §2의 "모듈별, 신규는 strict"
+  패턴.
+
+### 항목 3-DTZ — 의도적 미채택 (측정 후 제외)
+
+DTZ 28건을 검토: 대부분 `datetime.now()`/`fromtimestamp()`가 **파일명·표시용·빌드
+날짜 등 의도된 로컬 시간**. UTC 변환은 사용자에게 보이는 시각을 바꾸는 **회귀**이고,
+28개 noqa는 저가치 churn. 또한 시발점이던 `datetime.UTC`는 import 호환 문제라 DTZ가
+잡지도 못함. → **미채택**이 올바른 판단. (측정→합리적 제외도 하나의 결론.)
+
+### 나머지(8-죽은코드/복잡도, 9-퍼즈, 10-렌더회귀)
+예정. [[docs/CODE_QUALITY_GUIDE.md]] Appendix A를 로드맵으로 사용.

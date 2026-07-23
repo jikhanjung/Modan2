@@ -95,8 +95,14 @@ class ObjectDialog(QDialog):
         # separately-fetched dataset instance).
         self.curve_config = []
         self.curve_raw_map = {}
+        # Sparse click anchors for edge-snapped curves {id: [[x, y], ...]}. Only
+        # present for snap-traced curves; editing an anchor re-snaps to rebuild
+        # the dense curve_raw_map entry. Hand-traced curves have no anchors and
+        # are edited point-by-point directly.
+        self.curve_anchor_map = {}
         self._orig_curve_config = []
         self._orig_curve_raw = {}
+        self._orig_curve_anchor = {}
         # Snapshot of the full savable state (name/sequence/desc/landmarks/
         # variables/curves) taken once the object is loaded, so Cancel can detect
         # any unsaved edit, not just curve edits.
@@ -1019,8 +1025,10 @@ class ObjectDialog(QDialog):
             # dialog's working copies; snapshot them to detect unsaved edits.
             self.curve_config = self.dataset.get_curve_config() if self.dataset is not None else []
             self.curve_raw_map = object.get_curve_raw()
+            self.curve_anchor_map = object.get_curve_anchors()
             self._orig_curve_config = copy.deepcopy(self.curve_config)
             self._orig_curve_raw = copy.deepcopy(self.curve_raw_map)
+            self._orig_curve_anchor = copy.deepcopy(self.curve_anchor_map)
             self.show_curves()
             # Expected-landmark digitizing aid (2D): mirror the flag onto the
             # viewers and recompute for this object (reference excludes it).
@@ -1207,14 +1215,18 @@ class ObjectDialog(QDialog):
         if self.object_view is not None:
             self.object_view.update()
 
-    def finish_curve(self, raw_points):
-        """Store a traced curve as its raw polyline.
+    def finish_curve(self, raw_points, anchors=None):
+        """Store a traced curve as its raw polyline (plus snap anchors, if any).
 
         Merge-at-analysis model: the semi-landmarks are NOT written into the
         landmark list. Only the raw trace is kept on the object; the dataset's
         curve scheme says how many semi-landmarks it resamples to, and display
         and analysis derive them on demand. The trace fills the next un-traced
         curve in the dataset scheme, in order. 2D only (the 2D viewer traces).
+
+        ``anchors`` are the sparse points the user clicked when edge-snapping;
+        stored so the curve can later be edited by its clicks and re-snapped.
+        ``None`` (hand-traced) leaves the raw points themselves editable.
         """
         if raw_points is None or len(raw_points) < 2:
             return
@@ -1249,6 +1261,12 @@ class ObjectDialog(QDialog):
             self.curve_config = mu.build_curve_config(fixed_count, counts)
             target = self.curve_config[-1]
         self.curve_raw_map[target["id"]] = [list(p) for p in raw_points]
+        if anchors and len(anchors) >= 2:
+            self.curve_anchor_map[target["id"]] = [list(p) for p in anchors]
+        else:
+            # Hand-traced (or a re-trace without snap): no sparse anchors, so the
+            # raw points stay the editable points.
+            self.curve_anchor_map.pop(target["id"], None)
         self.curve_trace_changed()
         # The N prompt ran a nested event loop; force an immediate repaint so the
         # new curve shows without waiting for the next event.
@@ -1304,6 +1322,7 @@ class ObjectDialog(QDialog):
         if curve_id not in self.curve_raw_map:
             return
         del self.curve_raw_map[curve_id]
+        self.curve_anchor_map.pop(curve_id, None)
         for view in (self.object_view_2d, self.object_view_3d):
             if view is not None:
                 view.selected_curve_id = None
@@ -1338,15 +1357,20 @@ class ObjectDialog(QDialog):
         self.dataset.save()
         if self.object is not None:
             self.object.set_curve_raw(self.curve_raw_map)
+            self.object.set_curve_anchors(self.curve_anchor_map)
             self.object.save()
         delete_curve_from_dataset(self.dataset, row)
         # Re-sync in-memory copies from the updated database.
         self.curve_config = self.dataset.get_curve_config()
         if self.object is not None:
-            self.object.curve_raw_json = MdObject.get_by_id(self.object.id).curve_raw_json
+            fresh = MdObject.get_by_id(self.object.id)
+            self.object.curve_raw_json = fresh.curve_raw_json
+            self.object.curve_anchor_json = fresh.curve_anchor_json
             self.curve_raw_map = self.object.get_curve_raw()
+            self.curve_anchor_map = self.object.get_curve_anchors()
         self._orig_curve_config = copy.deepcopy(self.curve_config)
         self._orig_curve_raw = copy.deepcopy(self.curve_raw_map)
+        self._orig_curve_anchor = copy.deepcopy(self.curve_anchor_map)
         for view in (self.object_view_2d, self.object_view_3d):
             if view is not None:
                 view.selected_curve_id = None
@@ -1669,9 +1693,11 @@ class ObjectDialog(QDialog):
             self.dataset.save()
         if self.object is not None:
             self.object.set_curve_raw(self.curve_raw_map)
+            self.object.set_curve_anchors(self.curve_anchor_map)
             self.object.save()
         self._orig_curve_config = copy.deepcopy(self.curve_config)
         self._orig_curve_raw = copy.deepcopy(self.curve_raw_map)
+        self._orig_curve_anchor = copy.deepcopy(self.curve_anchor_map)
         self._saved_snapshot = self._snapshot_state()
 
         # Refresh this object's row in the main window's list (landmark count may
@@ -1820,7 +1846,11 @@ class ObjectDialog(QDialog):
         self.accept()
 
     def _has_unsaved_curve_changes(self):
-        return self.curve_config != self._orig_curve_config or self.curve_raw_map != self._orig_curve_raw
+        return (
+            self.curve_config != self._orig_curve_config
+            or self.curve_raw_map != self._orig_curve_raw
+            or self.curve_anchor_map != self._orig_curve_anchor
+        )
 
     def _snapshot_state(self):
         # Everything save_object() would persist, so Cancel can tell whether any
@@ -1833,6 +1863,7 @@ class ObjectDialog(QDialog):
             "variables": [edt.text() for edt in self.edtPropertyList],
             "curve_config": copy.deepcopy(self.curve_config),
             "curve_raw": copy.deepcopy(self.curve_raw_map),
+            "curve_anchor": copy.deepcopy(self.curve_anchor_map),
         }
 
     def _has_unsaved_changes(self):

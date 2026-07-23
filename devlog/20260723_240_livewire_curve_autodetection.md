@@ -98,6 +98,20 @@
   **Enter accept·Esc cancel**, 힌트가 snap 상태에 따라 바뀜.
 - 37개 신규 전부 통과. 기존 뷰어/대화상자/세미랜드마크 스위트 회귀 없음.
 
+### 스냅 곡선 편집 (앵커 저장 + 재스냅)
+스냅 트레이스는 조밀한 경로 전체(수백 점)를 raw로 저장해 선택해도 편집이 불가능했다.
+클릭한 **앵커**를 따로 저장하고, 선택 시 앵커를 편집하며 편집 후 재스냅한다:
+- 모델: `MdObject.curve_anchor_json`(JSON, null 허용) + `get/set_curve_anchors`,
+  `copy_object` 전파, 마이그레이션 009. 스냅 곡선만 앵커를 가지며, 손으로 그린
+  곡선은 raw 점 자체가 편집점이라 앵커 없음.
+- 뷰어: 스냅 클릭 시 `current_curve_anchors`에 클릭 위치 기록 → finish 시
+  `finish_curve(points, anchors)`로 전달. 편집은 `_curve_editpoints()`가 앵커(있으면)
+  /raw(없으면)를 반환해 히트테스트·드래그·삽입·삭제·핸들 렌더가 그것을 대상으로.
+  앵커 편집 후 `_resnap_selected_curve()`가 앵커 사이를 라이브와이어로 다시 이어
+  dense raw를 재생성(이미지 없으면 직선 폴백). 핸들은 조밀 raw가 아니라 앵커에만.
+- 대화상자: `curve_anchor_map` 생명주기(로드/저장/삭제/취소감지), 데이터셋 전역
+  곡선 삭제 시 `delete_curve_from_dataset`가 raw와 함께 앵커도 재번호·리매핑.
+
 ## 남은 것 / 한계
 
 - **곡선 추종 품질은 합성 이미지로만 검증**했다. 실제 표본 사진(질감·조명

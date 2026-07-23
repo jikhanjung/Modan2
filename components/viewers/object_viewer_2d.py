@@ -147,6 +147,10 @@ class ObjectViewer2D(QLabel):
         # Raw points of the curve currently being traced in EDIT_CURVE mode
         # (image coordinates). Committed to semi-landmarks on double-click.
         self.current_curve_points = []
+        # The sparse points actually clicked during an edge-snapped trace (the
+        # dense path lives in current_curve_points). Stored with the finished
+        # curve so it can later be edited by its clicks and re-snapped.
+        self.current_curve_anchors = []
         # When a curve is selected (from the object dialog's curve table) its raw
         # trace points become editable instead of tracing a new curve.
         self.selected_curve_id = None
@@ -370,6 +374,7 @@ class ObjectViewer2D(QLabel):
             self.moving_curve_point_index = -1
             self.hover_curve_point_index = -1
             self.livewire_preview = []
+            self.current_curve_anchors = []
         if self.edit_mode == MODE["EDIT_LANDMARK"]:
             self.setCursor(Qt.CrossCursor)
             self.show_message(self.tr("Click on image to add landmark"))
@@ -385,6 +390,7 @@ class ObjectViewer2D(QLabel):
         elif self.edit_mode == MODE["EDIT_CURVE"]:
             self.setCursor(Qt.CrossCursor)
             self.current_curve_points = []
+            self.current_curve_anchors = []
             self.show_message(self._curve_hint())
         else:
             self.setCursor(Qt.ArrowCursor)
@@ -537,14 +543,51 @@ class ObjectViewer2D(QLabel):
                     pass
         return semis
 
-    def _selected_curve_raw(self):
-        """The mutable raw-point list of the selected curve, or None."""
-        if self.selected_curve_id is None:
-            return None
+    def _curve_anchor_map(self):
+        """The object's snap anchors (id -> clicked points), from the dialog."""
         dlg = getattr(self, "object_dialog", None)
-        if dlg is None:
+        return getattr(dlg, "curve_anchor_map", {}) if dlg is not None else {}
+
+    def _curve_editpoints(self, curve_id):
+        """Points the user manipulates for a curve: the sparse snap anchors if it
+        has any, else its raw trace (whose points are the clicks for hand-traced
+        curves). This is what edit hit-tests, drags, inserts and handles use."""
+        if curve_id is None:
             return None
-        return dlg.curve_raw_map.get(self.selected_curve_id)
+        anchors = self._curve_anchor_map().get(curve_id)
+        if anchors:
+            return anchors
+        return self._curve_raw_map().get(curve_id)
+
+    def _selected_curve_raw(self):
+        """Editable points of the selected curve (anchors if snapped, else raw).
+
+        Kept named ``_selected_curve_raw`` because every editing path (hit-test,
+        drag, insert, delete) manipulates these points; for snap curves they are
+        the anchors, and a re-snap rebuilds the dense trace afterwards.
+        """
+        return self._curve_editpoints(self.selected_curve_id)
+
+    def _resnap_selected_curve(self):
+        """Rebuild the selected snap-curve's dense trace from its edited anchors.
+
+        No-op for a hand-traced curve (no anchors -- its raw points were edited
+        directly). Snaps between consecutive anchors when an image is available,
+        falling back to straight segments otherwise, and writes the result back
+        to the dialog's raw map so resampling and rendering stay in sync.
+        """
+        curve_id = self.selected_curve_id
+        anchors = self._curve_anchor_map().get(curve_id)
+        dlg = getattr(self, "object_dialog", None)
+        if not anchors or dlg is None:
+            return
+        if len(anchors) < 2:
+            dlg.curve_raw_map[curve_id] = [list(p) for p in anchors]
+            return
+        dense = [list(anchors[0])]
+        for a, b in zip(anchors, anchors[1:]):
+            dense.extend(self._livewire_segment(a, b)[1:])
+        dlg.curve_raw_map[curve_id] = dense
 
     def _show_curve_context_menu(self, global_pos):
         """Right-click menu in curve mode: delete a point and/or the curve."""
@@ -566,6 +609,7 @@ class ObjectViewer2D(QLabel):
             raw = self._selected_curve_raw()
             if raw is not None and len(raw) > 2:
                 raw.pop(point_idx)
+                self._resnap_selected_curve()
                 self._notify_curve_edited()
         elif action is del_curve_action:
             if self.object_dialog is not None and hasattr(self.object_dialog, "delete_curve"):
@@ -823,6 +867,10 @@ class ObjectViewer2D(QLabel):
                         raw = self._selected_curve_raw()
                         raw.insert(seg_idx + 1, [self._2imgx(self.mouse_curr_x), self._2imgy(self.mouse_curr_y)])
                         self.moving_curve_point_index = seg_idx + 1
+                        # For a snap curve the inserted point is a new anchor;
+                        # re-snap so the dense trace follows it (drag re-snaps
+                        # again on release).
+                        self._resnap_selected_curve()
                         self.repaint()
                         return
                 # 2) A click near any curve selects it (unless mid-trace).
@@ -841,12 +889,18 @@ class ObjectViewer2D(QLabel):
                     img_y = self._2imgy(self.mouse_curr_y)
                     if img_x < 0 or img_x > self.orig_pixmap.width() or img_y < 0 or img_y > self.orig_pixmap.height():
                         return
-                    if self.livewire_enabled and self.current_curve_points:
+                    if self.livewire_enabled:
                         # Snap from the last point to the click along the strongest
                         # edge, appending the intermediate points (skip index 0,
-                        # which repeats the point already in the trace).
-                        segment = self._livewire_segment(self.current_curve_points[-1], [img_x, img_y])
-                        self.current_curve_points.extend(segment[1:])
+                        # which repeats the point already in the trace). Remember
+                        # the click itself as an anchor so the curve stays
+                        # editable by its clicks.
+                        if self.current_curve_points:
+                            segment = self._livewire_segment(self.current_curve_points[-1], [img_x, img_y])
+                            self.current_curve_points.extend(segment[1:])
+                        else:
+                            self.current_curve_points.append([img_x, img_y])
+                        self.current_curve_anchors.append([img_x, img_y])
                     else:
                         self.current_curve_points.append([img_x, img_y])
                     self.livewire_preview = []
@@ -856,6 +910,7 @@ class ObjectViewer2D(QLabel):
                 if self.current_curve_points:
                     # Cancel the curve being traced.
                     self.current_curve_points = []
+                    self.current_curve_anchors = []
                     self.livewire_preview = []
                 elif self._curve_at_position([self.mouse_curr_x, self.mouse_curr_y]) is not None:
                     # Near a curve: context menu (delete point / curve).
@@ -913,8 +968,10 @@ class ObjectViewer2D(QLabel):
             self.calibration_from_img_x = -1
             self.calibration_from_img_y = -1
         elif self.edit_mode == MODE["EDIT_CURVE"] and self.moving_curve_point_index >= 0:
-            # Finished dragging (or inserting) a curve point.
+            # Finished dragging (or inserting) a curve point. For a snap curve the
+            # dragged point is an anchor, so re-snap the dense trace to it.
             self.moving_curve_point_index = -1
+            self._resnap_selected_curve()
             self._notify_curve_edited()
 
         self.repaint()
@@ -930,10 +987,12 @@ class ObjectViewer2D(QLabel):
         if self.object_dialog is None:
             return False
         points = self.current_curve_points
+        anchors = self.current_curve_anchors
         self.current_curve_points = []
+        self.current_curve_anchors = []
         self.livewire_preview = []
         if len(points) >= 2:
-            self.object_dialog.finish_curve(points)
+            self.object_dialog.finish_curve(points, anchors or None)
         self.repaint()
         return True
 
@@ -942,6 +1001,7 @@ class ObjectViewer2D(QLabel):
         if self.edit_mode != MODE["EDIT_CURVE"] or not self.current_curve_points:
             return False
         self.current_curve_points = []
+        self.current_curve_anchors = []
         self.livewire_preview = []
         self.repaint()
         return True
@@ -1416,7 +1476,12 @@ class ObjectViewer2D(QLabel):
                         if self.show_index:
                             painter.drawText(sx + 6, sy, f"C{num}-{i}")
                 if curve.get("id") in (self.selected_curve_id, self.hover_curve_id):
-                    for j, (cx, cy) in enumerate(canvas_pts):
+                    # Editable handles sit on the manipulated points -- the sparse
+                    # snap anchors, or the raw points for a hand-traced curve --
+                    # not every dense point of a snapped trace.
+                    edit_pts = self._curve_editpoints(curve.get("id")) or raw
+                    handle_pts = [(int(self._2canx(p[0])), int(self._2cany(p[1]))) for p in edit_pts]
+                    for j, (cx, cy) in enumerate(handle_pts):
                         is_selected = curve.get("id") == self.selected_curve_id
                         if is_selected and j in (self.hover_curve_point_index, self.moving_curve_point_index):
                             painter.setPen(QPen(mu.as_qt_color(COLOR["SELECTED_LANDMARK"]), 2))

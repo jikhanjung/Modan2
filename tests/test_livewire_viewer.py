@@ -106,7 +106,8 @@ class TestAcceptCancel:
     def test_enter_accepts_and_finishes(self, qtbot):
         v = self._curve_viewer(qtbot)
         v.keyPressEvent(QKeyEvent(QEvent.KeyPress, Qt.Key_Return, Qt.NoModifier))
-        v.object_dialog.finish_curve.assert_called_once_with([[0, 0], [5, 5], [10, 10]])
+        # No snap anchors were recorded, so anchors is None (hand-traced).
+        v.object_dialog.finish_curve.assert_called_once_with([[0, 0], [5, 5], [10, 10]], None)
         assert v.current_curve_points == []
 
     def test_escape_cancels_without_finishing(self, qtbot):
@@ -130,6 +131,68 @@ class TestAcceptCancel:
         v.current_curve_points = [[0, 0], [5, 5]]
         # Not in curve mode -> the helper reports nothing to accept.
         assert v._accept_current_curve() is False
+
+
+class TestSnapAnchorsEditable:
+    def _snap_viewer(self, qtbot):
+        v = ObjectViewer2D()
+        qtbot.addWidget(v)
+        v.orig_pixmap = _bar_pixmap(w=40, h=40, bar_x=20)
+        v.set_mode(MODE["EDIT_CURVE"])
+        v.livewire_enabled = True
+        v.object_dialog = Mock()
+        v.object_dialog.curve_raw_map = {}
+        v.object_dialog.curve_anchor_map = {}
+        return v
+
+    def test_snap_trace_records_sparse_anchors(self, qtbot):
+        v = self._snap_viewer(qtbot)
+        # Simulate the snap-click bookkeeping directly: seed, then a snapped step.
+        v.current_curve_points = [[21, 5]]
+        v.current_curve_anchors = [[21, 5]]
+        seg = v._livewire_segment([21, 5], [21, 35])
+        v.current_curve_points.extend(seg[1:])
+        v.current_curve_anchors.append([21, 35])
+        # Dense path has many points; anchors keep just the two clicks.
+        assert len(v.current_curve_points) > len(v.current_curve_anchors)
+        assert v.current_curve_anchors == [[21, 5], [21, 35]]
+
+    def test_editpoints_are_anchors_when_present(self, qtbot):
+        v = self._snap_viewer(qtbot)
+        v.object_dialog.curve_raw_map = {"curve1": [[0, 0], [1, 0], [2, 0], [3, 0]]}
+        v.object_dialog.curve_anchor_map = {"curve1": [[0, 0], [3, 0]]}
+        assert v._curve_editpoints("curve1") == [[0, 0], [3, 0]]  # anchors, not dense
+        v.selected_curve_id = "curve1"
+        assert v._selected_curve_raw() == [[0, 0], [3, 0]]
+
+    def test_editpoints_fall_back_to_raw_for_hand_traced(self, qtbot):
+        v = self._snap_viewer(qtbot)
+        v.object_dialog.curve_raw_map = {"curve1": [[0, 0], [5, 5], [9, 9]]}
+        v.object_dialog.curve_anchor_map = {}  # no anchors -> raw is editable
+        assert v._curve_editpoints("curve1") == [[0, 0], [5, 5], [9, 9]]
+
+    def test_editing_an_anchor_resnaps_the_dense_trace(self, qtbot):
+        v = self._snap_viewer(qtbot)
+        v.object_dialog.curve_raw_map = {"curve1": [[21, 5], [21, 35]]}
+        v.object_dialog.curve_anchor_map = {"curve1": [[21, 5], [21, 35]]}
+        v.selected_curve_id = "curve1"
+        # Move the lower anchor, then re-snap: the rebuilt trace runs between the
+        # anchors along the bar and has more points than the two anchors.
+        v.object_dialog.curve_anchor_map["curve1"][1] = [21, 30]
+        v._resnap_selected_curve()
+        dense = v.object_dialog.curve_raw_map["curve1"]
+        assert len(dense) > 2
+        assert dense[0] == [21, 5]
+        assert dense[-1] == [21, 30]
+
+    def test_resnap_noop_for_hand_traced_curve(self, qtbot):
+        v = self._snap_viewer(qtbot)
+        raw = [[0, 0], [5, 5], [9, 9]]
+        v.object_dialog.curve_raw_map = {"curve1": raw}
+        v.object_dialog.curve_anchor_map = {}
+        v.selected_curve_id = "curve1"
+        v._resnap_selected_curve()
+        assert v.object_dialog.curve_raw_map["curve1"] == raw  # untouched
 
 
 class TestCurveHint:

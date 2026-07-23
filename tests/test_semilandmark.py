@@ -254,6 +254,36 @@ class TestObjectCurveRaw:
         assert clone.get_curve_raw() == raw
 
 
+class TestObjectCurveAnchors:
+    def test_round_trip(self, test_database):
+        ds = mm.MdDataset.create(dataset_name="DS", dimension=2)
+        obj = mm.MdObject.create(object_name="O", dataset=ds)
+        anchors = {"curve1": [[0.0, 0.0], [10.0, 5.0], [20.0, 0.0]]}
+        obj.set_curve_anchors(anchors)
+        obj.save()
+        assert mm.MdObject.get_by_id(obj.id).get_curve_anchors() == anchors
+
+    def test_default_empty(self, test_database):
+        ds = mm.MdDataset.create(dataset_name="DS", dimension=2)
+        obj = mm.MdObject.create(object_name="O", dataset=ds)
+        assert obj.get_curve_anchors() == {}
+
+    def test_corrupt_json_yields_empty(self, test_database):
+        ds = mm.MdDataset.create(dataset_name="DS", dimension=2)
+        obj = mm.MdObject.create(object_name="O", dataset=ds)
+        obj.curve_anchor_json = "not json"
+        assert obj.get_curve_anchors() == {}
+
+    def test_copy_object_carries_anchors(self, test_database):
+        ds = mm.MdDataset.create(dataset_name="DS", dimension=2)
+        other = mm.MdDataset.create(dataset_name="DS2", dimension=2)
+        obj = mm.MdObject.create(object_name="O", dataset=ds)
+        anchors = {"curve1": [[0.0, 0.0], [1.0, 1.0]]}
+        obj.set_curve_anchors(anchors)
+        obj.save()
+        assert obj.copy_object(other).get_curve_anchors() == anchors
+
+
 class TestAnalysisCurveConfigSnapshot:
     def test_round_trip(self, test_database):
         ds = mm.MdDataset.create(dataset_name="DS", dimension=2)
@@ -433,8 +463,10 @@ def _build_dialog(qtbot, landmarks=None):
     dlg.landmark_list = landmarks if landmarks is not None else [[1.0, 2.0], [3.0, 4.0]]
     dlg.curve_config = []
     dlg.curve_raw_map = {}
+    dlg.curve_anchor_map = {}
     dlg._orig_curve_config = []
     dlg._orig_curve_raw = {}
+    dlg._orig_curve_anchor = {}
     dlg._populating_landmark_table = False
     dlg.selected_landmark_index = -1
     dlg.object_view_2d = _FakeView()
@@ -602,8 +634,9 @@ from ModanComponents import ObjectViewer2D  # noqa: E402
 
 
 class _RawDlg:
-    def __init__(self, raw_map):
+    def __init__(self, raw_map, anchor_map=None):
         self.curve_raw_map = raw_map
+        self.curve_anchor_map = anchor_map if anchor_map is not None else {}
         self.curve_config = [{"id": cid, "n": 5, "method": "equidistant", "start": 0} for cid in raw_map]
         self.curves_refreshed = 0
 
@@ -1102,3 +1135,26 @@ class TestSemilandmarkEndToEndAnalysis:
         pca = ms.PerformPCA(ds_ops)
         assert pca is not None
         assert pca.nVariable == (self.N_FIXED + self.N_SEMI) * 3
+
+    def test_zero_fixed_landmarks_only_semilandmarks(self, test_database):
+        """A dataset with no fixed landmarks -- only curve semi-landmarks -- still
+        merges, aligns and analyzes (the semi-landmarks are ordinary coords)."""
+        n_semi = 6
+        ds = mm.MdDataset.create(dataset_name="OnlySemi", dimension=2)
+        ds.set_curve_config([{"id": "c1", "n": n_semi, "method": "equidistant", "start": 0, "name": "", "desc": ""}])
+        ds.save()
+        rng = np.random.default_rng(1)
+        raw_base = np.array([[0.0, 0.0], [1.0, 2.0], [2.0, 2.5], [3.0, 2.0], [4.0, 0.0]])
+        for i in range(6):
+            obj = mm.MdObject.create(object_name=f"o{i}", dataset=ds, sequence=i)
+            obj.landmark_str = ""  # no fixed landmarks at all
+            obj.set_curve_raw({"c1": (raw_base + rng.normal(0, 0.05, raw_base.shape)).tolist()})
+            obj.save()
+
+        ds_ops = mm.MdDatasetOps(ds)
+        for ops in ds_ops.object_list:
+            assert len(ops.landmark_list) == n_semi  # purely semi-landmarks
+        assert ds_ops.procrustes_superimposition() is True
+        pca = ms.PerformPCA(ds_ops)
+        assert pca is not None
+        assert pca.nVariable == n_semi * 2

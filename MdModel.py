@@ -482,6 +482,10 @@ class MdObject(Model):
     # Raw digitized curve traces (JSON). See get_curve_raw(). Nullable and
     # optional -- absent for landmark-only or imported objects.
     curve_raw_json = CharField(null=True)
+    # Sparse click anchors for edge-snapped (live-wire) curves (JSON). See
+    # get_curve_anchors(). Present only for snap-traced curves; the dense
+    # curve_raw_json is re-derived by snapping between these on edit.
+    curve_anchor_json = CharField(null=True)
 
     class Meta:
         database = gDatabase
@@ -517,6 +521,28 @@ class MdObject(Model):
         """Store raw digitized curve traces (see :meth:`get_curve_raw`)."""
         self.curve_raw_json = json.dumps(raw) if raw else None
 
+    def get_curve_anchors(self):
+        """Sparse click anchors per snap-traced curve, ``{}`` when unset/unreadable.
+
+        Keyed by curve id -> list of ``[x, y(, z)]`` -- the points the user
+        actually clicked while edge-snapping. The dense trace in
+        ``curve_raw_json`` is the live-wire path between them; editing an anchor
+        re-snaps to rebuild it. Absent for hand-traced or imported curves, whose
+        raw points are themselves the editable points. Never raises.
+        """
+        if not self.curve_anchor_json:
+            return {}
+        try:
+            anchors = json.loads(self.curve_anchor_json)
+        except (ValueError, TypeError) as e:
+            logger.warning("Ignoring unreadable curve anchors for object %s: %s", self.id, e)
+            return {}
+        return anchors if isinstance(anchors, dict) else {}
+
+    def set_curve_anchors(self, anchors):
+        """Store sparse curve click anchors (see :meth:`get_curve_anchors`)."""
+        self.curve_anchor_json = json.dumps(anchors) if anchors else None
+
     def copy_object(self, new_dataset):
         new_object = MdObject()
         new_object.object_name = self.object_name
@@ -526,6 +552,7 @@ class MdObject(Model):
         new_object.dataset = new_dataset
         new_object.property_str = self.property_str
         new_object.curve_raw_json = self.curve_raw_json
+        new_object.curve_anchor_json = self.curve_anchor_json
         # new_object.save()
         return new_object
 
@@ -2615,8 +2642,9 @@ def delete_curve_from_dataset(dataset, curve_index):
 
     Deleting the curve at ``curve_index`` renumbers the remaining curves
     (``curve1``, ``curve2``, ...), recomputes their start indices, and remaps
-    every object's raw traces to the new ids (dropping the deleted one). Persists
-    the dataset and every affected object. No-op for an out-of-range index.
+    every object's raw traces and snap anchors to the new ids (dropping the
+    deleted one). Persists the dataset and every affected object. No-op for an
+    out-of-range index.
     """
     config = dataset.get_curve_config()
     if curve_index < 0 or curve_index >= len(config):
@@ -2633,10 +2661,13 @@ def delete_curve_from_dataset(dataset, curve_index):
     dataset.save()
     for obj in dataset.object_list:
         raw = obj.get_curve_raw()
-        if not raw:
+        anchors = obj.get_curve_anchors()
+        if not raw and not anchors:
             continue
-        new_raw = {id_map[old_id]: pts for old_id, pts in raw.items() if old_id in id_map}
-        obj.set_curve_raw(new_raw)
+        if raw:
+            obj.set_curve_raw({id_map[old]: pts for old, pts in raw.items() if old in id_map})
+        if anchors:
+            obj.set_curve_anchors({id_map[old]: pts for old, pts in anchors.items() if old in id_map})
         obj.save()
 
 

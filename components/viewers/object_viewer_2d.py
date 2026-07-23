@@ -1561,7 +1561,9 @@ class ObjectViewer2D(QLabel):
                     continue
                 canvas_pts = [(int(self._2canx(p[0])), int(self._2cany(p[1]))) for p in raw]
                 if self.show_curve:
-                    painter.setPen(QPen(mu.as_qt_color(COLOR["CURVE"]), 1))
+                    # Draw the selected curve's line thicker so it stands out.
+                    line_width = 3 if curve.get("id") == self.selected_curve_id else 1
+                    painter.setPen(QPen(mu.as_qt_color(COLOR["CURVE"]), line_width))
                     painter.setBrush(Qt.NoBrush)
                     for j in range(len(canvas_pts) - 1):
                         painter.drawLine(*canvas_pts[j], *canvas_pts[j + 1])

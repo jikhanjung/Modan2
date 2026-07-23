@@ -84,6 +84,6 @@ python_version = "3.12"
 # Third-party stubs are spotty for the scientific/Qt stack; don't fail on them.
 ignore_missing_imports = true
 # Type checking is adopted incrementally: only the modules passed to mypy in CI
-# (see .github/workflows/test.yml `mypy ...`) are gated today — currently the
-# already-clean typed core (MdStatistics.py, MdConstants.py). Expand that list as
-# each further module is brought to zero mypy errors (e.g. MdUtils.py has ~44).
+# (see .github/workflows/test.yml `mypy ...`) are gated today — currently
+# MdConstants, MdStatistics, MdHelpers, version. Expand that list as each further
+# module is brought to zero mypy errors (e.g. MdUtils.py / MdModel.py have ~44).

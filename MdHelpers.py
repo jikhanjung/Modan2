@@ -12,7 +12,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from PyQt5.QtCore import QSettings, QStandardPaths, QUrl
+from PyQt5.QtCore import QSettings, QStandardPaths, Qt, QUrl
 from PyQt5.QtGui import QColor, QIcon, QPixmap
 from PyQt5.QtWidgets import QApplication, QFileDialog, QMessageBox
 
@@ -90,6 +90,7 @@ def show_message(parent, title: str, message: str, message_type: str = "info") -
         QMessageBox.critical(parent, title, message)
     elif message_type == "question":
         return QMessageBox.question(parent, title, message, QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+    return None
 
 
 def show_error(parent, message: str):
@@ -222,7 +223,7 @@ def calculate_file_hash(file_path: str, algorithm: str = "md5") -> str:
         return ""
 
 
-def format_file_size(size_bytes: int) -> str:
+def format_file_size(size_bytes: float) -> str:
     """Format file size in human-readable format.
 
     Args:
@@ -509,7 +510,7 @@ def create_icon(icon_path: str, size: int = 32) -> QIcon:
     if Path(icon_path).exists():
         pixmap = QPixmap(icon_path)
         if not pixmap.isNull():
-            icon.addPixmap(pixmap.scaled(size, size, aspectRatioMode=1))
+            icon.addPixmap(pixmap.scaled(size, size, aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio))
 
     return icon
 
@@ -824,7 +825,7 @@ def is_dark_theme() -> bool:
     try:
         app = QApplication.instance()
         if app:
-            palette = app.palette()
+            palette = QApplication.palette()
             bg_color = palette.color(palette.Window)
             return bg_color.lightness() < 128
     except (RuntimeError, AttributeError) as e:
@@ -1210,7 +1211,7 @@ class ProgressReporter:
         self.current_step = 0
         self.logger = logging.getLogger(__name__)
 
-    def update(self, step: int = None, message: str = ""):
+    def update(self, step: int | None = None, message: str = ""):
         """Update progress.
 
         Args:

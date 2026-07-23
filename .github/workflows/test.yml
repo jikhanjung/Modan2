@@ -42,7 +42,7 @@ jobs:
       # errors. Expand this list as more modules are cleaned (config in
       # pyproject.toml [tool.mypy]).
       - name: mypy (typed core modules)
-        run: mypy MdStatistics.py MdConstants.py
+        run: mypy MdConstants.py MdStatistics.py MdHelpers.py version.py
 
       # Complexity REPORT (never fails the build): lists functions above a
       # cyclomatic-complexity of 15 in the log as a refactoring watch-list. Not

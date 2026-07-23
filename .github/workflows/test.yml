@@ -8,146 +8,139 @@ on:
   workflow_call:  # Allow this workflow to be called from other workflows
 
 jobs:
-  test:
+  # ---------------------------------------------------------------------------
+  # Lint / format — gating (runs once, not per-OS). The repo is kept ruff-clean
+  # and ruff-format-clean, so these are hard checks, not advisory.
+  # ---------------------------------------------------------------------------
+  lint:
+    name: Lint (ruff)
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Install ruff
+        run: pip install ruff
+
+      - name: ruff check
+        run: ruff check . --output-format=github
+
+      - name: ruff format --check
+        run: ruff format --check .
+
+  # ---------------------------------------------------------------------------
+  # Tests — cross-platform matrix. Linux (3.11 + 3.12) is gating. Windows/macOS
+  # (3.12) run as `experimental` (continue-on-error) so their results are
+  # visible without blocking merges; flip experimental:false to make them gating
+  # once they are confirmed consistently green.
+  # ---------------------------------------------------------------------------
+  test:
+    name: Test (${{ matrix.os }}, py${{ matrix.python-version }})
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.experimental }}
+    timeout-minutes: 40
 
     strategy:
+      fail-fast: false
       matrix:
-        python-version: [3.11, 3.12]
+        os: [ubuntu-latest]
+        python-version: ['3.11', '3.12']
+        experimental: [false]
+        include:
+          - os: windows-latest
+            python-version: '3.12'
+            experimental: true
+          - os: macos-latest
+            python-version: '3.12'
+            experimental: true
+
+    defaults:
+      run:
+        shell: bash  # so the same scripts run on Windows (Git Bash) too
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v7
+      - name: Checkout code
+        uses: actions/checkout@v7
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v6
-      with:
-        python-version: ${{ matrix.python-version }}
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
 
-    - name: Install system dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          xvfb \
-          libxcb-xinerama0 \
-          libxcb-icccm4 \
-          libxcb-image0 \
-          libxcb-keysyms1 \
-          libxcb-randr0 \
-          libxcb-render-util0 \
-          libxcb-xfixes0 \
-          libxcb-shape0 \
-          libxcb-cursor0 \
-          qt5-qmake \
-          qtbase5-dev \
-          libqt5gui5 \
-          libqt5core5a \
-          libqt5widgets5 \
-          libglut-dev \
-          libglut3.12 \
-          python3-opengl
+      - name: Install Linux system dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            xvfb \
+            libxcb-xinerama0 \
+            libxcb-icccm4 \
+            libxcb-image0 \
+            libxcb-keysyms1 \
+            libxcb-randr0 \
+            libxcb-render-util0 \
+            libxcb-xfixes0 \
+            libxcb-shape0 \
+            libxcb-cursor0 \
+            qt5-qmake \
+            qtbase5-dev \
+            libqt5gui5 \
+            libqt5core5a \
+            libqt5widgets5 \
+            libglut-dev \
+            libglut3.12 \
+            python3-opengl
 
-    - name: Cache pip dependencies
-      uses: actions/cache@v6
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt', 'config/requirements*.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
+      - name: Cache pip dependencies
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt', 'config/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
-    - name: Install Python dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r config/requirements-ci.txt
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r config/requirements-ci.txt
 
-    - name: Lint with ruff (optional)
-      run: |
-        pip install ruff
-        ruff check . --output-format=github || true
-      continue-on-error: true
+      # Fast, cross-platform guard: import every app module. Catches
+      # runtime-version-only symbols and broken native extensions on the OS/
+      # version that unit tests would miss. Gating on all platforms.
+      - name: Smoke test (imports)
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            xvfb-run -a -s "-screen 0 1024x768x24" pytest tests/test_smoke_import.py -v --timeout=60
+          else
+            pytest tests/test_smoke_import.py -v --timeout=60
+          fi
 
-    - name: Run Unit Tests
-      env:
-        QT_QPA_PLATFORM: offscreen
-        QT_DEBUG_PLUGINS: 0
-        COVERAGE_FILE: .coverage.unit
-      run: |
-        echo "=== Running Unit Tests ==="
-        xvfb-run -a -s "-screen 0 1024x768x24" \
-          pytest tests/test_md*.py \
-            --cov=. \
-            --cov-report=term \
-            --tb=short \
-            --timeout=30 \
-            -v || echo "Some unit tests may have failed"
+      - name: Run test suite
+        env:
+          QT_QPA_PLATFORM: offscreen
+          QT_DEBUG_PLUGINS: 0
+        run: |
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            xvfb-run -a -s "-screen 0 1024x768x24" \
+              pytest tests/ --cov=. --cov-report=term --cov-report=xml --tb=short --timeout=60
+          else
+            pytest tests/ --tb=short --timeout=60
+          fi
 
-    - name: Run Dialog Tests
-      env:
-        QT_QPA_PLATFORM: offscreen
-        QT_DEBUG_PLUGINS: 0
-        COVERAGE_FILE: .coverage.dialogs
-      run: |
-        echo "=== Running Dialog UI Tests ==="
-        xvfb-run -a -s "-screen 0 1024x768x24" \
-          pytest tests/dialogs/ \
-            --cov=dialogs \
-            --cov-report=term \
-            --tb=short \
-            --timeout=30 \
-            -v || echo "Some dialog tests may have failed"
-
-    - name: Run Integration Tests
-      env:
-        QT_QPA_PLATFORM: offscreen
-        QT_DEBUG_PLUGINS: 0
-        COVERAGE_FILE: .coverage.integration
-      run: |
-        echo "=== Running Integration Workflow Tests ==="
-        xvfb-run -a -s "-screen 0 1024x768x24" \
-          pytest tests/test_integration_workflows.py \
-            --cov=. \
-            --cov-report=term \
-            --tb=short \
-            --timeout=30 \
-            -v || echo "Some integration tests may have failed"
-
-    - name: Generate Combined Coverage Report
-      run: |
-        echo "=== Generating Combined Coverage Report ==="
-        # Check if any .coverage files exist
-        if ls .coverage* 1> /dev/null 2>&1; then
-          echo "Found coverage data files"
-          coverage combine 2>/dev/null || true
-        else
-          echo "No coverage data files found, skipping combine"
-        fi
-        # Generate reports if coverage data exists
-        if [ -f .coverage ]; then
-          echo "Generating coverage reports..."
-          coverage report --skip-empty || true
-          coverage xml -o coverage.xml || true
-        else
-          echo "No combined coverage data, creating empty coverage.xml"
-          echo '<?xml version="1.0" ?><coverage version="7.0"><packages/></coverage>' > coverage.xml
-        fi
-
-    - name: Test Summary
-      if: always()
-      run: |
-        echo "=== Test Execution Summary ==="
-        echo "✅ Unit tests completed"
-        echo "✅ Dialog tests completed"
-        echo "✅ Integration tests completed"
-        echo ""
-        echo "Check individual test outputs above for details"
-
-    - name: Upload test results
-      uses: actions/upload-artifact@v7
-      if: always()
-      with:
-        name: test-results-${{ matrix.python-version }}
-        path: |
-          coverage.xml
-          .coverage
+      - name: Upload coverage (Linux)
+        if: always() && runner.os == 'Linux'
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-py${{ matrix.python-version }}
+          path: coverage.xml
+          if-no-files-found: ignore

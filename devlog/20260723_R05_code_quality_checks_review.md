@@ -121,7 +121,26 @@ warnings-as-error)은 먼저 위반/실패 건수를 측정**하고 자동수정
 **다음 단계(권장 순서):** DTZ(28, 개별 검토 — 로컬시간 의도 여부) → PIE/RET
 자동수정(단독) → SIM/PERF/A → S 선별 → PTH/G/C901 전용 패스.
 
-### 나머지 항목(1,2,4,5,6~10)
-CI 매트릭스·gating·warnings-as-error·스모크 테스트 등은 워크플로/설정 변경이라
-로컬 검증이 제한적(특히 Windows CI). 사용자와 진행 순서를 조율해 단계적으로.
-[[docs/CODE_QUALITY_GUIDE.md]] Appendix A의 채택 체크리스트를 로드맵으로 사용.
+### 항목 1·2·5 — 크로스플랫폼 CI + gating + 스모크 테스트 (착수)
+
+`.github/workflows/test.yml` 재작성:
+- **스모크 테스트**(항목 5): `tests/test_smoke_import.py` — 앱 전 모듈(28개)을
+  import. `datetime.UTC`/`PyQt5.sip`/`PIL._imaging` 계열을 즉시 CI 실패로.
+  전 플랫폼 gating. 로컬 28건 통과.
+- **크로스플랫폼 매트릭스**(항목 1): `os=[ubuntu(3.11,3.12), windows(3.12),
+  macos(3.12)]`. `shell: bash` 통일, Linux만 apt/xvfb, 그 외는 offscreen.
+  Windows/macOS는 `experimental: true`(continue-on-error)로 **초기엔 결과만
+  노출·비차단** — 안정적으로 green 되면 `experimental:false`로 gating 승격.
+- **gating**(항목 2): `lint` job 분리(ruff check + format --check, 차단).
+  레포 전체 ruff·format clean(159파일) 확인. 테스트 실패 삼킴(`|| echo`) 제거.
+
+release.yml이 이 워크플로를 workflow_call로 호출 — lint/Linux 실패는 릴리스를
+막고, experimental 잡은 non-blocking. YAML 유효성·의존성 확인 완료.
+
+> **사용자 관찰 필요:** push 후 실제 CI에서 Windows/macOS 레그가 드러내는 실패를
+> 보고 조정(경로 구분자·DB 경로·OpenGL 등 예상). 안정화되면 gating 승격.
+
+### 나머지 항목(3-DTZ, 4, 6~10)
+DTZ(28, 케이스별 판단) → warnings-as-error → 커버리지 게이트 → 의존성 스캔 →
+타입체크 → 죽은코드/복잡도 → 퍼즈. [[docs/CODE_QUALITY_GUIDE.md]] Appendix A를
+로드맵으로 사용.

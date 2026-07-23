@@ -1593,7 +1593,9 @@ class ObjectViewer2D(QLabel):
                         else:
                             painter.setPen(QPen(mu.as_qt_color(COLOR["CURVE"]), 2))
                             painter.setBrush(Qt.NoBrush)
-                        painter.drawEllipse(cx - 3, cy - 3, 6, 6)
+                        # Square handles for the anchor/edit points, to set them
+                        # apart from the round semi-landmarks.
+                        painter.drawRect(cx - 3, cy - 3, 6, 6)
 
         # draw the curve currently being traced (EDIT_CURVE mode)
         if self.current_curve_points:

@@ -80,7 +80,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            xvfb \
             libxcb-xinerama0 \
             libxcb-icccm4 \
             libxcb-image0 \
@@ -115,15 +114,15 @@ jobs:
       # Fast, cross-platform guard: import every app module. Catches
       # runtime-version-only symbols and broken native extensions on the OS/
       # version that unit tests would miss. Gating on all platforms.
+      #
+      # We use the Qt offscreen platform (no real display needed) and disable the
+      # pytest-xvfb plugin (-p no:xvfb): with an X server present, importing the
+      # OpenGL viewers connects to it and the connection dies at teardown with a
+      # non-zero "XIO: fatal IO error" exit even though every test passed.
       - name: Smoke test (imports)
         env:
           QT_QPA_PLATFORM: offscreen
-        run: |
-          if [ "$RUNNER_OS" = "Linux" ]; then
-            xvfb-run -a -s "-screen 0 1024x768x24" pytest tests/test_smoke_import.py -v --timeout=60
-          else
-            pytest tests/test_smoke_import.py -v --timeout=60
-          fi
+        run: pytest tests/test_smoke_import.py -p no:xvfb -v --timeout=60
 
       - name: Run test suite
         env:
@@ -131,10 +130,9 @@ jobs:
           QT_DEBUG_PLUGINS: 0
         run: |
           if [ "$RUNNER_OS" = "Linux" ]; then
-            xvfb-run -a -s "-screen 0 1024x768x24" \
-              pytest tests/ --cov=. --cov-report=term --cov-report=xml --tb=short --timeout=60
+            pytest tests/ -p no:xvfb --cov=. --cov-report=term --cov-report=xml --tb=short --timeout=60
           else
-            pytest tests/ --tb=short --timeout=60
+            pytest tests/ -p no:xvfb --tb=short --timeout=60
           fi
 
       - name: Upload coverage (Linux)

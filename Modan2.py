@@ -575,31 +575,12 @@ class ModanMainWindow(QMainWindow):
         if self.init_done:
             self.update_language()
 
-        # Build font.family from the fonts actually registered on THIS machine.
-        # Two reasons it must be an explicit, filtered list of concrete names:
-        #  - matplotlib's per-glyph fallback only walks an explicit font.family
-        #    list; a generic family="serif" (+ font.serif=[...]) does NOT trigger
-        #    it, so Korean glyphs stayed tofu (verified on Windows/matplotlib 3.11).
-        #  - listing a font that isn't installed makes matplotlib log
-        #    "findfont: Font family 'X' not found" on every draw, so we keep only
-        #    names present here.
-        # Times New Roman first keeps Latin in serif; the first available CJK font
-        # then renders Korean group/label text via per-glyph fallback.
-        from matplotlib import font_manager
+        # Latin renders in serif; the first installed CJK font follows so Korean
+        # labels fall back per-glyph instead of drawing tofu. See the helper and
+        # devlog 241 for why this must be an explicit list of installed names.
+        from MdHelpers import resolve_matplotlib_font_family
 
-        available = {f.name for f in font_manager.fontManager.ttflist}
-        serif_pref = ["Times New Roman", "DejaVu Serif"]
-        cjk_pref = [
-            "Malgun Gothic",  # Windows
-            "Apple SD Gothic Neo",  # macOS
-            "AppleGothic",  # macOS (older)
-            "NanumGothic",  # Linux
-            "NanumBarunGothic",
-            "Gulim",
-            "Batang",
-        ]
-        font_family = [f for f in serif_pref if f in available] + [f for f in cjk_pref if f in available]
-        plt.rcParams["font.family"] = font_family or ["serif"]
+        plt.rcParams["font.family"] = resolve_matplotlib_font_family()
         plt.rcParams["mathtext.fontset"] = "stix"
         plt.rcParams["font.size"] = 12
 

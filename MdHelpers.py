@@ -586,6 +586,34 @@ def normalize_path(path: str) -> str:
     return str(Path(path).resolve())
 
 
+def resolve_matplotlib_font_family() -> list[str]:
+    """Return a matplotlib ``font.family`` list built from fonts installed here.
+
+    Latin renders in a serif face; the first available CJK font follows so
+    Korean/CJK labels fall back per-glyph instead of drawing tofu. Only names
+    actually registered with matplotlib are included, so it doesn't log
+    ``findfont: Font family 'X' not found`` on every draw. Must be concrete font
+    names, not a generic family, or matplotlib's per-glyph fallback won't walk
+    the list (see devlog 241). Falls back to the generic ``serif`` if nothing
+    matches.
+    """
+    from matplotlib import font_manager
+
+    available = {f.name for f in font_manager.fontManager.ttflist}
+    serif_pref = ["Times New Roman", "DejaVu Serif"]
+    cjk_pref = [
+        "Malgun Gothic",  # Windows
+        "Apple SD Gothic Neo",  # macOS
+        "AppleGothic",  # macOS (older)
+        "NanumGothic",  # Linux
+        "NanumBarunGothic",
+        "Gulim",
+        "Batang",
+    ]
+    family = [f for f in serif_pref if f in available] + [f for f in cjk_pref if f in available]
+    return family or ["serif"]
+
+
 def get_relative_path(file_path: str, base_path: str) -> str:
     """Get relative path from base path.
 

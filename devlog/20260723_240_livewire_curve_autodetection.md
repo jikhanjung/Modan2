@@ -68,6 +68,19 @@
 - 마우스 이동: 스냅 미리보기 경로 계산 → paintEvent에서 점선으로 렌더.
 - 곡선 확정/취소/모드 이탈/이미지 변경 시 미리보기·캐시 정리.
 
+### accept/cancel UX
+라이브와이어는 대화형이라 별도 감지-후-수락이 아니라 트레이스 완료가 곧 accept다.
+발견성을 위해 키보드·상태바를 보강:
+- **각 클릭** = 스냅 구간 확정(commit), **더블클릭/Enter** = 곡선 전체 accept
+  (`finish_curve`→N→리샘플→append), **우클릭/Esc** = 진행 중 트레이스 취소.
+- 완료/취소 로직을 `_accept_current_curve()`/`_cancel_current_curve()` 헬퍼로
+  뽑아 더블클릭·우클릭과 키 입력이 공유. `keyPressEvent`에서 Enter/Esc 처리.
+- QLabel은 기본 포커스를 안 받으므로 `setFocusPolicy(Qt.ClickFocus)`로 키 입력
+  수신(클릭 시 포커스 획득).
+- 상태바 힌트를 snap 상태에 맞춰: 켜짐 "Snap on: click along the edge;
+  Enter/double-click to accept, Esc/right-click to cancel", 꺼짐도 accept/cancel
+  키를 명시. `set_livewire_enabled` 토글 시 즉시 갱신.
+
 `dialogs/object_dialog.py`:
 - 곡선 툴버튼 옆에 체크형 **"Snap" 토글 버튼**(`btnCurveSnap`) 추가. 모드가
   아니라 곡선 모드의 **modifier**라 배타 그룹 밖. 켜면 곡선 모드로 진입하며
@@ -78,9 +91,10 @@
 - `tests/test_livewire.py` (21) — 비용장(에지가 더 쌈, 범위, 예외), 최소경로
   스냅(채널 스냅·우회·seed 재사용·범위 클램프), 다운스케일 팩토리, **곡선 추종**
   (양 끝점만으로 원호 추종·노이즈 강건·중간점 방향 결정).
-- `tests/test_livewire_viewer.py` (8) — QPixmap→gray, 토글/캐시 리셋, orig_pixmap
-  스냅, 대화상자 Snap 버튼 전달.
-- 29개 신규 전부 통과. 기존 뷰어/대화상자/세미랜드마크 스위트 회귀 없음.
+- `tests/test_livewire_viewer.py` (14) — QPixmap→gray, 토글/캐시 리셋,
+  orig_pixmap 스냅, 대화상자 Snap 버튼 전달, **Enter accept·Esc cancel**, 힌트가
+  snap 상태에 따라 바뀜.
+- 35개 신규 전부 통과. 기존 뷰어/대화상자/세미랜드마크 스위트 회귀 없음.
 
 ## 남은 것 / 한계
 

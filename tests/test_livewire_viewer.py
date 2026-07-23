@@ -8,9 +8,11 @@ image, plus the ObjectDialog "Snap" button forwarding.
 
 import os
 import sys
+from unittest.mock import Mock
 
 import pytest
-from PyQt5.QtGui import QImage, QPixmap, qRgb
+from PyQt5.QtCore import QEvent, Qt
+from PyQt5.QtGui import QImage, QKeyEvent, QPixmap, qRgb
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -90,6 +92,61 @@ class TestLivewireSegment:
         viewer.orig_pixmap = None
         seg = viewer._livewire_segment([1, 2], [3, 4])
         assert seg == [[1, 2], [3, 4]]
+
+
+class TestAcceptCancel:
+    def _curve_viewer(self, qtbot):
+        v = ObjectViewer2D()
+        qtbot.addWidget(v)
+        v.set_mode(MODE["EDIT_CURVE"])
+        v.object_dialog = Mock()
+        v.current_curve_points = [[0, 0], [5, 5], [10, 10]]
+        return v
+
+    def test_enter_accepts_and_finishes(self, qtbot):
+        v = self._curve_viewer(qtbot)
+        v.keyPressEvent(QKeyEvent(QEvent.KeyPress, Qt.Key_Return, Qt.NoModifier))
+        v.object_dialog.finish_curve.assert_called_once_with([[0, 0], [5, 5], [10, 10]])
+        assert v.current_curve_points == []
+
+    def test_escape_cancels_without_finishing(self, qtbot):
+        v = self._curve_viewer(qtbot)
+        v.keyPressEvent(QKeyEvent(QEvent.KeyPress, Qt.Key_Escape, Qt.NoModifier))
+        v.object_dialog.finish_curve.assert_not_called()
+        assert v.current_curve_points == []
+        assert v.livewire_preview == []
+
+    def test_accept_needs_two_points(self, qtbot):
+        v = self._curve_viewer(qtbot)
+        v.current_curve_points = [[0, 0]]  # a single point is not a curve
+        accepted = v._accept_current_curve()
+        assert accepted is True  # the trace is consumed
+        v.object_dialog.finish_curve.assert_not_called()  # but nothing committed
+
+    def test_keys_ignored_outside_curve_mode(self, qtbot):
+        v = self._curve_viewer(qtbot)
+        v.set_mode(MODE["EDIT_LANDMARK"])
+        v.object_dialog = Mock()
+        v.current_curve_points = [[0, 0], [5, 5]]
+        # Not in curve mode -> the helper reports nothing to accept.
+        assert v._accept_current_curve() is False
+
+
+class TestCurveHint:
+    def test_hint_mentions_enter_and_esc(self, qtbot):
+        v = ObjectViewer2D()
+        qtbot.addWidget(v)
+        assert "Enter" in v._curve_hint()
+        assert "Esc" in v._curve_hint()
+
+    def test_hint_changes_with_snap(self, qtbot):
+        v = ObjectViewer2D()
+        qtbot.addWidget(v)
+        plain = v._curve_hint()
+        v.livewire_enabled = True
+        snap = v._curve_hint()
+        assert snap != plain
+        assert "Snap" in snap
 
 
 class TestDialogSnapButton:

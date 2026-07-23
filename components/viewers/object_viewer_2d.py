@@ -178,6 +178,9 @@ class ObjectViewer2D(QLabel):
 
         self.setAcceptDrops(True)
         self.setMouseTracking(True)
+        # Accept keyboard focus on click so curve mode can handle Enter (accept)
+        # and Esc (cancel); QLabel takes no focus by default.
+        self.setFocusPolicy(Qt.ClickFocus)
         self.set_mode(MODE["EDIT_LANDMARK"])
         self.comparison_data = {}
         self.source_preference = None
@@ -382,9 +385,15 @@ class ObjectViewer2D(QLabel):
         elif self.edit_mode == MODE["EDIT_CURVE"]:
             self.setCursor(Qt.CrossCursor)
             self.current_curve_points = []
-            self.show_message(self.tr("Click to trace a curve; double-click to finish"))
+            self.show_message(self._curve_hint())
         else:
             self.setCursor(Qt.ArrowCursor)
+
+    def _curve_hint(self):
+        """Status-bar guidance for curve tracing, tailored to the snap toggle."""
+        if self.livewire_enabled:
+            return self.tr("Snap on: click along the edge; Enter/double-click to accept, Esc/right-click to cancel")
+        return self.tr("Click to trace a curve; Enter/double-click to accept, Esc/right-click to cancel")
 
     def set_livewire_enabled(self, enabled):
         """Toggle live-wire snapping for curve tracing.
@@ -395,6 +404,8 @@ class ObjectViewer2D(QLabel):
         self.livewire_enabled = bool(enabled)
         if not self.livewire_enabled:
             self.livewire_preview = []
+        if self.edit_mode == MODE["EDIT_CURVE"]:
+            self.show_message(self._curve_hint())
         self.repaint()
 
     def _reset_livewire(self):
@@ -909,18 +920,50 @@ class ObjectViewer2D(QLabel):
         self.repaint()
         return super().mouseReleaseEvent(ev)
 
+    def _accept_current_curve(self):
+        """Commit the in-progress trace as semi-landmarks (double-click / Enter).
+
+        Returns True if a trace was accepted, so callers can swallow the event.
+        """
+        if self.edit_mode != MODE["EDIT_CURVE"] or self.selected_curve_id is not None:
+            return False
+        if self.object_dialog is None:
+            return False
+        points = self.current_curve_points
+        self.current_curve_points = []
+        self.livewire_preview = []
+        if len(points) >= 2:
+            self.object_dialog.finish_curve(points)
+        self.repaint()
+        return True
+
+    def _cancel_current_curve(self):
+        """Discard the in-progress trace (right-click / Esc). Returns True if any."""
+        if self.edit_mode != MODE["EDIT_CURVE"] or not self.current_curve_points:
+            return False
+        self.current_curve_points = []
+        self.livewire_preview = []
+        self.repaint()
+        return True
+
     def mouseDoubleClickEvent(self, event):
         # Finish tracing a curve: the double-click's first press already added the
         # end point, so commit the collected points as semi-landmarks.
-        if self.edit_mode == MODE["EDIT_CURVE"] and self.selected_curve_id is None and self.object_dialog is not None:
-            points = self.current_curve_points
-            self.current_curve_points = []
-            self.livewire_preview = []
-            if len(points) >= 2:
-                self.object_dialog.finish_curve(points)
-            self.repaint()
+        if self._accept_current_curve():
             return
         return super().mouseDoubleClickEvent(event)
+
+    def keyPressEvent(self, event):
+        # In curve mode, Enter accepts the current trace and Esc cancels it,
+        # mirroring double-click / right-click for keyboard users.
+        if self.edit_mode == MODE["EDIT_CURVE"] and self.selected_curve_id is None:
+            if event.key() in (Qt.Key_Return, Qt.Key_Enter):
+                if self._accept_current_curve():
+                    return
+            elif event.key() == Qt.Key_Escape:
+                if self._cancel_current_curve():
+                    return
+        return super().keyPressEvent(event)
 
     def wheelEvent(self, event):
         we = QWheelEvent(event)

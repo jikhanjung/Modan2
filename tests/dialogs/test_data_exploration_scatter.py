@@ -272,6 +272,28 @@ def test_find_nearest_data_point_snaps_and_misses(qtbot, mock_database):
     assert dialog._find_nearest_data_point(1000.0, 1000.0) is None
 
 
+def test_prepare_scatter_data_with_no_third_axis(qtbot, mock_database):
+    """A None third axis (fewer PCs than the axis slot) must not crash.
+
+    Regression: comboAxis3 with no current item returns None, and
+    prepare_scatter_data used to do analysis_result_list[idx][None] -> TypeError.
+    It now defaults the missing axis to a flat 0.0 so 2D plots still render.
+    """
+    dialog = _prepared_dialog(qtbot)
+
+    # Force the "no third axis available" state and rebuild.
+    dialog.comboAxis3.setCurrentIndex(-1)
+    assert dialog.comboAxis3.currentData() is None
+    dialog.prepare_scatter_data()  # must not raise
+
+    for key in ("M", "F"):
+        z_vals = dialog.scatter_data[key]["z_val"]
+        assert len(z_vals) == 3
+        assert all(z == 0.0 for z in z_vals)
+    # x/y still come from the real PCA scores.
+    assert any(x != 0.0 for x in dialog.scatter_data["M"]["x_val"])
+
+
 def test_snap_toggle_defaults_on(qtbot, mock_database):
     """The snap-to-points option exists and defaults on (preserves the behavior
     users asked for; can be turned off for free-position previews)."""

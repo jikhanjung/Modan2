@@ -1949,6 +1949,16 @@ class DataExplorationDialog(QDialog):
         flip_axis2 = opts["flip_axis2"]
         flip_axis3 = opts["flip_axis3"]
 
+        def axis_value(idx, axis, flip):
+            # An axis combo returns None when the analysis has fewer components
+            # than that axis slot (e.g. a 3rd axis on a 2-PC result, where
+            # comboAxis3.setCurrentIndex(2) leaves no current item). Treat it as a
+            # flat 0.0 so a 2D plot still renders and a 3D plot degrades gracefully
+            # instead of raising "list indices must be integers ... not NoneType".
+            if axis is None:
+                return 0.0
+            return flip * self.analysis_result_list[idx][axis]
+
         for idx, obj in enumerate(self.object_info_list):
             scatter_key_name = "__default__"
             regression_key_name = "__default__"
@@ -1975,18 +1985,15 @@ class DataExplorationDialog(QDialog):
                 self.scatter_data[scatter_key_name]["x_val"].append(obj["csize"])
                 self.regression_data[regression_key_name]["x_val"].append(obj["csize"])
             else:
-                self.scatter_data[scatter_key_name]["x_val"].append(flip_axis1 * self.analysis_result_list[idx][axis1])
-                self.regression_data[regression_key_name]["x_val"].append(
-                    flip_axis1 * self.analysis_result_list[idx][axis1]
-                )
-            self.scatter_data[scatter_key_name]["y_val"].append(flip_axis2 * self.analysis_result_list[idx][axis2])
-            self.regression_data[regression_key_name]["y_val"].append(
-                flip_axis2 * self.analysis_result_list[idx][axis2]
-            )
-            self.scatter_data[scatter_key_name]["z_val"].append(flip_axis3 * self.analysis_result_list[idx][axis3])
-            self.regression_data[regression_key_name]["z_val"].append(
-                flip_axis3 * self.analysis_result_list[idx][axis3]
-            )
+                x_value = axis_value(idx, axis1, flip_axis1)
+                self.scatter_data[scatter_key_name]["x_val"].append(x_value)
+                self.regression_data[regression_key_name]["x_val"].append(x_value)
+            y_value = axis_value(idx, axis2, flip_axis2)
+            self.scatter_data[scatter_key_name]["y_val"].append(y_value)
+            self.regression_data[regression_key_name]["y_val"].append(y_value)
+            z_value = axis_value(idx, axis3, flip_axis3)
+            self.scatter_data[scatter_key_name]["z_val"].append(z_value)
+            self.regression_data[regression_key_name]["z_val"].append(z_value)
 
             self.scatter_data[scatter_key_name]["data"].append(obj)
             self.regression_data[regression_key_name]["data"].append(obj)

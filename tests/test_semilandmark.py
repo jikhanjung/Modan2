@@ -897,3 +897,208 @@ class TestObjectDialogCurveNameAndDelete:
         assert mm.MdObject.get_by_id(o2.id).get_curve_raw() == {"curve1": [[9, 9]]}
         # Dialog's in-memory copy re-synced.
         assert [c["id"] for c in dlg.curve_config] == ["curve1"]
+
+
+# --------------------------------------------------------------------------- #
+# End-to-end analysis on a semi-landmark dataset
+#
+# The merge-at-analysis model claims that once curves are resampled into the
+# landmark list, semi-landmarks are "just coordinates" and every downstream
+# statistic (Procrustes, PCA, CVA, MANOVA) works unchanged (devlog 237). These
+# tests exercise that whole path on a dataset that only stores fixed landmarks
+# plus raw traces, and pin the central claim by comparing against an equivalent
+# plain-landmark dataset with the resampled points baked in.
+# --------------------------------------------------------------------------- #
+
+import MdStatistics as ms  # noqa: E402
+
+# Three fixed anatomical landmarks and a raw arc traced above them. The raw
+# trace has more points than the semi-landmark count, so resampling is real work.
+_FIXED_2D = [[0.0, 0.0], [4.0, 0.0], [2.0, 3.0]]
+_CURVE_RAW_2D = [[0.0, 4.0], [1.0, 4.8], [2.0, 5.0], [3.0, 4.8], [4.0, 4.0]]
+
+
+def _specimen_shapes(n_per_group=4, dimension=2, seed=7):
+    """Deterministically generate (fixed, raw, group) tuples for each specimen.
+
+    Two groups ("A"/"B"); group B is shifted along y so the groups actually
+    separate (meaningful CVA/MANOVA). Small per-specimen jitter gives PCA real
+    variance instead of a degenerate rank-0 cloud.
+    """
+    rng = np.random.default_rng(seed)
+    fixed_base = np.array(_FIXED_2D)
+    raw_base = np.array(_CURVE_RAW_2D)
+    if dimension == 3:
+        fixed_base = np.hstack([fixed_base, np.zeros((len(fixed_base), 1))])
+        raw_base = np.hstack([raw_base, np.zeros((len(raw_base), 1))])
+
+    specimens = []
+    for g, group in enumerate(("A", "B")):
+        shift = np.zeros(dimension)
+        shift[1] = 1.5 * g
+        for _ in range(n_per_group):
+            fixed = (fixed_base + rng.normal(0.0, 0.05, fixed_base.shape) + shift).tolist()
+            raw = (raw_base + rng.normal(0.0, 0.05, raw_base.shape) + shift).tolist()
+            specimens.append((fixed, raw, group))
+    return specimens
+
+
+def _make_curve_dataset(specimens, n_semi=5, dimension=2, drop_curve_on=None):
+    """Dataset that stores fixed landmarks + a raw curve trace per object.
+
+    ``drop_curve_on`` optionally leaves one object's curve untraced, so the
+    imputation path (a block of missing semi-landmarks) is exercised.
+    """
+    n_fixed = len(_FIXED_2D)
+    ds = mm.MdDataset.create(dataset_name="Curved", dimension=dimension)
+    ds.variablename_list = ["Group"]
+    ds.pack_variablename_str()
+    ds.set_curve_config(
+        [{"id": "c1", "n": n_semi, "method": "equidistant", "start": n_fixed, "name": "outline", "desc": ""}]
+    )
+    ds.save()
+
+    for idx, (fixed, raw, group) in enumerate(specimens):
+        obj = mm.MdObject.create(object_name=f"obj{idx}", dataset=ds, sequence=idx)
+        obj.variable_list = [group]
+        obj.pack_variable()
+        obj.landmark_list = fixed
+        obj.pack_landmark()
+        if drop_curve_on != idx:
+            obj.set_curve_raw({"c1": raw})
+        obj.save()
+
+    ds.get_variablename_list()  # populate ds.variablename_list for MdDatasetOps
+    return ds
+
+
+def _make_plain_dataset(specimens, n_semi=5, dimension=2):
+    """Equivalent dataset with resampled semi-landmarks baked into landmark_str.
+
+    No curve_config, no raw traces -- the resampled points are stored as ordinary
+    landmarks. This is the reference the merge-at-analysis dataset must match.
+    """
+    ds = mm.MdDataset.create(dataset_name="Plain", dimension=dimension)
+    ds.variablename_list = ["Group"]
+    ds.pack_variablename_str()
+    ds.save()
+
+    for idx, (fixed, raw, group) in enumerate(specimens):
+        semi = [list(p) for p in mu.resample_polyline(raw, n_semi)]
+        obj = mm.MdObject.create(object_name=f"obj{idx}", dataset=ds, sequence=idx)
+        obj.variable_list = [group]
+        obj.pack_variable()
+        obj.landmark_list = [list(p) for p in fixed] + semi
+        obj.pack_landmark()
+        obj.save()
+
+    ds.get_variablename_list()
+    return ds
+
+
+class TestSemilandmarkEndToEndAnalysis:
+    N_SEMI = 5
+    N_FIXED = len(_FIXED_2D)
+
+    def test_datasetops_merges_fixed_and_semilandmarks(self, test_database):
+        ds = _make_curve_dataset(_specimen_shapes(), n_semi=self.N_SEMI)
+        ds_ops = mm.MdDatasetOps(ds)
+        expected = self.N_FIXED + self.N_SEMI
+        for obj in ds_ops.object_list:
+            assert len(obj.landmark_list) == expected
+
+    def test_procrustes_aligns_the_merged_shapes(self, test_database):
+        ds = _make_curve_dataset(_specimen_shapes(), n_semi=self.N_SEMI)
+        ds_ops = mm.MdDatasetOps(ds)
+        assert ds_ops.procrustes_superimposition() is True
+        # Every aligned shape (fixed + semi-landmarks) is centred at the origin.
+        for obj in ds_ops.object_list:
+            centroid = obj.get_centroid_coord()
+            assert abs(centroid[0]) < 1e-6
+            assert abs(centroid[1]) < 1e-6
+
+    def test_pca_consumes_the_semilandmark_coordinates(self, test_database):
+        specimens = _specimen_shapes()
+        ds = _make_curve_dataset(specimens, n_semi=self.N_SEMI)
+        ds_ops = mm.MdDatasetOps(ds)
+        assert ds_ops.procrustes_superimposition() is True
+
+        pca = ms.PerformPCA(ds_ops)
+        assert pca is not None
+        n_coords = (self.N_FIXED + self.N_SEMI) * 2
+        assert pca.nVariable == n_coords
+        assert pca.rotated_matrix.shape == (len(specimens), n_coords)
+        # Variance percentages are a proper distribution.
+        assert abs(sum(pca.eigen_value_percentages) - 1.0) < 1e-6
+
+    def test_cva_separates_groups_from_semilandmark_data(self, test_database):
+        specimens = _specimen_shapes()
+        ds = _make_curve_dataset(specimens, n_semi=self.N_SEMI)
+        ds_ops = mm.MdDatasetOps(ds)
+        assert ds_ops.procrustes_superimposition() is True
+
+        cva = ms.PerformCVA(ds_ops, 0)  # classify by "Group"
+        assert cva is not None
+        assert cva.rotated_matrix.shape[0] == len(specimens)
+        # Projected onto CV1 the two groups' means are clearly apart.
+        cv1 = cva.rotated_matrix[:, 0]
+        groups = np.array([g for _, _, g in specimens])
+        sep = abs(cv1[groups == "A"].mean() - cv1[groups == "B"].mean())
+        assert sep > cv1.std()
+
+    def test_manova_runs_on_semilandmark_pca_scores(self, test_database):
+        specimens = _specimen_shapes()
+        ds = _make_curve_dataset(specimens, n_semi=self.N_SEMI)
+        ds_ops = mm.MdDatasetOps(ds)
+        assert ds_ops.procrustes_superimposition() is True
+
+        pca = ms.PerformPCA(ds_ops)
+        scores = pca.rotated_matrix[:, :2].tolist()  # first two PCs
+        manova = ms.PerformManova(ds_ops, scores, 0)
+        assert manova is not None
+        # statsmodels populates a result table keyed by the grouping term; its
+        # multivariate test stats (Wilks' lambda etc.) are present.
+        group_result = manova.results["Group"]
+        assert "stat" in group_result
+
+    def test_matches_equivalent_plain_landmark_dataset(self, test_database):
+        """The core merge-at-analysis claim: a curve dataset and a plain dataset
+        with the resampled points baked in yield identical PCA results."""
+        specimens = _specimen_shapes()
+        curve_ds = _make_curve_dataset(specimens, n_semi=self.N_SEMI)
+        plain_ds = _make_plain_dataset(specimens, n_semi=self.N_SEMI)
+
+        curve_ops = mm.MdDatasetOps(curve_ds)
+        plain_ops = mm.MdDatasetOps(plain_ds)
+        assert curve_ops.procrustes_superimposition() is True
+        assert plain_ops.procrustes_superimposition() is True
+
+        curve_pca = ms.PerformPCA(curve_ops)
+        plain_pca = ms.PerformPCA(plain_ops)
+        assert np.allclose(curve_pca.rotated_matrix, plain_pca.rotated_matrix)
+        assert np.allclose(curve_pca.eigen_value_percentages, plain_pca.eigen_value_percentages)
+
+    def test_untraced_curve_is_imputed_end_to_end(self, test_database):
+        specimens = _specimen_shapes()
+        ds = _make_curve_dataset(specimens, n_semi=self.N_SEMI, drop_curve_on=0)
+        ds_ops = mm.MdDatasetOps(ds)
+
+        # The untraced object still occupies the full fixed+semi layout, with the
+        # semi-landmark block left missing for imputation.
+        expected = self.N_FIXED + self.N_SEMI
+        assert len(ds_ops.object_list[0].landmark_list) == expected
+        assert any(None in lm for lm in ds_ops.object_list[0].landmark_list)
+
+        # procrustes_superimposition() routes missing data through imputation.
+        assert ds_ops.procrustes_superimposition() is True
+        assert ms.PerformPCA(ds_ops) is not None
+
+    def test_3d_semilandmark_dataset_runs_through_pca(self, test_database):
+        specimens = _specimen_shapes(dimension=3)
+        ds = _make_curve_dataset(specimens, n_semi=self.N_SEMI, dimension=3)
+        ds_ops = mm.MdDatasetOps(ds)
+        assert ds_ops.procrustes_superimposition() is True
+
+        pca = ms.PerformPCA(ds_ops)
+        assert pca is not None
+        assert pca.nVariable == (self.N_FIXED + self.N_SEMI) * 3

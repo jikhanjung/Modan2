@@ -449,11 +449,12 @@ class ObjectDialog(QDialog):
         self.cbxShowSemiLandmark.setText(self.tr("Semi-LM"))
         self.cbxShowSemiLandmark.setChecked(True)
         # Snap curve tracing to the strongest image edge (live-wire auto-detect).
-        # Only meaningful while tracing, so it is enabled just in curve mode.
+        # Only meaningful while tracing, so it is enabled just in curve mode. On
+        # by default -- entering curve mode applies this state to the viewer.
         self.cbxSnapToCurve = QCheckBox()
         self.cbxSnapToCurve.setText(self.tr("Snap to curve"))
         self.cbxSnapToCurve.setToolTip(self.tr("Snap curve tracing to image edges (live-wire)"))
-        self.cbxSnapToCurve.setChecked(False)
+        self.cbxSnapToCurve.setChecked(True)
         self.cbxSnapToCurve.setEnabled(False)
         self.cbxSnapToCurve.stateChanged.connect(self.snap_to_curve_state_changed)
         self.btnAddFile = QPushButton()

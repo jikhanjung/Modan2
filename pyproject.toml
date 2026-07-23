@@ -32,6 +32,9 @@ select = [
     "UP",  # pyupgrade
     "B",   # flake8-bugbear
     "C4",  # flake8-comprehensions
+    "LOG", # flake8-logging (logging misuse) — 0 current violations; guards new code
+    # Phased adoption of further groups is planned in devlog R05 (measured
+    # violation counts + handling per group). Add them here as each phase lands.
 ]
 
 # Ignore specific rules

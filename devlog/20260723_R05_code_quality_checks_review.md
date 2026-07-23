@@ -212,3 +212,19 @@ DTZ 28건을 검토: 대부분 `datetime.now()`/`fromtimestamp()`가 **파일명
 매트릭스(3 OS)**. 리포트: **복잡도**. 남은 강화는 필요시 — mypy 모듈 확장, 커버리지
 하한 상향, 복잡도 핫스팟 리팩토링, 파서 퍼즈 확대. 최종 강제는 GitHub Branch
 protection에서 체크 Required 지정(선택).
+
+### mypy 확장 (2026-07-24)
+
+`mypy MdUtils.py`가 44개 에러로 보였으나 **전부 import 그래프의 다른 모듈**(레포
+전역 matplotlib `FigureCanvas` 스텁 · OpenGL `glut` 재정의 패턴)에서 온 것이었고
+**MdUtils 자체는 0 에러**였다. per-module 게이트는 그 모듈 자신만 봐야 하므로
+config에 **`follow_imports = "silent"`**(import는 타입 정보로만 쓰고 그쪽 에러는
+미보고)를 설정. 이러면 대다수 모듈이 자체 클린으로 드러남.
+
+작은 실제 타입 버그만 정리(implicit Optional, 반환 타입 `| None`, main.py
+handlers 리스트 주석, `_import_landmark_file`의 dataset 불변식 assert 등):
+- MdAppSetup(1), main(1), ModanController(5) 수정
+- **mypy 게이트 4개 → 11개 모듈**: MdConstants·MdStatistics·MdHelpers·MdUtils·
+  MdModel·MdAppSetup·MdSplashScreen·ModanController·Modan2·main·version.
+- 남은 미게이팅: dialogs/·components/(레포 전역 FigureCanvas/glut 패턴을 정리하면
+  일괄 편입 가능 — 별도 작업).

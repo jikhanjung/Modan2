@@ -247,7 +247,7 @@ class ModanController(QObject):
 
     # ========== Object Operations ==========
 
-    def create_object(self, object_name: str = None, object_desc: str = "") -> MdModel.MdObject:
+    def create_object(self, object_name: str | None = None, object_desc: str = "") -> MdModel.MdObject | None:
         """Create a new empty object.
 
         Args:
@@ -362,6 +362,9 @@ class ModanController(QObject):
         Returns:
             List of created objects
         """
+        # Invariant: the public caller (import_objects) rejects a missing dataset
+        # before delegating here.
+        assert self.current_dataset is not None
         try:
             # Read landmark data
             landmarks_data = mu.read_landmark_file(file_path)

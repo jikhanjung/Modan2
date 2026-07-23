@@ -83,7 +83,11 @@ known-third-party = ["PyQt5", "peewee", "numpy", "pandas", "scipy", "matplotlib"
 python_version = "3.12"
 # Third-party stubs are spotty for the scientific/Qt stack; don't fail on them.
 ignore_missing_imports = true
-# Type checking is adopted incrementally: only the modules passed to mypy in CI
-# (see .github/workflows/test.yml `mypy ...`) are gated today — currently
-# MdConstants, MdStatistics, MdHelpers, version. Expand that list as each further
-# module is brought to zero mypy errors (e.g. MdUtils.py / MdModel.py have ~44).
+# Per-module incremental adoption: check each gated module on its OWN errors,
+# using imports only for type info (don't report errors in imported modules).
+# Without this, `mypy MdUtils.py` reports the whole import graph's errors (e.g.
+# the repo-wide matplotlib FigureCanvas / OpenGL glut stub patterns), so no
+# module could be gated until the entire tree was clean.
+follow_imports = "silent"
+# The modules passed to mypy in CI (see .github/workflows/test.yml `mypy ...`)
+# are gated. Expand that list as each further module reaches zero own-errors.

@@ -308,7 +308,7 @@ class ApplicationSetup:
 
         return existing_files
 
-    def save_window_state(self, geometry: bytes, state: bytes, splitter_state: bytes = None):
+    def save_window_state(self, geometry: bytes, state: bytes, splitter_state: bytes | None = None):
         """Save window geometry and state."""
         self.config.update(
             {

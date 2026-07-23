@@ -107,7 +107,7 @@ def setup_logging(debug: bool = False):
     # Setup handlers
     try:
         file_handler = logging.FileHandler(log_file_path, encoding="utf-8")
-        handlers = [logging.StreamHandler(sys.stdout), file_handler]
+        handlers: list[logging.Handler] = [logging.StreamHandler(sys.stdout), file_handler]
     except Exception as e:
         print(f"Warning: Could not create file handler: {e}")
         # Fallback to console-only logging if file handler cannot be created

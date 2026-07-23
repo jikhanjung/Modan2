@@ -80,6 +80,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
+            xvfb \
             libxcb-xinerama0 \
             libxcb-icccm4 \
             libxcb-image0 \
@@ -111,14 +112,27 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r config/requirements-ci.txt
 
+      # Provide a display for GLUT. Qt runs offscreen (no display needed), but some
+      # modules call glutInit() at import time, which SEGFAULTS (uncatchable) when
+      # there is no display at all — so `import Modan2` crashed the process on a
+      # headless runner. Run Xvfb detached (not via xvfb-run) and just export
+      # DISPLAY: because we never tear Xvfb down ourselves, the test process closes
+      # its X connection on normal exit and there is no "XIO: fatal IO error"
+      # teardown exit-1 (which xvfb-run's ordering caused). Linux only; on
+      # Windows/macOS GLUT degrades without this.
+      - name: Start virtual display (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          Xvfb :99 -screen 0 1024x768x24 >/tmp/xvfb.log 2>&1 &
+          echo "DISPLAY=:99" >> "$GITHUB_ENV"
+          sleep 2
+
       # Fast, cross-platform guard: import every app module. Catches
       # runtime-version-only symbols and broken native extensions on the OS/
       # version that unit tests would miss. Gating on all platforms.
-      #
-      # We use the Qt offscreen platform (no real display needed) and disable the
-      # pytest-xvfb plugin (-p no:xvfb): with an X server present, importing the
-      # OpenGL viewers connects to it and the connection dies at teardown with a
-      # non-zero "XIO: fatal IO error" exit even though every test passed.
+      # -p no:xvfb disables the pytest-xvfb plugin so it doesn't start/tear down
+      # its own X server (the source of the earlier XIO exit-1); we manage the
+      # display above instead.
       - name: Smoke test (imports)
         env:
           QT_QPA_PLATFORM: offscreen

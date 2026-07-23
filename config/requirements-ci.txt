@@ -21,3 +21,4 @@ coverage[toml]>=7.10.0,<8.0     # Coverage with TOML config support
 
 # Performance Monitoring
 psutil>=7.0.0,<8.0              # System and process utilities for memory testing
+hypothesis>=6.0,<7.0            # Property-based / fuzz testing

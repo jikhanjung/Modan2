@@ -44,6 +44,13 @@ jobs:
       - name: mypy (typed core modules)
         run: mypy MdStatistics.py MdConstants.py
 
+      # Complexity REPORT (never fails the build): lists functions above a
+      # cyclomatic-complexity of 15 in the log as a refactoring watch-list. Not
+      # a gate — mccabe on a GUI codebase has legitimate long paintEvent/
+      # draw handlers; this is signal, not a blocker.
+      - name: Complexity report (C901, non-gating)
+        run: ruff check . --select C901 --config "lint.mccabe.max-complexity=15" --exit-zero
+
   # ---------------------------------------------------------------------------
   # Tests — cross-platform matrix. All legs are gating: Linux (3.11 + 3.12) and
   # Windows / macOS (3.12). Windows/macOS were introduced as `experimental`

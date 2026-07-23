@@ -281,6 +281,8 @@ prefix 검사라 형제 디렉터리(`dest=/tmp/ab`, 멤버 `/tmp/abcd/…`)가 
 
 - **guard_slot 커버리지 확대**: #7 백스톱이 생겼지만, 사용자 조작 슬롯 전반에
   `@guard_slot`을 넓히면 개별 컨텍스트 메시지가 더 친절해짐(구조적, 별도 작업).
+  → 착수: object_dialog(Delete/입력 슬롯 4종)·data_exploration(export_chart) 가드
+  추가([[20260723_241_post_audit_runtime_fixes]]). 나머지 다이얼로그 미완.
 - **#4 잔여**: 봉쇄 위반은 이제 차단되나, atomic 롤백 시 복사된 미디어 orphan 파일
   정리는 import 경로의 `copied_files` cleanup에 의존 — 별도 점검 여지.
 - **죽은 코드(#14) 제거**: bookstein/resistant_fit 변형은 호출자 없음 — 가드 대신

@@ -1493,10 +1493,12 @@ class ObjectDialog(QDialog):
 
         self._update_missing_button_text()
 
+    @guard_slot("Failed to add landmark")
     def btnAddInput_clicked(self):
         """Handle Add button click"""
         self.input_coords_process()
 
+    @guard_slot("Failed to update landmark")
     def btnUpdateInput_clicked(self):
         """Handle Update button click"""
         if self.selected_landmark_index >= 0:
@@ -1530,6 +1532,7 @@ class ObjectDialog(QDialog):
             self.object_view.update_landmark_list()
             self.object_view.calculate_resize()
 
+    @guard_slot("Failed to delete landmark")
     def btnDeleteInput_clicked(self):
         """Handle Delete button click"""
         if self.selected_landmark_index >= 0:
@@ -1758,6 +1761,7 @@ class ObjectDialog(QDialog):
     def set_tableview(self, tableview):
         self.tableView = tableview
 
+    @guard_slot("Failed to delete object")
     def Delete(self):
         ret = QMessageBox.question(
             self, "", self.tr("Are you sure to delete this object?"), QMessageBox.Yes | QMessageBox.No, QMessageBox.No

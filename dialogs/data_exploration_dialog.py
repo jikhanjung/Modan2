@@ -650,6 +650,7 @@ class DataExplorationDialog(QDialog):
             # Restore normal cursor after processing
             QApplication.restoreOverrideCursor()
 
+    @guard_slot("Failed to export chart")
     def export_chart(self):
         dialog = QFileDialog()
         dialog.setFileMode(QFileDialog.AnyFile)

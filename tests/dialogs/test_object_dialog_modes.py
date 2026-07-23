@@ -77,3 +77,23 @@ def test_calibration_cancel_keeps_calibration_mode(qtbot, mock_database):
 
     # Cancel does not force a mode change; calibration stays selected.
     assert _checked_modes(dialog) == ["calibration"]
+
+
+def test_non_numeric_coordinate_update_is_guarded(qtbot, mock_database):
+    """A non-numeric coordinate must not crash the Update slot.
+
+    btnUpdateInput_clicked does float(inputX.text()); "abc" raises ValueError.
+    With @guard_slot the slot logs, shows a (suppressed-in-tests) dialog and
+    returns None instead of letting the exception escape the event loop. The
+    selected landmark is left unchanged (the bad update is not partially applied).
+    """
+    dialog = _dialog(qtbot)
+    dialog.add_landmark("1.0", "2.0")
+    dialog.selected_landmark_index = 0
+    before = list(dialog.landmark_list[0])
+
+    dialog.inputX.setText("abc")  # not a number
+    dialog.inputY.setText("2.0")
+
+    assert dialog.btnUpdateInput_clicked() is None
+    assert list(dialog.landmark_list[0]) == before

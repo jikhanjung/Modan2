@@ -9,6 +9,7 @@ import math
 import os
 import sys
 import tempfile
+from typing import ClassVar
 
 import numpy as np
 import pytest
@@ -843,7 +844,7 @@ class TestExpectedFromLongerSpecimens:
 
 
 class TestDeleteCurve:
-    SCHEME3 = [
+    SCHEME3: ClassVar = [
         {"id": "curve1", "n": 5, "method": "equidistant", "start": 2},
         {"id": "curve2", "n": 8, "method": "equidistant", "start": 7},
         {"id": "curve3", "n": 4, "method": "equidistant", "start": 15},
@@ -926,7 +927,7 @@ class TestDeleteCurveFromDataset:
 
 
 class TestObjectDialogCurveNameAndDelete:
-    SCHEME2 = [
+    SCHEME2: ClassVar = [
         {"id": "curve1", "n": 5, "method": "equidistant", "start": 2, "name": ""},
         {"id": "curve2", "n": 8, "method": "equidistant", "start": 7, "name": ""},
     ]

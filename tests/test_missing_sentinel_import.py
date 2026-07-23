@@ -2,6 +2,7 @@
 
 import os
 import sys
+from typing import ClassVar
 
 import pytest
 
@@ -240,12 +241,12 @@ class TestControllerSerialisation:
         class _ImportData:
             dimension = 2
             nobjects = 1
-            variablename_list = []
-            edge_list = []
-            object_name_list = ["A"]
-            object_comment = {}
-            object_images = {}
-            landmark_data = {"A": [[1.0, 2.0], [None, None], [3.0, None]]}
+            variablename_list: ClassVar = []
+            edge_list: ClassVar = []
+            object_name_list: ClassVar = ["A"]
+            object_comment: ClassVar = {}
+            object_images: ClassVar = {}
+            landmark_data: ClassVar = {"A": [[1.0, 2.0], [None, None], [3.0, None]]}
 
         controller = ModanController()
         dataset = controller.import_dataset(_ImportData(), "ds", str(tmp_path))

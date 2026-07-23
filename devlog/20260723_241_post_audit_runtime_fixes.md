@@ -53,17 +53,33 @@ UserWarning: Glyph 48373 (\N{HANGUL SYLLABLE BOG}) missing from font(s) Times Ne
 `font.family="serif"`, `font.serif=["Times New Roman"]`로 고정한다. Times New
 Roman에는 한글 글리프가 없어 경고 + 두부 렌더링.
 
-### 수정
-serif 리스트에 크로스플랫폼 한글 폰트를 **폴백**으로 덧붙였다:
-`["Times New Roman", "Malgun Gothic"(Win), "AppleGothic"(mac), "NanumGothic"(Linux),
-"DejaVu Serif", "serif"]`. matplotlib(≥3.6)은 리스트를 **글리프별로** 순회하므로
-라틴은 Times New Roman, 한글은 처음 발견되는 한글 폰트로 렌더된다. 없는 폰트명은
-스킵된다. 사용자 Windows에는 Malgun Gothic이 기본 설치돼 해결.
+### 수정 (2단계 — 첫 시도가 Windows에서 안 먹음)
 
-- 주의: OS에 한글 폰트가 있어야 한다. Windows/macOS는 기본 제공, 순수 Linux는
-  `fonts-nanum` 등 설치 필요. (WSL 개발 박스엔 CJK 폰트가 없어 폴백이 리스트
-  끝까지 순회하는 것만 확인 가능했다.)
-- 커밋 `61674d2`.
+**첫 시도(`61674d2`, 부족했음):** `font.family="serif"` + `font.serif=[Times New
+Roman, 한글폰트…]`로 폴백을 걸었으나 **Windows에서 여전히 경고**. 진단 결과
+(matplotlib 3.11, Malgun Gothic 등록·해석 정상) 핵심 원인이 드러났다: **matplotlib
+의 글리프별 폴백은 `font.family`가 구체적 폰트명 리스트일 때만 그 리스트를
+순회한다.** 제네릭 `family="serif"` + `font.serif=[...]` 조합은 폴백을 태우지
+않아 첫 폰트(Times New Roman)에서 멈춘다.
+- 재현: `family="serif"+serif리스트` → 경고 3, `family=["Malgun Gothic"]` → 경고 0,
+  `family=["Times New Roman","Malgun Gothic",…]` → 경고 0 + 라틴은 `times.ttf` 유지.
+
+**확정 수정(`<이 커밋>`):** `font.family`에 **구체적 폰트명 리스트**를 직접 넣는다.
+단, 없는 폰트명을 넣으면 그릴 때마다 `findfont: Font family 'X' not found` 로그가
+쏟아지므로(진단 중 AppleGothic/NanumGothic이 그랬다), **이 머신에 실제 등록된
+폰트만** 골라 구성한다:
+```python
+available = {f.name for f in font_manager.fontManager.ttflist}
+serif_pref = ["Times New Roman", "DejaVu Serif"]
+cjk_pref   = ["Malgun Gothic","Apple SD Gothic Neo","AppleGothic","NanumGothic",…]
+font_family = [f for f in serif_pref if f in available] + [f for f in cjk_pref if f in available]
+plt.rcParams["font.family"] = font_family or ["serif"]
+```
+라틴은 Times New Roman(serif) 유지, 한글은 처음 발견되는 CJK 폰트로 글리프별
+폴백. 없는 폰트는 애초에 리스트에 안 들어가 로그 스팸도 없다.
+
+- 주의: OS에 한글 폰트가 있어야 한다. Windows(Malgun Gothic)·macOS(Apple SD
+  Gothic Neo)는 기본 제공, 순수 Linux는 `fonts-nanum` 등 설치 필요.
 
 ## 3. 환경(설치) 문제 — 코드 아님, 진단만
 

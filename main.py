@@ -10,6 +10,38 @@ import sys
 from pathlib import Path
 
 
+def _install_global_excepthook(logger):
+    """Install a last-resort hook for exceptions not caught by a slot's guard.
+
+    PyQt5 aborts the process when an exception escapes a slot invoked from the
+    event loop. The per-slot ``@guard_slot`` decorator is the primary defense,
+    but its coverage is partial; this hook is a backstop that logs the traceback
+    and shows a non-fatal dialog so an unguarded slot raising does not kill the
+    app with no explanation. ``KeyboardInterrupt`` is left to the default handler.
+    """
+
+    def _hook(exc_type, exc_value, exc_tb):
+        if issubclass(exc_type, KeyboardInterrupt):
+            sys.__excepthook__(exc_type, exc_value, exc_tb)
+            return
+        logger.error("Unhandled exception", exc_info=(exc_type, exc_value, exc_tb))
+        try:
+            from PyQt5.QtWidgets import QApplication, QMessageBox
+
+            if QApplication.instance() is not None:
+                QMessageBox.critical(
+                    None,
+                    "Modan2 - Unexpected Error",
+                    f"An unexpected error occurred:\n\n{exc_value}\n\n"
+                    "The application will try to continue. Details are in the log.",
+                )
+        except Exception:
+            # Never let the error handler itself raise.
+            pass
+
+    sys.excepthook = _hook
+
+
 def parse_arguments():
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
@@ -160,6 +192,10 @@ def main():
         app.setApplicationName("Modan2")
         app.setApplicationVersion(app_version)
         app.setOrganizationName("Modan2 Team")
+
+        # Backstop behind @guard_slot: keep an unguarded slot exception from
+        # aborting the whole process (see _install_global_excepthook).
+        _install_global_excepthook(logger)
 
         # Set application icon
         icon_path = Path(__file__).parent / "icons" / "Modan2.png"

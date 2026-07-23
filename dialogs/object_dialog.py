@@ -1694,11 +1694,20 @@ class ObjectDialog(QDialog):
         if self.dataset.propertyname_str is not None and self.dataset.propertyname_str != "":
             property_str = ",".join([edt.text() for edt in self.edtPropertyList])
 
+        # Validate the sequence field before persisting: it is a nullable integer,
+        # so an empty field is fine (None), but a non-numeric entry gets a clear
+        # message via @guard_slot instead of a raw ValueError crashing the slot.
+        seq_text = self.edtSequence.text().strip()
+        try:
+            sequence = int(seq_text) if seq_text else None
+        except ValueError as e:
+            raise ValueError(f"Sequence must be a whole number (got '{seq_text}').") from e
+
         self.object = self.controller.save_object(
             self.object,
             self.dataset,
             object_name=self.edtObjectName.text(),
-            sequence=int(self.edtSequence.text()),
+            sequence=sequence,
             object_desc=self.edtObjectDesc.toPlainText(),
             landmark_str=self.make_landmark_str(),
             property_str=property_str,
@@ -1782,6 +1791,7 @@ class ObjectDialog(QDialog):
 
         return selected_object_list
 
+    @guard_slot("Failed to save object")
     def Previous(self):
         # get all items from tableView
         model = self.tableView.model()
@@ -1822,6 +1832,7 @@ class ObjectDialog(QDialog):
 
             # self.accept()
 
+    @guard_slot("Failed to save object")
     def Next(self):
         # get all items from tableView
         model = self.tableView.model()
@@ -1860,6 +1871,7 @@ class ObjectDialog(QDialog):
             self.tableView.selectRow(new_proxy_index.row())
             # self.accept()
 
+    @guard_slot("Failed to save object")
     def Okay(self):
         self.save_object()
         self.object_deleted = False

@@ -34,7 +34,9 @@ class OBJ:
         mtl = None
         dirname = os.path.dirname(filename)
 
-        for line in open(filename):
+        with open(filename, encoding="utf-8", errors="replace") as _fh:
+            mtl_lines = _fh.readlines()
+        for line in mtl_lines:
             if line.startswith("#"):
                 continue
             values = line.split()
@@ -74,7 +76,9 @@ class OBJ:
         self.generated = False
         os.path.dirname(filename)
 
-        for line in open(filename):
+        with open(filename, encoding="utf-8", errors="replace") as _fh:
+            obj_lines = _fh.readlines()
+        for line in obj_lines:
             if line.startswith("#"):
                 continue
             values = line.split()

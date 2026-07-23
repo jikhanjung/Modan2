@@ -81,6 +81,10 @@ class Morphologika:
                 raw_data[dsl] = []
                 continue
             else:
+                if dsl == "":
+                    # Data appearing before any [section] header is malformed;
+                    # ignore it rather than raising KeyError on raw_data[""].
+                    continue
                 raw_data[dsl].append(line)
                 if dsl == "individuals":
                     object_count = int(line)
@@ -91,6 +95,12 @@ class Morphologika:
 
         if object_count < 0 or landmark_count < 0:
             return False
+
+        # Required sections must exist before we index them below, otherwise a
+        # file missing [names] or [rawpoints] raises a bare KeyError.
+        missing = [s for s in ("names", "rawpoints") if s not in raw_data]
+        if missing:
+            raise ValueError(f"Malformed Morphologika file: missing required section(s) {missing}: {self.filename}")
 
         self.raw_data = raw_data
         self.nlandmarks = landmark_count

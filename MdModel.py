@@ -1725,6 +1725,8 @@ class MdObjectOps:
         # print "size: ", size
         # print "rescale: ", rescale
         if rescale < 0:
+            if size == 0:
+                raise ValueError("Cannot rescale by baseline: the two baseline landmarks coincide (zero length)")
             self.rescale(1 / size)
         elif rescale > 0:
             self.rescale(1 / rescale)
@@ -1751,6 +1753,8 @@ class MdObjectOps:
         zdiff = self.landmark_list[point1][2] - self.landmark_list[point2][2]
 
         size = math.sqrt(xdiff * xdiff + ydiff * ydiff)
+        if size == 0:
+            raise ValueError("Cannot align baseline: the two baseline landmarks coincide (zero length)")
         cos_val = xdiff / size
         # print "x, y, z diff: ", xdiff, ",", ydiff, ",", zdiff
         # print "cos val: ", cos_val
@@ -2245,8 +2249,9 @@ class MdDatasetOps:
 
     def resistant_fit_superimposition(self):
         if len(self.object_list) == 0:
-            print("No objects to transform!")
-            raise
+            # Was a bare `raise` with no active exception (RuntimeError: No active
+            # exception to reraise); raise a meaningful error instead.
+            raise ValueError("No objects to transform")
 
         for mo in self.object_list:
             mo.move_to_center()
@@ -2328,6 +2333,10 @@ class MdDatasetOps:
                     + (reference_shape.landmark_list[i][1] - reference_shape.landmark_list[j][1]) ** 2
                     + (reference_shape.landmark_list[i][2] - reference_shape.landmark_list[j][2]) ** 2
                 )
+                # Coincident target landmarks give a zero distance; skip that pair
+                # rather than dividing by zero.
+                if target_distance == 0:
+                    continue
                 tau = reference_distance / target_distance
                 inner_tau_array.append(tau)
                 median_index = self.get_median_index(inner_tau_array)

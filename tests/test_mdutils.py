@@ -16,6 +16,27 @@ import MdModel as mm
 import MdUtils as mu
 
 
+class TestPathContainment:
+    """Test the _is_within_directory containment helper (R04 #8 / #4)."""
+
+    def test_inside_directory(self, tmp_path):
+        assert mu._is_within_directory(tmp_path, tmp_path / "a" / "b.txt") is True
+
+    def test_directory_itself(self, tmp_path):
+        assert mu._is_within_directory(tmp_path, tmp_path) is True
+
+    def test_traversal_escapes(self, tmp_path):
+        # A crafted "../../.." must be rejected even though it starts under base.
+        assert mu._is_within_directory(tmp_path, tmp_path / ".." / ".." / "etc" / "passwd") is False
+
+    def test_sibling_sharing_prefix_rejected(self, tmp_path):
+        # Prefix-string comparison would wrongly accept a sibling like <base>_evil.
+        base = tmp_path / "ab"
+        base.mkdir()
+        sibling = tmp_path / "abcd" / "x"
+        assert mu._is_within_directory(base, sibling) is False
+
+
 class TestConstants:
     """Test module constants."""
 
@@ -661,14 +682,24 @@ class TestGetStorageDir:
 class TestErrorPaths:
     """Test error handling paths in various functions."""
 
-    def test_read_landmark_file_unicode_error(self, tmp_path):
-        """Test landmark file unicode decoding error."""
-        # Create file with invalid encoding
-        txt_file = tmp_path / "invalid.txt"
-        txt_file.write_bytes(b"\xff\xfe" + b"LM=3\n" + b"\x80\x81\x82")
+    def test_read_landmark_file_non_utf8_name_is_tolerated(self, tmp_path):
+        """A legacy (non-UTF-8) encoded landmark file is read, not rejected.
 
-        with pytest.raises(ValueError, match="Cannot decode file"):
-            mu.read_landmark_file(str(txt_file))
+        Regression test for R04 #1: read_landmark_file / read_tps_file used strict
+        encoding="utf-8" and raised on a cp949-encoded specimen name; they now go
+        through the tolerant open_text() decoder, so such a file imports instead
+        of failing with "Cannot decode file".
+        """
+        txt_file = tmp_path / "legacy.txt"
+        # Valid TPS body whose specimen name is encoded in cp949 (non-UTF-8).
+        content = "LM=2\n1.0 2.0\n3.0 4.0\nID=한글이름\n"
+        txt_file.write_bytes(content.encode("cp949"))
+
+        specimens = mu.read_landmark_file(str(txt_file))
+
+        assert len(specimens) == 1
+        _name, landmarks = specimens[0]
+        assert len(landmarks) == 2
 
     def test_read_landmark_file_permission_error(self, tmp_path, monkeypatch):
         """Test landmark file permission error."""

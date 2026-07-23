@@ -78,8 +78,14 @@ class X1Y1:
             if self.invertY:
                 y_flip = -1.0
 
+            if not lines:
+                raise ValueError(f"Empty or unreadable X1Y1 file: {self.filename}")
             header = lines[0].strip().split("\t")
             xyz_header_list = header[1:]
+            if len(xyz_header_list) < 3:
+                raise ValueError(
+                    f"Malformed X1Y1 header (need a name column plus at least 3 coordinate columns): {self.filename}"
+                )
             if xyz_header_list[2].lower()[0] == "x":
                 self.dimension = 2
             else:

@@ -228,8 +228,10 @@ def process_3d_file(file_name):
 
     temp_dir = tempfile.mkdtemp()
 
-    # get filename without extension
-    file_name_only = os.path.splitext(file_name)[0]
+    # get filename without extension (basename only — an absolute source path
+    # would otherwise win the os.path.join and drop the converted file next to the
+    # original instead of in temp_dir)
+    file_name_only = os.path.splitext(os.path.basename(file_name))[0]
     # copy to temp dir
     new_file_name = os.path.join(temp_dir, file_name_only + ".obj")
     # print("new_file_name:", new_file_name)
@@ -237,7 +239,11 @@ def process_3d_file(file_name):
     if file_extension == "stl":
         # stl_mesh = mesh.Mesh.from_file(file_name)
         # tri_mesh = trimesh.Trimesh(stl_mesh.vectors, process=False)
-        tri_mesh = trimesh.load_mesh(file_name)
+        try:
+            tri_mesh = trimesh.load_mesh(file_name)
+        except Exception as e:
+            logger.error(f"Failed to load STL mesh from {file_name}: {e}")
+            raise ValueError(f"Cannot load STL file {file_name}: {e}") from e
 
         # if vertices are not 2D array, convert to 2D array
         # actually in that case vertices have faces data.
@@ -365,7 +371,9 @@ def read_landmark_file(file_path):
     elif file_ext == ".txt":
         # Try to detect format
         try:
-            with open(file_path, encoding="utf-8") as f:
+            from components.formats._encoding import open_text
+
+            with open_text(file_path) as f:
                 first_line = f.readline().strip()
                 if first_line.startswith("LM="):
                     return read_tps_file(file_path)
@@ -395,7 +403,9 @@ def read_tps_file(file_path):
     current_name = ""
 
     try:
-        with open(file_path, encoding="utf-8") as f:
+        from components.formats._encoding import open_text
+
+        with open_text(file_path) as f:
             for line in f:
                 line = line.strip()
 
@@ -459,7 +469,9 @@ def read_nts_file(file_path):
     specimens = []
 
     try:
-        with open(file_path, encoding="utf-8") as f:
+        from components.formats._encoding import open_text
+
+        with open_text(file_path) as f:
             lines = f.readlines()
     except (FileNotFoundError, PermissionError) as e:
         logger.error(f"Cannot read NTS file {file_path}: {e}")
@@ -782,14 +794,25 @@ def validate_json_schema(data: dict) -> tuple[bool, list[str]]:
     return (len(errors) == 0), errors
 
 
+def _is_within_directory(base: Path, target: Path) -> bool:
+    """Return True if resolved ``target`` is inside (or equals) resolved ``base``.
+
+    Uses path-component containment rather than a raw string-prefix test, so a
+    sibling directory sharing the prefix (e.g. base ``/tmp/ab`` vs
+    ``/tmp/abcd``) is correctly rejected.
+    """
+    base = base.resolve()
+    target = target.resolve()
+    return target == base or base in target.parents
+
+
 def safe_extract_zip(zip_path: str, dest_dir: str) -> str:
     """Safely extract ZIP to dest_dir, preventing Zip Slip."""
     dest = Path(dest_dir).resolve()
     with zipfile.ZipFile(zip_path, "r") as zf:
         for member in zf.infolist():
             member_path = dest / member.filename
-            resolved = member_path.resolve()
-            if not str(resolved).startswith(str(dest)):
+            if not _is_within_directory(dest, member_path):
                 raise ValueError(f"Unsafe path in ZIP: {member.filename}")
         zf.extractall(dest)
     return str(dest)
@@ -897,7 +920,12 @@ def import_dataset_from_zip(zip_path: str, progress_callback: Callable[[int, int
                     img_meta = files.get("image") if isinstance(files, dict) else None
                     if img_meta and img_meta.get("path"):
                         src = Path(root) / img_meta["path"]
-                        if src.exists():
+                        # The path comes from the (untrusted) dataset.json inside the
+                        # package; reject anything that escapes the extraction root
+                        # so a crafted "../../.." cannot copy an arbitrary host file.
+                        if not _is_within_directory(Path(root), src):
+                            logger.warning(f"Skipping unsafe image path in package: {img_meta['path']!r}")
+                        elif src.exists():
                             new_image = MdImage()
                             new_image.object = mo
                             new_image.load_file_info(str(src))
@@ -911,7 +939,10 @@ def import_dataset_from_zip(zip_path: str, progress_callback: Callable[[int, int
                     mdl_meta = files.get("model") if isinstance(files, dict) else None
                     if mdl_meta and mdl_meta.get("path"):
                         src = Path(root) / mdl_meta["path"]
-                        if src.exists():
+                        # Same containment check as the image path above.
+                        if not _is_within_directory(Path(root), src):
+                            logger.warning(f"Skipping unsafe model path in package: {mdl_meta['path']!r}")
+                        elif src.exists():
                             new_model = MdThreeDModel()
                             new_model.object = mo
                             new_model.load_file_info(str(src))

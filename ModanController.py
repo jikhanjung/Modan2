@@ -571,15 +571,20 @@ class ModanController(QObject):
         if property_str is not None:
             obj.property_str = property_str
 
-        obj.save()
+        # Persist the object row and its media atomically: if attaching the image
+        # or 3D model fails, the object row is rolled back too, so we never leave a
+        # half-written object (row committed without its media). The exception
+        # propagates to the caller's @guard_slot, which surfaces it to the user.
+        with MdModel.gDatabase.atomic():
+            obj.save()
 
-        if image_path is not None:
-            if not obj.has_image():
-                obj.add_image(image_path).save()
-            elif image_changed:
-                obj.update_image(image_path).save()
-        elif model_path is not None and not obj.has_threed_model():
-            obj.add_threed_model(model_path).save()
+            if image_path is not None:
+                if not obj.has_image():
+                    obj.add_image(image_path).save()
+                elif image_changed:
+                    obj.update_image(image_path).save()
+            elif model_path is not None and not obj.has_threed_model():
+                obj.add_threed_model(model_path).save()
 
         return obj
 
@@ -803,6 +808,9 @@ class ModanController(QObject):
             # (the CVA-only / MANOVA-only branches never assign them).
             cva_result = None
             manova_result = None
+            # Track requested-but-failed subordinate analyses so a partial run is
+            # reported to the user instead of being silently logged as success.
+            subordinate_failures = []
 
             # Run comprehensive analysis (PCA includes all three: PCA, CVA, MANOVA)
             if analysis_type.upper() == "PCA":
@@ -830,6 +838,7 @@ class ModanController(QObject):
                         import traceback
 
                         self.logger.warning(f"CVA error traceback: {traceback.format_exc()}")
+                        subordinate_failures.append(f"CVA ({e})")
                 else:
                     self.logger.warning("CVA group_by is None - skipping CVA analysis")
 
@@ -854,6 +863,7 @@ class ModanController(QObject):
                             self.logger.info(f"MANOVA stat_dict keys: {manova_result['stat_dict'].keys()}")
                     except Exception as e:
                         self.logger.warning(f"MANOVA analysis failed: {e}")
+                        subordinate_failures.append(f"MANOVA ({e})")
 
             elif analysis_type.upper() == "CVA":
                 result = self._run_cva(landmarks_data, params)
@@ -878,7 +888,15 @@ class ModanController(QObject):
 
             self.analysis_progress.emit(100)
             self.analysis_completed.emit(analysis)
-            self.info_message.emit(f"{analysis_type} analysis completed successfully")
+            if subordinate_failures:
+                # PCA succeeded but a requested CVA/MANOVA did not — tell the user
+                # rather than reporting an unqualified success.
+                self.warning_occurred.emit(
+                    f"{analysis_type} completed, but the following requested "
+                    f"analyses failed and were not saved: {', '.join(subordinate_failures)}"
+                )
+            else:
+                self.info_message.emit(f"{analysis_type} analysis completed successfully")
 
             return analysis
 

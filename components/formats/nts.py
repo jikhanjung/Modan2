@@ -80,6 +80,10 @@ class NTS:
             column_names_exist = False
             column_names_read = False
             row_names_read = False
+            # Bound here so a header with no separate row-name line still has a
+            # defined list at the `elif len(row_names_list) > 0` branch below
+            # (otherwise that path raises NameError).
+            row_names_list = []
             row_names_exist_at_row_beginning = False
             row_names_exist_at_row_ending = False
             row_names_exist_in_separate_line = False

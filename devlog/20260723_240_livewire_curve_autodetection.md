@@ -82,19 +82,21 @@
   키를 명시. `set_livewire_enabled` 토글 시 즉시 갱신.
 
 `dialogs/object_dialog.py`:
-- 곡선 툴버튼 옆에 체크형 **"Snap" 토글 버튼**(`btnCurveSnap`) 추가. 모드가
-  아니라 곡선 모드의 **modifier**라 배타 그룹 밖. 켜면 곡선 모드로 진입하며
-  뷰어의 `set_livewire_enabled`로 전달.
+- **"Snap to curve" 체크박스**(`cbxSnapToCurve`)를 옵션 체크박스 열에 추가.
+  기본 꺼짐이며 **곡선 모드에서만 활성화**(다른 모드에선 비활성/회색). 곡선 모드
+  진입 시 체크 상태를 뷰어에 적용(`_apply_snap`), 재진입해도 마지막 선택 복원.
+  라이브와이어는 2D 전용이라 `set_livewire_enabled` 유무를 확인 후 전달.
+  (초기엔 툴버튼 형태였다가, 발견성을 위해 제목 있는 체크박스로 교체.)
 
 ## 테스트
 
 - `tests/test_livewire.py` (21) — 비용장(에지가 더 쌈, 범위, 예외), 최소경로
   스냅(채널 스냅·우회·seed 재사용·범위 클램프), 다운스케일 팩토리, **곡선 추종**
   (양 끝점만으로 원호 추종·노이즈 강건·중간점 방향 결정).
-- `tests/test_livewire_viewer.py` (14) — QPixmap→gray, 토글/캐시 리셋,
-  orig_pixmap 스냅, 대화상자 Snap 버튼 전달, **Enter accept·Esc cancel**, 힌트가
-  snap 상태에 따라 바뀜.
-- 35개 신규 전부 통과. 기존 뷰어/대화상자/세미랜드마크 스위트 회귀 없음.
+- `tests/test_livewire_viewer.py` (16) — QPixmap→gray, 토글/캐시 리셋,
+  orig_pixmap 스냅, **Snap 체크박스 전달·곡선 모드에서만 활성·진입 시 상태 적용**,
+  **Enter accept·Esc cancel**, 힌트가 snap 상태에 따라 바뀜.
+- 37개 신규 전부 통과. 기존 뷰어/대화상자/세미랜드마크 스위트 회귀 없음.
 
 ## 남은 것 / 한계
 

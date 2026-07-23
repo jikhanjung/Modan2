@@ -149,24 +149,38 @@ class TestCurveHint:
         assert "Snap" in snap
 
 
-class TestDialogSnapButton:
-    def test_button_forwards_to_viewer(self, qtbot):
-        # Build a minimal dialog stub: the real Snap slot toggling a real viewer.
-        from PyQt5.QtWidgets import QPushButton
+class TestDialogSnapCheckbox:
+    def _dlg(self, qtbot):
+        from PyQt5.QtWidgets import QCheckBox
 
         from dialogs.object_dialog import ObjectDialog
 
         dlg = ObjectDialog.__new__(ObjectDialog)
         dlg.object_view = ObjectViewer2D()
         qtbot.addWidget(dlg.object_view)
-        dlg.object_view.set_mode(MODE["EDIT_CURVE"])  # already in curve mode
-        dlg.btnCurveSnap = QPushButton()
-        dlg.btnCurveSnap.setCheckable(True)
-        dlg.btnCurveSnap.setChecked(True)
+        dlg.cbxSnapToCurve = QCheckBox()
+        qtbot.addWidget(dlg.cbxSnapToCurve)
+        return dlg
 
-        dlg.btnCurveSnap_clicked()
+    def test_checkbox_forwards_to_viewer(self, qtbot):
+        dlg = self._dlg(qtbot)
+        dlg.cbxSnapToCurve.setChecked(True)
+        dlg._apply_snap()
         assert dlg.object_view.livewire_enabled is True
-
-        dlg.btnCurveSnap.setChecked(False)
-        dlg.btnCurveSnap_clicked()
+        dlg.cbxSnapToCurve.setChecked(False)
+        dlg._apply_snap()
         assert dlg.object_view.livewire_enabled is False
+
+    def test_snap_enabled_only_in_curve_mode(self, qtbot):
+        dlg = self._dlg(qtbot)
+        dlg._set_snap_available(True)
+        assert dlg.cbxSnapToCurve.isEnabled() is True
+        dlg._set_snap_available(False)
+        assert dlg.cbxSnapToCurve.isEnabled() is False
+
+    def test_entering_curve_mode_applies_checkbox_state(self, qtbot):
+        dlg = self._dlg(qtbot)
+        dlg.cbxSnapToCurve.setChecked(True)
+        dlg.object_view.livewire_enabled = False
+        dlg._set_snap_available(True)  # entering curve mode
+        assert dlg.object_view.livewire_enabled is True

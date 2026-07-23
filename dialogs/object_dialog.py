@@ -218,6 +218,7 @@ class ObjectDialog(QDialog):
         self.right_middle_layout.addWidget(self.cbxShowModel)
         self.right_middle_layout.addWidget(self.cbxShowCurve)
         self.right_middle_layout.addWidget(self.cbxShowSemiLandmark)
+        self.right_middle_layout.addWidget(self.cbxSnapToCurve)
         self.right_middle_layout.addWidget(self.cbxAutoRotate)
         self.right_middle_layout.addWidget(self.btnAddFile)
         self.right_middle_layout.addWidget(self.cbxUseOriginal)
@@ -382,28 +383,11 @@ class ObjectDialog(QDialog):
         self.btnWireframe.setFixedSize(BUTTON_SIZE, BUTTON_SIZE)
         self.btnCalibration.setFixedSize(BUTTON_SIZE, BUTTON_SIZE)
         self.btnCurve.setFixedSize(BUTTON_SIZE, BUTTON_SIZE)
-        # Live-wire snapping toggle: when on, curve tracing follows the strongest
-        # image edge between clicks (auto-detection) instead of straight
-        # segments. A modifier for curve mode, not a tool, so it stays out of the
-        # exclusive group and can be on or off independently.
-        self.btnCurveSnap = QPushButton(self.tr("Snap"))
-        self.btnCurveSnap.setToolTip(self.tr("Auto-detect: snap the curve to image edges (live-wire)"))
-        self.btnCurveSnap.setFlat(True)
-        self.btnCurveSnap.setStyleSheet(
-            "QPushButton { border: none; background: transparent; }"
-            "QPushButton:hover { background: #e6f3ff; border: 1px solid #3399ff; border-radius: 4px; }"
-            "QPushButton:checked { background: #cce6ff; border: 1px solid #3399ff; border-radius: 4px; }"
-        )
-        self.btnCurveSnap.setCheckable(True)
-        self.btnCurveSnap.setChecked(False)
-        self.btnCurveSnap.clicked.connect(self.btnCurveSnap_clicked)
-        self.btnCurveSnap.setFixedSize(BUTTON_SIZE, BUTTON_SIZE)
         self.btn_layout2 = QGridLayout()
         self.btn_layout2.addWidget(self.btnLandmark, 0, 0)
         self.btn_layout2.addWidget(self.btnWireframe, 0, 1)
         self.btn_layout2.addWidget(self.btnCalibration, 1, 0)
         self.btn_layout2.addWidget(self.btnCurve, 1, 1)
-        self.btn_layout2.addWidget(self.btnCurveSnap, 2, 1)
 
     def _init_option_checkboxes(self):
         """Build the view-option checkboxes (index/wireframe/polygon/estimated/…)
@@ -458,6 +442,14 @@ class ObjectDialog(QDialog):
         self.cbxShowSemiLandmark = QCheckBox()
         self.cbxShowSemiLandmark.setText(self.tr("Semi-LM"))
         self.cbxShowSemiLandmark.setChecked(True)
+        # Snap curve tracing to the strongest image edge (live-wire auto-detect).
+        # Only meaningful while tracing, so it is enabled just in curve mode.
+        self.cbxSnapToCurve = QCheckBox()
+        self.cbxSnapToCurve.setText(self.tr("Snap to curve"))
+        self.cbxSnapToCurve.setToolTip(self.tr("Snap curve tracing to image edges (live-wire)"))
+        self.cbxSnapToCurve.setChecked(False)
+        self.cbxSnapToCurve.setEnabled(False)
+        self.cbxSnapToCurve.stateChanged.connect(self.snap_to_curve_state_changed)
         self.btnAddFile = QPushButton()
         self.btnAddFile.setText(self.tr("Load Image"))
         self.btnAddFile.clicked.connect(self.btnAddFile_clicked)
@@ -723,6 +715,27 @@ class ObjectDialog(QDialog):
         else:
             self.object_view_2d.set_fullres_source(None)
 
+    def _set_snap_available(self, available):
+        """Enable the Snap-to-curve checkbox only in curve mode; apply its state.
+
+        Live-wire snapping is only used while tracing, so the checkbox is greyed
+        out in the other modes. Entering curve mode pushes the checkbox's current
+        state to the viewer so re-entering restores the last choice.
+        """
+        if not hasattr(self, "cbxSnapToCurve"):
+            return
+        self.cbxSnapToCurve.setEnabled(available)
+        if available:
+            self._apply_snap()
+
+    def _apply_snap(self):
+        """Forward the Snap checkbox state to the 2D viewer's live-wire."""
+        if hasattr(self.object_view, "set_livewire_enabled"):
+            self.object_view.set_livewire_enabled(self.cbxSnapToCurve.isChecked())
+
+    def snap_to_curve_state_changed(self, _state):
+        self._apply_snap()
+
     def btnLandmark_clicked(self):
         # self.edit_mode = MODE_ADD_LANDMARK
         # if self.object.image.count() == 0:
@@ -737,6 +750,7 @@ class ObjectDialog(QDialog):
         self.btnCalibration.setChecked(False)
         self.btnCurve.setDown(False)
         self.btnCurve.setChecked(False)
+        self._set_snap_available(False)
 
     def btnCurve_clicked(self):
         # Entering trace mode: no curve selected, so a new curve is drawn.
@@ -751,15 +765,7 @@ class ObjectDialog(QDialog):
         self.btnWireframe.setChecked(False)
         self.btnCalibration.setDown(False)
         self.btnCalibration.setChecked(False)
-
-    def btnCurveSnap_clicked(self):
-        # Toggle live-wire edge snapping for curve tracing. Switching it on also
-        # enters curve mode so the effect is immediately usable.
-        enabled = self.btnCurveSnap.isChecked()
-        self.object_view.set_livewire_enabled(enabled)
-        if enabled and self.object_view.edit_mode != MODE["EDIT_CURVE"]:
-            self.btnCurve.setChecked(True)
-            self.btnCurve_clicked()
+        self._set_snap_available(True)
 
     def btnCalibration_clicked(self):
         # self.edit_mode = MODE_ADD_LANDMARK
@@ -773,6 +779,7 @@ class ObjectDialog(QDialog):
         self.btnWireframe.setChecked(False)
         self.btnCurve.setDown(False)
         self.btnCurve.setChecked(False)
+        self._set_snap_available(False)
 
     def calibrate(self, dist):
         logger = logging.getLogger(__name__)
@@ -800,6 +807,7 @@ class ObjectDialog(QDialog):
         self.btnCalibration.setChecked(False)
         self.btnCurve.setDown(False)
         self.btnCurve.setChecked(False)
+        self._set_snap_available(False)
 
     def set_object_name(self, name):
         # print("set_object_name", self.edtObjectName.text(), name)

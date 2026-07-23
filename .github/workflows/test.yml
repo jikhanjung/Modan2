@@ -143,7 +143,10 @@ jobs:
           QT_DEBUG_PLUGINS: 0
         run: |
           if [ "$RUNNER_OS" = "Linux" ]; then
-            pytest tests/ -p no:xvfb --cov=. --cov-report=term --cov-report=xml --tb=short --timeout=60
+            # --cov-fail-under is a ratchet floor (current overall ~64%); raise it
+            # over time. Coverage is measured on Linux only.
+            pytest tests/ -p no:xvfb --cov=. --cov-report=term --cov-report=xml \
+              --cov-fail-under=60 --tb=short --timeout=60
           else
             pytest tests/ -p no:xvfb --tb=short --timeout=60
           fi

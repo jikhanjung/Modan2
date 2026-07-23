@@ -515,6 +515,7 @@ class TestMathFunctions:
 class TestPathFunctions:
     """Test path manipulation functions."""
 
+    @pytest.mark.skipif(os.name == "nt", reason="Unix absolute-path semantics only on POSIX")
     def test_normalize_path_unix(self):
         """Test path normalization with Unix paths."""
         path = helpers.normalize_path("/path/to/../file.txt")
@@ -788,7 +789,9 @@ class TestMimeDataExtraction:
 
         result = helpers.extract_urls_from_mime(mime_data)
         assert len(result) == 1
-        assert str(test_file) in result
+        # Compare as paths, not strings: QUrl yields forward slashes even on
+        # Windows, where str(test_file) uses backslashes.
+        assert Path(result[0]) == test_file
 
 
 class TestWindowState:

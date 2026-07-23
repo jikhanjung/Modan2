@@ -63,10 +63,15 @@ class TestConstants:
     def test_directory_constants(self):
         """Test that directory constants are properly formed."""
         assert mu.USER_PROFILE_DIRECTORY == os.path.expanduser("~")
-        assert mu.DEFAULT_DB_DIRECTORY.endswith("PaleoBytes/Modan2")
-        assert mu.DEFAULT_STORAGE_DIRECTORY.endswith("PaleoBytes/Modan2/data/")
-        assert mu.DEFAULT_LOG_DIRECTORY.endswith("PaleoBytes/Modan2/logs/")
-        assert mu.DB_BACKUP_DIRECTORY.endswith("PaleoBytes/Modan2/backups/")
+
+        # Normalize separators so the expected tails hold on Windows (backslash) too.
+        def _fwd(p):
+            return p.replace("\\", "/")
+
+        assert _fwd(mu.DEFAULT_DB_DIRECTORY).endswith("PaleoBytes/Modan2")
+        assert _fwd(mu.DEFAULT_STORAGE_DIRECTORY).endswith("PaleoBytes/Modan2/data/")
+        assert _fwd(mu.DEFAULT_LOG_DIRECTORY).endswith("PaleoBytes/Modan2/logs/")
+        assert _fwd(mu.DB_BACKUP_DIRECTORY).endswith("PaleoBytes/Modan2/backups/")
 
     def test_extension_lists(self):
         """Test file extension lists."""

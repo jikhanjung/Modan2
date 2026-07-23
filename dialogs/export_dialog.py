@@ -30,6 +30,30 @@ from MdModel import MdDatasetOps, MdObject
 NEWLINE = "\n"
 
 
+def format_tps(rows, dimension):
+    """Build TPS file text from ``(name, landmarks, curves)`` rows.
+
+    ``landmarks`` are written under ``LM=``; ``curves`` (a list of raw
+    point-lists) under ``CURVES=`` / ``POINTS=`` -- the inverse of the reader's
+    parsing, so a semi-landmark curve dataset round-trips through export/import.
+    An empty ``curves`` writes no CURVES block. Coordinates are truncated to
+    ``dimension`` components.
+    """
+    lines = []
+    for name, landmarks, curves in rows:
+        lines.append(f"LM={len(landmarks)}")
+        for lm in landmarks:
+            lines.append("\t".join(str(c) for c in lm[:dimension]))
+        if curves:
+            lines.append(f"CURVES={len(curves)}")
+            for pts in curves:
+                lines.append(f"POINTS={len(pts)}")
+                for p in pts:
+                    lines.append("\t".join(str(c) for c in p[:dimension]))
+        lines.append(f"ID={name}")
+    return NEWLINE.join(lines) + NEWLINE
+
+
 class ExportDatasetDialog(BaseDialog):
     """Dialog for exporting datasets to various file formats.
 
@@ -306,16 +330,35 @@ class ExportDatasetDialog(BaseDialog):
         filename_candidate = f"{self.ds_ops.dataset_name}_{date_str}.tps"
         filepath = os.path.join(mu.USER_PROFILE_DIRECTORY, filename_candidate)
         filename, _ = QFileDialog.getSaveFileName(self, "Save File As", filepath, "TPS format (*.tps)")
-        if filename:
-            with open(filename, "w", encoding="utf-8") as f:
-                for obj in object_list:
-                    f.write(f"LM={len(obj.landmark_list)}\n")
-                    for lm in obj.landmark_list:
-                        if self.ds_ops.dimension == 2:
-                            f.write("{}\t{}\n".format(*lm))
-                        else:
-                            f.write("{}\t{}\t{}\n".format(*lm))
-                    f.write(f"ID={obj.object_name}\n")
+        if not filename:
+            return
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write(format_tps(self._tps_rows(object_list), self.ds_ops.dimension))
+
+    def _tps_rows(self, object_list):
+        """Assemble (name, landmarks, curves) rows for a TPS export.
+
+        With semi-landmark curves, write the fixed landmarks under LM= and the
+        raw traces as CURVES= so the file round-trips (the merge-at-analysis
+        model stores only fixed landmarks + raw curves; ds_ops merges them). Raw
+        traces are in image space, so curves are written only for a raw export --
+        under Procrustes the aligned merged landmarks are written instead, as
+        before. Without curves, behaviour is unchanged.
+        """
+        curve_config = self.dataset.get_curve_config() if self.dataset is not None else []
+        include_curves = bool(curve_config) and not self.rbProcrustes.isChecked()
+        fixed_count = curve_config[0].get("start", 0) if curve_config else 0
+        rows = []
+        for obj in object_list:
+            if include_curves:
+                landmarks = obj.landmark_list[:fixed_count]
+                raw_map = MdObject.get_by_id(obj.id).get_curve_raw()
+                curves = [raw_map[c["id"]] for c in curve_config if c.get("id") in raw_map]
+            else:
+                landmarks = obj.landmark_list
+                curves = []
+            rows.append((obj.object_name, landmarks, curves))
+        return rows
 
     def _export_morphologika(self, date_str, object_list):
         """Export dataset to Morphologika format.

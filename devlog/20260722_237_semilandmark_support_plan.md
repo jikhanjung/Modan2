@@ -203,8 +203,13 @@ CharField(TEXT, 길이 무제한)로 충분하며 정말 커지면 `MdCurve` 별
 - `tps.py:read()` 에 `CURVES=` 브랜치 추가하여 곡선 설정으로 변환. 익스포트 대칭.
   (임포트된 데이터는 원시점이 없을 수 있음 → `curve_raw_json` 부재 허용.)
 
-**구현 상태(2026-07-22)**: TPS `CURVES=` import 완료 (커밋 b821c24). 익스포트는
-후속.
+**구현 상태(2026-07-22)**: TPS `CURVES=` import 완료 (커밋 b821c24).
+**익스포트 완료(2026-07-23)**: `dialogs/export_dialog.py`에 순수 함수 `format_tps`
+추가, `_export_tps`가 곡선 데이터셋이면 **고정 랜드마크를 LM=, 원시 곡선을
+CURVES=/POINTS=** 로 써서 import와 대칭 왕복. 원시 곡선은 이미지 좌표라 **raw
+export(Procrustes 미적용)에서만** 곡선을 쓰고, Procrustes 시엔 기존처럼 병합·정렬된
+랜드마크를 씀. 테스트 `tests/test_tps_curve_export.py`(format_tps 단위 +
+export→import 왕복 + 데이터셋 기반 `_tps_rows`).
 
 ## 구현 범위에서 제외 (기록 보존)
 

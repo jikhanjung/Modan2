@@ -234,262 +234,144 @@ class AnalysisInfoWidget(QWidget):
         # Set initial button state - enable only for PCA tab
         self.on_tab_changed(0)
 
-    def show_analysis_result(self):
+    def _normalize_manova_result(self, raw):
+        """Coerce stored MANOVA JSON into the shape the table expects.
+
+        Accepts the current ``{'stat_dict': ...}`` wrapper, a bare stat_dict
+        (identified by ``column_names``), or an unknown layout passed through.
+        """
         logger = logging.getLogger(__name__)
-        logger.info(f"show_analysis_result called for: {self.analysis.analysis_name}")
+        if not isinstance(raw, dict):
+            logger.warning(f"MANOVA result is not a dict, type: {type(raw)}")
+            return raw
+        if "stat_dict" in raw:
+            logger.info("MANOVA format: already has stat_dict wrapper")
+            return raw
+        if "column_names" in raw:
+            logger.info("MANOVA format: is a stat_dict, wrapping it")
+            return {"stat_dict": raw}
+        logger.warning("MANOVA format: unknown, using as-is")
+        return raw
 
-        # Handle legacy analysis data - if JSON is missing, show basic info
-        if not self.analysis.object_info_json:
-            logger.warning("No JSON data found - showing basic analysis info")
-            # Show analysis name and details in a simple format
-            self.edtAnalysisName.setText(self.analysis.analysis_name)
-            self.edtSuperimposition.setText(self.analysis.superimposition_method or "Unknown")
-            return
+    def _load_result_json(self):
+        """Parse the analysis' stored JSON blobs.
 
-        # Continue with full analysis display if JSON data exists
-        logger.info("Loading object_info_json")
+        Returns ``(object_info_list, pca_result_list, cva_result_list,
+        manova_result)``; the result lists are None when that analysis was not run.
+        """
+        logger = logging.getLogger(__name__)
         object_info_list = json.loads(self.analysis.object_info_json)
         for obj in object_info_list:
             if "property_list" in obj.keys():
                 obj["variable_list"] = obj["property_list"]
 
-        # Initialize result variables
-        pca_analysis_result_list = None
-        cva_analysis_result_list = None
-        manova_result = None
-
+        pca_result_list = None
         if self.analysis.pca_analysis_result_json:
-            logger.info("Loading pca_analysis_result_json")
-            pca_analysis_result_list = json.loads(self.analysis.pca_analysis_result_json)
-            logger.info(
-                f"PCA result loaded: type={type(pca_analysis_result_list)}, len={len(pca_analysis_result_list) if pca_analysis_result_list else 'None'}"
-            )
+            pca_result_list = json.loads(self.analysis.pca_analysis_result_json)
 
-        logger.info(f"CVA JSON exists: {bool(self.analysis.cva_analysis_result_json)}")
+        cva_result_list = None
         if self.analysis.cva_analysis_result_json:
-            logger.info("Loading cva_analysis_result_json")
-            cva_analysis_result_list = json.loads(self.analysis.cva_analysis_result_json)
-            logger.info(
-                f"CVA result loaded: type={type(cva_analysis_result_list)}, len={len(cva_analysis_result_list) if cva_analysis_result_list else 'None'}"
-            )
+            cva_result_list = json.loads(self.analysis.cva_analysis_result_json)
         else:
             logger.warning("CVA analysis_result_json is empty or None")
 
         manova_result = None
         if self.analysis.manova_analysis_result_json:
-            logger.info("Loading manova_analysis_result_json")
-            logger.info(f"MANOVA JSON length: {len(self.analysis.manova_analysis_result_json)}")
-            logger.info(f"MANOVA JSON preview: {self.analysis.manova_analysis_result_json[:200]}...")
-
             try:
-                manova_result_raw = json.loads(self.analysis.manova_analysis_result_json)
-                logger.info(f"MANOVA result loaded, type: {type(manova_result_raw)}")
-
-                # Check if it's already in the expected format
-                if isinstance(manova_result_raw, dict):
-                    logger.info(f"MANOVA result keys: {manova_result_raw.keys()}")
-                    if "stat_dict" in manova_result_raw:
-                        # Already has stat_dict wrapper
-                        manova_result = manova_result_raw
-                        logger.info("MANOVA format: Already has stat_dict wrapper")
-                    elif "column_names" in manova_result_raw:
-                        # This IS the stat_dict, wrap it
-                        manova_result = {"stat_dict": manova_result_raw}
-                        logger.info("MANOVA format: Is stat_dict, wrapping it")
-                    else:
-                        # Unknown format, try to use as-is
-                        manova_result = manova_result_raw
-                        logger.warning("MANOVA format: Unknown, using as-is")
-                else:
-                    manova_result = manova_result_raw
-                    logger.warning(f"MANOVA result is not a dict, type: {type(manova_result_raw)}")
+                manova_result = self._normalize_manova_result(json.loads(self.analysis.manova_analysis_result_json))
             except Exception as e:
                 logger.error(f"Failed to parse MANOVA JSON: {e}")
-                manova_result = None
         else:
             logger.warning("No MANOVA analysis_result_json")
 
-        # Handle MANOVA results
+        return object_info_list, pca_result_list, cva_result_list, manova_result
+
+    def _fill_manova_stat_dict(self, stat_dict):
+        """Fill the table from the current stat_dict layout (one row per statistic)."""
+        logger = logging.getLogger(__name__)
+        for stat_name, stat_values in stat_dict.items():
+            if stat_name == "column_names":
+                continue
+            row = self.tabManovaResult.rowCount()
+            self.tabManovaResult.insertRow(row)
+            self.tabManovaResult.setItem(row, 0, QTableWidgetItem(stat_name))
+            if isinstance(stat_values, list) and len(stat_values) >= 5:
+                self.tabManovaResult.setItem(row, 1, QTableWidgetItem(f"{stat_values[0]:.6e}"))
+                self.tabManovaResult.setItem(row, 2, QTableWidgetItem(str(int(stat_values[1]))))
+                self.tabManovaResult.setItem(row, 3, QTableWidgetItem(str(int(stat_values[2]))))
+                self.tabManovaResult.setItem(row, 4, QTableWidgetItem(f"{stat_values[3]:.3f}"))
+                self.tabManovaResult.setItem(row, 5, QTableWidgetItem(f"{stat_values[4]:.3f}"))
+            else:
+                logger.warning(f"Invalid stat values for {stat_name}: {stat_values}")
+
+    def _fill_manova_statistics(self, statistics):
+        """Fill the table from the older per-statistic dict layout."""
+        for stat_name, stat_data in statistics.items():
+            row = self.tabManovaResult.rowCount()
+            self.tabManovaResult.insertRow(row)
+            self.tabManovaResult.setItem(row, 0, QTableWidgetItem(stat_name))
+            if isinstance(stat_data, dict):
+                for col, key in enumerate(("value", "num_df", "den_df", "f_statistic", "p_value"), start=1):
+                    self.tabManovaResult.setItem(row, col, QTableWidgetItem(str(stat_data.get(key, "N/A"))))
+
+    def _fill_manova_flat(self, manova_result):
+        """Fill the table from a flat {statistic: value} layout."""
+        stat_mapping = {
+            "wilks_lambda": "Wilks' Lambda",
+            "pillais_trace": "Pillai's Trace",
+            "hotellings_trace": "Hotelling's Trace",
+            "roys_largest_root": "Roy's Largest Root",
+            "f_statistic": "F Statistic",
+            "p_value": "P Value",
+        }
+        degrees_of_freedom = manova_result.get("degrees_of_freedom")
+        for key, value in manova_result.items():
+            if key in ("analysis_type", "degrees_of_freedom"):
+                continue  # meta information, not a statistic row
+            row = self.tabManovaResult.rowCount()
+            self.tabManovaResult.insertRow(row)
+            self.tabManovaResult.setItem(row, 0, QTableWidgetItem(stat_mapping.get(key, key.replace("_", " ").title())))
+            self.tabManovaResult.setItem(row, 1, QTableWidgetItem(str(value)))
+            if isinstance(degrees_of_freedom, (list, tuple)) and len(degrees_of_freedom) >= 2:
+                self.tabManovaResult.setItem(row, 2, QTableWidgetItem(str(degrees_of_freedom[0])))
+                self.tabManovaResult.setItem(row, 3, QTableWidgetItem(str(degrees_of_freedom[1])))
+
+    def _populate_manova_table(self, manova_result):
+        """Reset and fill the MANOVA table, tolerating the stored layouts."""
+        logger = logging.getLogger(__name__)
         self.tabManovaResult.clear()
         self.tabManovaResult.setRowCount(0)
-
-        if manova_result:
-            logger.info("Processing MANOVA result for display")
-            logger.debug(f"MANOVA result structure: {manova_result}")
-
-            # Set up proper MANOVA table format
-            # Columns: Statistic, Value, Num DF, Den DF, F Value, Pr>F
-            column_headers = ["Statistic", "Value", "Num DF", "Den DF", "F Value", "Pr>F"]
-            self.tabManovaResult.setColumnCount(len(column_headers))
-            self.tabManovaResult.setHorizontalHeaderLabels(column_headers)
-
-            # Check if MANOVA result contains multiple statistics or single values
-            if "stat_dict" in manova_result and isinstance(manova_result["stat_dict"], dict):
-                # New stat_dict format (matches original Modan2)
-                logger.info("MANOVA: Processing stat_dict format")
-                stat_dict = manova_result["stat_dict"]
-                stat_dict.get("column_names", column_headers)
-                logger.info(f"MANOVA stat_dict has {len(stat_dict)} items")
-
-                for stat_name, stat_values in stat_dict.items():
-                    if stat_name == "column_names":
-                        continue
-
-                    logger.info(f"Processing MANOVA stat: {stat_name} = {stat_values}")
-                    row = self.tabManovaResult.rowCount()
-                    self.tabManovaResult.insertRow(row)
-
-                    # Set statistic name
-                    self.tabManovaResult.setItem(row, 0, QTableWidgetItem(stat_name))
-
-                    # Set values from the list
-                    if isinstance(stat_values, list) and len(stat_values) >= 5:
-                        self.tabManovaResult.setItem(row, 1, QTableWidgetItem(f"{stat_values[0]:.6e}"))
-                        self.tabManovaResult.setItem(row, 2, QTableWidgetItem(str(int(stat_values[1]))))
-                        self.tabManovaResult.setItem(row, 3, QTableWidgetItem(str(int(stat_values[2]))))
-                        self.tabManovaResult.setItem(row, 4, QTableWidgetItem(f"{stat_values[3]:.3f}"))
-                        self.tabManovaResult.setItem(row, 5, QTableWidgetItem(f"{stat_values[4]:.3f}"))
-                        logger.info(f"Added MANOVA row for {stat_name}")
-                    else:
-                        logger.warning(f"Invalid stat values for {stat_name}: {stat_values}")
-
-            elif "statistics" in manova_result and isinstance(manova_result["statistics"], dict):
-                # Multiple statistics format
-                logger.info("MANOVA: Processing multiple statistics format")
-                for stat_name, stat_data in manova_result["statistics"].items():
-                    row = self.tabManovaResult.rowCount()
-                    self.tabManovaResult.insertRow(row)
-
-                    # Set statistic name
-                    self.tabManovaResult.setItem(row, 0, QTableWidgetItem(stat_name))
-
-                    # Set values if available
-                    if isinstance(stat_data, dict):
-                        self.tabManovaResult.setItem(row, 1, QTableWidgetItem(str(stat_data.get("value", "N/A"))))
-                        self.tabManovaResult.setItem(row, 2, QTableWidgetItem(str(stat_data.get("num_df", "N/A"))))
-                        self.tabManovaResult.setItem(row, 3, QTableWidgetItem(str(stat_data.get("den_df", "N/A"))))
-                        self.tabManovaResult.setItem(row, 4, QTableWidgetItem(str(stat_data.get("f_statistic", "N/A"))))
-                        self.tabManovaResult.setItem(row, 5, QTableWidgetItem(str(stat_data.get("p_value", "N/A"))))
-            else:
-                # Single statistics - convert current format to table rows
-                logger.info("MANOVA: Processing single statistics format")
-
-                # Map common MANOVA statistics to display names
-                stat_mapping = {
-                    "wilks_lambda": "Wilks' Lambda",
-                    "pillais_trace": "Pillai's Trace",
-                    "hotellings_trace": "Hotelling's Trace",
-                    "roys_largest_root": "Roy's Largest Root",
-                    "f_statistic": "F Statistic",
-                    "p_value": "P Value",
-                }
-
-                for key, value in manova_result.items():
-                    if key in ["analysis_type", "degrees_of_freedom"]:
-                        continue  # Skip meta information
-
-                    row = self.tabManovaResult.rowCount()
-                    self.tabManovaResult.insertRow(row)
-
-                    # Use mapped name if available, otherwise use key
-                    display_name = stat_mapping.get(key, key.replace("_", " ").title())
-                    self.tabManovaResult.setItem(row, 0, QTableWidgetItem(display_name))
-
-                    # Set the value
-                    self.tabManovaResult.setItem(row, 1, QTableWidgetItem(str(value)))
-
-                    # For degrees of freedom, try to extract if available
-                    if key == "degrees_of_freedom" and isinstance(value, (list, tuple)) and len(value) >= 2:
-                        self.tabManovaResult.setItem(row, 2, QTableWidgetItem(str(value[0])))  # Num DF
-                        self.tabManovaResult.setItem(row, 3, QTableWidgetItem(str(value[1])))  # Den DF
-                    elif "degrees_of_freedom" in manova_result and isinstance(
-                        manova_result["degrees_of_freedom"], (list, tuple)
-                    ):
-                        df = manova_result["degrees_of_freedom"]
-                        if len(df) >= 2:
-                            self.tabManovaResult.setItem(row, 2, QTableWidgetItem(str(df[0])))
-                            self.tabManovaResult.setItem(row, 3, QTableWidgetItem(str(df[1])))
-
-            logger.info(
-                f"MANOVA table final size: {self.tabManovaResult.rowCount()}x{self.tabManovaResult.columnCount()}"
-            )
-        else:
+        if not manova_result:
             logger.warning("MANOVA result is empty or None")
+            return
 
-        # Handle property names safely
-        if self.analysis.propertyname_str:
-            variablename_list = self.analysis.propertyname_str.split(",")
+        column_headers = ["Statistic", "Value", "Num DF", "Den DF", "F Value", "Pr>F"]
+        self.tabManovaResult.setColumnCount(len(column_headers))
+        self.tabManovaResult.setHorizontalHeaderLabels(column_headers)
+
+        if isinstance(manova_result.get("stat_dict"), dict):
+            self._fill_manova_stat_dict(manova_result["stat_dict"])
+        elif isinstance(manova_result.get("statistics"), dict):
+            self._fill_manova_statistics(manova_result["statistics"])
         else:
-            # Fallback to dataset's variable names if analysis doesn't have them
-            variablename_list = self.analysis.dataset.get_variablename_list()
-            logger.info(f"Using dataset variable names: {variablename_list}")
+            self._fill_manova_flat(manova_result)
 
-        symbol_candidate = ["o", "s", "^", "x", "+", "d", "v", "<", ">", "p", "h"]
+    def _plot_analysis_scatter(
+        self, axis_prefix, analysis_result_list, object_info_list, variablename_list, combo, ax, fig, scatter_size
+    ):
+        """Group the objects by the selected variable and draw one analysis
+        type's 3-axis scatter (PCA or CVA)."""
+        logger = logging.getLogger(__name__)
         symbol_candidate = self.marker_list[:]
-        color_candidate = ["blue", "green", "black", "cyan", "magenta", "yellow", "gray", "red"]
         color_candidate = self.color_list[:]
+        axis1, axis2, axis3 = 0, 1, 2
 
-        SCATTER_MEDIUM_SIZE = 50
-        scatter_size = SCATTER_MEDIUM_SIZE
+        propertyname = combo.currentText()
+        propertyname_index = variablename_list.index(propertyname) if propertyname in variablename_list else -1
+        logger.info(f"Grouping for {axis_prefix}: propertyname='{propertyname}', index={propertyname_index}")
 
-        self.pca_ax3.clear()
-        self.cva_ax3.clear()
-
-        axis_prefix_list = ["PC", "CV"]
-        combo_list = [self.comboPcaGroupBy, self.comboCvaGroupBy]
-        fig_list = [self.pca_fig3, self.cva_fig3]
-        ax_list = [self.pca_ax3, self.cva_ax3]
-        propertyname_index_list = [-1, -1]
-        self.pca_scatter_data = {}
-        self.cva_scatter_data = {}
-        scatter_data_list = [self.pca_scatter_data, self.cva_scatter_data]
-        self.pca_scatter_result = {}
-        self.cva_scatter_result = {}
-        scatter_result_list = [self.pca_scatter_result, self.cva_scatter_result]
-        analysis_result_list_list = [pca_analysis_result_list, cva_analysis_result_list]
-
-        # Debug logging for analysis results
-        logger.info(f"Object count: {len(object_info_list)}")
-        if pca_analysis_result_list:
-            logger.info(f"PCA result count: {len(pca_analysis_result_list)}")
-        else:
-            logger.info("PCA result is None/empty")
-        if cva_analysis_result_list:
-            logger.info(f"CVA result count: {len(cva_analysis_result_list)}")
-        else:
-            logger.info("CVA result is None/empty")
-
-        for idx, axis_prefix in enumerate(axis_prefix_list):
-            logger.info(
-                f"Processing analysis type idx={idx}, prefix='{axis_prefix}', has_data={analysis_result_list_list[idx] is not None}"
-            )
-
-            # Skip processing if no data available for this analysis type
-            if not analysis_result_list_list[idx]:
-                logger.info(f"Skipping {axis_prefix} processing - no data available")
-                continue
-
-            depth_shade = False
-            axis1 = 0
-            axis2 = 1
-            axis3 = 2
-            axis1_title = axis_prefix + str(axis1 + 1)
-            axis2_title = axis_prefix + str(axis2 + 1)
-            axis3_title = axis_prefix + str(axis3 + 1)
-            propertyname = combo_list[idx].currentText()
-            propertyname_index_list[idx] = (
-                variablename_list.index(propertyname) if propertyname in variablename_list else -1
-            )
-            logger.info(
-                f"Grouping for {axis_prefix}: propertyname='{propertyname}', index={propertyname_index_list[idx]}"
-            )
-            logger.info(f"Available variables: {variablename_list[:10]}")  # Show first 10 variables
-            scatter_data_list[idx] = {}
-            scatter_result_list[idx] = {}
-
-            key_list = []
-            key_list.append("__default__")
-            scatter_data_list[idx]["__default__"] = {
+        scatter_data = {
+            "__default__": {
                 "x_val": [],
                 "y_val": [],
                 "z_val": [],
@@ -501,120 +383,119 @@ class AnalysisInfoWidget(QWidget):
                 "color": color_candidate[0],
                 "size": scatter_size,
             }
+        }
 
-            for idx2, obj in enumerate(object_info_list):
-                key_name = "__default__"
-                """ get propertyname """
-                if idx2 < 3:  # Debug first 3 objects
-                    logger.info(f"Object {idx2} keys: {list(obj.keys())}")
-                    if "variable_list" in obj.keys():
-                        logger.info(
-                            f"Object {idx2} variable_list: {obj['variable_list'][:5] if len(obj['variable_list']) > 5 else obj['variable_list']}"
-                        )
+        for idx, obj in enumerate(object_info_list):
+            source_list = obj["variable_list"] if "variable_list" in obj.keys() else obj["property_list"]
+            key_name = source_list[propertyname_index] if -1 < propertyname_index < len(source_list) else "__default__"
 
-                if "variable_list" in obj.keys():
-                    if propertyname_index_list[idx] > -1 and propertyname_index_list[idx] < len(obj["variable_list"]):
-                        key_name = obj["variable_list"][propertyname_index_list[idx]]
-                else:
-                    if propertyname_index_list[idx] > -1 and propertyname_index_list[idx] < len(obj["property_list"]):
-                        key_name = obj["property_list"][propertyname_index_list[idx]]
+            if key_name not in scatter_data:
+                scatter_data[key_name] = {
+                    "x_val": [],
+                    "y_val": [],
+                    "z_val": [],
+                    "data": [],
+                    "property": key_name,
+                    "symbol": "",
+                    "color": "",
+                    "size": scatter_size,
+                }
 
-                if key_name not in scatter_data_list[idx].keys():
-                    scatter_data_list[idx][key_name] = {
-                        "x_val": [],
-                        "y_val": [],
-                        "z_val": [],
-                        "data": [],
-                        "property": key_name,
-                        "symbol": "",
-                        "color": "",
-                        "size": scatter_size,
-                    }
-                    if idx2 < 5:  # Only log first few objects
-                        logger.info(f"Created new group '{key_name}' for object {idx2}")
+            group = scatter_data[key_name]
+            row = analysis_result_list[idx] if idx < len(analysis_result_list) else None
+            if row is not None and len(row) > max(axis1, axis2, axis3):
+                group["x_val"].append(row[axis1])
+                group["y_val"].append(row[axis2])
+                group["z_val"].append(row[axis3])
+            else:
+                # Keep the group aligned with object_info_list even when the
+                # result row is missing or too short.
+                group["x_val"].append(0.0)
+                group["y_val"].append(0.0)
+                group["z_val"].append(0.0)
+            group["data"].append(obj)
 
-                # Safety check for analysis result data
-                if (
-                    analysis_result_list_list[idx]
-                    and idx2 < len(analysis_result_list_list[idx])
-                    and analysis_result_list_list[idx][idx2] is not None
-                    and len(analysis_result_list_list[idx][idx2]) > max(axis1, axis2, axis3)
-                ):
-                    scatter_data_list[idx][key_name]["x_val"].append(analysis_result_list_list[idx][idx2][axis1])
-                    scatter_data_list[idx][key_name]["y_val"].append(analysis_result_list_list[idx][idx2][axis2])
-                    scatter_data_list[idx][key_name]["z_val"].append(analysis_result_list_list[idx][idx2][axis3])
-                    scatter_data_list[idx][key_name]["data"].append(obj)
-                else:
-                    # Debug detailed failure reason
-                    failure_reasons = []
-                    if not analysis_result_list_list[idx]:
-                        failure_reasons.append("no analysis data")
-                    elif idx2 >= len(analysis_result_list_list[idx]):
-                        failure_reasons.append(f"idx2({idx2}) >= data_len({len(analysis_result_list_list[idx])})")
-                    elif analysis_result_list_list[idx][idx2] is None:
-                        failure_reasons.append("result is None")
-                    elif len(analysis_result_list_list[idx][idx2]) <= max(axis1, axis2, axis3):
-                        failure_reasons.append(
-                            f"result_len({len(analysis_result_list_list[idx][idx2])}) <= max_axis({max(axis1, axis2, axis3)})"
-                        )
+        if len(scatter_data["__default__"]["x_val"]) == 0:
+            del scatter_data["__default__"]
 
-                    # Silently skip invalid analysis result data
-                    # logger.warning(f"Skipping invalid analysis result data for object {idx2}: {', '.join(failure_reasons)}")
-                    # Add default values to maintain consistency
-                    scatter_data_list[idx][key_name]["x_val"].append(0.0)
-                    scatter_data_list[idx][key_name]["y_val"].append(0.0)
-                    scatter_data_list[idx][key_name]["z_val"].append(0.0)
-                    scatter_data_list[idx][key_name]["data"].append(obj)
+        sc_idx = 0
+        for group in scatter_data.values():
+            if group["color"] == "":
+                group["color"] = color_candidate[sc_idx % len(color_candidate)]
+                group["symbol"] = symbol_candidate[sc_idx % len(symbol_candidate)]
+                sc_idx += 1
 
-            """ remove empty group """
-            if len(scatter_data_list[idx]["__default__"]["x_val"]) == 0:
-                del scatter_data_list[idx]["__default__"]
+        ax.clear()
+        scatter_result = {}
+        for name, group in scatter_data.items():
+            if len(group["x_val"]) > 0:
+                scatter_result[name] = ax.scatter(
+                    group["x_val"],
+                    group["y_val"],
+                    group["z_val"],
+                    s=group["size"],
+                    marker=group["symbol"],
+                    color=group["color"],
+                    data=group["data"],
+                    depthshade=False,
+                    picker=True,
+                    pickradius=5,
+                )
+        scatter_result.pop("__default__", None)
 
-            """ assign color and symbol """
-            sc_idx = 0
-            for key_name in scatter_data_list[idx].keys():
-                if scatter_data_list[idx][key_name]["color"] == "":
-                    scatter_data_list[idx][key_name]["color"] = color_candidate[sc_idx % len(color_candidate)]
-                    scatter_data_list[idx][key_name]["symbol"] = symbol_candidate[sc_idx % len(symbol_candidate)]
-                    sc_idx += 1
+        # Imported lazily: `dialogs/__init__` pulls in this package, so a
+        # module-level import here is a circular import.
+        from dialogs.scatter_utils import apply_legend_italics, format_legend_label
 
-            if True:
-                ax_list[idx].clear()
-                for name in scatter_data_list[idx].keys():
-                    group = scatter_data_list[idx][name]
-                    if len(scatter_data_list[idx][name]["x_val"]) > 0:
-                        scatter_result_list[idx][name] = ax_list[idx].scatter(
-                            group["x_val"],
-                            group["y_val"],
-                            group["z_val"],
-                            s=group["size"],
-                            marker=group["symbol"],
-                            color=group["color"],
-                            data=group["data"],
-                            depthshade=depth_shade,
-                            picker=True,
-                            pickradius=5,
-                        )
+        legend_keys = list(scatter_result.keys())
+        legend = ax.legend(
+            scatter_result.values(),
+            [format_legend_label(key)[0] for key in legend_keys],
+            loc="upper right",
+            bbox_to_anchor=(1.05, 1),
+        )
+        apply_legend_italics(legend, legend_keys)
 
-                if True:
-                    if "__default__" in scatter_result_list[idx].keys():
-                        del scatter_result_list[idx]["__default__"]
-                    # Imported lazily: `dialogs/__init__` pulls in this package,
-                    # so a module-level import here is a circular import.
-                    from dialogs.scatter_utils import apply_legend_italics, format_legend_label
+        ax.set_xlabel(f"{axis_prefix}{axis1 + 1}")
+        ax.set_ylabel(f"{axis_prefix}{axis2 + 1}")
+        ax.set_zlabel(f"{axis_prefix}{axis3 + 1}")
+        fig.tight_layout()
+        fig.canvas.draw()
+        fig.canvas.flush_events()
 
-                    legend_keys = list(scatter_result_list[idx].keys())
-                    legend = ax_list[idx].legend(
-                        scatter_result_list[idx].values(),
-                        [format_legend_label(key)[0] for key in legend_keys],
-                        loc="upper right",
-                        bbox_to_anchor=(1.05, 1),
-                    )
-                    apply_legend_italics(legend, legend_keys)
-                if True:
-                    ax_list[idx].set_xlabel(axis1_title)
-                    ax_list[idx].set_ylabel(axis2_title)
-                    ax_list[idx].set_zlabel(axis3_title)
-                fig_list[idx].tight_layout()
-                fig_list[idx].canvas.draw()
-                fig_list[idx].canvas.flush_events()
+    def show_analysis_result(self):
+        """Populate the info fields, MANOVA table and PCA/CVA scatter plots."""
+        logger = logging.getLogger(__name__)
+        logger.info(f"show_analysis_result called for: {self.analysis.analysis_name}")
+
+        # Legacy analyses have no JSON payload — show just the basics.
+        if not self.analysis.object_info_json:
+            logger.warning("No JSON data found - showing basic analysis info")
+            self.edtAnalysisName.setText(self.analysis.analysis_name)
+            self.edtSuperimposition.setText(self.analysis.superimposition_method or "Unknown")
+            return
+
+        object_info_list, pca_result_list, cva_result_list, manova_result = self._load_result_json()
+
+        self._populate_manova_table(manova_result)
+
+        if self.analysis.propertyname_str:
+            variablename_list = self.analysis.propertyname_str.split(",")
+        else:
+            # Fallback to the dataset's variable names if the analysis lacks them.
+            variablename_list = self.analysis.dataset.get_variablename_list()
+
+        scatter_size = 50  # SCATTER_MEDIUM_SIZE
+        self.pca_ax3.clear()
+        self.cva_ax3.clear()
+
+        for axis_prefix, result_list, combo, ax, fig in (
+            ("PC", pca_result_list, self.comboPcaGroupBy, self.pca_ax3, self.pca_fig3),
+            ("CV", cva_result_list, self.comboCvaGroupBy, self.cva_ax3, self.cva_fig3),
+        ):
+            if not result_list:
+                logger.info(f"Skipping {axis_prefix} processing - no data available")
+                continue
+            self._plot_analysis_scatter(
+                axis_prefix, result_list, object_info_list, variablename_list, combo, ax, fig, scatter_size
+            )

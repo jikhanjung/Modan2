@@ -20,7 +20,7 @@ pytest-xvfb>=3.0.0,<4.0         # Headless GUI testing for Linux CI/CD
 psutil>=7.0.0,<8.0              # System and process utilities for memory testing
 
 # Coverage Reporting
-coverage[toml]>=7.10.0,<8.0     # Coverage with TOML config support
+coverage[toml]>=7.15.2,<8.0     # Coverage with TOML config support
 
 # Code Quality Tools (optional - uncomment to use)
 # ruff>=0.1.0,<1.0              # Fast Python linter (recommended)

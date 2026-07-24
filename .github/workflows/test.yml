@@ -26,8 +26,13 @@ jobs:
         with:
           python-version: '3.12'
 
+      # Pin the linter: an unpinned `pip install ruff` picks up whatever released
+      # last, and a newer ruff started formatting Python blocks inside Markdown,
+      # turning a green tree into "103 files would be reformatted". Keep this in
+      # sync with the rev in .pre-commit-config.yaml so CI, pre-commit and local
+      # runs all agree.
       - name: Install ruff
-        run: pip install ruff
+        run: pip install ruff==0.15.22
 
       - name: ruff check
         run: ruff check . --output-format=github
@@ -35,8 +40,10 @@ jobs:
       - name: ruff format --check
         run: ruff format --check .
 
+      # Pinned for the same reason as ruff: a new mypy release adding checks
+      # should be an intentional upgrade, not a surprise red build.
       - name: Install mypy
-        run: pip install mypy
+        run: pip install mypy==2.3.0
 
       # Type checking is incremental: gate only the modules already at zero mypy
       # errors. Expand this list as more modules are cleaned (config in

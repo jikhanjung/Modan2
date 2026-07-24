@@ -155,6 +155,12 @@ working set of packages.
   - **`pip-audit`** in CI to fail on known-vulnerable dependencies.
 - **Separate runtime vs dev vs CI requirements** so the shipped app isn't bloated
   with test tooling.
+- **Pin your *tooling* too, not just your dependencies.** An unpinned
+  `pip install <linter>` in CI silently upgrades on every run, so an upstream
+  release can turn a green tree red without any code change. (This project hit
+  exactly that: a newer ruff began formatting Python blocks inside Markdown and
+  reported "103 files would be reformatted".) Pin the linter/type-checker to the
+  same version your pre-commit config uses, and upgrade deliberately.
 
 ## 7. Packaging & release verification
 

@@ -203,3 +203,33 @@ group_by 이름 해석의 **CVA/MANOVA 블록이 복붙 중복** → `_resolve_g
 | 22 | `data_exploration_dialog.prepare_shape_view` |
 | 21 | `ObjectViewer2D.mouseMoveEvent` |
 | 21 / 20 | `tools/build_index.py`, `tools/search_index.py` (개발 도구, 우선순위 낮음) |
+
+---
+
+## 5. 20 이상 핫스팟 마무리 (2026-07-24 후속)
+
+렌더링 3인방 이후 남은 20 이상 앱 코드 핫스팟을 모두 정리했다.
+
+| 대상 | 복잡도 | 요지 / 부수 발견 |
+|---|---|---|
+| `nts.py::read` | 22 → <15 | `_parse_header`/`_row_name` 분리. **잠복 버그: `nlandmarks`가 모든 NTS에서 0**(stale 지역 `dimension` 가드) — 실측 1100인데 0 보고. 커브 설정 소비처가 NTS엔 도달 안 해 잠복. |
+| `tps.py::read` | 25 → <15 | `_TPSObjectState` 상태 홀더 + `_apply_keyword`/`_apply_coordinates`. (36→25→<15, 2단계) |
+| `import_dataset_from_zip` | 23 → <15 | 이미지/모델 twin 복사 블록을 `_import_media`로 통합 + `_dataset_from_manifest`/`_object_from_manifest`. |
+| `prepare_shape_view` | 22 → <15 | 모드별 dict 초기화 3중복 통합 + 4개 헬퍼. |
+| `ObjectViewer3D.mouseMoveEvent` | 25 → <15 | `_drag_view`(bool 반환) + edit-mode별 hover/drag 헬퍼. |
+| `ObjectViewer2D.mouseMoveEvent` | 21 → <15 | edit-mode별 5개 헬퍼. missing-lm early-return(repaint 스킵) 보존. |
+
+두 `mouseMoveEvent`는 특성화 커버리지가 없어 **먼저 크로스플랫폼 특성화 테스트**를
+추가(updateGL·hit 헬퍼 목킹, GL 미사용)한 뒤 리팩토링했다. 모두 이빨 검증.
+
+### 별건 — export/import 데이터 손실 3건
+파서 리팩토링 중 "리더가 채우는 `self.*` vs import/serialize가 읽는 필드" 대조로
+**조용한 데이터 손실 3건**을 발견·수정(별도 문서
+[[20260724_243_zip_export_import_curve_missing_dataloss]]): 세미랜드마크 커브(zip),
+missing 인코딩(zip), polygons(파일 import).
+
+## 최종 상태
+
+**앱 코드에 복잡도 15 초과 함수 없음**(캠페인 시작 시 최대 56). 남은 16~19대는
+정상 범위로 방치(비게이팅 리포트 유지). `tools/`·`scripts/`·`tests/`의 몇몇은
+개발 보조라 우선순위 밖.

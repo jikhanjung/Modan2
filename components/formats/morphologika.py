@@ -57,24 +57,22 @@ class Morphologika:
         self.invertY = invertY
         self.read()
 
-    def read(self):
-        with open_text(self.filename) as f:
-            morphologika_data = f.read()
+    def _parse_sections(self, data_lines):
+        """Group the flat lines into their ``[section]`` buckets.
 
+        Returns ``(raw_data, object_count, landmark_count, dimension)``; counts
+        stay -1 when their section is absent.
+        """
         object_count = -1
         landmark_count = -1
-        data_lines = [l.strip() for l in morphologika_data.split("\n")]
-        dsl = ""
         dimension = 2
+        dsl = ""
         raw_data = {}
         for line in data_lines:
             line = line.strip()
-            if line == "":
+            if line == "" or line[0] == "'":  # blank or comment
                 continue
-            if line[0] == "'":
-                """comment"""
-                continue
-            elif line[0] == "[":
+            if line[0] == "[":
                 # A "[" with no following word characters (e.g. a bare "[") is a
                 # malformed section header; skip it rather than crashing on
                 # re.search(...).group() of None.
@@ -84,18 +82,49 @@ class Morphologika:
                 dsl = section.group(0).lower()
                 raw_data[dsl] = []
                 continue
-            else:
-                if dsl == "":
-                    # Data appearing before any [section] header is malformed;
-                    # ignore it rather than raising KeyError on raw_data[""].
-                    continue
-                raw_data[dsl].append(line)
-                if dsl == "individuals":
-                    object_count = int(line)
-                if dsl == "landmarks":
-                    landmark_count = int(line)
-                if dsl == "dimensions":
-                    dimension = int(line)
+            if dsl == "":
+                # Data before any [section] header is malformed; ignore it rather
+                # than raising KeyError on raw_data[""].
+                continue
+            raw_data[dsl].append(line)
+            if dsl == "individuals":
+                object_count = int(line)
+            elif dsl == "landmarks":
+                landmark_count = int(line)
+            elif dsl == "dimensions":
+                dimension = int(line)
+        return raw_data, object_count, landmark_count, dimension
+
+    def _apply_optional_sections(self):
+        """Populate the optional lists (labels, wireframe, images, ...) from the
+        parsed ``raw_data``; each section is present only if the file had it."""
+        if "labels" in self.raw_data:
+            for line in self.raw_data["labels"]:
+                self.variablename_list.extend(re.split(r"\s+", line))
+        if "labelvalues" in self.raw_data:
+            for line in self.raw_data["labelvalues"]:
+                self.property_list_list.append(re.split(r"\s+", line))
+        if "wireframe" in self.raw_data:
+            for line in self.raw_data["wireframe"]:
+                self.edge_list.append(sorted(int(v) for v in re.split(r"\s+", line)))
+        if "polygons" in self.raw_data:
+            for line in self.raw_data["polygons"]:
+                self.polygon_list.append(sorted(int(v) for v in re.split(r"\s+", line)))
+        if "images" in self.raw_data:
+            for idx, line in enumerate(self.raw_data["images"]):
+                self.object_images[self.object_name_list[idx]] = line
+        if "pixelspermm" in self.raw_data:
+            for line in self.raw_data["pixelspermm"]:
+                self.ppmm_list.append(line)
+        self.edge_list.sort()
+        self.polygon_list.sort()
+
+    def read(self):
+        with open_text(self.filename) as f:
+            morphologika_data = f.read()
+        data_lines = [line.strip() for line in morphologika_data.split("\n")]
+
+        raw_data, object_count, landmark_count, dimension = self._parse_sections(data_lines)
 
         if object_count < 0 or landmark_count < 0:
             return False
@@ -110,17 +139,15 @@ class Morphologika:
         self.nlandmarks = landmark_count
         self.dimension = dimension
         self.object_name_list = self.raw_data["names"]
-        self.nobjects = len(self.object_name_list)
         self.nobjects = object_count
 
         objects = {}
         for i, name in enumerate(self.object_name_list):
             begin = i * self.nlandmarks
-            count = self.nlandmarks
-            objects[name] = []
-            for point in self.raw_data["rawpoints"][begin : begin + count]:
-                coords = re.split(r"\s+", point)[:dimension]
-                objects[name].append(coords)
+            objects[name] = [
+                re.split(r"\s+", point)[:dimension]
+                for point in self.raw_data["rawpoints"][begin : begin + self.nlandmarks]
+            ]
 
         self.landmark_data = objects
         self.edge_list = []
@@ -130,42 +157,9 @@ class Morphologika:
         self.property_list_list = []
 
         if self.dimension == 2 and self.invertY:
-            for key in objects.keys():
+            for key in objects:
                 for idx in range(len(objects[key])):
                     objects[key][idx][1] = -1.0 * float(objects[key][idx][1])
 
-        if "labels" in self.raw_data.keys():
-            for line in self.raw_data["labels"]:
-                labels = re.split(r"\s+", line)
-                for label in labels:
-                    self.variablename_list.append(label)
-
-        if "labelvalues" in self.raw_data.keys():
-            for line in self.raw_data["labelvalues"]:
-                property_list = re.split(r"\s+", line)
-                self.property_list_list.append(property_list)
-
-        if "wireframe" in self.raw_data.keys():
-            for line in self.raw_data["wireframe"]:
-                edge = [int(v) for v in re.split(r"\s+", line)]
-                edge.sort()
-                self.edge_list.append(edge)
-
-        if "polygons" in self.raw_data.keys():
-            for line in self.raw_data["polygons"]:
-                poly = [int(v) for v in re.split(r"\s+", line)]
-                poly.sort()
-                self.polygon_list.append(poly)
-
-        if "images" in self.raw_data.keys():
-            for idx, line in enumerate(self.raw_data["images"]):
-                object_name = self.object_name_list[idx]
-                self.object_images[object_name] = line
-
-        if "pixelspermm" in self.raw_data.keys():
-            for idx, line in enumerate(self.raw_data["pixelspermm"]):
-                self.ppmm_list.append(line)
-
-        self.edge_list.sort()
-        self.polygon_list.sort()
+        self._apply_optional_sections()
         return

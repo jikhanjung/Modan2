@@ -158,6 +158,13 @@ All five CTHarvester CI recommendations are now resolved (3 shipped in commit
       build (first real CI validation).
 - [x] **Retire `config/requirements-ci.txt`** — DONE (devlog 245). Removed (the
       dev lockfile is a superset); `config/README.md` + `CLAUDE.md` updated.
+- [ ] **Set the `LOCK_REFRESH_TOKEN` PAT** (devlog 247) — one-time repo setup so
+      Dependabot PRs that change a *pinned* dependency (which force a lockfile
+      update) auto-refresh the locks AND re-run CI to green. Fine-grained PAT,
+      Contents: Read/write, added as an Actions secret. Without it, such a PR's
+      lock is refreshed but CI must be kicked manually (the `gh pr close && gh pr
+      reopen` trick used on #24 works as a no-PAT fallback). PRs that only bump a
+      floor (most) don't need it — the lock is unchanged.
 
 Not adopted (agreed overkill for this solo commit-to-main repo; documented in
 R06 §3): `dependency-review` action, a dedicated performance-tracking workflow,

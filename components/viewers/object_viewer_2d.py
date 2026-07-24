@@ -826,6 +826,79 @@ class ObjectViewer2D(QLabel):
     def get_distance(self, pos1, pos2):
         return math.sqrt((pos1[0] - pos2[0]) ** 2 + (pos1[1] - pos2[1]) ** 2)
 
+    def _hover_edit_landmark(self, curr_pos):
+        """EDIT_LANDMARK hover: arm a move when near a landmark, else highlight a
+        curve under the cursor."""
+        near_idx = self.get_landmark_index_within_threshold(curr_pos, DISTANCE_THRESHOLD)
+        if near_idx >= 0:
+            self.set_mode(MODE["READY_MOVE_LANDMARK"])
+            self.selected_landmark_index = near_idx
+            self.hover_curve_id = None
+        else:
+            # Highlight a curve under the cursor (a click would select it).
+            self.hover_curve_id = self._curve_at_position(curr_pos)
+
+    def _hover_wireframe(self, curr_pos):
+        """WIREFRAME hover: highlight the vertex being connected, or the edge
+        under the cursor when not near a vertex."""
+        near_idx = self.get_landmark_index_within_threshold(curr_pos, DISTANCE_THRESHOLD)
+        if near_idx >= 0:
+            self.selected_edge_index = -1
+            if self.wire_hover_index < 0:
+                self.wire_hover_index = near_idx
+        elif self.wire_start_index >= 0:
+            self.wire_hover_index = -1
+        else:
+            self.wire_hover_index = -1
+            near_wire_idx = self.get_edge_index_within_threshold(curr_pos, DISTANCE_THRESHOLD)
+            self.selected_edge_index = near_wire_idx if near_wire_idx >= 0 else -1
+
+    def _drag_landmark(self):
+        """MOVE_LANDMARK: move the grabbed landmark to the cursor."""
+        if self.selected_landmark_index < 0:
+            return
+        self.landmark_list[self.selected_landmark_index] = [
+            self._2imgx(self.mouse_curr_x),
+            self._2imgy(self.mouse_curr_y),
+        ]
+        if self.object_dialog is not None:
+            self.object_dialog.update_landmark(
+                self.selected_landmark_index, *self.landmark_list[self.selected_landmark_index]
+            )
+
+    def _hover_ready_move_landmark(self, curr_pos):
+        """READY_MOVE_LANDMARK: drop back to EDIT_LANDMARK once the cursor leaves
+        the armed landmark. Returns True if the caller should stop (missing lm)."""
+        ready_landmark = self.landmark_list[self.selected_landmark_index]
+        if ready_landmark[0] is None or ready_landmark[1] is None:
+            return True  # don't try to move a missing landmark
+        lm_can_pos = [self._2canx(ready_landmark[0]), self._2cany(ready_landmark[1])]
+        if self.get_distance(curr_pos, lm_can_pos) > DISTANCE_THRESHOLD:
+            self.set_mode(MODE["EDIT_LANDMARK"])
+            self.selected_landmark_index = -1
+        return False
+
+    def _hover_edit_curve(self, curr_pos):
+        """EDIT_CURVE: drag a grabbed curve point (re-snapping live), hover-
+        highlight a point, or preview the live-wire to the cursor."""
+        self.hover_curve_id = self._curve_at_position(curr_pos)
+        if self.selected_curve_id is not None:
+            raw = self._selected_curve_raw()
+            if raw is not None and self.moving_curve_point_index >= 0:
+                # Drag the grabbed point (an anchor for a snap curve). Re-snap live
+                # so the dense trace follows the anchor as it moves.
+                raw[self.moving_curve_point_index] = [self._2imgx(self.mouse_curr_x), self._2imgy(self.mouse_curr_y)]
+                self._resnap_selected_curve(moving_index=self.moving_curve_point_index)
+            elif raw is not None:
+                # Hover highlight for the point under the cursor.
+                self.hover_curve_point_index = self._curve_point_within_threshold(curr_pos)
+        elif self.livewire_enabled and self.current_curve_points:
+            # Live preview: snap the last point to the cursor along edges.
+            self.livewire_preview = self._livewire_segment(
+                self.current_curve_points[-1],
+                [self._2imgx(self.mouse_curr_x), self._2imgy(self.mouse_curr_y)],
+            )
+
     def mouseMoveEvent(self, event):
         if self.object_dialog is None:
             return
@@ -838,79 +911,17 @@ class ObjectViewer2D(QLabel):
         if self.pan_mode == MODE["PAN"]:
             self.temp_pan_x = int(self.mouse_curr_x - self.mouse_down_x)
             self.temp_pan_y = int(self.mouse_curr_y - self.mouse_down_y)
-
         elif self.edit_mode == MODE["EDIT_LANDMARK"]:
-            near_idx = self.get_landmark_index_within_threshold(curr_pos, DISTANCE_THRESHOLD)
-            if near_idx >= 0:
-                self.set_mode(MODE["READY_MOVE_LANDMARK"])
-                self.selected_landmark_index = near_idx
-                self.hover_curve_id = None
-            else:
-                # Highlight a curve under the cursor (a click would select it).
-                self.hover_curve_id = self._curve_at_position(curr_pos)
-
+            self._hover_edit_landmark(curr_pos)
         elif self.edit_mode == MODE["WIREFRAME"]:
-            near_idx = self.get_landmark_index_within_threshold(curr_pos, DISTANCE_THRESHOLD)
-            if near_idx >= 0:
-                self.selected_edge_index = -1
-                if self.wire_hover_index < 0:
-                    self.wire_hover_index = near_idx
-                else:
-                    pass
-            elif self.wire_start_index >= 0:
-                self.wire_hover_index = -1
-            else:
-                self.wire_hover_index = -1
-                near_wire_idx = self.get_edge_index_within_threshold(curr_pos, DISTANCE_THRESHOLD)
-                if near_wire_idx >= 0:
-                    self.edge_list[near_wire_idx]
-                    self.selected_edge_index = near_wire_idx
-                else:
-                    self.selected_edge_index = -1
-
+            self._hover_wireframe(curr_pos)
         elif self.edit_mode == MODE["MOVE_LANDMARK"]:
-            if self.selected_landmark_index >= 0:
-                self.landmark_list[self.selected_landmark_index] = [
-                    self._2imgx(self.mouse_curr_x),
-                    self._2imgy(self.mouse_curr_y),
-                ]
-                if self.object_dialog is not None:
-                    self.object_dialog.update_landmark(
-                        self.selected_landmark_index, *self.landmark_list[self.selected_landmark_index]
-                    )
-
+            self._drag_landmark()
         elif self.edit_mode == MODE["READY_MOVE_LANDMARK"]:
-            curr_pos = [self.mouse_curr_x, self.mouse_curr_y]
-            ready_landmark = self.landmark_list[self.selected_landmark_index]
-            # Don't try to move missing landmarks
-            if ready_landmark[0] is None or ready_landmark[1] is None:
+            if self._hover_ready_move_landmark(curr_pos):
                 return
-            lm_can_pos = [self._2canx(ready_landmark[0]), self._2cany(ready_landmark[1])]
-            if self.get_distance(curr_pos, lm_can_pos) > DISTANCE_THRESHOLD:
-                self.set_mode(MODE["EDIT_LANDMARK"])
-                self.selected_landmark_index = -1
-
         elif self.edit_mode == MODE["EDIT_CURVE"]:
-            self.hover_curve_id = self._curve_at_position(curr_pos)
-            if self.selected_curve_id is not None:
-                raw = self._selected_curve_raw()
-                if raw is not None and self.moving_curve_point_index >= 0:
-                    # Drag the grabbed point (an anchor for a snap curve). Re-snap
-                    # live so the dense trace follows the anchor as it moves.
-                    raw[self.moving_curve_point_index] = [
-                        self._2imgx(self.mouse_curr_x),
-                        self._2imgy(self.mouse_curr_y),
-                    ]
-                    self._resnap_selected_curve(moving_index=self.moving_curve_point_index)
-                elif raw is not None:
-                    # Hover highlight for the point under the cursor.
-                    self.hover_curve_point_index = self._curve_point_within_threshold(curr_pos)
-            elif self.livewire_enabled and self.current_curve_points:
-                # Live preview: snap the last point to the cursor along edges.
-                self.livewire_preview = self._livewire_segment(
-                    self.current_curve_points[-1],
-                    [self._2imgx(self.mouse_curr_x), self._2imgy(self.mouse_curr_y)],
-                )
+            self._hover_edit_curve(curr_pos)
 
         self.repaint()
         QLabel.mouseMoveEvent(self, event)

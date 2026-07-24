@@ -136,6 +136,37 @@ Post-0.1.8 review items, in priority order:
 
 ---
 
+## 🟠 R06 CI-recommendations review (2026-07-24) — see `devlog/20260724_R06_ci_recommendations_review_and_quickwins.md`
+
+Three of the five CTHarvester CI recommendations were adopted and shipped
+(lockfiles + `--require-hashes`, CodeQL SAST, version-consistency test — commit
+`b52bab0`, devlog 244). Remaining, deferred by design:
+
+- [ ] **ruff `S` (flake8-bandit) ruleset** — the file-ingesting-desktop-app
+      security rules (`eval`/`exec`/`pickle`/`shell=True`/unsafe-YAML/weak-hash/
+      insecure-path). Valuable but needs a triage budget for the first-pass
+      findings, so folded into the R05 phased-adoption cadence rather than added
+      blind. Next step: `ruff check . --select S` dry-run to size the finding
+      count, then add `"S"` to the `select` in `pyproject.toml` with the
+      `"tests/**" = ["S101"]` carve-out.
+- [ ] **Packaged-artifact smoke test** (shared gap w/ CTHarvester) — CI builds
+      per-OS installers but only checks the executable *file exists*; it never
+      installs the produced artifact on a clean runner and launches it headless.
+      This is the "works from source, broken when frozen" surface (PyInstaller
+      missing a data file / unbundled native lib). Proposed: after the build job,
+      on a clean runner install the artifact, launch with `QT_QPA_PLATFORM=offscreen`,
+      assert it reaches an idle main window, quit; gate the release on it. ~2h,
+      OS-by-OS.
+- [ ] **Retire `config/requirements-ci.txt`** — now unused by CI (the dev
+      lockfile is a superset). Left in place for now in case it's referenced
+      locally/in docs; decide whether to remove it.
+
+Not adopted (agreed overkill for this solo commit-to-main repo; documented in
+R06 §3): `dependency-review` action, a dedicated performance-tracking workflow,
+a README-badge auto-commit bot.
+
+---
+
 ## 🔵 Semi-landmarks & assisted digitizing (future features)
 
 Feature work building on the semi-landmark support planned in

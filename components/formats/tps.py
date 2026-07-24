@@ -67,6 +67,28 @@ class TPS:
         except ValueError:
             return False
 
+    def _store_object(self, data, object_id, comment_1, comment_2, image_path, curves, object_count):
+        """Store one accumulated object into the result collections.
+
+        Extracted so the two flush points — on a new ``LM=`` header and at
+        end-of-file — share one implementation instead of duplicating the
+        key-selection + storage logic (which had to be kept in sync by hand).
+        """
+        if object_id != "":
+            key = object_id
+        elif comment_1 != "":
+            key = comment_1
+            comment_1 = ""  # used as the name; don't repeat it in the comment
+        else:
+            key = self.datasetname + "_" + str(object_count + 1)
+        self.landmark_data[key] = data
+        self.object_name_list.append(key)
+        self.object_comment[key] = " ".join([comment_1, comment_2]).strip()
+        if image_path != "":
+            self.object_images[key] = image_path
+        if curves:
+            self.curve_data[key] = curves
+
     def read(self):
         with open_text(self.filename) as f:
             tps_lines = f.readlines()
@@ -74,12 +96,13 @@ class TPS:
             object_count = 0
             landmark_count = 0
             data = []
-            object_name_list = []
             threed = 0
             twod = 0
-            objects = {}
-            object_comment = {}
-            object_images = {}
+            self.landmark_data = {}
+            self.object_name_list = []
+            self.object_comment = {}
+            self.object_images = {}
+            self.curve_data = {}
             currently_in_data_section = False
             object_id = ""
             object_image_path = ""
@@ -90,7 +113,6 @@ class TPS:
             # block with CURVES=<k> then k x (POINTS=<m> + m coordinate lines).
             # Those coordinate lines must go to curves, not into `data` (which
             # would corrupt the landmark list).
-            curve_data = {}
             current_curves = []
             current_curve = []
             curve_points_remaining = 0
@@ -109,21 +131,15 @@ class TPS:
                 if headerline is not None:
                     if currently_in_data_section:
                         if len(data) > 0:
-                            if object_id != "":
-                                key = object_id
-                            elif object_comment_1 != "":
-                                key = object_comment_1
-                                object_comment_1 = ""
-                            else:
-                                key = self.datasetname + "_" + str(object_count + 1)
-                            objects[key] = data
-                            object_name_list.append(key)
-                            object_comment[key] = " ".join([object_comment_1, object_comment_2]).strip()
-                            if object_image_path != "":
-                                object_images[key] = object_image_path
-                            if current_curves:
-                                curve_data[key] = current_curves
-                            # print("data:", data)
+                            self._store_object(
+                                data,
+                                object_id,
+                                object_comment_1,
+                                object_comment_2,
+                                object_image_path,
+                                current_curves,
+                                object_count,
+                            )
                             data = []
                             object_id = ""
                             object_comment_1 = ""
@@ -162,53 +178,38 @@ class TPS:
                         object_comment_2 = dataline.group(2)
                     elif dataline.group(1).lower() == "id":
                         object_id = dataline.group(2)
-                        pass
                     elif dataline.group(1).lower() == "curves":
                         reading_curves = True
                     elif dataline.group(1).lower() == "points":
                         curve_points_remaining = int(dataline.group(2))
                         current_curve = []
 
-            if len(data) > 0:
-                if object_id != "":
-                    key = object_id
-                elif object_comment_1 != "":
-                    key = object_comment_1
-                    object_comment_1 = ""
-                else:
-                    key = self.datasetname + "_" + str(object_count + 1)
-                objects[key] = data
-                object_name_list.append(key)
-                object_comment[key] = " ".join([object_comment_1, object_comment_2]).strip()
-                if object_image_path != "":
-                    object_images[key] = object_image_path
-                if current_curves:
-                    curve_data[key] = current_curves
-
+            # An empty / non-TPS file (no LM header, no landmarks): discard before
+            # storing anything, matching the pre-refactor behavior.
             if object_count == 0 and landmark_count == 0:
                 return None
 
-            if threed > twod:
-                self.dimension = 3
-            else:
-                self.dimension = 2
+            if len(data) > 0:
+                self._store_object(
+                    data,
+                    object_id,
+                    object_comment_1,
+                    object_comment_2,
+                    object_image_path,
+                    current_curves,
+                    object_count,
+                )
+
+            self.dimension = 3 if threed > twod else 2
 
             if self.dimension == 2 and self.invertY:
-                for key in objects.keys():
-                    for idx in range(len(objects[key])):
-                        objects[key][idx][1] = -1 * objects[key][idx][1]
+                for key in self.landmark_data:
+                    for idx in range(len(self.landmark_data[key])):
+                        self.landmark_data[key][idx][1] = -1 * self.landmark_data[key][idx][1]
+                for curve in (c for curves in self.curve_data.values() for c in curves):
+                    for point in curve:
+                        point[1] = -1 * point[1]
 
-            if self.dimension == 2 and self.invertY:
-                for key in curve_data:
-                    for curve in curve_data[key]:
-                        for point in curve:
-                            point[1] = -1 * point[1]
-
-            self.nobjects = len(object_name_list)
+            self.nobjects = len(self.object_name_list)
             self.nlandmarks = landmark_count
-            self.landmark_data = objects
-            self.curve_data = curve_data
-            self.object_name_list = object_name_list
-            self.object_comment = object_comment
-            self.object_images = object_images
             return dataset

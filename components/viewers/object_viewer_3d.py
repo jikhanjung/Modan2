@@ -849,6 +849,152 @@ class ObjectViewer3D(QGLWidget):
                     self.draw_simple_cone()
                 gl.glPopMatrix()
 
+    def _picking(self, current_buffer):
+        """True when rendering into the off-screen picker buffer."""
+        return current_buffer == self.picker_buffer and self.object_dialog is not None
+
+    def _draw_temp_edge(self, object):
+        """The wireframe edge currently being dragged."""
+        if not (self.show_wireframe and len(self.temp_edge) == 2 and object.show_wireframe):
+            return
+        gl.glColor3f(*mu.as_gl_color(object.edge_color or self.wireframe_color))
+        gl.glLineWidth(int(self.wireframe_thickness) + 1)
+        gl.glBegin(gl.GL_LINE_STRIP)
+        for v in self.temp_edge:
+            gl.glVertex3f(*v)
+        gl.glEnd()
+
+    @staticmethod
+    def _edge_is_drawable(object, edge):
+        """False when any of the edge's landmarks is missing."""
+        for lm_idx in edge:
+            if lm_idx <= len(object.landmark_list):
+                lm = object.landmark_list[lm_idx - 1]
+                if len(lm) < 3 or lm[0] is None or lm[1] is None or lm[2] is None:
+                    return False
+        return True
+
+    def _draw_wireframe_edges(self, object, current_buffer):
+        """Draw the dataset wireframe, or its pick-colour stand-in."""
+        if not (self.show_wireframe and len(self.edge_list) > 0 and object.show_wireframe):
+            return
+        picking = self._picking(current_buffer)
+        for i, edge in enumerate(self.edge_list):
+            if picking:
+                gl.glDisable(gl.GL_LIGHTING)
+                pick_color = self.edge_idx_to_color["edge_" + str(i)]
+                gl.glColor3f(*[c / 255.0 for c in pick_color])
+                gl.glLineWidth(3 * (int(self.wireframe_thickness) + 1))
+            else:
+                if i == self.selected_edge_index:
+                    gl.glColor3f(*COLOR["SELECTED_EDGE"])
+                else:
+                    gl.glColor3f(*mu.as_gl_color(object.edge_color or self.wireframe_color))
+                gl.glLineWidth(int(self.wireframe_thickness) + 1)
+
+            gl.glBegin(gl.GL_LINE_STRIP)
+            # Only draw the edge if all of its landmarks are present.
+            if self._edge_is_drawable(object, edge):
+                for lm_idx in edge:
+                    if lm_idx <= len(object.landmark_list):
+                        gl.glVertex3f(*object.landmark_list[lm_idx - 1])
+            gl.glEnd()
+
+            if picking:
+                gl.glEnable(gl.GL_LIGHTING)
+
+    def _draw_polygons(self, object, polygon_color):
+        """Fill the dataset polygons with the object's (or the given) colour."""
+        if not (self.show_polygon and len(self.polygon_list) > 0 and object.show_polygon):
+            return
+        self.calculate_normal_list(object, self.polygon_list)
+        for polygon in self.polygon_list:
+            normal = self.calculate_normal(object, polygon)
+            gl.glEnable(gl.GL_LIGHTING)
+            if object.polygon_color:
+                pg_color = mu.as_gl_color(object.polygon_color)
+            elif isinstance(polygon_color, QColor):
+                pg_color = mu.as_gl_color(polygon_color)
+            elif len(polygon_color) == 3:
+                pg_color = polygon_color
+            else:
+                pg_color = mu.as_gl_color(polygon_color)
+            gl.glColor4f(*pg_color, object.opacity)
+            gl.glNormal3f(*normal)
+            gl.glBegin(gl.GL_POLYGON)
+            for lm_idx in polygon:
+                if lm_idx <= len(object.landmark_list):
+                    gl.glVertex3f(*object.landmark_list[lm_idx - 1])
+            gl.glEnd()
+
+    def _draw_landmark_index(self, i, lm):
+        """Bitmap index label next to a landmark."""
+        if not self.show_index:
+            return
+        gl.glDisable(gl.GL_LIGHTING)
+        gl.glColor3f(*mu.as_gl_color(self.index_color))
+        gl.glRasterPos3f(lm[0] + 0.05, lm[1] + 0.05, lm[2])
+        font_size_list = [
+            glut.GLUT_BITMAP_HELVETICA_10,
+            glut.GLUT_BITMAP_HELVETICA_12,
+            glut.GLUT_BITMAP_HELVETICA_18,
+        ]
+        if GLUT_AVAILABLE and GLUT_INITIALIZED and glut:
+            try:
+                for letter in str(i + 1):
+                    glut.glutBitmapCharacter(font_size_list[int(self.index_size)], ord(letter))
+            except (OSError, AttributeError):
+                pass  # GLUT text rendering unavailable; skip the label
+        gl.glEnable(gl.GL_LIGHTING)
+
+    def _draw_landmark_spheres(self, object, color, current_buffer):
+        """Draw each landmark as a sphere (the normal, pickable representation)."""
+        picking = self._picking(current_buffer)
+        for i, lm in enumerate(object.landmark_list):
+            if len(lm) < 3 or lm[0] is None or lm[1] is None or lm[2] is None:
+                continue  # missing landmark
+            gl.glPushMatrix()
+            gl.glTranslate(*lm)
+            gl.glColor3f(*color)
+            if i in (self.selected_landmark_idx, self.wireframe_from_idx, self.wireframe_to_idx):
+                gl.glColor3f(*COLOR["SELECTED_LANDMARK"])
+            if picking:
+                gl.glDisable(gl.GL_LIGHTING)
+                pick_color = self.lm_idx_to_color["lm_" + str(i)]
+                gl.glColor3f(*[c / 255.0 for c in pick_color])
+            self.draw_sphere(0.02 * (int(self.landmark_size) + 1))
+            if picking:
+                gl.glEnable(gl.GL_LIGHTING)
+            gl.glPopMatrix()
+
+            self._draw_landmark_index(i, lm)
+
+    def _draw_landmark_points(self, object, color):
+        """Draw landmarks as plain points (the lightweight representation)."""
+        gl.glPointSize(5)
+        gl.glDisable(gl.GL_LIGHTING)
+        gl.glColor3f(*color)
+        gl.glBegin(gl.GL_POINTS)
+        for lm in object.landmark_list:
+            if len(lm) < 3 or lm[0] is None or lm[1] is None or lm[2] is None:
+                continue  # missing landmark
+            gl.glVertex3f(lm[0], lm[1], lm[2])
+        gl.glEnd()
+        gl.glEnable(gl.GL_LIGHTING)
+
+    def _draw_threed_model(self):
+        """Render the attached 3D mesh and the vertex under the cursor."""
+        if self.threed_model is None or self.show_model is not True:
+            return
+        self.threed_model.render()
+        if self.cursor_on_vertex > -1:
+            lm = self.threed_model.vertices[self.cursor_on_vertex]
+            gl.glPushMatrix()
+            gl.glTranslate(*lm)
+            gl.glColor3f(*COLOR["SELECTED_LANDMARK"])
+            self.draw_sphere(0.03)
+            gl.glPopMatrix()
+
     def draw_object(
         self,
         object,
@@ -857,149 +1003,25 @@ class ObjectViewer3D(QGLWidget):
         edge_color=COLOR["NORMAL_SHAPE"],
         polygon_color=COLOR["NORMAL_SHAPE"],
     ):
+        """Draw one object: wireframe, polygons, landmarks and the 3D model.
+
+        ``edge_color`` is accepted for call-site compatibility but unused -- edge
+        colour comes from the object or the viewer's wireframe_color.
+        """
         if object is None:
             return
         current_buffer = gl.glGetIntegerv(gl.GL_FRAMEBUFFER_BINDING)
 
-        if self.show_wireframe and len(self.temp_edge) == 2 and object.show_wireframe:
-            if object.edge_color:
-                wf_color = mu.as_gl_color(object.edge_color)
-            else:
-                wf_color = mu.as_gl_color(self.wireframe_color)
-            gl.glColor3f(*wf_color)  # *COLOR['WIREFRAME'])
-            gl.glLineWidth(int(self.wireframe_thickness) + 1)
-            gl.glBegin(gl.GL_LINE_STRIP)
-            for v in self.temp_edge:
-                gl.glVertex3f(*v)
-            gl.glEnd()
-
-        if self.show_wireframe and len(self.edge_list) > 0 and object.show_wireframe:
-            for i, edge in enumerate(self.edge_list):
-                if current_buffer == self.picker_buffer and self.object_dialog is not None:
-                    gl.glDisable(gl.GL_LIGHTING)
-                    key = "edge_" + str(i)
-                    color = self.edge_idx_to_color[key]
-                    gl.glColor3f(*[c * 1.0 / 255 for c in color])
-                    line_width = 3 * (int(self.wireframe_thickness) + 1)
-                    gl.glLineWidth(line_width)
-                else:
-                    if i == self.selected_edge_index:
-                        gl.glColor3f(*COLOR["SELECTED_EDGE"])
-                    else:
-                        if object.edge_color:
-                            wf_color = mu.as_gl_color(object.edge_color)
-                        else:
-                            wf_color = mu.as_gl_color(self.wireframe_color)
-                        gl.glColor3f(*wf_color)
-                    line_width = 1 * (int(self.wireframe_thickness) + 1)
-                    gl.glLineWidth(line_width)
-                gl.glBegin(gl.GL_LINE_STRIP)
-                valid_edge = True
-                for lm_idx in edge:
-                    if lm_idx <= len(object.landmark_list):
-                        lm = object.landmark_list[lm_idx - 1]
-                        # Check if landmark is missing
-                        if len(lm) < 3 or lm[0] is None or lm[1] is None or lm[2] is None:
-                            valid_edge = False
-                            break
-                # Only draw edge if all landmarks are valid
-                if valid_edge:
-                    for lm_idx in edge:
-                        if lm_idx <= len(object.landmark_list):
-                            lm = object.landmark_list[lm_idx - 1]
-                            gl.glVertex3f(*lm)
-                gl.glEnd()
-                if current_buffer == self.picker_buffer and self.object_dialog is not None:
-                    gl.glEnable(gl.GL_LIGHTING)
-
-        if self.show_polygon and len(self.polygon_list) > 0 and object.show_polygon:
-            self.calculate_normal_list(object, self.polygon_list)
-            for i, polygon in enumerate(self.polygon_list):
-                normal = self.calculate_normal(object, polygon)
-                gl.glEnable(gl.GL_LIGHTING)
-                if object.polygon_color:
-                    pg_color = mu.as_gl_color(object.polygon_color)
-                elif isinstance(polygon_color, QColor):
-                    pg_color = mu.as_gl_color(polygon_color)
-                elif len(polygon_color) == 3:
-                    pg_color = polygon_color
-                else:
-                    pg_color = mu.as_gl_color(polygon_color)
-                gl.glColor4f(*pg_color, object.opacity)
-                gl.glNormal3f(*normal)
-                gl.glBegin(gl.GL_POLYGON)
-                for lm_idx in polygon:
-                    if lm_idx <= len(object.landmark_list):
-                        lm = object.landmark_list[lm_idx - 1]
-                        gl.glVertex3f(*lm)
-                gl.glEnd()
+        self._draw_temp_edge(object)
+        self._draw_wireframe_edges(object, current_buffer)
+        self._draw_polygons(object, polygon_color)
 
         if landmark_as_sphere and object.show_landmark:
-            len(object.landmark_list)
-            for i, lm in enumerate(object.landmark_list):
-                # Skip missing landmarks in 3D view
-                if len(lm) < 3 or lm[0] is None or lm[1] is None or lm[2] is None:
-                    continue
-                gl.glPushMatrix()
-                gl.glTranslate(*lm)
-                gl.glColor3f(*color)
-                if i in [self.selected_landmark_idx, self.wireframe_from_idx, self.wireframe_to_idx]:
-                    gl.glColor3f(*COLOR["SELECTED_LANDMARK"])
-
-                if current_buffer == self.picker_buffer and self.object_dialog is not None:
-                    gl.glDisable(gl.GL_LIGHTING)
-                    key = "lm_" + str(i)
-                    color = self.lm_idx_to_color[key]
-                    gl.glColor3f(*[c * 1.0 / 255 for c in color])
-                self.draw_sphere(0.02 * (int(self.landmark_size) + 1))
-                if current_buffer == self.picker_buffer and self.object_dialog is not None:
-                    gl.glEnable(gl.GL_LIGHTING)
-                gl.glPopMatrix()
-
-                if self.show_index:
-                    gl.glDisable(gl.GL_LIGHTING)
-                    index_color = mu.as_gl_color(self.index_color)
-                    gl.glColor3f(*index_color)
-                    gl.glRasterPos3f(lm[0] + 0.05, lm[1] + 0.05, lm[2])
-                    font_size_list = [
-                        glut.GLUT_BITMAP_HELVETICA_10,
-                        glut.GLUT_BITMAP_HELVETICA_12,
-                        glut.GLUT_BITMAP_HELVETICA_18,
-                    ]
-                    if GLUT_AVAILABLE and GLUT_INITIALIZED and glut:
-                        try:
-                            for letter in list(str(i + 1)):
-                                glut.glutBitmapCharacter(font_size_list[int(self.index_size)], ord(letter))
-                        except (OSError, AttributeError):
-                            # Fallback if GLUT text rendering fails
-                            pass
-                    gl.glEnable(gl.GL_LIGHTING)
-
+            self._draw_landmark_spheres(object, color, current_buffer)
         elif object.show_landmark:
-            gl.glPointSize(5)
-            gl.glDisable(gl.GL_LIGHTING)
-            gl.glColor3f(*color)
-            gl.glBegin(gl.GL_POINTS)
-            # gl.glColor3f( 1.0, 1.0, 0.0 )
-            for lm in object.landmark_list:
-                # Skip missing landmarks
-                if len(lm) < 3 or lm[0] is None or lm[1] is None or lm[2] is None:
-                    continue
-                gl.glVertex3f(lm[0], lm[1], lm[2])
-            gl.glEnd()
-            gl.glEnable(gl.GL_LIGHTING)
+            self._draw_landmark_points(object, color)
 
-        if self.threed_model is not None and self.show_model is True:
-            self.threed_model.render()
-
-            if self.cursor_on_vertex > -1:
-                lm = self.threed_model.vertices[self.cursor_on_vertex]
-                gl.glPushMatrix()
-                gl.glTranslate(*lm)
-                gl.glColor3f(*COLOR["SELECTED_LANDMARK"])
-                self.draw_sphere(0.03)
-                gl.glPopMatrix()
-            return
+        self._draw_threed_model()
 
     def calculate_normal(self, obj_ops, polygon):
         p1 = obj_ops.landmark_list[polygon[0] - 1]

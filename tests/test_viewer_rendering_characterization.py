@@ -13,6 +13,8 @@ flaky. Interaction is asserted precisely, as the observable state transition of
 each mousePressEvent branch.
 """
 
+import sys
+
 import pytest
 from PyQt5.QtCore import QPoint, Qt
 from PyQt5.QtGui import QMouseEvent
@@ -157,6 +159,14 @@ class TestMousePressEventCharacterization:
         assert list(viewer_2d_obj.landmark_list) == before
 
 
+@pytest.mark.skipif(
+    not sys.platform.startswith("linux"),
+    reason=(
+        "needs a usable offscreen GL context: on headless Windows CI "
+        "glGetIntegerv(GL_FRAMEBUFFER_BINDING) raises GLError 1282, and macOS CI "
+        "segfaults (uncatchable, so it cannot be guarded with try/except)"
+    ),
+)
 class TestDrawObject3DCharacterization:
     """ObjectViewer3D.draw_object runs inside a GL context for its flag combos."""
 

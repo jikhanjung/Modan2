@@ -447,3 +447,40 @@ class TestImportEdgeCases:
             # Check if dataset was created (behavior depends on implementation)
             MdModel.MdDataset.select().count()
             # This test documents the current behavior, may need adjustment based on requirements
+
+
+class TestImportPreservesGeometry:
+    """Controller-level import must carry the file's dataset-wide geometry
+    (wireframe, polygons) and per-object metadata into the database."""
+
+    MORPHOLOGIKA = (
+        "[individuals]\n2\n"
+        "[landmarks]\n3\n"
+        "[dimensions]\n2\n"
+        "[names]\nA\nB\n"
+        "[rawpoints]\n0 0\n1 0\n0 1\n0 0\n2 0\n0 2\n"
+        "[labels]\nSex\n"
+        "[labelvalues]\nM\nF\n"
+        "[wireframe]\n1 2\n2 3\n"
+        "[polygons]\n1 2 3\n"
+    )
+
+    def test_morphologika_polygons_and_wireframe_survive_import(self, mock_database, tmp_path):
+        """Regression: import dropped the reader's polygon_list, so a Morphologika
+        file with a [polygons] block imported with no polygons."""
+        from components.formats import Morphologika
+        from ModanController import ModanController
+
+        path = tmp_path / "m.txt"
+        path.write_text(self.MORPHOLOGIKA)
+        parsed = Morphologika(str(path), "ds")
+        # sanity: the reader itself parsed the geometry
+        assert parsed.polygon_list == [[1, 2, 3]]
+        assert parsed.edge_list == [[1, 2], [2, 3]]
+
+        dataset = ModanController().import_dataset(parsed, "imported", str(tmp_path))
+        dataset = MdModel.MdDataset.get_by_id(dataset.id)
+
+        assert dataset.unpack_polygons() == [[1, 2, 3]]
+        assert dataset.unpack_wireframe() == [[1, 2], [2, 3]]
+        assert dataset.get_variablename_list() == ["Sex"]

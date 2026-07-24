@@ -662,6 +662,12 @@ class ModanController(QObject):
         if len(import_data.edge_list) > 0:
             dataset.edge_list = import_data.edge_list
             dataset.wireframe = dataset.pack_wireframe()
+        # Polygons (e.g. Morphologika [polygons]). The reader parses them, and the
+        # dataset model / ZIP export both carry them, so persist them here too —
+        # otherwise a polygon-bearing file silently imports with no polygons.
+        if len(getattr(import_data, "polygon_list", []) or []) > 0:
+            dataset.polygon_list = import_data.polygon_list
+            dataset.polygons = dataset.pack_polygons()
         # Semi-landmark curve configuration (TPS CURVES=). The curve points
         # become semi-landmarks appended after the fixed landmarks, so record
         # where each curve's block starts and how many points it has. Taken from

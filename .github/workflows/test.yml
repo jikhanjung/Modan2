@@ -130,19 +130,26 @@ jobs:
         uses: actions/cache@v6
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements-dev.lock') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements-*.lock') }}
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      # Install from the hash-verified lockfile so every matrix leg, and the
-      # release build, resolve the exact same wheels. requirements-dev.lock is
-      # compiled from requirements.txt + config/requirements-dev.txt (see the
-      # Makefile `lock` target); the lock-check job in security.yml gates it
-      # against drift.
+      # Install from the hash-verified, per-platform lockfile so every matrix leg
+      # and the release build resolve the exact same wheels. The locks are
+      # per-OS because PyQt5's Qt binary pins differ by platform (see Makefile);
+      # each is compiled from requirements.txt + config/requirements-dev.txt and
+      # gated against drift by the lock-check job in security.yml.
       - name: Install Python dependencies
         run: |
+          case "$RUNNER_OS" in
+            Linux)   LOCK=requirements-linux.lock ;;
+            Windows) LOCK=requirements-windows.lock ;;
+            macOS)   LOCK=requirements-macos.lock ;;
+            *) echo "Unknown RUNNER_OS: $RUNNER_OS"; exit 1 ;;
+          esac
+          echo "Installing from $LOCK"
           python -m pip install --upgrade pip
-          pip install --require-hashes -r requirements-dev.lock
+          pip install --require-hashes -r "$LOCK"
 
       # Provide a display for GLUT. Qt runs offscreen (no display needed), but some
       # modules call glutInit() at import time, which SEGFAULTS (uncatchable) when

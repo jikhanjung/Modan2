@@ -23,23 +23,25 @@ pip install -r config/requirements-dev.txt
 - Upper bound: Next major version (to prevent breaking changes)
 - Example: `>=8.4.0,<9.0` allows 8.x series but blocks 9.x
 
-### Lockfiles — `requirements.lock` / `requirements-dev.lock` (repo root)
-CI and release builds install from **hash-pinned lockfiles**, not the loose
-requirements files, so every run resolves identical wheels. They are compiled
-from the requirements files above (see the root `Makefile`):
+### Lockfiles — `requirements-{linux,windows,macos}.lock` (repo root)
+CI and release builds install from **hash-pinned, per-platform lockfiles**, not
+the loose requirements files, so every run resolves identical wheels. Each lock
+is the full set (runtime + dev/test, from `requirements.txt` +
+`config/requirements-dev.txt`), compiled per OS (see the root `Makefile`).
 
-- `requirements.lock` — runtime only (from `requirements.txt`)
-- `requirements-dev.lock` — runtime + dev/test (+ `config/requirements-dev.txt`)
+They are **per-platform, not universal**: PyQt5's Qt binary (`pyqt5-qt5`) ships
+different latest versions per OS — Linux/macOS reach 5.15.19 but Windows stops
+at 5.15.2 — so one universal pin would be uninstallable on Windows.
 
 ```bash
-# CI/build install (exact, verified):
-pip install --require-hashes -r requirements-dev.lock
+# CI test/build jobs install the lock matching their runner, e.g. on Linux:
+pip install --require-hashes -r requirements-linux.lock
 
-# Regenerate after editing a requirements file, then commit the locks:
+# Regenerate all three after editing a requirements file, then commit the locks:
 make lock          # security.yml's lock-check job fails if you forget
 ```
 
-> `config/requirements-ci.txt` was retired 2026-07-24: the dev lockfile is a
+> `config/requirements-ci.txt` was retired 2026-07-24: the lockfiles are a
 > superset, so a separate CI requirements file is no longer needed.
 
 ## Pytest Configuration
@@ -93,7 +95,7 @@ pytest -m "not slow"    # Skip slow tests
 
 The workflow automatically:
 1. Installs system dependencies (Qt, OpenGL, etc.)
-2. Installs Python dependencies from `requirements-dev.lock` (`--require-hashes`)
+2. Installs Python dependencies from the per-platform `requirements-<os>.lock` (`--require-hashes`)
 3. Runs tests with xvfb (headless GUI)
 4. Generates coverage reports
 5. Uploads results to Codecov

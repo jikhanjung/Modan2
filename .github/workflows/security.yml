@@ -28,13 +28,13 @@ jobs:
       - name: Install pip-audit
         run: pip install pip-audit
 
-      # Audit the shipped runtime dependencies at their exact locked versions —
-      # requirements.lock is what the release build installs, so this audits
-      # precisely what ships. Fails (non-zero) if any pinned package has a known
+      # Audit the locked dependencies at their exact pinned versions. This job
+      # runs on Linux, so it audits requirements-linux.lock (the same lock the
+      # Linux build installs). Fails (non-zero) if any pinned package has a known
       # vulnerability. Currently clean; if an unfixable advisory appears, add
       # `--ignore-vuln <ID>` with a comment rather than dropping the gate.
-      - name: Audit runtime dependencies
-        run: pip-audit -r requirements.lock
+      - name: Audit locked dependencies
+        run: pip-audit -r requirements-linux.lock
 
   lock-check:
     name: Lockfiles up to date

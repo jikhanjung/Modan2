@@ -66,6 +66,23 @@ jobs:
             echo "InnoSetup/Output does not exist"
           }
 
+      # Launch the frozen onedir build headless and assert it boots to an idle
+      # main window then exits 0 (main.py --self-test). The exe is self-contained
+      # (uses its bundled Python/libs, not the build venv), so this catches the
+      # "works from source, broken when frozen" class — a missing --add-data file
+      # or unbundled native lib — that source-tree tests cannot reach.
+      - name: Smoke-test frozen build (Windows)
+        shell: pwsh
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          $exe = "dist/Modan2/Modan2.exe"
+          if (-not (Test-Path $exe)) { echo "ERROR: $exe not found"; exit 1 }
+          # Start-Process -Wait so a windowed (--noconsole) app is actually awaited.
+          $p = Start-Process -FilePath $exe -ArgumentList "--self-test","--no-splash","--lang","en" -Wait -PassThru -NoNewWindow
+          if ($p.ExitCode -ne 0) { echo "Smoke test FAILED: exit $($p.ExitCode)"; exit 1 }
+          echo "Smoke test passed"
+
       - name: Zip Windows Installer or Portable Build
         shell: pwsh
         if: success()
@@ -140,6 +157,18 @@ jobs:
           python build.py
         env:
           BUILD_NUMBER: ${{ inputs.build_number }}
+
+      # Smoke-test the frozen onedir build headless before bundling (see the
+      # Windows step for rationale). macOS has no `timeout`, so we rely on the
+      # in-app --self-test watchdog to exit.
+      - name: Smoke-test frozen build (macOS)
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          exe="dist/Modan2/Modan2"
+          if [ ! -x "$exe" ]; then echo "ERROR: $exe not found"; ls -la dist/ dist/Modan2 2>/dev/null || true; exit 1; fi
+          "$exe" --self-test --no-splash --lang en
+          echo "Smoke test passed (exit $?)"
 
       - name: Create macOS app bundle
         run: |
@@ -288,6 +317,23 @@ jobs:
           python build.py
         env:
           BUILD_NUMBER: ${{ inputs.build_number }}
+
+      # Smoke-test the frozen onedir build headless before packaging (see the
+      # Windows step for rationale). Needs a real X display: the viewers call
+      # glutInit() at construction, which SEGFAULTs with no display even under
+      # the offscreen Qt platform — same reason test.yml runs Xvfb.
+      - name: Smoke-test frozen build (Linux)
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          sudo apt-get install -y xvfb
+          Xvfb :99 -screen 0 1024x768x24 >/tmp/xvfb.log 2>&1 &
+          export DISPLAY=:99
+          sleep 2
+          exe="dist/Modan2/Modan2"
+          if [ ! -x "$exe" ]; then echo "ERROR: $exe not found"; ls -la dist/ dist/Modan2 2>/dev/null || true; exit 1; fi
+          timeout 120 "$exe" --self-test --no-splash --lang en
+          echo "Smoke test passed (exit $?)"
 
       - name: Create Linux AppImage
         run: |

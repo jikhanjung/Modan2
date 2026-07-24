@@ -364,8 +364,8 @@ class ModanController(QObject):
             List of created objects
         """
         # Invariant: the public caller (import_objects) rejects a missing dataset
-        # before delegating here.
-        assert self.current_dataset is not None
+        # before delegating here. Also narrows the type for the checker below.
+        assert self.current_dataset is not None  # noqa: S101 — type-narrowing invariant, not input validation
         try:
             # Read landmark data
             landmarks_data = mu.read_landmark_file(file_path)

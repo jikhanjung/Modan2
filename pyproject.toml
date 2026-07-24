@@ -34,6 +34,11 @@ select = [
     "C4",  # flake8-comprehensions
     "LOG",    # flake8-logging (logging misuse) — 0 app-code violations; guards new code
     "RUF012", # mutable class-attr default (shared-state-across-instances bug); app code is clean
+    "S",      # flake8-bandit (security) — file-ingesting desktop app; guards new code
+              # for eval/exec/pickle/unsafe-yaml/hardcoded-SQL etc. The noisy subset
+              # (S101 asserts, S110/S112 defensive suppression, S311 non-crypto random)
+              # is ignored below after a full triage (devlog 245); md5 fixed with
+              # usedforsecurity=False; dev/build-tool subprocess is per-file-ignored.
     # Phased adoption of further groups is planned in devlog R05 (measured
     # violation counts + handling per group). Add them here as each phase lands.
 ]
@@ -47,6 +52,13 @@ ignore = [
     "N806",  # variable in function should be lowercase (Qt variables use camelCase)
     "N812",  # lowercase imported as non-lowercase (APP_VERSION is intentional)
     "B905",  # zip without explicit strict parameter (not available in Python 3.9)
+    # flake8-bandit noise, triaged in devlog 245 (all 13 S110/S112 sites are
+    # intentional best-effort suppression: error-handler cleanup, optional-feature
+    # fallbacks, startup guards that must never re-raise):
+    "S110",  # try-except-pass — intentional defensive suppression across the GUI
+    "S112",  # try-except-continue — same, in per-item loops
+    "S311",  # non-crypto random — only used for viewer color-picking/visuals; the
+             # app has no cryptographic use of randomness
 ]
 
 [tool.ruff.format]
@@ -64,9 +76,13 @@ known-third-party = ["PyQt5", "peewee", "numpy", "pandas", "scipy", "matplotlib"
 # Ignore specific rules for specific files
 "__init__.py" = ["F401"]  # Unused imports in __init__.py are often intentional
 "tests/*" = ["N802", "N803", "E712", "E722", "B017"]  # Allow non-lowercase function names, comparison to True/False, bare except, and generic exceptions in tests
+"tests/**" = ["S"]  # bandit doesn't apply to trusted test code: asserts (S101), /tmp fixtures (S108), test SQL/subprocess/md5 fixtures
 "dialogs/*" = ["N813"]  # Allow "import MdUtils as mu" convention in dialogs
 "components/*" = ["N811", "N813", "B007", "B008", "E741", "N815", "F811", "F821"]  # Allow OpenGL/GLUT lowercase imports, MdUtils as mu, loop control variables, Qt naming conventions, ambiguous variables, duplicate functions, and undefined names
-"build.py" = ["E402", "N813"]  # Allow imports after code and lowercase module imports
+"build.py" = ["E402", "N813", "S603"]  # Allow imports after code, lowercase module imports; subprocess runs trusted build commands
+"manage_version.py" = ["S603", "S607"]  # Dev tool: subprocess runs trusted git/python with partial paths
+"docs/build_all.py" = ["S602", "S603", "S607"]  # Dev docs-build script: trusted shell/subprocess commands
+"tools/*" = ["S603", "S607"]  # Dev index tooling: subprocess runs trusted commands with partial paths
 "migrate.py" = ["E402", "N813", "N816"]  # Allow imports after code and naming conventions
 "MdHelpers.py" = ["F401"]  # Imports in try-except blocks for dependency checking
 "MdModel.py" = ["N813", "N816"]  # Allow "import MdUtils as mu" and gDatabase global

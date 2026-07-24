@@ -59,6 +59,13 @@ def parse_arguments():
 
     parser.add_argument("--no-splash", action="store_true", help="Skip splash screen on startup")
 
+    # Boot the full app (heavy imports + main window) then exit 0 without entering
+    # interactive use. Used by CI to smoke-test the *frozen* build on a clean
+    # runner (QT_QPA_PLATFORM=offscreen): catches "works from source, broken when
+    # frozen" failures (a PyInstaller-missing data file / unbundled native lib)
+    # that source-tree tests cannot reach.
+    parser.add_argument("--self-test", action="store_true", help="Boot the app headless, then exit 0 (CI smoke test)")
+
     # Import version
     try:
         from version import __version__
@@ -253,6 +260,21 @@ def main():
             window.statusBar.showMessage("Debug mode enabled")
 
         logger.info("Application started successfully")
+
+        # Self-test: the full startup path above already exercised the frozen
+        # bundle (every heavy import + main-window construction). Now let the
+        # event loop spin briefly so deferred work runs, then quit with 0. Close
+        # any top-levels first so a stray modal's nested loop can't outlive quit().
+        if args.self_test:
+            from PyQt5.QtCore import QTimer
+
+            def _self_test_exit():
+                logger.info("Self-test: main window reached; exiting cleanly")
+                for w in QApplication.topLevelWidgets():
+                    w.close()
+                app.quit()
+
+            QTimer.singleShot(2000, _self_test_exit)
 
         # Run application
         exit_code = app.exec_()

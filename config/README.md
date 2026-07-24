@@ -23,20 +23,24 @@ pip install -r config/requirements-dev.txt
 - Upper bound: Next major version (to prevent breaking changes)
 - Example: `>=8.4.0,<9.0` allows 8.x series but blocks 9.x
 
-### `requirements-ci.txt`
-CI/CD testing dependencies for automated testing environments.
+### Lockfiles — `requirements.lock` / `requirements-dev.lock` (repo root)
+CI and release builds install from **hash-pinned lockfiles**, not the loose
+requirements files, so every run resolves identical wheels. They are compiled
+from the requirements files above (see the root `Makefile`):
 
-**Install:**
+- `requirements.lock` — runtime only (from `requirements.txt`)
+- `requirements-dev.lock` — runtime + dev/test (+ `config/requirements-dev.txt`)
+
 ```bash
-pip install -r config/requirements-ci.txt
+# CI/build install (exact, verified):
+pip install --require-hashes -r requirements-dev.lock
+
+# Regenerate after editing a requirements file, then commit the locks:
+make lock          # security.yml's lock-check job fails if you forget
 ```
 
-**Includes:**
-- All items from `requirements-dev.txt`
-- Base application dependencies (`requirements.txt`)
-- CI-specific tools (pytest-xvfb for headless GUI testing)
-
-**Used by:** GitHub Actions workflow (`.github/workflows/test.yml`)
+> `config/requirements-ci.txt` was retired 2026-07-24: the dev lockfile is a
+> superset, so a separate CI requirements file is no longer needed.
 
 ## Pytest Configuration
 
@@ -89,7 +93,7 @@ pytest -m "not slow"    # Skip slow tests
 
 The workflow automatically:
 1. Installs system dependencies (Qt, OpenGL, etc.)
-2. Installs Python dependencies from `config/requirements-ci.txt`
+2. Installs Python dependencies from `requirements-dev.lock` (`--require-hashes`)
 3. Runs tests with xvfb (headless GUI)
 4. Generates coverage reports
 5. Uploads results to Codecov
@@ -178,8 +182,8 @@ pytest~=8.4.0
 
 ### Import errors in CI
 ```bash
-# Check: Is dependency in requirements-ci.txt?
-# Fix: Add to requirements-ci.txt
+# Check: Is dependency in requirements.txt / config/requirements-dev.txt?
+# Fix: add it there, then `make lock` to refresh the lockfiles, and commit.
 ```
 
 ### Version conflicts

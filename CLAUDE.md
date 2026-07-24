@@ -49,7 +49,7 @@ Modan2/
 ├── pytest.ini            # Pytest configuration (the one pytest uses)
 ├── translations/         # Modan2_{ko,en}.ts / .qm
 ├── logs/                 # Application log files
-├── config/               # requirements-dev.txt, requirements-ci.txt
+├── config/               # requirements-dev.txt (CI/build install from requirements*.lock)
 ├── tests/                # Automated test suite (pytest)
 ├── devlog/               # Development documentation and logs
 └── tools/                # Code index builder and search

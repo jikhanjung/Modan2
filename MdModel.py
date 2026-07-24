@@ -1083,7 +1083,7 @@ class MdImage(Model):
 
     def get_md5hash_info(self, filepath):
         try:
-            hasher = hashlib.md5()
+            hasher = hashlib.md5(usedforsecurity=False)
             with open(filepath, "rb") as afile:
                 image_data = afile.read()
                 hasher.update(image_data)
@@ -1258,7 +1258,7 @@ class MdThreeDModel(Model):
 
     def get_md5hash_info(self, filepath):
         try:
-            hasher = hashlib.md5()
+            hasher = hashlib.md5(usedforsecurity=False)
             with open(filepath, "rb") as afile:
                 image_data = afile.read()
                 hasher.update(image_data)

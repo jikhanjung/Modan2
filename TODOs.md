@@ -138,28 +138,26 @@ Post-0.1.8 review items, in priority order:
 
 ## 🟠 R06 CI-recommendations review (2026-07-24) — see `devlog/20260724_R06_ci_recommendations_review_and_quickwins.md`
 
-Three of the five CTHarvester CI recommendations were adopted and shipped
-(lockfiles + `--require-hashes`, CodeQL SAST, version-consistency test — commit
-`b52bab0`, devlog 244). Remaining, deferred by design:
+All five CTHarvester CI recommendations are now resolved (3 shipped in commit
+`b52bab0`/devlog 244; the remaining 3 in devlog 245):
 
-- [ ] **ruff `S` (flake8-bandit) ruleset** — the file-ingesting-desktop-app
-      security rules (`eval`/`exec`/`pickle`/`shell=True`/unsafe-YAML/weak-hash/
-      insecure-path). Valuable but needs a triage budget for the first-pass
-      findings, so folded into the R05 phased-adoption cadence rather than added
-      blind. Next step: `ruff check . --select S` dry-run to size the finding
-      count, then add `"S"` to the `select` in `pyproject.toml` with the
-      `"tests/**" = ["S101"]` carve-out.
-- [ ] **Packaged-artifact smoke test** (shared gap w/ CTHarvester) — CI builds
-      per-OS installers but only checks the executable *file exists*; it never
-      installs the produced artifact on a clean runner and launches it headless.
-      This is the "works from source, broken when frozen" surface (PyInstaller
-      missing a data file / unbundled native lib). Proposed: after the build job,
-      on a clean runner install the artifact, launch with `QT_QPA_PLATFORM=offscreen`,
-      assert it reaches an idle main window, quit; gate the release on it. ~2h,
-      OS-by-OS.
-- [ ] **Retire `config/requirements-ci.txt`** — now unused by CI (the dev
-      lockfile is a superset). Left in place for now in case it's referenced
-      locally/in docs; decide whether to remove it.
+- [x] **ruff `S` (flake8-bandit) ruleset** — DONE (devlog 245). Full triage of
+      the 34 app-code findings (3751 of 3818 were test asserts): fixed the 2 real
+      ones (`md5` → `usedforsecurity=False` in `MdModel`), globally ignored the
+      pure-noise rules (S110/S112 intentional defensive suppression, S311
+      non-crypto viewer random) with rationale, per-file-ignored dev/build-tool
+      subprocess (S603/S607/S602), `# noqa`'d one type-narrowing assert. `S` now
+      active app-wide for the valuable rules (eval/exec/pickle/unsafe-YAML/SQL);
+      `ruff check .` clean.
+- [x] **Packaged-artifact smoke test** — DONE (devlog 245). Added
+      `main.py --self-test` (boots the full app headless, exits 0) and a
+      smoke step in each of the 3 `reusable_build.yml` build jobs that launches
+      the frozen onedir exe under `QT_QPA_PLATFORM=offscreen` (Linux needs Xvfb
+      for glutInit). Catches the "broken when frozen" class. `tests/test_main_cli.py`
+      guards the flag. **Watch:** verify the 3 steps are green on the next release
+      build (first real CI validation).
+- [x] **Retire `config/requirements-ci.txt`** — DONE (devlog 245). Removed (the
+      dev lockfile is a superset); `config/README.md` + `CLAUDE.md` updated.
 
 Not adopted (agreed overkill for this solo commit-to-main repo; documented in
 R06 §3): `dependency-review` action, a dedicated performance-tracking workflow,

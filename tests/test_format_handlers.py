@@ -22,6 +22,7 @@ import tempfile
 import pytest
 
 from components.formats.morphologika import Morphologika
+from components.formats.nts import NTS
 from components.formats.tps import TPS
 
 
@@ -197,15 +198,40 @@ ID=TestInvert
 
 @pytest.mark.skip(reason="NTS format requires investigation of real-world file samples")
 class TestNTSFormat:
-    """Test NTS format handler - SKIPPED
+    """Test NTS format handler.
 
-    Note: NTS format tests are currently skipped. The NTS format has complex header
-    parsing with regex patterns that require specific whitespace and field ordering.
-    Real-world NTS files use patterns like "1 81L 144 0 dim=3" which don't match
-    the simple patterns initially assumed. Further investigation needed.
+    The header is positional, e.g. ``1 2L 6 0 dim=2``: object count, a row-name
+    flag (``L`` = names on their own line, ``b``/``e`` = at the row's start/end),
+    the variable count, and the dimension.
     """
 
-    pass
+    @staticmethod
+    def _write(tmp_path, content):
+        path = tmp_path / "test.nts"
+        path.write_text(content, encoding="utf-8")
+        return str(path)
+
+    def test_nts_parses_header_and_rows(self, tmp_path):
+        content = "1 2L 6 0 dim=2\nObjA ObjB\n1.0 2.0 3.0 4.0 5.0 6.0\n7.0 8.0 9.0 10.0 11.0 12.0\n"
+        nts = NTS(self._write(tmp_path, content), "ds")
+
+        assert nts.dimension == 2
+        assert nts.nobjects == 2
+        assert nts.object_name_list == ["ObjA", "ObjB"]
+        assert nts.landmark_data["ObjA"] == [[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]]
+
+    def test_nts_reports_landmark_count(self, tmp_path):
+        """nlandmarks is variables / dimension.
+
+        Regression: the count was computed behind a guard that read a stale local
+        `dimension` (only self.dimension was ever updated), so the guard was
+        always false and nlandmarks stayed 0 for every NTS file.
+        """
+        content = "1 2L 6 0 dim=2\nObjA ObjB\n1.0 2.0 3.0 4.0 5.0 6.0\n7.0 8.0 9.0 10.0 11.0 12.0\n"
+        nts = NTS(self._write(tmp_path, content), "ds")
+
+        assert nts.nlandmarks == 3
+        assert nts.nlandmarks == len(nts.landmark_data["ObjA"])
 
 
 @pytest.mark.skip(reason="X1Y1 format requires investigation of dimension detection logic")

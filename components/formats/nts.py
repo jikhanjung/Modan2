@@ -61,104 +61,109 @@ class NTS:
         except ValueError:
             return False
 
+    def _parse_header(self, headerline):
+        """Parse the NTS header line.
+
+        Sets ``self.dimension`` and returns ``(total_object_count,
+        variable_count, layout)``; ``layout`` records where the row / column
+        names live.
+        """
+        total_object_count = int(headerline.group(3))
+        variable_count = int(headerline.group(6))
+        self.dimension = int(headerline.group(14))
+        if headerline.group(13).lower() == "dim":
+            self.dimension = int(headerline.group(14))
+
+        row_flag = headerline.group(4).lower()
+        layout = {
+            "row_names_separate_line": row_flag == "l",
+            "row_names_at_beginning": row_flag == "b",
+            "row_names_at_ending": row_flag == "e",
+            "column_names_exist": headerline.group(7).lower() == "l",
+        }
+        return total_object_count, variable_count, layout
+
+    def _row_name(self, data_list, layout, row_names_list, index):
+        """Take this row's object name per the header layout.
+
+        Names given at the row's start/end are popped out of ``data_list`` so
+        only coordinates remain. Falls back to a generated name when the file
+        supplies fewer names than rows (rather than raising IndexError).
+        """
+        if layout["row_names_at_beginning"]:
+            return data_list.pop(0)
+        if layout["row_names_at_ending"]:
+            return data_list.pop(-1)
+        if index < len(row_names_list):
+            return row_names_list[index]
+        return f"{self.datasetname}_{index + 1}"
+
     def read(self):
         with open_text(self.filename) as f:
             nts_lines = f.readlines()
 
-            dataset = {}
+        dataset = {}
+        total_object_count = -1
+        landmark_count = 0
+        objects = {}
+        object_name_list = []
+        row_names_list = []
+        comments = ""
+        layout = None  # set once the header line is seen
+        row_names_read = False
+        column_names_read = False
 
-            total_object_count = 0
-            landmark_count = 0
-            object_name_list = []
-            objects = {}
-            total_object_count = -1
-            variable_count = -1
-            dimension = -1
-            headerline_processed = False
-            column_names_exist = False
-            column_names_read = False
-            row_names_read = False
-            # Bound here so a header with no separate row-name line still has a
-            # defined list at the `elif len(row_names_list) > 0` branch below
-            # (otherwise that path raises NameError).
-            row_names_list = []
-            row_names_exist_at_row_beginning = False
-            row_names_exist_at_row_ending = False
-            row_names_exist_in_separate_line = False
+        for line in nts_lines:
+            line = line.strip()
+            if line == "":
+                continue
+            if line.startswith('"') or line.startswith("'"):
+                comments += line
+                continue
 
-            current_object_count = 0
-            comments = ""
+            #                          1    2     3   4    5     6    7   8    9    10   11   12   13    14
+            headerline = re.search(
+                r"^(\d+)(\s+)(\d+)(\w*)(\s+)(\d+)(\w*)(\s+)(\d+)(\s+)(\d*)(\s*)(\w+)=(\d+)(.*)", line
+            )
+            if headerline is not None:
+                total_object_count, variable_count, layout = self._parse_header(headerline)
+                # Landmarks per object. This used a stale local `dimension` that
+                # was never updated (only self.dimension was), so the condition
+                # was always false and nlandmarks stayed 0 for every NTS file.
+                if variable_count > 0 and self.dimension > 0:
+                    landmark_count = int(variable_count / self.dimension)
+                continue
 
-            for line in nts_lines:
-                line = line.strip()
-                if line == "":
-                    continue
-                if line.startswith('"') or line.startswith("'"):
-                    comments += line
-                    continue
-                #                          1    2     3   4    5     6    7   8    9    10   11   12   13    14
-                headerline = re.search(
-                    r"^(\d+)(\s+)(\d+)(\w*)(\s+)(\d+)(\w*)(\s+)(\d+)(\s+)(\d*)(\s*)(\w+)=(\d+)(.*)", line
-                )
-                if headerline is not None:
-                    headerline.group(1)
-                    total_object_count = int(headerline.group(3))
-                    variable_count = int(headerline.group(6))
-                    self.dimension = int(headerline.group(14))
-                    if variable_count > 0 and dimension > 0:
-                        landmark_count = int(float(variable_count) / float(dimension))
-                    if headerline.group(4).lower() == "l":
-                        row_names_exist_in_separate_line = True
-                    elif headerline.group(4).lower() == "b":
-                        row_names_exist_at_row_beginning = True
-                    elif headerline.group(4).lower() == "e":
-                        row_names_exist_at_row_ending = True
-                    if headerline.group(7).lower() == "l":
-                        column_names_exist = True
-                    if headerline.group(13).lower() == "dim":
-                        self.dimension = int(headerline.group(14))
-                    headerline_processed = True
-                    continue
+            if layout is None:
+                continue  # data before the header line; ignore it
 
-                if headerline_processed and row_names_exist_in_separate_line and not row_names_read:
-                    row_names_list = re.split(r"\s+", line)
-                    row_names_read = True
-                    continue
+            if layout["row_names_separate_line"] and not row_names_read:
+                row_names_list = re.split(r"\s+", line)
+                row_names_read = True
+                continue
 
-                if headerline_processed and column_names_exist and not column_names_read:
-                    re.split(r"\s+", line)
-                    column_names_read = True
-                    continue
+            if layout["column_names_exist"] and not column_names_read:
+                column_names_read = True  # column names are parsed but unused
+                continue
 
-                if headerline_processed:
-                    data_list = re.split(r"\s+", line)
-                    if row_names_exist_at_row_beginning:
-                        row_name = data_list.pop(0)
-                    elif row_names_exist_at_row_ending:
-                        row_name = data_list.pop(-1)
-                    elif len(row_names_list) > 0:
-                        row_name = row_names_list[current_object_count]
-                    else:
-                        row_name = self.datasetname + "_" + str(current_object_count + 1)
-                    data_list = [float(x) for x in data_list]
-                    objects[row_name] = []
-                    for idx in range(0, len(data_list), self.dimension):
-                        objects[row_name].append(data_list[idx : idx + self.dimension])
-                    object_name_list.append(row_name)
-                    current_object_count += 1
+            data_list = re.split(r"\s+", line)
+            row_name = self._row_name(data_list, layout, row_names_list, len(object_name_list))
+            coords = [float(x) for x in data_list]
+            objects[row_name] = [coords[i : i + self.dimension] for i in range(0, len(coords), self.dimension)]
+            object_name_list.append(row_name)
 
-            if total_object_count == 0 and landmark_count == 0:
-                return None
+        if total_object_count == 0 and landmark_count == 0:
+            return None
 
-            self.nobjects = len(object_name_list)
-            self.nlandmarks = landmark_count
-            self.landmark_data = objects
-            self.object_name_list = object_name_list
-            self.description = comments
+        self.nobjects = len(object_name_list)
+        self.nlandmarks = landmark_count
+        self.landmark_data = objects
+        self.object_name_list = object_name_list
+        self.description = comments
 
-            if self.dimension == 2 and self.invertY:
-                for key in objects.keys():
-                    for idx in range(len(objects[key])):
-                        objects[key][idx][1] = -1 * objects[key][idx][1]
+        if self.dimension == 2 and self.invertY:
+            for coords in objects.values():
+                for point in coords:
+                    point[1] = -1 * point[1]
 
-            return dataset
+        return dataset

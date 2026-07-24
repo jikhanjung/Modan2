@@ -8,6 +8,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+## [0.2.0-alpha.2] - 2026-07-24
+
+A hardening release for the 0.2 alpha: several data-loss and crash fixes found by
+a file-I/O/security audit and by fuzzing, plus a large internal quality push
+(cross-platform CI, type checking, and a complexity-refactoring campaign).
+
+### Fixed
+- **Semi-landmark curves are no longer lost on ZIP export/import.** A dataset
+  packaged to `.zip` and re-imported dropped its curve scheme and every traced
+  curve; the package format now carries them (manifest schema 1.2, older
+  packages still import).
+- **Polygons are no longer dropped when importing a file.** A Morphologika file
+  with a `[polygons]` block imported with no polygons.
+- **Missing landmarks survive ZIP round-trips correctly**, stored with the app's
+  "Missing" marker instead of the string "None".
+- **NTS files now report the correct landmark count** (it was always 0).
+- **Korean (and other non-Latin) chart text renders instead of showing boxes**,
+  via a per-glyph font fallback built from the fonts installed on the machine.
+- **Landmark file readers tolerate non-ASCII specimen names on any locale**
+  (e.g. cp949 files on a UTF-8 system and vice-versa), including a second set of
+  readers the earlier fix had missed.
+- **A malformed input file no longer crashes a reader** — fuzzing surfaced a
+  Morphologika crash on a bare `[`; parsers now fail with a clear error.
+- **Data Exploration no longer crashes when an analysis has fewer components
+  than the selected axis** (a scatter plot with a 3rd axis on a 2-component PCA).
+- **A requested CVA/MANOVA that fails is reported to you**, instead of the
+  analysis claiming success while silently saving nothing.
+- **Saving an object is now atomic** — a failure while attaching its image/3D
+  model can no longer leave a half-written object.
+- **More dialog actions surface errors instead of silently closing the window**
+  (expanded the guarded-slot coverage), with a global crash handler as a backstop.
+- Importing a crafted dataset package can no longer copy files from outside the
+  package (path-traversal hardening).
+
+### Added
+- **Export semi-landmark curves to TPS** (`CURVES=`), symmetric to the existing
+  import.
+
+### Changed / Internal
+- Cross-platform CI (Linux/Windows/macOS) with an import smoke test; linting,
+  formatting, type-checking (mypy), a dependency CVE scan, and a coverage floor
+  are now enforced.
+- A complexity-refactoring campaign brought every application function under a
+  cyclomatic complexity of 15 (was 56), with characterization tests added for the
+  viewers; this surfaced and fixed several of the bugs above.
+- Added `docs/CODE_QUALITY_GUIDE.md`.
+
+
 ## [0.2.0-alpha.1] - 2026-07-23
 
 Semi-landmark curves: trace a curve on a specimen and have it resampled into

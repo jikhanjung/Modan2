@@ -12,7 +12,7 @@ xlsxwriter
 # pytz dependency (migrated to tzdata), which broke the frozen Windows build with
 # "Can't determine version for pytz". Staying on 2.x keeps CI matching dev and
 # ships a pytz that has proper metadata + __version__.
-pandas>=2.0,<3.0
+pandas>=3.0.5,<4.0
 peewee-migrate
 scikit-learn
 statsmodels

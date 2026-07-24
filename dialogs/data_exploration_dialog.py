@@ -2168,13 +2168,187 @@ class DataExplorationDialog(QDialog):
         r_squared = 1 - (ss_res / ss_total)
         return r_squared
 
+    def _plot_scatter_groups(self, show_average_shape, show_data_labels):
+        """Draw each group's points, its labels, and optionally its mean shape."""
+        for name, group in self.scatter_data.items():
+            if len(group["x_val"]) > 0:
+                self.scatter_result[name] = self.ax2.scatter(
+                    group["x_val"],
+                    group["y_val"],
+                    s=group["size"],
+                    marker=group["symbol"],
+                    color=group["color"],
+                    data=group["data"],
+                    picker=True,
+                    pickradius=5,
+                )
+            if name == "__selected__":
+                for idx, obj in enumerate(group["data"]):
+                    self.ax2.annotate(obj.object_name, (group["x_val"][idx], group["y_val"][idx]))
+            elif show_data_labels:
+                for idx in range(len(group["x_val"])):
+                    label = self._data_point_label(group["data"][idx]) if idx < len(group["data"]) else ""
+                    if label:
+                        self.ax2.annotate(
+                            label,
+                            (group["x_val"][idx], group["y_val"][idx]),
+                            textcoords="offset pixels",
+                            xytext=(6, 6),
+                            fontsize=8,
+                            color="dimgray",
+                        )
+
+            if show_average_shape:
+                self.ax2.scatter(
+                    self.average_shape[name]["x_val"],
+                    self.average_shape[name]["y_val"],
+                    s=group["size"] * 3,
+                    marker=group["symbol"],
+                    color=group["color"],
+                )
+
+    def _annotate_regression_curve(self, curve):
+        """Label a fitted curve with its polynomial model and R^2."""
+        degree = len(curve["model"]) - 1
+        model_text = "Y="
+        for i in range(degree + 1):
+            coeff = round(curve["model"][i] * 1000) / 1000
+            if coeff == 0.0:
+                continue
+            model_text += str(coeff)
+            if degree != i:
+                model_text += "X"
+                model_text += "^" + str(degree - i) if degree - i > 1 else ""
+            if i < degree:
+                model_text += " + "
+        r_squared_text = "R^2=" + str(round(curve["r_squared"] * 1000) / 1000)
+
+        for text, point in (
+            (model_text, (curve["size_range"][10], curve["curve"][10])),
+            (r_squared_text, (curve["size_range"][90], curve["curve"][90])),
+        ):
+            annotation = self.ax2.annotate(rf"${text}$", point, fontname="Times New Roman")
+            annotation.set_bbox({"boxstyle": "round", "facecolor": "white", "edgecolor": "none", "alpha": 0.7})
+
+    def _plot_regression_curves(self, show_extrapolate, show_annotation):
+        """Draw each fitted regression curve (and its extrapolation / annotation)."""
+        if not self.curve_list:
+            return
+        for curve in self.curve_list:
+            if curve is None:
+                continue
+            self.ax2.plot(curve["size_range"], curve["curve"], label=curve["key"], color=curve["color"])
+            if show_extrapolate:
+                self.ax2.plot(
+                    curve["size_range2"],
+                    curve["curve2"],
+                    label=curve["key"],
+                    color=curve["color"],
+                    linestyle="dashed",
+                )
+            if show_annotation:
+                self._annotate_regression_curve(curve)
+
+    def _draw_legends(self, show_regression):
+        """Add the group legend, plus a separate regression legend when the
+        regression grouping differs from the scatter grouping."""
+        scatter_legend = build_scatter_legend(
+            self.ax2, self.scatter_result, order=self.get_legend_order(), **self.legend_placement_kwargs()
+        )
+        self.ax2.add_artist(scatter_legend)
+        self.apply_legend_placement(scatter_legend)
+        bbox = scatter_legend.get_window_extent()
+        bbox.transformed(self.ax2.transAxes.inverted())
+
+        if show_regression and self.regression_variable_index != self.scatter_variable_index:
+            values = []
+            keys = []
+            for curve in self.curve_list:
+                if curve:
+                    keys.append(curve["key"])
+                    values.append(curve)
+            regression_legend = self.ax2.legend(
+                values,
+                [format_legend_label(key)[0] for key in keys],
+                loc="lower right",
+                bbox_to_anchor=(1.05, 0),
+            )
+            apply_legend_italics(regression_legend, keys)
+            self.ax2.add_artist(regression_legend)
+
+    def _append_variance_to_titles(self, axis1_title, axis2_title):
+        """Append each axis' explained-variance percentage to its title."""
+        var_explained = None
+        if hasattr(self, "analysis_result") and hasattr(self.analysis_result, "eigen_value_percentages"):
+            var_explained = self.analysis_result.eigen_value_percentages
+        elif hasattr(self, "eigen_value_percentages"):
+            var_explained = self.eigen_value_percentages
+        if not var_explained:
+            return axis1_title, axis2_title
+
+        axis1_idx = self.comboAxis1.currentIndex()
+        axis2_idx = self.comboAxis2.currentIndex()
+        try:
+            # Axis1 index 0 is CSize, so PC1 sits at index 1 -> subtract 1.
+            if axis1_idx > 0:
+                pc_idx_1 = axis1_idx - 1
+                if 0 <= pc_idx_1 < len(var_explained):
+                    axis1_title += f" ({var_explained[pc_idx_1] * 100:.1f}%)"
+            # Axis2 index maps directly to the PC number.
+            if 0 <= axis2_idx < len(var_explained):
+                axis2_title += f" ({var_explained[axis2_idx] * 100:.1f}%)"
+        except (IndexError, TypeError, ValueError) as e:
+            logger.debug(f"Could not add variance explained to axis labels: {e}")
+        return axis1_title, axis2_title
+
+    def _draw_convex_hulls(self):
+        """Outline and fill each group's convex hull."""
+        for group in self.scatter_data.values():
+            if "hull" not in group:
+                continue
+            hull = group["hull"]
+            for simplex in hull.simplices:
+                self.ax2.plot(group["points"][simplex, 0], group["points"][simplex, 1], color=group["color"])
+
+            hull_vertices_x = np.append(group["points"][hull.vertices, 0], group["points"][hull.vertices, 0][0])
+            hull_vertices_y = np.append(group["points"][hull.vertices, 1], group["points"][hull.vertices, 1][0])
+            self.ax2.fill(hull_vertices_x, hull_vertices_y, color=group["color"], alpha=0.5)
+
+    def _draw_confidence_ellipses(self):
+        """Draw each group's confidence ellipse around its mean."""
+        for key_name, group in self.scatter_data.items():
+            if "ellipse" not in group:
+                continue
+            width, height, angle = group["ellipse"]
+            ellipse = matplotlib.patches.Ellipse(
+                xy=(self.average_shape[key_name]["x_val"], self.average_shape[key_name]["y_val"]),
+                width=width,
+                height=height,
+                angle=angle,
+                color=group["color"],
+                lw=2,
+                alpha=0.3,
+                fill=True,
+            )
+            self.ax2.add_patch(ellipse)
+
+    def _update_shape_grid(self):
+        """Refresh the overlaid shape views at their chart positions."""
+        for keyname in self.shape_grid.keys():
+            shape = self.raw_chart_coords_to_shape(self.shape_grid[keyname]["x_val"], self.shape_grid[keyname]["y_val"])
+            obj = self.shape_to_object(shape)
+
+            view = self.shape_grid[keyname]["view"]
+            view.show()
+            view.set_object(obj)
+            view.apply_rotation(self.rotation_matrix)
+            view.set_shape_preference(self.sgpWidget.get_preference())
+        self.reposition_shape_grid()
+
     def show_analysis_result(self):
-        # print("show analysis result", datetime.datetime.now())
-        # self.plot_widget.clear()
+        """Render the scatter chart from the prepared scatter_data."""
         self.ax2.clear()
 
-        # get axis1 and axis2 value from comboAxis1 and 2 index
-        # depth_shade = False
         show_average_shape = self.cbxAverage.isChecked()
         show_regression = self.cbxRegression.isChecked()
         show_annotation = self.cbxAnnotation.isChecked()
@@ -2183,234 +2357,36 @@ class DataExplorationDialog(QDialog):
         show_variance = self.cbxShowVariance.isChecked() if hasattr(self, "cbxShowVariance") else False
         show_convex_hull = self.cbxConvexHull.isChecked()
         show_confidence_ellipse = self.cbxConfidenceEllipse.isChecked()
-        show_axis_label = True
-        show_extraplolate = self.cbxExtrapolate.isChecked()
+        show_extrapolate = self.cbxExtrapolate.isChecked()
 
         axis1_title = self.comboAxis1.currentText()
         axis2_title = self.comboAxis2.currentText()
-        self.comboAxis3.currentText()
 
-        if True:
-            self.ax2.clear()
-            for name in self.scatter_data.keys():
-                # print("name", name, "len(group_hash[name]['x_val'])", len(group_hash[name]['x_val']), group_hash[name]['symbol'])
-                group = self.scatter_data[name]
-                if len(group["x_val"]) > 0:
-                    self.scatter_result[name] = self.ax2.scatter(
-                        group["x_val"],
-                        group["y_val"],
-                        s=group["size"],
-                        marker=group["symbol"],
-                        color=group["color"],
-                        data=group["data"],
-                        picker=True,
-                        pickradius=5,
-                    )
-                    # print("ret", ret)
-                if name == "__selected__":
-                    for idx, obj in enumerate(group["data"]):
-                        self.ax2.annotate(obj.object_name, (group["x_val"][idx], group["y_val"][idx]))
-                elif show_data_labels:
-                    for idx in range(len(group["x_val"])):
-                        label = self._data_point_label(group["data"][idx]) if idx < len(group["data"]) else ""
-                        if label:
-                            self.ax2.annotate(
-                                label,
-                                (group["x_val"][idx], group["y_val"][idx]),
-                                textcoords="offset pixels",
-                                xytext=(6, 6),
-                                fontsize=8,
-                                color="dimgray",
-                            )
+        self._plot_scatter_groups(show_average_shape, show_data_labels)
 
-                if show_average_shape:
-                    self.ax2.scatter(
-                        self.average_shape[name]["x_val"],
-                        self.average_shape[name]["y_val"],
-                        s=group["size"] * 3,
-                        marker=group["symbol"],
-                        color=group["color"],
-                    )
+        if show_regression:
+            self._plot_regression_curves(show_extrapolate, show_annotation)
 
-            if show_regression:
-                if self.curve_list is not None and len(self.curve_list) > 0:
-                    for curve in self.curve_list:
-                        if curve is None:
-                            continue
-                        self.ax2.plot(curve["size_range"], curve["curve"], label=curve["key"], color=curve["color"])
-                        if show_extraplolate:
-                            self.ax2.plot(
-                                curve["size_range2"],
-                                curve["curve2"],
-                                label=curve["key"],
-                                color=curve["color"],
-                                linestyle="dashed",
-                            )
-                        degree = len(curve["model"]) - 1
-                        model_text = "Y="
-                        # superscript_list = ["⁰","¹","²","³","⁴","⁵","⁶","⁷","⁸","⁹"]
-                        for i in range(degree + 1):
-                            coeff = round(curve["model"][i] * 1000) / 1000
-                            if coeff == 0.0:
-                                continue
-                            model_text += str(coeff)
+        if show_legend:
+            self._draw_legends(show_regression)
 
-                            if degree != i:
-                                model_text += "X"
-                                model_text += "^" + str(degree - i) if degree - i > 1 else ""
-                                # model_text += str(superscript_list[degree-i]) if degree-i > 1 else ""
-                            if i < degree:
-                                model_text += " + "
-                        r_squared_text = "R^2=" + str(round(curve["r_squared"] * 1000) / 1000)
+        if show_variance and self.analysis_method == "PCA":
+            axis1_title, axis2_title = self._append_variance_to_titles(axis1_title, axis2_title)
+        self.ax2.set_xlabel(axis1_title)
+        self.ax2.set_ylabel(axis2_title)
 
-                        # self.ax2.annotate(str(curve['model'])+" "+str(curve['r_squared']), (curve['size_range'][50], curve['curve'][50]))
-                        if show_annotation:
-                            annotation1 = self.ax2.annotate(
-                                rf"${model_text}$",
-                                (curve["size_range"][10], curve["curve"][10]),
-                                fontname="Times New Roman",
-                            )
-                            annotation2 = self.ax2.annotate(
-                                rf"${r_squared_text}$",
-                                (curve["size_range"][90], curve["curve"][90]),
-                                fontname="Times New Roman",
-                            )
-                            annotation1.set_bbox(
-                                {"boxstyle": "round", "facecolor": "white", "edgecolor": "none", "alpha": 0.7}
-                            )
-                            annotation2.set_bbox(
-                                {"boxstyle": "round", "facecolor": "white", "edgecolor": "none", "alpha": 0.7}
-                            )
+        if show_convex_hull:
+            self._draw_convex_hulls()
 
-                # self.ax2.plot(size_range, group_a_curve, label='Group A')
-            # print("show_legend:", show_legend)
-            if show_legend:
-                scatter_legend = build_scatter_legend(
-                    self.ax2, self.scatter_result, order=self.get_legend_order(), **self.legend_placement_kwargs()
-                )
-                self.ax2.add_artist(scatter_legend)
-                self.apply_legend_placement(scatter_legend)
-                bbox = scatter_legend.get_window_extent()
-                # Convert to axis coordinates
-                bbox.transformed(self.ax2.transAxes.inverted())
-                # Calculate the height of first legend in axis coordinates
+        if show_confidence_ellipse:
+            self._draw_confidence_ellipses()
 
-                if show_regression and self.regression_variable_index != self.scatter_variable_index:
-                    values = []
-                    keys = []
-                    for curve in self.curve_list:
-                        # print("curve", curve)
-                        if curve:
-                            keys.append(curve["key"])
-                            values.append(curve)
-                    regression_legend = self.ax2.legend(
-                        values,
-                        [format_legend_label(key)[0] for key in keys],
-                        loc="lower right",
-                        bbox_to_anchor=(1.05, 0),
-                    )
-                    apply_legend_italics(regression_legend, keys)
-                    self.ax2.add_artist(regression_legend)
+        self.fig2.canvas.draw()
+        self.fig2.canvas.flush_events()
 
-            # print("show axis label:", show_axis_label)
-            if show_axis_label:
-                # print("show axis label true")
-                # Add variance explained to axis titles if enabled and analysis is PCA
-                if show_variance and self.analysis_method == "PCA":
-                    # Get axis indices from combo boxes
-                    axis1_idx = self.comboAxis1.currentIndex()
-                    axis2_idx = self.comboAxis2.currentIndex()
-
-                    # Try to get eigenvalues from analysis_result or from stored values
-                    var_explained = None
-                    if hasattr(self, "analysis_result") and hasattr(self.analysis_result, "eigen_value_percentages"):
-                        var_explained = self.analysis_result.eigen_value_percentages
-                    elif hasattr(self, "eigen_value_percentages"):
-                        var_explained = self.eigen_value_percentages
-
-                    if var_explained:
-                        try:
-                            # Axis1: index 0 is CSize, so PC1 is at index 1, PC2 at index 2, etc.
-                            # So we need to subtract 1 to get the PC number (0-based)
-                            if axis1_idx > 0:  # Skip if CSize is selected (index 0)
-                                pc_idx_1 = axis1_idx - 1
-                                if pc_idx_1 >= 0 and pc_idx_1 < len(var_explained):
-                                    axis1_title += f" ({var_explained[pc_idx_1] * 100:.1f}%)"
-
-                            # Axis2: PC1 is at index 0, PC2 at index 1, etc.
-                            # So the index directly corresponds to the PC number (0-based)
-                            if axis2_idx >= 0 and axis2_idx < len(var_explained):
-                                axis2_title += f" ({var_explained[axis2_idx] * 100:.1f}%)"
-                        except (IndexError, TypeError, ValueError) as e:
-                            logger.debug(f"Could not add variance explained to axis labels: {e}")
-                            pass  # Silently continue if there's any issue
-                self.ax2.set_xlabel(axis1_title)
-                # print("ret_x", ret_x)
-
-                self.ax2.set_ylabel(axis2_title)
-                # print("ret_y", ret_y)
-
-            # if self.vertical_line_xval is not None:
-            # self.ax2.axvline(x=self.vertical_line_xval, color='gray', linestyle=self.vertical_line_style)
-
-            if show_convex_hull:
-                # print("showing convex hull")
-                for key_name in self.scatter_data.keys():
-                    if "hull" in self.scatter_data[key_name].keys():
-                        hull = self.scatter_data[key_name]["hull"]
-                        for simplex in hull.simplices:
-                            self.ax2.plot(
-                                self.scatter_data[key_name]["points"][simplex, 0],
-                                self.scatter_data[key_name]["points"][simplex, 1],
-                                color=self.scatter_data[key_name]["color"],
-                            )
-
-                        hull_vertices_x = self.scatter_data[key_name]["points"][hull.vertices, 0]
-                        hull_vertices_y = self.scatter_data[key_name]["points"][hull.vertices, 1]
-                        hull_vertices_x = np.append(hull_vertices_x, hull_vertices_x[0])
-                        hull_vertices_y = np.append(hull_vertices_y, hull_vertices_y[0])
-                        self.ax2.fill(
-                            hull_vertices_x, hull_vertices_y, color=self.scatter_data[key_name]["color"], alpha=0.5
-                        )
-
-            if show_confidence_ellipse:
-                for key_name in self.scatter_data.keys():
-                    if "ellipse" in self.scatter_data[key_name].keys():
-                        width, height, angle = self.scatter_data[key_name]["ellipse"]
-                        ellipse = matplotlib.patches.Ellipse(
-                            xy=(self.average_shape[key_name]["x_val"], self.average_shape[key_name]["y_val"]),
-                            width=width,
-                            height=height,
-                            angle=angle,
-                            color=self.scatter_data[key_name]["color"],
-                            lw=2,
-                            alpha=0.3,
-                            fill=True,
-                        )
-                        self.ax2.add_patch(ellipse)
-
-            # self.fig2.tight_layout()
-            self.fig2.canvas.draw()
-            self.fig2.canvas.flush_events()
-
-            """ overlay shapes """
-            # shape grid
-            show_shape_grid = self.cbxShapeGrid.isChecked()
-            # get widget position
-            # print("fig_pos", fig_pos)
-            if show_shape_grid:
-                for keyname in self.shape_grid.keys():
-                    shape = self.raw_chart_coords_to_shape(
-                        self.shape_grid[keyname]["x_val"], self.shape_grid[keyname]["y_val"]
-                    )
-                    obj = self.shape_to_object(shape)
-
-                    view = self.shape_grid[keyname]["view"]
-                    view.show()
-                    view.set_object(obj)
-                    view.apply_rotation(self.rotation_matrix)
-                    view.set_shape_preference(self.sgpWidget.get_preference())
-                self.reposition_shape_grid()
+        # Overlay shapes on top of the drawn chart.
+        if self.cbxShapeGrid.isChecked():
+            self._update_shape_grid()
 
     def reposition_shape_grid(self):
         # check if self has fig2

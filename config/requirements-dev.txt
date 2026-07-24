@@ -27,4 +27,4 @@ coverage[toml]>=7.10.0,<8.0     # Coverage with TOML config support
 # mypy>=1.0.0,<2.0              # Static type checker
 # black>=23.0.0,<24.0           # Code formatter
 # isort>=5.12.0,<6.0            # Import sorting
-hypothesis>=6.0,<7.0            # Property-based / fuzz testing
+hypothesis>=6.161.1,<7.0            # Property-based / fuzz testing

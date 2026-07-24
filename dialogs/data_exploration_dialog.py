@@ -1085,7 +1085,8 @@ class DataExplorationDialog(QDialog):
             self.pick_idx = -1
             self.plot_widget2.setCursor(QCursor(Qt.ArrowCursor))
 
-    def prepare_shape_view(self):
+    def _teardown_shape_views(self):
+        """Dispose the widgets and chart artists left by the previous layout."""
         for shape_label in self.shape_label_list:
             shape_label.deleteLater()
         for shape_button in self.shape_button_list:
@@ -1095,17 +1096,16 @@ class DataExplorationDialog(QDialog):
         for shape_view in self.shape_view_list:
             self.shape_view_layout.removeWidget(shape_view)
             shape_view.deleteLater()
-        for key in self.custom_shape_hash.keys():
-            self.custom_shape_hash[key]["coords"] = []
-            if self.custom_shape_hash[key]["point"] is not None:
-                safe_remove_artist(self.custom_shape_hash[key]["point"], self.ax2)
-            self.custom_shape_hash[key]["point"] = None
-            if self.custom_shape_hash[key]["label"] is not None:
-                safe_remove_artist(self.custom_shape_hash[key]["label"], self.ax2)
-            self.custom_shape_hash[key]["label"] = None
+        for entry in self.custom_shape_hash.values():
+            entry["coords"] = []
+            if entry["point"] is not None:
+                safe_remove_artist(entry["point"], self.ax2)
+            entry["point"] = None
+            if entry["label"] is not None:
+                safe_remove_artist(entry["label"], self.ax2)
+            entry["label"] = None
         self.arrow_widget.hide()
 
-        # self.custom_shape_list = []
         self.shape_view_list = []
         self.shape_label_list = []
         self.shape_button_list = []
@@ -1113,110 +1113,99 @@ class DataExplorationDialog(QDialog):
         self.custom_shape_hash = {}
         self.grid_view_list = []
 
-        if self.mode in [MODE_REGRESSION, MODE_AVERAGE]:
-            keyname_list = self.scatter_data.keys()
-        elif self.mode == MODE_COMPARISON:
-            keyname_list = ["A", "B"]
-            for idx, keyname in enumerate(keyname_list):
-                self.custom_shape_hash[idx] = {
-                    "name": keyname,
-                    "coords": [],
-                    "point": None,
-                    "color": None,
-                    "label": None,
-                }
-        elif self.mode == MODE_COMPARISON2:
-            keyname_list = ["A", "B"]
-            for idx, keyname in enumerate(keyname_list):
-                self.custom_shape_hash[idx] = {
-                    "name": keyname,
-                    "coords": [],
-                    "point": None,
-                    "color": None,
-                    "label": None,
-                }
-        elif self.mode == MODE_EXPLORATION:
-            keyname_list = [""]
-            for idx, keyname in enumerate(keyname_list):
-                self.custom_shape_hash[idx] = {
-                    "name": keyname,
-                    "coords": [],
-                    "point": None,
-                    "color": None,
-                    "label": None,
-                }
+    def _shape_keynames(self):
+        """Keys to build shape views for.
 
+        Regression/average views follow the scatter groups; the modes where the
+        user places their own shapes on the chart get a seeded custom_shape_hash.
+        """
+        if self.mode in (MODE_REGRESSION, MODE_AVERAGE):
+            return list(self.scatter_data.keys())
+
+        keyname_list = [""] if self.mode == MODE_EXPLORATION else ["A", "B"]
         for idx, keyname in enumerate(keyname_list):
-            if self.analysis.dimension == 2:
-                shape_view = ObjectViewer2D(self)
-                shape_view.show_index = False
+            self.custom_shape_hash[idx] = {
+                "name": keyname,
+                "coords": [],
+                "point": None,
+                "color": None,
+                "label": None,
+            }
+        return keyname_list
+
+    def _add_shape_preference(self, idx, keyname, shape_view):
+        """Build one shape's preference panel (plus, in comparison modes, the
+        landmark button overlaid on its view)."""
+        if self.mode in (MODE_COMPARISON, MODE_COMPARISON2):
+            shape_button = QPushButton(QIcon(mu.resource_path("icons/M2Landmark_2.png")), "")
+            # bind idx per button
+            shape_button.clicked.connect(lambda checked, idx=idx: self.shape_button_clicked(idx))
+            shape_button.setParent(shape_view)
+            shape_button.setAutoDefault(False)
+            self.shape_button_list.append(shape_button)
+
+            shape_preference = ShapePreference(self)
+            if idx == 0:
+                shape_preference.set_title(self.tr("Source shape"))
+                shape_preference.set_color("red")
+                shape_preference.set_opacity(1.0)
             else:
-                shape_view = ObjectViewer3D(self)
-            self.shape_view_list.append(shape_view)
+                shape_preference.set_title(self.tr("Target shape"))
+                shape_preference.set_color("blue")
+                shape_preference.set_opacity(0.5)
+        else:
+            shape_preference = ShapePreference(self)
+            shape_preference.hide_title()
+            shape_preference.hide_name()
+            shape_preference.hide_cbxShow()
+            shape_preference.set_color(self.color_list[idx])
 
-            if self.mode in [MODE_COMPARISON, MODE_COMPARISON2]:
-                shape_button = QPushButton(QIcon(mu.resource_path("icons/M2Landmark_2.png")), "")
-                # send idx to lambda function
-                shape_button.clicked.connect(lambda checked, idx=idx: self.shape_button_clicked(idx))
+        shape_preference.set_name(keyname)
+        shape_preference.set_index(idx)
+        shape_preference.shape_preference_changed.connect(self.shape_preference_changed)
+        self.shape_preference_list.append(shape_preference)
+        self.shape_preference_layout.addWidget(shape_preference)
 
-                shape_button.setParent(shape_view)
-                self.shape_button_list.append(shape_button)
-                shape_button.setAutoDefault(False)
+    def _create_shape_view(self, idx, keyname):
+        """Create one shape viewer with its label and preference panel."""
+        if self.analysis.dimension == 2:
+            shape_view = ObjectViewer2D(self)
+            shape_view.show_index = False
+        else:
+            shape_view = ObjectViewer3D(self)
+        self.shape_view_list.append(shape_view)
 
-                # print("shape_preference", idx)
-                shape_preference = ShapePreference(self)
-                if idx == 0:
-                    shape_preference.set_title(self.tr("Source shape"))
-                    shape_preference.set_color("red")
-                    shape_preference.set_opacity(1.0)
-                else:
-                    shape_preference.set_title(self.tr("Target shape"))
-                    shape_preference.set_color("blue")
-                    shape_preference.set_opacity(0.5)
-                shape_preference.set_name(keyname)
-                shape_preference.set_index(idx)
-                # shape_preference.set_color(self.color_list[idx])
-                # connect shape_preference signal to self.shape_preference_changed
-                shape_preference.shape_preference_changed.connect(self.shape_preference_changed)
+        self._add_shape_preference(idx, keyname, shape_view)
 
-                self.shape_preference_list.append(shape_preference)
-                self.shape_preference_layout.addWidget(shape_preference)
-            else:
-                shape_preference = ShapePreference(self)
-                shape_preference.hide_title()
-                shape_preference.hide_name()
-                shape_preference.hide_cbxShow()
-                shape_preference.set_name(keyname)
-                shape_preference.set_index(idx)
+        shape_label = QLabel(keyname)
+        shape_label.setParent(shape_view)
+        shape_label.setStyleSheet("background-color: " + self.bgcolor + "; color: white")
+        self.shape_label_list.append(shape_label)
+        if keyname == "__default__":
+            shape_label.hide()
 
-                shape_preference.set_color(self.color_list[idx])
-                self.shape_preference_list.append(shape_preference)
-                self.shape_preference_layout.addWidget(shape_preference)
-                shape_preference.shape_preference_changed.connect(self.shape_preference_changed)
+        self.shape_view_layout.addWidget(shape_view, 1)
+        shape_view.set_object_name(keyname)
+        shape_view.show()
 
-            shape_label = QLabel(keyname)
-            shape_label.setParent(shape_view)
-            shape_label.setStyleSheet("background-color: " + self.bgcolor + "; color: white")
+    def prepare_shape_view(self):
+        """Rebuild the shape viewers for the current visualization mode."""
+        self._teardown_shape_views()
 
-            self.shape_label_list.append(shape_label)
-            if keyname == "__default__":
-                shape_label.hide()
+        for idx, keyname in enumerate(self._shape_keynames()):
+            self._create_shape_view(idx, keyname)
 
-            self.shape_view_layout.addWidget(shape_view, 1)
-            shape_view.set_object_name(keyname)
-            shape_view.show()
         if self.mode == MODE_AVERAGE:
             self.show_average_shapes()
-            # pass
+
         if self.mode == MODE_COMPARISON2:
-            # self.arrow_widget.hi()
+            # Overlay B's label/button onto A's view and hide B's own view, so the
+            # two shapes are compared in one place with an arrow between them.
             self.shape_label_list[1].setParent(self.shape_view_list[0])
             self.shape_button_list[1].setParent(self.shape_view_list[0])
             self.shape_label_list[1].show()
             self.shape_button_list[1].show()
             self.shape_view_list[1].hide()
-            # self.shape_view_list[0].set_source_shape_color(QColor(255,0,0))
-            # self.shape_view_list[0].set_target_shape_color(QColor(0,0,255))
             self.shape_view_list[0].show_arrow = True
 
     def arrow_preference_changed(self):

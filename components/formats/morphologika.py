@@ -75,7 +75,13 @@ class Morphologika:
                 """comment"""
                 continue
             elif line[0] == "[":
-                dsl = re.search(r"(\w+)", line).group(0).lower()
+                # A "[" with no following word characters (e.g. a bare "[") is a
+                # malformed section header; skip it rather than crashing on
+                # re.search(...).group() of None.
+                section = re.search(r"(\w+)", line)
+                if section is None:
+                    continue
+                dsl = section.group(0).lower()
                 raw_data[dsl] = []
                 continue
             else:

@@ -14,7 +14,12 @@ sys.path.insert(0, os.path.abspath(".."))
 project = "Modan2"
 copyright = "2023-2025, Modan2 Contributors"
 author = "Modan2 Contributors"
-release = "0.1.5"
+
+# Version is single-sourced from version.py (see tests/test_version_consistency.py).
+from version import __version__, __version_info__  # noqa: E402
+
+release = __version__
+version = f"{__version_info__[0]}.{__version_info__[1]}"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

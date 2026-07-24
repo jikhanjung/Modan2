@@ -130,14 +130,19 @@ jobs:
         uses: actions/cache@v6
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt', 'config/requirements*.txt') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements-dev.lock') }}
           restore-keys: |
             ${{ runner.os }}-pip-
 
+      # Install from the hash-verified lockfile so every matrix leg, and the
+      # release build, resolve the exact same wheels. requirements-dev.lock is
+      # compiled from requirements.txt + config/requirements-dev.txt (see the
+      # Makefile `lock` target); the lock-check job in security.yml gates it
+      # against drift.
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r config/requirements-ci.txt
+          pip install --require-hashes -r requirements-dev.lock
 
       # Provide a display for GLUT. Qt runs offscreen (no display needed), but some
       # modules call glutInit() at import time, which SEGFAULTS (uncatchable) when

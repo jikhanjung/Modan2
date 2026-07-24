@@ -136,3 +136,70 @@ group_by 이름 해석의 **CVA/MANOVA 블록이 복붙 중복** → `_resolve_g
   `nts.read`(22), `on_canvas_move`(19), `on_btnSaveResults_clicked`(16),
   `run_analysis`(16), `pick_shape`(16), `tps.read`(25, 이미 36에서 개선).
 - 복잡도 리포트는 비게이팅 유지(가이드 §13: GUI 코드엔 정당하게 긴 핸들러가 있다).
+
+---
+
+## 4. 렌더링 3인방 리팩토링 (특성화 테스트 완비 후)
+
+3절의 안전망을 깔고 최상위 핫스팟 3개를 정리했다.
+
+| 대상 | 복잡도 | 요지 |
+|---|---|---|
+| `ObjectViewer2D.paintEvent` | **56 → <15** | 9개 오버레이로 분해 |
+| `ObjectViewer2D.mousePressEvent` | **33 → <15** | 버튼×모드 디스패치 분해 |
+| `ObjectViewer3D.draw_object` | **39 → <15** | 6개 드로잉 블록 분해 |
+
+### 4-1. `paintEvent` (56 → <15)
+259줄이 9개 독립 오버레이(와이어프레임 / 캘리브레이션 선 / 랜드마크 / 예상 위치 /
+편집 중 와이어 / 커브 / 트레이스 중 커브 / 스케일바 / 디버그)를 한 몸에 그리고
+있었다. 각각 `_paint_*` 헬퍼로 추출.
+- **주의점:** painter 상태가 섹션 간에 흐르므로(같은 painter 객체) **문장 순서를
+  그대로 보존**했다. 무조건 실행되는 pen/brush 설정은 `paintEvent`에 남기고, 각
+  오버레이의 자체 가드만 헬퍼 안으로 옮겼다.
+- 정리: 선택 랜드마크 색상 **4중 분기 → 멤버십 1개**, 스케일바의 10x/5x/2x 사다리
+  → 루프, 단위 변환은 `_scalebar_length_text()`로.
+
+### 4-2. `mousePressEvent` (33 → <15)
+버튼×edit_mode 디스패치를 `_press_left` / `_press_right` + 모드별 핸들러로 분해.
+- **가장 까다로운 부분:** 여러 분기가 **early return으로 마지막 `self.repaint()`를
+  건너뛰고**, 다른 분기는 스스로 repaint한 뒤 return한다. 핸들러가 **"이미 완전히
+  처리함"을 bool로 반환**하고 원본이 repaint하던 자리에서 스스로 repaint하게 해서,
+  호출부의 단일 trailing repaint가 **정확히 같은 경우에만** 실행되도록 보존했다.
+- 우클릭 pan을 시작하던 3곳은 `_start_pan()`으로 공유.
+
+### 4-3. `draw_object` (39 → <15)
+6개 드로잉 블록으로 분해하고, 4번 반복되던 "picker 버퍼에 렌더 중인가" 판정을
+`_picking()` 술어로 통일.
+
+**잠복 트랩 발견:** 루프 안에서 `color = self.edge_idx_to_color[...]` /
+`self.lm_idx_to_color[...]`로 **`color` 파라미터 자체를 재바인딩**하고 있었다. 그
+결과 picker 색상이 **이후 섹션(다음 반복·랜드마크 점 그리기)으로 새어나갔다**.
+헬퍼로 분리하면서 각자 자기 인자를 받게 되어 자연히 해소. 그 외 결과를 버리는
+`len(object.landmark_list)` 제거, 사용되지 않는 `edge_color` 파라미터를 문서화.
+
+### 4-4. CI가 잡은 테스트 이식성 문제
+
+로컬(Linux, 1826 통과) 후 push했더니 CI 실패 — **원인은 리팩토링이 아니라 3절에서
+내가 추가한 3D 특성화 테스트**였다. GL을 직접 호출하는데 Linux offscreen에서만
+검증했던 것:
+- **Windows:** `glGetIntegerv(GL_FRAMEBUFFER_BINDING)` → `GLError 1282`
+- **macOS:** **세그폴트** — try/except로 잡을 수 없어 방어 불가
+
+→ 해당 클래스를 **Linux 전용으로 제한**(2D 렌더링·mousePressEvent 특성화는 전
+플랫폼 유지). 크로스플랫폼 CI가 아니었으면 "로컬에선 되는데" 상태로 남았을 문제다.
+
+---
+
+## 현재 상태 / 남은 핫스팟
+
+최악 56이 사라지고 **최대 25**로 내려왔다. 20 이상 잔여:
+
+| 복잡도 | 대상 |
+|---|---|
+| 25 | `components/formats/tps.py::read` (36에서 개선됨) |
+| 25 | `ObjectViewer3D.mouseMoveEvent` |
+| 23 | `MdUtils.import_dataset_from_zip` |
+| 22 | `components/formats/nts.py::read` |
+| 22 | `data_exploration_dialog.prepare_shape_view` |
+| 21 | `ObjectViewer2D.mouseMoveEvent` |
+| 21 / 20 | `tools/build_index.py`, `tools/search_index.py` (개발 도구, 우선순위 낮음) |

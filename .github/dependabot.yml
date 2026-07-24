@@ -13,6 +13,15 @@ updates:
     commit-message:
       prefix: "deps"
       include: "scope"
+    # These majors are intentionally pinned out in requirements.txt: pandas 3.x
+    # drops the bundled pytz metadata and breaks the frozen Windows build ("Can't
+    # determine version for pytz"); numpy is held below 3.0 for the same app era.
+    # Don't let Dependabot re-propose them every week (see devlog 247).
+    ignore:
+      - dependency-name: "pandas"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "numpy"
+        update-types: ["version-update:semver-major"]
 
   # Keep GitHub Actions (checkout, setup-python, cache, ...) current — actions
   # get security fixes and pinned major versions go stale otherwise.

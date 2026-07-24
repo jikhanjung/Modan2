@@ -1,0 +1,66 @@
+name: Dependabot lock refresh
+
+# When Dependabot bumps a dependency in requirements.txt / requirements_win.txt /
+# config/requirements-dev.txt, the committed per-platform lockfiles go stale and
+# the lock-check gate (security.yml) fails. This workflow regenerates the locks
+# on the PR branch so the PR can go green without manual intervention.
+#
+# Why pull_request_target: Dependabot-triggered `pull_request` runs get a
+# read-only token and cannot read Actions secrets, so they can't push. This
+# event runs in the base-repo context with a writable token and secret access.
+# It is gated to `dependabot[bot]` (an actor no external PR author can spoof) and
+# only runs `uv pip compile` (dependency resolution — it does not execute package
+# code), so checking out the PR head here is safe.
+#
+# Token: pushing with the default GITHUB_TOKEN succeeds but does NOT re-trigger
+# CI on the new commit (GitHub's loop-prevention), so the PR's checks would stay
+# stale. Provide a fine-grained PAT with `contents: write` as the
+# LOCK_REFRESH_TOKEN Actions secret to make the pushed commit re-run CI. Without
+# it, the workflow falls back to GITHUB_TOKEN: the locks are still refreshed, but
+# you must re-run the PR's checks manually (or `@dependabot rebase`).
+
+on:
+  pull_request_target:
+    branches: [main]
+    paths:
+      - requirements.txt
+      - requirements_win.txt
+      - config/requirements-dev.txt
+
+permissions:
+  contents: write
+
+jobs:
+  refresh-locks:
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ secrets.LOCK_REFRESH_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Regenerate per-platform lockfiles
+        run: make lock
+
+      - name: Commit and push refreshed locks (if changed)
+        run: |
+          if git diff --quiet -- requirements-linux.lock requirements-windows.lock requirements-macos.lock; then
+            echo "Lockfiles already in sync with the updated requirements — nothing to refresh."
+            exit 0
+          fi
+          git config user.name "dependabot[bot]"
+          git config user.email "49699333+dependabot[bot]@users.noreply.github.com"
+          git add requirements-linux.lock requirements-windows.lock requirements-macos.lock
+          git commit -m "chore: Refresh per-platform lockfiles for dependabot update"
+          git push

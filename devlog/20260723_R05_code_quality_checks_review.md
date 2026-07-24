@@ -256,3 +256,10 @@ Morphologika + MdUtils read_tps/read_nts에 무작위 입력. 계약 = 제어된
 `re.search(r"(\w+)", line).group()`이 None → **AttributeError**(R04가 고치던
 "추한 크래시" 유형). None 가드로 malformed 라인 skip. 나머지 5개 리더는 robust
 확인(R04 하드닝 검증). 정상 파싱 회귀 없음(format/import 18개 통과).
+
+### 복잡도 리포트의 후속 (2026-07-24)
+
+항목 8에서 도입한 비게이팅 복잡도 리포트가 짚은 핫스팟들을 실제로 정리했다 —
+리팩토링 6건(최대 51→<15)과, 그 과정에서 드러난 잠복 버그·죽은 코드, CI 도구 버전
+핀 사건, 렌더링 핫스팟 특성화 테스트 40개.
+→ [[20260724_242_complexity_refactoring_and_characterization]]

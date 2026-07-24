@@ -63,9 +63,9 @@ jobs:
         run: ruff check . --select C901 --config "lint.mccabe.max-complexity=15" --exit-zero
 
   # ---------------------------------------------------------------------------
-  # Tests — cross-platform matrix. All legs are gating: Linux (3.11 + 3.12) and
-  # Windows / macOS (3.12). Windows/macOS were introduced as `experimental`
-  # (non-blocking) and promoted to gating once confirmed green.
+  # Tests — cross-platform matrix. All legs are gating: Linux / Windows / macOS
+  # on Python 3.12. 3.11 was dropped 2026-07-24 (devlog 248): numpy 2.5.1+
+  # requires 3.12, and the app targets 3.12 anyway.
   # ---------------------------------------------------------------------------
   test:
     name: Test (${{ matrix.os }}, py${{ matrix.python-version }})
@@ -78,7 +78,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        python-version: ['3.11', '3.12']
+        python-version: ['3.12']
         experimental: [false]
         include:
           - os: windows-latest

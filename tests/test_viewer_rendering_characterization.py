@@ -14,12 +14,14 @@ each mousePressEvent branch.
 """
 
 import sys
+from unittest.mock import patch
 
 import pytest
-from PyQt5.QtCore import QPoint, Qt
+from PyQt5.QtCore import QEvent, QPoint, Qt
 from PyQt5.QtGui import QMouseEvent
 
 import MdModel as mm
+from components.viewers import object_viewer_3d as v3
 from components.viewers.object_viewer_2d import ObjectViewer2D
 from components.viewers.object_viewer_3d import ObjectViewer3D
 from MdConstants import MODE
@@ -157,6 +159,86 @@ class TestMousePressEventCharacterization:
         before = list(viewer_2d_obj.landmark_list)
         _press(viewer_2d_obj, Qt.LeftButton)
         assert list(viewer_2d_obj.landmark_list) == before
+
+
+def _move(x, y, buttons=Qt.NoButton):
+    """A mouse-move event at (x, y) with the given buttons held."""
+    return QMouseEvent(QEvent.MouseMove, QPoint(x, y), Qt.NoButton, buttons, Qt.NoModifier)
+
+
+class TestMouseMoveEvent3DCharacterization:
+    """ObjectViewer3D.mouseMoveEvent state transitions.
+
+    GL is not exercised: updateGL and the GL-backed hit helpers are patched, so
+    these assert the observable drag / selection state and run on every platform.
+    """
+
+    @pytest.fixture
+    def viewer(self, qtbot):
+        viewer = ObjectViewer3D(None)
+        qtbot.addWidget(viewer)
+        viewer.resize(200, 200)
+        viewer.down_x = 100
+        viewer.down_y = 100
+        return viewer
+
+    def test_left_drag_in_rotate_mode_sets_temp_rotation(self, viewer):
+        viewer.view_mode = v3.ROTATE_MODE
+        with patch.object(viewer, "updateGL"):
+            viewer.mouseMoveEvent(_move(130, 145, Qt.LeftButton))
+        assert viewer.is_dragging
+        assert viewer.temp_rotate_x == 30
+        assert viewer.temp_rotate_y == 45
+
+    def test_right_drag_in_zoom_mode_sets_dolly(self, viewer):
+        viewer.view_mode = v3.ZOOM_MODE
+        with patch.object(viewer, "updateGL"):
+            viewer.mouseMoveEvent(_move(100, 200, Qt.RightButton))
+        assert viewer.is_dragging
+        assert viewer.temp_dolly == (200 - 100) / 100.0
+
+    def test_middle_drag_in_pan_mode_sets_temp_pan(self, viewer):
+        viewer.view_mode = v3.PAN_MODE
+        with patch.object(viewer, "updateGL"):
+            viewer.mouseMoveEvent(_move(120, 90, Qt.MiddleButton))
+        assert viewer.is_dragging
+        assert viewer.temp_pan_x == 20
+        assert viewer.temp_pan_y == -10
+
+    def test_wireframe_hover_selects_hit_landmark(self, viewer):
+        viewer.edit_mode = MODE["WIREFRAME"]
+        viewer.wireframe_from_idx = -1
+        with patch.object(viewer, "updateGL"), patch.object(viewer, "hit_test", return_value=("Landmark", 4)):
+            viewer.mouseMoveEvent(_move(10, 10))
+        assert viewer.selected_landmark_idx == 4
+
+    def test_wireframe_hover_selects_hit_edge(self, viewer):
+        viewer.edit_mode = MODE["WIREFRAME"]
+        viewer.wireframe_from_idx = -1
+        with patch.object(viewer, "updateGL"), patch.object(viewer, "hit_test", return_value=("Edge", 2)):
+            viewer.mouseMoveEvent(_move(10, 10))
+        assert viewer.selected_edge_index == 2
+        assert viewer.selected_landmark_idx == -1
+
+    def test_wireframe_hover_miss_clears_selection(self, viewer):
+        viewer.edit_mode = MODE["WIREFRAME"]
+        viewer.wireframe_from_idx = -1
+        viewer.selected_landmark_idx = 3
+        viewer.selected_edge_index = 1
+        with patch.object(viewer, "updateGL"), patch.object(viewer, "hit_test", return_value=("None", -1)):
+            viewer.mouseMoveEvent(_move(10, 10))
+        assert viewer.selected_landmark_idx == -1
+        assert viewer.selected_edge_index == -1
+
+    def test_edit_landmark_hover_selects_and_deselects(self, viewer):
+        viewer.edit_mode = MODE["EDIT_LANDMARK"]
+        viewer.show_model = False
+        with patch.object(viewer, "updateGL"), patch.object(viewer, "hit_test", return_value=("Landmark", 7)):
+            viewer.mouseMoveEvent(_move(10, 10))
+        assert viewer.selected_landmark_idx == 7
+        with patch.object(viewer, "updateGL"), patch.object(viewer, "hit_test", return_value=("None", -1)):
+            viewer.mouseMoveEvent(_move(10, 10))
+        assert viewer.selected_landmark_idx == -1
 
 
 @pytest.mark.skipif(

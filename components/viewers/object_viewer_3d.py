@@ -327,95 +327,112 @@ class ObjectViewer3D(QGLWidget):
         self.view_mode = VIEW_MODE
         self.updateGL()
 
-    def mouseMoveEvent(self, event):
-        self.curr_x = event.x()
-        self.curr_y = event.y()
-        if self.edit_mode == MODE["WIREFRAME"]:
-            kind, idx = self.hit_test(self.curr_x, self.curr_y)
-            if kind == "Landmark":
-                lm_idx = idx
-
-                if lm_idx > -1:
-                    self.selected_landmark_idx = lm_idx
+    def _hover_wireframe(self):
+        """WIREFRAME hover: highlight the landmark/edge under the cursor and drag
+        the in-progress edge's free end."""
+        kind, idx = self.hit_test(self.curr_x, self.curr_y)
+        if kind == "Landmark":
+            if idx > -1:
+                self.selected_landmark_idx = idx
+                self.no_hit_count = 0
+            elif self.selected_landmark_idx > -1:
+                # Debounce: only drop the highlight after a few consecutive misses.
+                self.no_hit_count += 1
+                if self.no_hit_count > 5:
+                    self.selected_landmark_idx = -1
                     self.no_hit_count = 0
-                elif self.selected_landmark_idx > -1:
-                    self.no_hit_count += 1
-                    if self.no_hit_count > 5:
-                        self.selected_landmark_idx = -1
-                        self.no_hit_count = 0
-            elif kind == "Edge":
-                self.selected_edge_index = idx
-                self.selected_landmark_idx = -1
+        elif kind == "Edge":
+            self.selected_edge_index = idx
+            self.selected_landmark_idx = -1
+        else:
+            self.selected_landmark_idx = -1
+            self.selected_edge_index = -1
+
+        if self.wireframe_from_idx > -1:
+            near, _ray_direction = self.unproject_mouse(self.curr_x, self.curr_y)
+            self.temp_edge[1] = near
+
+    def _hover_edit_landmark(self):
+        """EDIT_LANDMARK hover: highlight the landmark under the cursor and, on a
+        model, track the mesh vertex the cursor is over."""
+        hit_type, hit_idx = self.hit_test(self.curr_x, self.curr_y)
+        self.selected_landmark_idx = hit_idx if hit_type == "Landmark" else -1
+        if hit_type == "Landmark":
+            self.no_hit_count = 0
+
+        if self.show_model:
+            if self.hit_background_test(self.curr_x, self.curr_y):
+                self.cursor_on_vertex = -1
             else:
-                self.selected_landmark_idx = -1
-                self.selected_edge_index = -1
+                closest_element = self.pick_element(self.curr_x, self.curr_y)
+                self.cursor_on_vertex = closest_element if closest_element is not None else -1
 
-            if self.wireframe_from_idx > -1:
-                near, ray_direction = self.unproject_mouse(self.curr_x, self.curr_y)
-                self.temp_edge[1] = near
+    def _drag_move_landmark(self):
+        """MOVE_LANDMARK: pin the selected landmark to the mesh vertex under the
+        cursor, or restore it and drop back to EDIT_LANDMARK over the background."""
+        if not self.show_model:
+            return
+        if self.hit_background_test(self.curr_x, self.curr_y):
+            self.cursor_on_vertex = -1
+            self.landmark_list[self.selected_landmark_idx] = self.stored_landmark["coords"]
+            self.selected_landmark_idx = -1
+            self.set_mode(MODE["EDIT_LANDMARK"])
+            return
+        closest_element = self.pick_element(self.curr_x, self.curr_y)
+        if closest_element is None:
+            self.cursor_on_vertex = -1
+            return
+        self.cursor_on_vertex = closest_element
+        if self.selected_landmark_idx >= 0:
+            self.landmark_list[self.selected_landmark_idx] = self.threed_model.original_vertices[closest_element]
+            if self.object_dialog is not None:
+                self.object_dialog.update_landmark(
+                    self.selected_landmark_idx, *self.landmark_list[self.selected_landmark_idx]
+                )
+                self.update_landmark_list()
+                self.initialize_colors()
+                self.calculate_resize()
 
+    def _drag_view(self, event):
+        """Rotate / zoom / pan the view while the matching button is held.
+
+        Returns True if a drag was handled, so the caller skips edit-mode hover.
+        """
         if event.buttons() == Qt.LeftButton and self.view_mode == ROTATE_MODE:
             self.is_dragging = True
             self.temp_rotate_x = self.curr_x - self.down_x
             self.temp_rotate_y = self.curr_y - self.down_y
             if self.parent is not None and callable(getattr(self.parent, "sync_temp_rotation", None)):
                 self.parent.sync_temp_rotation(self, self.temp_rotate_x, self.temp_rotate_y)
-
-        elif event.buttons() == Qt.RightButton and self.view_mode == ZOOM_MODE:
+            return True
+        if event.buttons() == Qt.RightButton and self.view_mode == ZOOM_MODE:
             self.is_dragging = True
             self.temp_dolly = (self.curr_y - self.down_y) / 100.0
             if self.parent is not None and callable(getattr(self.parent, "sync_temp_zoom", None)):
                 self.parent.sync_temp_zoom(self, self.temp_dolly)
-
-        elif event.buttons() == Qt.MiddleButton and self.view_mode == PAN_MODE:
+            return True
+        if event.buttons() == Qt.MiddleButton and self.view_mode == PAN_MODE:
             self.is_dragging = True
             self.temp_pan_x = self.curr_x - self.down_x
             self.temp_pan_y = self.curr_y - self.down_y
             if self.parent is not None and callable(getattr(self.parent, "sync_temp_pan", None)):
                 self.parent.sync_temp_pan(self, self.temp_pan_x, self.temp_pan_y)
-        elif self.edit_mode == MODE["EDIT_LANDMARK"]:
-            hit_type, hit_idx = self.hit_test(self.curr_x, self.curr_y)
-            if hit_type == "Landmark":
-                self.selected_landmark_idx = hit_idx
-                self.no_hit_count = 0
-            else:
-                self.selected_landmark_idx = -1
+            return True
+        return False
 
-            if self.show_model:
-                on_background = self.hit_background_test(self.curr_x, self.curr_y)
-                if on_background:
-                    self.cursor_on_vertex = -1
-                else:
-                    closest_element = self.pick_element(self.curr_x, self.curr_y)
-                    if closest_element is not None:
-                        self.cursor_on_vertex = closest_element
-                    else:
-                        self.cursor_on_vertex = -1
-        elif self.edit_mode == MODE["MOVE_LANDMARK"]:
-            if self.show_model:
-                on_background = self.hit_background_test(self.curr_x, self.curr_y)
-                if on_background:
-                    self.cursor_on_vertex = -1
-                    self.landmark_list[self.selected_landmark_idx] = self.stored_landmark["coords"]
-                    self.selected_landmark_idx = -1
-                    self.set_mode(MODE["EDIT_LANDMARK"])
-                else:
-                    closest_element = self.pick_element(self.curr_x, self.curr_y)
-                    if closest_element is not None:
-                        self.cursor_on_vertex = closest_element
-                        if self.selected_landmark_idx >= 0:
-                            self.landmark_list[self.selected_landmark_idx] = self.threed_model.original_vertices[
-                                closest_element
-                            ]
-                            if self.object_dialog is not None:
-                                self.object_dialog.update_landmark(
-                                    self.selected_landmark_idx, *self.landmark_list[self.selected_landmark_idx]
-                                )
-                                self.update_landmark_list()
-                                self.initialize_colors()
-                                self.calculate_resize()
-                    else:
-                        self.cursor_on_vertex = -1
+    def mouseMoveEvent(self, event):
+        self.curr_x = event.x()
+        self.curr_y = event.y()
+
+        # Wireframe hover highlighting runs regardless of any drag.
+        if self.edit_mode == MODE["WIREFRAME"]:
+            self._hover_wireframe()
+
+        if not self._drag_view(event):
+            if self.edit_mode == MODE["EDIT_LANDMARK"]:
+                self._hover_edit_landmark()
+            elif self.edit_mode == MODE["MOVE_LANDMARK"]:
+                self._drag_move_landmark()
 
         self.updateGL()
 

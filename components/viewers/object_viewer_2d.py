@@ -6,7 +6,6 @@ Part of modular refactoring effort.
 import logging
 import sys
 
-from matplotlib.backends.backend_qt5agg import FigureCanvas as FigureCanvas
 from PyQt5.QtCore import (
     QPointF,
     Qt,
@@ -36,7 +35,7 @@ GLUT_INITIALIZED = False
 glut = None
 
 try:
-    from OpenGL import GLUT as glut
+    from OpenGL import GLUT as glut  # type: ignore[no-redef]
 
     GLUT_AVAILABLE = True
 except ImportError as e:
@@ -1041,7 +1040,7 @@ class ObjectViewer2D(QLabel):
 
         self.repaint()
 
-    def mouseReleaseEvent(self, ev: QMouseEvent) -> None:
+    def mouseReleaseEvent(self, ev) -> None:
         if self.object_dialog is None:
             return
         QMouseEvent(ev)
@@ -1203,44 +1202,6 @@ class ObjectViewer2D(QLabel):
             self.object_dialog.btnLandmark_clicked()
             self.object_dialog.btnLandmark.setDown(True)
             self.object_dialog.btnLandmark.setEnabled(True)
-
-    def draw_dataset(self, painter):
-        ds_ops = self.ds_ops
-        logger = logging.getLogger(__name__)
-        logger.debug(f"draw dataset: {ds_ops}, objects: {ds_ops.object_list}")
-        if self.show_arrow and len(ds_ops.object_list) > 1:
-            self.draw_arrow(painter, 0, 1)
-
-        for _idx, obj in enumerate(ds_ops.object_list):
-            logger.debug(f"draw object: {obj}, landmarks: {obj.landmark_list}")
-            if not obj.visible:
-                continue
-            if obj.id in ds_ops.selected_object_id_list:
-                object_color = COLOR["SELECTED_SHAPE"]
-            else:
-                if obj.landmark_color is not None:
-                    object_color = mu.as_gl_color(obj.landmark_color)
-                else:
-                    object_color = mu.as_gl_color(self.landmark_color)  # COLOR['NORMAL_SHAPE']
-            edge_color = self.wireframe_color
-            if obj.edge_color is not None:
-                edge_color = obj.edge_color
-            polygon_color = self.wireframe_color
-            if obj.polygon_color is not None:
-                polygon_color = obj.polygon_color
-
-            self.draw_object(
-                painter,
-                obj,
-                landmark_as_sphere=False,
-                color=object_color,
-                edge_color=edge_color,
-                polygon_color=polygon_color,
-            )
-
-        if self.show_average:
-            object_color = COLOR["AVERAGE_SHAPE"]
-            self.draw_object(ds_ops.get_average_shape(), landmark_as_sphere=True, color=object_color)
 
     def draw_dataset(self, painter):
         ds_ops = self.ds_ops

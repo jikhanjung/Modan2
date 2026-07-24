@@ -6,7 +6,6 @@ Part of modular refactoring effort.
 import logging
 import sys
 
-from matplotlib.backends.backend_qt5agg import FigureCanvas as FigureCanvas
 from PyQt5.QtCore import (
     QAbstractTableModel,
     QItemSelectionModel,
@@ -41,7 +40,7 @@ GLUT_INITIALIZED = False
 glut = None
 
 try:
-    from OpenGL import GLUT as glut
+    from OpenGL import GLUT as glut  # type: ignore[no-redef]
 
     GLUT_AVAILABLE = True
 except ImportError as e:
@@ -535,7 +534,7 @@ class MdTableView(QTableView):
 #: Per-cell count of missing landmarks, read by ``MdLandmarkCountDelegate``.
 #: Kept out of DisplayRole so the displayed value stays an int and the column
 #: still sorts numerically.
-MISSING_COUNT_ROLE = Qt.UserRole + 1
+MISSING_COUNT_ROLE = Qt.ItemDataRole.UserRole + 1
 
 
 class MdTableModel(QAbstractTableModel):

@@ -115,7 +115,7 @@ class BaseDialog(QDialog):
         Returns:
             Return value from func
         """
-        QApplication.setOverrideCursor(Qt.WaitCursor)
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
         try:
             return func()
         finally:

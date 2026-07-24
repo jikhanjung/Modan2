@@ -43,8 +43,10 @@ jobs:
       # pyproject.toml [tool.mypy]).
       - name: mypy (typed modules)
         run: >
-          mypy MdConstants.py MdStatistics.py MdHelpers.py MdUtils.py MdModel.py
-          MdAppSetup.py MdSplashScreen.py ModanController.py Modan2.py main.py version.py
+          mypy components dialogs
+          MdConstants.py MdStatistics.py MdHelpers.py MdUtils.py MdModel.py
+          MdAppSetup.py MdSplashScreen.py ModanController.py ModanComponents.py
+          Modan2.py main.py version.py
 
       # Complexity REPORT (never fails the build): lists functions above a
       # cyclomatic-complexity of 15 in the log as a refactoring watch-list. Not

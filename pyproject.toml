@@ -90,4 +90,5 @@ ignore_missing_imports = true
 # module could be gated until the entire tree was clean.
 follow_imports = "silent"
 # The modules passed to mypy in CI (see .github/workflows/test.yml `mypy ...`)
-# are gated. Expand that list as each further module reaches zero own-errors.
+# are gated — now the core root modules plus all of components/ and dialogs/.
+# tests/ and build scripts remain ungated.

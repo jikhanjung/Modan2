@@ -6,7 +6,7 @@ Part of modular refactoring effort.
 import logging
 import sys
 
-from matplotlib.backends.backend_qt5agg import FigureCanvas as FigureCanvas
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 from PyQt5.QtCore import (
@@ -30,7 +30,7 @@ GLUT_INITIALIZED = False
 glut = None
 
 try:
-    from OpenGL import GLUT as glut
+    from OpenGL import GLUT as glut  # type: ignore[no-redef]
 
     GLUT_AVAILABLE = True
 except ImportError as e:

@@ -824,9 +824,100 @@ def read_json_from_zip(zip_path: str) -> dict:
             return json.loads(f.read().decode("utf-8"))
 
 
+def _unique_dataset_name(MdDataset, base_name):
+    """Append (1), (2), ... until the dataset name is free."""
+    candidate = base_name
+    suffix = 1
+    while MdDataset.select().where(MdDataset.dataset_name == candidate).exists():
+        candidate = f"{base_name} ({suffix})"
+        suffix += 1
+    return candidate
+
+
+def _dataset_from_manifest(ds_meta):
+    """Create and save the MdDataset described by a package manifest."""
+    from MdModel import MdDataset
+
+    ds = MdDataset()
+    ds.dataset_name = _unique_dataset_name(MdDataset, ds_meta.get("name") or "Imported Dataset")
+    ds.dataset_desc = ds_meta.get("description")
+    try:
+        ds.dimension = int(ds_meta.get("dimension") or 2)
+    except (ValueError, TypeError) as e:
+        raise ValueError(f"Invalid dimension in manifest: {ds_meta.get('dimension')!r}") from e
+
+    ds.variablename_list = ds_meta.get("variables") or []
+    ds.pack_variablename_str()
+    ds.edge_list = ds_meta.get("wireframe") or []
+    ds.pack_wireframe()
+    ds.polygon_list = ds_meta.get("polygons") or []
+    ds.pack_polygons()
+    baseline = ds_meta.get("baseline") or []
+    if baseline:
+        ds.baseline_point_list = baseline
+        ds.pack_baseline()
+    ds.save()
+    return ds
+
+
+def _object_from_manifest(obj_meta, ds):
+    """Create and save one MdObject described by a package manifest."""
+    from MdModel import MdObject
+
+    mo = MdObject()
+    mo.object_name = obj_meta.get("name") or str(obj_meta.get("id"))
+    mo.object_desc = None
+
+    ppm = obj_meta.get("pixels_per_mm")
+    try:
+        mo.pixels_per_mm = float(ppm) if ppm is not None else None
+    except (ValueError, TypeError):
+        logger.warning(f"Invalid pixels_per_mm {ppm!r}; leaving unset")
+        mo.pixels_per_mm = None
+
+    mo.sequence = obj_meta.get("sequence")
+    mo.landmark_str = "\n".join(
+        "\t".join(str(x) for x in lm[: ds.dimension]) for lm in (obj_meta.get("landmarks") or []) if lm is not None
+    )
+
+    varmap = obj_meta.get("variables") or {}
+    mo.variable_list = [varmap.get(n) if varmap.get(n) is not None else "" for n in ds.variablename_list]
+    mo.pack_variable()
+    mo.dataset = ds
+    mo.save()
+    return mo
+
+
+def _import_media(meta, media_cls, mo, root, storage_base, copied_files, kind):
+    """Copy one packaged media file (image or 3D model) into permanent storage.
+
+    The path comes from the (untrusted) dataset.json inside the package, so it is
+    rejected unless it stays within the extraction root -- a crafted "../../.."
+    must not copy an arbitrary host file. Shared by the image and model paths,
+    which were otherwise identical.
+    """
+    if not (meta and meta.get("path")):
+        return
+    src = Path(root) / meta["path"]
+    if not _is_within_directory(Path(root), src):
+        logger.warning(f"Skipping unsafe {kind} path in package: {meta['path']!r}")
+        return
+    if not src.exists():
+        return
+
+    media = media_cls()
+    media.object = mo
+    media.load_file_info(str(src))
+    new_fp = media.get_file_path(storage_base)
+    Path(new_fp).parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(str(src), str(new_fp))
+    copied_files.append(str(new_fp))
+    media.save()
+
+
 def import_dataset_from_zip(zip_path: str, progress_callback: Callable[[int, int], None] | None = None) -> int:
     """Import dataset from a JSON+ZIP package. Returns new dataset id."""
-    from MdModel import MdDataset, MdImage, MdObject, MdThreeDModel, gDatabase
+    from MdModel import MdImage, MdThreeDModel, gDatabase
 
     # Media copied into permanent storage; removed if the transaction rolls back
     # so a failed import doesn't leave orphaned files behind.
@@ -842,9 +933,7 @@ def import_dataset_from_zip(zip_path: str, progress_callback: Callable[[int, int
         if not ok:
             raise ValueError("Invalid dataset.json: " + "; ".join(errs))
 
-        ds_meta = data["dataset"]
         objs = data.get("objects", [])
-
         total = max(1, len(objs) * 3)
         curr = 0
         if progress_callback:
@@ -852,105 +941,19 @@ def import_dataset_from_zip(zip_path: str, progress_callback: Callable[[int, int
 
         try:
             with gDatabase.atomic():
-                # Create dataset
-                ds = MdDataset()
-                # Ensure unique dataset name by appending (1), (2), ... if needed
-                base_name = ds_meta.get("name") or "Imported Dataset"
-                candidate = base_name
-                suffix = 1
-                while MdDataset.select().where(MdDataset.dataset_name == candidate).exists():
-                    candidate = f"{base_name} ({suffix})"
-                    suffix += 1
-                ds.dataset_name = candidate
-                ds.dataset_desc = ds_meta.get("description")
-                try:
-                    ds.dimension = int(ds_meta.get("dimension") or 2)
-                except (ValueError, TypeError) as e:
-                    raise ValueError(f"Invalid dimension in manifest: {ds_meta.get('dimension')!r}") from e
-                # variables
-                ds.variablename_list = ds_meta.get("variables") or []
-                ds.pack_variablename_str()
-                # geometry
-                ds.edge_list = ds_meta.get("wireframe") or []
-                ds.pack_wireframe()
-                ds.polygon_list = ds_meta.get("polygons") or []
-                ds.pack_polygons()
-                baseline = ds_meta.get("baseline") or []
-                if baseline:
-                    ds.baseline_point_list = baseline
-                    ds.pack_baseline()
-                ds.save()
-
+                ds = _dataset_from_manifest(data["dataset"])
                 storage_base = _get_storage_dir()
 
-                for o in objs:
-                    mo = MdObject()
-                    mo.object_name = o.get("name") or str(o.get("id"))
-                    mo.object_desc = None
-                    ppm = o.get("pixels_per_mm")
-                    try:
-                        mo.pixels_per_mm = float(ppm) if ppm is not None else None
-                    except (ValueError, TypeError):
-                        logger.warning(f"Invalid pixels_per_mm {ppm!r}; leaving unset")
-                        mo.pixels_per_mm = None
-                    mo.sequence = o.get("sequence")
-                    # landmarks -> landmark_str
-                    lm_lines = []
-                    for lm in o.get("landmarks") or []:
-                        if lm is None:
-                            continue
-                        lm_str = "\t".join([str(x) for x in lm[: ds.dimension]])
-                        lm_lines.append(lm_str)
-                    mo.landmark_str = "\n".join(lm_lines)
-                    # variables -> property_str
-                    varmap = o.get("variables") or {}
-                    varvals = [varmap.get(n) if varmap.get(n) is not None else "" for n in ds.variablename_list]
-                    mo.variable_list = varvals
-                    mo.pack_variable()
-                    mo.dataset = ds
-                    mo.save()
-
+                for obj_meta in objs:
+                    mo = _object_from_manifest(obj_meta, ds)
                     curr += 1
                     if progress_callback:
                         progress_callback(curr, total)
 
-                    # files
-                    files = o.get("files") or {}
-                    # image
-                    img_meta = files.get("image") if isinstance(files, dict) else None
-                    if img_meta and img_meta.get("path"):
-                        src = Path(root) / img_meta["path"]
-                        # The path comes from the (untrusted) dataset.json inside the
-                        # package; reject anything that escapes the extraction root
-                        # so a crafted "../../.." cannot copy an arbitrary host file.
-                        if not _is_within_directory(Path(root), src):
-                            logger.warning(f"Skipping unsafe image path in package: {img_meta['path']!r}")
-                        elif src.exists():
-                            new_image = MdImage()
-                            new_image.object = mo
-                            new_image.load_file_info(str(src))
-                            new_fp = new_image.get_file_path(storage_base)
-                            Path(new_fp).parent.mkdir(parents=True, exist_ok=True)
-                            shutil.copy2(str(src), str(new_fp))
-                            copied_files.append(str(new_fp))
-                            new_image.save()
-
-                    # model
-                    mdl_meta = files.get("model") if isinstance(files, dict) else None
-                    if mdl_meta and mdl_meta.get("path"):
-                        src = Path(root) / mdl_meta["path"]
-                        # Same containment check as the image path above.
-                        if not _is_within_directory(Path(root), src):
-                            logger.warning(f"Skipping unsafe model path in package: {mdl_meta['path']!r}")
-                        elif src.exists():
-                            new_model = MdThreeDModel()
-                            new_model.object = mo
-                            new_model.load_file_info(str(src))
-                            new_fp = new_model.get_file_path(storage_base)
-                            Path(new_fp).parent.mkdir(parents=True, exist_ok=True)
-                            shutil.copy2(str(src), str(new_fp))
-                            copied_files.append(str(new_fp))
-                            new_model.save()
+                    files = obj_meta.get("files") or {}
+                    if isinstance(files, dict):
+                        _import_media(files.get("image"), MdImage, mo, root, storage_base, copied_files, "image")
+                        _import_media(files.get("model"), MdThreeDModel, mo, root, storage_base, copied_files, "model")
 
                     curr += 2
                     if progress_callback:

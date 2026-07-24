@@ -7,6 +7,7 @@ visualizing shapes, and managing dataset-level analysis options.
 import datetime
 import logging
 import os
+from typing import ClassVar
 
 import numpy as np
 import xlsxwriter
@@ -801,12 +802,130 @@ class DatasetAnalysisDialog(QDialog):
         #    for obj in ds_ops.object_list:
         #        f.write(obj.object_name + "\t" + "\t".join([str(x) for x in obj.pca_result]) + "\n")
 
+    SCATTER_SIZES: ClassVar = {"small": 30, "medium": 50, "large": 60}
+    SCATTER_SELECTED_SIZE = 60
+
+    def _scatter_point_size(self):
+        """Marker size for the configured plot size (defaults to medium)."""
+        return self.SCATTER_SIZES.get(self.plot_size.lower(), self.SCATTER_SIZES["medium"])
+
+    def _build_scatter_groups(self, axis1, axis2, axis3, flip_axis1, flip_axis2, flip_axis3, scatter_size):
+        """Group the analysed objects into per-variable scatter series."""
+        color_candidate = self.color_list[:]
+        symbol_candidate = self.marker_list[:]
+        self.propertyname_index = self.comboPropertyName.currentIndex() - 1
+        self.scatter_data = {}
+        self.scatter_result = {}
+
+        self.scatter_data["__default__"] = build_scatter_group(
+            scatter_size, symbol="o", color=color_candidate[0], meta=True
+        )
+        if len(self.selected_object_id_list) > 0:
+            self.scatter_data["__selected__"] = build_scatter_group(
+                self.SCATTER_SELECTED_SIZE, symbol="o", color="red", meta=True
+            )
+
+        for obj in self.ds_ops.object_list:
+            key_name = "__default__"
+            if obj.id in self.selected_object_id_list:
+                key_name = "__selected__"
+            elif -1 < self.propertyname_index < len(obj.variable_list):
+                key_name = obj.variable_list[self.propertyname_index]
+
+            if key_name not in self.scatter_data:
+                self.scatter_data[key_name] = build_scatter_group(scatter_size, property_name=key_name)
+
+            group = self.scatter_data[key_name]
+            if axis1 == 10:
+                # Axis entry 10 is centroid size, which lives on the DB object.
+                group["x_val"].append(flip_axis1 * MdObject.get_by_id(obj.id).get_centroid_size(True))
+            else:
+                group["x_val"].append(flip_axis1 * obj.analysis_result[axis1])
+            group["y_val"].append(flip_axis2 * obj.analysis_result[axis2])
+            group["z_val"].append(flip_axis3 * obj.analysis_result[axis3])
+            group["data"].append(obj)
+
+        # remove empty group
+        if len(self.scatter_data["__default__"]["x_val"]) == 0:
+            del self.scatter_data["__default__"]
+
+        # assign color and symbol
+        sc_idx = 0
+        for group in self.scatter_data.values():
+            if group["color"] == "":
+                group["color"] = color_candidate[sc_idx % len(color_candidate)]
+                group["symbol"] = symbol_candidate[sc_idx % len(symbol_candidate)]
+                sc_idx += 1
+
+    def _finish_canvas(self, fig):
+        """Lay out, draw and (re)connect the chart's interaction handlers."""
+        fig.tight_layout()
+        fig.canvas.draw()
+        fig.canvas.flush_events()
+        fig.canvas.mpl_connect("pick_event", self.on_pick)
+        fig.canvas.mpl_connect("button_press_event", self.on_canvas_button_press)
+        fig.canvas.mpl_connect("button_release_event", self.on_canvas_button_release)
+
+    def _draw_scatter_2d(self, show_legend, show_axis_label, axis1_title, axis2_title):
+        """Render the groups on the 2D axes."""
+        self.ax2.clear()
+        for name, group in self.scatter_data.items():
+            if len(group["x_val"]) > 0:
+                self.scatter_result[name] = self.ax2.scatter(
+                    group["x_val"],
+                    group["y_val"],
+                    s=group["size"],
+                    marker=group["symbol"],
+                    color=group["color"],
+                    data=group["data"],
+                    picker=True,
+                    pickradius=5,
+                )
+            if name == "__selected__":
+                for idx, obj in enumerate(group["data"]):
+                    self.ax2.annotate(obj.object_name, (group["x_val"][idx], group["y_val"][idx]))
+
+        if show_legend:
+            build_scatter_legend(self.ax2, self.scatter_result, loc="upper right")
+        if show_axis_label:
+            self.ax2.set_xlabel(axis1_title)
+            self.ax2.set_ylabel(axis2_title)
+        self._finish_canvas(self.fig2)
+
+    def _draw_scatter_3d(self, depth_shade, show_legend, show_axis_label, axis1_title, axis2_title, axis3_title):
+        """Render the groups on the 3D axes."""
+        self.ax3.clear()
+        for name, group in self.scatter_data.items():
+            if len(group["x_val"]) > 0:
+                self.scatter_result[name] = self.ax3.scatter(
+                    group["x_val"],
+                    group["y_val"],
+                    group["z_val"],
+                    s=group["size"],
+                    marker=group["symbol"],
+                    color=group["color"],
+                    data=group["data"],
+                    depthshade=depth_shade,
+                    picker=True,
+                    pickradius=5,
+                )
+            if name == "__selected__":
+                for idx, obj in enumerate(group["data"]):
+                    self.ax3.text(group["x_val"][idx], group["y_val"][idx], group["z_val"][idx], obj.object_name)
+
+        if show_legend:
+            build_scatter_legend(self.ax3, self.scatter_result, loc="upper left")
+        if show_axis_label:
+            self.ax3.set_xlabel(axis1_title)
+            self.ax3.set_ylabel(axis2_title)
+            self.ax3.set_zlabel(axis3_title)
+        self._finish_canvas(self.fig3)
+
     @guard_slot("Failed to display analysis result")
     def show_analysis_result(self):
-        # self.plot_widget.clear()
-
+        """Refresh the result table and redraw the scatter chart (2D or 3D)."""
         self.show_result_table()
-        # get axis1 and axis2 value from comboAxis1 and 2 index
+
         depth_shade = self.cbxDepthShade.isChecked()
         show_legend = self.cbxLegend.isChecked()
         show_axis_label = self.cbxAxisLabel.isChecked()
@@ -820,136 +939,12 @@ class DatasetAnalysisDialog(QDialog):
         flip_axis2 = -1.0 if self.cbxFlipAxis2.isChecked() else 1.0
         flip_axis3 = -1.0 if self.cbxFlipAxis3.isChecked() else 1.0
 
-        symbol_candidate = ["o", "s", "^", "x", "+", "d", "v", "<", ">", "p", "h"]
-        color_candidate = ["blue", "green", "black", "cyan", "magenta", "yellow", "gray", "red"]
-        color_candidate = self.color_list[:]
-        symbol_candidate = self.marker_list[:]
-        self.propertyname_index = self.comboPropertyName.currentIndex() - 1
-        self.scatter_data = {}
-        self.scatter_result = {}
-        SCATTER_SMALL_SIZE = 30
-        SCATTER_MEDIUM_SIZE = 50
-        SCATTER_LARGE_SIZE = 60
-        if self.plot_size.lower() == "small":
-            scatter_size = SCATTER_SMALL_SIZE
-        elif self.plot_size.lower() == "medium":
-            scatter_size = SCATTER_MEDIUM_SIZE
-        elif self.plot_size.lower() == "large":
-            scatter_size = SCATTER_LARGE_SIZE
-
-        key_list = []
-        key_list.append("__default__")
-        self.scatter_data["__default__"] = build_scatter_group(
-            scatter_size, symbol="o", color=color_candidate[0], meta=True
-        )
-        if len(self.selected_object_id_list) > 0:
-            self.scatter_data["__selected__"] = build_scatter_group(
-                SCATTER_LARGE_SIZE, symbol="o", color="red", meta=True
-            )
-            key_list.append("__selected__")
-
-        for obj in self.ds_ops.object_list:
-            key_name = "__default__"
-
-            if obj.id in self.selected_object_id_list:
-                key_name = "__selected__"
-            elif self.propertyname_index > -1 and self.propertyname_index < len(obj.variable_list):
-                key_name = obj.variable_list[self.propertyname_index]
-
-            if key_name not in self.scatter_data.keys():
-                self.scatter_data[key_name] = build_scatter_group(scatter_size, property_name=key_name)
-            if axis1 == 10:
-                mdobject = MdObject.get_by_id(obj.id)
-                mdobject.get_centroid_size(True)
-                # print("obj:", mdobject.id, "csize:", csize)
-                self.scatter_data[key_name]["x_val"].append(flip_axis1 * mdobject.get_centroid_size(True))
-            else:
-                self.scatter_data[key_name]["x_val"].append(flip_axis1 * obj.analysis_result[axis1])
-            self.scatter_data[key_name]["y_val"].append(flip_axis2 * obj.analysis_result[axis2])
-            self.scatter_data[key_name]["z_val"].append(flip_axis3 * obj.analysis_result[axis3])
-            self.scatter_data[key_name]["data"].append(obj)
-            # group_hash[key_name]['text'].append(obj.object_name)
-            # group_hash[key_name]['hoverinfo'].append(obj.id)
-
-        # remove empty group
-        if len(self.scatter_data["__default__"]["x_val"]) == 0:
-            del self.scatter_data["__default__"]
-
-        # assign color and symbol
-        sc_idx = 0
-        for key_name in self.scatter_data.keys():
-            if self.scatter_data[key_name]["color"] == "":
-                self.scatter_data[key_name]["color"] = color_candidate[sc_idx % len(color_candidate)]
-                self.scatter_data[key_name]["symbol"] = symbol_candidate[sc_idx % len(symbol_candidate)]
-                sc_idx += 1
+        self._build_scatter_groups(axis1, axis2, axis3, flip_axis1, flip_axis2, flip_axis3, self._scatter_point_size())
 
         if self.rb2DChartDim.isChecked():
-            self.ax2.clear()
-            for name in self.scatter_data.keys():
-                # print("name", name, "len(group_hash[name]['x_val'])", len(group_hash[name]['x_val']), group_hash[name]['symbol'])
-                group = self.scatter_data[name]
-                if len(group["x_val"]) > 0:
-                    self.scatter_result[name] = self.ax2.scatter(
-                        group["x_val"],
-                        group["y_val"],
-                        s=group["size"],
-                        marker=group["symbol"],
-                        color=group["color"],
-                        data=group["data"],
-                        picker=True,
-                        pickradius=5,
-                    )
-                    # print("ret", ret)
-                if name == "__selected__":
-                    for idx, obj in enumerate(group["data"]):
-                        self.ax2.annotate(obj.object_name, (group["x_val"][idx], group["y_val"][idx]))
-            if show_legend:
-                build_scatter_legend(self.ax2, self.scatter_result, loc="upper right")
-            if show_axis_label:
-                self.ax2.set_xlabel(axis1_title)
-                self.ax2.set_ylabel(axis2_title)
-            self.fig2.tight_layout()
-            self.fig2.canvas.draw()
-            self.fig2.canvas.flush_events()
-            self.fig2.canvas.mpl_connect("pick_event", self.on_pick)
-            self.fig2.canvas.mpl_connect("button_press_event", self.on_canvas_button_press)
-            self.fig2.canvas.mpl_connect("button_release_event", self.on_canvas_button_release)
+            self._draw_scatter_2d(show_legend, show_axis_label, axis1_title, axis2_title)
         else:
-            self.ax3.clear()
-            for name in self.scatter_data.keys():
-                group = self.scatter_data[name]
-                # print("name", name, "len(group_hash[name]['x_val'])", len(group['x_val']), group['symbol'])
-                if len(self.scatter_data[name]["x_val"]) > 0:
-                    self.scatter_result[name] = self.ax3.scatter(
-                        group["x_val"],
-                        group["y_val"],
-                        group["z_val"],
-                        s=group["size"],
-                        marker=group["symbol"],
-                        color=group["color"],
-                        data=group["data"],
-                        depthshade=depth_shade,
-                        picker=True,
-                        pickradius=5,
-                    )
-                if name == "__selected__":
-                    for idx, obj in enumerate(group["data"]):
-                        self.ax3.text(group["x_val"][idx], group["y_val"][idx], group["z_val"][idx], obj.object_name)
-                    # print("ret", ret)
-            if show_legend:
-                build_scatter_legend(self.ax3, self.scatter_result, loc="upper left")
-            # if show_legend:
-            #    self.ax3.legend(self.scatter_result.values(), self.scatter_result.keys(), loc='upper left', bbox_to_anchor=(1.05, 1))
-            if show_axis_label:
-                self.ax3.set_xlabel(axis1_title)
-                self.ax3.set_ylabel(axis2_title)
-                self.ax3.set_zlabel(axis3_title)
-            self.fig3.tight_layout()
-            self.fig3.canvas.draw()
-            self.fig3.canvas.flush_events()
-            self.fig3.canvas.mpl_connect("pick_event", self.on_pick)
-            self.fig3.canvas.mpl_connect("button_press_event", self.on_canvas_button_press)
-            self.fig3.canvas.mpl_connect("button_release_event", self.on_canvas_button_release)
+            self._draw_scatter_3d(depth_shade, show_legend, show_axis_label, axis1_title, axis2_title, axis3_title)
 
     def show_result_table(self):
         self.plot_data.clear()

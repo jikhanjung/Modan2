@@ -915,129 +915,157 @@ class ObjectViewer2D(QLabel):
         self.repaint()
         QLabel.mouseMoveEvent(self, event)
 
+    def _start_pan(self, me):
+        """Begin a right-drag pan from the current cursor position."""
+        self.pan_mode = MODE["PAN"]
+        self.mouse_down_x = me.x()
+        self.mouse_down_y = me.y()
+
+    def _press_left_edit_landmark(self, me):
+        """Left click in landmark mode: enter curve mode if one is under the
+        cursor, otherwise place a landmark.
+
+        Returns True when the event is fully handled (the caller must not repaint
+        again), mirroring the original early returns.
+        """
+        if self.orig_pixmap is None:
+            return True
+        # A click near an existing curve selects it and switches to curve mode,
+        # instead of placing a landmark.
+        near_id = self._curve_at_position([self.mouse_curr_x, self.mouse_curr_y])
+        if near_id is not None and self.object_dialog is not None and hasattr(self.object_dialog, "enter_curve_mode"):
+            self.object_dialog.enter_curve_mode(near_id)
+            self.repaint()
+            return True
+
+        img_x = self._2imgx(self.mouse_curr_x)
+        img_y = self._2imgy(self.mouse_curr_y)
+        if img_x < 0 or img_x > self.orig_pixmap.width() or img_y < 0 or img_y > self.orig_pixmap.height():
+            return True
+        self.object_dialog.add_landmark(img_x, img_y)
+        return False
+
+    def _press_left_edit_curve(self, me):
+        """Left click while editing curves: grab or insert a handle, select a
+        curve, or extend the trace. Returns True when fully handled."""
+        if self.orig_pixmap is None:
+            return True
+        curr_pos = [self.mouse_curr_x, self.mouse_curr_y]
+
+        # 1) Editing the selected curve: grab a point or insert one.
+        if self.selected_curve_id is not None:
+            pt_idx = self._curve_point_within_threshold(curr_pos)
+            if pt_idx >= 0:
+                self.moving_curve_point_index = pt_idx
+                self.repaint()
+                return True
+            ins_idx = self._insert_editpoint_near(curr_pos)
+            if ins_idx >= 0:
+                self.moving_curve_point_index = ins_idx
+                # For a snap curve the inserted point is a new anchor; re-snap so
+                # the dense trace runs through it (a following drag re-snaps live).
+                self._resnap_selected_curve()
+                self.repaint()
+                return True
+
+        # 2) A click near any curve selects it (unless mid-trace).
+        if not self.current_curve_points:
+            near_id = self._curve_at_position(curr_pos)
+            if near_id is not None:
+                if self.object_dialog is not None and hasattr(self.object_dialog, "select_curve_row"):
+                    self.object_dialog.select_curve_row(near_id)
+                else:
+                    self.selected_curve_id = near_id
+                self.repaint()
+                return True
+
+        # 3) Otherwise, with no curve selected, add a point to the trace.
+        if self.selected_curve_id is None:
+            img_x = self._2imgx(self.mouse_curr_x)
+            img_y = self._2imgy(self.mouse_curr_y)
+            if img_x < 0 or img_x > self.orig_pixmap.width() or img_y < 0 or img_y > self.orig_pixmap.height():
+                return True
+            if self.livewire_enabled:
+                # Snap from the last point to the click along the strongest edge,
+                # appending the intermediate points (skip index 0, which repeats
+                # the point already in the trace). Remember the click itself as an
+                # anchor so the curve stays editable by its clicks.
+                if self.current_curve_points:
+                    segment = self._livewire_segment(self.current_curve_points[-1], [img_x, img_y])
+                    self.current_curve_points.extend(segment[1:])
+                else:
+                    self.current_curve_points.append([img_x, img_y])
+                self.current_curve_anchors.append([img_x, img_y])
+            else:
+                self.current_curve_points.append([img_x, img_y])
+            self.livewire_preview = []
+        return False
+
+    def _press_left(self, me):
+        """Dispatch a left click by edit mode. True = already fully handled."""
+        if self.edit_mode == MODE["EDIT_LANDMARK"]:
+            return self._press_left_edit_landmark(me)
+        if self.edit_mode == MODE["EDIT_CURVE"]:
+            return self._press_left_edit_curve(me)
+        if self.edit_mode == MODE["READY_MOVE_LANDMARK"]:
+            self.set_mode(MODE["MOVE_LANDMARK"])
+        elif self.edit_mode == MODE["WIREFRAME"]:
+            if self.wire_hover_index >= 0 and self.wire_start_index < 0:
+                self.wire_start_index = self.wire_hover_index
+                self.wire_hover_index = -1
+        elif self.edit_mode == MODE["CALIBRATION"]:
+            self.calibration_from_img_x = self._2imgx(self.mouse_curr_x)
+            self.calibration_from_img_y = self._2imgy(self.mouse_curr_y)
+        return False
+
+    def _press_right_edit_curve(self, me):
+        """Right click while editing curves: cancel the trace, open the context
+        menu near a curve, or start panning on empty space."""
+        if self.current_curve_points:
+            # Cancel the curve being traced.
+            self.current_curve_points = []
+            self.current_curve_anchors = []
+            self.livewire_preview = []
+        elif self._curve_at_position([self.mouse_curr_x, self.mouse_curr_y]) is not None:
+            # Near a curve: context menu (delete point / curve).
+            self._show_curve_context_menu(me.globalPos())
+        else:
+            # Empty space: right-drag pans, like the other modes.
+            self._start_pan(me)
+
+    def _press_right(self, me):
+        """Dispatch a right click by edit mode; anything unhandled starts a pan."""
+        if self.edit_mode == MODE["EDIT_CURVE"]:
+            self._press_right_edit_curve(me)
+        elif self.edit_mode == MODE["WIREFRAME"]:
+            if self.wire_start_index >= 0:
+                self.wire_start_index = -1
+                self.wire_hover_index = -1
+            elif self.selected_edge_index >= 0:
+                self.delete_edge(self.selected_edge_index)
+                self.selected_edge_index = -1
+        elif self.edit_mode == MODE["READY_MOVE_LANDMARK"]:
+            if self.selected_landmark_index >= 0:
+                self.object_dialog.delete_landmark(self.selected_landmark_index)
+                self.selected_landmark_index = -1
+                self.set_mode(MODE["EDIT_LANDMARK"])
+        elif (
+            self.edit_mode == MODE["EDIT_LANDMARK"]
+            and self._curve_at_position([self.mouse_curr_x, self.mouse_curr_y]) is not None
+        ):
+            # Right-click a highlighted curve in landmark mode: offer to delete it
+            # (no curve is selected here, so only "Delete Curve" shows).
+            self._show_curve_context_menu(me.globalPos())
+        else:
+            self._start_pan(me)
+
     def mousePressEvent(self, event):
         me = QMouseEvent(event)
         if me.button() == Qt.LeftButton:
-            if self.edit_mode == MODE["EDIT_LANDMARK"]:
-                if self.orig_pixmap is None:
-                    return
-                # A click near an existing curve selects it and switches to curve
-                # mode, instead of placing a landmark.
-                near_id = self._curve_at_position([self.mouse_curr_x, self.mouse_curr_y])
-                if (
-                    near_id is not None
-                    and self.object_dialog is not None
-                    and hasattr(self.object_dialog, "enter_curve_mode")
-                ):
-                    self.object_dialog.enter_curve_mode(near_id)
-                    self.repaint()
-                    return
-                img_x = self._2imgx(self.mouse_curr_x)
-                img_y = self._2imgy(self.mouse_curr_y)
-                if img_x < 0 or img_x > self.orig_pixmap.width() or img_y < 0 or img_y > self.orig_pixmap.height():
-                    return
-                self.object_dialog.add_landmark(img_x, img_y)
-            elif self.edit_mode == MODE["READY_MOVE_LANDMARK"]:
-                self.set_mode(MODE["MOVE_LANDMARK"])
-            elif self.edit_mode == MODE["WIREFRAME"]:
-                if self.wire_hover_index >= 0:
-                    if self.wire_start_index < 0:
-                        self.wire_start_index = self.wire_hover_index
-                        self.wire_hover_index = -1
-            elif self.edit_mode == MODE["CALIBRATION"]:
-                self.calibration_from_img_x = self._2imgx(self.mouse_curr_x)
-                self.calibration_from_img_y = self._2imgy(self.mouse_curr_y)
-            elif self.edit_mode == MODE["EDIT_CURVE"]:
-                if self.orig_pixmap is None:
-                    return
-                curr_pos = [self.mouse_curr_x, self.mouse_curr_y]
-                # 1) Editing the selected curve: grab a point or insert one.
-                if self.selected_curve_id is not None:
-                    pt_idx = self._curve_point_within_threshold(curr_pos)
-                    if pt_idx >= 0:
-                        self.moving_curve_point_index = pt_idx
-                        self.repaint()
-                        return
-                    ins_idx = self._insert_editpoint_near(curr_pos)
-                    if ins_idx >= 0:
-                        self.moving_curve_point_index = ins_idx
-                        # For a snap curve the inserted point is a new anchor;
-                        # re-snap so the dense trace runs through it (a following
-                        # drag re-snaps live).
-                        self._resnap_selected_curve()
-                        self.repaint()
-                        return
-                # 2) A click near any curve selects it (unless mid-trace).
-                if not self.current_curve_points:
-                    near_id = self._curve_at_position(curr_pos)
-                    if near_id is not None:
-                        if self.object_dialog is not None and hasattr(self.object_dialog, "select_curve_row"):
-                            self.object_dialog.select_curve_row(near_id)
-                        else:
-                            self.selected_curve_id = near_id
-                        self.repaint()
-                        return
-                # 3) Otherwise, with no curve selected, add a point to the trace.
-                if self.selected_curve_id is None:
-                    img_x = self._2imgx(self.mouse_curr_x)
-                    img_y = self._2imgy(self.mouse_curr_y)
-                    if img_x < 0 or img_x > self.orig_pixmap.width() or img_y < 0 or img_y > self.orig_pixmap.height():
-                        return
-                    if self.livewire_enabled:
-                        # Snap from the last point to the click along the strongest
-                        # edge, appending the intermediate points (skip index 0,
-                        # which repeats the point already in the trace). Remember
-                        # the click itself as an anchor so the curve stays
-                        # editable by its clicks.
-                        if self.current_curve_points:
-                            segment = self._livewire_segment(self.current_curve_points[-1], [img_x, img_y])
-                            self.current_curve_points.extend(segment[1:])
-                        else:
-                            self.current_curve_points.append([img_x, img_y])
-                        self.current_curve_anchors.append([img_x, img_y])
-                    else:
-                        self.current_curve_points.append([img_x, img_y])
-                    self.livewire_preview = []
-
+            if self._press_left(me):
+                return
         elif me.button() == Qt.RightButton:
-            if self.edit_mode == MODE["EDIT_CURVE"]:
-                if self.current_curve_points:
-                    # Cancel the curve being traced.
-                    self.current_curve_points = []
-                    self.current_curve_anchors = []
-                    self.livewire_preview = []
-                elif self._curve_at_position([self.mouse_curr_x, self.mouse_curr_y]) is not None:
-                    # Near a curve: context menu (delete point / curve).
-                    self._show_curve_context_menu(me.globalPos())
-                else:
-                    # Empty space: right-drag pans, like the other modes.
-                    self.pan_mode = MODE["PAN"]
-                    self.mouse_down_x = me.x()
-                    self.mouse_down_y = me.y()
-            elif self.edit_mode == MODE["WIREFRAME"]:
-                if self.wire_start_index >= 0:
-                    self.wire_start_index = -1
-                    self.wire_hover_index = -1
-                elif self.selected_edge_index >= 0:
-                    self.delete_edge(self.selected_edge_index)
-                    self.selected_edge_index = -1
-            elif self.edit_mode == MODE["READY_MOVE_LANDMARK"]:
-                if self.selected_landmark_index >= 0:
-                    self.object_dialog.delete_landmark(self.selected_landmark_index)
-                    self.selected_landmark_index = -1
-                    self.set_mode(MODE["EDIT_LANDMARK"])
-            elif (
-                self.edit_mode == MODE["EDIT_LANDMARK"]
-                and self._curve_at_position([self.mouse_curr_x, self.mouse_curr_y]) is not None
-            ):
-                # Right-click a highlighted curve in landmark mode: offer to delete
-                # it (no curve is selected here, so only "Delete Curve" shows).
-                self._show_curve_context_menu(me.globalPos())
-            else:
-                self.pan_mode = MODE["PAN"]
-                self.mouse_down_x = me.x()
-                self.mouse_down_y = me.y()
-
+            self._press_right(me)
         self.repaint()
 
     def mouseReleaseEvent(self, ev) -> None:

@@ -957,7 +957,7 @@ class TestDatasetSerialization:
 
         result = mu.serialize_dataset_to_json(dataset.id, include_files=False)
 
-        assert result["format_version"] == "1.1"
+        assert result["format_version"] == "1.2"
         assert "export_info" in result
         assert result["dataset"]["name"] == "Test Dataset"
         assert result["dataset"]["dimension"] == 2
@@ -1251,6 +1251,42 @@ class TestDatasetImportFromZip:
 
         assert new_dataset_id > 0
         assert len(progress_calls) > 0
+
+    def test_zip_roundtrip_preserves_missing_landmarks_and_curves(self, mock_database, tmp_path):
+        """Missing landmarks and semi-landmark curves survive an export/import.
+
+        Regression: the schema-1.1 manifest carried no curve fields, so a dataset
+        with semi-landmark curves lost them entirely on round-trip, and missing
+        coordinates were written back as the string "None" instead of the app's
+        "Missing" marker.
+        """
+        dataset = mm.MdDataset.create(dataset_name="RoundTrip", dataset_desc="d", dimension=2)
+        curve_config = [{"id": "c1", "n": 4, "method": "equidistant", "start": 3, "name": "outline", "desc": ""}]
+        dataset.set_curve_config(curve_config)
+        dataset.save()
+
+        obj = mm.MdObject.create(object_name="O1", dataset=dataset, sequence=1)
+        obj.landmark_list = [[1.0, 2.0], [None, None], [5.0, 6.0]]  # middle one missing
+        obj.pack_landmark()
+        obj.set_curve_raw({"c1": [[10.0, 11.0], [12.0, 13.0], [14.0, 15.0]]})
+        obj.set_curve_anchors({"c1": [[10.0, 11.0], [14.0, 15.0]]})
+        obj.save()
+
+        zip_path = tmp_path / "rt.zip"
+        mu.create_zip_package(dataset.id, str(zip_path), include_files=False)
+        imported = mm.MdDataset.get_by_id(mu.import_dataset_from_zip(str(zip_path)))
+        imported_obj = imported.object_list.first()
+        imported_obj.unpack_landmark()
+
+        # curve scheme (dataset) + per-object trace and anchors preserved
+        assert imported.get_curve_config() == curve_config
+        assert imported_obj.get_curve_raw() == {"c1": [[10.0, 11.0], [12.0, 13.0], [14.0, 15.0]]}
+        assert imported_obj.get_curve_anchors() == {"c1": [[10.0, 11.0], [14.0, 15.0]]}
+
+        # missing landmark preserved, and stored with the app's marker
+        assert imported_obj.landmark_list == [[1.0, 2.0], [None, None], [5.0, 6.0]]
+        assert "Missing" in imported_obj.landmark_str
+        assert "None" not in imported_obj.landmark_str
 
     def test_import_dataset_invalid_json(self, mock_database, tmp_path):
         """Test import fails with invalid JSON schema."""

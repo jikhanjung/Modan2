@@ -556,7 +556,7 @@ def serialize_dataset_to_json(dataset_id: int, include_files: bool = True, stora
         storage_dir: Base storage directory for attached files
 
     Returns:
-        dict representing the JSON schema (v1.1)
+        dict representing the JSON schema (v1.2)
     """
     from MdModel import MdDataset, MdObject
 
@@ -630,6 +630,10 @@ def serialize_dataset_to_json(dataset_id: int, include_files: bool = True, stora
                 "pixels_per_mm": obj.pixels_per_mm,
                 "landmarks": lms,
                 "variables": variables,
+                # Semi-landmark curves (schema 1.2). The raw trace and its click
+                # anchors are per-object; the scheme they follow is on the dataset.
+                "curve_raw": obj.get_curve_raw() or None,
+                "curve_anchors": obj.get_curve_anchors() or None,
                 "files": files_meta or None,
             }
         )
@@ -656,10 +660,13 @@ def serialize_dataset_to_json(dataset_id: int, include_files: bool = True, stora
         "wireframe": wf or [],
         "polygons": polys or [],
         "baseline": base or [],
+        # Semi-landmark curve scheme (schema 1.2): how many semi-landmarks each
+        # curve carries and where its block starts. Shared by every object.
+        "curve_config": dataset.get_curve_config() or [],
     }
 
     return {
-        "format_version": "1.1",
+        "format_version": "1.2",
         "export_info": export_info,
         "dataset": dataset_json,
         "objects": objects_json,
@@ -856,6 +863,10 @@ def _dataset_from_manifest(ds_meta):
     if baseline:
         ds.baseline_point_list = baseline
         ds.pack_baseline()
+    # Semi-landmark curve scheme (schema 1.2+); absent in 1.1 packages.
+    curve_config = ds_meta.get("curve_config") or []
+    if curve_config:
+        ds.set_curve_config(curve_config)
     ds.save()
     return ds
 
@@ -876,15 +887,25 @@ def _object_from_manifest(obj_meta, ds):
         mo.pixels_per_mm = None
 
     mo.sequence = obj_meta.get("sequence")
-    mo.landmark_str = "\n".join(
-        "\t".join(str(x) for x in lm[: ds.dimension]) for lm in (obj_meta.get("landmarks") or []) if lm is not None
-    )
+
+    # Missing coordinates are exported as JSON null; write them back with the
+    # app's own marker (pack_landmark's "Missing"), not str(None).
+    mo.dataset = ds
+    mo.landmark_list = [lm[: ds.dimension] for lm in (obj_meta.get("landmarks") or []) if lm is not None]
+    mo.pack_landmark()
 
     varmap = obj_meta.get("variables") or {}
     mo.variable_list = [varmap.get(n) if varmap.get(n) is not None else "" for n in ds.variablename_list]
     mo.pack_variable()
-    mo.dataset = ds
     mo.save()
+
+    # Semi-landmark curves (schema 1.2+); absent in 1.1 packages.
+    curve_raw = obj_meta.get("curve_raw") or {}
+    curve_anchors = obj_meta.get("curve_anchors") or {}
+    if curve_raw or curve_anchors:
+        mo.set_curve_raw(curve_raw)
+        mo.set_curve_anchors(curve_anchors)
+        mo.save()
     return mo
 
 

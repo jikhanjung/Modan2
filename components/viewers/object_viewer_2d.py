@@ -1378,110 +1378,85 @@ class ObjectViewer2D(QLabel):
         painter.drawLine(x_pos - x_size, y_pos - x_size, x_pos + x_size, y_pos + x_size)
         painter.drawLine(x_pos - x_size, y_pos + x_size, x_pos + x_size, y_pos - x_size)
 
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        if not self.transparent:
-            painter.fillRect(self.rect(), QBrush(QColor(self.bgcolor)))
-        if self.object is None:
-            # print("no object")
-            if self.ds_ops is not None:
-                self.draw_dataset(painter)
-            return
-        if self.curr_pixmap is not None:
-            painter.drawPixmap(self.pan_x + self.temp_pan_x, self.pan_y + self.temp_pan_y, self.curr_pixmap)
+    def _landmark_radius(self):
+        """On-canvas radius of a landmark marker at the configured size."""
+        return BASE_LANDMARK_RADIUS * (int(self.landmark_size) + 1)
 
-        if self.show_wireframe:
-            if self.obj_ops.edge_color:
-                color = QColor(self.obj_ops.edge_color)
-            else:
-                color = QColor(self.wireframe_color)
-            painter.setPen(QPen(color, int(self.wireframe_thickness) + 1))
-            painter.setBrush(QBrush(color))
+    def _paint_wireframe(self, painter):
+        """Draw the dataset wireframe edges, highlighting the selected one."""
+        color = QColor(self.obj_ops.edge_color) if self.obj_ops.edge_color else QColor(self.wireframe_color)
+        painter.setPen(QPen(color, int(self.wireframe_thickness) + 1))
+        painter.setBrush(QBrush(color))
 
-            for wire in self.edge_list:
-                from_lm_idx = wire[0] - 1
-                to_lm_idx = wire[1] - 1
-                if from_lm_idx >= len(self.landmark_list) or to_lm_idx >= len(self.landmark_list):
-                    continue
-                from_lm = self.landmark_list[from_lm_idx]
-                to_lm = self.landmark_list[to_lm_idx]
-                # Skip edges with missing landmarks
-                if from_lm[0] is None or from_lm[1] is None or to_lm[0] is None or to_lm[1] is None:
-                    continue
-                [from_x, from_y] = from_lm
-                [to_x, to_y] = to_lm
+        for wire in self.edge_list:
+            from_lm_idx = wire[0] - 1
+            to_lm_idx = wire[1] - 1
+            if from_lm_idx >= len(self.landmark_list) or to_lm_idx >= len(self.landmark_list):
+                continue
+            from_lm = self.landmark_list[from_lm_idx]
+            to_lm = self.landmark_list[to_lm_idx]
+            # Skip edges with missing landmarks
+            if from_lm[0] is None or from_lm[1] is None or to_lm[0] is None or to_lm[1] is None:
+                continue
+            [from_x, from_y] = from_lm
+            [to_x, to_y] = to_lm
+            painter.drawLine(
+                int(self._2canx(from_x)), int(self._2cany(from_y)), int(self._2canx(to_x)), int(self._2cany(to_y))
+            )
+
+        if self.selected_edge_index >= 0:
+            edge = self.edge_list[self.selected_edge_index]
+            from_lm_idx = edge[0] - 1
+            to_lm_idx = edge[1] - 1
+            painter.setPen(QPen(mu.as_qt_color(COLOR["SELECTED_EDGE"]), 2))
+            if from_lm_idx < len(self.landmark_list) and to_lm_idx < len(self.landmark_list):
+                [from_x, from_y] = self.landmark_list[from_lm_idx]
+                [to_x, to_y] = self.landmark_list[to_lm_idx]
                 painter.drawLine(
-                    int(self._2canx(from_x)), int(self._2cany(from_y)), int(self._2canx(to_x)), int(self._2cany(to_y))
+                    int(self._2canx(from_x)),
+                    int(self._2cany(from_y)),
+                    int(self._2canx(to_x)),
+                    int(self._2cany(to_y)),
                 )
-            if self.selected_edge_index >= 0:
-                edge = self.edge_list[self.selected_edge_index]
-                from_lm_idx = edge[0] - 1
-                to_lm_idx = edge[1] - 1
-                painter.setPen(QPen(mu.as_qt_color(COLOR["SELECTED_EDGE"]), 2))
-                if from_lm_idx >= len(self.landmark_list) or to_lm_idx >= len(self.landmark_list):
-                    pass
-                else:
-                    [from_x, from_y] = self.landmark_list[from_lm_idx]
-                    [to_x, to_y] = self.landmark_list[to_lm_idx]
-                    painter.drawLine(
-                        int(self._2canx(from_x)),
-                        int(self._2cany(from_y)),
-                        int(self._2canx(to_x)),
-                        int(self._2cany(to_y)),
-                    )
 
-        radius = BASE_LANDMARK_RADIUS * (int(self.landmark_size) + 1)
-        painter.setPen(QPen(Qt.blue, 2))
-        painter.setBrush(QBrush(Qt.blue))
-        if self.edit_mode == MODE["CALIBRATION"]:
-            if self.calibration_from_img_x >= 0 and self.calibration_from_img_y >= 0:
-                x1 = int(self._2canx(self.calibration_from_img_x))
-                y1 = int(self._2cany(self.calibration_from_img_y))
-                x2 = self.mouse_curr_x
-                y2 = self.mouse_curr_y
-                painter.setPen(QPen(mu.as_qt_color(COLOR["SELECTED_LANDMARK"]), 2))
-                painter.drawLine(x1, y1, x2, y2)
+    def _paint_calibration_line(self, painter):
+        """Rubber-band line from the calibration start point to the cursor."""
+        if self.edit_mode != MODE["CALIBRATION"]:
+            return
+        if self.calibration_from_img_x >= 0 and self.calibration_from_img_y >= 0:
+            x1 = int(self._2canx(self.calibration_from_img_x))
+            y1 = int(self._2cany(self.calibration_from_img_y))
+            painter.setPen(QPen(mu.as_qt_color(COLOR["SELECTED_LANDMARK"]), 2))
+            painter.drawLine(x1, y1, self.mouse_curr_x, self.mouse_curr_y)
 
+    def _paint_landmarks(self, painter):
+        """Draw each placed landmark (or its estimate) and, optionally, its label."""
+        radius = self._landmark_radius()
         painter.setFont(QFont("Helvetica", 10 + int(self.index_size) * 3))
         landmark_names = self._landmark_names() if self.show_landmark_name else []
         for idx, landmark in enumerate(self.landmark_list):
-            # Check for missing landmarks
             if landmark[0] is None or landmark[1] is None:
-                # Check if we have an estimated position from object_dialog
+                # Missing landmark: draw the dialog's estimate if it has one,
+                # otherwise skip (estimates only exist in the object dialog).
                 if hasattr(self, "object_dialog") and self.object_dialog:
-                    if (
-                        hasattr(self.object_dialog, "estimated_landmark_list")
-                        and self.object_dialog.estimated_landmark_list is not None
-                        and idx < len(self.object_dialog.estimated_landmark_list)
-                    ):
-                        est_lm = self.object_dialog.estimated_landmark_list[idx]
+                    estimated = getattr(self.object_dialog, "estimated_landmark_list", None)
+                    if estimated is not None and idx < len(estimated):
+                        est_lm = estimated[idx]
                         if est_lm[0] is not None and est_lm[1] is not None:
-                            # Draw estimated landmark with distinctive style
                             self.draw_estimated_landmark(painter, est_lm[0], est_lm[1], idx)
-                            continue
-                # Skip missing landmarks (no estimation available or not in object_dialog)
-                # Missing landmarks should only be shown with proper estimation in Object Dialog
                 continue
 
-            if idx == self.wire_hover_index:
-                painter.setPen(QPen(mu.as_qt_color(COLOR["SELECTED_LANDMARK"]), 2))
-                painter.setBrush(QBrush(mu.as_qt_color(COLOR["SELECTED_LANDMARK"])))
-            elif idx == self.wire_start_index or idx == self.wire_end_index:
-                painter.setPen(QPen(mu.as_qt_color(COLOR["SELECTED_LANDMARK"]), 2))
-                painter.setBrush(QBrush(mu.as_qt_color(COLOR["SELECTED_LANDMARK"])))
-            elif idx == self.selected_landmark_index:
+            if idx in (self.wire_hover_index, self.wire_start_index, self.wire_end_index, self.selected_landmark_index):
                 painter.setPen(QPen(mu.as_qt_color(COLOR["SELECTED_LANDMARK"]), 2))
                 painter.setBrush(QBrush(mu.as_qt_color(COLOR["SELECTED_LANDMARK"])))
             else:
-                if self.obj_ops.landmark_color:
-                    color = QColor(self.obj_ops.landmark_color)
-                else:
-                    color = QColor(self.landmark_color)
+                color = QColor(self.obj_ops.landmark_color or self.landmark_color)
                 painter.setPen(QPen(color, 2))
                 painter.setBrush(QBrush(color))
             painter.drawEllipse(
                 int(self._2canx(landmark[0]) - radius), int(self._2cany(landmark[1])) - radius, radius * 2, radius * 2
             )
+
             if self.show_index:
                 idx_color = QColor(self.index_color)
                 painter.setPen(QPen(idx_color, 2))
@@ -1492,151 +1467,201 @@ class ObjectViewer2D(QLabel):
                     self._landmark_label(idx, landmark_names),
                 )
 
-        # draw expected positions of the not-yet-placed landmarks (digitizing aid)
-        if self.show_expected and self.object_dialog is not None:
-            expected = getattr(self.object_dialog, "expected_landmark_list", None)
-            if expected is not None:
-                for idx in range(len(self.landmark_list), len(expected)):
-                    lm = expected[idx]
-                    if lm and lm[0] is not None and lm[1] is not None:
-                        self.draw_estimated_landmark(painter, lm[0], lm[1], idx)
+    def _paint_expected_landmarks(self, painter):
+        """Digitizing aid: expected positions of the not-yet-placed landmarks."""
+        if not (self.show_expected and self.object_dialog is not None):
+            return
+        expected = getattr(self.object_dialog, "expected_landmark_list", None)
+        if expected is None:
+            return
+        for idx in range(len(self.landmark_list), len(expected)):
+            lm = expected[idx]
+            if lm and lm[0] is not None and lm[1] is not None:
+                self.draw_estimated_landmark(painter, lm[0], lm[1], idx)
 
-        # draw wireframe being edited
-        if self.wire_start_index >= 0:
-            painter.setPen(QPen(mu.as_qt_color(COLOR["WIREFRAME"]), 2))
-            painter.setBrush(QBrush(mu.as_qt_color(COLOR["WIREFRAME"])))
-            start_lm = self.landmark_list[self.wire_start_index]
-            painter.drawLine(
-                int(self._2canx(start_lm[0])), int(self._2cany(start_lm[1])), self.mouse_curr_x, self.mouse_curr_y
-            )
+    def _paint_wireframe_in_progress(self, painter):
+        """Rubber-band edge from the latched start vertex to the cursor."""
+        if self.wire_start_index < 0:
+            return
+        painter.setPen(QPen(mu.as_qt_color(COLOR["WIREFRAME"]), 2))
+        painter.setBrush(QBrush(mu.as_qt_color(COLOR["WIREFRAME"])))
+        start_lm = self.landmark_list[self.wire_start_index]
+        painter.drawLine(
+            int(self._2canx(start_lm[0])), int(self._2cany(start_lm[1])), self.mouse_curr_x, self.mouse_curr_y
+        )
 
-        # draw each curve: its raw trace (polyline), the derived semi-landmarks
-        # (labelled C<curve>-<semi-landmark> when indices are shown), and, for the
-        # selected curve, editable point handles
+    def _paint_curve_handles(self, painter, curve, raw):
+        """Editable handles for the selected/hovered curve.
+
+        These sit on the manipulated points -- the sparse snap anchors, or the
+        raw points of a hand trace -- not on every dense point of a snapped one.
+        """
+        edit_pts = self._curve_editpoints(curve.get("id")) or raw
+        is_selected = curve.get("id") == self.selected_curve_id
+        for j, p in enumerate(edit_pts):
+            cx, cy = int(self._2canx(p[0])), int(self._2cany(p[1]))
+            if is_selected and j in (self.hover_curve_point_index, self.moving_curve_point_index):
+                painter.setPen(QPen(mu.as_qt_color(COLOR["SELECTED_LANDMARK"]), 2))
+                painter.setBrush(QBrush(mu.as_qt_color(COLOR["SELECTED_LANDMARK"])))
+            else:
+                painter.setPen(QPen(mu.as_qt_color(COLOR["CURVE"]), 2))
+                painter.setBrush(Qt.NoBrush)
+            # Square handles, to set them apart from the round semi-landmarks.
+            painter.drawRect(cx - 3, cy - 3, 6, 6)
+
+    def _paint_curves(self, painter):
+        """Draw each curve: its raw trace, the derived semi-landmarks, and the
+        selected curve's editable handles."""
         raw_map = self._curve_raw_map()
-        if raw_map:
-            semi_color = mu.as_qt_color(COLOR["SEMI_LANDMARK"])
-            for num, curve in enumerate(self._curve_config(), start=1):
-                raw = raw_map.get(curve.get("id"))
-                if not raw:
-                    continue
-                canvas_pts = [(int(self._2canx(p[0])), int(self._2cany(p[1]))) for p in raw]
-                if self.show_curve:
-                    # Draw the selected curve's line thicker so it stands out.
-                    line_width = 3 if curve.get("id") == self.selected_curve_id else 1
-                    painter.setPen(QPen(mu.as_qt_color(COLOR["CURVE"]), line_width))
-                    painter.setBrush(Qt.NoBrush)
-                    for j in range(len(canvas_pts) - 1):
-                        painter.drawLine(*canvas_pts[j], *canvas_pts[j + 1])
-                if self.show_semi_landmark and len(raw) >= 2:
-                    try:
-                        semis = mu.resample_polyline(raw, curve.get("n", 0))
-                    except ValueError:
-                        semis = []
-                    for i, pt in enumerate(semis, start=1):
-                        sx, sy = int(self._2canx(pt[0])), int(self._2cany(pt[1]))
-                        painter.setPen(QPen(semi_color, 2))
-                        painter.setBrush(QBrush(semi_color))
-                        painter.drawEllipse(sx - radius, sy - radius, radius * 2, radius * 2)
-                        if self.show_index:
-                            painter.drawText(sx + 6, sy, f"C{num}-{i}")
-                if curve.get("id") in (self.selected_curve_id, self.hover_curve_id):
-                    # Editable handles sit on the manipulated points -- the sparse
-                    # snap anchors, or the raw points for a hand-traced curve --
-                    # not every dense point of a snapped trace.
-                    edit_pts = self._curve_editpoints(curve.get("id")) or raw
-                    handle_pts = [(int(self._2canx(p[0])), int(self._2cany(p[1]))) for p in edit_pts]
-                    for j, (cx, cy) in enumerate(handle_pts):
-                        is_selected = curve.get("id") == self.selected_curve_id
-                        if is_selected and j in (self.hover_curve_point_index, self.moving_curve_point_index):
-                            painter.setPen(QPen(mu.as_qt_color(COLOR["SELECTED_LANDMARK"]), 2))
-                            painter.setBrush(QBrush(mu.as_qt_color(COLOR["SELECTED_LANDMARK"])))
-                        else:
-                            painter.setPen(QPen(mu.as_qt_color(COLOR["CURVE"]), 2))
-                            painter.setBrush(Qt.NoBrush)
-                        # Square handles for the anchor/edit points, to set them
-                        # apart from the round semi-landmarks.
-                        painter.drawRect(cx - 3, cy - 3, 6, 6)
+        if not raw_map:
+            return
+        radius = self._landmark_radius()
+        semi_color = mu.as_qt_color(COLOR["SEMI_LANDMARK"])
+        for num, curve in enumerate(self._curve_config(), start=1):
+            raw = raw_map.get(curve.get("id"))
+            if not raw:
+                continue
+            canvas_pts = [(int(self._2canx(p[0])), int(self._2cany(p[1]))) for p in raw]
 
-        # draw the curve currently being traced (EDIT_CURVE mode)
-        if self.current_curve_points:
-            painter.setPen(QPen(mu.as_qt_color(COLOR["CURVE"]), 2))
-            painter.setBrush(QBrush(mu.as_qt_color(COLOR["CURVE"])))
-            prev = None
-            for pt in self.current_curve_points:
-                cx, cy = int(self._2canx(pt[0])), int(self._2cany(pt[1]))
-                painter.drawEllipse(cx - 2, cy - 2, 4, 4)
-                if prev is not None:
-                    painter.drawLine(prev[0], prev[1], cx, cy)
-                prev = (cx, cy)
-            if self.livewire_enabled and self.livewire_preview:
-                # Snapped rubber-band: draw the live-wire path to the cursor.
-                pen = QPen(mu.as_qt_color(COLOR["CURVE"]), 2, Qt.DashLine)
-                painter.setPen(pen)
-                pv_prev = prev
-                for pt in self.livewire_preview:
-                    px, py = int(self._2canx(pt[0])), int(self._2cany(pt[1]))
-                    painter.drawLine(pv_prev[0], pv_prev[1], px, py)
-                    pv_prev = (px, py)
-            else:
-                # Straight rubber-band segment from the last point to the cursor.
-                painter.drawLine(prev[0], prev[1], self.mouse_curr_x, self.mouse_curr_y)
+            if self.show_curve:
+                # Draw the selected curve's line thicker so it stands out.
+                line_width = 3 if curve.get("id") == self.selected_curve_id else 1
+                painter.setPen(QPen(mu.as_qt_color(COLOR["CURVE"]), line_width))
+                painter.setBrush(Qt.NoBrush)
+                for j in range(len(canvas_pts) - 1):
+                    painter.drawLine(*canvas_pts[j], *canvas_pts[j + 1])
 
-        if self.object.pixels_per_mm is not None and self.object.pixels_per_mm > 0:
-            pixels_per_mm = self.object.pixels_per_mm
-            max_scalebar_size = 120
-            bar_width = (float(pixels_per_mm) / self.image_canvas_ratio) * self.scale
-            actual_length = 1.0
-            while bar_width > max_scalebar_size:
-                bar_width /= 10.0
-                actual_length /= 10.0
-            if bar_width * 10.0 < max_scalebar_size:
-                bar_width *= 10.0
-                actual_length *= 10.0
-            elif bar_width * 5.0 < max_scalebar_size:
-                bar_width *= 5.0
-                actual_length *= 5.0
-            elif bar_width * 2.0 < max_scalebar_size:
-                bar_width *= 2.0
-                actual_length *= 2.0
+            if self.show_semi_landmark and len(raw) >= 2:
+                try:
+                    semis = mu.resample_polyline(raw, curve.get("n", 0))
+                except ValueError:
+                    semis = []
+                for i, pt in enumerate(semis, start=1):
+                    sx, sy = int(self._2canx(pt[0])), int(self._2cany(pt[1]))
+                    painter.setPen(QPen(semi_color, 2))
+                    painter.setBrush(QBrush(semi_color))
+                    painter.drawEllipse(sx - radius, sy - radius, radius * 2, radius * 2)
+                    if self.show_index:
+                        painter.drawText(sx + 6, sy, f"C{num}-{i}")
 
-            bar_width = int(math.floor(bar_width + 0.5))
-            x = self.width() - 15 - (bar_width + 20)
-            y = self.height() - 15 - 35
+            if curve.get("id") in (self.selected_curve_id, self.hover_curve_id):
+                self._paint_curve_handles(painter, curve, raw)
 
-            painter.setPen(QPen(Qt.white, 1))
-            painter.setBrush(QBrush(Qt.white))
-            painter.drawRect(x, y, bar_width + 20, 30)
-            x += 10
-            y += 20
-            painter.setPen(QPen(Qt.black, 1))
-            painter.drawLine(x, y, x + bar_width, y)
-            painter.drawLine(x, y - 5, x, y + 5)
-            painter.drawLine(x + bar_width, y - 5, x + bar_width, y + 5)
-            if actual_length >= 1000:
-                length_text = str(int(actual_length / 1000.0)) + " m"
-            elif actual_length >= 10:
-                length_text = str(int(actual_length / 10)) + " cm"
-            elif actual_length >= 1:
-                length_text = str(int(actual_length)) + " mm"
-            elif actual_length >= 0.001:
-                length_text = str(int(actual_length * 1000.0)) + " um"
-            else:
-                length_text = str(round(actual_length * 1000000.0 * 1000) / 1000) + " nm"
-            painter.setPen(QPen(Qt.black, 1))
-            painter.setFont(QFont("Helvetica", 10))
-            painter.drawText(
-                x + int(math.floor(float(bar_width) / 2.0 + 0.5)) - len(length_text) * 4, y - 5, length_text
-            )
+    def _paint_current_curve(self, painter):
+        """Draw the curve being traced, with a straight or snapped rubber band."""
+        if not self.current_curve_points:
+            return
+        painter.setPen(QPen(mu.as_qt_color(COLOR["CURVE"]), 2))
+        painter.setBrush(QBrush(mu.as_qt_color(COLOR["CURVE"])))
+        prev = None
+        for pt in self.current_curve_points:
+            cx, cy = int(self._2canx(pt[0])), int(self._2cany(pt[1]))
+            painter.drawEllipse(cx - 2, cy - 2, 4, 4)
+            if prev is not None:
+                painter.drawLine(prev[0], prev[1], cx, cy)
+            prev = (cx, cy)
 
-        if self.debug:
-            painter.setPen(QPen(Qt.black, 1))
-            painter.setFont(QFont("Helvetica", 10))
-            painter.drawText(
-                10,
-                20,
-                f"Scale: {self.scale} prev_scale: {self.prev_scale} image_to_canvas_ratio: {self.image_canvas_ratio}, pan: {self.pan_x}, {self.pan_y}",
-            )
+        if self.livewire_enabled and self.livewire_preview:
+            # Snapped rubber-band: draw the live-wire path to the cursor.
+            painter.setPen(QPen(mu.as_qt_color(COLOR["CURVE"]), 2, Qt.DashLine))
+            pv_prev = prev
+            for pt in self.livewire_preview:
+                px, py = int(self._2canx(pt[0])), int(self._2cany(pt[1]))
+                painter.drawLine(pv_prev[0], pv_prev[1], px, py)
+                pv_prev = (px, py)
+        else:
+            # Straight rubber-band segment from the last point to the cursor.
+            painter.drawLine(prev[0], prev[1], self.mouse_curr_x, self.mouse_curr_y)
+
+    @staticmethod
+    def _scalebar_length_text(actual_length):
+        """Human-readable length for the scale bar."""
+        if actual_length >= 1000:
+            return str(int(actual_length / 1000.0)) + " m"
+        if actual_length >= 10:
+            return str(int(actual_length / 10)) + " cm"
+        if actual_length >= 1:
+            return str(int(actual_length)) + " mm"
+        if actual_length >= 0.001:
+            return str(int(actual_length * 1000.0)) + " um"
+        return str(round(actual_length * 1000000.0 * 1000) / 1000) + " nm"
+
+    def _paint_scale_bar(self, painter):
+        """Draw the physical-scale bar when the image has a known pixels/mm."""
+        if not (self.object.pixels_per_mm is not None and self.object.pixels_per_mm > 0):
+            return
+        max_scalebar_size = 120
+        bar_width = (float(self.object.pixels_per_mm) / self.image_canvas_ratio) * self.scale
+        actual_length = 1.0
+        while bar_width > max_scalebar_size:
+            bar_width /= 10.0
+            actual_length /= 10.0
+        # Grow back to the largest round multiple that still fits.
+        for factor in (10.0, 5.0, 2.0):
+            if bar_width * factor < max_scalebar_size:
+                bar_width *= factor
+                actual_length *= factor
+                break
+
+        bar_width = int(math.floor(bar_width + 0.5))
+        x = self.width() - 15 - (bar_width + 20)
+        y = self.height() - 15 - 35
+
+        painter.setPen(QPen(Qt.white, 1))
+        painter.setBrush(QBrush(Qt.white))
+        painter.drawRect(x, y, bar_width + 20, 30)
+        x += 10
+        y += 20
+        painter.setPen(QPen(Qt.black, 1))
+        painter.drawLine(x, y, x + bar_width, y)
+        painter.drawLine(x, y - 5, x, y + 5)
+        painter.drawLine(x + bar_width, y - 5, x + bar_width, y + 5)
+
+        length_text = self._scalebar_length_text(actual_length)
+        painter.setPen(QPen(Qt.black, 1))
+        painter.setFont(QFont("Helvetica", 10))
+        painter.drawText(x + int(math.floor(float(bar_width) / 2.0 + 0.5)) - len(length_text) * 4, y - 5, length_text)
+
+    def _paint_debug_overlay(self, painter):
+        """Scale/pan readout, shown only in debug mode."""
+        if not self.debug:
+            return
+        painter.setPen(QPen(Qt.black, 1))
+        painter.setFont(QFont("Helvetica", 10))
+        painter.drawText(
+            10,
+            20,
+            f"Scale: {self.scale} prev_scale: {self.prev_scale} "
+            f"image_to_canvas_ratio: {self.image_canvas_ratio}, pan: {self.pan_x}, {self.pan_y}",
+        )
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        if not self.transparent:
+            painter.fillRect(self.rect(), QBrush(QColor(self.bgcolor)))
+
+        if self.object is None:
+            if self.ds_ops is not None:
+                self.draw_dataset(painter)
+            return
+
+        if self.curr_pixmap is not None:
+            painter.drawPixmap(self.pan_x + self.temp_pan_x, self.pan_y + self.temp_pan_y, self.curr_pixmap)
+
+        if self.show_wireframe:
+            self._paint_wireframe(painter)
+
+        painter.setPen(QPen(Qt.blue, 2))
+        painter.setBrush(QBrush(Qt.blue))
+        self._paint_calibration_line(painter)
+
+        self._paint_landmarks(painter)
+        self._paint_expected_landmarks(painter)
+        self._paint_wireframe_in_progress(painter)
+        self._paint_curves(painter)
+        self._paint_current_curve(painter)
+        self._paint_scale_bar(painter)
+        self._paint_debug_overlay(painter)
 
     def update_landmark_list(self):
         return

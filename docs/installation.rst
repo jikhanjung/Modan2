@@ -9,7 +9,7 @@ System Requirements
 **Minimum Requirements**:
 
 - **Operating System**: Windows 10/11, macOS 10.14+, or Linux (Ubuntu 20.04+, Fedora 34+)
-- **Python**: 3.11 or newer (for source installation)
+- **Python**: 3.12 or newer (for source installation)
 - **RAM**: 4 GB (8 GB recommended for large datasets)
 - **Disk Space**: 500 MB for application + space for your data
 - **Display**: 1280x720 resolution (1920x1080 recommended)
@@ -47,7 +47,7 @@ No installation required - useful for USB drives or restricted environments.
 
 .. code-block:: bash
 
-   # Install Python 3.11+ from python.org
+   # Install Python 3.12+ from python.org
    # Clone the repository
    git clone https://github.com/jikhanjung/Modan2.git
    cd Modan2
@@ -56,7 +56,7 @@ No installation required - useful for USB drives or restricted environments.
    pip install -r requirements.txt
 
    # Run the application
-   python Modan2.py
+   python main.py
 
 macOS Installation
 ~~~~~~~~~~~~~~~~~~
@@ -75,8 +75,8 @@ macOS Installation
 
 .. code-block:: bash
 
-   # Install Python 3.11+ (via Homebrew)
-   brew install python@3.11
+   # Install Python 3.12+ (via Homebrew)
+   brew install python@3.12
 
    # Clone the repository
    git clone https://github.com/jikhanjung/Modan2.git
@@ -86,7 +86,7 @@ macOS Installation
    pip3 install -r requirements.txt
 
    # Run the application
-   python3 Modan2.py
+   python3 main.py
 
 Linux Installation
 ~~~~~~~~~~~~~~~~~~
@@ -224,7 +224,7 @@ Missing Python Dependencies
 
 .. code-block:: bash
 
-   # Ensure you're using Python 3.11+
+   # Ensure you're using Python 3.12+
    python3 --version
 
    # Reinstall all dependencies

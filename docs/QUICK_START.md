@@ -19,10 +19,10 @@
 ### Linux
 ```bash
 sudo apt-get install python3 python3-pip python3-pyqt5
-git clone https://github.com/yourusername/Modan2.git
+git clone https://github.com/jikhanjung/Modan2.git
 cd Modan2
 pip install -r requirements.txt
-python3 Modan2.py
+python3 main.py
 ```
 
 ---
@@ -41,21 +41,19 @@ Done! Your dataset appears in the left panel.
 
 ## 3. Import Data (2 minutes)
 
-### Option A: Import Landmark File (TPS, NTS, etc.)
+### Option A: Import Landmark File (TPS, NTS, X1Y1, Morphologika)
 
-1. **File → Import → TPS** (or your format)
-2. Select your `.tps` file
-3. Choose dataset: `My_First_Dataset`
-4. Click **Import**
+1. Click **Import** (`Ctrl+I`)
+2. Select your file (the format is auto-detected)
+3. Click **Import**
 
-✅ Objects appear in the center table!
+✅ Objects appear in the center table! (You can also drag files onto the table.)
 
 ### Option B: Import Images for Digitizing
 
-1. **File → Import → Images**
-2. Select image files (`.jpg`, `.png`)
-3. Choose dataset: `My_First_Dataset`
-4. Click **Import**
+1. Click **Import** (`Ctrl+I`) and select image files (`.jpg`, `.png`), or drag
+   them onto the dataset
+2. Click **Import**
 
 ✅ Images ready for digitizing!
 
@@ -65,41 +63,36 @@ Done! Your dataset appears in the left panel.
 
 **If you imported images**:
 
-1. **Double-click** first object in table
-2. Object editor opens with image
-3. **Click on image** to place landmarks
-   - Landmark 1, 2, 3... placed sequentially
-4. **Zoom**: Mouse wheel
-5. **Pan**: Right-click + drag
-6. Click **OK** when done
-7. Press **Space** to move to next object
+1. **Double-click** the first object in the table
+2. The object editor opens (Landmark mode is active by default)
+3. **Click on the image** to place landmarks (numbered 1, 2, 3... sequentially)
+4. **Zoom**: mouse wheel · **Pan**: right-drag on empty space
+5. Right-click a landmark to delete it; drag it to move it
+6. Click **Save** when done, and use **Next** / **Previous** to move between objects
 
-**Keyboard Shortcuts**:
-- `Space`: Next object
-- `Delete`: Remove last landmark
-- `Ctrl+Z`: Undo
-- `Esc`: Cancel
+> **Tip — semi-landmark curves**: click the **Curve** mode button to trace an
+> outline; it snaps to image edges automatically and is resampled into evenly
+> spaced points. See the full User Guide for details.
 
 ---
 
 ## 5. Run Analysis (2 minutes)
 
-### Run PCA
+### Run the Analysis
 
-1. **Analysis → New Analysis**
-2. Select dataset: `My_First_Dataset`
-3. Configure:
-   - **Superimposition**: Procrustes
-   - **Analysis Type**: PCA
-4. Click **Run Analysis**
+One run computes **PCA, CVA, and MANOVA together**.
+
+1. Select the dataset and click **Analyze** (`Ctrl+G`)
+2. Set the **superimposition method** (Procrustes) and, if you have groups, the
+   **CVA / MANOVA grouping variables**
+3. Click **OK**
 
 ✅ Results appear in ~100ms (for typical datasets)!
 
 ### View Results
 
-1. **Analysis → View Analysis Results**
-2. Select your PCA analysis
-3. Interactive plot appears:
+1. Double-click the completed analysis in the tree to open **Data Exploration**
+2. An interactive plot appears:
    - **PC1 vs PC2** scatter plot
    - Objects colored by group
    - Zoom, pan, explore
@@ -113,11 +106,12 @@ Done! Your dataset appears in the left panel.
 | Shortcut | Action |
 |----------|--------|
 | `Ctrl+N` | New dataset |
+| `Ctrl+Shift+N` | New object |
+| `Ctrl+Shift+O` | Edit object |
 | `Ctrl+I` | Import |
-| `Ctrl+S` | Save |
-| `Space` | Next (digitizing) |
-| `Delete` | Delete |
-| `F2` | Edit |
+| `Ctrl+E` | Export |
+| `Ctrl+G` | Analyze |
+| `Ctrl+S` | Save changes |
 
 ### Typical Workflow
 
@@ -126,11 +120,11 @@ Done! Your dataset appears in the left panel.
    ↓
 2. Import Data (landmarks or images)
    ↓
-3. Digitize (if using images)
+3. Digitize landmarks / trace curves (if using images)
    ↓
 4. Add Variables (optional, for grouping)
    ↓
-5. Run Analysis (Procrustes → PCA/CVA)
+5. Run Analysis (Procrustes → PCA + CVA + MANOVA)
    ↓
 6. View & Interpret Results
    ↓
@@ -173,42 +167,34 @@ Done! Your dataset appears in the left panel.
 
 ### Add Variables for Analysis
 
-1. Right-click dataset → **Edit Dataset**
-2. In "Variable Names" section:
-   - Click **Add**
-   - Enter variable name: `Species`
+1. Right-click the dataset → **Edit Dataset**
+2. In the variables section:
+   - Click **Add Variable**
+   - Enter a name: `Species`
    - Repeat for `Sex`, `Age`, etc.
 3. Click **OK**
 
 ### Set Object Properties
 
-1. Select object in table
-2. Right-click → **Edit Object**
-3. In "Properties" field, enter comma-separated values:
-   - Example: `Sparrow,Male,2.5`
-4. Click **OK**
+1. Double-click the object (or right-click → **Edit Object**)
+2. Enter the variable values for the object
+3. Click **Save**
 
 ### Run CVA (Group Comparison)
 
-1. **Analysis → New Analysis**
-2. Select dataset
-3. Configure:
-   - **Superimposition**: Procrustes
-   - **Analysis Type**: CVA
-   - **Grouping Variable**: `Species` (or your variable)
-4. Click **Run**
+CVA is part of the standard analysis run:
+
+1. Select the dataset and click **Analyze** (`Ctrl+G`)
+2. Set the **CVA grouping variable** to `Species` (or your variable)
+3. Click **OK**, then open the result in **Data Exploration**
 
 ### Export Results
 
-**Export Plot**:
-1. In results viewer, right-click plot
-2. **Save as Image** → Choose PNG/PDF/SVG
-3. Save for publication
+**Export a dataset**: select it, choose **Export** (`Ctrl+E`), and pick a format
+(TPS, X1Y1, Morphologika, or a JSON+ZIP package).
 
-**Export Data**:
-1. Click **Export** button in results
-2. Choose format (CSV, Excel)
-3. Save scores/loadings/statistics
+**Export a plot**: in the Data Exploration dialog, use its export/chart-image
+control to save the plot for publication.
 
 ---
 
@@ -218,7 +204,8 @@ Done! Your dataset appears in the left panel.
 - **Fix**: Click on dataset in left tree to refresh
 
 **Issue**: Landmarks not placing
-- **Fix**: Make sure you're in edit mode (double-click object)
+- **Fix**: Make sure you opened the object editor (double-click the object) and
+  the **Landmark** mode button is selected (not Curve or Calibration)
 
 **Issue**: Analysis fails
 - **Fix**: Verify all objects have same number of landmarks
@@ -304,6 +291,5 @@ Done! Your dataset appears in the left panel.
 
 ---
 
-**Document Version**: 1.0
-**Last Updated**: 2025-10-08
-**For Modan2 Version**: 0.1.4+
+**Last Updated**: 2026-07-26
+**For Modan2 Version**: 0.2.0-alpha.2

@@ -13,25 +13,30 @@ Launching Modan2
 
 - **Windows**: Start Menu → Modan2
 - **macOS**: Applications → Modan2.app
-- **Linux**: Terminal: ``python3 Modan2.py``
+- **Linux**: Terminal: ``python3 main.py``
 
 **From source**:
 
 .. code-block:: bash
 
    cd Modan2
-   python3 Modan2.py
+   python3 main.py
+
+``main.py`` accepts ``--debug``, ``--db <path>`` (open a specific database),
+``--lang <en|ko>``, and ``--no-splash``.
 
 Main Window Overview
 ~~~~~~~~~~~~~~~~~~~~
 
 The Modan2 main window consists of several key components:
 
-1. **Menu Bar**: File, Edit, View, Tools, Help
+1. **Menu Bar**: File, Edit, View, Data, Help
 2. **Toolbar**: Quick access to common operations
 3. **Dataset Tree View** (Left): Hierarchical view of datasets
-4. **Object Table** (Center): List of objects in the selected dataset
-5. **Object Preview** (Right): Visual preview of selected object
+4. **Object Table** (Center): List of objects in the selected dataset, with
+   **LM Count** and **Curve** columns
+5. **Object Preview** (Right): Visual preview of the selected object
+   (toggle with ``Ctrl+P``)
 6. **Status Bar** (Bottom): Information and progress indicators
 
 Working with Datasets
@@ -57,6 +62,19 @@ Creating a New Dataset
 
      - Subspecies_A (child)
      - Subspecies_B (child)
+
+The dataset dialog is organized into tabs. Beyond the basic information above, it
+also holds:
+
+- **Wireframe / Baseline / Polygons**: define how landmarks are connected for
+  display.
+- **Landmark names**: a table giving each landmark index a name/abbreviation and
+  a description (see :ref:`landmark-names`).
+- **Curve scheme**: the dataset's semi-landmark curves — each with a name and a
+  point count ``N`` (see :ref:`semi-landmark-curves`).
+
+These schemes are shared by every object in the dataset, so a landmark name or a
+curve you define once applies to all specimens.
 
 Dataset Variables
 ~~~~~~~~~~~~~~~~~
@@ -148,7 +166,24 @@ Importing 3D Models
 Importing Landmark Files
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Supported formats**: TPS, NTS, CSV
+**Supported formats**: TPS, NTS, X1Y1, Morphologika, and JSON+ZIP dataset
+packages.
+
+Open **File → Import** (``Ctrl+I``). Modan2 detects the format from the file
+extension (``.tps``, ``.nts``, ``.txt`` for Morphologika, ``.zip`` for a
+JSON+ZIP package), but you can also pick it explicitly with the format radio
+buttons. An **Invert Y** option flips the Y axis for files that use a
+bottom-left origin.
+
+.. note::
+   **Missing-landmark placeholder.** If an imported file contains the
+   ``-999`` morphometrics placeholder, Modan2 asks whether to treat those
+   coordinates as missing landmarks (recommended). Tick the "always" option to
+   remember your answer. The invert-Y option is accounted for before the scan.
+
+.. note::
+   **Semi-landmark curves in TPS.** ``CURVES=`` / ``POINTS=`` blocks in a TPS
+   file are read in as semi-landmark curves (see :ref:`semi-landmark-curves`).
 
 **TPS Format Example**:
 
@@ -167,25 +202,33 @@ Importing Landmark Files
    15.2 32.8
    ...
 
-**Importing TPS/NTS**:
+**Importing a landmark file**:
 
-1. **File → Import → Import Landmark File**
-2. Select TPS or NTS file
+1. **File → Import** (``Ctrl+I``)
+2. Select the file (TPS, NTS, X1Y1, or Morphologika)
 3. Modan2 will:
 
    - Create objects for each specimen
-   - Link to image files (if IMAGE= field exists)
-   - Import landmark coordinates
+   - Link to image files (if an ``IMAGE=`` field exists)
+   - Import landmark coordinates (and any curves, for TPS)
 
 4. Click **"Import"**
 
-**CSV Format**:
+Importing a Dataset Package (JSON+ZIP)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code-block:: text
+A **JSON+ZIP package** (``.zip``) is Modan2's own complete-backup format: it
+bundles the dataset's metadata, landmark names, curve scheme, variables, and —
+optionally — the image and 3D-model files. Importing one recreates the whole
+dataset, including traced semi-landmark curves and missing landmarks.
 
-   object,lm1_x,lm1_y,lm2_x,lm2_y,lm3_x,lm3_y
-   specimen_001,12.5,34.2,45.6,78.9,23.1,56.4
-   specimen_002,15.2,32.8,48.1,76.2,25.3,54.7
+1. **File → Import** (``Ctrl+I``)
+2. Select the ``.zip`` package
+3. Click **"Import"**
+
+Packages are imported inside a transaction and roll back on any error, and
+extraction is hardened against path-traversal ("Zip Slip") archives. Older
+packages (schema 1.1) still import; curves default to empty for those.
 
 Working with Objects
 --------------------
@@ -202,22 +245,25 @@ The Object Dialog shows:
 - Landmark table
 - 2D/3D viewer with landmarks visualized
 
+The Object Dialog has mode buttons that decide what a click does:
+**Landmark** (place/move landmarks, the default), **Curve** (trace a
+semi-landmark curve), and **Calibration** (set the image scale). Only one is
+active at a time.
+
 Placing Landmarks (2D)
 ~~~~~~~~~~~~~~~~~~~~~~
 
-1. Open Object Dialog for a 2D object
+1. Open the Object Dialog for a 2D object (**Landmark** mode is active by default)
 2. Click on the image to place a landmark
 3. Landmarks are numbered sequentially (1, 2, 3, ...)
-4. Right-click a landmark to delete it
-5. Click and drag to move an existing landmark
+4. Click and drag an existing landmark to move it
+5. Right-click a landmark to delete it
 
-**Keyboard Shortcuts in Object Dialog**:
+**Mouse in the 2D viewer**:
 
-- ``Ctrl+Z`` - Undo last landmark
-- ``Delete`` - Remove selected landmark
-- ``+/-`` - Zoom in/out
-- ``Space+Drag`` - Pan image
-- ``Home`` - Reset zoom
+- **Mouse wheel** - Zoom in/out
+- **Right-drag on empty space** - Pan the image
+- ``Ctrl+W`` - Close the dialog
 
 Placing Landmarks (3D)
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -235,10 +281,10 @@ Placing Landmarks (3D)
 
 **3D Viewer Controls**:
 
-- ``R`` - Reset camera
-- ``W`` - Wireframe mode
-- ``S`` - Solid/surface mode
-- ``L`` - Toggle lighting
+- **Left-drag**: rotate
+- **Right-drag**: pan
+- **Mouse wheel**: zoom
+- **3D Model** / **Rotate** checkboxes: show the mesh, and auto-rotate it
 
 Editing Landmark Coordinates
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -259,40 +305,130 @@ Editing Landmark Coordinates
 Missing Landmarks
 ~~~~~~~~~~~~~~~~~
 
-If a landmark cannot be placed (damaged specimen, obscured feature):
+If a landmark cannot be placed (damaged specimen, obscured feature), mark it
+missing in the landmark table instead of skipping it — this keeps the landmark
+count consistent across the dataset. To mark a landmark missing:
 
-1. Leave the landmark position empty, or
-2. Right-click in the landmark table → **"Mark as Missing"**
-3. The cell shows **"MISSING"**
-4. In the viewer:
+- Click **"Add Missing"** to append a missing landmark, **or**
+- Select a row first and the button becomes **"Insert Missing"**, which inserts
+  the gap *before* the selected row (so it lands where it belongs), **or**
+- Type ``MISSING`` into a coordinate cell, or leave the cell blank.
 
-   - **Checkbox "Show Estimated" checked**: Hollow circle shows estimated position
-   - **Checkbox unchecked**: No visualization
+A cell only accepts a number or ``MISSING`` (blank counts as missing); anything
+else reverts to the stored value with an explanatory tooltip.
 
-**How Estimation Works**:
+**Visualizing missing landmarks** with the **"Show Estimated"** checkbox (on by
+default) draws a hollow circle at each missing landmark's estimated position.
+Uncheck it to hide the estimates.
 
-- Modan2 uses Procrustes-aligned mean shape from complete specimens
-- Estimates are transformed to match the scale and position of the current object
-- Estimated landmarks shown as **hollow circles** with **"3?"** label
+**How estimation works**: Modan2 fits the dataset's mean shape onto the
+landmarks the specimen actually has — matching rotation, scale, and position (a
+similarity transform) — then reads the missing positions off the fitted mean.
+This stays accurate even when a specimen was photographed at an angle.
 
 .. note::
-   Missing landmarks are handled during Procrustes superimposition through iterative imputation. See :ref:`analysis-missing-landmarks` for details.
+   During analysis, missing landmarks are filled with the same method and
+   refined as the alignment settles. See :ref:`analysis-missing-landmarks`.
+
+.. _landmark-names:
+
+Landmark Names
+~~~~~~~~~~~~~~
+
+You can give each landmark a name/abbreviation and a description at the **dataset**
+level, so they apply to every specimen.
+
+1. In the Object Dialog, click **"Landmark Names"** (or use the dataset dialog's
+   landmark-names tab)
+2. Fill in the **Name** and **Description** columns for each landmark index
+3. Click **Save**
+
+While digitizing, switch the label mode with the **Show** checkbox and the
+**Index** / **Name** radio buttons: **Name** draws the landmark's name instead of
+its number, and the description appears as a tooltip.
+
+.. _semi-landmark-curves:
+
+Semi-landmark Curves
+~~~~~~~~~~~~~~~~~~~~~
+
+Semi-landmarks let you capture a *curve* (an outline or ridge) rather than
+discrete points. You trace the curve on each specimen, and Modan2 resamples it
+into a fixed number of evenly-spaced points along its length. Analysis treats
+those points like ordinary landmarks — the fixed (anatomical) landmarks keep
+their positions and indices, and the semi-landmarks follow after them. A dataset
+can even be analyzed with only semi-landmarks and no fixed landmarks.
+
+The raw trace is kept with the specimen, so you can re-trace it or change the
+point count at any time. Semi-landmark curves are a **2D** feature.
+
+**Tracing a curve**:
+
+1. Open the Object Dialog for a 2D object and click the **Curve** mode button
+   (tooltip: *Trace a curve (semi-landmarks)*)
+2. Click along the curve to lay down points
+3. Press **Enter** or **double-click** to accept the trace; press **Esc** or
+   **right-click** to cancel
+4. For a brand-new curve you are asked **"Number of semi-landmarks on this
+   curve"** (default 10). This count is dataset-wide, so it applies to that curve
+   on every specimen.
+
+**Snap to curve (live-wire edge detection)** — on by default in Curve mode. The
+trace snaps to the strongest image edge between your clicks, so a clean outline
+needs only a few clicks (start and end for a gentle curve, a couple of points in
+between for a sharp one). Uncheck **"Snap to curve"** for a plain hand trace.
+
+**Smooth curve** — on by default. Removes the pixel staircase from a snapped
+trace so the semi-landmarks sit on a clean curve, while the points you clicked
+stay put. Toggle with the **"Smooth curve"** checkbox. (Snap and Smooth are only
+available in Curve mode.)
+
+**Editing a traced curve**:
+
+- Click a curve to select it (it draws thicker, with square anchor handles)
+- Drag a point to move it; click the line to add a point; right-click a point for
+  **Delete Point** or the whole curve for **Delete Curve**
+- Snapped curves are edited by their clicked anchors and re-snap to the edge live
+  as you drag
+
+**The curve table** (in the Object Dialog) lists each curve with **Name**, **N**
+(point count), and **Traced** (✓). Editing **N** re-resamples the curve.
+Right-click a row → **"Delete Curve (all specimens)"** removes that curve from the
+whole dataset.
+
+Curves are held in memory while you work and written to the database on **Save**.
+
+Digitizing Aids
+~~~~~~~~~~~~~~~
+
+- **Show Expected** (2D): once at least two landmarks are placed on a new
+  specimen, the remaining positions are predicted from the dataset mean shape and
+  shown as a guide, so you know roughly where each one goes. Off by default.
+- **Show Original** (2D): when a specimen's image was downscaled on import (its
+  longer side exceeded 2560 px), an archived full-resolution original is kept.
+  Tick **"Show Original"** to render the viewer from that original for extra
+  detail while digitizing. This affects display only — coordinates stay in the
+  working-copy pixel space. The checkbox appears only when an original exists.
 
 Display Options
 ~~~~~~~~~~~~~~~
 
 In the Object Dialog, customize visualization:
 
-- **Show Landmarks**: Toggle landmark visibility
-- **Show Index**: Show/hide landmark numbers
-- **Show Polygon**: Connect landmarks with lines (wireframe)
-- **Show Baseline**: Highlight baseline between specific landmarks
-- **Show Estimated**: Display estimated positions for missing landmarks (hollow circles)
+- **Show** + **Index** / **Name**: toggle landmark labels and choose whether the
+  label is the index number or the landmark name
+- **Wireframe**: connect landmarks along the dataset wireframe
+- **Polygon**: fill defined polygons
+- **Baseline**: highlight the baseline landmarks
+- **Show Estimated**: hollow circles at estimated positions of missing landmarks
+- **Show Expected**: predicted positions of not-yet-placed landmarks (see
+  Digitizing Aids)
+- **Curve**: show the raw traced curves
+- **Semi-LM**: show the derived semi-landmarks
+- **3D Model** / **Rotate** (3D objects): show the mesh and auto-rotate it
 
-**Size Controls**:
-
-- **Landmark Size**: Adjust circle radius
-- **Index Size**: Adjust label font size
+Landmark size, wireframe thickness, and label size are set in
+**Preferences** (separately for 2D and 3D).
 
 Statistical Analysis
 --------------------
@@ -311,16 +447,22 @@ All analyses require **Procrustes superimposition** as a preprocessing step.
 Running an Analysis
 ~~~~~~~~~~~~~~~~~~~
 
+A single analysis run performs the superimposition and then computes **PCA, CVA,
+and MANOVA together** — you don't pick one type. The results are saved with the
+dataset and can be re-opened later.
+
 1. Select a dataset in the tree view
-2. Click **"Analyze Dataset"** button or menu: **Tools → Analyze Dataset**
-3. The **New Analysis Dialog** opens:
+2. Click **Analyze** (``Ctrl+G``) or use the **Data** menu
+3. In the analysis dialog, set:
 
-   - **Analysis Type**: PCA, CVA, or MANOVA
-   - **Dataset**: Pre-selected
-   - **Options**: Analysis-specific settings
+   - **Analysis name** (a unique name is suggested)
+   - **Superimposition method**: Procrustes (default), Bookstein, or Resistant Fit
+   - **CVA grouping variable**: the categorical variable that defines groups for CVA
+   - **MANOVA grouping variable**: the categorical variable for MANOVA
 
-4. Configure options (see below)
-5. Click **"OK"** to run
+4. Click **"OK"** to run. Progress is shown, and if CVA/MANOVA cannot be computed
+   (e.g. too few groups) the failure is reported rather than silently skipped.
+5. Explore the results in the **Data Exploration** dialog.
 
 .. _analysis-procrustes:
 
@@ -335,24 +477,19 @@ Procrustes Superimposition
 
 **Handling Missing Landmarks**:
 
-If your dataset has missing landmarks, Procrustes uses **iterative imputation**:
+If your dataset has missing landmarks, Procrustes fills them in with an
+EM-style refinement loop (see :ref:`analysis-missing-landmarks`).
 
-1. Start with complete specimens only
-2. Compute mean shape
-3. Estimate missing landmarks from mean
-4. Re-run Procrustes with estimated values
-5. Repeat until convergence (max 100 iterations)
+**Superimposition method**:
 
-**Options**:
-
-- **Reference Shape**:
-  - *Mean shape*: Default, uses average
-  - *First object*: Uses first specimen as reference
+- *Procrustes*: the default full Generalized Procrustes alignment
+- *Bookstein*: two-point baseline registration
+- *Resistant Fit*: an outlier-robust alignment
 
 **When Procrustes Runs**:
 
-- Automatically before PCA, CVA, or MANOVA
-- Results are cached - subsequent analyses reuse aligned shapes
+- Automatically as the first step of every analysis run
+- The aligned shapes feed PCA, CVA, and MANOVA
 
 .. _analysis-pca:
 
@@ -368,15 +505,9 @@ Principal Component Analysis (PCA)
 - Identifying outliers
 - Reducing dimensionality
 
-**Running PCA**:
-
-1. **Tools → Analyze Dataset → PCA**
-2. Options:
-
-   - **Number of PCs**: How many principal components to compute (default: all)
-   - **Use Covariance Matrix**: Unchecked = correlation matrix (default)
-
-3. Click **OK**
+**Running PCA**: PCA is computed automatically as part of every analysis run (see
+`Running an Analysis`_). Open the completed analysis in the **Data Exploration**
+dialog to explore its principal components.
 
 **Interpreting Results**:
 
@@ -441,15 +572,10 @@ Canonical Variate Analysis (CVA)
 - At least 2 groups defined via dataset variables
 - At least 2 specimens per group
 
-**Running CVA**:
-
-1. **Tools → Analyze Dataset → CVA**
-2. Options:
-
-   - **Grouping Variable**: Select categorical variable (e.g., "Species")
-   - **Number of CVs**: Default = min(groups-1, landmarks*2)
-
-3. Click **OK**
+**Running CVA**: CVA is computed as part of every analysis run. In the analysis
+dialog, set the **CVA grouping variable** to the categorical variable that
+defines your groups (e.g. "Species"), then open the result in **Data
+Exploration**.
 
 **Interpreting Results**:
 
@@ -501,15 +627,9 @@ MANOVA
 - Comparing multiple groups simultaneously
 - Assessing effect size
 
-**Running MANOVA**:
-
-1. **Tools → Analyze Dataset → MANOVA**
-2. Options:
-
-   - **Grouping Variable**: Select categorical variable
-   - **Alpha Level**: Significance threshold (default: 0.05)
-
-3. Click **OK**
+**Running MANOVA**: MANOVA is computed as part of every analysis run. In the
+analysis dialog, set the **MANOVA grouping variable** to the categorical variable
+you want to test.
 
 **Interpreting Results**:
 
@@ -547,37 +667,32 @@ MANOVA
 Handling Missing Landmarks
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Modan2 automatically handles missing landmarks during analysis:
+Modan2 fills in missing landmarks automatically during analysis, using an
+EM-style refinement loop that interleaves alignment and imputation:
 
-**During Procrustes**:
+1. Align all specimens, leaving missing landmarks as gaps (the mean shape is
+   computed ignoring the gaps, and each specimen is aligned on the landmarks it
+   actually has).
+2. For each specimen with missing data, fit the current mean shape onto its
+   observed landmarks by a similarity transform (rotation, scale, and
+   translation) and read the missing positions off the fitted mean.
+3. Re-align with the filled-in values, then **re-open the original gaps** and
+   re-estimate them from the improved mean.
+4. Repeat step 3 a small number of times so estimates keep improving as the
+   alignment settles (they are never fitted on previous estimates).
 
-1. Identifies complete specimens (no missing landmarks)
-2. Runs Procrustes on complete specimens → mean shape
-3. For each specimen with missing data:
+Imputed values live only in the analysis working copy — they are never written
+back to the database. PCA, CVA, and MANOVA then run on the aligned coordinates.
 
-   - Estimates missing landmarks from mean shape
-   - Applies scale/position transformation to match the specimen
-   - Updates coordinates in temporary working copy (NOT in database)
-
-4. Re-runs Procrustes with estimated values
-5. Repeats until convergence
-
-**During PCA/CVA/MANOVA**:
-
-- Uses coordinates after Procrustes (with imputed values)
-- Missing landmarks are treated as estimated values
-- No further imputation needed
-
-**Limitations**:
-
-- Simple mean-based imputation (advanced methods in future releases)
-- Accuracy depends on having sufficient complete specimens
-- Large amounts of missing data (>30%) may affect results
+.. note::
+   This is the same shape-fitting method used by the "Show Estimated" and "Show
+   Expected" previews in the Object Dialog. On synthetic test shapes where the
+   true answer is known, its error is essentially zero.
 
 **Best Practices**:
 
 - Aim for <10% missing landmarks in your dataset
-- Ensure at least 50% of specimens are complete
+- Keep a good number of complete (or near-complete) specimens
 - Use biological knowledge to verify estimated positions make sense
 
 Visualization
@@ -588,43 +703,26 @@ Visualization
 
 **Features**:
 
-- Zoom: Mouse wheel or ``+/-``
-- Pan: Space + drag or middle mouse button
-- Reset view: ``Home`` key
-- Landmark overlay: Colored circles with indices
-
-**Export Options**:
-
-- Right-click → **"Export Image"**
-- Formats: PNG, JPG, PDF
-- Resolution: Original or custom DPI
+- Zoom: mouse wheel
+- Pan: right-drag on empty space
+- Landmark overlay: colored circles with index or name labels
+- Semi-landmark curves and their derived points (toggle with the **Curve** and
+  **Semi-LM** checkboxes)
 
 3D Viewer
 ~~~~~~~~~
 
 **Controls**:
 
-- **Rotate**: Left mouse drag
-- **Pan**: Right mouse drag or Shift + left drag
-- **Zoom**: Mouse wheel
-- **Reset**: ``R`` key
-
-**Rendering Modes**:
-
-- **Wireframe** (``W``): Shows mesh edges
-- **Solid** (``S``): Filled surface with lighting
-- **Wireframe + Solid**: Both simultaneously
+- **Rotate**: left-drag
+- **Pan**: right-drag
+- **Zoom**: mouse wheel
 
 **Landmark Display**:
 
 - Landmarks rendered as spheres
-- Size adjustable via slider
-- Index labels optional
-
-**Lighting**:
-
-- Toggle: ``L`` key
-- Improves depth perception for complex surfaces
+- Size adjustable in **Preferences**
+- Index/name labels optional
 
 Statistical Plots
 ~~~~~~~~~~~~~~~~~
@@ -655,31 +753,35 @@ Data Export
 Exporting Datasets
 ~~~~~~~~~~~~~~~~~~
 
-**File → Export Dataset**
+Select a dataset and choose **Export** (``Ctrl+E``).
 
-1. Select dataset
-2. Choose export format:
+1. Choose the export **format**:
 
-   - **TPS**: Landmark coordinates in TPS format
-   - **NTS**: NTS format (legacy)
-   - **CSV**: Spreadsheet-compatible
-   - **JSON**: Machine-readable with metadata
+   - **TPS**: landmark coordinates in TPS format
+   - **X1Y1**: plain coordinate columns
+   - **Morphologika**: Morphologika format (with images and metadata)
+   - **JSON+ZIP**: a complete dataset package (see below)
 
-3. Options:
+2. Choose the **superimposition** applied on export: **None** (raw coordinates) or
+   **Procrustes** (aligned). For a raw TPS export, traced semi-landmark curves are
+   written under ``CURVES=`` / ``POINTS=`` blocks; a Procrustes export writes the
+   merged aligned landmarks.
+3. Pick which objects to include from the object list.
+4. Click **"Export"**.
 
-   - **Include Analysis Results**: Embed PC/CV scores
-   - **Include Variables**: Export grouping data
-   - **Include Missing**: Export "NA" for missing landmarks
+Exporting a Dataset Package (JSON+ZIP)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-4. Click **"Export"**
+The **JSON+ZIP** format is Modan2's complete-backup format. It captures the
+dataset metadata, landmark names, curve scheme, variables, landmarks, and traced
+curves in a JSON manifest, and can bundle the image and 3D-model files alongside
+it.
 
-**CSV Export Format**:
-
-.. code-block:: text
-
-   object,lm1_x,lm1_y,lm2_x,lm2_y,species,sex,PC1,PC2
-   spec_001,12.5,34.2,45.6,78.9,A,male,0.234,-0.123
-   spec_002,15.2,32.8,48.1,76.2,A,female,0.156,-0.089
+- Tick **"Include image and model files"** to bundle the media; an **Estimated
+  size** figure updates as you change the options.
+- The output is a ``<dataset>_<timestamp>.zip`` you can archive or share, and
+  re-import losslessly on another machine (see `Importing a Dataset Package
+  (JSON+ZIP)`_).
 
 Exporting Analysis Results
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -693,74 +795,59 @@ In the **Data Exploration Dialog**:
 Keyboard Shortcuts
 ------------------
 
-Global Shortcuts
-~~~~~~~~~~~~~~~~
+Main Window
+~~~~~~~~~~~
 
 - ``Ctrl+N`` - New Dataset
 - ``Ctrl+Shift+N`` - New Object
-- ``Ctrl+O`` - Open Database
+- ``Ctrl+Shift+O`` - Edit Object
 - ``Ctrl+S`` - Save Changes
-- ``Ctrl+W`` - Close Window
-- ``Ctrl+Q`` - Quit Application
-- ``Delete`` - Delete Selected Items
-- ``F5`` - Refresh View
+- ``Ctrl+I`` - Import
+- ``Ctrl+E`` - Export
+- ``Ctrl+G`` - Analyze
+- ``Ctrl+P`` - Toggle object preview
+- ``Ctrl+W`` - Exit
+- ``F1`` - About
 
-Object Dialog
-~~~~~~~~~~~~~
+Object Dialog (Curve mode)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-- ``Ctrl+Z`` - Undo Last Action
-- ``Delete`` - Remove Selected Landmark
-- ``+`` / ``-`` - Zoom In/Out
-- ``Home`` - Reset Zoom
-- ``Space+Drag`` - Pan
-- ``Ctrl+C`` - Copy Landmark Coordinates
-- ``Ctrl+V`` - Paste Coordinates
-
-3D Viewer
-~~~~~~~~~
-
-- ``R`` - Reset Camera
-- ``W`` - Wireframe Mode
-- ``S`` - Solid Mode
-- ``L`` - Toggle Lighting
-- ``F`` - Fit to View
+- **Enter** / **double-click** - Accept the current trace
+- **Esc** / **right-click** - Cancel the current trace
+- **Right-click a curve point** - Delete Point / Delete Curve
+- ``Ctrl+W`` - Close the dialog
 
 Preferences
 -----------
 
-**File → Preferences** or ``Ctrl+,`` (macOS: ``Cmd+,``)
+Open **Edit → Preferences**.
 
-General Settings
+General
+~~~~~~~
+
+- **Language**: English or Korean (한국어), applied immediately
+- **Remember Geometry**: restore window size/position between sessions (Yes/No)
+- **Toolbar Icon Size**: Small / Medium / Large
+
+Viewer Appearance
+~~~~~~~~~~~~~~~~~~
+
+Set separately for **2D** and **3D**:
+
+- **Landmark** size: Small / Medium / Large
+- **Wireframe** thickness: Thin / Medium / Thick
+- **Index** (label) size: Small / Medium / Large
+
+Also:
+
+- **Background Color**: viewer background
+
+Plot Appearance
 ~~~~~~~~~~~~~~~~
 
-- **Default Database Location**: Where new databases are created
-- **Auto-Save Interval**: Frequency of automatic saves (0 = disabled)
-- **Language**: English or Korean (한국어)
-
-Display Settings
-~~~~~~~~~~~~~~~~
-
-- **Landmark Color**: Default color for new objects
-- **Index Color**: Color for landmark number labels
-- **Background Color**: Viewer background (white/black/gray)
-- **Font Size**: UI text size
-- **Theme**: Light or Dark (if available)
-
-Analysis Settings
-~~~~~~~~~~~~~~~~~
-
-- **Max Procrustes Iterations**: Default 100
-- **Convergence Threshold**: When to stop iterating (default: 0.0001)
-- **PCA Method**: Covariance or Correlation matrix
-- **CVA Cross-Validation**: Leave-one-out or K-fold
-
-Advanced Settings
-~~~~~~~~~~~~~~~~~
-
-- **Enable Logging**: Write debug logs to file
-- **Log Level**: INFO, DEBUG, WARNING, ERROR
-- **GPU Acceleration**: Use GPU for 3D rendering (if available)
-- **Memory Limit**: Max RAM for large datasets (MB)
+- **Data point size**: Small / Medium / Large
+- **Data point colors** and **Data point markers**: per-group defaults used in the
+  Data Exploration plots
 
 Tips and Best Practices
 ------------------------
@@ -794,11 +881,11 @@ Statistical Analysis
 Performance Optimization
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-1. **Close unused datasets**: Reduces memory usage
-2. **Limit 3D polygon count**: Simplify meshes before import
-3. **Use lower resolution for preview**: Full resolution for analysis only
-4. **Run analyses on subsets**: Test on small sample first
-5. **Clear cache**: Tools → Clear Cache (if application becomes slow)
+1. **Limit 3D polygon count**: Simplify meshes before import
+2. **Let large photos downscale**: oversized images (longer side > 2560 px) are
+   stored as a smaller working copy automatically, with the original archived;
+   use **Show Original** only when you need full detail
+3. **Run analyses on subsets**: test on a small sample first
 
 Common Workflows
 ----------------
@@ -838,12 +925,11 @@ Workflow 3: Missing Data Study
 .. code-block:: text
 
    1. Import dataset with incomplete specimens
-   2. Mark missing landmarks (right-click → "Mark as Missing")
-   3. Verify estimation: Object Dialog → "Show Estimated" checkbox
-   4. Run Procrustes (automatic imputation)
-   5. Check convergence (logged in console)
-   6. Run PCA/CVA/MANOVA with imputed data
-   7. Validate results against complete-specimen-only analysis
+   2. Mark missing landmarks ("Add/Insert Missing", or type MISSING in a cell)
+   3. Verify estimation: Object Dialog -> "Show Estimated" checkbox
+   4. Run the analysis (missing landmarks are imputed automatically)
+   5. Explore PCA/CVA/MANOVA results in Data Exploration
+   6. Validate results against a complete-specimen-only analysis
 
 Troubleshooting
 ---------------
@@ -866,8 +952,8 @@ Landmarks Not Showing
 
 **Solution**:
 
-- Check "Show Landmarks" checkbox is enabled
-- Adjust "Landmark Size" slider
+- Check the "Show" checkbox is enabled (with Index or Name selected)
+- Increase the landmark size in Preferences
 - Zoom in - landmarks may be too small
 
 Slow Performance
@@ -879,7 +965,6 @@ Slow Performance
 
 - Reduce dataset size (split into smaller datasets)
 - Close other applications
-- Increase RAM allocation (Preferences → Memory Limit)
 - Simplify 3D meshes (reduce polygon count)
 
 Next Steps

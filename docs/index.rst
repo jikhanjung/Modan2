@@ -22,9 +22,11 @@ Features
 
 * **Hierarchical Data Management**: Organize data into nested datasets with a clear structure
 * **2D & 3D Visualization**: Integrated viewers for 2D images and 3D models with landmark plotting
+* **Semi-landmark Curves**: Trace curves on specimens and resample them into evenly-spaced semi-landmarks, with edge-snapping (live-wire) auto-detection
 * **Statistical Analysis**: Perform Principal Component Analysis (PCA), Canonical Variate Analysis (CVA), and MANOVA
-* **Missing Landmark Support**: Advanced handling of incomplete landmark data with visual estimation
-* **Data Import/Export**: Supports various file types (TPS, NTS, OBJ, PLY, STL) with drag-and-drop
+* **Missing Landmark Support**: Advanced handling of incomplete landmark data with shape-fitted visual estimation
+* **Digitizing Aids**: Dataset-wide landmark names/descriptions and a "Show Expected" guide that predicts remaining landmark positions
+* **Data Import/Export**: Supports various file types (TPS, NTS, Morphologika, CSV, OBJ, PLY, STL) plus a JSON+ZIP package format that bundles images and 3D models, all with drag-and-drop
 * **Persistent Storage**: All data and analyses saved in a local SQLite database managed by Peewee ORM
 
 Quick Start
@@ -82,7 +84,7 @@ For more detailed instructions, see the :doc:`user_guide`.
 Technology Stack
 ----------------
 
-- **Language**: Python 3.11+
+- **Language**: Python 3.12+
 - **GUI Framework**: PyQt5
 - **Core Libraries**:
     - **Database ORM**: Peewee

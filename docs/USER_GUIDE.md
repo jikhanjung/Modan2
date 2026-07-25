@@ -1,7 +1,7 @@
 # Modan2 User Guide
 
-**Version**: 0.1.4
-**Last Updated**: 2025-10-08
+**Version**: 0.2.0-alpha.2
+**Last Updated**: 2026-07-26
 
 ---
 
@@ -35,13 +35,14 @@ Modan2 is a powerful desktop application for **geometric morphometric analysis**
 ### Key Features
 
 ✅ **2D and 3D landmark analysis**
-✅ **Multiple import formats**: TPS, NTS, Morphologika, JSON, image files, 3D models
-✅ **Procrustes superimposition** with multiple alignment options
+✅ **Semi-landmark curves**: trace a curve and resample it into evenly-spaced points, with edge-snapping (live-wire) auto-detection
+✅ **Digitizing aids**: dataset-wide landmark names, "Show Expected" position prediction, and full-resolution "Show Original"
+✅ **Multiple import formats**: TPS, NTS, X1Y1, Morphologika, JSON+ZIP packages, image files, 3D models
+✅ **Procrustes superimposition** with multiple alignment options (Procrustes, Bookstein, Resistant Fit)
 ✅ **Statistical analyses**: PCA, CVA, MANOVA
 ✅ **Interactive visualization** with customizable plots
 ✅ **Hierarchical dataset organization**
-✅ **Batch processing** for large datasets
-✅ **High performance**: Handles 10,000+ objects smoothly
+✅ **JSON+ZIP dataset packages**: complete, lossless backup and sharing (bundles images and 3D models)
 
 ### System Requirements
 
@@ -82,11 +83,13 @@ sudo apt-get install python3 python3-pip libxcb-xinerama0 \
 
 2. Install from PyPI (when available) or run from source:
 ```bash
-git clone https://github.com/yourusername/Modan2.git
+git clone https://github.com/jikhanjung/Modan2.git
 cd Modan2
 pip install -r requirements.txt
-python3 Modan2.py
+python3 main.py
 ```
+
+`main.py` accepts `--debug`, `--db <path>`, `--lang <en|ko>`, and `--no-splash`.
 
 ### First Launch
 
@@ -101,7 +104,7 @@ The main window has five key areas:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│ Menu Bar: File | Edit | View | Analysis | Help          │
+│ Menu Bar: File | Edit | View | Data | Help              │
 ├──────────┬──────────────────────────┬──────────────────┤
 │          │                          │                  │
 │ Dataset  │    Object Table          │  Object Preview  │
@@ -130,11 +133,15 @@ The main window has five key areas:
 - Pan, zoom, rotate controls
 
 **4. Menu Bar**:
-- **File**: New, Open, Save, Import, Export
-- **Edit**: Undo, Redo, Preferences
-- **View**: Show/hide panels, zoom controls
-- **Analysis**: Run statistical analyses
-- **Help**: Documentation, About
+- **File**: Exit
+- **Edit**: Preferences
+- **View**: Toggle the object preview overlay (`Ctrl+P`)
+- **Data**: New Dataset, New Object, Analyze (`Ctrl+G`), Import, Export
+- **Help**: About (`F1`)
+
+Most day-to-day actions are also on the toolbar. Dataset/object operations
+(New Dataset/Object, Edit, Analyze, Export, Delete) are on the right-click menu
+in the dataset tree.
 
 **5. Status Bar**:
 - Current operation status
@@ -189,8 +196,8 @@ Variables define grouping and categorical data for statistical analysis.
 
 **Adding Variables**:
 1. Select dataset in tree
-2. Right-click → "Edit Dataset" or press `F2`
-3. In "Variable Names" section:
+2. Right-click → "Edit Dataset"
+3. In the dataset dialog's variables section:
    - Click "Add" to create new variable
    - Enter variable name (e.g., "Species", "Sex", "Age")
    - Drag to reorder
@@ -228,13 +235,12 @@ Example: `sparrow,male,2.5,Site_A`
 **Delete Dataset**:
 1. Right-click dataset → "Delete Dataset"
 2. Confirm deletion
-3. ⚠️ **Warning**: This deletes ALL objects and analyses in the dataset!
+3. ⚠️ **Warning**: This deletes ALL objects and analyses in the dataset, and
+   removes their image/model files from disk.
 
 **Move Objects Between Datasets**:
-1. Select object(s) in source dataset
-2. Right-click → "Move to Dataset"
-3. Select destination dataset
-4. Click OK
+Drag the selected object(s) from the object table onto the destination dataset in
+the tree.
 
 ---
 
@@ -246,13 +252,17 @@ Modan2 supports multiple import formats for flexibility in your workflow.
 
 | Format | Extension | Type | Description |
 |--------|-----------|------|-------------|
-| TPS | `.tps` | 2D/3D | Morphologika format |
+| TPS | `.tps` | 2D/3D | TPS landmark format (reads `CURVES=` semi-landmark blocks) |
 | NTS | `.nts` | 2D | Landmark coordinates |
 | X1Y1 | `.txt` | 2D | Simple X Y format |
 | Morphologika | `.txt` | 2D/3D | Morphologika text format |
-| JSON+ZIP | `.zip` | 2D/3D | Modan2 native format (with images) |
+| JSON+ZIP | `.zip` | 2D/3D | Modan2 dataset package (with images and models) |
 | Images | `.jpg`, `.png`, `.bmp` | 2D | For digitizing |
 | 3D Models | `.obj`, `.ply`, `.stl` | 3D | For 3D digitizing |
+
+> **Missing-landmark placeholder**: if an imported file contains the `-999`
+> morphometrics placeholder, Modan2 asks whether to treat those coordinates as
+> missing landmarks (recommended), with an option to remember your answer.
 
 ### Importing Landmark Files
 
@@ -391,30 +401,30 @@ Modan2's native format preserves:
 1. Double-click object in table, OR
 2. Select object → Right-click → "Edit Object"
 
-**Digitizing Workflow**:
+The Object Dialog has mode buttons that decide what a click does: **Landmark**
+(the default), **Curve** (trace a semi-landmark curve), and **Calibration** (set
+the image scale). Only one is active at a time.
+
+**Digitizing Workflow** (Landmark mode):
 
 1. **Place Landmarks**:
-   - Click on image to place landmark
-   - Landmarks numbered sequentially (1, 2, 3...)
-   - Zoom: Mouse wheel or `Ctrl +/-`
-   - Pan: Right-click + drag
+   - Click on the image to place a landmark
+   - Landmarks are numbered sequentially (1, 2, 3...)
+   - Zoom: mouse wheel
+   - Pan: right-drag on empty space
 
 2. **Edit Landmarks**:
-   - Drag landmark to reposition
-   - Delete: Select landmark → Press `Delete`
-   - Insert: `Shift+Click` between landmarks
+   - Drag a landmark to reposition it
+   - Right-click a landmark to delete it
+   - Or edit coordinates directly in the landmark table (a cell accepts a number,
+     or `MISSING`/blank for a missing landmark)
 
-3. **Save**:
-   - Click "OK" to save
+3. **Move between objects**: use the **Previous** / **Next** buttons.
+
+4. **Save**:
+   - Click "Save" (or "OK") to save
    - Click "Cancel" to discard changes
-
-**Keyboard Shortcuts**:
-- `Space`: Next object (for batch digitizing)
-- `Backspace`: Previous object
-- `Delete`: Delete selected landmark
-- `Ctrl+Z`: Undo last landmark
-- `Ctrl+S`: Save and continue
-- `Esc`: Cancel
+   - `Ctrl+W` closes the dialog
 
 **Digitizing Tips**:
 - ✅ Work at consistent zoom level
@@ -430,21 +440,22 @@ Modan2's native format preserves:
 2. 3D viewer opens with model
 
 **3D Viewer Controls**:
-- **Rotate**: Left-click + drag
-- **Pan**: Middle-click + drag (or `Shift` + left-click + drag)
-- **Zoom**: Mouse wheel
-- **Reset View**: Press `R`
+- **Rotate**: left-drag
+- **Pan**: right-drag
+- **Zoom**: mouse wheel
 
 **Placing 3D Landmarks**:
-1. Click on model surface to place landmark
-2. Landmark appears as sphere
-3. Landmarks numbered sequentially
+1. Click on the model surface to place a landmark
+2. The landmark appears as a sphere
+3. Landmarks are numbered sequentially
 
 **3D Landmark Editing**:
-- **Select**: Click on landmark sphere
-- **Move**: Drag landmark on surface
-- **Delete**: Select → Press `Delete`
-- **Adjust view**: Rotate model to see all angles
+- **Move**: drag a landmark on the surface
+- **Delete**: right-click a landmark, or delete its row in the landmark table
+- **Adjust view**: rotate the model to see all angles
+
+> Note: semi-landmark curve tracing is a **2D** feature; it is not available in the
+> 3D viewer.
 
 **3D Digitizing Tips**:
 - ✅ Rotate model to verify landmark position from multiple angles
@@ -452,13 +463,83 @@ Modan2's native format preserves:
 - ✅ Consistent lighting helps identify landmarks
 - ✅ For symmetrical features, use consistent side
 
+### Semi-landmark Curves
+
+Semi-landmarks capture a *curve* (an outline or ridge) rather than discrete
+points. You trace the curve on each specimen, and Modan2 resamples it into a
+fixed number of evenly-spaced points. Analysis treats those points like ordinary
+landmarks: fixed (anatomical) landmarks keep their positions and indices, and the
+semi-landmarks follow after them. The raw trace is kept with the specimen, so you
+can re-trace or change the count anytime. Curves are a **2D** feature.
+
+**Tracing a curve**:
+1. Click the **Curve** mode button in the Object Dialog
+2. Click along the curve to lay down points
+3. Press **Enter** (or **double-click**) to accept; press **Esc** (or
+   **right-click**) to cancel
+4. For a brand-new curve you are asked for the **number of semi-landmarks**
+   (default 10). This count is dataset-wide.
+
+**Snap to curve (live-wire)** — on by default in Curve mode. The trace snaps to
+the strongest image edge between clicks, so a clean outline needs only a few
+clicks. Uncheck **"Snap to curve"** for a plain hand trace.
+
+**Smooth curve** — on by default. Removes the pixel staircase from a snapped
+trace while keeping your clicked points put. Toggle with **"Smooth curve"**.
+
+**Editing a curve**: click a curve to select it (drawn thicker with square
+handles), then drag a point to move it, click the line to add a point, or
+right-click for **Delete Point** / **Delete Curve**. The **curve table** lists
+each curve's **Name**, **N** (point count), and **Traced** status; right-click a
+row → **"Delete Curve (all specimens)"** to remove it dataset-wide.
+
+Curves are held in memory while you work and written to the database on **Save**.
+
+### Landmark Names
+
+Give each landmark a name/abbreviation and description at the **dataset** level so
+they apply to every specimen:
+
+1. Click **"Landmark Names"** in the Object Dialog (or use the dataset dialog's
+   landmark-names tab)
+2. Fill in the **Name** and **Description** columns per landmark index
+3. Click **Save**
+
+While digitizing, use the **Show** checkbox with the **Index** / **Name** radio
+buttons to choose whether the label is the number or the name; descriptions appear
+as tooltips.
+
+### Missing Landmarks
+
+Mark a landmark missing (rather than skipping it) to keep the landmark count
+consistent across the dataset:
+
+- Click **"Add Missing"** to append one, or select a row so the button becomes
+  **"Insert Missing"** and inserts the gap before that row, or
+- Type `MISSING` in a coordinate cell, or leave the cell blank.
+
+Tick **"Show Estimated"** (on by default) to draw hollow circles at the estimated
+positions of missing landmarks. Modan2 fits the dataset mean shape onto the
+landmarks the specimen actually has (matching rotation, scale, and position) and
+reads the missing positions off the fit, so it stays accurate even for specimens
+photographed at an angle.
+
+### Digitizing Aids
+
+- **Show Expected** (2D): once at least two landmarks are placed, the remaining
+  positions are predicted from the dataset mean shape and shown as a guide. Off by
+  default.
+- **Show Original** (2D): if a photo was downscaled on import (longer side > 2560
+  px), the full-resolution original is archived. Tick **"Show Original"** to render
+  the viewer from it for extra detail. Display only — coordinates stay in the
+  working-copy pixel space. The checkbox appears only when an original exists.
+
 ### Calibration (Scale Setting)
 
 For measurements in real-world units:
 
-1. **Open Calibration Tool**:
-   - Tools → Calibration, OR
-   - In object editor, click "Calibrate"
+1. **Open the calibration tool**:
+   - In the Object Dialog, click the **Calibration** mode button
 
 2. **Draw Scale Line**:
    - Click two points on known distance
@@ -483,12 +564,16 @@ Modan2 provides comprehensive statistical analysis tools for geometric morphomet
 
 ### Analysis Workflow
 
+A single analysis run performs the superimposition and computes **PCA, CVA, and
+MANOVA together** — you don't pick one type.
+
 ```
-1. Select Dataset
-2. Choose Analysis Type (PCA, CVA, MANOVA)
-3. Configure Parameters
-4. Run Analysis
-5. View Results
+1. Select the dataset
+2. Click Analyze (Ctrl+G), or use the Data menu
+3. Set the analysis name, superimposition method,
+   and the CVA / MANOVA grouping variables
+4. Run — PCA, CVA, and MANOVA are all computed
+5. Explore results in the Data Exploration dialog
 6. Export (optional)
 ```
 
@@ -497,40 +582,23 @@ Modan2 provides comprehensive statistical analysis tools for geometric morphomet
 **What is it?**
 Aligns landmark configurations to remove variation due to position, rotation, and scale, leaving only shape variation.
 
-**Methods**:
-1. **Generalized Procrustes Analysis (GPA)**: Most common, minimizes squared distances
-2. **Bookstein Coordinates**: Uses baseline between two landmarks
-3. **Resistant Fit**: Robust to outliers
-4. **None**: Use raw coordinates (not recommended for shape analysis)
+**Methods** (chosen in the analysis dialog):
+1. **Procrustes**: Generalized Procrustes Analysis, the standard method
+2. **Bookstein**: uses a baseline between two landmarks
+3. **Resistant Fit**: robust to outliers
 
-**Running Procrustes**:
-1. Analysis → New Analysis
-2. Select dataset
-3. Choose "Procrustes" method
-4. Configure options:
-   - **Method**: GPA (recommended)
-   - **Scaling**: Yes (recommended for size removal)
-   - **Reflection**: Allow if bilateral symmetry
-5. Click "Run"
-
-**Performance**:
-- 100 objects: < 50ms
-- 1,000 objects: < 800ms
-- 2,000 objects: < 2s
+Procrustes runs automatically as the first step of every analysis. If the dataset
+has missing landmarks, they are imputed with an EM-style refinement loop that
+interleaves alignment and estimation (imputed values live only in the analysis
+working copy, never in the database).
 
 ### Principal Component Analysis (PCA)
 
 **Purpose**: Reduce dimensionality, identify main axes of shape variation.
 
-**Running PCA**:
-1. Analysis → New Analysis
-2. Select dataset with Procrustes superimposition
-3. Analysis type: "PCA"
-4. Options:
-   - **Components**: Number to compute (default: all)
-   - **Center data**: Yes (recommended)
-   - **Scale**: No (for shape data)
-5. Click "Run"
+**Running PCA**: PCA is computed automatically as part of every analysis run.
+Open the completed analysis in the **Data Exploration** dialog to explore its
+principal components.
 
 **Interpreting Results**:
 - **Scree Plot**: Shows variance explained by each PC
@@ -557,14 +625,9 @@ Aligns landmark configurations to remove variation due to position, rotation, an
 - At least 2 groups
 - Multiple objects per group (recommended: 5+)
 
-**Running CVA**:
-1. Analysis → New Analysis
-2. Select dataset with Procrustes
-3. Analysis type: "CVA"
-4. Configure:
-   - **Grouping Variable**: Choose variable (e.g., "Species")
-   - **Cross-validation**: Optional, for classification accuracy
-5. Click "Run"
+**Running CVA**: CVA is computed as part of every analysis run. In the analysis
+dialog, set the **CVA grouping variable** to the categorical variable that defines
+your groups (e.g., "Species"), then open the result in **Data Exploration**.
 
 **Interpreting Results**:
 - **CV Scores Plot**: Groups plotted in CV space
@@ -587,14 +650,9 @@ Aligns landmark configurations to remove variation due to position, rotation, an
 
 **Purpose**: Test for significant differences in shape among groups.
 
-**Running MANOVA**:
-1. Analysis → New Analysis
-2. Select dataset with Procrustes
-3. Analysis type: "MANOVA"
-4. Configure:
-   - **Factors**: Select grouping variable(s)
-   - **Permutations**: Number for permutation test (default: 1000)
-5. Click "Run"
+**Running MANOVA**: MANOVA is computed as part of every analysis run. In the
+analysis dialog, set the **MANOVA grouping variable** to the categorical variable
+you want to test.
 
 **Interpreting Results**:
 - **Wilks' Lambda**: Multivariate test statistic (0-1, lower = more different)
@@ -610,9 +668,9 @@ Aligns landmark configurations to remove variation due to position, rotation, an
 ### Visualizing Results
 
 **Data Exploration Dialog**:
-1. Analysis → View Analysis Results
-2. Select analysis from list
-3. Interactive plots:
+1. Double-click a completed analysis in the dataset tree (or open it from the
+   dataset's analysis list)
+2. Interactive plots:
    - **Scatter plots**: PC1 vs PC2, CV1 vs CV2, etc.
    - **3D plots**: PC1-PC2-PC3
    - **Group coloring**: Color by variable
@@ -638,18 +696,22 @@ Aligns landmark configurations to remove variation due to position, rotation, an
 ### Export Dataset
 
 **Formats**:
-- **TPS**: Widely compatible
-- **Morphologika**: Standard format
-- **JSON+ZIP**: Modan2 native (includes images)
+- **TPS**: widely compatible (a raw export also writes traced curves as
+  `CURVES=` / `POINTS=` blocks)
+- **X1Y1**: plain coordinate columns
+- **Morphologika**: standard format (with images and metadata)
+- **JSON+ZIP**: Modan2's complete dataset package — bundles metadata, landmark
+  names, curve scheme, variables, images, and 3D models; imports losslessly
 
 **Export Workflow**:
-1. Right-click dataset → "Export Dataset"
-2. Choose format
+1. Select the dataset and choose **Export** (`Ctrl+E`)
+2. Choose the format
 3. Options:
-   - **Objects**: All or selected only
-   - **Superimposition**: Apply Procrustes before export
-   - **Images**: Include in ZIP (JSON+ZIP only)
-4. Select output location
+   - **Objects**: all or a selected subset
+   - **Superimposition**: None (raw) or Procrustes (aligned)
+   - **Include image and model files** (JSON+ZIP only) — an estimated package size
+     is shown
+4. Select the output location
 5. Click "Export"
 
 **Performance**:
@@ -709,10 +771,10 @@ Modan2 is optimized for excellent performance. Based on comprehensive testing (P
 ### Performance Tips
 
 **For Best Performance**:
-1. ✅ **Close unused datasets**: Frees memory
-2. ✅ **Use appropriate image sizes**: 1024-2048px recommended
-3. ✅ **Batch operations**: Import/export in bulk when possible
-4. ✅ **Regular maintenance**: Compact database periodically (Tools → Compact Database)
+1. ✅ **Use appropriate image sizes**: oversized photos (longer side > 2560 px) are
+   downscaled to a working copy automatically, with the original archived
+2. ✅ **Batch operations**: import/export in bulk when possible
+3. ✅ **Simplify 3D meshes**: keep polygon counts reasonable (< 100k)
 
 **Expected Analysis Times** (1000 objects):
 - **Procrustes**: ~800ms
@@ -765,7 +827,7 @@ python3 fix_qt_import.py
 
 # Option 2: Set environment variable
 export QT_QPA_PLATFORM_PLUGIN_PATH=/usr/lib/x86_64-linux-gnu/qt5/plugins/platforms
-python3 Modan2.py
+python3 main.py
 ```
 
 #### "OpenGL Error" or 3D viewer not working
@@ -814,21 +876,20 @@ sudo apt-get install libglut-dev libglut3.12 python3-opengl
 - Background processes
 
 **Solution**:
-1. Resize images before import (1024-2048px recommended)
-2. Close unused datasets
-3. Tools → Compact Database
-4. Restart Modan2
-5. Close other applications to free RAM
+1. Let large photos downscale (or resize before import)
+2. Restart Modan2
+3. Close other applications to free RAM
+4. Simplify very heavy 3D meshes
 
-#### Database corruption
+#### Protecting your data
 
-**Rare, but possible after crashes**
+The database is a single SQLite file (default `modan2.db`); the images and 3D
+models live in a storage folder alongside it.
 
-**Solution**:
-1. Tools → Check Database Integrity
-2. If corruption detected: Tools → Repair Database
-3. If repair fails: Restore from backup
-4. Backup regularly: File → Backup Database
+**Recommendation**: back up regularly by copying the database file (and its
+storage folder) to another location, and use **JSON+ZIP** exports for portable,
+self-contained snapshots of individual datasets. Note that deleting a dataset or
+object now also deletes its files from disk.
 
 ### Getting Help
 
@@ -932,25 +993,24 @@ Project_2024/
 
 **Keyboard Shortcuts**:
 - `Ctrl+N`: New dataset
-- `Ctrl+O`: Open database
-- `Ctrl+S`: Save
+- `Ctrl+Shift+N`: New object
+- `Ctrl+Shift+O`: Edit object
+- `Ctrl+S`: Save changes
 - `Ctrl+I`: Import
 - `Ctrl+E`: Export
-- `F2`: Edit dataset/object
-- `Delete`: Delete selected
-- `Space`: Next object (in digitizing)
+- `Ctrl+G`: Analyze
+- `Ctrl+P`: Toggle object preview
 
 **Batch Operations**:
 - Import multiple images at once
 - Select multiple objects for batch editing
-- Export multiple datasets together
 - Use variables for batch grouping
 
 **Backup Strategy**:
-1. **Daily**: Automatic backup on exit (Tools → Preferences)
-2. **Weekly**: Manual backup to external drive
-3. **Major milestones**: Backup before large imports or analyses
-4. File → Backup Database → Choose location
+1. Copy the database file (default `modan2.db`) and its storage folder to a safe
+   location on a regular schedule
+2. Back up before large imports or analyses
+3. Use **JSON+ZIP** exports for portable, self-contained dataset snapshots
 
 ### Publication-Ready Results
 
@@ -1035,22 +1095,29 @@ specimen_002
 
 ### Keyboard Shortcuts Reference
 
+**Main window**
+
 | Shortcut | Action |
 |----------|--------|
 | `Ctrl+N` | New dataset |
-| `Ctrl+O` | Open database |
-| `Ctrl+S` | Save |
+| `Ctrl+Shift+N` | New object |
+| `Ctrl+Shift+O` | Edit object |
+| `Ctrl+S` | Save changes |
 | `Ctrl+I` | Import |
 | `Ctrl+E` | Export |
-| `Ctrl+Z` | Undo |
-| `Ctrl+Y` | Redo |
-| `Ctrl+F` | Find |
-| `F2` | Edit |
-| `Delete` | Delete selected |
-| `Space` | Next (in digitizing) |
-| `Backspace` | Previous (in digitizing) |
-| `Esc` | Cancel |
-| `Ctrl+W` | Close dialog |
+| `Ctrl+G` | Analyze |
+| `Ctrl+P` | Toggle object preview |
+| `Ctrl+W` | Exit |
+| `F1` | About |
+
+**Object dialog — Curve mode**
+
+| Input | Action |
+|-------|--------|
+| `Enter` / double-click | Accept the current trace |
+| `Esc` / right-click | Cancel the current trace |
+| Right-click a curve point | Delete Point / Delete Curve |
+| `Ctrl+W` | Close the dialog |
 
 ### Glossary
 
@@ -1080,27 +1147,25 @@ specimen_002
 
 ## Version History
 
-### 0.1.4 (2025-10-08)
-- Comprehensive performance testing completed
-- All performance targets exceeded by 8-5091×
-- Production-ready performance validated
-- UI responsiveness optimized
-- Memory efficiency confirmed (125× better than target)
+See [`CHANGELOG.md`](../CHANGELOG.md) for the full, per-release history. Highlights
+of the 0.2 alpha series:
 
-### 0.1.3
-- Dialog extraction Phase 2 completed
-- Test coverage improved to 93.5%
-- Code organization enhanced
+### 0.2.0-alpha.2 (2026-07-24)
+- Semi-landmark curves, missing landmarks, and polygons are preserved across
+  JSON+ZIP export/import and file import (several data-loss fixes)
+- TPS export of semi-landmark curves (`CURVES=`)
+- Cross-platform CI, type checking, and a complexity-refactoring campaign
 
-### 0.1.2
-- Integration testing Phase 6 completed
-- 1,240 total tests implemented
-- Error recovery workflows validated
+### 0.2.0-alpha.1 (2026-07-23)
+- **Semi-landmark curves** with edge-snapping (live-wire) auto-detection and
+  smoothing
+- **Dataset-wide landmark names** and the **"Show Expected"** digitizing aid
+- Dataset dialog reorganized into tabs; object list gains LM Count / Curve columns
 
-### 0.1.1
-- Initial release
-- Core functionality implemented
-- 2D and 3D landmark support
+### 0.1.x highlights
+- Accurate shape-fitted missing-landmark estimation
+- Oversized images downscaled on attach with archived originals ("Show Original")
+- Full Korean interface; legend arrangement in Data Exploration
 
 ---
 
@@ -1108,12 +1173,7 @@ specimen_002
 
 Modan2 is released under the MIT License.
 
-Copyright (c) 2024-2025 Modan2 Development Team
-
 ---
 
-**Document Version**: 1.0
-**Last Updated**: 2025-10-08
-**For Modan2 Version**: 0.1.4+
-
-For the latest documentation, visit: [documentation URL]
+**Last Updated**: 2026-07-26
+**For Modan2 Version**: 0.2.0-alpha.2

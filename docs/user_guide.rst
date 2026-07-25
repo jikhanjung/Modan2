@@ -456,7 +456,8 @@ dataset and can be re-opened later.
 3. In the analysis dialog, set:
 
    - **Analysis name** (a unique name is suggested)
-   - **Superimposition method**: Procrustes (default), Bookstein, or Resistant Fit
+   - **Superimposition method**: Procrustes (Bookstein and Resistant Fit are
+     listed but currently disabled)
    - **CVA grouping variable**: the categorical variable that defines groups for CVA
    - **MANOVA grouping variable**: the categorical variable for MANOVA
 
@@ -482,9 +483,9 @@ EM-style refinement loop (see :ref:`analysis-missing-landmarks`).
 
 **Superimposition method**:
 
-- *Procrustes*: the default full Generalized Procrustes alignment
-- *Bookstein*: two-point baseline registration
-- *Resistant Fit*: an outlier-robust alignment
+Procrustes (Generalized Procrustes Analysis) is the method used for analysis.
+*Bookstein* (two-point baseline registration) and *Resistant Fit* (outlier-robust
+alignment) appear in the dialog but are currently disabled.
 
 **When Procrustes Runs**:
 

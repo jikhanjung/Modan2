@@ -2,18 +2,14 @@
 Test suite for format handler components
 
 Tests cover:
-- TPS format reading and parsing (6 tests, all passing)
-- NTS format reading and parsing (skipped - requires investigation)
-- X1Y1 format reading and parsing (skipped - requires investigation)
-- Morphologika format reading and parsing (4 tests, all passing)
+- TPS format reading and parsing
+- NTS format reading and parsing (header layouts, dimension, invertY, comments)
+- X1Y1 format reading and parsing (2D/3D, landmark count, invertY, errors)
+- Morphologika format reading and parsing
 - Object name extraction
 - Landmark data extraction
 - Wireframe/edge list extraction
 - Variable/property extraction
-
-Note: NTS and X1Y1 format handlers have complex implementations that require
-real-world file samples for accurate testing. These tests are marked as skipped
-pending further investigation of the actual file format specifications.
 """
 
 import os
@@ -24,6 +20,7 @@ import pytest
 from components.formats.morphologika import Morphologika
 from components.formats.nts import NTS
 from components.formats.tps import TPS
+from components.formats.x1y1 import X1Y1
 
 
 class TestTPSFormat:
@@ -196,13 +193,12 @@ ID=TestInvert
             os.unlink(tps_file)
 
 
-@pytest.mark.skip(reason="NTS format requires investigation of real-world file samples")
 class TestNTSFormat:
     """Test NTS format handler.
 
-    The header is positional, e.g. ``1 2L 6 0 dim=2``: object count, a row-name
-    flag (``L`` = names on their own line, ``b``/``e`` = at the row's start/end),
-    the variable count, and the dimension.
+    The header is positional, e.g. ``1 2L 6 0 dim=2``: a matrix marker, the
+    object count with a row-name flag (``L`` = names on their own line, ``b``/
+    ``e`` = at the row's start/end), the variable count, and the dimension.
     """
 
     @staticmethod
@@ -219,6 +215,7 @@ class TestNTSFormat:
         assert nts.nobjects == 2
         assert nts.object_name_list == ["ObjA", "ObjB"]
         assert nts.landmark_data["ObjA"] == [[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]]
+        assert nts.landmark_data["ObjB"] == [[7.0, 8.0], [9.0, 10.0], [11.0, 12.0]]
 
     def test_nts_reports_landmark_count(self, tmp_path):
         """nlandmarks is variables / dimension.
@@ -233,25 +230,130 @@ class TestNTSFormat:
         assert nts.nlandmarks == 3
         assert nts.nlandmarks == len(nts.landmark_data["ObjA"])
 
+    def test_nts_row_names_at_beginning(self, tmp_path):
+        """``b`` flag: each data row starts with its object name."""
+        content = "1 2b 4 0 dim=2\nObjA 1.0 2.0 3.0 4.0\nObjB 5.0 6.0 7.0 8.0\n"
+        nts = NTS(self._write(tmp_path, content), "ds")
 
-@pytest.mark.skip(reason="X1Y1 format requires investigation of dimension detection logic")
+        assert nts.object_name_list == ["ObjA", "ObjB"]
+        assert nts.landmark_data["ObjA"] == [[1.0, 2.0], [3.0, 4.0]]
+        assert nts.landmark_data["ObjB"] == [[5.0, 6.0], [7.0, 8.0]]
+
+    def test_nts_row_names_at_ending(self, tmp_path):
+        """``e`` flag: each data row ends with its object name."""
+        content = "1 2e 4 0 dim=2\n1.0 2.0 3.0 4.0 ObjA\n5.0 6.0 7.0 8.0 ObjB\n"
+        nts = NTS(self._write(tmp_path, content), "ds")
+
+        assert nts.object_name_list == ["ObjA", "ObjB"]
+        assert nts.landmark_data["ObjA"] == [[1.0, 2.0], [3.0, 4.0]]
+
+    def test_nts_generates_names_when_none_supplied(self, tmp_path):
+        """No row-name flag and no name line: names fall back to dataset_index."""
+        content = "1 2 4 0 dim=2\n1.0 2.0 3.0 4.0\n5.0 6.0 7.0 8.0\n"
+        nts = NTS(self._write(tmp_path, content), "MyDS")
+
+        assert nts.object_name_list == ["MyDS_1", "MyDS_2"]
+        assert nts.landmark_data["MyDS_1"] == [[1.0, 2.0], [3.0, 4.0]]
+
+    def test_nts_3d_dimension(self, tmp_path):
+        content = "1 1L 6 0 dim=3\nObjA\n1.0 2.0 3.0 4.0 5.0 6.0\n"
+        nts = NTS(self._write(tmp_path, content), "ds")
+
+        assert nts.dimension == 3
+        assert nts.nlandmarks == 2
+        assert nts.landmark_data["ObjA"] == [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]
+
+    def test_nts_invert_y_negates_y_for_2d(self, tmp_path):
+        content = "1 1L 4 0 dim=2\nObjA\n1.0 2.0 3.0 4.0\n"
+        nts = NTS(self._write(tmp_path, content), "ds", invertY=True)
+
+        assert nts.landmark_data["ObjA"] == [[1.0, -2.0], [3.0, -4.0]]
+
+    def test_nts_collects_quoted_comment_lines(self, tmp_path):
+        content = '"a header comment"\n1 1L 4 0 dim=2\nObjA\n1.0 2.0 3.0 4.0\n'
+        nts = NTS(self._write(tmp_path, content), "ds")
+
+        assert "a header comment" in nts.description
+        assert nts.object_name_list == ["ObjA"]
+
+    def test_nts_empty_matrix_returns_no_objects(self, tmp_path):
+        """A 0-object / 0-variable header short-circuits without objects."""
+        content = "1 0 0 0 dim=2\n"
+        nts = NTS(self._write(tmp_path, content), "ds")
+
+        assert nts.nobjects == 0
+        assert nts.landmark_data == {}
+
+
 class TestX1Y1Format:
-    """Test X1Y1 format handler - SKIPPED
+    """Test X1Y1 format handler.
 
-    Note: X1Y1 format tests are currently skipped. The X1Y1 format determines
-    2D vs 3D by examining the header[2] field (xyz_header_list[2]), looking for
-    'x' as the first character. The actual logic is:
-    - If xyz_header_list[2].lower()[0] == 'x': dimension = 2
-    - Else: dimension = 3
-
-    This means with header ['', 'X1', 'Y1', 'X2', 'Y2'], xyz_header_list[2] is 'Y1',
-    which starts with 'y', so it's treated as 3D (not 2D as expected).
-
-    The dimension detection logic appears counter-intuitive and needs investigation
-    with real-world X1Y1 files to understand the actual format specification.
+    X1Y1 is a tab-separated table: a header row of column names (a name column
+    followed by coordinate columns ``X1 Y1 X2 Y2 ...`` for 2D or ``X1 Y1 Z1 ...``
+    for 3D), then one object per row. Dimension is inferred from the third
+    coordinate column: for 2D it is ``X2`` (starts with ``x`` -> 2D); for 3D it
+    is ``Z1`` (does not start with ``x`` -> 3D).
     """
 
-    pass
+    @staticmethod
+    def _write(tmp_path, content):
+        path = tmp_path / "test.x1y1"
+        path.write_text(content, encoding="utf-8")
+        return str(path)
+
+    def test_x1y1_basic_2d_parsing(self, tmp_path):
+        content = "name\tX1\tY1\tX2\tY2\nObj1\t1.0\t2.0\t3.0\t4.0\nObj2\t5.0\t6.0\t7.0\t8.0\n"
+        x = X1Y1(self._write(tmp_path, content), "ds")
+
+        assert x.dimension == 2
+        assert x.nobjects == 2
+        assert x.object_name_list == ["Obj1", "Obj2"]
+        assert x.landmark_data["Obj1"] == [[1.0, 2.0], [3.0, 4.0]]
+        assert x.landmark_data["Obj2"] == [[5.0, 6.0], [7.0, 8.0]]
+
+    def test_x1y1_reports_landmark_count(self, tmp_path):
+        """nlandmarks is coordinate columns / dimension.
+
+        Regression: the count was computed and discarded, so nlandmarks stayed 0
+        for every X1Y1 file (the same latent bug fixed earlier in nts.py).
+        ModanController.import_dataset feeds this value into build_curve_config.
+        """
+        content = "name\tX1\tY1\tX2\tY2\nObj1\t1.0\t2.0\t3.0\t4.0\n"
+        x = X1Y1(self._write(tmp_path, content), "ds")
+
+        assert x.nlandmarks == 2
+        assert x.nlandmarks == len(x.landmark_data["Obj1"])
+
+    def test_x1y1_3d_parsing(self, tmp_path):
+        content = "name\tX1\tY1\tZ1\tX2\tY2\tZ2\nObj1\t1.0\t2.0\t3.0\t4.0\t5.0\t6.0\n"
+        x = X1Y1(self._write(tmp_path, content), "ds")
+
+        assert x.dimension == 3
+        assert x.nlandmarks == 2
+        assert x.landmark_data["Obj1"] == [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]
+
+    def test_x1y1_invert_y_negates_y_for_2d(self, tmp_path):
+        content = "name\tX1\tY1\tX2\tY2\nObj1\t1.0\t2.0\t3.0\t4.0\n"
+        x = X1Y1(self._write(tmp_path, content), "ds", invertY=True)
+
+        assert x.landmark_data["Obj1"] == [[1.0, -2.0], [3.0, -4.0]]
+
+    def test_x1y1_skips_comment_and_quoted_lines(self, tmp_path):
+        content = "name\tX1\tY1\tX2\tY2\n# a comment\nObj1\t1.0\t2.0\t3.0\t4.0\n'quoted'\n"
+        x = X1Y1(self._write(tmp_path, content), "ds")
+
+        assert x.object_name_list == ["Obj1"]
+        assert x.nobjects == 1
+
+    def test_x1y1_empty_file_raises(self, tmp_path):
+        with pytest.raises(ValueError):
+            X1Y1(self._write(tmp_path, ""), "ds")
+
+    def test_x1y1_malformed_header_raises(self, tmp_path):
+        """A header with fewer than 3 coordinate columns is rejected."""
+        content = "name\tX1\tY1\nObj1\t1.0\t2.0\n"
+        with pytest.raises(ValueError):
+            X1Y1(self._write(tmp_path, content), "ds")
 
 
 class TestMorphologikaFormat:

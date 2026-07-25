@@ -88,7 +88,10 @@ class X1Y1:
                 self.dimension = 2
             else:
                 self.dimension = 3
-            int(len(xyz_header_list) / self.dimension)
+            # Landmarks per object = coordinate columns / dimension. The result
+            # used to be computed and discarded, so nlandmarks stayed 0 for every
+            # X1Y1 file (the same latent bug that was fixed in nts.py).
+            landmark_count = int(len(xyz_header_list) / self.dimension)
             lines = lines[1:]
 
             for line in lines:

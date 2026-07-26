@@ -457,7 +457,6 @@ dataset and can be re-opened later.
 
    - **Analysis name** (a unique name is suggested)
    - **Superimposition method**: Procrustes, Bookstein, or Resistant Fit
-     (Resistant Fit is available for 2D datasets only)
    - **CVA grouping variable**: the categorical variable that defines groups for CVA
    - **MANOVA grouping variable**: the categorical variable for MANOVA
 
@@ -492,7 +491,7 @@ EM-style refinement loop (see :ref:`analysis-missing-landmarks`).
   missing) — otherwise the run reports a clear error.
 - *Resistant Fit* (RFTRA): a robust alignment that uses repeated medians of
   pairwise landmark relationships, so a few displaced (outlier) landmarks do not
-  pull the whole fit the way Procrustes can. **2D datasets only**, and requires
+  pull the whole fit the way Procrustes can. Works for 2D and 3D; requires
   complete landmarks.
 
 **When Procrustes Runs**:

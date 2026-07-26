@@ -38,7 +38,7 @@ Modan2 is a powerful desktop application for **geometric morphometric analysis**
 ✅ **Semi-landmark curves**: trace a curve and resample it into evenly-spaced points, with edge-snapping (live-wire) auto-detection
 ✅ **Digitizing aids**: dataset-wide landmark names, "Show Expected" position prediction, and full-resolution "Show Original"
 ✅ **Multiple import formats**: TPS, NTS, X1Y1, Morphologika, JSON+ZIP packages, image files, 3D models
-✅ **Superimposition**: Procrustes (GPA), Bookstein baseline registration, and Resistant Fit (RFTRA, 2D)
+✅ **Superimposition**: Procrustes (GPA), Bookstein baseline registration, and Resistant Fit (RFTRA)
 ✅ **Statistical analyses**: PCA, CVA, MANOVA
 ✅ **Interactive visualization** with customizable plots
 ✅ **Hierarchical dataset organization**
@@ -589,7 +589,7 @@ Aligns landmark configurations to remove variation due to position, rotation, an
    to a standard position. Requires a baseline defined on the dataset and complete
    landmarks (no missing); otherwise the run reports a clear error
 3. **Resistant Fit** (RFTRA): a robust alignment (repeated medians) that tolerates
-   a few outlier landmarks better than Procrustes. **2D datasets only**, complete
+   a few outlier landmarks better than Procrustes. Works for 2D and 3D; complete
    landmarks required
 
 Procrustes runs automatically as the first step of every analysis. If the dataset

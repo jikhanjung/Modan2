@@ -4671,11 +4671,11 @@ class TestMdObjectOpsGeometryExtras:
 
 
 class TestResistantFitSuperimposition:
-    """Dataset-level 2D resistant-fit superimposition (RFTRA, repeated medians)."""
+    """Dataset-level resistant-fit superimposition (RFTRA, repeated medians)."""
 
     @staticmethod
-    def _make_2d_dataset(shapes):
-        ds = mm.MdDataset.create(dataset_name="RF", dimension=2)
+    def _make_dataset(dimension, shapes):
+        ds = mm.MdDataset.create(dataset_name="RF", dimension=dimension)
         for k, shape in enumerate(shapes):
             obj = mm.MdObject.create(object_name=f"o{k}", dataset=ds)
             obj.landmark_list = [list(p) for p in shape]
@@ -4684,22 +4684,27 @@ class TestResistantFitSuperimposition:
             obj.save()
         return ds
 
+    @classmethod
+    def _make_2d_dataset(cls, shapes):
+        return cls._make_dataset(2, shapes)
+
     @staticmethod
     def _similarity(shape, scale, deg, tx, ty):
         th = math.radians(deg)
         c, s = math.cos(th), math.sin(th)
         return [[scale * (c * x - s * y) + tx, scale * (s * x + c * y) + ty] for x, y in shape]
 
-    def test_resistant_fit_rejects_3d(self, test_database):
-        ds = mm.MdDataset.create(dataset_name="RF3D", dimension=3)
-        for k in range(2):
-            obj = mm.MdObject.create(object_name=f"o{k}", dataset=ds)
-            obj.landmark_list = [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
-            obj.pack_landmark()
-            obj.save()
-        ds_ops = mm.MdDatasetOps(ds)
-        with pytest.raises(ValueError, match="2D"):
-            ds_ops.resistant_fit_superimposition()
+    @staticmethod
+    def _similarity_3d(shape, scale, angles, translation):
+        import numpy as np
+
+        a, b, g = angles
+        rz = np.array([[math.cos(a), -math.sin(a), 0], [math.sin(a), math.cos(a), 0], [0, 0, 1]])
+        ry = np.array([[math.cos(b), 0, math.sin(b)], [0, 1, 0], [-math.sin(b), 0, math.cos(b)]])
+        rx = np.array([[1, 0, 0], [0, math.cos(g), -math.sin(g)], [0, math.sin(g), math.cos(g)]])
+        r = rz @ ry @ rx
+        pts = scale * (np.asarray(shape, dtype=float) @ r.T) + np.asarray(translation, dtype=float)
+        return [list(p) for p in pts]
 
     def test_resistant_fit_rejects_missing_landmarks(self, test_database):
         ds = self._make_2d_dataset([[[0.0, 0.0], [1.0, 0.0], [0.5, 1.0]], [[0.0, 0.0], [1.0, 0.0], [None, None]]])
@@ -4736,6 +4741,34 @@ class TestResistantFitSuperimposition:
         for k in (0, 1, 3, 4):
             assert math.dist(clean0[k], corrupted[k]) < 1e-6
         # ...while the displaced landmark is left far from where the clean shapes put it.
+        assert math.dist(clean0[2], corrupted[2]) > 1.0
+
+    def test_resistant_fit_aligns_similar_shapes_3d(self, test_database):
+        base = [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0], [1.0, 1.0, 1.0]]
+        shapes = [
+            base,
+            self._similarity_3d(base, 1.7, (0.6, -0.4, 0.9), (3.0, -2.0, 1.0)),
+            self._similarity_3d(base, 0.6, (-0.5, 0.8, -0.3), (-1.0, 4.0, -2.0)),
+        ]
+        ds_ops = mm.MdDatasetOps(self._make_dataset(3, shapes))
+        assert ds_ops.resistant_fit_superimposition() is True
+
+        aligned = [mo.landmark_list for mo in ds_ops.object_list]
+        for k in range(len(base)):
+            assert len(aligned[0][k]) == 3
+            for other in aligned[1:]:
+                assert math.dist(aligned[0][k], other[k]) < 1e-6
+
+    def test_resistant_fit_ignores_an_outlier_landmark_3d(self, test_database):
+        base = [[0.0, 0.0, 0.0], [2.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 2.0], [1.0, 1.0, 1.0]]
+        outlier = [list(p) for p in base]
+        outlier[2] = [40.0, -25.0, 33.0]  # one grossly displaced landmark
+        ds_ops = mm.MdDatasetOps(self._make_dataset(3, [base, base, outlier]))
+        ds_ops.resistant_fit_superimposition()
+
+        clean0, _clean1, corrupted = (mo.landmark_list for mo in ds_ops.object_list)
+        for k in (0, 1, 3, 4):
+            assert math.dist(clean0[k], corrupted[k]) < 1e-6
         assert math.dist(clean0[2], corrupted[2]) > 1.0
 
 

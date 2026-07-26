@@ -2335,32 +2335,30 @@ class MdDatasetOps:
         return [list(row) for row in transformed]
 
     def resistant_fit_superimposition(self, max_iterations=100, convergence_threshold=1e-6):
-        """Resistant-fit superimposition (RFTRA; Rohlf & Slice 1990), 2D only.
+        """Resistant-fit superimposition (RFTRA; Rohlf & Slice 1990), 2D and 3D.
 
         Aligns shapes using repeated medians of the pairwise interlandmark scale
         ratios and rotation angles, plus a median translation, so that a few
         grossly displaced (outlier) landmarks do not drag the whole fit the way
-        least-squares Procrustes does.
+        least-squares Procrustes does. Rotation is estimated per coordinate plane:
+        about Z for 2D, and iterated about Z, Y, X for 3D.
 
-        2D only: a robust 3D resistant fit (generalized resistant fit) is not
-        implemented. Missing landmarks are not supported.
+        Missing landmarks are not supported.
 
         Returns:
             True on success.
 
         Raises:
-            ValueError: no objects, a 3D dataset, or any missing landmark.
+            ValueError: no objects, or any missing landmark.
         """
         if len(self.object_list) == 0:
             raise ValueError("No objects to superimpose")
-        if self.dimension == 3:
-            raise ValueError("Resistant Fit is available for 2D datasets only; use Procrustes for 3D.")
         for mo in self.object_list:
             if any(c is None for lm in mo.landmark_list for c in lm):
                 raise ValueError("Resistant Fit does not support missing landmarks; use Procrustes.")
 
-        # Center each shape and work in numpy (N x 2).
-        shapes = [np.asarray([[lm[0], lm[1]] for lm in mo.landmark_list], dtype=float) for mo in self.object_list]
+        dim = 3 if self.dimension == 3 else 2
+        shapes = [np.asarray([lm[:dim] for lm in mo.landmark_list], dtype=float) for mo in self.object_list]
         shapes = [s - s.mean(axis=0) for s in shapes]
 
         # Iterate: align every shape to the current median consensus until it
@@ -2368,7 +2366,7 @@ class MdDatasetOps:
         # outlier in one shape from pulling the target the others align to.
         reference = shapes[0].copy()
         for _ in range(max_iterations):
-            shapes = [self._resistant_align_2d(s, reference) for s in shapes]
+            shapes = [self._resistant_align(s, reference, dim) for s in shapes]
             new_reference = np.median(np.stack(shapes), axis=0)
             shift = math.sqrt(float(np.sum((new_reference - reference) ** 2)))
             reference = new_reference
@@ -2376,61 +2374,113 @@ class MdDatasetOps:
                 break
 
         for mo, s in zip(self.object_list, shapes, strict=False):
-            mo.landmark_list = [[float(x), float(y)] for x, y in s]
+            mo.landmark_list = [[float(c) for c in row] for row in s]
         self.reference_shape = self.get_average_shape()
         return True
 
-    @staticmethod
-    def _resistant_align_2d(target, reference):
-        """Repeated-median resistant alignment of one 2D shape to a reference.
+    @classmethod
+    def _resistant_align(cls, target, reference, dim):
+        """Repeated-median resistant alignment of one shape to a reference.
 
         Estimates scale, rotation, and translation from repeated medians of
-        pairwise landmark relationships (median over j of a per-landmark median),
-        which tolerates a minority of displaced landmarks.
+        pairwise landmark relationships, which tolerates a minority of displaced
+        landmarks.
         """
-        n = len(target)
+        scaled = target * cls._resistant_scale(target, reference)
+        if dim == 3:
+            rotated = cls._resistant_rotate_3d(scaled, reference)
+        else:
+            theta = cls._repeated_median_angle(scaled, reference, 0, 1)  # about Z: (x, y)
+            rotated = scaled @ cls._axis_rotation_2d(theta)
+        translation = np.median(reference - rotated, axis=0)
+        return rotated + translation
 
-        # 1. Scale: repeated median of pairwise distance ratios (reference / target).
+    @staticmethod
+    def _resistant_scale(target, reference):
+        """Repeated median of pairwise distance ratios (reference / target)."""
+        n = len(target)
         scale_medians = []
         for i in range(n):
             ratios = []
             for j in range(n):
                 if i == j:
                     continue
-                dt = math.hypot(target[i][0] - target[j][0], target[i][1] - target[j][1])
+                dt = float(np.linalg.norm(target[i] - target[j]))
                 if dt == 0:
                     continue
-                dr = math.hypot(reference[i][0] - reference[j][0], reference[i][1] - reference[j][1])
-                ratios.append(dr / dt)
+                ratios.append(float(np.linalg.norm(reference[i] - reference[j])) / dt)
             if ratios:
                 scale_medians.append(np.median(ratios))
-        scale = float(np.median(scale_medians)) if scale_medians else 1.0
-        scaled = target * scale
+        return float(np.median(scale_medians)) if scale_medians else 1.0
 
-        # 2. Rotation: repeated median of pairwise angle differences.
-        angle_medians = []
+    @staticmethod
+    def _repeated_median_angle(target, reference, u, w):
+        """Repeated-median in-plane rotation angle mapping target(u,w) to reference(u,w).
+
+        Uses coordinates ``u`` and ``w`` of each landmark; the returned angle is
+        the robust rotation (radians) in that plane.
+        """
+        n = len(target)
+        medians = []
         for i in range(n):
             diffs = []
             for j in range(n):
                 if i == j:
                     continue
-                vt = scaled[j] - scaled[i]
-                vr = reference[j] - reference[i]
-                if math.hypot(vt[0], vt[1]) == 0 or math.hypot(vr[0], vr[1]) == 0:
+                tu, tw = target[j][u] - target[i][u], target[j][w] - target[i][w]
+                ru, rw = reference[j][u] - reference[i][u], reference[j][w] - reference[i][w]
+                if (tu == 0 and tw == 0) or (ru == 0 and rw == 0):
                     continue
-                d = math.atan2(vr[1], vr[0]) - math.atan2(vt[1], vt[0])
+                d = math.atan2(rw, ru) - math.atan2(tw, tu)
                 d = (d + math.pi) % (2 * math.pi) - math.pi  # normalize to (-pi, pi]
                 diffs.append(d)
             if diffs:
-                angle_medians.append(np.median(diffs))
-        theta = float(np.median(angle_medians)) if angle_medians else 0.0
-        cos_t, sin_t = math.cos(theta), math.sin(theta)
-        rot = np.array([[cos_t, sin_t], [-sin_t, cos_t]])  # row-vector CCW rotation
-        rotated = scaled @ rot
+                medians.append(np.median(diffs))
+        return float(np.median(medians)) if medians else 0.0
 
-        # 3. Translation: coordinate-wise median offset to the reference.
-        translation = np.median(reference - rotated, axis=0)
-        return rotated + translation
+    @staticmethod
+    def _axis_rotation_2d(theta):
+        """Row-vector CCW rotation matrix for 2D points (apply as ``pts @ M``)."""
+        c, s = math.cos(theta), math.sin(theta)
+        return np.array([[c, s], [-s, c]])
+
+    @classmethod
+    def _resistant_rotate_3d(cls, target, reference, max_iter=100, tol=1e-12):
+        """Robust 3D rotation by coordinate-descent over the Z, Y, X coordinate planes.
+
+        Each sweep estimates a repeated-median in-plane angle about one axis and
+        applies it; sweeping until the accumulated angle vanishes converges to the
+        aligning rotation (0 is the fixed point once the shapes coincide).
+        """
+        # (axis coordinate index, in-plane u, in-plane w): Z->(x,y), Y->(z,x), X->(y,z).
+        planes = [(2, 0, 1), (1, 2, 0), (0, 1, 2)]
+        pts = target
+        for _ in range(max_iter):
+            total = 0.0
+            for axis, u, w in planes:
+                theta = cls._repeated_median_angle(pts, reference, u, w)
+                pts = pts @ cls._axis_rotation_3d(axis, theta)
+                total += abs(theta)
+            if total < tol:
+                break
+        return pts
+
+    @staticmethod
+    def _axis_rotation_3d(axis, theta):
+        """Row-vector rotation matrix about a coordinate axis (apply as ``pts @ M``).
+
+        ``axis`` is the fixed coordinate index (2=Z, 1=Y, 0=X); a positive angle
+        rotates the in-plane u axis toward w, matching ``_repeated_median_angle``.
+        """
+        c, s = math.cos(theta), math.sin(theta)
+        col = np.eye(3)
+        if axis == 2:  # Z: (x, y)
+            col[0, 0], col[0, 1], col[1, 0], col[1, 1] = c, -s, s, c
+        elif axis == 1:  # Y: (z, x)
+            col[2, 2], col[2, 0], col[0, 2], col[0, 0] = c, -s, s, c
+        else:  # X: (y, z)
+            col[1, 1], col[1, 2], col[2, 1], col[2, 2] = c, -s, s, c
+        return col.T
 
     def rotate_vector_2d(self, theta, vec):
         return self.rotate_vector_3d(theta, vec, "Z")

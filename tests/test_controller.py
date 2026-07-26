@@ -1,5 +1,6 @@
 """Tests for ModanController business logic."""
 
+import math
 from unittest.mock import Mock, patch
 
 import pytest
@@ -404,26 +405,30 @@ class TestAnalysisOperations:
     def test_prepare_landmarks_dispatches_to_resistant_fit(self, mock_database):
         """superimposition_method routes _prepare_landmarks to Resistant Fit.
 
-        Verified via its 2D-only guard: a 3D dataset makes the Resistant Fit path
-        raise, which the Procrustes path (on the same data) does not.
+        Two similar 2D shapes coincide after a resistant fit; a missing landmark
+        makes the Resistant Fit path raise (which Procrustes would not), pinning
+        the dispatch to the resistant-fit implementation.
         """
         controller = ModanController()
-        dataset = MdModel.MdDataset.create(dataset_name="RFdispatch", dimension=3, landmark_count=3)
+        dataset = MdModel.MdDataset.create(dataset_name="RFdispatch", dimension=2, landmark_count=3)
         dataset.save()
-        for i in range(3):
-            MdModel.MdObject.create(
-                dataset=dataset,
-                object_name=f"o{i}",
-                sequence=i + 1,
-                landmark_str="\n".join([f"{i}.0\t{i}.0\t0.0", f"{i + 1}.0\t{i}.0\t0.0", f"{i}.0\t{i + 1}.0\t0.0"]),
-            )
+        shapes = [
+            "\n".join(["0.0\t0.0", "2.0\t0.0", "1.0\t1.0"]),
+            "\n".join(["5.0\t5.0", "5.0\t9.0", "3.0\t7.0"]),  # similarity transform of the first
+        ]
+        for i, lm in enumerate(shapes):
+            MdModel.MdObject.create(dataset=dataset, object_name=f"o{i}", sequence=i + 1, landmark_str=lm)
         controller.set_current_dataset(dataset)
 
-        with pytest.raises(ValueError, match="2D"):
-            controller._prepare_landmarks("Resistant Fit")
+        _ds_ops, aligned = controller._prepare_landmarks("Resistant Fit")
+        assert len(aligned) == 2
+        for k in range(3):
+            assert math.dist(aligned[0][k], aligned[1][k]) < 1e-6
 
-        _ds_ops, shapes = controller._prepare_landmarks("Procrustes")
-        assert len(shapes) == 3
+        # The resistant-fit path rejects missing landmarks; Procrustes imputes them.
+        MdModel.MdObject.create(dataset=dataset, object_name="miss", sequence=3, landmark_str="0.0\t0.0\n2.0\t0.0\n\t")
+        with pytest.raises(ValueError, match="missing landmarks"):
+            controller._prepare_landmarks("Resistant Fit")
 
     def test_delete_analysis(self, controller_with_data):
         """Test analysis deletion."""

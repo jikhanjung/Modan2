@@ -68,15 +68,12 @@ class NewAnalysisDialog(BaseDialog):
         self.edtAnalysisName.textChanged.connect(self.edtAnalysisName_changed)
 
         # Superimposition methods, all wired into the run path
-        # (ModanController._prepare_landmarks). Resistant Fit is 2D-only for now,
-        # so it is disabled for 3D datasets.
+        # (ModanController._prepare_landmarks) and supporting 2D and 3D.
         self.lblSuperimposition = QLabel(self.tr("Superimposition method"), self)
         self.comboSuperimposition = QComboBox(self)
         self.comboSuperimposition.addItem(self.tr("Procrustes"))
         self.comboSuperimposition.addItem(self.tr("Bookstein"))
         self.comboSuperimposition.addItem(self.tr("Resistant Fit"))
-        if self.dataset.dimension == 3:
-            self.comboSuperimposition.model().item(2).setEnabled(False)  # Resistant Fit (2D only)
 
         # CVA grouping variable
         self.lblCvaGroupBy = QLabel(self.tr("CVA grouping variable"), self)

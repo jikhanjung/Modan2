@@ -405,9 +405,8 @@ class TestAnalysisOperations:
     def test_prepare_landmarks_dispatches_to_resistant_fit(self, mock_database):
         """superimposition_method routes _prepare_landmarks to Resistant Fit.
 
-        Two similar 2D shapes coincide after a resistant fit; a missing landmark
-        makes the Resistant Fit path raise (which Procrustes would not), pinning
-        the dispatch to the resistant-fit implementation.
+        Two similar 2D shapes still coincide after a resistant fit; a spy confirms
+        the resistant-fit path (not Procrustes) is the one that ran.
         """
         controller = ModanController()
         dataset = MdModel.MdDataset.create(dataset_name="RFdispatch", dimension=2, landmark_count=3)
@@ -425,10 +424,12 @@ class TestAnalysisOperations:
         for k in range(3):
             assert math.dist(aligned[0][k], aligned[1][k]) < 1e-6
 
-        # The resistant-fit path rejects missing landmarks; Procrustes imputes them.
-        MdModel.MdObject.create(dataset=dataset, object_name="miss", sequence=3, landmark_str="0.0\t0.0\n2.0\t0.0\n\t")
-        with pytest.raises(ValueError, match="missing landmarks"):
+        with patch.object(MdModel.MdDatasetOps, "resistant_fit_superimposition", return_value=True) as spy:
             controller._prepare_landmarks("Resistant Fit")
+            assert spy.called
+        with patch.object(MdModel.MdDatasetOps, "resistant_fit_superimposition", return_value=True) as spy:
+            controller._prepare_landmarks("Procrustes")
+            assert not spy.called
 
     def test_delete_analysis(self, controller_with_data):
         """Test analysis deletion."""

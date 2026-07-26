@@ -487,12 +487,12 @@ EM-style refinement loop (see :ref:`analysis-missing-landmarks`).
 - *Bookstein* (baseline registration): re-expresses each shape as Bookstein shape
   coordinates by fixing the dataset's baseline landmarks to a standard position
   (2D: endpoints at (-0.5, 0) and (0.5, 0); 3D uses a 3-point baseline). It
-  **requires a baseline** defined on the dataset and **complete landmarks** (no
-  missing) — otherwise the run reports a clear error.
+  **requires a baseline** defined on the dataset; missing landmarks are imputed
+  first (as in Procrustes).
 - *Resistant Fit* (RFTRA): a robust alignment that uses repeated medians of
   pairwise landmark relationships, so a few displaced (outlier) landmarks do not
-  pull the whole fit the way Procrustes can. Works for 2D and 3D; requires
-  complete landmarks.
+  pull the whole fit the way Procrustes can. Works for 2D and 3D; missing
+  landmarks are imputed first.
 
 **When Procrustes Runs**:
 

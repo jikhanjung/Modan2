@@ -2247,6 +2247,30 @@ class MdDatasetOps:
             return True
         return False
 
+    def _fill_missing_landmarks(self):
+        """Impute missing landmarks in place so a superimposition that needs
+        complete shapes (Bookstein, Resistant Fit) can run.
+
+        Reuses the shared Procrustes EM imputation — fit the mean shape onto each
+        object's observed landmarks and refine as the alignment settles
+        (:meth:`procrustes_superimposition_with_imputation`) — then leaves every
+        object complete. No-op when nothing is missing.
+
+        Raises:
+            ValueError: if a landmark is missing in every object and so cannot be
+                imputed (a non-finite coordinate survives).
+        """
+        if not self.has_missing_landmarks():
+            return
+        self.procrustes_superimposition_with_imputation()
+        for mo in self.object_list:
+            for lm in mo.landmark_list:
+                for c in lm[: self.dimension]:
+                    if c is None or not math.isfinite(c):
+                        raise ValueError(
+                            "Some landmarks are missing in every object and cannot be imputed; use Procrustes."
+                        )
+
     def bookstein_superimposition(self):
         """Bookstein baseline registration for every object in the dataset.
 
@@ -2258,17 +2282,16 @@ class MdDatasetOps:
           baseline point is rotated into the +y half of the xy-plane (z = 0).
 
         The baseline comes from the dataset (``baseline_point_list``, 1-based
-        landmark indices). Unlike Procrustes this uses closed-form transforms,
-        preserves the point dimension (2D stays 2D), and does not impute missing
-        landmarks.
+        landmark indices). Missing landmarks are imputed first (shared Procrustes
+        EM imputation) so the baseline mapping runs on complete shapes.
 
         Returns:
             True on success.
 
         Raises:
             ValueError: no objects; no baseline (or too few points for the
-                dimension); any missing landmark; or a degenerate baseline
-                (coincident endpoints, or a collinear 3D triple).
+                dimension); a landmark missing in every object; or a degenerate
+                baseline (coincident endpoints, or a collinear 3D triple).
         """
         if len(self.object_list) == 0:
             raise ValueError("No objects to superimpose")
@@ -2281,9 +2304,7 @@ class MdDatasetOps:
                 "set one in the dataset before running it."
             )
 
-        for mo in self.object_list:
-            if any(c is None for lm in mo.landmark_list for c in lm):
-                raise ValueError("Bookstein superimposition does not support missing landmarks; use Procrustes.")
+        self._fill_missing_landmarks()
 
         idx = [b - 1 for b in baseline[:need]]  # baseline indices are 1-based
         for mo in self.object_list:
@@ -2343,19 +2364,17 @@ class MdDatasetOps:
         least-squares Procrustes does. Rotation is estimated per coordinate plane:
         about Z for 2D, and iterated about Z, Y, X for 3D.
 
-        Missing landmarks are not supported.
+        Missing landmarks are imputed first (shared Procrustes EM imputation).
 
         Returns:
             True on success.
 
         Raises:
-            ValueError: no objects, or any missing landmark.
+            ValueError: no objects, or a landmark missing in every object.
         """
         if len(self.object_list) == 0:
             raise ValueError("No objects to superimpose")
-        for mo in self.object_list:
-            if any(c is None for lm in mo.landmark_list for c in lm):
-                raise ValueError("Resistant Fit does not support missing landmarks; use Procrustes.")
+        self._fill_missing_landmarks()
 
         dim = 3 if self.dimension == 3 else 2
         shapes = [np.asarray([lm[:dim] for lm in mo.landmark_list], dtype=float) for mo in self.object_list]

@@ -586,11 +586,11 @@ Aligns landmark configurations to remove variation due to position, rotation, an
 1. **Procrustes**: Generalized Procrustes Analysis, the default; also imputes
    missing landmarks
 2. **Bookstein**: baseline registration — fixes the dataset's baseline landmarks
-   to a standard position. Requires a baseline defined on the dataset and complete
-   landmarks (no missing); otherwise the run reports a clear error
+   to a standard position. Requires a baseline defined on the dataset; missing
+   landmarks are imputed first (as in Procrustes)
 3. **Resistant Fit** (RFTRA): a robust alignment (repeated medians) that tolerates
-   a few outlier landmarks better than Procrustes. Works for 2D and 3D; complete
-   landmarks required
+   a few outlier landmarks better than Procrustes. Works for 2D and 3D; missing
+   landmarks are imputed first
 
 Procrustes runs automatically as the first step of every analysis. If the dataset
 has missing landmarks, they are imputed with an EM-style refinement loop that

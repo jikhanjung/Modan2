@@ -4691,3 +4691,80 @@ class TestResistantFitSuperimposition:
 
         # Converged to a reference shape with the expected landmark count.
         assert len(ds_ops.reference_shape.landmark_list) == 4
+
+
+class TestBooksteinSuperimposition:
+    """Dataset-level Bookstein baseline registration (2D and 3D)."""
+
+    @staticmethod
+    def _make_dataset(dimension, baseline, shapes):
+        ds = mm.MdDataset.create(dataset_name="BK", dimension=dimension)
+        ds.baseline = ",".join(str(b) for b in baseline)  # 1-based indices
+        ds.save()
+        for k, shape in enumerate(shapes):
+            obj = mm.MdObject.create(object_name=f"o{k}", dataset=ds)
+            obj.landmark_list = [list(p) for p in shape]
+            # MdDatasetOps re-reads objects from the DB, so persist as landmark_str.
+            obj.pack_landmark()
+            obj.save()
+        return ds
+
+    def test_bookstein_2d_maps_baseline_and_is_similarity_invariant(self, test_database):
+        # Shape 2 is Shape 1 scaled x2, rotated 90 degrees, translated -> identical
+        # Bookstein coordinates expected.
+        shape1 = [[0.0, 0.0], [2.0, 0.0], [1.0, 1.0]]
+        shape2 = [[5.0, 5.0], [5.0, 9.0], [3.0, 7.0]]
+        ds = self._make_dataset(2, [1, 2], [shape1, shape2])
+
+        ds_ops = mm.MdDatasetOps(ds)
+        assert ds_ops.bookstein_superimposition() is True
+
+        for mo in ds_ops.object_list:
+            a, b, c = mo.landmark_list
+            assert len(a) == 2  # dimension preserved (2D stays 2D)
+            assert a == pytest.approx([-0.5, 0.0])
+            assert b == pytest.approx([0.5, 0.0])
+            assert c == pytest.approx([0.0, 0.5])  # same for both similar shapes
+
+    def test_bookstein_3d_maps_baseline_to_standard(self, test_database):
+        # Baseline = landmarks 1,2,3; a 4th free point.
+        shape = [[0.0, 0.0, 0.0], [2.0, 0.0, 0.0], [1.0, 1.0, 0.0], [1.0, 0.0, 1.0]]
+        ds = self._make_dataset(3, [1, 2, 3], [shape, shape])
+
+        ds_ops = mm.MdDatasetOps(ds)
+        assert ds_ops.bookstein_superimposition() is True
+
+        for mo in ds_ops.object_list:
+            a, b, c, _d = mo.landmark_list
+            assert len(a) == 3
+            assert list(a) == pytest.approx([-0.5, 0.0, 0.0])
+            assert list(b) == pytest.approx([0.5, 0.0, 0.0])
+            # Third baseline point sits in the +y half of the xy-plane.
+            assert c[2] == pytest.approx(0.0)
+            assert c[1] > 0.0
+
+    def test_bookstein_requires_a_baseline(self, test_database):
+        ds = self._make_dataset(2, [], [[[0.0, 0.0], [1.0, 0.0]], [[0.0, 0.0], [2.0, 0.0]]])
+        ds_ops = mm.MdDatasetOps(ds)
+        with pytest.raises(ValueError, match="baseline"):
+            ds_ops.bookstein_superimposition()
+
+    def test_bookstein_rejects_missing_landmarks(self, test_database):
+        ds = mm.MdDataset.create(dataset_name="BKmiss", dimension=2)
+        ds.baseline = "1,2"
+        ds.save()
+        for k, shape in enumerate([[[0.0, 0.0], [2.0, 0.0], [1.0, 1.0]], [[0.0, 0.0], [2.0, 0.0], [None, None]]]):
+            obj = mm.MdObject.create(object_name=f"o{k}", dataset=ds)
+            obj.landmark_list = [list(p) for p in shape]
+            obj.pack_landmark()
+            obj.save()
+        ds_ops = mm.MdDatasetOps(ds)
+        with pytest.raises(ValueError, match="missing landmarks"):
+            ds_ops.bookstein_superimposition()
+
+    def test_bookstein_rejects_coincident_baseline(self, test_database):
+        shape = [[1.0, 1.0], [1.0, 1.0], [2.0, 3.0]]  # baseline endpoints coincide
+        ds = self._make_dataset(2, [1, 2], [shape, shape])
+        ds_ops = mm.MdDatasetOps(ds)
+        with pytest.raises(ValueError, match="coincide"):
+            ds_ops.bookstein_superimposition()

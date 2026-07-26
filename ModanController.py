@@ -808,7 +808,7 @@ class ModanController(QObject):
             self.logger.info(f"Starting {analysis_type} analysis")
             self.analysis_started.emit(analysis_type)
 
-            ds_ops, landmarks_data = self._prepare_landmarks()
+            ds_ops, landmarks_data = self._prepare_landmarks(superimposition_method)
 
             # Run analysis based on type
             self.analysis_progress.emit(25)
@@ -1083,17 +1083,22 @@ class ModanController(QObject):
 
         return analysis
 
-    def _prepare_landmarks(self):
-        """Collect landmark-bearing objects, run Procrustes, and return the
+    def _prepare_landmarks(self, superimposition_method="Procrustes"):
+        """Collect landmark-bearing objects, superimpose them, and return the
         superimposed dataset ops together with the superimposed landmark arrays.
+
+        Args:
+            superimposition_method: "Procrustes" (default) or "Bookstein".
+                Anything else falls back to Procrustes (Resistant Fit is not yet
+                implemented and is disabled in the UI).
 
         Returns:
             (ds_ops, landmarks_data): the ``MdDatasetOps`` holding the
             superimposed objects, and the list of superimposed landmark lists.
 
         Raises:
-            ValueError: if fewer than 2 objects have landmarks, if Procrustes
-                superimposition fails, or if no landmark data results.
+            ValueError: if fewer than 2 objects have landmarks, if superimposition
+                fails, or if no landmark data results.
         """
         # Get objects with landmarks
         objects = list(self.current_dataset.object_list)
@@ -1108,10 +1113,11 @@ class ModanController(QObject):
                 f"At least 2 objects with landmarks are required for analysis (found {len(objects_with_landmarks)} objects with landmarks out of {len(objects)} total objects)"
             )
 
-        self.logger.info(f"Found {len(objects_with_landmarks)} objects with landmarks before Procrustes")
+        method = (superimposition_method or "Procrustes").strip().lower()
+        method_label = "Bookstein" if method == "bookstein" else "Procrustes"
+        self.logger.info(f"Found {len(objects_with_landmarks)} objects with landmarks before {method_label}")
 
-        # Perform Procrustes superimposition before analysis
-        self.logger.info("Performing Procrustes superimposition")
+        self.logger.info(f"Performing {method_label} superimposition")
         from MdModel import MdDatasetOps
 
         # Diagnose the one failure mode the user can actually act on before
@@ -1127,10 +1133,14 @@ class ModanController(QObject):
             raise ValueError(unimputable_landmarks_message(unimputable))
 
         ds_ops = MdDatasetOps(self.current_dataset)
-        if not ds_ops.procrustes_superimposition():
+        # Bookstein raises a ValueError with a specific reason (no baseline /
+        # missing landmarks); Procrustes returns False on failure.
+        if method == "bookstein":
+            ds_ops.bookstein_superimposition()
+        elif not ds_ops.procrustes_superimposition():
             raise ValueError("Procrustes superimposition failed")
 
-        self.logger.info(f"Procrustes completed - now have {len(ds_ops.object_list)} objects")
+        self.logger.info(f"{method_label} completed - now have {len(ds_ops.object_list)} objects")
 
         # Extract landmarks from the superimposed objects
         landmarks_data = [obj.landmark_list for obj in ds_ops.object_list]

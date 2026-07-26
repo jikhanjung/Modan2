@@ -67,18 +67,16 @@ class NewAnalysisDialog(BaseDialog):
         self.edtAnalysisName = QLineEdit(self)
         self.edtAnalysisName.textChanged.connect(self.edtAnalysisName_changed)
 
-        # Superimposition method. Only Procrustes is wired into the run path
-        # (ModanController always calls procrustes_superimposition), so Bookstein
-        # and Resistant Fit are shown but disabled to avoid silently running
-        # Procrustes when one of them is picked. The export dialog disables them
-        # the same way. Re-enable each here once its dispatch is implemented.
+        # Superimposition method. Procrustes and Bookstein are wired into the run
+        # path (ModanController._prepare_landmarks). Resistant Fit is still shown
+        # but disabled because its implementation is broken (rotation not applied,
+        # 3D-only); re-enable it here once it is reimplemented and dispatched.
         self.lblSuperimposition = QLabel(self.tr("Superimposition method"), self)
         self.comboSuperimposition = QComboBox(self)
         self.comboSuperimposition.addItem(self.tr("Procrustes"))
         self.comboSuperimposition.addItem(self.tr("Bookstein"))
         self.comboSuperimposition.addItem(self.tr("Resistant Fit"))
-        for i in (1, 2):  # Bookstein, Resistant Fit
-            self.comboSuperimposition.model().item(i).setEnabled(False)
+        self.comboSuperimposition.model().item(2).setEnabled(False)  # Resistant Fit
 
         # CVA grouping variable
         self.lblCvaGroupBy = QLabel(self.tr("CVA grouping variable"), self)

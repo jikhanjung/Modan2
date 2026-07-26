@@ -2247,6 +2247,93 @@ class MdDatasetOps:
             return True
         return False
 
+    def bookstein_superimposition(self):
+        """Bookstein baseline registration for every object in the dataset.
+
+        Re-expresses each shape as Bookstein shape coordinates by mapping the
+        baseline landmarks to a fixed standard position:
+
+        - 2D: the two baseline endpoints go to (-0.5, 0) and (0.5, 0).
+        - 3D: the two endpoints go to (-0.5, 0, 0) and (0.5, 0, 0), and the third
+          baseline point is rotated into the +y half of the xy-plane (z = 0).
+
+        The baseline comes from the dataset (``baseline_point_list``, 1-based
+        landmark indices). Unlike Procrustes this uses closed-form transforms,
+        preserves the point dimension (2D stays 2D), and does not impute missing
+        landmarks.
+
+        Returns:
+            True on success.
+
+        Raises:
+            ValueError: no objects; no baseline (or too few points for the
+                dimension); any missing landmark; or a degenerate baseline
+                (coincident endpoints, or a collinear 3D triple).
+        """
+        if len(self.object_list) == 0:
+            raise ValueError("No objects to superimpose")
+
+        need = 3 if self.dimension == 3 else 2
+        baseline = self.baseline_point_list or []
+        if len(baseline) < need:
+            raise ValueError(
+                f"Bookstein superimposition needs a baseline of {need} landmarks; "
+                "set one in the dataset before running it."
+            )
+
+        for mo in self.object_list:
+            if any(c is None for lm in mo.landmark_list for c in lm):
+                raise ValueError("Bookstein superimposition does not support missing landmarks; use Procrustes.")
+
+        idx = [b - 1 for b in baseline[:need]]  # baseline indices are 1-based
+        for mo in self.object_list:
+            if self.dimension == 3:
+                mo.landmark_list = self._bookstein_coords_3d(mo.landmark_list, idx)
+            else:
+                mo.landmark_list = self._bookstein_coords_2d(mo.landmark_list, idx)
+        return True
+
+    @staticmethod
+    def _bookstein_coords_2d(landmarks, baseline_idx):
+        """2D Bookstein coordinates: baseline endpoints -> (-0.5, 0), (0.5, 0)."""
+        a, b = baseline_idx[0], baseline_idx[1]
+        ax, ay = landmarks[a][0], landmarks[a][1]
+        bx, by = landmarks[b][0], landmarks[b][1]
+        dx, dy = bx - ax, by - ay
+        d2 = dx * dx + dy * dy
+        if d2 == 0:
+            raise ValueError("Bookstein baseline endpoints coincide (zero length).")
+        out = []
+        for lm in landmarks:
+            px, py = lm[0], lm[1]
+            u = ((px - ax) * dx + (py - ay) * dy) / d2 - 0.5
+            v = ((py - ay) * dx - (px - ax) * dy) / d2
+            out.append([u, v])
+        return out
+
+    @staticmethod
+    def _bookstein_coords_3d(landmarks, baseline_idx):
+        """3D Bookstein: endpoints -> (+/-0.5, 0, 0); third point into +y of xy-plane."""
+        a, b, c = baseline_idx[0], baseline_idx[1], baseline_idx[2]
+        pts = np.asarray(landmarks, dtype=float)
+        point_a, point_b, point_c = pts[a], pts[b], pts[c]
+        length = np.linalg.norm(point_b - point_a)
+        if length == 0:
+            raise ValueError("Bookstein baseline endpoints coincide (zero length).")
+        mid = (point_a + point_b) / 2.0
+        e1 = (point_b - point_a) / length
+        # Component of the third point orthogonal to the baseline defines +y.
+        offset = point_c - mid
+        w = offset - np.dot(offset, e1) * e1
+        w_norm = np.linalg.norm(w)
+        if w_norm == 0:
+            raise ValueError("Bookstein baseline points are collinear; a 3D baseline must not be collinear.")
+        e2 = w / w_norm
+        e3 = np.cross(e1, e2)
+        basis = np.vstack([e1, e2, e3])
+        transformed = ((pts - mid) / length) @ basis.T
+        return [list(row) for row in transformed]
+
     def resistant_fit_superimposition(self):
         if len(self.object_list) == 0:
             # Was a bare `raise` with no active exception (RuntimeError: No active

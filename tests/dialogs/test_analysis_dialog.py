@@ -143,16 +143,15 @@ class TestNewAnalysisDialogInitialization:
         # Should have 3 methods (language-dependent text)
         assert dialog.comboSuperimposition.count() == 3
 
-    def test_only_procrustes_is_selectable(self, dialog):
-        """Bookstein and Resistant Fit are shown but disabled.
+    def test_resistant_fit_is_disabled(self, dialog):
+        """Procrustes and Bookstein are selectable; Resistant Fit is disabled.
 
-        Only Procrustes is wired into the run path (ModanController always calls
-        procrustes_superimposition), so the other two are greyed out to avoid
-        silently running Procrustes when one of them is picked.
+        Procrustes and Bookstein are wired into the run path; Resistant Fit's
+        implementation is broken, so it is greyed out until reimplemented.
         """
         model = dialog.comboSuperimposition.model()
         assert model.item(0).isEnabled()  # Procrustes
-        assert not model.item(1).isEnabled()  # Bookstein
+        assert model.item(1).isEnabled()  # Bookstein
         assert not model.item(2).isEnabled()  # Resistant Fit
 
     def test_grouping_variables_populated(self, dialog, sample_dataset_with_variables):

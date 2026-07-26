@@ -372,6 +372,35 @@ class TestAnalysisOperations:
         assert not is_valid  # Only 5 objects, need 6 for CVA
         assert "6" in message
 
+    def test_prepare_landmarks_dispatches_to_bookstein(self, mock_database):
+        """superimposition_method routes _prepare_landmarks to Bookstein.
+
+        Bookstein pins the baseline landmarks to (-0.5, 0) / (0.5, 0); Procrustes
+        does not, so the two methods produce visibly different coordinates.
+        """
+        controller = ModanController()
+        dataset = MdModel.MdDataset.create(dataset_name="BKdispatch", dimension=2, landmark_count=3)
+        dataset.baseline = "1,2"  # baseline = first two landmarks
+        dataset.save()
+        for i in range(3):
+            MdModel.MdObject.create(
+                dataset=dataset,
+                object_name=f"o{i}",
+                sequence=i + 1,
+                landmark_str="\n".join([f"{i}.0\t{i}.0", f"{i + 2}.0\t{i}.0", f"{i + 1}.0\t{i + 2}.0"]),
+            )
+        controller.set_current_dataset(dataset)
+
+        _ds_ops, bookstein = controller._prepare_landmarks("Bookstein")
+        for shape in bookstein:
+            assert shape[0] == pytest.approx([-0.5, 0.0])
+            assert shape[1] == pytest.approx([0.5, 0.0])
+
+        _ds_ops2, procrustes = controller._prepare_landmarks("Procrustes")
+        assert len(procrustes) == 3
+        # Procrustes does not pin the baseline to Bookstein's fixed positions.
+        assert procrustes[0][0] != pytest.approx([-0.5, 0.0])
+
     def test_delete_analysis(self, controller_with_data):
         """Test analysis deletion."""
         # Create analysis

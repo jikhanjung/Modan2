@@ -275,11 +275,11 @@ class PreferencesDialog(BaseDialog):
         self.btnResetPastel.setMaximumSize(100, 20)
 
         self.lblColor_list = []
-        for i in range(len(self.m_app.color_list)):
+        for i, color in enumerate(self.m_app.color_list):
             lbl = QPushButton()
             lbl.setMinimumSize(20, 20)
-            lbl.setStyleSheet("background-color: " + self.m_app.color_list[i])
-            lbl.setToolTip(self.m_app.color_list[i])
+            lbl.setStyleSheet("background-color: " + color)
+            lbl.setToolTip(color)
             lbl.setCursor(Qt.PointingHandCursor)
             lbl.setText(str(i + 1))
             self.lblColor_list.append(lbl)
@@ -297,10 +297,10 @@ class PreferencesDialog(BaseDialog):
         self.btnResetMarkers.setMaximumSize(100, 20)
 
         self.comboMarker_list = []
-        for i in range(len(self.m_app.marker_list)):
+        for marker in self.m_app.marker_list:
             combo = QComboBox()
             combo.addItems(mu.MARKER_LIST)
-            combo.setCurrentIndex(mu.MARKER_LIST.index(self.m_app.marker_list[i]))
+            combo.setCurrentIndex(mu.MARKER_LIST.index(marker))
             self.comboMarker_list.append(combo)
             self.gbPlotMarkers.layout().addWidget(combo)
         self.gbPlotMarkers.layout().addWidget(self.btnResetMarkers)
@@ -502,22 +502,22 @@ class PreferencesDialog(BaseDialog):
     def on_btnResetMarkers_clicked(self):
         """Reset markers to default values."""
         self.m_app.marker_list = mu.MARKER_LIST[:]
-        for i in range(len(self.m_app.marker_list)):
-            self.comboMarker_list[i].setCurrentText(self.m_app.marker_list[i])
+        for i, marker in enumerate(self.m_app.marker_list):
+            self.comboMarker_list[i].setCurrentText(marker)
 
     def on_btnResetPastel_clicked(self):
         """Reset colors to pastel palette."""
         self.m_app.color_list = mu.PASTEL_COLOR_LIST[:]
-        for i in range(len(self.m_app.color_list)):
-            self.lblColor_list[i].setStyleSheet("background-color: " + self.m_app.color_list[i])
-            self.lblColor_list[i].setToolTip(self.m_app.color_list[i])
+        for i, color in enumerate(self.m_app.color_list):
+            self.lblColor_list[i].setStyleSheet("background-color: " + color)
+            self.lblColor_list[i].setToolTip(color)
 
     def on_btnResetVivid_clicked(self):
         """Reset colors to vivid palette."""
         self.m_app.color_list = mu.VIVID_COLOR_LIST[:]
-        for i in range(len(self.m_app.color_list)):
-            self.lblColor_list[i].setStyleSheet("background-color: " + self.m_app.color_list[i])
-            self.lblColor_list[i].setToolTip(self.m_app.color_list[i])
+        for i, color in enumerate(self.m_app.color_list):
+            self.lblColor_list[i].setStyleSheet("background-color: " + color)
+            self.lblColor_list[i].setToolTip(color)
 
     def on_lblColor_clicked(self, event, index):
         """Handle color button click.
@@ -695,13 +695,11 @@ class PreferencesDialog(BaseDialog):
             self.toolbar_icon_large = True
 
         # Colors and markers
-        for i in range(len(self.m_app.color_list)):
+        for i, _ in enumerate(self.m_app.color_list):
             self.m_app.color_list[i] = self.m_app.settings.value("DataPointColor/" + str(i), self.default_color_list[i])
 
-        for i in range(len(self.m_app.marker_list)):
-            self.m_app.marker_list[i] = self.m_app.settings.value(
-                "DataPointMarker/" + str(i), self.m_app.marker_list[i]
-            )
+        for i, marker in enumerate(self.m_app.marker_list):
+            self.m_app.marker_list[i] = self.m_app.settings.value("DataPointMarker/" + str(i), marker)
 
         self.m_app.plot_size = self.m_app.settings.value("PlotSize", self.m_app.plot_size)
 
@@ -766,11 +764,11 @@ class PreferencesDialog(BaseDialog):
         self.m_app.settings.setValue("WindowGeometry/RememberGeometry", self.m_app.remember_geometry)
 
         # Save markers and colors
-        for i in range(len(self.m_app.marker_list)):
-            self.m_app.settings.setValue("DataPointMarker/" + str(i), self.m_app.marker_list[i])
+        for i, marker in enumerate(self.m_app.marker_list):
+            self.m_app.settings.setValue("DataPointMarker/" + str(i), marker)
 
-        for i in range(len(self.m_app.color_list)):
-            self.m_app.settings.setValue("DataPointColor/" + str(i), self.m_app.color_list[i])
+        for i, color in enumerate(self.m_app.color_list):
+            self.m_app.settings.setValue("DataPointColor/" + str(i), color)
 
         # Save dialog geometry
         if self.m_app.remember_geometry:

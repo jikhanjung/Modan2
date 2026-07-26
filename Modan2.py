@@ -576,7 +576,6 @@ class ModanMainWindow(QMainWindow):
             if hasattr(self, "actionTogglePreview"):
                 self.actionTogglePreview.setChecked(self.object_overlay_auto_show)
 
-            logger = logging.getLogger(__name__)
             logger.debug(f"READ_SETTINGS - Remember geometry: {self.m_app.remember_geometry}")
             logger.debug(f"READ_SETTINGS - Object overlay auto-show: {self.object_overlay_auto_show}")
 
@@ -601,7 +600,6 @@ class ModanMainWindow(QMainWindow):
         Extracted from ``read_settings``; runs only on the initial (pre-``init_done``)
         pass when ``remember_geometry`` handling applies.
         """
-        logger = logging.getLogger(__name__)
         if self.m_app.remember_geometry:
             geometry_data = self.config.get("ui", {}).get("window_geometry", {})
             logger.debug(f"READ_SETTINGS - Raw geometry data: {geometry_data}")
@@ -699,7 +697,6 @@ class ModanMainWindow(QMainWindow):
         self.m_app.settings.setValue("WindowGeometry/RememberGeometry", self.m_app.remember_geometry)
 
         if self.m_app.remember_geometry:
-            logger = logging.getLogger(__name__)
             current_geometry = self.geometry()
             logger.debug(
                 f"WRITE_SETTINGS - Current window geometry: x={current_geometry.x()}, y={current_geometry.y()}, w={current_geometry.width()}, h={current_geometry.height()}"
@@ -1232,12 +1229,10 @@ class ModanMainWindow(QMainWindow):
                 self.selected_dataset = self.selected_dataset.get_by_id(self.selected_dataset.id)
                 self.dlg.set_parent_dataset(self.selected_dataset)
             except DoesNotExist:
-                logger = logging.getLogger(__name__)
                 logger.error(f"Selected dataset {self.selected_dataset.id} no longer exists")
                 self.selected_dataset = None
                 self.dlg.set_parent_dataset(None)
             except Exception as e:
-                logger = logging.getLogger(__name__)
                 logger.error(f"Error accessing selected dataset: {e}")
                 self.dlg.set_parent_dataset(None)
         else:
@@ -1313,7 +1308,6 @@ class ModanMainWindow(QMainWindow):
     @pyqtSlot()
     def on_action_new_object_triggered(self):
         """Handle new object action using controller"""
-        logger = logging.getLogger(__name__)
         logger.debug(f"selected_dataset = {self.selected_dataset}")
         if not self.selected_dataset:
             return
@@ -1352,7 +1346,6 @@ class ModanMainWindow(QMainWindow):
     @guard_slot("Failed to open object")
     def on_tableView_doubleClicked(self):
         if self.selected_object is None:
-            logger = logging.getLogger(__name__)
             logger.warning("no object selected")
             return
         self.dlg = ObjectDialog(self)
@@ -1596,7 +1589,6 @@ class ModanMainWindow(QMainWindow):
 
     @guard_slot("Failed to import dropped file")
     def tableView_drop_event(self, event):
-        logger = logging.getLogger(__name__)
         logger.debug(f"tableview drop event: {event.mimeData().text()}")
         if self.selected_dataset is None:
             return
@@ -1679,13 +1671,11 @@ class ModanMainWindow(QMainWindow):
         # Check if Shift is pressed
         modifiers = QApplication.queryKeyboardModifiers()
         if bool(modifiers & Qt.ShiftModifier):
-            logger = logging.getLogger(__name__)
             logger.debug("copy cursor")
             # QApplication.restoreOverrideCursor()
             # QApplication.setOverrideCursor(Qt.CrossCursor)
             # QApplication.changeOverrideCursor(self.copy_cursor)
         else:
-            logger = logging.getLogger(__name__)
             logger.debug("move cursor")
             # QApplication.restoreOverrideCursor()
             # QApplication.setOverrideCursor(Qt.ClosedHandCursor)

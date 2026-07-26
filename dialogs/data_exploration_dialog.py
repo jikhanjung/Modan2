@@ -1900,12 +1900,15 @@ class DataExplorationDialog(QDialog):
         self.average_shape = {}
         self.regression_data = {}
         self.data_range = {
-            "x_min": 99999,
-            "x_max": -99999,
-            "y_min": 99999,
-            "y_max": -99999,
-            "z_min": 99999,
-            "z_max": -99999,
+            # Seed min/max accumulators with infinities so the first real value
+            # always wins (a finite seed like 99999 would wrongly cap a larger
+            # coordinate).
+            "x_min": float("inf"),
+            "x_max": float("-inf"),
+            "y_min": float("inf"),
+            "y_max": float("-inf"),
+            "z_min": float("inf"),
+            "z_max": float("-inf"),
             "x_sum": 0,
             "y_sum": 0,
             "z_sum": 0,

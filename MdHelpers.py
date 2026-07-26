@@ -1024,7 +1024,7 @@ def translate_points(points: list[list[float]], translation: list[float]) -> lis
     Returns:
         Translated points
     """
-    return [[point[i] + translation[i] for i in range(len(point))] for point in points]
+    return [[p + t for p, t in zip(point, translation)] for point in points]
 
 
 def center_points(points: list[list[float]]) -> list[list[float]]:

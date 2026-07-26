@@ -326,7 +326,7 @@ def get_timestamp_string(format_str: str = "%Y%m%d_%H%M%S") -> str:
     Returns:
         Formatted timestamp string
     """
-    return datetime.now().strftime(format_str)
+    return datetime.now().astimezone().strftime(format_str)
 
 
 def get_app_data_dir() -> Path:
@@ -539,7 +539,7 @@ def parse_datetime(dt_str: str, format_str: str = "%Y-%m-%d %H:%M:%S") -> dateti
         Datetime object or None if parsing failed
     """
     try:
-        return datetime.strptime(dt_str, format_str)
+        return datetime.strptime(dt_str, format_str)  # noqa: DTZ007 -- format-agnostic parser, naive by design
     except ValueError:
         return None
 
@@ -722,8 +722,8 @@ def get_file_info(file_path: str) -> dict[str, Any]:
             "suffix": path.suffix,
             "size": stat.st_size,
             "size_formatted": format_file_size(stat.st_size),
-            "created": datetime.fromtimestamp(stat.st_ctime),
-            "modified": datetime.fromtimestamp(stat.st_mtime),
+            "created": datetime.fromtimestamp(stat.st_ctime).astimezone(),
+            "modified": datetime.fromtimestamp(stat.st_mtime).astimezone(),
             "is_readable": os.access(file_path, os.R_OK),
             "is_writable": os.access(file_path, os.W_OK),
         }

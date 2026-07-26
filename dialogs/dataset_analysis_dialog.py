@@ -611,7 +611,7 @@ class DatasetAnalysisDialog(QDialog):
         self.show_object_shape()
 
     def on_btnSaveResults_clicked(self):
-        today = datetime.datetime.now()
+        today = datetime.datetime.now().astimezone()
         date_str = today.strftime("%Y%m%d_%H%M%S")
 
         filename_candidate = f"{self.ds_ops.dataset_name}_analysis_{date_str}.xlsx"

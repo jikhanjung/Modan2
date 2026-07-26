@@ -308,7 +308,7 @@ class ExportDatasetDialog(BaseDialog):
             self.ds_ops.procrustes_superimposition()
 
         object_list = self.ds_ops.object_list
-        today = datetime.datetime.now()
+        today = datetime.datetime.now().astimezone()
         date_str = today.strftime("%Y%m%d_%H%M%S")
 
         if self.rbTPS.isChecked():

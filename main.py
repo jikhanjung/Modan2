@@ -87,7 +87,7 @@ def setup_logging(debug: bool = False):
     # Try to get proper log directory, with fallbacks
     from datetime import datetime
 
-    date_str = datetime.now().strftime("%Y%m%d")
+    date_str = datetime.now().astimezone().strftime("%Y%m%d")
     log_filename = f"Modan2.{date_str}.log"
 
     log_file_path = None

@@ -1167,7 +1167,7 @@ class MdImage(Model):
 
         if image_info["date"] == "":
             str1 = time.ctime(os.path.getmtime(fullpath))
-            datetime_object = datetime.datetime.strptime(str1, "%a %b %d %H:%M:%S %Y")
+            datetime_object = datetime.datetime.strptime(str1, "%a %b %d %H:%M:%S %Y").astimezone()
             image_info["date"] = datetime_object.strftime("%Y-%m-%d")
             image_info["time"] = datetime_object.strftime("%H:%M:%S")
         else:
@@ -2664,7 +2664,7 @@ def prepare_database():
     migrations_path = mu.resource_path("migrations")
     logger.info("migrations path: %s", migrations_path)
     logger.info("database path: %s", database_path)
-    now = datetime.datetime.now()
+    now = datetime.datetime.now().astimezone()
     date_str = now.strftime("%Y%m%d")
 
     # backup database file to backup directory. Name the backup after the file

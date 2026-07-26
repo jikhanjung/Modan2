@@ -65,7 +65,7 @@ def get_build_info():
         "version": PROGRAM_VERSION,
         "build_number": "local",
         "build_date": "development",
-        "build_year": datetime.now().year,  # Use current year for development
+        "build_year": datetime.now().astimezone().year,  # Use current year for development
         "platform": sys.platform,
     }
 
@@ -83,7 +83,7 @@ def get_copyright_year():
     if "build_year" in BUILD_INFO:
         return BUILD_INFO["build_year"]
     # Fallback to current year for development environment
-    return datetime.now().year
+    return datetime.now().astimezone().year
 
 
 COPYRIGHT_YEAR = get_copyright_year()
@@ -597,7 +597,7 @@ def serialize_dataset_to_json(dataset_id: int, include_files: bool = True, stora
                     "original_filename": img.original_filename,
                     "size": img.size,
                     "md5hash": img.md5hash,
-                    "last_modified": datetime.fromtimestamp(img.file_modified).isoformat()
+                    "last_modified": datetime.fromtimestamp(img.file_modified).astimezone().isoformat()
                     if img.file_modified
                     else None,
                 }
@@ -611,7 +611,7 @@ def serialize_dataset_to_json(dataset_id: int, include_files: bool = True, stora
                     "original_filename": mdl.original_filename,
                     "size": mdl.size,
                     "md5hash": mdl.md5hash,
-                    "last_modified": datetime.fromtimestamp(mdl.file_modified).isoformat()
+                    "last_modified": datetime.fromtimestamp(mdl.file_modified).astimezone().isoformat()
                     if mdl.file_modified
                     else None,
                 }

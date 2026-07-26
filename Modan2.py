@@ -63,7 +63,7 @@ from dialogs import (
 )
 from MdConstants import ICONS as ICON_CONSTANTS
 from MdConstants import MODE
-from MdHelpers import guard_slot, show_error, show_info, show_warning
+from MdHelpers import guard_slot, show_error, show_warning
 from MdModel import MdAnalysis, MdDataset, MdObject, landmark_position_count
 from ModanComponents import (
     MISSING_COUNT_ROLE,
@@ -420,11 +420,15 @@ class ModanMainWindow(QMainWindow):
         self.controller.analysis_completed.connect(self.on_analysis_completed)
         self.controller.analysis_failed.connect(self.on_analysis_failed)
         self.controller.error_occurred.connect(self.on_controller_error)
+        # The controller is the single source of the info/warning text (with the
+        # dataset name, object counts, etc.); show it transiently in the status
+        # bar rather than a modal popup. Errors stay modal (on_controller_error).
+        self.controller.warning_occurred.connect(self.on_controller_warning)
+        self.controller.info_message.connect(self.on_controller_info)
 
     def on_dataset_created(self, dataset):
         """Handle dataset creation from controller"""
         self.load_dataset()
-        show_info(self, "Dataset created successfully")
 
     def on_dataset_updated(self, dataset):
         """Handle dataset update from controller"""
@@ -441,7 +445,14 @@ class ModanMainWindow(QMainWindow):
     def on_analysis_completed(self, analysis):
         """Handle analysis completion from controller"""
         self.load_dataset()
-        show_info(self, "Analysis completed successfully")
+
+    def on_controller_info(self, message):
+        """Show a transient info message from the controller in the status bar."""
+        self.statusBar.showMessage(message, 5000)
+
+    def on_controller_warning(self, message):
+        """Show a transient warning message from the controller in the status bar."""
+        self.statusBar.showMessage(message, 5000)
 
     def on_analysis_failed(self, error_msg):
         """Handle analysis failure from controller"""

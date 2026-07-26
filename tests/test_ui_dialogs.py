@@ -57,3 +57,19 @@ class TestControllerMessages:
 
             mock_critical.assert_called_once()
             assert "singular matrix" in mock_critical.call_args[0][2]
+
+    def test_info_message_goes_to_the_status_bar(self, qtbot, main_window):
+        main_window.on_controller_info("Imported 5 object(s)")
+        assert main_window.statusBar.currentMessage() == "Imported 5 object(s)"
+
+    def test_warning_goes_to_the_status_bar(self, qtbot, main_window):
+        main_window.on_controller_warning("Another analysis is already running")
+        assert main_window.statusBar.currentMessage() == "Another analysis is already running"
+
+    def test_controller_info_and_warning_signals_are_connected(self, qtbot, main_window):
+        # End to end: emitting the controller signals reaches the status bar,
+        # which is the regression this wiring fixes (they were dropped before).
+        main_window.controller.info_message.emit("Dataset 'Birds' created")
+        assert main_window.statusBar.currentMessage() == "Dataset 'Birds' created"
+        main_window.controller.warning_occurred.emit("Another operation is in progress")
+        assert main_window.statusBar.currentMessage() == "Another operation is in progress"

@@ -1114,7 +1114,8 @@ class ModanController(QObject):
             )
 
         method = (superimposition_method or "Procrustes").strip().lower()
-        method_label = "Bookstein" if method == "bookstein" else "Procrustes"
+        method_labels = {"bookstein": "Bookstein", "resistant fit": "Resistant Fit"}
+        method_label = method_labels.get(method, "Procrustes")
         self.logger.info(f"Found {len(objects_with_landmarks)} objects with landmarks before {method_label}")
 
         self.logger.info(f"Performing {method_label} superimposition")
@@ -1133,10 +1134,13 @@ class ModanController(QObject):
             raise ValueError(unimputable_landmarks_message(unimputable))
 
         ds_ops = MdDatasetOps(self.current_dataset)
-        # Bookstein raises a ValueError with a specific reason (no baseline /
-        # missing landmarks); Procrustes returns False on failure.
+        # Bookstein and Resistant Fit raise a ValueError with a specific reason
+        # (no baseline / 3D / missing landmarks); Procrustes returns False on
+        # failure. Anything unrecognized falls back to Procrustes.
         if method == "bookstein":
             ds_ops.bookstein_superimposition()
+        elif method == "resistant fit":
+            ds_ops.resistant_fit_superimposition()
         elif not ds_ops.procrustes_superimposition():
             raise ValueError("Procrustes superimposition failed")
 

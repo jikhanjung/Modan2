@@ -2334,29 +2334,103 @@ class MdDatasetOps:
         transformed = ((pts - mid) / length) @ basis.T
         return [list(row) for row in transformed]
 
-    def resistant_fit_superimposition(self):
+    def resistant_fit_superimposition(self, max_iterations=100, convergence_threshold=1e-6):
+        """Resistant-fit superimposition (RFTRA; Rohlf & Slice 1990), 2D only.
+
+        Aligns shapes using repeated medians of the pairwise interlandmark scale
+        ratios and rotation angles, plus a median translation, so that a few
+        grossly displaced (outlier) landmarks do not drag the whole fit the way
+        least-squares Procrustes does.
+
+        2D only: a robust 3D resistant fit (generalized resistant fit) is not
+        implemented. Missing landmarks are not supported.
+
+        Returns:
+            True on success.
+
+        Raises:
+            ValueError: no objects, a 3D dataset, or any missing landmark.
+        """
         if len(self.object_list) == 0:
-            # Was a bare `raise` with no active exception (RuntimeError: No active
-            # exception to reraise); raise a meaningful error instead.
-            raise ValueError("No objects to transform")
-
+            raise ValueError("No objects to superimpose")
+        if self.dimension == 3:
+            raise ValueError("Resistant Fit is available for 2D datasets only; use Procrustes for 3D.")
         for mo in self.object_list:
-            mo.move_to_center()
-        average_shape = None
-        previous_average_shape = None
+            if any(c is None for lm in mo.landmark_list for c in lm):
+                raise ValueError("Resistant Fit does not support missing landmarks; use Procrustes.")
 
-        i = 0
-        while True:
-            i += 1
-            # print "iteration: ", i
-            previous_average_shape = average_shape
-            average_shape = self.get_average_shape()
-            average_shape.rescale_to_unitsize()
-            if self.is_same_shape(previous_average_shape, average_shape) and previous_average_shape is not None:
+        # Center each shape and work in numpy (N x 2).
+        shapes = [np.asarray([[lm[0], lm[1]] for lm in mo.landmark_list], dtype=float) for mo in self.object_list]
+        shapes = [s - s.mean(axis=0) for s in shapes]
+
+        # Iterate: align every shape to the current median consensus until it
+        # stops moving (or the iteration cap is hit). A median consensus keeps an
+        # outlier in one shape from pulling the target the others align to.
+        reference = shapes[0].copy()
+        for _ in range(max_iterations):
+            shapes = [self._resistant_align_2d(s, reference) for s in shapes]
+            new_reference = np.median(np.stack(shapes), axis=0)
+            shift = math.sqrt(float(np.sum((new_reference - reference) ** 2)))
+            reference = new_reference
+            if shift < convergence_threshold:
                 break
-            self.set_reference_shape(average_shape)
-            for j in range(len(self.object_list)):
-                self.rotate_resistant_fit_to_reference_shape(j)
+
+        for mo, s in zip(self.object_list, shapes, strict=False):
+            mo.landmark_list = [[float(x), float(y)] for x, y in s]
+        self.reference_shape = self.get_average_shape()
+        return True
+
+    @staticmethod
+    def _resistant_align_2d(target, reference):
+        """Repeated-median resistant alignment of one 2D shape to a reference.
+
+        Estimates scale, rotation, and translation from repeated medians of
+        pairwise landmark relationships (median over j of a per-landmark median),
+        which tolerates a minority of displaced landmarks.
+        """
+        n = len(target)
+
+        # 1. Scale: repeated median of pairwise distance ratios (reference / target).
+        scale_medians = []
+        for i in range(n):
+            ratios = []
+            for j in range(n):
+                if i == j:
+                    continue
+                dt = math.hypot(target[i][0] - target[j][0], target[i][1] - target[j][1])
+                if dt == 0:
+                    continue
+                dr = math.hypot(reference[i][0] - reference[j][0], reference[i][1] - reference[j][1])
+                ratios.append(dr / dt)
+            if ratios:
+                scale_medians.append(np.median(ratios))
+        scale = float(np.median(scale_medians)) if scale_medians else 1.0
+        scaled = target * scale
+
+        # 2. Rotation: repeated median of pairwise angle differences.
+        angle_medians = []
+        for i in range(n):
+            diffs = []
+            for j in range(n):
+                if i == j:
+                    continue
+                vt = scaled[j] - scaled[i]
+                vr = reference[j] - reference[i]
+                if math.hypot(vt[0], vt[1]) == 0 or math.hypot(vr[0], vr[1]) == 0:
+                    continue
+                d = math.atan2(vr[1], vr[0]) - math.atan2(vt[1], vt[0])
+                d = (d + math.pi) % (2 * math.pi) - math.pi  # normalize to (-pi, pi]
+                diffs.append(d)
+            if diffs:
+                angle_medians.append(np.median(diffs))
+        theta = float(np.median(angle_medians)) if angle_medians else 0.0
+        cos_t, sin_t = math.cos(theta), math.sin(theta)
+        rot = np.array([[cos_t, sin_t], [-sin_t, cos_t]])  # row-vector CCW rotation
+        rotated = scaled @ rot
+
+        # 3. Translation: coordinate-wise median offset to the reference.
+        translation = np.median(reference - rotated, axis=0)
+        return rotated + translation
 
     def rotate_vector_2d(self, theta, vec):
         return self.rotate_vector_3d(theta, vec, "Z")
@@ -2388,259 +2462,6 @@ class MdDatasetOps:
         vec[1] = y_rotated
         vec[2] = z_rotated
         return vec
-
-    def rotate_resistant_fit_to_reference_shape(self, object_index):
-        num_obj = len(self.object_list)
-        if num_obj == 0 or num_obj - 1 < object_index:
-            return
-
-        target_shape = self.object_list[object_index]
-        nlandmarks = len(target_shape.landmark_list)
-        # target_shape = np.zeros((nlandmarks,3))
-        reference_shape = self.reference_shape
-
-        # rotation_matrix = self.rotation_matrix( reference_shape, target_shape )
-
-        # rotated_shape = np.transpose( np.dot( rotation_matrix, np.transpose( target_shape ) ) )
-
-        # obtain scale factor using repeated median
-        landmark_count = len(reference_shape.landmark_list)
-        inner_tau_array = []
-        outer_tau_array = []
-        median_index = -1
-        for i in range(landmark_count - 1):
-            for j in range(i + 1, landmark_count):
-                target_distance = math.sqrt(
-                    (target_shape.landmark_list[i][0] - target_shape.landmark_list[j][0]) ** 2
-                    + (target_shape.landmark_list[i][1] - target_shape.landmark_list[j][1]) ** 2
-                    + (target_shape.landmark_list[i][2] - target_shape.landmark_list[j][2]) ** 2
-                )
-                reference_distance = math.sqrt(
-                    (reference_shape.landmark_list[i][0] - reference_shape.landmark_list[j][0]) ** 2
-                    + (reference_shape.landmark_list[i][1] - reference_shape.landmark_list[j][1]) ** 2
-                    + (reference_shape.landmark_list[i][2] - reference_shape.landmark_list[j][2]) ** 2
-                )
-                # Coincident target landmarks give a zero distance; skip that pair
-                # rather than dividing by zero.
-                if target_distance == 0:
-                    continue
-                tau = reference_distance / target_distance
-                inner_tau_array.append(tau)
-                median_index = self.get_median_index(inner_tau_array)
-            #       print median_index
-            # print "tau: ", inner_tau_array
-            outer_tau_array.append(inner_tau_array[median_index])
-            inner_tau_array = []
-        median_index = self.get_median_index(outer_tau_array)
-        # print "tau: ", outer_tau_array
-        tau_final = outer_tau_array[median_index]
-
-        # rescale to scale factor
-        # print "index:", object_index
-        # print "scale factor:", tau_final
-        # target_shape.print_landmarks("before rescale")
-        target_shape.rescale(tau_final)
-        # target_shape.print_landmarks("after rescale")
-        # exit
-
-        # obtain rotation angle using repeated median
-        inner_theta_array = []
-        outer_theta_array = []
-        inner_vector_array = []
-        outer_vector_array = []
-        for i in range(landmark_count - 1):
-            for j in range(i + 1, landmark_count):
-                # get vector
-                target_vector = np.array(
-                    [
-                        target_shape.landmark_list[i][0] - target_shape.landmark_list[j][0],
-                        target_shape.landmark_list[i][1] - target_shape.landmark_list[j][1],
-                        target_shape.landmark_list[i][2] - target_shape.landmark_list[j][2],
-                    ]
-                )
-                reference_vector = np.array(
-                    [
-                        reference_shape.landmark_list[i][0] - reference_shape.landmark_list[j][0],
-                        reference_shape.landmark_list[i][1] - reference_shape.landmark_list[j][1],
-                        reference_shape.landmark_list[i][2] - reference_shape.landmark_list[j][2],
-                    ]
-                )
-                #       cos_val = ( target_vector[0] * reference_vector[0] + \
-                #                   target_vector[1] * reference_vector[1] + \
-                #                   target_vector[2] * reference_vector[2] ) \
-                #                  / \
-                #                  ( math.sqrt( target_vector[0] ** 2 + target_vector[1]**2 + target_vector[2]**2 ) * \
-                #                    math.sqrt( reference_vector[0] ** 2 + reference_vector[1]**2 + reference_vector[2]**2 ) )
-                #        if( cos_val > 1.0 ):
-                #          print "cos_val 1: ", cos_val
-                #          print target_vector
-                #          print reference_vector
-                #          print math.acos( cos_val )
-                #          cos_val = 1.0
-                cos_val = (
-                    np.vdot(target_vector, reference_vector)
-                    / np.linalg.norm(target_vector)
-                    * np.linalg.norm(reference_vector)
-                )
-                #        if( cos_val > 1.0 ):
-                #          print "cos_val 2: ", cos_val
-                #          cos_val = 1.0
-                #        try:
-                #          if( cos_val == 1.0 ):
-                #            theta = 0.0
-                #          else:
-                theta = math.acos(cos_val)
-                #        except ValueError:
-                #          print "acos value error"
-                #          theta = 0.0
-                inner_theta_array.append(theta)
-                inner_vector_array.append(np.array([target_vector, reference_vector]))
-                # print inner_vector_array[-1]
-            median_index = self.get_median_index(inner_theta_array)
-            #      print inner_vector_array[median_index]
-            outer_theta_array.append(inner_theta_array[median_index])
-            outer_vector_array.append(inner_vector_array[median_index])
-            inner_theta_array = []
-            inner_vector_array = []
-        median_index = self.get_median_index(outer_theta_array)
-        # theta_final = outer_theta_array[median_index]
-        vector_final = outer_vector_array[median_index]
-        #    print vector_final
-
-        target_shape = np.zeros((1, 3))
-        reference_shape = np.zeros((1, 3))
-        # print vector_final
-        target_shape[0] = vector_final[0]
-        reference_shape[0] = vector_final[1]
-
-        rotation_matrix = self.get_vector_rotation_matrix(vector_final[1], vector_final[0])
-
-        # rotation_matrix = self.rotation_matrix( reference_shape, target_shape )
-        # print reference_shape
-        # print target_shape
-        # rotated_shape = np.transpose( np.dot( rotation_matrix, np.transpose( target_shape ) ) )
-        # print rotated_shape
-        # exit
-        target_shape = np.zeros((nlandmarks, 3))
-        i = 0
-        for lm in self.object_list[object_index].landmark_list:
-            target_shape[i] = lm
-            i += 1
-
-        reference_shape = np.zeros((nlandmarks, 3))
-        i = 0
-        for lm in self.reference_shape.landmark_list:
-            reference_shape[i] = lm
-            i += 1
-
-        rotated_shape = np.transpose(np.dot(rotation_matrix, np.transpose(target_shape)))
-
-        # print "reference: ", reference_shape[0]
-        # print "target: ", target_shape[0], np.linalg.norm(target_shape[0])
-        # print "rotation: ", rotation_matrix
-        # print "rotated: ", rotated_shape[0], np.linalg.norm(rotated_shape[0])
-        # print "determinant: ", np.linalg.det( rotation_matrix )
-
-        i = 0
-        for lm in self.object_list[object_index].landmark_list:
-            lm = [rotated_shape[i, 0], rotated_shape[i, 1], rotated_shape[i, 2]]
-            i += 1
-        if object_index == 0:
-            pass
-            # self.reference_shape.print_landmarks("ref:")
-            # self.objects[object_index].print_landmarks(str(object_index))
-            # print "reference: ", reference_shape[0]
-            # print "target: ", target_shape[0], np.linalg.norm(target_shape[0])
-            # print "rotation: ", rotation_matrix
-            # print "rotated: ", rotated_shape[0], np.linalg.norm(rotated_shape[0])
-            # print "determinant: ", np.linalg.det( rotation_matrix )
-
-    def get_vector_rotation_matrix(self, ref, target):
-        (x, y, z) = (0, 1, 2)
-        # print ref
-        # print target
-        # print "0 ref", ref
-        # print "0 target", target
-
-        ref_1 = ref
-        ref_1[z] = 0
-        cos_val = ref[x] / math.sqrt(ref[x] ** 2 + ref[z] ** 2)
-        theta1 = math.acos(cos_val)
-        if ref[z] < 0:
-            theta1 = theta1 * -1
-        ref = self.rotate_vector_3d(-1 * theta1, ref, "Y")
-        target = self.rotate_vector_3d(-1 * theta1, target, "Y")
-
-        # print "1 ref", ref
-        # print "1 target", target
-
-        cos_val = ref[x] / math.sqrt(ref[x] ** 2 + ref[y] ** 2)
-        theta2 = math.acos(cos_val)
-        if ref[y] < 0:
-            theta2 = theta2 * -1
-        ref = self.rotate_vector_2d(-1 * theta2, ref)
-        target = self.rotate_vector_2d(-1 * theta2, target)
-
-        # print "2 ref", ref
-        # print "2 target", target
-
-        cos_val = target[x] / math.sqrt(target[x] ** 2 + target[z] ** 2)
-        theta1 = math.acos(cos_val)
-        if target[z] < 0:
-            theta1 = theta1 * -1
-        target = self.rotate_vector_3d(-1 * theta1, target, "Y")
-
-        # print "3 ref", ref
-        # print "3 target", target
-
-        cos_val = target[x] / math.sqrt(target[x] ** 2 + target[y] ** 2)
-        theta2 = math.acos(cos_val)
-        if target[y] < 0:
-            theta2 = theta2 * -1
-        target = self.rotate_vector_2d(-1 * theta2, target)
-
-        # print "4 ref", ref
-        # print "4 target", target
-
-        r_mx1 = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
-        r_mx2 = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
-        # print "shape:", r_mx1.shape
-        # print "r_mx1", r_mx1
-        # print "theta1", theta1
-        # print "cos theta1", math.cos( theta1 )
-        # print "sin theta1", math.sin( theta1 )
-        # print "r_mx2", r_mx2
-        # print "theta2", theta2
-        r_mx1[0][0] = math.cos(theta1)
-        r_mx1[0][2] = math.sin(theta1)
-        r_mx1[2][0] = math.sin(theta1) * -1
-        r_mx1[2][2] = math.cos(theta1)
-
-        # print "r_mx1", r_mx1
-        # print "theta1", theta1
-        # print "r_mx2", r_mx2
-        # print "theta2", theta2
-
-        r_mx2[0][0] = math.cos(theta2)
-        r_mx2[0][1] = math.sin(theta2)
-        r_mx2[1][0] = math.sin(theta2) * -1
-        r_mx2[1][1] = math.cos(theta2)
-
-        # print "r_mx1", r_mx1
-        # print "theta1", theta1
-        # print "r_mx2", r_mx2
-        # print "theta2", theta2
-
-        rotation_matrix = np.dot(r_mx1, r_mx2)
-        return rotation_matrix
-
-    def get_median_index(self, arr):
-        arr.sort()
-        len_arr = len(arr)
-        if len_arr == 0:
-            return -1
-        half_len = int(math.floor(len_arr / 2.0))
-        return half_len
 
 
 class MdAnalysis(Model):

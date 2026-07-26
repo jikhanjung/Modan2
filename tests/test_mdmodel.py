@@ -4671,26 +4671,72 @@ class TestMdObjectOpsGeometryExtras:
 
 
 class TestResistantFitSuperimposition:
-    """Smoke-test the 3D resistant-fit superimposition end to end."""
+    """Dataset-level 2D resistant-fit superimposition (RFTRA, repeated medians)."""
 
-    @pytest.mark.timeout(30)
-    def test_resistant_fit_runs_and_converges(self, test_database):
-        dataset = mm.MdDataset.create(dataset_name="RF", dimension=3)
-        base = [[0.0, 0.0, 0.0], [2.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 2.0]]
-        for k in range(3):
-            obj = mm.MdObject.create(object_name=f"o{k}", dataset=dataset)
-            # Perturb each object slightly so distances stay non-degenerate.
-            obj.landmark_list = [[c + 0.1 * k for c in lm] for lm in base]
-            # MdDatasetOps re-reads objects from the DB, so the landmarks must be
-            # persisted as landmark_str (landmark_list alone does not survive).
+    @staticmethod
+    def _make_2d_dataset(shapes):
+        ds = mm.MdDataset.create(dataset_name="RF", dimension=2)
+        for k, shape in enumerate(shapes):
+            obj = mm.MdObject.create(object_name=f"o{k}", dataset=ds)
+            obj.landmark_list = [list(p) for p in shape]
+            # MdDatasetOps re-reads from the DB, so persist as landmark_str.
             obj.pack_landmark()
             obj.save()
+        return ds
 
-        ds_ops = mm.MdDatasetOps(dataset)
+    @staticmethod
+    def _similarity(shape, scale, deg, tx, ty):
+        th = math.radians(deg)
+        c, s = math.cos(th), math.sin(th)
+        return [[scale * (c * x - s * y) + tx, scale * (s * x + c * y) + ty] for x, y in shape]
+
+    def test_resistant_fit_rejects_3d(self, test_database):
+        ds = mm.MdDataset.create(dataset_name="RF3D", dimension=3)
+        for k in range(2):
+            obj = mm.MdObject.create(object_name=f"o{k}", dataset=ds)
+            obj.landmark_list = [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
+            obj.pack_landmark()
+            obj.save()
+        ds_ops = mm.MdDatasetOps(ds)
+        with pytest.raises(ValueError, match="2D"):
+            ds_ops.resistant_fit_superimposition()
+
+    def test_resistant_fit_rejects_missing_landmarks(self, test_database):
+        ds = self._make_2d_dataset([[[0.0, 0.0], [1.0, 0.0], [0.5, 1.0]], [[0.0, 0.0], [1.0, 0.0], [None, None]]])
+        ds_ops = mm.MdDatasetOps(ds)
+        with pytest.raises(ValueError, match="missing landmarks"):
+            ds_ops.resistant_fit_superimposition()
+
+    def test_resistant_fit_aligns_similar_shapes(self, test_database):
+        base = [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0], [0.5, 2.0]]
+        shapes = [
+            base,
+            self._similarity(base, 1.5, 40, 3.0, -2.0),
+            self._similarity(base, 0.7, -25, -1.0, 4.0),
+        ]
+        ds_ops = mm.MdDatasetOps(self._make_2d_dataset(shapes))
+        assert ds_ops.resistant_fit_superimposition() is True
+
+        aligned = [mo.landmark_list for mo in ds_ops.object_list]
+        # Similarity transforms of one shape coincide landmark-for-landmark once
+        # position, scale, and rotation are removed.
+        for k in range(len(base)):
+            for other in aligned[1:]:
+                assert math.dist(aligned[0][k], other[k]) < 1e-6
+
+    def test_resistant_fit_ignores_an_outlier_landmark(self, test_database):
+        base = [[0.0, 0.0], [2.0, 0.0], [2.0, 1.0], [0.0, 1.0], [1.0, 2.0]]
+        outlier = [list(p) for p in base]
+        outlier[2] = [50.0, -30.0]  # one grossly displaced landmark
+        ds_ops = mm.MdDatasetOps(self._make_2d_dataset([base, base, outlier]))
         ds_ops.resistant_fit_superimposition()
 
-        # Converged to a reference shape with the expected landmark count.
-        assert len(ds_ops.reference_shape.landmark_list) == 4
+        clean0, _clean1, corrupted = (mo.landmark_list for mo in ds_ops.object_list)
+        # The non-outlier landmarks of the corrupted shape still align tightly...
+        for k in (0, 1, 3, 4):
+            assert math.dist(clean0[k], corrupted[k]) < 1e-6
+        # ...while the displaced landmark is left far from where the clean shapes put it.
+        assert math.dist(clean0[2], corrupted[2]) > 1.0
 
 
 class TestBooksteinSuperimposition:

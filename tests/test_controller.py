@@ -401,6 +401,30 @@ class TestAnalysisOperations:
         # Procrustes does not pin the baseline to Bookstein's fixed positions.
         assert procrustes[0][0] != pytest.approx([-0.5, 0.0])
 
+    def test_prepare_landmarks_dispatches_to_resistant_fit(self, mock_database):
+        """superimposition_method routes _prepare_landmarks to Resistant Fit.
+
+        Verified via its 2D-only guard: a 3D dataset makes the Resistant Fit path
+        raise, which the Procrustes path (on the same data) does not.
+        """
+        controller = ModanController()
+        dataset = MdModel.MdDataset.create(dataset_name="RFdispatch", dimension=3, landmark_count=3)
+        dataset.save()
+        for i in range(3):
+            MdModel.MdObject.create(
+                dataset=dataset,
+                object_name=f"o{i}",
+                sequence=i + 1,
+                landmark_str="\n".join([f"{i}.0\t{i}.0\t0.0", f"{i + 1}.0\t{i}.0\t0.0", f"{i}.0\t{i + 1}.0\t0.0"]),
+            )
+        controller.set_current_dataset(dataset)
+
+        with pytest.raises(ValueError, match="2D"):
+            controller._prepare_landmarks("Resistant Fit")
+
+        _ds_ops, shapes = controller._prepare_landmarks("Procrustes")
+        assert len(shapes) == 3
+
     def test_delete_analysis(self, controller_with_data):
         """Test analysis deletion."""
         # Create analysis

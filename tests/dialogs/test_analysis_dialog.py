@@ -143,16 +143,32 @@ class TestNewAnalysisDialogInitialization:
         # Should have 3 methods (language-dependent text)
         assert dialog.comboSuperimposition.count() == 3
 
-    def test_resistant_fit_is_disabled(self, dialog):
-        """Procrustes and Bookstein are selectable; Resistant Fit is disabled.
+    def test_all_methods_enabled_for_2d_dataset(self, dialog):
+        """All three superimposition methods are selectable for a 2D dataset.
 
-        Procrustes and Bookstein are wired into the run path; Resistant Fit's
-        implementation is broken, so it is greyed out until reimplemented.
+        (The sample dataset is 2D; Resistant Fit is 2D-only and is disabled only
+        for 3D datasets.)
         """
         model = dialog.comboSuperimposition.model()
         assert model.item(0).isEnabled()  # Procrustes
         assert model.item(1).isEnabled()  # Bookstein
-        assert not model.item(2).isEnabled()  # Resistant Fit
+        assert model.item(2).isEnabled()  # Resistant Fit (2D)
+
+    def test_resistant_fit_disabled_for_3d_dataset(self, qtbot, mock_parent, mock_database):
+        """Resistant Fit is 2D-only, so it is disabled for a 3D dataset."""
+        ds = MdModel.MdDataset.create(
+            dataset_name="RF3D dialog", dimension=3, landmark_count=3, variablename_list=["ID"]
+        )
+        for i in range(3):
+            obj = MdModel.MdObject.create(dataset=ds, object_name=f"o{i}", sequence=i + 1)
+            obj.landmark_str = "\n".join([f"{j}.0\t{j}.0\t0.0" for j in range(3)])
+            obj.save()
+
+        dlg = NewAnalysisDialog(mock_parent, ds)
+        qtbot.addWidget(dlg)
+        model = dlg.comboSuperimposition.model()
+        assert model.item(1).isEnabled()  # Bookstein still available in 3D
+        assert not model.item(2).isEnabled()  # Resistant Fit disabled in 3D
 
     def test_grouping_variables_populated(self, dialog, sample_dataset_with_variables):
         """Test that grouping variables are populated from dataset."""

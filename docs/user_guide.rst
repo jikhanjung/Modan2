@@ -456,8 +456,8 @@ dataset and can be re-opened later.
 3. In the analysis dialog, set:
 
    - **Analysis name** (a unique name is suggested)
-   - **Superimposition method**: Procrustes or Bookstein (Resistant Fit is listed
-     but currently disabled)
+   - **Superimposition method**: Procrustes, Bookstein, or Resistant Fit
+     (Resistant Fit is available for 2D datasets only)
    - **CVA grouping variable**: the categorical variable that defines groups for CVA
    - **MANOVA grouping variable**: the categorical variable for MANOVA
 
@@ -490,7 +490,10 @@ EM-style refinement loop (see :ref:`analysis-missing-landmarks`).
   (2D: endpoints at (-0.5, 0) and (0.5, 0); 3D uses a 3-point baseline). It
   **requires a baseline** defined on the dataset and **complete landmarks** (no
   missing) — otherwise the run reports a clear error.
-- *Resistant Fit*: listed in the dialog but currently disabled.
+- *Resistant Fit* (RFTRA): a robust alignment that uses repeated medians of
+  pairwise landmark relationships, so a few displaced (outlier) landmarks do not
+  pull the whole fit the way Procrustes can. **2D datasets only**, and requires
+  complete landmarks.
 
 **When Procrustes Runs**:
 

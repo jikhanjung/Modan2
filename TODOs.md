@@ -9,6 +9,37 @@ As of **2026-06-25**, all CRITICAL/HIGH **correctness** items and the HIGH
 
 ---
 
+## 📌 2026-07-26 session — done, and what is left (recorded, not started)
+
+**Done this session** (devlogs 249–259):
+- Parser test coverage `x1y1`/`nts` + fixed the `x1y1` `nlandmarks==0` latent bug (249).
+- Superimposition: fixed the no-op method selector, then **implemented Bookstein**
+  (250–251), **rewrote Resistant Fit** as 2D+3D RFTRA (252–253), and added
+  **missing-landmark imputation** to both (254). All three methods now work in 2D/3D.
+- Controller info/warning messages → status bar (255).
+- ZIP-import rollback removes orphaned media/dirs (256).
+- `@guard_slot` on the two unguarded save slots (257).
+- Ruff **DTZ** adopted (258). Low-risk cleanups: loggers / enumerate / inf sentinels (259).
+
+**Left to do (recorded only — not started):**
+- **Features (large):** 3D semi-landmark curve tracing (2D only today); sliding
+  semi-landmarks during GPA; semi-landmark weighting; image-driven assisted
+  landmark suggestion (§ Semi-landmarks below, items 2/2a/2b).
+- **Ruff phased adoption (R05), remaining groups after DTZ:** PIE/RET (mostly
+  autofix, one PR each) → SIM/PERF/A → S-selective → PTH/G/C901.
+- **MEDIUM/LOW cleanups still open:** in-method import hoisting; `if x==""`→`if not x`;
+  vectorize `MdHelpers` thin helpers; builtin shadowing; redundant `float()`;
+  dead branch `object_dialog.py:~936`; stale commented cruft; hardcoded `qt_version`.
+- **Validation (needs real data — user):** sanity-check missing-landmark imputation
+  on a real dataset; validate live-wire curve quality on real specimen photos.
+- **CI / ops (user action):** set `LOCK_REFRESH_TOKEN` PAT; confirm the frozen-build
+  smoke steps are green on the next release; promote required status checks in
+  GitHub branch protection.
+- **R02 deferred (dead path):** standalone `run_analysis("CVA")`/`("MANOVA")` never
+  persist their result — fix if those entry points are ever revived (see HANDOFF).
+
+---
+
 ## ✅ Batch C — Structural refactor (HIGH) — **COMPLETE** (devlog 176–193)
 
 All four items done (god-method decomposition, shared scatter helpers, dialog I/O →
@@ -128,11 +159,12 @@ Post-0.1.8 review items, in priority order:
       `tests/test_format_encoding.py` (utf-8 / cp949 / arbitrary bytes / BOM,
       plus TPS round-trip with a non-ASCII specimen name).
 
-- [ ] `ModanController` emits `warning_occurred` (2 sites) and `info_message`
-      (7 sites), but `Modan2.py` connects neither, so those messages are
-      dropped. Simply connecting them would double up with the messages
-      `on_dataset_created` and friends already show directly — decide which
-      layer owns user-facing messaging first.
+- [x] `ModanController` emits `warning_occurred` and `info_message`, but
+      `Modan2.py` connected neither, so those messages were dropped.
+      **DONE 2026-07-26** (devlog 255): the controller now owns the info/warning
+      text and it is shown in the status bar (non-modal); the duplicate hardcoded
+      `show_info` modals in `on_dataset_created`/`on_analysis_completed` were
+      removed. Errors stay modal.
 
 ---
 
@@ -229,16 +261,17 @@ Skipped on purpose during the 2026-06-25 pass; revisit only if desired.
 - [ ] In-method imports → hoist to module scope (some are intentional lazy /
       circular-import avoidance — needs per-site judgment)
 - [ ] `if x == "" / x is None` → `if not x` (semantic risk: `0` / `[]` are falsy)
-- [ ] Magic sentinels `99999 / -99999` → `float('inf')` / `min`/`max`
-      (`dialogs/data_exploration_dialog.py:~1695` + twin)
+- [x] Magic sentinels `99999 / -99999` → `float('inf')` — **DONE 2026-07-26**
+      (devlog 259): `data_exploration_dialog` `data_range` min/max seeds. Also
+      fixed the latent bug where a coordinate > 99999 was wrongly clamped.
 - [ ] Vectorize thin helpers in `MdHelpers.py` (centroid/bbox/translate) — not a
       live hotspot, so low priority
 
 ### Partially done (same pattern remains in other files)
-- [ ] Per-method `logger = getLogger(__name__)` recreation — **`Modan2.py` (9 sites)**
-      still to do (done in `MdUtils.py` / `MdModel.py`)
-- [ ] `for i in range(len(...))` → `enumerate`/`zip` — **`MdHelpers.py` (1)** and
-      **`dialogs/preferences_dialog.py` (9)** still to do (done in `MdModel.py`)
+- [x] Per-method `logger = getLogger(__name__)` recreation — **DONE 2026-07-26**
+      (devlog 259): removed 10 sites in `Modan2.py` (same logger as the module's).
+- [x] `for i in range(len(...))` → `enumerate`/`zip` — **DONE 2026-07-26**
+      (devlog 259): `MdHelpers.py` (1) and `dialogs/preferences_dialog.py` (9).
 
 ---
 

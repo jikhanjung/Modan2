@@ -960,6 +960,7 @@ def import_dataset_from_zip(zip_path: str, progress_callback: Callable[[int, int
         if progress_callback:
             progress_callback(curr, total)
 
+        ds = None
         try:
             with gDatabase.atomic():
                 ds = _dataset_from_manifest(data["dataset"])
@@ -982,8 +983,19 @@ def import_dataset_from_zip(zip_path: str, progress_callback: Callable[[int, int
 
             return ds.id
         except Exception:
-            # atomic() rolled back the DB; remove any media already copied into
-            # permanent storage so a failed import leaves nothing orphaned behind.
+            # atomic() rolled back the DB, so the new dataset no longer exists.
+            # Remove its whole storage directory: it holds every media file
+            # copied for this import (all under <storage>/<ds.id>/) plus any
+            # directories created along the way, including a file left partially
+            # written by a copy that failed mid-way and so was never tracked.
+            if ds is not None:
+                storage_dir = os.path.join(_get_storage_dir(), str(ds.id))
+                try:
+                    if os.path.isdir(storage_dir):
+                        shutil.rmtree(storage_dir)
+                except OSError as e:
+                    logger.warning(f"Failed to remove orphaned import directory {storage_dir}: {e}")
+            # Backstop for any tracked file that somehow sits outside that tree.
             for fp in copied_files:
                 try:
                     if os.path.exists(fp):

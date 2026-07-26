@@ -1252,6 +1252,57 @@ class TestDatasetImportFromZip:
         assert new_dataset_id > 0
         assert len(progress_calls) > 0
 
+    def test_failed_import_leaves_no_orphaned_files(self, mock_database, tmp_path, monkeypatch):
+        """A rolled-back ZIP import removes the media it already copied.
+
+        The DB rolls back atomically, but files copied into permanent storage
+        (and the dataset directory created for them) must go too.
+        """
+        from PIL import Image
+
+        storage = tmp_path / "storage"
+        storage.mkdir()
+        monkeypatch.setattr(mu, "_get_storage_dir", lambda: str(storage))
+
+        # Source dataset: two objects, the first carrying an image, exported with
+        # its files so the import has media to copy.
+        src = mm.MdDataset.create(dataset_name="OrphanSrc", dimension=2)
+        img_path = tmp_path / "src.jpg"
+        Image.new("RGB", (20, 20), (10, 20, 30)).save(str(img_path))
+        for i in range(2):
+            obj = mm.MdObject.create(object_name=f"o{i}", dataset=src, sequence=i + 1)
+            obj.landmark_list = [[1.0, 2.0], [3.0, 4.0]]
+            obj.pack_landmark()
+            obj.save()
+            if i == 0:
+                image = mm.MdImage()
+                image.object = obj
+                image.add_file(str(img_path), base_path=str(storage))
+                image.save()
+
+        zip_path = tmp_path / "pkg.zip"
+        mu.create_zip_package(src.id, str(zip_path), include_files=True)
+        before = set(os.listdir(storage))  # just the source dataset's directory
+
+        # Fail on the second object, after the first object's image was copied.
+        real_from_manifest = mu._object_from_manifest
+        calls = {"n": 0}
+
+        def flaky(meta, ds):
+            calls["n"] += 1
+            if calls["n"] == 2:
+                raise RuntimeError("boom")
+            return real_from_manifest(meta, ds)
+
+        monkeypatch.setattr(mu, "_object_from_manifest", flaky)
+
+        with pytest.raises(RuntimeError):
+            mu.import_dataset_from_zip(str(zip_path))
+
+        # No orphaned dataset directory left behind, and nothing persisted.
+        assert set(os.listdir(storage)) == before
+        assert mm.MdDataset.select().where(mm.MdDataset.id != src.id).count() == 0
+
     def test_zip_roundtrip_preserves_missing_landmarks_and_curves(self, mock_database, tmp_path):
         """Missing landmarks and semi-landmark curves survive an export/import.
 

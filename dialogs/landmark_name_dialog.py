@@ -17,6 +17,8 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
 )
 
+from MdHelpers import guard_slot
+
 logger = logging.getLogger(__name__)
 
 
@@ -74,6 +76,7 @@ class LandmarkNameDialog(QDialog):
             )
         return names
 
+    @guard_slot("Failed to save landmark names")
     def accept_names(self):
         if self.dataset is not None:
             self.dataset.set_landmark_names(self.get_names())

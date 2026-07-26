@@ -3,9 +3,11 @@
 import os
 import sys
 import tempfile
+from unittest.mock import patch
 
 import pytest
 from peewee import SqliteDatabase
+from PyQt5.QtWidgets import QMessageBox
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -84,6 +86,19 @@ class TestLandmarkNameDialog:
         dlg.accept_names()
         saved = mm.MdDataset.get_by_id(ds.id).get_landmark_names()
         assert saved[2] == {"name": "S1", "desc": ""}
+
+    def test_accept_names_surfaces_save_error(self, qtbot, test_database, monkeypatch):
+        # A DB failure while saving must surface as an error dialog, not kill the
+        # window silently (@guard_slot on accept_names).
+        ds = mm.MdDataset.create(dataset_name="D", dimension=2)
+        ds.save()
+        dlg = LandmarkNameDialog(None, ds, landmark_count=3)
+        qtbot.addWidget(dlg)
+
+        monkeypatch.setattr(dlg.dataset, "save", lambda: (_ for _ in ()).throw(RuntimeError("db down")))
+        with patch.object(QMessageBox, "critical") as mock_critical:
+            dlg.accept_names()  # does not raise
+            mock_critical.assert_called_once()
 
 
 class TestViewerLandmarkLabel:

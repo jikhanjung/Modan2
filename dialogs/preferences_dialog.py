@@ -25,6 +25,7 @@ from PyQt5.QtWidgets import (
 
 import MdUtils as mu
 from dialogs.base_dialog import BaseDialog
+from MdHelpers import guard_slot
 
 logger = logging.getLogger(__name__)
 
@@ -847,6 +848,7 @@ class PreferencesDialog(BaseDialog):
         self.parent.update_settings()
         event.accept()
 
+    @guard_slot("Failed to save preferences")
     def Okay(self):
         """Save settings and close dialog."""
         self.write_settings()

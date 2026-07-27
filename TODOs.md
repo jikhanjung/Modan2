@@ -88,9 +88,14 @@ entries across devlogs 261–262). `main.py`'s `--db` help was corrected too.
       object_dialog.py`), so it stayed; `build_index.py` now records the
       project-relative `path` alongside it and the search tool reads that.
       **10+ minutes (never finished) → 0.96 s.**
-- [ ] `developer_guide.rst` says `python Modan2.py` (3 sites) and references
-      `Output/Modan2-Setup.exe`; source instructions belong there, but they should
-      name `main.py` and the real installer name.
+- [x] `developer_guide.rst` stale references — **DONE 2026-07-27**. Beyond the
+      `python Modan2.py` sites, the release section told readers to bump the
+      version in `MdUtils.py` (`PROGRAM_VERSION = "0.1.5"`) — it is imported from
+      `version.py`, and `manage_version.py` is the actual tool. The project tree
+      listed `MdLogger.py` (does not exist) and `ModanDialogs.py` (deleted), and
+      the architecture diagram named both plus `modan.db`. All corrected, and the
+      tree I had duplicated under Development Setup was folded back into the one
+      in Project Overview.
 - [ ] **A broken docs build went unnoticed for two days / 6 commits.** `docs.yml`
       is not a required status check, so its failures are invisible. Making it one
       needs branch protection, and `main` currently has **none** — enabling it would
@@ -98,9 +103,9 @@ entries across devlogs 261–262). `main.py`'s `--db` help was corrected too.
       workflow decision, not a config tweak. Partially mitigated in devlog 265:
       `version.py` was added to the `docs.yml` path trigger, closing a gap where a
       version bump would not have rebuilt the docs at all (`conf.py` imports it).
-- [ ] From the same addendum, non-docs items: a `C901` complexity ratchet
-      (`max-complexity = 30` today, lower over time — 12 functions are over 15), and
-      PyOpenGL hidden imports (informational only; Modan2's frozen smoke test passes).
+- [x] From the same addendum: the `C901` ratchet — **DONE 2026-07-27**, set to 19.
+      PyOpenGL hidden imports remain informational only (Modan2's frozen smoke test
+      passes on all three platforms, so the bundle is fine as built).
 
 ---
 

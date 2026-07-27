@@ -19,79 +19,44 @@ Modan2 is a Python desktop application for geometric morphometrics built with:
 .. code-block:: text
 
    Modan2/
-   ├── Modan2.py                    # Main application entry point
-   ├── MdModel.py                   # Database models (Peewee ORM)
-   ├── MdUtils.py                   # Utility functions and constants
-   ├── MdStatistics.py              # Statistical analysis functions
-   ├── MdHelpers.py                 # Helper functions
-   ├── MdConstants.py               # Application constants
-   ├── MdLogger.py                  # Logging utilities
-   ├── MdAppSetup.py                # Application initialization
-   ├── MdSplashScreen.py            # Splash screen widget
-   ├── ModanController.py           # MVC controller
-   ├── ModanDialogs.py              # Legacy dialogs (being phased out)
-   ├── ModanComponents.py           # Legacy components (being phased out)
-   ├── ModanWidgets.py              # Reusable widget utilities
-   ├── build.py                     # PyInstaller build script
-   ├── migrate.py                   # Database migration tool
-   ├── requirements.txt             # Python dependencies
+   ├── main.py               Entry point (--debug, --db, --config, --lang, --no-splash)
+   ├── Modan2.py             ModanMainWindow, imported by main.py
+   ├── ModanController.py    Controller layer: DB/file I/O, analysis runs
+   ├── MdModel.py            Peewee models + Procrustes/superimposition operations
+   ├── MdStatistics.py       PCA, CVA, MANOVA
+   ├── MdUtils.py            Utilities, paths, constants
+   ├── MdHelpers.py          Shared helpers (guard_slot, geometry, …)
+   ├── MdConstants.py        Shared constants
+   ├── MdAppSetup.py         Application initialization
+   ├── MdSplashScreen.py     Splash screen
+   ├── MdLiveWire.py         Edge-following curve tracing
+   ├── build.py              PyInstaller build script
+   ├── migrate.py            Database migration tool
+   ├── version.py            Single source of truth for the version
    │
-   ├── dialogs/                     # Dialog modules (Phase 2+ refactoring)
-   │   ├── __init__.py
-   │   ├── base_dialog.py           # Base dialog class
-   │   ├── analysis_dialog.py       # New analysis dialog
-   │   ├── analysis_result_dialog.py # Analysis results
-   │   ├── calibration_dialog.py    # Image calibration
-   │   ├── data_exploration_dialog.py # Data visualization & exploration
-   │   ├── dataset_analysis_dialog.py # Dataset analysis configuration
-   │   ├── dataset_dialog.py        # Dataset create/edit
-   │   ├── export_dialog.py         # Data export (TPS, Morphologika, JSON+ZIP)
-   │   ├── import_dialog.py         # Data import (TPS, NTS, X1Y1, etc.)
-   │   ├── object_dialog.py         # Object/specimen editor with landmarks
-   │   ├── preferences_dialog.py    # Application preferences
-   │   └── progress_dialog.py       # Progress tracking
+   ├── dialogs/              One module per dialog, all inheriting BaseDialog
+   ├── components/
+   │   ├── formats/          TPS / NTS / X1Y1 / Morphologika readers
+   │   ├── viewers/          ObjectViewer2D, ObjectViewer3D
+   │   └── widgets/          Custom PyQt5 widgets
+   ├── OBJFileLoader/        3D OBJ loading
    │
-   ├── components/                  # Reusable components (Phase 3+ refactoring)
-   │   ├── __init__.py
-   │   ├── formats/                 # File format parsers
-   │   │   ├── tps.py              # TPS format support
-   │   │   ├── nts.py              # NTS format support
-   │   │   ├── x1y1.py             # X1Y1 format support
-   │   │   └── morphologika.py     # Morphologika format support
-   │   ├── viewers/                 # 2D/3D visualization widgets
-   │   │   ├── object_viewer_2d.py # 2D image viewer with landmarks
-   │   │   └── object_viewer_3d.py # 3D model viewer (OpenGL)
-   │   └── widgets/                 # UI widgets
-   │       ├── analysis_info.py     # Analysis info widget
-   │       ├── dataset_ops_viewer.py # Dataset operations viewer
-   │       ├── delegates.py         # Table/tree delegates
-   │       ├── drag_widgets.py      # Drag-and-drop widgets
-   │       ├── overlay_widget.py    # Overlay rendering widget
-   │       ├── pic_button.py        # Picture button widget
-   │       ├── shape_preference.py  # Shape visualization preferences
-   │       └── table_view.py        # Custom table view
-   │
-   ├── OBJFileLoader/               # 3D OBJ file loading
-   │   ├── objloader.py
-   │   └── objviewer.py
-   │
-   ├── tests/                       # Automated tests (pytest)
-   │   ├── conftest.py              # Test fixtures
-   │   ├── test_mdmodel.py          # Database model tests
-   │   ├── test_mdstatistics.py     # Statistical analysis tests
-   │   ├── test_mdutils.py          # Utility function tests
-   │   └── ...                      # Additional test modules
-   │
-   ├── devlog/                      # Development log (142+ sessions)
-   ├── docs/                        # Sphinx documentation
-   ├── icons/                       # Application icons
-   ├── migrations/                  # Database schema migrations
-   ├── benchmarks/                  # Performance benchmarks
-   ├── tools/                       # Development tools & scripts
-   ├── config/                      # Configuration files
-   │   ├── pytest.ini
-   │   └── requirements-dev.txt
-   └── translations/                # i18n translation files
+   ├── tests/                pytest suite
+   ├── migrations/           Database schema migrations
+   ├── tools/                Code index builder and search (dev only)
+   ├── scripts/              Benchmarks and profilers (dev only)
+   ├── benchmarks/           Benchmark output
+   ├── devlog/               Development log
+   ├── docs/                 Repository-only Markdown notes
+   │   └── manual/           This manual (Sphinx, .rst)
+   ├── config/               requirements-dev.txt
+   ├── icons/                Application icons
+   └── translations/         Qt i18n files (.ts / .qm)
+
+``ModanComponents.py`` is a backward-compatibility shim re-exporting
+``components/``; new code should import from ``components.<subpackage>`` and
+``dialogs.<module>`` directly. ``ModanDialogs.py`` no longer exists — every
+dialog has been migrated into ``dialogs/``.
 
 Architecture
 ------------
@@ -114,7 +79,7 @@ Modan2 follows a modified **Model-View-Controller (MVC)** pattern:
                   ├─── Signals/Slots ───┐
                   │                      │
    ┌──────────────▼─────────────┐  ┌────▼──────────────┐
-   │  ModanController           │  │  ModanDialogs     │
+   │  ModanController           │  │  dialogs/         │
    │  - Dataset operations      │  │  - ObjectDialog   │
    │  - Object CRUD             │  │  - AnalysisDialog │
    │  - Analysis coordination   │  │  - Preferences    │
@@ -129,7 +94,7 @@ Modan2 follows a modified **Model-View-Controller (MVC)** pattern:
    │  │MdImage   │  │ MdAnalysis  │            │
    │  └──────────┘  └─────────────┘            │
    │                                             │
-   │  Database: modan.db (SQLite)               │
+   │  Database: Modan2.db (SQLite)              │
    └────────────────────────────────────────────┘
                     │
                     │ Queries
@@ -330,34 +295,6 @@ Installed via ``config/requirements-dev.txt``:
 - ``ruff``: linting and formatting (enforced in CI)
 - ``mypy``: type checking
 - ``pre-commit``: the commit hooks
-
-Project Layout
-~~~~~~~~~~~~~~
-
-.. code-block:: text
-
-   Modan2/
-   ├── main.py               Entry point (--debug, --db, --config, --lang, --no-splash)
-   ├── Modan2.py             ModanMainWindow, imported by main.py
-   ├── ModanController.py    Controller layer: DB/file I/O, analysis runs
-   ├── MdModel.py            Peewee models + Procrustes/superimposition operations
-   ├── MdStatistics.py       PCA, CVA, MANOVA
-   ├── MdUtils.py            Utilities and paths
-   ├── MdHelpers.py          Shared helpers (guard_slot, geometry, …)
-   ├── MdConstants.py        Shared constants
-   ├── dialogs/              One module per dialog
-   ├── components/
-   │   ├── viewers/          ObjectViewer2D, ObjectViewer3D
-   │   ├── widgets/          Custom PyQt5 widgets
-   │   └── formats/          TPS / NTS / X1Y1 / Morphologika readers
-   ├── migrations/           Database migrations
-   ├── tests/                pytest suite
-   ├── docs/manual/          This manual (Sphinx, .rst)
-   └── devlog/               Development log
-
-``ModanComponents.py`` is a backward-compatibility shim re-exporting
-``components/``; new code should import from ``components.<subpackage>`` and
-``dialogs.<module>`` directly.
 
 Code Quality Tools
 ~~~~~~~~~~~~~~~~~~
@@ -860,32 +797,32 @@ InnoSetup Installer (Windows)
 For Windows installers:
 
 1. Install InnoSetup from https://jrsoftware.org/isinfo.php
-2. Build executable: ``python build.py``
-3. Compile installer:
-
-   .. code-block:: bash
-
-      iscc InnoSetup/Modan2.iss
-
-4. Output: ``Output/Modan2-Setup.exe``
+2. Run ``python build.py`` — it builds the executable, fills
+   ``InnoSetup/Modan2.iss.template`` in with the current version and build
+   number, and compiles the installer
+3. Output: ``InnoSetup/Output/Modan2_v<version>_build<build>_Installer.exe``
 
 Creating Releases
 ~~~~~~~~~~~~~~~~~
 
-1. **Update version** in ``MdUtils.py``:
-
-   .. code-block:: python
-
-      PROGRAM_VERSION = "0.1.5"
-
-2. **Update CHANGELOG.md** with release notes
-
-3. **Commit changes**:
+1. **Bump the version.** ``version.py`` is the single source of truth — every
+   other place (the app, ``conf.py``, the installer name) derives from it, and
+   ``tests/test_version_consistency.py`` fails if something hardcodes it
+   instead. Use the helper rather than editing by hand:
 
    .. code-block:: bash
 
-      git commit -am "Release v0.1.5"
-      git tag v0.1.5
+      python manage_version.py patch        # or minor / major
+      python manage_version.py prerelease   # 0.2.0-alpha.2 -> alpha.3
+
+2. **Update CHANGELOG.md** with release notes
+
+3. **Commit and tag**:
+
+   .. code-block:: bash
+
+      git commit -am "Release v<version>"
+      git tag v<version>
       git push origin main --tags
 
 4. **Build executables** for Windows, macOS, Linux

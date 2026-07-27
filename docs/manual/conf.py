@@ -33,10 +33,17 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.todo",
     "sphinx.ext.coverage",
+    # Used only by changelog.rst, to include the repository-root CHANGELOG.md
+    # rather than maintaining a second copy of the release notes here.
+    "myst_parser",
 ]
 
 templates_path = ["_templates"]
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+# myst_parser makes Sphinx treat .md in this directory as documents too, so the
+# project's own README has to be excluded explicitly. The rule stays what
+# docs/README.md states: .rst is what gets published, and Markdown is pulled in
+# only where a file must live outside this directory (the root CHANGELOG.md).
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "README.md"]
 
 # Internationalization (i18n) settings
 locale_dirs = ["locale/"]

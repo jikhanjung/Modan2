@@ -4,5 +4,10 @@ sphinx_rtd_theme>=3.1.0
 sphinx-intl>=2.3.2
 sphinx-autobuild>=2025.8.25
 
+# Only so changelog.rst can pull in the repository-root CHANGELOG.md, which is
+# the single source of truth for release notes. Markdown is still not published
+# from docs/ generally -- see docs/README.md.
+myst-parser>=4.0.0
+
 # conf.py single-sources the version from ../version.py, which imports semver.
 semver>=3.0.0

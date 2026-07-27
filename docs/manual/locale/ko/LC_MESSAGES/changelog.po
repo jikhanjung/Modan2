@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Modan2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-27 17:09+0900\n"
+"POT-Creation-Date: 2026-07-27 18:47+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: ko <LL@li.org>\n"
@@ -19,25 +19,28 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:2
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:1
 msgid "Changelog"
 msgstr "변경 이력"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:4
-msgid "All notable changes to Modan2 are documented here."
-msgstr "Modan2의 모든 주요 변경 사항이 여기에 문서화되어 있습니다."
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:3
+msgid "All notable changes to this project will be documented in this file."
+msgstr "이 프로젝트의 모든 주요 변경 사항을 이 파일에 기록합니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:6
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:5
 msgid ""
-"This project follows `Semantic Versioning "
-"<https://semver.org/spec/v2.0.0.html>`_."
-msgstr "이 프로젝트는 `유의적 버전 관리 <https://semver.org/spec/v2.0.0.html>`_ 를 따릅니다."
+"The format is based on [Keep a "
+"Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres "
+"to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)."
+msgstr ""
+"형식은 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)를 따르며, 이 프로젝트는 "
+"[유의적 버전(Semantic Versioning)](https://semver.org/spec/v2.0.0.html)을 준수합니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:9
-msgid "Version 0.2.0-beta.1 (2026-07-27)"
-msgstr "버전 0.2.0-beta.1 (2026-07-27)"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:11
+msgid "[0.2.0-beta.1] - 2026-07-27"
+msgstr "[0.2.0-beta.1] - 2026-07-27"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:11
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:13
 msgid ""
 "The 0.2 series moves to beta. Superimposition is now complete — all three "
 "methods work in 2D and 3D — and the documentation has been rebuilt against "
@@ -47,27 +50,34 @@ msgstr ""
 "0.2 시리즈가 베타로 넘어갑니다. 중첩정렬이 완성되어 세 가지 방식 모두 2D와 3D에서 동작하며, 오랫동안 갱신되지 않았던 발행 "
 "문서를 애플리케이션에 맞춰 다시 만들었습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:16
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:97
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:120
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:164
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:195
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:253
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:281
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:353
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:17
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:105
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:125
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:169
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:200
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:261
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:330
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:386
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:474
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:531
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:625
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:634
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:641
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:648
 msgid "Added"
 msgstr "추가"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:18
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:18
 msgid ""
 "**Bookstein superimposition.** Shapes are re-expressed as Bookstein shape "
 "coordinates by fixing the dataset's baseline landmarks to a standard "
-"position. Requires a baseline defined on the dataset."
+"position (2D uses the baseline endpoints; 3D uses a 3-point baseline). "
+"Requires a baseline defined on the dataset."
 msgstr ""
-"**북스틴 중첩정렬.** 데이터셋의 베이스라인 랜드마크를 표준 위치에 고정하여 각 형상을 북스틴 형상좌표로 다시 표현합니다. 데이터셋에 "
-"베이스라인이 정의되어 있어야 합니다."
+"**북스틴 중첩정렬.** 데이터셋의 베이스라인 랜드마크를 표준 위치에 고정하여 각 형상을 북스틴 형상좌표로 다시 표현합니다(2D는 "
+"베이스라인 양 끝점, 3D는 3점 베이스라인 사용). 데이터셋에 베이스라인이 정의되어 있어야 합니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:21
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:22
 msgid ""
 "**Resistant Fit superimposition (RFTRA)**, in both 2D and 3D. It aligns "
 "using repeated medians of pairwise landmark relationships, so a few "
@@ -77,115 +87,160 @@ msgstr ""
 "**강건적합 중첩정렬(RFTRA)**, 2D와 3D 모두 지원합니다. 랜드마크 쌍 관계의 반복 중앙값으로 정렬하므로, 몇 개의 이탈 "
 "랜드마크가 프로크루스테스에서처럼 전체 정합을 끌어당기지 않습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:24
-msgid "**Missing landmarks are imputed for Bookstein and Resistant Fit too.**"
-msgstr "**북스틴과 강건적합에서도 결측 랜드마크를 대치합니다.**"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:25
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:25
 msgid ""
-"**A Quick Start page**, a **file format reference**, a **glossary**, and a "
-"section on **calibrating an object** against a known distance."
-msgstr ""
-"**빠른 시작 페이지**, **파일 형식 레퍼런스**, **용어집**, 그리고 알고 있는 거리를 기준으로 **객체를 캘리브레이션** 하는"
-" 절을 추가했습니다."
+"**Missing landmarks are imputed for Bookstein and Resistant Fit too**, using"
+" the same shape-fitting Procrustes already used."
+msgstr "**북스틴과 강건적합에서도 결측 랜드마크를 대치합니다.** 프로크루스테스에서 이미 쓰던 형상 정합 방식을 그대로 사용합니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:29
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:68
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:180
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:217
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:240
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:335
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:421
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:27
+msgid ""
+"**A Quick Start page** and a **file format reference** (TPS, NTS, "
+"Morphologika, X1Y1) in the manual, plus a glossary and a section on "
+"calibrating an object against a known distance."
+msgstr ""
+"매뉴얼에 **빠른 시작 페이지** 와 **파일 형식 레퍼런스**\\ (TPS, NTS, Morphologika, X1Y1)를 추가했고, "
+"용어집과 알고 있는 거리로 객체를 캘리브레이션하는 절도 함께 넣었습니다."
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:31
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:77
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:187
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:225
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:251
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:291
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:338
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:398
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:517
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:589
 msgid "Fixed"
 msgstr "수정"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:31
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:32
 msgid ""
-"**The superimposition method selector did nothing** — choosing Bookstein or "
-"Resistant Fit silently ran Procrustes."
+"**The superimposition method selector did nothing.** Choosing Bookstein or "
+"Resistant Fit silently ran Procrustes. The options were disabled until the "
+"methods were implemented, and are now live."
 msgstr ""
-"**중첩정렬 방식 선택이 아무 동작도 하지 않았습니다** — 북스틴이나 강건적합을 골라도 조용히 프로크루스테스가 실행되었습니다."
+"**중첩정렬 방식 선택이 아무 동작도 하지 않았습니다.** 북스틴이나 강건적합을 골라도 조용히 프로크루스테스가 실행되었습니다. 구현 "
+"전까지는 해당 옵션을 비활성화해 두었고, 이제 실제로 동작합니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:33
-msgid "**NTS and X1Y1 files reported a landmark count of 0.**"
-msgstr "**NTS와 X1Y1 파일의 랜드마크 개수가 0으로 표시되었습니다.**"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:34
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:35
 msgid ""
-"**Information and warning messages from a running analysis were dropped**; "
-"they now appear in the status bar."
-msgstr "**분석 중 발생하는 정보·경고 메시지가 버려지고 있었습니다.** 이제 상태 표시줄에 나타납니다."
+"**NTS and X1Y1 files reported a landmark count of 0.** The count is now "
+"computed correctly, and both parsers have test coverage."
+msgstr ""
+"**NTS와 X1Y1 파일의 랜드마크 개수가 0으로 보고되었습니다.** 이제 올바르게 계산되며, 두 파서 모두 테스트로 커버됩니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:36
-msgid "**A failed dataset-package import left files behind.**"
-msgstr "**데이터셋 패키지 가져오기가 실패하면 파일이 남았습니다.**"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:37
+msgid ""
+"**Information and warning messages from a running analysis were dropped.** "
+"They are shown in the status bar; errors still open a dialog."
+msgstr ""
+"**분석 중 발생하는 정보·경고 메시지가 버려지고 있었습니다.** 이제 상태 표시줄에 표시되며, 오류는 여전히 대화상자로 알립니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:37
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:39
+msgid ""
+"**A failed dataset-package import left files behind.** The rollback now "
+"removes the media and directories it had created."
+msgstr "**데이터셋 패키지 가져오기가 실패하면 파일이 남았습니다.** 이제 롤백이 생성했던 미디어와 디렉터리를 제거합니다."
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:41
 msgid ""
 "**Two save actions could close their window on an error instead of reporting"
 " it** (landmark names, preferences)."
 msgstr "**두 저장 동작이 오류 발생 시 알리지 않고 창을 닫을 수 있었습니다** (랜드마크 이름, 환경 설정)."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:41
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:150
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:172
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:206
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:234
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:268
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:317
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:399
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:44
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:156
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:178
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:212
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:244
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:280
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:366
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:392
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:450
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:504
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:570
 msgid "Changed"
 msgstr "변경"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:43
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:45
 msgid ""
 "Coordinate values above 99999 are no longer clamped when a plot's data range"
 " is computed."
 msgstr "플롯의 데이터 범위를 계산할 때 99999를 넘는 좌표값이 더 이상 잘리지 않습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:45
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:47
 msgid "Python 3.11 is no longer supported; 3.12 is the minimum."
 msgstr "Python 3.11은 더 이상 지원하지 않으며, 최소 버전은 3.12입니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:48
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:49
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:463
 msgid "Documentation"
 msgstr "문서"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:50
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:50
 msgid ""
 "**The documentation site had been stuck 411 commits behind** — every docs "
-"build had failed since 2026-07-24. Fixed, and the site is current again."
+"build had failed since 2026-07-24 for two separate reasons. Fixed, and the "
+"site is current again."
 msgstr ""
-"**문서 사이트가 411 커밋 뒤에 멈춰 있었습니다** — 2026-07-24 이후 모든 문서 빌드가 실패했습니다. 수정했고 사이트는 "
-"다시 최신입니다."
+"**문서 사이트가 411 커밋 뒤에 멈춰 있었습니다** — 2026-07-24 이후 모든 문서 빌드가 서로 다른 두 가지 이유로 "
+"실패했습니다. 수정했고 사이트는 다시 최신입니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:52
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:53
 msgid ""
-"**The manual was checked against the code, page by page.** It documented a "
-"\"Mark as Missing\" flow that does not exist, environment variables and "
-"command-line flags the application never had, keyboard shortcuts that were "
-"never bound, and superimposition methods it does not offer."
+"**The published manual was checked against the code, page by page.** It "
+"documented a \"Mark as Missing\" flow that does not exist, environment "
+"variables and command-line flags the application never had, keyboard "
+"shortcuts that were never bound, and superimposition methods it does not "
+"offer. All corrected."
 msgstr ""
-"**매뉴얼을 코드와 페이지 단위로 대조했습니다.** 존재하지 않는 \"Mark as Missing\" 흐름, 애플리케이션에 없는 환경 "
-"변수와 명령줄 옵션, 연결된 적 없는 키보드 단축키, 제공하지 않는 중첩정렬 방식을 안내하고 있었습니다."
+"**발행된 매뉴얼을 코드와 페이지 단위로 대조했습니다.** 존재하지 않는 \"Mark as Missing\" 흐름, 애플리케이션에 한 "
+"번도 없었던 환경 변수와 명령줄 옵션, 연결된 적 없는 키보드 단축키, 제공하지 않는 중첩정렬 방식을 안내하고 있었습니다. 모두 "
+"바로잡았습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:56
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:57
 msgid ""
-"**Installation instructions now match the actual release files**, and say "
-"plainly that only the Windows build is well tested."
-msgstr "**설치 안내가 실제 릴리스 파일과 일치하며**, 충분히 테스트된 것은 Windows 빌드뿐이라는 점을 명시합니다."
+"**Installation instructions now match the actual release files** — the "
+"version-stamped installer ZIP, DMG and AppImage — and say plainly that only "
+"the Windows build is well tested."
+msgstr ""
+"**설치 안내가 실제 릴리스 파일과 일치합니다** — 버전이 박힌 설치 프로그램 ZIP, DMG, AppImage — 그리고 충분히 "
+"테스트된 것은 Windows 빌드뿐이라는 점을 명시합니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:58
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:60
 msgid ""
-"**The Korean manual is complete**, using the application's own interface "
-"terms."
-msgstr "**한국어 매뉴얼이 완성되었습니다.** 애플리케이션 자체의 인터페이스 용어를 따랐습니다."
+"**The Korean manual is complete.** Every page is translated, using the "
+"application's own Korean interface terms."
+msgstr "**한국어 매뉴얼이 완성되었습니다.** 모든 페이지를 애플리케이션 자체의 한국어 인터페이스 용어로 번역했습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:61
-msgid "Version 0.2.0-alpha.2 (2026-07-24)"
-msgstr "버전 0.2.0-alpha.2 (2026-07-24)"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:62
+msgid ""
+"Documentation moved to `docs/manual/`, so what is published is unambiguous; "
+"`docs/*.md` is now repository-only developer notes."
+msgstr ""
+"문서를 `docs/manual/` 로 옮겨 무엇이 발행되는지 명확해졌습니다. `docs/*.md` 는 이제 저장소 전용 개발 노트입니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:63
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:65
+msgid "Internal"
+msgstr "내부"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:66
+msgid ""
+"Ruff gained PIE, RET, SIM, PERF, A and G, and cyclomatic complexity is now "
+"enforced as a ratchet. Adopting them surfaced several real defects, "
+"including a test that asserted nothing and a function that returned a dict "
+"or None depending on which branch it took."
+msgstr ""
+"Ruff에 PIE, RET, SIM, PERF, A, G를 추가했고 순환 복잡도를 래칫으로 강제합니다. 도입 과정에서 실제 결함 여러 "
+"건이 드러났습니다 — 아무것도 검증하지 않던 테스트, 분기에 따라 dict 또는 None을 반환하던 함수 등."
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:71
+msgid "[0.2.0-alpha.2] - 2026-07-24"
+msgstr "[0.2.0-alpha.2] - 2026-07-24"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:73
 msgid ""
 "A hardening release for the 0.2 alpha: several data-loss and crash fixes "
 "found by a file-I/O/security audit and by fuzzing, plus a large internal "
@@ -195,37 +250,36 @@ msgstr ""
 "0.2 알파의 안정화 릴리스입니다. 파일 I/O·보안 감사와 퍼징으로 발견한 데이터 손실 및 크래시 문제를 여러 건 수정했고, 내부 품질"
 " 작업(크로스 플랫폼 CI, 타입 검사, 복잡도 리팩터링)을 대폭 진행했습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:70
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:78
 msgid ""
 "**Semi-landmark curves are no longer lost on ZIP export/import.** A dataset "
-"packaged to ``.zip`` and re-imported dropped its curve scheme and every "
-"traced curve; the package format now carries them (manifest schema 1.2, "
-"older packages still import)."
+"packaged to `.zip` and re-imported dropped its curve scheme and every traced"
+" curve; the package format now carries them (manifest schema 1.2, older "
+"packages still import)."
 msgstr ""
-"**ZIP 내보내기/가져오기에서 준랜드마크 곡선이 더 이상 사라지지 않습니다.** ``.zip`` 으로 묶은 데이터셋을 다시 가져오면 "
-"곡선 구성과 추적한 모든 곡선이 사라졌습니다. 이제 패키지 형식이 이를 함께 담습니다(매니페스트 스키마 1.2, 이전 패키지도 계속 "
-"가져올 수 있습니다)."
+"**ZIP 내보내기/가져오기에서 준랜드마크 곡선이 더 이상 사라지지 않습니다.** `.zip` 으로 묶은 데이터셋을 다시 가져오면 곡선 "
+"구성과 추적한 모든 곡선이 사라졌습니다. 이제 패키지 형식이 이를 함께 담습니다(매니페스트 스키마 1.2, 이전 패키지도 계속 가져올 수"
+" 있습니다)."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:74
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:82
 msgid ""
-"**Polygons are no longer dropped when importing a file** (a Morphologika "
-"file with a ``[polygons]`` block imported with no polygons)."
+"**Polygons are no longer dropped when importing a file.** A Morphologika "
+"file with a `[polygons]` block imported with no polygons."
 msgstr ""
-"**파일을 가져올 때 폴리곤이 더 이상 누락되지 않습니다** (``[polygons]`` 블록이 있는 Morphologika 파일이 "
-"폴리곤 없이 들어왔습니다)."
+"**파일을 가져올 때 폴리곤이 더 이상 누락되지 않습니다.** `[polygons]` 블록이 있는 Morphologika 파일이 폴리곤 "
+"없이 들어왔습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:76
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:84
 msgid ""
 "**Missing landmarks survive ZIP round-trips correctly**, stored with the "
-"app's \"Missing\" marker instead of the string ``None``."
-msgstr ""
-"**결측 랜드마크가 ZIP 왕복에서 올바르게 보존됩니다.** 문자열 ``None`` 대신 앱의 \"Missing\" 표시로 저장됩니다."
+"app's \"Missing\" marker instead of the string \"None\"."
+msgstr "**결측 랜드마크가 ZIP 왕복에서 올바르게 보존됩니다.** 문자열 \"None\" 대신 앱의 \"Missing\" 표시로 저장됩니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:78
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:86
 msgid "**NTS files now report the correct landmark count** (it was always 0)."
 msgstr "**NTS 파일의 랜드마크 개수가 올바르게 표시됩니다** (항상 0이었습니다)."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:79
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:87
 msgid ""
 "**Korean (and other non-Latin) chart text renders instead of showing "
 "boxes**, via a per-glyph font fallback built from the fonts installed on the"
@@ -234,66 +288,72 @@ msgstr ""
 "**한국어(및 기타 비라틴 문자) 차트 텍스트가 네모 상자 대신 정상적으로 표시됩니다.** 시스템에 설치된 폰트로부터 글리프 단위 대체 "
 "폰트를 구성해 해결했습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:81
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:89
 msgid ""
 "**Landmark file readers tolerate non-ASCII specimen names on any locale** "
-"(e.g. cp949 files on a UTF-8 system and vice-versa)."
+"(e.g. cp949 files on a UTF-8 system and vice-versa), including a second set "
+"of readers the earlier fix had missed."
 msgstr ""
-"**랜드마크 파일 리더가 어떤 로케일에서도 비ASCII 표본 이름을 처리합니다** (예: UTF-8 시스템에서의 cp949 파일, 그 "
-"반대의 경우도)."
+"**랜드마크 파일 리더가 어떤 로케일에서도 비ASCII 표본 이름을 처리합니다**\\ (예: UTF-8 시스템의 cp949 파일, 그 "
+"반대도). 앞선 수정이 놓쳤던 두 번째 리더 묶음까지 포함합니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:83
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:92
 msgid ""
-"**A malformed input file no longer crashes a reader** (fuzzing surfaced a "
-"Morphologika crash on a bare ``[``; parsers now fail with a clear error)."
+"**A malformed input file no longer crashes a reader** — fuzzing surfaced a "
+"Morphologika crash on a bare `[`; parsers now fail with a clear error."
 msgstr ""
-"**잘못된 형식의 입력 파일이 더 이상 리더를 죽이지 않습니다** (퍼징으로 대괄호 ``[`` 하나만 있는 Morphologika "
-"파일에서의 크래시를 발견했으며, 이제 파서가 명확한 오류로 실패합니다)."
+"**잘못된 형식의 입력 파일이 더 이상 리더를 죽이지 않습니다** — 퍼징으로 대괄호 `[` 하나만 있는 Morphologika "
+"파일에서의 크래시를 발견했으며, 이제 파서가 명확한 오류로 실패합니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:85
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:94
 msgid ""
 "**Data Exploration no longer crashes when an analysis has fewer components "
-"than the selected axis** (e.g. a 3rd axis on a 2-component PCA)."
+"than the selected axis** (a scatter plot with a 3rd axis on a 2-component "
+"PCA)."
 msgstr ""
-"**선택한 축보다 성분 수가 적은 분석에서 데이터 탐색이 더 이상 죽지 않습니다** (예: 2성분 PCA에서 3번째 축을 선택한 경우)."
+"**선택한 축보다 성분 수가 적은 분석에서 데이터 탐색이 더 이상 죽지 않습니다**\\ (2성분 PCA에서 3번째 축을 지정한 산점도)."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:87
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:96
 msgid ""
-"**A requested CVA/MANOVA that fails is reported**, instead of claiming "
-"success while silently saving nothing."
+"**A requested CVA/MANOVA that fails is reported to you**, instead of the "
+"analysis claiming success while silently saving nothing."
 msgstr ""
-"**요청한 CVA/MANOVA가 실패하면 실패를 알려줍니다.** 이전에는 성공했다고 하면서 실제로는 아무것도 저장하지 않았습니다."
+"**요청한 CVA/MANOVA가 실패하면 사용자에게 알립니다.** 이전에는 분석이 성공했다고 하면서 실제로는 아무것도 저장하지 "
+"않았습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:89
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:98
 msgid ""
 "**Saving an object is now atomic** — a failure while attaching its image/3D "
 "model can no longer leave a half-written object."
 msgstr ""
 "**객체 저장이 이제 원자적으로 이루어집니다.** 이미지/3D 모델을 붙이는 중 실패해도 절반만 기록된 객체가 남지 않습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:91
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:100
 msgid ""
 "**More dialog actions surface errors instead of silently closing the "
-"window**, with a global crash handler as a backstop."
-msgstr "**더 많은 대화상자 동작이 창을 조용히 닫는 대신 오류를 표시합니다.** 최후의 보루로 전역 크래시 핸들러도 추가했습니다."
+"window** (expanded the guarded-slot coverage), with a global crash handler "
+"as a backstop."
+msgstr ""
+"**더 많은 대화상자 동작이 창을 조용히 닫는 대신 오류를 표시합니다**\\ (guarded-slot 적용 범위 확대). 최후의 보루로 "
+"전역 크래시 핸들러도 두었습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:93
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:102
 msgid ""
 "Importing a crafted dataset package can no longer copy files from outside "
 "the package (path-traversal hardening)."
 msgstr "조작된 데이터셋 패키지를 가져와도 패키지 바깥의 파일을 복사할 수 없습니다(경로 탈출 방어 강화)."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:99
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:106
 msgid ""
-"**Export semi-landmark curves to TPS** (``CURVES=``), symmetric to the "
+"**Export semi-landmark curves to TPS** (`CURVES=`), symmetric to the "
 "existing import."
-msgstr "**준랜드마크 곡선을 TPS로 내보내기** (``CURVES=``). 기존의 가져오기와 대칭됩니다."
+msgstr "**준랜드마크 곡선을 TPS로 내보내기**\\ (`CURVES=`). 기존의 가져오기와 대칭됩니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:103
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:109
 msgid "Changed / Internal"
 msgstr "변경 / 내부"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:105
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:110
 msgid ""
 "Cross-platform CI (Linux/Windows/macOS) with an import smoke test; linting, "
 "formatting, type-checking (mypy), a dependency CVE scan, and a coverage "
@@ -302,19 +362,24 @@ msgstr ""
 "크로스 플랫폼 CI(Linux/Windows/macOS)와 임포트 스모크 테스트를 도입했고, 린팅·포매팅·타입 검사(mypy)·의존성 "
 "CVE 검사·커버리지 하한을 강제합니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:108
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:113
 msgid ""
 "A complexity-refactoring campaign brought the worst application function "
 "from a cyclomatic complexity of 56 down to 21, with characterization tests "
-"added for the viewers."
+"added for the viewers; this surfaced and fixed several of the bugs above."
 msgstr ""
-"복잡도 리팩터링 작업으로 애플리케이션 함수 중 최악의 복잡도를 56에서 21로 낮췄으며, 뷰어에 대한 특성화 테스트를 추가했습니다."
+"복잡도 리팩터링 작업으로 애플리케이션 함수 중 최악의 순환 복잡도를 56에서 21로 낮췄고, 뷰어에 특성화 테스트를 추가했습니다. 이 "
+"과정에서 위 버그 여러 건이 드러나 함께 수정되었습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:113
-msgid "Version 0.2.0-alpha.1 (2026-07-23)"
-msgstr "버전 0.2.0-alpha.1 (2026-07-23)"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:116
+msgid "Added `docs/CODE_QUALITY_GUIDE.md`."
+msgstr "`docs/CODE_QUALITY_GUIDE.md` 를 추가했습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:115
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:119
+msgid "[0.2.0-alpha.1] - 2026-07-23"
+msgstr "[0.2.0-alpha.1] - 2026-07-23"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:121
 msgid ""
 "Semi-landmark curves: trace a curve on a specimen and have it resampled into"
 " evenly-spaced semi-landmarks for analysis, with edge-snapping auto-"
@@ -323,7 +388,7 @@ msgstr ""
 "준랜드마크 곡선: 표본 위에 곡선을 추적하면 분석용으로 균등한 간격의 준랜드마크로 재표본화되며, 경계 스냅 자동 검출을 지원합니다. "
 "0.2 시리즈의 첫 알파입니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:122
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:126
 msgid ""
 "**Semi-landmark curves.** Define curves for a dataset — how many semi-"
 "landmarks each carries — then trace them on each specimen. The traced curve "
@@ -339,37 +404,42 @@ msgstr ""
 "위치와 인덱스를 그대로 유지하고 준랜드마크가 그 뒤에 이어집니다. 추적한 원본 경로는 표본과 함께 보관되므로 언제든 다시 추적하거나 "
 "개수를 바꿀 수 있습니다. 고정 랜드마크 없이 준랜드마크만으로 데이터셋을 분석할 수도 있습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:129
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:134
 msgid ""
 "**Snap to curve — edge auto-detection.** While tracing, the curve snaps to "
 "the strongest image edge between your clicks (a \"live-wire\"), so a clean "
-"outline needs only a few clicks. On by default in curve mode; uncheck **Snap"
-" to curve** for a plain hand trace. Enter accepts the trace, Esc cancels."
+"outline needs only a few clicks: start and end for a gentle curve, a couple "
+"of points in between for a sharp one. On by default in curve mode; uncheck "
+"**Snap to curve** for a plain hand trace. Enter accepts the trace, Esc "
+"cancels."
 msgstr ""
 "**곡선에 스냅 — 경계 자동 검출.** 추적하는 동안 곡선이 클릭한 점들 사이에서 이미지의 가장 강한 경계를 "
-"따라갑니다(\"라이브와이어\"). 덕분에 깔끔한 윤곽선을 몇 번의 클릭만으로 얻을 수 있습니다. 곡선 모드에서 기본으로 켜져 있으며, "
-"손으로 그대로 그리려면 **Snap to curve** 체크를 해제하세요. Enter로 추적을 확정하고 Esc로 취소합니다."
+"따라갑니다(\"라이브와이어\"). 덕분에 깔끔한 윤곽선을 몇 번의 클릭만으로 얻을 수 있습니다 — 완만한 곡선은 시작점과 끝점만, 급하게"
+" 꺾이는 곡선은 중간에 점 몇 개를 더 찍으면 됩니다. 곡선 모드에서 기본으로 켜져 있으며, 손으로 그대로 그리려면 **Snap to "
+"curve** 체크를 해제하세요. Enter로 확정하고 Esc로 취소합니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:133
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:139
 msgid ""
-"**Smooth curve.** Snapped traces are smoothed to remove the pixel staircase,"
-" so the semi-landmarks sit on a clean curve while the points you clicked "
-"stay put. Toggle with the **Smooth curve** checkbox."
+"**Smooth curve.** Snapped traces are smoothed to remove the pixel staircase "
+"so the semi-landmarks sit on a clean curve, while the points you clicked "
+"stay put. Toggle it with the **Smooth curve** checkbox."
 msgstr ""
-"**곡선 부드럽게.** 스냅된 추적선은 픽셀 계단 현상을 없애도록 다듬어져, 사용자가 클릭한 점은 그대로 둔 채 준랜드마크가 매끄러운 "
-"곡선 위에 놓입니다. **Smooth curve** 체크박스로 켜고 끕니다."
+"**곡선 부드럽게.** 스냅된 추적선은 픽셀 계단 현상을 없애도록 다듬어져 준랜드마크가 매끄러운 곡선 위에 놓이며, 사용자가 클릭한 점은"
+" 그대로 유지됩니다. **Smooth curve** 체크박스로 켜고 끕니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:136
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:142
 msgid ""
 "**Edit a traced curve.** Select a curve to adjust it — drag a point, click "
-"the line to add one, right-click to delete a point or the whole curve. "
-"Snapped curves are edited by their clicked anchors and re-snap to the edge "
-"live as you drag."
+"the line to add one, and right-click to delete a point or the whole curve "
+"(deleting a curve also works by right-clicking it in landmark mode). Snapped"
+" curves are edited by their clicked anchors and re-snap to the edge live as "
+"you drag. The selected curve is drawn thicker with square anchor handles."
 msgstr ""
 "**추적한 곡선 편집.** 곡선을 선택해 조정할 수 있습니다 — 점을 드래그해 옮기고, 선을 클릭해 점을 추가하며, 오른쪽 클릭으로 "
-"점이나 곡선 전체를 삭제합니다. 스냅된 곡선은 클릭했던 앵커로 편집하며, 드래그하는 동안 경계에 실시간으로 다시 스냅됩니다."
+"점이나 곡선 전체를 삭제합니다(랜드마크 모드에서 곡선을 오른쪽 클릭해도 삭제됩니다). 스냅된 곡선은 클릭했던 앵커로 편집하며, 드래그하는"
+" 동안 경계에 실시간으로 다시 스냅됩니다. 선택된 곡선은 더 굵게, 사각형 앵커 핸들과 함께 그려집니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:140
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:147
 msgid ""
 "**Dataset-wide landmark names.** Give each landmark a name/abbreviation and "
 "a description at the dataset level; the viewer shows the name instead of the"
@@ -378,844 +448,1806 @@ msgstr ""
 "**데이터셋 전체에 적용되는 랜드마크 이름.** 각 랜드마크에 데이터셋 수준에서 이름/약어와 설명을 지정할 수 있습니다. 디지타이징 중 "
 "뷰어가 인덱스 대신 이름을 표시하고, 설명은 툴팁으로 나타납니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:143
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:150
 msgid ""
 "**\"Show Expected\" digitizing aid (2D).** Once two landmarks are placed on "
 "a new specimen, the remaining positions are predicted from the dataset mean "
-"shape and shown as a guide."
+"shape and shown as a guide so you know roughly where each one goes."
 msgstr ""
-"**\"Show Expected\" 디지타이징 보조 기능 (2D).** 새 표본에 랜드마크를 두 개 배치하면 나머지 위치를 데이터셋 평균"
-" 형상에서 예측해 안내선으로 보여줍니다."
+"**\"Show Expected\" 디지타이징 보조 기능(2D).** 새 표본에 랜드마크를 두 개 배치하면 나머지 위치를 데이터셋 평균 "
+"형상에서 예측해 안내선으로 보여 주므로, 각 랜드마크가 대략 어디쯤인지 알 수 있습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:146
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:153
 msgid ""
-"**Import curves from TPS.** ``CURVES=`` blocks in TPS files are read in as "
+"**Import curves from TPS.** `CURVES=` blocks in TPS files are read in as "
 "semi-landmark curves."
-msgstr "**TPS에서 곡선 가져오기.** TPS 파일의 ``CURVES=`` 블록을 준랜드마크 곡선으로 읽어들입니다."
+msgstr "**TPS에서 곡선 가져오기.** TPS 파일의 `CURVES=` 블록을 준랜드마크 곡선으로 읽어들입니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:152
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:157
 msgid ""
 "**The dataset dialog is organized into tabs**, and gains tables for dataset-"
 "wide landmark names and the curve scheme."
 msgstr "**데이터셋 대화상자가 탭으로 구성되었으며**, 데이터셋 전체 랜드마크 이름과 곡선 구성을 위한 표가 추가되었습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:154
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:159
 msgid ""
 "**The object list shows an \"LM Count\" column and a \"Curve\" column**, and"
 " refreshes on Save/Next/Previous while keeping your selection."
 msgstr "**객체 목록에 \"LM Count\" 열과 \"Curve\" 열이 표시되며**, 저장/다음/이전 시 선택 상태를 유지한 채 갱신됩니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:158
-msgid "Version 0.1.12 (2026-07-21)"
-msgstr "버전 0.1.12 (2026-07-21)"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:164
+msgid "[0.1.12] - 2026-07-21"
+msgstr "[0.1.12] - 2026-07-21"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:160
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:166
 msgid ""
 "Legend arrangement in Data Exploration, a sharper 2D viewer, and a complete "
 "Korean interface."
 msgstr "데이터 탐색의 범례 배치, 더 선명해진 2D 뷰어, 그리고 완전한 한국어 인터페이스."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:166
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:170
 msgid ""
 "**Arrange the legend in Data Exploration.** With the legend shown, a "
 "**Movable** checkbox lets you drag it wherever it suits the plot, and "
 "**Order...** opens a list you can drag entries into the order you want (with"
-" A-Z / Z-A shortcuts). Both the order and the position are remembered per "
-"grouping variable."
+" A-Z / Z-A shortcuts). Entries used to appear in whatever order specimens "
+"happened to sit in the dataset. Both the order and the position are "
+"remembered per grouping variable and restored the next time you open the "
+"analysis."
 msgstr ""
-"**데이터 탐색에서 범례 배치.** 범례를 표시한 상태에서 **Movable** 체크박스로 원하는 위치에 끌어다 놓을 수 있고, "
-"**Order...** 를 열면 항목을 원하는 순서로 드래그해 정렬할 수 있습니다(A-Z / Z-A 단축 버튼 포함). 순서와 위치 모두"
-" 그룹화 변수별로 기억됩니다."
+"**데이터 탐색에서 범례 배치.** 범례를 표시한 상태에서 **Movable** 체크박스로 플롯에 맞는 위치로 끌어다 놓을 수 있고, "
+"**Order...** 를 열면 항목을 원하는 순서로 드래그해 정렬할 수 있습니다(A-Z / Z-A 단축 버튼 포함). 이전에는 표본이 "
+"데이터셋에 들어 있는 순서 그대로 나열되었습니다. 순서와 위치 모두 그룹화 변수별로 기억되어 다음에 분석을 열 때 복원됩니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:174
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:179
 msgid ""
 "**The 2D viewer scales images more smoothly**, so zooming and fitting no "
-"longer show jagged edges while placing landmarks."
+"longer show the jagged edges that made fine detail harder to read while "
+"placing landmarks."
 msgstr ""
-"**2D 뷰어가 이미지를 더 매끄럽게 확대·축소합니다.** 랜드마크를 배치하는 동안 확대나 맞춤에서 계단 현상이 더 이상 보이지 "
-"않습니다."
+"**2D 뷰어가 이미지를 더 매끄럽게 확대·축소합니다.** 확대나 맞춤에서 계단 현상이 사라져, 랜드마크를 배치할 때 세부를 읽기 "
+"쉬워졌습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:176
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:182
 msgid ""
-"**The Korean interface is fully translated** (strings added over several "
-"releases had never been picked up)."
-msgstr "**한국어 인터페이스가 완전히 번역되었습니다** (여러 릴리스에 걸쳐 추가된 문자열이 한 번도 반영되지 않았습니다)."
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:182
-msgid ""
-"**A failure during startup now says what went wrong.** The message was "
-"hidden behind the splash screen; the splash now closes first and the message"
-" points at the log file."
+"**The Korean interface is fully translated.** Strings added over several "
+"releases had never been picked up, so parts of the UI stayed in English — "
+"including some that had a translation but were being skipped when the "
+"translation file was built."
 msgstr ""
-"**시작 중 실패하면 무엇이 잘못되었는지 알려줍니다.** 이전에는 메시지가 스플래시 화면에 가려져 있었습니다. 이제 스플래시가 먼저 "
-"닫히고 메시지가 로그 파일 위치를 알려줍니다."
+"**한국어 인터페이스가 완전히 번역되었습니다.** 여러 릴리스에 걸쳐 추가된 문자열이 한 번도 반영되지 않아 UI 일부가 영어로 남아 "
+"있었습니다 — 번역이 있는데도 번역 파일을 빌드할 때 누락되던 것들도 포함됩니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:185
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:188
 msgid ""
-"**``--db`` now opens the database you name** (the option was accepted and "
-"then ignored)."
-msgstr "**``--db`` 가 지정한 데이터베이스를 실제로 엽니다** (옵션을 받아들이고는 무시했습니다)."
+"**A failure during startup now says what went wrong.** The error was being "
+"reported behind the splash screen, which stays on top, so all you could see "
+"was a splash frozen on the step that failed. The splash now closes first and"
+" the message points at the log file."
+msgstr ""
+"**시작 중 실패하면 무엇이 잘못되었는지 알려줍니다.** 오류가 항상 위에 떠 있는 스플래시 화면 뒤에서 보고되어, 실패한 단계에서 멈춘"
+" 스플래시만 보였습니다. 이제 스플래시가 먼저 닫히고 메시지가 로그 파일 위치를 알려줍니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:189
-msgid "Version 0.1.8 (2026-07-21)"
-msgstr "버전 0.1.8 (2026-07-21)"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:192
+msgid ""
+"**`--db` now opens the database you name.** The option was accepted and then"
+" ignored, so the default database was always used."
+msgstr ""
+"**`--db` 가 지정한 데이터베이스를 실제로 엽니다.** 옵션을 받아들이고는 무시해 항상 기본 데이터베이스가 사용되었습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:191
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:195
+msgid "[0.1.8] - 2026-07-21"
+msgstr "[0.1.8] - 2026-07-21"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:197
 msgid ""
 "Better handling of large images, much more accurate missing-landmark "
 "estimation, and fixes for memory that was never released."
 msgstr "큰 이미지 처리 개선, 훨씬 정확해진 결측 랜드마크 추정, 그리고 해제되지 않던 메모리 문제 수정."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:197
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:201
 msgid ""
 "**Oversized images are downscaled when attached.** Photos whose longer side "
 "exceeds 2560 px are stored as a smaller working copy (used for landmarking),"
-" while the pristine original is archived alongside it. No image data is "
+" while the pristine original is archived alongside it. Digitizing and "
+"viewing large photos is faster and lighter on memory, and no image data is "
 "lost."
 msgstr ""
 "**첨부 시 과도하게 큰 이미지를 축소합니다.** 긴 변이 2560 px를 넘는 사진은 더 작은 작업본으로 저장해 랜드마킹에 사용하고, "
-"손상되지 않은 원본은 그 옆에 따로 보관합니다. 이미지 데이터가 손실되지 않습니다."
+"손상되지 않은 원본은 그 옆에 보관합니다. 큰 사진의 디지타이징과 보기가 빨라지고 메모리 부담도 줄며, 이미지 데이터는 손실되지 "
+"않습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:200
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:205
 msgid ""
 "**\"Show Original\" checkbox in the object dialog.** When an archived "
 "original exists, you can render the 2D view from the full-resolution image "
-"for extra detail. This affects display only."
+"for extra detail while placing landmarks. This affects display only — "
+"landmark coordinates stay in the working-copy pixel space."
 msgstr ""
-"**객체 대화상자의 \"원본 보기\" 체크박스.** 보관된 원본이 있으면 2D 뷰를 원본 해상도 이미지로 렌더링해 더 세밀하게 볼 수 "
-"있습니다. 표시에만 영향을 줍니다."
+"**객체 대화상자의 \"원본 보기\" 체크박스.** 보관된 원본이 있으면 랜드마크를 배치하는 동안 2D 뷰를 원본 해상도 이미지로 "
+"렌더링해 더 세밀하게 볼 수 있습니다. 표시에만 영향을 주며, 랜드마크 좌표는 작업본 픽셀 좌표계를 유지합니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:203
-msgid "**The About box links to the project page.**"
-msgstr "**정보 창에 프로젝트 페이지 링크가 추가되었습니다.**"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:209
+msgid ""
+"**The About box links to the project page**, so you can open it in your "
+"browser with a click."
+msgstr "**정보 창에서 프로젝트 페이지로 연결됩니다.** 클릭하면 브라우저에서 열립니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:208
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:213
 #, python-format
 msgid ""
-"**Missing landmarks are estimated far more accurately.** Both the preview "
-"and the estimation used in analysis now fit the mean shape onto the "
-"landmarks a specimen actually has — matching rotation, scale and position — "
-"before filling the gaps, and analysis repeats the estimate as the alignment "
-"settles. On test shapes where the right answer is known, the error went from"
-" 61% of specimen size to essentially zero. Analysis results change for "
-"datasets with missing landmarks; datasets without them are unaffected."
+"**Missing landmarks are estimated far more accurately.** Both the \"show "
+"estimate\" preview and the estimation used in analysis now fit the mean "
+"shape onto the landmarks a specimen actually has — matching rotation, scale "
+"and position — before filling the gaps, and analysis repeats the estimate as"
+" the alignment settles. Estimates previously landed in the wrong place "
+"whenever a specimen was photographed at an angle; in analysis they were also"
+" computed before the specimens were aligned and then never revisited, so "
+"they were off by a large margin and that error fed into the results. On test"
+" shapes where the right answer is known, the error went from 61% of specimen"
+" size to essentially zero. Analysis results change for datasets with missing"
+" landmarks; datasets without them are unaffected."
 msgstr ""
-"**결측 랜드마크 추정이 훨씬 정확해졌습니다.** 미리보기와 분석에 쓰이는 추정 모두, 빈 자리를 채우기 전에 평균 형상을 표본이 실제로"
-" 가진 랜드마크에 맞춰 정합합니다 — 회전, 크기, 위치를 맞춥니다 — 그리고 분석에서는 정렬이 수렴하는 동안 추정을 반복합니다. 정답을"
-" 알고 있는 시험 형상에서 오차가 표본 크기의 61%에서 사실상 0으로 줄었습니다. 결측 랜드마크가 있는 데이터셋은 분석 결과가 "
-"달라지며, 결측이 없는 데이터셋은 영향을 받지 않습니다."
+"**결측 랜드마크 추정이 훨씬 정확해졌습니다.** \"추정값 보기\" 미리보기와 분석에 쓰이는 추정 모두, 빈 자리를 채우기 전에 평균 "
+"형상을 표본이 실제로 가진 랜드마크에 맞춰 정합합니다(회전, 크기, 위치를 맞춤). 분석에서는 정렬이 수렴하는 동안 추정을 반복합니다. "
+"이전에는 표본을 비스듬히 촬영한 경우 추정값이 엉뚱한 곳에 놓였고, 분석에서는 표본을 정렬하기도 전에 계산한 뒤 다시 들여다보지 않아 "
+"오차가 크게 벌어진 채 결과에 반영되었습니다. 정답을 알고 있는 시험 형상에서 오차가 표본 크기의 61%에서 사실상 0으로 줄었습니다. "
+"결측 랜드마크가 있는 데이터셋은 분석 결과가 달라지며, 결측이 없는 데이터셋은 영향을 받지 않습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:219
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:226
 msgid ""
-"**Zooming far into a 2D image no longer risks exhausting memory** (the zoom "
-"scale is capped)."
-msgstr "**2D 이미지를 아주 크게 확대해도 메모리가 고갈될 위험이 없습니다** (확대 배율에 상한을 두었습니다)."
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:221
-msgid ""
-"**Dialogs are now released when closed** (every dialog previously stayed in "
-"memory for the rest of the session)."
-msgstr "**대화상자가 닫힐 때 이제 해제됩니다** (이전에는 열었던 모든 대화상자가 세션이 끝날 때까지 메모리에 남아 있었습니다)."
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:223
-msgid "**Replacing an object's image no longer leaves the old files behind.**"
-msgstr "**객체의 이미지를 교체해도 이전 파일이 남지 않습니다.**"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:224
-msgid ""
-"**Deleting a dataset or an object now deletes its files too** (images, "
-"archived originals, and 3D models). Files orphaned by earlier versions are "
-"not cleaned up automatically."
+"**Zooming far into a 2D image no longer risks exhausting memory.** The zoom "
+"scale is capped so the rendered image can always be allocated."
 msgstr ""
-"**데이터셋이나 객체를 삭제하면 해당 파일도 함께 삭제됩니다** (이미지, 보관된 원본, 3D 모델). 이전 버전에서 이미 고아가 된 "
-"파일은 자동으로 정리되지 않습니다."
+"**2D 이미지를 아주 크게 확대해도 메모리가 고갈될 위험이 없습니다.** 렌더링할 이미지를 항상 할당할 수 있도록 확대 배율에 상한을 "
+"두었습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:229
-msgid "Version 0.1.7 (2026-07-21)"
-msgstr "버전 0.1.7 (2026-07-21)"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:228
+msgid ""
+"**Dialogs are now released when closed.** Every dialog that was opened "
+"stayed in memory for the rest of the session, so memory grew steadily as you"
+" worked — noticeably with the data exploration and analysis windows, which "
+"hold large plots. They are now freed on close."
+msgstr ""
+"**대화상자가 닫힐 때 이제 해제됩니다.** 열었던 모든 대화상자가 세션이 끝날 때까지 메모리에 남아 작업할수록 메모리가 계속 늘었습니다"
+" — 특히 큰 플롯을 보유하는 데이터 탐색·분석 창에서 두드러졌습니다. 이제 닫을 때 해제됩니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:231
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:232
+msgid ""
+"**Replacing an object's image no longer leaves the old files behind.** When "
+"the new image had a different file extension, the previous image (and its "
+"archived original) stayed on disk forever."
+msgstr ""
+"**객체의 이미지를 교체해도 이전 파일이 남지 않습니다.** 새 이미지의 확장자가 다르면 이전 이미지(와 보관된 원본)가 디스크에 영원히"
+" 남았습니다."
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:235
+msgid ""
+"**Deleting a dataset or an object now deletes its files too.** Images, their"
+" archived originals and 3D models were left on disk indefinitely — for a "
+"dataset, its entire storage folder — so deleted data kept taking up space. "
+"Files already orphaned by earlier versions are not cleaned up automatically."
+msgstr ""
+"**데이터셋이나 객체를 삭제하면 해당 파일도 함께 삭제됩니다.** 이미지와 보관된 원본, 3D 모델이 디스크에 무기한 남았고 — "
+"데이터셋의 경우 저장 폴더 전체가 — 삭제한 데이터가 계속 공간을 차지했습니다. 이전 버전에서 이미 고아가 된 파일은 자동으로 정리되지 "
+"않습니다."
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:240
+msgid "[0.1.7] - 2026-07-21"
+msgstr "[0.1.7] - 2026-07-21"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:242
 msgid "A small maintenance release: one crash fix and a 3D rendering speedup."
 msgstr "소규모 유지보수 릴리스: 크래시 수정 한 건과 3D 렌더링 속도 개선."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:236
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:245
 msgid ""
-"**3D landmark spheres render much faster** — drawn from a sphere compiled "
-"once and reused, instead of being rebuilt triangle-by-triangle every frame."
+"**3D landmark spheres render much faster.** Spheres are now drawn from a "
+"sphere shape compiled once and reused, instead of being rebuilt triangle-by-"
+"triangle for every landmark on every frame. Rotating and dragging 3D views "
+"with many landmarks is noticeably smoother, especially in landmark-edit "
+"mode, which draws the scene twice."
 msgstr ""
-"**3D 랜드마크 구체 렌더링이 훨씬 빨라졌습니다.** 매 프레임마다 삼각형 단위로 다시 만드는 대신, 한 번 컴파일한 구체를 재사용해 "
-"그립니다."
+"**3D 랜드마크 구체 렌더링이 훨씬 빨라졌습니다.** 매 프레임 모든 랜드마크마다 삼각형 단위로 다시 만드는 대신, 한 번 컴파일한 "
+"구체 형상을 재사용해 그립니다. 랜드마크가 많은 3D 뷰의 회전과 드래그가 눈에 띄게 부드러워졌으며, 장면을 두 번 그리는 랜드마크 편집"
+" 모드에서 특히 그렇습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:242
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:252
 msgid ""
 "**Chart no longer fails with \"string index out of range\"** when the "
 "selected grouping variable is blank for some objects. Those objects now "
-"appear in the legend as an unlabeled group."
+"appear in the legend as an unlabeled group instead of breaking the plot."
 msgstr ""
 "**선택한 그룹화 변수가 일부 객체에서 비어 있을 때 차트가 \"string index out of range\" 로 실패하지 "
-"않습니다.** 해당 객체들은 이제 이름 없는 그룹으로 범례에 표시됩니다."
+"않습니다.** 해당 객체들은 플롯을 깨뜨리는 대신 이름 없는 그룹으로 범례에 표시됩니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:247
-msgid "Version 0.1.6 (2026-07-20)"
-msgstr "버전 0.1.6 (2026-07-20)"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:256
+msgid "[0.1.6] - 2026-07-20"
+msgstr "[0.1.6] - 2026-07-20"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:249
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:258
 msgid ""
 "Focused on making **missing landmarks** work end to end — from import, "
-"through editing and display, to analysis."
-msgstr "**결측 랜드마크** 를 가져오기부터 편집·표시를 거쳐 분석까지 전 과정에서 제대로 동작하게 만드는 데 집중했습니다."
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:255
-msgid ""
-"**Missing landmark handling on import.** Import detects the ``-999`` "
-"morphometrics placeholder and asks whether to treat those coordinates as "
-"missing landmarks (with an \"always\" checkbox to remember the answer), and "
-"handles the invert-Y option correctly."
+"through editing and display, to analysis — and on the crashes found along "
+"the way."
 msgstr ""
-"**가져오기 시 결측 랜드마크 처리.** 가져오기가 형태측정학의 표시값 ``-999`` 를 감지해 해당 좌표를 결측 랜드마크로 처리할지 "
-"묻고(답을 기억하는 \"항상\" 체크박스 포함), invert-Y 옵션도 올바르게 처리합니다."
+"**결측 랜드마크** 를 가져오기부터 편집·표시를 거쳐 분석까지 전 과정에서 제대로 동작하게 만드는 데 집중했고, 그 과정에서 발견한 "
+"크래시들도 함께 처리했습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:259
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:262
+msgid "**Missing landmark handling on import**"
+msgstr "**가져오기 시 결측 랜드마크 처리**"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:263
 msgid ""
-"**Insert a missing landmark at a chosen position.** \"Add Missing\" now "
-"inserts before the selected row instead of only appending; the button reads "
-"\"Insert Missing\" or \"Add Missing\" depending on whether a row is "
-"selected."
-msgstr ""
-"**원하는 위치에 결측 랜드마크 삽입.** \"결측 추가\"가 이제 끝에 덧붙이기만 하지 않고 선택한 행 앞에 삽입합니다. 행 선택 "
-"여부에 따라 버튼이 \"결측 삽입\" 또는 \"결측 추가\"로 바뀝니다."
+"Import detects the `-999` morphometrics placeholder and asks whether to "
+"treat those coordinates as missing landmarks (defaults to yes)"
+msgstr "가져오기가 형태측정학의 표시값 `-999` 를 감지해 해당 좌표를 결측 랜드마크로 처리할지 묻습니다(기본값은 예)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:262
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:265
+msgid "\"Always treat -999 as a missing landmark\" checkbox remembers the answer"
+msgstr "\"항상 -999를 결측 랜드마크로 처리\" 체크박스가 답을 기억합니다"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:266
+msgid ""
+"Correctly handles the invert-Y option, which negates a `-999` in the Y "
+"column to `+999` before the scan runs"
+msgstr ""
+"invert-Y 옵션을 올바르게 처리합니다 — 이 옵션은 검사가 실행되기 전에 Y 열의 `-999` 를 `+999` 로 바꿉니다"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:268
+msgid "**Insert a missing landmark at a chosen position**"
+msgstr "**원하는 위치에 결측 랜드마크 삽입**"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:269
+msgid ""
+"\"Add Missing\" now inserts before the selected row instead of only "
+"appending, so a gap can be placed where it actually belongs"
+msgstr "\"결측 추가\"가 이제 끝에 덧붙이기만 하지 않고 선택한 행 앞에 삽입하므로, 빈 자리를 제자리에 넣을 수 있습니다"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:271
+msgid ""
+"The button reads \"Insert Missing\" or \"Add Missing\" depending on whether "
+"a row is selected"
+msgstr "행 선택 여부에 따라 버튼이 \"결측 삽입\" 또는 \"결측 추가\"로 표시됩니다"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:273
 msgid ""
 "**Missing landmarks visible in the object list** — the Landmarks column "
-"shows the recorded count with the missing tally beside it in red, e.g. ``9 "
-"(1)``."
+"shows the recorded count with the missing tally beside it in red, e.g. `9 "
+"(1)`. The column still sorts numerically."
 msgstr ""
-"**객체 목록에서 결측 랜드마크가 보입니다.** 랜드마크 열에 기록된 개수와 함께 결측 개수가 빨간색으로 표시됩니다(예: ``9 "
-"(1)``)."
+"**객체 목록에서 결측 랜드마크가 보입니다** — 랜드마크 열에 기록된 개수와 함께 결측 개수가 빨간색으로 표시됩니다(예: `9 "
+"(1)`). 이 열은 여전히 숫자로 정렬됩니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:264
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:276
 msgid ""
 "**Italic legend labels** — a grouping value wrapped in asterisks renders "
-"italic in plot legends (``*Eurekia*`` → *Eurekia*)."
+"italic in plot legends, so taxon names typeset correctly (`*Eurekia*` → "
+"*Eurekia*). Works for any script, including Hangul."
 msgstr ""
-"**기울임꼴 범례 레이블.** 별표로 감싼 그룹 값은 플롯 범례에서 기울임꼴로 표시됩니다(``*Eurekia*`` → "
-"*Eurekia*)."
+"**기울임꼴 범례 레이블** — 별표로 감싼 그룹 값은 플롯 범례에서 기울임꼴로 표시되어 분류군 이름이 올바른 서체로 "
+"조판됩니다(`*Eurekia*\\ ` → *Eurekia*). 한글을 포함한 모든 문자 체계에서 동작합니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:270
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:281
 msgid ""
 "**Landmark table cells are validated when an edit is committed.** A cell "
-"accepts a number or ``MISSING`` (a blank cell counts as missing); anything "
-"else reverts to the stored value with an explanatory tooltip."
+"accepts a number, or `MISSING` (a blank cell counts as missing); anything "
+"else reverts to the stored value with an explanatory tooltip. Previously any"
+" typo silently turned the landmark into a missing one."
 msgstr ""
-"**랜드마크 표의 셀은 편집을 확정할 때 검증됩니다.** 셀에는 숫자 또는 ``MISSING`` 을 입력할 수 있습니다(빈 셀은 결측으로"
-" 간주). 그 외의 값은 설명 툴팁과 함께 저장되어 있던 값으로 되돌아갑니다."
+"**랜드마크 표의 셀은 편집을 확정할 때 검증됩니다.** 셀에는 숫자 또는 `MISSING` 을 입력할 수 있습니다(빈 셀은 결측으로 "
+"간주). 그 외의 값은 설명 툴팁과 함께 저장되어 있던 값으로 되돌아갑니다. 이전에는 오타 하나가 조용히 해당 랜드마크를 결측으로 "
+"만들었습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:273
-msgid "**Edits to the landmark table update the viewer immediately.**"
-msgstr "**랜드마크 표를 편집하면 뷰어에 즉시 반영됩니다.**"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:285
+msgid ""
+"**Edits to the landmark table now update the viewer immediately** rather "
+"than only at save time."
+msgstr "**랜드마크 표를 편집하면 저장할 때가 아니라 즉시 뷰어에 반영됩니다.**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:274
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:287
 msgid ""
 "**Analysis errors say what to do.** A landmark-count mismatch names the "
-"object, both counts, and points at \"Insert Missing\"."
+"object, both counts, and points at \"Insert Missing\"; a landmark missing in"
+" every object is named up front instead of failing deep inside PCA."
 msgstr ""
-"**분석 오류가 무엇을 해야 할지 알려줍니다.** 랜드마크 개수 불일치 시 해당 객체 이름과 양쪽 개수를 함께 알려주고 \"결측 "
-"삽입\"을 안내합니다."
+"**분석 오류가 무엇을 해야 할지 알려줍니다.** 랜드마크 개수 불일치 시 해당 객체 이름과 양쪽 개수를 알려주고 \"결측 삽입\"을 "
+"안내합니다. 모든 객체에서 빠진 랜드마크는 PCA 내부에서 실패하는 대신 미리 지목합니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:278
-msgid "Version 0.1.5-alpha.1 (2025-09-11)"
-msgstr "버전 0.1.5-alpha.1 (2025-09-11)"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:283
-msgid "**JSON+ZIP Dataset Packaging System**"
-msgstr "**JSON+ZIP 데이터셋 패키징 시스템**"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:285
-msgid "Complete dataset backup and sharing with new export/import format"
-msgstr "새로운 내보내기/가져오기 형식을 사용한 완전한 데이터셋 백업 및 공유"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:286
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:292
 msgid ""
-"JSON schema v1.1 with extended metadata (wireframe, polygons, baseline, "
-"variables)"
-msgstr "확장된 메타데이터(와이어프레임, 폴리곤, 베이스라인, 변수)를 포함한 JSON 스키마 v1.1"
+"**Clearing a landmark cell no longer breaks the dataset.** A blank tab/comma"
+" field produced a short landmark row, crashing `count_landmarks`, "
+"`has_missing_landmarks` and Procrustes superimposition with `IndexError` and"
+" taking the whole dataset's analysis with it."
+msgstr ""
+"**랜드마크 셀을 비워도 데이터셋이 깨지지 않습니다.** 빈 탭/쉼표 필드가 짧은 랜드마크 행을 만들어 `count_landmarks`,"
+" `has_missing_landmarks`, 프로크루스테스 중첩정렬이 `IndexError` 로 죽고 데이터셋 전체의 분석까지 함께 "
+"무너뜨렸습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:287
-msgid "ZIP packaging with support for images and 3D model files"
-msgstr "이미지 및 3D 모델 파일을 지원하는 ZIP 패키징"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:288
-msgid "Structured file layout (dataset.json, images/, models/)"
-msgstr "구조화된 파일 레이아웃 (dataset.json, images/, models/)"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:289
-msgid "Lossless round-trip data preservation"
-msgstr "무손실 양방향 데이터 보존"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:291
-msgid "**Security and Stability Features**"
-msgstr "**보안 및 안정성 기능**"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:293
-msgid "Zip Slip attack defense system"
-msgstr "Zip Slip 공격 방어 시스템"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:294
-msgid "Transaction-based import (automatic rollback on failure)"
-msgstr "트랜잭션 기반 가져오기 (실패 시 자동 롤백)"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:295
-msgid "File integrity verification (MD5 checksums)"
-msgstr "파일 무결성 검증 (MD5 체크섬)"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:296
-msgid "Safe ZIP extraction (``safe_extract_zip()``)"
-msgstr "안전한 ZIP 압축 해제 (``safe_extract_zip()``)"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:297
-msgid "JSON schema validation and error reporting"
-msgstr "JSON 스키마 검증 및 오류 보고"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:299
-msgid "**New API Functions (MdUtils.py)**"
-msgstr "**새로운 API 함수 (MdUtils.py)**"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:301
-msgid "``serialize_dataset_to_json()`` - Serialize dataset to JSON structure"
-msgstr "``serialize_dataset_to_json()`` - 데이터셋을 JSON 구조로 직렬화"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:302
-msgid "``create_zip_package()`` - File collection and ZIP packaging"
-msgstr "``create_zip_package()`` - 파일 수집 및 ZIP 패키징"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:303
-msgid "``import_dataset_from_zip()`` - Safe ZIP-based dataset import"
-msgstr "``import_dataset_from_zip()`` - 안전한 ZIP 기반 데이터셋 가져오기"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:304
-msgid "``collect_dataset_files()`` - Collect dataset-related file paths"
-msgstr "``collect_dataset_files()`` - 데이터셋 관련 파일 경로 수집"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:305
-msgid "``estimate_package_size()`` - Estimate package size"
-msgstr "``estimate_package_size()`` - 패키지 크기 추정"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:306
-msgid "``validate_json_schema()`` - JSON schema validation"
-msgstr "``validate_json_schema()`` - JSON 스키마 검증"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:308
-msgid "**User Interface Improvements**"
-msgstr "**사용자 인터페이스 개선**"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:310
-msgid "\"JSON+ZIP Package\" option in Export Dialog"
-msgstr "내보내기 대화 상자에 \"JSON+ZIP 패키지\" 옵션 추가"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:311
-msgid "\"Include image and model files\" toggle"
-msgstr "\"이미지 및 모델 파일 포함\" 토글"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:312
-msgid "Real-time file size estimation display"
-msgstr "실시간 파일 크기 추정 표시"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:313
-msgid "JSON+ZIP format support in Import Dialog"
-msgstr "가져오기 대화 상자에서 JSON+ZIP 형식 지원"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:314
-msgid "Progress tracking with progress callbacks"
-msgstr "진행 상황 콜백을 통한 진행률 추적"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:319
-msgid "**Existing Export Formats Maintained**"
-msgstr "**기존 내보내기 형식 유지**"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:321
-msgid "TPS, NTS, Morphologika, CSV/Excel formats continue to be supported"
-msgstr "TPS, NTS, Morphologika, CSV/Excel 형식 계속 지원"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:322
-msgid "JSON+ZIP provided as additional option for complete backups"
-msgstr "완전한 백업을 위한 추가 옵션으로 JSON+ZIP 제공"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:324
-msgid "**Improved File Naming Conventions**"
-msgstr "**개선된 파일 명명 규칙**"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:326
-msgid "Files inside ZIP use ``<object_id>.<ext>`` format to avoid conflicts"
-msgstr "ZIP 내부 파일은 충돌 방지를 위해 ``<object_id>.<ext>`` 형식 사용"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:327
-msgid "Relative paths for platform independence"
-msgstr "플랫폼 독립성을 위한 상대 경로 사용"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:329
-msgid "**Database Handling Improvements**"
-msgstr "**데이터베이스 처리 개선**"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:331
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:296
 msgid ""
-"Automatic duplicate dataset name resolution (\"Dataset (1)\", \"Dataset "
-"(2)\", etc.)"
-msgstr "자동 중복 데이터셋 이름 해결 (\"Dataset (1)\", \"Dataset (2)\" 등)"
+"**Clearing only the X coordinate no longer shifts Y into X's slot** — a "
+"silent coordinate corruption that produced no error at all."
+msgstr "**X 좌표만 지워도 Y가 X 자리로 밀려들지 않습니다** — 오류가 전혀 나지 않던 조용한 좌표 손상이었습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:332
-msgid "Optimized variable mapping and landmark processing"
-msgstr "최적화된 변수 매핑 및 랜드마크 처리"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:337
-msgid "**Cross-Platform Compatibility**"
-msgstr "**크로스 플랫폼 호환성**"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:339
-msgid "UTF-8 encoding for Korean filenames"
-msgstr "한국어 파일명을 위한 UTF-8 인코딩"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:340
-msgid "Unified path handling for Windows, macOS, Linux"
-msgstr "Windows, macOS, Linux를 위한 통합 경로 처리"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:341
-msgid "Added file system safety verification"
-msgstr "파일 시스템 안전성 검증 추가"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:343
-msgid "**Memory and Performance Optimization**"
-msgstr "**메모리 및 성능 최적화**"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:345
-msgid "Streaming processing for large files"
-msgstr "대용량 파일에 대한 스트리밍 처리"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:346
-msgid "Safe temporary file cleanup (context managers)"
-msgstr "안전한 임시 파일 정리 (컨텍스트 매니저)"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:347
-msgid "Prevention of partial imports on error"
-msgstr "오류 발생 시 부분 가져오기 방지"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:350
-msgid "Version 0.1.4 (2025-09-10)"
-msgstr "버전 0.1.4 (2025-09-10)"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:355
-msgid "**CI/CD and Build System**"
-msgstr "**CI/CD 및 빌드 시스템**"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:357
-msgid "GitHub Actions workflows (automatic build, test, release)"
-msgstr "GitHub Actions 워크플로우 (자동 빌드, 테스트, 릴리스)"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:358
-msgid "Cross-platform build support (Windows, Linux, macOS)"
-msgstr "크로스 플랫폼 빌드 지원 (Windows, Linux, macOS)"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:359
-msgid "PyInstaller-based automated build script (``build.py``)"
-msgstr "PyInstaller 기반 자동화 빌드 스크립트 (``build.py``)"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:360
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:298
 msgid ""
-"Build number system and centralized version management (``version.py``)"
-msgstr "빌드 번호 시스템 및 중앙 집중식 버전 관리 (``version.py``)"
+"**Landmark-count consistency used two conflicting definitions**, so an "
+"object with a missing landmark could be rejected against its own count while"
+" the Procrustes gate accepted the same dataset."
+msgstr ""
+"**랜드마크 개수 일관성 검사가 서로 다른 두 정의를 쓰고 있었습니다.** 그래서 결측 랜드마크가 있는 객체가 자기 개수 기준으로는 "
+"거부되면서도 프로크루스테스 관문은 같은 데이터셋을 통과시켰습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:362
-msgid "**Testing Infrastructure**"
-msgstr "**테스트 인프라**"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:301
+msgid ""
+"**Analysis on a landmark missing in every object** no longer fails with "
+"`float() argument must be a string or a real number, not 'NoneType'`."
+msgstr ""
+"**모든 객체에서 빠진 랜드마크가 있는 데이터셋 분석** 이 `float() argument must be a string or a "
+"real number, not 'NoneType'` 으로 실패하지 않습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:364
-msgid "pytest-based automated test system (229 tests, 13 modules)"
-msgstr "pytest 기반 자동화 테스트 시스템 (229개 테스트, 13개 모듈)"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:303
+msgid ""
+"**Fixed a segmentation fault** caused by item delegates being registered "
+"without a parent, leaving Qt holding a pointer to a garbage-collected "
+"object."
+msgstr ""
+"**세그멘테이션 오류를 수정했습니다.** 항목 델리게이트가 부모 없이 등록되어 Qt가 가비지 컬렉션된 객체의 포인터를 들고 있던 것이 "
+"원인이었습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:365
-msgid "Test categories: unit, integration, performance, GUI, workflow"
-msgstr "테스트 카테고리: 단위, 통합, 성능, GUI, 워크플로우"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:305
+msgid ""
+"**Fixed a circular import** that broke `import ModanComponents` in a fresh "
+"interpreter."
+msgstr "**순환 import를 수정했습니다.** 새 인터프리터에서 `import ModanComponents` 가 실패했습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:366
-msgid "CI integration with automatic tests on PR"
-msgstr "PR에 대한 자동 테스트를 통한 CI 통합"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:308
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:370
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:406
+msgid "Technical"
+msgstr "기술적 사항"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:367
-msgid "Test coverage analysis tools"
-msgstr "테스트 커버리지 분석 도구"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:309
+msgid "Test suite grew from 1242 to **1404 passing** (75 skipped)"
+msgstr "테스트 스위트가 1242개에서 **1404개 통과** 로 늘었습니다(75개 건너뜀)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:369
-msgid "**UI/UX Features**"
-msgstr "**UI/UX 기능**"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:310
+msgid ""
+"New regression suites: import cycles (checked in a fresh subprocess, since "
+"in-process module caching hides them), landmark parsing, cell validation, "
+"sentinel import, count consistency, unimputable landmarks, count display"
+msgstr ""
+"새 회귀 스위트: import 순환(모듈 캐싱이 문제를 가리므로 새 서브프로세스에서 검사), 랜드마크 파싱, 셀 검증, 표시값 가져오기,"
+" 개수 일관성, 대치 불가 랜드마크, 개수 표시"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:371
-msgid "Overlay drag and corner snap functionality"
-msgstr "오버레이 드래그 및 모서리 스냅 기능"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:313
+msgid ""
+"Single implementations for landmark counting (`landmark_position_count`, "
+"`find_landmark_count_mismatch`) shared by every gate that can reject a "
+"dataset"
+msgstr ""
+"데이터셋을 거부할 수 있는 모든 관문이 공유하는 단일 랜드마크 개수 계산 구현(`landmark_position_count`, "
+"`find_landmark_count_mismatch`)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:372
-msgid "Overlay title display"
-msgstr "오버레이 제목 표시"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:315
+msgid ""
+"`pre-commit` installed and configured; `AppDir/` excluded from the "
+"whitespace hooks, which corrupted git symlinks on filesystems without "
+"symlink support"
+msgstr ""
+"`pre-commit` 설치·설정. 심볼릭 링크를 지원하지 않는 파일시스템에서 git 심볼릭 링크를 손상시키던 공백 훅에서 "
+"`AppDir/` 을 제외했습니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:373
-msgid "Splash screen (build info and copyright)"
-msgstr "스플래시 화면 (빌드 정보 및 저작권)"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:317
+msgid ""
+"Ruff pinned in `.pre-commit-config.yaml` to match the installed version"
+msgstr "설치된 버전과 맞도록 `.pre-commit-config.yaml` 에 Ruff를 핀했습니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:374
-msgid "3D landmark index display restored (using GLUT)"
-msgstr "3D 랜드마크 인덱스 표시 복원 (GLUT 사용)"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:320
+msgid "[0.1.5] - 2026-07-18"
+msgstr "[0.1.5] - 2026-07-18"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:375
-msgid "Improved toolbar button state management"
-msgstr "개선된 툴바 버튼 상태 관리"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:322
+msgid ""
+"Stabilisation release. A full code review (R01) corrected several "
+"**statistical results**, a structural refactor removed the last god-methods "
+"and dead modules, and an error-handling audit closed the paths where a "
+"failure could kill a window silently."
+msgstr ""
+"안정화 릴리스입니다. 전면 코드 리뷰(R01)로 여러 **통계 결과** 를 바로잡았고, 구조 리팩터링으로 마지막 남은 god-"
+"method와 죽은 모듈을 제거했으며, 오류 처리 감사로 실패가 창을 조용히 죽일 수 있던 경로들을 막았습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:376
-msgid "TreeView usability improvements"
-msgstr "TreeView 사용성 개선"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:327
+msgid ""
+"**Note for existing analyses:** the CVA and MANOVA fixes below change "
+"numeric output. Analyses saved before 0.1.5 may differ if re-run."
+msgstr ""
+"**기존 분석에 대한 참고:** 아래 CVA와 MANOVA 수정은 수치 결과를 바꿉니다. 0.1.5 이전에 저장한 분석은 다시 실행하면 "
+"값이 달라질 수 있습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:377
-msgid "Read-only column context menus"
-msgstr "읽기 전용 열 컨텍스트 메뉴"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:331
+msgid "**Data Exploration plot**"
+msgstr "**데이터 탐색 플롯**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:379
-msgid "**Documentation**"
-msgstr "**문서**"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:332
+msgid "Optional data-point labels"
+msgstr "데이터 점 레이블(선택)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:381
-msgid "Korean README (``README.ko.md``)"
-msgstr "한국어 README (``README.ko.md``)"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:333
+msgid "Snap-to-point when picking shapes"
+msgstr "형상을 고를 때 점에 스냅"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:382
-msgid "Development guide documents (CLAUDE.md, GEMINI.md)"
-msgstr "개발 가이드 문서 (CLAUDE.md, GEMINI.md)"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:334
+msgid "Shape-preview snapping is now toggleable (\"Snap to points\")"
+msgstr "형상 미리보기 스냅을 켜고 끌 수 있습니다(\"Snap to points\")"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:383
-msgid "Release guide and version management documents"
-msgstr "릴리스 가이드 및 버전 관리 문서"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:335
+msgid ""
+"**Object editing** — landmark mode is entered automatically after "
+"calibration, and exactly one tool mode stays selected"
+msgstr "**객체 편집** — 캘리브레이션 후 자동으로 랜드마크 모드로 들어가며, 도구 모드는 항상 정확히 하나만 선택됩니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:384
-msgid "Windows Defender notice document"
-msgstr "Windows Defender 안내 문서"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:339
+msgid "**Statistics correctness**"
+msgstr "**통계 정확성**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:385
-msgid "Detailed development logs (devlog directory)"
-msgstr "상세 개발 로그 (devlog 디렉터리)"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:340
+msgid ""
+"CVA: use pseudo-inverse for a singular within-group covariance matrix "
+"instead of failing or producing garbage"
+msgstr "CVA: 그룹 내 공분산 행렬이 특이할 때 실패하거나 엉뚱한 값을 내는 대신 유사역행렬을 사용"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:387
-msgid "**Internationalization (i18n)**"
-msgstr "**국제화 (i18n)**"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:342
+msgid "CVA: raw eigenvalues no longer overwritten by their percentages"
+msgstr "CVA: 원시 고윳값이 백분율로 덮어써지지 않습니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:389
-msgid "Significantly improved Korean translations"
-msgstr "대폭 개선된 한국어 번역"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:343
+msgid ""
+"CVA/MANOVA: the Z coordinate of 3D landmarks is no longer dropped when "
+"flattening shapes"
+msgstr "CVA/MANOVA: 형상을 평탄화할 때 3D 랜드마크의 Z 좌표가 더 이상 버려지지 않습니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:390
-msgid "Instant language setting application"
-msgstr "즉시 언어 설정 적용"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:345
+msgid "MANOVA: variable truncation is surfaced instead of silently capping"
+msgstr "MANOVA: 변수 절단을 조용히 제한하지 않고 사용자에게 알립니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:392
-msgid "**Project Management**"
-msgstr "**프로젝트 관리**"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:346
+msgid "**Crashes and silent failures**"
+msgstr "**크래시와 조용한 실패**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:394
-msgid "Refined requirements.txt (tested and verified dependencies)"
-msgstr "정제된 requirements.txt (테스트 및 검증된 의존성)"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:347
+msgid ""
+"Clicking the dataset tree and exporting an analysis to Excel could kill the "
+"window with no message; the export crash was traced to the Shapes sheet"
+msgstr ""
+"데이터셋 트리를 클릭하거나 분석을 Excel로 내보낼 때 아무 메시지 없이 창이 죽을 수 있었습니다. 내보내기 크래시의 원인은 "
+"Shapes 시트였습니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:395
-msgid "Support for Python 3.11+"
-msgstr "Python 3.11+ 지원"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:349
+msgid ""
+"Frozen (packaged) builds failed at startup with \"Can't determine version "
+"for pytz\""
+msgstr "프리즈(패키징) 빌드가 시작 시 \"Can't determine version for pytz\" 로 실패했습니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:396
-msgid "OpenGL implementation improvements (font rendering)"
-msgstr "OpenGL 구현 개선 (폰트 렌더링)"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:351
+msgid ""
+"Preferences were intermittently reset — settings are now written atomically"
+msgstr "환경 설정이 간헐적으로 초기화되었습니다 — 이제 설정을 원자적으로 기록합니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:401
-msgid "**Code Refactoring**"
-msgstr "**코드 리팩토링**"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:352
+msgid ""
+"Error-handling audit: 40+ user-triggered handlers across the main window, "
+"dialogs, file parsers, 3D model I/O and zip import now report failures "
+"instead of dying quietly"
+msgstr ""
+"오류 처리 감사: 메인 창, 대화상자, 파일 파서, 3D 모델 I/O, zip 가져오기에 걸친 40개 이상의 사용자 트리거 핸들러가 "
+"조용히 죽는 대신 실패를 알립니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:403
-msgid "Modularized color constants (MdConstants.py)"
-msgstr "모듈화된 색상 상수 (MdConstants.py)"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:404
-msgid "Unified icon path management"
-msgstr "통합 아이콘 경로 관리"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:405
-msgid "Standardized logging system"
-msgstr "표준화된 로깅 시스템"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:406
-msgid "Optimized import statements"
-msgstr "최적화된 import 문"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:408
-msgid "**Analysis System**"
-msgstr "**분석 시스템**"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:410
-msgid "PCA/CVA/MANOVA stability improvements"
-msgstr "PCA/CVA/MANOVA 안정성 개선"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:411
-msgid "Enhanced progress indicators during analysis"
-msgstr "분석 중 향상된 진행 표시기"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:412
-msgid "Improved error handling and reporting"
-msgstr "개선된 오류 처리 및 보고"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:414
-msgid "**UI Behavior**"
-msgstr "**UI 동작**"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:416
-msgid "Consistent dialog behavior"
-msgstr "일관된 대화 상자 동작"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:417
-msgid "Auto-refresh after data changes"
-msgstr "데이터 변경 후 자동 새로고침"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:418
-msgid "More intuitive keyboard shortcuts"
-msgstr "더 직관적인 키보드 단축키"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:423
-msgid "**Critical Bugs**"
-msgstr "**중요 버그**"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:425
-msgid "Dataset import/export encoding issues"
-msgstr "데이터셋 가져오기/내보내기 인코딩 문제"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:426
-msgid "3D viewer crashes"
-msgstr "3D 뷰어 충돌"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:427
-msgid "TreeView update timing issues"
-msgstr "TreeView 업데이트 타이밍 문제"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:428
-msgid "Analysis result caching problems"
-msgstr "분석 결과 캐싱 문제"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:430
-msgid "**Platform-Specific Issues**"
-msgstr "**플랫폼별 문제**"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:432
-msgid "WSL/Linux Qt plugin errors (added fix_qt_import.py)"
-msgstr "WSL/Linux Qt 플러그인 오류 (fix_qt_import.py 추가)"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:433
-msgid "OpenGL version compatibility"
-msgstr "OpenGL 버전 호환성"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:434
-msgid "Font rendering on different platforms"
-msgstr "다양한 플랫폼에서의 폰트 렌더링"
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:436
-msgid "**Data Integrity**"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:355
+msgid "**Data integrity**"
 msgstr "**데이터 무결성**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:438
-msgid "Landmark coordinate precision maintenance"
-msgstr "랜드마크 좌표 정밀도 유지"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:356
+msgid ""
+"Multi-row database operations are wrapped in transactions, so a failure "
+"part-way through no longer leaves a half-written dataset"
+msgstr "여러 행을 다루는 데이터베이스 작업을 트랜잭션으로 감쌌습니다. 중간에 실패해도 절반만 기록된 데이터셋이 남지 않습니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:439
-msgid "Wireframe/polygon data preservation"
-msgstr "와이어프레임/폴리곤 데이터 보존"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:358
+msgid "Corrected model field names in controller create/import paths"
+msgstr "컨트롤러의 생성/가져오기 경로에서 모델 필드 이름을 바로잡았습니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:440
-msgid "Analysis result consistency"
-msgstr "분석 결과 일관성"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:359
+msgid "Class-level mutable attributes were shared between instances"
+msgstr "클래스 수준의 가변 속성이 인스턴스 간에 공유되고 있었습니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:443
-msgid "Previous Versions"
-msgstr "이전 버전"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:360
+msgid ""
+"Analysis results were silently not persisted when the analysis type was "
+"passed in lowercase"
+msgstr "분석 종류를 소문자로 전달하면 분석 결과가 조용히 저장되지 않았습니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:446
-msgid "Version 0.1.3"
-msgstr "버전 0.1.3"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:362
+msgid "**Interface**"
+msgstr "**인터페이스**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:448
-msgid "Initial public release"
-msgstr "최초 공개 릴리스"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:363
+msgid ""
+"The Preferences dialog is scrollable, so it is usable on low-resolution "
+"monitors"
+msgstr "환경 설정 대화상자를 스크롤 가능하게 만들어 저해상도 모니터에서도 쓸 수 있습니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:449
-msgid "Basic 2D/3D landmark support"
-msgstr "기본 2D/3D 랜드마크 지원"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:367
+msgid ""
+"**Performance** — eliminated N+1 queries in CVA/MANOVA group extraction and "
+"in dataset switching; vectorised average-shape and CVA covariance "
+"computation"
+msgstr ""
+"**성능** — CVA/MANOVA 그룹 추출과 데이터셋 전환에서 N+1 쿼리를 제거하고, 평균 형상과 CVA 공분산 계산을 "
+"벡터화했습니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:450
-msgid "PCA, CVA, MANOVA analysis"
-msgstr "PCA, CVA, MANOVA 분석"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:371
+msgid ""
+"Removed dead code: `ModanDialogs.py` (2,539 lines) migrated to the "
+"`dialogs/` package, plus 6 unused modules and 8 stale build specs"
+msgstr ""
+"죽은 코드 제거: `ModanDialogs.py`(2,539줄)를 `dialogs/` 패키지로 이전하고, 사용하지 않는 모듈 6개와 낡은"
+" 빌드 스펙 8개를 삭제했습니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:451
-msgid "TPS/NTS file import"
-msgstr "TPS/NTS 파일 가져오기"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:373
+msgid ""
+"De-duplicated the `MODE` dictionary (15 copies → 1) and object-viewer "
+"constants into `MdConstants`"
+msgstr "`MODE` 딕셔너리(사본 15개 → 1개)와 객체 뷰어 상수를 `MdConstants` 로 통합했습니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:452
-msgid "SQLite database with Peewee ORM"
-msgstr "Peewee ORM을 사용한 SQLite 데이터베이스"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:375
+msgid ""
+"Decomposed god-methods: `run_analysis`, `prepare_scatter_data`, "
+"`read_settings`, and two dialog `__init__`s; moved dialog database/file I/O "
+"into `ModanController`"
+msgstr ""
+"god-method 분해: `run_analysis`, `prepare_scatter_data`, `read_settings`, 그리고 "
+"대화상자 `__init__` 두 개. 대화상자의 데이터베이스/파일 I/O를 `ModanController` 로 옮겼습니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:455
-msgid "Version 0.1.2"
-msgstr "버전 0.1.2"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:378
+msgid "Added the `guard_slot` decorator for Qt signal handlers"
+msgstr "Qt 시그널 핸들러용 `guard_slot` 데코레이터를 추가했습니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:457
-msgid "Added 3D model support (OBJ, PLY, STL)"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:379
+msgid ""
+"Repo-wide ruff lint/format clean; numpy pins reconciled to `>=2.0.0,<3.0.0`"
+msgstr "저장소 전체 ruff 린트/포맷 클린. numpy 핀을 `>=2.0.0,<3.0.0` 으로 정리했습니다"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:380
+msgid ""
+"CI: build numbers derived from commit count across all build workflows; Inno"
+" Setup pinned to 6.7.3"
+msgstr "CI: 모든 빌드 워크플로에서 커밋 수 기반으로 빌드 번호를 산출하고, Inno Setup을 6.7.3에 핀했습니다"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:384
+msgid "[0.1.5-beta.2] - 2025-11-03"
+msgstr "[0.1.5-beta.2] - 2025-11-03"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:387
+msgid "**Object Preview Enhancements**"
+msgstr "**객체 미리보기 개선**"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:388
+msgid "Preview toolbar button icon (icons/Preview.png)"
+msgstr "미리보기 툴바 버튼 아이콘 (icons/Preview.png)"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:389
+msgid "Smart button activation (enabled only when dataset is selected)"
+msgstr "스마트 버튼 활성화 (데이터셋이 선택된 경우에만 활성)"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:390
+msgid "Consistent UI behavior with other dataset-related actions"
+msgstr "다른 데이터셋 관련 동작과 일관된 UI 동작"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:393
+msgid "**UI Consistency Improvements**"
+msgstr "**UI 일관성 개선**"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:394
+msgid ""
+"Preview button now follows same activation pattern as New Object, Export, "
+"and Analyze buttons"
+msgstr "미리보기 버튼이 새 객체, 내보내기, 분석 버튼과 동일한 활성화 방식을 따릅니다"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:395
+msgid "Preview button disabled when analysis is selected or no dataset loaded"
+msgstr "분석이 선택되었거나 데이터셋이 없으면 미리보기 버튼이 비활성화됩니다"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:396
+msgid "Improved visual feedback with proper icon display"
+msgstr "아이콘이 제대로 표시되어 시각적 피드백이 개선되었습니다"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:399
+msgid "**Object Drag and Drop**"
+msgstr "**객체 드래그 앤 드롭**"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:400
+msgid ""
+"Fixed `NameError: name 'CustomDrag' is not defined` when dragging objects "
+"between datasets"
+msgstr ""
+"데이터셋 간에 객체를 드래그할 때 발생하던 `NameError: name 'CustomDrag' is not defined` 를 "
+"수정했습니다"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:401
+msgid ""
+"Added missing `CustomDrag` import in `components/widgets/table_view.py`"
+msgstr ""
+"`components/widgets/table_view.py` 에 빠져 있던 `CustomDrag` import를 추가했습니다"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:402
+msgid "Fixed cursor not restoring to normal after drag operation completes"
+msgstr "드래그 작업이 끝난 뒤 커서가 원래대로 돌아오지 않던 문제를 수정했습니다"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:403
+msgid ""
+"Implemented proper cursor stack cleanup using "
+"`QApplication.restoreOverrideCursor()`"
+msgstr "`QApplication.restoreOverrideCursor()` 로 커서 스택을 제대로 정리하도록 구현했습니다"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:404
+msgid ""
+"Cursor now correctly reverts to arrow cursor after both successful and "
+"cancelled drag operations"
+msgstr "드래그가 성공하든 취소되든 커서가 화살표로 정확히 되돌아옵니다"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:407
+msgid "**Code Quality**"
+msgstr "**코드 품질**"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:408
+msgid ""
+"Added cursor restoration in both `startDrag()` and `mouseReleaseEvent()` "
+"methods"
+msgstr "`startDrag()` 와 `mouseReleaseEvent()` 양쪽에 커서 복원을 추가했습니다"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:409
+msgid "Used while loop to clear all override cursors from Qt's cursor stack"
+msgstr "while 루프로 Qt 커서 스택의 모든 override 커서를 비웁니다"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:410
+msgid "Improved drag operation robustness with proper cleanup"
+msgstr "정리 처리를 제대로 하여 드래그 작업의 견고성을 높였습니다"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:411
+msgid "All drag widget tests passing (3/3)"
+msgstr "드래그 위젯 테스트 전부 통과 (3/3)"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:412
+msgid "Overall test coverage maintained at 99.6% (230/231 tests passing)"
+msgstr "전체 테스트 커버리지 99.6% 유지 (231개 중 230개 통과)"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:415
+msgid "[0.1.5-beta.1] - 2025-10-08"
+msgstr "[0.1.5-beta.1] - 2025-10-08"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:417
+msgid "Added (Phase 7 - Performance Testing & Scalability)"
+msgstr "추가 (Phase 7 - 성능 테스트 및 확장성)"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:418
+msgid "**Comprehensive Performance Testing Infrastructure**"
+msgstr "**종합 성능 테스트 인프라**"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:419
+msgid "Large-scale benchmarking tool (`scripts/benchmark_large_scale.py`)"
+msgstr "대규모 벤치마크 도구 (`scripts/benchmark_large_scale.py`)"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:420
+msgid "CVA performance profiler (`scripts/profile_cva.py`)"
+msgstr "CVA 성능 프로파일러 (`scripts/profile_cva.py`)"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:421
+msgid "Memory profiling system (`scripts/profile_memory.py`)"
+msgstr "메모리 프로파일링 시스템 (`scripts/profile_memory.py`)"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:422
+msgid "UI responsiveness tests (`scripts/test_ui_responsiveness.py`)"
+msgstr "UI 반응성 테스트 (`scripts/test_ui_responsiveness.py`)"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:424
+msgid "**Performance Validation** (All Targets Exceeded)"
+msgstr "**성능 검증** (모든 목표 초과 달성)"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:425
+msgid "Load performance: **18-200× better than targets**"
+msgstr "로드 성능: **목표 대비 18~200배**"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:426
+msgid "1000 objects load: 277ms (target: < 5s) - **18× faster**"
+msgstr "객체 1000개 로드: 277ms (목표: 5초 미만) - **18배 빠름**"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:427
+msgid "1000 objects PCA: 60ms (target: < 2s) - **33× faster**"
+msgstr "객체 1000개 PCA: 60ms (목표: 2초 미만) - **33배 빠름**"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:428
+msgid "Memory efficiency: **125× better than target**"
+msgstr "메모리 효율: **목표 대비 125배**"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:429
+msgid "1000 objects: 4.04MB peak (target: < 500MB)"
+msgstr "객체 1000개: 최대 4.04MB (목표: 500MB 미만)"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:430
+msgid "Linear scaling: ~4KB per object"
+msgstr "선형 확장: 객체당 약 4KB"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:431
+msgid "No memory leaks detected (2.7KB growth over 50 iterations)"
+msgstr "메모리 누수 없음 (50회 반복에서 2.7KB 증가)"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:432
+msgid "UI responsiveness: **9-5091× better than targets**"
+msgstr "UI 반응성: **목표 대비 9~5091배**"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:433
+msgid ""
+"Widget creation: 12.63ms for 1000-row table (target: < 100ms) - **8× "
+"faster**"
+msgstr "위젯 생성: 1000행 표에서 12.63ms (목표: 100ms 미만) - **8배 빠름**"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:434
+msgid "Dataset loading: 536ms for 1000 objects (target: < 5s) - **9× faster**"
+msgstr "데이터셋 로딩: 객체 1000개에 536ms (목표: 5초 미만) - **9배 빠름**"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:435
+msgid "Progress updates: 152,746/sec (target: > 30/sec) - **5091× faster**"
+msgstr "진행 상황 갱신: 초당 152,746회 (목표: 초당 30회 이상) - **5091배 빠름**"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:437
+msgid "**Comprehensive User Documentation**"
+msgstr "**종합 사용자 문서**"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:438
+msgid "Quick Start Guide (10-minute tutorial)"
+msgstr "빠른 시작 안내서 (10분 튜토리얼)"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:439
+msgid "Complete User Guide (400+ lines covering all features)"
+msgstr "완전한 사용자 안내서 (모든 기능을 다루는 400줄 이상)"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:440
+msgid "Performance guide integrated with Phase 7 results"
+msgstr "Phase 7 결과를 반영한 성능 안내서"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:441
+msgid "Troubleshooting section with solutions"
+msgstr "해결책이 포함된 문제 해결 절"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:442
+msgid "Installation guide for all platforms"
+msgstr "모든 플랫폼용 설치 안내서"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:443
+msgid "Build guide for developers"
+msgstr "개발자용 빌드 안내서"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:445
+msgid "**Release Preparation** (Phase 8)"
+msgstr "**릴리스 준비** (Phase 8)"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:446
+msgid "BUILD_GUIDE.md - Comprehensive build instructions"
+msgstr "BUILD_GUIDE.md - 종합 빌드 안내"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:447
+msgid "INSTALL.md - Platform-specific installation guides"
+msgstr "INSTALL.md - 플랫폼별 설치 안내"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:448
+msgid "Enhanced documentation structure"
+msgstr "문서 구조 개선"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:451
+msgid "**Code Quality Improvements**"
+msgstr "**코드 품질 개선**"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:452
+msgid "Extensive test coverage (1,240 tests, 93.5% pass rate)"
+msgstr "폭넓은 테스트 커버리지 (1,240개 테스트, 통과율 93.5%)"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:453
+msgid "Integration testing complete (Phase 6)"
+msgstr "통합 테스트 완료 (Phase 6)"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:454
+msgid "Component testing complete (Phase 5)"
+msgstr "컴포넌트 테스트 완료 (Phase 5)"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:455
+msgid "Performance profiling and validation (Phase 7)"
+msgstr "성능 프로파일링 및 검증 (Phase 7)"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:457
+msgid "Performance"
+msgstr "성능"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:458
+msgid "**Validated Scalability**"
+msgstr "**검증된 확장성**"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:459
+msgid "Tested up to 2,000 objects"
+msgstr "객체 2,000개까지 검증"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:460
+msgid "All operations linear O(n) scaling"
+msgstr "모든 작업이 선형 O(n) 확장"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:461
+msgid "Production-ready for datasets of 100,000+ objects"
+msgstr "객체 100,000개 이상 데이터셋도 실사용 가능"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:464
+msgid "**Complete Documentation Suite**"
+msgstr "**완전한 문서 모음**"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:465
+msgid "User documentation for all skill levels"
+msgstr "모든 숙련도 수준을 위한 사용자 문서"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:466
+msgid "Developer guides and API references"
+msgstr "개발자 안내서와 API 레퍼런스"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:467
+msgid "Build and installation instructions"
+msgstr "빌드 및 설치 안내"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:468
+msgid "Performance expectations and best practices"
+msgstr "성능 기대치와 권장 사항"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:472
+msgid "[0.1.5-alpha.1] - 2025-09-11"
+msgstr "[0.1.5-alpha.1] - 2025-09-11"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:475
+msgid "**JSON+ZIP 데이터셋 패키징 시스템**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:476
+msgid "완전한 데이터셋 백업 및 공유를 위한 새로운 export/import 형식"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:477
+#, fuzzy
+msgid ""
+"JSON schema v1.1 with 확장된 메타데이터 (wireframe, polygons, baseline, variables)"
+msgstr "확장된 메타데이터(와이어프레임, 폴리곤, 베이스라인, 변수)를 포함한 JSON 스키마 v1.1"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:478
+msgid "ZIP 패키징으로 이미지 및 3D 모델 파일 포함 지원"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:479
+#, fuzzy
+msgid "구조화된 파일 레이아웃 (dataset.json, images/, models/)"
+msgstr "구조화된 파일 레이아웃 (dataset.json, images/, models/)"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:480
+msgid "손실 없는 라운드트립 데이터 보존"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:482
+msgid "**보안 및 안정성 기능**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:483
+msgid "Zip Slip 공격 방어 시스템"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:484
+msgid "트랜잭션 기반 import (실패 시 자동 롤백)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:485
+msgid "파일 무결성 검증 (MD5 체크섬)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:486
+#, fuzzy
+msgid "안전한 ZIP 압축 해제 (`safe_extract_zip()`)"
+msgstr "안전한 ZIP 압축 해제 (``safe_extract_zip()``)"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:487
+msgid "JSON 스키마 검증 및 에러 리포팅"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:489
+#, fuzzy
+msgid "**새로운 API 함수들 (MdUtils.py)**"
+msgstr "**새로운 API 함수 (MdUtils.py)**"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:490
+#, fuzzy
+msgid "`serialize_dataset_to_json()` - 데이터셋을 JSON 구조로 직렬화"
+msgstr "``serialize_dataset_to_json()`` - 데이터셋을 JSON 구조로 직렬화"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:491
+#, fuzzy
+msgid "`create_zip_package()` - 파일 수집 및 ZIP 패키징"
+msgstr "``create_zip_package()`` - 파일 수집 및 ZIP 패키징"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:492
+#, fuzzy
+msgid "`import_dataset_from_zip()` - 안전한 ZIP 기반 데이터셋 import"
+msgstr "``import_dataset_from_zip()`` - 안전한 ZIP 기반 데이터셋 가져오기"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:493
+msgid "`collect_dataset_files()` - 데이터셋 관련 파일 경로 수집"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:494
+#, fuzzy
+msgid "`estimate_package_size()` - 패키지 크기 추정"
+msgstr "``estimate_package_size()`` - 패키지 크기 추정"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:495
+#, fuzzy
+msgid "`validate_json_schema()` - JSON 스키마 유효성 검사"
+msgstr "``validate_json_schema()`` - JSON 스키마 검증"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:497
+msgid "**사용자 인터페이스 개선**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:498
+msgid "Export Dialog에 \"JSON+ZIP Package\" 옵션 추가"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:499
+#, fuzzy
+msgid "\"Include image and model files\" 토글 기능"
+msgstr "\"이미지 및 모델 파일 포함\" 토글"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:500
+msgid "실시간 파일 크기 추정 표시"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:501
+msgid "Import Dialog에 JSON+ZIP 형식 지원 추가"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:502
+msgid "진행률 추적 및 진행 상황 콜백"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:505
+msgid "**기존 export 형식 유지**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:506
+#, fuzzy
+msgid "TPS, NTS, Morphologika, CSV/Excel 형식 계속 지원"
+msgstr "TPS, NTS, Morphologika, CSV/Excel 형식 계속 지원"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:507
+msgid "JSON+ZIP은 완전한 백업용 추가 옵션으로 제공"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:509
+msgid "**파일 명명 규칙 개선**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:510
+msgid "ZIP 내부 파일은 `<object_id>.<ext>` 형식으로 충돌 방지"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:511
+msgid "상대 경로 사용으로 플랫폼 독립성 확보"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:513
+msgid "**데이터베이스 처리 개선**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:514
+msgid "중복 데이터셋 이름 자동 해결 (\"Dataset (1)\", \"Dataset (2)\" 등)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:515
+msgid "변수 매핑 및 랜드마크 처리 최적화"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:518
+msgid "**크로스 플랫폼 호환성**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:519
+msgid "UTF-8 인코딩으로 한국어 파일명 지원"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:520
+msgid "Windows, macOS, Linux 경로 처리 통일"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:521
+msgid "파일 시스템 안전성 검증 추가"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:523
+msgid "**메모리 및 성능 최적화**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:524
+msgid "대용량 파일 스트리밍 처리"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:525
+msgid "임시 파일 안전한 정리 (context manager 사용)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:526
+msgid "에러 발생 시 부분 import 방지"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:529
+msgid "[0.1.4] - 2025-09-10"
+msgstr "[0.1.4] - 2025-09-10"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:532
+msgid "**CI/CD 및 빌드 시스템**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:533
+msgid "GitHub Actions 워크플로우 구축 (자동 빌드, 테스트, 릴리즈)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:534
+msgid "크로스 플랫폼 빌드 지원 (Windows, Linux, macOS)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:535
+msgid "PyInstaller 기반 자동화 빌드 스크립트 (`build.py`)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:536
+msgid "빌드 번호 시스템 및 버전 관리 중앙화 (`version.py`)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:538
+msgid "**테스트 인프라**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:539
+msgid "pytest 기반 자동화 테스트 시스템 (229개 테스트, 13개 모듈)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:540
+msgid "테스트 카테고리: 단위, 통합, 성능, GUI, 워크플로우"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:541
+msgid "CI 통합으로 PR시 자동 테스트 실행"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:542
+msgid "테스트 커버리지 분석 도구 설정"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:544
+#, fuzzy
+msgid "**UI/UX 기능**"
+msgstr "**UI/UX 기능**"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:545
+msgid "오버레이 드래그 및 코너 스냅 기능"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:546
+msgid "오버레이 타이틀 표시"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:547
+msgid "스플래시 스크린 (빌드 정보 및 저작권 표시)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:548
+msgid "3D 랜드마크 인덱스 표시 복원 (GLUT 사용)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:549
+msgid "툴바 버튼 상태 관리 개선"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:550
+msgid "TreeView 사용성 개선"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:551
+msgid "읽기 전용 열 컨텍스트 메뉴"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:553
+msgid "**문서화**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:554
+#, fuzzy
+msgid "한국어 README (`README.ko.md`)"
+msgstr "한국어 README (``README.ko.md``)"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:555
+#, fuzzy
+msgid "개발 가이드 문서 (CLAUDE.md, GEMINI.md)"
+msgstr "개발 가이드 문서 (CLAUDE.md, GEMINI.md)"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:556
+msgid "릴리즈 가이드 및 버전 관리 문서"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:557
+#, fuzzy
+msgid "Windows Defender 공지 문서"
+msgstr "Windows Defender 안내 문서"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:558
+msgid "상세한 개발 로그 (devlog 디렉토리)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:560
+msgid "**국제화 (i18n)**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:561
+msgid "한국어 번역 대폭 개선"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:562
+msgid "언어 설정 즉시 적용 기능"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:563
+msgid "번역 파일 업데이트 (Modan2_ko.ts)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:565
+msgid "**코드 인덱싱 시스템**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:566
+msgid "소스코드 구조 분석 및 인덱싱 도구 구축"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:567
+msgid "대화형 HTML 대시보드 (tools/visualize_index.py)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:568
+msgid "심볼 검색 및 의존성 분석 도구"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:571
+msgid "**코드 구조 개선**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:572
+msgid ""
+"새로운 모듈 분리: `ModanController.py`, `MdHelpers.py`, `MdConstants.py`, "
+"`ModanWidgets.py`"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:573
+msgid "설정 관리를 QSettings에서 JSON으로 마이그레이션"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:574
+msgid "로깅 시스템 전환 (print문을 logging 모듈로)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:575
+msgid "에러 핸들링 강화 (체계적인 try-catch 구조)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:576
+msgid "저작권 정보 동적 연도 업데이트"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:578
+msgid "**의존성 업데이트**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:579
+msgid "NumPy 2.0+ 지원 (OpenGL 호환성 문제 해결)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:580
+msgid "Python 3.12 지원"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:581
+msgid "요구사항 파일 정리 및 크로스 플랫폼 지원"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:583
+msgid "**데이터 분석 개선**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:584
+msgid "PCA/CVA 분석 시스템 재구조화"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:585
+msgid "회귀 분석과 산점도 분리"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:586
+msgid "Data Exploration Dialog 재구성"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:587
+msgid "속성(property)에서 변수(variable)로 용어 통일"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:590
+msgid "**분석 기능 개선**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:591
+msgid "CVA/MANOVA 변수 선택 오류 수정: 선택된 그룹화 변수가 분석 함수에 제대로 전달되지 않던 심각한 문제 해결"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:592
+msgid "분석 정확도 향상: CVA 및 MANOVA 계산에 올바른 범주형 변수가 사용되도록 변수 인덱싱 수정"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:593
+msgid "데이터 검증 강화: 분석 실행 전 그룹화 변수 요구사항에 대한 적절한 검사 추가"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:595
+msgid "**주요 버그 수정**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:596
+msgid "PCA 분석 일관성 및 차원 문제 해결"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:597
+msgid "Reset Pose 기능 완전 복구"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:598
+#, fuzzy
+msgid "Windows Defender 오탐 문제 완화"
+msgstr "Windows Defender 안내 문서"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:599
+msgid "OpenGL/GLUT와 matplotlib 호환성 문제 해결"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:600
+msgid "Linux/WSL Qt 플랫폼 플러그인 오류 수정"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:601
+msgid "CI/CD 테스트 XIO fatal 오류 해결"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:602
+msgid "썸네일 동기화 문제 (WSL 특정)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:603
+msgid "landmark_count 의존성 제거 및 동적 계산"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:604
+msgid "2D 객체 뷰 마이너 버그 수정"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:605
+msgid "데이터셋 저장 모니터링 코드 개선"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:606
+msgid "shape retrieval 문제 해결 (currentData vs currentIndex)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:607
+msgid "와이어프레임 랜드마크 인덱스 불일치 수정"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:609
+msgid "**빌드 및 배포**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:610
+msgid "InnoSetup 출력 디렉토리 수정"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:611
+msgid "Linux AppImage 생성 프로세스 개선"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:612
+msgid "macOS 빌드 아티팩트 패턴 수정"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:613
+msgid "Anaconda Python 호환성 개선"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:615
+msgid "**테스트 수정**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:616
+msgid "PyQt5 호환성 문제 해결"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:617
+msgid "테스트 데이터에 그룹화 변수 추가"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:619
+msgid "Removed"
+msgstr "제거됨"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:620
+msgid "하드코딩된 Modan2.spec 파일 (동적 생성으로 전환)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:621
+msgid "레거시 테스트 스크립트 (pytest로 마이그레이션)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:623
+msgid "[0.1.3] - 2024-06-21"
+msgstr "[0.1.3] - 2024-06-21"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:626
+msgid "초기 안정 버전 릴리즈"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:627
+msgid "기본 형태 분석 기능"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:628
+msgid "2D/3D 랜드마크 지원"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:629
+msgid "TPS, NTS, OBJ, PLY, STL 파일 형식 지원"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:630
+msgid "기본 통계 분석 기능 (PCA, CVA, MANOVA)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:632
+msgid "[0.1.2] - 2024-05-30"
+msgstr "[0.1.2] - 2024-05-30"
+
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:635
+#, fuzzy
+msgid "3D 모델 지원 (OBJ, PLY, STL)"
 msgstr "3D 모델 지원 추가 (OBJ, PLY, STL)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:458
-msgid "Improved 2D/3D viewers"
-msgstr "개선된 2D/3D 뷰어"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:636
+msgid "2D/3D 뷰어 개선"
+msgstr ""
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:459
-msgid "Dataset hierarchy"
-msgstr "데이터셋 계층 구조"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:637
+msgid "데이터셋 계층 구조"
+msgstr ""
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:462
-msgid "Version 0.1.1"
-msgstr "버전 0.1.1"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:639
+msgid "[0.1.1] - 2024-04-12"
+msgstr "[0.1.1] - 2024-04-12"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:464
-msgid "Basic morphometric analysis"
-msgstr "기본 형태계측 분석"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:642
+msgid "기본 형태측정 분석"
+msgstr ""
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:465
-msgid "Procrustes superimposition"
-msgstr "Procrustes 중첩"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:643
+msgid "프로크루스테스 중첩정렬"
+msgstr ""
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:466
-msgid "Simple data management"
-msgstr "간단한 데이터 관리"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:644
+msgid "간단한 데이터 관리"
+msgstr ""
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:469
-msgid "Version 0.1.0"
-msgstr "버전 0.1.0"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:646
+msgid "[0.1.0] - 2024-03-01"
+msgstr "[0.1.0] - 2024-03-01"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:471
-msgid "Initial development version"
-msgstr "최초 개발 버전"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:649
+msgid "초기 개발 버전"
+msgstr ""
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:472
-msgid "Proof of concept"
+#: ../../../../../../../mnt/d/projects/Modan2/CHANGELOG.md:650
+#, fuzzy
+msgid "개념 증명(proof of concept)"
 msgstr "개념 증명"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:475
-msgid "Upcoming Features"
-msgstr "향후 기능"
+#~ msgid ""
+#~ "This project follows `Semantic Versioning "
+#~ "<https://semver.org/spec/v2.0.0.html>`_."
+#~ msgstr "이 프로젝트는 `유의적 버전 관리 <https://semver.org/spec/v2.0.0.html>`_ 를 따릅니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:478
-msgid "Planned for Future Releases"
-msgstr "향후 릴리스 계획"
+#~ msgid "**NTS and X1Y1 files reported a landmark count of 0.**"
+#~ msgstr "**NTS와 X1Y1 파일의 랜드마크 개수가 0으로 표시되었습니다.**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:480
-msgid "**Missing Landmark Support (Phase 3-5)**"
-msgstr "**결측 랜드마크 지원 (3-5단계)**"
+#~ msgid ""
+#~ "**Dialogs are now released when closed** (every dialog previously stayed in "
+#~ "memory for the rest of the session)."
+#~ msgstr "**대화상자가 닫힐 때 이제 해제됩니다** (이전에는 열었던 모든 대화상자가 세션이 끝날 때까지 메모리에 남아 있었습니다)."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:482
-msgid "Advanced imputation methods (TPS warping, regression)"
-msgstr "고급 대치 방법 (TPS 워핑, 회귀)"
+#~ msgid "**Replacing an object's image no longer leaves the old files behind.**"
+#~ msgstr "**객체의 이미지를 교체해도 이전 파일이 남지 않습니다.**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:483
-msgid "Confidence intervals for estimated positions"
-msgstr "추정 위치에 대한 신뢰 구간"
+#~ msgid ""
+#~ "**Insert a missing landmark at a chosen position.** \"Add Missing\" now "
+#~ "inserts before the selected row instead of only appending; the button reads "
+#~ "\"Insert Missing\" or \"Add Missing\" depending on whether a row is "
+#~ "selected."
+#~ msgstr ""
+#~ "**원하는 위치에 결측 랜드마크 삽입.** \"결측 추가\"가 이제 끝에 덧붙이기만 하지 않고 선택한 행 앞에 삽입합니다. 행 선택 "
+#~ "여부에 따라 버튼이 \"결측 삽입\" 또는 \"결측 추가\"로 바뀝니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:484
-msgid "Multiple imputation for uncertainty quantification"
-msgstr "불확실성 정량화를 위한 다중 대치"
+#~ msgid "**JSON+ZIP Dataset Packaging System**"
+#~ msgstr "**JSON+ZIP 데이터셋 패키징 시스템**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:485
-msgid "Missing-aware statistical methods (PPCA, EM-based CVA)"
-msgstr "결측 인식 통계 방법 (PPCA, EM 기반 CVA)"
+#~ msgid "Complete dataset backup and sharing with new export/import format"
+#~ msgstr "새로운 내보내기/가져오기 형식을 사용한 완전한 데이터셋 백업 및 공유"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:487
-msgid "**Enhanced Analysis**"
-msgstr "**향상된 분석**"
+#~ msgid "ZIP packaging with support for images and 3D model files"
+#~ msgstr "이미지 및 3D 모델 파일을 지원하는 ZIP 패키징"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:489
-msgid "Partial Least Squares (PLS)"
-msgstr "부분 최소 제곱법 (PLS)"
+#~ msgid "Lossless round-trip data preservation"
+#~ msgstr "무손실 양방향 데이터 보존"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:490
-msgid "Phylogenetic comparative methods"
-msgstr "계통 발생 비교 방법"
+#~ msgid "Zip Slip attack defense system"
+#~ msgstr "Zip Slip 공격 방어 시스템"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:491
-msgid "Disparity analysis"
-msgstr "형태 다양성 분석"
+#~ msgid "Transaction-based import (automatic rollback on failure)"
+#~ msgstr "트랜잭션 기반 가져오기 (실패 시 자동 롤백)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:492
-msgid "Asymmetry analysis"
-msgstr "비대칭 분석"
+#~ msgid "File integrity verification (MD5 checksums)"
+#~ msgstr "파일 무결성 검증 (MD5 체크섬)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:494
-msgid "**User Interface**"
-msgstr "**사용자 인터페이스**"
+#~ msgid "JSON schema validation and error reporting"
+#~ msgstr "JSON 스키마 검증 및 오류 보고"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:496
-msgid "Dark mode theme"
-msgstr "다크 모드 테마"
+#~ msgid "``collect_dataset_files()`` - Collect dataset-related file paths"
+#~ msgstr "``collect_dataset_files()`` - 데이터셋 관련 파일 경로 수집"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:497
-msgid "Customizable toolbar"
-msgstr "사용자 정의 가능한 툴바"
+#~ msgid "\"JSON+ZIP Package\" option in Export Dialog"
+#~ msgstr "내보내기 대화 상자에 \"JSON+ZIP 패키지\" 옵션 추가"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:498
-msgid "Advanced plot customization"
-msgstr "고급 플롯 사용자 정의"
+#~ msgid "Real-time file size estimation display"
+#~ msgstr "실시간 파일 크기 추정 표시"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:499
-msgid "Interactive 3D landmark editing"
-msgstr "대화형 3D 랜드마크 편집"
+#~ msgid "JSON+ZIP format support in Import Dialog"
+#~ msgstr "가져오기 대화 상자에서 JSON+ZIP 형식 지원"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:501
-msgid "**Performance**"
-msgstr "**성능**"
+#~ msgid "Progress tracking with progress callbacks"
+#~ msgstr "진행 상황 콜백을 통한 진행률 추적"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:503
-msgid "GPU-accelerated Procrustes"
-msgstr "GPU 가속 Procrustes"
+#~ msgid "**Existing Export Formats Maintained**"
+#~ msgstr "**기존 내보내기 형식 유지**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:504
-msgid "Lazy loading for large datasets"
-msgstr "대용량 데이터셋을 위한 지연 로딩"
+#~ msgid "JSON+ZIP provided as additional option for complete backups"
+#~ msgstr "완전한 백업을 위한 추가 옵션으로 JSON+ZIP 제공"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:505
-msgid "Caching improvements"
-msgstr "캐싱 개선"
+#~ msgid "**Improved File Naming Conventions**"
+#~ msgstr "**개선된 파일 명명 규칙**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:506
-msgid "Parallel processing support"
-msgstr "병렬 처리 지원"
+#~ msgid "Files inside ZIP use ``<object_id>.<ext>`` format to avoid conflicts"
+#~ msgstr "ZIP 내부 파일은 충돌 방지를 위해 ``<object_id>.<ext>`` 형식 사용"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:508
-msgid "**Integration**"
-msgstr "**통합**"
+#~ msgid "Relative paths for platform independence"
+#~ msgstr "플랫폼 독립성을 위한 상대 경로 사용"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:510
-msgid "R integration (export to geomorph, Morpho)"
-msgstr "R 통합 (geomorph, Morpho로 내보내기)"
+#~ msgid ""
+#~ "Automatic duplicate dataset name resolution (\"Dataset (1)\", \"Dataset "
+#~ "(2)\", etc.)"
+#~ msgstr "자동 중복 데이터셋 이름 해결 (\"Dataset (1)\", \"Dataset (2)\" 등)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:511
-msgid "Python API for scripting"
-msgstr "스크립팅을 위한 Python API"
+#~ msgid "Optimized variable mapping and landmark processing"
+#~ msgstr "최적화된 변수 매핑 및 랜드마크 처리"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:512
-msgid "Command-line interface"
-msgstr "명령줄 인터페이스"
+#~ msgid "**Cross-Platform Compatibility**"
+#~ msgstr "**크로스 플랫폼 호환성**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:513
-msgid "Plugin system"
-msgstr "플러그인 시스템"
+#~ msgid "UTF-8 encoding for Korean filenames"
+#~ msgstr "한국어 파일명을 위한 UTF-8 인코딩"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/changelog.rst:515
-msgid ""
-"See the `GitHub Issues <https://github.com/jikhanjung/Modan2/issues>`_ page "
-"for full roadmap and feature requests."
-msgstr ""
-"전체 로드맵 및 기능 요청은 `GitHub Issues "
-"<https://github.com/jikhanjung/Modan2/issues>`_ 페이지를 참조하세요."
+#~ msgid "Unified path handling for Windows, macOS, Linux"
+#~ msgstr "Windows, macOS, Linux를 위한 통합 경로 처리"
+
+#~ msgid "Added file system safety verification"
+#~ msgstr "파일 시스템 안전성 검증 추가"
+
+#~ msgid "**Memory and Performance Optimization**"
+#~ msgstr "**메모리 및 성능 최적화**"
+
+#~ msgid "Streaming processing for large files"
+#~ msgstr "대용량 파일에 대한 스트리밍 처리"
+
+#~ msgid "Safe temporary file cleanup (context managers)"
+#~ msgstr "안전한 임시 파일 정리 (컨텍스트 매니저)"
+
+#~ msgid "Prevention of partial imports on error"
+#~ msgstr "오류 발생 시 부분 가져오기 방지"
+
+#~ msgid "**CI/CD and Build System**"
+#~ msgstr "**CI/CD 및 빌드 시스템**"
+
+#~ msgid "GitHub Actions workflows (automatic build, test, release)"
+#~ msgstr "GitHub Actions 워크플로우 (자동 빌드, 테스트, 릴리스)"
+
+#~ msgid "Cross-platform build support (Windows, Linux, macOS)"
+#~ msgstr "크로스 플랫폼 빌드 지원 (Windows, Linux, macOS)"
+
+#~ msgid "PyInstaller-based automated build script (``build.py``)"
+#~ msgstr "PyInstaller 기반 자동화 빌드 스크립트 (``build.py``)"
+
+#~ msgid ""
+#~ "Build number system and centralized version management (``version.py``)"
+#~ msgstr "빌드 번호 시스템 및 중앙 집중식 버전 관리 (``version.py``)"
+
+#~ msgid "pytest-based automated test system (229 tests, 13 modules)"
+#~ msgstr "pytest 기반 자동화 테스트 시스템 (229개 테스트, 13개 모듈)"
+
+#~ msgid "Test categories: unit, integration, performance, GUI, workflow"
+#~ msgstr "테스트 카테고리: 단위, 통합, 성능, GUI, 워크플로우"
+
+#~ msgid "CI integration with automatic tests on PR"
+#~ msgstr "PR에 대한 자동 테스트를 통한 CI 통합"
+
+#~ msgid "Test coverage analysis tools"
+#~ msgstr "테스트 커버리지 분석 도구"
+
+#~ msgid "Overlay drag and corner snap functionality"
+#~ msgstr "오버레이 드래그 및 모서리 스냅 기능"
+
+#~ msgid "Overlay title display"
+#~ msgstr "오버레이 제목 표시"
+
+#~ msgid "Splash screen (build info and copyright)"
+#~ msgstr "스플래시 화면 (빌드 정보 및 저작권)"
+
+#~ msgid "3D landmark index display restored (using GLUT)"
+#~ msgstr "3D 랜드마크 인덱스 표시 복원 (GLUT 사용)"
+
+#~ msgid "Improved toolbar button state management"
+#~ msgstr "개선된 툴바 버튼 상태 관리"
+
+#~ msgid "TreeView usability improvements"
+#~ msgstr "TreeView 사용성 개선"
+
+#~ msgid "Read-only column context menus"
+#~ msgstr "읽기 전용 열 컨텍스트 메뉴"
+
+#~ msgid "Release guide and version management documents"
+#~ msgstr "릴리스 가이드 및 버전 관리 문서"
+
+#~ msgid "Detailed development logs (devlog directory)"
+#~ msgstr "상세 개발 로그 (devlog 디렉터리)"
+
+#~ msgid "**Internationalization (i18n)**"
+#~ msgstr "**국제화 (i18n)**"
+
+#~ msgid "Significantly improved Korean translations"
+#~ msgstr "대폭 개선된 한국어 번역"
+
+#~ msgid "Instant language setting application"
+#~ msgstr "즉시 언어 설정 적용"
+
+#~ msgid "Refined requirements.txt (tested and verified dependencies)"
+#~ msgstr "정제된 requirements.txt (테스트 및 검증된 의존성)"
+
+#~ msgid "Support for Python 3.11+"
+#~ msgstr "Python 3.11+ 지원"
+
+#~ msgid "OpenGL implementation improvements (font rendering)"
+#~ msgstr "OpenGL 구현 개선 (폰트 렌더링)"
+
+#~ msgid "Modularized color constants (MdConstants.py)"
+#~ msgstr "모듈화된 색상 상수 (MdConstants.py)"
+
+#~ msgid "Unified icon path management"
+#~ msgstr "통합 아이콘 경로 관리"
+
+#~ msgid "Standardized logging system"
+#~ msgstr "표준화된 로깅 시스템"
+
+#~ msgid "Optimized import statements"
+#~ msgstr "최적화된 import 문"
+
+#~ msgid "**Analysis System**"
+#~ msgstr "**분석 시스템**"
+
+#~ msgid "PCA/CVA/MANOVA stability improvements"
+#~ msgstr "PCA/CVA/MANOVA 안정성 개선"
+
+#~ msgid "Enhanced progress indicators during analysis"
+#~ msgstr "분석 중 향상된 진행 표시기"
+
+#~ msgid "Improved error handling and reporting"
+#~ msgstr "개선된 오류 처리 및 보고"
+
+#~ msgid "**UI Behavior**"
+#~ msgstr "**UI 동작**"
+
+#~ msgid "Consistent dialog behavior"
+#~ msgstr "일관된 대화 상자 동작"
+
+#~ msgid "Auto-refresh after data changes"
+#~ msgstr "데이터 변경 후 자동 새로고침"
+
+#~ msgid "More intuitive keyboard shortcuts"
+#~ msgstr "더 직관적인 키보드 단축키"
+
+#~ msgid "**Critical Bugs**"
+#~ msgstr "**중요 버그**"
+
+#~ msgid "Dataset import/export encoding issues"
+#~ msgstr "데이터셋 가져오기/내보내기 인코딩 문제"
+
+#~ msgid "3D viewer crashes"
+#~ msgstr "3D 뷰어 충돌"
+
+#~ msgid "TreeView update timing issues"
+#~ msgstr "TreeView 업데이트 타이밍 문제"
+
+#~ msgid "Analysis result caching problems"
+#~ msgstr "분석 결과 캐싱 문제"
+
+#~ msgid "**Platform-Specific Issues**"
+#~ msgstr "**플랫폼별 문제**"
+
+#~ msgid "WSL/Linux Qt plugin errors (added fix_qt_import.py)"
+#~ msgstr "WSL/Linux Qt 플러그인 오류 (fix_qt_import.py 추가)"
+
+#~ msgid "OpenGL version compatibility"
+#~ msgstr "OpenGL 버전 호환성"
+
+#~ msgid "Font rendering on different platforms"
+#~ msgstr "다양한 플랫폼에서의 폰트 렌더링"
+
+#~ msgid "Landmark coordinate precision maintenance"
+#~ msgstr "랜드마크 좌표 정밀도 유지"
+
+#~ msgid "Wireframe/polygon data preservation"
+#~ msgstr "와이어프레임/폴리곤 데이터 보존"
+
+#~ msgid "Analysis result consistency"
+#~ msgstr "분석 결과 일관성"
+
+#~ msgid "Previous Versions"
+#~ msgstr "이전 버전"
+
+#~ msgid "Version 0.1.3"
+#~ msgstr "버전 0.1.3"
+
+#~ msgid "Initial public release"
+#~ msgstr "최초 공개 릴리스"
+
+#~ msgid "Basic 2D/3D landmark support"
+#~ msgstr "기본 2D/3D 랜드마크 지원"
+
+#~ msgid "PCA, CVA, MANOVA analysis"
+#~ msgstr "PCA, CVA, MANOVA 분석"
+
+#~ msgid "TPS/NTS file import"
+#~ msgstr "TPS/NTS 파일 가져오기"
+
+#~ msgid "SQLite database with Peewee ORM"
+#~ msgstr "Peewee ORM을 사용한 SQLite 데이터베이스"
+
+#~ msgid "Version 0.1.2"
+#~ msgstr "버전 0.1.2"
+
+#~ msgid "Improved 2D/3D viewers"
+#~ msgstr "개선된 2D/3D 뷰어"
+
+#~ msgid "Dataset hierarchy"
+#~ msgstr "데이터셋 계층 구조"
+
+#~ msgid "Version 0.1.1"
+#~ msgstr "버전 0.1.1"
+
+#~ msgid "Basic morphometric analysis"
+#~ msgstr "기본 형태계측 분석"
+
+#~ msgid "Procrustes superimposition"
+#~ msgstr "Procrustes 중첩"
+
+#~ msgid "Simple data management"
+#~ msgstr "간단한 데이터 관리"
+
+#~ msgid "Version 0.1.0"
+#~ msgstr "버전 0.1.0"
+
+#~ msgid "Initial development version"
+#~ msgstr "최초 개발 버전"
+
+#~ msgid "Upcoming Features"
+#~ msgstr "향후 기능"
+
+#~ msgid "Planned for Future Releases"
+#~ msgstr "향후 릴리스 계획"
+
+#~ msgid "Advanced imputation methods (TPS warping, regression)"
+#~ msgstr "고급 대치 방법 (TPS 워핑, 회귀)"
+
+#~ msgid "Confidence intervals for estimated positions"
+#~ msgstr "추정 위치에 대한 신뢰 구간"
+
+#~ msgid "Multiple imputation for uncertainty quantification"
+#~ msgstr "불확실성 정량화를 위한 다중 대치"
+
+#~ msgid "Missing-aware statistical methods (PPCA, EM-based CVA)"
+#~ msgstr "결측 인식 통계 방법 (PPCA, EM 기반 CVA)"
+
+#~ msgid "**Enhanced Analysis**"
+#~ msgstr "**향상된 분석**"
+
+#~ msgid "Partial Least Squares (PLS)"
+#~ msgstr "부분 최소 제곱법 (PLS)"
+
+#~ msgid "Phylogenetic comparative methods"
+#~ msgstr "계통 발생 비교 방법"
+
+#~ msgid "Disparity analysis"
+#~ msgstr "형태 다양성 분석"
+
+#~ msgid "Asymmetry analysis"
+#~ msgstr "비대칭 분석"
+
+#~ msgid "Dark mode theme"
+#~ msgstr "다크 모드 테마"
+
+#~ msgid "Customizable toolbar"
+#~ msgstr "사용자 정의 가능한 툴바"
+
+#~ msgid "Advanced plot customization"
+#~ msgstr "고급 플롯 사용자 정의"
+
+#~ msgid "Interactive 3D landmark editing"
+#~ msgstr "대화형 3D 랜드마크 편집"
+
+#~ msgid "GPU-accelerated Procrustes"
+#~ msgstr "GPU 가속 Procrustes"
+
+#~ msgid "Lazy loading for large datasets"
+#~ msgstr "대용량 데이터셋을 위한 지연 로딩"
+
+#~ msgid "Caching improvements"
+#~ msgstr "캐싱 개선"
+
+#~ msgid "Parallel processing support"
+#~ msgstr "병렬 처리 지원"
+
+#~ msgid "R integration (export to geomorph, Morpho)"
+#~ msgstr "R 통합 (geomorph, Morpho로 내보내기)"
+
+#~ msgid "Python API for scripting"
+#~ msgstr "스크립팅을 위한 Python API"
+
+#~ msgid "Command-line interface"
+#~ msgstr "명령줄 인터페이스"
+
+#~ msgid "Plugin system"
+#~ msgstr "플러그인 시스템"
+
+#~ msgid ""
+#~ "See the `GitHub Issues <https://github.com/jikhanjung/Modan2/issues>`_ page "
+#~ "for full roadmap and feature requests."
+#~ msgstr ""
+#~ "전체 로드맵 및 기능 요청은 `GitHub Issues "
+#~ "<https://github.com/jikhanjung/Modan2/issues>`_ 페이지를 참조하세요."

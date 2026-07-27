@@ -4,11 +4,14 @@ This directory is the Sphinx project behind
 <https://jikhanjung.github.io/Modan2/> — the user-facing manual, in English and
 Korean.
 
-**Everything here is `.rst`, and only `.rst` is published.** Sphinx is not
-configured with `myst_parser`, so a `.md` file placed here would build into
-nothing. Repository-only notes (build guides, release process, architecture
-notes) live one level up in `docs/` as Markdown and are read on GitHub; see
-`docs/README.md`.
+**Everything here is `.rst`.** The one exception is `changelog.rst`, which is a
+two-line include of the repository-root `CHANGELOG.md` — release notes are
+written there and nowhere else. `myst_parser` is enabled for that include alone;
+because it makes Sphinx treat `.md` in this directory as pages, this README is
+listed in `conf.py`'s `exclude_patterns`.
+
+Repository-only notes (build guides, release process, architecture notes) live
+one level up in `docs/` as Markdown and are read on GitHub; see `docs/README.md`.
 
 ## Building Documentation
 

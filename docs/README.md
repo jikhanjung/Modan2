@@ -7,10 +7,18 @@ Documentation here is split by extension, and the split is deliberate:
 | **`docs/manual/`** | `.rst` only | Published to <https://jikhanjung.github.io/Modan2/> (English + Korean) |
 | **`docs/*.md`** | Markdown | Repository only — read on GitHub, never published |
 
-Sphinx is not configured with `myst_parser`, so it reads `.rst` and nothing else.
-A Markdown file added to `docs/manual/` would build into nothing; a `.rst` file
-added to `docs/` would never be picked up. Put user-facing documentation in
-`docs/manual/` and developer or release notes here.
+Put user-facing documentation in `docs/manual/`, as `.rst`, and developer or
+release notes here. A `.rst` file added to `docs/` is never picked up.
+
+`myst_parser` **is** enabled, but for exactly one purpose: `manual/changelog.rst`
+pulls in the repository-root `CHANGELOG.md` so the release notes exist in one
+place only. That file has to live at the repository root — contributors edit it
+there and `release.yml` extracts the GitHub release body from it — so the manual
+includes it rather than keeping a second copy. Keeping a copy is what let the two
+drift apart before: each ended up with versions the other did not have.
+
+Markdown is otherwise still not published. `manual/README.md` is excluded in
+`conf.py` precisely because enabling myst would otherwise turn it into a page.
 
 ## The published manual
 

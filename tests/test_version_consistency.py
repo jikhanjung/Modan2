@@ -4,13 +4,13 @@
 other file that carries a version must *derive* from it rather than hardcode a
 literal that can silently drift. These tests fail the build when a release bump
 touches one file and forgets another — the failure mode that had left
-``docs/conf.py`` pinned at ``0.1.5`` while ``version.py`` said ``0.2.0-alpha.2``
+``docs/manual/conf.py`` pinned at ``0.1.5`` while ``version.py`` said ``0.2.0-alpha.2``
 (devlog R06).
 
 Modan2's version-bearing files and how each stays in sync:
 
 - ``setup.py``        — ``get_version()`` reads ``version.__version__``.
-- ``docs/conf.py``    — imports ``__version__`` from ``version.py``.
+- ``docs/manual/conf.py`` — imports ``__version__`` from ``version.py``.
 - InnoSetup template  — uses a ``{{VERSION}}`` placeholder injected at build time.
 
 There is no ``[project]`` table in ``pyproject.toml`` (it holds tool config only)
@@ -40,11 +40,11 @@ def test_version_is_valid_semver():
 
 def test_docs_conf_derives_version():
     """Sphinx ``release`` must be imported from version.py, not typed in."""
-    source = (PROJECT_ROOT / "docs" / "conf.py").read_text(encoding="utf-8")
+    source = (PROJECT_ROOT / "docs" / "manual" / "conf.py").read_text(encoding="utf-8")
 
     hardcoded = re.search(r"^\s*release\s*=\s*['\"]", source, re.MULTILINE)
-    assert not hardcoded, "docs/conf.py hardcodes `release`; import it from version.py instead"
-    assert "from version import" in source, "docs/conf.py must import the version from version.py"
+    assert not hardcoded, "docs/manual/conf.py hardcodes `release`; import it from version.py instead"
+    assert "from version import" in source, "docs/manual/conf.py must import the version from version.py"
 
 
 def test_setup_derives_version():

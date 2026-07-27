@@ -16,8 +16,25 @@ Modan2 is a desktop GUI application for morphometric analysis, supporting 2D/3D 
 sudo apt-get install -y libxcb-xinerama0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 \
   libxcb-randr0 libxcb-render-util0 libxcb-xfixes0 libxcb-shape0 libxcb-cursor0 \
   qt5-qmake qtbase5-dev libqt5gui5 libqt5core5a libqt5widgets5 python3-pyqt5 \
-  libglut-dev libglut3.12 python3-opengl
+  libglut-dev libglut3.12 python3-opengl \
+  xvfb fonts-nanum
 ```
+
+`xvfb` is required to run the **GUI test suite** headlessly — without it the Qt
+tests abort the interpreter (`Fatal Python error: Aborted`) rather than failing
+cleanly, which looks like a code problem but is not. `fonts-nanum` is what CI
+installs so Korean chart text renders. Both match the list in
+`.github/workflows/test.yml`.
+
+```bash
+# Run the suite headlessly, the same way CI does
+Xvfb :99 -screen 0 1024x768x24 >/tmp/xvfb.log 2>&1 &
+export DISPLAY=:99
+pytest -p no:xvfb
+```
+
+`-p no:xvfb` disables the `pytest-xvfb` plugin so it does not start and tear down
+its own server on top of this one.
 
 #### Python Dependencies
 - Install: `pip install -r requirements.txt`

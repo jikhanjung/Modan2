@@ -413,6 +413,22 @@ Running Tests
 
    pytest
 
+.. important::
+   On Linux (including WSL) the GUI tests need an X server. Without one they do
+   not fail cleanly — the interpreter aborts with ``Fatal Python error: Aborted``
+   partway through, which looks like a code problem but is not. Install ``xvfb``
+   and run the suite against it, the same way CI does:
+
+   .. code-block:: bash
+
+      sudo apt-get install -y xvfb
+      Xvfb :99 -screen 0 1024x768x24 >/tmp/xvfb.log 2>&1 &
+      export DISPLAY=:99
+      pytest -p no:xvfb
+
+   ``-p no:xvfb`` disables the ``pytest-xvfb`` plugin so it does not start and
+   tear down a second server on top of this one.
+
 **Run specific test file**:
 
 .. code-block:: bash

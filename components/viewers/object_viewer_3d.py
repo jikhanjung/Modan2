@@ -1187,8 +1187,7 @@ class ObjectViewer3D(QGLWidget):
         bg_color = [int(255 * c) for c in COLOR["BACKGROUND"]]
         if bg_color == rgb_list:
             return True
-        else:
-            return False
+        return False
 
     def hit_test(self, x, y):
         gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, self.picker_buffer)
@@ -1199,7 +1198,7 @@ class ObjectViewer3D(QGLWidget):
         if rgb_tuple in self.color_to_lm_idx.keys():
             lm_idx = self.color_to_lm_idx[rgb_tuple]
             return "Landmark", int(lm_idx)
-        elif rgb_tuple in self.color_to_edge_idx.keys():
+        if rgb_tuple in self.color_to_edge_idx.keys():
             edge_idx = self.color_to_edge_idx[rgb_tuple]
             return "Edge", int(edge_idx)
         return "", -1
@@ -1301,8 +1300,7 @@ class ObjectViewer3D(QGLWidget):
 
         if (u >= 0) and (v >= 0) and (u + v <= 1):
             return intersection_point, d
-        else:
-            return None, None  # No intersection
+        return None, None  # No intersection
 
     def distance_to_ray(self, ray_origin, ray_direction, point):
         point_vector = point - ray_origin

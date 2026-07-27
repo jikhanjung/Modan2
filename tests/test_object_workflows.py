@@ -20,7 +20,6 @@ class TestObjectCreationWorkflow:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Setup database for all tests."""
-        pass
 
     @pytest.fixture
     def sample_dataset(self):
@@ -120,7 +119,6 @@ class TestObjectEditingWorkflow:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Setup database for all tests."""
-        pass
 
     @pytest.fixture
     def dataset_with_object(self):
@@ -209,7 +207,6 @@ class TestObjectDeletionWorkflow:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Setup database for all tests."""
-        pass
 
     def test_delete_object_from_dataset(self, qtbot):
         """Test deleting object removes it from dataset."""
@@ -262,7 +259,6 @@ class TestObjectBatchOperations:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Setup database for all tests."""
-        pass
 
     def test_batch_create_objects_programmatically(self, qtbot):
         """Test creating many objects programmatically."""
@@ -325,7 +321,6 @@ class TestObjectValidation:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Setup database for all tests."""
-        pass
 
     def test_object_requires_dataset(self, qtbot):
         """Test that object cannot be created without dataset."""

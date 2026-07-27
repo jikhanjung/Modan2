@@ -172,18 +172,17 @@ class DatasetAnalysisDialog(QDialog):
         if set_result is False:
             self.close()
             return
-        elif set_result is None:
+        if set_result is None:
             self.close()
             return
-        else:
-            self.reset_tableView()
-            self.load_object()
-            self.chart_options_clicked()
-            self.rb3DChartDim.setChecked(True)
-            self.on_chart_dim_changed()
-            self.on_btn_analysis_clicked()
+        self.reset_tableView()
+        self.load_object()
+        self.chart_options_clicked()
+        self.rb3DChartDim.setChecked(True)
+        self.on_chart_dim_changed()
+        self.on_btn_analysis_clicked()
 
-            self.btnSaveResults.setFocus()
+        self.btnSaveResults.setFocus()
 
     def _init_object_table(self):
         """Build the object/group table tab and its select-all/none/invert controls."""
@@ -1165,7 +1164,7 @@ class DatasetAnalysisDialog(QDialog):
         # print("property_index:",property_index)
         if property_index < 0:
             QMessageBox.information(self, "Information", "Please select a property.")
-            return
+            return None
         datamatrix = []
         category_list = []
         # obj = dataset_ops.object_list[0]

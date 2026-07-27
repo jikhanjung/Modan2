@@ -27,7 +27,6 @@ class TestImportExportWorkflow:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Setup database for all tests."""
-        pass
 
     @pytest.fixture
     def mock_parent(self, qtbot):
@@ -180,7 +179,6 @@ class TestDatasetAnalysisWorkflow:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Setup database for all tests."""
-        pass
 
     @pytest.fixture
     def mock_parent_with_controller(self, qtbot):
@@ -345,7 +343,6 @@ class TestMultiDialogWorkflow:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Setup database for all tests."""
-        pass
 
     @pytest.fixture
     def mock_parent(self, qtbot):
@@ -408,7 +405,6 @@ class TestErrorHandlingWorkflows:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Setup database for all tests."""
-        pass
 
     @pytest.fixture
     def mock_parent(self, qtbot):

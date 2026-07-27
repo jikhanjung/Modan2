@@ -1080,6 +1080,7 @@ class MdImage(Model):
         self.exifdatetime = file_info["exifdatetime"]
         self.file_created = file_info["ctime"]
         self.file_modified = file_info["mtime"]
+        return file_info
 
     def get_md5hash_info(self, filepath):
         try:
@@ -1365,7 +1366,7 @@ class MdObjectOps:
 
         if len(self.landmark_list) == 0:
             return -1
-        elif len(self.landmark_list) == 1:
+        if len(self.landmark_list) == 1:
             return 1
         if (self.centroid_size > 0) and (not refresh):
             return self.centroid_size
@@ -1560,7 +1561,6 @@ class MdObjectOps:
             if len(curr_vector1) == 2:
                 return
             # do nothing
-            pass
         else:
             if len(curr_vector1) == 2:
                 # print("2D rotation", curr_vector1, to_vector1)
@@ -1603,44 +1603,41 @@ class MdObjectOps:
                 self.landmark_list = rotated_landmarks
                 # print("landmarks after rotation", self.landmark_list)
                 return
-            else:
-                # calculate cosine and sine of rotation angle
-                cos_theta = np.dot(curr_vector1, to_vector1) / (
-                    np.linalg.norm(curr_vector1) * np.linalg.norm(to_vector1)
-                )
-                sin_theta = np.sqrt(1 - cos_theta**2)
+            # calculate cosine and sine of rotation angle
+            cos_theta = np.dot(curr_vector1, to_vector1) / (np.linalg.norm(curr_vector1) * np.linalg.norm(to_vector1))
+            sin_theta = np.sqrt(1 - cos_theta**2)
 
-                # calculate rotation axis
-                rotation_axis = np.cross(curr_vector1, to_vector1)
-                rotation_axis = rotation_axis / np.linalg.norm(rotation_axis)
+            # calculate rotation axis
+            rotation_axis = np.cross(curr_vector1, to_vector1)
+            rotation_axis = rotation_axis / np.linalg.norm(rotation_axis)
 
-                # calculate rotation matrix to align vector1 to x-axis - Rodrigues' rotation formula
-                # https://en.wikipedia.org/wiki/Rodrigues%27_rotation_formula
-                r_mx = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
-                r_mx[0][0] = cos_theta + rotation_axis[0] * rotation_axis[0] * (1 - cos_theta)
-                r_mx[0][1] = rotation_axis[0] * rotation_axis[1] * (1 - cos_theta) - rotation_axis[2] * sin_theta
-                r_mx[0][2] = rotation_axis[0] * rotation_axis[2] * (1 - cos_theta) + rotation_axis[1] * sin_theta
-                r_mx[1][0] = rotation_axis[1] * rotation_axis[0] * (1 - cos_theta) + rotation_axis[2] * sin_theta
-                r_mx[1][1] = cos_theta + rotation_axis[1] * rotation_axis[1] * (1 - cos_theta)
-                r_mx[1][2] = rotation_axis[1] * rotation_axis[2] * (1 - cos_theta) - rotation_axis[0] * sin_theta
-                r_mx[2][0] = rotation_axis[2] * rotation_axis[0] * (1 - cos_theta) - rotation_axis[1] * sin_theta
-                r_mx[2][1] = rotation_axis[2] * rotation_axis[1] * (1 - cos_theta) + rotation_axis[0] * sin_theta
-                r_mx[2][2] = cos_theta + rotation_axis[2] * rotation_axis[2] * (1 - cos_theta)
+            # calculate rotation matrix to align vector1 to x-axis - Rodrigues' rotation formula
+            # https://en.wikipedia.org/wiki/Rodrigues%27_rotation_formula
+            r_mx = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+            r_mx[0][0] = cos_theta + rotation_axis[0] * rotation_axis[0] * (1 - cos_theta)
+            r_mx[0][1] = rotation_axis[0] * rotation_axis[1] * (1 - cos_theta) - rotation_axis[2] * sin_theta
+            r_mx[0][2] = rotation_axis[0] * rotation_axis[2] * (1 - cos_theta) + rotation_axis[1] * sin_theta
+            r_mx[1][0] = rotation_axis[1] * rotation_axis[0] * (1 - cos_theta) + rotation_axis[2] * sin_theta
+            r_mx[1][1] = cos_theta + rotation_axis[1] * rotation_axis[1] * (1 - cos_theta)
+            r_mx[1][2] = rotation_axis[1] * rotation_axis[2] * (1 - cos_theta) - rotation_axis[0] * sin_theta
+            r_mx[2][0] = rotation_axis[2] * rotation_axis[0] * (1 - cos_theta) - rotation_axis[1] * sin_theta
+            r_mx[2][1] = rotation_axis[2] * rotation_axis[1] * (1 - cos_theta) + rotation_axis[0] * sin_theta
+            r_mx[2][2] = cos_theta + rotation_axis[2] * rotation_axis[2] * (1 - cos_theta)
 
-                # r_mx = [[1, 0, 0,0], [0, 1, 0,0], [0, 0, 1,0],[0,0,0,1]]
-                # r_mx[1][1] = cos_theta
-                # r_mx[1][2] = sin_theta
-                # r_mx[2][1] = -1 * sin_theta
-                # r_mx[2][2] = cos_theta
+            # r_mx = [[1, 0, 0,0], [0, 1, 0,0], [0, 0, 1,0],[0,0,0,1]]
+            # r_mx[1][1] = cos_theta
+            # r_mx[1][2] = sin_theta
+            # r_mx[2][1] = -1 * sin_theta
+            # r_mx[2][2] = cos_theta
 
-                # print("rotation matrix:", r_mx)
+            # print("rotation matrix:", r_mx)
 
-                # apply rotation matrix to all landmarks
-                self.apply_rotation_matrix(np.array(r_mx))
+            # apply rotation matrix to all landmarks
+            self.apply_rotation_matrix(np.array(r_mx))
 
-                curr_vector1 = np.array(self.landmark_list[point2 - 1]) - np.array(self.landmark_list[point1 - 1])
-                # print("curr_vector1 after rotation:", curr_vector1)
-                # print(self.landmark_list[point2 - 1], self.landmark_list[point1 - 1])
+            curr_vector1 = np.array(self.landmark_list[point2 - 1]) - np.array(self.landmark_list[point1 - 1])
+            # print("curr_vector1 after rotation:", curr_vector1)
+            # print(self.landmark_list[point2 - 1], self.landmark_list[point1 - 1])
 
         mid_point12 = np.array(self.landmark_list[point1 - 1]) + curr_vector1 / 2
         curr_vector2 = np.array(self.landmark_list[point3 - 1]) - np.array(mid_point12)

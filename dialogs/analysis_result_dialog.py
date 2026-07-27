@@ -65,7 +65,6 @@ class AnalysisResultDialog(BaseDialog):
             This is a placeholder method. Subclasses should override this
             to implement specific UI initialization.
         """
-        pass
 
     def read_settings(self):
         """Read dialog settings from application settings."""

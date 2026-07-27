@@ -1081,7 +1081,7 @@ class ObjectViewer2D(QLabel):
 
     def mouseReleaseEvent(self, ev) -> None:
         if self.object_dialog is None:
-            return
+            return None
         QMouseEvent(ev)
         if self.pan_mode == MODE["PAN"]:
             self.pan_mode = MODE["NONE"]
@@ -1150,7 +1150,7 @@ class ObjectViewer2D(QLabel):
         # Finish tracing a curve: the double-click's first press already added the
         # end point, so commit the collected points as semi-landmarks.
         if self._accept_current_curve():
-            return
+            return None
         return super().mouseDoubleClickEvent(event)
 
     def keyPressEvent(self, event):
@@ -1159,10 +1159,10 @@ class ObjectViewer2D(QLabel):
         if self.edit_mode == MODE["EDIT_CURVE"] and self.selected_curve_id is None:
             if event.key() in (Qt.Key_Return, Qt.Key_Enter):
                 if self._accept_current_curve():
-                    return
+                    return None
             elif event.key() == Qt.Key_Escape:
                 if self._cancel_current_curve():
-                    return
+                    return None
         return super().keyPressEvent(event)
 
     def wheelEvent(self, event):
@@ -1326,8 +1326,7 @@ class ObjectViewer2D(QLabel):
                     # Skip missing landmarks in dataset view
                     # (they are properly displayed in Object Dialog with estimation)
                     continue
-                else:
-                    self.draw_landmark(painter, landmark[0], landmark[1], color)
+                self.draw_landmark(painter, landmark[0], landmark[1], color)
         if obj.show_wireframe:
             for edge in self.ds_ops.edge_list:
                 from_lm_idx = edge[0] - 1

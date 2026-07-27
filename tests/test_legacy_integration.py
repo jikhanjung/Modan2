@@ -53,7 +53,6 @@ class TestDatasetDialogEdgeCases:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Automatically setup database for all tests in this class."""
-        pass
 
     def test_dialog_geometry_handling(self, qtbot):
         """Test dialog geometry handling with various settings."""
@@ -100,7 +99,6 @@ class TestObjectDialogEdgeCases:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Automatically setup database for all tests in this class."""
-        pass
 
     @pytest.fixture
     def sample_dataset_for_edge_cases(self):
@@ -151,7 +149,6 @@ class TestImportEdgeCasesLegacy:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Automatically setup database for all tests in this class."""
-        pass
 
     def test_import_with_special_characters_in_filename(self, qtbot):
         """Test import handling of filenames with special characters."""
@@ -233,7 +230,6 @@ class TestIntegrationRegressionTests:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Automatically setup database for all tests in this class."""
-        pass
 
     def test_dataset_creation_with_unicode_names(self, qtbot):
         """Regression test for unicode dataset names."""
@@ -291,7 +287,6 @@ class TestLegacyCompatibility:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Automatically setup database for all tests in this class."""
-        pass
 
     def test_old_dataset_dialog_interface(self, dataset_dialog):
         """Test that old DatasetDialog interface still works."""

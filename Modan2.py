@@ -185,7 +185,7 @@ class SettingsWrapper:
                     from PyQt5.QtCore import QRect
 
                     return QRect(*value)
-                elif hasattr(default_value, "x"):  # default_value is QRect
+                if hasattr(default_value, "x"):  # default_value is QRect
                     return default_value
             return value
         return default_value
@@ -1248,13 +1248,12 @@ class ModanMainWindow(QMainWindow):
         selected_indexes = self.treeView.selectionModel().selectedRows()
         if len(selected_indexes) == 0:
             return None
-        else:
-            selected_dataset_list = []
-            for index in selected_indexes:
-                item = self.dataset_model.itemFromIndex(index)
-                dataset = item.data()
-                selected_dataset_list.append(dataset)
-            return selected_dataset_list[0]
+        selected_dataset_list = []
+        for index in selected_indexes:
+            item = self.dataset_model.itemFromIndex(index)
+            dataset = item.data()
+            selected_dataset_list.append(dataset)
+        return selected_dataset_list[0]
 
     @pyqtSlot()
     def on_treeView_clicked(self, event):
@@ -1279,7 +1278,7 @@ class ModanMainWindow(QMainWindow):
         self.dlg.deleteLater()
         if ret == 0:
             return
-        elif ret == 1:
+        if ret == 1:
             if self.selected_dataset is None:  # deleted
                 self.load_dataset()
                 self.reset_tableView()
@@ -1360,7 +1359,7 @@ class ModanMainWindow(QMainWindow):
         self.dlg.deleteLater()
         if ret == 0:
             return
-        elif ret == 1:
+        if ret == 1:
             if object_deleted:
                 dataset = self.selected_dataset
                 self.load_dataset()

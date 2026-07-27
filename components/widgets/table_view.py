@@ -566,9 +566,9 @@ class MdTableModel(QAbstractTableModel):
         if role == Qt.DisplayRole or role == Qt.EditRole:
             if isinstance(d, str):
                 return d  # self._data[index.row()][index.column()]
-            elif isinstance(d, list):
+            if isinstance(d, list):
                 return " ".join(d)
-            elif isinstance(d, dict) and "value" in d:
+            if isinstance(d, dict) and "value" in d:
                 return d["value"]
         if role == Qt.BackgroundRole:
             # if d is str or list, return default color
@@ -576,7 +576,7 @@ class MdTableModel(QAbstractTableModel):
                 return QColor(240, 240, 240)
             if isinstance(d, (str, list)):
                 return None
-            elif isinstance(d, dict) and d.get("changed", False):
+            if isinstance(d, dict) and d.get("changed", False):
                 return QColor("yellow")
         if role == MISSING_COUNT_ROLE:
             return d.get("missing", 0) if isinstance(d, dict) else 0
@@ -616,8 +616,7 @@ class MdTableModel(QAbstractTableModel):
             return Qt.NoItemFlags
         if index.column() in self._uneditable_columns:
             return Qt.ItemIsEnabled | Qt.ItemIsSelectable
-        else:
-            return super().flags(index) | Qt.ItemIsEditable
+        return super().flags(index) | Qt.ItemIsEditable
 
     def resetColors(self):
         for row in range(self.rowCount()):
@@ -640,14 +639,14 @@ class MdTableModel(QAbstractTableModel):
                 # Return the header text for the given horizontal section
                 return f"{self._hheader_data[section]}"
                 # return ""
-            elif orientation == Qt.Vertical:
+            if orientation == Qt.Vertical:
                 # Return the header text for the given vertical section
                 if len(self._vheader_data) == 0:
                     return f"{section + 1}"
-                else:
-                    return f"{self._vheader_data[section]}"
+                return f"{self._vheader_data[section]}"
         if role == Qt.ToolTipRole and orientation == Qt.Vertical:
             return ""
+        return None
 
     def setVerticalHeader(self, header_data):
         self._vheader_data = header_data

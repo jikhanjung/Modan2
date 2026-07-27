@@ -24,7 +24,6 @@ class TestImportErrorRecovery:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Setup database for all tests."""
-        pass
 
     def test_import_invalid_tps_format_recovers(self, qtbot):
         """Test recovery from invalid TPS file format."""
@@ -139,7 +138,6 @@ class TestAnalysisErrorRecovery:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Setup database for all tests."""
-        pass
 
     def test_analysis_insufficient_objects(self, qtbot):
         """Test analysis error when insufficient objects in dataset."""
@@ -234,7 +232,6 @@ class TestDataIntegrityValidation:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Setup database for all tests."""
-        pass
 
     def test_dataset_name_unique_constraint(self, qtbot):
         """Test handling of duplicate dataset names."""
@@ -320,7 +317,6 @@ class TestErrorMessageHandling:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Setup database for all tests."""
-        pass
 
     @patch("PyQt5.QtWidgets.QMessageBox.critical")
     def test_file_not_found_error_message(self, mock_critical, qtbot):
@@ -377,7 +373,6 @@ class TestGracefulDegradation:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Setup database for all tests."""
-        pass
 
     def test_partial_dataset_still_usable(self, qtbot):
         """Test that dataset remains usable even with some invalid objects."""

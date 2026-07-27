@@ -162,4 +162,4 @@ class Morphologika:
                     objects[key][idx][1] = -1.0 * float(objects[key][idx][1])
 
         self._apply_optional_sections()
-        return
+        return None

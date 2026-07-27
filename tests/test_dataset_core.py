@@ -18,7 +18,6 @@ class TestDatasetCore:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Automatically setup database for all tests in this class."""
-        pass
 
     def test_dataset_dialog_creation(self, qtbot):
         """Test that DatasetDialog can be created and displays correctly."""
@@ -104,7 +103,6 @@ class TestObjectCore:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Automatically setup database for all tests in this class."""
-        pass
 
     @pytest.fixture
     def sample_dataset(self, qtbot):
@@ -178,7 +176,6 @@ class TestDatasetObjectIntegration:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Automatically setup database for all tests in this class."""
-        pass
 
     def test_dataset_object_relationship(self, qtbot):
         """Test the relationship between datasets and objects."""

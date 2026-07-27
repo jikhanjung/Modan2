@@ -124,5 +124,4 @@ class MdSequenceDelegate(QStyledItemDelegate):
             editor = QLineEdit(parent)
             editor.setValidator(QIntValidator())
             return editor
-        else:
-            return super().createEditor(parent, option, index)
+        return super().createEditor(parent, option, index)

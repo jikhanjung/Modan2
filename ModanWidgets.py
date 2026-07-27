@@ -321,12 +321,11 @@ class ObjectTableWidget(QTableWidget):
         """
         if obj.image:
             return "Image"
-        elif obj.model_3d:
+        if obj.model_3d:
             return "3D Model"
-        elif obj.landmarks:
+        if obj.landmarks:
             return "Landmarks"
-        else:
-            return "Empty"
+        return "Empty"
 
     def _get_object_size(self, obj: MdModel.MdObject) -> str:
         """Get object size string.
@@ -339,12 +338,11 @@ class ObjectTableWidget(QTableWidget):
         """
         if obj.image:
             return f"{obj.image.width}×{obj.image.height}"
-        elif obj.model_3d:
+        if obj.model_3d:
             return f"{obj.model_3d.vertex_count} vertices"
-        elif obj.landmarks:
+        if obj.landmarks:
             return f"{len(obj.landmarks)} points"
-        else:
-            return "-"
+        return "-"
 
     def _get_object_status(self, obj: MdModel.MdObject) -> str:
         """Get object status string.
@@ -357,10 +355,9 @@ class ObjectTableWidget(QTableWidget):
         """
         if obj.landmarks and len(obj.landmarks) > 0:
             return "✓ Ready"
-        elif obj.image or obj.model_3d:
+        if obj.image or obj.model_3d:
             return "⚠ No landmarks"
-        else:
-            return "✗ Empty"
+        return "✗ Empty"
 
     def _set_row_color(self, row: int, obj: MdModel.MdObject):
         """Set row background color based on object status.
@@ -962,7 +959,6 @@ class AnalysisResultWidget(QWidget):
     def _update_visualization(self):
         """Update visualization tab."""
         # Placeholder for future matplotlib integration
-        pass
 
 
 class ProgressIndicator(QWidget):

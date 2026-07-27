@@ -282,7 +282,6 @@ class ImportDatasetDialog(BaseDialog):
 
     def file_type_changed(self):
         """Handle file type selection change."""
-        pass
 
     def suggest_unique_dataset_name(self, base_name: str) -> str:
         """Generate unique dataset name by appending number if needed.
@@ -401,11 +400,11 @@ class ImportDatasetDialog(BaseDialog):
         """
         if filetype == "TPS":
             return TPS(filename, datasetname, invertY)
-        elif filetype == "NTS":
+        if filetype == "NTS":
             return NTS(filename, datasetname, invertY)
-        elif filetype == "X1Y1":
+        if filetype == "X1Y1":
             return X1Y1(filename, datasetname, invertY)
-        elif filetype == "Morphologika":
+        if filetype == "Morphologika":
             return Morphologika(filename, datasetname, invertY)
         return None
 

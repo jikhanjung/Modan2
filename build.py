@@ -61,8 +61,7 @@ def run_pyinstaller(args):
                     for item in (dist_path / "Modan2").iterdir():
                         print(f"  {item}")
             raise FileNotFoundError(f"Expected executable not found: {exe_path}")
-        else:
-            print(f"Executable created: {exe_path}")
+        print(f"Executable created: {exe_path}")
 
     except subprocess.CalledProcessError as e:
         print(f"PyInstaller failed with exit code {e.returncode}")

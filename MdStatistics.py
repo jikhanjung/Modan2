@@ -181,7 +181,7 @@ def PerformCVA(dataset_ops, classifier_index):
     logger.info("Perform CVA group by classifier index %s", classifier_index)
     if classifier_index < 0:
         # QMessageBox.information(self, "Information", "Please select a property.")
-        return
+        return None
     datamatrix = []
     category_list = []
     # obj = dataset_ops.object_list[0]
@@ -280,7 +280,7 @@ def PerformManova(dataset_ops, new_coords, classifier_index):
     logger.info("Perform Manova group by property index %s", classifier_index)
     if classifier_index < 0:
         # QMessageBox.information(self, "Information", "Please select a property.")
-        return
+        return None
     datamatrix = new_coords
     column_list = []
     for pc_idx, _pc_val in enumerate(new_coords[0]):

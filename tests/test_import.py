@@ -65,7 +65,6 @@ class TestImportDatasetDialog:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Automatically setup database for all tests in this class."""
-        pass
 
     def test_import_dialog_creation(self, qtbot):
         """Test that ImportDatasetDialog can be created and displays correctly."""
@@ -131,7 +130,6 @@ class TestTpsImport:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Automatically setup database for all tests in this class."""
-        pass
 
     def test_tps_parsing_only(self, qtbot):
         """Test TPS file parsing without UI interaction."""
@@ -191,7 +189,6 @@ class TestImportWithMessageBoxHandling:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Automatically setup database for all tests in this class."""
-        pass
 
     def setup_auto_click_messagebox(self):
         """Set up auto-clicking for QMessageBox dialogs."""
@@ -370,7 +367,6 @@ class TestImportEdgeCases:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Automatically setup database for all tests in this class."""
-        pass
 
     def test_import_nonexistent_file(self, qtbot):
         """Test handling of non-existent file import."""

@@ -375,16 +375,15 @@ class NewAnalysisDialog(BaseDialog):
         """
         if name not in name_list:
             return name
-        else:
-            i = 1
-            # Get last index of current name which is in the form of "name (i)"
-            match = re.match(r"(.+)\s+\((\d+)\)", name)
-            if match:
-                name = match.group(1)
-                i = int(match.group(2))
-                i += 1
-            while True:
-                new_name = name + " (" + str(i) + ")"
-                if new_name not in name_list:
-                    return new_name
-                i += 1
+        i = 1
+        # Get last index of current name which is in the form of "name (i)"
+        match = re.match(r"(.+)\s+\((\d+)\)", name)
+        if match:
+            name = match.group(1)
+            i = int(match.group(2))
+            i += 1
+        while True:
+            new_name = name + " (" + str(i) + ")"
+            if new_name not in name_list:
+                return new_name
+            i += 1

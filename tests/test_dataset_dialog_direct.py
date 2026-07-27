@@ -81,7 +81,6 @@ class TestDatasetDialogDirect:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Automatically setup database for all tests in this class."""
-        pass
 
     def test_dataset_dialog_creation(self, dataset_dialog):
         """Test that dataset dialog can be created and shows proper UI elements."""
@@ -295,7 +294,6 @@ class TestDatasetObjectIntegration:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Automatically setup database for all tests in this class."""
-        pass
 
     def test_dataset_to_object_workflow(self, dataset_dialog):
         """Test complete workflow from Dataset creation to Object creation."""
@@ -462,7 +460,6 @@ class TestDatasetDialogEdgeCases:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Automatically setup database for all tests in this class."""
-        pass
 
     def test_special_characters_in_name(self, dataset_dialog):
         """Test dataset name with special characters."""
@@ -480,7 +477,6 @@ class TestObjectDialogDirect:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Automatically setup database for all tests in this class."""
-        pass
 
     def test_object_dialog_creation(self, object_dialog_with_dataset):
         """Test that object dialog can be created and shows proper UI elements."""
@@ -667,7 +663,6 @@ class TestDatasetObjectDialogIntegration:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Automatically setup database for all tests in this class."""
-        pass
 
     def test_complete_dataset_object_dialog_workflow(self, dataset_dialog, qtbot):
         """Test complete workflow: Create dataset via dialog, then create object via dialog."""

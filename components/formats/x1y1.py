@@ -100,7 +100,7 @@ class X1Y1:
                     continue
                 if line.startswith("#"):
                     continue
-                if line.startswith('"') or line.startswith("'"):
+                if line.startswith(('"', "'")):
                     continue
 
                 data = []

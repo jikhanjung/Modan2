@@ -20,7 +20,6 @@ class TestSequentialAnalysisWorkflow:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Setup database for all tests."""
-        pass
 
     @pytest.fixture
     def dataset_with_grouped_objects(self):
@@ -209,7 +208,6 @@ class TestAnalysisPersistence:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Setup database for all tests."""
-        pass
 
     def test_analysis_results_persist_after_reload(self, qtbot):
         """Test that analysis results persist and can be retrieved."""
@@ -283,7 +281,6 @@ class TestLargeDatasetAnalysis:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Setup database for all tests."""
-        pass
 
     def test_analysis_with_100_objects(self, qtbot):
         """Test running analysis on dataset with 100 objects."""
@@ -353,7 +350,6 @@ class TestAnalysisComparison:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Setup database for all tests."""
-        pass
 
     def test_compare_pca_results_different_methods(self, qtbot):
         """Test comparing PCA results from different superimposition methods."""

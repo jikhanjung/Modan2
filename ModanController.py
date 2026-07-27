@@ -347,12 +347,11 @@ class ModanController(QObject):
 
         if file_ext in [".tps", ".nts", ".txt"]:
             return self._import_landmark_file(file_path)
-        elif file_ext in [".jpg", ".jpeg", ".png", ".bmp", ".tiff"]:
+        if file_ext in [".jpg", ".jpeg", ".png", ".bmp", ".tiff"]:
             return [self._import_image_file(file_path)]
-        elif file_ext in [".obj", ".ply", ".stl"]:
+        if file_ext in [".obj", ".ply", ".stl"]:
             return [self._import_3d_file(file_path)]
-        else:
-            raise ValueError(f"Unsupported file type: {file_ext}")
+        raise ValueError(f"Unsupported file type: {file_ext}")
 
     def _import_landmark_file(self, file_path: str) -> list[MdModel.MdObject]:
         """Import landmarks from TPS/NTS file.
@@ -1506,9 +1505,8 @@ class ModanController(QObject):
         if isinstance(dataset_or_analysis_type, str):
             # Called with analysis_type string - use current_dataset
             return self._validate_dataset_for_analysis_type(dataset_or_analysis_type)
-        else:
-            # Called with dataset object - validate for general analysis
-            return self._validate_dataset_for_general_analysis(dataset_or_analysis_type)
+        # Called with dataset object - validate for general analysis
+        return self._validate_dataset_for_general_analysis(dataset_or_analysis_type)
 
     def _validate_dataset_for_analysis_type(self, analysis_type: str) -> tuple[bool, str]:
         """Validate that current dataset is suitable for specific analysis type.

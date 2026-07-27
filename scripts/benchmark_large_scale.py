@@ -34,12 +34,11 @@ def format_time(seconds):
     """Format seconds to human-readable time."""
     if seconds < 1:
         return f"{seconds * 1000:.1f}ms"
-    elif seconds < 60:
+    if seconds < 60:
         return f"{seconds:.2f}s"
-    else:
-        minutes = int(seconds / 60)
-        secs = seconds % 60
-        return f"{minutes}m {secs:.1f}s"
+    minutes = int(seconds / 60)
+    secs = seconds % 60
+    return f"{minutes}m {secs:.1f}s"
 
 
 def create_large_dataset(n_objects, n_landmarks, dimension=2):

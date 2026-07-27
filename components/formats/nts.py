@@ -117,7 +117,7 @@ class NTS:
             line = line.strip()
             if line == "":
                 continue
-            if line.startswith('"') or line.startswith("'"):
+            if line.startswith(('"', "'")):
                 comments += line
                 continue
 

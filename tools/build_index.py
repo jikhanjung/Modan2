@@ -359,9 +359,9 @@ class Modan2Indexer:
         """Get name from AST node"""
         if isinstance(node, ast.Name):
             return node.id
-        elif isinstance(node, ast.Attribute):
+        if isinstance(node, ast.Attribute):
             return f"{self.get_name(node.value)}.{node.attr}"
-        elif isinstance(node, str):
+        if isinstance(node, str):
             return node
         return str(node.__class__.__name__)
 
@@ -369,9 +369,9 @@ class Modan2Indexer:
         """Get value from AST node"""
         if isinstance(node, ast.Constant):
             return node.value
-        elif isinstance(node, ast.Str):
+        if isinstance(node, ast.Str):
             return node.s
-        elif isinstance(node, ast.Name):
+        if isinstance(node, ast.Name):
             return node.id
         return None
 

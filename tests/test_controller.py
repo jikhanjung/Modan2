@@ -791,7 +791,7 @@ class TestAnalysisParameters:
 
         def capture(landmarks_data, params):
             captured["groups"] = params.get("groups")
-            return None
+            return
 
         with patch.object(controller, "_run_cva", side_effect=capture):
             controller.run_analysis(ds, cva_group_by=0)

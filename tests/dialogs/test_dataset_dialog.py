@@ -13,7 +13,6 @@ class TestDatasetDialogInitialization:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Setup database for all tests."""
-        pass
 
     @pytest.fixture
     def mock_parent(self, qtbot):
@@ -81,7 +80,6 @@ class TestDatasetDialogDimensionSelection:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Setup database for all tests."""
-        pass
 
     @pytest.fixture
     def mock_parent(self, qtbot):
@@ -119,7 +117,6 @@ class TestDatasetDialogBasicInput:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Setup database for all tests."""
-        pass
 
     @pytest.fixture
     def mock_parent(self, qtbot):
@@ -157,7 +154,6 @@ class TestDatasetDialogVariableManagement:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Setup database for all tests."""
-        pass
 
     @pytest.fixture
     def mock_parent(self, qtbot):
@@ -280,7 +276,6 @@ class TestDatasetDialogSettings:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Setup database for all tests."""
-        pass
 
     @pytest.fixture
     def mock_parent(self, qtbot):
@@ -315,7 +310,6 @@ class TestDatasetDialogIntegration:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Setup database for all tests."""
-        pass
 
     @pytest.fixture
     def mock_parent(self, qtbot):

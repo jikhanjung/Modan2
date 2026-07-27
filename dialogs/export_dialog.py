@@ -233,35 +233,27 @@ class ExportDatasetDialog(BaseDialog):
     # Radio button handlers
     def on_rbProcrustes_clicked(self):
         """Handle Procrustes radio button click."""
-        pass
 
     def on_rbBookstein_clicked(self):
         """Handle Bookstein radio button click."""
-        pass
 
     def on_rbRFTRA_clicked(self):
         """Handle Resistant fit radio button click."""
-        pass
 
     def on_rbNone_clicked(self):
         """Handle None radio button click."""
-        pass
 
     def on_rbTPS_clicked(self):
         """Handle TPS radio button click."""
-        pass
 
     def on_rbNTS_clicked(self):
         """Handle NTS radio button click."""
-        pass
 
     def on_rbX1Y1_clicked(self):
         """Handle X1Y1 radio button click."""
-        pass
 
     def on_rbMorphologika_clicked(self):
         """Handle Morphologika radio button click."""
-        pass
 
     def on_rbJSONZip_clicked(self):
         """Handle JSON+ZIP radio button click - enable file inclusion."""

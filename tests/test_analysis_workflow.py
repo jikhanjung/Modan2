@@ -28,7 +28,6 @@ class TestAnalysisDialog:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Automatically setup database for all tests in this class."""
-        pass
 
     @pytest.fixture
     def sample_dataset_with_objects(self, qtbot):
@@ -140,7 +139,6 @@ class TestMainWindowAnalysis:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Automatically setup database for all tests in this class."""
-        pass
 
     def setup_qapplication_settings(self):
         """Setup QApplication settings mock for MainWindow."""
@@ -337,7 +335,6 @@ class TestCompleteWorkflows:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Automatically setup database for all tests in this class."""
-        pass
 
     def setup_auto_click_messagebox(self):
         """Set up auto-clicking for QMessageBox dialogs."""
@@ -571,7 +568,6 @@ class TestAnalysisValidation:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Automatically setup database for all tests in this class."""
-        pass
 
     @pytest.mark.skip(reason="Requires manual dialog interaction - run locally with UI")
     def test_analysis_with_insufficient_data(self, qtbot):

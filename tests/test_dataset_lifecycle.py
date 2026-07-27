@@ -23,7 +23,6 @@ class TestDatasetCreationWorkflow:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Setup database for all tests."""
-        pass
 
     def test_create_dataset_with_variables_and_objects(self, qtbot):
         """Test complete workflow: create dataset → add variables → add objects."""
@@ -211,7 +210,6 @@ class TestDatasetDeletionWorkflow:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Setup database for all tests."""
-        pass
 
     def test_delete_dataset_cascades_to_objects(self, qtbot):
         """Test deleting dataset also deletes all its objects."""
@@ -268,7 +266,6 @@ class TestDatasetModificationWorkflow:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Setup database for all tests."""
-        pass
 
     def test_add_variable_to_existing_dataset(self, qtbot):
         """Test adding variable to dataset with existing objects."""
@@ -354,7 +351,6 @@ class TestLargeDatasetWorkflow:
     @pytest.fixture(autouse=True)
     def setup_database(self, mock_database):
         """Setup database for all tests."""
-        pass
 
     def test_create_dataset_with_many_objects(self, qtbot):
         """Test creating dataset with 100+ objects."""

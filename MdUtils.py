@@ -121,7 +121,6 @@ try:
     ensure_directories()
 except Exception as e:
     print(f"Warning: Directory initialization failed: {e}")
-    pass
 
 
 def resource_path(relative_path):
@@ -366,9 +365,9 @@ def read_landmark_file(file_path):
 
     if file_ext == ".tps":
         return read_tps_file(file_path)
-    elif file_ext == ".nts":
+    if file_ext == ".nts":
         return read_nts_file(file_path)
-    elif file_ext == ".txt":
+    if file_ext == ".txt":
         # Try to detect format
         try:
             from components.formats._encoding import open_text
@@ -377,7 +376,7 @@ def read_landmark_file(file_path):
                 first_line = f.readline().strip()
                 if first_line.startswith("LM="):
                     return read_tps_file(file_path)
-                elif "DIM=" in first_line:
+                if "DIM=" in first_line:
                     return read_nts_file(file_path)
         except (FileNotFoundError, PermissionError) as e:
             logger.error(f"Cannot read landmark file {file_path}: {e}")

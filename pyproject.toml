@@ -45,6 +45,11 @@ select = [
               # .astimezone(); tests and dev/build scripts are per-file-ignored.
     "C901",   # cyclomatic complexity — enforced as a *ratchet*, see
               # [tool.ruff.lint.mccabe] below.
+    "PIE",    # flake8-pie — 64 violations, 62 of them a stray `pass` left behind
+              # when a body gained real statements; autofixed. The 2 PIE810 sites
+              # were literal-argument startswith() chains, folded into tuples.
+    "RET",    # flake8-return — 58 violations, mostly `else` after `return`;
+              # autofixed. RET504 is ignored below.
     # Phased adoption of further groups is planned in devlog R05 (measured
     # violation counts + handling per group). Add them here as each phase lands.
 ]
@@ -65,6 +70,14 @@ ignore = [
     "S112",  # try-except-continue — same, in per-item loops
     "S311",  # non-crypto random — only used for viewer color-picking/visuals; the
              # app has no cryptographic use of randomness
+    # flake8-return noise:
+    "RET504",  # assign-then-return. 16 sites, 9 in application code, nearly all in
+               # numeric routines (`rot_mx = np.dot(v, w); return rot_mx`,
+               # `normal = normal / norm(normal); return normal`). The name is what
+               # says which quantity is being returned, and keeping the binding is
+               # what makes the value inspectable — MdModel has a commented-out
+               # print of exactly such a variable next to the return. Inlining
+               # these trades documentation for one fewer line.
 ]
 
 [tool.ruff.lint.mccabe]

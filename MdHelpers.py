@@ -932,8 +932,7 @@ def format_number(value: int | float, precision: int = 6, scientific: bool = Fal
     """
     if scientific:
         return f"{value:.{precision}e}"
-    else:
-        return f"{value:.{precision}f}".rstrip("0").rstrip(".")
+    return f"{value:.{precision}f}".rstrip("0").rstrip(".")
 
 
 def calculate_centroid(points: list[list[float]]) -> list[float]:

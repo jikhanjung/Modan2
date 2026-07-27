@@ -270,7 +270,7 @@ Development Setup
 Prerequisites
 ~~~~~~~~~~~~~
 
-- **Python**: 3.11 or newer
+- **Python**: 3.12 or newer
 - **Git**: For version control
 - **IDE**: VSCode, PyCharm, or any Python IDE
 - **Operating System**: Windows, macOS, or Linux
@@ -309,9 +309,13 @@ Running from Source
 
 .. code-block:: bash
 
-   python Modan2.py
+   python main.py
 
-**Linux/WSL**: If Qt errors occur:
+``main.py`` is the entry point; ``Modan2.py`` is a module it imports, not a
+script. Useful flags: ``--debug``, ``--db <path>``, ``--config <path>``,
+``--lang <en|ko>``, ``--no-splash``.
+
+**Linux/WSL**: if Qt cannot load its ``xcb`` platform plugin:
 
 .. code-block:: bash
 
@@ -322,10 +326,65 @@ Development Dependencies
 
 Installed via ``config/requirements-dev.txt``:
 
-- ``pytest``: Testing framework
-- ``pytest-cov``: Code coverage
-- ``pytest-qt``: PyQt5 testing support (future)
-- ``ruff``: Linting (future)
+- ``pytest``, ``pytest-cov``, ``pytest-qt``, ``pytest-mock``: the test suite
+- ``ruff``: linting and formatting (enforced in CI)
+- ``mypy``: type checking
+- ``pre-commit``: the commit hooks
+
+Project Layout
+~~~~~~~~~~~~~~
+
+.. code-block:: text
+
+   Modan2/
+   ├── main.py               Entry point (--debug, --db, --config, --lang, --no-splash)
+   ├── Modan2.py             ModanMainWindow, imported by main.py
+   ├── ModanController.py    Controller layer: DB/file I/O, analysis runs
+   ├── MdModel.py            Peewee models + Procrustes/superimposition operations
+   ├── MdStatistics.py       PCA, CVA, MANOVA
+   ├── MdUtils.py            Utilities and paths
+   ├── MdHelpers.py          Shared helpers (guard_slot, geometry, …)
+   ├── MdConstants.py        Shared constants
+   ├── dialogs/              One module per dialog
+   ├── components/
+   │   ├── viewers/          ObjectViewer2D, ObjectViewer3D
+   │   ├── widgets/          Custom PyQt5 widgets
+   │   └── formats/          TPS / NTS / X1Y1 / Morphologika readers
+   ├── migrations/           Database migrations
+   ├── tests/                pytest suite
+   ├── docs/manual/          This manual (Sphinx, .rst)
+   └── devlog/               Development log
+
+``ModanComponents.py`` is a backward-compatibility shim re-exporting
+``components/``; new code should import from ``components.<subpackage>`` and
+``dialogs.<module>`` directly.
+
+Code Quality Tools
+~~~~~~~~~~~~~~~~~~
+
+Ruff handles both linting and formatting; configuration lives in
+``pyproject.toml`` (line length 120, target Python 3.12).
+
+.. code-block:: bash
+
+   ruff format .          # format
+   ruff check .           # lint
+   ruff check --fix .     # lint and auto-fix
+
+Type checking is optional locally but runs in CI:
+
+.. code-block:: bash
+
+   mypy MdStatistics.py MdUtils.py
+
+Pre-commit runs the same checks before each commit:
+
+.. code-block:: bash
+
+   pre-commit install         # one-time setup
+   pre-commit run --all-files # run manually
+
+Before pushing, the short version is: ``ruff check . && ruff format . && pytest``.
 
 Testing
 -------
@@ -486,6 +545,146 @@ PyQt5 Patterns
        finally:
            QApplication.restoreOverrideCursor()
        return result
+
+Common Tasks
+------------
+
+Adding a New Dialog
+~~~~~~~~~~~~~~~~~~~
+
+Dialogs live one per module under ``dialogs/`` and inherit ``BaseDialog``, which
+supplies the title, geometry save/restore, ``show_error`` / ``show_warning`` /
+``show_info``, ``with_wait_cursor``, and ``create_button_box``.
+
+.. code-block:: python
+
+   # dialogs/my_new_dialog.py
+   from PyQt5.QtWidgets import QLabel, QVBoxLayout
+
+   from dialogs.base_dialog import BaseDialog
+
+
+   class MyNewDialog(BaseDialog):
+       """Dialog for the new feature."""
+
+       def __init__(self, parent=None):
+           super().__init__(parent, title="My New Dialog")
+           self._create_widgets()
+           self._create_layout()
+           self._connect_signals()
+
+       def _create_widgets(self):
+           self.lblInfo = QLabel("Information goes here")
+
+       def _create_layout(self):
+           layout = QVBoxLayout()
+           layout.addWidget(self.lblInfo)
+           layout.addWidget(self.create_button_box())
+           self.setLayout(layout)
+
+       def _connect_signals(self):
+           pass
+
+Export it from ``dialogs/__init__.py`` (import it and add the name to
+``__all__``), then open it from the main window:
+
+.. code-block:: python
+
+   from dialogs import MyNewDialog
+
+   @guard_slot("Failed to open the new feature")
+   def on_action_new_feature_triggered(self):
+       dialog = MyNewDialog(self)
+       if dialog.exec_() == QDialog.Accepted:
+           ...
+       dialog.deleteLater()
+
+.. note::
+   Wrap slots in ``@guard_slot`` so an exception surfaces as an error dialog
+   instead of silently closing the window, and call ``deleteLater()`` after
+   ``exec_()`` — parented dialogs are otherwise never freed.
+
+Add a test under ``tests/dialogs/``:
+
+.. code-block:: python
+
+   def test_dialog_creation(qtbot):
+       dialog = MyNewDialog()
+       qtbot.addWidget(dialog)
+       assert dialog.windowTitle() == "My New Dialog"
+
+Adding a New Analysis Method
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A single analysis run performs the superimposition and then computes PCA, CVA,
+and MANOVA together — there is no per-analysis-type switch to extend. Statistical
+routines live in ``MdStatistics.py`` and follow the ``do_*_analysis`` convention
+(``do_pca_analysis``, ``do_cva_analysis``, ``do_manova_analysis``), taking
+landmark data plus grouping and returning a result dictionary.
+
+.. code-block:: python
+
+   # MdStatistics.py
+   def do_new_analysis(landmarks_data, groups=None):
+       """Perform the new analysis.
+
+       Args:
+           landmarks_data: sequence of (n_landmarks, n_dims) arrays
+           groups: per-object group labels, when the method needs them
+
+       Returns:
+           dict with the results and any summary statistics
+       """
+       if not landmarks_data:
+           raise ValueError("landmarks_data cannot be empty")
+       ...
+
+Call it from ``ModanController.run_analysis``, which already receives
+``superimposition_method``, ``cva_group_by``, and ``manova_group_by``, and
+persist the output alongside the other results in ``_persist_analysis_results``.
+Anything you want to keep needs a field on ``MdAnalysis`` and a migration (see
+`Database Migrations`_).
+
+Cover the new routine in ``tests/test_mdstatistics.py``; that module has the
+highest coverage in the project and is the right place to keep it.
+
+Adding a New File Format
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Readers live in ``components/formats/`` — one module per format, each exposing a
+class (``TPS``, ``NTS``, ``X1Y1``, ``Morphologika``).
+
+.. code-block:: python
+
+   # components/formats/newformat.py
+   from components.formats._encoding import open_text
+
+
+   class NewFormat:
+       def __init__(self, filename, datasetname, invertY=False):
+           self.filename = filename
+           self.dataset_name = datasetname
+           self.invertY = invertY
+           self.nlandmarks = 0
+           self.object_name_list = []
+           self.landmark_data = {}
+
+       def read(self):
+           with open_text(self.filename) as f:
+               ...
+
+.. important::
+   Open files through ``components/formats/_encoding.py``'s ``open_text``, not
+   plain ``open()``. It tries UTF-8, then the platform encoding, then latin-1, so
+   a file with non-ASCII specimen names imports on any locale.
+
+   Set ``nlandmarks`` from the data rather than leaving it at zero — that was a
+   real bug in the X1Y1 reader.
+
+Export the class from ``components/formats/__init__.py``, add a radio button and
+a branch in ``dialogs/import_dialog.py``, and add parser tests under ``tests/``
+covering a well-formed file, a malformed one (it must raise a clear error, not
+crash), and a non-ASCII specimen name.
 
 Contributing
 ------------
@@ -807,7 +1006,7 @@ Profiling and Optimization
 
 .. code-block:: bash
 
-   python -m cProfile -o profile.stats Modan2.py
+   python -m cProfile -o profile.stats main.py
    # Analyze with snakeviz
    pip install snakeviz
    snakeviz profile.stats
@@ -817,24 +1016,70 @@ Profiling and Optimization
 .. code-block:: bash
 
    pip install memory_profiler
-   python -m memory_profiler Modan2.py
+   python -m memory_profiler main.py
 
 Debugging
 ~~~~~~~~~
 
-**Enable detailed logging**:
+**Logging**. Modules take a standard module-level logger; ``main.py`` configures
+the handlers in ``setup_logging()``, and ``--debug`` raises the level.
 
 .. code-block:: python
 
-   # In Modan2.py
-   logging.basicConfig(level=logging.DEBUG)
+   import logging
+
+   logger = logging.getLogger(__name__)
+
+   logger.debug("Detailed debugging info")
+   logger.error("Something failed", exc_info=True)
+
+Log files are written to ``~/PaleoBytes/Modan2/logs/``.
 
 **Qt debugging**:
 
 .. code-block:: bash
 
    export QT_DEBUG_PLUGINS=1
-   python Modan2.py
+   python main.py --debug
+
+**Database debugging**. Peewee logs the SQL it emits:
+
+.. code-block:: python
+
+   import logging
+
+   logging.getLogger("peewee").addHandler(logging.StreamHandler())
+   logging.getLogger("peewee").setLevel(logging.DEBUG)
+
+To inspect the database directly:
+
+.. code-block:: bash
+
+   sqlite3 ~/PaleoBytes/Modan2/Modan2.db "PRAGMA integrity_check"
+
+Useful Commands
+~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+   # Development
+   pytest                              # run the suite
+   pytest --cov=. --cov-report=html    # coverage report
+   pytest --lf                         # re-run last failures
+   ruff check . && ruff format .       # lint and format
+   pre-commit run --all-files          # all hooks
+
+   # Performance
+   python scripts/benchmark_analysis.py     # analysis benchmarks
+   python scripts/benchmark_large_scale.py  # large-dataset benchmarks
+   python scripts/profile_detailed.py       # profiling
+   snakeviz benchmarks/*.prof               # view a profile
+
+   # Database
+   python migrate.py                        # run migrations
+
+   # Build
+   python build.py                          # build the executable
 
 Resources
 ---------

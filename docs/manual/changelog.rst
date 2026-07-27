@@ -53,9 +53,9 @@ Changed / Internal
 - Cross-platform CI (Linux/Windows/macOS) with an import smoke test; linting,
   formatting, type-checking (mypy), a dependency CVE scan, and a coverage floor
   are now enforced.
-- A complexity-refactoring campaign brought every application function under a
-  cyclomatic complexity of 15 (was 56), with characterization tests added for the
-  viewers.
+- A complexity-refactoring campaign brought the worst application function from a
+  cyclomatic complexity of 56 down to 21, with characterization tests added for
+  the viewers.
 
 Version 0.2.0-alpha.1 (2026-07-23)
 -----------------------------------

@@ -72,9 +72,23 @@ entries across devlogs 261–262). `main.py`'s `--db` help was corrected too.
       after refactoring the single function above it. Note the campaign in devlog
       242 never actually got everything under 15 — 12 functions were over it before
       this session — and the CHANGELOG claim was corrected to match.
-- [ ] **Lower the ratchet to 19**, blocked by one function:
-      `tools/search_index.py::find_wait_cursor_methods` (20). Then keep stepping it
-      down; 7 application functions remain above 15.
+- [x] **Lower the ratchet to 19** — **DONE 2026-07-27**. 19 is the application's
+      own ceiling; the limit had only sat higher because two `tools/` scripts (not
+      imported by the app, not shipped) were above it. Both were split.
+- [ ] **Keep stepping the ratchet down.** 10 functions are over 15: 7 in
+      application code — `rotate_gls_to_reference_shape` (19), `on_canvas_move`
+      (19), `mouseReleaseEvent` (17), `main` (17), `run_analysis` (16),
+      `pick_shape` (16), `on_btnSaveResults_clicked` (16) — and 3 in `tests/` and
+      `scripts/` (16 each). Note `run_analysis` was decomposed in devlog 176–178
+      and has crept back to 16 as superimposition methods were added.
+- [ ] **`search_index.py --wait-cursor` does not complete.** `build_index.py`
+      stores `file_stats` keyed by basename (`filepath.name`), so 127 of 146
+      entries miss a direct path lookup and fall back to `rglob` over the entire
+      tree — 127 full walks including `.git`, `build`, `dist`, `AppDir`, on a
+      `/mnt/d` mount. Either store relative paths in the index (cleaner, but the
+      other lookups read the same keys) or have the search tool walk once and keep
+      a basename → path map. A documented command in `CLAUDE.md` is currently
+      unusable here.
 - [ ] `developer_guide.rst` says `python Modan2.py` (3 sites) and references
       `Output/Modan2-Setup.exe`; source instructions belong there, but they should
       name `main.py` and the real installer name.

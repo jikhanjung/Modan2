@@ -51,7 +51,7 @@ def parse_arguments():
 
     parser.add_argument("--debug", action="store_true", help="Enable debug mode with verbose logging")
 
-    parser.add_argument("--db", type=str, help="Database file path (default: ~/.modan2/modan2.db)")
+    parser.add_argument("--db", type=str, help="Database file path (default: ~/PaleoBytes/Modan2/Modan2.db)")
 
     parser.add_argument("--config", type=str, help="Configuration file path (default: ~/.modan2/config.json)")
 

@@ -7,103 +7,70 @@ This guide provides solutions to common problems and errors you may encounter wh
    :local:
    :depth: 2
 
+.. _where-things-live:
+
+Where Modan2 Keeps Your Files
+-----------------------------
+
+Several problems below come down to a file being missing or unwritable, so it
+helps to know where things are. ``~`` is your home folder (for example
+``C:\Users\<you>`` on Windows).
+
++------------------+--------------------------------------+
+| What             | Where                                |
++==================+======================================+
+| Database         | ``~/PaleoBytes/Modan2/Modan2.db``    |
++------------------+--------------------------------------+
+| Images, 3D models| ``~/PaleoBytes/Modan2/data/``        |
++------------------+--------------------------------------+
+| Log files        | ``~/PaleoBytes/Modan2/logs/``        |
++------------------+--------------------------------------+
+| Backups          | ``~/PaleoBytes/Modan2/backups/``     |
++------------------+--------------------------------------+
+| Settings         | ``~/.modan2/config.json``            |
++------------------+--------------------------------------+
+
 Installation Issues
 -------------------
 
-Python Import Errors
-~~~~~~~~~~~~~~~~~~~~
+Application Will Not Start
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Problem:** ``ImportError: No module named 'PyQt5'`` or similar module not found errors
+**Windows**
 
-**Solution:**
+* Windows Defender or SmartScreen may block the unsigned installer. Choose
+  "More info" → "Run anyway" if you trust the source.
+* If the installer itself will not run, check that you extracted it from the
+  downloaded ZIP first — running it from inside the archive can fail.
 
-1. Ensure you have installed all dependencies:
+**macOS**
 
-   .. code-block:: bash
+* On first launch, right-click the app and choose "Open" to get past the
+  Gatekeeper warning for unsigned applications.
 
-      pip install -r requirements.txt
+**Linux**
 
-2. If using a virtual environment, verify it is activated:
+* Make sure the AppImage is executable: ``chmod +x Modan2-Linux-*.AppImage``
+* If it exits complaining about FUSE, either install it
+  (``sudo apt-get install libfuse2`` on Ubuntu/Debian) or run it with
+  ``--appimage-extract-and-run``.
 
-   .. code-block:: bash
-
-      # Windows
-      venv\Scripts\activate
-
-      # Linux/macOS
-      source venv/bin/activate
-
-3. Try reinstalling the specific missing package:
-
-   .. code-block:: bash
-
-      pip install PyQt5 --upgrade
-
-**Problem:** ``ModuleNotFoundError: No module named 'OpenGL'``
-
-**Solution (Linux):**
-
-.. code-block:: bash
-
-   # Ubuntu/Debian
-   sudo apt-get update
-   sudo apt-get install python3-opengl libglu1-mesa freeglut3
-
-   # Fedora
-   sudo dnf install python3-pyopengl mesa-libGLU freeglut
-
-**Solution (Windows/macOS):**
-
-.. code-block:: bash
-
-   pip install PyOpenGL PyOpenGL-accelerate
-
-Qt Platform Plugin Issues (Linux/WSL)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-**Problem:** ``qt.qpa.plugin: Could not load the Qt platform plugin "xcb"``
-
-**Symptoms:**
-
-* Application fails to start
-* Error message about Qt plugins
-* Black screen or crash on startup
-
-**Solution 1: Use fix script**
-
-.. code-block:: bash
-
-   python fix_qt_import.py
-
-This script sets the correct Qt plugin path for your system.
-
-**Solution 2: Install XCB libraries**
-
-.. code-block:: bash
-
-   # Ubuntu/Debian
-   sudo apt-get install -y libxcb-xinerama0 libxcb-icccm4 \
-     libxcb-image0 libxcb-keysyms1 libxcb-randr0 \
-     libxcb-render-util0 libxcb-xfixes0 libxcb-shape0 libxcb-cursor0
-
-**Solution 3: Set environment variable**
-
-.. code-block:: bash
-
-   export QT_QPA_PLATFORM_PLUGIN_PATH=/usr/lib/x86_64-linux-gnu/qt5/plugins/platforms
-   python Modan2.py
+.. note::
+   Only the Windows build is well tested. If the macOS or Linux package fails in
+   a way not covered here, please report it on the
+   `issues page <https://github.com/jikhanjung/Modan2/issues>`_.
 
 Permission Issues
 ~~~~~~~~~~~~~~~~~
 
-**Problem:** "Permission denied" when opening database or saving files
+**Problem:** "Permission denied" when opening the database or saving files
 
 **Windows Solution:**
 
 1. Right-click Modan2.exe → "Run as administrator" (not recommended for normal use)
 2. Or change folder permissions:
 
-   * Right-click folder → Properties → Security
+   * Right-click the folder → Properties → Security
    * Ensure your user has "Full control"
 
 **Linux/macOS Solution:**
@@ -111,41 +78,29 @@ Permission Issues
 .. code-block:: bash
 
    # Check permissions
-   ls -la ~/.local/share/Modan2
+   ls -la ~/PaleoBytes/Modan2
 
    # Fix permissions if needed
-   chmod -R u+rw ~/.local/share/Modan2
-   chmod -R u+rw ~/.config/Modan2
+   chmod -R u+rw ~/PaleoBytes/Modan2
+   chmod -R u+rw ~/.modan2
 
 **Problem:** Settings not saving
 
-**Location of settings files:**
-
-* Windows: ``%APPDATA%\Modan2\settings.json``
-* Linux/macOS: ``~/.config/Modan2/settings.json``
+Settings live in ``~/.modan2/config.json`` and are written when the application
+exits.
 
 **Solution:**
 
-1. Check write permissions on the config directory
-2. Manually create the directory if it doesn't exist:
+1. Check write permissions on that directory
+2. Delete a corrupted settings file to regenerate defaults — quit Modan2 first:
 
    .. code-block:: bash
 
       # Windows (PowerShell)
-      mkdir "$env:APPDATA\Modan2"
+      rm "$env:USERPROFILE\.modan2\config.json"
 
       # Linux/macOS
-      mkdir -p ~/.config/Modan2
-
-3. Delete corrupted settings file to regenerate defaults:
-
-   .. code-block:: bash
-
-      # Windows (PowerShell)
-      rm "$env:APPDATA\Modan2\settings.json"
-
-      # Linux/macOS
-      rm ~/.config/Modan2/settings.json
+      rm ~/.modan2/config.json
 
 Database Issues
 ---------------
@@ -180,17 +135,16 @@ Ensure no other Modan2 processes are running:
 .. code-block:: bash
 
    # 1. Locate database
-   # Windows: %APPDATA%\Modan2\modan.db
-   # Linux: ~/.local/share/Modan2/modan.db
+   # Database: ~/PaleoBytes/Modan2/Modan2.db
 
    # 2. Make backup
-   cp modan.db modan.db.backup
+   cp Modan2.db Modan2.db.backup
 
    # 3. Try SQLite repair
-   sqlite3 modan.db "PRAGMA integrity_check;"
+   sqlite3 Modan2.db "PRAGMA integrity_check;"
 
    # 4. If corrupted beyond repair, restore from backup
-   cp modan.db.backup modan.db
+   cp Modan2.db.backup Modan2.db
 
 **Solution 3: Export and reimport**
 
@@ -198,7 +152,7 @@ If you have a recent backup:
 
 1. Use backup database
 2. Export all datasets as JSON+ZIP
-3. Create new database (delete modan.db)
+3. Create new database (delete Modan2.db)
 4. Import datasets from JSON+ZIP
 
 Cannot Access Database
@@ -220,7 +174,7 @@ Cannot Access Database
    .. code-block:: bash
 
       # Linux/macOS
-      ls -la ~/.local/share/Modan2/modan.db
+      ls -la ~/PaleoBytes/Modan2/Modan2.db
 
 2. **Check disk space:**
 
@@ -236,7 +190,7 @@ Cannot Access Database
 
    .. code-block:: bash
 
-      mkdir -p ~/.local/share/Modan2
+      mkdir -p ~/PaleoBytes/Modan2
 
 4. **Let Modan2 create new database:**
 
@@ -425,9 +379,8 @@ Procrustes Alignment Issues
 
 2. **Try different method:**
 
-   * Full Procrustes → Partial Procrustes
-   * Or use Bookstein registration
-   * Or try Resistant Fit
+   * Try Bookstein registration (needs a baseline on the dataset)
+   * Or try Resistant Fit, which resists a few badly-placed landmarks
 
 3. **Check for outliers:**
 
@@ -590,7 +543,7 @@ Application Slow to Start
 
    .. code-block:: bash
 
-      sqlite3 modan.db "VACUUM;"
+      sqlite3 Modan2.db "VACUUM;"
 
 3. **Move to SSD:**
 
@@ -682,13 +635,7 @@ UI Elements Not Displaying Correctly
    * Set scaling to 100% or 125%
    * Restart Modan2
 
-2. **Update Qt:**
-
-   .. code-block:: bash
-
-      pip install --upgrade PyQt5
-
-3. **Reset window geometry:**
+2. **Reset window geometry:**
 
    * Delete settings file (see above)
    * Restart Modan2
@@ -725,17 +672,18 @@ High DPI Display Issues
    * Compatibility → High DPI settings
    * Override scaling behavior
 
-2. **Set environment variable:**
+2. **Set the Qt scaling environment variable** before launching Modan2:
 
    .. code-block:: bash
 
       # Windows (PowerShell)
       $env:QT_AUTO_SCREEN_SCALE_FACTOR=1
-      python Modan2.py
 
       # Linux/macOS
       export QT_AUTO_SCREEN_SCALE_FACTOR=1
-      python Modan2.py
+
+   This is a Qt setting, not a Modan2 one; it must be set in the same shell you
+   start the application from.
 
 Advanced Troubleshooting
 -------------------------
@@ -747,80 +695,56 @@ When reporting issues, include this information:
 
 1. **System Information:**
 
-   .. code-block:: bash
-
-      # Python version
-      python --version
-
-      # OS version
-      # Windows: winver
-      # macOS: sw_vers
-      # Linux: lsb_release -a
+   * Your OS and its version
+     (Windows: ``winver``; macOS: ``sw_vers``; Linux: ``lsb_release -a``)
 
 2. **Modan2 version:**
 
    * Help → About Modan2
-   * Note version number
+   * Note the version and build number, which also appear in the name of the
+     package you downloaded
 
 3. **Log files:**
 
-   * Windows: ``%APPDATA%\Modan2\logs\``
-   * Linux/macOS: ``~/.local/share/Modan2/logs/``
-   * Help → View Logs
-
-4. **Package versions:**
-
-   .. code-block:: bash
-
-      pip list | grep -E "PyQt5|numpy|scipy|peewee"
+   * ``~/PaleoBytes/Modan2/logs/`` — attach the most recent one
 
 Enabling Debug Logging
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-To get more detailed logs:
-
-1. **Via Settings (future feature):**
-
-   * Settings → Advanced → Logging
-   * Set "Log level" to "DEBUG"
-
-2. **Via Environment Variable:**
-
-   .. code-block:: bash
-
-      # Linux/macOS
-      export MODAN2_LOG_LEVEL=DEBUG
-      python Modan2.py
-
-      # Windows (PowerShell)
-      $env:MODAN2_LOG_LEVEL="DEBUG"
-      python Modan2.py
-
-3. **View logs in real-time:**
-
-   .. code-block:: bash
-
-      # Linux/macOS
-      tail -f ~/.local/share/Modan2/logs/modan2_*.log
-
-      # Windows PowerShell
-      Get-Content -Path "$env:APPDATA\Modan2\logs\modan2_*.log" -Wait
-
-Running in Safe Mode
-~~~~~~~~~~~~~~~~~~~~
-
-To disable optimizations and troubleshoot:
+Start Modan2 with ``--debug`` for verbose logging. Launch it from a terminal (or
+a Windows shortcut with the flag appended) so you can also see any startup error
+printed there:
 
 .. code-block:: bash
 
-   # Run from command line to see errors
-   python Modan2.py
+   # Linux (AppImage)
+   ./Modan2-Linux-v<version>-build<build>.AppImage --debug
 
-   # With debug output
-   python Modan2.py --verbose
+   # macOS
+   /Applications/Modan2.app/Contents/MacOS/Modan2 --debug
 
-   # Without 3D visualization (if OpenGL issues)
-   python Modan2.py --no-3d
+   # Windows (PowerShell), from the installation folder
+   .\Modan2.exe --debug
+
+**View logs in real time:**
+
+.. code-block:: bash
+
+   # Linux/macOS
+   tail -f ~/PaleoBytes/Modan2/logs/*.log
+
+   # Windows PowerShell
+   Get-Content -Path "$env:USERPROFILE\PaleoBytes\Modan2\logs\*.log" -Wait
+
+Other Startup Options
+~~~~~~~~~~~~~~~~~~~~~
+
+* ``--db <path>`` — open a different database, useful for testing whether the
+  problem is in your data or in the application
+* ``--config <path>`` — use a different configuration file, to rule out a bad
+  setting without deleting your own
+* ``--no-splash`` — skip the splash screen
+* ``--lang <en|ko>`` — force the interface language
 
 Common Error Messages
 ---------------------
@@ -880,8 +804,7 @@ If this guide doesn't solve your problem:
    Include:
 
    * Operating system and version
-   * Python version (``python --version``)
-   * Modan2 version
+   * Modan2 version and build number
    * Error message or description
    * Steps to reproduce
    * Log files (see "Collecting Debug Information" above)
@@ -904,43 +827,38 @@ Known Issues and Limitations
 Current Limitations
 ~~~~~~~~~~~~~~~~~~~
 
-1. **Missing landmark estimation:**
+1. **Semi-landmark curves are 2D only:**
 
-   * Limited to TPS interpolation
-   * More methods planned
+   * Curve tracing is available for 2D specimens; 3D curve tracing is not
+     implemented yet
+   * Semi-landmarks are not slid during Procrustes alignment
 
-2. **3D Export Formats:**
+2. **Testing coverage by platform:**
 
-   * Analysis results to CSV/Excel only
-   * More formats planned
+   * Only the Windows build is well tested
+   * macOS builds are not code-signed (first launch requires manual approval)
+   * The Linux AppImage may need FUSE installed
 
-3. **Platform-Specific:**
+3. **GUI only:**
 
-   * macOS builds not code-signed (requires manual approval)
-   * Linux may need manual Qt plugin configuration
+   * There is no batch/headless mode; the startup options exist to configure a
+     normal GUI session, not to run analyses without one
 
-4. **GUI Only:**
+4. **Language:**
 
-   * No command-line interface yet
-   * Cannot run in headless mode
-
-5. **Language:**
-
-   * UI primarily English
-   * Korean translation partially complete
-   * More languages planned
+   * English and Korean interfaces are available
+   * Some newer dialogs (notably Curve mode) are still English-only in the
+     Korean interface
 
 Planned Improvements
 ~~~~~~~~~~~~~~~~~~~~
 
-See CHANGELOG and GitHub milestones for planned features:
+See the CHANGELOG and GitHub milestones for planned features:
 
-* Command-line interface for batch processing
-* Enhanced 3D visualization
-* More analysis methods
-* Improved documentation
+* 3D semi-landmark curve tracing
+* Sliding semi-landmarks during alignment
+* Image-assisted landmark suggestion
 * Better cross-platform support
-* Plugin system
 
 Contributing
 ------------

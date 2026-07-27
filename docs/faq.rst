@@ -110,33 +110,29 @@ See the Installation Guide for detailed instructions.
 Where is my data stored?
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Database Location:**
+``~`` below is your home folder (for example ``C:\Users\<you>`` on Windows).
 
-* Windows: ``%APPDATA%\Modan2\modan.db``
-* Linux/macOS: ``~/.local/share/Modan2/modan.db``
+* **Database:** ``~/PaleoBytes/Modan2/Modan2.db``
+* **Images and 3D models:** ``~/PaleoBytes/Modan2/data/``
+* **Log files:** ``~/PaleoBytes/Modan2/logs/``
+* **Backups:** ``~/PaleoBytes/Modan2/backups/``
+* **Settings:** ``~/.modan2/config.json``
 
-**Settings File:**
-
-* Windows: ``%APPDATA%\Modan2\settings.json``
-* Linux/macOS: ``~/.config/Modan2/settings.json``
-
-**Log Files:**
-
-* Windows: ``%APPDATA%\Modan2\logs\``
-* Linux/macOS: ``~/.local/share/Modan2/logs/``
-
-**Note:** Original image and 3D model files remain in their original locations. Only landmark data is stored in the database.
+**Note:** When you attach an image or 3D model, Modan2 copies it into its own
+``data/`` folder, so your originals are left where they are. An oversized photo
+(longer side above 2560 px) is stored as a smaller working copy with the
+full-resolution original archived alongside it.
 
 Can I backup my data?
 ~~~~~~~~~~~~~~~~~~~~~
 
 **Yes!** Multiple backup options:
 
-1. **Copy database file**
+1. **Copy the data folder**
 
-   * Locate ``modan.db`` (see above)
-   * Copy to backup location
-   * Restore by replacing database file
+   * Copy ``~/PaleoBytes/Modan2/`` — it holds the database and the media files
+   * Restore by putting it back
+   * Quit Modan2 first, so the database is not mid-write
 
 2. **Export datasets**
 
@@ -225,16 +221,38 @@ Can I have missing landmarks?
 
 **Yes!** Modan2 supports missing landmarks:
 
-* Mark landmarks as "missing" in object dialog
-* Missing landmarks excluded from analyses
-* Visualization shows missing landmarks differently
-* Can estimate missing landmarks from existing data
+* Mark one in the object dialog with **"Add Missing"** / **"Insert Missing"**, or
+  by typing ``MISSING`` into a coordinate cell (a blank cell counts as missing)
+* The viewer draws a hollow circle at each missing landmark's estimated position
+  while **"Show Estimated"** is ticked
+* Marking a landmark missing keeps the landmark count consistent across the
+  dataset, which is what analysis requires
 
-**Estimation methods:**
+**How they are estimated:** Modan2 fits the dataset's mean shape onto the
+landmarks a specimen actually has — matching rotation, scale, and position — and
+reads the missing positions off the fitted mean. During analysis this is repeated
+as the alignment settles (an EM-style loop), and the imputed values are used only
+in the analysis working copy, never written back to your data.
 
-* Thin-plate spline (TPS) interpolation
-* Mean configuration estimation
-* Manual estimation
+**Best practice:** keep missing data under about 10% of landmarks, and keep a good
+number of complete specimens.
+
+Can I capture curves instead of individual points?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Yes — semi-landmark curves** (2D only for now).
+
+You define a curve once for the dataset, with a name and a point count ``N``, then
+trace it on each specimen. Modan2 resamples the trace into ``N`` evenly-spaced
+points along its length, and analysis treats those points like ordinary
+landmarks, appended after the fixed (anatomical) ones.
+
+* Trace in the object dialog's **Curve** mode
+* **"Snap to curve"** (on by default) follows the strongest image edge between
+  your clicks, so a clean outline takes only a few points
+* Editing ``N`` later re-resamples the stored trace — no need to re-trace
+* Curves round-trip through TPS (``CURVES=`` blocks) and the JSON+ZIP package
+* A dataset can be analyzed with only semi-landmarks and no fixed landmarks
 
 Landmark Digitization
 ---------------------
@@ -315,38 +333,40 @@ What analyses does Modan2 support?
 * **CVA (Canonical Variate Analysis):** Analyze group differences
 * **MANOVA (Multivariate Analysis of Variance):** Test group differences
 
-**Procrustes Methods:**
+**Superimposition Methods:**
 
-* **Full Procrustes:** Translation, rotation, scaling
-* **Partial Procrustes:** Translation, rotation only
-* **Bookstein registration:** Align using baseline
-* **Resistant Fit:** Robust to outliers
+* **Procrustes:** translation, rotation, and scaling (the default)
+* **Bookstein:** baseline registration; requires a baseline on the dataset
+* **Resistant Fit:** robust alignment that resists outlier landmarks
+
+All three impute missing landmarks first.
 
 **Shape Analysis:**
 
 * Mean shape calculation
-* Shape differences visualization
-* Regression analysis
-* Size and shape components
+* Shape grid showing how shape changes across a plot
+* Regression overlay on scatter plots
 
-How do I run a PCA analysis?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+How do I run an analysis?
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A single run computes **PCA, CVA, and MANOVA together** — you do not choose an
+analysis type.
 
 **Steps:**
 
-1. Select dataset in tree view
-2. Click Analysis → New Analysis
-3. Analysis Type: PCA
-4. Optional: Select grouping variable for coloring
-5. Click OK
-6. Results appear in new tab
+1. Select the dataset in the tree view
+2. Click **Analyze** (``Ctrl+G``) or use the **Data** menu
+3. Set the analysis name, the superimposition method, and the grouping variables
+   for CVA and MANOVA
+4. Click **OK**
+5. Open the finished analysis in the **Data Exploration** dialog
 
-**PCA Results Include:**
+**Results include:**
 
-* Scree plot (variance explained)
-* Score plots (PC1 vs PC2, etc.)
-* Loadings visualization
-* Shape variation along PCs
+* Score plots (PC1 vs PC2, and other axis combinations)
+* Variance explained per component
+* CVA and MANOVA output for the chosen grouping variables
 * Export options
 
 What is Procrustes superimposition?
@@ -666,7 +686,7 @@ How does the database work?
 
 * **Engine:** SQLite (embedded database)
 * **ORM:** Peewee (Python Object-Relational Mapping)
-* **Location:** Single file (modan.db)
+* **Location:** a single file, ``~/PaleoBytes/Modan2/Modan2.db``
 
 **Tables:**
 
@@ -687,19 +707,15 @@ How does the database work?
 Can I run Modan2 on a server?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Not currently.** Modan2 requires GUI environment.
-
-**Future feature:** Command-line interface for server deployment planned.
+**Not currently.** Modan2 needs a GUI environment; there is no batch or headless
+mode.
 
 **Current workarounds:**
 
-* Use VNC/Remote Desktop for GUI access
-* Or use X11 forwarding over SSH:
-
-  .. code-block:: bash
-
-     ssh -X user@server
-     python Modan2.py
+* Use VNC or Remote Desktop for GUI access
+* Or use X11 forwarding over SSH (``ssh -X user@server``) and launch the
+  application there — note that 3D rendering often does not work over a
+  forwarded session
 
 Development and Contributing
 -----------------------------

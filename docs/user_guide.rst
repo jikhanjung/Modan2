@@ -272,8 +272,8 @@ Placing Landmarks (3D)
 **3D Viewer Controls**:
 
 - **Left-drag**: rotate
-- **Right-drag**: pan
-- **Mouse wheel**: zoom
+- **Middle-drag**: pan
+- **Right-drag** or **mouse wheel**: zoom
 - **3D Model** / **Rotate** checkboxes: show the mesh, and auto-rotate it
 
 Editing Landmark Coordinates
@@ -713,8 +713,8 @@ Visualization
 **Controls**:
 
 - **Rotate**: left-drag
-- **Pan**: right-drag
-- **Zoom**: mouse wheel
+- **Pan**: middle-drag
+- **Zoom**: right-drag or mouse wheel
 
 **Landmark Display**:
 
@@ -856,7 +856,8 @@ Data Organization
 1. **Use consistent naming**: ``species_ID_number.jpg`` (e.g., ``sparrow_001.jpg``)
 2. **Organize hierarchically**: Group related datasets
 3. **Document metadata**: Use description fields
-4. **Back up regularly**: Export database or copy ``modan.db``
+4. **Back up regularly**: export datasets as JSON+ZIP packages, or copy
+   ``~/PaleoBytes/Modan2/`` while Modan2 is closed
 
 Landmark Placement
 ~~~~~~~~~~~~~~~~~~

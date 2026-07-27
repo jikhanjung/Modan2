@@ -20,11 +20,11 @@ Modan2 uses SQLite for data storage. Regular maintenance improves performance.
 .. code-block:: bash
 
    # Using SQLite command line
-   sqlite3 ~/.local/share/Modan2/modan.db "VACUUM;"
+   sqlite3 ~/PaleoBytes/Modan2/Modan2.db "VACUUM;"
 
    # Or using Python
    import sqlite3
-   conn = sqlite3.connect('modan.db')
+   conn = sqlite3.connect('Modan2.db')
    conn.execute('VACUUM')
    conn.close()
 
@@ -124,26 +124,16 @@ Hierarchical Datasets
 
 **Creating child datasets:**
 
-1. Right-click parent dataset
-2. Select "New Child Dataset"
-3. Choose options:
+1. Right-click the parent dataset in the tree
+2. Select **"Add child dataset"**
+3. Fill in the new dataset's dialog as usual — the parent is preset for you
 
-   * Copy landmarks (start with same data)
-   * Different superimposition method
-   * Subset of objects
+A child dataset is a new, empty dataset nested under the parent; objects are not
+copied into it. Use it to organise a study into subsets you populate yourself.
 
 **Use cases:**
 
-**Example 1: Different superimpositions**
-
-.. code-block:: text
-
-   Raw Data (parent)
-   ├── Full Procrustes (child)
-   ├── Partial Procrustes (child)
-   └── Bookstein Registration (child)
-
-**Example 2: Taxonomic subsets**
+**Example 1: Taxonomic subsets**
 
 .. code-block:: text
 
@@ -152,7 +142,7 @@ Hierarchical Datasets
    ├── Species B (child)
    └── Species C (child)
 
-**Example 3: Time periods**
+**Example 2: Time periods**
 
 .. code-block:: text
 
@@ -181,20 +171,34 @@ Batch Operations
 
 **Batch variable editing:**
 
-1. Select dataset
-2. View → Object Table
-3. Edit cells directly
-4. Copy/paste from Excel
+1. Select the dataset
+2. Edit cells directly in the object table
+3. Copy/paste to and from a spreadsheet with ``Ctrl+C`` / ``Ctrl+V``
 
 **Batch import:**
 
-.. code-block:: bash
+Drag several landmark files onto the window at once, or select them together in
+**File → Import** — each becomes an object in the dataset.
 
-   # Import multiple TPS files
-   for file in *.tps; do
-       # Import via GUI or script
-       python import_tps.py "$file"
-   done
+Semi-landmark Curves at Scale
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Curves are defined once for the dataset (a name and a point count ``N``) and then
+traced per specimen, so the semi-landmark count stays consistent across the whole
+dataset by construction.
+
+* **Change ``N`` after tracing.** Editing ``N`` in the curve table re-resamples
+  the stored trace — you do not have to re-trace anything.
+* **Trace fewer clicks.** With **"Snap to curve"** on (the default in Curve
+  mode), the trace follows the strongest image edge between clicks, so a clean
+  outline usually needs only a handful of points.
+* **Remove a curve everywhere.** Right-click a row in the curve table →
+  **"Delete Curve (all specimens)"**.
+* **Round-trip.** ``CURVES=`` / ``POINTS=`` blocks are read from and written to
+  TPS, and the JSON+ZIP package carries the curve scheme and every traced curve.
+
+Semi-landmark curves are a 2D feature. In analysis the derived points are treated
+as ordinary landmarks, appended after the fixed (anatomical) ones.
 
 Database Direct Access
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -227,105 +231,88 @@ Advanced Statistical Analysis
 Custom Analysis Workflows
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Regression Analysis:**
+A single analysis run always computes PCA, CVA, and MANOVA together; the
+exploration below happens afterwards, in the **Data Exploration** dialog.
 
-Use Data Exploration dialog for regression:
+**Regression overlay:**
 
-1. Select dataset with continuous variables
-2. Data Exploration → Regression
-3. Select X and Y variables
-4. View scatter plot with regression line
-5. Export coefficients
+1. Open a completed analysis in **Data Exploration**
+2. Tick **"Show regression"**
+3. Choose the grouping with **Group by**, and whether the line is fitted to
+   **All** points, **By group**, or a **Select group**
 
-**Shape Variation Analysis:**
+**Shape grid:**
 
-Visualize shape changes along PC axes:
+Tick **"Shape grid"** in Data Exploration to draw the shape reconstructed at
+positions across the plot, so you can see how shape changes along each axis.
 
-1. Run PCA
-2. Results → Shape Variation
-3. Select PC axis
-4. View wireframe deformation
-5. Export shape coordinates
+Superimposition Methods
+~~~~~~~~~~~~~~~~~~~~~~~
 
-**Asymmetry Analysis:**
+Modan2 offers three superimposition methods, chosen in the analysis dialog. All
+three impute missing landmarks first (see `Missing Landmark Handling`_).
 
-For bilateral symmetry:
+**Procrustes** (Generalized Procrustes Analysis):
 
-1. Create dataset with symmetric landmark pairs
-2. Define symmetry in wireframe
-3. Run specialized asymmetry analysis
-4. Separate symmetric/asymmetric components
+* Translation + rotation + scaling
+* Standardises centroid size, leaving pure shape
+* The default, and the right choice unless you have a specific reason otherwise
 
-Procrustes Methods
-~~~~~~~~~~~~~~~~~~
+**Bookstein** (baseline registration):
 
-**Full Procrustes:**
+* Re-expresses each shape as Bookstein shape coordinates by fixing the dataset's
+  **baseline** landmarks to a standard position
+* 2D: the baseline endpoints go to (-0.5, 0) and (0.5, 0); 3D uses a 3-point baseline
+* **Requires a baseline defined on the dataset**
+* Useful when a well-defined anatomical axis should anchor the comparison
 
-* Translation + Rotation + Scaling
-* Standardizes size to 1.0
-* Use for pure shape analysis
+**Resistant Fit** (RFTRA):
 
-**Partial Procrustes:**
+* Robust alignment built on repeated medians of pairwise landmark relationships
+* A few displaced (outlier) landmarks do not drag the whole fit the way they can
+  under Procrustes
+* Works for both 2D and 3D
 
-* Translation + Rotation only
-* Preserves size information
-* Use when size is important
+**Choosing a method:**
 
-**Bookstein Registration:**
-
-* Align using baseline (2 landmarks)
-* First 2 landmarks define axis
-* Useful for oriented structures
-
-**Resistant Fit:**
-
-* Robust to outliers
-* Iterative weighting
-* Use with messy data
-
-**Choosing method:**
-
-+------------------+-------------------+------------------+
-| Research Goal    | Recommended       | Notes            |
-+==================+===================+==================+
-| Pure shape       | Full Procrustes   | Remove size      |
-+------------------+-------------------+------------------+
-| Shape + size     | Partial Procrustes| Keep size info   |
-+------------------+-------------------+------------------+
-| Directional data | Bookstein         | Known baseline   |
-+------------------+-------------------+------------------+
-| Noisy data       | Resistant Fit     | Handle outliers  |
-+------------------+-------------------+------------------+
++------------------+-------------------+---------------------------+
+| Research Goal    | Recommended       | Notes                     |
++==================+===================+===========================+
+| Pure shape       | Procrustes        | The default               |
++------------------+-------------------+---------------------------+
+| Anchored on an   | Bookstein         | Needs a dataset baseline  |
+| anatomical axis  |                   |                           |
++------------------+-------------------+---------------------------+
+| A few unreliable | Resistant Fit     | Resists outlier landmarks |
+| landmarks        |                   |                           |
++------------------+-------------------+---------------------------+
 
 Missing Landmark Handling
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Estimation methods:**
+Modan2 fills missing landmarks automatically during analysis with an EM-style
+loop that interleaves alignment and imputation:
 
-1. **TPS Interpolation:**
+1. Align every specimen with the gaps left open — the mean shape ignores them,
+   and each specimen is aligned on the landmarks it actually has.
+2. For each specimen with missing data, fit the current mean shape onto its
+   observed landmarks by a similarity transform (rotation, scale, translation)
+   and read the missing positions off the fitted mean.
+3. Re-align with the filled-in values, then **re-open the original gaps** and
+   re-estimate them from the improved mean.
+4. Repeat step 3 a few times, so estimates improve as the alignment settles and
+   are never fitted on previous estimates.
 
-   * Thin-plate spline from complete landmarks
-   * Smooth interpolation
-   * Works well for few missing landmarks
-
-2. **Mean Substitution:**
-
-   * Use mean configuration
-   * Simple but less accurate
-   * For many missing landmarks
-
-3. **Iterative Estimation:**
-
-   * Estimate → Procrustes → Re-estimate
-   * Converges to best fit
-   * Most accurate but slower
+Imputed values exist only in the analysis working copy — they are never written
+back to the database. The same shape-fitting drives the "Show Estimated" and
+"Show Expected" previews in the Object Dialog.
 
 **Best practices:**
 
 * Limit missing data to < 10% of landmarks
-* Estimate before Procrustes
-* Document which landmarks estimated
-* Sensitivity analysis (compare with/without)
+* Keep a good number of complete (or near-complete) specimens
+* Document which landmarks were missing
+* Sensitivity analysis (compare with/without the affected specimens)
 
 3D Visualization Techniques
 ----------------------------
@@ -335,50 +322,36 @@ Advanced 3D Controls
 
 **Navigation:**
 
-* **Left-drag:** Rotate around center
+* **Left-drag:** Rotate around centre
 * **Middle-drag:** Pan (translate)
-* **Scroll:** Zoom in/out
-* **Shift+drag:** Constrained rotation
-* **Ctrl+drag:** Roll (rotate around view axis)
-* **Double-click:** Reset view
+* **Right-drag** or **scroll wheel:** Zoom in/out
 
-**Viewing modes:**
+**Display toggles** (checkboxes beside the viewer):
 
-1. **Solid:** Default view
-2. **Wireframe:** Show mesh structure
-3. **Points:** Show vertices only
-4. **Solid + wireframe:** Combined view
-
-**Keyboard shortcuts:**
-
-* ``F3``: Toggle 3D view
-* ``W``: Wireframe mode
-* ``S``: Solid mode
-* ``P``: Point mode
-* ``R``: Reset view
-* ``L``: Toggle lighting
+* **3D Model:** show the mesh
+* **Rotate:** spin the model continuously
+* **Wireframe** / **Polygon** / **Baseline:** draw the dataset's landmark
+  connections, filled polygons, and baseline
 
 Landmark Visualization
 ~~~~~~~~~~~~~~~~~~~~~~
 
-**Customization:**
+**Customization** — set in **Edit → Preferences**, separately for 2D and 3D:
 
-* Settings → Visualization → 3D Landmarks
-* Sphere size: 0.5 - 5.0
-* Color: RGB picker
-* Opacity: 0-100%
+* **Landmark** size: Small / Medium / Large
+* **Wireframe** thickness: Thin / Medium / Thick
+* **Index** (label) size: Small / Medium / Large
+* **Background Color** for the viewer
 
 **Landmark labels:**
 
-* Show/hide landmark numbers
-* Font size adjustment
-* Color customization
+* The **Show** checkbox toggles labels
+* The **Index** / **Name** radio buttons choose whether the label is the
+  landmark's number or its dataset-wide name
 
 **Wireframe display:**
 
-* Define connections in dataset dialog
-* Color coding by region
-* Line width adjustment
+* Define the connections in the dataset dialog's wireframe tab
 
 Model Import and Processing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -746,117 +719,70 @@ Settings and Configuration
 Settings File Format
 ~~~~~~~~~~~~~~~~~~~~
 
-Modan2 settings are stored in JSON format.
+Modan2 keeps its settings in a JSON file written when the application exits.
 
-**Location:**
+**Location:** ``~/.modan2/config.json`` on every platform (``~`` is your home
+folder, e.g. ``C:\Users\<you>`` on Windows).
 
-* Windows: ``%APPDATA%\Modan2\settings.json``
-* Linux/macOS: ``~/.config/Modan2/settings.json``
+The data itself lives separately, under ``~/PaleoBytes/Modan2/``: ``data/`` for
+images and 3D models, ``logs/`` for log files, and ``backups/``.
 
-**Example settings.json:**
-
-.. code-block:: json
-
-   {
-     "general": {
-       "language": "en",
-       "remember_window_geometry": true,
-       "remember_last_dataset": true,
-       "auto_save_interval": 300
-     },
-     "visualization": {
-       "landmark_size_2d": 5,
-       "landmark_size_3d": 1.0,
-       "landmark_color": "#FF0000",
-       "wireframe_color": "#0000FF",
-       "show_landmark_labels": true
-     },
-     "analysis": {
-       "default_procrustes": "full",
-       "pca_components": 10,
-       "cva_permutations": 1000
-     },
-     "paths": {
-       "last_import_dir": "/path/to/data",
-       "last_export_dir": "/path/to/exports",
-       "database_path": "~/.local/share/Modan2/modan.db"
-     }
-   }
-
-Backup settings:
+Everything in the file is written by the **Preferences** dialog and by the
+window geometry that is remembered between sessions, so the normal way to change
+a setting is through the UI. To reset Modan2 to defaults, quit it and delete the
+file — it is recreated on the next launch.
 
 .. code-block:: bash
 
    # Backup
-   cp settings.json settings.json.backup
+   cp ~/.modan2/config.json ~/.modan2/config.json.backup
 
    # Restore
-   cp settings.json.backup settings.json
+   cp ~/.modan2/config.json.backup ~/.modan2/config.json
 
-Environment Variables
-~~~~~~~~~~~~~~~~~~~~~
+Command-Line Options
+~~~~~~~~~~~~~~~~~~~~
 
-Control Modan2 behavior via environment variables:
+The application accepts a few options at startup:
 
-**Log level:**
+* ``--db <path>`` — open a specific database instead of the default
+* ``--config <path>`` — use a different configuration file
+* ``--lang <en|ko>`` — start in the given language
+* ``--debug`` — verbose logging
+* ``--no-splash`` — skip the splash screen
+* ``--version`` — print the version and exit
 
-.. code-block:: bash
-
-   export MODAN2_LOG_LEVEL=DEBUG
-   python Modan2.py
-
-**Database location:**
-
-.. code-block:: bash
-
-   export MODAN2_DB_PATH=/custom/path/modan.db
-   python Modan2.py
-
-**Combined example:**
-
-.. code-block:: bash
-
-   #!/bin/bash
-   # Production environment setup
-
-   export MODAN2_DB_PATH=/data/morphometrics/modan.db
-   export MODAN2_LOG_LEVEL=INFO
-   export MODAN2_LOG_DIR=/var/log/modan2
-
-   python Modan2.py
+.. note::
+   Modan2 is not configured through environment variables; use these options (or
+   the Preferences dialog) instead.
 
 Tips and Tricks
 ---------------
 
-Keyboard Power User Shortcuts
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Keyboard Shortcuts
+~~~~~~~~~~~~~~~~~~
 
-**General:**
+**Main window:**
 
 * ``Ctrl+N``: New dataset
-* ``Ctrl+O``: Open/Import
-* ``Ctrl+S``: Save (if editing)
-* ``Ctrl+W``: Close window/tab
-* ``Ctrl+Q``: Quit application
+* ``Ctrl+Shift+N``: New object
+* ``Ctrl+Shift+O``: Edit object
+* ``Ctrl+S``: Save changes
+* ``Ctrl+I``: Import
+* ``Ctrl+E``: Export
+* ``Ctrl+G``: Analyze
+* ``Ctrl+P``: Toggle the object preview
+* ``Ctrl+W``: Exit
+* ``F1``: About
 
-**Navigation:**
+**Object Dialog (Curve mode):**
 
-* ``Ctrl+1`` to ``Ctrl+9``: Switch tabs
-* ``Ctrl+Tab``: Next tab
-* ``Ctrl+Shift+Tab``: Previous tab
+* ``Enter`` / double-click: accept the current trace
+* ``Esc`` / right-click: cancel the current trace
 
-**Analysis:**
+**Tables:**
 
-* ``F5``: Refresh view
-* ``F3``: Toggle 3D view
-* ``Ctrl+R``: Run analysis
-
-**Editing:**
-
-* ``Ctrl+C``: Copy
-* ``Ctrl+V``: Paste
-* ``Ctrl+Z``: Undo
-* ``Ctrl+Y``: Redo (where applicable)
+* ``Ctrl+C`` / ``Ctrl+V``: copy and paste cells (e.g. to and from a spreadsheet)
 
 Workflow Optimization
 ~~~~~~~~~~~~~~~~~~~~~
@@ -906,14 +832,14 @@ Hidden Features
 * Double-click dataset: Expand/collapse
 * Double-click object: Open object dialog
 * Double-click analysis: Open results
-* Double-click 3D view: Reset camera
 
 **Right-click context menus:**
 
-* Right-click dataset: Quick operations
-* Right-click object: Edit/delete options
-* Right-click analysis: Export/delete
-* Right-click table: Copy data
+* Right-click dataset in the tree: add a child dataset, object, or analysis;
+  explore data; reload
+* Right-click a landmark in the 2D viewer: delete it
+* Right-click a curve point (Curve mode): **Delete Point** / **Delete Curve**
+* Right-click a row in the curve table: **Delete Curve (all specimens)**
 
 **Drag-and-drop:**
 

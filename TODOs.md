@@ -125,8 +125,9 @@ entries across devlogs 261–262). `main.py`'s `--db` help was corrected too.
 - **Features (large):** 3D semi-landmark curve tracing (2D only today); sliding
   semi-landmarks during GPA; semi-landmark weighting; image-driven assisted
   landmark suggestion (§ Semi-landmarks below, items 2/2a/2b).
-- **Ruff phased adoption (R05), remaining groups after DTZ:** PIE/RET (mostly
-  autofix, one PR each) → SIM/PERF/A → S-selective → PTH/G/C901.
+- **Ruff phased adoption (R05):** DTZ (258), **PIE/RET done 2026-07-27** (devlog
+  266; RET504 ignored with rationale), **C901 done 2026-07-27** as a ratchet at
+  19. Remaining groups: SIM/PERF/A → PTH/G.
 - **MEDIUM/LOW cleanups still open:** in-method import hoisting; `if x==""`→`if not x`;
   vectorize `MdHelpers` thin helpers; builtin shadowing; redundant `float()`;
   dead branch `object_dialog.py:~936`; stale commented cruft; hardcoded `qt_version`.

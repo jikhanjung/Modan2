@@ -43,6 +43,8 @@ select = [
               # datetime bugs (devlog 258). App timestamps are local wall-clock by
               # intent (filenames, display, build metadata), made explicit with
               # .astimezone(); tests and dev/build scripts are per-file-ignored.
+    "C901",   # cyclomatic complexity — enforced as a *ratchet*, see
+              # [tool.ruff.lint.mccabe] below.
     # Phased adoption of further groups is planned in devlog R05 (measured
     # violation counts + handling per group). Add them here as each phase lands.
 ]
@@ -64,6 +66,21 @@ ignore = [
     "S311",  # non-crypto random — only used for viewer color-picking/visuals; the
              # app has no cryptographic use of randomness
 ]
+
+[tool.ruff.lint.mccabe]
+# Complexity ratchet. The 2026-07-24 refactoring campaign (devlog 242) brought the
+# worst function from 56 down to 21, but C901 was left non-gating, so nothing
+# stopped it climbing back and the CHANGELOG's "every function under 15" was never
+# actually true. This pins a ceiling: the rule passes today, and no function can
+# get more complex than the ones already here.
+#
+# Lower it as functions are split — never raise it. Distribution at the time of
+# writing: > 18: 3   > 15: 11   > 10: 52. Of the 11 over 15, 7 are application
+# code and 4 are in tools/, tests/, and scripts/.
+#
+# The next notch down is 19, blocked by a single function:
+# tools/search_index.py::find_wait_cursor_methods (20).
+max-complexity = 20
 
 [tool.ruff.format]
 # Formatting options

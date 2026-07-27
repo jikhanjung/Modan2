@@ -18,6 +18,25 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 
+def expr_to_str(node: ast.AST) -> str:
+    """Render an expression node as the short readable string used in the index."""
+    if isinstance(node, ast.Attribute):
+        return f"{expr_to_str(node.value)}.{node.attr}"
+    if isinstance(node, ast.Name):
+        return node.id
+    if isinstance(node, ast.Call):
+        fn = expr_to_str(node.func)
+        # Show only first arg for partial-like calls
+        if fn.endswith("partial") and node.args:
+            return f"{fn}({expr_to_str(node.args[0])}, …)"
+        return f"{fn}(…)"
+    if isinstance(node, ast.Lambda):
+        return "lambda"
+    if isinstance(node, ast.Constant):
+        return repr(node.value)
+    return node.__class__.__name__
+
+
 class Modan2Indexer:
     def __init__(self, project_root: Path):
         self.project_root = project_root
@@ -138,67 +157,61 @@ class Modan2Indexer:
         try:
             tree = ast.parse(source, str(filepath))
         except Exception:
-            # Fallback to regex if AST parse fails
-            signal_pattern = r"(\w+)\s*=\s*(?:pyqtSignal|Signal)\((.*?)\)"
-            for match in re.finditer(signal_pattern, source):
-                self.qt_signals["definitions"].append(
-                    {"name": match.group(1), "signature": match.group(2), "file": filepath.name}
-                )
-            connect_pattern = r"(\w+)\.(\w+)\.connect\(([^)]+)\)"
-            for match in re.finditer(connect_pattern, source):
-                self.qt_signals["connections"].append(
-                    {"object": match.group(1), "signal": match.group(2), "slot": match.group(3), "file": filepath.name}
-                )
+            self._extract_qt_by_regex(source, filepath)
             return
 
-        def expr_to_str(node: ast.AST) -> str:
-            if isinstance(node, ast.Attribute):
-                return f"{expr_to_str(node.value)}.{node.attr}"
-            if isinstance(node, ast.Name):
-                return node.id
-            if isinstance(node, ast.Call):
-                fn = expr_to_str(node.func)
-                # Show only first arg for partial-like calls
-                if fn.endswith("partial") and node.args:
-                    return f"{fn}({expr_to_str(node.args[0])}, …)"
-                return f"{fn}(…)"
-            if isinstance(node, ast.Lambda):
-                return "lambda"
-            if isinstance(node, ast.Constant):
-                return repr(node.value)
-            return node.__class__.__name__
+        self._extract_signal_definitions(tree, filepath)
+        self._extract_signal_connections(tree, filepath)
 
-        # pyqtSignal definitions: simple Assign with Call to pyqtSignal/Signal
-        for n in ast.walk(tree):
-            if isinstance(n, ast.Assign) and isinstance(n.value, ast.Call):
-                fn_name = expr_to_str(n.value.func)
-                if fn_name in ("pyqtSignal", "Signal"):
-                    for tgt in n.targets:
-                        if isinstance(tgt, ast.Name):
-                            sig = {
-                                "name": tgt.id,
-                                "signature": ",".join([expr_to_str(a) for a in n.value.args]),
-                                "file": filepath.name,
-                            }
-                            self.qt_signals["definitions"].append(sig)
+    def _extract_qt_by_regex(self, source: str, filepath: Path):
+        """Fallback used when the file does not parse: scan the text directly."""
+        signal_pattern = r"(\w+)\s*=\s*(?:pyqtSignal|Signal)\((.*?)\)"
+        for match in re.finditer(signal_pattern, source):
+            self.qt_signals["definitions"].append(
+                {"name": match.group(1), "signature": match.group(2), "file": filepath.name}
+            )
+        connect_pattern = r"(\w+)\.(\w+)\.connect\(([^)]+)\)"
+        for match in re.finditer(connect_pattern, source):
+            self.qt_signals["connections"].append(
+                {"object": match.group(1), "signal": match.group(2), "slot": match.group(3), "file": filepath.name}
+            )
 
-        # signal.connect(slot) calls
+    def _extract_signal_definitions(self, tree: ast.AST, filepath: Path):
+        """Record ``name = pyqtSignal(...)`` class attributes."""
         for n in ast.walk(tree):
-            if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) and n.func.attr == "connect":
-                # Expect n.func.value to be Attribute: <object>.<signal>
-                obj = signal = None
-                if isinstance(n.func.value, ast.Attribute):
-                    signal = n.func.value.attr
-                    obj = expr_to_str(n.func.value.value)
-                else:
-                    obj = expr_to_str(n.func.value)
-                slot = expr_to_str(n.args[0]) if n.args else ""
-                entry = {"object": obj, "signal": signal or "unknown", "slot": slot, "file": filepath.name}
-                self.qt_signals["connections"].append(entry)
-                # Heuristic: QAction actions
-                if isinstance(n.func.value, ast.Attribute):
-                    if n.func.value.attr == "triggered" or (obj and "action" in obj.lower()):
-                        self.qt_signals["actions"].append({"action": obj, "handler": slot, "file": filepath.name})
+            if not (isinstance(n, ast.Assign) and isinstance(n.value, ast.Call)):
+                continue
+            if expr_to_str(n.value.func) not in ("pyqtSignal", "Signal"):
+                continue
+            for tgt in n.targets:
+                if isinstance(tgt, ast.Name):
+                    self.qt_signals["definitions"].append(
+                        {
+                            "name": tgt.id,
+                            "signature": ",".join([expr_to_str(a) for a in n.value.args]),
+                            "file": filepath.name,
+                        }
+                    )
+
+    def _extract_signal_connections(self, tree: ast.AST, filepath: Path):
+        """Record ``<object>.<signal>.connect(<slot>)`` calls, and QAction handlers."""
+        for n in ast.walk(tree):
+            if not (isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) and n.func.attr == "connect"):
+                continue
+            # Expect n.func.value to be Attribute: <object>.<signal>
+            signal = None
+            if isinstance(n.func.value, ast.Attribute):
+                signal = n.func.value.attr
+                obj = expr_to_str(n.func.value.value)
+            else:
+                obj = expr_to_str(n.func.value)
+            slot = expr_to_str(n.args[0]) if n.args else ""
+            self.qt_signals["connections"].append(
+                {"object": obj, "signal": signal or "unknown", "slot": slot, "file": filepath.name}
+            )
+            # Heuristic: QAction actions
+            if signal == "triggered" or (signal is not None and obj and "action" in obj.lower()):
+                self.qt_signals["actions"].append({"action": obj, "handler": slot, "file": filepath.name})
 
     def extract_db_models(self, tree: ast.AST, filepath: Path):
         """Extract Peewee database models"""

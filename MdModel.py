@@ -400,9 +400,7 @@ class MdDataset(Model):
         polygon_list.sort()
 
         new_polygons = []
-        for polygon in polygon_list:
-            # print points
-            new_polygons.append("-".join([str(x) for x in polygon]))
+        new_polygons.extend("-".join([str(x) for x in polygon]) for polygon in polygon_list)
         self.polygons = ",".join(new_polygons)
         return self.polygons
 
@@ -1547,10 +1545,7 @@ class MdObjectOps:
 
         curr_vector1 = np.array(self.landmark_list[point2 - 1]) - np.array(self.landmark_list[point1 - 1])
 
-        if len(curr_vector1) == 2:
-            to_vector1 = np.array([1, 0])
-        else:
-            to_vector1 = np.array([1, 0, 0])
+        to_vector1 = np.array([1, 0]) if len(curr_vector1) == 2 else np.array([1, 0, 0])
 
         # print("curr_vector1:", curr_vector1)
         # print("to_vector1:", to_vector1)
@@ -1848,26 +1843,20 @@ class MdDatasetOps:
             target_shape = np.zeros((nlandmarks, self.dimension))
             reference_shape = np.zeros((nlandmarks, self.dimension))
 
-            i = 0
-            for lm in mo.landmark_list:
+            for i, lm in enumerate(mo.landmark_list):
                 for j in range(self.dimension):
                     target_shape[i, j] = lm[j]
-                i += 1
 
-            i = 0
-            for lm in self.reference_shape.landmark_list:
+            for i, lm in enumerate(self.reference_shape.landmark_list):
                 for j in range(self.dimension):
                     reference_shape[i, j] = lm[j]
-                i += 1
 
             rotation_matrix = self.rotation_matrix(reference_shape, target_shape)
             rotated_shape = np.transpose(np.dot(rotation_matrix, np.transpose(target_shape)))
 
-            i = 0
-            for lm in mo.landmark_list:
+            for i, lm in enumerate(mo.landmark_list):
                 for j in range(self.dimension):
                     lm[j] = rotated_shape[i, j]
-                i += 1
         else:
             # New implementation for missing data - use only valid landmarks
             valid_indices = []
@@ -2240,9 +2229,7 @@ class MdDatasetOps:
             return False
         sum_coord = math.sqrt(sum_coord)
         # print "diff: ", sum
-        if sum_coord < threshold:
-            return True
-        return False
+        return sum_coord < threshold
 
     def _fill_missing_landmarks(self):
         """Impute missing landmarks in place so a superimposition that needs

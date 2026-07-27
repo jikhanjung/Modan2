@@ -412,9 +412,7 @@ class TestModernAnalysisFunctions:
         # 5 specimens, 3 landmarks each, 2D
         data = []
         for i in range(5):
-            specimen = []
-            for j in range(3):
-                specimen.append([i + j + np.random.randn() * 0.1, i - j + np.random.randn() * 0.1])
+            specimen = [[i + j + np.random.randn() * 0.1, i - j + np.random.randn() * 0.1] for j in range(3)]
             data.append(specimen)
         return data
 
@@ -425,11 +423,10 @@ class TestModernAnalysisFunctions:
         # 5 specimens, 3 landmarks each, 3D
         data = []
         for i in range(5):
-            specimen = []
-            for j in range(3):
-                specimen.append(
-                    [i + j + np.random.randn() * 0.1, i - j + np.random.randn() * 0.1, i + np.random.randn() * 0.1]
-                )
+            specimen = [
+                [i + j + np.random.randn() * 0.1, i - j + np.random.randn() * 0.1, i + np.random.randn() * 0.1]
+                for j in range(3)
+            ]
             data.append(specimen)
         return data
 

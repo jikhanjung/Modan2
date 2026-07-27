@@ -80,12 +80,10 @@ def main():
     out.append("## Key Components Indexed")
     out.append("")
     out.append(f"### 1. Dialog Classes ({len(dialogs)})")
-    for d in dialogs:
-        out.append(f"- `{d}`")
+    out.extend(f"- `{d}`" for d in dialogs)
     out.append("")
     out.append(f"### 2. Database Models ({len(models)})")
-    for m in models:
-        out.append(f"- `{m}`")
+    out.extend(f"- `{m}`" for m in models)
     out.append("")
     out.append("## Qt Signal/Slot Analysis")
     out.append("")

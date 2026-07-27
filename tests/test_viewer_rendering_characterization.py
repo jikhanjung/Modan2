@@ -187,8 +187,13 @@ class TestMouseMoveEvent2DCharacterization:
         viewer = ObjectViewer2D()
         qtbot.addWidget(viewer)
         viewer.object_dialog = None
+        before = (viewer.mouse_curr_x, viewer.mouse_curr_y)
+
         viewer.mouseMoveEvent(_move(10, 10))  # must not raise
-        assert viewer.mouse_curr_x != 10 or True  # untouched; just no crash
+
+        # mouseMoveEvent returns before recording the position when there is no
+        # dialog, so the move leaves the viewer's state alone.
+        assert (viewer.mouse_curr_x, viewer.mouse_curr_y) == before
 
     def test_pan_updates_temp_pan(self, viewer):
         viewer.pan_mode = MODE["PAN"]

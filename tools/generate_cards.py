@@ -173,9 +173,11 @@ class SymbolCardGenerator:
         connections = []
 
         # Search in signals
-        for conn in self.qt_data.get("signals", {}).get("connections", []):
-            if class_name in str(conn.get("slot", "")):
-                connections.append(conn)
+        connections.extend(
+            conn
+            for conn in self.qt_data.get("signals", {}).get("connections", [])
+            if class_name in str(conn.get("slot", ""))
+        )
 
         return connections
 
@@ -219,9 +221,11 @@ class SymbolCardGenerator:
         usage = []
 
         # Simple heuristic - check class names
-        for cls in self.symbols.get("classes", []):
-            if "Controller" in cls["name"] or "Dialog" in cls["name"]:
-                usage.append(cls["name"])
+        usage.extend(
+            cls["name"]
+            for cls in self.symbols.get("classes", [])
+            if "Controller" in cls["name"] or "Dialog" in cls["name"]
+        )
 
         return usage[:5]  # Limit to top 5
 
@@ -235,9 +239,11 @@ class SymbolCardGenerator:
 
         # Find slots
         for method in class_data.get("methods", []):
-            if "pyqtSlot" in method.get("decorators", []):
-                qt_meta["slots"].append(method["name"])
-            elif method["name"].startswith("on_") and method["name"].endswith("_triggered"):
+            if (
+                "pyqtSlot" in method.get("decorators", [])
+                or method["name"].startswith("on_")
+                and method["name"].endswith("_triggered")
+            ):
                 qt_meta["slots"].append(method["name"])
 
         return qt_meta

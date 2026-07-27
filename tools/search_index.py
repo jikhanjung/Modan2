@@ -91,7 +91,7 @@ class CodeSearcher:
                     if stype == "classes" and "methods" in item:
                         for method in item["methods"]:
                             if query_lower in method["name"].lower():
-                                results.append(
+                                results.append(  # noqa: PERF401 - reads worse as a comprehension
                                     {
                                         "type": "method",
                                         "name": f"{item['name']}.{method['name']}",
@@ -111,7 +111,7 @@ class CodeSearcher:
         if "connections" in self.qt_data.get("signals", {}):
             for conn in self.qt_data["signals"]["connections"]:
                 if query_lower in conn.get("signal", "").lower() or query_lower in conn.get("slot", "").lower():
-                    results.append(
+                    results.append(  # noqa: PERF401 - reads worse as a comprehension
                         {
                             "type": "connection",
                             "signal": f"{conn['object']}.{conn['signal']}",
@@ -124,7 +124,7 @@ class CodeSearcher:
         if "actions" in self.qt_data.get("signals", {}):
             for action in self.qt_data["signals"]["actions"]:
                 if query_lower in action.get("action", "").lower() or query_lower in action.get("handler", "").lower():
-                    results.append(
+                    results.append(  # noqa: PERF401 - reads worse as a comprehension
                         {
                             "type": "action",
                             "action": action["action"],
@@ -227,7 +227,7 @@ class CodeSearcher:
 
         for dialog in self.symbols.get("dialogs", []):
             if dialog_name.lower() in dialog["name"].lower():
-                results.append(
+                results.append(  # noqa: PERF401 - reads worse as a comprehension
                     {
                         "dialog": dialog["name"],
                         "file": dialog["file"],

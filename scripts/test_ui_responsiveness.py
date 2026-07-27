@@ -494,9 +494,8 @@ def generate_summary_report(all_results):
             )
 
     # Check progress dialog
-    if "progress_dialog" in all_results:
-        if all_results["progress_dialog"]["avg_ms"] > 33:
-            recommendations.append("⚠️  Progress updates slower than 30 fps - reduce update frequency")
+    if "progress_dialog" in all_results and all_results["progress_dialog"]["avg_ms"] > 33:
+        recommendations.append("⚠️  Progress updates slower than 30 fps - reduce update frequency")
 
     if not recommendations:
         recommendations.append("✅ All UI operations meet responsiveness targets")

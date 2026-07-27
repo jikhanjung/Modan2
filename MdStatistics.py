@@ -56,25 +56,23 @@ class MdPrincipalComponent:
         v, s, w = numpy.linalg.svd(self.covariance_matrix)
 
         self.raw_eigen_values = s
-        sum = 0
+        total = 0
         for ss in s:
-            sum += ss
+            total += ss
         for ss in s:
-            self.eigen_value_percentages.append(ss / sum)
+            self.eigen_value_percentages.append(ss / total)
         cumul = 0
         eigen_values = []
-        i = 0
         nSignificantEigenValue = -1
         nEigenValues = -1
-        for ss in s:
+        for i, ss in enumerate(s):
             cumul += ss
             eigen_values.append(ss)
             # print sum, cumul, ss
-            if cumul / sum > 0.95 and nSignificantEigenValue == -1:
+            if cumul / total > 0.95 and nSignificantEigenValue == -1:
                 nSignificantEigenValue = i + 1
-            if (ss / sum) < 0.00001 and nEigenValues == -1:
+            if (ss / total) < 0.00001 and nEigenValues == -1:
                 nEigenValues = i + 1
-            i += 1
 
         self.rotated_matrix = numpy.dot(np_data, v)
         self.rotation_matrix = v

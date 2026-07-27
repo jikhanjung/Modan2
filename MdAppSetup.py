@@ -296,10 +296,7 @@ class ApplicationSetup:
         recent_files = self.config.get("recent_files", [])
 
         # Filter out files that no longer exist
-        existing_files = []
-        for file_path in recent_files:
-            if Path(file_path).exists():
-                existing_files.append(file_path)
+        existing_files = [file_path for file_path in recent_files if Path(file_path).exists()]
 
         # Update config if files were removed
         if len(existing_files) != len(recent_files):

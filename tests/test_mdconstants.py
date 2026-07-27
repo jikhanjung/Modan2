@@ -74,7 +74,7 @@ class TestFileFilters:
 
     def test_filter_format(self):
         """Test filter strings are properly formatted."""
-        for _filter_name, filter_str in mc.FILE_FILTERS.items():
+        for filter_str in mc.FILE_FILTERS.values():
             assert isinstance(filter_str, str)
             assert len(filter_str) > 0
 
@@ -293,7 +293,7 @@ class TestExportFormats:
 
     def test_export_format_structure(self):
         """Test each export format has required fields."""
-        for _format_name, format_info in mc.EXPORT_FORMATS.items():
+        for format_info in mc.EXPORT_FORMATS.values():
             assert "name" in format_info
             assert "extension" in format_info
             assert "supports_landmarks" in format_info

@@ -1,5 +1,6 @@
 """New Analysis Dialog for creating and running morphometric analyses."""
 
+import contextlib
 import re
 
 from PyQt5.QtCore import Qt, QTimer
@@ -87,9 +88,9 @@ class NewAnalysisDialog(BaseDialog):
         valid_property_index_list = self.dataset.get_grouping_variable_index_list()
         variablename_list = self.dataset.get_variablename_list()
         for idx in valid_property_index_list:
-            property = variablename_list[idx]
-            self.comboCvaGroupBy.addItem(property, idx)
-            self.comboManovaGroupBy.addItem(property, idx)
+            variablename = variablename_list[idx]
+            self.comboCvaGroupBy.addItem(variablename, idx)
+            self.comboManovaGroupBy.addItem(variablename, idx)
 
         self.ignore_change = False
 
@@ -339,11 +340,9 @@ class NewAnalysisDialog(BaseDialog):
         QApplication.restoreOverrideCursor()
 
         for signal, slot in self.signal_connections:
-            try:
+            # Signal might already be disconnected
+            with contextlib.suppress(TypeError):
                 signal.disconnect(slot)
-            except TypeError:
-                # Signal might already be disconnected
-                pass
         self.signal_connections.clear()
 
     def close_dialog(self):

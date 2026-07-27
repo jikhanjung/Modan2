@@ -11,6 +11,8 @@ from peewee import IntegrityError
 # Add project root to Python path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+import contextlib
+
 from peewee import SqliteDatabase
 
 import MdModel as mm
@@ -55,10 +57,8 @@ def test_database():
     mm.MdAnalysis._meta.database = original_db
 
     # Remove test database file
-    try:
+    with contextlib.suppress(BaseException):
         os.unlink(test_db_path)
-    except:
-        pass
 
 
 @pytest.fixture

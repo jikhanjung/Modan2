@@ -691,7 +691,7 @@ class DataExplorationDialog(QDialog):
         self.plot_widget2.render(painter)
 
         # 4. Overlay the shape images
-        for keyname in self.shape_grid.keys():
+        for keyname in self.shape_grid:
             view = self.shape_grid[keyname]["view"]
             if view:
                 # print("keyname", keyname, "x_val", self.shape_grid[keyname]['x_val'], "y_val", self.shape_grid[keyname]['y_val'])
@@ -972,7 +972,7 @@ class DataExplorationDialog(QDialog):
             shape_view.reset_pose()  # Widget handles its own update
 
         logger.info(f"Resetting {len(self.shape_grid.keys())} shape grid views")
-        for key in self.shape_grid.keys():
+        for key in self.shape_grid:
             view = self.shape_grid[key]["view"]
             if view:
                 view.reset_pose()  # Widget handles its own update
@@ -1333,7 +1333,7 @@ class DataExplorationDialog(QDialog):
 
         self.update_chart()
 
-    def flip_axis_changed(self, int):
+    def flip_axis_changed(self, _state):
         # if self.ds_ops is not None:
         self.update_chart()
 
@@ -1380,7 +1380,7 @@ class DataExplorationDialog(QDialog):
         self.write_settings()
         # for shape_view in self.shape_view_list:
         #    shape_view.close()
-        for key in self.shape_grid.keys():
+        for key in self.shape_grid:
             if self.shape_grid[key]["view"]:
                 self.shape_grid[key]["view"].close()
         # if self.analysis_dialog is not None:
@@ -1409,7 +1409,7 @@ class DataExplorationDialog(QDialog):
             temp_rotate_y = math.radians(self.shape_view_list[0].temp_rotate_y)
             # (math.radians(self.rotate_x),math.radians(self.rotate_y),apply_rotation_to_vertex)
             self.store_rotation(temp_rotate_x, temp_rotate_y)
-        for key in self.shape_grid.keys():
+        for key in self.shape_grid:
             if self.shape_grid[key]["view"]:
                 self.shape_grid[key]["view"].sync_rotation()
                 self.shape_grid[key]["view"].update()
@@ -1462,7 +1462,7 @@ class DataExplorationDialog(QDialog):
                     sv.dolly = zoom_factor
                 # sv.sync_zoom()
                 sv.update()
-        for key in self.shape_grid.keys():
+        for key in self.shape_grid:
             if self.shape_grid[key]["view"]:
                 if is_2D:
                     self.shape_grid[key]["view"].adjust_scale(zoom_factor)
@@ -1476,7 +1476,7 @@ class DataExplorationDialog(QDialog):
                 sv.temp_dolly = temp_dolly
                 # sv.sync_zoom()
                 sv.update()
-        for key in self.shape_grid.keys():
+        for key in self.shape_grid:
             if self.shape_grid[key]["view"]:
                 self.shape_grid[key]["view"].temp_dolly = temp_dolly
                 self.shape_grid[key]["view"].update()
@@ -1488,7 +1488,7 @@ class DataExplorationDialog(QDialog):
                 sv.temp_rotate_y = temp_rotate_y
                 # sv.sync_rotation()
                 sv.update()
-        for key in self.shape_grid.keys():
+        for key in self.shape_grid:
             view = self.shape_grid[key]["view"]
             if view:
                 view.temp_rotate_x = temp_rotate_x
@@ -1537,7 +1537,7 @@ class DataExplorationDialog(QDialog):
         self.comboSelectGroup.clear()
         unique_groupname_list = []
         for _idx, obj in enumerate(self.object_info_list):
-            if "variable_list" in obj.keys():
+            if "variable_list" in obj:
                 if propertyname_index > -1 and propertyname_index < len(obj["variable_list"]):
                     key_name = obj["variable_list"][self.scatter_variable_index]
                     if key_name not in unique_groupname_list:
@@ -1743,9 +1743,9 @@ class DataExplorationDialog(QDialog):
         valid_property_index_list = analysis.dataset.get_grouping_variable_index_list()
         variablename_list = analysis.dataset.get_variablename_list()
         for idx in valid_property_index_list:
-            property = variablename_list[idx]
-            self.comboGroupBy.addItem(property, idx)
-            self.comboRegressionBasedOn.addItem(property, idx)
+            variablename = variablename_list[idx]
+            self.comboGroupBy.addItem(variablename, idx)
+            self.comboRegressionBasedOn.addItem(variablename, idx)
 
         # print("set_analysis 2", analysis, analysis_method, group_by, self.ignore_change)
         if analysis_method == "PCA":
@@ -1785,7 +1785,7 @@ class DataExplorationDialog(QDialog):
         # print("set_analysis 5", analysis, analysis_method, group_by, self.ignore_change)
         self.object_info_list = json.loads(self.analysis.object_info_json)
         for obj in self.object_info_list:
-            if "property_list" in obj.keys():
+            if "property_list" in obj:
                 obj["variable_list"] = obj["property_list"]
         if self.analysis_method == "PCA":
             self.analysis_result_list = json.loads(self.analysis.pca_analysis_result_json)
@@ -1918,7 +1918,7 @@ class DataExplorationDialog(QDialog):
         }
 
         # Drop any existing shape-grid views before they get rebuilt.
-        for scatter_key_name in self.shape_grid.keys():
+        for scatter_key_name in self.shape_grid:
             if self.shape_grid[scatter_key_name]["view"] is not None:
                 self.shape_grid[scatter_key_name]["view"].hide()
                 self.shape_grid[scatter_key_name]["view"].deleteLater()
@@ -1956,7 +1956,7 @@ class DataExplorationDialog(QDialog):
             scatter_key_name = "__default__"
             regression_key_name = "__default__"
 
-            if "variable_list" in obj.keys():
+            if "variable_list" in obj:
                 if self.scatter_variable_index > -1 and self.scatter_variable_index < len(obj["variable_list"]):
                     scatter_key_name = obj["variable_list"][self.scatter_variable_index]
                 if self.regression_variable_index > -1 and self.regression_variable_index < len(obj["variable_list"]):
@@ -1965,11 +1965,11 @@ class DataExplorationDialog(QDialog):
                 if self.scatter_variable_index > -1 and self.scatter_variable_index < len(obj["property_list"]):
                     scatter_key_name = obj["property_list"][self.scatter_variable_index]
 
-            if scatter_key_name not in self.scatter_data.keys():
+            if scatter_key_name not in self.scatter_data:
                 self.scatter_data[scatter_key_name] = build_scatter_group(scatter_size, property_name=scatter_key_name)
                 self.average_shape[scatter_key_name] = build_scatter_group(scatter_size, property_name=scatter_key_name)
 
-            if regression_key_name not in self.regression_data.keys():
+            if regression_key_name not in self.regression_data:
                 self.regression_data[regression_key_name] = build_scatter_group(
                     scatter_size, property_name=regression_key_name
                 )
@@ -2030,13 +2030,13 @@ class DataExplorationDialog(QDialog):
             del self.average_shape["__default__"]
             del self.regression_data["__default__"]
 
-        for scatter_key_name in self.scatter_data.keys():
+        for scatter_key_name in self.scatter_data:
             self.average_shape[scatter_key_name]["x_val"] = np.mean(self.scatter_data[scatter_key_name]["x_val"])
             self.average_shape[scatter_key_name]["y_val"] = np.mean(self.scatter_data[scatter_key_name]["y_val"])
             self.average_shape[scatter_key_name]["z_val"] = np.mean(self.scatter_data[scatter_key_name]["z_val"])
 
         if opts["show_convex_hull"]:
-            for scatter_key_name in self.scatter_data.keys():
+            for scatter_key_name in self.scatter_data:
                 if len(self.scatter_data[scatter_key_name]["x_val"]) > 1:
                     self.scatter_data[scatter_key_name]["points"] = np.array(
                         [self.scatter_data[scatter_key_name]["x_val"], self.scatter_data[scatter_key_name]["y_val"]]
@@ -2049,7 +2049,7 @@ class DataExplorationDialog(QDialog):
                         logger.warning(f"Convex hull skipped for group '{scatter_key_name}': {e}")
 
         if opts["show_confidence_ellipse"]:
-            for scatter_key_name in self.scatter_data.keys():
+            for scatter_key_name in self.scatter_data:
                 if len(self.scatter_data[scatter_key_name]["x_val"]) > 1:
                     covariance = np.cov(
                         [self.scatter_data[scatter_key_name]["x_val"], self.scatter_data[scatter_key_name]["y_val"]]
@@ -2326,7 +2326,7 @@ class DataExplorationDialog(QDialog):
 
     def _update_shape_grid(self):
         """Refresh the overlaid shape views at their chart positions."""
-        for keyname in self.shape_grid.keys():
+        for keyname in self.shape_grid:
             shape = self.raw_chart_coords_to_shape(self.shape_grid[keyname]["x_val"], self.shape_grid[keyname]["y_val"])
             obj = self.shape_to_object(shape)
 
@@ -2388,7 +2388,7 @@ class DataExplorationDialog(QDialog):
         pos_x = self.fig2.canvas.mapToGlobal(QPoint(0, 0)).x()
         pos_y = self.fig2.canvas.mapToGlobal(QPoint(0, 0)).y()
         # print("pos_x", pos_x, "pos_y", pos_y)
-        for keyname in self.shape_grid.keys():
+        for keyname in self.shape_grid:
             view = self.shape_grid[keyname]["view"]
             if view:
                 # print("keyname", keyname, "x_val", self.shape_grid[keyname]['x_val'], "y_val", self.shape_grid[keyname]['y_val'])
@@ -2790,7 +2790,7 @@ class DataExplorationDialog(QDialog):
         self.onpick_happened = True
         # print("evt", evt, evt.ind, evt.artist )
         selected_object_id_list = []
-        for key_name in self.scatter_data.keys():
+        for key_name in self.scatter_data:
             if evt.artist == self.scatter_result[key_name]:
                 # print("key_name", key_name)
                 for idx in evt.ind:
@@ -2806,9 +2806,9 @@ class DataExplorationDialog(QDialog):
 
         # print("selected_object_id_list", selected_object_id_list)
         self.selection_changed_off = True
-        for id in selected_object_id_list:
-            # item = self.object_model.findItems(str(id), Qt.MatchExactly, 0)
-            item = self.object_hash[id]
+        for object_id in selected_object_id_list:
+            # item = self.object_model.findItems(str(object_id), Qt.MatchExactly, 0)
+            item = self.object_hash[object_id]
             self.tableView1.selectionModel().select(item.index(), QItemSelectionModel.Rows | QItemSelectionModel.Select)
         self.selection_changed_off = False
         self.on_object_selection_changed([], [])

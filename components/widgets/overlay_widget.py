@@ -129,10 +129,7 @@ class ResizableOverlayWidget(QWidget):
             return False
 
         # Exclude close button area
-        if self.is_close_button_area(pos):
-            return False
-
-        return True
+        return not self.is_close_button_area(pos)
 
     def is_close_button_area(self, pos):
         """Check if position is in close button area"""
@@ -164,9 +161,8 @@ class ResizableOverlayWidget(QWidget):
         elif self.current_corner == "bottom_left":
             if right_edge and top_edge:
                 return self.RESIZE_TOP_RIGHT
-        elif self.current_corner == "bottom_right":
-            if left_edge and top_edge:
-                return self.RESIZE_TOP_LEFT
+        elif self.current_corner == "bottom_right" and left_edge and top_edge:
+            return self.RESIZE_TOP_LEFT
 
         return self.RESIZE_NONE
 

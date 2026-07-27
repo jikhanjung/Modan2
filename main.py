@@ -5,6 +5,7 @@ Main entry point for the application
 """
 
 import argparse
+import contextlib
 import logging
 import sys
 from pathlib import Path
@@ -289,10 +290,8 @@ def main():
         # error dialog below opens *behind* it — leaving the user staring at a
         # splash frozen on whatever step failed, with no way to see why.
         if splash is not None:
-            try:
+            with contextlib.suppress(Exception):
                 splash.close()
-            except Exception:
-                pass
 
         # Try to show error dialog if Qt is available
         try:

@@ -12,7 +12,9 @@ sys.path.insert(0, os.path.abspath("../.."))
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "Modan2"
-copyright = "2023-2025, Modan2 Contributors"
+# `copyright` is the name Sphinx requires for this setting, so the shadowing
+# is not ours to rename.
+copyright = "2023-2025, Modan2 Contributors"  # noqa: A001
 author = "Modan2 Contributors"
 
 # Version is single-sourced from version.py (see tests/test_version_consistency.py).

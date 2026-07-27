@@ -11,6 +11,8 @@ from PyQt5.QtWidgets import QMessageBox
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+import contextlib
+
 import MdModel as mm
 from components.viewers.object_viewer_2d import ObjectViewer2D
 from dialogs.landmark_name_dialog import LandmarkNameDialog
@@ -34,10 +36,8 @@ def test_database():
     mm.gDatabase = original
     for model in models:
         model._meta.database = original
-    try:
+    with contextlib.suppress(OSError):
         os.unlink(path)
-    except OSError:
-        pass
 
 
 NAMES = [{"name": "CR1", "desc": "cranial right 1"}, {"name": "CL1", "desc": "cranial left 1"}]

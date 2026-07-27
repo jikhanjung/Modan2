@@ -211,10 +211,7 @@ def process_dropped_file_name(file_name):
     parsed_url = urlparse(url)
     # print("parsed_url:", parsed_url)
     file_path = unquote(parsed_url.path)
-    if os.name == "nt":
-        file_path = file_path[1:]
-    else:
-        file_path = file_path
+    file_path = file_path[1:] if os.name == "nt" else file_path
     return file_path
 
 
@@ -788,13 +785,9 @@ def validate_json_schema(data: dict) -> tuple[bool, list[str]]:
     errors: list[str] = []
     if not isinstance(data, dict):
         return False, ["Root is not an object"]
-    for k in ["format_version", "export_info", "dataset", "objects"]:
-        if k not in data:
-            errors.append(f"Missing key: {k}")
+    errors.extend(f"Missing key: {k}" for k in ["format_version", "export_info", "dataset", "objects"] if k not in data)
     ds = data.get("dataset", {})
-    for k in ["name", "dimension", "variables"]:
-        if k not in ds:
-            errors.append(f"dataset missing: {k}")
+    errors.extend(f"dataset missing: {k}" for k in ["name", "dimension", "variables"] if k not in ds)
     if not isinstance(data.get("objects", []), list):
         errors.append("objects must be a list")
     return (len(errors) == 0), errors
@@ -825,9 +818,8 @@ def safe_extract_zip(zip_path: str, dest_dir: str) -> str:
 
 
 def read_json_from_zip(zip_path: str) -> dict:
-    with zipfile.ZipFile(zip_path, "r") as zf:
-        with zf.open("dataset.json") as f:
-            return json.loads(f.read().decode("utf-8"))
+    with zipfile.ZipFile(zip_path, "r") as zf, zf.open("dataset.json") as f:
+        return json.loads(f.read().decode("utf-8"))
 
 
 def _unique_dataset_name(MdDataset, base_name):

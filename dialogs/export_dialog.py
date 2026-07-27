@@ -1,5 +1,6 @@
 """Export Dataset Dialog for exporting datasets to various formats."""
 
+import contextlib
 import datetime
 import os
 import shutil
@@ -42,14 +43,12 @@ def format_tps(rows, dimension):
     lines = []
     for name, landmarks, curves in rows:
         lines.append(f"LM={len(landmarks)}")
-        for lm in landmarks:
-            lines.append("\t".join(str(c) for c in lm[:dimension]))
+        lines.extend("\t".join(str(c) for c in lm[:dimension]) for lm in landmarks)
         if curves:
             lines.append(f"CURVES={len(curves)}")
             for pts in curves:
                 lines.append(f"POINTS={len(pts)}")
-                for p in pts:
-                    lines.append("\t".join(str(c) for c in p[:dimension]))
+                lines.extend("\t".join(str(c) for c in p[:dimension]) for p in pts)
         lines.append(f"ID={name}")
     return NEWLINE.join(lines) + NEWLINE
 
@@ -456,8 +455,6 @@ class ExportDatasetDialog(BaseDialog):
             progress.close()
             QMessageBox.information(self, self.tr("Export"), self.tr("Export completed."))
         except Exception as e:
-            try:
+            with contextlib.suppress(Exception):
                 progress.close()
-            except Exception:
-                pass
             QMessageBox.critical(self, self.tr("Export"), self.tr("Export failed: ") + str(e))

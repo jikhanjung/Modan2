@@ -605,8 +605,7 @@ class ModanController(QObject):
         for image in obj.image:
             paths.append(image.get_file_path(storage_directory))
             paths.append(image.get_original_file_path(storage_directory))
-        for model in obj.threed_model:
-            paths.append(model.get_file_path(storage_directory))
+        paths.extend(model.get_file_path(storage_directory) for model in obj.threed_model)
         return paths
 
     def _remove_dataset_directory(self, dataset_id, storage_directory=None):
@@ -700,11 +699,12 @@ class ModanController(QObject):
         # Set landmarks. Only the fixed landmarks go into landmark_str; TPS
         # CURVES= points are kept as raw curve traces (merge-at-analysis model)
         # and expanded into semi-landmarks at analysis time.
-        landmark_list = []
-        for landmark in import_data.landmark_data[obj.object_name]:
-            # None means "not recorded" (e.g. a -999 sentinel the import resolved);
-            # store the marker unpack_landmark expects, not the string "None".
-            landmark_list.append("\t".join(["Missing" if x is None else str(x) for x in landmark]))
+        # None means "not recorded" (e.g. a -999 sentinel the import resolved);
+        # store the marker unpack_landmark expects, not the string "None".
+        landmark_list = [
+            "\t".join(["Missing" if x is None else str(x) for x in landmark])
+            for landmark in import_data.landmark_data[obj.object_name]
+        ]
         obj.landmark_str = "\n".join(landmark_list)
         curves = getattr(import_data, "curve_data", {}).get(obj.object_name, [])
         if curves:
@@ -716,13 +716,13 @@ class ModanController(QObject):
             obj.pack_variable()
 
         # Set description
-        if obj.object_name in import_data.object_comment.keys():
+        if obj.object_name in import_data.object_comment:
             obj.object_desc = import_data.object_comment[import_data.object_name_list[index]]
 
         obj.save()
 
         # Import image if available
-        if obj.object_name in import_data.object_images.keys():
+        if obj.object_name in import_data.object_images:
             self._import_object_image(obj, import_data, storage_directory)
 
     def _import_object_image(self, obj, import_data, storage_directory):
@@ -1200,7 +1200,7 @@ class ModanController(QObject):
 
         try:
             # Use existing PCA function
-            pca_result = MdStatistics.do_pca_analysis(landmarks_data, n_components=params.get("n_components", None))
+            pca_result = MdStatistics.do_pca_analysis(landmarks_data, n_components=params.get("n_components"))
 
             # Format results
             result = {
@@ -1275,7 +1275,7 @@ class ModanController(QObject):
                 raise ValueError("Group information is required for MANOVA")
 
             # Get PCA result for eigenvalue-based component selection
-            pca_result = params.get("pca_result", None)
+            pca_result = params.get("pca_result")
 
             if pca_result and "scores" in pca_result and "explained_variance" in pca_result:
                 # Use PCA scores with proper eigenvalue-based selection

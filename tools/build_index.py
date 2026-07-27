@@ -290,9 +290,8 @@ class Modan2Indexer:
             if isinstance(node, ast.Import):
                 for alias in node.names:
                     self.import_graph[filepath.name].add(alias.name)
-            elif isinstance(node, ast.ImportFrom):
-                if node.module:
-                    self.import_graph[filepath.name].add(node.module)
+            elif isinstance(node, ast.ImportFrom) and node.module:
+                self.import_graph[filepath.name].add(node.module)
 
     def save_indexes(self):
         """Save all indexes to JSON files"""

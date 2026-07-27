@@ -50,6 +50,21 @@ select = [
               # were literal-argument startswith() chains, folded into tuples.
     "RET",    # flake8-return — 58 violations, mostly `else` after `return`;
               # autofixed. RET504 is ignored below.
+    "PERF",   # perflint — 21 violations. PERF102 (2) autofixed; PERF401's 19
+              # append-loops were rewritten as comprehensions/extend, except four
+              # in tools/search_index.py that build multi-line dicts inside nested
+              # loops, where a comprehension reads worse (noqa'd in place).
+    "SIM",    # flake8-simplify — 97 violations. Autofixed the mechanical ones
+              # (dict.keys(), manual counters, nested with, needless bool) and
+              # hand-converted the 8 defensive try/except/pass blocks to
+              # contextlib.suppress, which states the intent the S110 ignore below
+              # describes. SIM102/SIM108 are ignored, see below.
+    "A",      # flake8-builtins — 43 violations. The 14 `int` arguments were Qt
+              # slot signatures (`def cbxShow_stateChanged(self, int)`), renamed
+              # to `_state`; the 17 `object` arguments became `obj` after checking
+              # no call site passes them by keyword. The 12 shadowed locals were
+              # renamed, except `copyright` in docs/manual/conf.py, which is the
+              # name Sphinx requires (noqa'd there).
     # Phased adoption of further groups is planned in devlog R05 (measured
     # violation counts + handling per group). Add them here as each phase lands.
 ]
@@ -70,6 +85,15 @@ ignore = [
     "S112",  # try-except-continue — same, in per-item loops
     "S311",  # non-crypto random — only used for viewer color-picking/visuals; the
              # app has no cryptographic use of randomness
+    # flake8-simplify: the two rules whose "simplification" costs more than it
+    # saves here. Ruff itself declines to autofix either at these sites, because
+    # the fix would drop the comments — which is the tell.
+    "SIM102",  # collapsible nested `if`. All 7 sites are layered guards where each
+               # level carries its own comment explaining what it screens out
+               # (drag-mode checks in table_view, GLUT availability in the 3D
+               # viewer). Collapsing yields one long condition and no comments.
+    "SIM108",  # if-else block instead of a ternary. The 3 remaining sites have a
+               # comment inside a branch; the ternary has nowhere to put it.
     # flake8-return noise:
     "RET504",  # assign-then-return. 16 sites, 9 in application code, nearly all in
                # numeric routines (`rot_mx = np.dot(v, w); return rot_mx`,

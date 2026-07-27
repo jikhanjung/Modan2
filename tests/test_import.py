@@ -7,6 +7,7 @@ These tests depend on the core dataset/object functionality but are isolated
 from analysis workflows.
 """
 
+import contextlib
 from pathlib import Path
 from unittest.mock import Mock, patch
 
@@ -397,10 +398,8 @@ class TestImportEdgeCases:
             initial_count = MdModel.MdDataset.select().count()
 
             # This should handle the error gracefully
-            try:
+            with contextlib.suppress(Exception):  # expected to fail
                 dialog.import_file()
-            except Exception:
-                pass  # Expected to fail
 
             # Should not create any datasets
             final_count = MdModel.MdDataset.select().count()
@@ -435,10 +434,8 @@ class TestImportEdgeCases:
             MdModel.MdDataset.select().count()
 
             # This should handle empty name appropriately
-            try:
+            with contextlib.suppress(Exception):
                 dialog.import_file()
-            except Exception:
-                pass
 
             # Check if dataset was created (behavior depends on implementation)
             MdModel.MdDataset.select().count()

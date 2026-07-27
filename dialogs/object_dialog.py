@@ -4,6 +4,7 @@ This module provides the ObjectDialog class for creating, editing, and viewing
 morphometric objects with their associated landmarks and metadata.
 """
 
+import contextlib
 import copy
 import logging
 from pathlib import Path
@@ -632,26 +633,26 @@ class ObjectDialog(QDialog):
         self.object_view.show_index = self.cbxShowIndex.isChecked()
         self.object_view.update()
 
-    def show_model_state_changed(self, int):
+    def show_model_state_changed(self, _state):
         self.object_view.show_model = self.cbxShowModel.isChecked()
         self.object_view.update()
 
-    def show_baseline_state_changed(self, int):
+    def show_baseline_state_changed(self, _state):
         self.object_view.show_baseline = self.cbxShowBaseline.isChecked()
         self.object_view.update()
 
-    def auto_rotate_state_changed(self, int):
+    def auto_rotate_state_changed(self, _state):
         self.object_view.auto_rotate = self.cbxAutoRotate.isChecked()
 
-    def show_wireframe_state_changed(self, int):
+    def show_wireframe_state_changed(self, _state):
         self.object_view.show_wireframe = self.cbxShowWireframe.isChecked()
         self.object_view.update()
 
-    def show_curve_state_changed(self, int):
+    def show_curve_state_changed(self, _state):
         self.object_view.show_curve = self.cbxShowCurve.isChecked()
         self.object_view.update()
 
-    def show_semi_landmark_state_changed(self, int):
+    def show_semi_landmark_state_changed(self, _state):
         self.object_view.show_semi_landmark = self.cbxShowSemiLandmark.isChecked()
         self.object_view.update()
 
@@ -712,7 +713,7 @@ class ObjectDialog(QDialog):
         padded = [list(p) for p in placed] + [[None, None]] * (len(reference.landmark_list) - len(placed))
         self.expected_landmark_list = impute_missing_landmarks(padded, reference.landmark_list)
 
-    def show_polygon_state_changed(self, int):
+    def show_polygon_state_changed(self, _state):
         self.object_view.show_polygon = self.cbxShowPolygon.isChecked()
         self.object_view.update()
 
@@ -1016,49 +1017,49 @@ class ObjectDialog(QDialog):
         # self.inputZ.setFixedWidth(input_width)
         # self.btnAddInput.setFixedWidth(input_width)
 
-    def set_object(self, object):
-        # print("set_object", object.object_name, object.dataset.dimension)
-        if object is not None:
-            self.object = object
-            self.edtObjectName.setText(object.object_name)
-            self.edtSequence.setText(str(object.sequence or 1))
-            self.edtObjectDesc.setText(object.object_desc)
-            # self.edtLandmarkStr.setText(object.landmark_str)
-            object.unpack_landmark()
+    def set_object(self, obj):
+        # print("set_object", obj.object_name, obj.dataset.dimension)
+        if obj is not None:
+            self.object = obj
+            self.edtObjectName.setText(obj.object_name)
+            self.edtSequence.setText(str(obj.sequence or 1))
+            self.edtObjectDesc.setText(obj.object_desc)
+            # self.edtLandmarkStr.setText(obj.landmark_str)
+            obj.unpack_landmark()
 
             # Store original landmark list
-            self.original_landmark_list = copy.deepcopy(object.landmark_list)
+            self.original_landmark_list = copy.deepcopy(obj.landmark_list)
 
-            # Check if object has missing landmarks
-            has_missing = any(lm[0] is None or lm[1] is None for lm in object.landmark_list)
+            # Check if obj has missing landmarks
+            has_missing = any(lm[0] is None or lm[1] is None for lm in obj.landmark_list)
 
             # Estimate missing landmarks if needed and enabled
             if has_missing and self.show_estimated:
-                self.estimated_landmark_list = self.estimate_missing_for_object(object)
+                self.estimated_landmark_list = self.estimate_missing_for_object(obj)
             else:
                 self.estimated_landmark_list = None
 
             # Always use original for table display (keep "MISSING" text)
             # Estimated values are only used for visualization in viewer
             self.landmark_list = self.original_landmark_list
-            # Load the curve scheme (dataset) and this object's raw traces into the
+            # Load the curve scheme (dataset) and this obj's raw traces into the
             # dialog's working copies; snapshot them to detect unsaved edits.
             self.curve_config = self.dataset.get_curve_config() if self.dataset is not None else []
-            self.curve_raw_map = object.get_curve_raw()
-            self.curve_anchor_map = object.get_curve_anchors()
+            self.curve_raw_map = obj.get_curve_raw()
+            self.curve_anchor_map = obj.get_curve_anchors()
             self._orig_curve_config = copy.deepcopy(self.curve_config)
             self._orig_curve_raw = copy.deepcopy(self.curve_raw_map)
             self._orig_curve_anchor = copy.deepcopy(self.curve_anchor_map)
             self.show_curves()
             # Expected-landmark digitizing aid (2D): mirror the flag onto the
-            # viewers and recompute for this object (reference excludes it).
+            # viewers and recompute for this obj (reference excludes it).
             self._expected_reference_cache = None
             for view in (self.object_view_2d, self.object_view_3d):
                 if view is not None:
                     view.show_expected = self.show_expected
             self.update_expected_landmarks()
-            # Use object's dataset if self.dataset is None
-            dataset_to_use = self.dataset if self.dataset is not None else object.dataset
+            # Use obj's dataset if self.dataset is None
+            dataset_to_use = self.dataset if self.dataset is not None else obj.dataset
             if dataset_to_use is not None:
                 self.edge_list = dataset_to_use.unpack_wireframe()
             else:
@@ -1067,14 +1068,14 @@ class ObjectDialog(QDialog):
             #    self.show_landmark(*lm)
             # self.show_landmarks()
 
-        # Use object's dataset if self.dataset is None
-        dataset_to_use = self.dataset if self.dataset is not None else (object.dataset if object is not None else None)
+        # Use obj's dataset if self.dataset is None
+        dataset_to_use = self.dataset if self.dataset is not None else (obj.dataset if obj is not None else None)
         if dataset_to_use is not None and dataset_to_use.dimension == 3:
             # print("set_object 3d 1")
             self.object_view = self.object_view_3d
             self.object_view.auto_rotate = False
-            # obj_ops = MdObjectOps(object)
-            # self.object_view.set_dataset(object.dataset)
+            # obj_ops = MdObjectOps(obj)
+            # self.object_view.set_dataset(obj.dataset)
             # self.btnLandmark.setDisabled(True)
             # print("set_object 3d 2")
             self.btnCalibration.setDisabled(True)
@@ -1085,13 +1086,13 @@ class ObjectDialog(QDialog):
             # self.cbxShowModel.setEnabled(True)
             self.btnAddFile.setText(self.tr("Load 3D Model"))
             # print("set_object 3d 3")
-            if object is not None:
-                # print("object dialog self.landmark_list in set object 3d", self.landmark_list)
-                self.object_view.set_object(object)
+            if obj is not None:
+                # print("obj dialog self.landmark_list in set obj 3d", self.landmark_list)
+                self.object_view.set_object(obj)
                 self.object_view.landmark_list = self.landmark_list
                 self.object_view.update_landmark_list()
                 self.object_view.calculate_resize()
-                if object.threed_model is not None and len(object.threed_model) > 0:
+                if obj.threed_model is not None and len(obj.threed_model) > 0:
                     self.enable_landmark_edit()
                     # self.cbxShowModel.show()
                     self.cbxShowModel.setEnabled(True)
@@ -1109,37 +1110,37 @@ class ObjectDialog(QDialog):
             # self.cbxShowModel.setEnabled(True)
             self.btnAddFile.setText(self.tr("Load Image"))
 
-            if object is not None:
-                if object.image is not None and len(object.image) > 0:
-                    # img = object.image[0]
+            if obj is not None:
+                if obj.image is not None and len(obj.image) > 0:
+                    # img = obj.image[0]
                     # image_path = img.get_file_path(self.m_app.storage_directory)
                     ##check if image_path exists
                     # if os.path.exists(image_path):
                     #    self.object_view.set_image(image_path)
                     self.btnCalibration.setEnabled(True)
                     self.enable_landmark_edit()
-                    if object.pixels_per_mm is None:
+                    if obj.pixels_per_mm is None:
                         self.btnCalibration_clicked()
                         # self.btnCalibration.setDisabled(False)
                 else:
                     self.btnCalibration.setDisabled(True)
                     self.disable_landmark_edit()
                 # Offer "Show Original" only when this image has an archived
-                # pristine original. Reset to the working copy on every object
+                # pristine original. Reset to the working copy on every obj
                 # switch (set_image drops the full-res source anyway).
                 has_original = (
-                    object.image is not None
-                    and len(object.image) > 0
-                    and object.image[0].has_archived_original(
+                    obj.image is not None
+                    and len(obj.image) > 0
+                    and obj.image[0].has_archived_original(
                         getattr(self.m_app, "storage_directory", mu.DEFAULT_STORAGE_DIRECTORY)
                     )
                 )
                 self.cbxUseOriginal.setChecked(False)
                 self.cbxUseOriginal.setVisible(has_original)
                 # elif len(self.landmark_list) > 0:
-                # print("objectdialog self.landmark_list in set object 2d", self.landmark_list)
+                # print("objectdialog self.landmark_list in set obj 2d", self.landmark_list)
                 self.object_view.clear_object()
-                self.object_view.set_object(object)
+                self.object_view.set_object(obj)
                 self.object_view.image_changed = False
                 self.object_view.landmark_list = self.landmark_list
                 self.object_view.update_landmark_list()
@@ -1149,11 +1150,11 @@ class ObjectDialog(QDialog):
             self.object.unpack_variable()
             self.dataset.unpack_variablename_str()
             for idx, _propertyname in enumerate(self.dataset.variablename_list):
-                if idx < len(object.variable_list):
-                    self.edtPropertyList[idx].setText(object.variable_list[idx])
+                if idx < len(obj.variable_list):
+                    self.edtPropertyList[idx].setText(obj.variable_list[idx])
 
             # self.object_view_3d.landmark_list = self.landmark_list
-        # self.set_dataset(object.dataset)
+        # self.set_dataset(obj.dataset)
         self.show_index_state_changed()
         self.object_view.align_object()
         self.show_landmarks()
@@ -1585,18 +1586,14 @@ class ObjectDialog(QDialog):
         self.edtLandmarkStr.setSelectionMode(QTableWidget.SingleSelection)
 
         # Connect selection handler
-        try:
+        # No connections exist yet on the first call
+        with contextlib.suppress(TypeError):
             self.edtLandmarkStr.itemSelectionChanged.disconnect()
-        except TypeError:
-            # No connections exist yet
-            pass
         self.edtLandmarkStr.itemSelectionChanged.connect(self.on_landmark_selected)
 
-        try:
+        # No connections exist yet on the first call
+        with contextlib.suppress(TypeError):
             self.edtLandmarkStr.itemChanged.disconnect()
-        except TypeError:
-            # No connections exist yet
-            pass
         self.edtLandmarkStr.itemChanged.connect(self.on_landmark_cell_changed)
 
         column_count = 3 if self.dataset.dimension == 3 else 2
@@ -1790,8 +1787,8 @@ class ObjectDialog(QDialog):
             item = self.object_model.itemFromIndex(index)
             object_id = item.text()
             object_id = int(object_id)
-            object = MdObject.get_by_id(object_id)
-            selected_object_list.append(object)
+            obj = MdObject.get_by_id(object_id)
+            selected_object_list.append(obj)
 
         return selected_object_list
 

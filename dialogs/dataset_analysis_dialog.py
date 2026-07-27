@@ -4,6 +4,7 @@ This module provides the DatasetAnalysisDialog class for displaying analysis res
 visualizing shapes, and managing dataset-level analysis options.
 """
 
+import contextlib
 import datetime
 import logging
 import os
@@ -466,10 +467,7 @@ class DatasetAnalysisDialog(QDialog):
         self.comboAxis1.clear()
         self.comboAxis2.clear()
         self.comboAxis3.clear()
-        if self.rbPCA.isChecked():
-            header = "PC"
-        else:
-            header = "CV"
+        header = "PC" if self.rbPCA.isChecked() else "CV"
 
         for i in range(1, 11):
             self.comboAxis1.addItem(header + str(i))
@@ -592,7 +590,7 @@ class DatasetAnalysisDialog(QDialog):
         if self.ds_ops is not None and self.analysis_done is True:
             self.show_analysis_result()
 
-    def flip_axis_changed(self, int):
+    def flip_axis_changed(self, _state):
         if self.ds_ops is not None:
             self.show_analysis_result()
 
@@ -640,11 +638,9 @@ class DatasetAnalysisDialog(QDialog):
             header.append("CSize")
             worksheet = doc.add_worksheet("Result coordinates")
             row_index = 0
-            column_index = 0
 
-            for colname in header:
+            for column_index, colname in enumerate(header):
                 worksheet.write(row_index, column_index, colname)
-                column_index += 1
 
             new_coords = self.analysis_result.rotated_matrix.tolist()
             for i, obj in enumerate(self.ds_ops.object_list):
@@ -692,10 +688,8 @@ class DatasetAnalysisDialog(QDialog):
         except Exception as e:
             logger.error(f"Failed to save analysis results to '{filename}': {e}", exc_info=True)
             if doc is not None:
-                try:
+                with contextlib.suppress(Exception):
                     doc.close()
-                except Exception:
-                    pass
             QMessageBox.critical(
                 self,
                 self.tr("Save Results"),
@@ -1021,8 +1015,7 @@ class DatasetAnalysisDialog(QDialog):
             axis_label = ["x", "y", "z"]
 
         column_header_list = ["name"]
-        for i in range(vector_length):
-            column_header_list.append(axis_label[i % dimension] + str(int(i / dimension) + 1))
+        column_header_list.extend(axis_label[i % dimension] + str(int(i / dimension) + 1) for i in range(vector_length))
         # column_header_list.append("CSize")
 
         """
@@ -1101,7 +1094,7 @@ class DatasetAnalysisDialog(QDialog):
         self.onpick_happened = True
         # print("evt", evt, evt.ind, evt.artist )
         selected_object_id_list = []
-        for key_name in self.scatter_data.keys():
+        for key_name in self.scatter_data:
             if evt.artist == self.scatter_result[key_name]:
                 # print("key_name", key_name)
                 for idx in evt.ind:
@@ -1117,9 +1110,9 @@ class DatasetAnalysisDialog(QDialog):
 
         # print("selected_object_id_list", selected_object_id_list)
         self.selection_changed_off = True
-        for id in selected_object_id_list:
-            # item = self.object_model.findItems(str(id), Qt.MatchExactly, 0)
-            item = self.object_hash[id]
+        for object_id in selected_object_id_list:
+            # item = self.object_model.findItems(str(object_id), Qt.MatchExactly, 0)
+            item = self.object_hash[object_id]
             self.tableView1.selectionModel().select(item.index(), QItemSelectionModel.Rows | QItemSelectionModel.Select)
         self.selection_changed_off = False
         self.on_object_selection_changed([], [])

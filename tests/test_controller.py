@@ -569,9 +569,11 @@ class TestSignalEmission:
         with patch("MdUtils.read_landmark_file") as mock_read:
             mock_read.return_value = [("test_specimen", [[1, 2], [3, 4]])]
 
-            with qtbot.waitSignal(controller.object_added, timeout=1000):
-                with patch("pathlib.Path.exists", return_value=True):
-                    controller.import_objects(["/path/to/test.tps"])
+            with (
+                qtbot.waitSignal(controller.object_added, timeout=1000),
+                patch("pathlib.Path.exists", return_value=True),
+            ):
+                controller.import_objects(["/path/to/test.tps"])
 
 
 class TestErrorHandling:
@@ -594,9 +596,11 @@ class TestErrorHandling:
         """Test handling of file errors."""
         controller.set_current_dataset(sample_dataset)
 
-        with patch("MdUtils.read_landmark_file", side_effect=Exception("File error")):
-            with patch("pathlib.Path.exists", return_value=True):
-                objects = controller.import_objects(["/path/to/bad_file.tps"])
+        with (
+            patch("MdUtils.read_landmark_file", side_effect=Exception("File error")),
+            patch("pathlib.Path.exists", return_value=True),
+        ):
+            objects = controller.import_objects(["/path/to/bad_file.tps"])
 
         assert len(objects) == 0
 
@@ -1269,17 +1273,21 @@ class TestImportFileErrorHandling:
 
     def test_import_image_file_error(self, controller):
         """Test image import with error."""
-        with patch("MdModel.MdImage.create", side_effect=Exception("Image error")):
-            with patch("pathlib.Path.exists", return_value=True):
-                objects = controller.import_objects(["/path/to/image.jpg"])
+        with (
+            patch("MdModel.MdImage.create", side_effect=Exception("Image error")),
+            patch("pathlib.Path.exists", return_value=True),
+        ):
+            objects = controller.import_objects(["/path/to/image.jpg"])
 
         assert len(objects) == 0
 
     def test_import_3d_file_error(self, controller):
         """Test 3D file import with error."""
-        with patch("MdUtils.process_3d_file", side_effect=Exception("3D error")):
-            with patch("pathlib.Path.exists", return_value=True):
-                objects = controller.import_objects(["/path/to/model.obj"])
+        with (
+            patch("MdUtils.process_3d_file", side_effect=Exception("3D error")),
+            patch("pathlib.Path.exists", return_value=True),
+        ):
+            objects = controller.import_objects(["/path/to/model.obj"])
 
         assert len(objects) == 0
 

@@ -63,6 +63,8 @@ import MdUtils as mu
 
 logger = logging.getLogger(__name__)
 
+import contextlib
+
 from MdConstants import BASE_LANDMARK_RADIUS, COLOR, DATASET_MODE, DISTANCE_THRESHOLD, MODE, OBJECT_MODE
 
 # Cap on the scaled render pixmap's longer side. adjust_scale allocates a
@@ -225,14 +227,14 @@ class ObjectViewer2D(QLabel):
     def set_target_shape_color(self, color):
         self.target_shape_color = color
 
-    def set_source_shape(self, object):
-        self.comparison_data["source_shape"] = object
+    def set_source_shape(self, obj):
+        self.comparison_data["source_shape"] = obj
 
-    def set_target_shape(self, object):
-        self.comparison_data["target_shape"] = object
+    def set_target_shape(self, obj):
+        self.comparison_data["target_shape"] = obj
 
-    def set_intermediate_shape(self, object):
-        self.comparison_data["intermediate_shape"] = object
+    def set_intermediate_shape(self, obj):
+        self.comparison_data["intermediate_shape"] = obj
 
     def generate_reference_shape(self):
         shape_list = []
@@ -556,10 +558,8 @@ class ObjectViewer2D(QLabel):
         for curve in self._curve_config():
             raw = raw_map.get(curve.get("id"))
             if raw and len(raw) >= 2:
-                try:
+                with contextlib.suppress(ValueError):
                     semis.extend(mu.resample_polyline(raw, curve.get("n", 0)))
-                except ValueError:
-                    pass
         return semis
 
     def _curve_anchor_map(self):
@@ -1160,18 +1160,14 @@ class ObjectViewer2D(QLabel):
             if event.key() in (Qt.Key_Return, Qt.Key_Enter):
                 if self._accept_current_curve():
                     return None
-            elif event.key() == Qt.Key_Escape:
-                if self._cancel_current_curve():
-                    return None
+            elif event.key() == Qt.Key_Escape and self._cancel_current_curve():
+                return None
         return super().keyPressEvent(event)
 
     def wheelEvent(self, event):
         we = QWheelEvent(event)
         scale_delta_ratio = 0
-        if we.angleDelta().y() > 0:
-            scale_delta_ratio = 0.1
-        else:
-            scale_delta_ratio = -0.1
+        scale_delta_ratio = 0.1 if we.angleDelta().y() > 0 else -0.1
         if self.scale <= 0.8 and scale_delta_ratio < 0:
             return
 
@@ -1189,10 +1185,7 @@ class ObjectViewer2D(QLabel):
         if self.parent is not None and callable(getattr(self.parent, "sync_zoom", None)) and recurse:
             self.parent.sync_zoom(self, scale_delta_ratio)
 
-        if self.scale > 1:
-            scale_delta = math.floor(self.scale) * scale_delta_ratio
-        else:
-            scale_delta = scale_delta_ratio
+        scale_delta = math.floor(self.scale) * scale_delta_ratio if self.scale > 1 else scale_delta_ratio
 
         self.scale += scale_delta
         self.scale = round(self.scale * 10) / 10
@@ -1749,27 +1742,27 @@ class ObjectViewer2D(QLabel):
         self.calculate_resize()
         QLabel.resizeEvent(self, event)
 
-    def set_object(self, object):
+    def set_object(self, obj):
         m_app = QApplication.instance()
-        self.object = object
-        self.dataset = object.dataset
+        self.object = obj
+        self.dataset = obj.dataset
 
         if self.object.pixels_per_mm is not None and self.object.pixels_per_mm > 0:
             self.pixels_per_mm = self.object.pixels_per_mm
-        if object.image.count() > 0:
-            image_path = object.image[0].get_file_path(m_app.storage_directory)
+        if obj.image.count() > 0:
+            image_path = obj.image[0].get_file_path(m_app.storage_directory)
             if image_path is not None and os.path.exists(image_path):
                 self.set_image(image_path)
             else:
                 self.clear_object()
 
-        object.unpack_landmark()
-        object.dataset.unpack_wireframe()
+        obj.unpack_landmark()
+        obj.dataset.unpack_wireframe()
 
-        if isinstance(object, MdObject):
-            self.object = object
-            obj_ops = MdObjectOps(object)
-        elif object is None:
+        if isinstance(obj, MdObject):
+            self.object = obj
+            obj_ops = MdObjectOps(obj)
+        elif obj is None:
             self.object = MdObject()
             obj_ops = MdObjectOps(self.object)
 
@@ -1780,8 +1773,8 @@ class ObjectViewer2D(QLabel):
         self.rotate_x = self.rotate_y = 0
         self.edge_list = self.dataset.unpack_wireframe()
 
-        self.landmark_list = object.landmark_list
-        self.edge_list = object.dataset.edge_list
+        self.landmark_list = obj.landmark_list
+        self.edge_list = obj.dataset.edge_list
         self.calculate_resize()
         if self.dataset.baseline is not None:
             self.dataset.unpack_baseline()

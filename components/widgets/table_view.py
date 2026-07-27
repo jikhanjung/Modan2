@@ -451,10 +451,7 @@ class MdTableView(QTableView):
             for col in range(self.model().columnCount()):
                 if not self.isColumnHidden(col):
                     cell_rect = self.visualRect(self.model().index(self.selected_object_row, col))
-                    if row_rect.isNull():
-                        row_rect = cell_rect
-                    else:
-                        row_rect = row_rect.united(cell_rect)
+                    row_rect = cell_rect if row_rect.isNull() else row_rect.united(cell_rect)
 
             if not row_rect.isNull():
                 # Draw the border around the entire row
@@ -689,8 +686,8 @@ class MdTableModel(QAbstractTableModel):
     def save_object_info(self):
         for row in self._data:
             # print(row)
-            id = row[0]["value"]
-            obj = MdObject.get_by_id(id)
+            object_id = row[0]["value"]
+            obj = MdObject.get_by_id(object_id)
             ds = obj.dataset
             ds.get_variablename_list()
             property_list = []

@@ -14,6 +14,8 @@ from peewee import SqliteDatabase
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+import contextlib
+
 import MdModel as mm
 from components.formats.tps import TPS
 from dialogs.export_dialog import ExportDatasetDialog, format_tps
@@ -37,10 +39,8 @@ def test_database():
     mm.gDatabase = original
     for model in models:
         model._meta.database = original
-    try:
+    with contextlib.suppress(OSError):
         os.unlink(path)
-    except OSError:
-        pass
 
 
 class TestFormatTps:

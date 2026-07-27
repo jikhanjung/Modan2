@@ -208,8 +208,8 @@ class AnalysisInfoWidget(QWidget):
             valid_property_index_list = analysis.dataset.get_grouping_variable_index_list()
             variablename_list = analysis.dataset.get_variablename_list()
             for idx in valid_property_index_list:
-                property = variablename_list[idx]
-                combo.addItem(property, idx)
+                variablename = variablename_list[idx]
+                combo.addItem(variablename, idx)
 
         self.comboPcaGroupBy.setEnabled(True)
         self.comboCvaGroupBy.setEnabled(False)
@@ -262,7 +262,7 @@ class AnalysisInfoWidget(QWidget):
         logger = logging.getLogger(__name__)
         object_info_list = json.loads(self.analysis.object_info_json)
         for obj in object_info_list:
-            if "property_list" in obj.keys():
+            if "property_list" in obj:
                 obj["variable_list"] = obj["property_list"]
 
         pca_result_list = None
@@ -386,7 +386,7 @@ class AnalysisInfoWidget(QWidget):
         }
 
         for idx, obj in enumerate(object_info_list):
-            source_list = obj["variable_list"] if "variable_list" in obj.keys() else obj["property_list"]
+            source_list = obj["variable_list"] if "variable_list" in obj else obj["property_list"]
             key_name = source_list[propertyname_index] if -1 < propertyname_index < len(source_list) else "__default__"
 
             if key_name not in scatter_data:

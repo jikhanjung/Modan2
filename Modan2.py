@@ -11,6 +11,7 @@ if hasattr(sys, "version") and "| packaged by Anaconda" in sys.version:
         # Keep only the first part (version) and last part (compiler info)
         sys.version = parts[0].strip() + " " + parts[-1].strip()
 
+import contextlib
 import copy
 import logging
 from pathlib import Path
@@ -166,9 +167,7 @@ class SettingsWrapper:
         # Ensure all parent dictionaries exist
         current = self.config
         for key in keys[:-1]:
-            if key not in current:
-                current[key] = {}
-            elif not isinstance(current[key], dict):
+            if key not in current or not isinstance(current[key], dict):
                 current[key] = {}
             current = current[key]
 
@@ -227,10 +226,8 @@ class SettingsWrapper:
                     os.fsync(f.fileno())
                 os.replace(tmp_path, config_path)
             except Exception:
-                try:
+                with contextlib.suppress(OSError):
                     os.unlink(tmp_path)
-                except OSError:
-                    pass
                 raise
         except Exception as e:
             logger.error(f"Failed to save config: {e}")
@@ -753,12 +750,10 @@ class ModanMainWindow(QMainWindow):
     def closeEvent(self, event):
         self.write_settings()
         if self.analysis_dialog is not None:
-            try:
+            # Already deleted (WA_DeleteOnClose / deleteLater); the Python
+            # wrapper outlives the C++ widget.
+            with contextlib.suppress(RuntimeError):
                 self.analysis_dialog.close()
-            except RuntimeError:
-                # Already deleted (WA_DeleteOnClose / deleteLater); the Python
-                # wrapper outlives the C++ widget.
-                pass
         event.accept()
 
     @pyqtSlot()
@@ -1123,8 +1118,8 @@ class ModanMainWindow(QMainWindow):
             # and 3D model are removed too; deleting the row alone left them on
             # disk forever (devlog 228).
             storage_directory = getattr(self.m_app, "storage_directory", None)
-            for object in selected_object_list:
-                self.controller.delete_object(object.id, storage_directory)
+            for obj in selected_object_list:
+                self.controller.delete_object(obj.id, storage_directory)
             dataset = self.selected_dataset
             self.reset_treeView()
             self.load_dataset()
@@ -1458,21 +1453,16 @@ class ModanMainWindow(QMainWindow):
             selected_object_list = self.get_selected_object_list()
             source_dataset = None
             total_count = len(selected_object_list)
-            current_count = 0
 
             self.progress_dialog = ProgressDialog(self)
             self.progress_dialog.setModal(True)
-            if shift_clicked:
-                label_text = f"Moving {total_count} objects..."
-            else:
-                label_text = f"Copying {total_count} objects..."
+            label_text = f"Moving {total_count} objects..." if shift_clicked else f"Copying {total_count} objects..."
             self.progress_dialog.lbl_text.setText(label_text)
             self.progress_dialog.pb_progress.setValue(0)
             self.progress_dialog.show()
 
-            for source_object in selected_object_list:
+            for current_count, source_object in enumerate(selected_object_list, start=1):
                 source_dataset = source_object.dataset
-                current_count += 1
                 self.progress_dialog.pb_progress.setValue(int((current_count / float(total_count)) * 100))
                 self.progress_dialog.update()
                 QApplication.processEvents()
@@ -1533,12 +1523,12 @@ class ModanMainWindow(QMainWindow):
         for index in selected_indexes:
             try:
                 object_id = int(self.object_model._data[index.row()][0]["value"])
-                object = MdObject.get_by_id(object_id)
+                obj = MdObject.get_by_id(object_id)
             except (IndexError, KeyError, ValueError, TypeError, DoesNotExist) as e:
                 logger.warning(f"Skipping unreadable table row {index.row()}: {e}")
                 continue
-            if object is not None and object not in selected_object_list:
-                selected_object_list.append(object)
+            if obj is not None and obj not in selected_object_list:
+                selected_object_list.append(obj)
 
         return selected_object_list
 
@@ -1602,7 +1592,6 @@ class ModanMainWindow(QMainWindow):
 
         QApplication.setOverrideCursor(Qt.WaitCursor)
         total_count = len(file_name_list)
-        current_count = 0
         self.progress_dialog = ProgressDialog(self)
         self.progress_dialog.setModal(True)
         if self.selected_dataset.dimension == 3:
@@ -1613,8 +1602,7 @@ class ModanMainWindow(QMainWindow):
         self.progress_dialog.pb_progress.setValue(0)
         self.progress_dialog.show()
 
-        for file_name in file_name_list:
-            current_count += 1
+        for current_count, file_name in enumerate(file_name_list, start=1):
             self.progress_dialog.pb_progress.setValue(int((current_count / float(total_count)) * 100))
             self.progress_dialog.update()
             QApplication.processEvents()
@@ -1860,10 +1848,7 @@ class ModanMainWindow(QMainWindow):
                 if len(self.selected_dataset.variablename_list) > 0:
                     variable_list = obj.unpack_variable()
                     for var_idx, _prop in enumerate(self.selected_dataset.variablename_list):
-                        if var_idx < len(variable_list):
-                            item = variable_list[var_idx]
-                        else:
-                            item = ""
+                        item = variable_list[var_idx] if var_idx < len(variable_list) else ""
                         row_data.append(item)
                 rowdata_list.append(row_data)
             except Exception as e:

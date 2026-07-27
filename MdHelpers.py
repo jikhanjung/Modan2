@@ -2,6 +2,7 @@
 Helper functions and utilities for Modan2 application.
 """
 
+import contextlib
 import functools
 import hashlib
 import inspect
@@ -56,10 +57,8 @@ def guard_slot(user_message: str = "An unexpected error occurred"):
                         QApplication.restoreOverrideCursor()
                 except Exception:
                     pass
-                try:
+                with contextlib.suppress(Exception):
                     QMessageBox.critical(self, "Error", f"{user_message}:\n{e}")
-                except Exception:
-                    pass
                 return None
 
         return wrapper
@@ -688,10 +687,7 @@ def find_files(directory: str, pattern: str = "*", recursive: bool = True) -> li
         return []
 
     try:
-        if recursive:
-            files = path.rglob(pattern)
-        else:
-            files = path.glob(pattern)
+        files = path.rglob(pattern) if recursive else path.glob(pattern)
 
         return [str(f) for f in files if f.is_file()]
 

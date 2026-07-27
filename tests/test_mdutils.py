@@ -48,7 +48,7 @@ class TestConstants:
         # Import version from the single source of truth
         from version import __version__
 
-        assert mu.PROGRAM_VERSION == __version__
+        assert __version__ == mu.PROGRAM_VERSION
 
         # Version should follow semantic versioning (but may have pre-release suffix)
         import semver
@@ -62,7 +62,7 @@ class TestConstants:
 
     def test_directory_constants(self):
         """Test that directory constants are properly formed."""
-        assert mu.USER_PROFILE_DIRECTORY == os.path.expanduser("~")
+        assert os.path.expanduser("~") == mu.USER_PROFILE_DIRECTORY
 
         # Normalize separators so the expected tails hold on Windows (backslash) too.
         def _fwd(p):
@@ -903,12 +903,11 @@ class TestFilePathProcessing:
         from unittest.mock import patch
 
         # Simulate Windows
-        with patch.object(sys, "platform", "win32"):
-            with patch("os.name", "nt"):
-                # Windows file URL format
-                url = "file:///C:/Users/test/file.txt"
-                result = mu.process_dropped_file_name(url)
-                assert result == "C:/Users/test/file.txt"
+        with patch.object(sys, "platform", "win32"), patch("os.name", "nt"):
+            # Windows file URL format
+            url = "file:///C:/Users/test/file.txt"
+            result = mu.process_dropped_file_name(url)
+            assert result == "C:/Users/test/file.txt"
 
     def test_process_dropped_file_name_linux(self):
         """Test processing dropped file name on Linux."""
@@ -916,12 +915,11 @@ class TestFilePathProcessing:
         from unittest.mock import patch
 
         # Simulate Linux
-        with patch.object(sys, "platform", "linux"):
-            with patch("os.name", "posix"):
-                # Linux file URL format
-                url = "file:///home/user/file.txt"
-                result = mu.process_dropped_file_name(url)
-                assert result == "/home/user/file.txt"
+        with patch.object(sys, "platform", "linux"), patch("os.name", "posix"):
+            # Linux file URL format
+            url = "file:///home/user/file.txt"
+            result = mu.process_dropped_file_name(url)
+            assert result == "/home/user/file.txt"
 
     def test_process_dropped_file_name_with_spaces(self):
         """Test processing file name with URL-encoded spaces."""

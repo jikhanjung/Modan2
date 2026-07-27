@@ -9,6 +9,7 @@ Tests error handling and recovery workflows:
 - Graceful error handling
 """
 
+import contextlib
 from unittest.mock import patch
 
 import pytest
@@ -90,12 +91,10 @@ class TestImportErrorRecovery:
         # Try to run PCA analysis - may fail with mismatched sizes
         # In real app, this shows error message
         # Note: The actual behavior depends on implementation
-        try:
+        # Either outcome is acceptable: it may handle the mismatch internally,
+        # or raise, which is expected with mismatched landmark counts.
+        with contextlib.suppress(Exception):
             _ = do_pca_analysis(landmarks)
-            # If it succeeds, it may have handled mismatch internally
-        except Exception:
-            # If it fails, that's expected with mismatched landmarks
-            pass
 
     def test_recover_from_corrupted_landmark_data(self, qtbot):
         """Test recovery when landmark data is corrupted."""

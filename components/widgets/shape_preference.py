@@ -231,27 +231,27 @@ class ShapePreference(QWidget):
     def btnColor_clicked(self):
         pass
 
-    def cbxShow_stateChanged(self, int):
+    def cbxShow_stateChanged(self, _state):
         self.visible = self.cbxShow.isChecked()
         if self.ignore_change is False:
             self.emit_changed_signal()
 
-    def cbxShowLandmark_stateChanged(self, int):
+    def cbxShowLandmark_stateChanged(self, _state):
         self.show_landmark = self.cbxShowLandmark.isChecked()
         if self.ignore_change is False:
             self.emit_changed_signal()
 
-    def cbxShowWireframe_stateChanged(self, int):
+    def cbxShowWireframe_stateChanged(self, _state):
         self.show_wireframe = self.cbxShowWireframe.isChecked()
         if self.ignore_change is False:
             self.emit_changed_signal()
 
-    def cbxShowPolygon_stateChanged(self, int):
+    def cbxShowPolygon_stateChanged(self, _state):
         self.show_polygon = self.cbxShowPolygon.isChecked()
         if self.ignore_change is False:
             self.emit_changed_signal()
 
-    def sliderTransparency_valueChanged(self, int):
+    def sliderTransparency_valueChanged(self, _state):
         self.transparency = self.sliderTransparency.value() / 100.0
         self.opacity = 1 - self.transparency
         if self.ignore_change is False:

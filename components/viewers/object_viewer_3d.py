@@ -3,6 +3,7 @@ ObjectViewer3D - Extracted from ModanComponents.py
 Part of modular refactoring effort.
 """
 
+import contextlib
 import logging
 import sys
 
@@ -538,14 +539,14 @@ class ObjectViewer3D(QGLWidget):
     def set_target_shape_color(self, color):
         self.target_shape_color = color
 
-    def set_source_shape(self, object):
-        self.comparison_data["source_shape"] = object
+    def set_source_shape(self, obj):
+        self.comparison_data["source_shape"] = obj
 
-    def set_target_shape(self, object):
-        self.comparison_data["target_shape"] = object
+    def set_target_shape(self, obj):
+        self.comparison_data["target_shape"] = obj
 
-    def set_intermediate_shape(self, object):
-        self.comparison_data["intermediate_shape"] = object
+    def set_intermediate_shape(self, obj):
+        self.comparison_data["intermediate_shape"] = obj
 
     def generate_reference_shape(self):
         shape_list = []
@@ -583,19 +584,19 @@ class ObjectViewer3D(QGLWidget):
         if self.target_preference is not None:
             self.set_target_shape_preference(self.target_preference)
 
-    def set_object(self, object, idx=-1):
+    def set_object(self, obj, idx=-1):
         self.show()
-        self.landmark_list = copy.deepcopy(object.landmark_list)
+        self.landmark_list = copy.deepcopy(obj.landmark_list)
         m_app = QApplication.instance()
-        if isinstance(object, MdObject):
-            self.object = object
-            obj_ops = MdObjectOps(object)
-        elif object is None:
+        if isinstance(obj, MdObject):
+            self.object = obj
+            obj_ops = MdObjectOps(obj)
+        elif obj is None:
             self.object = MdObject()
             obj_ops = MdObjectOps(self.object)
         else:
             pass
-        self.dataset = object.dataset
+        self.dataset = obj.dataset
         if self.dataset.baseline is not None:
             self.dataset.unpack_baseline()
         self.ds_ops = MdDatasetOps(self.dataset)
@@ -606,8 +607,8 @@ class ObjectViewer3D(QGLWidget):
         self.rotate_x = self.rotate_y = 0
         self.edge_list = self.dataset.unpack_wireframe()
         self.polygon_list = self.dataset.unpack_polygons()
-        if object.threed_model.count() > 0:
-            filepath = object.threed_model[0].get_file_path(m_app.storage_directory)
+        if obj.threed_model.count() > 0:
+            filepath = obj.threed_model[0].get_file_path(m_app.storage_directory)
             self.set_threed_model(filepath)
         else:
             self.threed_model = None
@@ -616,11 +617,11 @@ class ObjectViewer3D(QGLWidget):
         if self.dataset.baseline is not None:
             self.align_object()
 
-    def update_object(self, object):
+    def update_object(self, obj):
         return
-        self.object = object
-        self.landmark_list = object.landmark_list
-        self.edge_list = object.dataset.edge_list
+        self.object = obj
+        self.landmark_list = obj.landmark_list
+        self.edge_list = obj.dataset.edge_list
         self.calculate_resize()
         self.updateGL()
 
@@ -840,11 +841,9 @@ class ObjectViewer3D(QGLWidget):
             gl.glRotatef(angle, *axis)
             gl.glScalef(0.005, 0.005, length - 0.03)
             if GLUT_AVAILABLE and GLUT_INITIALIZED and glut:
-                try:
+                # Falls through to drawing a cube manually
+                with contextlib.suppress(OSError, AttributeError):
                     glut.glutSolidCube(1)
-                except (OSError, AttributeError):
-                    # Fallback to drawing a cube manually
-                    pass
             else:
                 # Fallback: draw wireframe cube
                 self.draw_wireframe_cube()
@@ -856,11 +855,9 @@ class ObjectViewer3D(QGLWidget):
                 gl.glTranslatef(*[x * -0.03 for x in direction])
                 gl.glRotatef(angle, *axis)
                 if GLUT_AVAILABLE and GLUT_INITIALIZED and glut:
-                    try:
+                    # Falls through to the simple cone if the GLUT call fails
+                    with contextlib.suppress(OSError, AttributeError):
                         glut.glutSolidCone(0.02, 0.03, 10, 10)
-                    except (OSError, AttributeError):
-                        # Fallback if GLUT call fails
-                        pass
                 else:
                     # Fallback: draw simple cone
                     self.draw_simple_cone()
@@ -870,11 +867,11 @@ class ObjectViewer3D(QGLWidget):
         """True when rendering into the off-screen picker buffer."""
         return current_buffer == self.picker_buffer and self.object_dialog is not None
 
-    def _draw_temp_edge(self, object):
+    def _draw_temp_edge(self, obj):
         """The wireframe edge currently being dragged."""
-        if not (self.show_wireframe and len(self.temp_edge) == 2 and object.show_wireframe):
+        if not (self.show_wireframe and len(self.temp_edge) == 2 and obj.show_wireframe):
             return
-        gl.glColor3f(*mu.as_gl_color(object.edge_color or self.wireframe_color))
+        gl.glColor3f(*mu.as_gl_color(obj.edge_color or self.wireframe_color))
         gl.glLineWidth(int(self.wireframe_thickness) + 1)
         gl.glBegin(gl.GL_LINE_STRIP)
         for v in self.temp_edge:
@@ -882,18 +879,18 @@ class ObjectViewer3D(QGLWidget):
         gl.glEnd()
 
     @staticmethod
-    def _edge_is_drawable(object, edge):
+    def _edge_is_drawable(obj, edge):
         """False when any of the edge's landmarks is missing."""
         for lm_idx in edge:
-            if lm_idx <= len(object.landmark_list):
-                lm = object.landmark_list[lm_idx - 1]
+            if lm_idx <= len(obj.landmark_list):
+                lm = obj.landmark_list[lm_idx - 1]
                 if len(lm) < 3 or lm[0] is None or lm[1] is None or lm[2] is None:
                     return False
         return True
 
-    def _draw_wireframe_edges(self, object, current_buffer):
+    def _draw_wireframe_edges(self, obj, current_buffer):
         """Draw the dataset wireframe, or its pick-colour stand-in."""
-        if not (self.show_wireframe and len(self.edge_list) > 0 and object.show_wireframe):
+        if not (self.show_wireframe and len(self.edge_list) > 0 and obj.show_wireframe):
             return
         picking = self._picking(current_buffer)
         for i, edge in enumerate(self.edge_list):
@@ -906,42 +903,42 @@ class ObjectViewer3D(QGLWidget):
                 if i == self.selected_edge_index:
                     gl.glColor3f(*COLOR["SELECTED_EDGE"])
                 else:
-                    gl.glColor3f(*mu.as_gl_color(object.edge_color or self.wireframe_color))
+                    gl.glColor3f(*mu.as_gl_color(obj.edge_color or self.wireframe_color))
                 gl.glLineWidth(int(self.wireframe_thickness) + 1)
 
             gl.glBegin(gl.GL_LINE_STRIP)
             # Only draw the edge if all of its landmarks are present.
-            if self._edge_is_drawable(object, edge):
+            if self._edge_is_drawable(obj, edge):
                 for lm_idx in edge:
-                    if lm_idx <= len(object.landmark_list):
-                        gl.glVertex3f(*object.landmark_list[lm_idx - 1])
+                    if lm_idx <= len(obj.landmark_list):
+                        gl.glVertex3f(*obj.landmark_list[lm_idx - 1])
             gl.glEnd()
 
             if picking:
                 gl.glEnable(gl.GL_LIGHTING)
 
-    def _draw_polygons(self, object, polygon_color):
-        """Fill the dataset polygons with the object's (or the given) colour."""
-        if not (self.show_polygon and len(self.polygon_list) > 0 and object.show_polygon):
+    def _draw_polygons(self, obj, polygon_color):
+        """Fill the dataset polygons with the obj's (or the given) colour."""
+        if not (self.show_polygon and len(self.polygon_list) > 0 and obj.show_polygon):
             return
-        self.calculate_normal_list(object, self.polygon_list)
+        self.calculate_normal_list(obj, self.polygon_list)
         for polygon in self.polygon_list:
-            normal = self.calculate_normal(object, polygon)
+            normal = self.calculate_normal(obj, polygon)
             gl.glEnable(gl.GL_LIGHTING)
-            if object.polygon_color:
-                pg_color = mu.as_gl_color(object.polygon_color)
+            if obj.polygon_color:
+                pg_color = mu.as_gl_color(obj.polygon_color)
             elif isinstance(polygon_color, QColor):
                 pg_color = mu.as_gl_color(polygon_color)
             elif len(polygon_color) == 3:
                 pg_color = polygon_color
             else:
                 pg_color = mu.as_gl_color(polygon_color)
-            gl.glColor4f(*pg_color, object.opacity)
+            gl.glColor4f(*pg_color, obj.opacity)
             gl.glNormal3f(*normal)
             gl.glBegin(gl.GL_POLYGON)
             for lm_idx in polygon:
-                if lm_idx <= len(object.landmark_list):
-                    gl.glVertex3f(*object.landmark_list[lm_idx - 1])
+                if lm_idx <= len(obj.landmark_list):
+                    gl.glVertex3f(*obj.landmark_list[lm_idx - 1])
             gl.glEnd()
 
     def _draw_landmark_index(self, i, lm):
@@ -964,10 +961,10 @@ class ObjectViewer3D(QGLWidget):
                 pass  # GLUT text rendering unavailable; skip the label
         gl.glEnable(gl.GL_LIGHTING)
 
-    def _draw_landmark_spheres(self, object, color, current_buffer):
+    def _draw_landmark_spheres(self, obj, color, current_buffer):
         """Draw each landmark as a sphere (the normal, pickable representation)."""
         picking = self._picking(current_buffer)
-        for i, lm in enumerate(object.landmark_list):
+        for i, lm in enumerate(obj.landmark_list):
             if len(lm) < 3 or lm[0] is None or lm[1] is None or lm[2] is None:
                 continue  # missing landmark
             gl.glPushMatrix()
@@ -986,13 +983,13 @@ class ObjectViewer3D(QGLWidget):
 
             self._draw_landmark_index(i, lm)
 
-    def _draw_landmark_points(self, object, color):
+    def _draw_landmark_points(self, obj, color):
         """Draw landmarks as plain points (the lightweight representation)."""
         gl.glPointSize(5)
         gl.glDisable(gl.GL_LIGHTING)
         gl.glColor3f(*color)
         gl.glBegin(gl.GL_POINTS)
-        for lm in object.landmark_list:
+        for lm in obj.landmark_list:
             if len(lm) < 3 or lm[0] is None or lm[1] is None or lm[2] is None:
                 continue  # missing landmark
             gl.glVertex3f(lm[0], lm[1], lm[2])
@@ -1014,29 +1011,29 @@ class ObjectViewer3D(QGLWidget):
 
     def draw_object(
         self,
-        object,
+        obj,
         landmark_as_sphere=True,
         color=COLOR["NORMAL_SHAPE"],
         edge_color=COLOR["NORMAL_SHAPE"],
         polygon_color=COLOR["NORMAL_SHAPE"],
     ):
-        """Draw one object: wireframe, polygons, landmarks and the 3D model.
+        """Draw one obj: wireframe, polygons, landmarks and the 3D model.
 
         ``edge_color`` is accepted for call-site compatibility but unused -- edge
-        colour comes from the object or the viewer's wireframe_color.
+        colour comes from the obj or the viewer's wireframe_color.
         """
-        if object is None:
+        if obj is None:
             return
         current_buffer = gl.glGetIntegerv(gl.GL_FRAMEBUFFER_BINDING)
 
-        self._draw_temp_edge(object)
-        self._draw_wireframe_edges(object, current_buffer)
-        self._draw_polygons(object, polygon_color)
+        self._draw_temp_edge(obj)
+        self._draw_wireframe_edges(obj, current_buffer)
+        self._draw_polygons(obj, polygon_color)
 
-        if landmark_as_sphere and object.show_landmark:
-            self._draw_landmark_spheres(object, color, current_buffer)
-        elif object.show_landmark:
-            self._draw_landmark_points(object, color)
+        if landmark_as_sphere and obj.show_landmark:
+            self._draw_landmark_spheres(obj, color, current_buffer)
+        elif obj.show_landmark:
+            self._draw_landmark_points(obj, color)
 
         self._draw_threed_model()
 
@@ -1082,10 +1079,7 @@ class ObjectViewer3D(QGLWidget):
                     normal_dict[i] = {"normal": normal, "count": 1}
         normal_list = []
         for i in range(len(obj_ops.landmark_list)):
-            if i in normal_dict:
-                normal = normal_dict[i]["normal"] / normal_dict[i]["count"]
-            else:
-                normal = np.array([0, 0, 0])
+            normal = normal_dict[i]["normal"] / normal_dict[i]["count"] if i in normal_dict else np.array([0, 0, 0])
             normal_list.append(normal)
         return normal_list
 
@@ -1185,9 +1179,7 @@ class ObjectViewer3D(QGLWidget):
         r, g, b = struct.unpack("BBB", pixels)
         rgb_list = [r, g, b]
         bg_color = [int(255 * c) for c in COLOR["BACKGROUND"]]
-        if bg_color == rgb_list:
-            return True
-        return False
+        return bg_color == rgb_list
 
     def hit_test(self, x, y):
         gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, self.picker_buffer)
@@ -1195,10 +1187,10 @@ class ObjectViewer3D(QGLWidget):
         r, g, b = struct.unpack("BBB", pixels)
         rgb_tuple = (r, g, b)
 
-        if rgb_tuple in self.color_to_lm_idx.keys():
+        if rgb_tuple in self.color_to_lm_idx:
             lm_idx = self.color_to_lm_idx[rgb_tuple]
             return "Landmark", int(lm_idx)
-        if rgb_tuple in self.color_to_edge_idx.keys():
+        if rgb_tuple in self.color_to_edge_idx:
             edge_idx = self.color_to_edge_idx[rgb_tuple]
             return "Edge", int(edge_idx)
         return "", -1
@@ -1209,7 +1201,7 @@ class ObjectViewer3D(QGLWidget):
         for i in range(len(self.landmark_list)):
             while True:
                 color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-                if color not in self.color_to_lm_idx.keys():
+                if color not in self.color_to_lm_idx:
                     break
             self.color_to_lm_idx[color] = str(i)
             self.lm_idx_to_color["lm_" + str(i)] = color
@@ -1219,7 +1211,7 @@ class ObjectViewer3D(QGLWidget):
         for i in range(len(self.edge_list)):
             while True:
                 color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-                if color not in self.color_to_lm_idx.keys() and color not in self.color_to_edge_idx.keys():
+                if color not in self.color_to_lm_idx and color not in self.color_to_edge_idx:
                     break
             self.color_to_edge_idx[color] = str(i)
             self.edge_idx_to_color["edge_" + str(i)] = color
@@ -1396,10 +1388,7 @@ class ObjectViewer3D(QGLWidget):
             self.obj_ops.rotate_3d(math.radians(-1 * self.rotate_x), "Y")
             self.obj_ops.rotate_3d(math.radians(self.rotate_y), "X")
             if self.threed_model is not None:
-                if self.show_model:
-                    apply_rotation_to_vertex = True
-                else:
-                    apply_rotation_to_vertex = False
+                apply_rotation_to_vertex = bool(self.show_model)
                 self.threed_model.rotate(
                     math.radians(self.rotate_x), math.radians(self.rotate_y), apply_rotation_to_vertex
                 )

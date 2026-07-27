@@ -57,17 +57,34 @@ entries across devlogs 261–262). `main.py`'s `--db` help was corrected too.
       **Glossary**, and a **Quick Start** page. The stale TPS/NTS/Morphologika
       format appendix was deliberately *not* merged — its NTS example does not match
       the parser, which expects a header line.
-- [ ] **`developer_guide.md` (1082 lines) vs `developer_guide.rst` (876).** Same
-      situation, still open: the Markdown is the fuller one (110 headings absent
-      from the `.rst`, mostly environment setup and contribution workflow). Merge
-      the unique sections across, verifying each against the repo as above, then
-      delete it. Lower priority than the user-facing pages were.
+- [x] **`developer_guide.md`** — **DONE 2026-07-27** (devlog 265). The "110 unique
+      headings" figure was wrong: `grep "^#"` counted shell comments inside bash
+      code fences, and the real count was 53 against the `.rst`'s 46. Merged after
+      the same verification pass, which again found errors on both sides (the
+      `.rst` said Python 3.11 and `python Modan2.py`; the `.md` documented an
+      analysis-type switch, file readers in `MdUtils.py`, and an `MdLogger` module
+      that does not exist). `docs/*.md` now holds only repository-only notes.
+- [x] **File format reference** — **DONE 2026-07-27** (devlog 265). Deliberately
+      skipped in devlog 264 because the `.md`'s NTS example did not match the
+      parser; the parsers were read and the TPS / NTS / Morphologika / X1Y1 specs
+      documented from what they actually accept.
+- [x] **`C901` complexity ratchet** — **DONE 2026-07-27** (devlog 265). Set to 20
+      after refactoring the single function above it. Note the campaign in devlog
+      242 never actually got everything under 15 — 12 functions were over it before
+      this session — and the CHANGELOG claim was corrected to match.
+- [ ] **Lower the ratchet to 19**, blocked by one function:
+      `tools/search_index.py::find_wait_cursor_methods` (20). Then keep stepping it
+      down; 7 application functions remain above 15.
 - [ ] `developer_guide.rst` says `python Modan2.py` (3 sites) and references
       `Output/Modan2-Setup.exe`; source instructions belong there, but they should
       name `main.py` and the real installer name.
-- [ ] **A broken docs build went unnoticed for two days / 6 commits** — `docs.yml` is not
-      a required status check, so its failures are invisible. Worth folding into the
-      branch-protection item below.
+- [ ] **A broken docs build went unnoticed for two days / 6 commits.** `docs.yml`
+      is not a required status check, so its failures are invisible. Making it one
+      needs branch protection, and `main` currently has **none** — enabling it would
+      force a PR workflow on a repo that commits directly to main, so that is a
+      workflow decision, not a config tweak. Partially mitigated in devlog 265:
+      `version.py` was added to the `docs.yml` path trigger, closing a gap where a
+      version bump would not have rebuilt the docs at all (`conf.py` imports it).
 - [ ] From the same addendum, non-docs items: a `C901` complexity ratchet
       (`max-complexity = 30` today, lower over time — 12 functions are over 15), and
       PyOpenGL hidden imports (informational only; Modan2's frozen smoke test passes).

@@ -1008,6 +1008,101 @@ Slow Performance
 - Close other applications
 - Simplify 3D meshes (reduce polygon count)
 
+File Format Reference
+---------------------
+
+What Modan2's readers actually expect. Blank lines are ignored throughout.
+
+TPS
+~~~
+
+An object is an ``LM=<n>`` header, ``n`` coordinate lines, and optional
+``KEY=VALUE`` lines. Recognised keys are ``ID``, ``IMAGE``, ``COMMENT``, and
+``SCALE``. Lines beginning with ``#``, ``"`` or ``'`` are comments.
+
+.. code-block:: text
+
+   LM=4
+   1.5 2.3
+   2.1 3.4
+   3.2 4.1
+   4.0 2.8
+   ID=specimen_001
+   IMAGE=specimen_001.jpg
+
+   LM=4
+   ...
+
+Semi-landmark curves follow the landmarks as a ``CURVES=<k>`` header and then
+``k`` blocks, each a ``POINTS=<m>`` header with ``m`` coordinate lines:
+
+.. code-block:: text
+
+   LM=4
+   1.5 2.3
+   ...
+   CURVES=1
+   POINTS=3
+   5.0 6.0
+   5.4 6.6
+   5.9 7.1
+   ID=specimen_001
+
+Modan2 both reads and writes these blocks (see :ref:`semi-landmark-curves`).
+
+NTS
+~~~
+
+An NTSYS-style matrix file: optional comment lines in quotes, then a header line,
+then the data.
+
+.. code-block:: text
+
+   "Bird wing landmarks
+   1 24L 20 0 DIM=2
+   specimen_001
+   1.5 2.3 2.1 3.4 ...
+   specimen_002
+   ...
+
+The header fields are, in order: the matrix type, the number of objects with a
+row-name flag, the number of variables with a column-name flag, a missing-value
+indicator, and ``DIM=<d>`` giving the dimensionality.
+
+The row-name flag says where object names live — ``L`` on their own line, ``B``
+at the beginning of each data row, ``E`` at the end. The number of landmarks is
+the variable count divided by ``DIM``.
+
+Morphologika
+~~~~~~~~~~~~
+
+A sectioned text file. ``[names]`` and ``[rawpoints]`` are required; the rest are
+optional.
+
+.. code-block:: text
+
+   [individuals]
+   2
+   [landmarks]
+   4
+   [dimensions]
+   2
+   [names]
+   specimen_001
+   specimen_002
+   [rawpoints]
+   1.5 2.3
+   2.1 3.4
+   ...
+
+Optional sections Modan2 reads: ``[labels]`` and ``[labelvalues]`` (variables),
+``[wireframe]``, ``[polygons]``, ``[images]``, and ``[pixelspermm]``.
+
+X1Y1
+~~~~
+
+Plain coordinate columns, one row per object.
+
 Glossary
 --------
 

@@ -15,9 +15,24 @@ Modan2 is a desktop GUI application for morphometric analysis, supporting 2D/3D 
 ```bash
 sudo apt-get install -y libxcb-xinerama0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 \
   libxcb-randr0 libxcb-render-util0 libxcb-xfixes0 libxcb-shape0 libxcb-cursor0 \
+  libxkbcommon-x11-0 \
   qt5-qmake qtbase5-dev libqt5gui5 libqt5core5a libqt5widgets5 python3-pyqt5 \
   libglut-dev libglut3.12 python3-opengl \
   xvfb fonts-nanum
+```
+
+**All of these are required for the GUI tests, not optional.** PyQt5 ships its own
+`libqxcb.so`, which dynamically links the `libxcb-*` libraries above; if any is
+missing, Qt cannot load the `xcb` platform plugin and `QApplication([])` aborts
+the interpreter (`Fatal Python error: Aborted`) instead of raising. That looks
+like a code failure but is not. `libxkbcommon-x11-0` is needed too — the GitHub
+runners happen to have it already, so it is absent from `test.yml`'s list.
+
+To diagnose, ask Qt which library it could not open:
+
+```bash
+QT_DEBUG_PLUGINS=1 python -c "from PyQt5.QtWidgets import QApplication; QApplication([])"
+# Cannot load library .../libqxcb.so: (libxcb-icccm.so.4: cannot open shared object file)
 ```
 
 `xvfb` is required to run the **GUI test suite** headlessly — without it the Qt

@@ -414,20 +414,32 @@ Running Tests
    pytest
 
 .. important::
-   On Linux (including WSL) the GUI tests need an X server. Without one they do
-   not fail cleanly — the interpreter aborts with ``Fatal Python error: Aborted``
-   partway through, which looks like a code problem but is not. Install ``xvfb``
-   and run the suite against it, the same way CI does:
+   On Linux (including WSL) the GUI tests need an X server **and** the xcb
+   libraries PyQt5's platform plugin links against. If either is missing the
+   suite does not fail cleanly — the interpreter aborts with ``Fatal Python
+   error: Aborted`` partway through, which looks like a code problem but is not.
 
    .. code-block:: bash
 
-      sudo apt-get install -y xvfb
+      sudo apt-get install -y xvfb fonts-nanum \
+        libxcb-xinerama0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 \
+        libxcb-randr0 libxcb-render-util0 libxcb-xfixes0 libxcb-shape0 \
+        libxcb-cursor0 libxkbcommon-x11-0
+
       Xvfb :99 -screen 0 1024x768x24 >/tmp/xvfb.log 2>&1 &
       export DISPLAY=:99
       pytest -p no:xvfb
 
    ``-p no:xvfb`` disables the ``pytest-xvfb`` plugin so it does not start and
    tear down a second server on top of this one.
+
+   If it still aborts, ask Qt which library it could not open:
+
+   .. code-block:: bash
+
+      QT_DEBUG_PLUGINS=1 python -c "from PyQt5.QtWidgets import QApplication; QApplication([])"
+
+   The answer is usually one missing ``libxcb-*`` package named in the error.
 
 **Run specific test file**:
 

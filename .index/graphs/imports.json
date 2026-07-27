@@ -1,1013 +1,1174 @@
 {
   "build.py": [
-    "os",
-    "subprocess",
-    "MdUtils",
-    "json",
-    "version",
-    "datetime",
-    "shutil",
     "tempfile",
+    "shutil",
+    "subprocess",
     "pathlib",
+    "datetime",
     "platform",
-    "re"
+    "re",
+    "os",
+    "version",
+    "MdUtils",
+    "json"
   ],
   "fix_qt_import.py": [
-    "PyQt5.QtCore",
-    "sys",
-    "os",
-    "PyQt5.QtWidgets",
     "traceback",
-    "main"
+    "PyQt5.QtCore",
+    "os",
+    "main",
+    "sys",
+    "PyQt5.QtWidgets"
   ],
   "main.py": [
-    "PyQt5.QtCore",
-    "MdSplashScreen",
-    "sys",
-    "MdAppSetup",
-    "MdUtils",
-    "version",
     "logging",
+    "MdUtils",
+    "MdAppSetup",
+    "tempfile",
+    "pytz",
+    "PyQt5.QtCore",
+    "pathlib",
+    "datetime",
+    "MdSplashScreen",
+    "importlib.metadata",
+    "sys",
+    "PyQt5.QtGui",
+    "Modan2",
     "argparse",
     "PyQt5.QtWidgets",
-    "datetime",
-    "Modan2",
-    "pytz",
-    "tempfile",
-    "pathlib",
-    "PyQt5.QtGui",
-    "importlib.metadata"
+    "version"
   ],
   "manage_version.py": [
-    "semver",
-    "sys",
     "subprocess",
-    "datetime",
     "pathlib",
-    "re"
+    "datetime",
+    "re",
+    "semver",
+    "sys"
   ],
   "MdAppSetup.py": [
-    "PyQt5.QtCore",
-    "migrate",
-    "json",
-    "PyQt5.QtWidgets",
     "logging",
-    "MdModel",
     "typing",
-    "pathlib"
+    "PyQt5.QtCore",
+    "pathlib",
+    "MdModel",
+    "PyQt5.QtWidgets",
+    "json"
   ],
   "MdConstants.py": [
     "pathlib",
     "version"
   ],
   "MdHelpers.py": [
-    "os",
-    "PyQt5.QtWidgets",
-    "inspect",
-    "scipy",
-    "typing",
-    "psutil",
-    "PyQt5.QtGui",
-    "functools",
-    "json",
-    "numpy",
     "logging",
     "hashlib",
-    "gc",
-    "datetime",
-    "PyQt5",
-    "PyQt5.QtCore",
-    "matplotlib",
-    "time",
-    "sys",
-    "pandas",
-    "cv2",
-    "shutil",
     "peewee",
+    "shutil",
+    "functools",
+    "numpy",
+    "sys",
+    "PyQt5.QtWidgets",
+    "time",
+    "matplotlib",
+    "gc",
+    "PyQt5",
+    "pandas",
+    "datetime",
+    "json",
+    "typing",
+    "PyQt5.QtCore",
+    "scipy",
+    "platform",
+    "os",
+    "PyQt5.QtGui",
     "trimesh",
+    "psutil",
+    "inspect",
     "pathlib",
-    "platform"
+    "cv2"
+  ],
+  "MdLiveWire.py": [
+    "scipy.sparse",
+    "__future__",
+    "scipy",
+    "numpy",
+    "scipy.sparse.csgraph"
   ],
   "MdModel.py": [
-    "time",
-    "PIL",
-    "peewee_migrate",
-    "copy",
-    "math",
-    "os",
-    "numpy",
-    "MdUtils",
     "logging",
     "hashlib",
-    "warnings",
-    "datetime",
-    "PIL.ExifTags",
-    "io",
-    "shutil",
+    "peewee_migrate",
+    "PIL",
     "peewee",
-    "pathlib"
+    "shutil",
+    "math",
+    "pathlib",
+    "datetime",
+    "io",
+    "copy",
+    "os",
+    "numpy",
+    "PIL.ExifTags",
+    "warnings",
+    "MdUtils",
+    "json",
+    "time"
   ],
   "MdSplashScreen.py": [
     "PyQt5.QtCore",
-    "MdUtils",
-    "PyQt5.QtWidgets",
     "pathlib",
-    "PyQt5.QtGui"
+    "PyQt5.QtGui",
+    "MdUtils",
+    "PyQt5.QtWidgets"
   ],
   "MdStatistics.py": [
-    "sklearn.discriminant_analysis",
-    "numpy",
     "logging",
-    "pandas",
     "statsmodels.multivariate.manova",
-    "scipy",
     "traceback",
-    "sklearn.metrics"
+    "pandas",
+    "scipy",
+    "sklearn.discriminant_analysis",
+    "sklearn.metrics",
+    "numpy"
   ],
   "MdUtils.py": [
-    "urllib.parse",
-    "sys",
-    "os",
-    "json",
-    "numpy",
     "logging",
-    "collections.abc",
-    "PyQt5.QtWidgets",
+    "tempfile",
+    "urllib.parse",
+    "shutil",
+    "pathlib",
     "datetime",
+    "PyQt5.QtWidgets",
+    "os",
+    "collections.abc",
+    "numpy",
+    "sys",
+    "trimesh",
+    "PyQt5.QtGui",
     "version",
     "MdModel",
-    "shutil",
-    "tempfile",
-    "trimesh",
-    "pathlib",
-    "PyQt5.QtGui",
-    "zipfile"
+    "components.formats._encoding",
+    "zipfile",
+    "json"
   ],
   "migrate.py": [
+    "logging",
     "peewee_migrate",
+    "peewee",
+    "datetime",
     "os",
     "MdUtils",
-    "logging",
-    "datetime",
-    "MdModel",
-    "peewee"
+    "MdModel"
   ],
   "Modan2.py": [
-    "os",
-    "PyQt5.QtWidgets",
-    "ModanComponents",
-    "PyQt5.QtGui",
-    "ModanController",
-    "json",
     "logging",
+    "ModanController",
+    "peewee",
+    "ModanComponents",
+    "sys",
     "MdConstants",
-    "tempfile",
-    "PyQt5.QtCore",
+    "MdUtils",
+    "PyQt5.QtWidgets",
     "matplotlib",
     "MdHelpers",
-    "matplotlib.pyplot",
-    "dialogs",
     "copy",
-    "sys",
-    "MdUtils",
-    "MdModel",
-    "peewee",
-    "pathlib"
-  ],
-  "ModanComponents.py": [
-    "sys",
-    "logging",
-    "components",
-    "MdConstants",
-    "OpenGL"
-  ],
-  "ModanController.py": [
+    "json",
+    "dialogs",
+    "tempfile",
     "PyQt5.QtCore",
     "os",
-    "MdStatistics",
-    "MdUtils",
+    "PyQt5.QtGui",
+    "matplotlib.pyplot",
+    "pathlib",
+    "MdModel"
+  ],
+  "ModanComponents.py": [
     "logging",
-    "MdHelpers",
-    "json",
-    "traceback",
-    "MdModel",
-    "shutil",
+    "sys",
+    "MdConstants",
+    "OpenGL",
+    "components"
+  ],
+  "ModanController.py": [
+    "logging",
     "typing",
-    "pathlib"
+    "MdUtils",
+    "MdHelpers",
+    "MdStatistics",
+    "shutil",
+    "PyQt5.QtCore",
+    "traceback",
+    "pathlib",
+    "os",
+    "MdModel",
+    "json"
   ],
   "ModanWidgets.py": [
-    "PyQt5.QtCore",
-    "PyQt5.QtWidgets",
     "logging",
-    "MdModel",
     "typing",
+    "PyQt5.QtCore",
     "pathlib",
-    "PyQt5.QtGui"
+    "PyQt5.QtGui",
+    "MdModel",
+    "PyQt5.QtWidgets"
   ],
   "objloader.py": [
-    "OpenGL.GL",
     "math",
     "os",
     "numpy",
+    "OpenGL.GL",
     "pygame"
   ],
   "setup.py": [
     "cx_Freeze",
+    "version",
     "sys",
-    "re",
-    "version"
+    "re"
   ],
   "version.py": [
     "semver"
   ],
   "__init__.py": [
-    "delegates",
+    "nts",
     "dataset_ops_viewer",
-    "shape_preference",
-    "dialogs.analysis_result_dialog",
-    "object_viewer_2d",
-    "tree_view",
-    "widgets",
+    "dialogs.base_dialog",
+    "viewers",
+    "morphologika",
+    "dialogs.analysis_dialog",
+    "delegates",
     "formats",
     "dialogs.export_dialog",
-    "components.widgets",
-    "dialogs.dataset_dialog",
-    "dialogs.calibration_dialog",
-    "drag_widgets",
-    "morphologika",
-    "dialogs.import_dialog",
-    "tps",
-    "dialogs.dataset_analysis_dialog",
-    "nts",
-    "objloader",
-    "dialogs.base_dialog",
-    "pic_button",
-    "dialogs.progress_dialog",
-    "object_viewer_3d",
+    "dialogs.object_dialog",
     "x1y1",
-    "table_view",
-    "dialogs.preferences_dialog",
+    "analysis_info",
+    "drag_widgets",
+    "tree_view",
+    "widgets",
+    "dialogs.progress_dialog",
+    "objloader",
     "dialogs.data_exploration_dialog",
     "overlay_widget",
-    "dialogs.analysis_dialog",
-    "viewers",
-    "analysis_info",
-    "dialogs.object_dialog"
+    "dialogs.import_dialog",
+    "table_view",
+    "dialogs.preferences_dialog",
+    "dialogs.dataset_analysis_dialog",
+    "components.widgets",
+    "dialogs.dataset_dialog",
+    "tps",
+    "object_viewer_2d",
+    "dialogs.calibration_dialog",
+    "pic_button",
+    "shape_preference",
+    "dialogs.analysis_result_dialog",
+    "object_viewer_3d"
   ],
   "analysis_dialog.py": [
     "PyQt5.QtCore",
+    "PyQt5.QtWidgets",
     "dialogs.base_dialog",
-    "re",
-    "PyQt5.QtWidgets"
+    "re"
   ],
   "analysis_result_dialog.py": [
-    "PyQt5.QtCore",
-    "MdUtils",
-    "PyQt5.QtWidgets",
     "logging",
-    "dialogs.base_dialog"
+    "PyQt5.QtCore",
+    "dialogs.base_dialog",
+    "MdUtils",
+    "PyQt5.QtWidgets"
   ],
   "base_dialog.py": [
-    "PyQt5.QtCore",
-    "MdUtils",
-    "PyQt5.QtWidgets",
     "logging",
-    "collections.abc"
+    "PyQt5.QtCore",
+    "collections.abc",
+    "MdUtils",
+    "PyQt5.QtWidgets"
   ],
   "calibration_dialog.py": [
-    "PyQt5.QtCore",
     "MdHelpers",
-    "PyQt5.QtWidgets",
+    "PyQt5.QtCore",
+    "PyQt5.QtGui",
     "dialogs.base_dialog",
-    "PyQt5.QtGui"
+    "PyQt5.QtWidgets"
   ],
   "dataset_analysis_dialog.py": [
-    "PyQt5.QtCore",
-    "MdStatistics",
-    "dialogs.scatter_utils",
-    "os",
-    "numpy",
-    "PyQt5.QtWidgets",
     "logging",
-    "MdUtils",
-    "matplotlib.backends.backend_qt5agg",
-    "datetime",
-    "components.widgets",
-    "dialogs.base_dialog",
-    "MdHelpers",
-    "MdModel",
+    "numpy",
     "ModanComponents",
+    "dialogs.base_dialog",
+    "MdUtils",
+    "PyQt5.QtWidgets",
+    "matplotlib.backends.backend_qt5agg",
+    "MdHelpers",
+    "datetime",
+    "matplotlib.figure",
+    "MdStatistics",
+    "typing",
+    "PyQt5.QtCore",
+    "os",
     "xlsxwriter",
     "PyQt5.QtGui",
-    "matplotlib.figure"
+    "components.widgets",
+    "dialogs.scatter_utils",
+    "MdModel"
   ],
   "dataset_dialog.py": [
-    "PyQt5.QtCore",
-    "MdHelpers",
-    "PyQt5.QtWidgets",
     "logging",
-    "dialogs.base_dialog",
-    "MdModel",
+    "ModanController",
+    "MdHelpers",
     "peewee",
+    "PyQt5.QtCore",
     "PyQt5.QtGui",
-    "ModanController"
+    "dialogs.base_dialog",
+    "MdUtils",
+    "PyQt5.QtWidgets",
+    "MdModel"
   ],
   "data_exploration_dialog.py": [
-    "PyQt5.QtWidgets",
-    "ModanComponents",
-    "scipy",
-    "PyQt5.QtGui",
-    "math",
-    "json",
-    "numpy",
     "logging",
+    "numpy",
+    "ModanComponents",
+    "sys",
+    "dialogs.base_dialog",
+    "MdUtils",
+    "PyQt5.QtWidgets",
+    "matplotlib",
+    "matplotlib.backends.backend_qt5agg",
+    "MdHelpers",
+    "math",
+    "matplotlib.figure",
+    "dialogs.legend_order_dialog",
+    "json",
+    "glob",
     "tempfile",
     "PyQt5.QtCore",
-    "matplotlib",
-    "MdHelpers",
-    "glob",
-    "scipy.spatial",
-    "dialogs.base_dialog",
-    "dialogs.scatter_utils",
-    "sys",
-    "MdUtils",
-    "matplotlib.backends.backend_qt5agg",
+    "scipy",
+    "PyQt5.QtGui",
     "cv2",
-    "MdModel",
-    "matplotlib.figure"
+    "dialogs.scatter_utils",
+    "scipy.spatial",
+    "MdModel"
   ],
   "export_dialog.py": [
+    "MdHelpers",
+    "shutil",
     "PyQt5.QtCore",
+    "dialogs.progress_dialog",
+    "datetime",
     "os",
+    "dialogs.base_dialog",
     "MdUtils",
     "PyQt5.QtWidgets",
-    "MdHelpers",
-    "datetime",
-    "dialogs.base_dialog",
-    "MdModel",
-    "shutil",
-    "dialogs.progress_dialog"
+    "MdModel"
   ],
   "import_dialog.py": [
-    "PyQt5.QtCore",
+    "logging",
+    "ModanController",
     "MdHelpers",
+    "PyQt5.QtCore",
+    "pathlib",
+    "ModanComponents",
+    "dialogs.base_dialog",
     "MdUtils",
     "PyQt5.QtWidgets",
+    "MdModel"
+  ],
+  "landmark_name_dialog.py": [
     "logging",
-    "dialogs.base_dialog",
-    "MdModel",
-    "ModanComponents",
-    "pathlib",
-    "ModanController"
+    "PyQt5.QtWidgets",
+    "MdHelpers",
+    "PyQt5.QtCore"
+  ],
+  "legend_order_dialog.py": [
+    "PyQt5.QtCore",
+    "PyQt5.QtWidgets"
   ],
   "object_dialog.py": [
-    "PyQt5.QtCore",
-    "copy",
-    "MdHelpers",
-    "MdUtils",
-    "PyQt5.QtWidgets",
     "logging",
+    "ModanController",
+    "MdHelpers",
+    "PyQt5.QtCore",
+    "dialogs.landmark_name_dialog",
+    "pathlib",
     "components.widgets",
-    "MdModel",
+    "copy",
+    "dialogs.calibration_dialog",
     "ModanComponents",
     "MdConstants",
-    "pathlib",
     "PyQt5.QtGui",
-    "ModanController",
-    "dialogs.calibration_dialog"
-  ],
-  "preferences_dialog.py": [
-    "PyQt5.QtCore",
-    "os",
     "MdUtils",
     "PyQt5.QtWidgets",
+    "MdModel"
+  ],
+  "preferences_dialog.py": [
     "logging",
-    "dialogs.base_dialog",
+    "MdHelpers",
+    "PyQt5.QtCore",
     "pathlib",
-    "PyQt5.QtGui"
+    "os",
+    "PyQt5.QtGui",
+    "dialogs.base_dialog",
+    "MdUtils",
+    "PyQt5.QtWidgets"
   ],
   "progress_dialog.py": [
     "PyQt5.QtCore",
-    "dialogs.base_dialog",
-    "PyQt5.QtWidgets"
+    "PyQt5.QtWidgets",
+    "dialogs.base_dialog"
   ],
   "scatter_utils.py": [
     "re"
   ],
-  "build_all.py": [
-    "sys",
-    "os",
-    "subprocess",
-    "shutil",
-    "pathlib"
-  ],
-  "conf.py": [
-    "sys",
-    "os"
-  ],
   "drag_test.py": [
     "PyQt5.QtCore",
+    "PyQt5.QtWidgets",
     "sys",
-    "PyQt5.QtGui",
-    "PyQt5.QtWidgets"
+    "PyQt5.QtGui"
   ],
   "drag_test2.py": [
     "PyQt5.QtCore",
+    "PyQt5.QtWidgets",
     "sys",
-    "PyQt5.QtGui",
-    "PyQt5.QtWidgets"
+    "PyQt5.QtGui"
   ],
   "drag_test3.py": [
     "PyQt5.QtCore",
+    "PyQt5.QtWidgets",
     "sys",
-    "PyQt5.QtGui",
-    "PyQt5.QtWidgets"
+    "PyQt5.QtGui"
   ],
   "drag_test4.py": [
     "PyQt5.QtCore",
+    "PyQt5.QtWidgets",
     "sys",
-    "PyQt5.QtGui",
-    "PyQt5.QtWidgets"
+    "PyQt5.QtGui"
   ],
   "drag_test5.py": [
     "PyQt5.QtCore",
+    "PyQt5.QtWidgets",
     "sys",
-    "PyQt5.QtGui",
-    "PyQt5.QtWidgets"
+    "PyQt5.QtGui"
   ],
   "drag_test6.py": [
     "PyQt5.QtCore",
+    "PyQt5.QtWidgets",
     "sys",
-    "PyQt5.QtGui",
-    "PyQt5.QtWidgets"
+    "PyQt5.QtGui"
   ],
   "drag_test7.py": [
     "PyQt5.QtCore",
+    "PyQt5.QtWidgets",
     "sys",
-    "PyQt5.QtGui",
-    "PyQt5.QtWidgets"
+    "PyQt5.QtGui"
   ],
   "drag_test8.py": [
     "PyQt5.QtCore",
+    "PyQt5.QtWidgets",
     "sys",
-    "PyQt5.QtGui",
-    "PyQt5.QtWidgets"
+    "PyQt5.QtGui"
   ],
   "001_20240305.py": [
-    "peewee",
     "peewee_migrate",
+    "contextlib",
     "playhouse.postgres_ext",
-    "contextlib"
+    "peewee"
   ],
   "002_20240319.py": [
-    "peewee",
     "peewee_migrate",
+    "contextlib",
     "playhouse.postgres_ext",
-    "contextlib"
+    "peewee"
   ],
   "003_20240409.py": [
-    "peewee",
     "peewee_migrate",
+    "contextlib",
     "playhouse.postgres_ext",
-    "contextlib"
+    "peewee"
   ],
   "004_20240604.py": [
-    "peewee",
     "peewee_migrate",
+    "contextlib",
     "playhouse.postgres_ext",
-    "contextlib"
+    "peewee"
   ],
   "005_20240609.py": [
-    "peewee",
     "peewee_migrate",
+    "contextlib",
     "playhouse.postgres_ext",
-    "contextlib"
+    "peewee"
+  ],
+  "006_20260721.py": [
+    "peewee_migrate",
+    "contextlib",
+    "playhouse.postgres_ext",
+    "peewee"
+  ],
+  "007_20260722.py": [
+    "peewee_migrate",
+    "contextlib",
+    "playhouse.postgres_ext",
+    "peewee"
+  ],
+  "008_20260722.py": [
+    "peewee_migrate",
+    "contextlib",
+    "playhouse.postgres_ext",
+    "peewee"
+  ],
+  "009_20260723.py": [
+    "peewee_migrate",
+    "contextlib",
+    "playhouse.postgres_ext",
+    "peewee"
   ],
   "objviewer.py": [
-    "OpenGL.GLU",
+    "pygame.locals",
     "pygame.constants",
+    "objloader",
+    "OpenGL.GLU",
     "OpenGL.GL",
     "sys",
-    "objloader",
-    "pygame",
-    "pygame.locals"
+    "pygame"
   ],
   "benchmark_analysis.py": [
-    "time",
-    "sys",
-    "json",
     "MdStatistics",
+    "pathlib",
     "numpy",
+    "sys",
     "MdModel",
-    "pathlib"
+    "json",
+    "time"
   ],
   "benchmark_large_scale.py": [
-    "time",
-    "tracemalloc",
-    "sys",
-    "json",
     "MdStatistics",
     "traceback",
-    "MdModel",
-    "pathlib"
-  ],
-  "check_sys_version.py": [
-    "sys",
-    "platform",
-    "numpy",
-    "pandas"
-  ],
-  "profile_cva.py": [
-    "time",
-    "sklearn.discriminant_analysis",
-    "sys",
-    "MdStatistics",
-    "numpy",
-    "cProfile",
-    "io",
-    "pstats",
-    "pathlib"
-  ],
-  "profile_detailed.py": [
-    "sys",
-    "MdStatistics",
-    "numpy",
-    "cProfile",
-    "MdModel",
-    "io",
-    "pstats",
-    "pathlib"
-  ],
-  "profile_memory.py": [
+    "pathlib",
     "tracemalloc",
     "sys",
-    "MdStatistics",
-    "gc",
     "MdModel",
-    "pathlib"
+    "json",
+    "time"
+  ],
+  "check_sys_version.py": [
+    "pandas",
+    "numpy",
+    "sys",
+    "platform"
+  ],
+  "profile_cva.py": [
+    "pstats",
+    "pathlib",
+    "io",
+    "cProfile",
+    "sklearn.discriminant_analysis",
+    "numpy",
+    "sys",
+    "MdStatistics",
+    "time"
+  ],
+  "profile_detailed.py": [
+    "pstats",
+    "MdStatistics",
+    "pathlib",
+    "io",
+    "cProfile",
+    "numpy",
+    "sys",
+    "MdModel"
+  ],
+  "profile_memory.py": [
+    "gc",
+    "MdStatistics",
+    "pathlib",
+    "tracemalloc",
+    "sys",
+    "MdModel"
   ],
   "profile_procrustes.py": [
     "MdModel",
+    "pathlib",
     "sys",
-    "numpy",
-    "pathlib"
+    "numpy"
   ],
   "test_ui_responsiveness.py": [
-    "time",
-    "PyQt5.QtCore",
     "dialogs",
+    "PyQt5.QtCore",
+    "pathlib",
     "sys",
-    "PyQt5.QtWidgets",
     "MdModel",
-    "pathlib"
+    "PyQt5.QtWidgets",
+    "time"
   ],
   "conftest.py": [
-    "PyQt5.QtCore",
+    "pytest",
+    "ModanController",
+    "tempfile",
+    "gc",
     "unittest.mock",
     "peewee",
-    "sys",
-    "os",
-    "Modan2",
-    "PyQt5.QtWidgets",
-    "gc",
-    "MdModel",
-    "tempfile",
+    "PyQt5.QtCore",
     "pathlib",
-    "ModanController",
-    "pytest"
+    "os",
+    "sys",
+    "Modan2",
+    "MdModel",
+    "PyQt5.QtWidgets"
   ],
   "test_about_dialog.py": [
     "PyQt5.QtCore",
-    "sys",
     "os",
+    "sys",
     "MdUtils",
     "PyQt5.QtWidgets"
   ],
   "test_add_missing_landmark.py": [
-    "sys",
-    "os",
-    "PyQt5.QtWidgets",
+    "pytest",
     "dialogs.object_dialog",
-    "pytest"
-  ],
-  "test_analysis_info_widget.py": [
-    "components.widgets.analysis_info",
-    "unittest.mock",
+    "os",
+    "sys",
     "PyQt5.QtWidgets"
   ],
+  "test_analysis_info_widget.py": [
+    "PyQt5.QtWidgets",
+    "unittest.mock",
+    "components.widgets.analysis_info"
+  ],
   "test_analysis_workflow.py": [
-    "PyQt5.QtCore",
+    "pytest",
     "dialogs",
     "unittest.mock",
-    "Modan2",
+    "PyQt5.QtCore",
     "os",
-    "PyQt5.QtWidgets",
+    "Modan2",
     "MdModel",
-    "pytest"
+    "PyQt5.QtWidgets"
   ],
   "test_controller.py": [
-    "PyQt5.QtCore",
-    "unittest.mock",
-    "MdModel",
+    "pytest",
     "ModanController",
-    "pytest"
+    "unittest.mock",
+    "PyQt5.QtCore",
+    "math",
+    "MdModel"
   ],
   "test_controller_object_io.py": [
-    "os",
     "MdModel",
+    "os",
     "ModanController"
   ],
   "test_controller_r02.py": [
     "MdModel",
     "ModanController"
   ],
+  "test_database_path.py": [
+    "MdAppSetup",
+    "sqlite3",
+    "MdUtils",
+    "peewee_migrate",
+    "peewee",
+    "os",
+    "sys",
+    "MdModel"
+  ],
   "test_dataset_core.py": [
+    "pytest",
     "dialogs",
-    "MdModel",
-    "pytest"
+    "MdModel"
   ],
   "test_dataset_dialog_direct.py": [
-    "PyQt5.QtCore",
+    "pytest",
     "dialogs",
-    "time",
-    "unittest.mock",
-    "sys",
-    "os",
-    "PyQt5.QtWidgets",
-    "MdModel",
     "ModanController",
-    "pytest"
+    "unittest.mock",
+    "PyQt5.QtCore",
+    "os",
+    "sys",
+    "MdModel",
+    "PyQt5.QtWidgets",
+    "time"
   ],
   "test_dataset_lifecycle.py": [
-    "PyQt5.QtCore",
+    "pytest",
     "dialogs",
-    "PyQt5.QtWidgets",
+    "PyQt5.QtCore",
     "MdModel",
-    "pytest"
+    "PyQt5.QtWidgets"
   ],
   "test_dataset_ops_viewer.py": [
-    "components.widgets.dataset_ops_viewer",
     "PyQt5.QtGui",
-    "unittest.mock"
+    "unittest.mock",
+    "components.widgets.dataset_ops_viewer"
   ],
   "test_delegates.py": [
-    "PyQt5.QtCore",
     "unittest.mock",
+    "PyQt5.QtCore",
     "components.widgets.delegates",
-    "PyQt5.QtWidgets",
-    "PyQt5.QtGui"
+    "PyQt5.QtGui",
+    "PyQt5.QtWidgets"
   ],
   "test_delete_file_cleanup.py": [
-    "sys",
-    "os",
-    "PyQt5.QtWidgets",
-    "MdModel",
-    "dialogs.dataset_dialog",
+    "pytest",
     "ModanController",
-    "pytest"
+    "dialogs.dataset_dialog",
+    "os",
+    "sys",
+    "MdModel",
+    "PyQt5.QtWidgets"
   ],
   "test_error_recovery_workflow.py": [
+    "pytest",
     "unittest.mock",
     "MdStatistics",
-    "PyQt5.QtWidgets",
     "MdModel",
-    "pytest"
+    "PyQt5.QtWidgets"
   ],
   "test_estimate_missing_landmarks.py": [
+    "pytest",
+    "dialogs.object_dialog",
     "math",
-    "sys",
     "os",
     "numpy",
-    "dialogs.object_dialog",
-    "pytest"
+    "sys"
+  ],
+  "test_font_rendering.py": [
+    "matplotlib",
+    "pytest",
+    "MdHelpers",
+    "warnings",
+    "matplotlib.pyplot"
+  ],
+  "test_format_encoding.py": [
+    "components.formats.tps",
+    "os",
+    "sys",
+    "components.formats._encoding"
   ],
   "test_format_handlers.py": [
-    "os",
-    "components.formats.morphologika",
-    "components.formats.tps",
+    "pytest",
+    "components.formats.nts",
     "tempfile",
-    "pytest"
+    "components.formats.tps",
+    "os",
+    "components.formats.x1y1",
+    "components.formats.morphologika"
+  ],
+  "test_fuzz_parsers.py": [
+    "pytest",
+    "tempfile",
+    "hypothesis",
+    "os",
+    "components.formats",
+    "MdUtils"
+  ],
+  "test_fuzz_resample.py": [
+    "pytest",
+    "MdUtils",
+    "numpy",
+    "hypothesis"
   ],
   "test_guard_slot.py": [
     "PyQt5.QtCore",
+    "PyQt5.QtWidgets",
     "MdHelpers",
-    "unittest.mock",
-    "PyQt5.QtWidgets"
+    "unittest.mock"
   ],
   "test_image_attach_downscale.py": [
-    "PIL",
-    "sys",
-    "os",
+    "pytest",
     "hashlib",
-    "MdModel",
-    "pytest"
+    "PIL",
+    "os",
+    "sys",
+    "MdModel"
   ],
   "test_import.py": [
-    "PyQt5.QtCore",
+    "pytest",
     "dialogs",
+    "ModanController",
     "unittest.mock",
-    "PyQt5.QtWidgets",
-    "MdModel",
-    "ModanComponents",
+    "PyQt5.QtCore",
     "pathlib",
-    "pytest"
+    "ModanComponents",
+    "components.formats",
+    "MdModel",
+    "PyQt5.QtWidgets"
   ],
   "test_import_cycles.py": [
-    "sys",
+    "pytest",
     "os",
-    "subprocess",
-    "pytest"
+    "sys",
+    "subprocess"
   ],
   "test_import_error_handling.py": [
     "MdModel",
-    "unittest.mock",
     "PyQt5.QtWidgets",
+    "unittest.mock",
     "dialogs.import_dialog"
   ],
   "test_imputation_accuracy.py": [
+    "pytest",
     "math",
-    "sys",
     "os",
     "numpy",
-    "MdModel",
-    "pytest"
+    "sys",
+    "MdModel"
   ],
   "test_integration_workflows.py": [
-    "PyQt5.QtCore",
+    "pytest",
     "dialogs",
     "unittest.mock",
-    "PyQt5.QtWidgets",
+    "PyQt5.QtCore",
     "MdModel",
-    "pytest"
+    "PyQt5.QtWidgets"
   ],
   "test_landmark_cell_validation.py": [
-    "sys",
-    "os",
-    "PyQt5.QtWidgets",
+    "pytest",
     "dialogs.object_dialog",
-    "pytest"
+    "os",
+    "sys",
+    "PyQt5.QtWidgets"
   ],
   "test_landmark_count_consistency.py": [
-    "sys",
-    "os",
-    "MdModel",
-    "peewee",
+    "pytest",
     "ModanController",
-    "pytest"
+    "peewee",
+    "os",
+    "sys",
+    "MdModel"
   ],
   "test_landmark_count_display.py": [
+    "pytest",
     "PyQt5.QtCore",
-    "sys",
     "os",
-    "PyQt5.QtWidgets",
     "ModanComponents",
+    "sys",
     "PyQt5.QtGui",
-    "pytest"
+    "PyQt5.QtWidgets"
+  ],
+  "test_landmark_names.py": [
+    "pytest",
+    "tempfile",
+    "unittest.mock",
+    "peewee",
+    "dialogs.landmark_name_dialog",
+    "components.viewers.object_viewer_2d",
+    "os",
+    "sys",
+    "MdModel",
+    "PyQt5.QtWidgets"
   ],
   "test_landmark_parsing.py": [
-    "sys",
-    "os",
-    "MdModel",
+    "pytest",
     "peewee",
-    "pytest"
+    "os",
+    "sys",
+    "MdModel"
   ],
   "test_legacy_integration.py": [
-    "PyQt5.QtCore",
+    "pytest",
     "dialogs",
     "unittest.mock",
-    "sys",
+    "PyQt5.QtCore",
     "os",
-    "PyQt5.QtWidgets",
+    "sys",
     "MdModel",
-    "pytest"
+    "PyQt5.QtWidgets"
   ],
   "test_legend_italics.py": [
+    "os",
     "dialogs.scatter_utils",
+    "sys"
+  ],
+  "test_livewire.py": [
+    "pytest",
+    "MdLiveWire",
+    "os",
+    "numpy",
+    "sys"
+  ],
+  "test_livewire_viewer.py": [
+    "pytest",
+    "dialogs.object_dialog",
+    "unittest.mock",
+    "PyQt5.QtCore",
+    "components.viewers.object_viewer_2d",
+    "os",
     "sys",
-    "os"
+    "PyQt5.QtGui",
+    "PyQt5.QtWidgets"
+  ],
+  "test_main_cli.py": [
+    "main",
+    "pathlib",
+    "sys"
   ],
   "test_mdconstants.py": [
-    "sys",
-    "os",
-    "MdConstants",
     "pathlib",
-    "re"
+    "re",
+    "os",
+    "sys",
+    "MdConstants"
   ],
   "test_mdhelpers.py": [
-    "PyQt5.QtCore",
-    "unittest.mock",
-    "os",
+    "pytest",
     "MdHelpers",
-    "PyQt5.QtWidgets",
-    "datetime",
+    "unittest.mock",
+    "PyQt5.QtCore",
     "pathlib",
+    "datetime",
+    "os",
     "PyQt5.QtGui",
-    "pytest"
+    "PyQt5.QtWidgets"
   ],
   "test_mdmodel.py": [
-    "math",
-    "peewee",
-    "sys",
-    "os",
-    "json",
-    "numpy",
-    "datetime",
-    "MdModel",
+    "pytest",
+    "hashlib",
     "tempfile",
-    "pytest"
+    "PIL",
+    "peewee",
+    "math",
+    "datetime",
+    "os",
+    "numpy",
+    "sys",
+    "MdModel",
+    "json"
   ],
   "test_mdstatistics.py": [
+    "pytest",
     "unittest.mock",
-    "sys",
     "os",
     "numpy",
-    "MdStatistics",
-    "pytest"
+    "sys",
+    "MdStatistics"
   ],
   "test_mdutils.py": [
-    "semver",
+    "pytest",
+    "MdUtils",
     "unittest.mock",
-    "sys",
+    "PIL",
+    "zipfile",
+    "pathlib",
+    "json",
     "os",
     "numpy",
-    "PyQt5.QtWidgets",
-    "MdUtils",
-    "version",
-    "zipfile",
-    "json",
-    "MdModel",
-    "pathlib",
+    "semver",
+    "sys",
     "PyQt5.QtGui",
-    "pytest"
+    "MdModel",
+    "PyQt5.QtWidgets",
+    "version"
+  ],
+  "test_migrations.py": [
+    "pytest",
+    "peewee_migrate",
+    "peewee",
+    "pathlib",
+    "os",
+    "sys"
   ],
   "test_missing_sentinel_import.py": [
-    "dialogs.import_dialog",
-    "sys",
+    "typing",
+    "pytest",
+    "ModanController",
+    "peewee",
     "os",
+    "sys",
     "MdUtils",
     "MdModel",
-    "peewee",
-    "ModanController",
-    "pytest"
+    "dialogs.import_dialog"
   ],
   "test_modan2_menu_actions.py": [
-    "pytest",
     "MdModel",
-    "unittest.mock",
-    "PyQt5.QtWidgets"
+    "PyQt5.QtWidgets",
+    "unittest.mock"
   ],
   "test_modan2_toolbar_actions.py": [
-    "pytest",
     "MdModel",
-    "unittest.mock",
-    "PyQt5.QtWidgets"
+    "PyQt5.QtWidgets",
+    "unittest.mock"
   ],
   "test_modan2_tree_interactions.py": [
     "PyQt5.QtCore",
-    "pytest",
     "MdModel",
     "unittest.mock"
   ],
   "test_modan_widgets.py": [
+    "pytest",
     "unittest.mock",
-    "datetime",
-    "MdModel",
     "ModanWidgets",
-    "pytest"
+    "datetime",
+    "MdModel"
   ],
   "test_multi_analysis_workflow.py": [
-    "MdStatistics",
-    "MdModel",
     "pytest",
-    "json"
+    "json",
+    "MdModel",
+    "MdStatistics"
   ],
   "test_object_overlay_persistence.py": [
-    "PyQt5.QtCore",
+    "pytest",
     "PyQt5.QtTest",
     "MdModel",
-    "pytest"
+    "PyQt5.QtCore"
   ],
   "test_object_viewer_2d.py": [
+    "pytest",
+    "unittest.mock",
     "PyQt5.QtCore",
     "components.viewers.object_viewer_2d",
-    "unittest.mock",
-    "MdModel",
     "PyQt5.QtGui",
-    "pytest"
+    "MdModel"
   ],
   "test_object_workflows.py": [
+    "pytest",
     "dialogs",
-    "MdModel",
-    "pytest"
+    "MdModel"
   ],
   "test_performance.py": [
-    "time",
-    "sys",
-    "os",
-    "MdStatistics",
+    "pytest",
     "MdUtils",
     "gc",
-    "numpy",
-    "MdModel",
-    "psutil",
-    "pytest"
-  ],
-  "test_procrustes_missing.py": [
-    "sys",
+    "MdStatistics",
     "os",
     "numpy",
+    "sys",
     "MdModel",
+    "time",
+    "psutil"
+  ],
+  "test_procrustes_missing.py": [
+    "pytest",
     "peewee",
-    "pytest"
+    "os",
+    "numpy",
+    "sys",
+    "MdModel"
+  ],
+  "test_semilandmark.py": [
+    "typing",
+    "pytest",
+    "MdUtils",
+    "tempfile",
+    "ModanController",
+    "unittest.mock",
+    "peewee",
+    "dialogs.object_dialog",
+    "MdStatistics",
+    "math",
+    "dialogs.dataset_dialog",
+    "os",
+    "numpy",
+    "ModanComponents",
+    "sys",
+    "MdConstants",
+    "MdModel",
+    "PyQt5.QtWidgets"
   ],
   "test_settings_wrapper.py": [
     "PyQt5.QtCore",
-    "Modan2",
-    "json"
+    "json",
+    "Modan2"
   ],
   "test_shape_preference.py": [
-    "components.widgets.shape_preference",
     "pytest",
-    "PyQt5.QtGui",
-    "unittest.mock"
+    "components.widgets.shape_preference",
+    "unittest.mock",
+    "PyQt5.QtGui"
+  ],
+  "test_smoke_import.py": [
+    "pytest",
+    "importlib"
   ],
   "test_table_view.py": [
     "PyQt5.QtCore",
     "components.widgets.table_view"
   ],
   "test_threed_model_io.py": [
-    "MdModel",
-    "pytest"
+    "pytest",
+    "MdModel"
+  ],
+  "test_tps_curve_export.py": [
+    "pytest",
+    "dialogs.export_dialog",
+    "tempfile",
+    "components.formats.tps",
+    "unittest.mock",
+    "peewee",
+    "os",
+    "sys",
+    "MdModel"
   ],
   "test_ui_basic.py": [
     "MdModel",
     "unittest.mock"
   ],
   "test_ui_dialogs.py": [
-    "dialogs",
-    "unittest.mock",
-    "sys",
     "os",
     "PyQt5.QtWidgets",
-    "PyQt5.QtGui",
-    "pytest"
+    "sys",
+    "unittest.mock"
   ],
   "test_unimputable_landmarks.py": [
-    "sys",
-    "os",
-    "MdModel",
-    "peewee",
+    "pytest",
     "ModanController",
-    "pytest"
+    "peewee",
+    "os",
+    "sys",
+    "MdModel"
+  ],
+  "test_version_consistency.py": [
+    "pytest",
+    "pathlib",
+    "re",
+    "sys",
+    "version"
   ],
   "test_viewer_fullres_source.py": [
+    "os",
+    "sys",
+    "PyQt5.QtGui",
+    "components.viewers.object_viewer_2d"
+  ],
+  "test_viewer_rendering_characterization.py": [
+    "pytest",
+    "components.viewers",
+    "unittest.mock",
+    "PyQt5.QtCore",
     "components.viewers.object_viewer_2d",
     "sys",
-    "os",
-    "PyQt5.QtGui"
+    "PyQt5.QtGui",
+    "MdConstants",
+    "MdModel",
+    "components.viewers.object_viewer_3d"
   ],
   "test_viewer_zoom_clamp.py": [
-    "components.viewers.object_viewer_2d",
-    "sys",
     "os",
-    "PyQt5.QtGui"
+    "sys",
+    "PyQt5.QtGui",
+    "components.viewers.object_viewer_2d"
   ],
   "test_widgets.py": [
-    "PyQt5.QtCore",
+    "pytest",
     "components.widgets.pic_button",
-    "components.widgets.tree_view",
-    "PyQt5.QtWidgets",
-    "components.widgets.drag_widgets",
     "components.widgets.overlay_widget",
-    "PyQt5.QtGui",
-    "pytest"
-  ],
-  "test_workflows.py": [
     "PyQt5.QtCore",
-    "unittest.mock",
-    "sys",
-    "os",
-    "PyQt5.QtWidgets",
-    "MdModel",
-    "tempfile",
-    "pathlib",
     "PyQt5.QtGui",
-    "pytest"
+    "components.widgets.tree_view",
+    "components.widgets.drag_widgets",
+    "PyQt5.QtWidgets"
   ],
   "build_index.py": [
-    "ast",
-    "sys",
-    "json",
     "logging",
-    "datetime",
-    "collections",
+    "ast",
     "pathlib",
-    "re"
+    "datetime",
+    "re",
+    "sys",
+    "collections",
+    "json"
   ],
   "generate_cards.py": [
+    "logging",
     "pathlib",
-    "json",
-    "logging"
+    "json"
   ],
   "generate_report.py": [
     "datetime",
@@ -1015,250 +1176,270 @@
     "json"
   ],
   "search_index.py": [
-    "sys",
-    "json",
+    "ast",
     "pathlib",
-    "argparse"
+    "sys",
+    "argparse",
+    "json"
   ],
   "visualize_index.py": [
-    "webbrowser",
-    "json",
-    "subprocess",
     "logging",
     "typing",
+    "webbrowser",
+    "subprocess",
     "pathlib",
-    "platform"
+    "platform",
+    "json"
   ],
   "morphologika.py": [
-    "sys",
-    "os",
     "logging",
-    "matplotlib.backends.backend_qt5agg",
-    "OpenGL",
-    "re"
+    "re",
+    "os",
+    "_encoding",
+    "sys",
+    "OpenGL"
   ],
   "nts.py": [
-    "sys",
     "logging",
-    "matplotlib.backends.backend_qt5agg",
-    "OpenGL",
-    "re"
+    "re",
+    "_encoding",
+    "sys",
+    "OpenGL"
   ],
   "tps.py": [
-    "sys",
-    "os",
     "logging",
-    "matplotlib.backends.backend_qt5agg",
-    "OpenGL",
-    "re"
+    "re",
+    "os",
+    "_encoding",
+    "sys",
+    "OpenGL"
   ],
   "x1y1.py": [
-    "sys",
-    "os",
     "logging",
-    "matplotlib.backends.backend_qt5agg",
-    "OpenGL"
+    "os",
+    "sys",
+    "OpenGL",
+    "_encoding"
+  ],
+  "_encoding.py": [
+    "io",
+    "locale"
   ],
   "object_viewer_2d.py": [
-    "PyQt5.QtCore",
-    "math",
-    "sys",
-    "os",
-    "numpy",
-    "PyQt5.QtWidgets",
     "logging",
     "MdUtils",
-    "matplotlib.backends.backend_qt5agg",
-    "OpenGL",
-    "MdModel",
+    "MdLiveWire",
+    "PyQt5.QtCore",
     "scipy.spatial.distance",
-    "MdConstants",
-    "pathlib",
-    "PyQt5.QtGui"
-  ],
-  "object_viewer_3d.py": [
-    "PyQt5.QtWidgets",
-    "PyQt5.QtGui",
     "math",
-    "numpy",
-    "logging",
-    "struct",
-    "MdConstants",
-    "OBJFileLoader",
-    "PyQt5.QtCore",
-    "OpenGL.GL",
-    "MdHelpers",
-    "PyQt5.QtOpenGL",
-    "OpenGL",
-    "random",
-    "copy",
-    "sys",
-    "MdUtils",
-    "matplotlib.backends.backend_qt5agg",
-    "MdModel",
-    "pathlib"
-  ],
-  "analysis_info.py": [
-    "PyQt5.QtCore",
-    "dialogs.scatter_utils",
-    "sys",
-    "json",
+    "pathlib",
     "os",
-    "PyQt5.QtWidgets",
-    "logging",
-    "MdUtils",
-    "matplotlib.backends.backend_qt5agg",
-    "OpenGL",
-    "matplotlib.figure"
-  ],
-  "dataset_ops_viewer.py": [
+    "numpy",
+    "sys",
     "PyQt5.QtGui",
-    "MdUtils",
-    "PyQt5.QtWidgets",
-    "logging"
-  ],
-  "delegates.py": [
-    "sys",
-    "PyQt5.QtWidgets",
-    "logging",
-    "matplotlib.backends.backend_qt5agg",
+    "MdConstants",
     "OpenGL",
-    "PyQt5.QtGui"
-  ],
-  "drag_widgets.py": [
-    "PyQt5.QtCore",
-    "sys",
-    "PyQt5.QtWidgets",
-    "logging",
-    "matplotlib.backends.backend_qt5agg",
-    "OpenGL",
-    "PyQt5.QtGui"
-  ],
-  "overlay_widget.py": [
-    "PyQt5.QtCore",
-    "sys",
-    "PyQt5.QtWidgets",
-    "logging",
-    "matplotlib.backends.backend_qt5agg",
-    "OpenGL",
-    "PyQt5.QtGui"
-  ],
-  "pic_button.py": [
-    "PyQt5.QtCore",
-    "PyQt5.QtGui",
-    "PyQt5.QtWidgets",
-    "logging"
-  ],
-  "shape_preference.py": [
-    "PyQt5.QtCore",
-    "sys",
-    "PyQt5.QtWidgets",
-    "logging",
-    "matplotlib.backends.backend_qt5agg",
-    "OpenGL",
-    "PyQt5.QtGui"
-  ],
-  "table_view.py": [
-    "PyQt5.QtCore",
-    "sys",
-    "PyQt5.QtWidgets",
-    "logging",
-    "matplotlib.backends.backend_qt5agg",
     "MdModel",
-    "OpenGL",
-    "PyQt5.QtGui",
-    "drag_widgets"
-  ],
-  "tree_view.py": [
-    "PyQt5.QtCore",
-    "sys",
-    "PyQt5.QtWidgets",
-    "logging",
-    "matplotlib.backends.backend_qt5agg",
-    "OpenGL"
-  ],
-  "test_analysis_dialog.py": [
-    "PyQt5.QtCore",
-    "dialogs",
-    "unittest.mock",
-    "PyQt5.QtWidgets",
-    "MdModel",
-    "PyQt5.QtGui",
-    "pytest"
-  ],
-  "test_analysis_result_dialog.py": [
-    "PyQt5.QtCore",
-    "dialogs",
-    "MdUtils",
-    "PyQt5.QtWidgets",
-    "PyQt5.QtGui",
-    "pytest"
-  ],
-  "test_base_dialog.py": [
-    "dialogs.base_dialog",
-    "pytest",
-    "unittest.mock",
     "PyQt5.QtWidgets"
   ],
-  "test_calibration_dialog.py": [
+  "object_viewer_3d.py": [
+    "logging",
+    "PyQt5.QtOpenGL",
+    "random",
+    "OpenGL.GL",
+    "numpy",
+    "sys",
+    "struct",
+    "MdConstants",
+    "MdUtils",
+    "PyQt5.QtWidgets",
+    "MdHelpers",
+    "math",
+    "copy",
     "PyQt5.QtCore",
+    "PyQt5.QtGui",
+    "OBJFileLoader",
+    "pathlib",
+    "OpenGL",
+    "MdModel"
+  ],
+  "analysis_info.py": [
+    "logging",
+    "matplotlib.backends.backend_qt5agg",
+    "PyQt5.QtCore",
+    "matplotlib.figure",
+    "os",
+    "dialogs.scatter_utils",
+    "sys",
+    "OpenGL",
+    "MdUtils",
+    "PyQt5.QtWidgets",
+    "json"
+  ],
+  "dataset_ops_viewer.py": [
+    "logging",
+    "MdUtils",
+    "PyQt5.QtWidgets",
+    "PyQt5.QtGui"
+  ],
+  "delegates.py": [
+    "logging",
+    "sys",
+    "PyQt5.QtGui",
+    "OpenGL",
+    "PyQt5.QtWidgets"
+  ],
+  "drag_widgets.py": [
+    "logging",
+    "PyQt5.QtCore",
+    "sys",
+    "PyQt5.QtGui",
+    "OpenGL",
+    "PyQt5.QtWidgets"
+  ],
+  "overlay_widget.py": [
+    "logging",
+    "PyQt5.QtCore",
+    "sys",
+    "PyQt5.QtGui",
+    "OpenGL",
+    "PyQt5.QtWidgets"
+  ],
+  "pic_button.py": [
+    "logging",
+    "PyQt5.QtWidgets",
+    "PyQt5.QtGui",
+    "PyQt5.QtCore"
+  ],
+  "shape_preference.py": [
+    "logging",
+    "PyQt5.QtCore",
+    "sys",
+    "PyQt5.QtGui",
+    "OpenGL",
+    "PyQt5.QtWidgets"
+  ],
+  "table_view.py": [
+    "logging",
+    "PyQt5.QtCore",
+    "sys",
+    "PyQt5.QtGui",
+    "drag_widgets",
+    "OpenGL",
+    "MdModel",
+    "PyQt5.QtWidgets"
+  ],
+  "tree_view.py": [
+    "logging",
+    "PyQt5.QtCore",
+    "sys",
+    "OpenGL",
+    "PyQt5.QtWidgets"
+  ],
+  "build_all.py": [
+    "shutil",
+    "subprocess",
+    "pathlib",
+    "os",
+    "sys"
+  ],
+  "conf.py": [
+    "os",
+    "version",
+    "sys"
+  ],
+  "test_analysis_dialog.py": [
+    "pytest",
     "dialogs",
     "unittest.mock",
+    "PyQt5.QtCore",
+    "PyQt5.QtGui",
+    "MdModel",
+    "PyQt5.QtWidgets"
+  ],
+  "test_analysis_result_dialog.py": [
+    "pytest",
+    "dialogs",
+    "PyQt5.QtCore",
+    "PyQt5.QtGui",
+    "MdUtils",
+    "PyQt5.QtWidgets"
+  ],
+  "test_base_dialog.py": [
+    "pytest",
     "PyQt5.QtWidgets",
-    "pytest"
+    "unittest.mock",
+    "dialogs.base_dialog"
+  ],
+  "test_calibration_dialog.py": [
+    "pytest",
+    "dialogs",
+    "unittest.mock",
+    "PyQt5.QtCore",
+    "PyQt5.QtWidgets"
   ],
   "test_dataset_analysis_scatter.py": [
     "unittest.mock",
     "dialogs.dataset_analysis_dialog",
     "os",
-    "PyQt5.QtWidgets",
-    "MdModel"
-  ],
-  "test_dataset_dialog.py": [
-    "PyQt5.QtCore",
-    "dialogs",
-    "pytest",
+    "MdModel",
     "PyQt5.QtWidgets"
   ],
-  "test_data_exploration_scatter.py": [
+  "test_dataset_dialog.py": [
+    "pytest",
+    "dialogs",
     "PyQt5.QtWidgets",
-    "dialogs.data_exploration_dialog",
-    "MdModel",
+    "PyQt5.QtCore"
+  ],
+  "test_data_exploration_scatter.py": [
+    "pytest",
     "ModanController",
-    "pytest"
+    "MdModel",
+    "dialogs.data_exploration_dialog",
+    "PyQt5.QtWidgets"
   ],
   "test_export_dialog.py": [
-    "PyQt5.QtCore",
+    "pytest",
     "dialogs",
     "unittest.mock",
-    "PyQt5.QtWidgets",
-    "MdModel",
+    "PyQt5.QtCore",
     "PyQt5.QtGui",
-    "pytest"
+    "MdModel",
+    "PyQt5.QtWidgets"
   ],
   "test_import_dialog.py": [
-    "PyQt5.QtCore",
+    "pytest",
     "dialogs",
     "unittest.mock",
-    "PyQt5.QtWidgets",
-    "MdModel",
+    "PyQt5.QtCore",
     "PyQt5.QtGui",
-    "pytest"
+    "MdModel",
+    "PyQt5.QtWidgets"
+  ],
+  "test_legend_arrangement.py": [
+    "pytest",
+    "ModanController",
+    "matplotlib.backend_bases",
+    "dialogs.legend_order_dialog",
+    "dialogs.scatter_utils",
+    "MdModel",
+    "dialogs.data_exploration_dialog",
+    "PyQt5.QtWidgets"
   ],
   "test_object_dialog_modes.py": [
-    "unittest.mock",
-    "PyQt5.QtWidgets",
-    "MdModel",
     "dialogs.object_dialog",
-    "MdConstants"
+    "unittest.mock",
+    "MdConstants",
+    "MdModel",
+    "PyQt5.QtWidgets"
   ],
   "test_preferences_dialog.py": [
-    "PyQt5.QtCore",
+    "pytest",
     "dialogs",
     "unittest.mock",
-    "PyQt5.QtWidgets",
+    "PyQt5.QtCore",
     "PyQt5.QtGui",
-    "pytest"
+    "PyQt5.QtWidgets"
   ],
   "test_scatter_utils.py": [
     "dialogs.scatter_utils"

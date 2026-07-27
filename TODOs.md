@@ -81,14 +81,13 @@ entries across devlogs 261–262). `main.py`'s `--db` help was corrected too.
       `pick_shape` (16), `on_btnSaveResults_clicked` (16) — and 3 in `tests/` and
       `scripts/` (16 each). Note `run_analysis` was decomposed in devlog 176–178
       and has crept back to 16 as superimposition methods were added.
-- [ ] **`search_index.py --wait-cursor` does not complete.** `build_index.py`
-      stores `file_stats` keyed by basename (`filepath.name`), so 127 of 146
-      entries miss a direct path lookup and fall back to `rglob` over the entire
-      tree — 127 full walks including `.git`, `build`, `dist`, `AppDir`, on a
-      `/mnt/d` mount. Either store relative paths in the index (cleaner, but the
-      other lookups read the same keys) or have the search tool walk once and keep
-      a basename → path map. A documented command in `CLAUDE.md` is currently
-      unusable here.
+- [x] **`search_index.py --wait-cursor` does not complete** — **DONE 2026-07-27**.
+      `file_stats` is keyed by basename, so 127 of 146 entries missed a direct path
+      lookup and fell back to `rglob` over the whole tree — 127 full walks, on a
+      `/mnt/d` mount. The basename key is the tool's interface (`--file
+      object_dialog.py`), so it stayed; `build_index.py` now records the
+      project-relative `path` alongside it and the search tool reads that.
+      **10+ minutes (never finished) → 0.96 s.**
 - [ ] `developer_guide.rst` says `python Modan2.py` (3 sites) and references
       `Output/Modan2-Setup.exe`; source instructions belong there, but they should
       name `main.py` and the real installer name.

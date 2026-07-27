@@ -77,11 +77,14 @@ class Modan2Indexer:
             with open(filepath, encoding="utf-8") as f:
                 source = f.read()
 
-            # Basic file stats
+            # Basic file stats. Keyed by basename because that is the interface
+            # the search tool exposes (``--file object_dialog.py``); ``path`` is
+            # recorded alongside so consumers never have to hunt for the file.
             self.file_stats[str(filepath.name)] = {
                 "lines": len(source.splitlines()),
                 "size": len(source),
                 "modified": datetime.fromtimestamp(filepath.stat().st_mtime).isoformat(),
+                "path": filepath.relative_to(self.project_root).as_posix(),
             }
 
             # Parse AST

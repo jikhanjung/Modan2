@@ -401,32 +401,36 @@ python tools/generate_cards.py
 
 | Component | File | Key Classes/Functions |
 |-----------|------|----------------------|
-| Main Window | `Modan2.py` (2,024 lines) | ModanMainWindow |
-| Controller | `ModanController.py` (1,567 lines) | ModanController — DB/file I/O, analysis |
-| Database + Procrustes | `MdModel.py` (2,469 lines) | MdDataset, MdObject, MdDatasetOps |
+| Main Window | `Modan2.py` (2,097 lines) | ModanMainWindow |
+| Controller | `ModanController.py` (1,607 lines) | ModanController — DB/file I/O, analysis |
+| Database + Procrustes | `MdModel.py` (2,691 lines) | MdDataset, MdObject, MdDatasetOps |
 | Statistics | `MdStatistics.py` | PCA, CVA, MANOVA functions |
-| Data exploration | `dialogs/data_exploration_dialog.py` (2,683 lines) | DataExplorationDialog |
-| Object editing | `dialogs/object_dialog.py` (1,337 lines) | ObjectDialog |
-| Dataset analysis | `dialogs/dataset_analysis_dialog.py` (1,339 lines) | DatasetAnalysisDialog |
+| Data exploration | `dialogs/data_exploration_dialog.py` (2,851 lines) | DataExplorationDialog |
+| Object editing | `dialogs/object_dialog.py` (1,932 lines) | ObjectDialog |
+| Dataset analysis | `dialogs/dataset_analysis_dialog.py` (1,334 lines) | DatasetAnalysisDialog |
 | Viewers | `components/viewers/` | ObjectViewer2D, ObjectViewer3D |
 | Utilities | `MdUtils.py`, `MdHelpers.py`, `MdConstants.py` | Helpers, constants |
 
 ### Performance Hotspots
 Methods that show a wait cursor (long operations):
-- `dialogs/data_exploration_dialog.py:615` - cbxShapeGrid_state_changed
-- `dialogs/data_exploration_dialog.py:885` - animate_shape
-- `dialogs/dataset_analysis_dialog.py:759` - on_btn_analysis_clicked
-- `dialogs/analysis_dialog.py:181` - btnOK_clicked
-- `Modan2.py:1566` - tableView_drop_event
-- `dialogs/base_dialog.py:109` - `with_wait_cursor` (the shared wrapper)
+- `dialogs/base_dialog.py:118` - `with_wait_cursor` (the shared wrapper)
+- `dialogs/data_exploration_dialog.py:641` - cbxShapeGrid_state_changed
+- `dialogs/data_exploration_dialog.py:823` - chart_animation
+- `dialogs/data_exploration_dialog.py:2681` - pick_shape
+- `dialogs/dataset_analysis_dialog.py:763` - on_btn_analysis_clicked
+- `dialogs/analysis_dialog.py:203` - btnOK_clicked
+- `Modan2.py:1604` - tableView_drop_event
 
-### Quick Stats (index rebuilt 2026-07-21, includes `tests/`)
-- **Total Files**: 146
-- **Total Lines**: 58,855
-- **Classes**: 547
-- **Functions**: 3,098
-- **Dialog classes**: 83
+Regenerate this list with `python tools/search_index.py --wait-cursor`.
+
+### Quick Stats (index rebuilt 2026-07-27, includes `tests/`)
+- **Total Files**: 169
+- **Total Lines**: 65,558
+- **Classes**: 613
+- **Functions**: 3,693
+- **Dialog classes**: 82
 - **Database Models**: 5
-- **Qt Connections**: 241
+- **Qt Connections**: 277
 
-Application code alone (excluding `tests/`) is ~32,800 lines.
+Application code alone (excluding `tests/`, `scripts/`, `tools/`, `migrations/`
+and the `drag_test/` scratch files) is ~29,700 lines.

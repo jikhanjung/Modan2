@@ -2,7 +2,7 @@
   "MdDataset": {
     "name": "MdDataset",
     "file": "MdModel.py",
-    "line": 198,
+    "line": 222,
     "fields": [
       {
         "name": "dataset_name",
@@ -43,6 +43,14 @@
       {
         "name": "propertyname_str",
         "type": "CharField"
+      },
+      {
+        "name": "curve_config_json",
+        "type": "CharField"
+      },
+      {
+        "name": "landmark_name_json",
+        "type": "CharField"
       }
     ],
     "meta": {
@@ -52,7 +60,7 @@
   "MdObject": {
     "name": "MdObject",
     "file": "MdModel.py",
-    "line": 391,
+    "line": 472,
     "fields": [
       {
         "name": "object_name",
@@ -89,6 +97,14 @@
       {
         "name": "sequence",
         "type": "IntegerField"
+      },
+      {
+        "name": "curve_raw_json",
+        "type": "CharField"
+      },
+      {
+        "name": "curve_anchor_json",
+        "type": "CharField"
       }
     ],
     "meta": {
@@ -98,7 +114,7 @@
   "MdImage": {
     "name": "MdImage",
     "file": "MdModel.py",
-    "line": 787,
+    "line": 921,
     "fields": [
       {
         "name": "original_path",
@@ -152,7 +168,7 @@
   "MdThreeDModel": {
     "name": "MdThreeDModel",
     "file": "MdModel.py",
-    "line": 1045,
+    "line": 1179,
     "fields": [
       {
         "name": "original_path",
@@ -202,7 +218,7 @@
   "MdAnalysis": {
     "name": "MdAnalysis",
     "file": "MdModel.py",
-    "line": 2399,
+    "line": 2536,
     "fields": [
       {
         "name": "analysis_name",
@@ -286,6 +302,14 @@
       },
       {
         "name": "manova_analysis_result_json",
+        "type": "CharField"
+      },
+      {
+        "name": "chart_settings_json",
+        "type": "CharField"
+      },
+      {
+        "name": "curve_config_json",
         "type": "CharField"
       },
       {

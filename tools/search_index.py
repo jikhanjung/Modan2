@@ -135,31 +135,41 @@ class CodeSearcher:
 
         return results
 
-    def _resolve_source(self, filename: str) -> str | None:
-        """Read ``filename`` relative to the project, searching subdirectories.
+    def _source_path(self, filename: str) -> Path | None:
+        """Locate the source file for a ``file_stats`` key.
 
-        ``file_stats`` sometimes stores a bare basename, so fall back to a
-        recursive search. Returns None when the file cannot be found or read.
+        Entries are keyed by basename but carry the project-relative ``path``.
+        Indexes built before that field existed fall back to a recursive search,
+        which is slow enough to matter (one full tree walk per file), so rebuild
+        the index if you hit it.
         """
-        py_path = self.project_root / filename
-        if not py_path.exists():
-            found = list(self.project_root.rglob(f"**/{filename}"))
-            if not found:
-                return None
-            py_path = found[0]
-        try:
-            return py_path.read_text(encoding="utf-8")
-        except OSError:
-            return None
+        recorded = self.file_stats.get(filename, {}).get("path")
+        if recorded:
+            candidate = self.project_root / recorded
+            if candidate.exists():
+                return candidate
+
+        candidate = self.project_root / filename
+        if candidate.exists():
+            return candidate
+
+        found = list(self.project_root.rglob(f"**/{filename}"))
+        return found[0] if found else None
 
     def find_wait_cursor_methods(self) -> list[dict]:
         """Find methods that use wait cursor by scanning sources"""
         results: list[dict] = []
         for filename in self.file_stats:
-            src = self._resolve_source(filename)
-            if src is None or not any(p in src for p in WAIT_CURSOR_PATTERNS):
+            path = self._source_path(filename)
+            if path is None:
                 continue
-            spans = function_spans(src, self.project_root / filename)
+            try:
+                src = path.read_text(encoding="utf-8")
+            except OSError:
+                continue
+            if not any(p in src for p in WAIT_CURSOR_PATTERNS):
+                continue
+            spans = function_spans(src, path)
             for i, line in enumerate(src.splitlines(), start=1):
                 if any(p in line for p in WAIT_CURSOR_PATTERNS):
                     results.append({"file": filename, "method": enclosing_function(spans, i), "line": i})

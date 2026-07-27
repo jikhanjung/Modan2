@@ -146,6 +146,18 @@
         "file": "Modan2.py"
       },
       {
+        "object": "self.controller",
+        "signal": "warning_occurred",
+        "slot": "self.on_controller_warning",
+        "file": "Modan2.py"
+      },
+      {
+        "object": "self.controller",
+        "signal": "info_message",
+        "slot": "self.on_controller_info",
+        "file": "Modan2.py"
+      },
+      {
         "object": "self.btnSaveChanges",
         "signal": "clicked",
         "slot": "self.on_btnSaveChanges_clicked",
@@ -542,6 +554,12 @@
         "file": "dataset_dialog.py"
       },
       {
+        "object": "self.curveTable",
+        "signal": "customContextMenuRequested",
+        "slot": "self.on_curve_table_context_menu",
+        "file": "dataset_dialog.py"
+      },
+      {
         "object": "self.btnAddVariable",
         "signal": "clicked",
         "slot": "self.addVariable",
@@ -616,7 +634,19 @@
       {
         "object": "self.cbxLegend",
         "signal": "toggled",
+        "slot": "self.on_legend_toggled",
+        "file": "data_exploration_dialog.py"
+      },
+      {
+        "object": "self.cbxLegendDraggable",
+        "signal": "toggled",
         "slot": "self.update_chart",
+        "file": "data_exploration_dialog.py"
+      },
+      {
+        "object": "self.btnLegendOrder",
+        "signal": "clicked",
+        "slot": "self.btnLegendOrder_clicked",
         "file": "data_exploration_dialog.py"
       },
       {
@@ -812,21 +842,15 @@
         "file": "data_exploration_dialog.py"
       },
       {
+        "object": "shape_preference",
+        "signal": "shape_preference_changed",
+        "slot": "self.shape_preference_changed",
+        "file": "data_exploration_dialog.py"
+      },
+      {
         "object": "shape_button",
         "signal": "clicked",
         "slot": "lambda",
-        "file": "data_exploration_dialog.py"
-      },
-      {
-        "object": "shape_preference",
-        "signal": "shape_preference_changed",
-        "slot": "self.shape_preference_changed",
-        "file": "data_exploration_dialog.py"
-      },
-      {
-        "object": "shape_preference",
-        "signal": "shape_preference_changed",
-        "slot": "self.shape_preference_changed",
         "file": "data_exploration_dialog.py"
       },
       {
@@ -926,9 +950,63 @@
         "file": "import_dialog.py"
       },
       {
+        "object": "self.btnOkay",
+        "signal": "clicked",
+        "slot": "self.accept_names",
+        "file": "landmark_name_dialog.py"
+      },
+      {
+        "object": "self.btnCancel",
+        "signal": "clicked",
+        "slot": "self.reject",
+        "file": "landmark_name_dialog.py"
+      },
+      {
+        "object": "self.btnSortAsc",
+        "signal": "clicked",
+        "slot": "lambda",
+        "file": "legend_order_dialog.py"
+      },
+      {
+        "object": "self.btnSortDesc",
+        "signal": "clicked",
+        "slot": "lambda",
+        "file": "legend_order_dialog.py"
+      },
+      {
+        "object": "buttons",
+        "signal": "accepted",
+        "slot": "self.accept",
+        "file": "legend_order_dialog.py"
+      },
+      {
+        "object": "buttons",
+        "signal": "rejected",
+        "slot": "self.reject",
+        "file": "legend_order_dialog.py"
+      },
+      {
         "object": "close_shortcut",
         "signal": "activated",
         "slot": "self.close",
+        "file": "object_dialog.py"
+      },
+      {
+        "object": "self.curveTable",
+        "signal": "itemChanged",
+        "slot": "self.on_curve_cell_changed",
+        "file": "object_dialog.py"
+      },
+      {
+        "object": "self.curveTable",
+        "signal": "itemSelectionChanged",
+        "slot": "self.on_curve_selected",
+        "file": "object_dialog.py"
+      },
+      {
+        "object": "self.curveTable",
+        "signal": "customContextMenuRequested",
+        "slot": "self.on_curve_table_context_menu",
         "file": "object_dialog.py"
       },
       {
@@ -971,6 +1049,18 @@
         "object": "self.cbxShowModel",
         "signal": "stateChanged",
         "slot": "self.show_model_state_changed",
+        "file": "object_dialog.py"
+      },
+      {
+        "object": "self.cbxShowCurve",
+        "signal": "stateChanged",
+        "slot": "self.show_curve_state_changed",
+        "file": "object_dialog.py"
+      },
+      {
+        "object": "self.cbxShowSemiLandmark",
+        "signal": "stateChanged",
+        "slot": "self.show_semi_landmark_state_changed",
         "file": "object_dialog.py"
       },
       {
@@ -1034,9 +1124,45 @@
         "file": "object_dialog.py"
       },
       {
+        "object": "self.btnCurve",
+        "signal": "clicked",
+        "slot": "self.btnCurve_clicked",
+        "file": "object_dialog.py"
+      },
+      {
+        "object": "self.rbShowName",
+        "signal": "toggled",
+        "slot": "self.show_name_state_changed",
+        "file": "object_dialog.py"
+      },
+      {
+        "object": "self.btnEditLandmarkNames",
+        "signal": "clicked",
+        "slot": "self.btnEditLandmarkNames_clicked",
+        "file": "object_dialog.py"
+      },
+      {
         "object": "self.cbxShowEstimated",
         "signal": "stateChanged",
         "slot": "self.toggle_estimation",
+        "file": "object_dialog.py"
+      },
+      {
+        "object": "self.cbxShowExpected",
+        "signal": "stateChanged",
+        "slot": "self.show_expected_state_changed",
+        "file": "object_dialog.py"
+      },
+      {
+        "object": "self.cbxSnapToCurve",
+        "signal": "stateChanged",
+        "slot": "self.snap_to_curve_state_changed",
+        "file": "object_dialog.py"
+      },
+      {
+        "object": "self.cbxSmoothCurve",
+        "signal": "stateChanged",
+        "slot": "self.smooth_curve_state_changed",
         "file": "object_dialog.py"
       },
       {
@@ -1262,6 +1388,42 @@
         "file": "test_analysis_workflow.py"
       },
       {
+        "object": "MdModel",
+        "signal": "gDatabase",
+        "slot": "",
+        "file": "test_database_path.py"
+      },
+      {
+        "object": "MdModel",
+        "signal": "gDatabase",
+        "slot": "",
+        "file": "test_database_path.py"
+      },
+      {
+        "object": "seed",
+        "signal": "unknown",
+        "slot": "",
+        "file": "test_database_path.py"
+      },
+      {
+        "object": "sqlite3",
+        "signal": "unknown",
+        "slot": "str(\u2026)",
+        "file": "test_database_path.py"
+      },
+      {
+        "object": "sqlite3",
+        "signal": "unknown",
+        "slot": "str(\u2026)",
+        "file": "test_database_path.py"
+      },
+      {
+        "object": "sqlite3",
+        "signal": "unknown",
+        "slot": "str(\u2026)",
+        "file": "test_database_path.py"
+      },
+      {
         "object": "timer",
         "signal": "timeout",
         "slot": "auto_click_messagebox",
@@ -1274,12 +1436,60 @@
         "file": "test_landmark_cell_validation.py"
       },
       {
+        "object": "db",
+        "signal": "unknown",
+        "slot": "",
+        "file": "test_landmark_names.py"
+      },
+      {
         "object": "test_db",
         "signal": "unknown",
         "slot": "",
         "file": "test_mdmodel.py"
       },
       {
+        "object": "db",
+        "signal": "unknown",
+        "slot": "",
+        "file": "test_migrations.py"
+      },
+      {
+        "object": "db",
+        "signal": "unknown",
+        "slot": "",
+        "file": "test_migrations.py"
+      },
+      {
+        "object": "retry",
+        "signal": "unknown",
+        "slot": "",
+        "file": "test_migrations.py"
+      },
+      {
+        "object": "db",
+        "signal": "unknown",
+        "slot": "",
+        "file": "test_migrations.py"
+      },
+      {
+        "object": "db",
+        "signal": "unknown",
+        "slot": "",
+        "file": "test_semilandmark.py"
+      },
+      {
+        "object": "curve_table",
+        "signal": "itemChanged",
+        "slot": "dlg.on_curve_cell_changed",
+        "file": "test_semilandmark.py"
+      },
+      {
+        "object": "curve_table",
+        "signal": "itemSelectionChanged",
+        "slot": "dlg.on_curve_selected",
+        "file": "test_semilandmark.py"
+      },
+      {
         "object": "widget",
         "signal": "shape_preference_changed",
         "slot": "mock_slot",
@@ -1290,6 +1500,12 @@
         "signal": "shape_preference_changed",
         "slot": "mock_slot",
         "file": "test_shape_preference.py"
+      },
+      {
+        "object": "db",
+        "signal": "unknown",
+        "slot": "",
+        "file": "test_tps_curve_export.py"
       },
       {
         "object": "button",
@@ -1724,103 +1940,103 @@
         "class": "ModanMainWindow",
         "method": "on_action_open_db_triggered",
         "file": "Modan2.py",
-        "line": 529
+        "line": 544
       },
       {
         "class": "ModanMainWindow",
         "method": "on_action_new_db_triggered",
         "file": "Modan2.py",
-        "line": 532
+        "line": 547
       },
       {
         "class": "ModanMainWindow",
         "method": "on_action_save_as_triggered",
         "file": "Modan2.py",
-        "line": 535
+        "line": 550
       },
       {
         "class": "ModanMainWindow",
         "method": "on_action_edit_preferences_triggered",
         "file": "Modan2.py",
-        "line": 745
+        "line": 765
       },
       {
         "class": "ModanMainWindow",
         "method": "on_action_exit_triggered",
         "file": "Modan2.py",
-        "line": 757
+        "line": 777
       },
       {
         "class": "ModanMainWindow",
         "method": "on_action_about_triggered",
         "file": "Modan2.py",
-        "line": 780
+        "line": 800
       },
       {
         "class": "ModanMainWindow",
         "method": "on_action_analyze_dataset_triggered",
         "file": "Modan2.py",
-        "line": 784
+        "line": 804
       },
       {
         "class": "ModanMainWindow",
         "method": "on_action_cell_selection_triggered",
         "file": "Modan2.py",
-        "line": 1012
+        "line": 1034
       },
       {
         "class": "ModanMainWindow",
         "method": "on_action_row_selection_triggered",
         "file": "Modan2.py",
-        "line": 1016
+        "line": 1038
       },
       {
         "class": "ModanMainWindow",
         "method": "on_action_add_variable_triggered",
         "file": "Modan2.py",
-        "line": 1064
+        "line": 1086
       },
       {
         "class": "ModanMainWindow",
         "method": "on_action_delete_object_triggered",
         "file": "Modan2.py",
-        "line": 1088
+        "line": 1110
       },
       {
         "class": "ModanMainWindow",
         "method": "on_action_delete_analysis_triggered",
         "file": "Modan2.py",
-        "line": 1151
+        "line": 1173
       },
       {
         "class": "ModanMainWindow",
         "method": "on_action_explore_data_triggered",
         "file": "Modan2.py",
-        "line": 1169
+        "line": 1191
       },
       {
         "class": "ModanMainWindow",
         "method": "on_action_import_dataset_triggered",
         "file": "Modan2.py",
-        "line": 1176
+        "line": 1198
       },
       {
         "class": "ModanMainWindow",
         "method": "on_action_export_dataset_triggered",
         "file": "Modan2.py",
-        "line": 1186
+        "line": 1208
       },
       {
         "class": "ModanMainWindow",
         "method": "on_action_new_dataset_triggered",
         "file": "Modan2.py",
-        "line": 1201
+        "line": 1223
       },
       {
         "class": "ModanMainWindow",
         "method": "on_action_new_object_triggered",
         "file": "Modan2.py",
-        "line": 1289
+        "line": 1309
       }
     ],
     "ui_handlers": [
@@ -1828,49 +2044,49 @@
         "class": "ModanMainWindow",
         "method": "btnAnalysisDetail_clicked",
         "file": "Modan2.py",
-        "line": 1027
+        "line": 1049
       },
       {
         "class": "ModanMainWindow",
         "method": "btnSaveAnalysis_clicked",
         "file": "Modan2.py",
-        "line": 1035
+        "line": 1057
       },
       {
         "class": "ModanMainWindow",
         "method": "btnDataExploration_clicked",
         "file": "Modan2.py",
-        "line": 1039
+        "line": 1061
       },
       {
         "class": "ModanMainWindow",
         "method": "on_btnSaveChanges_clicked",
         "file": "Modan2.py",
-        "line": 1077
+        "line": 1099
       },
       {
         "class": "ModanMainWindow",
         "method": "on_treeView_clicked",
         "file": "Modan2.py",
-        "line": 1240
+        "line": 1260
       },
       {
         "class": "ModanMainWindow",
         "method": "on_object_data_changed",
         "file": "Modan2.py",
-        "line": 1521
+        "line": 1546
       },
       {
         "class": "ModanMainWindow",
         "method": "on_dataset_selection_changed",
         "file": "Modan2.py",
-        "line": 1718
+        "line": 1740
       },
       {
         "class": "ModanMainWindow",
         "method": "on_object_selection_changed",
         "file": "Modan2.py",
-        "line": 1856
+        "line": 1921
       },
       {
         "class": "DatasetTreeWidget",
@@ -1906,19 +2122,19 @@
         "class": "NewAnalysisDialog",
         "method": "edtAnalysisName_changed",
         "file": "analysis_dialog.py",
-        "line": 164
+        "line": 165
       },
       {
         "class": "NewAnalysisDialog",
         "method": "btnOK_clicked",
         "file": "analysis_dialog.py",
-        "line": 181
+        "line": 182
       },
       {
         "class": "NewAnalysisDialog",
         "method": "btnCancel_clicked",
         "file": "analysis_dialog.py",
-        "line": 235
+        "line": 236
       },
       {
         "class": "CalibrationDialog",
@@ -1936,265 +2152,271 @@
         "class": "DatasetAnalysisDialog",
         "method": "on_analysis_type_changed",
         "file": "dataset_analysis_dialog.py",
-        "line": 461
+        "line": 462
       },
       {
         "class": "DatasetAnalysisDialog",
         "method": "chart_options_clicked",
         "file": "dataset_analysis_dialog.py",
-        "line": 494
+        "line": 495
       },
       {
         "class": "DatasetAnalysisDialog",
         "method": "on_chart_dim_changed",
         "file": "dataset_analysis_dialog.py",
-        "line": 505
+        "line": 506
       },
       {
         "class": "DatasetAnalysisDialog",
         "method": "propertyname_changed",
         "file": "dataset_analysis_dialog.py",
-        "line": 574
+        "line": 575
       },
       {
         "class": "DatasetAnalysisDialog",
         "method": "axis_changed",
         "file": "dataset_analysis_dialog.py",
-        "line": 591
+        "line": 592
       },
       {
         "class": "DatasetAnalysisDialog",
         "method": "flip_axis_changed",
         "file": "dataset_analysis_dialog.py",
-        "line": 595
+        "line": 596
       },
       {
         "class": "DatasetAnalysisDialog",
         "method": "on_btnSuperimpose_clicked",
         "file": "dataset_analysis_dialog.py",
-        "line": 599
+        "line": 600
       },
       {
         "class": "DatasetAnalysisDialog",
         "method": "on_btnAnalyze_clicked",
         "file": "dataset_analysis_dialog.py",
-        "line": 603
+        "line": 604
       },
       {
         "class": "DatasetAnalysisDialog",
         "method": "on_btnSaveResults_clicked",
         "file": "dataset_analysis_dialog.py",
-        "line": 612
+        "line": 613
       },
       {
         "class": "DatasetAnalysisDialog",
         "method": "show_index_state_changed",
         "file": "dataset_analysis_dialog.py",
-        "line": 705
+        "line": 706
       },
       {
         "class": "DatasetAnalysisDialog",
         "method": "show_average_state_changed",
         "file": "dataset_analysis_dialog.py",
-        "line": 714
+        "line": 715
       },
       {
         "class": "DatasetAnalysisDialog",
         "method": "auto_rotate_state_changed",
         "file": "dataset_analysis_dialog.py",
-        "line": 723
+        "line": 724
       },
       {
         "class": "DatasetAnalysisDialog",
         "method": "show_wireframe_state_changed",
         "file": "dataset_analysis_dialog.py",
-        "line": 733
+        "line": 734
       },
       {
         "class": "DatasetAnalysisDialog",
         "method": "show_baseline_state_changed",
         "file": "dataset_analysis_dialog.py",
-        "line": 742
+        "line": 743
       },
       {
         "class": "DatasetAnalysisDialog",
         "method": "on_btn_analysis_clicked",
         "file": "dataset_analysis_dialog.py",
-        "line": 759
+        "line": 760
       },
       {
         "class": "DatasetAnalysisDialog",
         "method": "on_mouse_clicked",
         "file": "dataset_analysis_dialog.py",
-        "line": 1137
+        "line": 1132
       },
       {
         "class": "DatasetAnalysisDialog",
         "method": "on_scatter_item_clicked",
         "file": "dataset_analysis_dialog.py",
-        "line": 1153
+        "line": 1148
       },
       {
         "class": "DatasetAnalysisDialog",
         "method": "on_object_selection_changed",
         "file": "dataset_analysis_dialog.py",
-        "line": 1310
+        "line": 1305
       },
       {
         "class": "DataExplorationDialog",
         "method": "comboSelectGroup_changed",
         "file": "data_exploration_dialog.py",
-        "line": 580
+        "line": 603
       },
       {
         "class": "DataExplorationDialog",
         "method": "comboRegressionBy_changed",
         "file": "data_exploration_dialog.py",
-        "line": 592
+        "line": 615
       },
       {
         "class": "DataExplorationDialog",
         "method": "comboRegressionBasedOn_changed",
         "file": "data_exploration_dialog.py",
-        "line": 608
+        "line": 631
       },
       {
         "class": "DataExplorationDialog",
         "method": "cbxShapeGrid_state_changed",
         "file": "data_exploration_dialog.py",
-        "line": 615
+        "line": 638
       },
       {
         "class": "DataExplorationDialog",
         "method": "on_btnArrowColor_clicked",
         "file": "data_exploration_dialog.py",
-        "line": 721
+        "line": 745
       },
       {
         "class": "DataExplorationDialog",
         "method": "shape_grid_preference_changed",
         "file": "data_exploration_dialog.py",
-        "line": 731
+        "line": 755
       },
       {
         "class": "DataExplorationDialog",
         "method": "shape_preference_button_clicked",
         "file": "data_exploration_dialog.py",
-        "line": 753
+        "line": 777
       },
       {
         "class": "DataExplorationDialog",
         "method": "record_animation_changed",
         "file": "data_exploration_dialog.py",
-        "line": 764
+        "line": 788
       },
       {
         "class": "DataExplorationDialog",
         "method": "on_chart_dim_changed",
         "file": "data_exploration_dialog.py",
-        "line": 957
+        "line": 981
       },
       {
         "class": "DataExplorationDialog",
         "method": "comboVisualizationMethod_changed",
         "file": "data_exploration_dialog.py",
-        "line": 999
+        "line": 1023
       },
       {
         "class": "DataExplorationDialog",
         "method": "arrow_preference_changed",
         "file": "data_exploration_dialog.py",
-        "line": 1198
+        "line": 1211
       },
       {
         "class": "DataExplorationDialog",
         "method": "shape_preference_changed",
         "file": "data_exploration_dialog.py",
-        "line": 1203
+        "line": 1216
       },
       {
         "class": "DataExplorationDialog",
         "method": "shape_button_clicked",
         "file": "data_exploration_dialog.py",
-        "line": 1300
+        "line": 1313
       },
       {
         "class": "DataExplorationDialog",
         "method": "axis_changed",
         "file": "data_exploration_dialog.py",
-        "line": 1316
+        "line": 1329
       },
       {
         "class": "DataExplorationDialog",
         "method": "flip_axis_changed",
         "file": "data_exploration_dialog.py",
-        "line": 1323
+        "line": 1336
+      },
+      {
+        "class": "DataExplorationDialog",
+        "method": "btnLegendOrder_clicked",
+        "file": "data_exploration_dialog.py",
+        "line": 1695
       },
       {
         "class": "DataExplorationDialog",
         "method": "comboGroupBy_changed",
         "file": "data_exploration_dialog.py",
-        "line": 1546
+        "line": 1709
       },
       {
         "class": "DataExplorationDialog",
         "method": "comboShapeview_changed",
         "file": "data_exploration_dialog.py",
-        "line": 1558
+        "line": 1721
       },
       {
         "class": "ExportDatasetDialog",
         "method": "on_rbProcrustes_clicked",
         "file": "export_dialog.py",
-        "line": 210
+        "line": 234
       },
       {
         "class": "ExportDatasetDialog",
         "method": "on_rbBookstein_clicked",
         "file": "export_dialog.py",
-        "line": 214
+        "line": 238
       },
       {
         "class": "ExportDatasetDialog",
         "method": "on_rbRFTRA_clicked",
         "file": "export_dialog.py",
-        "line": 218
+        "line": 242
       },
       {
         "class": "ExportDatasetDialog",
         "method": "on_rbNone_clicked",
         "file": "export_dialog.py",
-        "line": 222
+        "line": 246
       },
       {
         "class": "ExportDatasetDialog",
         "method": "on_rbTPS_clicked",
         "file": "export_dialog.py",
-        "line": 226
+        "line": 250
       },
       {
         "class": "ExportDatasetDialog",
         "method": "on_rbNTS_clicked",
         "file": "export_dialog.py",
-        "line": 230
+        "line": 254
       },
       {
         "class": "ExportDatasetDialog",
         "method": "on_rbX1Y1_clicked",
         "file": "export_dialog.py",
-        "line": 234
+        "line": 258
       },
       {
         "class": "ExportDatasetDialog",
         "method": "on_rbMorphologika_clicked",
         "file": "export_dialog.py",
-        "line": 238
+        "line": 262
       },
       {
         "class": "ExportDatasetDialog",
         "method": "on_rbJSONZip_clicked",
         "file": "export_dialog.py",
-        "line": 242
+        "line": 266
       },
       {
         "class": "ImportDatasetDialog",
@@ -2206,199 +2428,259 @@
         "class": "ObjectDialog",
         "method": "btnAddFile_clicked",
         "file": "object_dialog.py",
-        "line": 407
+        "line": 530
       },
       {
         "class": "ObjectDialog",
         "method": "btnAddMissing_clicked",
         "file": "object_dialog.py",
-        "line": 475
+        "line": 598
       },
       {
         "class": "ObjectDialog",
         "method": "show_index_state_changed",
         "file": "object_dialog.py",
-        "line": 508
+        "line": 631
       },
       {
         "class": "ObjectDialog",
         "method": "show_model_state_changed",
         "file": "object_dialog.py",
-        "line": 512
+        "line": 635
       },
       {
         "class": "ObjectDialog",
         "method": "show_baseline_state_changed",
         "file": "object_dialog.py",
-        "line": 516
+        "line": 639
       },
       {
         "class": "ObjectDialog",
         "method": "auto_rotate_state_changed",
         "file": "object_dialog.py",
-        "line": 520
+        "line": 643
       },
       {
         "class": "ObjectDialog",
         "method": "show_wireframe_state_changed",
         "file": "object_dialog.py",
-        "line": 523
+        "line": 646
+      },
+      {
+        "class": "ObjectDialog",
+        "method": "show_curve_state_changed",
+        "file": "object_dialog.py",
+        "line": 650
+      },
+      {
+        "class": "ObjectDialog",
+        "method": "show_semi_landmark_state_changed",
+        "file": "object_dialog.py",
+        "line": 654
+      },
+      {
+        "class": "ObjectDialog",
+        "method": "show_name_state_changed",
+        "file": "object_dialog.py",
+        "line": 668
+      },
+      {
+        "class": "ObjectDialog",
+        "method": "btnEditLandmarkNames_clicked",
+        "file": "object_dialog.py",
+        "line": 676
+      },
+      {
+        "class": "ObjectDialog",
+        "method": "show_expected_state_changed",
+        "file": "object_dialog.py",
+        "line": 684
       },
       {
         "class": "ObjectDialog",
         "method": "show_polygon_state_changed",
         "file": "object_dialog.py",
-        "line": 537
+        "line": 715
       },
       {
         "class": "ObjectDialog",
         "method": "cbxUseOriginal_state_changed",
         "file": "object_dialog.py",
-        "line": 541
+        "line": 719
+      },
+      {
+        "class": "ObjectDialog",
+        "method": "snap_to_curve_state_changed",
+        "file": "object_dialog.py",
+        "line": 759
+      },
+      {
+        "class": "ObjectDialog",
+        "method": "smooth_curve_state_changed",
+        "file": "object_dialog.py",
+        "line": 762
       },
       {
         "class": "ObjectDialog",
         "method": "btnLandmark_clicked",
         "file": "object_dialog.py",
-        "line": 556
+        "line": 765
+      },
+      {
+        "class": "ObjectDialog",
+        "method": "btnCurve_clicked",
+        "file": "object_dialog.py",
+        "line": 781
       },
       {
         "class": "ObjectDialog",
         "method": "btnCalibration_clicked",
         "file": "object_dialog.py",
-        "line": 569
+        "line": 796
       },
       {
         "class": "ObjectDialog",
         "method": "btnWireframe_clicked",
         "file": "object_dialog.py",
-        "line": 594
+        "line": 824
       },
       {
         "class": "ObjectDialog",
         "method": "x_changed",
         "file": "object_dialog.py",
-        "line": 882
+        "line": 1176
+      },
+      {
+        "class": "ObjectDialog",
+        "method": "curve_trace_changed",
+        "file": "object_dialog.py",
+        "line": 1296
+      },
+      {
+        "class": "ObjectDialog",
+        "method": "on_curve_cell_changed",
+        "file": "object_dialog.py",
+        "line": 1420
       },
       {
         "class": "ObjectDialog",
         "method": "btnAddInput_clicked",
         "file": "object_dialog.py",
-        "line": 975
+        "line": 1497
       },
       {
         "class": "ObjectDialog",
         "method": "btnUpdateInput_clicked",
         "file": "object_dialog.py",
-        "line": 979
+        "line": 1502
       },
       {
         "class": "ObjectDialog",
         "method": "btnDeleteInput_clicked",
         "file": "object_dialog.py",
-        "line": 1012
+        "line": 1536
       },
       {
         "class": "ObjectDialog",
         "method": "on_landmark_cell_changed",
         "file": "object_dialog.py",
-        "line": 1112
+        "line": 1636
       },
       {
         "class": "PreferencesDialog",
         "method": "on_rbRememberGeometryYes_clicked",
         "file": "preferences_dialog.py",
-        "line": 455
+        "line": 456
       },
       {
         "class": "PreferencesDialog",
         "method": "on_rbRememberGeometryNo_clicked",
         "file": "preferences_dialog.py",
-        "line": 459
+        "line": 460
       },
       {
         "class": "PreferencesDialog",
         "method": "on_rbToolbarIconLarge_clicked",
         "file": "preferences_dialog.py",
-        "line": 464
+        "line": 465
       },
       {
         "class": "PreferencesDialog",
         "method": "on_rbToolbarIconSmall_clicked",
         "file": "preferences_dialog.py",
-        "line": 472
+        "line": 473
       },
       {
         "class": "PreferencesDialog",
         "method": "on_rbToolbarIconMedium_clicked",
         "file": "preferences_dialog.py",
-        "line": 480
+        "line": 481
       },
       {
         "class": "PreferencesDialog",
         "method": "on_rbPlotLarge_clicked",
         "file": "preferences_dialog.py",
-        "line": 489
+        "line": 490
       },
       {
         "class": "PreferencesDialog",
         "method": "on_rbPlotMedium_clicked",
         "file": "preferences_dialog.py",
-        "line": 493
+        "line": 494
       },
       {
         "class": "PreferencesDialog",
         "method": "on_rbPlotSmall_clicked",
         "file": "preferences_dialog.py",
-        "line": 497
+        "line": 498
       },
       {
         "class": "PreferencesDialog",
         "method": "on_btnResetMarkers_clicked",
         "file": "preferences_dialog.py",
-        "line": 501
+        "line": 502
       },
       {
         "class": "PreferencesDialog",
         "method": "on_btnResetPastel_clicked",
         "file": "preferences_dialog.py",
-        "line": 507
+        "line": 508
       },
       {
         "class": "PreferencesDialog",
         "method": "on_btnResetVivid_clicked",
         "file": "preferences_dialog.py",
-        "line": 514
+        "line": 515
       },
       {
         "class": "PreferencesDialog",
         "method": "on_lblColor_clicked",
         "file": "preferences_dialog.py",
-        "line": 521
+        "line": 522
       },
       {
         "class": "PreferencesDialog",
         "method": "on_lblLmColor_clicked",
         "file": "preferences_dialog.py",
-        "line": 558
+        "line": 559
       },
       {
         "class": "PreferencesDialog",
         "method": "on_lblWireframeColor_clicked",
         "file": "preferences_dialog.py",
-        "line": 588
+        "line": 589
       },
       {
         "class": "PreferencesDialog",
         "method": "on_lblIndexColor_clicked",
         "file": "preferences_dialog.py",
-        "line": 616
+        "line": 617
       },
       {
         "class": "PreferencesDialog",
         "method": "on_lblBgcolor_clicked",
         "file": "preferences_dialog.py",
-        "line": 633
+        "line": 634
       },
       {
         "class": "TestAnalysisInfoWidgetTabManagement",
@@ -2417,6 +2699,24 @@
         "method": "test_size_hint_unchanged_without_missing",
         "file": "test_landmark_count_display.py",
         "line": 97
+      },
+      {
+        "class": "TestSmoothPolyline",
+        "method": "test_short_input_unchanged",
+        "file": "test_semilandmark.py",
+        "line": 130
+      },
+      {
+        "class": "TestSmoothPolyline",
+        "method": "test_zero_iterations_unchanged",
+        "file": "test_semilandmark.py",
+        "line": 133
+      },
+      {
+        "class": "TestBuildLandmarksWithCurves",
+        "method": "test_fixed_landmarks_come_first_unchanged",
+        "file": "test_semilandmark.py",
+        "line": 145
       },
       {
         "class": "TestShapePreferenceSignals",
@@ -2452,31 +2752,31 @@
         "class": "ShapePreference",
         "method": "on_btnLMColor_clicked",
         "file": "shape_preference.py",
-        "line": 142
+        "line": 141
       },
       {
         "class": "ShapePreference",
         "method": "on_btnEdgeColor_clicked",
         "file": "shape_preference.py",
-        "line": 152
+        "line": 151
       },
       {
         "class": "ShapePreference",
         "method": "on_btnFaceColor_clicked",
         "file": "shape_preference.py",
-        "line": 162
+        "line": 161
       },
       {
         "class": "ShapePreference",
         "method": "emit_changed_signal",
         "file": "shape_preference.py",
-        "line": 177
+        "line": 176
       },
       {
         "class": "ShapePreference",
         "method": "btnColor_clicked",
         "file": "shape_preference.py",
-        "line": 232
+        "line": 231
       }
     ]
   }

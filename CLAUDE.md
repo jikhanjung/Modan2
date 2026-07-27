@@ -49,7 +49,11 @@ pytest -p no:xvfb
 ```
 
 `-p no:xvfb` disables the `pytest-xvfb` plugin so it does not start and tear down
-its own server on top of this one.
+its own server on top of this one. **Omitting it makes pytest hang** — not fail,
+hang, before collection even finishes — because the plugin tries to bring up its
+own Xvfb and never returns. Before `xvfb` was installed the plugin printed
+"could not find Xvfb" and carried on, so this only starts happening once the
+package is present.
 
 #### Python Dependencies
 - Install: `pip install -r requirements.txt`

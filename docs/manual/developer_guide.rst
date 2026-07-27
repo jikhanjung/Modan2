@@ -368,7 +368,9 @@ Running Tests
       pytest -p no:xvfb
 
    ``-p no:xvfb`` disables the ``pytest-xvfb`` plugin so it does not start and
-   tear down a second server on top of this one.
+   tear down a second server on top of this one. **Leaving it out makes pytest
+   hang** rather than fail — the plugin tries to start its own Xvfb and never
+   returns, so the run stalls before collection finishes.
 
    If it still aborts, ask Qt which library it could not open:
 

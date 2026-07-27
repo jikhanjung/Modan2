@@ -29,19 +29,35 @@ per-platform file names corrected (installer ZIP / DMG / AppImage, all version-s
 a warning added that only the Windows build is well tested, and the "From Source" /
 `python …py` instructions dropped from the user-facing pages.
 
+**Also done** (devlog 262): the three stale guides (`advanced_features`,
+`troubleshooting`, `faq`) were corrected against the code — a dozen documented
+features did not exist (env vars, `--verbose`/`--no-3d`, most keyboard shortcuts,
+3D viewer key handling, Full/Partial Procrustes, asymmetry analysis) and the
+settings/database paths were wrong. Then all three were translated: 492 + 374 +
+276 entries. **All 8 Korean catalogs are now at 0 untranslated/fuzzy** (1380
+entries across devlogs 261–262). `main.py`'s `--db` help was corrected too.
+
 **Left to do (docs):**
-- [ ] **Three toctree pages are stale and untranslated**: `advanced_features.rst`,
-      `faq.rst`, `troubleshooting.rst`. They have no semi-landmark content (0/1/0
-      mentions), their `.po` catalogs are newly created and 100% untranslated
-      (~1200 entries), and they still tell users to run `python Modan2.py` — which is
-      not even a valid entry point (`main.py` is). FAQ/troubleshooting are where users
-      actually look, so this is the highest-value remaining docs work.
-- [ ] `developer_guide.rst` also says `python Modan2.py` (3 sites) and references
-      `Output/Modan2-Setup.exe`; source instructions belong there, but they should name
-      `main.py` and the real installer name.
+- [ ] **`docs/*.md` is never published — 12 files.** Confirmed from the CTHarvester
+      addendum (`../CTHarvester/docs/CI_RECOMMENDATIONS_FOR_MODAN2.md`, 2026-07-27
+      §1): `conf.py` has no `myst_parser`, so Sphinx reads `.rst` only. Worse here
+      than there — **`USER_GUIDE.md` (34 KB) duplicates `user_guide.rst`** and
+      `developer_guide.md` (1082 lines) duplicates `developer_guide.rst`, and the
+      unpublished copies have already drifted (`USER_GUIDE.md` still has
+      `python3 main.py`, `Modan2-Setup`, `portable`, and the 3D "Pan: right-drag"
+      bug). `QUICK_START.md` is user-facing with no `.rst` counterpart, so it is
+      simply absent from the site. **Decision needed:** add `myst-parser` and put
+      the user-facing ones in the toctree, or split by extension (`.rst` = published
+      manual, `.md` = repo-only dev notes) and delete the duplicated `.md` copies.
+- [ ] `developer_guide.rst` says `python Modan2.py` (3 sites) and references
+      `Output/Modan2-Setup.exe`; source instructions belong there, but they should
+      name `main.py` and the real installer name.
 - [ ] **A broken docs build went unnoticed for two days / 6 commits** — `docs.yml` is not
       a required status check, so its failures are invisible. Worth folding into the
       branch-protection item below.
+- [ ] From the same addendum, non-docs items: a `C901` complexity ratchet
+      (`max-complexity = 30` today, lower over time — 12 functions are over 15), and
+      PyOpenGL hidden imports (informational only; Modan2's frozen smoke test passes).
 
 ---
 

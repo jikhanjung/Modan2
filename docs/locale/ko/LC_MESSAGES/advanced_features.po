@@ -8,1264 +8,1645 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Modan2 0.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-27 09:12+0900\n"
+"POT-Creation-Date: 2026-07-27 10:34+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language: ko\n"
 "Language-Team: ko <LL@li.org>\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Language: ko\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 "Generated-By: Babel 2.18.0\n"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:2
 msgid "Advanced Features Guide"
-msgstr ""
+msgstr "고급 기능 안내서"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:4
 msgid ""
 "This guide covers advanced features and techniques for power users of "
 "Modan2."
-msgstr ""
+msgstr "이 안내서는 Modan2를 깊이 활용하는 사용자를 위한 고급 기능과 기법을 다룹니다."
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:8
 msgid "Table of Contents"
-msgstr ""
+msgstr "목차"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:11
 msgid "Performance Optimization"
-msgstr ""
+msgstr "성능 최적화"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:14
 msgid "Database Optimization"
-msgstr ""
+msgstr "데이터베이스 최적화"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:16
 msgid ""
 "Modan2 uses SQLite for data storage. Regular maintenance improves "
 "performance."
-msgstr ""
+msgstr "Modan2는 데이터 저장에 SQLite를 사용합니다. 주기적으로 관리하면 성능이 향상됩니다."
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:18
 msgid "**Optimize database:**"
-msgstr ""
+msgstr "**데이터베이스 최적화:**"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:31
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:57
 msgid "**Benefits:**"
-msgstr ""
+msgstr "**이점:**"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:33
 msgid "Reduces database file size"
-msgstr ""
+msgstr "데이터베이스 파일 크기를 줄입니다"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:34
 msgid "Improves query performance"
-msgstr ""
+msgstr "쿼리 성능을 개선합니다"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:35
 msgid "Reclaims unused space"
-msgstr ""
+msgstr "사용하지 않는 공간을 회수합니다"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:37
 msgid "**When to optimize:**"
-msgstr ""
+msgstr "**최적화가 필요한 시점:**"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:39
 msgid "After deleting many datasets"
-msgstr ""
+msgstr "데이터셋을 많이 삭제한 뒤"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:40
 msgid "Database file larger than expected"
-msgstr ""
+msgstr "데이터베이스 파일이 예상보다 클 때"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:41
 msgid "Performance noticeably slower"
-msgstr ""
+msgstr "성능이 눈에 띄게 느려졌을 때"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:44
 msgid "Large Dataset Strategies"
-msgstr ""
+msgstr "대용량 데이터셋 전략"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:46
 msgid "For datasets with 1000+ objects:"
-msgstr ""
+msgstr "객체가 1000개 이상인 데이터셋의 경우:"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:48
 msgid "**1. Hierarchical Organization:**"
-msgstr ""
+msgstr "**1. 계층적 구성:**"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:59
 msgid "Analyze subsets independently"
-msgstr ""
+msgstr "하위 집합을 독립적으로 분석"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:60
 msgid "Faster individual analyses"
-msgstr ""
+msgstr "개별 분석 속도 향상"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:61
 msgid "Organized workflow"
-msgstr ""
+msgstr "체계적인 작업 흐름"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:63
 msgid "**2. Batch Processing:**"
-msgstr ""
+msgstr "**2. 일괄 처리:**"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:80
 msgid "**3. Memory Management:**"
-msgstr ""
+msgstr "**3. 메모리 관리:**"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:82
 msgid "Close unused object viewers"
-msgstr ""
+msgstr "사용하지 않는 객체 뷰어를 닫으세요"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:83
 msgid "Don't keep all analyses open"
-msgstr ""
+msgstr "모든 분석을 열어 두지 마세요"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:84
 msgid "Export results and close tabs"
-msgstr ""
+msgstr "결과를 내보낸 뒤 탭을 닫으세요"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:87
 msgid "Performance Benchmarks"
-msgstr ""
+msgstr "성능 벤치마크"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:89
 msgid "**Expected performance (Phase 7 validation):**"
-msgstr ""
+msgstr "**예상 성능 (Phase 7 검증 기준):**"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:92
 msgid "Operation"
-msgstr ""
+msgstr "작업"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:92
 msgid "100 objects"
-msgstr ""
+msgstr "객체 100개"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:92
 msgid "1000 objects"
-msgstr ""
+msgstr "객체 1000개"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:94
 msgid "Dataset load"
-msgstr ""
+msgstr "데이터셋 로드"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:94
 msgid "< 50ms"
-msgstr ""
+msgstr "< 50ms"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:94
 msgid "277ms"
-msgstr ""
+msgstr "277ms"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:96
 msgid "PCA"
-msgstr ""
+msgstr "PCA"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:96
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:100
 msgid "< 10ms"
-msgstr ""
+msgstr "< 10ms"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:96
 msgid "60ms"
-msgstr ""
+msgstr "60ms"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:98
 msgid "CVA"
-msgstr ""
+msgstr "CVA"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:98
 msgid "< 5ms"
-msgstr ""
+msgstr "< 5ms"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:98
 msgid "2.5ms"
-msgstr ""
+msgstr "2.5ms"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:100
 msgid "MANOVA"
-msgstr ""
+msgstr "MANOVA"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:100
 msgid "28ms"
-msgstr ""
+msgstr "28ms"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:102
 msgid "Object table"
-msgstr ""
+msgstr "객체 테이블"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:102
 msgid "5ms"
-msgstr ""
+msgstr "5ms"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:102
 msgid "12.63ms"
-msgstr ""
+msgstr "12.63ms"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:105
 msgid "**Memory usage:**"
-msgstr ""
+msgstr "**메모리 사용량:**"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:107
 msgid "~4KB per object (linear scaling)"
-msgstr ""
+msgstr "객체당 약 4KB (선형 증가)"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:108
 msgid "1000 objects: ~4MB"
-msgstr ""
+msgstr "객체 1000개: 약 4MB"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:109
 msgid "10000 objects: ~40MB"
-msgstr ""
+msgstr "객체 10000개: 약 40MB"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:111
 msgid "**Scalability:**"
-msgstr ""
+msgstr "**확장성:**"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:113
 msgid "Tested up to 2000 objects"
-msgstr ""
+msgstr "객체 2000개까지 검증됨"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:114
 msgid "Linear O(n) performance"
-msgstr ""
+msgstr "선형 O(n) 성능"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:115
 msgid "Production-ready for 100,000+ objects"
-msgstr ""
+msgstr "객체 100,000개 이상도 실사용 가능"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:118
 msgid "Advanced Data Management"
-msgstr ""
+msgstr "고급 데이터 관리"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:121
 msgid "Hierarchical Datasets"
-msgstr ""
+msgstr "계층적 데이터셋"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:123
 msgid "**Parent-child relationships** allow flexible data organization:"
-msgstr ""
+msgstr "**상위-하위 관계** 를 이용하면 데이터를 유연하게 구성할 수 있습니다:"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:125
 msgid "**Creating child datasets:**"
-msgstr ""
+msgstr "**하위 데이터셋 만들기:**"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:127
-msgid "Right-click parent dataset"
-msgstr ""
+msgid "Right-click the parent dataset in the tree"
+msgstr "트리에서 상위 데이터셋을 오른쪽 클릭합니다"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:128
-msgid "Select \"New Child Dataset\""
-msgstr ""
+msgid "Select **\"Add child dataset\"**"
+msgstr "**\"Add child dataset\"**\\ (하위 데이터셋 추가)를 선택합니다"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:129
-msgid "Choose options:"
-msgstr ""
+msgid ""
+"Fill in the new dataset's dialog as usual — the parent is preset for you"
+msgstr "새 데이터셋 대화상자를 평소처럼 채웁니다 — 상위 데이터셋은 미리 지정되어 있습니다"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:131
-msgid "Copy landmarks (start with same data)"
+msgid ""
+"A child dataset is a new, empty dataset nested under the parent; objects are"
+" not copied into it. Use it to organise a study into subsets you populate "
+"yourself."
 msgstr ""
+"하위 데이터셋은 상위 아래에 중첩되는 새 빈 데이터셋입니다. 객체가 복사되어 들어오지는 않습니다. 연구를 하위 집합으로 나누어 직접 채워"
+" 넣을 때 사용하세요."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:132
-msgid "Different superimposition method"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:133
-msgid "Subset of objects"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:135
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:134
 msgid "**Use cases:**"
-msgstr ""
+msgstr "**활용 사례:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:137
-msgid "**Example 1: Different superimpositions**"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:136
+msgid "**Example 1: Taxonomic subsets**"
+msgstr "**예 1: 분류군별 하위 집합**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:146
-msgid "**Example 2: Taxonomic subsets**"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:145
+msgid "**Example 2: Time periods**"
+msgstr "**예 2: 시기별 구분**"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:155
-msgid "**Example 3: Time periods**"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:165
 msgid "Batch Operations"
-msgstr ""
+msgstr "일괄 작업"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:167
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:157
 msgid "**Batch landmark editing:**"
-msgstr ""
+msgstr "**랜드마크 일괄 편집:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:182
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:172
 msgid "**Batch variable editing:**"
+msgstr "**변수 일괄 편집:**"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:174
+msgid "Select the dataset"
+msgstr "데이터셋을 선택합니다"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:175
+msgid "Edit cells directly in the object table"
+msgstr "객체 테이블에서 셀을 직접 편집합니다"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:176
+msgid "Copy/paste to and from a spreadsheet with ``Ctrl+C`` / ``Ctrl+V``"
+msgstr "``Ctrl+C`` / ``Ctrl+V`` 로 스프레드시트와 복사/붙여넣기를 주고받습니다"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:178
+msgid "**Batch import:**"
+msgstr "**일괄 가져오기:**"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:180
+msgid ""
+"Drag several landmark files onto the window at once, or select them together"
+" in **File → Import** — each becomes an object in the dataset."
 msgstr ""
+"랜드마크 파일 여러 개를 한 번에 창으로 끌어다 놓거나, **File → Import** 에서 함께 선택하세요 — 각각이 데이터셋의 "
+"객체가 됩니다."
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:184
-msgid "Select dataset"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:185
-msgid "View → Object Table"
-msgstr ""
+msgid "Semi-landmark Curves at Scale"
+msgstr "대규모 준랜드마크 곡선 작업"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:186
-msgid "Edit cells directly"
+msgid ""
+"Curves are defined once for the dataset (a name and a point count ``N``) and"
+" then traced per specimen, so the semi-landmark count stays consistent "
+"across the whole dataset by construction."
 msgstr ""
+"곡선은 데이터셋 수준에서 한 번만 정의하고(이름과 점 개수 ``N``) 표본마다 추적하므로, 준랜드마크 개수는 구조적으로 데이터셋 "
+"전체에서 일관되게 유지됩니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:187
-msgid "Copy/paste from Excel"
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:190
+msgid ""
+"**Change ``N`` after tracing.** Editing ``N`` in the curve table re-"
+"resamples the stored trace — you do not have to re-trace anything."
 msgstr ""
+"**추적한 뒤에도 ``N`` 을 바꿀 수 있습니다.** 곡선 표에서 ``N`` 을 수정하면 저장된 추적선을 다시 재표본화하므로, 다시 "
+"추적할 필요가 없습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:189
-msgid "**Batch import:**"
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:192
+msgid ""
+"**Trace fewer clicks.** With **\"Snap to curve\"** on (the default in Curve "
+"mode), the trace follows the strongest image edge between clicks, so a clean"
+" outline usually needs only a handful of points."
 msgstr ""
+"**클릭 수를 줄이세요.** **\"Snap to curve\"**\\ 가 켜져 있으면(Curve 모드의 기본값) 추적선이 클릭 사이에서"
+" 이미지의 가장 강한 경계를 따라가므로, 깔끔한 윤곽선에 보통 점 몇 개면 충분합니다."
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:195
+msgid ""
+"**Remove a curve everywhere.** Right-click a row in the curve table → "
+"**\"Delete Curve (all specimens)\"**."
+msgstr ""
+"**곡선을 전체에서 제거합니다.** 곡선 표의 행을 오른쪽 클릭 → **\"Delete Curve (all specimens)\"**."
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:197
+msgid ""
+"**Round-trip.** ``CURVES=`` / ``POINTS=`` blocks are read from and written "
+"to TPS, and the JSON+ZIP package carries the curve scheme and every traced "
+"curve."
+msgstr ""
+"**왕복 변환.** ``CURVES=`` / ``POINTS=`` 블록은 TPS에서 읽고 TPS로 쓰며, JSON+ZIP 패키지는 곡선 "
+"구성과 추적한 모든 곡선을 함께 담습니다."
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:200
+msgid ""
+"Semi-landmark curves are a 2D feature. In analysis the derived points are "
+"treated as ordinary landmarks, appended after the fixed (anatomical) ones."
+msgstr ""
+"준랜드마크 곡선은 2D 전용 기능입니다. 분석에서는 곡선에서 유도된 점들을 일반 랜드마크처럼 다루며, 고정(해부학적) 랜드마크 뒤에 이어"
+" 붙입니다."
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:204
 msgid "Database Direct Access"
-msgstr ""
+msgstr "데이터베이스 직접 접근"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:202
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:206
 msgid "Access database directly for advanced operations:"
-msgstr ""
+msgstr "고급 작업을 위해 데이터베이스에 직접 접근합니다:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:225
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:229
 msgid "Advanced Statistical Analysis"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:228
-msgid "Custom Analysis Workflows"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:230
-msgid "**Regression Analysis:**"
-msgstr ""
+msgstr "고급 통계 분석"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:232
-msgid "Use Data Exploration dialog for regression:"
-msgstr ""
+msgid "Custom Analysis Workflows"
+msgstr "사용자 정의 분석 작업 흐름"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:234
-msgid "Select dataset with continuous variables"
+msgid ""
+"A single analysis run always computes PCA, CVA, and MANOVA together; the "
+"exploration below happens afterwards, in the **Data Exploration** dialog."
 msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:235
-msgid "Data Exploration → Regression"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:236
-msgid "Select X and Y variables"
-msgstr ""
+"한 번의 분석 실행은 항상 PCA, CVA, MANOVA를 함께 계산합니다. 아래의 탐색 작업은 그 뒤에 **데이터 탐색**\\ "
+"(Data Exploration) 대화상자에서 이루어집니다."
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:237
-msgid "View scatter plot with regression line"
-msgstr ""
+msgid "**Regression overlay:**"
+msgstr "**회귀선 오버레이:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:238
-msgid "Export coefficients"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:239
+msgid "Open a completed analysis in **Data Exploration**"
+msgstr "완료된 분석을 **데이터 탐색** 에서 엽니다"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:240
-msgid "**Shape Variation Analysis:**"
-msgstr ""
+msgid "Tick **\"Show regression\"**"
+msgstr "**\"Show regression\"** 을 체크합니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:242
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:684
-msgid "Visualize shape changes along PC axes:"
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:241
+msgid ""
+"Choose the grouping with **Group by**, and whether the line is fitted to "
+"**All** points, **By group**, or a **Select group**"
 msgstr ""
+"**Group by** 로 그룹을 고르고, 회귀선을 **All**\\ (전체 점), **By group**\\ (그룹별), "
+"**Select group**\\ (선택한 그룹) 중 어디에 적합시킬지 정합니다"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:244
-msgid "Run PCA"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:245
-msgid "Results → Shape Variation"
-msgstr ""
+msgid "**Shape grid:**"
+msgstr "**형상 격자(Shape grid):**"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:246
-msgid "Select PC axis"
+msgid ""
+"Tick **\"Shape grid\"** in Data Exploration to draw the shape reconstructed "
+"at positions across the plot, so you can see how shape changes along each "
+"axis."
 msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:247
-msgid "View wireframe deformation"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:248
-msgid "Export shape coordinates"
-msgstr ""
+"데이터 탐색에서 **\"Shape grid\"** 를 체크하면 플롯의 여러 위치에서 복원한 형상을 그려 주므로, 각 축을 따라 형상이 "
+"어떻게 변하는지 볼 수 있습니다."
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:250
-msgid "**Asymmetry Analysis:**"
-msgstr ""
+msgid "Superimposition Methods"
+msgstr "중첩정렬 방식"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:252
-msgid "For bilateral symmetry:"
+msgid ""
+"Modan2 offers three superimposition methods, chosen in the analysis dialog. "
+"All three impute missing landmarks first (see `Missing Landmark Handling`_)."
 msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:254
-msgid "Create dataset with symmetric landmark pairs"
-msgstr ""
+"Modan2는 분석 대화상자에서 고를 수 있는 세 가지 중첩정렬 방식을 제공합니다. 세 방식 모두 결측 랜드마크를 먼저 "
+"대치합니다(`Missing Landmark Handling`_ 참조)."
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:255
-msgid "Define symmetry in wireframe"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:256
-msgid "Run specialized asymmetry analysis"
-msgstr ""
+msgid "**Procrustes** (Generalized Procrustes Analysis):"
+msgstr "**프로크루스테스**\\ (일반화 프로크루스테스 분석):"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:257
-msgid "Separate symmetric/asymmetric components"
-msgstr ""
+msgid "Translation + rotation + scaling"
+msgstr "이동 + 회전 + 크기 조정"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:260
-msgid "Procrustes Methods"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:258
+msgid "Standardises centroid size, leaving pure shape"
+msgstr "중심 크기를 표준화하여 순수한 형상만 남김"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:262
-msgid "**Full Procrustes:**"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:259
+msgid ""
+"The default, and the right choice unless you have a specific reason "
+"otherwise"
+msgstr "기본값이며, 특별한 이유가 없다면 이 방식이 적절합니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:264
-msgid "Translation + Rotation + Scaling"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:261
+msgid "**Bookstein** (baseline registration):"
+msgstr "**북스틴**\\ (베이스라인 정합):"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:263
+msgid ""
+"Re-expresses each shape as Bookstein shape coordinates by fixing the "
+"dataset's **baseline** landmarks to a standard position"
+msgstr "데이터셋의 **베이스라인** 랜드마크를 표준 위치에 고정하여 각 형상을 북스틴 형상좌표로 다시 표현합니다"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:265
-msgid "Standardizes size to 1.0"
-msgstr ""
+msgid ""
+"2D: the baseline endpoints go to (-0.5, 0) and (0.5, 0); 3D uses a 3-point "
+"baseline"
+msgstr "2D: 베이스라인 양 끝점을 (-0.5, 0)과 (0.5, 0)으로; 3D는 3점 베이스라인을 사용"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:266
-msgid "Use for pure shape analysis"
-msgstr ""
+msgid "**Requires a baseline defined on the dataset**"
+msgstr "**데이터셋에 베이스라인이 정의되어 있어야 합니다**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:268
-msgid "**Partial Procrustes:**"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:267
+msgid ""
+"Useful when a well-defined anatomical axis should anchor the comparison"
+msgstr "비교의 기준이 될 해부학적 축이 뚜렷할 때 유용합니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:270
-msgid "Translation + Rotation only"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:269
+msgid "**Resistant Fit** (RFTRA):"
+msgstr "**강건적합**\\ (RFTRA):"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:271
-msgid "Preserves size information"
-msgstr ""
+msgid ""
+"Robust alignment built on repeated medians of pairwise landmark "
+"relationships"
+msgstr "랜드마크 쌍 관계의 반복 중앙값(repeated median)에 기반한 강건한 정렬"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:272
-msgid "Use when size is important"
-msgstr ""
+msgid ""
+"A few displaced (outlier) landmarks do not drag the whole fit the way they "
+"can under Procrustes"
+msgstr "몇 개의 이탈(이상치) 랜드마크가 프로크루스테스에서처럼 전체 정합을 끌어당기지 않습니다"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:274
-msgid "**Bookstein Registration:**"
-msgstr ""
+msgid "Works for both 2D and 3D"
+msgstr "2D와 3D 모두 지원"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:276
-msgid "Align using baseline (2 landmarks)"
-msgstr ""
+msgid "**Choosing a method:**"
+msgstr "**방법 선택:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:277
-msgid "First 2 landmarks define axis"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:279
+msgid "Research Goal"
+msgstr "연구 목적"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:278
-msgid "Useful for oriented structures"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:279
+msgid "Recommended"
+msgstr "권장 방법"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:280
-msgid "**Resistant Fit:**"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:279
+msgid "Notes"
+msgstr "비고"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:282
-msgid "Robust to outliers"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:281
+msgid "Pure shape"
+msgstr "순수 형상"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:281
+msgid "Procrustes"
+msgstr "프로크루스테스"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:281
+msgid "The default"
+msgstr "기본값"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:283
-msgid "Iterative weighting"
-msgstr ""
+msgid "Anchored on an anatomical axis"
+msgstr "해부학적 축을 기준으로 고정"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:284
-msgid "Use with messy data"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:283
+msgid "Bookstein"
+msgstr "북스틴"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:283
+msgid "Needs a dataset baseline"
+msgstr "데이터셋 베이스라인 필요"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:286
-msgid "**Choosing method:**"
-msgstr ""
+msgid "A few unreliable landmarks"
+msgstr "신뢰하기 어려운 랜드마크가 일부 있음"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:289
-msgid "Research Goal"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:289
-msgid "Recommended"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:289
-msgid "Notes"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:291
-msgid "Pure shape"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:291
-msgid "Full Procrustes"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:291
-msgid "Remove size"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:293
-msgid "Shape + size"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:293
-msgid "Partial Procrustes"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:293
-msgid "Keep size info"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:295
-msgid "Directional data"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:295
-msgid "Bookstein"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:295
-msgid "Known baseline"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:297
-msgid "Noisy data"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:297
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:286
 msgid "Resistant Fit"
-msgstr ""
+msgstr "강건적합"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:297
-msgid "Handle outliers"
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:286
+msgid "Resists outlier landmarks"
+msgstr "이상치 랜드마크에 강함"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:291
+msgid "Missing Landmark Handling"
+msgstr "결측 랜드마크 처리"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:293
+msgid ""
+"Modan2 fills missing landmarks automatically during analysis with an EM-"
+"style loop that interleaves alignment and imputation:"
+msgstr "Modan2는 분석 중에 정렬과 대치를 번갈아 수행하는 EM 방식 루프로 결측 랜드마크를 자동으로 채웁니다:"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:296
+msgid ""
+"Align every specimen with the gaps left open — the mean shape ignores them, "
+"and each specimen is aligned on the landmarks it actually has."
 msgstr ""
+"빈 자리를 그대로 둔 채 모든 표본을 정렬합니다 — 평균 형상은 빈 자리를 무시하며, 각 표본은 실제로 가진 랜드마크만으로 정렬합니다."
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:298
+msgid ""
+"For each specimen with missing data, fit the current mean shape onto its "
+"observed landmarks by a similarity transform (rotation, scale, translation) "
+"and read the missing positions off the fitted mean."
+msgstr ""
+"결측이 있는 각 표본에 대해, 현재 평균 형상을 그 표본의 관측된 랜드마크에 상사변환(회전, 크기, 이동)으로 정합한 뒤, 정합된 평균 "
+"형상에서 결측 위치를 읽어옵니다."
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:301
-msgid "Missing Landmark Handling"
-msgstr ""
+msgid ""
+"Re-align with the filled-in values, then **re-open the original gaps** and "
+"re-estimate them from the improved mean."
+msgstr "채워 넣은 값으로 다시 정렬한 다음, **원래의 빈 자리를 다시 열어** 개선된 평균 형상으로부터 재추정합니다."
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:303
-msgid "**Estimation methods:**"
-msgstr ""
+msgid ""
+"Repeat step 3 a few times, so estimates improve as the alignment settles and"
+" are never fitted on previous estimates."
+msgstr "3단계를 몇 번 반복합니다. 정렬이 수렴하면서 추정값이 개선되며, 이전 추정값에 다시 맞추는 일은 없습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:305
-msgid "**TPS Interpolation:**"
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:306
+msgid ""
+"Imputed values exist only in the analysis working copy — they are never "
+"written back to the database. The same shape-fitting drives the \"Show "
+"Estimated\" and \"Show Expected\" previews in the Object Dialog."
 msgstr ""
+"대치된 값은 분석용 작업 사본에만 존재하며 데이터베이스에 다시 기록되지 않습니다. 객체 대화상자의 \"추정값 보기\"(Show "
+"Estimated)와 \"Show Expected\" 미리보기도 같은 형상 정합을 사용합니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:307
-msgid "Thin-plate spline from complete landmarks"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:308
-msgid "Smooth interpolation"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:309
-msgid "Works well for few missing landmarks"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:311
-msgid "**Mean Substitution:**"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:313
-msgid "Use mean configuration"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:314
-msgid "Simple but less accurate"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:315
-msgid "For many missing landmarks"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:317
-msgid "**Iterative Estimation:**"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:319
-msgid "Estimate → Procrustes → Re-estimate"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:320
-msgid "Converges to best fit"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:321
-msgid "Most accurate but slower"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:323
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:310
 msgid "**Best practices:**"
-msgstr ""
+msgstr "**권장 사항:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:325
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:312
 #, python-format
 msgid "Limit missing data to < 10% of landmarks"
-msgstr ""
+msgstr "결측 데이터를 전체 랜드마크의 10% 미만으로 유지하세요"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:313
+msgid "Keep a good number of complete (or near-complete) specimens"
+msgstr "완전한(또는 거의 완전한) 표본을 충분히 확보하세요"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:314
+msgid "Document which landmarks were missing"
+msgstr "어떤 랜드마크가 결측이었는지 기록하세요"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:315
+msgid "Sensitivity analysis (compare with/without the affected specimens)"
+msgstr "민감도 분석(해당 표본을 포함/제외한 결과 비교)"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:318
+msgid "3D Visualization Techniques"
+msgstr "3D 시각화 기법"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:321
+msgid "Advanced 3D Controls"
+msgstr "고급 3D 조작"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:323
+msgid "**Navigation:**"
+msgstr "**탐색:**"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:325
+msgid "**Left-drag:** Rotate around centre"
+msgstr "**왼쪽 버튼 드래그:** 중심을 기준으로 회전"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:326
-msgid "Estimate before Procrustes"
-msgstr ""
+msgid "**Middle-drag:** Pan (translate)"
+msgstr "**가운데 버튼 드래그:** 이동(팬)"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:327
-msgid "Document which landmarks estimated"
-msgstr ""
+msgid "**Right-drag** or **scroll wheel:** Zoom in/out"
+msgstr "**오른쪽 버튼 드래그** 또는 **스크롤 휠:** 확대/축소"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:328
-msgid "Sensitivity analysis (compare with/without)"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:329
+msgid "**Display toggles** (checkboxes beside the viewer):"
+msgstr "**표시 토글** (뷰어 옆의 체크박스):"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:331
-msgid "3D Visualization Techniques"
-msgstr ""
+msgid "**3D Model:** show the mesh"
+msgstr "**3D Model:** 메시를 표시"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:334
-msgid "Advanced 3D Controls"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:332
+msgid "**Rotate:** spin the model continuously"
+msgstr "**Rotate:** 모델을 계속 회전"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:336
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:842
-msgid "**Navigation:**"
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:333
+msgid ""
+"**Wireframe** / **Polygon** / **Baseline:** draw the dataset's landmark "
+"connections, filled polygons, and baseline"
 msgstr ""
+"**Wireframe** / **Polygon** / **Baseline:** 데이터셋의 랜드마크 연결선, 채워진 폴리곤, 베이스라인을 "
+"표시"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:338
-msgid "**Left-drag:** Rotate around center"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:337
+msgid "Landmark Visualization"
+msgstr "랜드마크 시각화"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:339
-msgid "**Middle-drag:** Pan (translate)"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:340
-msgid "**Scroll:** Zoom in/out"
-msgstr ""
+msgid ""
+"**Customization** — set in **Edit → Preferences**, separately for 2D and 3D:"
+msgstr "**사용자 지정** — **Edit → Preferences** 에서 2D와 3D를 각각 설정합니다:"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:341
-msgid "**Shift+drag:** Constrained rotation"
-msgstr ""
+msgid "**Landmark** size: Small / Medium / Large"
+msgstr "**랜드마크** 크기: 작게 / 중간 / 크게"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:342
-msgid "**Ctrl+drag:** Roll (rotate around view axis)"
-msgstr ""
+msgid "**Wireframe** thickness: Thin / Medium / Thick"
+msgstr "**와이어프레임** 두께: 얇게 / 중간 / 굵게"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:343
-msgid "**Double-click:** Reset view"
-msgstr ""
+msgid "**Index** (label) size: Small / Medium / Large"
+msgstr "**인덱스**\\ (레이블) 크기: 작게 / 중간 / 크게"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:345
-msgid "**Viewing modes:**"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:344
+msgid "**Background Color** for the viewer"
+msgstr "뷰어의 **배경 색상**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:347
-msgid "**Solid:** Default view"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:346
+msgid "**Landmark labels:**"
+msgstr "**랜드마크 레이블:**"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:348
-msgid "**Wireframe:** Show mesh structure"
-msgstr ""
+msgid "The **Show** checkbox toggles labels"
+msgstr "**Show** 체크박스로 레이블을 켜고 끕니다"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:349
-msgid "**Points:** Show vertices only"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:350
-msgid "**Solid + wireframe:** Combined view"
-msgstr ""
+msgid ""
+"The **Index** / **Name** radio buttons choose whether the label is the "
+"landmark's number or its dataset-wide name"
+msgstr "**Index** / **Name** 라디오 버튼으로 레이블을 랜드마크 번호로 할지 데이터셋 전체 이름으로 할지 정합니다"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:352
-msgid "**Keyboard shortcuts:**"
-msgstr ""
+msgid "**Wireframe display:**"
+msgstr "**와이어프레임 표시:**"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:354
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:851
-msgid "``F3``: Toggle 3D view"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:355
-msgid "``W``: Wireframe mode"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:356
-msgid "``S``: Solid mode"
-msgstr ""
+msgid "Define the connections in the dataset dialog's wireframe tab"
+msgstr "데이터셋 대화상자의 와이어프레임 탭에서 연결을 정의합니다"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:357
-msgid "``P``: Point mode"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:358
-msgid "``R``: Reset view"
-msgstr ""
+msgid "Model Import and Processing"
+msgstr "모델 가져오기 및 처리"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:359
-msgid "``L``: Toggle lighting"
-msgstr ""
+msgid "**Supported 3D formats:**"
+msgstr "**지원하는 3D 형식:**"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:361
+msgid "**OBJ:** Wavefront format (most common)"
+msgstr "**OBJ:** Wavefront 형식 (가장 널리 쓰임)"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:362
-msgid "Landmark Visualization"
-msgstr ""
+msgid "**PLY:** Polygon File Format"
+msgstr "**PLY:** Polygon File Format"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:364
-msgid "**Customization:**"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:363
+msgid "**STL:** Stereolithography"
+msgstr "**STL:** Stereolithography"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:366
-msgid "Settings → Visualization → 3D Landmarks"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:365
+msgid "**Pre-processing models:**"
+msgstr "**모델 전처리:**"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:367
-msgid "Sphere size: 0.5 - 5.0"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:368
-msgid "Color: RGB picker"
-msgstr ""
+msgid "For best performance, prepare models:"
+msgstr "성능을 높이려면 모델을 미리 다듬으세요:"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:369
-msgid "Opacity: 0-100%"
-msgstr ""
+msgid "**Reduce polygon count** (MeshLab/Blender):"
+msgstr "**폴리곤 수 줄이기** (MeshLab/Blender):"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:371
-msgid "**Landmark labels:**"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:373
-msgid "Show/hide landmark numbers"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:374
-msgid "Font size adjustment"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:375
-msgid "Color customization"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:377
-msgid "**Wireframe display:**"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:379
-msgid "Define connections in dataset dialog"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:378
+msgid "**Center model:**"
+msgstr "**모델 중심 맞추기:**"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:380
-msgid "Color coding by region"
-msgstr ""
+msgid "Model centered at origin"
+msgstr "모델이 원점에 중심을 둠"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:381
-msgid "Line width adjustment"
-msgstr ""
+msgid "Easier landmark placement"
+msgstr "랜드마크 배치가 쉬워짐"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:384
-msgid "Model Import and Processing"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:383
+msgid "**Scale appropriately:**"
+msgstr "**적절한 크기로 조정:**"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:385
+msgid "Reasonable coordinate range"
+msgstr "좌표 범위를 적당하게"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:386
-msgid "**Supported 3D formats:**"
-msgstr ""
+msgid "Not too large/small"
+msgstr "너무 크거나 작지 않게"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:388
-msgid "**OBJ:** Wavefront format (most common)"
-msgstr ""
+msgid "**Batch model processing:**"
+msgstr "**모델 일괄 처리:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:389
-msgid "**PLY:** Polygon File Format"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:403
+msgid "Integration with External Tools"
+msgstr "외부 도구와의 연동"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:390
-msgid "**STL:** Stereolithography"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:392
-msgid "**Pre-processing models:**"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:394
-msgid "For best performance, prepare models:"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:396
-msgid "**Reduce polygon count** (MeshLab/Blender):"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:405
-msgid "**Center model:**"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:407
-msgid "Model centered at origin"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:406
+msgid "R Integration"
+msgstr "R 연동"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:408
-msgid "Easier landmark placement"
-msgstr ""
+msgid "Export data for analysis in R:"
+msgstr "R에서 분석할 수 있도록 데이터를 내보냅니다:"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:410
-msgid "**Scale appropriately:**"
-msgstr ""
+msgid "**Export landmarks:**"
+msgstr "**랜드마크 내보내기:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:412
-msgid "Reasonable coordinate range"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:427
+msgid "**Import R results:**"
+msgstr "**R 결과 가져오기:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:413
-msgid "Not too large/small"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:415
-msgid "**Batch model processing:**"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:429
+msgid "Save R results as CSV"
+msgstr "R 결과를 CSV로 저장"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:430
-msgid "Integration with External Tools"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:433
-msgid "R Integration"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:435
-msgid "Export data for analysis in R:"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:437
-msgid "**Export landmarks:**"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:454
-msgid "**Import R results:**"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:456
-msgid "Save R results as CSV"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:457
 msgid "Import as variables in Modan2"
-msgstr ""
+msgstr "Modan2에 변수로 가져오기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:458
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:431
 msgid "Visualize in Data Exploration"
-msgstr ""
+msgstr "데이터 탐색에서 시각화"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:461
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:434
 msgid "Python/NumPy Integration"
-msgstr ""
+msgstr "Python/NumPy 연동"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:463
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:436
 msgid "Access data programmatically:"
-msgstr ""
+msgstr "프로그램으로 데이터에 접근합니다:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:498
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:471
 msgid "MorphoJ Compatibility"
-msgstr ""
+msgstr "MorphoJ 호환성"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:500
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:473
 msgid "**Export for MorphoJ:**"
-msgstr ""
+msgstr "**MorphoJ용으로 내보내기:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:502
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:475
 msgid "Export as Morphologika format"
-msgstr ""
+msgstr "Morphologika 형식으로 내보내기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:503
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:476
 msgid "Open in MorphoJ"
-msgstr ""
+msgstr "MorphoJ에서 열기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:504
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:477
 msgid "Perform additional analyses"
-msgstr ""
+msgstr "추가 분석 수행"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:505
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:478
 msgid "Compare results"
-msgstr ""
+msgstr "결과 비교"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:507
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:480
 msgid "**Import from MorphoJ:**"
-msgstr ""
+msgstr "**MorphoJ에서 가져오기:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:509
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:482
 msgid "Export from MorphoJ as Morphologika"
-msgstr ""
+msgstr "MorphoJ에서 Morphologika 형식으로 내보내기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:510
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:483
 msgid "Import into Modan2"
-msgstr ""
+msgstr "Modan2로 가져오기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:511
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:484
 msgid "Continue workflow"
-msgstr ""
+msgstr "작업 계속 진행"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:514
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:487
 msgid "Scripting and Automation"
-msgstr ""
+msgstr "스크립팅과 자동화"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:517
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:490
 msgid "Python API"
-msgstr ""
+msgstr "Python API"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:519
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:492
 msgid "Use Modan2 modules in scripts:"
-msgstr ""
+msgstr "스크립트에서 Modan2 모듈을 사용합니다:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:565
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:538
 msgid "Database Queries"
-msgstr ""
+msgstr "데이터베이스 쿼리"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:567
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:540
 msgid "Advanced database operations:"
-msgstr ""
+msgstr "고급 데이터베이스 작업:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:600
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:573
 msgid "Batch Export"
-msgstr ""
+msgstr "일괄 내보내기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:602
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:575
 msgid "Export multiple datasets:"
-msgstr ""
+msgstr "여러 데이터셋을 한 번에 내보냅니다:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:632
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:605
 msgid "Custom Visualizations"
-msgstr ""
+msgstr "사용자 정의 시각화"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:635
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:608
 msgid "Matplotlib Integration"
-msgstr ""
+msgstr "Matplotlib 연동"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:637
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:610
 msgid "Create custom plots from Modan2 data:"
-msgstr ""
+msgstr "Modan2 데이터로 사용자 정의 플롯을 만듭니다:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:682
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:655
 msgid "Shape Deformation Grids"
+msgstr "형상 변형 격자"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:657
+msgid "Visualize shape changes along PC axes:"
+msgstr "주성분 축을 따라 형상이 어떻게 변하는지 시각화합니다:"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:717
+msgid "Settings and Configuration"
+msgstr "설정과 구성"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:720
+msgid "Settings File Format"
+msgstr "설정 파일 형식"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:722
+msgid ""
+"Modan2 keeps its settings in a JSON file written when the application exits."
+msgstr "Modan2는 설정을 JSON 파일에 보관하며, 애플리케이션을 종료할 때 기록합니다."
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:724
+msgid ""
+"**Location:** ``~/.modan2/config.json`` on every platform (``~`` is your "
+"home folder, e.g. ``C:\\Users\\<you>`` on Windows)."
 msgstr ""
+"**위치:** 모든 플랫폼에서 ``~/.modan2/config.json`` 입니다(``~`` 는 홈 폴더로, Windows에서는 예를 "
+"들어 ``C:\\Users\\<사용자>``)."
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:727
+msgid ""
+"The data itself lives separately, under ``~/PaleoBytes/Modan2/``: ``data/`` "
+"for images and 3D models, ``logs/`` for log files, and ``backups/``."
+msgstr ""
+"데이터 자체는 별도로 ``~/PaleoBytes/Modan2/`` 아래에 있습니다: 이미지와 3D 모델은 ``data/``, 로그 파일은"
+" ``logs/``, 그리고 ``backups/``."
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:730
+msgid ""
+"Everything in the file is written by the **Preferences** dialog and by the "
+"window geometry that is remembered between sessions, so the normal way to "
+"change a setting is through the UI. To reset Modan2 to defaults, quit it and"
+" delete the file — it is recreated on the next launch."
+msgstr ""
+"이 파일의 내용은 모두 **환경 설정**\\ (Preferences) 대화상자와 세션 간에 기억되는 창 위치·크기가 기록하므로, 설정을 "
+"바꾸는 정상적인 방법은 UI를 이용하는 것입니다. Modan2를 기본값으로 되돌리려면 종료한 뒤 이 파일을 삭제하세요. 다음 실행 시 "
+"다시 만들어집니다."
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:744
-msgid "Settings and Configuration"
-msgstr ""
+msgid "Command-Line Options"
+msgstr "명령줄 옵션"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:747
-msgid "Settings File Format"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:746
+msgid "The application accepts a few options at startup:"
+msgstr "애플리케이션은 시작할 때 몇 가지 옵션을 받습니다:"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:748
+msgid "``--db <path>`` — open a specific database instead of the default"
+msgstr "``--db <경로>`` — 기본 데이터베이스 대신 특정 데이터베이스를 엽니다"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:749
-msgid "Modan2 settings are stored in JSON format."
-msgstr ""
+msgid "``--config <path>`` — use a different configuration file"
+msgstr "``--config <경로>`` — 다른 설정 파일을 사용합니다"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:750
+msgid "``--lang <en|ko>`` — start in the given language"
+msgstr "``--lang <en|ko>`` — 지정한 언어로 시작합니다"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:751
-msgid "**Location:**"
-msgstr ""
+msgid "``--debug`` — verbose logging"
+msgstr "``--debug`` — 상세 로깅"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:752
+msgid "``--no-splash`` — skip the splash screen"
+msgstr "``--no-splash`` — 스플래시 화면을 건너뜁니다"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:753
-msgid "Windows: ``%APPDATA%\\Modan2\\settings.json``"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:754
-msgid "Linux/macOS: ``~/.config/Modan2/settings.json``"
-msgstr ""
+msgid "``--version`` — print the version and exit"
+msgstr "``--version`` — 버전을 출력하고 종료합니다"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:756
-msgid "**Example settings.json:**"
-msgstr ""
+msgid ""
+"Modan2 is not configured through environment variables; use these options "
+"(or the Preferences dialog) instead."
+msgstr "Modan2는 환경 변수로 설정하지 않습니다. 이 옵션들(또는 환경 설정 대화상자)을 사용하세요."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:786
-msgid "Backup settings:"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:760
+msgid "Tips and Tricks"
+msgstr "팁과 요령"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:797
-msgid "Environment Variables"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:763
+msgid "Keyboard Shortcuts"
+msgstr "키보드 단축키"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:799
-msgid "Control Modan2 behavior via environment variables:"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:765
+msgid "**Main window:**"
+msgstr "**메인 창:**"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:767
+msgid "``Ctrl+N``: New dataset"
+msgstr "``Ctrl+N``: 새 데이터셋"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:768
+msgid "``Ctrl+Shift+N``: New object"
+msgstr "``Ctrl+Shift+N``: 새 객체"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:769
+msgid "``Ctrl+Shift+O``: Edit object"
+msgstr "``Ctrl+Shift+O``: 객체 편집"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:770
+msgid "``Ctrl+S``: Save changes"
+msgstr "``Ctrl+S``: 변경사항 저장"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:771
+msgid "``Ctrl+I``: Import"
+msgstr "``Ctrl+I``: 가져오기"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:772
+msgid "``Ctrl+E``: Export"
+msgstr "``Ctrl+E``: 내보내기"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:773
+msgid "``Ctrl+G``: Analyze"
+msgstr "``Ctrl+G``: 분석"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:774
+msgid "``Ctrl+P``: Toggle the object preview"
+msgstr "``Ctrl+P``: 객체 미리보기 켜기/끄기"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:775
+msgid "``Ctrl+W``: Exit"
+msgstr "``Ctrl+W``: 종료"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:776
+msgid "``F1``: About"
+msgstr "``F1``: 정보"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:778
+msgid "**Object Dialog (Curve mode):**"
+msgstr "**객체 대화상자 (Curve 모드):**"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:780
+msgid "``Enter`` / double-click: accept the current trace"
+msgstr "``Enter`` / 더블클릭: 현재 추적 확정"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:781
+msgid "``Esc`` / right-click: cancel the current trace"
+msgstr "``Esc`` / 오른쪽 클릭: 현재 추적 취소"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:783
+msgid "**Tables:**"
+msgstr "**표:**"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:785
+msgid ""
+"``Ctrl+C`` / ``Ctrl+V``: copy and paste cells (e.g. to and from a "
+"spreadsheet)"
+msgstr "``Ctrl+C`` / ``Ctrl+V``: 셀 복사·붙여넣기 (예: 스프레드시트와 주고받기)"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:788
+msgid "Workflow Optimization"
+msgstr "작업 흐름 최적화"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:790
+msgid "**Efficient data entry:**"
+msgstr "**효율적인 데이터 입력:**"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:792
+msgid "**Template datasets:**"
+msgstr "**템플릿 데이터셋:**"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:794
+msgid "Create dataset with complete structure"
+msgstr "구조를 완전히 갖춘 데이터셋을 만들어 두세요"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:795
+msgid "Duplicate for new studies"
+msgstr "새 연구마다 복제해서 사용하세요"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:796
+msgid "Pre-defined variables and wireframes"
+msgstr "변수와 와이어프레임을 미리 정의해 두세요"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:798
+msgid "**Keyboard navigation:**"
+msgstr "**키보드 이동:**"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:800
+msgid "Tab between fields"
+msgstr "Tab으로 입력란 이동"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:801
-msgid "**Log level:**"
-msgstr ""
+msgid "Enter to confirm"
+msgstr "Enter로 확정"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:802
+msgid "Escape to cancel"
+msgstr "Esc로 취소"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:804
+msgid "**Batch operations:**"
+msgstr "**일괄 작업:**"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:806
+msgid "Select multiple objects"
+msgstr "여러 객체 선택"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:807
+msgid "Edit variables in table"
+msgstr "표에서 변수 편집"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:808
-msgid "**Database location:**"
-msgstr ""
+msgid "Copy/paste from spreadsheet"
+msgstr "스프레드시트에서 복사/붙여넣기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:815
-msgid "**Combined example:**"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:810
+msgid "**Analysis workflows:**"
+msgstr "**분석 작업 흐름:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:829
-msgid "Tips and Tricks"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:828
+msgid "Hidden Features"
+msgstr "숨은 기능"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:830
+msgid "**Double-click behaviors:**"
+msgstr "**더블클릭 동작:**"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:832
-msgid "Keyboard Power User Shortcuts"
-msgstr ""
+msgid "Double-click dataset: Expand/collapse"
+msgstr "데이터셋 더블클릭: 펼치기/접기"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:833
+msgid "Double-click object: Open object dialog"
+msgstr "객체 더블클릭: 객체 대화상자 열기"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:834
-msgid "**General:**"
-msgstr ""
+msgid "Double-click analysis: Open results"
+msgstr "분석 더블클릭: 결과 열기"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:836
-msgid "``Ctrl+N``: New dataset"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:837
-msgid "``Ctrl+O``: Open/Import"
-msgstr ""
+msgid "**Right-click context menus:**"
+msgstr "**오른쪽 클릭 상황 메뉴:**"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:838
-msgid "``Ctrl+S``: Save (if editing)"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:839
-msgid "``Ctrl+W``: Close window/tab"
-msgstr ""
+msgid ""
+"Right-click dataset in the tree: add a child dataset, object, or analysis; "
+"explore data; reload"
+msgstr "트리에서 데이터셋 오른쪽 클릭: 하위 데이터셋·객체·분석 추가, 데이터 탐색, 새로 고침"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:840
-msgid "``Ctrl+Q``: Quit application"
-msgstr ""
+msgid "Right-click a landmark in the 2D viewer: delete it"
+msgstr "2D 뷰어에서 랜드마크 오른쪽 클릭: 삭제"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:841
+msgid ""
+"Right-click a curve point (Curve mode): **Delete Point** / **Delete Curve**"
+msgstr "곡선의 점 오른쪽 클릭 (Curve 모드): **Delete Point** / **Delete Curve**"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:842
+msgid "Right-click a row in the curve table: **Delete Curve (all specimens)**"
+msgstr "곡선 표의 행 오른쪽 클릭: **Delete Curve (all specimens)**"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:844
-msgid "``Ctrl+1`` to ``Ctrl+9``: Switch tabs"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:845
-msgid "``Ctrl+Tab``: Next tab"
-msgstr ""
+msgid "**Drag-and-drop:**"
+msgstr "**드래그 앤 드롭:**"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:846
-msgid "``Ctrl+Shift+Tab``: Previous tab"
-msgstr ""
+msgid "Drag TPS file to window: Import"
+msgstr "TPS 파일을 창으로 끌어다 놓기: 가져오기"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:847
+msgid "Drag image to object: Attach"
+msgstr "이미지를 객체로 끌어다 놓기: 첨부"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:848
-msgid "**Analysis:**"
-msgstr ""
+msgid "Drag 3D model to object: Attach"
+msgstr "3D 모델을 객체로 끌어다 놓기: 첨부"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:850
-msgid "``F5``: Refresh view"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:851
+msgid "Further Resources"
+msgstr "더 많은 자료"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:852
-msgid "``Ctrl+R``: Run analysis"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:853
+msgid "**Documentation:**"
+msgstr "**문서:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:854
-msgid "**Editing:**"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:855
+msgid "Installation Guide: Detailed setup"
+msgstr "설치 안내서: 자세한 설치 방법"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:856
-msgid "``Ctrl+C``: Copy"
-msgstr ""
+msgid "User Guide: Basic usage"
+msgstr "사용자 안내서: 기본 사용법"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:857
-msgid "``Ctrl+V``: Paste"
-msgstr ""
+msgid "Troubleshooting Guide: Problem-solving"
+msgstr "문제 해결 안내서: 문제 해결"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:858
-msgid "``Ctrl+Z``: Undo"
-msgstr ""
+msgid "FAQ: Common questions"
+msgstr "FAQ: 자주 묻는 질문"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:859
-msgid "``Ctrl+Y``: Redo (where applicable)"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:860
+msgid "**Community:**"
+msgstr "**커뮤니티:**"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:862
-msgid "Workflow Optimization"
-msgstr ""
+msgid "GitHub Discussions: Ask questions"
+msgstr "GitHub Discussions: 질문하기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:864
-msgid "**Efficient data entry:**"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:863
+msgid "GitHub Issues: Report bugs"
+msgstr "GitHub Issues: 버그 신고"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:866
-msgid "**Template datasets:**"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:865
+msgid "**Development:**"
+msgstr "**개발:**"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:867
+msgid "Developer Guide: Architecture"
+msgstr "개발자 안내서: 아키텍처"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:868
-msgid "Create dataset with complete structure"
-msgstr ""
+msgid "CONTRIBUTING.md: Contribution guide"
+msgstr "CONTRIBUTING.md: 기여 안내"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:869
-msgid "Duplicate for new studies"
-msgstr ""
+msgid "GitHub Repository: Source code"
+msgstr "GitHub 저장소: 소스 코드"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:870
-msgid "Pre-defined variables and wireframes"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:871
+msgid "**Contact:**"
+msgstr "**연락처:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:872
-msgid "**Keyboard navigation:**"
-msgstr ""
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:873
+msgid "Email: jikhanjung@gmail.com"
+msgstr "이메일: jikhanjung@gmail.com"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:874
-msgid "Tab between fields"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:875
-msgid "Enter to confirm"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:876
-msgid "Escape to cancel"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:878
-msgid "**Batch operations:**"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:880
-msgid "Select multiple objects"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:881
-msgid "Edit variables in table"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:882
-msgid "Copy/paste from spreadsheet"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:884
-msgid "**Analysis workflows:**"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:902
-msgid "Hidden Features"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:904
-msgid "**Double-click behaviors:**"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:906
-msgid "Double-click dataset: Expand/collapse"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:907
-msgid "Double-click object: Open object dialog"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:908
-msgid "Double-click analysis: Open results"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:909
-msgid "Double-click 3D view: Reset camera"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:911
-msgid "**Right-click context menus:**"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:913
-msgid "Right-click dataset: Quick operations"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:914
-msgid "Right-click object: Edit/delete options"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:915
-msgid "Right-click analysis: Export/delete"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:916
-msgid "Right-click table: Copy data"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:918
-msgid "**Drag-and-drop:**"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:920
-msgid "Drag TPS file to window: Import"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:921
-msgid "Drag image to object: Attach"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:922
-msgid "Drag 3D model to object: Attach"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:925
-msgid "Further Resources"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:927
-msgid "**Documentation:**"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:929
-msgid "Installation Guide: Detailed setup"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:930
-msgid "User Guide: Basic usage"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:931
-msgid "Troubleshooting Guide: Problem-solving"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:932
-msgid "FAQ: Common questions"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:934
-msgid "**Community:**"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:936
-msgid "GitHub Discussions: Ask questions"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:937
-msgid "GitHub Issues: Report bugs"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:939
-msgid "**Development:**"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:941
-msgid "Developer Guide: Architecture"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:942
-msgid "CONTRIBUTING.md: Contribution guide"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:943
-msgid "GitHub Repository: Source code"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:945
-msgid "**Contact:**"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:947
-msgid "Email: jikhanjung@gmail.com"
-msgstr ""
-
-#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:948
 msgid "GitHub: @jikhanjung"
-msgstr ""
+msgstr "GitHub: @jikhanjung"
 
+#~ msgid "Right-click parent dataset"
+#~ msgstr ""
+
+#~ msgid "Select \"New Child Dataset\""
+#~ msgstr ""
+
+#~ msgid "Choose options:"
+#~ msgstr ""
+
+#~ msgid "Copy landmarks (start with same data)"
+#~ msgstr ""
+
+#~ msgid "Different superimposition method"
+#~ msgstr ""
+
+#~ msgid "Subset of objects"
+#~ msgstr ""
+
+#~ msgid "**Example 1: Different superimpositions**"
+#~ msgstr ""
+
+#~ msgid "**Example 2: Taxonomic subsets**"
+#~ msgstr ""
+
+#~ msgid "**Example 3: Time periods**"
+#~ msgstr ""
+
+#~ msgid "Select dataset"
+#~ msgstr ""
+
+#~ msgid "View → Object Table"
+#~ msgstr ""
+
+#~ msgid "Edit cells directly"
+#~ msgstr ""
+
+#~ msgid "Copy/paste from Excel"
+#~ msgstr ""
+
+#~ msgid "**Regression Analysis:**"
+#~ msgstr ""
+
+#~ msgid "Use Data Exploration dialog for regression:"
+#~ msgstr ""
+
+#~ msgid "Select dataset with continuous variables"
+#~ msgstr ""
+
+#~ msgid "Data Exploration → Regression"
+#~ msgstr ""
+
+#~ msgid "Select X and Y variables"
+#~ msgstr ""
+
+#~ msgid "View scatter plot with regression line"
+#~ msgstr ""
+
+#~ msgid "Export coefficients"
+#~ msgstr ""
+
+#~ msgid "**Shape Variation Analysis:**"
+#~ msgstr ""
+
+#~ msgid "Run PCA"
+#~ msgstr ""
+
+#~ msgid "Results → Shape Variation"
+#~ msgstr ""
+
+#~ msgid "Select PC axis"
+#~ msgstr ""
+
+#~ msgid "View wireframe deformation"
+#~ msgstr ""
+
+#~ msgid "Export shape coordinates"
+#~ msgstr ""
+
+#~ msgid "**Asymmetry Analysis:**"
+#~ msgstr ""
+
+#~ msgid "For bilateral symmetry:"
+#~ msgstr ""
+
+#~ msgid "Create dataset with symmetric landmark pairs"
+#~ msgstr ""
+
+#~ msgid "Define symmetry in wireframe"
+#~ msgstr ""
+
+#~ msgid "Run specialized asymmetry analysis"
+#~ msgstr ""
+
+#~ msgid "Separate symmetric/asymmetric components"
+#~ msgstr ""
+
+#~ msgid "Procrustes Methods"
+#~ msgstr ""
+
+#~ msgid "**Full Procrustes:**"
+#~ msgstr ""
+
+#~ msgid "Translation + Rotation + Scaling"
+#~ msgstr ""
+
+#~ msgid "Standardizes size to 1.0"
+#~ msgstr ""
+
+#~ msgid "Use for pure shape analysis"
+#~ msgstr ""
+
+#~ msgid "**Partial Procrustes:**"
+#~ msgstr ""
+
+#~ msgid "Translation + Rotation only"
+#~ msgstr ""
+
+#~ msgid "Preserves size information"
+#~ msgstr ""
+
+#~ msgid "Use when size is important"
+#~ msgstr ""
+
+#~ msgid "**Bookstein Registration:**"
+#~ msgstr ""
+
+#~ msgid "Align using baseline (2 landmarks)"
+#~ msgstr ""
+
+#~ msgid "First 2 landmarks define axis"
+#~ msgstr ""
+
+#~ msgid "Useful for oriented structures"
+#~ msgstr ""
+
+#~ msgid "**Resistant Fit:**"
+#~ msgstr ""
+
+#~ msgid "Robust to outliers"
+#~ msgstr ""
+
+#~ msgid "Iterative weighting"
+#~ msgstr ""
+
+#~ msgid "Use with messy data"
+#~ msgstr ""
+
+#~ msgid "**Choosing method:**"
+#~ msgstr ""
+
+#~ msgid "Full Procrustes"
+#~ msgstr ""
+
+#~ msgid "Remove size"
+#~ msgstr ""
+
+#~ msgid "Shape + size"
+#~ msgstr ""
+
+#~ msgid "Partial Procrustes"
+#~ msgstr ""
+
+#~ msgid "Keep size info"
+#~ msgstr ""
+
+#~ msgid "Directional data"
+#~ msgstr ""
+
+#~ msgid "Known baseline"
+#~ msgstr ""
+
+#~ msgid "Noisy data"
+#~ msgstr ""
+
+#~ msgid "Handle outliers"
+#~ msgstr ""
+
+#~ msgid "**Estimation methods:**"
+#~ msgstr ""
+
+#~ msgid "**TPS Interpolation:**"
+#~ msgstr ""
+
+#~ msgid "Thin-plate spline from complete landmarks"
+#~ msgstr ""
+
+#~ msgid "Smooth interpolation"
+#~ msgstr ""
+
+#~ msgid "Works well for few missing landmarks"
+#~ msgstr ""
+
+#~ msgid "**Mean Substitution:**"
+#~ msgstr ""
+
+#~ msgid "Use mean configuration"
+#~ msgstr ""
+
+#~ msgid "Simple but less accurate"
+#~ msgstr ""
+
+#~ msgid "For many missing landmarks"
+#~ msgstr ""
+
+#~ msgid "**Iterative Estimation:**"
+#~ msgstr ""
+
+#~ msgid "Estimate → Procrustes → Re-estimate"
+#~ msgstr ""
+
+#~ msgid "Converges to best fit"
+#~ msgstr ""
+
+#~ msgid "Most accurate but slower"
+#~ msgstr ""
+
+#~ msgid "Estimate before Procrustes"
+#~ msgstr ""
+
+#~ msgid "Document which landmarks estimated"
+#~ msgstr ""
+
+#~ msgid "Sensitivity analysis (compare with/without)"
+#~ msgstr ""
+
+#~ msgid "**Left-drag:** Rotate around center"
+#~ msgstr ""
+
+#~ msgid "**Scroll:** Zoom in/out"
+#~ msgstr ""
+
+#~ msgid "**Shift+drag:** Constrained rotation"
+#~ msgstr ""
+
+#~ msgid "**Ctrl+drag:** Roll (rotate around view axis)"
+#~ msgstr ""
+
+#~ msgid "**Double-click:** Reset view"
+#~ msgstr ""
+
+#~ msgid "**Viewing modes:**"
+#~ msgstr ""
+
+#~ msgid "**Solid:** Default view"
+#~ msgstr ""
+
+#~ msgid "**Wireframe:** Show mesh structure"
+#~ msgstr ""
+
+#~ msgid "**Points:** Show vertices only"
+#~ msgstr ""
+
+#~ msgid "**Solid + wireframe:** Combined view"
+#~ msgstr ""
+
+#~ msgid "**Keyboard shortcuts:**"
+#~ msgstr ""
+
+#~ msgid "``F3``: Toggle 3D view"
+#~ msgstr ""
+
+#~ msgid "``W``: Wireframe mode"
+#~ msgstr ""
+
+#~ msgid "``S``: Solid mode"
+#~ msgstr ""
+
+#~ msgid "``P``: Point mode"
+#~ msgstr ""
+
+#~ msgid "``R``: Reset view"
+#~ msgstr ""
+
+#~ msgid "``L``: Toggle lighting"
+#~ msgstr ""
+
+#~ msgid "**Customization:**"
+#~ msgstr ""
+
+#~ msgid "Settings → Visualization → 3D Landmarks"
+#~ msgstr ""
+
+#~ msgid "Sphere size: 0.5 - 5.0"
+#~ msgstr ""
+
+#~ msgid "Color: RGB picker"
+#~ msgstr ""
+
+#~ msgid "Opacity: 0-100%"
+#~ msgstr ""
+
+#~ msgid "Show/hide landmark numbers"
+#~ msgstr ""
+
+#~ msgid "Font size adjustment"
+#~ msgstr ""
+
+#~ msgid "Color customization"
+#~ msgstr ""
+
+#~ msgid "Define connections in dataset dialog"
+#~ msgstr ""
+
+#~ msgid "Color coding by region"
+#~ msgstr ""
+
+#~ msgid "Line width adjustment"
+#~ msgstr ""
+
+#~ msgid "Modan2 settings are stored in JSON format."
+#~ msgstr ""
+
+#~ msgid "**Location:**"
+#~ msgstr ""
+
+#~ msgid "Windows: ``%APPDATA%\\Modan2\\settings.json``"
+#~ msgstr ""
+
+#~ msgid "Linux/macOS: ``~/.config/Modan2/settings.json``"
+#~ msgstr ""
+
+#~ msgid "**Example settings.json:**"
+#~ msgstr ""
+
+#~ msgid "Backup settings:"
+#~ msgstr ""
+
+#~ msgid "Environment Variables"
+#~ msgstr ""
+
+#~ msgid "Control Modan2 behavior via environment variables:"
+#~ msgstr ""
+
+#~ msgid "**Log level:**"
+#~ msgstr ""
+
+#~ msgid "**Database location:**"
+#~ msgstr ""
+
+#~ msgid "**Combined example:**"
+#~ msgstr ""
+
+#~ msgid "Keyboard Power User Shortcuts"
+#~ msgstr ""
+
+#~ msgid "**General:**"
+#~ msgstr ""
+
+#~ msgid "``Ctrl+O``: Open/Import"
+#~ msgstr ""
+
+#~ msgid "``Ctrl+S``: Save (if editing)"
+#~ msgstr ""
+
+#~ msgid "``Ctrl+W``: Close window/tab"
+#~ msgstr ""
+
+#~ msgid "``Ctrl+Q``: Quit application"
+#~ msgstr ""
+
+#~ msgid "``Ctrl+1`` to ``Ctrl+9``: Switch tabs"
+#~ msgstr ""
+
+#~ msgid "``Ctrl+Tab``: Next tab"
+#~ msgstr ""
+
+#~ msgid "``Ctrl+Shift+Tab``: Previous tab"
+#~ msgstr ""
+
+#~ msgid "**Analysis:**"
+#~ msgstr ""
+
+#~ msgid "``F5``: Refresh view"
+#~ msgstr ""
+
+#~ msgid "``Ctrl+R``: Run analysis"
+#~ msgstr ""
+
+#~ msgid "**Editing:**"
+#~ msgstr ""
+
+#~ msgid "``Ctrl+C``: Copy"
+#~ msgstr ""
+
+#~ msgid "``Ctrl+V``: Paste"
+#~ msgstr ""
+
+#~ msgid "``Ctrl+Z``: Undo"
+#~ msgstr ""
+
+#~ msgid "``Ctrl+Y``: Redo (where applicable)"
+#~ msgstr ""
+
+#~ msgid "Double-click 3D view: Reset camera"
+#~ msgstr ""
+
+#~ msgid "Right-click dataset: Quick operations"
+#~ msgstr ""
+
+#~ msgid "Right-click object: Edit/delete options"
+#~ msgstr ""
+
+#~ msgid "Right-click analysis: Export/delete"
+#~ msgstr ""
+
+#~ msgid "Right-click table: Copy data"
+#~ msgstr ""

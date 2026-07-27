@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Modan2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-27 10:12+0900\n"
+"POT-Creation-Date: 2026-07-27 10:34+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: ko <LL@li.org>\n"
@@ -587,12 +587,12 @@ msgid "**Left-drag**: rotate"
 msgstr "**왼쪽 버튼 드래그**: 회전"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:275
-msgid "**Right-drag**: pan"
-msgstr "**오른쪽 버튼 드래그**: 이동"
+msgid "**Middle-drag**: pan"
+msgstr "**가운데 버튼 드래그**: 이동"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:276
-msgid "**Mouse wheel**: zoom"
-msgstr "**마우스 휠**: 확대/축소"
+msgid "**Right-drag** or **mouse wheel**: zoom"
+msgstr "**오른쪽 버튼 드래그** 또는 **마우스 휠**: 확대/축소"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:277
 msgid ""
@@ -949,7 +949,7 @@ msgstr ""
 "랜드마크 크기, 와이어프레임 두께, 레이블 크기는 **환경 설정**\\ (Preferences)에서 2D와 3D 각각 따로 지정합니다."
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:424
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:871
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:872
 msgid "Statistical Analysis"
 msgstr "통계 분석"
 
@@ -1496,12 +1496,12 @@ msgid "**Rotate**: left-drag"
 msgstr "**회전**: 왼쪽 버튼 드래그"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:716
-msgid "**Pan**: right-drag"
-msgstr "**이동**: 오른쪽 버튼 드래그"
+msgid "**Pan**: middle-drag"
+msgstr "**이동**: 가운데 버튼 드래그"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:717
-msgid "**Zoom**: mouse wheel"
-msgstr "**확대/축소**: 마우스 휠"
+msgid "**Zoom**: right-drag or mouse wheel"
+msgstr "**확대/축소**: 오른쪽 버튼 드래그 또는 마우스 휠"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:719
 msgid "**Landmark Display**:"
@@ -1836,63 +1836,67 @@ msgid "**Document metadata**: Use description fields"
 msgstr "**메타데이터 문서화**: 설명 필드 사용"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:859
-msgid "**Back up regularly**: Export database or copy ``modan.db``"
-msgstr "**정기적 백업**: 데이터베이스 내보내기 또는 ``modan.db`` 복사"
+msgid ""
+"**Back up regularly**: export datasets as JSON+ZIP packages, or copy "
+"``~/PaleoBytes/Modan2/`` while Modan2 is closed"
+msgstr ""
+"**정기적으로 백업하세요**: 데이터셋을 JSON+ZIP 패키지로 내보내거나, Modan2를 종료한 상태에서 "
+"``~/PaleoBytes/Modan2/`` 를 복사하세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:862
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:863
 msgid "Landmark Placement"
 msgstr "랜드마크 배치"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:864
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:865
 msgid "**Define landmarks carefully**: Use anatomically meaningful points"
 msgstr "**랜드마크를 신중하게 정의**: 해부학적으로 의미 있는 점 사용"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:865
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:866
 msgid "**Be consistent**: Same landmarks across all specimens"
 msgstr "**일관성 유지**: 모든 표본에 동일한 랜드마크"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:866
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:867
 msgid "**Use high-resolution images**: Better precision"
 msgstr "**고해상도 이미지 사용**: 더 나은 정밀도"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:867
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:868
 msgid "**Avoid ambiguous points**: Choose clear, repeatable features"
 msgstr "**모호한 점 피하기**: 명확하고 반복 가능한 특징 선택"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:868
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:869
 msgid "**Document landmarks**: Write down definitions (e.g., \"tip of beak\")"
 msgstr "**랜드마크 문서화**: 정의를 기록 (예: \"부리 끝\")"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:873
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:874
 msgid "**Check assumptions**: Normal distribution, homogeneity of variance"
 msgstr "**가정 확인**: 정규 분포, 분산의 동질성"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:874
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:875
 msgid "**Sample size**: At least 30 specimens for PCA, 10+ per group for CVA"
 msgstr "**표본 크기**: PCA는 최소 30개 표본, CVA는 그룹당 10개 이상"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:875
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:876
 msgid "**Validate results**: Cross-validation, bootstrap resampling"
 msgstr "**결과 검증**: 교차 검증, 부트스트랩 재표본추출"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:876
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:877
 msgid ""
 "**Interpret cautiously**: Statistical significance ≠ biological significance"
 msgstr "**신중하게 해석**: 통계적 유의성 ≠ 생물학적 유의성"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:877
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:878
 msgid "**Visualize first**: Explore with PCA before formal tests"
 msgstr "**먼저 시각화**: 공식 검정 전에 PCA로 탐색"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:880
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:881
 msgid "Performance Optimization"
 msgstr "성능 최적화"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:882
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:883
 msgid "**Limit 3D polygon count**: Simplify meshes before import"
 msgstr "**3D 폴리곤 수 제한**: 가져오기 전에 메시 단순화"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:883
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:884
 msgid ""
 "**Let large photos downscale**: oversized images (longer side > 2560 px) are"
 " stored as a smaller working copy automatically, with the original archived;"
@@ -1901,109 +1905,109 @@ msgstr ""
 "**큰 사진은 축소되도록 두기**: 과도하게 큰 이미지(긴 변 > 2560 px)는 자동으로 더 작은 작업본으로 저장되고 원본은 따로 "
 "보관됩니다. 세밀하게 봐야 할 때만 **원본 보기**\\ (Show Original)를 사용하세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:886
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:887
 msgid "**Run analyses on subsets**: test on a small sample first"
 msgstr "**하위 집합에서 분석 실행**: 먼저 작은 샘플로 시험해 보세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:889
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:890
 msgid "Common Workflows"
 msgstr "일반적인 워크플로우"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:892
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:893
 msgid "Workflow 1: 2D Morphometric Study"
 msgstr "워크플로우 1: 2D 형태계측 연구"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:908
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:909
 msgid "Workflow 2: 3D Morphometric Study"
 msgstr "워크플로우 2: 3D 형태계측 연구"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:921
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:922
 msgid "Workflow 3: Missing Data Study"
 msgstr "워크플로우 3: 결측 데이터 연구"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:933
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:934
 msgid "Troubleshooting"
 msgstr "문제 해결"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:936
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:937
 msgid "Analysis Fails"
 msgstr "분석 실패"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:938
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:939
 msgid "**Error**: ``Not enough complete specimens for Procrustes``"
 msgstr "**오류**: ``Not enough complete specimens for Procrustes``"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:940
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:941
 msgid ""
 "**Solution**: Need at least 2 complete specimens without missing landmarks"
 msgstr "**해결책**: 결측 랜드마크가 없는 최소 2개의 완전한 표본 필요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:942
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:943
 msgid "**Error**: ``CVA requires at least 2 groups``"
 msgstr "**오류**: ``CVA requires at least 2 groups``"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:944
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:945
 msgid "**Solution**: Define a grouping variable with multiple values"
 msgstr "**해결책**: 여러 값을 가진 그룹화 변수 정의"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:947
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:948
 msgid "Landmarks Not Showing"
 msgstr "랜드마크가 표시되지 않음"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:949
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:950
 msgid "**Problem**: Placed landmarks but not visible"
 msgstr "**문제**: 랜드마크를 배치했지만 보이지 않음"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:951
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:962
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:952
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:963
 msgid "**Solution**:"
 msgstr "**해결책**:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:953
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:954
 msgid "Check the \"Show\" checkbox is enabled (with Index or Name selected)"
 msgstr "\"Show\" 체크박스가 켜져 있는지 확인하세요(Index 또는 Name 중 하나가 선택된 상태로)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:954
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:955
 msgid "Increase the landmark size in Preferences"
 msgstr "환경 설정에서 랜드마크 크기를 키우세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:955
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:956
 msgid "Zoom in - landmarks may be too small"
 msgstr "확대 - 랜드마크가 너무 작을 수 있음"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:958
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:959
 msgid "Slow Performance"
 msgstr "느린 성능"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:960
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:961
 msgid "**Problem**: Application freezes during analysis"
 msgstr "**문제**: 분석 중 애플리케이션 멈춤"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:964
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:965
 msgid "Reduce dataset size (split into smaller datasets)"
 msgstr "데이터셋 크기 축소 (더 작은 데이터셋으로 분할)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:965
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:966
 msgid "Close other applications"
 msgstr "다른 애플리케이션 닫기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:966
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:967
 msgid "Simplify 3D meshes (reduce polygon count)"
 msgstr "3D 메시 단순화 (폴리곤 수 축소)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:969
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:970
 msgid "Next Steps"
 msgstr "다음 단계"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:971
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:972
 msgid "Explore the :doc:`developer_guide` to contribute or extend Modan2"
 msgstr "Modan2에 기여하거나 확장하려면 :doc:`developer_guide` 를 탐색하세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:972
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:973
 msgid "Check the :doc:`changelog` for latest features and bug fixes"
 msgstr "최신 기능 및 버그 수정 사항은 :doc:`changelog` 를 확인하세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:973
+#: ../../../../../../../mnt/d/projects/Modan2/docs/user_guide.rst:974
 msgid ""
 "Visit the `GitHub repository <https://github.com/jikhanjung/Modan2>`_ for "
 "example datasets"

@@ -171,17 +171,14 @@ How do parent-child datasets work?
 
 **Child dataset:**
 
-* Inherits from parent
-* Can apply different Procrustes superimposition
-* Can have different object subsets
-* Can have additional variables
-* Shares landmark definitions with parent
+* A new, empty dataset nested under the parent
+* Objects are not copied into it — you populate it yourself
+* Has its own landmark count, dimension, and variables
 
 **Use cases:**
 
-* Compare different superimposition methods
-* Analyze subgroups from same original data
-* Test different analytical approaches
+* Organise a study into subgroups
+* Keep related datasets together in the tree
 
 What is the difference between objects and datasets?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -295,9 +292,7 @@ How do I digitize landmarks on 3D models?
 
 * Left-drag: Rotate
 * Middle-drag: Pan
-* Scroll: Zoom
-* Double-click: Reset view
-* Right-click: Context menu
+* Right-drag or scroll: Zoom
 
 Can I edit existing landmarks?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -376,13 +371,13 @@ What is Procrustes superimposition?
 
 1. **Translation:** Centers configurations
 2. **Rotation:** Aligns to minimize distance
-3. **Scaling:** Standardizes size (optional)
+3. **Scaling:** Standardizes centroid size
 
 **Purpose:** Compare shape independent of:
 
 * Position (translation)
 * Orientation (rotation)
-* Size (scaling, if full Procrustes)
+* Size (scaling)
 
 **Result:** Procrustes coordinates represent pure shape
 
@@ -520,7 +515,6 @@ Can I improve performance?
 
 * Ensure adequate RAM (8GB+ recommended)
 * Update graphics drivers for 3D performance
-* Use 64-bit Python installation
 
 What if analysis is taking too long?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -573,8 +567,7 @@ How do I report a bug?
 1. **System info:**
 
    * Operating system and version
-   * Python version (``python --version``)
-   * Modan2 version (Help → About)
+   * Modan2 version and build number (Help → About)
 
 2. **Problem description:**
 
@@ -590,8 +583,7 @@ How do I report a bug?
 
 4. **Log files:**
 
-   * Help → View Logs
-   * Attach relevant log files
+   * Attach the most recent file from ``~/PaleoBytes/Modan2/logs/``
 
 5. **Screenshots** (if UI-related)
 
@@ -605,14 +597,13 @@ Why does Modan2 crash?
 1. **Corrupted database** → Restore from backup
 2. **Out of memory** → Close other applications
 3. **Graphics driver issues** → Update GPU drivers
-4. **Qt plugin conflicts** → Use fix_qt_import.py (Linux)
-5. **Missing dependencies** → Reinstall requirements
+4. **Graphics/OpenGL problems** → See the Troubleshooting Guide
 
 **Debugging steps:**
 
 1. Check log files for error messages
 2. Try with sample data (isolate problem)
-3. Run from command line to see errors
+3. Run with ``--debug`` from a terminal to see errors
 4. Report crash with log files attached
 
 See Troubleshooting Guide for detailed solutions.
@@ -636,9 +627,9 @@ The 3D viewer is not working
 
 3. **Black screen:**
 
-   * Reset view (double-click)
-   * Check lighting settings
-   * Try different model
+   * Check that a 3D model is attached to the object
+   * Zoom out — the model may be off-screen
+   * Try a different model
 
 See Troubleshooting Guide → 3D Visualization Issues
 
@@ -675,7 +666,6 @@ Can I extend Modan2 with custom analyses?
 * **Python API:** Use modules directly in custom scripts
 * **Database access:** Query database with Peewee ORM
 * **Export data:** Analyze in R, Python, MATLAB
-* **Custom tools:** Add to Tools menu
 
 See Developer Guide for API documentation.
 
@@ -750,7 +740,7 @@ Can I contribute to Modan2?
 4. **Add features** - Submit Pull Request
 5. **Improve documentation** - Edit .rst/.md files
 6. **Write tutorials** - Share workflows
-7. **Translate UI** - Add new languages (future)
+7. **Translate UI** - Help complete the Korean translation, or add a language
 
 **Getting started:**
 

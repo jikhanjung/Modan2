@@ -47,17 +47,21 @@ entries across devlogs 261–262). `main.py`'s `--db` help was corrected too.
       path trigger is scoped to `docs/manual/**`, so editing the notes no longer
       redeploys the site. Documented in `docs/README.md`, `docs/manual/README.md`,
       and `CLAUDE.md`.
-- [ ] **Fold the unpublished user-facing Markdown into the manual, then remove it.**
-      `USER_GUIDE.md`, `QUICK_START.md`, and `developer_guide.md` are user-facing in
-      content but sit on the unpublished side. They are **not** clean duplicates:
-      `USER_GUIDE.md` has 57 headings absent from `user_guide.rst` (e.g. "Managing
-      Variables", which appears in no `.rst` file at all) and `developer_guide.md`
-      has 110 absent from `developer_guide.rst` — the Markdown versions are the
-      fuller ones, so deleting them outright would lose content. They have also
-      drifted where the `.rst` was corrected (`USER_GUIDE.md` still says
-      `python3 main.py`, `Modan2-Setup`, `portable`, and the 3D "Pan: right-drag"
-      bug fixed in devlog 262). Merge the genuinely-unique sections into the `.rst`
-      files, verify nothing is lost, then delete the three.
+- [x] **Fold the unpublished user-facing Markdown into the manual.** **DONE
+      2026-07-27** (devlog 264): `USER_GUIDE.md` and `QUICK_START.md` merged and
+      deleted. Reconciling them against the code turned up errors on *both* sides —
+      the `.rst` documented a variable-type selector and per-column table editing
+      that do not exist, and the `.md` claimed a batch calibration that does not
+      either. What was genuinely missing and is now published: **Calibration**
+      (absent from every `.rst`), **dataset editing/deleting/re-parenting**, a
+      **Glossary**, and a **Quick Start** page. The stale TPS/NTS/Morphologika
+      format appendix was deliberately *not* merged — its NTS example does not match
+      the parser, which expects a header line.
+- [ ] **`developer_guide.md` (1082 lines) vs `developer_guide.rst` (876).** Same
+      situation, still open: the Markdown is the fuller one (110 headings absent
+      from the `.rst`, mostly environment setup and contribution workflow). Merge
+      the unique sections across, verifying each against the repo as above, then
+      delete it. Lower priority than the user-facing pages were.
 - [ ] `developer_guide.rst` says `python Modan2.py` (3 sites) and references
       `Output/Modan2-Setup.exe`; source instructions belong there, but they should
       name `main.py` and the real installer name.

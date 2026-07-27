@@ -10,6 +10,7 @@ Modan2 is a user-friendly desktop application that empowers researchers to explo
    :caption: Contents:
 
    installation
+   quick_start
    user_guide
    faq
    troubleshooting

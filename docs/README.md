@@ -37,16 +37,16 @@ Written for contributors and maintainers, not for users of the application:
 | `architecture.md` | Internal architecture notes |
 | `performance.md` | Performance measurements and analysis |
 | `developer_guide.md` | Long-form developer notes (see caveat below) |
-| `USER_GUIDE.md` | Older monolithic user manual (see caveat below) |
-| `QUICK_START.md` | Short getting-started walkthrough (see caveat below) |
 
-### Caveat: three files predate this split
+### Caveat: `developer_guide.md`
 
-`USER_GUIDE.md`, `QUICK_START.md`, and `developer_guide.md` are user-facing in
-content but sit on the unpublished side, and they overlap with
-`manual/user_guide.rst` and `manual/developer_guide.rst` without being identical
-— the Markdown versions carry sections the published manual does not, and they
-have drifted where the `.rst` files were corrected.
+`developer_guide.md` overlaps `manual/developer_guide.rst` without being
+identical — the Markdown version is the longer of the two and carries setup and
+workflow sections the published one does not.
 
-Treat the `.rst` files as authoritative. Folding the remaining unique content
-into them, and then removing these three, is tracked in `TODOs.md`.
+Treat the `.rst` as authoritative for anything that appears in both. Folding the
+remaining unique content across and then removing this file is tracked in
+`TODOs.md`.
+
+`USER_GUIDE.md` and `QUICK_START.md` used to sit here with the same problem; they
+were merged into `manual/user_guide.rst` and `manual/quick_start.rst` and removed.

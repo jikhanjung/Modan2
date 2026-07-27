@@ -69,40 +69,59 @@ curve you define once applies to all specimens.
 Dataset Variables
 ~~~~~~~~~~~~~~~~~
 
-Variables define grouping and categorical data for statistical analysis.
+Variables hold the per-specimen data you analyse by — the grouping used for CVA
+and MANOVA, plus any measurements you want to keep alongside the shape.
+
+A variable is just a **name** defined at the dataset level. Modan2 does not ask
+you to declare a type or a list of allowed values; each object stores whatever
+text you type, and you pick which variable to group by when you run an analysis.
 
 **Adding Variables**:
 
-1. Select a dataset
-2. Click **"Add Variable"** in the toolbar
-3. Choose variable type:
+1. Open the dataset dialog and go to the **Variables** tab
+2. Click **"Add Variable"** and type the name (e.g. "Species", "Sex", "Age")
+3. Double-click a name in the list to rename it, or select it and click
+   **"Delete Variable"** to remove it
 
-   - **Categorical**: Groups (e.g., "male", "female", "juvenile")
-   - **Continuous**: Numeric measurements (e.g., age, weight)
-
-4. Enter variable name
-5. For categorical variables, add possible values
+The main window also has an **"Add variable"** action, which prompts for a name
+and appends it to the selected dataset.
 
 **Setting Object Variables**:
 
-1. Select object(s) in the table
-2. Click on the variable column
-3. Enter or select value
-4. Press ``Enter`` or click away to save
+Open the object (``Ctrl+Shift+O``, or double-click it). Each dataset variable
+appears as its own labelled field in the object dialog — type the value there and
+save. Values are free text, so a variable can hold a category ("male") or a
+number ("2.5") equally well.
 
 **Example Workflow**:
 
 .. code-block:: text
 
    Dataset: Bird Wings
-   Variables:
-     - Species (categorical): sparrow, robin, finch
-     - Sex (categorical): male, female
-     - Age (continuous): numeric
+   Variables: Species, Sex, Age
 
    Objects:
      - wing_001.jpg → Species: sparrow, Sex: male, Age: 2.5
      - wing_002.jpg → Species: sparrow, Sex: female, Age: 1.8
+
+   Analysis: group CVA by Species, MANOVA by Sex
+
+Editing and Organising Datasets
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Rename a dataset** by opening its dataset dialog, changing the name, and
+clicking OK.
+
+**Re-parent a dataset** by dragging it onto another dataset in the tree; it
+becomes a child of the target.
+
+**Move objects between datasets** by selecting them in the object table and
+dragging them onto the destination dataset in the tree.
+
+.. warning::
+   **Deleting a dataset deletes everything under it** — every object, every
+   analysis, and the image and 3D-model files those objects owned, removed from
+   disk. There is no undo.
 
 Importing Data
 --------------
@@ -387,6 +406,29 @@ Right-click a row → **"Delete Curve (all specimens)"** removes that curve from
 whole dataset.
 
 Curves are held in memory while you work and written to the database on **Save**.
+
+Calibration (Setting the Scale)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Landmark coordinates are in image pixels. If you want size reported in real-world
+units instead, calibrate the object against a known distance — a ruler in the
+photograph, or an anatomical distance you have measured.
+
+1. In the Object Dialog, click the **Calibration** mode button.
+2. **Drag** across the known distance in the image: press at one end and release
+   at the other. A line follows the cursor while you drag.
+3. Enter the real length in the dialog that appears and pick the unit
+   (**nm**, **um**, **mm**, **cm**, or **m**). The dialog shows how many pixels
+   you spanned.
+4. Click OK, then save the object.
+
+Modan2 stores the result as pixels-per-mm **on that object**, so calibration is
+per-specimen — photographs taken at different magnifications each get their own
+scale. Once set, centroid size is reported in real units rather than pixels.
+
+.. note::
+   There is no batch calibration: each object is calibrated on its own. The unit
+   you chose last is remembered as the default for the next one.
 
 Digitizing Aids
 ~~~~~~~~~~~~~~~
@@ -965,6 +1007,60 @@ Slow Performance
 - Reduce dataset size (split into smaller datasets)
 - Close other applications
 - Simplify 3D meshes (reduce polygon count)
+
+Glossary
+--------
+
+**Landmark**
+   A point location on a specimen, used for shape analysis. In Modan2 a landmark
+   has an index, optionally a name, and coordinates in image (2D) or model (3D)
+   space.
+
+**Semi-landmark**
+   A point placed along a *curve* rather than at a discrete feature. You trace the
+   curve and Modan2 resamples it into evenly-spaced points
+   (see :ref:`semi-landmark-curves`).
+
+**Type I / II / III landmark**
+   The conventional classification: **Type I** is a true homologous point (e.g. a
+   suture intersection), **Type II** is geometrically defined (e.g. a point of
+   maximum curvature), and **Type III** is an arbitrary point along a curve or
+   outline — what semi-landmarks capture.
+
+**Superimposition**
+   Aligning specimens so that only shape differences remain. Modan2 offers
+   Procrustes, Bookstein, and Resistant Fit (see `Procrustes Superimposition`_).
+
+**Procrustes superimposition**
+   Superimposition that removes position, orientation, and size by translating,
+   rotating, and scaling each configuration to best fit the others.
+
+**Centroid size**
+   A measure of size: the square root of the summed squared distances from every
+   landmark to the configuration's centroid. Reported in real units when the
+   object has been calibrated, in pixels otherwise.
+
+**Procrustes distance**
+   A measure of how different two shapes are, after superimposition.
+
+**Shape space**
+   The mathematical space in which each point is one shape; PCA and CVA are
+   explored as projections of it.
+
+**PCA (Principal Component Analysis)**
+   Finds the axes along which the dataset varies most, so a few components
+   summarise the main patterns of shape variation.
+
+**CVA (Canonical Variate Analysis)**
+   Finds the axes that best separate groups you have defined with a variable.
+
+**MANOVA (Multivariate Analysis of Variance)**
+   Tests whether the group differences are statistically significant.
+
+**Missing landmark**
+   A landmark that could not be recorded. Marked explicitly so the landmark count
+   stays consistent, and filled in during analysis by shape-fitting
+   (see :ref:`analysis-missing-landmarks`).
 
 Next Steps
 ----------

@@ -484,7 +484,19 @@ Chronological index of all development sessions for Modan2.
 ## Contributing
 
 When adding new devlog entries:
-1. Follow naming convention: `YYYYMMDD_NNN_brief_description.md`
+1. Follow the naming convention for the kind of entry:
+   - `YYYYMMDD_NNN_brief_description.md` — work log, one per session or change.
+     `NNN` is the next number in a single running sequence.
+   - `YYYYMMDD_PNN_brief_description.md` — **plan**, written before the work and
+     kept as the reference while implementing it.
+   - `YYYYMMDD_RNN_brief_description.md` — **review** or audit, findings across
+     the codebase rather than a change.
+
+   `P` and `R` have their own counters, independent of `NNN`.
 2. Start with a clear title as `# Your Title`
 3. Include metadata: Date, Status, Phase information
 4. Update this index (can be regenerated if needed)
+
+Note: `20260722_237_semilandmark_support_plan.md` is a plan that predates this
+convention and kept a sequential number. Other entries link to it by filename,
+so it was left alone rather than renamed.

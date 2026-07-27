@@ -340,6 +340,17 @@ curve-drawing UI (step 2) and the dataset-dialog N input.
       is the raw curve that `resample_polyline` turns into semi-landmarks, so it
       slots straight into the existing pipeline. 2D only; 3D still open.
 
+- [ ] **Outline analysis (elliptical Fourier).** Plan written 2026-07-27:
+      `devlog/20260727_P02_outline_efa_support_plan.md`. This **reverses** the
+      "out of scope" call in the semi-landmark plan (devlog 237), which
+      underestimated how meaning-neutral the statistics and exploration layers
+      already are — `PerformPCA` just flattens whatever vector it is given, and
+      `unrotate_shape` is a pure linear inverse. EFA also has no alignment step,
+      so its pipeline is *shorter* than the landmark one. Roughly: an EFA
+      transform module, a dataset mode plus one branch in `_prepare_landmarks`,
+      a synthesis path for rendering. Not started; priority against 3D curve
+      tracing and sliding semi-landmarks is undecided.
+
 - [ ] **2. Assisted landmark suggestion (longer-term).** Given the landmarks
       already placed on other specimens in the dataset, analyze the current
       specimen's image (2D first) to estimate and propose landmark positions for

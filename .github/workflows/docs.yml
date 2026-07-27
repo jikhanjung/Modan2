@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'docs/**'
+      - 'docs/manual/**'
       - '.github/workflows/docs.yml'
   workflow_dispatch:
 
@@ -34,21 +34,21 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r docs/requirements.txt
+          pip install -r docs/manual/requirements.txt
 
       - name: Build English documentation
         run: |
-          cd docs
+          cd docs/manual
           sphinx-build -b html -D language=en . _build/html/en
 
       - name: Build Korean documentation
         run: |
-          cd docs
+          cd docs/manual
           sphinx-build -b html -D language=ko . _build/html/ko
 
       - name: Create index redirect
         run: |
-          cat > docs/_build/html/index.html << 'EOF'
+          cat > docs/manual/_build/html/index.html << 'EOF'
           <!DOCTYPE html>
           <html>
           <head>
@@ -66,12 +66,12 @@ jobs:
 
       - name: Create .nojekyll file
         run: |
-          touch docs/_build/html/.nojekyll
+          touch docs/manual/_build/html/.nojekyll
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
         with:
-          path: 'docs/_build/html'
+          path: 'docs/manual/_build/html'
 
   deploy:
     environment:

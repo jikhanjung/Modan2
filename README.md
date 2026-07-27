@@ -15,15 +15,15 @@ Modan2 is a user-friendly desktop application that empowers researchers to explo
 **[View Documentation](https://jikhanjung.github.io/Modan2/en/)** | **[한국어 문서](https://jikhanjung.github.io/Modan2/ko/)**
 
 **New User? Start Here** 👇
-- **[Quick Start Guide](docs/QUICK_START.md)** - Get started in 10 minutes!
-- **[User Guide](docs/USER_GUIDE.md)** - Comprehensive guide with all features
+- **[User Guide](https://jikhanjung.github.io/Modan2/en/user_guide.html)** - Comprehensive guide with all features
+- **[Installation Guide](https://jikhanjung.github.io/Modan2/en/installation.html)** - Getting Modan2 running
+- **[FAQ](https://jikhanjung.github.io/Modan2/en/faq.html)** and [Troubleshooting](https://jikhanjung.github.io/Modan2/en/troubleshooting.html)
 
 **Additional Documentation**:
-- [Installation Guide](https://jikhanjung.github.io/Modan2/en/installation.html)
-- [Developer Guide](docs/developer_guide.md)
-- [Performance Guide](docs/performance.md)
-- [Architecture Overview](docs/architecture.md)
+- [Advanced Features](https://jikhanjung.github.io/Modan2/en/advanced_features.html)
+- [Developer Guide](https://jikhanjung.github.io/Modan2/en/developer_guide.html)
 - [Changelog](https://jikhanjung.github.io/Modan2/en/changelog.html)
+- Repository-only notes (architecture, performance, build and release process) live in [`docs/`](docs/README.md)
 
 ## Download
 

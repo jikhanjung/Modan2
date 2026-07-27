@@ -483,13 +483,13 @@ rm Modan2_linux
 
 **Installation Issues**:
 - Check [Troubleshooting](#troubleshooting) section above
-- See [User Guide](docs/USER_GUIDE.md) for detailed documentation
-- Report issues on [GitHub](https://github.com/yourusername/Modan2/issues)
+- See the [User Guide](https://jikhanjung.github.io/Modan2/en/user_guide.html) for detailed documentation
+- Report issues on [GitHub](https://github.com/jikhanjung/Modan2/issues)
 
 **Documentation**:
-- [Quick Start Guide](docs/QUICK_START.md) - Get started in 10 minutes
-- [User Guide](docs/USER_GUIDE.md) - Comprehensive guide
-- [Build Guide](docs/BUILD_GUIDE.md) - Building from source
+- [User Guide](https://jikhanjung.github.io/Modan2/en/user_guide.html) - Comprehensive guide
+- [Troubleshooting](https://jikhanjung.github.io/Modan2/en/troubleshooting.html) - When something goes wrong
+- [Build Guide](docs/BUILD_GUIDE.md) - Building from source (repository-only note)
 
 **Community**:
 - GitHub Issues: Bug reports and feature requests
@@ -501,13 +501,13 @@ rm Modan2_linux
 
 After successful installation:
 
-1. **Read** [Quick Start Guide](docs/QUICK_START.md) (10 minutes)
+1. **Read** the [User Guide](https://jikhanjung.github.io/Modan2/en/user_guide.html)
 2. **Try** creating your first dataset
 3. **Import** sample data (if provided)
 4. **Run** basic analysis (PCA)
 5. **Explore** features
 
-**Need Help?** See [User Guide](docs/USER_GUIDE.md) for comprehensive documentation.
+**Need Help?** See the [User Guide](https://jikhanjung.github.io/Modan2/en/user_guide.html) for comprehensive documentation.
 
 ---
 

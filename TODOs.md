@@ -38,17 +38,26 @@ settings/database paths were wrong. Then all three were translated: 492 + 374 +
 entries across devlogs 261–262). `main.py`'s `--db` help was corrected too.
 
 **Left to do (docs):**
-- [ ] **`docs/*.md` is never published — 12 files.** Confirmed from the CTHarvester
-      addendum (`../CTHarvester/docs/CI_RECOMMENDATIONS_FOR_MODAN2.md`, 2026-07-27
-      §1): `conf.py` has no `myst_parser`, so Sphinx reads `.rst` only. Worse here
-      than there — **`USER_GUIDE.md` (34 KB) duplicates `user_guide.rst`** and
-      `developer_guide.md` (1082 lines) duplicates `developer_guide.rst`, and the
-      unpublished copies have already drifted (`USER_GUIDE.md` still has
+- [x] **`docs/*.md` is never published — 12 files.** From the CTHarvester addendum
+      (`../CTHarvester/docs/CI_RECOMMENDATIONS_FOR_MODAN2.md`, 2026-07-27 §1):
+      `conf.py` has no `myst_parser`, so Sphinx reads `.rst` only. **DONE
+      2026-07-27** (devlog 263): the boundary is now a directory, not a convention
+      nobody could see — the Sphinx project moved to `docs/manual/` (`.rst` only,
+      published), and `docs/*.md` stays put as repository-only notes. `docs.yml`'s
+      path trigger is scoped to `docs/manual/**`, so editing the notes no longer
+      redeploys the site. Documented in `docs/README.md`, `docs/manual/README.md`,
+      and `CLAUDE.md`.
+- [ ] **Fold the unpublished user-facing Markdown into the manual, then remove it.**
+      `USER_GUIDE.md`, `QUICK_START.md`, and `developer_guide.md` are user-facing in
+      content but sit on the unpublished side. They are **not** clean duplicates:
+      `USER_GUIDE.md` has 57 headings absent from `user_guide.rst` (e.g. "Managing
+      Variables", which appears in no `.rst` file at all) and `developer_guide.md`
+      has 110 absent from `developer_guide.rst` — the Markdown versions are the
+      fuller ones, so deleting them outright would lose content. They have also
+      drifted where the `.rst` was corrected (`USER_GUIDE.md` still says
       `python3 main.py`, `Modan2-Setup`, `portable`, and the 3D "Pan: right-drag"
-      bug). `QUICK_START.md` is user-facing with no `.rst` counterpart, so it is
-      simply absent from the site. **Decision needed:** add `myst-parser` and put
-      the user-facing ones in the toctree, or split by extension (`.rst` = published
-      manual, `.md` = repo-only dev notes) and delete the duplicated `.md` copies.
+      bug fixed in devlog 262). Merge the genuinely-unique sections into the `.rst`
+      files, verify nothing is lost, then delete the three.
 - [ ] `developer_guide.rst` says `python Modan2.py` (3 sites) and references
       `Output/Modan2-Setup.exe`; source instructions belong there, but they should
       name `main.py` and the real installer name.

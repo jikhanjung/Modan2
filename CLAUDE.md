@@ -52,8 +52,16 @@ Modan2/
 ├── config/               # requirements-dev.txt (CI/build install from per-platform requirements-<os>.lock)
 ├── tests/                # Automated test suite (pytest)
 ├── devlog/               # Development documentation and logs
+├── docs/                 # Markdown notes (repository-only, never published)
+│   └── manual/           # Sphinx project (.rst only) → jikhanjung.github.io/Modan2
 └── tools/                # Code index builder and search
 ```
+
+Documentation is split by extension on purpose: `docs/manual/**` is `.rst` and is
+the published manual (English + Korean, deployed by `.github/workflows/docs.yml`);
+`docs/*.md` is developer/release notes read only on GitHub. Sphinx has no
+`myst_parser`, so Markdown placed under `docs/manual/` would build into nothing.
+See `docs/README.md`.
 
 Note: `ModanDialogs.py` no longer exists — dialogs live in `dialogs/`. Import
 from `dialogs.<module>` and `components.<subpackage>` in new code.

@@ -17,7 +17,7 @@ exclude = [
     "dist",
     "*.egg-info",
     ".index",
-    "docs/_build",
+    "docs/manual/_build",
     "OBJFileLoader",  # Third-party code
     "migrations",     # Auto-generated migration files
 ]
@@ -85,7 +85,7 @@ known-third-party = ["PyQt5", "peewee", "numpy", "pandas", "scipy", "matplotlib"
 "components/*" = ["N811", "N813", "B007", "B008", "E741", "N815", "F811", "F821"]  # Allow OpenGL/GLUT lowercase imports, MdUtils as mu, loop control variables, Qt naming conventions, ambiguous variables, duplicate functions, and undefined names
 "build.py" = ["E402", "N813", "S603", "DTZ"]  # Allow imports after code, lowercase module imports; subprocess runs trusted build commands
 "manage_version.py" = ["S603", "S607", "DTZ"]  # Dev tool: subprocess runs trusted git/python with partial paths
-"docs/build_all.py" = ["S602", "S603", "S607", "DTZ"]  # Dev docs-build script: trusted shell/subprocess commands
+"docs/manual/build_all.py" = ["S602", "S603", "S607", "DTZ"]  # Dev docs-build script: trusted shell/subprocess commands
 "tools/*" = ["S603", "S607", "DTZ"]  # Dev index tooling: subprocess runs trusted commands with partial paths
 "migrate.py" = ["E402", "N813", "N816", "DTZ"]  # Allow imports after code and naming conventions
 "MdHelpers.py" = ["F401"]  # Imports in try-except blocks for dependency checking

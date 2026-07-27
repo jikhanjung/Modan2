@@ -1,112 +1,52 @@
 # Modan2 Documentation
 
-This directory contains the Sphinx documentation for Modan2.
+Documentation here is split by extension, and the split is deliberate:
 
-## Building Documentation
+| | Format | Where it is read |
+|---|---|---|
+| **`docs/manual/`** | `.rst` only | Published to <https://jikhanjung.github.io/Modan2/> (English + Korean) |
+| **`docs/*.md`** | Markdown | Repository only — read on GitHub, never published |
 
-### Prerequisites
+Sphinx is not configured with `myst_parser`, so it reads `.rst` and nothing else.
+A Markdown file added to `docs/manual/` would build into nothing; a `.rst` file
+added to `docs/` would never be picked up. Put user-facing documentation in
+`docs/manual/` and developer or release notes here.
 
-```bash
-pip install -r requirements.txt
-```
+## The published manual
 
-### Build HTML Documentation
-
-```bash
-# Build both English and Korean
-make html
-
-# Or use the Python script directly
-python build_all.py
-```
-
-Output:
-- English: `_build/html/en/index.html`
-- Korean: `_build/html/ko/index.html`
-- Root redirect: `_build/html/index.html`
-
-### View Documentation
-
-Open in your browser:
-- English: `_build/html/en/index.html`
-- Korean: `_build/html/ko/index.html`
-
-The language switcher (🌐) at the top-right allows switching between languages while preserving the current page.
-
-### Development Server
-
-For live reloading during documentation writing:
+See `manual/README.md` for how to build it and how the Korean translation
+workflow works. In short:
 
 ```bash
-sphinx-autobuild . _build/html
+pip install -r manual/requirements.txt
+cd manual && make html
 ```
 
-Open http://127.0.0.1:8000
+## Repository-only notes
 
-## Translation Workflow
+Written for contributors and maintainers, not for users of the application:
 
-### Extract Translatable Strings
+| File | What it covers |
+|---|---|
+| `BUILD_GUIDE.md` | Building the frozen executables and installers |
+| `RELEASE_PROCESS.md` | Cutting and publishing a release |
+| `TEST_RELEASE_PLAN.md` | Pre-release testing plan |
+| `CODE_QUALITY_GUIDE.md` | Linting, formatting, typing, complexity |
+| `GITHUB_PAGES_SETUP.md` | How the documentation site is configured |
+| `SCREENSHOT_GUIDE.md` | Conventions for documentation screenshots |
+| `architecture.md` | Internal architecture notes |
+| `performance.md` | Performance measurements and analysis |
+| `developer_guide.md` | Long-form developer notes (see caveat below) |
+| `USER_GUIDE.md` | Older monolithic user manual (see caveat below) |
+| `QUICK_START.md` | Short getting-started walkthrough (see caveat below) |
 
-```bash
-make gettext
-```
+### Caveat: three files predate this split
 
-### Update Korean Translation Files
+`USER_GUIDE.md`, `QUICK_START.md`, and `developer_guide.md` are user-facing in
+content but sit on the unpublished side, and they overlap with
+`manual/user_guide.rst` and `manual/developer_guide.rst` without being identical
+— the Markdown versions carry sections the published manual does not, and they
+have drifted where the `.rst` files were corrected.
 
-```bash
-sphinx-intl update -p _build/gettext -l ko
-```
-
-### Edit Translation Files
-
-Edit `locale/ko/LC_MESSAGES/*.po` files using:
-- Text editor
-- [Poedit](https://poedit.net/)
-- [OmegaT](https://omegat.org/)
-
-### Build Korean Documentation
-
-```bash
-make html SPHINXOPTS="-D language=ko"
-```
-
-## Structure
-
-```
-docs/
-├── conf.py                 # Sphinx configuration
-├── index.rst               # Main page
-├── installation.rst        # Installation guide
-├── user_guide.rst          # User manual
-├── developer_guide.rst     # Developer documentation
-├── changelog.rst           # Version history
-├── _templates/
-│   └── layout.html        # Language switcher
-├── _static/
-│   ├── screenshots/       # UI screenshots (to be added)
-│   └── diagrams/          # Architecture diagrams (to be added)
-└── locale/
-    └── ko/
-        └── LC_MESSAGES/   # Korean translations
-```
-
-## Contributing
-
-When adding new content:
-
-1. Write in English first (`.rst` files)
-2. Build to test: `make html`
-3. Extract strings: `make gettext`
-4. Update translations: `sphinx-intl update -p _build/gettext -l ko`
-5. Translate `.po` files
-6. Build Korean version: `make html SPHINXOPTS="-D language=ko"`
-
-## Deployment
-
-Documentation will be automatically deployed to GitHub Pages via GitHub Actions (to be set up).
-
-## Resources
-
-- [Sphinx Documentation](https://www.sphinx-doc.org/)
-- [reStructuredText Primer](https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html)
-- [Read the Docs Theme](https://sphinx-rtd-theme.readthedocs.io/)
+Treat the `.rst` files as authoritative. Folding the remaining unique content
+into them, and then removing these three, is tracked in `TODOs.md`.

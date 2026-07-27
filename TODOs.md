@@ -9,6 +9,42 @@ As of **2026-06-25**, all CRITICAL/HIGH **correctness** items and the HIGH
 
 ---
 
+## 📌 2026-07-27 session — docs deployment
+
+**Done** (devlog 260): fixed `docs.yml`, which had failed on **every** run since
+2026-07-24, leaving GitHub Pages 411 commits behind main — the manual update in
+`be09357` (semi-landmark curves, rewritten missing-landmark handling) never reached
+the site, and the live page still documented a `Mark as Missing` flow that does not
+exist. Two breakages, the first masking the second: sphinx pinned `>=9.1.0` (needs
+Python >=3.12) while `docs.yml` was the last workflow on 3.11; and `conf.py` imports
+`version.py` → `semver`, which was missing from `docs/requirements.txt`. Both builds
+verified locally on 3.12.
+
+**Also done** (devlog 261): the Korean locale was refreshed (`sphinx-intl update`) and
+the 233 new/fuzzy entries across `user_guide` / `changelog` / `index` /
+`developer_guide` / `installation` were translated, matching the app's own Korean UI
+terms (중첩정렬, 강건적합, 결측 추가, 추정값 보기). The installation docs were rewritten
+against the real release assets: portable Windows build removed (not published), the
+per-platform file names corrected (installer ZIP / DMG / AppImage, all version-stamped),
+a warning added that only the Windows build is well tested, and the "From Source" /
+`python …py` instructions dropped from the user-facing pages.
+
+**Left to do (docs):**
+- [ ] **Three toctree pages are stale and untranslated**: `advanced_features.rst`,
+      `faq.rst`, `troubleshooting.rst`. They have no semi-landmark content (0/1/0
+      mentions), their `.po` catalogs are newly created and 100% untranslated
+      (~1200 entries), and they still tell users to run `python Modan2.py` — which is
+      not even a valid entry point (`main.py` is). FAQ/troubleshooting are where users
+      actually look, so this is the highest-value remaining docs work.
+- [ ] `developer_guide.rst` also says `python Modan2.py` (3 sites) and references
+      `Output/Modan2-Setup.exe`; source instructions belong there, but they should name
+      `main.py` and the real installer name.
+- [ ] **A broken docs build went unnoticed for two days / 6 commits** — `docs.yml` is not
+      a required status check, so its failures are invisible. Worth folding into the
+      branch-protection item below.
+
+---
+
 ## 📌 2026-07-26 session — done, and what is left (recorded, not started)
 
 **Done this session** (devlogs 249–259):

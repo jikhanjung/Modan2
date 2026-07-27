@@ -36,12 +36,18 @@ Installation
 ~~~~~~~~~~~~
 
 Download the latest version from the `releases page <https://github.com/jikhanjung/Modan2/releases>`_.
+Package names carry the version and build number.
 
 For Windows:
-   Download and run the installer (``Modan2-Setup.exe``)
+   Download the installer ZIP and run the installer inside it
 
-For Linux/macOS:
-   Download the appropriate package or run from source
+For macOS:
+   Download the DMG and drag ``Modan2.app`` to Applications
+
+For Linux:
+   Download the AppImage, make it executable, and run it
+
+Only the Windows build is well tested; see :doc:`installation` for details.
 
 Basic Usage
 ~~~~~~~~~~~

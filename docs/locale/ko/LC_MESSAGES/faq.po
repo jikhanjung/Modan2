@@ -1,0 +1,2070 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2023-2025, Modan2 Contributors
+# This file is distributed under the same license as the Modan2 package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Modan2 0.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-27 10:12+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ko\n"
+"Language-Team: ko <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:2
+msgid "Frequently Asked Questions (FAQ)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:6
+msgid "Table of Contents"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:9
+msgid "General Questions"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:12
+msgid "What is Modan2?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:14
+msgid ""
+"Modan2 is a user-friendly desktop application for geometric morphometrics"
+" research. It enables researchers to analyze shape variations in 2D and "
+"3D data through landmark-based methods and statistical analysis."
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:16
+msgid "**Key features:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:18
+msgid "Hierarchical dataset management with parent-child relationships"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:19
+msgid "2D image and 3D model landmark digitization"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:20
+msgid "Statistical analysis (PCA, CVA, MANOVA)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:21
+msgid "Multiple file format support (TPS, NTS, Morphologika, OBJ, PLY, STL)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:22
+msgid "Comprehensive visualization tools"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:23
+msgid "Built-in Procrustes superimposition"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:26
+msgid "Who is Modan2 for?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:28
+msgid "Modan2 is designed for:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:30
+msgid "**Researchers** in biology, paleontology, anthropology"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:31
+msgid "**Graduate students** learning geometric morphometrics"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:32
+msgid "**Morphologists** analyzing shape variation"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:33
+msgid "**Evolutionary biologists** studying form and function"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:34
+msgid "**Anyone** working with landmark-based shape analysis"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:37
+msgid "What makes Modan2 different from other morphometrics software?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:39
+msgid "**Traditional morphometrics software challenges:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:41
+msgid "Complex commercial software with steep learning curve"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:42
+msgid "Expensive licenses"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:43
+msgid "Limited 2D/3D integration"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:44
+msgid "Difficult data management"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:46
+msgid "**Modan2 advantages:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:48
+msgid "Free and open source (MIT license)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:49
+msgid "Intuitive interface designed for researchers"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:50
+msgid "Integrated 2D/3D workflow in one application"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:51
+msgid "Hierarchical dataset organization"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:52
+msgid "Built-in database for persistent storage"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:53
+msgid "Active development and community support"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:56
+msgid "What file formats does Modan2 support?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:58
+msgid "**Input Formats:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:60
+msgid "**Landmark data:** TPS, NTS, X1Y1, Morphologika"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:61
+msgid "**3D models:** OBJ, PLY, STL"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:62
+msgid "**Images:** JPG, PNG, BMP, TIF (for 2D landmark digitization)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:63
+msgid "**Import/Export:** JSON+ZIP packages (complete dataset backup)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:65
+msgid "**Output Formats:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:67
+msgid "Same as input for landmark data"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:68
+msgid "Excel/CSV for analysis results"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:69
+msgid "JSON+ZIP for complete dataset sharing"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:72
+msgid "Installation and Setup"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:75
+msgid "What are the system requirements?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:77
+msgid "**Minimum Requirements:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:79
+msgid "**OS:** Windows 10+, macOS 10.14+, or Ubuntu 18.04+"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:80
+msgid "**CPU:** Dual-core processor (2.0 GHz+)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:81
+msgid "**RAM:** 4GB minimum"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:82
+msgid "**Disk:** 500MB for application + space for datasets"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:83
+msgid "**Display:** 1280×720 resolution"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:84
+msgid "**Graphics:** OpenGL 3.3+ compatible GPU"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:86
+msgid "**Recommended Requirements:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:88
+msgid "**CPU:** Quad-core processor (3.0 GHz+)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:89
+msgid "**RAM:** 8GB or more"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:90
+msgid "**Disk:** 2GB for datasets"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:91
+msgid "**Display:** 1920×1080 or higher"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:92
+msgid "**Graphics:** Dedicated GPU for 3D visualization"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:95
+msgid "How do I install Modan2?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:97
+msgid ""
+"Download the package for your platform from "
+"https://github.com/jikhanjung/Modan2/releases — file names carry the "
+"version and build number."
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:101
+msgid "Windows: extract the installer ZIP and run the installer inside it"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:102
+msgid "macOS: open the DMG and drag ``Modan2.app`` to Applications"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:103
+msgid "Linux: make the AppImage executable and run it"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:105
+msgid ""
+"Only the Windows build is well tested; the macOS and Linux packages have "
+"not been through the same testing."
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:108
+msgid "See the Installation Guide for detailed instructions."
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:111
+msgid "Where is my data stored?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:113
+msgid "**Database Location:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:115
+msgid "Windows: ``%APPDATA%\\Modan2\\modan.db``"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:116
+msgid "Linux/macOS: ``~/.local/share/Modan2/modan.db``"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:118
+msgid "**Settings File:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:120
+msgid "Windows: ``%APPDATA%\\Modan2\\settings.json``"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:121
+msgid "Linux/macOS: ``~/.config/Modan2/settings.json``"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:123
+msgid "**Log Files:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:125
+msgid "Windows: ``%APPDATA%\\Modan2\\logs\\``"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:126
+msgid "Linux/macOS: ``~/.local/share/Modan2/logs/``"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:128
+msgid ""
+"**Note:** Original image and 3D model files remain in their original "
+"locations. Only landmark data is stored in the database."
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:131
+msgid "Can I backup my data?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:133
+msgid "**Yes!** Multiple backup options:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:135
+msgid "**Copy database file**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:137
+msgid "Locate ``modan.db`` (see above)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:138
+msgid "Copy to backup location"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:139
+msgid "Restore by replacing database file"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:141
+msgid "**Export datasets**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:143
+msgid "Export as JSON+ZIP package (includes all data and files)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:144
+msgid "Export as TPS, Morphologika, or other formats"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:146
+msgid "**Manual backup**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:148
+msgid "Keep original image/model files"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:149
+msgid "Export landmark data regularly"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:150
+msgid "Export analysis results"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:153
+msgid "Data Management"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:156
+msgid "What is a dataset in Modan2?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:158
+msgid "A **dataset** is a collection of objects (specimens) with shared:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:160
+msgid "Number of landmarks"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:161
+msgid "Dimension (2D or 3D)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:162
+msgid "Variable definitions (measurements, categories)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:163
+msgid "Wireframe/baseline/polygon definitions"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:164
+msgid "Analysis settings"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:166
+msgid ""
+"Datasets can have **parent-child relationships** for hierarchical "
+"organization."
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:169
+msgid "How do parent-child datasets work?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:171
+msgid "**Parent dataset:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:173
+msgid "Contains original landmark data"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:174
+msgid "Defines basic structure (landmark count, dimension)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:176
+msgid "**Child dataset:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:178
+msgid "Inherits from parent"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:179
+msgid "Can apply different Procrustes superimposition"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:180
+msgid "Can have different object subsets"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:181
+msgid "Can have additional variables"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:182
+msgid "Shares landmark definitions with parent"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:184
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:460
+msgid "**Use cases:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:186
+msgid "Compare different superimposition methods"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:187
+msgid "Analyze subgroups from same original data"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:188
+msgid "Test different analytical approaches"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:191
+msgid "What is the difference between objects and datasets?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:193
+msgid "**Dataset:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:195
+msgid "Container for multiple objects"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:196
+msgid "Defines structure (landmark count, dimension, variables)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:197
+msgid "Settings for visualization and analysis"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:199
+msgid "**Object:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:201
+msgid "Individual specimen"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:202
+msgid "Contains landmark coordinates"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:203
+msgid "Can have attached image or 3D model"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:204
+msgid "Has variable values (measurements, categories)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:206
+msgid "**Relationship:** Dataset contains multiple objects"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:209
+msgid "How many landmarks can I use?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:211
+msgid "**Practical limits:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:213
+msgid "**2D:** Up to 1000 landmarks per object (tested)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:214
+msgid "**3D:** Up to 1000 landmarks per object (tested)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:215
+msgid "**Objects:** Tested with 2,000 objects successfully"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:217
+msgid "**Performance:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:219
+msgid "100 landmarks, 1000 objects: Excellent performance"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:220
+msgid "Memory usage scales linearly (~4KB per object)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:221
+msgid "Analysis time depends on landmark count and algorithm"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:224
+msgid "Can I have missing landmarks?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:226
+msgid "**Yes!** Modan2 supports missing landmarks:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:228
+msgid "Mark landmarks as \"missing\" in object dialog"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:229
+msgid "Missing landmarks excluded from analyses"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:230
+msgid "Visualization shows missing landmarks differently"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:231
+msgid "Can estimate missing landmarks from existing data"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:233
+msgid "**Estimation methods:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:235
+msgid "Thin-plate spline (TPS) interpolation"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:236
+msgid "Mean configuration estimation"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:237
+msgid "Manual estimation"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:240
+msgid "Landmark Digitization"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:243
+msgid "How do I digitize landmarks on 2D images?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:245
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:265
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:335
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:392
+msgid "**Steps:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:247
+msgid "Create dataset → Set dimension to 2D"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:248
+msgid "Create object → Attach image"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:249
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:269
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:291
+msgid "Open object dialog"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:250
+msgid "Click on image to place landmarks"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:251
+msgid "Landmarks numbered sequentially"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:252
+msgid "Right-click to delete last landmark"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:253
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:274
+msgid "Save when complete"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:255
+msgid "**Tips:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:257
+msgid "Zoom in for precision (mouse wheel)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:258
+msgid "Pan by dragging with middle button"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:259
+msgid "Use wireframe to verify landmark placement"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:260
+msgid "Mark missing landmarks if needed"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:263
+msgid "How do I digitize landmarks on 3D models?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:267
+msgid "Create dataset → Set dimension to 3D"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:268
+msgid "Create object → Attach 3D model"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:270
+msgid "Rotate model to view landmark location"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:271
+msgid "Click to place landmark"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:272
+msgid "Landmark appears as sphere"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:273
+msgid "Continue for all landmarks"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:276
+msgid "**3D Controls:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:278
+msgid "Left-drag: Rotate"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:279
+msgid "Middle-drag: Pan"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:280
+msgid "Scroll: Zoom"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:281
+msgid "Double-click: Reset view"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:282
+msgid "Right-click: Context menu"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:285
+msgid "Can I edit existing landmarks?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:287
+msgid "**Yes!** Multiple editing options:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:289
+msgid "**Visual editing:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:292
+msgid "Click and drag landmarks"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:293
+msgid "Updates in real-time"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:295
+msgid "**Table editing:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:297
+msgid "Edit X, Y, Z coordinates directly in table"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:298
+msgid "Precision editing for fine adjustments"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:300
+msgid "**Batch editing:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:302
+msgid "Select multiple objects"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:303
+msgid "Apply transformations"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:304
+msgid "Update landmarks programmatically"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:307
+msgid "Statistical Analysis"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:310
+msgid "What analyses does Modan2 support?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:312
+msgid "**Multivariate Analysis:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:314
+msgid "**PCA (Principal Component Analysis):** Explore main patterns of variation"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:315
+msgid "**CVA (Canonical Variate Analysis):** Analyze group differences"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:316
+msgid "**MANOVA (Multivariate Analysis of Variance):** Test group differences"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:318
+msgid "**Procrustes Methods:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:320
+msgid "**Full Procrustes:** Translation, rotation, scaling"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:321
+msgid "**Partial Procrustes:** Translation, rotation only"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:322
+msgid "**Bookstein registration:** Align using baseline"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:323
+msgid "**Resistant Fit:** Robust to outliers"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:325
+msgid "**Shape Analysis:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:327
+msgid "Mean shape calculation"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:328
+msgid "Shape differences visualization"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:329
+msgid "Regression analysis"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:330
+msgid "Size and shape components"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:333
+msgid "How do I run a PCA analysis?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:337
+msgid "Select dataset in tree view"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:338
+msgid "Click Analysis → New Analysis"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:339
+msgid "Analysis Type: PCA"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:340
+msgid "Optional: Select grouping variable for coloring"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:341
+msgid "Click OK"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:342
+msgid "Results appear in new tab"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:344
+msgid "**PCA Results Include:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:346
+msgid "Scree plot (variance explained)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:347
+msgid "Score plots (PC1 vs PC2, etc.)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:348
+msgid "Loadings visualization"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:349
+msgid "Shape variation along PCs"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:350
+msgid "Export options"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:353
+msgid "What is Procrustes superimposition?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:355
+msgid "**Procrustes superimposition** removes non-shape variation:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:357
+msgid "**Translation:** Centers configurations"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:358
+msgid "**Rotation:** Aligns to minimize distance"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:359
+msgid "**Scaling:** Standardizes size (optional)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:361
+msgid "**Purpose:** Compare shape independent of:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:363
+msgid "Position (translation)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:364
+msgid "Orientation (rotation)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:365
+msgid "Size (scaling, if full Procrustes)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:367
+msgid "**Result:** Procrustes coordinates represent pure shape"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:370
+msgid "How many objects do I need for analysis?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:372
+msgid "**Minimum requirements:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:374
+msgid "**PCA:** At least 3 objects (more recommended)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:375
+msgid "**CVA:** At least 2 groups with 3+ objects each"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:376
+msgid "**MANOVA:** At least 2 groups with 3+ objects each"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:378
+msgid "**Recommended sample sizes:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:380
+msgid "**Exploratory PCA:** 20-30 objects minimum"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:381
+msgid "**Group comparison (CVA):** 10-15 per group minimum"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:382
+msgid "**Publication quality:** 30+ per group recommended"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:384
+msgid "**General rule:** More is better for robust results"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:387
+msgid "File Import and Export"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:390
+msgid "How do I import landmark data?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:394
+msgid "File → Import → [Format]"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:395
+msgid "Select file (TPS, NTS, Morphologika, etc.)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:396
+msgid "Choose or create target dataset"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:397
+msgid "Map variables if needed"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:398
+msgid "Click Import"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:400
+msgid "**Supported formats:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:402
+msgid "TPS (most common)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:403
+msgid "NTS"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:404
+msgid "X1Y1"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:405
+msgid "Morphologika"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:406
+msgid "JSON+ZIP (complete backup)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:409
+msgid "Can I import from other software?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:411
+msgid "**Yes!** Modan2 supports standard formats:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:413
+msgid "**From MorphoJ:** Export as TPS or Morphologika"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:414
+msgid "**From tpsUtil/tpsDig:** Use TPS files directly"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:415
+msgid "**From Landmark Editor:** Export as NTS"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:416
+msgid "**From R packages:** Save as TPS or Morphologika"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:418
+msgid "**Format compatibility:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:420
+msgid "TPS: Most compatible format"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:421
+msgid "Morphologika: Good for complex datasets"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:422
+msgid "NTS: Simple format"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:425
+msgid "How do I export my data?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:427
+msgid "**Export options:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:429
+msgid "**Dataset export:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:431
+msgid "File → Export → Dataset"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:432
+msgid "Choose format (TPS, Morphologika, JSON+ZIP)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:433
+msgid "Select objects to export"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:435
+msgid "**Analysis results:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:437
+msgid "Right-click analysis → Export"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:438
+msgid "Save as Excel or CSV"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:439
+msgid "Includes scores, loadings, statistics"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:441
+msgid "**Complete backup:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:443
+msgid "Export as JSON+ZIP"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:444
+msgid "Includes all data, images, models"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:445
+msgid "Perfect for sharing or archiving"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:448
+msgid "What is JSON+ZIP export?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:450
+msgid "**JSON+ZIP** is Modan2's comprehensive backup format:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:452
+msgid "**Includes:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:454
+msgid "Landmark coordinates"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:455
+msgid "Object metadata and variables"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:456
+msgid "Dataset settings (wireframe, baseline, polygons)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:457
+msgid "Attached images and 3D models (optional)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:458
+msgid "Analysis results"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:462
+msgid "Complete dataset backup"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:463
+msgid "Sharing data with collaborators"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:464
+msgid "Moving data between computers"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:465
+msgid "Long-term archival"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:467
+msgid "**Format:** Industry-standard JSON + ZIP compression"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:470
+msgid "Performance and Optimization"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:473
+msgid "How fast can Modan2 handle large datasets?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:475
+msgid "**Tested Performance** (Phase 7 validation):"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:477
+msgid "**1000 objects load:** 277ms (18× faster than target)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:478
+msgid "**1000 objects PCA:** 60ms (33× faster than target)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:479
+msgid "**Memory usage:** 4KB per object (125× better than target)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:480
+msgid "**UI responsiveness:** 12.63ms for 1000-row table"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:482
+msgid "**Scalability:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:484
+msgid "Linear O(n) scaling confirmed"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:485
+msgid "Production-ready for 100,000+ objects"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:486
+msgid "Tested up to 2,000 objects"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:489
+msgid "Can I improve performance?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:491
+msgid "**Tips for best performance:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:493
+msgid "**Use SSD** for database storage"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:494
+msgid "**Close unused objects** in tree view"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:495
+msgid "**Reduce polygon count** for 3D models"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:496
+msgid "**Disable** 3D preview during batch editing"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:497
+msgid "**Export subsets** for large analyses"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:499
+msgid "**System optimization:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:501
+msgid "Ensure adequate RAM (8GB+ recommended)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:502
+msgid "Update graphics drivers for 3D performance"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:503
+msgid "Use 64-bit Python installation"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:506
+msgid "What if analysis is taking too long?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:508
+msgid "**For large datasets:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:510
+msgid "**Check progress bar** - may still be running"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:511
+msgid "**Reduce object count** - analyze subset first"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:512
+msgid "**Simplify analysis** - fewer variables"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:513
+msgid "**Check memory** - ensure sufficient RAM"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:515
+msgid "**Typical analysis times:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:517
+msgid "100 objects: < 1 second"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:518
+msgid "1000 objects: 1-5 seconds"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:519
+msgid "2000 objects: 5-15 seconds"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:521
+msgid "**If much slower:** Check troubleshooting guide"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:524
+msgid "Troubleshooting"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:527
+msgid "Where do I get help?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:529
+msgid "**Resources (in order):**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:531
+msgid "**This FAQ** - Quick answers to common questions"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:532
+msgid "**User Guide** - Comprehensive documentation"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:533
+msgid "**Troubleshooting Guide** - Detailed problem-solving"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:534
+msgid "**GitHub Issues** - Search existing problems/solutions"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:536
+msgid "https://github.com/jikhanjung/Modan2/issues"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:538
+msgid "**GitHub Discussions** - Ask questions, share workflows"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:540
+msgid "https://github.com/jikhanjung/Modan2/discussions"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:542
+msgid "**Email Support** - jikhanjung@gmail.com"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:544
+msgid "(Please try above resources first)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:547
+msgid "How do I report a bug?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:549
+msgid "**GitHub Issues:** https://github.com/jikhanjung/Modan2/issues/new"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:551
+msgid "**Include this information:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:553
+msgid "**System info:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:555
+msgid "Operating system and version"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:556
+msgid "Python version (``python --version``)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:557
+msgid "Modan2 version (Help → About)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:559
+msgid "**Problem description:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:561
+msgid "What you were trying to do"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:562
+msgid "What actually happened"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:563
+msgid "Error message (if any)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:565
+msgid "**Steps to reproduce:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:567
+msgid "Open dataset..."
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:568
+msgid "Click button..."
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:569
+msgid "Error appears..."
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:571
+msgid "**Log files:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:573
+msgid "Help → View Logs"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:574
+msgid "Attach relevant log files"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:576
+msgid "**Screenshots** (if UI-related)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:578
+msgid "**Good bug reports get fixed faster!**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:581
+msgid "Why does Modan2 crash?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:583
+msgid "**Common causes:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:585
+msgid "**Corrupted database** → Restore from backup"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:586
+msgid "**Out of memory** → Close other applications"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:587
+msgid "**Graphics driver issues** → Update GPU drivers"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:588
+msgid "**Qt plugin conflicts** → Use fix_qt_import.py (Linux)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:589
+msgid "**Missing dependencies** → Reinstall requirements"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:591
+msgid "**Debugging steps:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:593
+msgid "Check log files for error messages"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:594
+msgid "Try with sample data (isolate problem)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:595
+msgid "Run from command line to see errors"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:596
+msgid "Report crash with log files attached"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:598
+msgid "See Troubleshooting Guide for detailed solutions."
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:601
+msgid "The 3D viewer is not working"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:603
+msgid "**Common issues:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:605
+msgid "**OpenGL not available:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:607
+msgid "Update graphics drivers"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:608
+msgid "Install OpenGL libraries (Linux)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:609
+msgid "Check GPU compatibility"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:611
+msgid "**Model not loading:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:613
+msgid "Verify file format (OBJ, PLY, STL)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:614
+msgid "Check file is not corrupted"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:615
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:621
+msgid "Try different model"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:617
+msgid "**Black screen:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:619
+msgid "Reset view (double-click)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:620
+msgid "Check lighting settings"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:623
+msgid "See Troubleshooting Guide → 3D Visualization Issues"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:626
+msgid "Advanced Topics"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:629
+msgid "Can I use Modan2 in a publication?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:631
+msgid "**Yes! Please do.**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:633
+msgid "**How to cite:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:646
+msgid "**In text:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:648
+msgid ""
+"\"Geometric morphometric analyses were performed using Modan2 v0.1.5 "
+"(Jung, 2025), an open-source desktop application for landmark-based shape"
+" analysis.\""
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:651
+msgid "Can I extend Modan2 with custom analyses?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:653
+msgid "**Yes!** Modan2 is extensible:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:655
+msgid "**Python API:** Use modules directly in custom scripts"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:656
+msgid "**Database access:** Query database with Peewee ORM"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:657
+msgid "**Export data:** Analyze in R, Python, MATLAB"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:658
+msgid "**Custom tools:** Add to Tools menu"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:660
+msgid "See Developer Guide for API documentation."
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:663
+msgid "How does the database work?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:665
+msgid "**Technology:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:667
+msgid "**Engine:** SQLite (embedded database)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:668
+msgid "**ORM:** Peewee (Python Object-Relational Mapping)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:669
+msgid "**Location:** Single file (modan.db)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:671
+msgid "**Tables:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:673
+msgid "md_dataset: Dataset definitions"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:674
+msgid "md_object: Objects and landmark data"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:675
+msgid "md_image: 2D image attachments"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:676
+msgid "md_threedmodel: 3D model attachments"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:677
+msgid "md_analysis: Analysis results"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:679
+msgid "**Advantages:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:681
+msgid "No server required"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:682
+msgid "Portable (single file)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:683
+msgid "ACID compliant (data integrity)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:684
+msgid "Fast queries"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:685
+msgid "Easy backup"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:688
+msgid "Can I run Modan2 on a server?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:690
+msgid "**Not currently.** Modan2 requires GUI environment."
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:692
+msgid "**Future feature:** Command-line interface for server deployment planned."
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:694
+msgid "**Current workarounds:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:696
+msgid "Use VNC/Remote Desktop for GUI access"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:697
+msgid "Or use X11 forwarding over SSH:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:705
+msgid "Development and Contributing"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:708
+msgid "Is Modan2 open source?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:710
+msgid "**Yes!**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:712
+msgid "**License:** MIT License (permissive)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:713
+msgid "**Repository:** https://github.com/jikhanjung/Modan2"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:714
+msgid "**Free to use:** Commercial and non-commercial"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:715
+msgid "**Free to modify:** Change, extend, redistribute"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:717
+msgid "**This means you can:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:719
+msgid "Use in research (published papers)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:720
+msgid "Use in commercial projects"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:721
+msgid "Modify for your specific needs"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:722
+msgid "Redistribute (must include license)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:725
+msgid "Can I contribute to Modan2?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:727
+msgid "**Absolutely! Contributions welcome:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:729
+msgid "**Ways to contribute:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:731
+msgid "**Report bugs** - GitHub Issues"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:732
+msgid "**Suggest features** - GitHub Discussions"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:733
+msgid "**Fix bugs** - Submit Pull Request"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:734
+msgid "**Add features** - Submit Pull Request"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:735
+msgid "**Improve documentation** - Edit .rst/.md files"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:736
+msgid "**Write tutorials** - Share workflows"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:737
+msgid "**Translate UI** - Add new languages (future)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:739
+msgid "**Getting started:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:741
+msgid "Read CONTRIBUTING.md (when available)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:742
+msgid "Fork the repository"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:743
+msgid "Make your changes"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:744
+msgid "Submit Pull Request"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:746
+msgid "**No contribution is too small!** Even fixing typos helps."
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:749
+msgid "What features are planned?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:751
+msgid "**Short-term (v1.0):**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:753
+msgid "Enhanced documentation"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:754
+msgid "UI polish and accessibility"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:755
+msgid "Performance optimization"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:756
+msgid "Additional statistical tests"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:757
+msgid "Beta testing program"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:759
+msgid "**Long-term (v1.1+):**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:761
+msgid "Command-line interface for batch processing"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:762
+msgid "Additional analysis methods"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:763
+msgid "Enhanced 3D visualization"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:764
+msgid "Plugin system"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:765
+msgid "Cloud storage integration"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:766
+msgid "Mobile companion app"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:768
+msgid "See GitHub Issues and Milestones for details."
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:771
+msgid "Who develops Modan2?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:773
+msgid "**Primary developer:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:775
+msgid "Jikhan Jung (@jikhanjung)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:776
+msgid "Part of PaleoBytes software suite"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:777
+msgid "Developed for morphometrics research"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:779
+msgid "**Contributors:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:781
+msgid "See GitHub contributors page"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:782
+msgid "Community bug reports and suggestions"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:783
+msgid "Open source contributions welcome"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:785
+msgid "**Funding/Support:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:787
+msgid "Academic research project"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:788
+msgid "No commercial backing"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:789
+msgid "Developed for research community"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:792
+msgid "License and Legal"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:795
+msgid "Can I use Modan2 commercially?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:797
+msgid "**Yes!** MIT License permits:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:799
+msgid "**Commercial use** - Use in for-profit projects"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:800
+msgid "**Modification** - Adapt to your needs"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:801
+msgid "**Distribution** - Redistribute modified versions"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:802
+msgid "**Private use** - Use internally without sharing"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:804
+msgid "**Requirements:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:806
+msgid "Include MIT License text"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:807
+msgid "Include copyright notice"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:809
+msgid "**No warranty:** Software provided \"as-is\""
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:812
+msgid "What if Modan2 damages my data?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:814
+msgid "**Disclaimer:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:816
+msgid "Software provided \"as-is\" (MIT License)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:817
+msgid "No warranty of any kind"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:818
+msgid "**Always backup original data**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:820
+msgid "**Best practices:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:822
+msgid "Keep original landmark data unchanged"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:823
+msgid "Test with sample data first"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:824
+msgid "Regular backups"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:825
+msgid "Export important results"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:827
+msgid "**In practice:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:829
+msgid "Modan2 uses database transactions (safe)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:830
+msgid "Does not modify original files"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:831
+msgid "Risk is very low with normal use"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:834
+msgid "Still Have Questions?"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:836
+msgid "**Check these resources:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:838
+msgid "**Installation Guide** - Setup and configuration"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:839
+msgid "**User Guide** - Detailed usage instructions"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:840
+msgid "**Troubleshooting Guide** - Problem-solving"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:841
+msgid "**Developer Guide** - Technical details"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:842
+msgid "**Advanced Features** - Power user tips"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:844
+msgid "**Contact:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:846
+msgid "GitHub Issues: https://github.com/jikhanjung/Modan2/issues"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:847
+msgid "Discussions: https://github.com/jikhanjung/Modan2/discussions"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:848
+msgid "Email: jikhanjung@gmail.com"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:850
+msgid "**This FAQ is open source!**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:852
+msgid "Found an error? Have suggestions? Submit a PR to improve this document."
+msgstr ""
+
+#~ msgid "**Binary Installation (Easiest):**"
+#~ msgstr ""
+
+#~ msgid "Download from https://github.com/jikhanjung/Modan2/releases"
+#~ msgstr ""
+
+#~ msgid "Windows: Run installer ``Modan2-Setup.exe``"
+#~ msgstr ""
+
+#~ msgid "macOS: Open DMG and drag to Applications"
+#~ msgstr ""
+
+#~ msgid "Linux: Use AppImage or install from source"
+#~ msgstr ""
+
+#~ msgid "**From Source (For Developers):**"
+#~ msgstr ""
+

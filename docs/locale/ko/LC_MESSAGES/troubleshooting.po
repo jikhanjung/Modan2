@@ -1,0 +1,1586 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2023-2025, Modan2 Contributors
+# This file is distributed under the same license as the Modan2 package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Modan2 0.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-27 09:12+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ko\n"
+"Language-Team: ko <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:2
+msgid "Troubleshooting Guide"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:4
+msgid ""
+"This guide provides solutions to common problems and errors you may "
+"encounter while using Modan2."
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:8
+msgid "Table of Contents"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:11
+msgid "Installation Issues"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:14
+msgid "Python Import Errors"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:16
+msgid ""
+"**Problem:** ``ImportError: No module named 'PyQt5'`` or similar module "
+"not found errors"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:18
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:127
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:216
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:261
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:302
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:326
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:387
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:418
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:450
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:481
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:546
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:582
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:646
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:677
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:702
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:720
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:847
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:857
+msgid "**Solution:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:20
+msgid "Ensure you have installed all dependencies:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:26
+msgid "If using a virtual environment, verify it is activated:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:36
+msgid "Try reinstalling the specific missing package:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:42
+msgid "**Problem:** ``ModuleNotFoundError: No module named 'OpenGL'``"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:44
+msgid "**Solution (Linux):**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:55
+msgid "**Solution (Windows/macOS):**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:62
+msgid "Qt Platform Plugin Issues (Linux/WSL)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:64
+msgid ""
+"**Problem:** ``qt.qpa.plugin: Could not load the Qt platform plugin "
+"\"xcb\"``"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:66
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:158
+msgid "**Symptoms:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:68
+msgid "Application fails to start"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:69
+msgid "Error message about Qt plugins"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:70
+msgid "Black screen or crash on startup"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:72
+msgid "**Solution 1: Use fix script**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:78
+msgid "This script sets the correct Qt plugin path for your system."
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:80
+msgid "**Solution 2: Install XCB libraries**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:89
+msgid "**Solution 3: Set environment variable**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:97
+msgid "Permission Issues"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:99
+msgid "**Problem:** \"Permission denied\" when opening database or saving files"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:101
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:526
+msgid "**Windows Solution:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:103
+msgid ""
+"Right-click Modan2.exe → \"Run as administrator\" (not recommended for "
+"normal use)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:104
+msgid "Or change folder permissions:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:106
+msgid "Right-click folder → Properties → Security"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:107
+msgid "Ensure your user has \"Full control\""
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:109
+msgid "**Linux/macOS Solution:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:120
+msgid "**Problem:** Settings not saving"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:122
+msgid "**Location of settings files:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:124
+msgid "Windows: ``%APPDATA%\\Modan2\\settings.json``"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:125
+msgid "Linux/macOS: ``~/.config/Modan2/settings.json``"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:129
+msgid "Check write permissions on the config directory"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:130
+msgid "Manually create the directory if it doesn't exist:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:140
+msgid "Delete corrupted settings file to regenerate defaults:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:151
+msgid "Database Issues"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:154
+msgid "Database File Corrupted"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:156
+msgid ""
+"**Problem:** \"Database is locked\" or \"Database disk image is "
+"malformed\""
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:160
+msgid "Cannot open Modan2"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:161
+msgid "Error messages about database"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:162
+msgid "Data not saving"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:164
+msgid "**Solution 1: Close other instances**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:166
+msgid "Ensure no other Modan2 processes are running:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:178
+msgid "**Solution 2: Backup and restore**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:195
+msgid "**Solution 3: Export and reimport**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:197
+msgid "If you have a recent backup:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:199
+msgid "Use backup database"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:200
+msgid "Export all datasets as JSON+ZIP"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:201
+msgid "Create new database (delete modan.db)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:202
+msgid "Import datasets from JSON+ZIP"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:205
+msgid "Cannot Access Database"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:207
+msgid "**Problem:** \"Unable to open database file\" error"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:209
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:296
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:411
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:576
+msgid "**Causes:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:211
+msgid "Database file missing"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:212
+msgid "Incorrect permissions"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:213
+msgid "Disk full"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:214
+msgid "File locked by another process"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:218
+msgid "**Check file exists:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:225
+msgid "**Check disk space:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:235
+msgid "**Create directory if missing:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:241
+msgid "**Let Modan2 create new database:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:243
+msgid "Start Modan2"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:244
+msgid "New database created automatically"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:245
+msgid "Import data from backups"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:248
+msgid "Data Loading and Import Issues"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:251
+msgid "Import File Format Not Recognized"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:253
+msgid "**Problem:** \"Unknown file format\" or \"Failed to import\" error"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:255
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:345
+msgid "**Supported formats:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:257
+msgid "**Landmark data:** TPS, NTS, X1Y1, Morphologika, JSON+ZIP"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:258
+msgid "**3D models:** OBJ, PLY, STL"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:259
+msgid "**Images:** JPG, PNG, BMP, TIF"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:263
+msgid "**Verify file format:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:265
+msgid "Check file extension matches content"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:266
+msgid "Open in text editor to verify format"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:268
+msgid "**TPS file issues:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:280
+msgid "Common issues:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:282
+msgid "Missing LM= line"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:283
+msgid "Incorrect coordinate format"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:284
+msgid "Missing ID= or IMAGE= lines"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:286
+msgid "**Try different format:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:288
+msgid "Convert to TPS using tpsUtil"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:289
+msgid "Or use Morphologika format"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:292
+msgid "Missing Data After Import"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:294
+msgid "**Problem:** Objects imported but no landmarks visible"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:298
+msgid "Landmark coordinates all zero"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:299
+msgid "Incorrect dimension (2D vs 3D)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:300
+msgid "Scale mismatch"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:304
+msgid "**Check coordinates in table:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:306
+msgid "Open object dialog"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:307
+msgid "View landmark table"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:308
+msgid "Verify non-zero coordinates"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:310
+msgid "**Check dimension:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:312
+msgid "Dataset should match file (2D/3D)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:313
+msgid "Recreate dataset with correct dimension"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:315
+msgid "**Check scale:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:317
+msgid "Landmarks may be outside viewing range"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:318
+msgid "Try \"Fit to View\" or zoom out"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:319
+msgid "Check coordinate values are reasonable"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:322
+msgid "Image/Model Not Loading"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:324
+msgid "**Problem:** \"Failed to load image\" or \"Model file not found\""
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:328
+msgid "**Check file paths:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:330
+msgid "Image/model paths stored in database"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:331
+msgid "If files moved, update paths"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:332
+msgid "Use relative paths when possible"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:334
+msgid "**Verify file integrity:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:347
+msgid "**Images:** JPG, PNG, BMP, TIF (RGB or grayscale)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:348
+msgid "**3D models:** OBJ, PLY, STL (text or binary)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:350
+msgid "**Re-attach files:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:352
+msgid "Right-click object → Properties"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:353
+msgid "Attach image/model again"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:354
+msgid "Browse to correct file"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:357
+msgid "Analysis Errors"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:360
+msgid "PCA/CVA/MANOVA Fails"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:362
+msgid "**Problem:** Analysis fails with error message"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:364
+msgid "**Common causes:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:366
+msgid "**Not enough objects:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:368
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:849
+msgid "PCA: Need at least 3 objects"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:369
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:850
+msgid "CVA/MANOVA: Need at least 2 groups with 3+ objects each"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:371
+msgid "**Missing landmarks:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:373
+msgid "Some landmarks marked as missing"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:374
+msgid "Not enough complete configurations"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:375
+msgid "Solution: Estimate missing landmarks or exclude objects"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:377
+msgid "**No grouping variable (CVA/MANOVA):**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:379
+msgid "Need categorical variable for groups"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:380
+msgid "Solution: Add grouping variable to objects"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:382
+msgid "**Insufficient variation:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:384
+msgid "All objects identical or nearly identical"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:385
+msgid "Solution: Check data quality"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:389
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:618
+msgid "**Check object count:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:391
+msgid "Select dataset"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:392
+msgid "View object count in status bar"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:393
+msgid "Ensure sufficient objects"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:395
+msgid "**Check for missing data:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:397
+msgid "Review objects for missing landmarks"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:398
+msgid "Use \"Estimate Missing\" feature or exclude"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:400
+msgid "**Verify grouping variable:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:402
+msgid "CVA/MANOVA require categorical variable"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:403
+msgid "Create variable in dataset dialog"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:404
+msgid "Assign values to objects"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:407
+msgid "Procrustes Alignment Issues"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:409
+msgid "**Problem:** \"Procrustes failed\" or incorrect alignment"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:413
+msgid "Collinear landmarks (all on one line)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:414
+msgid "Insufficient landmarks (< 3 for 2D, < 4 for 3D)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:415
+msgid "All landmarks at same position"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:416
+msgid "Scale issues"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:420
+msgid "**Check landmark quality:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:422
+msgid "View objects in viewer"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:423
+msgid "Ensure landmarks properly distributed"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:424
+msgid "No duplicates at same position"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:426
+msgid "**Try different method:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:428
+msgid "Full Procrustes → Partial Procrustes"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:429
+msgid "Or use Bookstein registration"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:430
+msgid "Or try Resistant Fit"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:432
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:457
+msgid "**Check for outliers:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:434
+msgid "Some objects very different from others"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:435
+msgid "May cause alignment issues"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:436
+msgid "Try excluding outliers"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:439
+msgid "Analysis Results Look Wrong"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:441
+msgid "**Problem:** Unexpected PCA/CVA results"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:443
+msgid "**Possible causes:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:445
+msgid "Incorrect Procrustes method"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:446
+msgid "Wrong grouping variable"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:447
+msgid "Outliers affecting results"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:448
+msgid "Missing landmarks not handled properly"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:452
+msgid "**Verify Procrustes settings:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:454
+msgid "Check which superimposition used"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:455
+msgid "Try different method"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:459
+msgid "View PC score plots"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:460
+msgid "Look for extreme points"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:461
+msgid "Investigate unusual specimens"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:463
+msgid "**Verify grouping:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:465
+msgid "CVA: Ensure correct grouping variable selected"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:466
+msgid "Check group assignments"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:468
+msgid "**Check sample size:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:470
+msgid "Small samples may give unstable results"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:471
+msgid "Need larger sample for robust analysis"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:474
+msgid "3D Visualization Issues"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:477
+msgid "3D Viewer Black Screen"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:479
+msgid "**Problem:** 3D viewer shows black screen or nothing visible"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:483
+msgid "**Reset view:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:485
+msgid "Double-click in 3D viewer"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:486
+msgid "Or use View → Reset Camera"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:488
+msgid "**Check OpenGL:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:498
+msgid "**Update graphics drivers:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:500
+msgid "Windows: NVIDIA, AMD, or Intel website"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:501
+msgid "Linux: Use distribution's driver manager"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:502
+msgid "macOS: Use Software Update"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:504
+msgid "**Check model loaded:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:506
+msgid "Verify 3D model file attached"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:507
+msgid "Try different model"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:508
+msgid "Check file is valid OBJ/PLY/STL"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:511
+msgid "OpenGL Errors"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:513
+msgid "**Problem:** \"OpenGL error\" or \"Failed to initialize OpenGL context\""
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:515
+msgid "**Linux Solution:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:528
+msgid "Update graphics drivers"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:529
+msgid "Try forcing software rendering (slower but works):"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:536
+msgid "**macOS Solution:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:538
+msgid "OpenGL should work out of the box on macOS 10.14+"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:539
+msgid "Update macOS to latest version if issues"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:542
+msgid "Landmark Spheres Not Visible"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:544
+msgid "**Problem:** Cannot see landmark spheres in 3D viewer"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:548
+msgid "**Increase sphere size:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:550
+msgid "Settings → Visualization → Landmark size"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:551
+msgid "Increase value"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:553
+msgid "**Check lighting:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:555
+msgid "Spheres may be too dark"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:556
+msgid "Adjust lighting in settings"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:558
+msgid "**Zoom in:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:560
+msgid "Spheres may be too small at current zoom"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:561
+msgid "Scroll to zoom closer"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:563
+msgid "**Check wireframe:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:565
+msgid "Wireframe may obscure spheres"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:566
+msgid "Toggle wireframe visibility"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:569
+msgid "Performance Issues"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:572
+msgid "Application Slow to Start"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:574
+msgid "**Problem:** Modan2 takes long time to start"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:578
+msgid "Large database"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:579
+msgid "Many datasets/objects loaded"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:580
+msgid "Disk I/O issues"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:584
+msgid "**Check database size:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:586
+msgid "Location: See FAQ"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:587
+msgid "Large database (>1GB) may slow startup"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:589
+msgid "**Optimize database:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:595
+msgid "**Move to SSD:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:597
+msgid "Database on HDD is slower"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:598
+msgid "Move to SSD for better performance"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:600
+msgid "**Reduce loaded data:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:602
+msgid "Close unused datasets"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:603
+msgid "Archive old analyses"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:606
+msgid "Slow Analysis or Visualization"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:608
+msgid "**Problem:** Analysis takes very long or UI freezes"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:610
+msgid "**Expected performance:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:612
+msgid "100 objects: < 1 second"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:613
+msgid "1000 objects: 1-5 seconds"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:614
+msgid "2000 objects: 5-15 seconds"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:616
+msgid "**If much slower:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:620
+msgid "Select dataset → View object count"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:621
+msgid "Verify within expected range"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:623
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:653
+msgid "**Close other applications:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:625
+msgid "Free up RAM"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:626
+msgid "Close web browsers"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:627
+msgid "Stop background processes"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:629
+msgid "**Check system resources:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:631
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:650
+msgid "Task Manager / Activity Monitor"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:632
+msgid "Look for high CPU or memory usage"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:633
+msgid "Close resource-heavy apps"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:635
+msgid "**Simplify visualization:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:637
+msgid "Reduce polygon count for 3D models"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:638
+msgid "Disable wireframes"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:639
+msgid "Close object viewers not in use"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:642
+msgid "Out of Memory Errors"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:644
+msgid "**Problem:** \"Out of memory\" or crash with large datasets"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:648
+msgid "**Check RAM usage:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:651
+msgid "Ensure sufficient RAM available"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:655
+msgid "Web browsers use lots of RAM"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:656
+msgid "Close unnecessary programs"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:658
+msgid "**Work with subsets:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:660
+msgid "Analyze smaller groups"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:661
+msgid "Export subsets of data"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:663
+msgid "**Upgrade RAM:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:665
+msgid "4GB: Small datasets only"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:666
+msgid "8GB: Recommended for most work"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:667
+msgid "16GB+: Large datasets"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:670
+msgid "UI and Display Issues"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:673
+msgid "UI Elements Not Displaying Correctly"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:675
+msgid "**Problem:** Buttons, menus, or dialogs appear garbled or cut off"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:679
+msgid "**Check display scaling (Windows):**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:681
+msgid "Right-click desktop → Display settings"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:682
+#, python-format
+msgid "Set scaling to 100% or 125%"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:683
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:694
+msgid "Restart Modan2"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:685
+msgid "**Update Qt:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:691
+msgid "**Reset window geometry:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:693
+msgid "Delete settings file (see above)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:695
+msgid "Windows repositioned to defaults"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:698
+msgid "Font Issues"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:700
+msgid "**Problem:** Text appears too small or too large"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:704
+msgid "**Adjust system font size:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:706
+msgid "Windows: Settings → Display → Scale"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:707
+msgid "macOS: System Preferences → Displays"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:708
+msgid "Linux: Display settings in DE"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:710
+msgid "**Application-specific (future):**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:712
+msgid "Font size settings planned"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:713
+msgid "Currently uses system fonts"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:716
+msgid "High DPI Display Issues"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:718
+msgid "**Problem:** UI elements tiny on 4K/high DPI displays"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:722
+msgid "**Enable high DPI scaling (Windows):**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:724
+msgid "Right-click Modan2.exe → Properties"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:725
+msgid "Compatibility → High DPI settings"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:726
+msgid "Override scaling behavior"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:728
+msgid "**Set environment variable:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:741
+msgid "Advanced Troubleshooting"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:744
+msgid "Collecting Debug Information"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:746
+msgid "When reporting issues, include this information:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:748
+msgid "**System Information:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:760
+msgid "**Modan2 version:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:762
+msgid "Help → About Modan2"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:763
+msgid "Note version number"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:765
+msgid "**Log files:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:767
+msgid "Windows: ``%APPDATA%\\Modan2\\logs\\``"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:768
+msgid "Linux/macOS: ``~/.local/share/Modan2/logs/``"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:769
+msgid "Help → View Logs"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:771
+msgid "**Package versions:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:778
+msgid "Enabling Debug Logging"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:780
+msgid "To get more detailed logs:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:782
+msgid "**Via Settings (future feature):**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:784
+msgid "Settings → Advanced → Logging"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:785
+msgid "Set \"Log level\" to \"DEBUG\""
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:787
+msgid "**Via Environment Variable:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:799
+msgid "**View logs in real-time:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:810
+msgid "Running in Safe Mode"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:812
+msgid "To disable optimizations and troubleshoot:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:826
+msgid "Common Error Messages"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:829
+msgid "\"Failed to connect to database\""
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:831
+msgid "**Cause:** Database file locked or inaccessible"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:833
+msgid "**Solution:** See \"Database Issues\" section above"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:836
+msgid "\"Procrustes superimposition failed\""
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:838
+msgid "**Cause:** Insufficient or collinear landmarks"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:840
+msgid "**Solution:** See \"Procrustes Alignment Issues\" section above"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:843
+msgid "\"Not enough objects for analysis\""
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:845
+msgid "**Cause:** Insufficient sample size"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:853
+msgid "\"Invalid landmark count\""
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:855
+msgid "**Cause:** Object has wrong number of landmarks for dataset"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:859
+msgid "Check dataset landmark count"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:860
+msgid "Verify object landmarks match"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:861
+msgid "Re-digitize object if needed"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:864
+msgid "Getting Additional Help"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:866
+msgid "If this guide doesn't solve your problem:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:868
+msgid "**Check FAQ:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:870
+msgid "Quick answers to common questions"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:872
+msgid "**Check GitHub Issues:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:874
+msgid "https://github.com/jikhanjung/Modan2/issues"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:876
+msgid "Search for similar problems - they may already be solved"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:878
+msgid "**Create New Issue:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:880
+msgid "Include:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:882
+msgid "Operating system and version"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:883
+msgid "Python version (``python --version``)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:884
+msgid "Modan2 version"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:885
+msgid "Error message or description"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:886
+msgid "Steps to reproduce"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:887
+msgid "Log files (see \"Collecting Debug Information\" above)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:889
+msgid "**GitHub Discussions:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:891
+msgid "For questions and general discussion:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:893
+msgid "https://github.com/jikhanjung/Modan2/discussions"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:895
+msgid "**Email Support:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:897
+msgid "Contact: jikhanjung@gmail.com"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:899
+msgid "(Please try above resources first)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:902
+msgid "Known Issues and Limitations"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:905
+msgid "Current Limitations"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:907
+msgid "**Missing landmark estimation:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:909
+msgid "Limited to TPS interpolation"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:910
+msgid "More methods planned"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:912
+msgid "**3D Export Formats:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:914
+msgid "Analysis results to CSV/Excel only"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:915
+msgid "More formats planned"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:917
+msgid "**Platform-Specific:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:919
+msgid "macOS builds not code-signed (requires manual approval)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:920
+msgid "Linux may need manual Qt plugin configuration"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:922
+msgid "**GUI Only:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:924
+msgid "No command-line interface yet"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:925
+msgid "Cannot run in headless mode"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:927
+msgid "**Language:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:929
+msgid "UI primarily English"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:930
+msgid "Korean translation partially complete"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:931
+msgid "More languages planned"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:934
+msgid "Planned Improvements"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:936
+msgid "See CHANGELOG and GitHub milestones for planned features:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:938
+msgid "Command-line interface for batch processing"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:939
+msgid "Enhanced 3D visualization"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:940
+msgid "More analysis methods"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:941
+msgid "Improved documentation"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:942
+msgid "Better cross-platform support"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:943
+msgid "Plugin system"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:946
+msgid "Contributing"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:948
+msgid "Found a bug or have suggestions? Contributions welcome!"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:950
+msgid "Report bugs: https://github.com/jikhanjung/Modan2/issues"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:951
+msgid "Submit fixes: https://github.com/jikhanjung/Modan2/pulls"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:952
+msgid "Improve docs: Edit this file and submit PR"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/troubleshooting.rst:954
+msgid "See CONTRIBUTING.md for detailed contribution guidelines (when available)."
+msgstr ""
+

@@ -4,250 +4,286 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Modan2 \n"
+"Project-Id-Version: Modan2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-04 11:41+0900\n"
+"POT-Creation-Date: 2026-07-27 10:12+0900\n"
 "PO-Revision-Date: 2025-10-04 12:00+0900\n"
 "Last-Translator: Modan2 Contributors\n"
-"Language: ko\n"
 "Language-Team: ko <LL@li.org>\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Language: ko\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.17.0\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Generated-By: Babel 2.18.0\n"
 
-#: ../../index.rst:8
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:8
 msgid "Contents:"
 msgstr "목차:"
 
-#: ../../index.rst:2
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:2
 msgid "Modan2 Documentation"
 msgstr "Modan2 문서"
 
-#: ../../index.rst:4
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:4
 msgid "Welcome to Modan2's documentation!"
 msgstr "Modan2 문서에 오신 것을 환영합니다!"
 
-#: ../../index.rst:6
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:6
 msgid ""
-"Modan2 is a user-friendly desktop application that empowers researchers "
-"to explore and understand shape variations through geometric "
-"morphometrics. It streamlines the entire workflow from data acquisition "
-"(2D/3D) to statistical analysis and visualization."
+"Modan2 is a user-friendly desktop application that empowers researchers to "
+"explore and understand shape variations through geometric morphometrics. It "
+"streamlines the entire workflow from data acquisition (2D/3D) to statistical"
+" analysis and visualization."
 msgstr ""
-"Modan2는 기하학적 형태분석을 통해 연구자들이 형태 변이를 탐색하고 이해할 수 있도록 "
-"돕는 사용자 친화적인 데스크톱 애플리케이션입니다. 데이터 수집(2D/3D)부터 통계 분석 "
-"및 시각화에 이르는 전체 워크플로우를 간소화합니다."
+"Modan2는 기하학적 형태분석을 통해 연구자들이 형태 변이를 탐색하고 이해할 수 있도록 돕는 사용자 친화적인 데스크톱 "
+"애플리케이션입니다. 데이터 수집(2D/3D)부터 통계 분석 및 시각화에 이르는 전체 워크플로우를 간소화합니다."
 
-#: ../../index.rst:18
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:21
 msgid "Features"
 msgstr "주요 기능"
 
-#: ../../index.rst:20
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:23
 msgid ""
-"**Hierarchical Data Management**: Organize data into nested datasets with"
-" a clear structure"
+"**Hierarchical Data Management**: Organize data into nested datasets with a "
+"clear structure"
 msgstr "**계층적 데이터 관리**: 명확한 구조로 데이터를 중첩된 데이터셋으로 구성"
 
-#: ../../index.rst:21
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:24
 msgid ""
-"**2D & 3D Visualization**: Integrated viewers for 2D images and 3D models"
-" with landmark plotting"
+"**2D & 3D Visualization**: Integrated viewers for 2D images and 3D models "
+"with landmark plotting"
 msgstr "**2D 및 3D 시각화**: 랜드마크 플로팅을 포함한 2D 이미지 및 3D 모델용 통합 뷰어"
 
-#: ../../index.rst:22
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:25
+msgid ""
+"**Semi-landmark Curves**: Trace curves on specimens and resample them into "
+"evenly-spaced semi-landmarks, with edge-snapping (live-wire) auto-detection"
+msgstr ""
+"**준랜드마크 곡선**: 표본 위에 곡선을 추적하고 균등한 간격의 준랜드마크로 재표본화하며, 경계 스냅(라이브와이어) 자동 검출을 "
+"지원합니다"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:26
 msgid ""
 "**Statistical Analysis**: Perform Principal Component Analysis (PCA), "
 "Canonical Variate Analysis (CVA), and MANOVA"
 msgstr "**통계 분석**: 주성분 분석(PCA), 정준 판별 분석(CVA), 다변량 분산 분석(MANOVA) 수행"
 
-#: ../../index.rst:23
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:27
 msgid ""
-"**Missing Landmark Support**: Advanced handling of incomplete landmark "
-"data with visual estimation"
-msgstr "**결측 랜드마크 지원**: 시각적 추정 기능이 있는 불완전한 랜드마크 데이터의 고급 처리"
+"**Missing Landmark Support**: Advanced handling of incomplete landmark data "
+"with shape-fitted visual estimation"
+msgstr "**결측 랜드마크 지원**: 불완전한 랜드마크 데이터를 형상 정합 기반의 시각적 추정으로 고급 처리합니다"
 
-#: ../../index.rst:24
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:28
 msgid ""
-"**Data Import/Export**: Supports various file types (TPS, NTS, OBJ, PLY, "
-"STL) with drag-and-drop"
-msgstr "**데이터 가져오기/내보내기**: 드래그 앤 드롭으로 다양한 파일 형식(TPS, NTS, OBJ, PLY, STL) 지원"
+"**Digitizing Aids**: Dataset-wide landmark names/descriptions and a \"Show "
+"Expected\" guide that predicts remaining landmark positions"
+msgstr ""
+"**디지타이징 보조**: 데이터셋 전체에 적용되는 랜드마크 이름/설명과, 남은 랜드마크 위치를 예측해 주는 \"Show "
+"Expected\" 안내 기능"
 
-#: ../../index.rst:25
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:29
+msgid ""
+"**Data Import/Export**: Supports various file types (TPS, NTS, Morphologika,"
+" CSV, OBJ, PLY, STL) plus a JSON+ZIP package format that bundles images and "
+"3D models, all with drag-and-drop"
+msgstr ""
+"**데이터 가져오기/내보내기**: 다양한 파일 형식(TPS, NTS, Morphologika, CSV, OBJ, PLY, STL)과 "
+"이미지·3D 모델을 함께 묶는 JSON+ZIP 패키지 형식을 지원하며, 모두 드래그 앤 드롭이 가능합니다"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:30
 msgid ""
 "**Persistent Storage**: All data and analyses saved in a local SQLite "
 "database managed by Peewee ORM"
 msgstr "**영구 저장소**: 모든 데이터와 분석 결과는 Peewee ORM으로 관리되는 로컬 SQLite 데이터베이스에 저장"
 
-#: ../../index.rst:28
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:33
 msgid "Quick Start"
 msgstr "빠른 시작"
 
-#: ../../index.rst:31
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:36
 msgid "Installation"
 msgstr "설치"
 
-#: ../../index.rst:33
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:38
 msgid ""
 "Download the latest version from the `releases page "
-"<https://github.com/jikhanjung/Modan2/releases>`_."
-msgstr "`릴리즈 페이지 <https://github.com/jikhanjung/Modan2/releases>`_ 에서 최신 버전을 다운로드하세요."
+"<https://github.com/jikhanjung/Modan2/releases>`_. Package names carry the "
+"version and build number."
+msgstr ""
+"`릴리스 페이지 <https://github.com/jikhanjung/Modan2/releases>`_ 에서 최신 버전을 내려받으세요."
+" 패키지 이름에는 버전과 빌드 번호가 들어 있습니다."
 
-#: ../../index.rst:35
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:41
 msgid "For Windows:"
 msgstr "Windows:"
 
-#: ../../index.rst:36
-msgid "Download and run the installer (``Modan2-Setup.exe``)"
-msgstr "인스톨러 (``Modan2-Setup.exe``) 를 다운로드하여 실행"
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:42
+msgid "Download the installer ZIP and run the installer inside it"
+msgstr "설치 프로그램 ZIP을 내려받아 그 안의 설치 프로그램을 실행"
 
-#: ../../index.rst:38
-msgid "For Linux/macOS:"
-msgstr "Linux/macOS:"
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:44
+msgid "For macOS:"
+msgstr "macOS:"
 
-#: ../../index.rst:39
-msgid "Download the appropriate package or run from source"
-msgstr "적절한 패키지를 다운로드하거나 소스에서 실행"
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:45
+msgid "Download the DMG and drag ``Modan2.app`` to Applications"
+msgstr "DMG를 내려받아 ``Modan2.app`` 을 응용 프로그램 폴더로 드래그"
 
-#: ../../index.rst:42
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:47
+msgid "For Linux:"
+msgstr "Linux:"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:48
+msgid "Download the AppImage, make it executable, and run it"
+msgstr "AppImage를 내려받아 실행 권한을 준 뒤 실행"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:50
+msgid ""
+"Only the Windows build is well tested; see :doc:`installation` for details."
+msgstr "충분히 테스트된 것은 Windows 빌드뿐입니다. 자세한 내용은 :doc:`installation` 을 참조하세요."
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:53
 msgid "Basic Usage"
 msgstr "기본 사용법"
 
-#: ../../index.rst:44
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:55
 msgid "**Create a New Dataset**"
 msgstr "**새 데이터셋 만들기**"
 
-#: ../../index.rst:46
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:57
 msgid ""
 "Click \"New Dataset\" or press ``Ctrl+N`` to create a dataset for your "
 "morphometric study."
 msgstr "\"새 데이터셋\"을 클릭하거나 ``Ctrl+N`` 을 눌러 형태분석 연구용 데이터셋을 만드세요."
 
-#: ../../index.rst:48
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:59
 msgid "**Import Objects**"
 msgstr "**객체 가져오기**"
 
-#: ../../index.rst:50
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:61
 msgid ""
-"Drag and drop 2D images or 3D models into your dataset, or use File → "
-"Import to load landmark files (TPS, NTS)."
+"Drag and drop 2D images or 3D models into your dataset, or use File → Import"
+" to load landmark files (TPS, NTS)."
 msgstr ""
-"2D 이미지나 3D 모델을 데이터셋에 드래그 앤 드롭하거나, 파일 → 가져오기를 사용하여 "
-"랜드마크 파일(TPS, NTS)을 불러오세요."
+"2D 이미지나 3D 모델을 데이터셋에 드래그 앤 드롭하거나, 파일 → 가져오기를 사용하여 랜드마크 파일(TPS, NTS)을 불러오세요."
 
-#: ../../index.rst:52
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:63
 msgid "**Place Landmarks**"
 msgstr "**랜드마크 배치**"
 
-#: ../../index.rst:54
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:65
 msgid ""
 "Double-click an object to open the Object Dialog, then click on the "
 "image/model to place landmarks."
 msgstr "객체를 더블클릭하여 객체 대화상자를 열고, 이미지/모델을 클릭하여 랜드마크를 배치하세요."
 
-#: ../../index.rst:56
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:67
 msgid "**Run Analysis**"
 msgstr "**분석 실행**"
 
-#: ../../index.rst:58
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:69
 msgid "Select your dataset and click \"Analyze Dataset\" to perform:"
 msgstr "데이터셋을 선택하고 \"데이터셋 분석\"을 클릭하여 다음을 수행하세요:"
 
-#: ../../index.rst:60
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:71
 msgid "Procrustes superimposition (aligns shapes)"
 msgstr "Procrustes 중첩 (형태 정렬)"
 
-#: ../../index.rst:61
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:72
 msgid "Principal Component Analysis (PCA)"
 msgstr "주성분 분석 (PCA)"
 
-#: ../../index.rst:62
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:73
 msgid "Canonical Variate Analysis (CVA)"
 msgstr "정준 판별 분석 (CVA)"
 
-#: ../../index.rst:63
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:74
 msgid "MANOVA (multivariate analysis of variance)"
 msgstr "다변량 분산 분석 (MANOVA)"
 
-#: ../../index.rst:65
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:76
 msgid "**Explore Results**"
 msgstr "**결과 탐색**"
 
-#: ../../index.rst:67
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:78
 msgid ""
 "View PC plots, shape variations, and statistical outputs in the Data "
 "Exploration dialog."
 msgstr "데이터 탐색 대화상자에서 PC 플롯, 형태 변이, 통계 출력을 확인하세요."
 
-#: ../../index.rst:69
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:80
 msgid "**Keyboard Shortcuts**:"
 msgstr "**키보드 단축키**:"
 
-#: ../../index.rst:71
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:82
 msgid "``Ctrl+N`` - New Dataset"
 msgstr "``Ctrl+N`` - 새 데이터셋"
 
-#: ../../index.rst:72
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:83
 msgid "``Ctrl+Shift+N`` - New Object"
 msgstr "``Ctrl+Shift+N`` - 새 객체"
 
-#: ../../index.rst:73
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:84
 msgid "``Ctrl+S`` - Save changes"
 msgstr "``Ctrl+S`` - 변경사항 저장"
 
-#: ../../index.rst:74
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:85
 msgid "``Ctrl+O`` - Open database"
 msgstr "``Ctrl+O`` - 데이터베이스 열기"
 
-#: ../../index.rst:75
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:86
 msgid "``Delete`` - Delete selected items"
 msgstr "``Delete`` - 선택한 항목 삭제"
 
-#: ../../index.rst:77
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:88
 msgid "For more detailed instructions, see the :doc:`user_guide`."
 msgstr "자세한 사용법은 :doc:`user_guide` 를 참조하세요."
 
-#: ../../index.rst:80
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:91
 msgid "Technology Stack"
 msgstr "기술 스택"
 
-#: ../../index.rst:82
-msgid "**Language**: Python 3.11+"
-msgstr "**언어**: Python 3.11+"
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:93
+msgid "**Language**: Python 3.12+"
+msgstr "**언어**: Python 3.12+"
 
-#: ../../index.rst:83
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:94
 msgid "**GUI Framework**: PyQt5"
 msgstr "**GUI 프레임워크**: PyQt5"
 
-#: ../../index.rst:84
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:95
 msgid "**Core Libraries**:"
 msgstr "**핵심 라이브러리**:"
 
-#: ../../index.rst:85
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:96
 msgid "**Database ORM**: Peewee"
 msgstr "**데이터베이스 ORM**: Peewee"
 
-#: ../../index.rst:86
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:97
 msgid "**Numerical/Scientific**: NumPy, SciPy, Pandas, Statsmodels"
 msgstr "**수치/과학**: NumPy, SciPy, Pandas, Statsmodels"
 
-#: ../../index.rst:87
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:98
 msgid "**3D Graphics & Image Processing**: PyOpenGL, Trimesh, Pillow, OpenCV"
 msgstr "**3D 그래픽스 및 이미지 처리**: PyOpenGL, Trimesh, Pillow, OpenCV"
 
-#: ../../index.rst:90
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:101
 msgid "Indices and tables"
 msgstr "색인 및 표"
 
-#: ../../index.rst:92
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:103
 msgid ":ref:`genindex`"
 msgstr ":ref:`genindex`"
 
-#: ../../index.rst:93
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:104
 msgid ":ref:`modindex`"
 msgstr ":ref:`modindex`"
 
-#: ../../index.rst:94
+#: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:105
 msgid ":ref:`search`"
 msgstr ":ref:`search`"
+
+#~ msgid "Download the appropriate package or run from source"
+#~ msgstr "적절한 패키지를 다운로드하거나 소스에서 실행"

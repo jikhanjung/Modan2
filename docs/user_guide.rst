@@ -9,21 +9,11 @@ Getting Started
 Launching Modan2
 ~~~~~~~~~~~~~~~~
 
-**From installed application**:
-
 - **Windows**: Start Menu → Modan2
 - **macOS**: Applications → Modan2.app
-- **Linux**: Terminal: ``python3 main.py``
+- **Linux**: run the AppImage
 
-**From source**:
-
-.. code-block:: bash
-
-   cd Modan2
-   python3 main.py
-
-``main.py`` accepts ``--debug``, ``--db <path>`` (open a specific database),
-``--lang <en|ko>``, and ``--no-splash``.
+See :doc:`installation` for how to obtain each package.
 
 Main Window Overview
 ~~~~~~~~~~~~~~~~~~~~

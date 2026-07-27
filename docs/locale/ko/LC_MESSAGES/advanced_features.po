@@ -1,0 +1,1271 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2023-2025, Modan2 Contributors
+# This file is distributed under the same license as the Modan2 package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Modan2 0.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-27 09:12+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ko\n"
+"Language-Team: ko <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:2
+msgid "Advanced Features Guide"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:4
+msgid ""
+"This guide covers advanced features and techniques for power users of "
+"Modan2."
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:8
+msgid "Table of Contents"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:11
+msgid "Performance Optimization"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:14
+msgid "Database Optimization"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:16
+msgid ""
+"Modan2 uses SQLite for data storage. Regular maintenance improves "
+"performance."
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:18
+msgid "**Optimize database:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:31
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:57
+msgid "**Benefits:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:33
+msgid "Reduces database file size"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:34
+msgid "Improves query performance"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:35
+msgid "Reclaims unused space"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:37
+msgid "**When to optimize:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:39
+msgid "After deleting many datasets"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:40
+msgid "Database file larger than expected"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:41
+msgid "Performance noticeably slower"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:44
+msgid "Large Dataset Strategies"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:46
+msgid "For datasets with 1000+ objects:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:48
+msgid "**1. Hierarchical Organization:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:59
+msgid "Analyze subsets independently"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:60
+msgid "Faster individual analyses"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:61
+msgid "Organized workflow"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:63
+msgid "**2. Batch Processing:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:80
+msgid "**3. Memory Management:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:82
+msgid "Close unused object viewers"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:83
+msgid "Don't keep all analyses open"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:84
+msgid "Export results and close tabs"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:87
+msgid "Performance Benchmarks"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:89
+msgid "**Expected performance (Phase 7 validation):**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:92
+msgid "Operation"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:92
+msgid "100 objects"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:92
+msgid "1000 objects"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:94
+msgid "Dataset load"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:94
+msgid "< 50ms"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:94
+msgid "277ms"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:96
+msgid "PCA"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:96
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:100
+msgid "< 10ms"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:96
+msgid "60ms"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:98
+msgid "CVA"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:98
+msgid "< 5ms"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:98
+msgid "2.5ms"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:100
+msgid "MANOVA"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:100
+msgid "28ms"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:102
+msgid "Object table"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:102
+msgid "5ms"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:102
+msgid "12.63ms"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:105
+msgid "**Memory usage:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:107
+msgid "~4KB per object (linear scaling)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:108
+msgid "1000 objects: ~4MB"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:109
+msgid "10000 objects: ~40MB"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:111
+msgid "**Scalability:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:113
+msgid "Tested up to 2000 objects"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:114
+msgid "Linear O(n) performance"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:115
+msgid "Production-ready for 100,000+ objects"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:118
+msgid "Advanced Data Management"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:121
+msgid "Hierarchical Datasets"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:123
+msgid "**Parent-child relationships** allow flexible data organization:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:125
+msgid "**Creating child datasets:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:127
+msgid "Right-click parent dataset"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:128
+msgid "Select \"New Child Dataset\""
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:129
+msgid "Choose options:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:131
+msgid "Copy landmarks (start with same data)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:132
+msgid "Different superimposition method"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:133
+msgid "Subset of objects"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:135
+msgid "**Use cases:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:137
+msgid "**Example 1: Different superimpositions**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:146
+msgid "**Example 2: Taxonomic subsets**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:155
+msgid "**Example 3: Time periods**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:165
+msgid "Batch Operations"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:167
+msgid "**Batch landmark editing:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:182
+msgid "**Batch variable editing:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:184
+msgid "Select dataset"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:185
+msgid "View → Object Table"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:186
+msgid "Edit cells directly"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:187
+msgid "Copy/paste from Excel"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:189
+msgid "**Batch import:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:200
+msgid "Database Direct Access"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:202
+msgid "Access database directly for advanced operations:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:225
+msgid "Advanced Statistical Analysis"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:228
+msgid "Custom Analysis Workflows"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:230
+msgid "**Regression Analysis:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:232
+msgid "Use Data Exploration dialog for regression:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:234
+msgid "Select dataset with continuous variables"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:235
+msgid "Data Exploration → Regression"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:236
+msgid "Select X and Y variables"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:237
+msgid "View scatter plot with regression line"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:238
+msgid "Export coefficients"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:240
+msgid "**Shape Variation Analysis:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:242
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:684
+msgid "Visualize shape changes along PC axes:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:244
+msgid "Run PCA"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:245
+msgid "Results → Shape Variation"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:246
+msgid "Select PC axis"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:247
+msgid "View wireframe deformation"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:248
+msgid "Export shape coordinates"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:250
+msgid "**Asymmetry Analysis:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:252
+msgid "For bilateral symmetry:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:254
+msgid "Create dataset with symmetric landmark pairs"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:255
+msgid "Define symmetry in wireframe"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:256
+msgid "Run specialized asymmetry analysis"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:257
+msgid "Separate symmetric/asymmetric components"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:260
+msgid "Procrustes Methods"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:262
+msgid "**Full Procrustes:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:264
+msgid "Translation + Rotation + Scaling"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:265
+msgid "Standardizes size to 1.0"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:266
+msgid "Use for pure shape analysis"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:268
+msgid "**Partial Procrustes:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:270
+msgid "Translation + Rotation only"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:271
+msgid "Preserves size information"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:272
+msgid "Use when size is important"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:274
+msgid "**Bookstein Registration:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:276
+msgid "Align using baseline (2 landmarks)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:277
+msgid "First 2 landmarks define axis"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:278
+msgid "Useful for oriented structures"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:280
+msgid "**Resistant Fit:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:282
+msgid "Robust to outliers"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:283
+msgid "Iterative weighting"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:284
+msgid "Use with messy data"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:286
+msgid "**Choosing method:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:289
+msgid "Research Goal"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:289
+msgid "Recommended"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:289
+msgid "Notes"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:291
+msgid "Pure shape"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:291
+msgid "Full Procrustes"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:291
+msgid "Remove size"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:293
+msgid "Shape + size"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:293
+msgid "Partial Procrustes"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:293
+msgid "Keep size info"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:295
+msgid "Directional data"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:295
+msgid "Bookstein"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:295
+msgid "Known baseline"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:297
+msgid "Noisy data"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:297
+msgid "Resistant Fit"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:297
+msgid "Handle outliers"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:301
+msgid "Missing Landmark Handling"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:303
+msgid "**Estimation methods:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:305
+msgid "**TPS Interpolation:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:307
+msgid "Thin-plate spline from complete landmarks"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:308
+msgid "Smooth interpolation"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:309
+msgid "Works well for few missing landmarks"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:311
+msgid "**Mean Substitution:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:313
+msgid "Use mean configuration"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:314
+msgid "Simple but less accurate"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:315
+msgid "For many missing landmarks"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:317
+msgid "**Iterative Estimation:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:319
+msgid "Estimate → Procrustes → Re-estimate"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:320
+msgid "Converges to best fit"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:321
+msgid "Most accurate but slower"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:323
+msgid "**Best practices:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:325
+#, python-format
+msgid "Limit missing data to < 10% of landmarks"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:326
+msgid "Estimate before Procrustes"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:327
+msgid "Document which landmarks estimated"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:328
+msgid "Sensitivity analysis (compare with/without)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:331
+msgid "3D Visualization Techniques"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:334
+msgid "Advanced 3D Controls"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:336
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:842
+msgid "**Navigation:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:338
+msgid "**Left-drag:** Rotate around center"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:339
+msgid "**Middle-drag:** Pan (translate)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:340
+msgid "**Scroll:** Zoom in/out"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:341
+msgid "**Shift+drag:** Constrained rotation"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:342
+msgid "**Ctrl+drag:** Roll (rotate around view axis)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:343
+msgid "**Double-click:** Reset view"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:345
+msgid "**Viewing modes:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:347
+msgid "**Solid:** Default view"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:348
+msgid "**Wireframe:** Show mesh structure"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:349
+msgid "**Points:** Show vertices only"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:350
+msgid "**Solid + wireframe:** Combined view"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:352
+msgid "**Keyboard shortcuts:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:354
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:851
+msgid "``F3``: Toggle 3D view"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:355
+msgid "``W``: Wireframe mode"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:356
+msgid "``S``: Solid mode"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:357
+msgid "``P``: Point mode"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:358
+msgid "``R``: Reset view"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:359
+msgid "``L``: Toggle lighting"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:362
+msgid "Landmark Visualization"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:364
+msgid "**Customization:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:366
+msgid "Settings → Visualization → 3D Landmarks"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:367
+msgid "Sphere size: 0.5 - 5.0"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:368
+msgid "Color: RGB picker"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:369
+msgid "Opacity: 0-100%"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:371
+msgid "**Landmark labels:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:373
+msgid "Show/hide landmark numbers"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:374
+msgid "Font size adjustment"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:375
+msgid "Color customization"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:377
+msgid "**Wireframe display:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:379
+msgid "Define connections in dataset dialog"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:380
+msgid "Color coding by region"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:381
+msgid "Line width adjustment"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:384
+msgid "Model Import and Processing"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:386
+msgid "**Supported 3D formats:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:388
+msgid "**OBJ:** Wavefront format (most common)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:389
+msgid "**PLY:** Polygon File Format"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:390
+msgid "**STL:** Stereolithography"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:392
+msgid "**Pre-processing models:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:394
+msgid "For best performance, prepare models:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:396
+msgid "**Reduce polygon count** (MeshLab/Blender):"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:405
+msgid "**Center model:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:407
+msgid "Model centered at origin"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:408
+msgid "Easier landmark placement"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:410
+msgid "**Scale appropriately:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:412
+msgid "Reasonable coordinate range"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:413
+msgid "Not too large/small"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:415
+msgid "**Batch model processing:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:430
+msgid "Integration with External Tools"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:433
+msgid "R Integration"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:435
+msgid "Export data for analysis in R:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:437
+msgid "**Export landmarks:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:454
+msgid "**Import R results:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:456
+msgid "Save R results as CSV"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:457
+msgid "Import as variables in Modan2"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:458
+msgid "Visualize in Data Exploration"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:461
+msgid "Python/NumPy Integration"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:463
+msgid "Access data programmatically:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:498
+msgid "MorphoJ Compatibility"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:500
+msgid "**Export for MorphoJ:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:502
+msgid "Export as Morphologika format"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:503
+msgid "Open in MorphoJ"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:504
+msgid "Perform additional analyses"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:505
+msgid "Compare results"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:507
+msgid "**Import from MorphoJ:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:509
+msgid "Export from MorphoJ as Morphologika"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:510
+msgid "Import into Modan2"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:511
+msgid "Continue workflow"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:514
+msgid "Scripting and Automation"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:517
+msgid "Python API"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:519
+msgid "Use Modan2 modules in scripts:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:565
+msgid "Database Queries"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:567
+msgid "Advanced database operations:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:600
+msgid "Batch Export"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:602
+msgid "Export multiple datasets:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:632
+msgid "Custom Visualizations"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:635
+msgid "Matplotlib Integration"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:637
+msgid "Create custom plots from Modan2 data:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:682
+msgid "Shape Deformation Grids"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:744
+msgid "Settings and Configuration"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:747
+msgid "Settings File Format"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:749
+msgid "Modan2 settings are stored in JSON format."
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:751
+msgid "**Location:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:753
+msgid "Windows: ``%APPDATA%\\Modan2\\settings.json``"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:754
+msgid "Linux/macOS: ``~/.config/Modan2/settings.json``"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:756
+msgid "**Example settings.json:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:786
+msgid "Backup settings:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:797
+msgid "Environment Variables"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:799
+msgid "Control Modan2 behavior via environment variables:"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:801
+msgid "**Log level:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:808
+msgid "**Database location:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:815
+msgid "**Combined example:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:829
+msgid "Tips and Tricks"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:832
+msgid "Keyboard Power User Shortcuts"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:834
+msgid "**General:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:836
+msgid "``Ctrl+N``: New dataset"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:837
+msgid "``Ctrl+O``: Open/Import"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:838
+msgid "``Ctrl+S``: Save (if editing)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:839
+msgid "``Ctrl+W``: Close window/tab"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:840
+msgid "``Ctrl+Q``: Quit application"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:844
+msgid "``Ctrl+1`` to ``Ctrl+9``: Switch tabs"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:845
+msgid "``Ctrl+Tab``: Next tab"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:846
+msgid "``Ctrl+Shift+Tab``: Previous tab"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:848
+msgid "**Analysis:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:850
+msgid "``F5``: Refresh view"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:852
+msgid "``Ctrl+R``: Run analysis"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:854
+msgid "**Editing:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:856
+msgid "``Ctrl+C``: Copy"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:857
+msgid "``Ctrl+V``: Paste"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:858
+msgid "``Ctrl+Z``: Undo"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:859
+msgid "``Ctrl+Y``: Redo (where applicable)"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:862
+msgid "Workflow Optimization"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:864
+msgid "**Efficient data entry:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:866
+msgid "**Template datasets:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:868
+msgid "Create dataset with complete structure"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:869
+msgid "Duplicate for new studies"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:870
+msgid "Pre-defined variables and wireframes"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:872
+msgid "**Keyboard navigation:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:874
+msgid "Tab between fields"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:875
+msgid "Enter to confirm"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:876
+msgid "Escape to cancel"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:878
+msgid "**Batch operations:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:880
+msgid "Select multiple objects"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:881
+msgid "Edit variables in table"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:882
+msgid "Copy/paste from spreadsheet"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:884
+msgid "**Analysis workflows:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:902
+msgid "Hidden Features"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:904
+msgid "**Double-click behaviors:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:906
+msgid "Double-click dataset: Expand/collapse"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:907
+msgid "Double-click object: Open object dialog"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:908
+msgid "Double-click analysis: Open results"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:909
+msgid "Double-click 3D view: Reset camera"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:911
+msgid "**Right-click context menus:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:913
+msgid "Right-click dataset: Quick operations"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:914
+msgid "Right-click object: Edit/delete options"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:915
+msgid "Right-click analysis: Export/delete"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:916
+msgid "Right-click table: Copy data"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:918
+msgid "**Drag-and-drop:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:920
+msgid "Drag TPS file to window: Import"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:921
+msgid "Drag image to object: Attach"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:922
+msgid "Drag 3D model to object: Attach"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:925
+msgid "Further Resources"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:927
+msgid "**Documentation:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:929
+msgid "Installation Guide: Detailed setup"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:930
+msgid "User Guide: Basic usage"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:931
+msgid "Troubleshooting Guide: Problem-solving"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:932
+msgid "FAQ: Common questions"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:934
+msgid "**Community:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:936
+msgid "GitHub Discussions: Ask questions"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:937
+msgid "GitHub Issues: Report bugs"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:939
+msgid "**Development:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:941
+msgid "Developer Guide: Architecture"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:942
+msgid "CONTRIBUTING.md: Contribution guide"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:943
+msgid "GitHub Repository: Source code"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:945
+msgid "**Contact:**"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:947
+msgid "Email: jikhanjung@gmail.com"
+msgstr ""
+
+#: ../../../../../../../mnt/d/projects/Modan2/docs/advanced_features.rst:948
+msgid "GitHub: @jikhanjung"
+msgstr ""
+

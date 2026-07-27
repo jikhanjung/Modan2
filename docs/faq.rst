@@ -94,21 +94,16 @@ What are the system requirements?
 How do I install Modan2?
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Binary Installation (Easiest):**
+Download the package for your platform from
+https://github.com/jikhanjung/Modan2/releases — file names carry the version and
+build number.
 
-1. Download from https://github.com/jikhanjung/Modan2/releases
-2. Windows: Run installer ``Modan2-Setup.exe``
-3. macOS: Open DMG and drag to Applications
-4. Linux: Use AppImage or install from source
+1. Windows: extract the installer ZIP and run the installer inside it
+2. macOS: open the DMG and drag ``Modan2.app`` to Applications
+3. Linux: make the AppImage executable and run it
 
-**From Source (For Developers):**
-
-.. code-block:: bash
-
-   git clone https://github.com/jikhanjung/Modan2.git
-   cd Modan2
-   pip install -r requirements.txt
-   python Modan2.py
+Only the Windows build is well tested; the macOS and Linux packages have not been
+through the same testing.
 
 See the Installation Guide for detailed instructions.
 

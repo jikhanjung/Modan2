@@ -74,13 +74,16 @@ ignore = [
 # actually true. This pins a ceiling: the rule passes today, and no function can
 # get more complex than the ones already here.
 #
-# Lower it as functions are split — never raise it. Distribution at the time of
-# writing: > 18: 3   > 15: 11   > 10: 52. Of the 11 over 15, 7 are application
-# code and 4 are in tools/, tests/, and scripts/.
+# Lower it as functions are split — never raise it.
 #
-# The next notch down is 19, blocked by a single function:
-# tools/search_index.py::find_wait_cursor_methods (20).
-max-complexity = 20
+# 19 is the application's own ceiling: MdModel::rotate_gls_to_reference_shape and
+# data_exploration_dialog::on_canvas_move. The limit sat at 21 only because two
+# dev tools in tools/ (not imported by the app, not shipped) were above it; both
+# were split, so this number now tracks application complexity rather than being
+# dragged up by tooling.
+#
+# 10 functions remain over 15: 7 in application code, 3 in tests/ and scripts/.
+max-complexity = 19
 
 [tool.ruff.format]
 # Formatting options

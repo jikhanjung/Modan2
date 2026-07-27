@@ -5,9 +5,51 @@ Search and query the code index
 """
 
 import argparse
+import ast
 import json
 import sys
 from pathlib import Path
+
+WAIT_CURSOR_PATTERNS = ("QApplication.setOverrideCursor", "QApplication.restoreOverrideCursor")
+
+
+def function_spans(source: str, path: Path) -> list[tuple[int, int, str]]:
+    """Return ``(start_line, end_line, qualified_name)`` for every function in ``source``.
+
+    Returns an empty list if the file does not parse, so callers can fall back to
+    reporting module-level hits rather than failing outright.
+    """
+    try:
+        tree = ast.parse(source, str(path))
+    except SyntaxError:
+        return []
+
+    # Tag methods with their class first, so the walk below can qualify them.
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ClassDef):
+            for item in node.body:
+                if isinstance(item, ast.FunctionDef):
+                    item.parent_class = node.name
+
+    spans = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.FunctionDef):
+            continue
+        start = getattr(node, "lineno", 1)
+        end = getattr(node, "end_lineno", None)
+        if end is None:
+            end = getattr(node.body[-1], "lineno", start) if node.body else start
+        parent_class = getattr(node, "parent_class", None)
+        spans.append((start, end, f"{parent_class}.{node.name}" if parent_class else node.name))
+    return spans
+
+
+def enclosing_function(spans: list[tuple[int, int, str]], line: int) -> str:
+    """Name the function containing ``line``, or ``<module>`` if none does."""
+    for start, end, qual in spans:
+        if start <= line <= end:
+            return qual
+    return "<module>"
 
 
 class CodeSearcher:
@@ -93,67 +135,34 @@ class CodeSearcher:
 
         return results
 
+    def _resolve_source(self, filename: str) -> str | None:
+        """Read ``filename`` relative to the project, searching subdirectories.
+
+        ``file_stats`` sometimes stores a bare basename, so fall back to a
+        recursive search. Returns None when the file cannot be found or read.
+        """
+        py_path = self.project_root / filename
+        if not py_path.exists():
+            found = list(self.project_root.rglob(f"**/{filename}"))
+            if not found:
+                return None
+            py_path = found[0]
+        try:
+            return py_path.read_text(encoding="utf-8")
+        except OSError:
+            return None
+
     def find_wait_cursor_methods(self) -> list[dict]:
         """Find methods that use wait cursor by scanning sources"""
-        patterns = ["QApplication.setOverrideCursor", "QApplication.restoreOverrideCursor"]
-
-        # Map line numbers to enclosing function/method using AST
-        def build_spans(py_path: Path):
-            try:
-                src = py_path.read_text(encoding="utf-8")
-            except Exception:
-                return [], ""
-            tree = None
-            try:
-                tree = __import__("ast").parse(src, str(py_path))
-            except Exception:
-                return [], src
-            spans = []  # (start, end, qualname)
-            for node in __import__("ast").walk(tree):
-                if isinstance(node, __import__("ast").FunctionDef):
-                    start = getattr(node, "lineno", 1)
-                    end = getattr(node, "end_lineno", None)
-                    if end is None and node.body:
-                        end = getattr(node.body[-1], "lineno", start)
-                    qual = node.name
-                    # Try to prefix with class if inside class
-                    parent_class = getattr(node, "parent_class", None)
-                    if parent_class:
-                        qual = f"{parent_class}.{qual}"
-                    spans.append((start, end or start, qual))
-                elif isinstance(node, __import__("ast").ClassDef):
-                    for item in node.body:
-                        if isinstance(item, __import__("ast").FunctionDef):
-                            item.parent_class = node.name
-            return spans, src
-
         results: list[dict] = []
-        for filename in self.file_stats.keys():
-            py_path = self.project_root / filename
-            if not py_path.exists():
-                # Try to locate in subdirs if stats stored as basename
-                found = list(self.project_root.rglob(f"**/{filename}"))
-                py_path = found[0] if found else None
-            if not py_path or not py_path.exists():
+        for filename in self.file_stats:
+            src = self._resolve_source(filename)
+            if src is None or not any(p in src for p in WAIT_CURSOR_PATTERNS):
                 continue
-            # Read source and quickly check for patterns
-            try:
-                src = py_path.read_text(encoding="utf-8")
-            except Exception:
-                continue
-            if not any(p in src for p in patterns):
-                continue
-            spans, _ = build_spans(py_path)
-            lines = src.splitlines()
-            for i, line in enumerate(lines, start=1):
-                if any(p in line for p in patterns):
-                    # Find enclosing function span
-                    method = None
-                    for start, end, qual in spans:
-                        if start <= i <= end:
-                            method = qual
-                            break
-                    results.append({"file": filename, "method": method or "<module>", "line": i})
+            spans = function_spans(src, self.project_root / filename)
+            for i, line in enumerate(src.splitlines(), start=1):
+                if any(p in line for p in WAIT_CURSOR_PATTERNS):
+                    results.append({"file": filename, "method": enclosing_function(spans, i), "line": i})
         return results
 
     def find_database_usage(self, model_name: str) -> list[dict]:

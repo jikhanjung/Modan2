@@ -5,6 +5,58 @@ All notable changes to Modan2 are documented here.
 
 This project follows `Semantic Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
+Version 0.2.0-beta.1 (2026-07-27)
+---------------------------------
+
+The 0.2 series moves to beta. Superimposition is now complete — all three methods
+work in 2D and 3D — and the documentation has been rebuilt against the
+application after a long stretch where the published site was out of date.
+
+Added
+~~~~~
+
+- **Bookstein superimposition.** Shapes are re-expressed as Bookstein shape
+  coordinates by fixing the dataset's baseline landmarks to a standard position.
+  Requires a baseline defined on the dataset.
+- **Resistant Fit superimposition (RFTRA)**, in both 2D and 3D. It aligns using
+  repeated medians of pairwise landmark relationships, so a few displaced
+  landmarks do not drag the whole fit the way they can under Procrustes.
+- **Missing landmarks are imputed for Bookstein and Resistant Fit too.**
+- **A Quick Start page**, a **file format reference**, a **glossary**, and a
+  section on **calibrating an object** against a known distance.
+
+Fixed
+~~~~~
+
+- **The superimposition method selector did nothing** — choosing Bookstein or
+  Resistant Fit silently ran Procrustes.
+- **NTS and X1Y1 files reported a landmark count of 0.**
+- **Information and warning messages from a running analysis were dropped**; they
+  now appear in the status bar.
+- **A failed dataset-package import left files behind.**
+- **Two save actions could close their window on an error instead of reporting
+  it** (landmark names, preferences).
+
+Changed
+~~~~~~~
+
+- Coordinate values above 99999 are no longer clamped when a plot's data range is
+  computed.
+- Python 3.11 is no longer supported; 3.12 is the minimum.
+
+Documentation
+~~~~~~~~~~~~~
+
+- **The documentation site had been stuck 411 commits behind** — every docs build
+  had failed since 2026-07-24. Fixed, and the site is current again.
+- **The manual was checked against the code, page by page.** It documented a
+  "Mark as Missing" flow that does not exist, environment variables and
+  command-line flags the application never had, keyboard shortcuts that were
+  never bound, and superimposition methods it does not offer.
+- **Installation instructions now match the actual release files**, and say
+  plainly that only the Windows build is well tested.
+- **The Korean manual is complete**, using the application's own interface terms.
+
 Version 0.2.0-alpha.2 (2026-07-24)
 -----------------------------------
 

@@ -8,6 +8,66 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+## [0.2.0-beta.1] - 2026-07-27
+
+The 0.2 series moves to beta. Superimposition is now complete — all three
+methods work in 2D and 3D — and the documentation has been rebuilt against the
+application after a long stretch where the published site was out of date.
+
+### Added
+- **Bookstein superimposition.** Shapes are re-expressed as Bookstein shape
+  coordinates by fixing the dataset's baseline landmarks to a standard position
+  (2D uses the baseline endpoints; 3D uses a 3-point baseline). Requires a
+  baseline defined on the dataset.
+- **Resistant Fit superimposition (RFTRA)**, in both 2D and 3D. It aligns using
+  repeated medians of pairwise landmark relationships, so a few displaced
+  landmarks do not drag the whole fit the way they can under Procrustes.
+- **Missing landmarks are imputed for Bookstein and Resistant Fit too**, using
+  the same shape-fitting Procrustes already used.
+- **A Quick Start page** and a **file format reference** (TPS, NTS, Morphologika,
+  X1Y1) in the manual, plus a glossary and a section on calibrating an object
+  against a known distance.
+
+### Fixed
+- **The superimposition method selector did nothing.** Choosing Bookstein or
+  Resistant Fit silently ran Procrustes. The options were disabled until the
+  methods were implemented, and are now live.
+- **NTS and X1Y1 files reported a landmark count of 0.** The count is now
+  computed correctly, and both parsers have test coverage.
+- **Information and warning messages from a running analysis were dropped.** They
+  are shown in the status bar; errors still open a dialog.
+- **A failed dataset-package import left files behind.** The rollback now removes
+  the media and directories it had created.
+- **Two save actions could close their window on an error instead of reporting
+  it** (landmark names, preferences).
+
+### Changed
+- Coordinate values above 99999 are no longer clamped when a plot's data range is
+  computed.
+- Python 3.11 is no longer supported; 3.12 is the minimum.
+
+### Documentation
+- **The documentation site had been stuck 411 commits behind** — every docs build
+  had failed since 2026-07-24 for two separate reasons. Fixed, and the site is
+  current again.
+- **The published manual was checked against the code, page by page.** It
+  documented a "Mark as Missing" flow that does not exist, environment variables
+  and command-line flags the application never had, keyboard shortcuts that were
+  never bound, and superimposition methods it does not offer. All corrected.
+- **Installation instructions now match the actual release files** — the
+  version-stamped installer ZIP, DMG and AppImage — and say plainly that only the
+  Windows build is well tested.
+- **The Korean manual is complete.** Every page is translated, using the
+  application's own Korean interface terms.
+- Documentation moved to `docs/manual/`, so what is published is unambiguous;
+  `docs/*.md` is now repository-only developer notes.
+
+### Internal
+- Ruff gained PIE, RET, SIM, PERF, A and G, and cyclomatic complexity is now
+  enforced as a ratchet. Adopting them surfaced several real defects, including a
+  test that asserted nothing and a function that returned a dict or None
+  depending on which branch it took.
+
 ## [0.2.0-alpha.2] - 2026-07-24
 
 A hardening release for the 0.2 alpha: several data-loss and crash fixes found by

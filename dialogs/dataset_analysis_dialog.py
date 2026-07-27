@@ -686,7 +686,7 @@ class DatasetAnalysisDialog(QDialog):
             doc.close()
             doc = None
         except Exception as e:
-            logger.error(f"Failed to save analysis results to '{filename}': {e}", exc_info=True)
+            logger.exception(f"Failed to save analysis results to '{filename}': {e}")
             if doc is not None:
                 with contextlib.suppress(Exception):
                     doc.close()

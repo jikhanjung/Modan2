@@ -50,7 +50,7 @@ def guard_slot(user_message: str = "An unexpected error occurred"):
             try:
                 return func(self, *call_args, **kwargs)
             except Exception as e:
-                logger.error(f"{func.__qualname__} failed: {e}", exc_info=True)
+                logger.exception(f"{func.__qualname__} failed: {e}")
                 # Pop any override cursor(s) the handler set before it raised.
                 try:
                     while QApplication.overrideCursor() is not None:

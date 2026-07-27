@@ -898,7 +898,7 @@ class DataExplorationDialog(QDialog):
             except Exception as e:
                 # cv2 codec/encode failure: don't let it escape this QTimer
                 # callback (which would abort silently and leave the cursor stuck).
-                logger.error(f"Failed to write video {video_name}: {e}", exc_info=True)
+                logger.exception(f"Failed to write video {video_name}: {e}")
                 QMessageBox.warning(self, self.tr("Error"), self.tr(f"Failed to save video:\n{e}"))
             finally:
                 if video is not None:

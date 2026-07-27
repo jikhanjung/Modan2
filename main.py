@@ -284,7 +284,7 @@ def main():
         return exit_code
 
     except Exception as e:
-        logger.error(f"Application failed to start: {e}", exc_info=True)
+        logger.exception(f"Application failed to start: {e}")
 
         # Close the splash screen first. It is WindowStaysOnTopHint, so the
         # error dialog below opens *behind* it — leaving the user staring at a

@@ -125,9 +125,27 @@ entries across devlogs 261–262). `main.py`'s `--db` help was corrected too.
 - **Features (large):** 3D semi-landmark curve tracing (2D only today); sliding
   semi-landmarks during GPA; semi-landmark weighting; image-driven assisted
   landmark suggestion (§ Semi-landmarks below, items 2/2a/2b).
-- **Ruff phased adoption (R05):** DTZ (258), **PIE/RET, SIM/PERF/A and C901 all
-  done 2026-07-27** (devlog 266–267). Ignored with rationale in `pyproject.toml`:
-  RET504, SIM102, SIM108. Remaining groups: PTH/G.
+- **Ruff phased adoption (R05):** DTZ (258), **PIE/RET, SIM/PERF/A, G and C901 all
+  done 2026-07-27** (devlog 266–268). Ignored with rationale in `pyproject.toml`:
+  RET504, SIM102, SIM108, G004. **PTH is the only group left, and is deliberately
+  deferred** — see below.
+- **Ruff PTH (`os.path` → `pathlib`) — deferred, not skipped.** 322 violations:
+  118 application, 189 tests, 18 tools. Split by risk:
+  - **Predicate/action rules are safe** — they return bool or act in place, so no
+    value crosses a boundary: PTH110 exists (62), PTH103 makedirs (11),
+    PTH107/108 remove/unlink (24), PTH112 isdir (5), PTH116 stat (2),
+    PTH202 getsize (5), PTH104/105 rename/replace (2), PTH208 listdir (3).
+  - **Value-producing rules are the risk**: PTH120 dirname (88), PTH100 abspath
+    (43), PTH118 join (26), PTH119 basename, PTH122 splitext, PTH111 expanduser,
+    PTH123 open (41). `MdModel.get_file_path()` and friends return
+    `os.path.join(...)`, i.e. a `str`, and that value flows into `shutil`,
+    `open()`, string comparisons, the JSON+ZIP path handling, and DB fields.
+    Returning a `Path` instead breaks some of those loudly and others **silently**
+    — `Path("a") != "a"` is True, so a comparison against a stored string simply
+    stops matching.
+  Suggested order when picked up: predicates first (mechanical, verifiable by the
+  suite), then the value rules one function at a time, checking each caller.
+  Do not bulk-autofix this group.
 - **MEDIUM/LOW cleanups still open:** in-method import hoisting; `if x==""`→`if not x`;
   vectorize `MdHelpers` thin helpers; builtin shadowing; redundant `float()`;
   dead branch `object_dialog.py:~936`; stale commented cruft; hardcoded `qt_version`.

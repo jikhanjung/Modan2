@@ -59,6 +59,9 @@ select = [
               # hand-converted the 8 defensive try/except/pass blocks to
               # contextlib.suppress, which states the intent the S110 ignore below
               # describes. SIM102/SIM108 are ignored, see below.
+    "G",      # flake8-logging-format — 256 violations, 252 of them G004 (ignored
+              # below). The 4 real findings were `logger.error(..., exc_info=True)`
+              # in except blocks, now `logger.exception(...)`.
     "A",      # flake8-builtins — 43 violations. The 14 `int` arguments were Qt
               # slot signatures (`def cbxShow_stateChanged(self, int)`), renamed
               # to `_state`; the 17 `object` arguments became `obj` after checking
@@ -85,6 +88,14 @@ ignore = [
     "S112",  # try-except-continue — same, in per-item loops
     "S311",  # non-crypto random — only used for viewer color-picking/visuals; the
              # app has no cryptographic use of randomness
+    # flake8-logging-format:
+    "G004",    # f-string in a logging call. 252 sites — effectively the project's
+               # logging style. The rule exists so the message is not formatted
+               # when the level is disabled; for a desktop app logging at this
+               # volume that saving is not measurable, and the lazy form
+               # (`logger.info("%s failed: %s", name, e)`) is materially harder to
+               # read and easy to get wrong when reordering args. G201, the rule
+               # in this group that finds real mistakes, stays on.
     # flake8-simplify: the two rules whose "simplification" costs more than it
     # saves here. Ruff itself declines to autofix either at these sites, because
     # the fix would drop the comments — which is the tell.

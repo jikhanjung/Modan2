@@ -94,26 +94,59 @@ devlog 272는 "사용자가 소유한 모든 것을 한 디렉터리에" 라는 
 
 ### 경로 결정
 
-```
-앱 데이터 (고정):
-  Windows  %LOCALAPPDATA%\PaleoBytes\Modan2\
-  macOS    ~/Library/Application Support/Modan2/
-  Linux    ~/.local/share/Modan2/        (XDG_DATA_HOME 존중)
+**전부 `QStandardPaths` 로 해석한다.** `expanduser("~")` 에 `"Documents"` 를
+붙이는 식의 조립은 한국어 Windows의 `문서`, 리디렉션된 알려진 폴더(OneDrive가
+Documents를 자기 폴더로 옮긴 경우가 흔하다), 플랫폼 차이에서 전부 깨진다.
 
-사용자 데이터 (기본값, 설정 가능):
-  전 플랫폼  <Documents>/PaleoBytes/Modan2/
-```
+| 무엇 | Qt 상수 | Linux (실측) | Windows (Qt 문서) | macOS (Qt 문서) |
+|---|---|---|---|---|
+| 설정 | `AppConfigLocation` | `~/.config/PaleoBytes/Modan2` | `%LOCALAPPDATA%\PaleoBytes\Modan2` | `~/Library/Preferences/PaleoBytes/Modan2` |
+| 로그 | `AppLocalDataLocation` + `/logs` | `~/.local/share/PaleoBytes/Modan2/logs` | `%LOCALAPPDATA%\PaleoBytes\Modan2\logs` | `~/Library/Application Support/PaleoBytes/Modan2/logs` |
+| 데이터 | `DocumentsLocation` + `/PaleoBytes/Modan2` | `~/Documents/PaleoBytes/Modan2` | 〃 | 〃 |
 
-**`QStandardPaths` 로 해석할 것.** `expanduser("~")` 에 `"Documents"` 를 붙이면
-한국어 Windows의 `문서`, 리디렉션된 알려진 폴더(OneDrive가 Documents를 자기
-폴더로 옮긴 경우가 흔하다), macOS/Linux 차이에서 전부 깨진다.
+Linux 값은 실행해 확인했다. Windows/macOS는 Qt 문서상의 매핑이며 이 환경에서
+검증할 수 없다.
 
-- `QStandardPaths.DocumentsLocation`
-- `QStandardPaths.AppLocalDataLocation` (앱 데이터; 조직명/앱명은
-  `main.py:200-202` 가 이미 설정한다)
+설정과 로그에 상수를 나눠 쓰는 이유는 **Linux 때문** 이다. XDG는 config
+(`~/.config`)와 data(`~/.local/share`)를 구분하고 Qt가 그걸 공짜로 해 준다.
+Windows에서는 어차피 같은 폴더로 합쳐지므로 손해가 없다.
+
+**백업은 데이터 디렉터리 안에 둔다.** DB 백업은 DB와 같은 운명을 따라야 사용자가
+폴더 하나를 복사할 때 함께 간다.
 
 Qt 의존성이 `MdUtils` 에 들어가는데, 이미 `from PyQt5.QtGui import QColor` 를
 쓰고 있으므로 새로운 결합은 아니다.
+
+### 설정을 Roaming 에 두지 않는 이유
+
+설정 파일은 1KB도 안 되므로 Windows의 `%APPDATA%`(Roaming)가 교과서적으로는
+맞다 — devlog 272가 130MB 프로그램 본체를 Roaming에서 뺀 것과 모순되지 않는다.
+그래도 Local을 고른 이유가 둘이다.
+
+1. **`SettingsWrapper.setValue` 가 변경할 때마다 즉시 저장한다**(`Modan2.py:203`
+   의 `save()` 는 모든 `setValue` 에서 호출된다). 창을 옮길 때마다 파일이 다시
+   쓰이므로, 동기화 폴더에 두면 불필요한 sync churn 이 생긴다.
+2. **내용의 대부분이 머신별 상태다** — 9개 창의 지오메트리와 최대화 플래그.
+   실험실 데스크톱과 노트북은 화면 구성이 다르니 로밍은 이득보다 성가심이 크다.
+   언어·색상 정도는 로밍될 값어치가 있지만, 그것 때문에 파일을 둘로 쪼개는 것은
+   1KB짜리 페이로드에 과하다.
+
+### 선행 조건 — 조직명 (완료)
+
+`QStandardPaths` 는 **조직명·앱명에서 경로를 만든다.** 그런데 `main.py:204` 는
+`setOrganizationName("Modan2 Team")` 이었고, `MdUtils.COMPANY_NAME` 과 설치
+경로는 `PaleoBytes` 였다. 그대로 두면 설정만 `.../Modan2 Team/Modan2` 로 어긋난다.
+(devlog 272에서 삭제한 죽은 QSettings 헬퍼는 `"Modan2Team"` 이라는 **세 번째**
+표기를 쓰고 있었다 — 이 값이 정리된 적이 없다.)
+
+**2026-07-28에 `COMPANY_NAME` 과 `PROGRAM_NAME` 을 쓰도록 통일했다.** 조직명뿐
+아니라 앱명도 같은 이유로 리터럴을 걷어냈다 — 둘 다 `QStandardPaths` 경로의 구성
+요소이므로 한 곳에서 와야 한다. 나중에 바꾸면 경로가 한 번 더 이동하고
+마이그레이션이 두 번 필요해지므로 1단계보다 앞서야 하는 항목이었다. 현재
+`QStandardPaths` 를 쓰는 코드가 없어 동작 변화는 없다 — 순수한 사전 정리다.
+
+`MdConstants.APP_AUTHOR` 는 `"Modan2 Team"` 으로 둔다. 그것은 제작자 표기이지
+경로 구성 요소가 아니다.
 
 ## 구현 단계
 
@@ -171,11 +204,15 @@ devlog 272의 설정 이전(999바이트 자동 복사)과 다르게 다루는 �
 **규모와 실패 비용.** 설정은 잃어도 창 위치가 초기화될 뿐이지만, 여기는 연구
 데이터다.
 
-### 4단계 — 설정·로그를 앱 데이터 위치로
+### 4단계 — 설정·로그를 OS 위치로
 
-devlog 272가 데이터 디렉터리로 모아 놓은 `preferences.json` 을 OS 앱 데이터
-위치로 옮긴다(부트스트랩 때문에 필수). 로그도 함께. 마이그레이션은 devlog 272의
-`migrate_legacy_config()` 와 같은 방식 — 작은 파일 복사이므로 자동으로 해도 된다.
+devlog 272가 데이터 디렉터리로 모아 놓은 `preferences.json` 을
+`AppConfigLocation` 으로, 로그를 `AppLocalDataLocation/logs` 로 옮긴다(설정은
+부트스트랩 때문에 필수). 마이그레이션은 devlog 272의 `migrate_legacy_config()`
+와 같은 방식 — 작은 파일 복사이므로 자동으로 해도 된다.
+
+로그 위치는 `main.py:98` 의 이른 초기화 때문에 설정과 무관하게 고정이어야 한다
+(조사 4). `AppLocalDataLocation` 은 설정을 읽지 않고 구할 수 있으므로 문제없다.
 
 **순서 주의**: 이 단계가 1단계보다 먼저 오면 안 된다. 1단계에서 설정 파일이
 데이터 디렉터리에 있는 채로 데이터 디렉터리를 설정에서 읽으려 하면 순환한다.

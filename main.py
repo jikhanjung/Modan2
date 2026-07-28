@@ -197,11 +197,19 @@ def main():
         except ImportError:
             app_version = "0.1.5-alpha.1"
 
+        # Qt derives QStandardPaths locations from the organisation and
+        # application names, so both come from MdUtils rather than being spelled
+        # out again here -- the organisation used to read "Modan2 Team" while
+        # everything else (COMPANY_NAME, the install path) said PaleoBytes, which
+        # would have put preferences beside nothing else.
+        # MdConstants.APP_AUTHOR stays "Modan2 Team": a credit, not a path.
+        from MdUtils import COMPANY_NAME, PROGRAM_NAME
+
         # Create Qt application
         app = QApplication(sys.argv)
-        app.setApplicationName("Modan2")
+        app.setApplicationName(PROGRAM_NAME)
         app.setApplicationVersion(app_version)
-        app.setOrganizationName("Modan2 Team")
+        app.setOrganizationName(COMPANY_NAME)
 
         # Backstop behind @guard_slot: keep an unguarded slot exception from
         # aborting the whole process (see _install_global_excepthook).

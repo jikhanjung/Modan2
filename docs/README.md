@@ -37,24 +37,22 @@ Written for contributors and maintainers, not for users of the application:
 | File | What it covers |
 |---|---|
 | `BUILD_GUIDE.md` | Building the frozen executables and installers |
-| `RELEASE_PROCESS.md` | Cutting and publishing a release |
 | `TEST_RELEASE_PLAN.md` | Pre-release testing plan |
 | `CODE_QUALITY_GUIDE.md` | Linting, formatting, typing, complexity |
 | `GITHUB_PAGES_SETUP.md` | How the documentation site is configured |
 | `SCREENSHOT_GUIDE.md` | Conventions for documentation screenshots |
 | `architecture.md` | Internal architecture notes |
 | `performance.md` | Performance measurements and analysis |
-| `developer_guide.md` | Long-form developer notes (see caveat below) |
 
-### Caveat: `developer_guide.md`
+### User-facing guides live in `manual/`, not here
 
-`developer_guide.md` overlaps `manual/developer_guide.rst` without being
-identical — the Markdown version is the longer of the two and carries setup and
-workflow sections the published one does not.
+Several Markdown guides used to duplicate the published manual and drifted from
+it. Each has been reconciled against the code and merged into the `.rst`:
+`USER_GUIDE.md` and `QUICK_START.md` (devlog 264), `developer_guide.md`
+(devlog 265), and the repository-root `INSTALL.md` (devlog 274). Release
+mechanics moved into `manual/developer_guide.rst` as well, replacing
+`RELEASE_PROCESS.md`, `RELEASE_GUIDE.md` and `VERSION_MANAGEMENT.md`.
 
-Treat the `.rst` as authoritative for anything that appears in both. Folding the
-remaining unique content across and then removing this file is tracked in
-`TODOs.md`.
-
-`USER_GUIDE.md` and `QUICK_START.md` used to sit here with the same problem; they
-were merged into `manual/user_guide.rst` and `manual/quick_start.rst` and removed.
+If you are about to write a user-facing or contributor-facing guide as `.md`
+here, put it in `manual/` as `.rst` instead — otherwise it is invisible to
+readers and starts drifting the day it is written.

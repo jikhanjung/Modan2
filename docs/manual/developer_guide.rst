@@ -248,6 +248,32 @@ Cloning the Repository
    git clone https://github.com/jikhanjung/Modan2.git
    cd Modan2
 
+System Dependencies (Linux)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+PyQt5 ships its own ``libqxcb.so`` but links it against system XCB libraries, so
+these are required, not optional — without them ``QApplication([])`` aborts the
+interpreter rather than raising.
+
+**Ubuntu/Debian**:
+
+.. code-block:: bash
+
+   sudo apt-get install -y libxcb-xinerama0 libxcb-icccm4 libxcb-image0 \
+     libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xfixes0 \
+     libxcb-shape0 libxcb-cursor0 libxkbcommon-x11-0 \
+     qt5-qmake qtbase5-dev libqt5gui5 libqt5core5a libqt5widgets5 python3-pyqt5 \
+     libglut-dev libglut3.12 python3-opengl \
+     xvfb fonts-nanum
+
+``xvfb`` is needed to run the GUI test suite headlessly and ``fonts-nanum`` so
+Korean chart text renders; both match what CI installs.
+
+**Fedora/RHEL**: ``sudo dnf install -y python3-qt5 qt5-qtbase mesa-libGLU
+freeglut xorg-x11-server-Xvfb``
+
+**Arch**: ``sudo pacman -S python-pyqt5 qt5-base freeglut xorg-server-xvfb``
+
 Virtual Environment Setup
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -807,6 +833,10 @@ For Windows installers:
 Creating Releases
 ~~~~~~~~~~~~~~~~~
 
+Pushing a ``v*.*.*`` tag is what publishes a release. ``release.yml`` then runs
+the tests on all three platforms, builds the packages, and creates the GitHub
+release with its assets. Nothing is built or uploaded by hand.
+
 1. **Bump the version.** ``version.py`` is the single source of truth — every
    other place (the app, ``conf.py``, the installer name) derives from it, and
    ``tests/test_version_consistency.py`` fails if something hardcodes it
@@ -815,29 +845,43 @@ Creating Releases
    .. code-block:: bash
 
       python manage_version.py patch        # or minor / major
-      python manage_version.py prerelease   # 0.2.0-alpha.2 -> alpha.3
+      python manage_version.py prerelease   # 0.2.0-beta.1 -> beta.2
+      python manage_version.py prepatch beta   # start a pre-release cycle
+      python manage_version.py stage rc      # 0.2.0-beta.2 -> 0.2.0-rc.1
+      python manage_version.py release       # drop the suffix: 0.2.0-rc.1 -> 0.2.0
 
-2. **Update CHANGELOG.md** with release notes
+   The helper prompts for confirmation, so it cannot be run unattended; editing
+   the one line by hand is equivalent.
 
-3. **Commit and tag**:
+2. **Write the CHANGELOG.md section.** This is not documentation *about* the
+   release — it *is* the release body. ``release.yml`` extracts the section
+   whose header matches the tag and publishes it verbatim. Check the extraction
+   before tagging, with the workflow's own awk:
 
    .. code-block:: bash
 
-      git commit -am "Release v<version>"
-      git tag v<version>
-      git push origin main --tags
+      VERSION=0.2.0-beta.2
+      awk -v hdr="## [$VERSION]" '
+        index($0, hdr) == 1 { found=1; next }
+        found && /^## \[/   { exit }
+        found               { print }
+      ' CHANGELOG.md
 
-4. **Build executables** for Windows, macOS, Linux
+   An empty result means the release would publish with checksums only.
 
-5. **Create GitHub Release**:
+3. **Push the bump without the tag, and wait for CI.** Pushing the tag publishes
+   immediately, so the bump goes first and the tag follows only once the five
+   workflows are green on that exact tree.
 
-   - Go to Releases → Draft a new release
-   - Tag: ``v0.1.5``
-   - Title: ``Modan2 v0.1.5``
-   - Description: Copy from CHANGELOG.md
-   - Attach built executables
+4. **Tag and push**:
 
-6. **Publish release**
+   .. code-block:: bash
+
+      git tag -a v<version> -m "Modan2 v<version>"
+      git push origin v<version>
+
+   Whether the release is marked as a pre-release is derived from the tag: any
+   of ``-alpha``, ``-beta`` or ``-rc`` in the name sets the flag.
 
 Database Migrations
 -------------------

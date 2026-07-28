@@ -43,12 +43,18 @@ Windows
    releases page.
 2. Extract the ZIP. It contains a single installer,
    ``Modan2_v<version>_build<build>_Installer.exe``.
-3. Run the installer and follow the wizard.
-4. Launch Modan2 from the Start Menu or the desktop shortcut.
+3. Run the installer and follow the wizard. It installs for the current user
+   only and does not ask for administrator rights.
+4. Launch Modan2 from the Start Menu.
 
 .. note::
    Windows Defender may warn about an unsigned executable. Click "More info" →
    "Run anyway" if you trust the source.
+
+.. note::
+   If you have a version older than 0.2.0-beta.2 installed, the installer
+   detects it and offers to remove it first. Accept unless you have a reason to
+   keep both — see :ref:`updating-modan2`.
 
 .. note::
    A portable (no-install) Windows build is **not** currently published — the
@@ -85,6 +91,43 @@ Linux is distributed as an AppImage, which runs without installation.
 
 Troubleshooting
 ---------------
+
+Windows: missing DLL on startup
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Symptom**: the application does not start and reports a missing DLL.
+
+Install the Microsoft Visual C++ Redistributable (x64), which the packaged build
+depends on and which some clean Windows installations lack:
+https://aka.ms/vs/17/release/vc_redist.x64.exe
+
+macOS: "Modan2 is damaged and can't be opened"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This is Gatekeeper's quarantine attribute on an unsigned application, not actual
+damage. Remove it:
+
+.. code-block:: bash
+
+   sudo xattr -rd com.apple.quarantine /Applications/Modan2.app
+
+Linux: "Could not load the Qt platform plugin xcb"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Qt ships its own ``libqxcb.so``, which links against system XCB libraries. If any
+is missing the plugin cannot load.
+
+.. code-block:: bash
+
+   sudo apt-get install -y libxcb-xinerama0 libxcb-icccm4 libxcb-image0 \
+     libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xfixes0 \
+     libxcb-shape0 libxcb-cursor0 libxkbcommon-x11-0
+
+To find out which one is missing, ask Qt:
+
+.. code-block:: bash
+
+   QT_DEBUG_PLUGINS=1 ./Modan2-Linux-<version>.AppImage
 
 OpenGL / 3D Rendering Errors
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -143,6 +186,8 @@ After installation, verify that Modan2 works correctly:
 
 If all steps complete without errors, your installation is successful!
 
+.. _updating-modan2:
+
 Updating Modan2
 ---------------
 
@@ -152,8 +197,38 @@ Download the package for the new release and install it the same way as before:
 - **macOS**: open the new DMG and replace ``Modan2.app`` in Applications.
 - **Linux**: download the new AppImage and run it instead of the old one.
 
-Your database and data files are kept separately from the application, so
-updating does not touch them.
+Your database, data files and preferences are kept separately from the
+application, so updating does not touch them.
+
+Updating from 0.2.0-beta.1 or earlier (Windows)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+0.2.0-beta.2 changed where Modan2 installs and how it identifies itself, so the
+installer cannot recognise a copy left by an earlier release. It detects one and
+offers to remove it; accepting is the simple path.
+
+If you decline and keep both, **remove the old one before you install the new
+one, not after.** The Start Menu shortcut and the example datasets live at fixed
+paths that both installations share. Installing the new version takes them over,
+but the old uninstaller still believes it owns them, so running it afterwards
+deletes the shortcut that now points at the new version and removes the example
+datasets.
+
+Your own data is never involved either way — it lives outside both program
+folders.
+
+Uninstalling Modan2
+-------------------
+
+- **Windows**: Settings → Apps → Modan2 → Uninstall.
+- **macOS**: drag ``Modan2.app`` from Applications to the Trash.
+- **Linux**: delete the AppImage file.
+
+**This leaves your data untouched**, which is usually what you want. Datasets,
+images, 3D models, logs, backups and preferences all live in
+``~/PaleoBytes/Modan2/`` (on Windows, ``C:\Users\<you>\PaleoBytes\Modan2``).
+Delete that folder as well if you want to remove everything — but note that it
+holds the only copy of your datasets.
 
 Getting Help
 ------------

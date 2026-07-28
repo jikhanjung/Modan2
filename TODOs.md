@@ -31,10 +31,13 @@ locations, two of them Roaming AppData. Now two: the program folder, and
 - `MdHelpers.get_app_data_dir` no longer uses Roaming AppData / `~/.modan2`.
 
 **Left to do:**
-- [ ] **Windows-only verification, first possible at the next release build.**
-      Inno cannot be compiled off Windows, so the `{{` GUID escape, the
-      `lowest` install mode and the resulting install path are **unverified**.
-      Check the Windows build job, then actually install the artifact.
+- [x] **Inno compiles** — confirmed by the 0.2.0-beta.2 build (devlog 274): the
+      Windows installer was produced, so the `[Code]`, the `{{` GUID escape and
+      the directive changes are syntactically valid.
+- [ ] **Runtime behaviour is still unverified — install the beta.2 artifact.**
+      Compiling proves nothing about what the installer *does*: that it lands in
+      `%LOCALAPPDATA%`, that `lowest` suppresses the UAC prompt, and that the
+      legacy-detection prompt appears (and its three answers work).
 - [ ] **Verify the legacy-install detection on Windows** (devlog 273). The
       installer now looks for the old `Modan2_is1` uninstall key and offers to
       run its uninstaller. The `[Code]` was checked structurally only —
@@ -42,6 +45,12 @@ locations, two of them Roaming AppData. Now two: the program folder, and
       placeholders — because Inno does not compile off Windows. Test all three
       answers (remove / keep both / cancel) **and** a fresh machine with no old
       install, where the prompt must not appear at all.
+- [ ] **`changelog.po`: 111 untranslated / 18 fuzzy** (devlog 274). Not caused by
+      this session — devlog 269 repointed `changelog.rst` at the full
+      `CHANGELOG.md`, so the entire release history became translatable where
+      before it was a hand-maintained excerpt. Decide: translate all, translate
+      only recent releases, or exclude `changelog` from the Korean build. Note
+      devlog 262's "all 8 catalogs at zero" no longer holds because of this.
 - [ ] **Orphaned `~/.modan2/`.** The legacy `config.json` is deliberately left
       behind (costs nothing, keeps older builds usable), and `~/.modan2/temp`
       is now unused. Consider removing both once the beta line is retired.

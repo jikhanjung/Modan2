@@ -36,7 +36,7 @@ locations, two of them Roaming AppData. Now two: the program folder, and
       the directive changes are syntactically valid.
 - [ ] **Runtime behaviour is still unverified — install the beta.2 artifact.**
       Compiling proves nothing about what the installer *does*: that it lands in
-      `%LOCALAPPDATA%`, that `lowest` suppresses the UAC prompt, and that the
+      `%LOCALAPPDATA%\Programs`, that `lowest` suppresses the UAC prompt, and that the
       legacy-detection prompt appears (and its three answers work).
 - [ ] **Verify the legacy-install detection on Windows** (devlog 273). The
       installer now looks for the old `Modan2_is1` uninstall key and offers to
@@ -52,6 +52,21 @@ locations, two of them Roaming AppData. Now two: the program folder, and
       and git-ignored, so `sphinx-intl update` recreating it cannot drift back
       in; the Korean page renders the English source. devlog 262's "all 8
       catalogs at zero" now reads "all 7".
+- [ ] **Is `~/PaleoBytes/Modan2/` the right home for user data?** (raised
+      2026-07-28, devlog 276). It matches no platform convention: Windows would
+      use `%LOCALAPPDATA%\<Vendor>\<App>` or `Documents\`, macOS
+      `~/Library/Application Support/`, Linux XDG `~/.local/share/`. The profile
+      root is for known folders, not application data. It predates this session
+      (`MdUtils.py:100`).
+      Defensible as it stands — the datasets are the user's only copy, a visible
+      folder is findable, and one directory copy moves an installation. But one
+      concrete risk: **OneDrive's Known Folder Move backs up Documents/Desktop,
+      not arbitrary profile-root folders**, so users who assume their files are
+      in the cloud would have the database silently excluded.
+      Moving it is a different order of risk from the install path: it means
+      relocating every existing user's database and media, where a failure loses
+      data. Decide between moving it (with a real migration) and keeping it plus
+      documenting the backup gap.
 - [ ] **Orphaned `~/.modan2/`.** The legacy `config.json` is deliberately left
       behind (costs nothing, keeps older builds usable), and `~/.modan2/temp`
       is now unused. Consider removing both once the beta line is retired.

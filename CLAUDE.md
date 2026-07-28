@@ -208,8 +208,8 @@ directory, *not* `%APPDATA%`):
 | Preferences | `preferences.json` | `mu.DEFAULT_CONFIG_PATH` |
 | Temp files | `temp/` | `MdHelpers.get_temp_dir` |
 
-The installed program itself is separate: `%LOCALAPPDATA%\PaleoBytes\Modan2` on
-Windows (`InnoSetup/Modan2.iss.template`).
+The installed program itself is separate: `%LOCALAPPDATA%\Programs\PaleoBytes\Modan2`
+on Windows (`InnoSetup/Modan2.iss.template`).
 
 Add new paths under `MdUtils`, next to the constants above. Preferences used to
 live in `~/.modan2/config.json` and the path was assembled independently in two

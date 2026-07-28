@@ -36,7 +36,7 @@ This guide explains how to build Modan2 executables and installers from source c
 3. **Windows Installer** (Windows only):
    - Created with InnoSetup
    - Output: `InnoSetup/Output/Modan2_v{VERSION}_build{BUILD}_Installer.exe`
-   - Installs per-user into `%LOCALAPPDATA%\PaleoBytes\Modan2`
+   - Installs per-user into `%LOCALAPPDATA%\Programs\PaleoBytes\Modan2`
 
 ---
 

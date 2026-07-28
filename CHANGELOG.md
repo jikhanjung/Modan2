@@ -31,9 +31,10 @@ Your datasets, images and preferences are stored outside the program folder and
 are not affected either way.
 
 ### Changed
-- **Modan2 installs to `%LOCALAPPDATA%` instead of `%APPDATA%` (Roaming).** The
-  program folder is ~130 MB and was being synchronised with the user profile on
-  domain-joined machines.
+- **Modan2 installs to `%LOCALAPPDATA%\Programs` instead of `%APPDATA%`
+  (Roaming).** The program folder is ~130 MB and was being synchronised with the
+  user profile on domain-joined machines. `%LOCALAPPDATA%\Programs` is the
+  standard location for an application installed for one user.
 - **The installer no longer asks for administrator rights.** It was requesting
   elevation for a per-user install; worse, consenting with a different
   administrator account installed Modan2 into *that* account's folder, where the

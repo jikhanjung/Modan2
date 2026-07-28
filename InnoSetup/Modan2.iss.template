@@ -13,9 +13,12 @@ AppPublisher=PaleoBytes
 ; Per-user install: no elevation, so {localappdata} and {userprograms} always
 ; resolve to the invoking user rather than to whoever consented to UAC.
 PrivilegesRequired=lowest
-; Local, not Roaming: the onedir payload is ~130 MB and would otherwise sync
-; with the user profile on domain-joined machines.
-DefaultDirName={localappdata}\PaleoBytes\Modan2
+; {userpf} is the per-user Program Files: %LOCALAPPDATA%\Programs. Local rather
+; than Roaming because the onedir payload is ~130 MB and would otherwise sync
+; with the user profile on domain-joined machines, and under Programs\ rather
+; than directly in %LOCALAPPDATA% so the application does not sit among the data
+; folders (Temp, Packages, Microsoft) that live there.
+DefaultDirName={userpf}\PaleoBytes\Modan2
 UninstallDisplayIcon={app}\Modan2.exe
 OutputDir={{DIST_PATH}}\..\InnoSetup\Output
 ; Use more conservative compression to reduce AV heuristics

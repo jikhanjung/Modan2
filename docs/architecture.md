@@ -517,8 +517,8 @@ back to the file that was read.
 Everything the user owns is under `~/PaleoBytes/Modan2/`
 (`mu.DEFAULT_DB_DIRECTORY`, the same on every platform): `Modan2.db`, `data/`
 for images and 3D models, `logs/`, `backups/`, `preferences.json` and `temp/`.
-The installed program is separate — `%LOCALAPPDATA%\PaleoBytes\Modan2` on
-Windows.
+The installed program is separate — `%LOCALAPPDATA%\Programs\PaleoBytes\Modan2`
+on Windows.
 
 ### Environment Variables
 

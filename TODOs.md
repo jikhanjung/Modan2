@@ -35,11 +35,13 @@ locations, two of them Roaming AppData. Now two: the program folder, and
       Inno cannot be compiled off Windows, so the `{{` GUID escape, the
       `lowest` install mode and the resulting install path are **unverified**.
       Check the Windows build job, then actually install the artifact.
-- [ ] **The next release notes must say "uninstall the old version first."**
-      `lowest` + the new `AppId` mean the installer no longer recognises
-      installations from 0.2.0-beta.1 and earlier; without the notice users get
-      two copies and two *Apps & features* entries. Drafted in CHANGELOG
-      `[Unreleased]`.
+- [ ] **Verify the legacy-install detection on Windows** (devlog 273). The
+      installer now looks for the old `Modan2_is1` uninstall key and offers to
+      run its uninstaller. The `[Code]` was checked structurally only —
+      begin/end balance, declaration order, no `{{` collision with `build.py`'s
+      placeholders — because Inno does not compile off Windows. Test all three
+      answers (remove / keep both / cancel) **and** a fresh machine with no old
+      install, where the prompt must not appear at all.
 - [ ] **Orphaned `~/.modan2/`.** The legacy `config.json` is deliberately left
       behind (costs nothing, keeps older builds usable), and `~/.modan2/temp`
       is now unused. Consider removing both once the beta line is retired.

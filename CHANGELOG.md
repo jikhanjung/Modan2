@@ -12,12 +12,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ⚠️ Upgrading from 0.2.0-beta.1 or earlier (Windows)
 
-**Uninstall the old version before installing this one.** The installer now
-performs a per-user install and identifies itself by a stable ID, so it no
-longer recognises installations made by earlier releases. If you skip this step
-you will end up with two copies of Modan2 and two entries in *Apps & features*.
-Your data and preferences are not affected — they live outside the program
-folder and are migrated automatically.
+The installer now performs a per-user install and identifies itself by a stable
+ID, so it no longer recognises installations made by earlier releases. **It
+detects them and offers to remove the old version for you** — accept, unless you
+have a reason to keep both.
+
+Order matters if you decline. The Start Menu shortcut and the example datasets
+sit at fixed paths that both installations share, so uninstalling the old
+version *after* installing the new one takes them away from the new one too.
+
+Your datasets, images and preferences are stored outside the program folder and
+are not affected either way.
 
 ### Changed
 - **Modan2 installs to `%LOCALAPPDATA%` instead of `%APPDATA%` (Roaming).** The

@@ -39,13 +39,130 @@ Source: "{{DIST_PATH}}\ExampleDataset\*"; DestDir: "{%userprofile}\PaleoBytes\Mo
 Filename: "{app}\Modan2.exe"; Flags: postinstall shellexec
 
 [Code]
-function InitializeSetup(): Boolean;
-begin
-  // Create a specific Start Menu group
-  if not DirExists(ExpandConstant('{userprograms}\PaleoBytes')) then
-    CreateDir(ExpandConstant('{userprograms}\PaleoBytes'));
+// --- Detect installations made before the AppId/per-user change -------------
+//
+// Releases up to 0.2.0-beta.1 had no AppId, so Inno fell back to AppName and
+// registered itself as "Modan2_is1". They also installed in admin mode, which
+// puts that key under HKLM. This installer is per-user (HKCU) with a GUID
+// AppId, so Inno cannot see those installations and will happily install
+// alongside them.
+//
+// Leaving both in place is not merely untidy. Two entries in [Icons] and
+// [Files] are literal paths outside {app} and are therefore SHARED by both
+// installations:
+//
+//   {userprograms}\PaleoBytes\Modan2                  (Start Menu shortcut)
+//   {%userprofile}\PaleoBytes\Modan2\ExampleDataset   (inside the user's data)
+//
+// Installing the new version overwrites both, but the old uninstall log still
+// lists them. Uninstalling the old version *afterwards* therefore deletes the
+// shortcut that now points at the new build, and removes the example datasets
+// from the user's data directory. Hence: uninstall first, then install.
 
+const
+  LegacyUninstallKey = 'Software\Microsoft\Windows\CurrentVersion\Uninstall\Modan2_is1';
+
+// Looks in every registry view the old installer could have written to. A
+// 32-bit-mode Inno install on 64-bit Windows lands in the 32-bit view, but do
+// not assume it. Accessing a 64-bit view on 32-bit Windows raises, so guard.
+function FindLegacyUninstaller(var Command: String): Boolean;
+begin
   Result := True;
+  if RegQueryStringValue(HKLM32, LegacyUninstallKey, 'UninstallString', Command) then Exit;
+  if RegQueryStringValue(HKCU32, LegacyUninstallKey, 'UninstallString', Command) then Exit;
+  if IsWin64 then
+  begin
+    if RegQueryStringValue(HKLM64, LegacyUninstallKey, 'UninstallString', Command) then Exit;
+    if RegQueryStringValue(HKCU64, LegacyUninstallKey, 'UninstallString', Command) then Exit;
+  end;
+  Result := False;
+  Command := '';
+end;
+
+function LegacyStillRegistered(): Boolean;
+var
+  Ignored: String;
+begin
+  Result := FindLegacyUninstaller(Ignored);
+end;
+
+// The old uninstaller relaunches itself from a temp copy, so Exec can return
+// before the work is done. Wait on the registry key disappearing instead of on
+// the process, and give up rather than hang if something goes wrong.
+function WaitForLegacyRemoval(): Boolean;
+var
+  Waited: Integer;
+begin
+  Waited := 0;
+  while (Waited < 120000) and LegacyStillRegistered() do
+  begin
+    Sleep(500);
+    Waited := Waited + 500;
+  end;
+  Result := not LegacyStillRegistered();
+end;
+
+function RemoveLegacyInstall(): Boolean;
+var
+  Command: String;
+  ResultCode: Integer;
+begin
+  Result := False;
+  if not FindLegacyUninstaller(Command) then
+    Exit;
+
+  if not Exec(RemoveQuotes(Command), '/SILENT /NORESTART /SUPPRESSMSGBOXES', '',
+              SW_SHOW, ewWaitUntilTerminated, ResultCode) then
+  begin
+    MsgBox('The previous version''s uninstaller could not be started.' + #13#10#13#10 +
+           'Please remove Modan2 from Settings > Apps, then run this installer again.',
+           mbError, MB_OK);
+    Exit;
+  end;
+
+  Result := WaitForLegacyRemoval();
+  if not Result then
+    MsgBox('The previous version does not appear to have been removed.' + #13#10#13#10 +
+           'Please remove Modan2 from Settings > Apps, then run this installer again.',
+           mbError, MB_OK);
+end;
+
+function InitializeSetup(): Boolean;
+var
+  Answer: Integer;
+begin
+  Result := True;
+
+  // Nothing below runs for a fresh install: no key, no prompt.
+  if LegacyStillRegistered() then
+  begin
+    Answer := MsgBox('An older version of Modan2 is installed.' + #13#10#13#10 +
+                     'It should be removed first. If it is uninstalled later it will ' +
+                     'take the Start Menu shortcut and the example datasets with it, ' +
+                     'even though the new version is using them.' + #13#10#13#10 +
+                     'Your datasets, images and preferences are stored separately and ' +
+                     'are not affected.' + #13#10#13#10 +
+                     'Remove the older version now?',
+                     mbConfirmation, MB_YESNOCANCEL);
+
+    if Answer = IDCANCEL then
+    begin
+      Result := False;
+      Exit;
+    end;
+
+    if Answer = IDYES then
+      Result := RemoveLegacyInstall();
+    // IDNO: continue and install alongside it, which is what the warning above
+    // describes. The user was told; respect the choice.
+  end;
+
+  if Result then
+  begin
+    // Create a specific Start Menu group
+    if not DirExists(ExpandConstant('{userprograms}\PaleoBytes')) then
+      CreateDir(ExpandConstant('{userprograms}\PaleoBytes'));
+  end;
 end;
 
 [Icons]

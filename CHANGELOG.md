@@ -8,6 +8,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+## [Unreleased]
+
+### ⚠️ Upgrading from 0.2.0-beta.1 or earlier (Windows)
+
+**Uninstall the old version before installing this one.** The installer now
+performs a per-user install and identifies itself by a stable ID, so it no
+longer recognises installations made by earlier releases. If you skip this step
+you will end up with two copies of Modan2 and two entries in *Apps & features*.
+Your data and preferences are not affected — they live outside the program
+folder and are migrated automatically.
+
+### Changed
+- **Modan2 installs to `%LOCALAPPDATA%` instead of `%APPDATA%` (Roaming).** The
+  program folder is ~130 MB and was being synchronised with the user profile on
+  domain-joined machines.
+- **The installer no longer asks for administrator rights.** It was requesting
+  elevation for a per-user install; worse, consenting with a different
+  administrator account installed Modan2 into *that* account's folder, where the
+  actual user could not see it.
+- **Preferences moved to `~/PaleoBytes/Modan2/preferences.json`**, beside the
+  database, media, logs and backups. One folder now holds everything you own, so
+  backing up or moving an installation is a single directory copy. Preferences
+  from the old location (`~/.modan2/config.json`) are copied over automatically
+  on first launch; the old file is left untouched and can be deleted afterwards.
+- Temporary files also moved out of Roaming AppData into `~/PaleoBytes/Modan2/`.
+
+### Fixed
+- **`--config` read from one file and saved to another.** Preferences changed
+  during a session were written to the default location regardless of the path
+  given on the command line.
+- The installer registers a publisher and an icon in *Apps & features*, both of
+  which were blank.
+
+
 ## [0.2.0-beta.1] - 2026-07-27
 
 The 0.2 series moves to beta. Superimposition is now complete — all three

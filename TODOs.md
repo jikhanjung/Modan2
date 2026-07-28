@@ -9,6 +9,43 @@ As of **2026-06-25**, all CRITICAL/HIGH **correctness** items and the HIGH
 
 ---
 
+## 📌 2026-07-28 session — install location, installer identity, settings relocation
+
+**Done** (devlog 272). The application was writing to **four** different
+locations, two of them Roaming AppData. Now two: the program folder, and
+`~/PaleoBytes/Modan2/` for everything the user owns.
+
+- Installer: `{userappdata}` → `{localappdata}` (the ~130 MB onedir payload was
+  syncing with roaming profiles); `PrivilegesRequired=lowest` (it was demanding
+  UAC for a per-user install, and elevating as a *different* admin account
+  installed into that account's folder); a stable GUID `AppId`;
+  `AppPublisher` / `UninstallDisplayIcon` (both blank before).
+- QSettings deleted — `MdHelpers.load_settings` / `save_window_state` /
+  `restore_window_state` were dead since the 2025-08-29/30 JSON refactor
+  (`2581a72`, `ca84a36`) and used a *different* organisation name than
+  `main.py` set anyway.
+- Preferences `~/.modan2/config.json` → `~/PaleoBytes/Modan2/preferences.json`,
+  with automatic migration; path consolidated into `mu.DEFAULT_CONFIG_PATH`
+  (the duplicate `MdConstants.CONFIG_DIR` is gone).
+- Fixed `--config` reading one file and saving to another.
+- `MdHelpers.get_app_data_dir` no longer uses Roaming AppData / `~/.modan2`.
+
+**Left to do:**
+- [ ] **Windows-only verification, first possible at the next release build.**
+      Inno cannot be compiled off Windows, so the `{{` GUID escape, the
+      `lowest` install mode and the resulting install path are **unverified**.
+      Check the Windows build job, then actually install the artifact.
+- [ ] **The next release notes must say "uninstall the old version first."**
+      `lowest` + the new `AppId` mean the installer no longer recognises
+      installations from 0.2.0-beta.1 and earlier; without the notice users get
+      two copies and two *Apps & features* entries. Drafted in CHANGELOG
+      `[Unreleased]`.
+- [ ] **Orphaned `~/.modan2/`.** The legacy `config.json` is deliberately left
+      behind (costs nothing, keeps older builds usable), and `~/.modan2/temp`
+      is now unused. Consider removing both once the beta line is retired.
+
+---
+
 ## 📌 2026-07-27 session — docs deployment
 
 **Done** (devlog 260): fixed `docs.yml`, which had failed on **every** run since

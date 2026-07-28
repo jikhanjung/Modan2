@@ -95,9 +95,11 @@ Modan2/
 
 Documentation is split by extension on purpose: `docs/manual/**` is `.rst` and is
 the published manual (English + Korean, deployed by `.github/workflows/docs.yml`);
-`docs/*.md` is developer/release notes read only on GitHub. Sphinx has no
-`myst_parser`, so Markdown placed under `docs/manual/` would build into nothing.
-See `docs/README.md`.
+`docs/*.md` is developer/release notes read only on GitHub. The split is a
+directory boundary, not a file-type one: `myst_parser` *is* installed (it exists
+so `docs/manual/changelog.rst` can pull in the repository-root `CHANGELOG.md`,
+the single source of release notes), so keep repository-only notes in `docs/`
+rather than relying on Sphinx to ignore them. See `docs/README.md`.
 
 Note: `ModanDialogs.py` no longer exists — dialogs live in `dialogs/`. Import
 from `dialogs.<module>` and `components.<subpackage>` in new code.
@@ -112,12 +114,15 @@ from `dialogs.<module>` and `components.<subpackage>` in new code.
 #### Current Testing Status
 Automated testing with pytest is fully operational.
 
-**Coverage Status** (as of 2026-07-21):
-- **Overall**: 1538 tests collected — 1463 passed, 75 skipped
-- **MdStatistics.py**: 95% coverage ✅
-- **MdUtils.py**: 78% coverage
-- **MdModel.py**: 56% coverage
+**Coverage Status** (measured 2026-07-28, `pytest --cov=.`):
+- **Suite**: 1892 tests collected — 1882 passed, 10 skipped
+- **Overall**: 67%
+- **MdStatistics.py** 93% · **MdModel.py** 92% · **MdUtils.py** 88% ·
+  **ModanController.py** 86% · **MdHelpers.py** 83% · **Modan2.py** 63%
 - **Target**: Maintain >70% for new code, >50% overall
+
+Measure coverage on a *finished* tree. Editing a file while the suite runs
+misattributes its lines and can understate a module by tens of points.
 
 #### Automated Testing Setup
 - **Framework**: pytest with pytest-qt, pytest-cov, pytest-mock
@@ -188,6 +193,34 @@ pytest --lf
 - Models: MdDataset, MdObject, MdImage, MdThreeDModel, MdAnalysis
 - Migrations tracked in `migrations/` folder
 
+### Where the user's files live
+
+**Everything the user owns is under one directory**, `~/PaleoBytes/Modan2/`
+(`mu.DEFAULT_DB_DIRECTORY`, same on every platform — note it is the home
+directory, *not* `%APPDATA%`):
+
+| What | Path | Constant |
+|---|---|---|
+| Database | `Modan2.db` | `MdModel.database_path` |
+| Images, 3D models | `data/` | `mu.DEFAULT_STORAGE_DIRECTORY` |
+| Logs | `logs/` | `mu.DEFAULT_LOG_DIRECTORY` |
+| Backups | `backups/` | `mu.DB_BACKUP_DIRECTORY` |
+| Preferences | `preferences.json` | `mu.DEFAULT_CONFIG_PATH` |
+| Temp files | `temp/` | `MdHelpers.get_temp_dir` |
+
+The installed program itself is separate: `%LOCALAPPDATA%\PaleoBytes\Modan2` on
+Windows (`InnoSetup/Modan2.iss.template`).
+
+Add new paths under `MdUtils`, next to the constants above. Preferences used to
+live in `~/.modan2/config.json` and the path was assembled independently in two
+modules, which let the load path and the save path drift apart; `--config` then
+read one file and wrote another. `mu.migrate_legacy_config()` moves the old file
+on first launch. See devlog 272.
+
+Preferences are **not** QSettings — they are a JSON file behind
+`Modan2.SettingsWrapper`, which only presents a QSettings-shaped API
+(`value`/`setValue`). The real QSettings helpers were removed in devlog 272.
+
 ### Known Issues and Solutions
 
 #### Qt Platform Plugin Error (Linux/WSL)
@@ -208,7 +241,7 @@ Install GLUT libraries: `sudo apt-get install -y libglut-dev libglut3.12 python3
 - Cross-platform application (Windows, macOS, Linux)
 - Supports various file formats: TPS, NTS, OBJ, PLY, STL, image formats
 - Core functionality: 2D/3D landmark analysis, statistical shape analysis
-- Version: see `version.py` (0.1.8 as of 2026-07-21)
+- Version: see `version.py` (0.2.0-beta.1 as of 2026-07-28)
 - License: MIT
 
 ### Development Workflow

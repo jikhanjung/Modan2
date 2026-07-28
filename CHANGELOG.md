@@ -8,7 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
-## [Unreleased]
+## [0.2.0-beta.2] - 2026-07-28
+
+A housekeeping beta. Nothing changes about morphometrics; what changes is where
+Modan2 puts things on your disk. The program used to write to four different
+places, two of them inside Roaming AppData — a share that follows your profile
+between machines on a managed network, and the wrong home for a 130 MB program
+folder or for scratch files. Everything you own now lives in one directory.
 
 ### ⚠️ Upgrading from 0.2.0-beta.1 or earlier (Windows)
 

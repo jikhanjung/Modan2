@@ -2,9 +2,21 @@
 #define BuildNumber GetEnv('BUILD_NUMBER')
 
 [Setup]
+; Product identity. NEVER change this value: Inno keys upgrade detection, the
+; uninstall entry and {app} resolution off it, so a new AppId makes every
+; existing installation invisible to the installer and leaves it behind.
+; The doubled leading brace is Inno's escape for a literal "{", not a typo.
+AppId={{46308C1B-18AE-4B0D-B029-41CF44660599}
 AppName=Modan2
 AppVersion={#AppVersion}
-DefaultDirName={userappdata}\PaleoBytes\Modan2
+AppPublisher=PaleoBytes
+; Per-user install: no elevation, so {localappdata} and {userprograms} always
+; resolve to the invoking user rather than to whoever consented to UAC.
+PrivilegesRequired=lowest
+; Local, not Roaming: the onedir payload is ~130 MB and would otherwise sync
+; with the user profile on domain-joined machines.
+DefaultDirName={localappdata}\PaleoBytes\Modan2
+UninstallDisplayIcon={app}\Modan2.exe
 OutputDir={{DIST_PATH}}\..\InnoSetup\Output
 ; Use more conservative compression to reduce AV heuristics
 Compression=lzma/normal

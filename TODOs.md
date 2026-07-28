@@ -52,6 +52,15 @@ locations, two of them Roaming AppData. Now two: the program folder, and
       and git-ignored, so `sphinx-intl update` recreating it cannot drift back
       in; the Korean page renders the English source. devlog 262's "all 8
       catalogs at zero" now reads "all 7".
+- [x] **Preferences moved out of the data directory** — DONE 2026-07-28
+      (devlog 277), P03 stage 3. They now sit under the OS configuration
+      location in `PaleoBytes/Modan2/`, resolved with `platformdirs` per the
+      PaleoBytes convention (PaperMeister devlog R02). This was the prerequisite
+      for the item below: the data directory's location is becoming a
+      preference, and a setting cannot live in the place it points at. Caught in
+      passing: `platformdirs` was a transitive dependency missing from all three
+      `--require-hashes` lockfiles, so the frozen builds would have failed on
+      import while local tests passed.
 - [ ] **Make the data location configurable, then change its default**
       (raised 2026-07-28, devlog 276). **Plan written: devlog P03**, which found
       the work is far smaller than feared — media paths are computed from a base

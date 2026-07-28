@@ -33,6 +33,11 @@ coverage.json
 # Databases and logs kept around for manual testing
 /testdb/
 
+# Sphinx build output and gettext catalogs compiled from the tracked .po files
+docs/manual/_build/
+docs/manual/locale/**/*.mo
+docs/build_output.log
+
 # The changelog page is deliberately not translated: it includes the whole of
 # CHANGELOG.md, so every past release note would become a translation unit for
 # no real benefit. `sphinx-intl update` recreates this catalog anyway, so it is

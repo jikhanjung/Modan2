@@ -16,19 +16,19 @@ Several problems below come down to a file being missing or unwritable, so it
 helps to know where things are. ``~`` is your home folder (for example
 ``C:\Users\<you>`` on Windows).
 
-+------------------+--------------------------------------+
-| What             | Where                                |
-+==================+======================================+
-| Database         | ``~/PaleoBytes/Modan2/Modan2.db``    |
-+------------------+--------------------------------------+
-| Images, 3D models| ``~/PaleoBytes/Modan2/data/``        |
-+------------------+--------------------------------------+
-| Log files        | ``~/PaleoBytes/Modan2/logs/``        |
-+------------------+--------------------------------------+
-| Backups          | ``~/PaleoBytes/Modan2/backups/``     |
-+------------------+--------------------------------------+
-| Settings         | ``~/.modan2/config.json``            |
-+------------------+--------------------------------------+
++-------------------+------------------------------------------+
+| What              | Where                                    |
++===================+==========================================+
+| Database          | ``~/PaleoBytes/Modan2/Modan2.db``        |
++-------------------+------------------------------------------+
+| Images, 3D models | ``~/PaleoBytes/Modan2/data/``            |
++-------------------+------------------------------------------+
+| Log files         | ``~/PaleoBytes/Modan2/logs/``            |
++-------------------+------------------------------------------+
+| Backups           | ``~/PaleoBytes/Modan2/backups/``         |
++-------------------+------------------------------------------+
+| Preferences       | ``~/PaleoBytes/Modan2/preferences.json`` |
++-------------------+------------------------------------------+
 
 Installation Issues
 -------------------
@@ -82,12 +82,11 @@ Permission Issues
 
    # Fix permissions if needed
    chmod -R u+rw ~/PaleoBytes/Modan2
-   chmod -R u+rw ~/.modan2
 
 **Problem:** Settings not saving
 
-Settings live in ``~/.modan2/config.json`` and are written when the application
-exits.
+Preferences live in ``~/PaleoBytes/Modan2/preferences.json`` and are written when
+the application exits.
 
 **Solution:**
 
@@ -97,10 +96,10 @@ exits.
    .. code-block:: bash
 
       # Windows (PowerShell)
-      rm "$env:USERPROFILE\.modan2\config.json"
+      rm "$env:USERPROFILE\PaleoBytes\Modan2\preferences.json"
 
       # Linux/macOS
-      rm ~/.modan2/config.json
+      rm ~/PaleoBytes/Modan2/preferences.json
 
 Database Issues
 ---------------

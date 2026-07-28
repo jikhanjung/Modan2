@@ -716,16 +716,21 @@ Visualize shape changes along PC axes:
 Settings and Configuration
 ---------------------------
 
-Settings File Format
-~~~~~~~~~~~~~~~~~~~~
+Preferences File Format
+~~~~~~~~~~~~~~~~~~~~~~~
 
-Modan2 keeps its settings in a JSON file written when the application exits.
+Modan2 keeps its preferences in a JSON file written when the application exits.
 
-**Location:** ``~/.modan2/config.json`` on every platform (``~`` is your home
-folder, e.g. ``C:\Users\<you>`` on Windows).
+**Location:** ``~/PaleoBytes/Modan2/preferences.json`` on every platform (``~``
+is your home folder, e.g. ``C:\Users\<you>`` on Windows).
 
-The data itself lives separately, under ``~/PaleoBytes/Modan2/``: ``data/`` for
-images and 3D models, ``logs/`` for log files, and ``backups/``.
+It sits beside the rest of your data in ``~/PaleoBytes/Modan2/``: the database,
+``data/`` for images and 3D models, ``logs/`` for log files, and ``backups/`` —
+so copying that one folder takes everything with it.
+
+Before version 0.2.0-beta.2 preferences lived in ``~/.modan2/config.json``. That
+file is copied to the new location automatically on first launch and then left
+alone; you can delete it once you have upgraded.
 
 Everything in the file is written by the **Preferences** dialog and by the
 window geometry that is remembered between sessions, so the normal way to change
@@ -735,10 +740,10 @@ file — it is recreated on the next launch.
 .. code-block:: bash
 
    # Backup
-   cp ~/.modan2/config.json ~/.modan2/config.json.backup
+   cp ~/PaleoBytes/Modan2/preferences.json ~/PaleoBytes/Modan2/preferences.json.backup
 
    # Restore
-   cp ~/.modan2/config.json.backup ~/.modan2/config.json
+   cp ~/PaleoBytes/Modan2/preferences.json.backup ~/PaleoBytes/Modan2/preferences.json
 
 Command-Line Options
 ~~~~~~~~~~~~~~~~~~~~

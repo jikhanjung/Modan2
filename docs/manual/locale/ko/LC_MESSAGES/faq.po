@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Modan2 0.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-27 10:43+0900\n"
+"POT-Creation-Date: 2026-07-28 15:14+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: ko <LL@li.org>\n"
@@ -19,23 +19,23 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:2
+#: ../../faq.rst:2
 msgid "Frequently Asked Questions (FAQ)"
 msgstr "자주 묻는 질문 (FAQ)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:6
+#: ../../faq.rst:6
 msgid "Table of Contents"
 msgstr "목차"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:9
+#: ../../faq.rst:9
 msgid "General Questions"
 msgstr "일반 질문"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:12
+#: ../../faq.rst:12
 msgid "What is Modan2?"
 msgstr "Modan2란 무엇인가요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:14
+#: ../../faq.rst:14
 msgid ""
 "Modan2 is a user-friendly desktop application for geometric morphometrics "
 "research. It enables researchers to analyze shape variations in 2D and 3D "
@@ -44,219 +44,219 @@ msgstr ""
 "Modan2는 기하학적 형태측정학 연구를 위한 사용하기 쉬운 데스크톱 애플리케이션입니다. 랜드마크 기반 방법과 통계 분석을 통해 2D 및"
 " 3D 데이터의 형상 변이를 분석할 수 있습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:16
+#: ../../faq.rst:16
 msgid "**Key features:**"
 msgstr "**주요 기능:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:18
+#: ../../faq.rst:18
 msgid "Hierarchical dataset management with parent-child relationships"
 msgstr "상위-하위 관계를 지원하는 계층적 데이터셋 관리"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:19
+#: ../../faq.rst:19
 msgid "2D image and 3D model landmark digitization"
 msgstr "2D 이미지와 3D 모델의 랜드마크 디지타이징"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:20
+#: ../../faq.rst:20
 msgid "Statistical analysis (PCA, CVA, MANOVA)"
 msgstr "통계 분석 (PCA, CVA, MANOVA)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:21
+#: ../../faq.rst:21
 msgid "Multiple file format support (TPS, NTS, Morphologika, OBJ, PLY, STL)"
 msgstr "다양한 파일 형식 지원 (TPS, NTS, Morphologika, OBJ, PLY, STL)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:22
+#: ../../faq.rst:22
 msgid "Comprehensive visualization tools"
 msgstr "종합적인 시각화 도구"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:23
+#: ../../faq.rst:23
 msgid "Built-in Procrustes superimposition"
 msgstr "내장 프로크루스테스 중첩정렬"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:26
+#: ../../faq.rst:26
 msgid "Who is Modan2 for?"
 msgstr "Modan2는 누구를 위한 프로그램인가요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:28
+#: ../../faq.rst:28
 msgid "Modan2 is designed for:"
 msgstr "Modan2는 다음 사용자를 위해 만들어졌습니다:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:30
+#: ../../faq.rst:30
 msgid "**Researchers** in biology, paleontology, anthropology"
 msgstr "생물학, 고생물학, 인류학 분야의 **연구자**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:31
+#: ../../faq.rst:31
 msgid "**Graduate students** learning geometric morphometrics"
 msgstr "기하학적 형태측정학을 배우는 **대학원생**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:32
+#: ../../faq.rst:32
 msgid "**Morphologists** analyzing shape variation"
 msgstr "형상 변이를 분석하는 **형태학자**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:33
+#: ../../faq.rst:33
 msgid "**Evolutionary biologists** studying form and function"
 msgstr "형태와 기능을 연구하는 **진화생물학자**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:34
+#: ../../faq.rst:34
 msgid "**Anyone** working with landmark-based shape analysis"
 msgstr "랜드마크 기반 형상 분석을 하는 **모든 분**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:37
+#: ../../faq.rst:37
 msgid "What makes Modan2 different from other morphometrics software?"
 msgstr "Modan2는 다른 형태측정학 소프트웨어와 무엇이 다른가요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:39
+#: ../../faq.rst:39
 msgid "**Traditional morphometrics software challenges:**"
 msgstr "**기존 형태측정학 소프트웨어의 어려움:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:41
+#: ../../faq.rst:41
 msgid "Complex commercial software with steep learning curve"
 msgstr "학습 곡선이 가파른 복잡한 상용 소프트웨어"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:42
+#: ../../faq.rst:42
 msgid "Expensive licenses"
 msgstr "비싼 라이선스"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:43
+#: ../../faq.rst:43
 msgid "Limited 2D/3D integration"
 msgstr "제한적인 2D/3D 통합"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:44
+#: ../../faq.rst:44
 msgid "Difficult data management"
 msgstr "까다로운 데이터 관리"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:46
+#: ../../faq.rst:46
 msgid "**Modan2 advantages:**"
 msgstr "**Modan2의 장점:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:48
+#: ../../faq.rst:48
 msgid "Free and open source (MIT license)"
 msgstr "무료 오픈 소스 (MIT 라이선스)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:49
+#: ../../faq.rst:49
 msgid "Intuitive interface designed for researchers"
 msgstr "연구자를 위해 설계된 직관적인 인터페이스"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:50
+#: ../../faq.rst:50
 msgid "Integrated 2D/3D workflow in one application"
 msgstr "2D/3D 작업 흐름을 한 애플리케이션에 통합"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:51
+#: ../../faq.rst:51
 msgid "Hierarchical dataset organization"
 msgstr "계층적 데이터셋 구성"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:52
+#: ../../faq.rst:52
 msgid "Built-in database for persistent storage"
 msgstr "영구 저장을 위한 내장 데이터베이스"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:53
+#: ../../faq.rst:53
 msgid "Active development and community support"
 msgstr "활발한 개발과 커뮤니티 지원"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:56
+#: ../../faq.rst:56
 msgid "What file formats does Modan2 support?"
 msgstr "Modan2는 어떤 파일 형식을 지원하나요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:58
+#: ../../faq.rst:58
 msgid "**Input Formats:**"
 msgstr "**입력 형식:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:60
+#: ../../faq.rst:60
 msgid "**Landmark data:** TPS, NTS, X1Y1, Morphologika"
 msgstr "**랜드마크 데이터:** TPS, NTS, X1Y1, Morphologika"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:61
+#: ../../faq.rst:61
 msgid "**3D models:** OBJ, PLY, STL"
 msgstr "**3D 모델:** OBJ, PLY, STL"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:62
+#: ../../faq.rst:62
 msgid "**Images:** JPG, PNG, BMP, TIF (for 2D landmark digitization)"
 msgstr "**이미지:** JPG, PNG, BMP, TIF (2D 랜드마크 디지타이징용)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:63
+#: ../../faq.rst:63
 msgid "**Import/Export:** JSON+ZIP packages (complete dataset backup)"
 msgstr "**가져오기/내보내기:** JSON+ZIP 패키지 (전체 데이터셋 백업)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:65
+#: ../../faq.rst:65
 msgid "**Output Formats:**"
 msgstr "**출력 형식:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:67
+#: ../../faq.rst:67
 msgid "Same as input for landmark data"
 msgstr "랜드마크 데이터는 입력 형식과 동일"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:68
+#: ../../faq.rst:68
 msgid "Excel/CSV for analysis results"
 msgstr "분석 결과는 Excel/CSV"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:69
+#: ../../faq.rst:69
 msgid "JSON+ZIP for complete dataset sharing"
 msgstr "전체 데이터셋 공유는 JSON+ZIP"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:72
+#: ../../faq.rst:72
 msgid "Installation and Setup"
 msgstr "설치와 설정"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:75
+#: ../../faq.rst:75
 msgid "What are the system requirements?"
 msgstr "시스템 요구 사항은 무엇인가요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:77
+#: ../../faq.rst:77
 msgid "**Minimum Requirements:**"
 msgstr "**최소 요구 사항:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:79
+#: ../../faq.rst:79
 msgid "**OS:** Windows 10+, macOS 10.14+, or Ubuntu 18.04+"
 msgstr "**OS:** Windows 10 이상, macOS 10.14 이상, 또는 Ubuntu 18.04 이상"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:80
+#: ../../faq.rst:80
 msgid "**CPU:** Dual-core processor (2.0 GHz+)"
 msgstr "**CPU:** 듀얼 코어 프로세서 (2.0 GHz 이상)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:81
+#: ../../faq.rst:81
 msgid "**RAM:** 4GB minimum"
 msgstr "**RAM:** 최소 4GB"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:82
+#: ../../faq.rst:82
 msgid "**Disk:** 500MB for application + space for datasets"
 msgstr "**디스크:** 애플리케이션용 500MB + 데이터셋 공간"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:83
+#: ../../faq.rst:83
 msgid "**Display:** 1280×720 resolution"
 msgstr "**디스플레이:** 1280×720 해상도"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:84
+#: ../../faq.rst:84
 msgid "**Graphics:** OpenGL 3.3+ compatible GPU"
 msgstr "**그래픽:** OpenGL 3.3 이상 호환 GPU"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:86
+#: ../../faq.rst:86
 msgid "**Recommended Requirements:**"
 msgstr "**권장 사양:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:88
+#: ../../faq.rst:88
 msgid "**CPU:** Quad-core processor (3.0 GHz+)"
 msgstr "**CPU:** 쿼드 코어 프로세서 (3.0 GHz 이상)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:89
+#: ../../faq.rst:89
 msgid "**RAM:** 8GB or more"
 msgstr "**RAM:** 8GB 이상"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:90
+#: ../../faq.rst:90
 msgid "**Disk:** 2GB for datasets"
 msgstr "**디스크:** 데이터셋용 2GB"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:91
+#: ../../faq.rst:91
 msgid "**Display:** 1920×1080 or higher"
 msgstr "**디스플레이:** 1920×1080 이상"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:92
+#: ../../faq.rst:92
 msgid "**Graphics:** Dedicated GPU for 3D visualization"
 msgstr "**그래픽:** 3D 시각화를 위한 전용 GPU"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:95
+#: ../../faq.rst:95
 msgid "How do I install Modan2?"
 msgstr "Modan2는 어떻게 설치하나요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:97
+#: ../../faq.rst:97
 msgid ""
 "Download the package for your platform from "
 "https://github.com/jikhanjung/Modan2/releases — file names carry the version"
@@ -265,59 +265,59 @@ msgstr ""
 "https://github.com/jikhanjung/Modan2/releases 에서 사용하는 플랫폼의 패키지를 내려받으세요. 파일 "
 "이름에는 버전과 빌드 번호가 들어 있습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:101
+#: ../../faq.rst:101
 msgid "Windows: extract the installer ZIP and run the installer inside it"
 msgstr "Windows: 설치 프로그램 ZIP의 압축을 풀고 그 안의 설치 프로그램을 실행"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:102
+#: ../../faq.rst:102
 msgid "macOS: open the DMG and drag ``Modan2.app`` to Applications"
 msgstr "macOS: DMG를 열고 ``Modan2.app`` 을 응용 프로그램 폴더로 드래그"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:103
+#: ../../faq.rst:103
 msgid "Linux: make the AppImage executable and run it"
 msgstr "Linux: AppImage에 실행 권한을 주고 실행"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:105
+#: ../../faq.rst:105
 msgid ""
 "Only the Windows build is well tested; the macOS and Linux packages have not"
 " been through the same testing."
 msgstr "충분히 테스트된 것은 Windows 빌드뿐이며, macOS와 Linux 패키지는 같은 수준의 테스트를 거치지 않았습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:108
+#: ../../faq.rst:108
 msgid "See the Installation Guide for detailed instructions."
 msgstr "자세한 방법은 설치 안내서를 참조하세요."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:111
+#: ../../faq.rst:111
 msgid "Where is my data stored?"
 msgstr "내 데이터는 어디에 저장되나요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:113
+#: ../../faq.rst:113
 msgid ""
 "``~`` below is your home folder (for example ``C:\\Users\\<you>`` on "
 "Windows)."
 msgstr "아래의 ``~`` 는 홈 폴더입니다(Windows에서는 예를 들어 ``C:\\Users\\<사용자>``)."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:115
+#: ../../faq.rst:115
 msgid "**Database:** ``~/PaleoBytes/Modan2/Modan2.db``"
 msgstr "**데이터베이스:** ``~/PaleoBytes/Modan2/Modan2.db``"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:116
+#: ../../faq.rst:116
 msgid "**Images and 3D models:** ``~/PaleoBytes/Modan2/data/``"
 msgstr "**이미지와 3D 모델:** ``~/PaleoBytes/Modan2/data/``"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:117
+#: ../../faq.rst:117
 msgid "**Log files:** ``~/PaleoBytes/Modan2/logs/``"
 msgstr "**로그 파일:** ``~/PaleoBytes/Modan2/logs/``"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:118
+#: ../../faq.rst:118
 msgid "**Backups:** ``~/PaleoBytes/Modan2/backups/``"
 msgstr "**백업:** ``~/PaleoBytes/Modan2/backups/``"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:119
-msgid "**Settings:** ``~/.modan2/config.json``"
-msgstr "**설정:** ``~/.modan2/config.json``"
+#: ../../faq.rst:119
+msgid "**Preferences:** ``~/PaleoBytes/Modan2/preferences.json``"
+msgstr "**설정:** ``~/PaleoBytes/Modan2/preferences.json``"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:121
+#: ../../faq.rst:121
 msgid ""
 "**Note:** When you attach an image or 3D model, Modan2 copies it into its "
 "own ``data/`` folder, so your originals are left where they are. An "
@@ -327,231 +327,230 @@ msgstr ""
 "**참고:** 이미지나 3D 모델을 첨부하면 Modan2가 자체 ``data/`` 폴더로 복사하므로 원본은 원래 자리에 그대로 남습니다."
 " 지나치게 큰 사진(긴 변이 2560 px 초과)은 더 작은 작업본으로 저장되고, 원본 해상도 파일은 그 옆에 따로 보관됩니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:127
+#: ../../faq.rst:127
 msgid "Can I backup my data?"
 msgstr "데이터를 백업할 수 있나요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:129
+#: ../../faq.rst:129
 msgid "**Yes!** Multiple backup options:"
 msgstr "**네!** 여러 가지 백업 방법이 있습니다:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:131
+#: ../../faq.rst:131
 msgid "**Copy the data folder**"
 msgstr "**데이터 폴더 복사**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:133
+#: ../../faq.rst:133
 msgid ""
 "Copy ``~/PaleoBytes/Modan2/`` — it holds the database and the media files"
 msgstr "``~/PaleoBytes/Modan2/`` 를 복사하세요 — 데이터베이스와 미디어 파일이 모두 들어 있습니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:134
+#: ../../faq.rst:134
 msgid "Restore by putting it back"
 msgstr "되돌릴 때는 다시 제자리에 놓으면 됩니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:135
+#: ../../faq.rst:135
 msgid "Quit Modan2 first, so the database is not mid-write"
 msgstr "데이터베이스가 기록 중이지 않도록 Modan2를 먼저 종료하세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:137
+#: ../../faq.rst:137
 msgid "**Export datasets**"
 msgstr "**데이터셋 내보내기**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:139
+#: ../../faq.rst:139
 msgid "Export as JSON+ZIP package (includes all data and files)"
 msgstr "JSON+ZIP 패키지로 내보내기 (모든 데이터와 파일 포함)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:140
+#: ../../faq.rst:140
 msgid "Export as TPS, Morphologika, or other formats"
 msgstr "TPS, Morphologika 등 다른 형식으로 내보내기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:142
+#: ../../faq.rst:142
 msgid "**Manual backup**"
 msgstr "**수동 백업**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:144
+#: ../../faq.rst:144
 msgid "Keep original image/model files"
 msgstr "원본 이미지/모델 파일을 보관"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:145
+#: ../../faq.rst:145
 msgid "Export landmark data regularly"
 msgstr "랜드마크 데이터를 정기적으로 내보내기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:146
+#: ../../faq.rst:146
 msgid "Export analysis results"
 msgstr "분석 결과 내보내기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:149
+#: ../../faq.rst:149
 msgid "Data Management"
 msgstr "데이터 관리"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:152
+#: ../../faq.rst:152
 msgid "What is a dataset in Modan2?"
 msgstr "Modan2에서 데이터셋이란 무엇인가요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:154
+#: ../../faq.rst:154
 msgid "A **dataset** is a collection of objects (specimens) with shared:"
 msgstr "**데이터셋** 은 다음을 공유하는 객체(표본)들의 모음입니다:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:156
+#: ../../faq.rst:156
 msgid "Number of landmarks"
 msgstr "랜드마크 개수"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:157
+#: ../../faq.rst:157
 msgid "Dimension (2D or 3D)"
 msgstr "차원 (2D 또는 3D)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:158
+#: ../../faq.rst:158
 msgid "Variable definitions (measurements, categories)"
 msgstr "변수 정의 (측정값, 범주)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:159
+#: ../../faq.rst:159
 msgid "Wireframe/baseline/polygon definitions"
 msgstr "와이어프레임/베이스라인/폴리곤 정의"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:160
+#: ../../faq.rst:160
 msgid "Analysis settings"
 msgstr "분석 설정"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:162
+#: ../../faq.rst:162
 msgid ""
 "Datasets can have **parent-child relationships** for hierarchical "
 "organization."
 msgstr "데이터셋은 계층적 구성을 위해 **상위-하위 관계** 를 가질 수 있습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:165
+#: ../../faq.rst:165
 msgid "How do parent-child datasets work?"
 msgstr "상위-하위 데이터셋은 어떻게 동작하나요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:167
+#: ../../faq.rst:167
 msgid "**Parent dataset:**"
 msgstr "**상위 데이터셋:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:169
+#: ../../faq.rst:169
 msgid "Contains original landmark data"
 msgstr "원본 랜드마크 데이터를 담습니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:170
+#: ../../faq.rst:170
 msgid "Defines basic structure (landmark count, dimension)"
 msgstr "기본 구조(랜드마크 개수, 차원)를 정의합니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:172
+#: ../../faq.rst:172
 msgid "**Child dataset:**"
 msgstr "**하위 데이터셋:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:174
+#: ../../faq.rst:174
 msgid "A new, empty dataset nested under the parent"
 msgstr "상위 아래에 중첩되는 새 빈 데이터셋입니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:175
+#: ../../faq.rst:175
 msgid "Objects are not copied into it — you populate it yourself"
 msgstr "객체가 복사되어 들어오지는 않으며, 직접 채워 넣습니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:176
+#: ../../faq.rst:176
 msgid "Has its own landmark count, dimension, and variables"
 msgstr "자체 랜드마크 개수, 차원, 변수를 가집니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:178
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:475
+#: ../../faq.rst:178 ../../faq.rst:475
 msgid "**Use cases:**"
 msgstr "**활용 사례:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:180
+#: ../../faq.rst:180
 msgid "Organise a study into subgroups"
 msgstr "연구를 하위 그룹으로 나누어 구성"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:181
+#: ../../faq.rst:181
 msgid "Keep related datasets together in the tree"
 msgstr "관련 데이터셋을 트리에서 함께 묶어 관리"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:184
+#: ../../faq.rst:184
 msgid "What is the difference between objects and datasets?"
 msgstr "객체와 데이터셋의 차이는 무엇인가요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:186
+#: ../../faq.rst:186
 msgid "**Dataset:**"
 msgstr "**데이터셋:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:188
+#: ../../faq.rst:188
 msgid "Container for multiple objects"
 msgstr "여러 객체를 담는 컨테이너"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:189
+#: ../../faq.rst:189
 msgid "Defines structure (landmark count, dimension, variables)"
 msgstr "구조(랜드마크 개수, 차원, 변수)를 정의"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:190
+#: ../../faq.rst:190
 msgid "Settings for visualization and analysis"
 msgstr "시각화와 분석 설정"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:192
+#: ../../faq.rst:192
 msgid "**Object:**"
 msgstr "**객체:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:194
+#: ../../faq.rst:194
 msgid "Individual specimen"
 msgstr "개별 표본"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:195
+#: ../../faq.rst:195
 msgid "Contains landmark coordinates"
 msgstr "랜드마크 좌표를 가짐"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:196
+#: ../../faq.rst:196
 msgid "Can have attached image or 3D model"
 msgstr "이미지나 3D 모델을 첨부할 수 있음"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:197
+#: ../../faq.rst:197
 msgid "Has variable values (measurements, categories)"
 msgstr "변수 값(측정값, 범주)을 가짐"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:199
+#: ../../faq.rst:199
 msgid "**Relationship:** Dataset contains multiple objects"
 msgstr "**관계:** 데이터셋은 여러 객체를 포함합니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:202
+#: ../../faq.rst:202
 msgid "How many landmarks can I use?"
 msgstr "랜드마크는 몇 개까지 쓸 수 있나요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:204
+#: ../../faq.rst:204
 msgid "**Practical limits:**"
 msgstr "**실용적 한계:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:206
+#: ../../faq.rst:206
 msgid "**2D:** Up to 1000 landmarks per object (tested)"
 msgstr "**2D:** 객체당 최대 1000개 (검증됨)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:207
+#: ../../faq.rst:207
 msgid "**3D:** Up to 1000 landmarks per object (tested)"
 msgstr "**3D:** 객체당 최대 1000개 (검증됨)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:208
+#: ../../faq.rst:208
 msgid "**Objects:** Tested with 2,000 objects successfully"
 msgstr "**객체:** 2,000개까지 정상 동작 확인"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:210
+#: ../../faq.rst:210
 msgid "**Performance:**"
 msgstr "**성능:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:212
+#: ../../faq.rst:212
 msgid "100 landmarks, 1000 objects: Excellent performance"
 msgstr "랜드마크 100개, 객체 1000개: 우수한 성능"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:213
+#: ../../faq.rst:213
 msgid "Memory usage scales linearly (~4KB per object)"
 msgstr "메모리 사용량은 선형으로 증가 (객체당 약 4KB)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:214
+#: ../../faq.rst:214
 msgid "Analysis time depends on landmark count and algorithm"
 msgstr "분석 시간은 랜드마크 개수와 알고리즘에 따라 달라짐"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:217
+#: ../../faq.rst:217
 msgid "Can I have missing landmarks?"
 msgstr "결측 랜드마크가 있어도 되나요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:219
+#: ../../faq.rst:219
 msgid "**Yes!** Modan2 supports missing landmarks:"
 msgstr "**네!** Modan2는 결측 랜드마크를 지원합니다:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:221
+#: ../../faq.rst:221
 msgid ""
 "Mark one in the object dialog with **\"Add Missing\"** / **\"Insert "
 "Missing\"**, or by typing ``MISSING`` into a coordinate cell (a blank cell "
@@ -560,19 +559,19 @@ msgstr ""
 "객체 대화상자에서 **\"결측 추가\"**\\ (Add Missing) / **\"결측 삽입\"**\\ (Insert Missing)으로"
 " 표시하거나, 좌표 셀에 ``MISSING`` 을 입력하세요(빈 셀도 결측으로 간주)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:223
+#: ../../faq.rst:223
 msgid ""
 "The viewer draws a hollow circle at each missing landmark's estimated "
 "position while **\"Show Estimated\"** is ticked"
 msgstr "**\"추정값 보기\"**\\ (Show Estimated)가 켜져 있으면 뷰어가 각 결측 랜드마크의 추정 위치에 빈 원을 그립니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:225
+#: ../../faq.rst:225
 msgid ""
 "Marking a landmark missing keeps the landmark count consistent across the "
 "dataset, which is what analysis requires"
 msgstr "랜드마크를 결측으로 표시하면 데이터셋 전체에서 랜드마크 개수가 일관되게 유지되며, 이는 분석에 필요한 조건입니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:228
+#: ../../faq.rst:228
 msgid ""
 "**How they are estimated:** Modan2 fits the dataset's mean shape onto the "
 "landmarks a specimen actually has — matching rotation, scale, and position —"
@@ -585,22 +584,22 @@ msgstr ""
 "맞춥니다 — 정합된 평균 형상에서 결측 위치를 읽어옵니다. 분석 중에는 정렬이 수렴하는 동안 이 과정을 반복하며(EM 방식 루프), "
 "대치된 값은 분석용 작업 사본에서만 쓰이고 사용자 데이터에 기록되지 않습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:234
+#: ../../faq.rst:234
 #, python-format
 msgid ""
 "**Best practice:** keep missing data under about 10% of landmarks, and keep "
 "a good number of complete specimens."
 msgstr "**권장 사항:** 결측 데이터는 전체 랜드마크의 약 10% 미만으로 유지하고, 완전한 표본을 충분히 확보하세요."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:238
+#: ../../faq.rst:238
 msgid "Can I capture curves instead of individual points?"
 msgstr "개별 점 대신 곡선을 기록할 수 있나요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:240
+#: ../../faq.rst:240
 msgid "**Yes — semi-landmark curves** (2D only for now)."
 msgstr "**네 — 준랜드마크 곡선** 을 쓰면 됩니다(현재는 2D 전용)."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:242
+#: ../../faq.rst:242
 msgid ""
 "You define a curve once for the dataset, with a name and a point count "
 "``N``, then trace it on each specimen. Modan2 resamples the trace into ``N``"
@@ -611,11 +610,11 @@ msgstr ""
 "따라 균등한 간격의 ``N`` 개 점으로 재표본화하며, 분석에서는 이 점들을 일반 랜드마크처럼 다루어 고정(해부학적) 랜드마크 뒤에 이어"
 " 붙입니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:247
+#: ../../faq.rst:247
 msgid "Trace in the object dialog's **Curve** mode"
 msgstr "객체 대화상자의 **Curve** 모드에서 추적합니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:248
+#: ../../faq.rst:248
 msgid ""
 "**\"Snap to curve\"** (on by default) follows the strongest image edge "
 "between your clicks, so a clean outline takes only a few points"
@@ -623,950 +622,944 @@ msgstr ""
 "**\"Snap to curve\"**\\ (기본 켜짐)가 클릭 사이에서 이미지의 가장 강한 경계를 따라가므로, 깔끔한 윤곽선을 점 몇 "
 "개로 얻을 수 있습니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:250
+#: ../../faq.rst:250
 msgid ""
 "Editing ``N`` later re-resamples the stored trace — no need to re-trace"
 msgstr "나중에 ``N`` 을 수정하면 저장된 추적선을 다시 재표본화하므로 다시 추적할 필요가 없습니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:251
+#: ../../faq.rst:251
 msgid ""
 "Curves round-trip through TPS (``CURVES=`` blocks) and the JSON+ZIP package"
 msgstr "곡선은 TPS(``CURVES=`` 블록)와 JSON+ZIP 패키지를 통해 왕복 변환됩니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:252
+#: ../../faq.rst:252
 msgid ""
 "A dataset can be analyzed with only semi-landmarks and no fixed landmarks"
 msgstr "고정 랜드마크 없이 준랜드마크만으로 데이터셋을 분석할 수도 있습니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:255
+#: ../../faq.rst:255
 msgid "Landmark Digitization"
 msgstr "랜드마크 디지타이징"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:258
+#: ../../faq.rst:258
 msgid "How do I digitize landmarks on 2D images?"
 msgstr "2D 이미지에서 랜드마크는 어떻게 찍나요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:260
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:280
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:351
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:407
+#: ../../faq.rst:260 ../../faq.rst:280 ../../faq.rst:351 ../../faq.rst:407
 msgid "**Steps:**"
 msgstr "**단계:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:262
+#: ../../faq.rst:262
 msgid "Create dataset → Set dimension to 2D"
 msgstr "데이터셋 생성 → 차원을 2D로 설정"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:263
+#: ../../faq.rst:263
 msgid "Create object → Attach image"
 msgstr "객체 생성 → 이미지 첨부"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:264
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:284
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:304
+#: ../../faq.rst:264 ../../faq.rst:284 ../../faq.rst:304
 msgid "Open object dialog"
 msgstr "객체 대화상자 열기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:265
+#: ../../faq.rst:265
 msgid "Click on image to place landmarks"
 msgstr "이미지를 클릭해 랜드마크 배치"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:266
+#: ../../faq.rst:266
 msgid "Landmarks numbered sequentially"
 msgstr "랜드마크는 순서대로 번호가 매겨집니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:267
+#: ../../faq.rst:267
 msgid "Right-click to delete last landmark"
 msgstr "오른쪽 클릭으로 마지막 랜드마크 삭제"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:268
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:289
+#: ../../faq.rst:268 ../../faq.rst:289
 msgid "Save when complete"
 msgstr "완료되면 저장"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:270
+#: ../../faq.rst:270
 msgid "**Tips:**"
 msgstr "**팁:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:272
+#: ../../faq.rst:272
 msgid "Zoom in for precision (mouse wheel)"
 msgstr "정밀도를 위해 확대하세요 (마우스 휠)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:273
+#: ../../faq.rst:273
 msgid "Pan by dragging with middle button"
 msgstr "가운데 버튼으로 드래그해 화면을 이동하세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:274
+#: ../../faq.rst:274
 msgid "Use wireframe to verify landmark placement"
 msgstr "와이어프레임으로 랜드마크 배치를 확인하세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:275
+#: ../../faq.rst:275
 msgid "Mark missing landmarks if needed"
 msgstr "필요하면 결측 랜드마크를 표시하세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:278
+#: ../../faq.rst:278
 msgid "How do I digitize landmarks on 3D models?"
 msgstr "3D 모델에서 랜드마크는 어떻게 찍나요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:282
+#: ../../faq.rst:282
 msgid "Create dataset → Set dimension to 3D"
 msgstr "데이터셋 생성 → 차원을 3D로 설정"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:283
+#: ../../faq.rst:283
 msgid "Create object → Attach 3D model"
 msgstr "객체 생성 → 3D 모델 첨부"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:285
+#: ../../faq.rst:285
 msgid "Rotate model to view landmark location"
 msgstr "랜드마크 위치가 보이도록 모델 회전"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:286
+#: ../../faq.rst:286
 msgid "Click to place landmark"
 msgstr "클릭해 랜드마크 배치"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:287
+#: ../../faq.rst:287
 msgid "Landmark appears as sphere"
 msgstr "랜드마크가 구체로 표시됩니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:288
+#: ../../faq.rst:288
 msgid "Continue for all landmarks"
 msgstr "모든 랜드마크에 대해 반복"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:291
+#: ../../faq.rst:291
 msgid "**3D Controls:**"
 msgstr "**3D 조작:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:293
+#: ../../faq.rst:293
 msgid "Left-drag: Rotate"
 msgstr "왼쪽 버튼 드래그: 회전"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:294
+#: ../../faq.rst:294
 msgid "Middle-drag: Pan"
 msgstr "가운데 버튼 드래그: 이동"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:295
+#: ../../faq.rst:295
 msgid "Right-drag or scroll: Zoom"
 msgstr "오른쪽 버튼 드래그 또는 스크롤: 확대/축소"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:298
+#: ../../faq.rst:298
 msgid "Can I edit existing landmarks?"
 msgstr "기존 랜드마크를 편집할 수 있나요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:300
+#: ../../faq.rst:300
 msgid "**Yes!** Multiple editing options:"
 msgstr "**네!** 여러 가지 편집 방법이 있습니다:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:302
+#: ../../faq.rst:302
 msgid "**Visual editing:**"
 msgstr "**시각적 편집:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:305
+#: ../../faq.rst:305
 msgid "Click and drag landmarks"
 msgstr "랜드마크를 클릭한 뒤 드래그"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:306
+#: ../../faq.rst:306
 msgid "Updates in real-time"
 msgstr "실시간으로 반영됨"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:308
+#: ../../faq.rst:308
 msgid "**Table editing:**"
 msgstr "**표에서 편집:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:310
+#: ../../faq.rst:310
 msgid "Edit X, Y, Z coordinates directly in table"
 msgstr "표에서 X, Y, Z 좌표를 직접 편집"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:311
+#: ../../faq.rst:311
 msgid "Precision editing for fine adjustments"
 msgstr "미세 조정을 위한 정밀 편집"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:313
+#: ../../faq.rst:313
 msgid "**Batch editing:**"
 msgstr "**일괄 편집:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:315
+#: ../../faq.rst:315
 msgid "Select multiple objects"
 msgstr "여러 객체 선택"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:316
+#: ../../faq.rst:316
 msgid "Apply transformations"
 msgstr "변환 적용"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:317
+#: ../../faq.rst:317
 msgid "Update landmarks programmatically"
 msgstr "프로그램으로 랜드마크 갱신"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:320
+#: ../../faq.rst:320
 msgid "Statistical Analysis"
 msgstr "통계 분석"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:323
+#: ../../faq.rst:323
 msgid "What analyses does Modan2 support?"
 msgstr "Modan2는 어떤 분석을 지원하나요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:325
+#: ../../faq.rst:325
 msgid "**Multivariate Analysis:**"
 msgstr "**다변량 분석:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:327
+#: ../../faq.rst:327
 msgid ""
 "**PCA (Principal Component Analysis):** Explore main patterns of variation"
 msgstr "**PCA (주성분 분석):** 변이의 주요 패턴을 탐색"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:328
+#: ../../faq.rst:328
 msgid "**CVA (Canonical Variate Analysis):** Analyze group differences"
 msgstr "**CVA (정준변량 분석):** 그룹 간 차이를 분석"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:329
+#: ../../faq.rst:329
 msgid "**MANOVA (Multivariate Analysis of Variance):** Test group differences"
 msgstr "**MANOVA (다변량 분산 분석):** 그룹 간 차이를 검정"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:331
+#: ../../faq.rst:331
 msgid "**Superimposition Methods:**"
 msgstr "**중첩정렬 방식:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:333
+#: ../../faq.rst:333
 msgid "**Procrustes:** translation, rotation, and scaling (the default)"
 msgstr "**프로크루스테스:** 이동, 회전, 크기 조정 (기본값)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:334
+#: ../../faq.rst:334
 msgid ""
 "**Bookstein:** baseline registration; requires a baseline on the dataset"
 msgstr "**북스틴:** 베이스라인 정합. 데이터셋에 베이스라인이 필요합니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:335
+#: ../../faq.rst:335
 msgid "**Resistant Fit:** robust alignment that resists outlier landmarks"
 msgstr "**강건적합:** 이상치 랜드마크에 강한 정렬"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:337
+#: ../../faq.rst:337
 msgid "All three impute missing landmarks first."
 msgstr "세 방식 모두 결측 랜드마크를 먼저 대치합니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:339
+#: ../../faq.rst:339
 msgid "**Shape Analysis:**"
 msgstr "**형상 분석:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:341
+#: ../../faq.rst:341
 msgid "Mean shape calculation"
 msgstr "평균 형상 계산"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:342
+#: ../../faq.rst:342
 msgid "Shape grid showing how shape changes across a plot"
 msgstr "플롯 전반에서 형상이 어떻게 변하는지 보여 주는 형상 격자"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:343
+#: ../../faq.rst:343
 msgid "Regression overlay on scatter plots"
 msgstr "산점도 위의 회귀선 오버레이"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:346
+#: ../../faq.rst:346
 msgid "How do I run an analysis?"
 msgstr "분석은 어떻게 실행하나요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:348
+#: ../../faq.rst:348
 msgid ""
 "A single run computes **PCA, CVA, and MANOVA together** — you do not choose "
 "an analysis type."
 msgstr "한 번의 실행이 **PCA, CVA, MANOVA를 함께** 계산합니다 — 분석 종류를 고르는 것이 아닙니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:353
+#: ../../faq.rst:353
 msgid "Select the dataset in the tree view"
 msgstr "트리 뷰에서 데이터셋을 선택합니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:354
+#: ../../faq.rst:354
 msgid "Click **Analyze** (``Ctrl+G``) or use the **Data** menu"
 msgstr "**분석**\\ (Analyze, ``Ctrl+G``)을 클릭하거나 **Data** 메뉴를 사용합니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:355
+#: ../../faq.rst:355
 msgid ""
 "Set the analysis name, the superimposition method, and the grouping "
 "variables for CVA and MANOVA"
 msgstr "분석 제목, 중첩정렬 방식, CVA와 MANOVA의 그룹화 변수를 지정합니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:357
+#: ../../faq.rst:357
 msgid "Click **OK**"
 msgstr "**OK** 를 클릭합니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:358
+#: ../../faq.rst:358
 msgid "Open the finished analysis in the **Data Exploration** dialog"
 msgstr "완료된 분석을 **데이터 탐색**\\ (Data Exploration) 대화상자에서 엽니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:360
+#: ../../faq.rst:360
 msgid "**Results include:**"
 msgstr "**결과에 포함되는 것:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:362
+#: ../../faq.rst:362
 msgid "Score plots (PC1 vs PC2, and other axis combinations)"
 msgstr "점수 플롯 (PC1 대 PC2 및 다른 축 조합)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:363
+#: ../../faq.rst:363
 msgid "Variance explained per component"
 msgstr "성분별 설명 분산"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:364
+#: ../../faq.rst:364
 msgid "CVA and MANOVA output for the chosen grouping variables"
 msgstr "선택한 그룹화 변수에 대한 CVA 및 MANOVA 결과"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:365
+#: ../../faq.rst:365
 msgid "Export options"
 msgstr "내보내기 옵션"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:368
+#: ../../faq.rst:368
 msgid "What is Procrustes superimposition?"
 msgstr "프로크루스테스 중첩정렬이란 무엇인가요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:370
+#: ../../faq.rst:370
 msgid "**Procrustes superimposition** removes non-shape variation:"
 msgstr "**프로크루스테스 중첩정렬** 은 형상과 무관한 변이를 제거합니다:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:372
+#: ../../faq.rst:372
 msgid "**Translation:** Centers configurations"
 msgstr "**이동:** 배열의 중심을 맞춤"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:373
+#: ../../faq.rst:373
 msgid "**Rotation:** Aligns to minimize distance"
 msgstr "**회전:** 거리가 최소가 되도록 정렬"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:374
+#: ../../faq.rst:374
 msgid "**Scaling:** Standardizes centroid size"
 msgstr "**크기 조정:** 중심 크기를 표준화"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:376
+#: ../../faq.rst:376
 msgid "**Purpose:** Compare shape independent of:"
 msgstr "**목적:** 다음과 무관하게 형상을 비교:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:378
+#: ../../faq.rst:378
 msgid "Position (translation)"
 msgstr "위치 (이동)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:379
+#: ../../faq.rst:379
 msgid "Orientation (rotation)"
 msgstr "방향 (회전)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:380
+#: ../../faq.rst:380
 msgid "Size (scaling)"
 msgstr "크기 (크기 조정)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:382
+#: ../../faq.rst:382
 msgid "**Result:** Procrustes coordinates represent pure shape"
 msgstr "**결과:** 프로크루스테스 좌표는 순수한 형상을 나타냅니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:385
+#: ../../faq.rst:385
 msgid "How many objects do I need for analysis?"
 msgstr "분석에는 객체가 몇 개나 필요한가요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:387
+#: ../../faq.rst:387
 msgid "**Minimum requirements:**"
 msgstr "**최소 요구 조건:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:389
+#: ../../faq.rst:389
 msgid "**PCA:** At least 3 objects (more recommended)"
 msgstr "**PCA:** 최소 3개 (더 많을수록 좋음)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:390
+#: ../../faq.rst:390
 msgid "**CVA:** At least 2 groups with 3+ objects each"
 msgstr "**CVA:** 각각 3개 이상의 객체를 가진 그룹이 최소 2개"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:391
+#: ../../faq.rst:391
 msgid "**MANOVA:** At least 2 groups with 3+ objects each"
 msgstr "**MANOVA:** 각각 3개 이상의 객체를 가진 그룹이 최소 2개"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:393
+#: ../../faq.rst:393
 msgid "**Recommended sample sizes:**"
 msgstr "**권장 표본 크기:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:395
+#: ../../faq.rst:395
 msgid "**Exploratory PCA:** 20-30 objects minimum"
 msgstr "**탐색적 PCA:** 최소 20~30개"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:396
+#: ../../faq.rst:396
 msgid "**Group comparison (CVA):** 10-15 per group minimum"
 msgstr "**그룹 비교 (CVA):** 그룹당 최소 10~15개"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:397
+#: ../../faq.rst:397
 msgid "**Publication quality:** 30+ per group recommended"
 msgstr "**논문 수준:** 그룹당 30개 이상 권장"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:399
+#: ../../faq.rst:399
 msgid "**General rule:** More is better for robust results"
 msgstr "**일반 원칙:** 안정적인 결과를 위해서는 많을수록 좋습니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:402
+#: ../../faq.rst:402
 msgid "File Import and Export"
 msgstr "파일 가져오기와 내보내기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:405
+#: ../../faq.rst:405
 msgid "How do I import landmark data?"
 msgstr "랜드마크 데이터는 어떻게 가져오나요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:409
+#: ../../faq.rst:409
 msgid "File → Import → [Format]"
 msgstr "File → Import → [형식]"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:410
+#: ../../faq.rst:410
 msgid "Select file (TPS, NTS, Morphologika, etc.)"
 msgstr "파일 선택 (TPS, NTS, Morphologika 등)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:411
+#: ../../faq.rst:411
 msgid "Choose or create target dataset"
 msgstr "대상 데이터셋을 선택하거나 새로 만들기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:412
+#: ../../faq.rst:412
 msgid "Map variables if needed"
 msgstr "필요하면 변수 매핑"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:413
+#: ../../faq.rst:413
 msgid "Click Import"
 msgstr "Import 클릭"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:415
+#: ../../faq.rst:415
 msgid "**Supported formats:**"
 msgstr "**지원 형식:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:417
+#: ../../faq.rst:417
 msgid "TPS (most common)"
 msgstr "TPS (가장 일반적)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:418
+#: ../../faq.rst:418
 msgid "NTS"
 msgstr "NTS"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:419
+#: ../../faq.rst:419
 msgid "X1Y1"
 msgstr "X1Y1"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:420
+#: ../../faq.rst:420
 msgid "Morphologika"
 msgstr "Morphologika"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:421
+#: ../../faq.rst:421
 msgid "JSON+ZIP (complete backup)"
 msgstr "JSON+ZIP (전체 백업)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:424
+#: ../../faq.rst:424
 msgid "Can I import from other software?"
 msgstr "다른 소프트웨어에서 가져올 수 있나요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:426
+#: ../../faq.rst:426
 msgid "**Yes!** Modan2 supports standard formats:"
 msgstr "**네!** Modan2는 표준 형식을 지원합니다:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:428
+#: ../../faq.rst:428
 msgid "**From MorphoJ:** Export as TPS or Morphologika"
 msgstr "**MorphoJ에서:** TPS 또는 Morphologika로 내보내기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:429
+#: ../../faq.rst:429
 msgid "**From tpsUtil/tpsDig:** Use TPS files directly"
 msgstr "**tpsUtil/tpsDig에서:** TPS 파일을 바로 사용"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:430
+#: ../../faq.rst:430
 msgid "**From Landmark Editor:** Export as NTS"
 msgstr "**Landmark Editor에서:** NTS로 내보내기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:431
+#: ../../faq.rst:431
 msgid "**From R packages:** Save as TPS or Morphologika"
 msgstr "**R 패키지에서:** TPS 또는 Morphologika로 저장"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:433
+#: ../../faq.rst:433
 msgid "**Format compatibility:**"
 msgstr "**형식 호환성:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:435
+#: ../../faq.rst:435
 msgid "TPS: Most compatible format"
 msgstr "TPS: 호환성이 가장 좋은 형식"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:436
+#: ../../faq.rst:436
 msgid "Morphologika: Good for complex datasets"
 msgstr "Morphologika: 복잡한 데이터셋에 적합"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:437
+#: ../../faq.rst:437
 msgid "NTS: Simple format"
 msgstr "NTS: 단순한 형식"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:440
+#: ../../faq.rst:440
 msgid "How do I export my data?"
 msgstr "데이터는 어떻게 내보내나요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:442
+#: ../../faq.rst:442
 msgid "**Export options:**"
 msgstr "**내보내기 옵션:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:444
+#: ../../faq.rst:444
 msgid "**Dataset export:**"
 msgstr "**데이터셋 내보내기:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:446
+#: ../../faq.rst:446
 msgid "File → Export → Dataset"
 msgstr "File → Export → Dataset"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:447
+#: ../../faq.rst:447
 msgid "Choose format (TPS, Morphologika, JSON+ZIP)"
 msgstr "형식 선택 (TPS, Morphologika, JSON+ZIP)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:448
+#: ../../faq.rst:448
 msgid "Select objects to export"
 msgstr "내보낼 객체 선택"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:450
+#: ../../faq.rst:450
 msgid "**Analysis results:**"
 msgstr "**분석 결과:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:452
+#: ../../faq.rst:452
 msgid "Right-click analysis → Export"
 msgstr "분석 오른쪽 클릭 → Export"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:453
+#: ../../faq.rst:453
 msgid "Save as Excel or CSV"
 msgstr "Excel 또는 CSV로 저장"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:454
+#: ../../faq.rst:454
 msgid "Includes scores, loadings, statistics"
 msgstr "점수, 적재량, 통계량 포함"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:456
+#: ../../faq.rst:456
 msgid "**Complete backup:**"
 msgstr "**전체 백업:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:458
+#: ../../faq.rst:458
 msgid "Export as JSON+ZIP"
 msgstr "JSON+ZIP으로 내보내기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:459
+#: ../../faq.rst:459
 msgid "Includes all data, images, models"
 msgstr "모든 데이터, 이미지, 모델 포함"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:460
+#: ../../faq.rst:460
 msgid "Perfect for sharing or archiving"
 msgstr "공유나 보관에 적합"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:463
+#: ../../faq.rst:463
 msgid "What is JSON+ZIP export?"
 msgstr "JSON+ZIP 내보내기란 무엇인가요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:465
+#: ../../faq.rst:465
 msgid "**JSON+ZIP** is Modan2's comprehensive backup format:"
 msgstr "**JSON+ZIP** 은 Modan2의 종합 백업 형식입니다:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:467
+#: ../../faq.rst:467
 msgid "**Includes:**"
 msgstr "**포함 내용:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:469
+#: ../../faq.rst:469
 msgid "Landmark coordinates"
 msgstr "랜드마크 좌표"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:470
+#: ../../faq.rst:470
 msgid "Object metadata and variables"
 msgstr "객체 메타데이터와 변수"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:471
+#: ../../faq.rst:471
 msgid "Dataset settings (wireframe, baseline, polygons)"
 msgstr "데이터셋 설정 (와이어프레임, 베이스라인, 폴리곤)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:472
+#: ../../faq.rst:472
 msgid "Attached images and 3D models (optional)"
 msgstr "첨부된 이미지와 3D 모델 (선택)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:473
+#: ../../faq.rst:473
 msgid "Analysis results"
 msgstr "분석 결과"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:477
+#: ../../faq.rst:477
 msgid "Complete dataset backup"
 msgstr "전체 데이터셋 백업"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:478
+#: ../../faq.rst:478
 msgid "Sharing data with collaborators"
 msgstr "공동 연구자와 데이터 공유"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:479
+#: ../../faq.rst:479
 msgid "Moving data between computers"
 msgstr "컴퓨터 간 데이터 이동"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:480
+#: ../../faq.rst:480
 msgid "Long-term archival"
 msgstr "장기 보관"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:482
+#: ../../faq.rst:482
 msgid "**Format:** Industry-standard JSON + ZIP compression"
 msgstr "**형식:** 표준 JSON + ZIP 압축"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:485
+#: ../../faq.rst:485
 msgid "Performance and Optimization"
 msgstr "성능과 최적화"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:488
+#: ../../faq.rst:488
 msgid "How fast can Modan2 handle large datasets?"
 msgstr "Modan2는 큰 데이터셋을 얼마나 빠르게 처리하나요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:490
+#: ../../faq.rst:490
 msgid "**Tested Performance** (Phase 7 validation):"
 msgstr "**검증된 성능** (Phase 7 검증):"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:492
+#: ../../faq.rst:492
 msgid "**1000 objects load:** 277ms (18× faster than target)"
 msgstr "**객체 1000개 로드:** 277ms (목표 대비 18배 빠름)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:493
+#: ../../faq.rst:493
 msgid "**1000 objects PCA:** 60ms (33× faster than target)"
 msgstr "**객체 1000개 PCA:** 60ms (목표 대비 33배 빠름)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:494
+#: ../../faq.rst:494
 msgid "**Memory usage:** 4KB per object (125× better than target)"
 msgstr "**메모리 사용량:** 객체당 4KB (목표 대비 125배 우수)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:495
+#: ../../faq.rst:495
 msgid "**UI responsiveness:** 12.63ms for 1000-row table"
 msgstr "**UI 반응성:** 1000행 표에서 12.63ms"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:497
+#: ../../faq.rst:497
 msgid "**Scalability:**"
 msgstr "**확장성:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:499
+#: ../../faq.rst:499
 msgid "Linear O(n) scaling confirmed"
 msgstr "선형 O(n) 확장 확인"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:500
+#: ../../faq.rst:500
 msgid "Production-ready for 100,000+ objects"
 msgstr "객체 100,000개 이상도 실사용 가능"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:501
+#: ../../faq.rst:501
 msgid "Tested up to 2,000 objects"
 msgstr "객체 2,000개까지 검증"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:504
+#: ../../faq.rst:504
 msgid "Can I improve performance?"
 msgstr "성능을 개선할 수 있나요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:506
+#: ../../faq.rst:506
 msgid "**Tips for best performance:**"
 msgstr "**성능을 높이는 팁:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:508
+#: ../../faq.rst:508
 msgid "**Use SSD** for database storage"
 msgstr "데이터베이스 저장에 **SSD 사용**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:509
+#: ../../faq.rst:509
 msgid "**Close unused objects** in tree view"
 msgstr "트리 뷰에서 **사용하지 않는 객체 닫기**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:510
+#: ../../faq.rst:510
 msgid "**Reduce polygon count** for 3D models"
 msgstr "3D 모델의 **폴리곤 수 줄이기**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:511
+#: ../../faq.rst:511
 msgid "**Disable** 3D preview during batch editing"
 msgstr "일괄 편집 중에는 3D 미리보기 **끄기**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:512
+#: ../../faq.rst:512
 msgid "**Export subsets** for large analyses"
 msgstr "큰 분석은 **하위 집합으로 내보내기**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:514
+#: ../../faq.rst:514
 msgid "**System optimization:**"
 msgstr "**시스템 최적화:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:516
+#: ../../faq.rst:516
 msgid "Ensure adequate RAM (8GB+ recommended)"
 msgstr "충분한 RAM 확보 (8GB 이상 권장)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:517
+#: ../../faq.rst:517
 msgid "Update graphics drivers for 3D performance"
 msgstr "3D 성능을 위해 그래픽 드라이버 업데이트"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:520
+#: ../../faq.rst:520
 msgid "What if analysis is taking too long?"
 msgstr "분석이 너무 오래 걸리면 어떻게 하나요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:522
+#: ../../faq.rst:522
 msgid "**For large datasets:**"
 msgstr "**큰 데이터셋의 경우:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:524
+#: ../../faq.rst:524
 msgid "**Check progress bar** - may still be running"
 msgstr "**진행 표시줄 확인** - 아직 실행 중일 수 있습니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:525
+#: ../../faq.rst:525
 msgid "**Reduce object count** - analyze subset first"
 msgstr "**객체 수 줄이기** - 먼저 하위 집합으로 분석"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:526
+#: ../../faq.rst:526
 msgid "**Simplify analysis** - fewer variables"
 msgstr "**분석 단순화** - 변수 수 줄이기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:527
+#: ../../faq.rst:527
 msgid "**Check memory** - ensure sufficient RAM"
 msgstr "**메모리 확인** - RAM이 충분한지 확인"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:529
+#: ../../faq.rst:529
 msgid "**Typical analysis times:**"
 msgstr "**일반적인 분석 시간:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:531
+#: ../../faq.rst:531
 msgid "100 objects: < 1 second"
 msgstr "객체 100개: 1초 미만"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:532
+#: ../../faq.rst:532
 msgid "1000 objects: 1-5 seconds"
 msgstr "객체 1000개: 1~5초"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:533
+#: ../../faq.rst:533
 msgid "2000 objects: 5-15 seconds"
 msgstr "객체 2000개: 5~15초"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:535
+#: ../../faq.rst:535
 msgid "**If much slower:** Check troubleshooting guide"
 msgstr "**이보다 훨씬 느리다면:** 문제 해결 안내서를 확인하세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:538
+#: ../../faq.rst:538
 msgid "Troubleshooting"
 msgstr "문제 해결"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:541
+#: ../../faq.rst:541
 msgid "Where do I get help?"
 msgstr "어디에서 도움을 받을 수 있나요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:543
+#: ../../faq.rst:543
 msgid "**Resources (in order):**"
 msgstr "**참고 자료 (순서대로):**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:545
+#: ../../faq.rst:545
 msgid "**This FAQ** - Quick answers to common questions"
 msgstr "**이 FAQ** - 자주 묻는 질문에 대한 간단한 답"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:546
+#: ../../faq.rst:546
 msgid "**User Guide** - Comprehensive documentation"
 msgstr "**사용자 안내서** - 종합 문서"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:547
+#: ../../faq.rst:547
 msgid "**Troubleshooting Guide** - Detailed problem-solving"
 msgstr "**문제 해결 안내서** - 자세한 문제 해결"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:548
+#: ../../faq.rst:548
 msgid "**GitHub Issues** - Search existing problems/solutions"
 msgstr "**GitHub Issues** - 기존 문제/해결책 검색"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:550
+#: ../../faq.rst:550
 msgid "https://github.com/jikhanjung/Modan2/issues"
 msgstr "https://github.com/jikhanjung/Modan2/issues"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:552
+#: ../../faq.rst:552
 msgid "**GitHub Discussions** - Ask questions, share workflows"
 msgstr "**GitHub Discussions** - 질문하고 작업 방식 공유"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:554
+#: ../../faq.rst:554
 msgid "https://github.com/jikhanjung/Modan2/discussions"
 msgstr "https://github.com/jikhanjung/Modan2/discussions"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:556
+#: ../../faq.rst:556
 msgid "**Email Support** - jikhanjung@gmail.com"
 msgstr "**이메일 문의** - jikhanjung@gmail.com"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:558
+#: ../../faq.rst:558
 msgid "(Please try above resources first)"
 msgstr "(위의 자료를 먼저 확인해 주세요)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:561
+#: ../../faq.rst:561
 msgid "How do I report a bug?"
 msgstr "버그는 어떻게 신고하나요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:563
+#: ../../faq.rst:563
 msgid "**GitHub Issues:** https://github.com/jikhanjung/Modan2/issues/new"
 msgstr "**GitHub Issues:** https://github.com/jikhanjung/Modan2/issues/new"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:565
+#: ../../faq.rst:565
 msgid "**Include this information:**"
 msgstr "**다음 정보를 포함해 주세요:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:567
+#: ../../faq.rst:567
 msgid "**System info:**"
 msgstr "**시스템 정보:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:569
+#: ../../faq.rst:569
 msgid "Operating system and version"
 msgstr "운영체제와 버전"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:570
+#: ../../faq.rst:570
 msgid "Modan2 version and build number (Help → About)"
 msgstr "Modan2 버전과 빌드 번호 (Help → About)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:572
+#: ../../faq.rst:572
 msgid "**Problem description:**"
 msgstr "**문제 설명:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:574
+#: ../../faq.rst:574
 msgid "What you were trying to do"
 msgstr "무엇을 하려고 했는지"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:575
+#: ../../faq.rst:575
 msgid "What actually happened"
 msgstr "실제로 어떤 일이 일어났는지"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:576
+#: ../../faq.rst:576
 msgid "Error message (if any)"
 msgstr "오류 메시지 (있는 경우)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:578
+#: ../../faq.rst:578
 msgid "**Steps to reproduce:**"
 msgstr "**재현 단계:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:580
+#: ../../faq.rst:580
 msgid "Open dataset..."
 msgstr "데이터셋 열기…"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:581
+#: ../../faq.rst:581
 msgid "Click button..."
 msgstr "버튼 클릭…"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:582
+#: ../../faq.rst:582
 msgid "Error appears..."
 msgstr "오류 발생…"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:584
+#: ../../faq.rst:584
 msgid "**Log files:**"
 msgstr "**로그 파일:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:586
+#: ../../faq.rst:586
 msgid "Attach the most recent file from ``~/PaleoBytes/Modan2/logs/``"
 msgstr "``~/PaleoBytes/Modan2/logs/`` 에서 가장 최근 파일을 첨부해 주세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:588
+#: ../../faq.rst:588
 msgid "**Screenshots** (if UI-related)"
 msgstr "**스크린샷** (UI 관련인 경우)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:590
+#: ../../faq.rst:590
 msgid "**Good bug reports get fixed faster!**"
 msgstr "**좋은 버그 신고가 빠른 수정으로 이어집니다!**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:593
+#: ../../faq.rst:593
 msgid "Why does Modan2 crash?"
 msgstr "Modan2가 왜 비정상 종료되나요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:595
+#: ../../faq.rst:595
 msgid "**Common causes:**"
 msgstr "**흔한 원인:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:597
+#: ../../faq.rst:597
 msgid "**Corrupted database** → Restore from backup"
 msgstr "**데이터베이스 손상** → 백업에서 복원"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:598
+#: ../../faq.rst:598
 msgid "**Out of memory** → Close other applications"
 msgstr "**메모리 부족** → 다른 애플리케이션 닫기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:599
+#: ../../faq.rst:599
 msgid "**Graphics driver issues** → Update GPU drivers"
 msgstr "**그래픽 드라이버 문제** → GPU 드라이버 업데이트"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:600
+#: ../../faq.rst:600
 msgid "**Graphics/OpenGL problems** → See the Troubleshooting Guide"
 msgstr "**그래픽/OpenGL 문제** → 문제 해결 안내서 참조"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:602
+#: ../../faq.rst:602
 msgid "**Debugging steps:**"
 msgstr "**디버깅 단계:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:604
+#: ../../faq.rst:604
 msgid "Check log files for error messages"
 msgstr "로그 파일에서 오류 메시지 확인"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:605
+#: ../../faq.rst:605
 msgid "Try with sample data (isolate problem)"
 msgstr "샘플 데이터로 시도 (문제 범위 좁히기)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:606
+#: ../../faq.rst:606
 msgid "Run with ``--debug`` from a terminal to see errors"
 msgstr "터미널에서 ``--debug`` 옵션으로 실행해 오류 확인"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:607
+#: ../../faq.rst:607
 msgid "Report crash with log files attached"
 msgstr "로그 파일을 첨부해 크래시 신고"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:609
+#: ../../faq.rst:609
 msgid "See Troubleshooting Guide for detailed solutions."
 msgstr "자세한 해결책은 문제 해결 안내서를 참조하세요."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:612
+#: ../../faq.rst:612
 msgid "The 3D viewer is not working"
 msgstr "3D 뷰어가 동작하지 않습니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:614
+#: ../../faq.rst:614
 msgid "**Common issues:**"
 msgstr "**흔한 문제:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:616
+#: ../../faq.rst:616
 msgid "**OpenGL not available:**"
 msgstr "**OpenGL을 사용할 수 없음:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:618
+#: ../../faq.rst:618
 msgid "Update graphics drivers"
 msgstr "그래픽 드라이버 업데이트"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:619
+#: ../../faq.rst:619
 msgid "Install OpenGL libraries (Linux)"
 msgstr "OpenGL 라이브러리 설치 (Linux)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:620
+#: ../../faq.rst:620
 msgid "Check GPU compatibility"
 msgstr "GPU 호환성 확인"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:622
+#: ../../faq.rst:622
 msgid "**Model not loading:**"
 msgstr "**모델이 로드되지 않음:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:624
+#: ../../faq.rst:624
 msgid "Verify file format (OBJ, PLY, STL)"
 msgstr "파일 형식 확인 (OBJ, PLY, STL)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:625
+#: ../../faq.rst:625
 msgid "Check file is not corrupted"
 msgstr "파일이 손상되지 않았는지 확인"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:626
+#: ../../faq.rst:626
 msgid "Try different model"
 msgstr "다른 모델로 시도"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:628
+#: ../../faq.rst:628
 msgid "**Black screen:**"
 msgstr "**검은 화면:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:630
+#: ../../faq.rst:630
 msgid "Check that a 3D model is attached to the object"
 msgstr "객체에 3D 모델이 첨부되어 있는지 확인"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:631
+#: ../../faq.rst:631
 msgid "Zoom out — the model may be off-screen"
 msgstr "축소해 보세요 — 모델이 화면 밖에 있을 수 있습니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:632
+#: ../../faq.rst:632
 msgid "Try a different model"
 msgstr "다른 모델로 시도"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:634
+#: ../../faq.rst:634
 msgid "See Troubleshooting Guide → 3D Visualization Issues"
 msgstr "문제 해결 안내서 → 3D 시각화 문제 참조"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:637
+#: ../../faq.rst:637
 msgid "Advanced Topics"
 msgstr "고급 주제"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:640
+#: ../../faq.rst:640
 msgid "Can I use Modan2 in a publication?"
 msgstr "논문에 Modan2를 사용해도 되나요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:642
+#: ../../faq.rst:642
 msgid "**Yes! Please do.**"
 msgstr "**네! 얼마든지 사용하세요.**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:644
+#: ../../faq.rst:644
 msgid "**How to cite:**"
 msgstr "**인용 방법:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:657
+#: ../../faq.rst:657
 msgid "**In text:**"
 msgstr "**본문 예시:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:659
+#: ../../faq.rst:659
 msgid ""
 "\"Geometric morphometric analyses were performed using Modan2 v0.1.5 (Jung, "
 "2025), an open-source desktop application for landmark-based shape "
@@ -1576,117 +1569,117 @@ msgstr ""
 "2025), an open-source desktop application for landmark-based shape "
 "analysis.\""
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:662
+#: ../../faq.rst:662
 msgid "Can I extend Modan2 with custom analyses?"
 msgstr "사용자 정의 분석으로 Modan2를 확장할 수 있나요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:664
+#: ../../faq.rst:664
 msgid "**Yes!** Modan2 is extensible:"
 msgstr "**네!** Modan2는 확장 가능합니다:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:666
+#: ../../faq.rst:666
 msgid "**Python API:** Use modules directly in custom scripts"
 msgstr "**Python API:** 사용자 스크립트에서 모듈을 직접 사용"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:667
+#: ../../faq.rst:667
 msgid "**Database access:** Query database with Peewee ORM"
 msgstr "**데이터베이스 접근:** Peewee ORM으로 데이터베이스 조회"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:668
+#: ../../faq.rst:668
 msgid "**Export data:** Analyze in R, Python, MATLAB"
 msgstr "**데이터 내보내기:** R, Python, MATLAB에서 분석"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:670
+#: ../../faq.rst:670
 msgid "See Developer Guide for API documentation."
 msgstr "API 문서는 개발자 안내서를 참조하세요."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:673
+#: ../../faq.rst:673
 msgid "How does the database work?"
 msgstr "데이터베이스는 어떻게 동작하나요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:675
+#: ../../faq.rst:675
 msgid "**Technology:**"
 msgstr "**기술:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:677
+#: ../../faq.rst:677
 msgid "**Engine:** SQLite (embedded database)"
 msgstr "**엔진:** SQLite (임베디드 데이터베이스)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:678
+#: ../../faq.rst:678
 msgid "**ORM:** Peewee (Python Object-Relational Mapping)"
 msgstr "**ORM:** Peewee (Python 객체 관계 매핑)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:679
+#: ../../faq.rst:679
 msgid "**Location:** a single file, ``~/PaleoBytes/Modan2/Modan2.db``"
 msgstr "**위치:** 단일 파일, ``~/PaleoBytes/Modan2/Modan2.db``"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:681
+#: ../../faq.rst:681
 msgid "**Tables:**"
 msgstr "**테이블:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:683
+#: ../../faq.rst:683
 msgid "md_dataset: Dataset definitions"
 msgstr "md_dataset: 데이터셋 정의"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:684
+#: ../../faq.rst:684
 msgid "md_object: Objects and landmark data"
 msgstr "md_object: 객체와 랜드마크 데이터"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:685
+#: ../../faq.rst:685
 msgid "md_image: 2D image attachments"
 msgstr "md_image: 2D 이미지 첨부"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:686
+#: ../../faq.rst:686
 msgid "md_threedmodel: 3D model attachments"
 msgstr "md_threedmodel: 3D 모델 첨부"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:687
+#: ../../faq.rst:687
 msgid "md_analysis: Analysis results"
 msgstr "md_analysis: 분석 결과"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:689
+#: ../../faq.rst:689
 msgid "**Advantages:**"
 msgstr "**장점:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:691
+#: ../../faq.rst:691
 msgid "No server required"
 msgstr "서버가 필요 없음"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:692
+#: ../../faq.rst:692
 msgid "Portable (single file)"
 msgstr "이식성이 좋음 (단일 파일)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:693
+#: ../../faq.rst:693
 msgid "ACID compliant (data integrity)"
 msgstr "ACID 준수 (데이터 무결성)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:694
+#: ../../faq.rst:694
 msgid "Fast queries"
 msgstr "빠른 쿼리"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:695
+#: ../../faq.rst:695
 msgid "Easy backup"
 msgstr "간편한 백업"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:698
+#: ../../faq.rst:698
 msgid "Can I run Modan2 on a server?"
 msgstr "서버에서 Modan2를 실행할 수 있나요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:700
+#: ../../faq.rst:700
 msgid ""
 "**Not currently.** Modan2 needs a GUI environment; there is no batch or "
 "headless mode."
 msgstr "**현재는 불가능합니다.** Modan2에는 GUI 환경이 필요하며, 일괄 실행이나 헤드리스 모드는 없습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:703
+#: ../../faq.rst:703
 msgid "**Current workarounds:**"
 msgstr "**현재의 우회 방법:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:705
+#: ../../faq.rst:705
 msgid "Use VNC or Remote Desktop for GUI access"
 msgstr "GUI 접근을 위해 VNC나 원격 데스크톱 사용"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:706
+#: ../../faq.rst:706
 msgid ""
 "Or use X11 forwarding over SSH (``ssh -X user@server``) and launch the "
 "application there — note that 3D rendering often does not work over a "
@@ -1695,380 +1688,380 @@ msgstr ""
 "또는 SSH의 X11 포워딩(``ssh -X user@server``)으로 애플리케이션을 실행 — 다만 포워딩된 세션에서는 3D 렌더링이"
 " 동작하지 않는 경우가 많습니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:711
+#: ../../faq.rst:711
 msgid "Development and Contributing"
 msgstr "개발과 기여"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:714
+#: ../../faq.rst:714
 msgid "Is Modan2 open source?"
 msgstr "Modan2는 오픈 소스인가요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:716
+#: ../../faq.rst:716
 msgid "**Yes!**"
 msgstr "**네!**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:718
+#: ../../faq.rst:718
 msgid "**License:** MIT License (permissive)"
 msgstr "**라이선스:** MIT 라이선스 (허용적)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:719
+#: ../../faq.rst:719
 msgid "**Repository:** https://github.com/jikhanjung/Modan2"
 msgstr "**저장소:** https://github.com/jikhanjung/Modan2"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:720
+#: ../../faq.rst:720
 msgid "**Free to use:** Commercial and non-commercial"
 msgstr "**자유로운 사용:** 상업적·비상업적 모두 가능"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:721
+#: ../../faq.rst:721
 msgid "**Free to modify:** Change, extend, redistribute"
 msgstr "**자유로운 수정:** 변경, 확장, 재배포 가능"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:723
+#: ../../faq.rst:723
 msgid "**This means you can:**"
 msgstr "**따라서 다음이 가능합니다:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:725
+#: ../../faq.rst:725
 msgid "Use in research (published papers)"
 msgstr "연구에 사용 (논문 게재)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:726
+#: ../../faq.rst:726
 msgid "Use in commercial projects"
 msgstr "상업 프로젝트에 사용"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:727
+#: ../../faq.rst:727
 msgid "Modify for your specific needs"
 msgstr "필요에 맞게 수정"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:728
+#: ../../faq.rst:728
 msgid "Redistribute (must include license)"
 msgstr "재배포 (라이선스 포함 필수)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:731
+#: ../../faq.rst:731
 msgid "Can I contribute to Modan2?"
 msgstr "Modan2에 기여할 수 있나요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:733
+#: ../../faq.rst:733
 msgid "**Absolutely! Contributions welcome:**"
 msgstr "**물론입니다! 기여를 환영합니다:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:735
+#: ../../faq.rst:735
 msgid "**Ways to contribute:**"
 msgstr "**기여 방법:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:737
+#: ../../faq.rst:737
 msgid "**Report bugs** - GitHub Issues"
 msgstr "**버그 신고** - GitHub Issues"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:738
+#: ../../faq.rst:738
 msgid "**Suggest features** - GitHub Discussions"
 msgstr "**기능 제안** - GitHub Discussions"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:739
+#: ../../faq.rst:739
 msgid "**Fix bugs** - Submit Pull Request"
 msgstr "**버그 수정** - Pull Request 제출"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:740
+#: ../../faq.rst:740
 msgid "**Add features** - Submit Pull Request"
 msgstr "**기능 추가** - Pull Request 제출"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:741
+#: ../../faq.rst:741
 msgid "**Improve documentation** - Edit .rst/.md files"
 msgstr "**문서 개선** - .rst/.md 파일 편집"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:742
+#: ../../faq.rst:742
 msgid "**Write tutorials** - Share workflows"
 msgstr "**튜토리얼 작성** - 작업 방식 공유"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:743
+#: ../../faq.rst:743
 msgid ""
 "**Translate UI** - Help complete the Korean translation, or add a language"
 msgstr "**UI 번역** - 한국어 번역 완성을 돕거나 새 언어 추가"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:745
+#: ../../faq.rst:745
 msgid "**Getting started:**"
 msgstr "**시작하기:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:747
+#: ../../faq.rst:747
 msgid "Read CONTRIBUTING.md (when available)"
 msgstr "CONTRIBUTING.md 읽기 (준비되는 대로)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:748
+#: ../../faq.rst:748
 msgid "Fork the repository"
 msgstr "저장소 포크"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:749
+#: ../../faq.rst:749
 msgid "Make your changes"
 msgstr "변경 사항 작성"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:750
+#: ../../faq.rst:750
 msgid "Submit Pull Request"
 msgstr "Pull Request 제출"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:752
+#: ../../faq.rst:752
 msgid "**No contribution is too small!** Even fixing typos helps."
 msgstr "**아무리 작은 기여도 소중합니다!** 오타 수정도 큰 도움이 됩니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:755
+#: ../../faq.rst:755
 msgid "What features are planned?"
 msgstr "어떤 기능이 계획되어 있나요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:757
+#: ../../faq.rst:757
 msgid "**Short-term (v1.0):**"
 msgstr "**단기 (v1.0):**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:759
+#: ../../faq.rst:759
 msgid "Enhanced documentation"
 msgstr "문서 보강"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:760
+#: ../../faq.rst:760
 msgid "UI polish and accessibility"
 msgstr "UI 다듬기와 접근성 개선"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:761
+#: ../../faq.rst:761
 msgid "Performance optimization"
 msgstr "성능 최적화"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:762
+#: ../../faq.rst:762
 msgid "Additional statistical tests"
 msgstr "통계 검정 추가"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:763
+#: ../../faq.rst:763
 msgid "Beta testing program"
 msgstr "베타 테스트 프로그램"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:765
+#: ../../faq.rst:765
 msgid "**Long-term (v1.1+):**"
 msgstr "**장기 (v1.1 이후):**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:767
+#: ../../faq.rst:767
 msgid "Command-line interface for batch processing"
 msgstr "일괄 처리를 위한 명령줄 인터페이스"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:768
+#: ../../faq.rst:768
 msgid "Additional analysis methods"
 msgstr "분석 방법 추가"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:769
+#: ../../faq.rst:769
 msgid "Enhanced 3D visualization"
 msgstr "3D 시각화 강화"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:770
+#: ../../faq.rst:770
 msgid "Plugin system"
 msgstr "플러그인 시스템"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:771
+#: ../../faq.rst:771
 msgid "Cloud storage integration"
 msgstr "클라우드 저장소 연동"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:772
+#: ../../faq.rst:772
 msgid "Mobile companion app"
 msgstr "모바일 보조 앱"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:774
+#: ../../faq.rst:774
 msgid "See GitHub Issues and Milestones for details."
 msgstr "자세한 내용은 GitHub Issues와 마일스톤을 참조하세요."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:777
+#: ../../faq.rst:777
 msgid "Who develops Modan2?"
 msgstr "Modan2는 누가 개발하나요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:779
+#: ../../faq.rst:779
 msgid "**Primary developer:**"
 msgstr "**주 개발자:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:781
+#: ../../faq.rst:781
 msgid "Jikhan Jung (@jikhanjung)"
 msgstr "정지한 (@jikhanjung)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:782
+#: ../../faq.rst:782
 msgid "Part of PaleoBytes software suite"
 msgstr "PaleoBytes 소프트웨어 모음의 일부"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:783
+#: ../../faq.rst:783
 msgid "Developed for morphometrics research"
 msgstr "형태측정학 연구를 위해 개발"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:785
+#: ../../faq.rst:785
 msgid "**Contributors:**"
 msgstr "**기여자:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:787
+#: ../../faq.rst:787
 msgid "See GitHub contributors page"
 msgstr "GitHub 기여자 페이지 참조"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:788
+#: ../../faq.rst:788
 msgid "Community bug reports and suggestions"
 msgstr "커뮤니티의 버그 신고와 제안"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:789
+#: ../../faq.rst:789
 msgid "Open source contributions welcome"
 msgstr "오픈 소스 기여 환영"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:791
+#: ../../faq.rst:791
 msgid "**Funding/Support:**"
 msgstr "**지원/후원:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:793
+#: ../../faq.rst:793
 msgid "Academic research project"
 msgstr "학술 연구 프로젝트"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:794
+#: ../../faq.rst:794
 msgid "No commercial backing"
 msgstr "상업적 후원 없음"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:795
+#: ../../faq.rst:795
 msgid "Developed for research community"
 msgstr "연구 커뮤니티를 위해 개발"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:798
+#: ../../faq.rst:798
 msgid "License and Legal"
 msgstr "라이선스와 법적 사항"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:801
+#: ../../faq.rst:801
 msgid "Can I use Modan2 commercially?"
 msgstr "Modan2를 상업적으로 사용할 수 있나요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:803
+#: ../../faq.rst:803
 msgid "**Yes!** MIT License permits:"
 msgstr "**네!** MIT 라이선스는 다음을 허용합니다:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:805
+#: ../../faq.rst:805
 msgid "**Commercial use** - Use in for-profit projects"
 msgstr "**상업적 사용** - 영리 프로젝트에 사용"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:806
+#: ../../faq.rst:806
 msgid "**Modification** - Adapt to your needs"
 msgstr "**수정** - 필요에 맞게 변경"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:807
+#: ../../faq.rst:807
 msgid "**Distribution** - Redistribute modified versions"
 msgstr "**배포** - 수정한 버전을 재배포"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:808
+#: ../../faq.rst:808
 msgid "**Private use** - Use internally without sharing"
 msgstr "**사적 사용** - 공개하지 않고 내부적으로 사용"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:810
+#: ../../faq.rst:810
 msgid "**Requirements:**"
 msgstr "**요구 사항:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:812
+#: ../../faq.rst:812
 msgid "Include MIT License text"
 msgstr "MIT 라이선스 전문 포함"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:813
+#: ../../faq.rst:813
 msgid "Include copyright notice"
 msgstr "저작권 고지 포함"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:815
+#: ../../faq.rst:815
 msgid "**No warranty:** Software provided \"as-is\""
 msgstr "**무보증:** 소프트웨어는 \"있는 그대로\" 제공됩니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:818
+#: ../../faq.rst:818
 msgid "What if Modan2 damages my data?"
 msgstr "Modan2가 내 데이터를 손상시키면 어떻게 하나요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:820
+#: ../../faq.rst:820
 msgid "**Disclaimer:**"
 msgstr "**면책 조항:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:822
+#: ../../faq.rst:822
 msgid "Software provided \"as-is\" (MIT License)"
 msgstr "소프트웨어는 \"있는 그대로\" 제공됩니다 (MIT 라이선스)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:823
+#: ../../faq.rst:823
 msgid "No warranty of any kind"
 msgstr "어떠한 보증도 제공하지 않습니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:824
+#: ../../faq.rst:824
 msgid "**Always backup original data**"
 msgstr "**항상 원본 데이터를 백업하세요**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:826
+#: ../../faq.rst:826
 msgid "**Best practices:**"
 msgstr "**권장 사항:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:828
+#: ../../faq.rst:828
 msgid "Keep original landmark data unchanged"
 msgstr "원본 랜드마크 데이터는 그대로 보존"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:829
+#: ../../faq.rst:829
 msgid "Test with sample data first"
 msgstr "먼저 샘플 데이터로 시험"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:830
+#: ../../faq.rst:830
 msgid "Regular backups"
 msgstr "정기적인 백업"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:831
+#: ../../faq.rst:831
 msgid "Export important results"
 msgstr "중요한 결과는 내보내기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:833
+#: ../../faq.rst:833
 msgid "**In practice:**"
 msgstr "**실제로는:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:835
+#: ../../faq.rst:835
 msgid "Modan2 uses database transactions (safe)"
 msgstr "Modan2는 데이터베이스 트랜잭션을 사용합니다 (안전)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:836
+#: ../../faq.rst:836
 msgid "Does not modify original files"
 msgstr "원본 파일을 수정하지 않습니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:837
+#: ../../faq.rst:837
 msgid "Risk is very low with normal use"
 msgstr "정상적으로 사용하면 위험은 매우 낮습니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:840
+#: ../../faq.rst:840
 msgid "Still Have Questions?"
 msgstr "아직 궁금한 점이 있나요?"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:842
+#: ../../faq.rst:842
 msgid "**Check these resources:**"
 msgstr "**다음 자료를 확인해 보세요:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:844
+#: ../../faq.rst:844
 msgid "**Installation Guide** - Setup and configuration"
 msgstr "**설치 안내서** - 설치와 설정"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:845
+#: ../../faq.rst:845
 msgid "**User Guide** - Detailed usage instructions"
 msgstr "**사용자 안내서** - 자세한 사용 방법"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:846
+#: ../../faq.rst:846
 msgid "**Troubleshooting Guide** - Problem-solving"
 msgstr "**문제 해결 안내서** - 문제 해결"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:847
+#: ../../faq.rst:847
 msgid "**Developer Guide** - Technical details"
 msgstr "**개발자 안내서** - 기술적 세부 사항"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:848
+#: ../../faq.rst:848
 msgid "**Advanced Features** - Power user tips"
 msgstr "**고급 기능** - 숙련자를 위한 팁"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:850
+#: ../../faq.rst:850
 msgid "**Contact:**"
 msgstr "**연락처:**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:852
+#: ../../faq.rst:852
 msgid "GitHub Issues: https://github.com/jikhanjung/Modan2/issues"
 msgstr "GitHub Issues: https://github.com/jikhanjung/Modan2/issues"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:853
+#: ../../faq.rst:853
 msgid "Discussions: https://github.com/jikhanjung/Modan2/discussions"
 msgstr "Discussions: https://github.com/jikhanjung/Modan2/discussions"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:854
+#: ../../faq.rst:854
 msgid "Email: jikhanjung@gmail.com"
 msgstr "이메일: jikhanjung@gmail.com"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:856
+#: ../../faq.rst:856
 msgid "**This FAQ is open source!**"
 msgstr "**이 FAQ도 오픈 소스입니다!**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/faq.rst:858
+#: ../../faq.rst:858
 msgid ""
 "Found an error? Have suggestions? Submit a PR to improve this document."
 msgstr "오류를 발견했거나 제안할 내용이 있나요? 이 문서를 개선하는 PR을 보내 주세요."
@@ -2309,3 +2302,6 @@ msgstr "오류를 발견했거나 제안할 내용이 있나요? 이 문서를 �
 
 #~ msgid "**Translate UI** - Add new languages (future)"
 #~ msgstr ""
+
+#~ msgid "**Settings:** ``~/.modan2/config.json``"
+#~ msgstr "**설정:** ``~/.modan2/config.json``"

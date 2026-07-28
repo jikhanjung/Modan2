@@ -8,7 +8,6 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 
 import pytest
-from PyQt5.QtCore import QSettings
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
 
 import MdHelpers as helpers
@@ -792,73 +791,6 @@ class TestMimeDataExtraction:
         # Compare as paths, not strings: QUrl yields forward slashes even on
         # Windows, where str(test_file) uses backslashes.
         assert Path(result[0]) == test_file
-
-
-class TestWindowState:
-    """Test window state save/restore functions."""
-
-    def test_save_window_state(self):
-        """Test saving window state."""
-        from PyQt5.QtWidgets import QMainWindow
-
-        window = Mock(spec=QMainWindow)
-        window.saveGeometry.return_value = b"geometry_data"
-        window.saveState.return_value = b"state_data"
-
-        settings = QSettings("Test", "Test")
-        helpers.save_window_state(window, settings)
-
-        window.saveGeometry.assert_called_once()
-        window.saveState.assert_called_once()
-
-    def test_save_window_state_with_splitters(self):
-        """Test saving window state with splitters."""
-        from PyQt5.QtWidgets import QMainWindow
-
-        window = Mock(spec=QMainWindow)
-        window.saveGeometry.return_value = b"geometry_data"
-        window.saveState.return_value = b"state_data"
-
-        # Add mock splitters
-        hsplitter = Mock()
-        hsplitter.saveState.return_value = b"hsplitter_state"
-        vsplitter = Mock()
-        vsplitter.saveState.return_value = b"vsplitter_state"
-        window.hsplitter = hsplitter
-        window.vsplitter = vsplitter
-
-        settings = QSettings("Test", "Test")
-        helpers.save_window_state(window, settings)
-
-        hsplitter.saveState.assert_called_once()
-        vsplitter.saveState.assert_called_once()
-
-    def test_restore_window_state_no_data(self):
-        """Test restoring window state with no saved data."""
-        from PyQt5.QtWidgets import QMainWindow
-
-        window = Mock(spec=QMainWindow)
-        settings = QSettings("Test", "Test")
-        settings.clear()  # Ensure no saved data
-
-        helpers.restore_window_state(window, settings)
-
-        # Should not crash even with no data
-        window.restoreGeometry.assert_not_called()
-
-    def test_restore_window_state_with_data(self):
-        """Test restoring window state with saved data."""
-        from PyQt5.QtWidgets import QMainWindow
-
-        window = Mock(spec=QMainWindow)
-        settings = QSettings("Test", "Test")
-        settings.setValue("geometry", b"geometry_data")
-        settings.setValue("windowState", b"state_data")
-
-        helpers.restore_window_state(window, settings)
-
-        window.restoreGeometry.assert_called_once_with(b"geometry_data")
-        window.restoreState.assert_called_once_with(b"state_data")
 
 
 class TestThemeDetection:

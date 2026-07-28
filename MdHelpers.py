@@ -13,9 +13,11 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from PyQt5.QtCore import QSettings, QStandardPaths, Qt, QUrl
+from PyQt5.QtCore import Qt, QUrl
 from PyQt5.QtGui import QColor, QIcon, QPixmap
 from PyQt5.QtWidgets import QApplication, QFileDialog, QMessageBox
+
+import MdUtils as mu
 
 logger = logging.getLogger(__name__)
 
@@ -331,16 +333,15 @@ def get_timestamp_string(format_str: str = "%Y%m%d_%H%M%S") -> str:
 def get_app_data_dir() -> Path:
     """Get application data directory.
 
+    The same directory as the database, media, logs and preferences — one place
+    for everything the user owns. It used to be a third location that also
+    differed per platform: Roaming AppData on Windows (a profile-syncing share,
+    wrong for scratch data) and ``~/.modan2`` elsewhere.
+
     Returns:
         Path to application data directory
     """
-    if os.name == "nt":  # Windows
-        app_data = QStandardPaths.writableLocation(QStandardPaths.AppDataLocation)
-    else:  # Linux/Mac
-        app_data = QStandardPaths.writableLocation(QStandardPaths.HomeLocation)
-        app_data = str(Path(app_data) / ".modan2")
-
-    path = Path(app_data)
+    path = Path(mu.DEFAULT_DB_DIRECTORY)
     path.mkdir(parents=True, exist_ok=True)
     return path
 
@@ -759,57 +760,6 @@ def extract_urls_from_mime(mime_data) -> list[str]:
                     file_paths.append(file_path)
 
     return file_paths
-
-
-def load_settings() -> QSettings:
-    """Load application settings.
-
-    Returns:
-        QSettings object
-    """
-    return QSettings("Modan2Team", "Modan2")
-
-
-def save_window_state(window, settings: QSettings):
-    """Save window geometry and state.
-
-    Args:
-        window: Main window object
-        settings: QSettings object
-    """
-    settings.setValue("geometry", window.saveGeometry())
-    settings.setValue("windowState", window.saveState())
-
-    # Save splitter states if they exist
-    if hasattr(window, "hsplitter"):
-        settings.setValue("hsplitter", window.hsplitter.saveState())
-    if hasattr(window, "vsplitter"):
-        settings.setValue("vsplitter", window.vsplitter.saveState())
-
-
-def restore_window_state(window, settings: QSettings):
-    """Restore window geometry and state.
-
-    Args:
-        window: Main window object
-        settings: QSettings object
-    """
-    geometry = settings.value("geometry")
-    if geometry:
-        window.restoreGeometry(geometry)
-
-    window_state = settings.value("windowState")
-    if window_state:
-        window.restoreState(window_state)
-
-    # Restore splitter states
-    hsplitter_state = settings.value("hsplitter")
-    if hsplitter_state and hasattr(window, "hsplitter"):
-        window.hsplitter.restoreState(hsplitter_state)
-
-    vsplitter_state = settings.value("vsplitter")
-    if vsplitter_state and hasattr(window, "vsplitter"):
-        window.vsplitter.restoreState(vsplitter_state)
 
 
 def is_dark_theme() -> bool:

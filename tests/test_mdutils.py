@@ -1355,3 +1355,43 @@ class TestDatasetImportFromZip:
 
         with pytest.raises(ValueError, match="Invalid dataset.json"):
             mu.import_dataset_from_zip(str(zip_path))
+
+
+class TestLegacyConfigMigration:
+    """``~/.modan2/config.json`` → ``<db dir>/preferences.json``, once.
+
+    Without the migration the move looks to a user like every preference was
+    reset, so these cover the three states that matter.
+    """
+
+    def _paths(self, tmp_path, monkeypatch):
+        legacy = tmp_path / ".modan2" / "config.json"
+        new = tmp_path / "PaleoBytes" / "Modan2" / "preferences.json"
+        monkeypatch.setattr(mu, "LEGACY_CONFIG_PATH", str(legacy))
+        monkeypatch.setattr(mu, "DEFAULT_CONFIG_PATH", str(new))
+        monkeypatch.setattr(mu, "DEFAULT_DB_DIRECTORY", str(new.parent))
+        return legacy, new
+
+    def test_copies_legacy_config_when_new_is_absent(self, tmp_path, monkeypatch):
+        legacy, new = self._paths(tmp_path, monkeypatch)
+        legacy.parent.mkdir(parents=True)
+        legacy.write_text('{"language": "ko"}', encoding="utf-8")
+
+        assert mu.migrate_legacy_config() is True
+        assert new.read_text(encoding="utf-8") == '{"language": "ko"}'
+        assert legacy.exists()  # left in place on purpose
+
+    def test_does_not_overwrite_an_existing_new_config(self, tmp_path, monkeypatch):
+        legacy, new = self._paths(tmp_path, monkeypatch)
+        legacy.parent.mkdir(parents=True)
+        legacy.write_text('{"language": "ko"}', encoding="utf-8")
+        new.parent.mkdir(parents=True)
+        new.write_text('{"language": "en"}', encoding="utf-8")
+
+        assert mu.migrate_legacy_config() is False
+        assert new.read_text(encoding="utf-8") == '{"language": "en"}'
+
+    def test_no_op_on_a_fresh_install(self, tmp_path, monkeypatch):
+        _legacy, new = self._paths(tmp_path, monkeypatch)
+        assert mu.migrate_legacy_config() is False
+        assert not new.exists()

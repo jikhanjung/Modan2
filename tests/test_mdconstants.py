@@ -35,7 +35,6 @@ class TestPathConstants:
         assert isinstance(mc.BASE_DIR, Path)
         assert isinstance(mc.ICONS_DIR, Path)
         assert isinstance(mc.TRANSLATIONS_DIR, Path)
-        assert isinstance(mc.CONFIG_DIR, Path)
         assert isinstance(mc.TEMP_DIR, Path)
 
     def test_base_dir_exists(self):

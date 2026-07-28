@@ -54,7 +54,9 @@ def parse_arguments():
 
     parser.add_argument("--db", type=str, help="Database file path (default: ~/PaleoBytes/Modan2/Modan2.db)")
 
-    parser.add_argument("--config", type=str, help="Configuration file path (default: ~/.modan2/config.json)")
+    parser.add_argument(
+        "--config", type=str, help="Configuration file path (default: ~/PaleoBytes/Modan2/preferences.json)"
+    )
 
     parser.add_argument("--lang", type=str, choices=["en", "ko"], default="en", help="UI language")
 
@@ -246,7 +248,7 @@ def main():
         # Create main window (heavy import)
         from Modan2 import ModanMainWindow
 
-        window = ModanMainWindow(setup.get_config())
+        window = ModanMainWindow(setup.get_config(), config_path=setup.config_path)
 
         if splash:
             splash.setProgress("Ready!")

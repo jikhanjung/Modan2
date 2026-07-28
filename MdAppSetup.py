@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 import MdModel
+import MdUtils as mu
 
 
 class ApplicationSetup:
@@ -41,10 +42,12 @@ class ApplicationSetup:
         self.logger = logging.getLogger(__name__)
 
     def _get_default_config_path(self) -> str:
-        """Get default configuration file path."""
-        app_dir = Path.home() / ".modan2"
-        app_dir.mkdir(exist_ok=True)
-        return str(app_dir / "config.json")
+        """Get default configuration file path.
+
+        Beside the database, not in a dot-directory of its own. The directory
+        itself is created by ``mu.ensure_directories()``.
+        """
+        return mu.DEFAULT_CONFIG_PATH
 
     def initialize(self):
         """Initialize application components."""
@@ -91,6 +94,11 @@ class ApplicationSetup:
     def _load_settings(self):
         """Load application settings from file."""
         self.logger.debug(f"Loading settings from: {self.config_path}")
+
+        # One-time move of pre-0.2.0-beta.2 preferences. Only applies to the
+        # default location; an explicit --config is taken at face value.
+        if self.config_path == mu.DEFAULT_CONFIG_PATH:
+            mu.migrate_legacy_config()
 
         if Path(self.config_path).exists():
             try:

@@ -102,6 +102,38 @@ DEFAULT_STORAGE_DIRECTORY = os.path.join(DEFAULT_DB_DIRECTORY, "data/")
 DEFAULT_LOG_DIRECTORY = os.path.join(DEFAULT_DB_DIRECTORY, "logs/")
 DB_BACKUP_DIRECTORY = os.path.join(DEFAULT_DB_DIRECTORY, "backups/")
 
+# Preferences live beside the database, not in a separate dot-directory: one
+# place holds everything the user owns (db, media, logs, backups, preferences),
+# so backing up or moving an installation is a single directory copy.
+DEFAULT_CONFIG_PATH = os.path.join(DEFAULT_DB_DIRECTORY, "preferences.json")
+
+# Where preferences lived before 0.2.0-beta.2. Only read, and only to migrate.
+LEGACY_CONFIG_PATH = os.path.join(USER_PROFILE_DIRECTORY, ".modan2", "config.json")
+
+
+def migrate_legacy_config():
+    """Copy pre-0.2.0-beta.2 preferences to their new home, once.
+
+    Without this the move silently resets every preference the user has set
+    (window geometry, language, overlay placement) — they would look lost
+    rather than moved. The legacy file is left in place: it costs nothing and
+    keeps an older build usable against the same profile.
+
+    Returns True if a migration was performed.
+    """
+    if os.path.exists(DEFAULT_CONFIG_PATH) or not os.path.exists(LEGACY_CONFIG_PATH):
+        return False
+    try:
+        os.makedirs(DEFAULT_DB_DIRECTORY, exist_ok=True)
+        shutil.copyfile(LEGACY_CONFIG_PATH, DEFAULT_CONFIG_PATH)
+    except OSError as e:
+        # Not fatal: the caller falls back to defaults, which is the same
+        # outcome as a fresh install.
+        logger.warning(f"Could not migrate preferences from {LEGACY_CONFIG_PATH}: {e}")
+        return False
+    logger.info(f"Migrated preferences from {LEGACY_CONFIG_PATH} to {DEFAULT_CONFIG_PATH}")
+    return True
+
 
 def ensure_directories():
     """Safely create necessary directories with error handling."""

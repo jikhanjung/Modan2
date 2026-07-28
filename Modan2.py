@@ -92,7 +92,7 @@ class SettingsWrapper:
     """QSettings-compatible wrapper backed by the JSON config dict.
 
     Maps QSettings-style keys (e.g. ``"WindowGeometry/MainWindow"``) to nested
-    paths in the config dict and persists changes to ``~/.modan2/config.json``.
+    paths in the config dict and persists changes to the preferences file.
     Hoisted out of ``ModanMainWindow.read_settings`` (was an inline nested class).
     """
 
@@ -174,6 +174,16 @@ class SettingsWrapper:
         # Set the final value
         current[keys[-1]] = value
 
+    def _config_path(self):
+        """The file to write, which must be the one that was loaded.
+
+        Taken from the parent window, which carries whatever ``--config``
+        resolved to. Falls back to the default for a parentless wrapper (tests,
+        and any standalone use).
+        """
+        path = getattr(self.parent, "config_path", None)
+        return Path(path) if path else Path(mu.DEFAULT_CONFIG_PATH)
+
     def value(self, key, default_value):
         """Get a setting value (QSettings compatible)."""
         if key in self.key_map:
@@ -213,9 +223,8 @@ class SettingsWrapper:
             import json
             import os
             import tempfile
-            from pathlib import Path
 
-            config_path = Path.home() / ".modan2" / "config.json"
+            config_path = self._config_path()
             config_path.parent.mkdir(parents=True, exist_ok=True)
 
             fd, tmp_path = tempfile.mkstemp(dir=str(config_path.parent), prefix=".config-", suffix=".tmp")
@@ -238,9 +247,12 @@ class SettingsWrapper:
 
 
 class ModanMainWindow(QMainWindow):
-    def __init__(self, config=None):
+    def __init__(self, config=None, config_path=None):
         super().__init__()
         self.config = config
+        # Where `config` came from, so SettingsWrapper writes back to the same
+        # file instead of assuming the default one.
+        self.config_path = config_path or mu.DEFAULT_CONFIG_PATH
         self.init_done = False
         self.setWindowIcon(QIcon(ICON_CONSTANTS["app_icon_alt"]))
         self.setWindowTitle("{} v{}".format(self.tr("Modan2"), mu.PROGRAM_VERSION))

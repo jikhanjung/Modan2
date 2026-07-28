@@ -21,8 +21,10 @@ APP_URL = "https://github.com/jikhanjung/Modan2"
 BASE_DIR = Path(__file__).parent
 ICONS_DIR = BASE_DIR / "icons"
 TRANSLATIONS_DIR = BASE_DIR / "translations"
-CONFIG_DIR = Path.home() / ".modan2"
 TEMP_DIR = BASE_DIR / "temp"
+# No CONFIG_DIR here: preferences live beside the database and the path is
+# owned by MdUtils (DEFAULT_CONFIG_PATH). A second definition in this module is
+# what let the load path and the save path drift apart.
 
 # ========== UI Interaction Modes ==========
 # Landmark-editing interaction modes shared by the object viewers and the main

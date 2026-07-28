@@ -44,8 +44,8 @@ class ApplicationSetup:
     def _get_default_config_path(self) -> str:
         """Get default configuration file path.
 
-        Beside the database, not in a dot-directory of its own. The directory
-        itself is created by ``mu.ensure_directories()``.
+        The OS configuration location (see ``mu.DEFAULT_CONFIG_PATH``), not the
+        data directory. The directory is created on first write.
         """
         return mu.DEFAULT_CONFIG_PATH
 
@@ -95,8 +95,8 @@ class ApplicationSetup:
         """Load application settings from file."""
         self.logger.debug(f"Loading settings from: {self.config_path}")
 
-        # One-time move of pre-0.2.0-beta.2 preferences. Only applies to the
-        # default location; an explicit --config is taken at face value.
+        # One-time move of preferences from wherever they were last kept.
+        # Only applies to the default location; --config is taken at face value.
         if self.config_path == mu.DEFAULT_CONFIG_PATH:
             mu.migrate_legacy_config()
 

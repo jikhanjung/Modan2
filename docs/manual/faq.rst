@@ -116,7 +116,10 @@ Where is my data stored?
 * **Images and 3D models:** ``~/PaleoBytes/Modan2/data/``
 * **Log files:** ``~/PaleoBytes/Modan2/logs/``
 * **Backups:** ``~/PaleoBytes/Modan2/backups/``
-* **Preferences:** ``~/PaleoBytes/Modan2/preferences.json``
+* **Preferences:** your operating system's settings folder — on Windows
+  ``%LOCALAPPDATA%\PaleoBytes\Modan2``, on macOS
+  ``~/Library/Application Support/PaleoBytes/Modan2``, on Linux
+  ``~/.config/PaleoBytes/Modan2``. These are settings, not data.
 
 **Note:** When you attach an image or 3D model, Modan2 copies it into its own
 ``data/`` folder, so your originals are left where they are. An oversized photo

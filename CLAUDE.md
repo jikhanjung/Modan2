@@ -205,8 +205,17 @@ directory, *not* `%APPDATA%`):
 | Images, 3D models | `data/` | `mu.DEFAULT_STORAGE_DIRECTORY` |
 | Logs | `logs/` | `mu.DEFAULT_LOG_DIRECTORY` |
 | Backups | `backups/` | `mu.DB_BACKUP_DIRECTORY` |
-| Preferences | `preferences.json` | `mu.DEFAULT_CONFIG_PATH` |
 | Temp files | `temp/` | `MdHelpers.get_temp_dir` |
+
+**Preferences are not in there.** They live in the OS configuration location
+(`mu.DEFAULT_CONFIG_PATH`, resolved with `platformdirs` + `COMPANY_NAME` +
+`PROGRAM_NAME`): `%LOCALAPPDATA%\PaleoBytes\Modan2\preferences.json` on Windows,
+`~/Library/Application Support/...` on macOS, `~/.config/...` on Linux. They are
+settings the application can recreate, and they have to sit outside the data
+directory because that directory's location is itself becoming a preference.
+`platformdirs` rather than Qt's `QStandardPaths`: `MdUtils` is imported before
+the `QApplication` exists, and Qt's app-specific locations need names that are
+not set yet.
 
 The installed program itself is separate: `%LOCALAPPDATA%\Programs\PaleoBytes\Modan2`
 on Windows (`InnoSetup/Modan2.iss.template`).

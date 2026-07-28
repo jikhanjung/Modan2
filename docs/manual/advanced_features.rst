@@ -721,16 +721,31 @@ Preferences File Format
 
 Modan2 keeps its preferences in a JSON file written when the application exits.
 
-**Location:** ``~/PaleoBytes/Modan2/preferences.json`` on every platform (``~``
-is your home folder, e.g. ``C:\Users\<you>`` on Windows).
+**Location** — the standard settings folder for your operating system:
 
-It sits beside the rest of your data in ``~/PaleoBytes/Modan2/``: the database,
-``data/`` for images and 3D models, ``logs/`` for log files, and ``backups/`` —
-so copying that one folder takes everything with it.
+.. list-table::
+   :header-rows: 1
+   :widths: 20 80
 
-Before version 0.2.0-beta.2 preferences lived in ``~/.modan2/config.json``. That
-file is copied to the new location automatically on first launch and then left
-alone; you can delete it once you have upgraded.
+   * - Platform
+     - Location
+   * - Windows
+     - ``%LOCALAPPDATA%\PaleoBytes\Modan2\preferences.json``
+   * - macOS
+     - ``~/Library/Application Support/PaleoBytes/Modan2/preferences.json``
+   * - Linux
+     - ``~/.config/PaleoBytes/Modan2/preferences.json``
+
+This is separate from your data (``~/PaleoBytes/Modan2/``, which holds the
+database, images, 3D models, logs and backups). Preferences are settings the
+application can recreate; your data cannot be recreated, so the two are kept
+apart.
+
+Preferences are copied forward automatically when the location changes, so
+upgrading never loses them. Earlier versions kept them in
+``~/PaleoBytes/Modan2/preferences.json`` and, before that,
+``~/.modan2/config.json``; those files are left in place and can be deleted once
+you have upgraded.
 
 Everything in the file is written by the **Preferences** dialog and by the
 window geometry that is remembered between sessions, so the normal way to change
@@ -739,11 +754,11 @@ file — it is recreated on the next launch.
 
 .. code-block:: bash
 
-   # Backup
-   cp ~/PaleoBytes/Modan2/preferences.json ~/PaleoBytes/Modan2/preferences.json.backup
+   # Backup (Linux; adjust the path for your platform, see the table above)
+   cp ~/.config/PaleoBytes/Modan2/preferences.json{,.backup}
 
    # Restore
-   cp ~/PaleoBytes/Modan2/preferences.json.backup ~/PaleoBytes/Modan2/preferences.json
+   cp ~/.config/PaleoBytes/Modan2/preferences.json{.backup,}
 
 Command-Line Options
 ~~~~~~~~~~~~~~~~~~~~

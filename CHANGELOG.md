@@ -8,6 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+## [Unreleased]
+
+### Changed
+- **Preferences moved to your operating system's settings folder** —
+  `%LOCALAPPDATA%\PaleoBytes\Modan2` on Windows,
+  `~/Library/Application Support/PaleoBytes/Modan2` on macOS,
+  `~/.config/PaleoBytes/Modan2` on Linux. They are settings the application can
+  recreate, so they belong beside other applications' settings rather than in
+  with your datasets. Your existing preferences are copied over automatically on
+  first launch; the old file is left alone and can be deleted.
+
+  This also prepares for letting you choose where your data lives: a setting
+  cannot be stored inside the folder it points at.
+
+
 ## [0.2.0-beta.2] - 2026-07-28
 
 A housekeeping beta. Nothing changes about morphometrics; what changes is where

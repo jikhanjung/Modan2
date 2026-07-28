@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Modan2 0.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-28 15:14+0900\n"
+"POT-Creation-Date: 2026-07-28 19:24+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: ko <LL@li.org>\n"
@@ -921,33 +921,64 @@ msgid ""
 msgstr "Modan2는 설정을 JSON 파일에 보관하며, 애플리케이션을 종료할 때 기록합니다."
 
 #: ../../advanced_features.rst:724
-msgid ""
-"**Location:** ``~/PaleoBytes/Modan2/preferences.json`` on every platform "
-"(``~`` is your home folder, e.g. ``C:\\Users\\<you>`` on Windows)."
-msgstr ""
-"**위치:** 모든 플랫폼에서 ``~/PaleoBytes/Modan2/preferences.json`` 입니다(``~`` 는 홈 폴더로,"
-" Windows에서는 예를 들어 ``C:\\Users\\<사용자>``)."
+msgid "**Location** — the standard settings folder for your operating system:"
+msgstr "**위치** — 운영체제의 표준 설정 폴더입니다:"
 
-#: ../../advanced_features.rst:727
-msgid ""
-"It sits beside the rest of your data in ``~/PaleoBytes/Modan2/``: the "
-"database, ``data/`` for images and 3D models, ``logs/`` for log files, and "
-"``backups/`` — so copying that one folder takes everything with it."
-msgstr ""
-"나머지 데이터와 같은 ``~/PaleoBytes/Modan2/`` 안에 함께 있습니다: 데이터베이스, 이미지와 3D 모델을 담는 "
-"``data/``, 로그 파일을 담는 ``logs/``, 그리고 ``backups/`` — 따라서 이 폴더 하나만 복사하면 전부 함께 "
-"옮겨집니다."
+#: ../../advanced_features.rst:730
+msgid "Platform"
+msgstr "플랫폼"
 
 #: ../../advanced_features.rst:731
-msgid ""
-"Before version 0.2.0-beta.2 preferences lived in ``~/.modan2/config.json``. "
-"That file is copied to the new location automatically on first launch and "
-"then left alone; you can delete it once you have upgraded."
-msgstr ""
-"0.2.0-beta.2 이전에는 설정이 ``~/.modan2/config.json`` 에 있었습니다. 이 파일은 첫 실행 때 새 위치로 "
-"자동 복사된 뒤 그대로 남겨두므로, 업그레이드가 끝나면 삭제해도 됩니다."
+msgid "Location"
+msgstr "위치"
+
+#: ../../advanced_features.rst:732
+msgid "Windows"
+msgstr "Windows"
+
+#: ../../advanced_features.rst:733
+msgid "``%LOCALAPPDATA%\\PaleoBytes\\Modan2\\preferences.json``"
+msgstr "``%LOCALAPPDATA%\\PaleoBytes\\Modan2\\preferences.json``"
+
+#: ../../advanced_features.rst:734
+msgid "macOS"
+msgstr "macOS"
 
 #: ../../advanced_features.rst:735
+msgid "``~/Library/Application Support/PaleoBytes/Modan2/preferences.json``"
+msgstr "``~/Library/Application Support/PaleoBytes/Modan2/preferences.json``"
+
+#: ../../advanced_features.rst:736
+msgid "Linux"
+msgstr "Linux"
+
+#: ../../advanced_features.rst:737
+msgid "``~/.config/PaleoBytes/Modan2/preferences.json``"
+msgstr "``~/.config/PaleoBytes/Modan2/preferences.json``"
+
+#: ../../advanced_features.rst:739
+msgid ""
+"This is separate from your data (``~/PaleoBytes/Modan2/``, which holds the "
+"database, images, 3D models, logs and backups). Preferences are settings the"
+" application can recreate; your data cannot be recreated, so the two are "
+"kept apart."
+msgstr ""
+"이것은 데이터(``~/PaleoBytes/Modan2/`` — 데이터베이스, 이미지, 3D 모델, 로그, 백업)와 별개입니다. 설정은 "
+"애플리케이션이 다시 만들 수 있지만 데이터는 그럴 수 없으므로 둘을 따로 둡니다."
+
+#: ../../advanced_features.rst:744
+msgid ""
+"Preferences are copied forward automatically when the location changes, so "
+"upgrading never loses them. Earlier versions kept them in "
+"``~/PaleoBytes/Modan2/preferences.json`` and, before that, "
+"``~/.modan2/config.json``; those files are left in place and can be deleted "
+"once you have upgraded."
+msgstr ""
+"위치가 바뀌면 설정은 자동으로 새 위치로 복사되므로 업그레이드로 잃는 일이 없습니다. 이전 버전은 "
+"``~/PaleoBytes/Modan2/preferences.json`` 에, 그 전에는 ``~/.modan2/config.json`` "
+"에 두었습니다. 그 파일들은 그대로 남으며 업그레이드가 끝나면 삭제해도 됩니다."
+
+#: ../../advanced_features.rst:750
 msgid ""
 "Everything in the file is written by the **Preferences** dialog and by the "
 "window geometry that is remembered between sessions, so the normal way to "
@@ -958,298 +989,298 @@ msgstr ""
 "바꾸는 정상적인 방법은 UI를 이용하는 것입니다. Modan2를 기본값으로 되돌리려면 종료한 뒤 이 파일을 삭제하세요. 다음 실행 시 "
 "다시 만들어집니다."
 
-#: ../../advanced_features.rst:749
+#: ../../advanced_features.rst:764
 msgid "Command-Line Options"
 msgstr "명령줄 옵션"
 
-#: ../../advanced_features.rst:751
+#: ../../advanced_features.rst:766
 msgid "The application accepts a few options at startup:"
 msgstr "애플리케이션은 시작할 때 몇 가지 옵션을 받습니다:"
 
-#: ../../advanced_features.rst:753
+#: ../../advanced_features.rst:768
 msgid "``--db <path>`` — open a specific database instead of the default"
 msgstr "``--db <경로>`` — 기본 데이터베이스 대신 특정 데이터베이스를 엽니다"
 
-#: ../../advanced_features.rst:754
+#: ../../advanced_features.rst:769
 msgid "``--config <path>`` — use a different configuration file"
 msgstr "``--config <경로>`` — 다른 설정 파일을 사용합니다"
 
-#: ../../advanced_features.rst:755
+#: ../../advanced_features.rst:770
 msgid "``--lang <en|ko>`` — start in the given language"
 msgstr "``--lang <en|ko>`` — 지정한 언어로 시작합니다"
 
-#: ../../advanced_features.rst:756
+#: ../../advanced_features.rst:771
 msgid "``--debug`` — verbose logging"
 msgstr "``--debug`` — 상세 로깅"
 
-#: ../../advanced_features.rst:757
+#: ../../advanced_features.rst:772
 msgid "``--no-splash`` — skip the splash screen"
 msgstr "``--no-splash`` — 스플래시 화면을 건너뜁니다"
 
-#: ../../advanced_features.rst:758
+#: ../../advanced_features.rst:773
 msgid "``--version`` — print the version and exit"
 msgstr "``--version`` — 버전을 출력하고 종료합니다"
 
-#: ../../advanced_features.rst:761
+#: ../../advanced_features.rst:776
 msgid ""
 "Modan2 is not configured through environment variables; use these options "
 "(or the Preferences dialog) instead."
 msgstr "Modan2는 환경 변수로 설정하지 않습니다. 이 옵션들(또는 환경 설정 대화상자)을 사용하세요."
 
-#: ../../advanced_features.rst:765
+#: ../../advanced_features.rst:780
 msgid "Tips and Tricks"
 msgstr "팁과 요령"
 
-#: ../../advanced_features.rst:768
+#: ../../advanced_features.rst:783
 msgid "Keyboard Shortcuts"
 msgstr "키보드 단축키"
 
-#: ../../advanced_features.rst:770
+#: ../../advanced_features.rst:785
 msgid "**Main window:**"
 msgstr "**메인 창:**"
 
-#: ../../advanced_features.rst:772
+#: ../../advanced_features.rst:787
 msgid "``Ctrl+N``: New dataset"
 msgstr "``Ctrl+N``: 새 데이터셋"
 
-#: ../../advanced_features.rst:773
+#: ../../advanced_features.rst:788
 msgid "``Ctrl+Shift+N``: New object"
 msgstr "``Ctrl+Shift+N``: 새 객체"
 
-#: ../../advanced_features.rst:774
+#: ../../advanced_features.rst:789
 msgid "``Ctrl+Shift+O``: Edit object"
 msgstr "``Ctrl+Shift+O``: 객체 편집"
 
-#: ../../advanced_features.rst:775
+#: ../../advanced_features.rst:790
 msgid "``Ctrl+S``: Save changes"
 msgstr "``Ctrl+S``: 변경사항 저장"
 
-#: ../../advanced_features.rst:776
+#: ../../advanced_features.rst:791
 msgid "``Ctrl+I``: Import"
 msgstr "``Ctrl+I``: 가져오기"
 
-#: ../../advanced_features.rst:777
+#: ../../advanced_features.rst:792
 msgid "``Ctrl+E``: Export"
 msgstr "``Ctrl+E``: 내보내기"
 
-#: ../../advanced_features.rst:778
+#: ../../advanced_features.rst:793
 msgid "``Ctrl+G``: Analyze"
 msgstr "``Ctrl+G``: 분석"
 
-#: ../../advanced_features.rst:779
+#: ../../advanced_features.rst:794
 msgid "``Ctrl+P``: Toggle the object preview"
 msgstr "``Ctrl+P``: 객체 미리보기 켜기/끄기"
 
-#: ../../advanced_features.rst:780
+#: ../../advanced_features.rst:795
 msgid "``Ctrl+W``: Exit"
 msgstr "``Ctrl+W``: 종료"
 
-#: ../../advanced_features.rst:781
+#: ../../advanced_features.rst:796
 msgid "``F1``: About"
 msgstr "``F1``: 정보"
 
-#: ../../advanced_features.rst:783
+#: ../../advanced_features.rst:798
 msgid "**Object Dialog (Curve mode):**"
 msgstr "**객체 대화상자 (Curve 모드):**"
 
-#: ../../advanced_features.rst:785
+#: ../../advanced_features.rst:800
 msgid "``Enter`` / double-click: accept the current trace"
 msgstr "``Enter`` / 더블클릭: 현재 추적 확정"
 
-#: ../../advanced_features.rst:786
+#: ../../advanced_features.rst:801
 msgid "``Esc`` / right-click: cancel the current trace"
 msgstr "``Esc`` / 오른쪽 클릭: 현재 추적 취소"
 
-#: ../../advanced_features.rst:788
+#: ../../advanced_features.rst:803
 msgid "**Tables:**"
 msgstr "**표:**"
 
-#: ../../advanced_features.rst:790
+#: ../../advanced_features.rst:805
 msgid ""
 "``Ctrl+C`` / ``Ctrl+V``: copy and paste cells (e.g. to and from a "
 "spreadsheet)"
 msgstr "``Ctrl+C`` / ``Ctrl+V``: 셀 복사·붙여넣기 (예: 스프레드시트와 주고받기)"
 
-#: ../../advanced_features.rst:793
+#: ../../advanced_features.rst:808
 msgid "Workflow Optimization"
 msgstr "작업 흐름 최적화"
 
-#: ../../advanced_features.rst:795
+#: ../../advanced_features.rst:810
 msgid "**Efficient data entry:**"
 msgstr "**효율적인 데이터 입력:**"
 
-#: ../../advanced_features.rst:797
+#: ../../advanced_features.rst:812
 msgid "**Template datasets:**"
 msgstr "**템플릿 데이터셋:**"
 
-#: ../../advanced_features.rst:799
+#: ../../advanced_features.rst:814
 msgid "Create dataset with complete structure"
 msgstr "구조를 완전히 갖춘 데이터셋을 만들어 두세요"
 
-#: ../../advanced_features.rst:800
+#: ../../advanced_features.rst:815
 msgid "Duplicate for new studies"
 msgstr "새 연구마다 복제해서 사용하세요"
 
-#: ../../advanced_features.rst:801
+#: ../../advanced_features.rst:816
 msgid "Pre-defined variables and wireframes"
 msgstr "변수와 와이어프레임을 미리 정의해 두세요"
 
-#: ../../advanced_features.rst:803
+#: ../../advanced_features.rst:818
 msgid "**Keyboard navigation:**"
 msgstr "**키보드 이동:**"
 
-#: ../../advanced_features.rst:805
+#: ../../advanced_features.rst:820
 msgid "Tab between fields"
 msgstr "Tab으로 입력란 이동"
 
-#: ../../advanced_features.rst:806
+#: ../../advanced_features.rst:821
 msgid "Enter to confirm"
 msgstr "Enter로 확정"
 
-#: ../../advanced_features.rst:807
+#: ../../advanced_features.rst:822
 msgid "Escape to cancel"
 msgstr "Esc로 취소"
 
-#: ../../advanced_features.rst:809
+#: ../../advanced_features.rst:824
 msgid "**Batch operations:**"
 msgstr "**일괄 작업:**"
 
-#: ../../advanced_features.rst:811
+#: ../../advanced_features.rst:826
 msgid "Select multiple objects"
 msgstr "여러 객체 선택"
 
-#: ../../advanced_features.rst:812
+#: ../../advanced_features.rst:827
 msgid "Edit variables in table"
 msgstr "표에서 변수 편집"
 
-#: ../../advanced_features.rst:813
+#: ../../advanced_features.rst:828
 msgid "Copy/paste from spreadsheet"
 msgstr "스프레드시트에서 복사/붙여넣기"
 
-#: ../../advanced_features.rst:815
+#: ../../advanced_features.rst:830
 msgid "**Analysis workflows:**"
 msgstr "**분석 작업 흐름:**"
 
-#: ../../advanced_features.rst:833
+#: ../../advanced_features.rst:848
 msgid "Hidden Features"
 msgstr "숨은 기능"
 
-#: ../../advanced_features.rst:835
+#: ../../advanced_features.rst:850
 msgid "**Double-click behaviors:**"
 msgstr "**더블클릭 동작:**"
 
-#: ../../advanced_features.rst:837
+#: ../../advanced_features.rst:852
 msgid "Double-click dataset: Expand/collapse"
 msgstr "데이터셋 더블클릭: 펼치기/접기"
 
-#: ../../advanced_features.rst:838
+#: ../../advanced_features.rst:853
 msgid "Double-click object: Open object dialog"
 msgstr "객체 더블클릭: 객체 대화상자 열기"
 
-#: ../../advanced_features.rst:839
+#: ../../advanced_features.rst:854
 msgid "Double-click analysis: Open results"
 msgstr "분석 더블클릭: 결과 열기"
 
-#: ../../advanced_features.rst:841
+#: ../../advanced_features.rst:856
 msgid "**Right-click context menus:**"
 msgstr "**오른쪽 클릭 상황 메뉴:**"
 
-#: ../../advanced_features.rst:843
+#: ../../advanced_features.rst:858
 msgid ""
 "Right-click dataset in the tree: add a child dataset, object, or analysis; "
 "explore data; reload"
 msgstr "트리에서 데이터셋 오른쪽 클릭: 하위 데이터셋·객체·분석 추가, 데이터 탐색, 새로 고침"
 
-#: ../../advanced_features.rst:845
+#: ../../advanced_features.rst:860
 msgid "Right-click a landmark in the 2D viewer: delete it"
 msgstr "2D 뷰어에서 랜드마크 오른쪽 클릭: 삭제"
 
-#: ../../advanced_features.rst:846
+#: ../../advanced_features.rst:861
 msgid ""
 "Right-click a curve point (Curve mode): **Delete Point** / **Delete Curve**"
 msgstr "곡선의 점 오른쪽 클릭 (Curve 모드): **Delete Point** / **Delete Curve**"
 
-#: ../../advanced_features.rst:847
+#: ../../advanced_features.rst:862
 msgid "Right-click a row in the curve table: **Delete Curve (all specimens)**"
 msgstr "곡선 표의 행 오른쪽 클릭: **Delete Curve (all specimens)**"
 
-#: ../../advanced_features.rst:849
+#: ../../advanced_features.rst:864
 msgid "**Drag-and-drop:**"
 msgstr "**드래그 앤 드롭:**"
 
-#: ../../advanced_features.rst:851
+#: ../../advanced_features.rst:866
 msgid "Drag TPS file to window: Import"
 msgstr "TPS 파일을 창으로 끌어다 놓기: 가져오기"
 
-#: ../../advanced_features.rst:852
+#: ../../advanced_features.rst:867
 msgid "Drag image to object: Attach"
 msgstr "이미지를 객체로 끌어다 놓기: 첨부"
 
-#: ../../advanced_features.rst:853
+#: ../../advanced_features.rst:868
 msgid "Drag 3D model to object: Attach"
 msgstr "3D 모델을 객체로 끌어다 놓기: 첨부"
 
-#: ../../advanced_features.rst:856
+#: ../../advanced_features.rst:871
 msgid "Further Resources"
 msgstr "더 많은 자료"
 
-#: ../../advanced_features.rst:858
+#: ../../advanced_features.rst:873
 msgid "**Documentation:**"
 msgstr "**문서:**"
 
-#: ../../advanced_features.rst:860
+#: ../../advanced_features.rst:875
 msgid "Installation Guide: Detailed setup"
 msgstr "설치 안내서: 자세한 설치 방법"
 
-#: ../../advanced_features.rst:861
+#: ../../advanced_features.rst:876
 msgid "User Guide: Basic usage"
 msgstr "사용자 안내서: 기본 사용법"
 
-#: ../../advanced_features.rst:862
+#: ../../advanced_features.rst:877
 msgid "Troubleshooting Guide: Problem-solving"
 msgstr "문제 해결 안내서: 문제 해결"
 
-#: ../../advanced_features.rst:863
+#: ../../advanced_features.rst:878
 msgid "FAQ: Common questions"
 msgstr "FAQ: 자주 묻는 질문"
 
-#: ../../advanced_features.rst:865
+#: ../../advanced_features.rst:880
 msgid "**Community:**"
 msgstr "**커뮤니티:**"
 
-#: ../../advanced_features.rst:867
+#: ../../advanced_features.rst:882
 msgid "GitHub Discussions: Ask questions"
 msgstr "GitHub Discussions: 질문하기"
 
-#: ../../advanced_features.rst:868
+#: ../../advanced_features.rst:883
 msgid "GitHub Issues: Report bugs"
 msgstr "GitHub Issues: 버그 신고"
 
-#: ../../advanced_features.rst:870
+#: ../../advanced_features.rst:885
 msgid "**Development:**"
 msgstr "**개발:**"
 
-#: ../../advanced_features.rst:872
+#: ../../advanced_features.rst:887
 msgid "Developer Guide: Architecture"
 msgstr "개발자 안내서: 아키텍처"
 
-#: ../../advanced_features.rst:873
+#: ../../advanced_features.rst:888
 msgid "CONTRIBUTING.md: Contribution guide"
 msgstr "CONTRIBUTING.md: 기여 안내"
 
-#: ../../advanced_features.rst:874
+#: ../../advanced_features.rst:889
 msgid "GitHub Repository: Source code"
 msgstr "GitHub 저장소: 소스 코드"
 
-#: ../../advanced_features.rst:876
+#: ../../advanced_features.rst:891
 msgid "**Contact:**"
 msgstr "**연락처:**"
 
-#: ../../advanced_features.rst:878
+#: ../../advanced_features.rst:893
 msgid "Email: jikhanjung@gmail.com"
 msgstr "이메일: jikhanjung@gmail.com"
 
-#: ../../advanced_features.rst:879
+#: ../../advanced_features.rst:894
 msgid "GitHub: @jikhanjung"
 msgstr "GitHub: @jikhanjung"
 
@@ -1660,3 +1691,27 @@ msgstr "GitHub: @jikhanjung"
 
 #~ msgid "Right-click table: Copy data"
 #~ msgstr ""
+
+#~ msgid ""
+#~ "**Location:** ``~/PaleoBytes/Modan2/preferences.json`` on every platform "
+#~ "(``~`` is your home folder, e.g. ``C:\\Users\\<you>`` on Windows)."
+#~ msgstr ""
+#~ "**위치:** 모든 플랫폼에서 ``~/PaleoBytes/Modan2/preferences.json`` 입니다(``~`` 는 홈 폴더로,"
+#~ " Windows에서는 예를 들어 ``C:\\Users\\<사용자>``)."
+
+#~ msgid ""
+#~ "It sits beside the rest of your data in ``~/PaleoBytes/Modan2/``: the "
+#~ "database, ``data/`` for images and 3D models, ``logs/`` for log files, and "
+#~ "``backups/`` — so copying that one folder takes everything with it."
+#~ msgstr ""
+#~ "나머지 데이터와 같은 ``~/PaleoBytes/Modan2/`` 안에 함께 있습니다: 데이터베이스, 이미지와 3D 모델을 담는 "
+#~ "``data/``, 로그 파일을 담는 ``logs/``, 그리고 ``backups/`` — 따라서 이 폴더 하나만 복사하면 전부 함께 "
+#~ "옮겨집니다."
+
+#~ msgid ""
+#~ "Before version 0.2.0-beta.2 preferences lived in ``~/.modan2/config.json``. "
+#~ "That file is copied to the new location automatically on first launch and "
+#~ "then left alone; you can delete it once you have upgraded."
+#~ msgstr ""
+#~ "0.2.0-beta.2 이전에는 설정이 ``~/.modan2/config.json`` 에 있었습니다. 이 파일은 첫 실행 때 새 위치로 "
+#~ "자동 복사된 뒤 그대로 남겨두므로, 업그레이드가 끝나면 삭제해도 됩니다."

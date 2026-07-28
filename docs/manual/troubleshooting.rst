@@ -16,19 +16,19 @@ Several problems below come down to a file being missing or unwritable, so it
 helps to know where things are. ``~`` is your home folder (for example
 ``C:\Users\<you>`` on Windows).
 
-+-------------------+------------------------------------------+
-| What              | Where                                    |
-+===================+==========================================+
-| Database          | ``~/PaleoBytes/Modan2/Modan2.db``        |
-+-------------------+------------------------------------------+
-| Images, 3D models | ``~/PaleoBytes/Modan2/data/``            |
-+-------------------+------------------------------------------+
-| Log files         | ``~/PaleoBytes/Modan2/logs/``            |
-+-------------------+------------------------------------------+
-| Backups           | ``~/PaleoBytes/Modan2/backups/``         |
-+-------------------+------------------------------------------+
-| Preferences       | ``~/PaleoBytes/Modan2/preferences.json`` |
-+-------------------+------------------------------------------+
++-------------------+-------------------------------------+
+| What              | Where                               |
++===================+=====================================+
+| Database          | ``~/PaleoBytes/Modan2/Modan2.db``   |
++-------------------+-------------------------------------+
+| Images, 3D models | ``~/PaleoBytes/Modan2/data/``       |
++-------------------+-------------------------------------+
+| Log files         | ``~/PaleoBytes/Modan2/logs/``       |
++-------------------+-------------------------------------+
+| Backups           | ``~/PaleoBytes/Modan2/backups/``    |
++-------------------+-------------------------------------+
+| Preferences       | your OS settings folder (see below) |
++-------------------+-------------------------------------+
 
 Installation Issues
 -------------------
@@ -85,8 +85,21 @@ Permission Issues
 
 **Problem:** Settings not saving
 
-Preferences live in ``~/PaleoBytes/Modan2/preferences.json`` and are written when
-the application exits.
+Preferences are written when the application exits, to your operating system's
+settings folder:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 80
+
+   * - Platform
+     - Location
+   * - Windows
+     - ``%LOCALAPPDATA%\PaleoBytes\Modan2\preferences.json``
+   * - macOS
+     - ``~/Library/Application Support/PaleoBytes/Modan2/preferences.json``
+   * - Linux
+     - ``~/.config/PaleoBytes/Modan2/preferences.json``
 
 **Solution:**
 
@@ -96,10 +109,13 @@ the application exits.
    .. code-block:: bash
 
       # Windows (PowerShell)
-      rm "$env:USERPROFILE\PaleoBytes\Modan2\preferences.json"
+      rm "$env:LOCALAPPDATA\PaleoBytes\Modan2\preferences.json"
 
-      # Linux/macOS
-      rm ~/PaleoBytes/Modan2/preferences.json
+      # macOS
+      rm ~/Library/Application\ Support/PaleoBytes/Modan2/preferences.json
+
+      # Linux
+      rm ~/.config/PaleoBytes/Modan2/preferences.json
 
 Database Issues
 ---------------

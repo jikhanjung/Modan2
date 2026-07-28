@@ -9,6 +9,7 @@ from collections.abc import Callable
 from pathlib import Path
 
 import numpy as np
+import platformdirs
 
 # from stl import mesh
 import trimesh
@@ -102,37 +103,74 @@ DEFAULT_STORAGE_DIRECTORY = os.path.join(DEFAULT_DB_DIRECTORY, "data/")
 DEFAULT_LOG_DIRECTORY = os.path.join(DEFAULT_DB_DIRECTORY, "logs/")
 DB_BACKUP_DIRECTORY = os.path.join(DEFAULT_DB_DIRECTORY, "backups/")
 
-# Preferences live beside the database, not in a separate dot-directory: one
-# place holds everything the user owns (db, media, logs, backups, preferences),
-# so backing up or moving an installation is a single directory copy.
-DEFAULT_CONFIG_PATH = os.path.join(DEFAULT_DB_DIRECTORY, "preferences.json")
+# Preferences: the OS configuration location, not the data directory.
+#
+# They are application data, not user documents -- losing them resets window
+# positions, not anyone's research -- and they have to sit outside the data
+# directory regardless, because that directory's location is itself becoming a
+# preference and a setting cannot be stored in the place it points at.
+#
+# platformdirs rather than Qt's QStandardPaths: this module is imported before
+# main.py constructs the QApplication (logging is configured first), and Qt's
+# app-specific locations are derived from names that are not set yet, so an
+# eager resolution would silently yield the bare config root shared with every
+# other application. platformdirs is pure Python and has no such ordering.
+#
+# The vendor directory is appended by hand. platformdirs drops appauthor on
+# macOS and Linux, where a vendor level is not the convention -- but every other
+# path this application owns is grouped under PaleoBytes (the install directory,
+# the Start Menu folder, the data directory), and having settings alone diverge
+# on two of three platforms is worse than following a convention that merely
+# permits rather than requires the extra level.
+#
+#   Windows  %LOCALAPPDATA%\PaleoBytes\Modan2\preferences.json
+#   macOS    ~/Library/Application Support/PaleoBytes/Modan2/preferences.json
+#   Linux    $XDG_CONFIG_HOME (or ~/.config)/PaleoBytes/Modan2/preferences.json
+#
+# Note macOS resolves to Application Support, not ~/Library/Preferences: Apple
+# reserves the latter for the plist/defaults system, and this is a JSON file the
+# application manages itself.
+DEFAULT_CONFIG_PATH = os.path.join(platformdirs.user_config_dir(), COMPANY_NAME, PROGRAM_NAME, "preferences.json")
 
-# Where preferences lived before 0.2.0-beta.2. Only read, and only to migrate.
-LEGACY_CONFIG_PATH = os.path.join(USER_PROFILE_DIRECTORY, ".modan2", "config.json")
+# Where preferences have lived, newest first. Only read, and only to migrate.
+#   ~/PaleoBytes/Modan2/preferences.json   0.2.0-beta.2 (devlog 272)
+#   ~/.modan2/config.json                  before that
+LEGACY_CONFIG_PATHS = (
+    os.path.join(DEFAULT_DB_DIRECTORY, "preferences.json"),
+    os.path.join(USER_PROFILE_DIRECTORY, ".modan2", "config.json"),
+)
 
 
 def migrate_legacy_config():
-    """Copy pre-0.2.0-beta.2 preferences to their new home, once.
+    """Copy preferences forward from wherever they were last kept, once.
 
-    Without this the move silently resets every preference the user has set
-    (window geometry, language, overlay placement) — they would look lost
-    rather than moved. The legacy file is left in place: it costs nothing and
-    keeps an older build usable against the same profile.
+    Without this a relocation silently resets every preference the user has set
+    (window geometry, language, overlay placement) -- they would look lost
+    rather than moved. Legacy files are left in place: they cost nothing and
+    keep an older build usable against the same profile.
 
-    Returns True if a migration was performed.
+    Unlike the data directory, this is done automatically: the file is under a
+    kilobyte and a failed copy costs window positions, not research data.
+
+    Returns the path migrated from, or None if nothing was done.
     """
-    if os.path.exists(DEFAULT_CONFIG_PATH) or not os.path.exists(LEGACY_CONFIG_PATH):
-        return False
+    if os.path.exists(DEFAULT_CONFIG_PATH):
+        return None
+
+    source = next((p for p in LEGACY_CONFIG_PATHS if os.path.exists(p)), None)
+    if source is None:
+        return None
+
     try:
-        os.makedirs(DEFAULT_DB_DIRECTORY, exist_ok=True)
-        shutil.copyfile(LEGACY_CONFIG_PATH, DEFAULT_CONFIG_PATH)
+        os.makedirs(os.path.dirname(DEFAULT_CONFIG_PATH), exist_ok=True)
+        shutil.copyfile(source, DEFAULT_CONFIG_PATH)
     except OSError as e:
         # Not fatal: the caller falls back to defaults, which is the same
         # outcome as a fresh install.
-        logger.warning(f"Could not migrate preferences from {LEGACY_CONFIG_PATH}: {e}")
-        return False
-    logger.info(f"Migrated preferences from {LEGACY_CONFIG_PATH} to {DEFAULT_CONFIG_PATH}")
-    return True
+        logger.warning(f"Could not migrate preferences from {source}: {e}")
+        return None
+    logger.info(f"Migrated preferences from {source} to {DEFAULT_CONFIG_PATH}")
+    return source
 
 
 def ensure_directories():

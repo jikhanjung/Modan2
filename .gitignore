@@ -32,3 +32,10 @@ coverage.json
 
 # Databases and logs kept around for manual testing
 /testdb/
+
+# The changelog page is deliberately not translated: it includes the whole of
+# CHANGELOG.md, so every past release note would become a translation unit for
+# no real benefit. `sphinx-intl update` recreates this catalog anyway, so it is
+# ignored rather than merely deleted -- without this it would drift back in.
+# The Korean changelog page renders the English source, which is intended.
+docs/manual/locale/ko/LC_MESSAGES/changelog.po

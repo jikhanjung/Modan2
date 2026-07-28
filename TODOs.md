@@ -45,12 +45,13 @@ locations, two of them Roaming AppData. Now two: the program folder, and
       placeholders — because Inno does not compile off Windows. Test all three
       answers (remove / keep both / cancel) **and** a fresh machine with no old
       install, where the prompt must not appear at all.
-- [ ] **`changelog.po`: 111 untranslated / 18 fuzzy** (devlog 274). Not caused by
-      this session — devlog 269 repointed `changelog.rst` at the full
-      `CHANGELOG.md`, so the entire release history became translatable where
-      before it was a hand-maintained excerpt. Decide: translate all, translate
-      only recent releases, or exclude `changelog` from the Korean build. Note
-      devlog 262's "all 8 catalogs at zero" no longer holds because of this.
+- [x] **`changelog` excluded from translation** — DONE 2026-07-28 (devlog 274).
+      devlog 269 repointed `changelog.rst` at the full `CHANGELOG.md`, which made
+      the entire release history translatable (111 untranslated / 18 fuzzy) and
+      would have added work to every future release. `changelog.po` is deleted
+      and git-ignored, so `sphinx-intl update` recreating it cannot drift back
+      in; the Korean page renders the English source. devlog 262's "all 8
+      catalogs at zero" now reads "all 7".
 - [ ] **Orphaned `~/.modan2/`.** The legacy `config.json` is deliberately left
       behind (costs nothing, keeps older builds usable), and `~/.modan2/temp`
       is now unused. Consider removing both once the beta line is retired.

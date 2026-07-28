@@ -68,6 +68,20 @@ make gettext
 sphinx-intl update -p _build/gettext -l ko
 ```
 
+**`changelog` is deliberately untranslated.** `changelog.rst` includes the whole
+of `CHANGELOG.md`, so translating it would mean maintaining a Korean copy of
+every past release note. `sphinx-intl update` recreates
+`locale/ko/LC_MESSAGES/changelog.po` regardless, so that one file is
+git-ignored — delete it or leave it, but do not commit it. The Korean changelog
+page renders the English source, which is the intended result.
+
+Every other catalog is kept at **zero untranslated and zero fuzzy entries**;
+check with:
+
+```bash
+python -c "import polib,glob; [print(f, len(polib.pofile(f).untranslated_entries()), len(polib.pofile(f).fuzzy_entries())) for f in sorted(glob.glob('locale/ko/LC_MESSAGES/*.po'))]"
+```
+
 ### Edit Translation Files
 
 Edit `locale/ko/LC_MESSAGES/*.po` files using:
@@ -109,7 +123,7 @@ When adding new content:
 2. Build to test: `make html`
 3. Extract strings: `make gettext`
 4. Update translations: `sphinx-intl update -p _build/gettext -l ko`
-5. Translate `.po` files
+5. Translate `.po` files (all except `changelog.po` — see above)
 6. Build Korean version: `make html SPHINXOPTS="-D language=ko"`
 
 ## Deployment

@@ -53,7 +53,10 @@ locations, two of them Roaming AppData. Now two: the program folder, and
       in; the Korean page renders the English source. devlog 262's "all 8
       catalogs at zero" now reads "all 7".
 - [ ] **Make the data location configurable, then change its default**
-      (raised 2026-07-28, devlog 276). Two items, in this order.
+      (raised 2026-07-28, devlog 276). **Plan written: devlog P03**, which found
+      the work is far smaller than feared — media paths are computed from a base
+      path, not stored, so relocating is a directory move with no database
+      rewrite. Two items, in this order.
 
       **1. Configurable (higher value).** It currently is not.
       `dialogs/preferences_dialog.py:859` `select_folder` is labelled a "legacy

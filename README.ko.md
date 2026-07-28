@@ -5,7 +5,7 @@
 [![Tests](https://github.com/jikhanjung/Modan2/actions/workflows/test.yml/badge.svg)](https://github.com/jikhanjung/Modan2/actions/workflows/test.yml)
 [![Release Status](https://github.com/jikhanjung/Modan2/actions/workflows/release.yml/badge.svg)](https://github.com/jikhanjung/Modan2/actions/workflows/release.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 
 *Read this in other languages: [English](README.md), [한국어](README.ko.md)*
 
@@ -50,7 +50,7 @@ Modan2는 연구자들이 기하학적 형태분석을 통해 형태의 변이�
 
 ### 사전 요구사항
 
-- Python 3.11 이상 (CI는 3.11과 3.12에서 테스트합니다)
+- Python 3.12 이상 (CI는 3.12에서 테스트합니다)
 - Git
 
 ### 1. 리포지토리 복제

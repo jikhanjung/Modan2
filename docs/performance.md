@@ -1,8 +1,17 @@
 # Modan2 Performance Documentation
 
-**Version**: 0.1.5-alpha.1
-**Last Updated**: 2025-10-06
-**Status**: Post Phase 4 Optimization
+**Measurements taken**: 2025-10-06, against 0.1.5-alpha.1 (Phase 4/7 work)
+**Reviewed**: 2026-07-28 — see the note below
+
+> **These are dated measurements, not current claims.** The numbers below were
+> produced on 0.1.5-alpha.1 and have **not** been re-run since. Treat them as a
+> record of what the optimisation work achieved and as a baseline shape
+> (complexity, hotspot ordering), not as a description of today's build.
+>
+> The "Known Performance Issues" statuses are from the same date and were not
+> re-verified either; several CVA/MANOVA defects have been fixed since — see
+> `CHANGELOG.md`. Re-run `scripts/benchmark_analysis.py` and
+> `scripts/profile_detailed.py` before relying on any figure here.
 
 ## Executive Summary
 

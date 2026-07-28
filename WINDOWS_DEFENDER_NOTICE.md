@@ -53,5 +53,5 @@ https://www.microsoft.com/en-us/wdsi/submission
 
 ## Alternative Installation Methods
 1. Build from source: `python build.py`
-2. Run directly with Python: `python Modan2.py`
+2. Run directly with Python: `python main.py`
 3. Use the Linux AppImage or macOS DMG versions if available

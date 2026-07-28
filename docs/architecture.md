@@ -1,8 +1,7 @@
 # Modan2 Architecture Documentation
 
-**Version**: 0.1.5-alpha.1
-**Last Updated**: 2025-10-06
-**Status**: Post Phase 4 Refactoring
+**Version**: 0.2.0-beta.2
+**Last Updated**: 2026-07-28
 
 ## Overview
 
@@ -10,13 +9,14 @@ Modan2 is a desktop application for morphometric analysis, built with PyQt5 and 
 
 ## Project Statistics
 
-- **Total Python Files**: 98
-- **Total Lines of Code**: ~28,000
-- **Main Modules**: 24
-- **Dialog Modules**: 13
-- **Component Modules**: 1
-- **Test Files**: 30+
-- **Test Coverage**: 70%+ (core modules)
+Measured 2026-07-28.
+
+- **Application Python files**: 68 (~30,800 lines) — 20 at the root, 48 under
+  `dialogs/`, `components/`, `OBJFileLoader/` and `migrations/`
+- **Dialog modules**: 16 (`dialogs/`)
+- **Component modules**: 20 (`components/`)
+- **Test files**: 86 (~30,100 lines), 1892 tests
+- **Coverage**: 67% overall; see the table under Testing Architecture
 
 ## Architecture Pattern
 
@@ -424,19 +424,20 @@ tests/
 └── [other test files...]
 ```
 
-### Test Coverage (Post Phase 4)
+### Test Coverage
 
-| Module | Coverage | Tests | Status |
-|--------|----------|-------|--------|
-| MdStatistics.py | 95% | 50+ | ✅ Excellent |
-| MdUtils.py | 78% | 40+ | ✅ Good |
-| MdModel.py | 70% | 262 | ✅ Target Met |
-| ModanController.py | 70% | 92 | ✅ Target Met |
-| dialogs/ | 79% | 200+ | ✅ Good |
-| ModanComponents.py | 26% | 15 | ⚠️ Low (complex UI) |
-| Modan2.py | 40% | 20 | ⚠️ Moderate |
+Measured 2026-07-28 with `pytest --cov=.`:
 
-**Total**: 962 tests, 913 passing (94.9%)
+| Module | Coverage |
+|--------|----------|
+| MdStatistics.py | 93% |
+| MdModel.py | 92% |
+| MdUtils.py | 88% |
+| ModanController.py | 86% |
+| MdHelpers.py | 83% |
+| Modan2.py | 63% |
+
+**Total**: 1892 tests — 1882 passing, 10 skipped; 67% overall.
 
 ### Test Commands
 
@@ -490,41 +491,48 @@ pytest tests/test_performance.py -v
 
 ## Configuration and Settings
 
-### Application Settings (QSettings)
+### Preferences (JSON, not QSettings)
 
-**Organization**: "YourOrganization"
-**Application**: "Modan2"
+Preferences are a JSON file, `~/PaleoBytes/Modan2/preferences.json`
+(`mu.DEFAULT_CONFIG_PATH`), written atomically — temp file, `fsync`, `os.replace`
+— so an interrupted write cannot leave a truncated file that would silently reset
+every preference on the next launch.
 
-**Stored Settings**:
-```
-geometry/                    # Window positions and sizes
-    main_window
-    analysis_result_dialog
-    dataset_analysis_dialog
+`Modan2.SettingsWrapper` presents a QSettings-shaped API (`value` / `setValue`)
+over that dict and maps flat keys onto nested paths, e.g.
+`"WindowGeometry/MainWindow"` → `config["ui"]["window_geometry"]["main_window"]`.
+It is only a shape: **the application does not use QSettings**, and the helpers
+that did were removed in devlog 272.
 
-preferences/                 # User preferences
-    remember_geometry
-    default_dimension
-    color_list
-    marker_list
+Stored under `ui`: window geometry and maximized state per window,
+`remember_geometry`, toolbar icon size, plot size, background colour, landmark
+and wireframe size/colour for 2D and 3D, object-overlay placement. At the top
+level: `language`, and `calibration.unit`.
 
-recent/                      # Recent files
-    databases
-    imports
-```
+`--config <path>` overrides the file; the window carries the path so writes go
+back to the file that was read.
+
+### Where the user's files live
+
+Everything the user owns is under `~/PaleoBytes/Modan2/`
+(`mu.DEFAULT_DB_DIRECTORY`, the same on every platform): `Modan2.db`, `data/`
+for images and 3D models, `logs/`, `backups/`, `preferences.json` and `temp/`.
+The installed program is separate — `%LOCALAPPDATA%\PaleoBytes\Modan2` on
+Windows.
 
 ### Environment Variables
 
+**The application reads none of its own.** The Qt variables below are
+occasionally useful when diagnosing a Linux/WSL plugin failure, but they are
+Qt's, not Modan2's:
+
 ```bash
-# Qt platform plugin (Linux/WSL)
 export QT_QPA_PLATFORM_PLUGIN_PATH=/usr/lib/x86_64-linux-gnu/qt5/plugins/platforms
-
-# Enable Qt debugging
-export QT_DEBUG_PLUGINS=1
-
-# Database location (default: ./modan.db)
-export MODAN_DB_PATH=/path/to/database.db
+export QT_DEBUG_PLUGINS=1     # report which library libqxcb.so could not open
 ```
+
+Runtime paths are set with command-line flags instead: `--db`, `--config`,
+`--lang`, `--debug`, `--no-splash`.
 
 ## Build and Deployment
 

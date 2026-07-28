@@ -1,7 +1,8 @@
 # Modan2 Build Guide
 
-**Version**: 0.1.5-alpha.1
-**Last Updated**: 2025-10-08
+**Applies to**: whatever `version.py` currently holds — `build.py` reads it, so
+this guide uses `<version>` and `<build>` placeholders rather than naming one.
+**Last Updated**: 2026-07-28
 
 ---
 
@@ -34,7 +35,8 @@ This guide explains how to build Modan2 executables and installers from source c
 
 3. **Windows Installer** (Windows only):
    - Created with InnoSetup
-   - Output: `Output/Modan2-Setup-{VERSION}.exe`
+   - Output: `InnoSetup/Output/Modan2_v{VERSION}_build{BUILD}_Installer.exe`
+   - Installs per-user into `%LOCALAPPDATA%\PaleoBytes\Modan2`
 
 ---
 
@@ -128,7 +130,7 @@ If you need more control:
 
 ```bash
 # 1. Create build info
-python -c "import json; json.dump({'version': '0.1.5-alpha.1', 'build_number': 'manual'}, open('build_info.json', 'w'))"
+python -c "import json; json.dump({'version': '<version>', 'build_number': 'manual'}, open('build_info.json', 'w'))"
 
 # 2. Run PyInstaller
 pyinstaller --name=Modan2 \
@@ -146,9 +148,9 @@ pyinstaller --name=Modan2 \
 
 ### Build Configuration
 
-**Version** is read from `version.py`:
+**Version** is read from `version.py`, the single source of truth:
 ```python
-__version__ = "0.1.5-alpha.1"
+__version__ = "0.2.0-beta.2"   # whatever is current; build.py imports this
 ```
 
 **Build Number**:
@@ -176,31 +178,31 @@ python build.py
 
 **Expected Output**:
 ```
-Building Modan2 version 0.1.5-alpha.1
+Building Modan2 version <version>
 Build number: local
 Build date: 20251008
 Created build_info.json
 PyInstaller completed successfully
-Executable created: dist\Modan2_v0.1.5-alpha.1_buildlocal.exe
+Executable created: dist\Modan2_v<version>_buildlocal.exe
 PyInstaller completed successfully
 Executable created: dist\Modan2\Modan2.exe
 Copied ExampleDataset to dist/ExampleDataset
-Installer created with version 0.1.5-alpha.1
-Build completed for version 0.1.5-alpha.1
+Installer created with version <version>
+Build completed for version <version>
 ```
 
 **Build Artifacts**:
-- `dist/Modan2_v0.1.5-alpha.1_buildlocal.exe` - Portable executable
+- `dist/Modan2_v<version>_buildlocal.exe` - Portable executable
 - `dist/Modan2/` - Directory bundle
-- `Output/Modan2-Setup-0.1.5-alpha.1.exe` - Installer
+- `InnoSetup/Output/Modan2_v<version>_buildlocal_Installer.exe` - Installer
 
 **Testing**:
 ```cmd
 # Test one-file executable
-dist\Modan2_v0.1.5-alpha.1_buildlocal.exe
+dist\Modan2_v<version>_buildlocal.exe
 
 # Test installer
-Output\Modan2-Setup-0.1.5-alpha.1.exe
+InnoSetup\Output\Modan2_v<version>_buildlocal_Installer.exe
 ```
 
 ### Building on Linux
@@ -225,29 +227,29 @@ python3 build.py
 
 **Expected Output**:
 ```
-Building Modan2 version 0.1.5-alpha.1
+Building Modan2 version <version>
 Build number: local
 Build date: 20251008
 Created build_info.json
 PyInstaller completed successfully
-Executable created: dist/Modan2_v0.1.5-alpha.1_buildlocal_linux
+Executable created: dist/Modan2_v<version>_buildlocal_linux
 PyInstaller completed successfully
 Executable created: dist/Modan2/Modan2
 Inno Setup is Windows-only, skipping...
-Build completed for version 0.1.5-alpha.1
+Build completed for version <version>
 ```
 
 **Build Artifacts**:
-- `dist/Modan2_v0.1.5-alpha.1_buildlocal_linux` - Portable executable
+- `dist/Modan2_v<version>_buildlocal_linux` - Portable executable
 - `dist/Modan2/` - Directory bundle
 
 **Testing**:
 ```bash
 # Make executable
-chmod +x dist/Modan2_v0.1.5-alpha.1_buildlocal_linux
+chmod +x dist/Modan2_v<version>_buildlocal_linux
 
 # Test
-./dist/Modan2_v0.1.5-alpha.1_buildlocal_linux
+./dist/Modan2_v<version>_buildlocal_linux
 
 # Or test directory bundle
 ./dist/Modan2/Modan2
@@ -315,29 +317,29 @@ python3 build.py
 
 **Expected Output**:
 ```
-Building Modan2 version 0.1.5-alpha.1
+Building Modan2 version <version>
 Build number: local
 Build date: 20251008
 Created build_info.json
 PyInstaller completed successfully
-Executable created: dist/Modan2_v0.1.5-alpha.1_buildlocal_macos
+Executable created: dist/Modan2_v<version>_buildlocal_macos
 PyInstaller completed successfully
 Executable created: dist/Modan2/Modan2
 Inno Setup is Windows-only, skipping...
-Build completed for version 0.1.5-alpha.1
+Build completed for version <version>
 ```
 
 **Build Artifacts**:
-- `dist/Modan2_v0.1.5-alpha.1_buildlocal_macos` - Portable executable
+- `dist/Modan2_v<version>_buildlocal_macos` - Portable executable
 - `dist/Modan2/` - Directory bundle
 
 **Testing**:
 ```bash
 # Make executable
-chmod +x dist/Modan2_v0.1.5-alpha.1_buildlocal_macos
+chmod +x dist/Modan2_v<version>_buildlocal_macos
 
 # Test
-./dist/Modan2_v0.1.5-alpha.1_buildlocal_macos
+./dist/Modan2_v<version>_buildlocal_macos
 ```
 
 **Creating DMG** (optional):
@@ -355,7 +357,7 @@ create-dmg \
   --icon "Modan2.app" 200 190 \
   --hide-extension "Modan2.app" \
   --app-drop-link 600 185 \
-  "Modan2-0.1.5-alpha.1.dmg" \
+  "Modan2-<version>.dmg" \
   "dist/"
 ```
 
@@ -496,7 +498,7 @@ ls -lh dist/
 - [ ] `dist/Modan2_v{VERSION}_build{BUILD}.exe` (one-file)
 - [ ] `dist/Modan2/Modan2.exe` (directory bundle)
 - [ ] `dist/Modan2/` contains DLLs and data files
-- [ ] `Output/Modan2-Setup-{VERSION}.exe` (installer)
+- [ ] `InnoSetup/Output/Modan2_v{VERSION}_build{BUILD}_Installer.exe` (installer)
 - [ ] `build_info.json` created
 
 **Linux**:
@@ -661,4 +663,4 @@ python build.py
 
 **Document Version**: 1.0
 **Last Updated**: 2025-10-08
-**For Modan2 Version**: 0.1.5-alpha.1
+**For Modan2 Version**: <version>

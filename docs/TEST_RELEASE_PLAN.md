@@ -1,8 +1,10 @@
 # Test Release Workflow Validation Plan
 
 **Purpose**: Validate GitHub Actions release workflow before production release
-**Phase**: Phase 8 Day 2
-**Status**: Ready to Execute
+**Status**: **Historical.** This plan was executed in October 2025 (see devlog
+144–147) and is kept as a record of what was checked. The release workflow has
+changed since — the release body now comes from `CHANGELOG.md` and the installer
+is per-user — so re-use the shape of these checks, not the steps verbatim.
 
 ---
 

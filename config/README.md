@@ -107,15 +107,15 @@ The workflow automatically:
 
 ### Test Coverage
 
-Current coverage: **34%** (baseline)
+Current coverage: **67%** (measured 2026-07-28)
 
 **Coverage by file:**
-- `MdModel.py`: 47%
-- `ModanController.py`: 53%
-- `MdStatistics.py`: 44%
-- `Modan2.py`: 40%
-- `ModanDialogs.py`: 21%
-- `ModanComponents.py`: 25%
+- `MdStatistics.py`: 93%
+- `MdModel.py`: 92%
+- `MdUtils.py`: 88%
+- `ModanController.py`: 86%
+- `MdHelpers.py`: 83%
+- `Modan2.py`: 63%
 
 **Coverage goals:**
 - Core logic (Model, Controller, Statistics): 70%+

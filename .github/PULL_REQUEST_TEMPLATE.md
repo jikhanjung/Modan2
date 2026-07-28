@@ -13,7 +13,7 @@
 
 ## Testing
 - [ ] Tests pass locally with `pytest`
-- [ ] Application launches successfully with `python Modan2.py`
+- [ ] Application launches successfully with `python main.py`
 - [ ] New tests added for new functionality
 - [ ] Manual testing performed
 

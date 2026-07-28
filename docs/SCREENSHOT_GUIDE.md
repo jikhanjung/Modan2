@@ -2,8 +2,8 @@
 
 **Purpose**: Capture screenshots for user documentation (Quick Start and User Guide)
 
-**Target**: Phase 8 Day 2
-**Status**: TODO - Requires GUI environment
+**Status**: **Not done.** Still requires someone at a GUI session; the published
+manual has no screenshots. The conventions below stand.
 
 ---
 

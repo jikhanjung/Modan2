@@ -1,15 +1,21 @@
 # Handoff
 
-## ▶ Current state (updated 2026-07-20)
+## ▶ Current state (updated 2026-07-28)
 
-**v0.1.6 released** (tag `v0.1.6`, commit `b4fd1a2`, 2026-07-20). Suite verified
-2026-07-20: **1404 passed, 75 skipped** (`pytest`, ~4.5 min), coverage **59%**.
+**v0.2.0-beta.2 released** (tag `v0.2.0-beta.2`, 2026-07-28, build 844,
+prerelease). Suite verified 2026-07-28: **1882 passed, 10 skipped**
+(`pytest -p no:xvfb`, ~5 min), coverage **67%**.
 
-Release convention from 2026-07-20: **each release bumps the patch version by
-one**, no prerelease suffixes. Edit `version.py` only — everything else reads
-from it (`MdUtils.PROGRAM_VERSION`, `MdConstants.APP_VERSION` and `main.py`'s
-strings are `ImportError` fallbacks). The GitHub release body is now the tag's
-own `CHANGELOG.md` section, extracted by `release.yml`.
+The 0.2 line is a pre-release series, so the patch-only convention noted here on
+2026-07-20 no longer applies — `manage_version.py prerelease` / `stage` drive the
+suffix. Edit `version.py` only; everything else reads from it
+(`MdUtils.PROGRAM_VERSION`, `MdConstants.APP_VERSION` and `main.py`'s strings are
+`ImportError` fallbacks). The GitHub release body is the tag's own
+`CHANGELOG.md` section, extracted by `release.yml`.
+
+The full release procedure now lives in the published developer guide
+(`docs/manual/developer_guide.rst`, "Creating Releases"); the three Markdown
+files that used to describe it were deleted in devlog 274.
 
 Everything below the line is **done and closed**:
 
@@ -119,13 +125,14 @@ Low coverage elsewhere is expected and not worth chasing: the OpenGL/Qt viewers
 - ~~Missing-landmark PCA gaps~~ — **all closed**. Positions that disagree are
   rejected with an actionable message (217); landmarks nothing can impute are
   named and declined (218).
-- **Delete `RELEASE_NOTES.md`** (deferred 2026-07-20, do it next session). It is
-  420 stale lines still describing itself as "Version: 0.1.5-alpha.1 / Status:
-  Pre-release / Alpha". Nothing reads it any more — `release.yml` now builds the
-  release body from the tag's `CHANGELOG.md` section — so it is dead weight that
-  reads like current release documentation.
-- Housekeeping: 6 open dependabot PRs (numpy, pytest family); stale local
-  branches `feature/missing-landmark`, `feature/pyqt6-quick-test`.
+- ~~Delete `RELEASE_NOTES.md`~~ — **done** (devlog 269), along with the rest of
+  the release-documentation sprawl in devlog 274.
+- Housekeeping: stale remote branches `feature/missing-landmark`,
+  `feature/pyqt6-quick-test`.
+
+**Open work is tracked in `TODOs.md`, not here** — this file records where 0.1.6
+landed and the analysis behind it. The current item is verifying the beta.2
+Windows installer on real hardware (devlog 272–274).
 
 ---
 

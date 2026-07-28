@@ -4,7 +4,7 @@
 [![Tests](https://github.com/jikhanjung/Modan2/actions/workflows/test.yml/badge.svg)](https://github.com/jikhanjung/Modan2/actions/workflows/test.yml)
 [![Release Status](https://github.com/jikhanjung/Modan2/actions/workflows/release.yml/badge.svg)](https://github.com/jikhanjung/Modan2/actions/workflows/release.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 
 *Read this in other languages: [English](README.md), [한국어](README.ko.md)*
 
@@ -55,7 +55,7 @@ Follow these instructions to run Modan2 from the source code.
 
 ### Prerequisites
 
-- Python 3.11 or newer (CI runs the test suite on 3.11 and 3.12)
+- Python 3.12 or newer (CI runs the test suite on 3.12)
 - Git
 
 ### 1. Clone the Repository

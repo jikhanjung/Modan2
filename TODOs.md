@@ -52,21 +52,47 @@ locations, two of them Roaming AppData. Now two: the program folder, and
       and git-ignored, so `sphinx-intl update` recreating it cannot drift back
       in; the Korean page renders the English source. devlog 262's "all 8
       catalogs at zero" now reads "all 7".
-- [ ] **Is `~/PaleoBytes/Modan2/` the right home for user data?** (raised
-      2026-07-28, devlog 276). It matches no platform convention: Windows would
-      use `%LOCALAPPDATA%\<Vendor>\<App>` or `Documents\`, macOS
-      `~/Library/Application Support/`, Linux XDG `~/.local/share/`. The profile
-      root is for known folders, not application data. It predates this session
-      (`MdUtils.py:100`).
-      Defensible as it stands — the datasets are the user's only copy, a visible
-      folder is findable, and one directory copy moves an installation. But one
-      concrete risk: **OneDrive's Known Folder Move backs up Documents/Desktop,
-      not arbitrary profile-root folders**, so users who assume their files are
-      in the cloud would have the database silently excluded.
-      Moving it is a different order of risk from the install path: it means
-      relocating every existing user's database and media, where a failure loses
-      data. Decide between moving it (with a real migration) and keeping it plus
-      documenting the backup gap.
+- [ ] **Make the data location configurable, then change its default**
+      (raised 2026-07-28, devlog 276). Two items, in this order.
+
+      **1. Configurable (higher value).** It currently is not.
+      `dialogs/preferences_dialog.py:859` `select_folder` is labelled a "legacy
+      method", the `edtDataFolder` widget it writes to **is never created**, the
+      chosen path is stored only on the dialog instance, and `Modan2.py:568`
+      overwrites `m_app.storage_directory` with `DEFAULT_STORAGE_DIRECTORY`
+      unconditionally. So it is dead UI. Research setups legitimately want data
+      on a network share or a specific volume — 3D models reach tens of GB — and
+      `--db` moves only the database, not the media store. Wire the setting up
+      and persist it in `preferences.json`.
+
+      **2. Default → `~/Documents/PaleoBytes/Modan2`.** `~/PaleoBytes/Modan2/`
+      matches no platform convention (Windows uses `%LOCALAPPDATA%\<Vendor>\<App>`
+      or `Documents\`, macOS `~/Library/Application Support/`, Linux XDG
+      `~/.local/share/`); the profile root is for known folders. It predates this
+      session (`MdUtils.py:100`).
+
+      Documents rather than `%LOCALAPPDATA%`, even though LocalAppData is the
+      by-the-book answer for "application data": LocalAppData is Microsoft's
+      place for machine-local data whose loss is survivable, and this is the
+      user's only copy of their specimens, landmarks and analyses. It is also
+      excluded from OneDrive Known Folder Move, so it would not fix the backup
+      gap — **KFM covers Documents/Desktop/Pictures but not arbitrary
+      profile-root folders**, which is the one concrete harm in the status quo:
+      users who believe their files are in the cloud have the database silently
+      left out. Documents is backed up by the tooling people actually have
+      (OneDrive KFM, Time Machine), is findable when sending a dataset to a
+      collaborator, and matches the semantics.
+
+      Resolve it with `QStandardPaths.DocumentsLocation`, not by joining
+      `expanduser("~")` with `"Documents"` — the former handles localised folder
+      names (`문서` on Korean Windows) and redirected known folders.
+
+      **Migration is the real work.** Unlike the install path, this relocates
+      every existing user's database and media, and a failure loses data. First
+      thing to check: whether media paths are stored relative or absolute.
+      `MdModel.get_file_path(base_path=...)` taking a base path suggests
+      relative, in which case moving the directory may suffice — **but verify
+      before assuming.**
 - [ ] **Orphaned `~/.modan2/`.** The legacy `config.json` is deliberately left
       behind (costs nothing, keeps older builds usable), and `~/.modan2/temp`
       is now unused. Consider removing both once the beta line is retired.

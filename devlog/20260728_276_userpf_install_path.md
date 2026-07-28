@@ -73,7 +73,35 @@ per-user의 알려진 약점이 이걸로 완화된다 — 관리된 환경에�
 
 **이번에 바꾸지 않았다.** 설치 경로 변경은 신규 설치만 영향받지만, 데이터 이동은
 기존 사용자의 DB·미디어를 실제로 옮겨야 하고 실패하면 데이터 손실이다. 설정 파일
-마이그레이션(999바이트 복사)과는 규모가 다르다. TODOs에 판단 항목으로 남겼다.
+마이그레이션(999바이트 복사)과는 규모가 다르다.
+
+### 권장안 (TODOs에 기록)
+
+조사하다 **위치를 바꿀 방법이 아예 없다는 것** 을 발견했다.
+`dialogs/preferences_dialog.py:859` 의 `select_folder` 는 주석 그대로 "legacy
+method" 이고, 거기서 쓰는 `edtDataFolder` 위젯은 **생성되는 곳이 없다.** 고른
+경로는 다이얼로그 인스턴스에만 남고, `Modan2.py:568` 이
+`m_app.storage_directory` 를 `DEFAULT_STORAGE_DIRECTORY` 로 무조건 덮어쓴다.
+죽은 UI다.
+
+그래서 순서는 **기본값보다 설정 가능화가 먼저** 다. 연구 환경에서는 데이터를
+네트워크 드라이브나 특정 볼륨에 두려는 요구가 실재하고(3D 모델은 수십 GB에
+이른다), `--db` 는 데이터베이스만 옮기고 미디어 저장소는 못 옮긴다.
+
+기본값은 **`~/Documents/PaleoBytes/Modan2`** 를 권한다. `%LOCALAPPDATA%` 가
+"앱 데이터"의 교과서적 답이지만 이 데이터에는 맞지 않는다 — LocalAppData는
+*잃어도 복구 가능한* 머신 로컬 데이터의 자리인데, 여기 있는 것은 사용자의 유일한
+연구 사본이다. 게다가 LocalAppData도 OneDrive KFM 대상이 아니므로 **백업 공백이
+그대로다.** Documents는 사용자가 실제로 쓰는 백업 도구(OneDrive KFM, Time
+Machine)가 기본으로 포함하고, 협업자에게 데이터셋을 보낼 때 찾을 수 있다.
+
+구현 시 `QStandardPaths.DocumentsLocation` 을 쓸 것. `expanduser("~")` 에
+`"Documents"` 를 붙이면 한국어 Windows의 `문서` 같은 지역화된 폴더명과 리디렉션된
+알려진 폴더에서 깨진다.
+
+마이그레이션에서 먼저 볼 것: **미디어 경로가 상대인지 절대인지.**
+`MdModel.get_file_path(base_path=...)` 가 base_path를 받는 것을 보면 상대일
+가능성이 높고 그렇다면 디렉터리 이동으로 충분하지만, 확인 없이 단정할 수 없다.
 
 ## 릴리스 처리
 

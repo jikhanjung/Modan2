@@ -38,11 +38,19 @@ Written for contributors and maintainers, not for users of the application:
 |---|---|
 | `BUILD_GUIDE.md` | Building the frozen executables and installers |
 | `TEST_RELEASE_PLAN.md` | Pre-release testing plan |
-| `CODE_QUALITY_GUIDE.md` | Linting, formatting, typing, complexity |
+| `CODE_QUALITY_GUIDE.md` | **Superseded, frozen at v1.0** — see `.guides/desktop/` |
 | `GITHUB_PAGES_SETUP.md` | How the documentation site is configured |
 | `SCREENSHOT_GUIDE.md` | Conventions for documentation screenshots |
 | `architecture.md` | Internal architecture notes |
 | `performance.md` | Performance measurements and analysis |
+
+**What belongs here, and what does not.** These are *this project's* operational
+documents — how to build Modan2, how its site is configured, what its numbers
+are. Guidance meant to transfer to other projects lives in the shared PaleoBytes
+guide set at `.guides/desktop/` (a symlink; see the repository `CLAUDE.md`), not
+in a copy here. `CODE_QUALITY_GUIDE.md` is the one file that crossed that line —
+it was written as a reusable guide, the shared set has since taken that role, and
+it is kept only as the dated baseline other records cite. Devlog 280.
 
 ### User-facing guides live in `manual/`, not here
 

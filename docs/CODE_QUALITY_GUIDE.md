@@ -1,6 +1,40 @@
 # Code Quality Guide — Multi-Platform Desktop Software
 
-**Version**: 1.0
+> ## ⚠ Superseded. Frozen at v1.0 — do not update.
+>
+> **For current guidance, read `.guides/desktop/` instead.** This document was
+> written to be reusable across projects; the shared PaleoBytes guide set now
+> holds that role and has outgrown it — roughly five times the material, with
+> the same ground covered in more detail. Where this guide records a case in one
+> sentence, the shared one usually records the fix as well.
+>
+> | This document | Where it now lives |
+> |---|---|
+> | §0 Why desktop is different | `.guides/desktop/README.md` |
+> | §1–2 Linting, typing · §3–4 Testing · §8 Robustness · §9 Resources · §10 i18n · §11 Performance · §13 Dead code | `.guides/desktop/code-quality.md` |
+> | §5 Cross-platform CI · §6 Dependencies · §12 Security scanning · §14 Gating | `.guides/desktop/ci.md` |
+> | §7 Packaging & release verification | `.guides/desktop/packaging-release.md` |
+> | Appendix A Adoption checklist | `.guides/desktop/README.md` |
+>
+> **Section numbers do not survive the move.** §7 here is *Packaging & release
+> verification*; §7 of `code-quality.md` is *Dead code, complexity & duplication*.
+> Cite documents by name, never as "§7 of the guide".
+>
+> ### Why it is kept rather than deleted
+>
+> It is a **dated baseline that other records are measured against**, and a
+> baseline that changes measures nothing:
+>
+> - CTHarvester scored its adoption table against Appendix A of *this version*,
+>   and froze that baseline into its own devlog 120 for the same reason.
+> - CTHarvester's devlogs 100 and 103 cite this file by relative path as the
+>   record of what they audited against at the time.
+> - This project's devlog 242 cites `§6` of this document by number.
+>
+> Editing it would silently invalidate all three. Improvements belong in
+> `.guides/desktop/`. See devlog 280.
+
+**Version**: 1.0 (frozen 2026-07-29)
 **Last Updated**: 2026-07-23
 **Scope**: A comprehensive, reusable checklist of the code-quality practices a
 cross-platform (Windows / macOS / Linux) desktop application should adopt —

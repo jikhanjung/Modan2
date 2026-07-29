@@ -17,10 +17,28 @@ identity, CI, packaging, code quality).
   broken symlink reads as *an empty directory* rather than an error. Check the
   link before concluding the guides are silent on something. Setup: devlog 279.
 
-Note the overlap: `docs/CODE_QUALITY_GUIDE.md` is this project's own document and
-is what `.guides/desktop/code-quality.md` was distilled from; sibling projects
-reference the former by relative path. Which one is canonical is **not settled** —
-see devlog 279.
+**`docs/CODE_QUALITY_GUIDE.md` is superseded and frozen at v1.0** (settled
+2026-07-29, devlog 280). The shared set took over the reusable-guidance role and
+outgrew it — about five times the material over the same ground. Read
+`.guides/desktop/` for anything current; the frozen file carries a map of where
+each of its sections went.
+
+It is kept, not deleted, because it is a **dated baseline that other records are
+measured against** — CTHarvester's adoption table (its devlog 120), CTHarvester's
+devlogs 100 and 103, and this project's devlog 242, which cites it by section
+number. A baseline that changes measures nothing, so **do not edit it**; put
+improvements in `.guides/desktop/`.
+
+**Section numbers do not survive the move, and that is the trap** — this
+project's §7 is *Packaging & release verification*, the shared guide's §7 is
+*Dead code, complexity & duplication*. Cite documents by name, never "§7 of the
+guide".
+
+The dividing line for `docs/` generally: **this project's operational documents
+stay here** (how to build Modan2, how its site is configured, its own
+measurements); **guidance meant to transfer to other projects lives in
+`.guides/`**, referenced rather than copied. `CODE_QUALITY_GUIDE.md` is the one
+file that had crossed that line.
 
 ## Key Information
 

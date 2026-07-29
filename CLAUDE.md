@@ -3,6 +3,25 @@
 ## Project Overview
 Modan2 is a desktop GUI application for morphometric analysis, supporting 2D/3D landmark-based shape analysis with statistical tools.
 
+## The family-wide conventions are not in this repository
+
+`.guides/` is a symlink to a checkout of the shared PaleoBytes guide set;
+`.guides/desktop/README.md` is the entry point (file locations, installer
+identity, CI, packaging, code quality).
+
+- **Referenced, not copied.** A copy drifts from the source and does not report
+  that it has — that happened within a day of the guides being written, and the
+  stale part was a generalization of *this project's* plan, since revised.
+- **Not committed here.** The guides are private and this repository is public.
+- **The link can dangle.** Without the checkout it resolves to nothing, and a
+  broken symlink reads as *an empty directory* rather than an error. Check the
+  link before concluding the guides are silent on something. Setup: devlog 279.
+
+Note the overlap: `docs/CODE_QUALITY_GUIDE.md` is this project's own document and
+is what `.guides/desktop/code-quality.md` was distilled from; sibling projects
+reference the former by relative path. Which one is canonical is **not settled** —
+see devlog 279.
+
 ## Key Information
 
 ### Main Entry Point
@@ -205,6 +224,10 @@ temp file so the mistake can't reach real data, and
 - Migrations tracked in `migrations/` folder
 
 ### Where the user's files live
+
+The family-wide rules behind this layout — including the part that has already
+been revised once — are in `.guides/desktop/file-locations.md`. What follows is
+this project's realization of them.
 
 **Everything the user owns is under one directory** — by default
 `~/PaleoBytes/Modan2/` (`mu.DEFAULT_DB_DIRECTORY`, same on every platform, and

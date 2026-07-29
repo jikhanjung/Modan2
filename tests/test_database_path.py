@@ -215,3 +215,56 @@ class TestDatabaseBackup:
         finally:
             _restore_default(original)
 
+
+class TestTheRealDatabaseIsOutOfReach:
+    """The session must never be able to write to the user's own library.
+
+    Fixtures in five test files used to rebind ``MdModel.gDatabase`` and nothing
+    else. That redirects nothing — peewee resolves ``create_tables``,
+    ``drop_tables`` and every query through each model's ``_meta.database`` — so
+    they were creating and dropping tables in ``~/PaleoBytes/Modan2/Modan2.db``.
+    A *passing* run of ``tests/test_landmark_parsing.py`` removed the
+    ``mddataset`` and ``mdobject`` tables, taking every dataset and object with
+    them.
+
+    The fixtures are fixed. This guards the guard: ``conftest`` repoints the
+    default binding at a throwaway file for the whole session, so the same
+    mistake damages that instead. Deleting it would make the failure silent
+    again.
+    """
+
+    def _real_paths(self):
+        import MdUtils as mu
+
+        default = os.path.abspath(mu.DEFAULT_DB_DIRECTORY)
+        return {
+            os.path.join(default, "Modan2.db"),
+            os.path.join(os.path.abspath(os.path.expanduser("~")), "PaleoBytes", "Modan2", "Modan2.db"),
+        }
+
+    def test_the_default_binding_is_a_throwaway_file(self):
+        assert MdModel.gDatabase.database not in self._real_paths()
+
+    def test_every_model_is_bound_away_from_it(self):
+        for model in (MdModel.MdDataset, MdModel.MdObject, MdModel.MdImage, MdModel.MdThreeDModel, MdModel.MdAnalysis):
+            bound = model._meta.database.database
+            assert bound not in self._real_paths(), f"{model.__name__} is bound to the user's real database"
+
+    def test_writing_through_a_model_cannot_reach_it(self):
+        """The end the guard exists for: a stray create() hits nothing real."""
+        import contextlib
+
+        import peewee
+
+        import MdUtils as mu
+
+        real = os.path.join(os.path.abspath(mu.DEFAULT_DB_DIRECTORY), "Modan2.db")
+        before = os.path.getmtime(real) if os.path.exists(real) else None
+
+        # The throwaway session database has no schema, so this raises. That is
+        # the point: the write went somewhere harmless instead of the real file.
+        with contextlib.suppress(peewee.OperationalError):
+            MdModel.MdDataset.create(dataset_name="probe", dimension=2)
+
+        after = os.path.getmtime(real) if os.path.exists(real) else None
+        assert before == after, "a model write reached the user's real database file"

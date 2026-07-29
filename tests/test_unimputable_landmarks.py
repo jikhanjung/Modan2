@@ -15,7 +15,6 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from peewee import SqliteDatabase
 
-import MdModel
 from MdModel import MdDataset, MdObject, find_unimputable_landmarks
 from ModanController import unimputable_landmarks_message
 
@@ -23,12 +22,15 @@ test_db = SqliteDatabase(":memory:")
 
 
 @pytest.fixture
-def setup_database():
-    MdModel.gDatabase = test_db
-    test_db.create_tables([MdDataset, MdObject])
-    yield
-    test_db.drop_tables([MdDataset, MdObject])
-    test_db.close()
+def setup_database(bound_database):
+    """Bind the models to an in-memory database for the test.
+
+    Via ``bound_database``, not by assigning ``MdModel.gDatabase``: peewee
+    resolves table creation and queries through each model's own
+    ``_meta.database``, so reassigning gDatabase alone left this fixture
+    creating and dropping tables in the user's real library.
+    """
+    yield bound_database(test_db, [MdDataset, MdObject])
 
 
 BASE = [

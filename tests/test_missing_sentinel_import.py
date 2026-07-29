@@ -227,16 +227,17 @@ class TestControllerSerialisation:
     """None must reach the DB as the 'Missing' marker, not the string 'None'."""
 
     @pytest.fixture
-    def imported_object(self, tmp_path):
+    def imported_object(self, tmp_path, bound_database):
         from peewee import SqliteDatabase
 
-        import MdModel
         from MdModel import MdDataset, MdObject
         from ModanController import ModanController
 
-        db = SqliteDatabase(":memory:")
-        MdModel.gDatabase = db
-        db.create_tables([MdDataset, MdObject])
+        # Via bound_database, not by assigning MdModel.gDatabase: peewee resolves
+        # table creation and queries through each model's own _meta.database, so
+        # reassigning gDatabase alone left this creating and dropping tables in
+        # the user's real library.
+        bound_database(SqliteDatabase(":memory:"), [MdDataset, MdObject])
 
         class _ImportData:
             dimension = 2
@@ -252,8 +253,6 @@ class TestControllerSerialisation:
         dataset = controller.import_dataset(_ImportData(), "ds", str(tmp_path))
         obj = list(dataset.object_list)[0]
         yield obj
-        db.drop_tables([MdDataset, MdObject])
-        db.close()
 
     def test_none_is_stored_as_missing_marker(self, imported_object):
         assert "None" not in imported_object.landmark_str

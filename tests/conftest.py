@@ -224,6 +224,71 @@ def suppress_modal_dialogs(monkeypatch):
     monkeypatch.setattr("PyQt5.QtWidgets.QDialog.open", lambda self: None)
 
 
+ALL_MODELS = ("MdDataset", "MdObject", "MdImage", "MdThreeDModel", "MdAnalysis")
+
+
+@pytest.fixture(autouse=True, scope="session")
+def _never_touch_the_real_database(tmp_path_factory):
+    """Make the user's real database unreachable for the whole test session.
+
+    A safety net, not a convenience. Several fixtures used to rebind
+    ``MdModel.gDatabase`` and nothing else, which does **not** redirect anything:
+    peewee resolves ``create_tables``, ``drop_tables`` and every query through
+    each model's own ``_meta.database``, still pointing at
+    ``~/PaleoBytes/Modan2/Modan2.db``. Those fixtures were creating and dropping
+    tables in the developer's actual library — a *passing* run of
+    ``tests/test_landmark_parsing.py`` deleted the ``mddataset`` and ``mdobject``
+    tables, and with them every dataset and object a real user had.
+
+    The individual fixtures are fixed, but the failure mode is silent and easy to
+    reintroduce, so the default binding is pointed at a throwaway file before any
+    test runs. Anything that forgets to redirect now damages that file instead.
+    """
+    import MdModel
+
+    MdModel.set_database_path(str(tmp_path_factory.mktemp("session-db") / "Modan2.db"))
+    yield
+
+
+@pytest.fixture
+def bound_database():
+    """Point the peewee models at a throwaway database, and put them back.
+
+    Use this instead of assigning ``MdModel.gDatabase`` — see
+    ``_never_touch_the_real_database`` for why that alone does nothing.
+
+    Call as ``bound_database(db, [MdDataset, MdObject])``. Tables are created on
+    entry, dropped on exit, and every model's original binding is restored even
+    if the test fails.
+    """
+    import MdModel
+
+    state = {}
+
+    def _bind(db, models):
+        state["db"] = db
+        state["models"] = models
+        state["original_g"] = MdModel.gDatabase
+        state["originals"] = {m: m._meta.database for m in models}
+        MdModel.gDatabase = db
+        for model in models:
+            model._meta.database = db
+        db.create_tables(models)
+        return db
+
+    yield _bind
+
+    if state:
+        db, models = state["db"], state["models"]
+        try:
+            db.drop_tables(models)
+        finally:
+            db.close()
+            MdModel.gDatabase = state["original_g"]
+            for model, original in state["originals"].items():
+                model._meta.database = original
+
+
 @pytest.fixture
 def mock_database(monkeypatch, temp_db):
     """Mock database operations."""

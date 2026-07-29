@@ -1,12 +1,14 @@
 """UI tests for PreferencesDialog."""
 
+import os
 from unittest.mock import Mock, patch
 
 import pytest
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QDialog, QWidget
+from PyQt5.QtWidgets import QDialog, QFileDialog, QMessageBox, QWidget
 
+import MdUtils as mu
 from dialogs import PreferencesDialog
 
 
@@ -434,3 +436,106 @@ class TestPreferencesDialogIntegration:
 
         # Just verify close doesn't crash
         assert True
+
+
+class TestDataFolderPreference:
+    """The data-folder row, which used to be a handler with no widget.
+
+    ``select_folder`` existed and referenced ``edtDataFolder``, but nothing ever
+    constructed that widget, so a chosen folder was written to the dialog
+    instance and discarded with it.
+    """
+
+    @pytest.fixture
+    def recorded(self, qapp, monkeypatch):
+        """Capture setValue calls without leaking a Mock into the shared qapp."""
+        calls = {}
+        settings = Mock()
+        settings.setValue = lambda k, v: calls.__setitem__(k, v)
+        settings.value = lambda k, default=None: calls.get(k, default)
+        monkeypatch.setattr(qapp, "settings", settings, raising=False)
+        return calls
+
+    def test_the_widgets_exist(self, dialog):
+        assert dialog.edtDataFolder is not None
+        assert dialog.btnDataFolder is not None
+        assert dialog.btnResetDataFolder is not None
+
+    def test_shows_the_resolved_default_when_unset(self, dialog):
+        assert dialog.edtDataFolder.text() == os.path.abspath(mu.DEFAULT_DB_DIRECTORY)
+
+    def test_not_editable_by_hand(self, dialog):
+        """A typo in a path silently sends a whole library somewhere else."""
+        assert dialog.edtDataFolder.isReadOnly()
+
+    def test_choosing_a_folder_persists_it(self, dialog, recorded, tmp_path):
+        chosen = str(tmp_path / "chosen")
+        os.makedirs(chosen)
+
+        with (
+            patch.object(QFileDialog, "getExistingDirectory", return_value=chosen),
+            patch.object(QMessageBox, "question", return_value=QMessageBox.Yes),
+            patch.object(QMessageBox, "information"),
+        ):
+            dialog.select_folder()
+
+        assert dialog.edtDataFolder.text() == chosen
+        assert recorded["Data/Directory"] == chosen
+
+    def test_choosing_a_folder_does_not_move_anything(self, dialog, recorded, tmp_path):
+        """Phase 1 points; phase 2 moves. The dialog must not pretend otherwise."""
+        chosen = str(tmp_path / "chosen")
+        os.makedirs(chosen)
+        before = mu.get_data_directory()
+
+        with (
+            patch.object(QFileDialog, "getExistingDirectory", return_value=chosen),
+            patch.object(QMessageBox, "question", return_value=QMessageBox.Yes),
+            patch.object(QMessageBox, "information") as info,
+        ):
+            dialog.select_folder()
+
+        # Nothing is relocated, and the running process keeps its own location:
+        # the database is already open and cannot follow until a restart.
+        assert mu.get_data_directory() == before
+        assert os.listdir(chosen) == []
+        info.assert_called_once()
+
+    def test_declining_the_confirmation_changes_nothing(self, dialog, recorded, tmp_path):
+        before = dialog.edtDataFolder.text()
+
+        with (
+            patch.object(QFileDialog, "getExistingDirectory", return_value=str(tmp_path)),
+            patch.object(QMessageBox, "question", return_value=QMessageBox.No),
+        ):
+            dialog.select_folder()
+
+        assert dialog.edtDataFolder.text() == before
+        assert recorded == {}
+
+    def test_cancelling_the_file_dialog_changes_nothing(self, dialog, recorded):
+        before = dialog.edtDataFolder.text()
+
+        with patch.object(QFileDialog, "getExistingDirectory", return_value=""):
+            dialog.select_folder()
+
+        assert dialog.edtDataFolder.text() == before
+        assert recorded == {}
+
+    def test_reset_stores_empty_not_a_resolved_path(self, dialog, recorded, tmp_path):
+        """Storing the resolved default would pin the user to today's default."""
+        recorded["Data/Directory"] = str(tmp_path)  # something to reset from
+
+        with patch.object(QMessageBox, "information"):
+            dialog.reset_data_folder()
+
+        assert recorded["Data/Directory"] == ""
+        assert dialog.edtDataFolder.text() == os.path.abspath(mu.DEFAULT_DB_DIRECTORY)
+
+    def test_reset_is_a_no_op_when_already_default(self, dialog, recorded):
+        """No "restart required" prompt for a change that is not a change."""
+        with patch.object(QMessageBox, "information") as info:
+            dialog.reset_data_folder()
+
+        assert recorded == {}
+        info.assert_not_called()

@@ -587,7 +587,6 @@ class ObjectViewer3D(QGLWidget):
     def set_object(self, obj, idx=-1):
         self.show()
         self.landmark_list = copy.deepcopy(obj.landmark_list)
-        m_app = QApplication.instance()
         if isinstance(obj, MdObject):
             self.object = obj
             obj_ops = MdObjectOps(obj)
@@ -608,7 +607,7 @@ class ObjectViewer3D(QGLWidget):
         self.edge_list = self.dataset.unpack_wireframe()
         self.polygon_list = self.dataset.unpack_polygons()
         if obj.threed_model.count() > 0:
-            filepath = obj.threed_model[0].get_file_path(m_app.storage_directory)
+            filepath = obj.threed_model[0].get_file_path()
             self.set_threed_model(filepath)
         else:
             self.threed_model = None

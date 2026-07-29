@@ -1743,14 +1743,13 @@ class ObjectViewer2D(QLabel):
         QLabel.resizeEvent(self, event)
 
     def set_object(self, obj):
-        m_app = QApplication.instance()
         self.object = obj
         self.dataset = obj.dataset
 
         if self.object.pixels_per_mm is not None and self.object.pixels_per_mm > 0:
             self.pixels_per_mm = self.object.pixels_per_mm
         if obj.image.count() > 0:
-            image_path = obj.image[0].get_file_path(m_app.storage_directory)
+            image_path = obj.image[0].get_file_path()
             if image_path is not None and os.path.exists(image_path):
                 self.set_image(image_path)
             else:

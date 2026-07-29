@@ -151,7 +151,7 @@ def test_dataset_dialog_delete_goes_through_the_controller(qtbot, tmp_path, monk
     qtbot.addWidget(dialog)
     # m_app is the shared QApplication singleton, so set this through
     # monkeypatch: left behind, it redirects storage for every later test
-    # (mu._get_storage_dir prefers the app attribute over the default).
+    # (mu.get_storage_directory prefers the app attribute over the default).
     monkeypatch.setattr(dialog.m_app, "storage_directory", storage, raising=False)
     dialog.dataset = dataset
     dialog.parent = type("P", (), {"selected_dataset": dataset})()

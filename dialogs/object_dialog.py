@@ -727,7 +727,7 @@ class ObjectDialog(QDialog):
         if self.object is None or self.object.image.count() == 0:
             return
         if state == Qt.Checked:
-            storage_dir = getattr(self.m_app, "storage_directory", mu.DEFAULT_STORAGE_DIRECTORY)
+            storage_dir = mu.get_storage_directory()
             self.object_view_2d.set_fullres_source(self.object.image[0].get_original_file_path(storage_dir))
         else:
             self.object_view_2d.set_fullres_source(None)
@@ -1128,13 +1128,7 @@ class ObjectDialog(QDialog):
                 # Offer "Show Original" only when this image has an archived
                 # pristine original. Reset to the working copy on every obj
                 # switch (set_image drops the full-res source anyway).
-                has_original = (
-                    obj.image is not None
-                    and len(obj.image) > 0
-                    and obj.image[0].has_archived_original(
-                        getattr(self.m_app, "storage_directory", mu.DEFAULT_STORAGE_DIRECTORY)
-                    )
-                )
+                has_original = obj.image is not None and len(obj.image) > 0 and obj.image[0].has_archived_original()
                 self.cbxUseOriginal.setChecked(False)
                 self.cbxUseOriginal.setVisible(has_original)
                 # elif len(self.landmark_list) > 0:

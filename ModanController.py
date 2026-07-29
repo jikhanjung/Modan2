@@ -600,7 +600,7 @@ class ModanController(QObject):
         paths are derived from the object's row, so collect them *before*
         deleting it.
         """
-        storage_directory = storage_directory or mu.DEFAULT_STORAGE_DIRECTORY
+        storage_directory = storage_directory or mu.get_storage_directory()
         paths = []
         for image in obj.image:
             paths.append(image.get_file_path(storage_directory))
@@ -610,7 +610,7 @@ class ModanController(QObject):
 
     def _remove_dataset_directory(self, dataset_id, storage_directory=None):
         """Remove the storage directory holding a dataset's files, if any."""
-        storage_directory = storage_directory or mu.DEFAULT_STORAGE_DIRECTORY
+        storage_directory = storage_directory or mu.get_storage_directory()
         directory = os.path.join(storage_directory, str(dataset_id))
         try:
             if os.path.isdir(directory):

@@ -16,6 +16,7 @@ from PIL import Image
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import MdModel
+import MdUtils as mu
 
 
 def _write_jpeg(path, w, h):
@@ -97,14 +98,9 @@ def test_copy_image_carries_archived_original(dataset, obj, tmp_path, monkeypatc
     monkeypatch.setattr(MdModel, "IMAGE_MAX_DIM", 100)
     storage = tmp_path / "storage"
 
-    # copy_image resolves paths with the default storage dir; redirect both
-    # path helpers to the test storage so nothing touches the real one.
-    orig_gfp = MdModel.MdImage.get_file_path
-    orig_gofp = MdModel.MdImage.get_original_file_path
-    monkeypatch.setattr(MdModel.MdImage, "get_file_path", lambda self, base_path=None: orig_gfp(self, str(storage)))
-    monkeypatch.setattr(
-        MdModel.MdImage, "get_original_file_path", lambda self, base_path=None: orig_gofp(self, str(storage))
-    )
+    # copy_image resolves paths itself, so point the resolver at the test
+    # storage to keep the real one untouched.
+    _redirect_storage(monkeypatch, storage)
 
     src = _write_jpeg(tmp_path / "big.jpg", 400, 200)
     image = _attach(obj, src, storage)
@@ -119,17 +115,14 @@ def test_copy_image_carries_archived_original(dataset, obj, tmp_path, monkeypatc
 
 
 def _redirect_storage(monkeypatch, storage):
-    """Point MdImage's path helpers at a tmp storage dir.
+    """Point attachment storage at a tmp directory.
 
-    The default base_path is bound at import time, so update_image (which uses
-    the defaults) can only be tested by patching the helpers themselves.
+    Patching the single resolver is enough. This used to have to replace
+    ``get_file_path`` and ``get_original_file_path`` wholesale, because
+    ``base_path`` defaulted to the storage directory and default arguments are
+    bound at import -- see ``MdUtils.get_storage_directory``.
     """
-    orig_gfp = MdModel.MdImage.get_file_path
-    orig_gofp = MdModel.MdImage.get_original_file_path
-    monkeypatch.setattr(MdModel.MdImage, "get_file_path", lambda self, base_path=None: orig_gfp(self, str(storage)))
-    monkeypatch.setattr(
-        MdModel.MdImage, "get_original_file_path", lambda self, base_path=None: orig_gofp(self, str(storage))
-    )
+    monkeypatch.setattr(mu, "get_storage_directory", lambda: str(storage))
 
 
 def test_update_image_removes_replaced_files(obj, tmp_path, monkeypatch):

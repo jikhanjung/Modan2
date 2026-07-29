@@ -82,8 +82,26 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def setup_logging(debug: bool = False):
-    """Setup application logging with fallback options."""
+def setup_logging(debug: bool = False, config_path: str | None = None):
+    """Setup application logging with fallback options.
+
+    Logging is configured before anything else, so the chosen data directory is
+    read straight from the preferences file here rather than from parsed
+    configuration that does not exist yet. That is possible because preferences
+    live in the OS configuration location (devlog 277) instead of inside the
+    data directory -- when they were inside it, finding them required knowing
+    the very thing being looked up.
+
+    A first launch after upgrading writes this run's log to the default location,
+    because the one-time preferences migration has not happened yet. Harmless,
+    and only ever once.
+
+    **A chosen directory that is missing is left alone here**, and this run logs
+    to the default location instead. Creating it would be the wrong thing twice
+    over: it destroys the evidence that startup needs in order to notice and ask
+    the user (an unplugged drive would look like an empty library), and the log
+    explaining that failure would be written to the very place nobody can find.
+    """
     level = logging.DEBUG if debug else logging.INFO
     format_str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
@@ -91,14 +109,19 @@ def setup_logging(debug: bool = False):
     from datetime import datetime
 
     date_str = datetime.now().astimezone().strftime("%Y%m%d")
-    log_filename = f"Modan2.{date_str}.log"
+    log_filename = f"Modan2_{date_str}.log"
 
     log_file_path = None
     try:
-        from MdUtils import DEFAULT_LOG_DIRECTORY, ensure_directories
+        import MdUtils
 
-        ensure_directories()
-        log_file_path = Path(DEFAULT_LOG_DIRECTORY) / log_filename
+        configured = MdUtils.read_configured_data_directory(config_path)
+        if configured and MdUtils.describe_data_directory_problem(configured):
+            print(f"Warning: the configured data directory is unavailable ({configured}); logging to the default")
+            configured = ""
+        MdUtils.set_data_directory(configured)
+        MdUtils.ensure_directories()
+        log_file_path = Path(MdUtils.get_log_directory()) / log_filename
     except Exception as e:
         print(f"Warning: Could not access configured log directory: {e}")
         # Fallback to local logs directory
@@ -160,12 +183,54 @@ def _patch_frozen_dependency_versions():
         pass
 
 
+def _ask_about_data_directory(problem, splash=None):
+    """Ask what to do about a data directory the user chose that is unusable.
+
+    Returns "quit", "default" or "continue". Asked before anything is created in
+    the location, because carrying on writes a fresh empty library there and
+    that is indistinguishable, to the user, from having lost the real one.
+    Falling back to the default without asking would look the same, so it is
+    offered rather than taken.
+
+    Deliberately untranslated. This runs during ``ApplicationSetup.initialize``,
+    before ``_load_translations`` has installed a QTranslator, so ``tr()`` here
+    would return the English string anyway -- with the added cost of looking as
+    though it had been handled.
+    """
+    from PyQt5.QtWidgets import QMessageBox
+
+    if splash is not None:
+        splash.hide()
+
+    box = QMessageBox()
+    box.setIcon(QMessageBox.Warning)
+    box.setWindowTitle("Modan2 — data location unavailable")
+    box.setText(problem)
+    box.setInformativeText(
+        "Your data has not been deleted. Check that the drive or network location "
+        "is connected, then start Modan2 again.\n\n"
+        "Starting anyway will create a new, empty library in that location."
+    )
+    quit_button = box.addButton("Quit", QMessageBox.RejectRole)
+    default_button = box.addButton("Use default location", QMessageBox.AcceptRole)
+    box.addButton("Start anyway", QMessageBox.DestructiveRole)
+    box.setDefaultButton(quit_button)
+    box.exec_()
+
+    clicked = box.clickedButton()
+    if clicked is quit_button:
+        return "quit"
+    if clicked is default_button:
+        return "default"
+    return "continue"
+
+
 def main():
     """Main application entry point."""
     args = parse_arguments()
 
     # Setup logging first
-    setup_logging(debug=args.debug)
+    setup_logging(debug=args.debug, config_path=args.config)
     logger = logging.getLogger(__name__)
 
     # Guard against frozen-build dependency-version quirks before any heavy
@@ -241,13 +306,31 @@ def main():
         # Initialize application setup
         from MdAppSetup import ApplicationSetup
 
-        setup = ApplicationSetup(debug=args.debug, db_path=args.db, config_path=args.config, language=args.lang)
+        setup = ApplicationSetup(
+            debug=args.debug,
+            db_path=args.db,
+            config_path=args.config,
+            language=args.lang,
+            # No prompt under --self-test: there is nobody to answer it, and a
+            # modal waiting forever would hang CI rather than fail it.
+            on_data_directory_problem=(
+                None if args.self_test else lambda problem, directory: _ask_about_data_directory(problem, splash)
+            ),
+        )
 
         if splash:
             splash.setProgress("Initializing configuration...")
             QApplication.processEvents()
 
         setup.initialize()
+
+        if setup.quit_requested:
+            # The chosen data directory was missing and the user chose to quit
+            # rather than start an empty library somewhere else.
+            logger.info("Startup cancelled: the configured data directory is unavailable")
+            if splash:
+                splash.close()
+            return 0
 
         if splash:
             splash.setProgress("Loading main window...")
@@ -308,12 +391,12 @@ def main():
             from PyQt5.QtWidgets import QApplication, QMessageBox
 
             if QApplication.instance():
-                from MdUtils import DEFAULT_LOG_DIRECTORY
+                from MdUtils import get_log_directory
 
                 QMessageBox.critical(
                     None,
                     "Modan2 Error",
-                    f"Application failed to start:\n\n{e}\n\nDetails are in the log:\n{DEFAULT_LOG_DIRECTORY}",
+                    f"Application failed to start:\n\n{e}\n\nDetails are in the log:\n{get_log_directory()}",
                 )
         except Exception:
             pass

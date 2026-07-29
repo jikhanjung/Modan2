@@ -1,16 +1,19 @@
 import datetime
 import logging
-import os
 
 from peewee import SqliteDatabase
 from peewee_migrate import Router
 
 import MdUtils as mu
 from MdModel import MdAnalysis, MdDataset, MdImage, MdObject, MdThreeDModel
+from MdModel import database_path as database_path
 
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
-database_path = os.path.join(mu.DEFAULT_DB_DIRECTORY, "Modan2.db")
+# Taken from MdModel rather than reassembled here. This file used to build its
+# own os.path.join(mu.DEFAULT_DB_DIRECTORY, "Modan2.db"), which was the same
+# value by coincidence rather than by construction -- the identical split that
+# let the preferences load path and save path drift apart (devlog 272).
 gDatabase = SqliteDatabase(database_path, pragmas={"foreign_keys": 1})
 
 

@@ -672,11 +672,11 @@ class TestJSONZipFunctions:
 
 
 class TestGetStorageDir:
-    """Test _get_storage_dir helper function."""
+    """Test get_storage_directory helper function."""
 
     def test_get_storage_dir_default(self):
-        """Test _get_storage_dir returns default when no QApplication."""
-        storage_dir = mu._get_storage_dir()
+        """Test get_storage_directory returns default when no QApplication."""
+        storage_dir = mu.get_storage_directory()
 
         assert storage_dir is not None
         assert os.path.isabs(storage_dir)
@@ -1260,7 +1260,7 @@ class TestDatasetImportFromZip:
 
         storage = tmp_path / "storage"
         storage.mkdir()
-        monkeypatch.setattr(mu, "_get_storage_dir", lambda: str(storage))
+        monkeypatch.setattr(mu, "get_storage_directory", lambda: str(storage))
 
         # Source dataset: two objects, the first carrying an image, exported with
         # its files so the import has media to copy.

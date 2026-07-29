@@ -116,6 +116,11 @@ class SettingsWrapper:
             "IsMaximized/DataExplorationWindow": ("ui", "is_maximized", "data_exploration_window"),
             # Calibration
             "Calibration/Unit": ("calibration", "unit"),
+            # Where the database, attachments, backups and logs are kept. Empty
+            # means "the default location"; it is deliberately not stored as a
+            # resolved path, so a user who never chose one is not pinned to
+            # whatever the default happened to be when they first launched.
+            "Data/Directory": ("data", "directory"),
             # UI settings
             "ToolbarIconSize": ("ui", "toolbar_icon_size"),
             "PlotSize": ("ui", "plot_size"),
@@ -559,13 +564,36 @@ class ModanMainWindow(QMainWindow):
     def on_action_save_as_triggered(self):
         pass
 
+    @staticmethod
+    def resolve_data_directory(config):
+        """The data directory per the config: ``(path, chosen_by_the_user)``.
+
+        ``MdAppSetup`` has already applied this during startup -- it has to,
+        since the database is opened there. This exists so the window can tell
+        whether the location is the user's choice (worth checking and warning
+        about) or the default (created on demand, absence means nothing).
+
+        An absent or empty value means "the default", and is kept that way
+        rather than resolved and written back: a user who never made a choice
+        should keep following the default, not a snapshot of what it happened to
+        be at first launch.
+        """
+        configured = (config.get("data") or {}).get("directory") or ""
+        return os.path.abspath(configured or mu.DEFAULT_DB_DIRECTORY), bool(configured)
+
     def read_settings(self):
         """Read settings from config object"""
         if self.config is None:
             return
 
         self.m_app = QApplication.instance()
-        self.m_app.storage_directory = os.path.abspath(mu.DEFAULT_STORAGE_DIRECTORY)
+
+        # A mirror of MdUtils, never a second source of truth: MdAppSetup has
+        # already resolved and applied the data directory (it had to -- the
+        # database is opened there). Kept because dialogs pass it explicitly to
+        # controller calls that take a storage root.
+        self.m_app.storage_directory = mu.get_storage_directory()
+
         self.m_app.toolbar_icon_size = self.config.get("ui", {}).get("toolbar_icon_size", "Medium")
 
         # Create a complete settings wrapper for compatibility

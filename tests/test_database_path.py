@@ -100,17 +100,25 @@ class TestApplicationSetupPicksTheRightDatabase:
     """
 
     def test_no_db_argument_leaves_the_database_where_it_is(self, monkeypatch):
+        """Startup now always opens explicitly -- at the same place as before.
+
+        The database follows the data directory, so ``_prepare_database`` opens
+        it by path rather than relying on the import-time binding. What must not
+        change is *which* path that is when nobody asked for another one.
+        """
+        import MdUtils as mu
         from MdAppSetup import ApplicationSetup
 
-        expected = MdModel.database_path
+        expected = os.path.join(os.path.abspath(mu.DEFAULT_DB_DIRECTORY), "Modan2.db")
         moved = []
-        monkeypatch.setattr(MdModel, "set_database_path", lambda p: moved.append(p))
+        monkeypatch.setattr(mu, "_configured_data_directory", None)
+        monkeypatch.setattr(MdModel, "set_database_path", lambda p: moved.append(p) or p)
         monkeypatch.setattr(MdModel, "prepare_database", lambda: None)
 
         setup = ApplicationSetup()
         setup._prepare_database()
 
-        assert moved == [], f"startup redirected the database to {moved}"
+        assert moved == [expected], f"startup redirected the database to {moved}"
         assert setup.db_path == expected
 
     def test_db_argument_is_honoured(self, monkeypatch, tmp_path):
@@ -118,7 +126,7 @@ class TestApplicationSetupPicksTheRightDatabase:
 
         target = str(tmp_path / "chosen.db")
         moved = []
-        monkeypatch.setattr(MdModel, "set_database_path", lambda p: moved.append(p))
+        monkeypatch.setattr(MdModel, "set_database_path", lambda p: moved.append(p) or p)
         monkeypatch.setattr(MdModel, "prepare_database", lambda: None)
 
         setup = ApplicationSetup(db_path=target)
@@ -143,10 +151,11 @@ class TestDatabaseBackup:
         """Run prepare_database with the storage dirs pointed at tmp_path."""
         import MdUtils as mu
 
+        # Backups derive from the data directory, resolved when the backup is
+        # taken -- patching the constant would no longer redirect anything.
+        monkeypatch.setattr(mu, "_configured_data_directory", str(tmp_path))
         backups = tmp_path / "backups"
         backups.mkdir(exist_ok=True)
-        monkeypatch.setattr(mu, "DB_BACKUP_DIRECTORY", str(backups))
-        monkeypatch.setattr(MdModel.mu, "DB_BACKUP_DIRECTORY", str(backups))
         MdModel.set_database_path(str(db_file))
         MdModel.prepare_database()
         MdModel.gDatabase.close()
@@ -205,3 +214,4 @@ class TestDatabaseBackup:
             assert list(backups.iterdir()) == []
         finally:
             _restore_default(original)
+

@@ -103,6 +103,103 @@ DEFAULT_STORAGE_DIRECTORY = os.path.join(DEFAULT_DB_DIRECTORY, "data/")
 DEFAULT_LOG_DIRECTORY = os.path.join(DEFAULT_DB_DIRECTORY, "logs/")
 DB_BACKUP_DIRECTORY = os.path.join(DEFAULT_DB_DIRECTORY, "backups/")
 
+DATABASE_FILENAME = PROGRAM_NAME + ".db"
+
+# The user's data directory, when they have chosen one. None means "use
+# DEFAULT_DB_DIRECTORY"; the choice is stored as an empty string rather than a
+# resolved path so a user who never chose keeps following the default instead of
+# a snapshot of what it was on the day they first launched.
+#
+# Module state rather than an attribute on the QApplication: the database is
+# opened during application setup, before the main window exists to carry one,
+# and a second place to read the location from is exactly how the preferences
+# load and save paths drifted apart in devlog 272. Everything below derives from
+# this one value, and callers must go through the getters -- never through the
+# DEFAULT_* constants, which are only the fallback.
+_configured_data_directory: str | None = None
+
+
+def set_data_directory(path: str | None) -> str:
+    """Point every data path at ``path`` ("" or None for the default).
+
+    Called once during startup, after preferences are read and before the
+    database is opened. Returns the directory now in effect.
+    """
+    global _configured_data_directory
+    _configured_data_directory = os.path.abspath(path) if path else None
+    return get_data_directory()
+
+
+def get_data_directory() -> str:
+    """The directory holding the database, attachments, backups and logs."""
+    return _configured_data_directory or os.path.abspath(DEFAULT_DB_DIRECTORY)
+
+
+def get_storage_directory() -> str:
+    """Where attached images and 3D models live.
+
+    **The single place this is resolved.** Every read, write, copy and delete of
+    an attachment must come through here, directly or via a ``base_path``
+    threaded down from a caller that did.
+
+    It has to be a function, not a constant. ``DEFAULT_STORAGE_DIRECTORY`` is
+    evaluated once at import, so a module-level default -- including a default
+    *argument*, which is the same thing -- freezes the location before the
+    preference that sets it has been read. That was a live hazard: the callers
+    that passed a path explicitly were mostly reads, while the ones bound to the
+    import-time default were the writes, deletes and copies inside ``MdModel``,
+    so honouring the preference at all would have made reads look in the new
+    place and writes land in the old one.
+    """
+    return os.path.join(get_data_directory(), "data")
+
+
+def get_backup_directory() -> str:
+    """Where rotating database backups are written."""
+    return os.path.join(get_data_directory(), "backups")
+
+
+def get_log_directory() -> str:
+    """Where log files are written.
+
+    Logs follow the data directory rather than staying put. The original plan
+    excluded them because logging is configured before preferences are read --
+    but preferences moved out to the OS configuration location (devlog 277), so
+    they can now be read without the database or the QApplication existing, and
+    ``setup_logging`` does exactly that. The remaining reason pointed the other
+    way: the argument for keeping logs beside the data is only served if they
+    actually move with it.
+    """
+    return os.path.join(get_data_directory(), "logs")
+
+
+def get_database_path() -> str:
+    """The database file implied by the current data directory.
+
+    ``--db`` overrides this; it names a file directly and is independent of the
+    data directory by design.
+    """
+    return os.path.join(get_data_directory(), DATABASE_FILENAME)
+
+
+def read_configured_data_directory(config_path: str | None = None) -> str:
+    """Read the chosen data directory straight from the preferences file.
+
+    For the startup steps that run before the configuration has been parsed into
+    an application object -- logging, and the database open. Returns "" for the
+    default, and for any unreadable or malformed file: a broken preferences file
+    must not stop the program from starting, and falling back to the default is
+    the same outcome as a fresh install.
+    """
+    path = config_path or DEFAULT_CONFIG_PATH
+    try:
+        with open(path, encoding="utf-8") as f:
+            config = json.load(f)
+        return (config.get("data") or {}).get("directory") or ""
+    except (OSError, ValueError, AttributeError):
+        return ""
+
+
 # Preferences: the OS configuration location, not the data directory.
 #
 # They are application data, not user documents -- losing them resets window
@@ -173,9 +270,32 @@ def migrate_legacy_config():
     return source
 
 
+def describe_data_directory_problem(path: str | None = None) -> str | None:
+    """Why ``path`` is unusable as a data directory, or None if it is fine.
+
+    Called once at startup, not per attachment. A chosen location can go missing
+    in entirely ordinary ways -- an external drive is not plugged in, a network
+    share is down, the folder was moved or renamed. The application must not
+    quietly carry on: it would create the directory afresh and present an empty
+    library, which to the user is indistinguishable from having lost their data.
+    Silently reverting to the default is wrong for the same reason.
+    """
+    path = path or get_data_directory()
+    if os.path.isdir(path):
+        return None if os.access(path, os.W_OK) else f"The data location is not writable: {path}"
+    if os.path.exists(path):
+        return f"The data location is not a folder: {path}"
+    return f"The data location cannot be found: {path}"
+
+
 def ensure_directories():
-    """Safely create necessary directories with error handling."""
-    directories = [DEFAULT_DB_DIRECTORY, DEFAULT_STORAGE_DIRECTORY, DEFAULT_LOG_DIRECTORY, DB_BACKUP_DIRECTORY]
+    """Create the data directory and its subdirectories, tolerating failure.
+
+    Resolved through the getters, so calling this again after
+    ``set_data_directory`` prepares the newly chosen location. At import time
+    that is the default, which is what a fresh install needs.
+    """
+    directories = [get_data_directory(), get_storage_directory(), get_log_directory(), get_backup_directory()]
 
     for directory in directories:
         try:
@@ -600,33 +720,25 @@ def read_nts_file(file_path):
 # -----------------------------
 
 
-def _get_storage_dir() -> str:
-    """Resolve storage directory from QApplication or fallback to default."""
-    try:
-        from PyQt5.QtWidgets import QApplication
-
-        app = QApplication.instance()
-        if app and hasattr(app, "storage_directory"):
-            return os.path.abspath(app.storage_directory)
-    except Exception:
-        pass
-    return os.path.abspath(DEFAULT_STORAGE_DIRECTORY)
-
-
-def serialize_dataset_to_json(dataset_id: int, include_files: bool = True, storage_dir: str | None = None) -> dict:
+def serialize_dataset_to_json(dataset_id: int, include_files: bool = True) -> dict:
     """Serialize dataset and objects to JSON structure for export.
+
+    Takes no storage directory: every file reference it emits is relative to the
+    package root (``images/<object id>.<ext>``), so where the attachments
+    actually live is the packaging step's business, not this one's. It used to
+    accept a ``storage_dir`` and document it, then evaluate
+    ``os.path.abspath(storage_dir or ...)`` without assigning it -- a parameter
+    that looked honoured and was not. ruff's B018 does not catch that: the
+    expression is a call, which it must assume has side effects.
 
     Args:
         dataset_id: Dataset primary key
         include_files: Include image/model metadata
-        storage_dir: Base storage directory for attached files
 
     Returns:
         dict representing the JSON schema (v1.2)
     """
     from MdModel import MdDataset, MdObject
-
-    os.path.abspath(storage_dir or _get_storage_dir())
 
     dataset = MdDataset.get_by_id(dataset_id)
     # Ensure lists are unpacked
@@ -743,7 +855,7 @@ def collect_dataset_files(dataset_id: int, storage_dir: str | None = None) -> tu
     """Collect absolute file paths (images, models) for the dataset."""
     from MdModel import MdDataset, MdObject
 
-    storage_base = os.path.abspath(storage_dir or _get_storage_dir())
+    storage_base = os.path.abspath(storage_dir or get_storage_directory())
     ds = MdDataset.get_by_id(dataset_id)
     images: list[str] = []
     models: list[str] = []
@@ -787,8 +899,8 @@ def create_zip_package(
 
     progress_callback: callable(curr, total)
     """
-    storage_base = _get_storage_dir()
-    data = serialize_dataset_to_json(dataset_id, include_files=include_files, storage_dir=storage_base)
+    storage_base = get_storage_directory()
+    data = serialize_dataset_to_json(dataset_id, include_files=include_files)
 
     # Prepare temp assembly dir
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -1025,7 +1137,7 @@ def import_dataset_from_zip(zip_path: str, progress_callback: Callable[[int, int
         try:
             with gDatabase.atomic():
                 ds = _dataset_from_manifest(data["dataset"])
-                storage_base = _get_storage_dir()
+                storage_base = get_storage_directory()
 
                 for obj_meta in objs:
                     mo = _object_from_manifest(obj_meta, ds)
@@ -1050,7 +1162,7 @@ def import_dataset_from_zip(zip_path: str, progress_callback: Callable[[int, int
             # directories created along the way, including a file left partially
             # written by a copy that failed mid-way and so was never tracked.
             if ds is not None:
-                storage_dir = os.path.join(_get_storage_dir(), str(ds.id))
+                storage_dir = os.path.join(get_storage_directory(), str(ds.id))
                 try:
                     if os.path.isdir(storage_dir):
                         shutil.rmtree(storage_dir)

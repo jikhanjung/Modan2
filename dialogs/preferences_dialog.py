@@ -16,6 +16,8 @@ from PyQt5.QtWidgets import (
     QGroupBox,
     QHBoxLayout,
     QLabel,
+    QLineEdit,
+    QMessageBox,
     QPushButton,
     QRadioButton,
     QScrollArea,
@@ -101,7 +103,30 @@ class PreferencesDialog(BaseDialog):
         self._create_bgcolor_widgets()
         self._create_plot_widgets()
         self._create_language_widgets()
+        self._create_data_folder_widgets()
         self._create_button_widgets()
+
+    def _create_data_folder_widgets(self):
+        """Create the data-folder chooser.
+
+        This row existed only as a dangling ``select_folder`` handler for a
+        widget nothing ever built, so a chosen folder lived on the dialog
+        instance and died with it. It is real now: it writes to
+        ``preferences.json`` and ``MdUtils.get_storage_directory`` reads it.
+
+        Only attachments (images, 3D models) follow this setting. The database
+        keeps its own location and its own switch (``--db``).
+        """
+        self.edtDataFolder = QLineEdit()
+        self.edtDataFolder.setReadOnly(True)
+        self.btnDataFolder = QPushButton(self.tr("Browse..."))
+        self.btnResetDataFolder = QPushButton(self.tr("Reset"))
+
+        self.data_folder_layout = QHBoxLayout()
+        self.data_folder_layout.setContentsMargins(0, 0, 0, 0)
+        self.data_folder_layout.addWidget(self.edtDataFolder, 1)
+        self.data_folder_layout.addWidget(self.btnDataFolder)
+        self.data_folder_layout.addWidget(self.btnResetDataFolder)
 
     def _create_geometry_widgets(self):
         """Create window geometry preference widgets."""
@@ -344,6 +369,7 @@ class PreferencesDialog(BaseDialog):
         self.lblIndex = QLabel(self.tr("Index"))
         self.lblBgcolorLabel = QLabel(self.tr("Background Color"))
         self.lblLang = QLabel(self.tr("Language"))
+        self.lblDataFolder = QLabel(self.tr("Data folder"))
 
         # Add rows
         self.main_layout.addRow(self.lblGeometry, self.gbRememberGeomegry)
@@ -361,12 +387,15 @@ class PreferencesDialog(BaseDialog):
         index_widget.setLayout(self.index_layout)
         lang_widget = QWidget()
         lang_widget.setLayout(self.lang_layout)
+        data_folder_widget = QWidget()
+        data_folder_widget.setLayout(self.data_folder_layout)
 
         self.main_layout.addRow(self.lblLandmark, landmark_widget)
         self.main_layout.addRow(self.lblWireframe, wireframe_widget)
         self.main_layout.addRow(self.lblIndex, index_widget)
         self.main_layout.addRow(self.lblBgcolorLabel, self.lblBgcolor)
         self.main_layout.addRow(self.lblLang, lang_widget)
+        self.main_layout.addRow(self.lblDataFolder, data_folder_widget)
 
         # Wrap the form in a scroll area (usable on low-res monitors); pin the Save
         # button below it so it's always visible.
@@ -388,6 +417,10 @@ class PreferencesDialog(BaseDialog):
         # Geometry
         self.rbRememberGeometryYes.clicked.connect(self.on_rbRememberGeometryYes_clicked)
         self.rbRememberGeometryNo.clicked.connect(self.on_rbRememberGeometryNo_clicked)
+
+        # Data folder
+        self.btnDataFolder.clicked.connect(self.select_folder)
+        self.btnResetDataFolder.clicked.connect(self.reset_data_folder)
 
         # Toolbar
         self.rbToolbarIconLarge.clicked.connect(self.on_rbToolbarIconLarge_clicked)
@@ -750,6 +783,12 @@ class PreferencesDialog(BaseDialog):
         self.m_app.language = self.m_app.settings.value("Language", "en")
         self.update_language()
 
+        # Data folder. Shown resolved even when unset, so the field always names
+        # a real place -- "" would read as "nowhere" rather than "the default".
+        configured = self.m_app.settings.value("Data/Directory", "") or ""
+        self.edtDataFolder.setText(os.path.abspath(configured or mu.DEFAULT_DB_DIRECTORY))
+        self.data_folder = Path(self.edtDataFolder.text())
+
         # Dialog geometry
         if self.m_app.remember_geometry:
             self.setGeometry(self.m_app.settings.value("WindowGeometry/PreferencesDialog", QRect(100, 100, 600, 400)))
@@ -807,6 +846,9 @@ class PreferencesDialog(BaseDialog):
         self.lblWireframe.setText(self.tr("Wireframe"))
         self.lblIndex.setText(self.tr("Index"))
         self.lblBgcolorLabel.setText(self.tr("Background Color"))
+        self.lblDataFolder.setText(self.tr("Data folder"))
+        self.btnDataFolder.setText(self.tr("Browse..."))
+        self.btnResetDataFolder.setText(self.tr("Reset"))
         self.lblLang.setText(self.tr("Language"))
 
         self.rbRememberGeometryYes.setText(self.tr("Yes"))
@@ -856,14 +898,65 @@ class PreferencesDialog(BaseDialog):
         """Close dialog without saving."""
         self.close()
 
+    @guard_slot("Failed to change the data folder")
     def select_folder(self):
-        """Select data folder (legacy method).
+        """Choose where the database, attachments and backups are kept.
 
-        Note:
-            This method appears unused but is kept for compatibility.
+        Nothing is moved and nothing is reopened here. The database is opened
+        during startup, before this dialog can exist, so the change takes effect
+        on the next launch -- and applying it by halves (new attachments here,
+        database still there) would split a library in two. The message says so.
+
+        Existing files stay put in any case: relocating gigabytes is phase 2's
+        job, and saying plainly that it has not happened beats a progress bar
+        that silently half-copies a library.
         """
-        folder = str(QFileDialog.getExistingDirectory(self, "Select a folder", str(getattr(self, "data_folder", "."))))
-        if folder:
-            self.data_folder = Path(folder).resolve()
-            if hasattr(self, "edtDataFolder"):
-                self.edtDataFolder.setText(folder)
+        current = self.edtDataFolder.text() or mu.get_data_directory()
+        folder = str(QFileDialog.getExistingDirectory(self, self.tr("Select a folder"), current))
+        if not folder:
+            return
+
+        folder = str(Path(folder).resolve())
+        if os.path.abspath(folder) == os.path.abspath(self.edtDataFolder.text() or ""):
+            return
+
+        answer = QMessageBox.question(
+            self,
+            self.tr("Change data folder"),
+            self.tr(
+                "Modan2 will use this folder the next time it starts:\n{}\n\n"
+                "Your database, images and 3D models are not moved. Until you move "
+                "them yourself, Modan2 will start with an empty library there.\n\n"
+                "Continue?"
+            ).format(folder),
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
+        if answer != QMessageBox.Yes:
+            return
+
+        self.data_folder = Path(folder)
+        self.edtDataFolder.setText(folder)
+        self._apply_data_folder(folder)
+
+    @guard_slot("Failed to reset the data folder")
+    def reset_data_folder(self):
+        """Go back to the default location, from the next launch."""
+        if not self.m_app.settings.value("Data/Directory", ""):
+            return
+        self.edtDataFolder.setText(os.path.abspath(mu.DEFAULT_DB_DIRECTORY))
+        self._apply_data_folder("")
+
+    def _apply_data_folder(self, folder):
+        """Record the choice. It takes effect on the next launch.
+
+        ``folder`` is "" for the default. The empty string is what gets stored:
+        recording a resolved path would pin a user who never made a choice to
+        whatever the default was on the day they first launched.
+        """
+        self.m_app.settings.setValue("Data/Directory", folder)
+        QMessageBox.information(
+            self,
+            self.tr("Restart required"),
+            self.tr("Restart Modan2 for the new data folder to take effect."),
+        )

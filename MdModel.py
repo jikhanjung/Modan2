@@ -27,7 +27,9 @@ LINE_SEPARATOR = "\n"
 VARIABLE_SEPARATOR = ","
 EDGE_SEPARATOR = "-"
 WIREFRAME_SEPARATOR = ","
-DATABASE_FILENAME = mu.PROGRAM_NAME + ".db"
+# Re-exported for the callers that already import it from here; MdUtils owns it,
+# so the name is defined once rather than assembled in two places.
+DATABASE_FILENAME = mu.DATABASE_FILENAME
 
 
 def landmark_position_count(obj):
@@ -217,6 +219,18 @@ def set_database_path(path):
     database_path = path
     logger.info("database path set to %s", path)
     return path
+
+
+def _storage_base(base_path):
+    """Resolve an optional explicit storage root to a concrete one.
+
+    Attachment paths take ``base_path=None`` and land here rather than carrying
+    ``mu.DEFAULT_STORAGE_DIRECTORY`` as a default argument. Default arguments are
+    evaluated at import, so that form ignored the preference entirely -- and it
+    did so asymmetrically, since the explicit callers were the reads while the
+    ones relying on the default were the writes, deletes and copies below.
+    """
+    return base_path if base_path else mu.get_storage_directory()
 
 
 class MdDataset(Model):
@@ -951,7 +965,7 @@ class MdImage(Model):
             shutil.copyfile(source_original, target_original)
         return new_image
 
-    def add_file(self, file_name, base_path=mu.DEFAULT_STORAGE_DIRECTORY):
+    def add_file(self, file_name, base_path=None):
         # print("add file:", file_name)
         try:
             self.load_file_info(file_name)
@@ -1019,25 +1033,39 @@ class MdImage(Model):
             logger.warning(f"Downscale of {source_path} failed, storing original verbatim: {e}")
             return False
 
-    def get_file_path(self, base_path=mu.DEFAULT_STORAGE_DIRECTORY):
+    def get_file_path(self, base_path=None):
+        """Where this image's working copy lives.
+
+        ``base_path`` defaults to None rather than to the storage directory
+        itself: a default argument is evaluated once at import, which would
+        freeze the location before the preference that sets it is read. See
+        ``MdUtils.get_storage_directory``.
+
+        Note the path is computed, never stored -- ``original_path`` records
+        where the file was imported *from* and contributes only its extension.
+        Relocating the library is therefore a directory move, with no database
+        rewrite.
+        """
         return os.path.join(
-            base_path, str(self.object.dataset.id), str(self.object.id) + "." + self.original_path.split(".")[-1]
+            _storage_base(base_path),
+            str(self.object.dataset.id),
+            str(self.object.id) + "." + self.original_path.split(".")[-1],
         )
 
-    def get_original_file_path(self, base_path=mu.DEFAULT_STORAGE_DIRECTORY):
+    def get_original_file_path(self, base_path=None):
         """Path of the archived pristine original for this image.
 
         Only oversized attachments are archived (small ones are stored verbatim
         as the working copy), so this path may not exist.
         """
         return os.path.join(
-            base_path,
+            _storage_base(base_path),
             str(self.object.dataset.id),
             "originals",
             str(self.object.id) + "." + self.original_path.split(".")[-1],
         )
 
-    def has_archived_original(self, base_path=mu.DEFAULT_STORAGE_DIRECTORY):
+    def has_archived_original(self, base_path=None):
         return os.path.exists(self.get_original_file_path(base_path))
 
     class Meta:
@@ -1203,13 +1231,13 @@ class MdThreeDModel(Model):
         new_model.add_file(self.get_file_path())
         return new_model
 
-    def add_file(self, file_name):
+    def add_file(self, file_name, base_path=None):
         # Mirror MdImage.add_file: log + raise typed errors so a failure surfaces
         # instead of leaving a 3D-model row without its file (data loss).
         try:
             file_name = mu.process_3d_file(file_name)
             self.load_file_info(file_name)
-            new_filepath = self.get_file_path()
+            new_filepath = self.get_file_path(base_path)
 
             try:
                 if not os.path.exists(os.path.dirname(new_filepath)):
@@ -1230,9 +1258,12 @@ class MdThreeDModel(Model):
 
         return self
 
-    def get_file_path(self, base_path=mu.DEFAULT_STORAGE_DIRECTORY):
+    def get_file_path(self, base_path=None):
+        """Where this 3D model's file lives. See ``MdImage.get_file_path``."""
         return os.path.join(
-            base_path, str(self.object.dataset.id), str(self.object.id) + "." + self.original_path.split(".")[-1]
+            _storage_base(base_path),
+            str(self.object.dataset.id),
+            str(self.object.id) + "." + self.original_path.split(".")[-1],
         )
 
     def load_file_info(self, fullpath):
@@ -2654,20 +2685,26 @@ def prepare_database():
     # backup database file to backup directory. Name the backup after the file
     # actually in use, so a database chosen with --db does not overwrite the
     # backups of the default one.
+    # Resolved now, not at import: mu.DB_BACKUP_DIRECTORY is fixed to the default
+    # data directory, so using it here would keep writing backups to the old
+    # place after the user chose a new one -- the same import-time trap the
+    # attachment paths had.
+    backup_directory = mu.get_backup_directory()
+    os.makedirs(backup_directory, exist_ok=True)
     database_filename = os.path.basename(database_path)
-    backup_path = os.path.join(mu.DB_BACKUP_DIRECTORY, database_filename + "." + date_str)
+    backup_path = os.path.join(backup_directory, database_filename + "." + date_str)
     if not os.path.exists(backup_path) and os.path.exists(database_path):
         shutil.copy2(database_path, backup_path)
         logger.info("backup database to %s", backup_path)
         # read backup directory and delete old backups
-        backup_list = os.listdir(mu.DB_BACKUP_DIRECTORY)
+        backup_list = os.listdir(backup_directory)
         # filter out non-backup files
         backup_list = [f for f in backup_list if f.startswith(database_filename)]
         backup_list.sort()
         if len(backup_list) > 10:
             # Keep the 10 most recent backups; remove the rest.
             for old_backup in backup_list[:-10]:
-                os.remove(os.path.join(mu.DB_BACKUP_DIRECTORY, old_backup))
+                os.remove(os.path.join(backup_directory, old_backup))
 
     gDatabase.connect()
     router = Router(gDatabase, migrate_dir=migrations_path)

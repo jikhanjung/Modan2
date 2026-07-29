@@ -20,6 +20,7 @@ class ApplicationSetup:
         db_path: str | None = None,
         config_path: str | None = None,
         language: str | None = None,
+        on_data_directory_problem=None,
     ):
         """Initialize application setup.
 
@@ -28,6 +29,12 @@ class ApplicationSetup:
             db_path: Custom database file path
             config_path: Custom configuration file path
             language: UI language (en/ko)
+            on_data_directory_problem: Called as ``(problem, directory)`` when
+                the data directory the user chose cannot be used, and must
+                return ``"continue"``, ``"default"`` or ``"quit"``. Without it
+                startup continues and creates the directory, which is the
+                behaviour scripts and tests want; an interactive run passes one
+                so the user is asked instead.
         """
         self.debug = debug
         # Only what was asked for on the command line. There is no default to
@@ -37,6 +44,8 @@ class ApplicationSetup:
         self.config_path = config_path or self._get_default_config_path()
         self.language = language or "en"
         self.config: dict[str, Any] = {}
+        self.on_data_directory_problem = on_data_directory_problem
+        self.quit_requested = False
 
         # Setup logging
         self.logger = logging.getLogger(__name__)
@@ -54,11 +63,19 @@ class ApplicationSetup:
         self.logger.info("Initializing Modan2 application...")
 
         try:
-            # 1. Prepare database
-            self._prepare_database()
-
-            # 2. Load settings
+            # 1. Load settings
+            #
+            # Before the database, not after. The data directory is a
+            # preference, and the database file lives in it -- opening the
+            # database first would have pinned it to the default location and
+            # made the setting unreachable for everything except attachments.
             self._load_settings()
+            self._apply_data_directory()
+            if self.quit_requested:
+                return
+
+            # 2. Prepare database
+            self._prepare_database()
 
             # 3. Load translations
             self._load_translations()
@@ -75,9 +92,57 @@ class ApplicationSetup:
             self.logger.error(f"Failed to initialize application: {e}")
             raise
 
+    def _apply_data_directory(self):
+        """Put the chosen data directory into effect for the rest of startup.
+
+        Everything downstream -- the database file, attachments, backups, logs
+        -- derives from ``MdUtils.get_data_directory()``, so this single call is
+        what makes the preference real.
+
+        A directory the user chose is checked *before* anything is created in
+        it. That order is the whole point: a moment later ``ensure_directories``
+        would recreate it and the database would be opened inside, and the user
+        would be looking at an empty library with no indication that their real
+        one is on a drive that is merely unplugged. The default location gets no
+        such check -- it is created on demand and its absence means nothing.
+        """
+        configured = (self.config.get("data") or {}).get("directory") or ""
+        directory = mu.set_data_directory(configured)
+
+        if configured:
+            problem = mu.describe_data_directory_problem(directory)
+            if problem:
+                self.logger.warning(f"Configured data directory unusable: {problem}")
+                if not self._resolve_data_directory_problem(problem, directory):
+                    return
+            else:
+                self.logger.info(f"Using the configured data directory: {directory}")
+
+        mu.ensure_directories()
+
+    def _resolve_data_directory_problem(self, problem, directory):
+        """Ask what to do about an unusable data directory. False to quit."""
+        choice = self.on_data_directory_problem(problem, directory) if self.on_data_directory_problem else "continue"
+
+        if choice == "quit":
+            self.quit_requested = True
+            return False
+        if choice == "default":
+            mu.set_data_directory("")
+            self.config.setdefault("data", {})["directory"] = ""
+            self._save_settings()
+            self.logger.info("Reverted to the default data directory")
+        else:
+            self.logger.warning(f"Starting with an empty library at {directory}")
+        return True
+
     def _prepare_database(self):
         """Initialize database and run migrations."""
-        # Redirect only when --db named a file. Overriding unconditionally
+        # --db names a file outright and wins over the data directory; the two
+        # are independent by design. Otherwise follow the data directory, which
+        # is the default location unless the user chose another.
+        #
+        # Redirect only when one of those applies. Overriding unconditionally
         # pointed every normal start at ~/.modan2/modan2.db -- not where the
         # database has ever lived -- so the app came up empty and migrated a
         # fresh file from scratch, while the real data sat untouched under
@@ -85,7 +150,7 @@ class ApplicationSetup:
         if self.db_path:
             MdModel.set_database_path(self.db_path)
         else:
-            self.db_path = MdModel.database_path
+            self.db_path = MdModel.set_database_path(mu.get_database_path())
         self.logger.debug(f"Preparing database at: {self.db_path}")
 
         # Runs the migrations too.

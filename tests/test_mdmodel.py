@@ -16,6 +16,7 @@ import contextlib
 from peewee import SqliteDatabase
 
 import MdModel as mm
+import MdUtils as mu
 
 
 @pytest.fixture
@@ -4456,21 +4457,17 @@ class TestMdDatasetOpsRotateVectorYAxis:
 def storage_dir(tmp_path, monkeypatch):
     """Redirect MdImage/MdThreeDModel file storage into a temp directory.
 
-    ``add_file``/``get_file_path``/``copy_*`` default ``base_path`` to
-    ``mu.DEFAULT_STORAGE_DIRECTORY`` (a real per-user dir). That default is bound
-    into each function's ``__defaults__`` at import, so patching ``mu`` is not
-    enough -- rebind the defaults themselves for the duration of the test.
+    Patching the one resolver is enough now. It used to take rebinding each
+    function's ``__defaults__``, because ``base_path`` defaulted to
+    ``mu.DEFAULT_STORAGE_DIRECTORY`` and a default argument is evaluated at
+    import -- and that workaround covered only the five functions listed, so
+    ``MdThreeDModel.add_file`` (which had no ``base_path`` at all) kept writing
+    to the real per-user directory while the reads came from tmp. A fixture
+    reproducing the production bug is a fair warning about the bug.
     """
     d = str(tmp_path / "storage")
     os.makedirs(d, exist_ok=True)
-    for fn in (
-        mm.MdImage.add_file,
-        mm.MdImage.get_file_path,
-        mm.MdImage.get_original_file_path,
-        mm.MdImage.has_archived_original,
-        mm.MdThreeDModel.get_file_path,
-    ):
-        monkeypatch.setattr(fn, "__defaults__", (d,))
+    monkeypatch.setattr(mu, "get_storage_directory", lambda: d)
     return d
 
 

@@ -10,7 +10,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **You can choose where Modan2 keeps your data.** Preferences now has a **Data
+  folder** row: point Modan2 at a larger drive, or anywhere else that suits you.
+  The database, images, 3D models, backups and logs all move together — they are
+  one library, and splitting them would leave either half useless on its own.
+
+  Two things it deliberately does not do. It **does not move your existing
+  files** — you keep them where they are until you move them yourself, and the
+  dialog says so before you confirm. And it takes effect **the next time you
+  start Modan2**, because the database is already open by the time you can
+  change the setting. Leave it alone and everything works exactly as before.
+
+  If a folder you chose is missing at startup (an external drive not plugged in,
+  a network share that is down), Modan2 tells you which folder and asks what to
+  do — quit, use the default, or start anyway — instead of quietly creating an
+  empty library there, which looks the same as losing your data.
+
+### Fixed
+- **Attached files could have been read from one folder and written to another.**
+  The storage location was resolved when the program started rather than when it
+  was used, and inconsistently: attaching, replacing, duplicating and deleting
+  files all ignored any change to it. Nothing was lost, because the location
+  could not actually be changed before now — but it had to be fixed before it
+  could be.
+
 ### Changed
+- **Log files are named `Modan2_20260729.log`** instead of `Modan2.20260729.log`.
+  Existing log files are left alone.
 - **Preferences moved to your operating system's settings folder** —
   `%LOCALAPPDATA%\PaleoBytes\Modan2` on Windows,
   `~/Library/Application Support/PaleoBytes/Modan2` on macOS,

@@ -110,7 +110,9 @@ See the Installation Guide for detailed instructions.
 Where is my data stored?
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-``~`` below is your home folder (for example ``C:\Users\<you>`` on Windows).
+By default, everything is under one folder. ``~`` below is your home folder (for
+example ``C:\Users\<you>`` on Windows); see the next question if you would
+rather keep it somewhere else.
 
 * **Database:** ``~/PaleoBytes/Modan2/Modan2.db``
 * **Images and 3D models:** ``~/PaleoBytes/Modan2/data/``
@@ -126,6 +128,35 @@ Where is my data stored?
 (longer side above 2560 px) is stored as a smaller working copy with the
 full-resolution original archived alongside it.
 
+Can I keep my data somewhere else?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Yes.** Open **Preferences** and change **Data folder** — useful when your 3D
+models outgrow the drive Modan2 was installed on. The database, images, 3D
+models, backups and logs all move together; they are one library, and either
+half is useless without the other.
+
+Three things to know:
+
+* **Your existing files are not moved.** The setting tells Modan2 where to look
+  from now on; everything already stored stays where it is until you move it
+  yourself. Modan2 tells you this before you confirm.
+* **It takes effect the next time you start Modan2**, because the database is
+  already open by the time you can change the setting.
+* **Avoid folders managed by OneDrive, Dropbox or a similar service, and network
+  drives.** The database is not safe to synchronise while it is open — if you
+  use Modan2 on two computers, the service will not merge the two copies, it
+  will silently keep both. To get your data into the cloud, put an exported
+  package there instead of the live folder.
+
+So to move an existing library: quit Modan2, copy the folder to its new home,
+start Modan2, set **Data folder** to the new location, and restart. Keep the old
+copy until you have confirmed everything is there.
+
+If the folder is missing when Modan2 starts — an external drive that is not
+plugged in, a share that is down — Modan2 says so and asks what to do rather
+than starting an empty library.
+
 Can I backup my data?
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -133,7 +164,7 @@ Can I backup my data?
 
 1. **Copy the data folder**
 
-   * Copy ``~/PaleoBytes/Modan2/`` — it holds the database and the media files
+   * Copy your data folder — it holds the database and the media files
    * Restore by putting it back
    * Quit Modan2 first, so the database is not mid-write
 

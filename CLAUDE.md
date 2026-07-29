@@ -115,7 +115,7 @@ from `dialogs.<module>` and `components.<subpackage>` in new code.
 Automated testing with pytest is fully operational.
 
 **Coverage Status** (measured 2026-07-28, `pytest --cov=.`):
-- **Suite**: 1892 tests collected — 1882 passed, 10 skipped
+- **Suite**: 1958 tests collected — 1948 passed, 10 skipped (2026-07-29)
 - **Overall**: 67%
 - **MdStatistics.py** 93% · **MdModel.py** 92% · **MdUtils.py** 88% ·
   **ModanController.py** 86% · **MdHelpers.py** 83% · **Modan2.py** 63%
@@ -153,6 +153,17 @@ pytest -s
 # Run only failed tests from last run
 pytest --lf
 ```
+
+#### Never bind test models by hand
+Use the `bound_database` fixture from `tests/conftest.py` to point models at a
+throwaway database. Assigning `MdModel.gDatabase` **redirects nothing**: peewee
+resolves `create_tables`, `drop_tables` and every query through each model's own
+`_meta.database`. Five fixtures did exactly that and were creating and dropping
+tables in the developer's real `~/PaleoBytes/Modan2/Modan2.db` — a *passing* run
+of `tests/test_landmark_parsing.py` deleted the `mddataset` and `mdobject`
+tables. A session-scoped autouse fixture now repoints the default binding at a
+temp file so the mistake can't reach real data, and
+`TestTheRealDatabaseIsOutOfReach` fails if that net is removed. See devlog 278.
 
 #### Test Development Guidelines
 1. Write tests for new features before or during implementation
@@ -195,17 +206,58 @@ pytest --lf
 
 ### Where the user's files live
 
-**Everything the user owns is under one directory**, `~/PaleoBytes/Modan2/`
-(`mu.DEFAULT_DB_DIRECTORY`, same on every platform — note it is the home
-directory, *not* `%APPDATA%`):
+**Everything the user owns is under one directory** — by default
+`~/PaleoBytes/Modan2/` (`mu.DEFAULT_DB_DIRECTORY`, same on every platform, and
+note it is the home directory, *not* `%APPDATA%`), and wherever the user points
+it otherwise:
 
 | What | Path | Constant |
 |---|---|---|
-| Database | `Modan2.db` | `MdModel.database_path` |
-| Images, 3D models | `data/` | `mu.DEFAULT_STORAGE_DIRECTORY` |
-| Logs | `logs/` | `mu.DEFAULT_LOG_DIRECTORY` |
-| Backups | `backups/` | `mu.DB_BACKUP_DIRECTORY` |
+| Database | `Modan2.db` | `mu.get_database_path()` |
+| Images, 3D models | `data/` | `mu.get_storage_directory()` |
+| Logs | `logs/Modan2_YYYYMMDD.log` | `mu.get_log_directory()` |
+| Backups | `backups/` | `mu.get_backup_directory()` |
 | Temp files | `temp/` | `MdHelpers.get_temp_dir` |
+
+**The whole directory is configurable** (`data.directory` in `preferences.json`),
+and everything in the table derives from one root. **Resolve through the getters,
+never through the `DEFAULT_*` constants** — those are only the fallback:
+
+| Getter | Constant it replaces |
+|---|---|
+| `mu.get_data_directory()` | `mu.DEFAULT_DB_DIRECTORY` |
+| `mu.get_storage_directory()` | `mu.DEFAULT_STORAGE_DIRECTORY` |
+| `mu.get_backup_directory()` | `mu.DB_BACKUP_DIRECTORY` |
+| `mu.get_log_directory()` | `mu.DEFAULT_LOG_DIRECTORY` |
+| `mu.get_database_path()` | — |
+
+Do not reintroduce `base_path=mu.DEFAULT_STORAGE_DIRECTORY` as a default
+argument anywhere: default arguments are evaluated at import, which froze the
+location before the preference was read — and it froze asymmetrically, since the
+explicit callers were the reads while the writes, deletes and copies inside
+`MdModel` rode the default. Pass `base_path=None` and let
+`MdModel._storage_base` resolve it. `tests/test_storage_directory.py` guards
+this, and asserts the negative (nothing written under the default) because a
+happy-path test misses exactly this bug. See devlog 278.
+
+**Startup order is load-bearing**, in `MdAppSetup.initialize`:
+
+1. `_load_settings` — the data directory is a preference, so it must be read
+   before anything that lives in the directory is opened.
+2. `_apply_data_directory` — `mu.set_data_directory()`, then the missing-location
+   check **before** `ensure_directories()` creates anything. Reversing those two
+   turns an unplugged drive into a silently empty library.
+3. `_prepare_database` — `--db` wins if given, otherwise `mu.get_database_path()`.
+
+`main.py:setup_logging` runs before all of it and reads the preferences file
+directly (`mu.read_configured_data_directory`), which is possible only because
+preferences live outside the data directory since devlog 277. It deliberately
+does **not** create a configured directory that is missing, for the same reason
+as step 2.
+
+`--db` names a file outright and is independent of the data directory. Changing
+the directory does not move anything and takes effect on the next launch;
+relocating an existing library is P03 phase 2.
 
 **Preferences are not in there.** They live in the OS configuration location
 (`mu.DEFAULT_CONFIG_PATH`, resolved with `platformdirs` + `COMPANY_NAME` +

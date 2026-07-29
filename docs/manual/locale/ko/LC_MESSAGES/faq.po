@@ -293,9 +293,12 @@ msgstr "내 데이터는 어디에 저장되나요?"
 
 #: ../../faq.rst:113
 msgid ""
-"``~`` below is your home folder (for example ``C:\\Users\\<you>`` on "
-"Windows)."
-msgstr "아래의 ``~`` 는 홈 폴더입니다(Windows에서는 예를 들어 ``C:\\Users\\<사용자>``)."
+"By default, everything is under one folder. ``~`` below is your home "
+"folder (for example ``C:\\Users\\<you>`` on Windows); see the next "
+"question if you would rather keep it somewhere else."
+msgstr ""
+"기본적으로 모든 것이 한 폴더 아래에 있습니다. 아래의 ``~`` 는 홈 폴더입니다(Windows에서는 예를 들어"
+" ``C:\\Users\\<사용자>``). 다른 곳에 두고 싶다면 다음 질문을 보세요."
 
 #: ../../faq.rst:115
 msgid "**Database:** ``~/PaleoBytes/Modan2/Modan2.db``"
@@ -347,9 +350,8 @@ msgid "**Copy the data folder**"
 msgstr "**데이터 폴더 복사**"
 
 #: ../../faq.rst:136
-msgid ""
-"Copy ``~/PaleoBytes/Modan2/`` — it holds the database and the media files"
-msgstr "``~/PaleoBytes/Modan2/`` 를 복사하세요 — 데이터베이스와 미디어 파일이 모두 들어 있습니다"
+msgid "Copy your data folder — it holds the database and the media files"
+msgstr "데이터 폴더를 복사하세요 — 데이터베이스와 미디어 파일이 모두 들어 있습니다"
 
 #: ../../faq.rst:137
 msgid "Restore by putting it back"

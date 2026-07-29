@@ -465,7 +465,15 @@ class TestMissingLocation:
         assert problem is not None
         assert "not a folder" in problem
 
-    @pytest.mark.skipif(os.geteuid() == 0, reason="root ignores the write bit")
+    # ``os.name`` is checked first so ``or`` short-circuits: geteuid does not
+    # exist on Windows, and this expression runs at import, so naming it
+    # unguarded fails *collection of the whole file* rather than one test.
+    # Skipping there is right on the merits too -- chmod does not remove write
+    # access from a directory on Windows, so the case cannot be set up.
+    @pytest.mark.skipif(
+        os.name != "posix" or os.geteuid() == 0,
+        reason="needs POSIX permission bits, and a non-root user to respect them",
+    )
     def test_unwritable_directory_is_reported(self, tmp_path):
         d = tmp_path / "read-only"
         d.mkdir()

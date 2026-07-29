@@ -279,6 +279,11 @@ def describe_data_directory_problem(path: str | None = None) -> str | None:
     quietly carry on: it would create the directory afresh and present an empty
     library, which to the user is indistinguishable from having lost their data.
     Silently reverting to the default is wrong for the same reason.
+
+    The writability check is weak on Windows, where ``os.access`` does not
+    consult directory ACLs and answers True for a folder that cannot be written
+    to. The case that matters -- the location is not there at all, because the
+    drive is unplugged or the share is down -- is detected on every platform.
     """
     path = path or get_data_directory()
     if os.path.isdir(path):

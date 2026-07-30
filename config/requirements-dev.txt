@@ -17,7 +17,7 @@ pytest-timeout>=2.4.0,<3.0      # Test timeout management
 pytest-xvfb>=3.0.0,<4.0         # Headless GUI testing for Linux CI/CD
 
 # Performance and System Monitoring
-psutil>=7.0.0,<8.0              # System and process utilities for memory testing
+psutil>=7.2.2,<8.0              # System and process utilities for memory testing
 
 # Coverage Reporting
 coverage[toml]>=7.15.2,<8.0     # Coverage with TOML config support

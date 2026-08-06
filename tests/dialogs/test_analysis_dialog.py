@@ -139,26 +139,22 @@ class TestNewAnalysisDialogInitialization:
         assert not dialog.lblStatus.isVisible()
 
     def test_superimposition_methods(self, dialog):
-        """Test that all superimposition methods are available."""
-        # Should have 3 methods (language-dependent text)
-        assert dialog.comboSuperimposition.count() == 3
+        """Only the two converging methods are offered (language-dependent text).
+
+        Resistant Fit was withdrawn because its iteration diverges rather than
+        settling; offering it would hand back an alignment that never converged.
+        """
+        assert dialog.comboSuperimposition.count() == 2
 
     def test_all_methods_enabled_for_2d_dataset(self, dialog):
-        """All three superimposition methods are selectable for a 2D dataset.
-
-        (The sample dataset is 2D; Resistant Fit is 2D-only and is disabled only
-        for 3D datasets.)
-        """
+        """Both superimposition methods are selectable for a 2D dataset."""
         model = dialog.comboSuperimposition.model()
         assert model.item(0).isEnabled()  # Procrustes
         assert model.item(1).isEnabled()  # Bookstein
-        assert model.item(2).isEnabled()  # Resistant Fit (2D)
 
     def test_all_methods_enabled_for_3d_dataset(self, qtbot, mock_parent, mock_database):
-        """All three superimposition methods are selectable for a 3D dataset too."""
-        ds = MdModel.MdDataset.create(
-            dataset_name="RF3D dialog", dimension=3, landmark_count=3, variablename_list=["ID"]
-        )
+        """Both superimposition methods are selectable for a 3D dataset too."""
+        ds = MdModel.MdDataset.create(dataset_name="3D dialog", dimension=3, landmark_count=3, variablename_list=["ID"])
         for i in range(3):
             obj = MdModel.MdObject.create(dataset=ds, object_name=f"o{i}", sequence=i + 1)
             obj.landmark_str = "\n".join([f"{j}.0\t{j}.0\t0.0" for j in range(3)])
@@ -169,7 +165,7 @@ class TestNewAnalysisDialogInitialization:
         model = dlg.comboSuperimposition.model()
         assert model.item(0).isEnabled()  # Procrustes
         assert model.item(1).isEnabled()  # Bookstein
-        assert model.item(2).isEnabled()  # Resistant Fit (now 2D and 3D)
+        assert dlg.comboSuperimposition.count() == 2  # Resistant Fit is not offered
 
     def test_grouping_variables_populated(self, dialog, sample_dataset_with_variables):
         """Test that grouping variables are populated from dataset."""

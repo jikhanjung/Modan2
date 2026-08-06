@@ -27,6 +27,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   do — quit, use the default, or start anyway — instead of quietly creating an
   empty library there, which looks the same as losing your data.
 
+### Removed
+- **Resistant Fit superimposition is no longer offered.** It does not converge.
+  On every dataset size tested it ran out its 100-iteration cap, and raising the
+  cap moved the answer further rather than settling it — between caps of 20 and
+  40 the coordinates changed by more than they had between 5 and 10. It is also
+  far too slow to use: the scale and angle estimates are pure-Python loops over
+  every pair of landmarks, run for every shape on every iteration, which puts a
+  222-specimen, 72-landmark dataset in the region of hours.
+
+  The option is gone from the analysis dialog and a request for it is now
+  refused rather than quietly answered with Procrustes, which would return a
+  different superimposition under the name you asked for. Choose **Procrustes**
+  or **Bookstein**. The implementation stays in the source, with its limits
+  documented, for whoever fixes it.
+
 ### Fixed
 - **Attached files could have been read from one folder and written to another.**
   The storage location was resolved when the program started rather than when it

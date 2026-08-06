@@ -70,11 +70,19 @@ class NewAnalysisDialog(BaseDialog):
 
         # Superimposition methods, all wired into the run path
         # (ModanController._prepare_landmarks) and supporting 2D and 3D.
+        #
+        # Resistant Fit is deliberately not offered. Its iteration does not
+        # converge on real datasets: it exhausts the 100-iteration cap at every
+        # size tested, and raising the cap moves the result further rather than
+        # settling it. It also costs O(n_landmarks^2) per shape per iteration in
+        # pure Python, which puts a 222 x 72 dataset in the region of hours. The
+        # implementation is left in MdModel for the tests and for whoever fixes
+        # it; until then the option would only produce answers no one should
+        # trust.
         self.lblSuperimposition = QLabel(self.tr("Superimposition method"), self)
         self.comboSuperimposition = QComboBox(self)
         self.comboSuperimposition.addItem(self.tr("Procrustes"))
         self.comboSuperimposition.addItem(self.tr("Bookstein"))
-        self.comboSuperimposition.addItem(self.tr("Resistant Fit"))
 
         # CVA grouping variable
         self.lblCvaGroupBy = QLabel(self.tr("CVA grouping variable"), self)

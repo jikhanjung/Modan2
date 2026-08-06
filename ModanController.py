@@ -1088,8 +1088,8 @@ class ModanController(QObject):
 
         Args:
             superimposition_method: "Procrustes" (default) or "Bookstein".
-                Anything else falls back to Procrustes (Resistant Fit is not yet
-                implemented and is disabled in the UI).
+                "Resistant Fit" is rejected — the method does not converge and is
+                disabled in the UI. Anything else falls back to Procrustes.
 
         Returns:
             (ds_ops, landmarks_data): the ``MdDatasetOps`` holding the
@@ -1133,13 +1133,16 @@ class ModanController(QObject):
             raise ValueError(unimputable_landmarks_message(unimputable))
 
         ds_ops = MdDatasetOps(self.current_dataset)
-        # Bookstein and Resistant Fit raise a ValueError with a specific reason
-        # (no baseline / 3D / missing landmarks); Procrustes returns False on
-        # failure. Anything unrecognized falls back to Procrustes.
+        # Bookstein raises a ValueError with a specific reason (no baseline /
+        # missing landmarks); Procrustes returns False on failure. Anything
+        # unrecognized falls back to Procrustes.
         if method == "bookstein":
             ds_ops.bookstein_superimposition()
         elif method == "resistant fit":
-            ds_ops.resistant_fit_superimposition()
+            raise ValueError(
+                "Resistant Fit is disabled: its iteration does not converge on real datasets. "
+                "Use Procrustes or Bookstein."
+            )
         elif not ds_ops.procrustes_superimposition():
             raise ValueError("Procrustes superimposition failed")
 

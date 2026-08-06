@@ -2373,6 +2373,24 @@ class MdDatasetOps:
     def resistant_fit_superimposition(self, max_iterations=100, convergence_threshold=1e-6):
         """Resistant-fit superimposition (RFTRA; Rohlf & Slice 1990), 2D and 3D.
 
+        .. warning::
+
+            **Not fit for use, and disabled in the UI and in
+            ``ModanController._prepare_landmarks``.** The iteration converges
+            only on trivial inputs. On real datasets it exhausts
+            ``max_iterations`` every time, and raising the cap moves the result
+            further rather than settling it — measured on 5-40 landmarks and
+            5-10 specimens, the coordinates changed by more between caps of 20
+            and 40 than between 5 and 10. Two causes are known: shapes are never
+            normalised to unit size, so ``convergence_threshold`` is compared
+            against raw data units, and the repeated-median scale and angle
+            estimates appear to admit a limit cycle. Cost is also prohibitive —
+            ``_resistant_scale`` and ``_repeated_median_angle`` are pure-Python
+            O(n^2) loops run per shape per iteration, with the 3D rotation
+            nesting up to 100 more sweeps inside that, which puts a 222 x 72
+            dataset in the region of hours. Kept for the tests and for whoever
+            fixes it.
+
         Aligns shapes using repeated medians of the pairwise interlandmark scale
         ratios and rotation angles, plus a median translation, so that a few
         grossly displaced (outlier) landmarks do not drag the whole fit the way

@@ -1,6 +1,5 @@
 """Tests for ModanController business logic."""
 
-import math
 from unittest.mock import Mock, patch
 
 import pytest
@@ -402,11 +401,14 @@ class TestAnalysisOperations:
         # Procrustes does not pin the baseline to Bookstein's fixed positions.
         assert procrustes[0][0] != pytest.approx([-0.5, 0.0])
 
-    def test_prepare_landmarks_dispatches_to_resistant_fit(self, mock_database):
-        """superimposition_method routes _prepare_landmarks to Resistant Fit.
+    def test_prepare_landmarks_rejects_resistant_fit(self, mock_database):
+        """Resistant Fit is refused rather than run.
 
-        Two similar 2D shapes still coincide after a resistant fit; a spy confirms
-        the resistant-fit path (not Procrustes) is the one that ran.
+        The method does not converge on real datasets (see
+        ``MdDatasetOps.resistant_fit_superimposition``), so the run path rejects
+        it outright instead of returning coordinates no one should trust. The
+        request must not quietly fall back to Procrustes either — that would
+        hand back a different superimposition under the requested name.
         """
         controller = ModanController()
         dataset = MdModel.MdDataset.create(dataset_name="RFdispatch", dimension=2, landmark_count=3)
@@ -419,16 +421,9 @@ class TestAnalysisOperations:
             MdModel.MdObject.create(dataset=dataset, object_name=f"o{i}", sequence=i + 1, landmark_str=lm)
         controller.set_current_dataset(dataset)
 
-        _ds_ops, aligned = controller._prepare_landmarks("Resistant Fit")
-        assert len(aligned) == 2
-        for k in range(3):
-            assert math.dist(aligned[0][k], aligned[1][k]) < 1e-6
-
-        with patch.object(MdModel.MdDatasetOps, "resistant_fit_superimposition", return_value=True) as spy:
-            controller._prepare_landmarks("Resistant Fit")
-            assert spy.called
-        with patch.object(MdModel.MdDatasetOps, "resistant_fit_superimposition", return_value=True) as spy:
-            controller._prepare_landmarks("Procrustes")
+        with patch.object(MdModel.MdDatasetOps, "resistant_fit_superimposition") as spy:
+            with pytest.raises(ValueError, match="Resistant Fit is disabled"):
+                controller._prepare_landmarks("Resistant Fit")
             assert not spy.called
 
     def test_delete_analysis(self, controller_with_data):

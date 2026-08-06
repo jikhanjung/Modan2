@@ -249,8 +249,8 @@ positions across the plot, so you can see how shape changes along each axis.
 Superimposition Methods
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Modan2 offers three superimposition methods, chosen in the analysis dialog. All
-three impute missing landmarks first (see `Missing Landmark Handling`_).
+Modan2 offers two superimposition methods, chosen in the analysis dialog. Both
+impute missing landmarks first (see `Missing Landmark Handling`_).
 
 **Procrustes** (Generalized Procrustes Analysis):
 
@@ -266,13 +266,6 @@ three impute missing landmarks first (see `Missing Landmark Handling`_).
 * **Requires a baseline defined on the dataset**
 * Useful when a well-defined anatomical axis should anchor the comparison
 
-**Resistant Fit** (RFTRA):
-
-* Robust alignment built on repeated medians of pairwise landmark relationships
-* A few displaced (outlier) landmarks do not drag the whole fit the way they can
-  under Procrustes
-* Works for both 2D and 3D
-
 **Choosing a method:**
 
 +------------------+-------------------+---------------------------+
@@ -283,9 +276,15 @@ three impute missing landmarks first (see `Missing Landmark Handling`_).
 | Anchored on an   | Bookstein         | Needs a dataset baseline  |
 | anatomical axis  |                   |                           |
 +------------------+-------------------+---------------------------+
-| A few unreliable | Resistant Fit     | Resists outlier landmarks |
-| landmarks        |                   |                           |
-+------------------+-------------------+---------------------------+
+
+.. note::
+
+   **Resistant Fit (RFTRA) is not available.** It was offered in earlier 0.2.0
+   pre-releases, but the alignment does not converge: it runs out its iteration
+   cap on any real dataset and the result drifts further as the cap is raised.
+   It is also prohibitively slow at realistic dataset sizes. The option has been
+   withdrawn rather than left in place returning numbers that cannot be relied
+   on.
 
 Missing Landmark Handling
 ~~~~~~~~~~~~~~~~~~~~~~~~~

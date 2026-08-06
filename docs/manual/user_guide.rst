@@ -488,7 +488,7 @@ dataset and can be re-opened later.
 3. In the analysis dialog, set:
 
    - **Analysis name** (a unique name is suggested)
-   - **Superimposition method**: Procrustes, Bookstein, or Resistant Fit
+   - **Superimposition method**: Procrustes or Bookstein
    - **CVA grouping variable**: the categorical variable that defines groups for CVA
    - **MANOVA grouping variable**: the categorical variable for MANOVA
 
@@ -521,10 +521,9 @@ EM-style refinement loop (see :ref:`analysis-missing-landmarks`).
   (2D: endpoints at (-0.5, 0) and (0.5, 0); 3D uses a 3-point baseline). It
   **requires a baseline** defined on the dataset; missing landmarks are imputed
   first (as in Procrustes).
-- *Resistant Fit* (RFTRA): a robust alignment that uses repeated medians of
-  pairwise landmark relationships, so a few displaced (outlier) landmarks do not
-  pull the whole fit the way Procrustes can. Works for 2D and 3D; missing
-  landmarks are imputed first.
+
+Resistant Fit (RFTRA) was offered in earlier 0.2.0 pre-releases and has been
+withdrawn; see the note under :doc:`advanced_features`.
 
 **When Procrustes Runs**:
 
@@ -1124,7 +1123,7 @@ Glossary
 
 **Superimposition**
    Aligning specimens so that only shape differences remain. Modan2 offers
-   Procrustes, Bookstein, and Resistant Fit (see `Procrustes Superimposition`_).
+   Procrustes and Bookstein (see `Procrustes Superimposition`_).
 
 **Procrustes superimposition**
    Superimposition that removes position, orientation, and size by translating,

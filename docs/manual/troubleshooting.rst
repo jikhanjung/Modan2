@@ -395,7 +395,6 @@ Procrustes Alignment Issues
 2. **Try different method:**
 
    * Try Bookstein registration (needs a baseline on the dataset)
-   * Or try Resistant Fit, which resists a few badly-placed landmarks
 
 3. **Check for outliers:**
 

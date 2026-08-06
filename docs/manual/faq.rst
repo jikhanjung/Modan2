@@ -366,9 +366,9 @@ What analyses does Modan2 support?
 
 * **Procrustes:** translation, rotation, and scaling (the default)
 * **Bookstein:** baseline registration; requires a baseline on the dataset
-* **Resistant Fit:** robust alignment that resists outlier landmarks
 
-All three impute missing landmarks first.
+Both impute missing landmarks first. Resistant Fit (RFTRA) was offered in
+earlier 0.2.0 pre-releases and has been withdrawn because it does not converge.
 
 **Shape Analysis:**
 

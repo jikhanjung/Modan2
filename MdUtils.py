@@ -1,3 +1,4 @@
+import contextlib
 import json
 import logging
 import os
@@ -1234,7 +1235,7 @@ def read_nts_file(file_path):
 # -----------------------------
 
 
-def serialize_dataset_to_json(dataset_id: int, include_files: bool = True) -> dict:
+def serialize_dataset_to_json(dataset_id: int, include_files: bool = True, include_analyses: bool = False) -> dict:
     """Serialize dataset and objects to JSON structure for export.
 
     Takes no storage directory: every file reference it emits is relative to the
@@ -1248,11 +1249,16 @@ def serialize_dataset_to_json(dataset_id: int, include_files: bool = True) -> di
     Args:
         dataset_id: Dataset primary key
         include_files: Include image/model metadata
+        include_analyses: Include saved analyses (schema 1.3). Off for export,
+            on for a library backup. Export leaves them out because an analysis
+            carries every object's raw and superimposed landmarks a second time
+            and would multiply the size of a package whose purpose is to hand a
+            dataset to someone else; a backup is not allowed to be lossy.
 
     Returns:
-        dict representing the JSON schema (v1.2)
+        dict representing the JSON schema (v1.3)
     """
-    from MdModel import MdDataset, MdObject
+    from MdModel import MdAnalysis, MdDataset, MdObject
 
     dataset = MdDataset.get_by_id(dataset_id)
     # Ensure lists are unpacked
@@ -1357,12 +1363,82 @@ def serialize_dataset_to_json(dataset_id: int, include_files: bool = True) -> di
         "curve_config": dataset.get_curve_config() or [],
     }
 
-    return {
-        "format_version": "1.2",
+    package = {
+        "format_version": "1.3",
         "export_info": export_info,
         "dataset": dataset_json,
         "objects": objects_json,
     }
+    if include_analyses:
+        package["analyses"] = [_analysis_to_manifest(a) for a in dataset.analyses.order_by(MdAnalysis.id)]
+    return package
+
+
+# Every column MdAnalysis owns except the primary key and the dataset it hangs
+# off. Listed rather than reflected so that adding a column is a decision about
+# whether it belongs in a backup, not something that happens silently -- and so
+# that a package written by a newer version stays readable by an older one.
+ANALYSIS_FIELDS = (
+    "analysis_name",
+    "analysis_desc",
+    "dimension",
+    "wireframe",
+    "baseline",
+    "polygons",
+    "propertyname_str",
+    "superimposition_method",
+    "object_info_json",
+    "raw_landmark_json",
+    "superimposed_landmark_json",
+    "pca_analysis_result_json",
+    "pca_rotation_matrix_json",
+    "pca_eigenvalues_json",
+    "cva_group_by",
+    "cva_analysis_result_json",
+    "cva_rotation_matrix_json",
+    "cva_eigenvalues_json",
+    "manova_group_by",
+    "manova_analysis_result_json",
+    "chart_settings_json",
+    "curve_config_json",
+)
+
+
+def _analysis_to_manifest(analysis):
+    """One MdAnalysis row as plain JSON data.
+
+    The model is flat -- every result is already a JSON string in a column -- so
+    this is a straight field copy. The timestamps are carried too: an analysis
+    is dated evidence, and restoring one with today's date would misrepresent
+    when the work was done.
+    """
+    entry = {field: getattr(analysis, field) for field in ANALYSIS_FIELDS}
+    entry["created_at"] = analysis.created_at.isoformat() if analysis.created_at else None
+    entry["modified_at"] = analysis.modified_at.isoformat() if analysis.modified_at else None
+    return entry
+
+
+def _analysis_from_manifest(entry, dataset):
+    """Recreate an analysis from a package and attach it to ``dataset``."""
+    from MdModel import MdAnalysis
+
+    analysis = MdAnalysis(dataset=dataset)
+    for field in ANALYSIS_FIELDS:
+        if field in entry:
+            setattr(analysis, field, entry[field])
+    # A name is required by the schema; a package that lost it should not take
+    # the whole restore down with it.
+    if not analysis.analysis_name:
+        analysis.analysis_name = "Restored analysis"
+    if not analysis.superimposition_method:
+        analysis.superimposition_method = "Procrustes"
+    for field in ("created_at", "modified_at"):
+        value = entry.get(field)
+        if value:
+            with contextlib.suppress(ValueError, TypeError):
+                setattr(analysis, field, datetime.fromisoformat(value))
+    analysis.save()
+    return analysis
 
 
 def collect_dataset_files(dataset_id: int, storage_dir: str | None = None) -> tuple[list[str], list[str]]:
@@ -1408,13 +1484,16 @@ def create_zip_package(
     output_path: str,
     include_files: bool = True,
     progress_callback: Callable[[int, int], None] | None = None,
+    include_analyses: bool = False,
 ) -> bool:
     """Create JSON+ZIP package for a dataset.
 
     progress_callback: callable(curr, total)
+    include_analyses: see ``serialize_dataset_to_json``. Defaults off so export
+        keeps producing what it always has; the library backup turns it on.
     """
     storage_base = get_storage_directory()
-    data = serialize_dataset_to_json(dataset_id, include_files=include_files)
+    data = serialize_dataset_to_json(dataset_id, include_files=include_files, include_analyses=include_analyses)
 
     # Prepare temp assembly dir
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -1668,6 +1747,13 @@ def import_dataset_from_zip(zip_path: str, progress_callback: Callable[[int, int
                     if progress_callback:
                         progress_callback(curr, total)
 
+                # Analyses last: they reference the dataset, and restoring them
+                # inside the same transaction means a package either arrives
+                # whole or not at all. Absent in packages before schema 1.3 and
+                # in every export, so the key is optional.
+                for entry in data.get("analyses") or []:
+                    _analysis_from_manifest(entry, ds)
+
             return ds.id
         except Exception:
             # atomic() rolled back the DB, so the new dataset no longer exists.
@@ -1690,6 +1776,239 @@ def import_dataset_from_zip(zip_path: str, progress_callback: Callable[[int, int
                 except OSError as e:
                     logger.warning(f"Failed to clean up orphaned import file {fp}: {e}")
             raise
+
+
+# ---------------------------------------------------------------------------
+# Backing up the whole library
+#
+# The database has rotating backups (``prepare_database``) but the media do not,
+# and those backups sit on the same disk as the thing they protect -- so the one
+# failure they cannot survive is the likely one. This produces a single
+# self-contained archive the user can put anywhere: an external drive, or a
+# synchronised folder, which is safe for an archive in a way a live database is
+# not (see ``describe_location_risk``). It is the answer to the risk that made
+# moving the default location the wrong fix.
+#
+# The format is a ZIP of the per-dataset packages that export already produces.
+# That is deliberate: both the writing and the reading side are code that is
+# already exercised, and a backup nobody can restore is not a backup. The outer
+# archive is stored uncompressed because its members are already deflated.
+#
+# **Saved analyses are included** (schema 1.3), which is why the packages here
+# are written with ``include_analyses=True`` while export is not. A backup is
+# not allowed to be lossy: an analysis is dated evidence of work done, and
+# "you can recompute it" is not the same as still having the one that was run.
+# Export keeps them out because an analysis repeats every object's raw and
+# superimposed landmarks, which would multiply the size of a package whose job
+# is to hand one dataset to a colleague.
+#
+# What is left out is preferences, which the application recreates. The manifest
+# states both lists in as many words, rather than leaving the boundary to be
+# discovered after a disk failure.
+# ---------------------------------------------------------------------------
+
+LIBRARY_BACKUP_FORMAT_VERSION = "1.0"
+LIBRARY_BACKUP_MANIFEST = "library.json"
+
+
+class LibraryBackupError(Exception):
+    """A backup or restore refused to start, or failed. The message is shown."""
+
+
+class LibraryBackupResult:
+    """What a backup or restore did.
+
+    ``missing_files`` is the part worth surfacing: a media file the database
+    knows about but the disk no longer has is exactly what a backup should be
+    reporting, and it must not be mistaken for a complete one.
+    """
+
+    def __init__(self, path=None, datasets=None, missing_files=None, cancelled=False, failed=None):
+        self.path = path
+        self.datasets = datasets or []
+        self.missing_files = missing_files or []
+        self.cancelled = cancelled
+        self.failed = failed or []
+
+    @property
+    def complete(self):
+        return not self.cancelled and not self.missing_files and not self.failed
+
+
+def _safe_member_name(name):
+    """A dataset name reduced to something every filesystem accepts."""
+    cleaned = "".join("_" if c in '<>:"/\\|?*' or ord(c) < 32 else c for c in (name or "")).strip(" .")
+    return (cleaned or "dataset")[:80]
+
+
+def _expected_media(dataset_id):
+    """The archive-relative media paths a dataset's package should contain."""
+    data = serialize_dataset_to_json(dataset_id, include_files=True)
+    return [
+        entry["path"]
+        for obj in data.get("objects", [])
+        for entry in (obj.get("files") or {}).values()
+        if entry and entry.get("path")
+    ]
+
+
+def _missing_from_package(dataset_id, package_path):
+    """Media the package should hold and does not.
+
+    Checked against the written archive rather than trusted from the writer:
+    ``create_zip_package`` logs a warning and carries on when a file cannot be
+    copied, which is defensible for an export and not for a backup.
+    """
+    with zipfile.ZipFile(package_path) as zf:
+        present = set(zf.namelist())
+    return [path for path in _expected_media(dataset_id) if path not in present]
+
+
+def create_library_backup(output_path, progress_callback=None, should_cancel=None):
+    """Write every dataset in the library to one archive at ``output_path``.
+
+    ``progress_callback`` is called as ``(done, total, label)``.
+
+    The archive is assembled under a temporary name and moved into place only
+    when it is complete. An interrupted run therefore leaves no file at all,
+    rather than a truncated one that looks like a backup -- believing you have a
+    backup you do not have is worse than knowing you have none.
+    """
+    from MdModel import MdDataset
+
+    datasets = list(MdDataset.select().order_by(MdDataset.id))
+    if not datasets:
+        raise LibraryBackupError("There is nothing to back up: this library has no datasets.")
+
+    output_path = os.path.abspath(output_path)
+    partial_path = output_path + ".partial"
+    entries = []
+    missing_files = []
+
+    try:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            packages = []
+            for index, dataset in enumerate(datasets, start=1):
+                if should_cancel and should_cancel():
+                    return LibraryBackupResult(cancelled=True)
+
+                member = f"datasets/{index:04d}_{_safe_member_name(dataset.dataset_name)}.zip"
+                package = os.path.join(tmpdir, f"{index:04d}.zip")
+                create_zip_package(dataset.id, package, include_files=True, include_analyses=True)
+
+                missing = _missing_from_package(dataset.id, package)
+                missing_files.extend(f"{dataset.dataset_name}: {path}" for path in missing)
+                packages.append((member, package))
+                entries.append(
+                    {
+                        "file": member,
+                        "id": dataset.id,
+                        "name": dataset.dataset_name,
+                        "dimension": dataset.dimension,
+                        "object_count": dataset.object_list.count(),
+                        "analysis_count": dataset.analyses.count(),
+                        "missing_files": missing,
+                    }
+                )
+                if progress_callback:
+                    progress_callback(index, len(datasets) + 1, dataset.dataset_name)
+
+            manifest = {
+                "format_version": LIBRARY_BACKUP_FORMAT_VERSION,
+                "program_version": PROGRAM_VERSION,
+                "created": datetime.now().astimezone().isoformat(),
+                "dataset_count": len(entries),
+                "datasets": entries,
+                # Stated in the archive itself, so it survives being read years
+                # later by someone who never saw the dialog that made it.
+                "includes": ("datasets, objects, landmarks, variables, images, 3D models, saved analyses"),
+                "excludes": "preferences (window layout, colours), which the application recreates",
+            }
+
+            # ZIP_STORED: every member is an already-deflated package, and
+            # compressing them again costs time to no purpose.
+            with zipfile.ZipFile(partial_path, "w", compression=zipfile.ZIP_STORED) as zf:
+                zf.writestr(LIBRARY_BACKUP_MANIFEST, json.dumps(manifest, ensure_ascii=False, indent=2))
+                for member, package in packages:
+                    zf.write(package, arcname=member)
+
+            if progress_callback:
+                progress_callback(len(datasets) + 1, len(datasets) + 1, "")
+
+        os.replace(partial_path, output_path)
+    except OSError as e:
+        _discard_partial_backup(partial_path)
+        raise LibraryBackupError(f"Could not write the backup to {output_path}: {e}") from e
+    except Exception:
+        _discard_partial_backup(partial_path)
+        raise
+
+    logger.info("Wrote a library backup of %d datasets to %s", len(entries), output_path)
+    return LibraryBackupResult(path=output_path, datasets=entries, missing_files=missing_files)
+
+
+def _discard_partial_backup(path):
+    try:
+        if os.path.exists(path):
+            os.remove(path)
+    except OSError as e:
+        logger.warning("Could not remove the incomplete backup %s: %s", path, e)
+
+
+def read_library_backup_manifest(zip_path):
+    """The manifest of a library backup, for showing what is in it before restoring."""
+    try:
+        with zipfile.ZipFile(zip_path) as zf, zf.open(LIBRARY_BACKUP_MANIFEST) as f:
+            manifest = json.loads(f.read().decode("utf-8"))
+    except (OSError, KeyError, zipfile.BadZipFile, ValueError) as e:
+        raise LibraryBackupError(f"{zip_path} is not a Modan2 library backup: {e}") from e
+
+    if not isinstance(manifest, dict) or "datasets" not in manifest:
+        raise LibraryBackupError(f"{zip_path} is not a Modan2 library backup: no dataset list.")
+    return manifest
+
+
+def restore_library_backup(zip_path, progress_callback=None, should_cancel=None):
+    """Import every dataset from a library backup into the current library.
+
+    **This adds; it never replaces.** Datasets arrive alongside what is already
+    there, taking a free name if one is taken. Restoring can therefore not
+    destroy anything, which is what makes it safe to offer to someone who is
+    unsure whether they need it -- the alternative, wiping the library first,
+    turns a mistaken restore into the very loss it was meant to undo.
+
+    A dataset that fails to import is recorded and the rest continue: each
+    import is its own transaction, so a bad one leaves nothing behind, and
+    stopping would deny the user the datasets that were fine.
+    """
+    manifest = read_library_backup_manifest(zip_path)
+    entries = manifest.get("datasets", [])
+    restored = []
+    failed = []
+
+    with tempfile.TemporaryDirectory() as tmpdir, zipfile.ZipFile(zip_path) as zf:
+        for index, entry in enumerate(entries, start=1):
+            if should_cancel and should_cancel():
+                return LibraryBackupResult(datasets=restored, failed=failed, cancelled=True)
+
+            member = entry.get("file")
+            name = entry.get("name") or member
+            try:
+                if member not in zf.namelist():
+                    raise LibraryBackupError(f"the archive has no member {member}")
+                extracted = os.path.join(tmpdir, f"{index:04d}.zip")
+                with zf.open(member) as src, open(extracted, "wb") as dst:
+                    shutil.copyfileobj(src, dst)
+                restored.append({"name": name, "id": import_dataset_from_zip(extracted)})
+            except Exception as e:
+                logger.warning("Could not restore %s from %s: %s", name, zip_path, e)
+                failed.append({"name": name, "error": str(e)})
+
+            if progress_callback:
+                progress_callback(index, len(entries), name)
+
+    logger.info("Restored %d of %d datasets from %s", len(restored), len(entries), zip_path)
+    return LibraryBackupResult(path=zip_path, datasets=restored, failed=failed)
 
 
 def resample_polyline(points, n, closed=False):

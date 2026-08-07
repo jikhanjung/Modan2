@@ -13,6 +13,7 @@ if hasattr(sys, "version") and "| packaged by Anaconda" in sys.version:
 
 import contextlib
 import copy
+import datetime
 import logging
 from pathlib import Path
 
@@ -35,12 +36,14 @@ from PyQt5.QtWidgets import (
     QApplication,
     QDialog,
     QDockWidget,
+    QFileDialog,
     QHBoxLayout,
     QInputDialog,
     QLabel,
     QMainWindow,
     QMenu,
     QMessageBox,
+    QProgressDialog,
     QPushButton,
     QSplitter,
     QStatusBar,
@@ -317,6 +320,10 @@ class ModanMainWindow(QMainWindow):
         self.actionExport = QAction(QIcon(ICON_CONSTANTS["export"]), self.tr("Export\tCtrl+E"), self)
         self.actionExport.triggered.connect(self.on_action_export_dataset_triggered)
         self.actionExport.setShortcut(QKeySequence("Ctrl+E"))
+        self.actionBackupLibrary = QAction(self.tr("Back Up Library..."), self)
+        self.actionBackupLibrary.triggered.connect(self.on_action_backup_library_triggered)
+        self.actionRestoreLibrary = QAction(self.tr("Restore from Backup..."), self)
+        self.actionRestoreLibrary.triggered.connect(self.on_action_restore_library_triggered)
         self.actionAnalyze = QAction(QIcon(ICON_CONSTANTS["analysis"]), self.tr("Analyze\tCtrl+G"), self)
         self.actionAnalyze.triggered.connect(self.on_action_analyze_dataset_triggered)
         self.actionAnalyze.setShortcut(QKeySequence("Ctrl+G"))
@@ -383,6 +390,9 @@ class ModanMainWindow(QMainWindow):
         self.data_menu.addSeparator()
         self.data_menu.addAction(self.actionImport)
         self.data_menu.addAction(self.actionExport)
+        self.data_menu.addSeparator()
+        self.data_menu.addAction(self.actionBackupLibrary)
+        self.data_menu.addAction(self.actionRestoreLibrary)
         self.help_menu = self.main_menu.addMenu(self.tr("Help"))
         self.help_menu.addAction(self.actionAbout)
 
@@ -1253,6 +1263,153 @@ class ModanMainWindow(QMainWindow):
             self.dlg.deleteLater()
         except Exception as e:
             show_error(self, f"Error exporting dataset: {str(e)}")
+
+    @guard_slot("Failed to back up the library")
+    def on_action_backup_library_triggered(self):
+        """Write the whole library to one archive the user can put anywhere.
+
+        This exists because the rotating database backups protect against the
+        wrong thing: they cover the database but not the images and 3D models,
+        and they sit on the same disk as the library they are backing up, so the
+        one failure they cannot survive is the likely one.
+
+        The archive is a snapshot, which is what makes it safe to keep in a
+        synchronised folder -- nothing is writing to it, unlike the live
+        database (see ``MdUtils.describe_location_risk``).
+        """
+        default_name = f"Modan2-library-{datetime.datetime.now().astimezone().strftime('%Y%m%d')}.zip"
+        path, _ = QFileDialog.getSaveFileName(
+            self,
+            self.tr("Back up library"),
+            os.path.join(mu.get_data_directory(), default_name),
+            self.tr("Modan2 library backup (*.zip)"),
+        )
+        if not path:
+            return
+
+        progress = QProgressDialog(self.tr("Backing up your library..."), self.tr("Stop"), 0, 100, self)
+        progress.setWindowTitle(self.tr("Back up library"))
+        progress.setWindowModality(Qt.WindowModal)
+        progress.setMinimumDuration(0)
+        progress.setValue(0)
+
+        def report(done, total, label):
+            progress.setLabelText(self.tr("Backing up {}...").format(label) if label else self.tr("Finishing..."))
+            progress.setValue(int(done * 100 / total) if total else 100)
+            QApplication.processEvents()
+
+        try:
+            result = mu.create_library_backup(path, progress_callback=report, should_cancel=progress.wasCanceled)
+        except mu.LibraryBackupError as e:
+            QMessageBox.critical(self, self.tr("Could not back up the library"), str(e))
+            return
+        finally:
+            progress.close()
+
+        if result.cancelled:
+            return
+
+        summary = self.tr("Backed up {} dataset(s) to:\n{}").format(len(result.datasets), result.path)
+        if result.missing_files:
+            # Reported, not buried in the log. A backup with holes that presents
+            # itself as complete is the failure this whole feature is against.
+            shown = "\n".join(result.missing_files[:10])
+            more = (
+                self.tr("\n...and {} more.").format(len(result.missing_files) - 10)
+                if len(result.missing_files) > 10
+                else ""
+            )
+            QMessageBox.warning(
+                self,
+                self.tr("Backed up, with files missing"),
+                self.tr(
+                    "{}\n\nThese files are recorded in the database but were not on disk, "
+                    "so they are not in the backup:\n{}{}"
+                ).format(summary, shown, more),
+            )
+        else:
+            QMessageBox.information(self, self.tr("Library backed up"), summary)
+
+    @guard_slot("Failed to restore from backup")
+    def on_action_restore_library_triggered(self):
+        """Bring the datasets in a backup into this library.
+
+        Restoring **adds**; it never replaces. The datasets arrive alongside
+        what is already here, so a restore started by mistake cannot destroy
+        anything -- which is the opposite of wiping the library first, where a
+        mistaken restore causes the very loss it was meant to undo. The
+        confirmation says which way it works, because "restore" ordinarily
+        implies the other one.
+        """
+        path, _ = QFileDialog.getOpenFileName(
+            self,
+            self.tr("Restore from backup"),
+            mu.get_data_directory(),
+            self.tr("Modan2 library backup (*.zip)"),
+        )
+        if not path:
+            return
+
+        try:
+            manifest = mu.read_library_backup_manifest(path)
+        except mu.LibraryBackupError as e:
+            QMessageBox.critical(self, self.tr("Not a library backup"), str(e))
+            return
+
+        answer = QMessageBox.question(
+            self,
+            self.tr("Restore from backup"),
+            self.tr(
+                "This backup holds {} dataset(s) and {} saved analysis(es), made on {}.\n\n"
+                "They will be added to your library alongside what is already there — "
+                "nothing is replaced or deleted. A dataset whose name is taken gets a new one.\n\n"
+                "Continue?"
+            ).format(
+                manifest.get("dataset_count", len(manifest.get("datasets", []))),
+                sum(d.get("analysis_count", 0) for d in manifest.get("datasets", [])),
+                manifest.get("created", "?"),
+            ),
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
+        if answer != QMessageBox.Yes:
+            return
+
+        progress = QProgressDialog(self.tr("Restoring..."), self.tr("Stop"), 0, 100, self)
+        progress.setWindowTitle(self.tr("Restore from backup"))
+        progress.setWindowModality(Qt.WindowModal)
+        progress.setMinimumDuration(0)
+        progress.setValue(0)
+
+        def report(done, total, label):
+            progress.setLabelText(self.tr("Restoring {}...").format(label))
+            progress.setValue(int(done * 100 / total) if total else 100)
+            QApplication.processEvents()
+
+        try:
+            result = mu.restore_library_backup(path, progress_callback=report, should_cancel=progress.wasCanceled)
+        except mu.LibraryBackupError as e:
+            QMessageBox.critical(self, self.tr("Could not restore the backup"), str(e))
+            return
+        finally:
+            progress.close()
+
+        self.load_dataset()
+        if result.failed:
+            QMessageBox.warning(
+                self,
+                self.tr("Restored, with failures"),
+                self.tr("Restored {} dataset(s). These could not be restored:\n{}").format(
+                    len(result.datasets),
+                    "\n".join(f"{f['name']}: {f['error']}" for f in result.failed[:10]),
+                ),
+            )
+        elif not result.cancelled:
+            QMessageBox.information(
+                self,
+                self.tr("Backup restored"),
+                self.tr("Restored {} dataset(s).").format(len(result.datasets)),
+            )
 
     @pyqtSlot()
     def on_action_new_dataset_triggered(self):

@@ -955,8 +955,11 @@ class TestDatasetSerialization:
 
         result = mu.serialize_dataset_to_json(dataset.id, include_files=False)
 
-        assert result["format_version"] == "1.2"
+        assert result["format_version"] == "1.3"
         assert "export_info" in result
+        # 1.3 added analyses, and export leaves them out: the key is absent
+        # unless asked for. See serialize_dataset_to_json.
+        assert "analyses" not in result
         assert result["dataset"]["name"] == "Test Dataset"
         assert result["dataset"]["dimension"] == 2
         assert len(result["objects"]) == 1

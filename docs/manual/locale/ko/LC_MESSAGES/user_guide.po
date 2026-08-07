@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Modan2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-27 12:05+0900\n"
+"POT-Creation-Date: 2026-08-07 15:02+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: ko <LL@li.org>\n"
@@ -19,61 +19,61 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:2
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:2
 msgid "User Guide"
 msgstr "사용자 가이드"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:4
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:4
 msgid ""
 "This guide provides comprehensive instructions for using Modan2 for "
 "geometric morphometric analysis."
 msgstr "이 가이드는 Modan2를 사용한 기하학적 형태계측 분석에 대한 종합적인 지침을 제공합니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:7
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:7
 msgid "Getting Started"
 msgstr "시작하기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:10
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:10
 msgid "Launching Modan2"
 msgstr "Modan2 실행하기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:12
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:12
 msgid "**Windows**: Start Menu → Modan2"
 msgstr "**Windows**: 시작 메뉴 → Modan2"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:13
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:13
 msgid "**macOS**: Applications → Modan2.app"
 msgstr "**macOS**: 응용 프로그램 → Modan2.app"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:14
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:14
 msgid "**Linux**: run the AppImage"
 msgstr "**Linux**: AppImage 실행"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:16
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:16
 msgid "See :doc:`installation` for how to obtain each package."
 msgstr "각 패키지를 받는 방법은 :doc:`installation` 을 참조하세요."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:19
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:19
 msgid "Main Window Overview"
 msgstr "메인 창 개요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:21
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:21
 msgid "The Modan2 main window consists of several key components:"
 msgstr "Modan2 메인 창은 여러 주요 구성 요소로 이루어져 있습니다:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:23
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:23
 msgid "**Menu Bar**: File, Edit, View, Data, Help"
 msgstr "**메뉴 바**: 파일(File), 편집(Edit), 보기(View), 데이터(Data), 도움말(Help)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:24
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:24
 msgid "**Toolbar**: Quick access to common operations"
 msgstr "**툴바**: 일반 작업에 대한 빠른 접근"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:25
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:25
 msgid "**Dataset Tree View** (Left): Hierarchical view of datasets"
 msgstr "**데이터셋 트리 뷰** (왼쪽): 데이터셋의 계층적 뷰"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:26
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:26
 msgid ""
 "**Object Table** (Center): List of objects in the selected dataset, with "
 "**LM Count** and **Curve** columns"
@@ -81,89 +81,89 @@ msgstr ""
 "**객체 테이블** (중앙): 선택한 데이터셋의 객체 목록. **LM Count**\\ (랜드마크 개수)와 **Curve**\\ (곡선)"
 " 열이 함께 표시됩니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:28
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:28
 msgid ""
 "**Object Preview** (Right): Visual preview of the selected object (toggle "
 "with ``Ctrl+P``)"
 msgstr "**객체 미리보기** (오른쪽): 선택한 객체의 시각적 미리보기 (``Ctrl+P`` 로 켜고 끄기)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:30
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:30
 msgid "**Status Bar** (Bottom): Information and progress indicators"
 msgstr "**상태 바** (하단): 정보 및 진행 표시기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:33
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:33
 msgid "Working with Datasets"
 msgstr "데이터셋 다루기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:36
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:36
 msgid "Creating a New Dataset"
 msgstr "새 데이터셋 만들기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:38
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:38
 msgid "Click **\"New Dataset\"** button or press ``Ctrl+N``"
 msgstr "**\"새 데이터셋\"** 버튼을 클릭하거나 ``Ctrl+N`` 을 누르세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:39
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:39
 msgid "Enter dataset information:"
 msgstr "데이터셋 정보를 입력하세요:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:41
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:41
 msgid "**Name**: Descriptive name for your dataset"
 msgstr "**이름**: 데이터셋의 설명적인 이름"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:42
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:42
 msgid "**Dimension**: 2D or 3D"
 msgstr "**차원**: 2D 또는 3D"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:43
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:43
 msgid "**Description**: Optional detailed description"
 msgstr "**설명**: 선택적 상세 설명"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:44
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:44
 msgid "**Parent Dataset**: Optional - create hierarchical structure"
 msgstr "**상위 데이터셋**: 선택사항 - 계층 구조 생성"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:46
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:46
 msgid "Click **OK** to create the dataset"
 msgstr "**확인** 을 클릭하여 데이터셋을 생성하세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:49
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:49
 msgid ""
 "Hierarchical datasets allow you to organize related studies. For example:"
 msgstr "계층적 데이터셋을 사용하여 관련 연구를 구성할 수 있습니다. 예를 들어:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:51
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:51
 msgid "Study_2024 (parent)"
 msgstr "Study_2024 (상위)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:53
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:53
 msgid "Subspecies_A (child)"
 msgstr "Subspecies_A (하위)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:54
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:54
 msgid "Subspecies_B (child)"
 msgstr "Subspecies_B (하위)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:56
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:56
 msgid ""
 "The dataset dialog is organized into tabs. Beyond the basic information "
 "above, it also holds:"
 msgstr "데이터셋 대화상자는 탭으로 구성되어 있습니다. 위의 기본 정보 외에 다음 항목도 담고 있습니다:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:59
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:59
 msgid ""
 "**Wireframe / Baseline / Polygons**: define how landmarks are connected for "
 "display."
 msgstr "**와이어프레임 / 베이스라인 / 폴리곤**: 표시할 때 랜드마크를 어떻게 연결할지 정의합니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:61
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:61
 msgid ""
 "**Landmark names**: a table giving each landmark index a name/abbreviation "
 "and a description (see :ref:`landmark-names`)."
 msgstr ""
 "**랜드마크 이름**: 각 랜드마크 인덱스에 이름/약어와 설명을 지정하는 표입니다 (:ref:`landmark-names` 참조)."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:63
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:63
 msgid ""
 "**Curve scheme**: the dataset's semi-landmark curves — each with a name and "
 "a point count ``N`` (see :ref:`semi-landmark-curves`)."
@@ -171,17 +171,17 @@ msgstr ""
 "**곡선 구성(curve scheme)**: 데이터셋의 준랜드마크 곡선 목록으로, 각 곡선은 이름과 점 개수 ``N`` 을 가집니다 "
 "(:ref:`semi-landmark-curves` 참조)."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:66
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:66
 msgid ""
 "These schemes are shared by every object in the dataset, so a landmark name "
 "or a curve you define once applies to all specimens."
 msgstr "이 구성들은 데이터셋의 모든 객체가 공유하므로, 랜드마크 이름이나 곡선을 한 번 정의하면 모든 표본에 적용됩니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:70
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:70
 msgid "Dataset Variables"
 msgstr "데이터셋 변수"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:72
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:72
 msgid ""
 "Variables hold the per-specimen data you analyse by — the grouping used for "
 "CVA and MANOVA, plus any measurements you want to keep alongside the shape."
@@ -189,7 +189,7 @@ msgstr ""
 "변수는 분석의 기준이 되는 표본별 데이터를 담습니다 — CVA와 MANOVA에 쓰이는 그룹 구분, 그리고 형상과 함께 보관하고 싶은 "
 "측정값들입니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:75
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:75
 msgid ""
 "A variable is just a **name** defined at the dataset level. Modan2 does not "
 "ask you to declare a type or a list of allowed values; each object stores "
@@ -199,35 +199,35 @@ msgstr ""
 "변수는 데이터셋 수준에서 정의하는 **이름** 일 뿐입니다. Modan2는 타입이나 허용 값 목록을 선언하라고 요구하지 않습니다. 각 "
 "객체는 입력한 텍스트를 그대로 저장하고, 분석을 실행할 때 어떤 변수로 그룹을 나눌지 고르게 됩니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:79
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:79
 msgid "**Adding Variables**:"
 msgstr "**변수 추가**:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:81
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:81
 msgid "Open the dataset dialog and go to the **Variables** tab"
 msgstr "데이터셋 대화상자를 열고 **Variables** 탭으로 이동합니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:82
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:82
 msgid "Click **\"Add Variable\"** and type the name (e.g. \"Species\", \"Sex\", \"Age\")"
 msgstr "**\"Add Variable\"** 을 클릭하고 이름을 입력합니다(예: \"Species\", \"Sex\", \"Age\")"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:83
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:83
 msgid ""
 "Double-click a name in the list to rename it, or select it and click "
 "**\"Delete Variable\"** to remove it"
 msgstr "목록에서 이름을 더블클릭하면 이름을 바꿀 수 있고, 선택한 뒤 **\"Delete Variable\"** 을 클릭하면 삭제됩니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:86
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:86
 msgid ""
 "The main window also has an **\"Add variable\"** action, which prompts for a"
 " name and appends it to the selected dataset."
 msgstr "메인 창에도 **\"Add variable\"** 동작이 있습니다. 이름을 물은 뒤 선택한 데이터셋에 변수를 추가합니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:89
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:89
 msgid "**Setting Object Variables**:"
 msgstr "**객체 변수 설정**:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:91
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:91
 msgid ""
 "Open the object (``Ctrl+Shift+O``, or double-click it). Each dataset "
 "variable appears as its own labelled field in the object dialog — type the "
@@ -238,34 +238,34 @@ msgstr ""
 "나타납니다. 여기에 값을 입력하고 저장하세요. 값은 자유 텍스트이므로 범주(\"male\")든 숫자(\"2.5\")든 똑같이 담을 수 "
 "있습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:96
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:581
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:96
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:580
 msgid "**Example Workflow**:"
 msgstr "**예제 워크플로우**:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:110
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:110
 msgid "Editing and Organising Datasets"
 msgstr "데이터셋 편집과 정리"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:112
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:112
 msgid ""
 "**Rename a dataset** by opening its dataset dialog, changing the name, and "
 "clicking OK."
 msgstr "**데이터셋 이름 변경**: 데이터셋 대화상자를 열어 이름을 바꾸고 OK를 클릭합니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:115
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:115
 msgid ""
 "**Re-parent a dataset** by dragging it onto another dataset in the tree; it "
 "becomes a child of the target."
 msgstr "**상위 데이터셋 변경**: 트리에서 다른 데이터셋 위로 끌어다 놓으면 해당 데이터셋의 하위가 됩니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:118
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:118
 msgid ""
 "**Move objects between datasets** by selecting them in the object table and "
 "dragging them onto the destination dataset in the tree."
 msgstr "**객체를 다른 데이터셋으로 이동**: 객체 테이블에서 객체를 선택한 뒤 트리의 대상 데이터셋 위로 끌어다 놓습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:122
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:122
 msgid ""
 "**Deleting a dataset deletes everything under it** — every object, every "
 "analysis, and the image and 3D-model files those objects owned, removed from"
@@ -274,132 +274,132 @@ msgstr ""
 "**데이터셋을 삭제하면 그 아래의 모든 것이 삭제됩니다** — 모든 객체, 모든 분석, 그리고 해당 객체들이 가지고 있던 이미지와 3D "
 "모델 파일까지 디스크에서 제거됩니다. 되돌릴 수 없습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:127
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:127
 msgid "Importing Data"
 msgstr "데이터 가져오기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:130
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:130
 msgid "Importing 2D Images"
 msgstr "2D 이미지 가져오기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:132
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:132
 msgid "**Supported formats**: JPG, PNG, BMP, TIFF, GIF"
 msgstr "**지원 형식**: JPG, PNG, BMP, TIFF, GIF"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:134
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:157
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:134
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:157
 msgid "**Method 1: Drag and Drop**"
 msgstr "**방법 1: 드래그 앤 드롭**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:136
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:486
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:136
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:486
 msgid "Select a dataset in the tree view"
 msgstr "트리 뷰에서 데이터셋을 선택하세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:137
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:137
 msgid "Drag image files from your file manager"
 msgstr "파일 관리자에서 이미지 파일을 드래그하세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:138
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:138
 msgid "Drop them onto the dataset or object table"
 msgstr "데이터셋이나 객체 테이블에 드롭하세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:139
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:139
 msgid "Images are automatically imported with filenames as object names"
 msgstr "이미지는 파일 이름을 객체 이름으로 자동 가져오기됩니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:141
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:163
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:141
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:163
 msgid "**Method 2: Import Dialog**"
 msgstr "**방법 2: 가져오기 대화상자**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:143
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:143
 msgid "Select dataset → **File → Import Objects**"
 msgstr "데이터셋 선택 → **파일 → 객체 가져오기**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:144
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:144
 msgid "Click **\"Add Images\"**"
 msgstr "**\"이미지 추가\"** 를 클릭하세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:145
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:145
 msgid "Select one or more image files"
 msgstr "하나 이상의 이미지 파일을 선택하세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:146
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:146
 msgid "Review the list"
 msgstr "목록을 검토하세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:147
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:224
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:236
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:147
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:224
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:236
 msgid "Click **\"Import\"**"
 msgstr "**\"가져오기\"** 를 클릭하세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:150
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:150
 msgid ""
 "Use consistent naming: ``specimen_001.jpg``, ``specimen_002.jpg`` for easier"
 " sorting"
 msgstr "일관된 이름 사용: ``specimen_001.jpg``, ``specimen_002.jpg`` 등으로 쉬운 정렬을 위해"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:153
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:153
 msgid "Importing 3D Models"
 msgstr "3D 모델 가져오기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:155
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:155
 msgid "**Supported formats**: OBJ, PLY, STL"
 msgstr "**지원 형식**: OBJ, PLY, STL"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:159
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:159
 msgid "Select a 3D dataset"
 msgstr "3D 데이터셋을 선택하세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:160
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:160
 msgid "Drag 3D model files into the application"
 msgstr "3D 모델 파일을 애플리케이션으로 드래그하세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:161
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:161
 msgid "Models are imported with automatic scaling"
 msgstr "모델은 자동 스케일링과 함께 가져오기됩니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:165
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:165
 msgid "**File → Import Objects → Add 3D Models**"
 msgstr "**파일 → 객체 가져오기 → 3D 모델 추가**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:166
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:166
 msgid "Select files"
 msgstr "파일 선택"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:167
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:167
 msgid "Review and import"
 msgstr "검토 및 가져오기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:169
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:169
 msgid "**3D Model Requirements**:"
 msgstr "**3D 모델 요구사항**:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:171
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:171
 msgid "Mesh should be manifold (closed surface)"
 msgstr "메시는 다양체여야 합니다 (닫힌 표면)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:172
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:172
 msgid "Reasonable polygon count (<100k faces recommended)"
 msgstr "적절한 폴리곤 수 (<100k 면 권장)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:173
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:173
 msgid "Centered at origin for best visualization"
 msgstr "최상의 시각화를 위해 원점에 중심 배치"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:176
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:176
 msgid "Importing Landmark Files"
 msgstr "랜드마크 파일 가져오기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:178
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:178
 msgid ""
 "**Supported formats**: TPS, NTS, X1Y1, Morphologika, and JSON+ZIP dataset "
 "packages."
 msgstr "**지원 형식**: TPS, NTS, X1Y1, Morphologika, 그리고 JSON+ZIP 데이터셋 패키지."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:181
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:181
 msgid ""
 "Open **File → Import** (``Ctrl+I``). Modan2 detects the format from the file"
 " extension (``.tps``, ``.nts``, ``.txt`` for Morphologika, ``.zip`` for a "
@@ -411,7 +411,7 @@ msgstr ""
 " ``.nts``, Morphologika는 ``.txt``, JSON+ZIP 패키지는 ``.zip``), 형식 라디오 버튼으로 직접 "
 "지정할 수도 있습니다. **Invert Y** 옵션은 좌하단을 원점으로 쓰는 파일을 위해 Y축을 뒤집습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:188
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:188
 msgid ""
 "**Missing-landmark placeholder.** If an imported file contains the ``-999`` "
 "morphometrics placeholder, Modan2 asks whether to treat those coordinates as"
@@ -422,7 +422,7 @@ msgstr ""
 "좌표를 결측 랜드마크로 처리할지 묻습니다(권장). \"항상\" 옵션을 체크하면 답을 기억합니다. Invert Y 옵션은 이 검사 전에 "
 "먼저 반영됩니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:194
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:194
 msgid ""
 "**Semi-landmark curves in TPS.** ``CURVES=`` / ``POINTS=`` blocks in a TPS "
 "file are read in as semi-landmark curves (see :ref:`semi-landmark-curves`)."
@@ -430,44 +430,44 @@ msgstr ""
 "**TPS 파일의 준랜드마크 곡선.** TPS 파일의 ``CURVES=`` / ``POINTS=`` 블록은 준랜드마크 곡선으로 "
 "읽어들입니다 (:ref:`semi-landmark-curves` 참조)."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:197
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:197
 msgid "**TPS Format Example**:"
 msgstr "**TPS 형식 예제**:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:214
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:214
 msgid "**Importing a landmark file**:"
 msgstr "**랜드마크 파일 가져오기**:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:216
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:234
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:216
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:234
 msgid "**File → Import** (``Ctrl+I``)"
 msgstr "**File → Import** (``Ctrl+I``)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:217
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:217
 msgid "Select the file (TPS, NTS, X1Y1, or Morphologika)"
 msgstr "파일을 선택합니다 (TPS, NTS, X1Y1 또는 Morphologika)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:218
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:218
 msgid "Modan2 will:"
 msgstr "Modan2는 다음을 수행합니다:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:220
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:220
 msgid "Create objects for each specimen"
 msgstr "각 표본에 대한 객체 생성"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:221
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:221
 msgid "Link to image files (if an ``IMAGE=`` field exists)"
 msgstr "이미지 파일에 연결 (``IMAGE=`` 필드가 있는 경우)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:222
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:222
 msgid "Import landmark coordinates (and any curves, for TPS)"
 msgstr "랜드마크 좌표를 가져옵니다 (TPS의 경우 곡선도 함께)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:227
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:227
 msgid "Importing a Dataset Package (JSON+ZIP)"
 msgstr "데이터셋 패키지 가져오기 (JSON+ZIP)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:229
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:229
 msgid ""
 "A **JSON+ZIP package** (``.zip``) is Modan2's own complete-backup format: it"
 " bundles the dataset's metadata, landmark names, curve scheme, variables, "
@@ -478,11 +478,11 @@ msgstr ""
 "곡선 구성, 변수, 그리고 선택적으로 이미지와 3D 모델 파일까지 하나로 묶습니다. 이 패키지를 가져오면 추적한 준랜드마크 곡선과 결측 "
 "랜드마크까지 포함해 데이터셋 전체가 복원됩니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:235
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:235
 msgid "Select the ``.zip`` package"
 msgstr "``.zip`` 패키지를 선택합니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:238
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:238
 msgid ""
 "Packages are imported inside a transaction and roll back on any error, and "
 "extraction is hardened against path-traversal (\"Zip Slip\") archives. Older"
@@ -491,39 +491,39 @@ msgstr ""
 "패키지는 트랜잭션 안에서 가져오며 오류가 발생하면 전부 되돌립니다. 압축 해제 과정은 경로 탈출(\"Zip Slip\") 아카이브에 대해"
 " 보호되어 있습니다. 이전 버전 패키지(스키마 1.1)도 계속 가져올 수 있으며, 이 경우 곡선은 비어 있는 상태가 됩니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:243
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:243
 msgid "Working with Objects"
 msgstr "객체 다루기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:246
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:246
 msgid "Viewing an Object"
 msgstr "객체 보기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:248
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:248
 msgid "**Double-click** an object in the table to open the **Object Dialog**."
 msgstr "테이블에서 객체를 **더블클릭** 하여 **객체 대화상자** 를 여세요."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:250
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:250
 msgid "The Object Dialog shows:"
 msgstr "객체 대화상자는 다음을 보여줍니다:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:252
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:252
 msgid "Object metadata (name, ID, creation date)"
 msgstr "객체 메타데이터 (이름, ID, 생성 날짜)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:253
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:253
 msgid "Associated image or 3D model"
 msgstr "연결된 이미지 또는 3D 모델"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:254
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:254
 msgid "Landmark table"
 msgstr "랜드마크 테이블"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:255
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:255
 msgid "2D/3D viewer with landmarks visualized"
 msgstr "랜드마크가 시각화된 2D/3D 뷰어"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:257
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:257
 msgid ""
 "The Object Dialog has mode buttons that decide what a click does: "
 "**Landmark** (place/move landmarks, the default), **Curve** (trace a semi-"
@@ -533,148 +533,148 @@ msgstr ""
 "객체 대화상자에는 클릭이 어떤 동작을 할지 결정하는 모드 버튼이 있습니다: **Landmark**\\ (랜드마크 배치/이동, 기본값), "
 "**Curve**\\ (준랜드마크 곡선 추적), **Calibration**\\ (이미지 축척 설정). 한 번에 하나만 활성화됩니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:263
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:263
 msgid "Placing Landmarks (2D)"
 msgstr "랜드마크 배치 (2D)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:265
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:265
 msgid ""
 "Open the Object Dialog for a 2D object (**Landmark** mode is active by "
 "default)"
 msgstr "2D 객체의 객체 대화상자를 엽니다 (**Landmark** 모드가 기본으로 활성화되어 있습니다)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:266
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:266
 msgid "Click on the image to place a landmark"
 msgstr "이미지를 클릭하여 랜드마크를 배치하세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:267
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:267
 msgid "Landmarks are numbered sequentially (1, 2, 3, ...)"
 msgstr "랜드마크는 순차적으로 번호가 매겨집니다 (1, 2, 3, ...)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:268
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:268
 msgid "Click and drag an existing landmark to move it"
 msgstr "기존 랜드마크를 클릭한 뒤 드래그하면 이동합니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:269
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:289
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:269
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:289
 msgid "Right-click a landmark to delete it"
 msgstr "랜드마크를 우클릭하여 삭제하세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:271
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:271
 msgid "**Mouse in the 2D viewer**:"
 msgstr "**2D 뷰어에서의 마우스 조작**:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:273
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:273
 msgid "**Mouse wheel** - Zoom in/out"
 msgstr "**마우스 휠** - 확대/축소"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:274
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:274
 msgid "**Right-drag on empty space** - Pan the image"
 msgstr "**빈 공간에서 오른쪽 버튼 드래그** - 이미지 이동"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:275
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:858
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:275
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:857
 msgid "``Ctrl+W`` - Close the dialog"
 msgstr "``Ctrl+W`` - 대화상자 닫기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:278
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:278
 msgid "Placing Landmarks (3D)"
 msgstr "랜드마크 배치 (3D)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:280
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:280
 msgid "Open Object Dialog for a 3D object"
 msgstr "3D 객체에 대한 객체 대화상자 열기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:281
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:281
 msgid "Rotate the model:"
 msgstr "모델 회전:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:283
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:283
 msgid "**Left mouse drag**: Rotate"
 msgstr "**왼쪽 마우스 드래그**: 회전"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:284
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:284
 msgid "**Right mouse drag**: Pan"
 msgstr "**오른쪽 마우스 드래그**: 이동"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:285
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:285
 msgid "**Mouse wheel**: Zoom"
 msgstr "**마우스 휠**: 확대/축소"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:287
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:287
 msgid "Click on the surface to place a landmark"
 msgstr "표면을 클릭하여 랜드마크를 배치하세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:288
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:288
 msgid "Landmarks appear as colored spheres"
 msgstr "랜드마크는 색상이 있는 구체로 나타납니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:291
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:291
 msgid "**3D Viewer Controls**:"
 msgstr "**3D 뷰어 컨트롤**:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:293
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:293
 msgid "**Left-drag**: rotate"
 msgstr "**왼쪽 버튼 드래그**: 회전"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:294
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:294
 msgid "**Middle-drag**: pan"
 msgstr "**가운데 버튼 드래그**: 이동"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:295
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:295
 msgid "**Right-drag** or **mouse wheel**: zoom"
 msgstr "**오른쪽 버튼 드래그** 또는 **마우스 휠**: 확대/축소"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:296
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:296
 msgid ""
 "**3D Model** / **Rotate** checkboxes: show the mesh, and auto-rotate it"
 msgstr "**3D Model** / **Rotate** 체크박스: 메시를 표시하고 자동으로 회전시킵니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:299
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:299
 msgid "Editing Landmark Coordinates"
 msgstr "랜드마크 좌표 편집"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:301
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:301
 msgid "**In the landmark table**:"
 msgstr "**랜드마크 테이블에서**:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:303
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:303
 msgid "Double-click a coordinate cell"
 msgstr "좌표 셀을 더블클릭하세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:304
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:304
 msgid "Enter new value"
 msgstr "새 값을 입력하세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:305
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:305
 msgid "Press ``Enter`` to save"
 msgstr "``Enter`` 를 눌러 저장하세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:306
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:306
 msgid "The viewer updates automatically"
 msgstr "뷰어가 자동으로 업데이트됩니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:308
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:308
 msgid "**Manual coordinate entry is useful for**:"
 msgstr "**수동 좌표 입력이 유용한 경우**:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:310
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:310
 msgid "Precise adjustments"
 msgstr "정밀한 조정"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:311
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:311
 msgid "Correcting digitization errors"
 msgstr "디지타이징 오류 수정"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:312
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:312
 msgid "Importing coordinates from external sources"
 msgstr "외부 소스에서 좌표 가져오기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:315
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:315
 msgid "Missing Landmarks"
 msgstr "결측 랜드마크"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:317
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:317
 msgid ""
 "If a landmark cannot be placed (damaged specimen, obscured feature), mark it"
 " missing in the landmark table instead of skipping it — this keeps the "
@@ -683,11 +683,11 @@ msgstr ""
 "랜드마크를 배치할 수 없는 경우(표본 손상, 특징이 가려짐 등)에는 건너뛰지 말고 랜드마크 표에서 결측으로 표시하세요 — 이렇게 하면 "
 "데이터셋 전체에서 랜드마크 개수가 일관되게 유지됩니다. 랜드마크를 결측으로 표시하는 방법:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:321
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:321
 msgid "Click **\"Add Missing\"** to append a missing landmark, **or**"
 msgstr "**\"결측 추가\"**\\ (Add Missing)를 클릭해 결측 랜드마크를 끝에 덧붙이거나, **또는**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:322
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:322
 msgid ""
 "Select a row first and the button becomes **\"Insert Missing\"**, which "
 "inserts the gap *before* the selected row (so it lands where it belongs), "
@@ -696,11 +696,11 @@ msgstr ""
 "먼저 행을 선택하면 버튼이 **\"결측 삽입\"**\\ (Insert Missing)으로 바뀌며, 선택한 행 *앞에* 빈 자리를 "
 "삽입합니다(제자리에 들어가도록). **또는**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:324
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:324
 msgid "Type ``MISSING`` into a coordinate cell, or leave the cell blank."
 msgstr "좌표 셀에 ``MISSING`` 을 입력하거나 셀을 비워 둡니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:326
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:326
 msgid ""
 "A cell only accepts a number or ``MISSING`` (blank counts as missing); "
 "anything else reverts to the stored value with an explanatory tooltip."
@@ -708,7 +708,7 @@ msgstr ""
 "셀에는 숫자 또는 ``MISSING`` 만 입력할 수 있습니다(빈 칸은 결측으로 간주). 그 외의 값을 넣으면 설명 툴팁과 함께 저장되어"
 " 있던 값으로 되돌아갑니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:329
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:329
 msgid ""
 "**Visualizing missing landmarks** with the **\"Show Estimated\"** checkbox "
 "(on by default) draws a hollow circle at each missing landmark's estimated "
@@ -717,7 +717,7 @@ msgstr ""
 "**결측 랜드마크 시각화**: **\"추정값 보기\"**\\ (Show Estimated) 체크박스(기본 켜짐)는 각 결측 랜드마크의 "
 "추정 위치에 빈 원을 그립니다. 체크를 해제하면 추정값이 숨겨집니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:333
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:333
 msgid ""
 "**How estimation works**: Modan2 fits the dataset's mean shape onto the "
 "landmarks the specimen actually has — matching rotation, scale, and position"
@@ -728,7 +728,7 @@ msgstr ""
 "맞추는 상사변환(similarity transform)입니다 — 그리고 정합된 평균 형상에서 결측 위치를 읽어옵니다. 표본을 비스듬히 "
 "촬영한 경우에도 정확도가 유지됩니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:339
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:339
 msgid ""
 "During analysis, missing landmarks are filled with the same method and "
 "refined as the alignment settles. See :ref:`analysis-missing-landmarks`."
@@ -736,32 +736,32 @@ msgstr ""
 "분석 중에도 같은 방법으로 결측 랜드마크를 채우며, 정렬이 수렴해 가면서 추정값도 함께 정밀해집니다. :ref:`analysis-"
 "missing-landmarks` 를 참조하세요."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:345
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:345
 msgid "Landmark Names"
 msgstr "랜드마크 이름"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:347
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:347
 msgid ""
 "You can give each landmark a name/abbreviation and a description at the "
 "**dataset** level, so they apply to every specimen."
 msgstr "각 랜드마크에 이름/약어와 설명을 **데이터셋** 수준에서 지정할 수 있으며, 이는 모든 표본에 적용됩니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:350
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:350
 msgid ""
 "In the Object Dialog, click **\"Landmark Names\"** (or use the dataset "
 "dialog's landmark-names tab)"
 msgstr "객체 대화상자에서 **\"Landmark Names\"** 를 클릭합니다(또는 데이터셋 대화상자의 랜드마크 이름 탭을 사용합니다)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:352
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:352
 msgid ""
 "Fill in the **Name** and **Description** columns for each landmark index"
 msgstr "각 랜드마크 인덱스에 대해 **Name**\\ (이름)과 **Description**\\ (설명) 열을 채웁니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:353
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:353
 msgid "Click **Save**"
 msgstr "**Save**\\ (저장)를 클릭합니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:355
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:355
 msgid ""
 "While digitizing, switch the label mode with the **Show** checkbox and the "
 "**Index** / **Name** radio buttons: **Name** draws the landmark's name "
@@ -770,11 +770,11 @@ msgstr ""
 "디지타이징 중에는 **Show** 체크박스와 **Index** / **Name** 라디오 버튼으로 레이블 모드를 바꿀 수 있습니다. "
 "**Name** 을 선택하면 번호 대신 랜드마크 이름이 표시되고, 설명은 툴팁으로 나타납니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:362
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:362
 msgid "Semi-landmark Curves"
 msgstr "준랜드마크 곡선"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:364
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:364
 msgid ""
 "Semi-landmarks let you capture a *curve* (an outline or ridge) rather than "
 "discrete points. You trace the curve on each specimen, and Modan2 resamples "
@@ -789,7 +789,7 @@ msgstr ""
 " 다룹니다 — 고정(해부학적) 랜드마크는 위치와 인덱스를 그대로 유지하고, 준랜드마크가 그 뒤에 이어집니다. 고정 랜드마크 없이 "
 "준랜드마크만으로 데이터셋을 분석할 수도 있습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:371
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:371
 msgid ""
 "The raw trace is kept with the specimen, so you can re-trace it or change "
 "the point count at any time. Semi-landmark curves are a **2D** feature."
@@ -797,11 +797,11 @@ msgstr ""
 "추적한 원본 경로는 표본과 함께 보관되므로 언제든지 다시 추적하거나 점 개수를 바꿀 수 있습니다. 준랜드마크 곡선은 **2D** 전용 "
 "기능입니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:374
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:374
 msgid "**Tracing a curve**:"
 msgstr "**곡선 추적하기**:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:376
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:376
 msgid ""
 "Open the Object Dialog for a 2D object and click the **Curve** mode button "
 "(tooltip: *Trace a curve (semi-landmarks)*)"
@@ -809,17 +809,17 @@ msgstr ""
 "2D 객체의 객체 대화상자를 열고 **Curve** 모드 버튼을 클릭합니다 (툴팁: *Trace a curve (semi-"
 "landmarks)*)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:378
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:378
 msgid "Click along the curve to lay down points"
 msgstr "곡선을 따라 클릭하여 점을 찍습니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:379
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:379
 msgid ""
 "Press **Enter** or **double-click** to accept the trace; press **Esc** or "
 "**right-click** to cancel"
 msgstr "**Enter** 또는 **더블클릭** 으로 추적을 확정하고, **Esc** 또는 **오른쪽 클릭** 으로 취소합니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:381
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:381
 msgid ""
 "For a brand-new curve you are asked **\"Number of semi-landmarks on this "
 "curve\"** (default 10). This count is dataset-wide, so it applies to that "
@@ -828,7 +828,7 @@ msgstr ""
 "새로 만드는 곡선에서는 **\"이 곡선의 준랜드마크 개수\"**\\ (Number of semi-landmarks on this "
 "curve)를 묻습니다(기본값 10). 이 개수는 데이터셋 전체에 적용되므로 모든 표본의 해당 곡선에 동일하게 쓰입니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:385
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:385
 msgid ""
 "**Snap to curve (live-wire edge detection)** — on by default in Curve mode. "
 "The trace snaps to the strongest image edge between your clicks, so a clean "
@@ -840,7 +840,7 @@ msgstr ""
 " 강한 경계를 따라가므로, 깔끔한 윤곽선을 몇 번의 클릭만으로 얻을 수 있습니다(완만한 곡선은 시작점과 끝점만, 급하게 꺾이는 곡선은 "
 "중간에 점 몇 개를 더). 손으로 그대로 그리려면 **\"Snap to curve\"** 체크를 해제하세요."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:390
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:390
 msgid ""
 "**Smooth curve** — on by default. Removes the pixel staircase from a snapped"
 " trace so the semi-landmarks sit on a clean curve, while the points you "
@@ -851,16 +851,16 @@ msgstr ""
 " 곡선 위에 놓이게 하며, 사용자가 직접 클릭한 점은 그대로 유지합니다. **\"Smooth curve\"** 체크박스로 켜고 끕니다. "
 "(스냅과 부드럽게는 Curve 모드에서만 사용할 수 있습니다.)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:395
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:395
 msgid "**Editing a traced curve**:"
 msgstr "**추적한 곡선 편집하기**:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:397
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:397
 msgid ""
 "Click a curve to select it (it draws thicker, with square anchor handles)"
 msgstr "곡선을 클릭하면 선택됩니다(더 굵게 그려지고 사각형 앵커 핸들이 표시됩니다)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:398
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:398
 msgid ""
 "Drag a point to move it; click the line to add a point; right-click a point "
 "for **Delete Point** or the whole curve for **Delete Curve**"
@@ -868,13 +868,13 @@ msgstr ""
 "점을 드래그하면 이동하고, 선을 클릭하면 점이 추가됩니다. 점에서 오른쪽 클릭하면 **Delete Point**, 곡선 전체를 지우려면 "
 "**Delete Curve** 를 사용합니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:400
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:400
 msgid ""
 "Snapped curves are edited by their clicked anchors and re-snap to the edge "
 "live as you drag"
 msgstr "스냅된 곡선은 클릭했던 앵커로 편집하며, 드래그하는 동안 경계에 실시간으로 다시 스냅됩니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:403
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:403
 msgid ""
 "**The curve table** (in the Object Dialog) lists each curve with **Name**, "
 "**N** (point count), and **Traced** (✓). Editing **N** re-resamples the "
@@ -885,17 +885,17 @@ msgstr ""
 "(추적 여부 ✓)와 함께 나열합니다. **N** 을 수정하면 곡선을 다시 재표본화합니다. 행에서 오른쪽 클릭 → **\"Delete "
 "Curve (all specimens)\"** 를 선택하면 데이터셋 전체에서 그 곡선이 삭제됩니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:408
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:408
 msgid ""
 "Curves are held in memory while you work and written to the database on "
 "**Save**."
 msgstr "곡선은 작업하는 동안 메모리에 보관되며 **Save**\\ (저장) 시 데이터베이스에 기록됩니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:411
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:411
 msgid "Calibration (Setting the Scale)"
 msgstr "캘리브레이션 (축척 설정)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:413
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:413
 msgid ""
 "Landmark coordinates are in image pixels. If you want size reported in real-"
 "world units instead, calibrate the object against a known distance — a ruler"
@@ -904,18 +904,18 @@ msgstr ""
 "랜드마크 좌표는 이미지 픽셀 단위입니다. 크기를 실제 단위로 표시하고 싶다면, 알고 있는 거리를 기준으로 객체를 캘리브레이션하세요 — "
 "사진 속 자, 또는 직접 측정한 해부학적 거리를 쓰면 됩니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:417
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:417
 msgid "In the Object Dialog, click the **Calibration** mode button."
 msgstr "객체 대화상자에서 **Calibration** 모드 버튼을 클릭합니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:418
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:418
 msgid ""
 "**Drag** across the known distance in the image: press at one end and "
 "release at the other. A line follows the cursor while you drag."
 msgstr ""
 "이미지에서 알고 있는 거리만큼 **드래그** 합니다: 한쪽 끝에서 누르고 반대쪽 끝에서 뗍니다. 드래그하는 동안 선이 커서를 따라옵니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:420
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:420
 msgid ""
 "Enter the real length in the dialog that appears and pick the unit (**nm**, "
 "**um**, **mm**, **cm**, or **m**). The dialog shows how many pixels you "
@@ -924,11 +924,11 @@ msgstr ""
 "나타나는 대화상자에 실제 길이를 입력하고 단위를 고릅니다(**nm**, **um**, **mm**, **cm**, **m**). "
 "대화상자에는 드래그한 픽셀 수가 표시됩니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:423
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:423
 msgid "Click OK, then save the object."
 msgstr "OK를 클릭한 뒤 객체를 저장합니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:425
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:425
 msgid ""
 "Modan2 stores the result as pixels-per-mm **on that object**, so calibration"
 " is per-specimen — photographs taken at different magnifications each get "
@@ -938,17 +938,17 @@ msgstr ""
 "Modan2는 결과를 mm당 픽셀 수로 **해당 객체에** 저장합니다. 즉 캘리브레이션은 표본별로 적용되므로, 서로 다른 배율로 촬영한 "
 "사진은 각자의 축척을 가집니다. 설정하고 나면 중심 크기가 픽셀이 아니라 실제 단위로 표시됩니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:430
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:430
 msgid ""
 "There is no batch calibration: each object is calibrated on its own. The "
 "unit you chose last is remembered as the default for the next one."
 msgstr "일괄 캘리브레이션은 없습니다. 객체마다 개별적으로 설정합니다. 마지막에 고른 단위는 다음 객체의 기본값으로 기억됩니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:434
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:434
 msgid "Digitizing Aids"
 msgstr "디지타이징 보조 기능"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:436
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:436
 msgid ""
 "**Show Expected** (2D): once at least two landmarks are placed on a new "
 "specimen, the remaining positions are predicted from the dataset mean shape "
@@ -958,7 +958,7 @@ msgstr ""
 "**Show Expected** (2D): 새 표본에 랜드마크를 두 개 이상 배치하면, 나머지 위치를 데이터셋 평균 형상에서 예측해 "
 "안내선으로 보여주므로 각 랜드마크가 대략 어디쯤인지 알 수 있습니다. 기본은 꺼짐입니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:439
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:439
 msgid ""
 "**Show Original** (2D): when a specimen's image was downscaled on import "
 "(its longer side exceeded 2560 px), an archived full-resolution original is "
@@ -972,15 +972,15 @@ msgstr ""
 "세밀하게 볼 수 있습니다. 이는 표시에만 영향을 주며 좌표는 작업본 픽셀 좌표계를 유지합니다. 원본이 있을 때만 이 체크박스가 "
 "나타납니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:446
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:446
 msgid "Display Options"
 msgstr "표시 옵션"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:448
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:448
 msgid "In the Object Dialog, customize visualization:"
 msgstr "객체 대화상자에서 시각화를 사용자 정의하세요:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:450
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:450
 msgid ""
 "**Show** + **Index** / **Name**: toggle landmark labels and choose whether "
 "the label is the index number or the landmark name"
@@ -988,85 +988,85 @@ msgstr ""
 "**Show** + **Index** / **Name**: 랜드마크 레이블을 켜고 끄며, 레이블을 인덱스 번호로 할지 랜드마크 이름으로 "
 "할지 선택합니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:452
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:452
 msgid "**Wireframe**: connect landmarks along the dataset wireframe"
 msgstr "**와이어프레임**: 데이터셋 와이어프레임에 따라 랜드마크를 연결합니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:453
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:453
 msgid "**Polygon**: fill defined polygons"
 msgstr "**폴리곤**: 정의된 폴리곤을 채웁니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:454
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:454
 msgid "**Baseline**: highlight the baseline landmarks"
 msgstr "**베이스라인**: 베이스라인 랜드마크를 강조합니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:455
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:455
 msgid ""
 "**Show Estimated**: hollow circles at estimated positions of missing "
 "landmarks"
 msgstr "**추정값 보기**\\ (Show Estimated): 결측 랜드마크의 추정 위치를 빈 원으로 표시합니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:456
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:456
 msgid ""
 "**Show Expected**: predicted positions of not-yet-placed landmarks (see "
 "Digitizing Aids)"
 msgstr "**Show Expected**: 아직 배치하지 않은 랜드마크의 예측 위치 (디지타이징 보조 기능 참조)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:458
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:458
 msgid "**Curve**: show the raw traced curves"
 msgstr "**Curve**: 추적한 원본 곡선을 표시합니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:459
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:459
 msgid "**Semi-LM**: show the derived semi-landmarks"
 msgstr "**Semi-LM**: 곡선에서 유도된 준랜드마크를 표시합니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:460
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:460
 msgid ""
 "**3D Model** / **Rotate** (3D objects): show the mesh and auto-rotate it"
 msgstr "**3D Model** / **Rotate** (3D 객체): 메시를 표시하고 자동으로 회전시킵니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:462
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:462
 msgid ""
 "Landmark size, wireframe thickness, and label size are set in "
 "**Preferences** (separately for 2D and 3D)."
 msgstr ""
 "랜드마크 크기, 와이어프레임 두께, 레이블 크기는 **환경 설정**\\ (Preferences)에서 2D와 3D 각각 따로 지정합니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:466
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:914
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:466
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:913
 msgid "Statistical Analysis"
 msgstr "통계 분석"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:469
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:469
 msgid "Overview"
 msgstr "개요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:471
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:471
 msgid "Modan2 provides three main statistical analyses:"
 msgstr "Modan2는 세 가지 주요 통계 분석을 제공합니다:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:473
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:473
 msgid "**Principal Component Analysis (PCA)**: Explore shape variation"
 msgstr "**주성분 분석 (PCA)**: 형태 변이 탐색"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:474
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:474
 msgid "**Canonical Variate Analysis (CVA)**: Discriminate between groups"
 msgstr "**정준 판별 분석 (CVA)**: 그룹 간 판별"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:475
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:475
 msgid "**MANOVA**: Test for group differences"
 msgstr "**MANOVA**: 그룹 차이 검정"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:477
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:477
 msgid ""
 "All analyses require **Procrustes superimposition** as a preprocessing step."
 msgstr "모든 분석은 전처리 단계로 **Procrustes 중첩** 을 필요로 합니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:480
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:480
 msgid "Running an Analysis"
 msgstr "분석 실행"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:482
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:482
 msgid ""
 "A single analysis run performs the superimposition and then computes **PCA, "
 "CVA, and MANOVA together** — you don't pick one type. The results are saved "
@@ -1075,33 +1075,34 @@ msgstr ""
 "한 번의 분석 실행에서 중첩정렬을 수행한 뒤 **PCA, CVA, MANOVA를 모두 함께** 계산합니다 — 종류를 골라서 하는 것이 "
 "아닙니다. 결과는 데이터셋과 함께 저장되어 나중에 다시 열 수 있습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:487
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:487
 msgid "Click **Analyze** (``Ctrl+G``) or use the **Data** menu"
 msgstr "**분석**\\ (Analyze, ``Ctrl+G``)을 클릭하거나 **Data** 메뉴를 사용합니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:488
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:488
 msgid "In the analysis dialog, set:"
 msgstr "분석 대화상자에서 다음을 지정합니다:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:490
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:490
 msgid "**Analysis name** (a unique name is suggested)"
 msgstr "**분석 제목** (고유한 이름이 자동으로 제안됩니다)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:491
-msgid "**Superimposition method**: Procrustes, Bookstein, or Resistant Fit"
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:491
+#, fuzzy
+msgid "**Superimposition method**: Procrustes or Bookstein"
 msgstr "**중첩정렬방식**: 프로크루스테스(Procrustes), 북스틴(Bookstein), 강건적합(Resistant Fit)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:492
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:492
 msgid ""
 "**CVA grouping variable**: the categorical variable that defines groups for "
 "CVA"
 msgstr "**CVA 그룹화 변수**: CVA의 그룹을 정의하는 범주형 변수"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:493
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:493
 msgid "**MANOVA grouping variable**: the categorical variable for MANOVA"
 msgstr "**MANOVA 그룹화 변수**: MANOVA에 사용할 범주형 변수"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:495
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:495
 msgid ""
 "Click **\"OK\"** to run. Progress is shown, and if CVA/MANOVA cannot be "
 "computed (e.g. too few groups) the failure is reported rather than silently "
@@ -1110,35 +1111,35 @@ msgstr ""
 "**\"OK\"** 를 클릭해 실행합니다. 진행 상황이 표시되며, CVA/MANOVA를 계산할 수 없는 경우(예: 그룹 수가 너무 "
 "적음)에는 조용히 건너뛰지 않고 실패를 알려줍니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:497
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:497
 msgid "Explore the results in the **Data Exploration** dialog."
 msgstr "결과는 **데이터 탐색**\\ (Data Exploration) 대화상자에서 살펴봅니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:502
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:502
 msgid "Procrustes Superimposition"
 msgstr "Procrustes 중첩"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:504
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:504
 msgid "**What it does**:"
 msgstr "**수행 작업**:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:506
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:506
 msgid "Aligns all shapes to a common coordinate system"
 msgstr "모든 형태를 공통 좌표계에 정렬합니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:507
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:507
 msgid "Removes differences due to position, rotation, and scale"
 msgstr "위치, 회전 및 스케일로 인한 차이를 제거합니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:508
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:508
 msgid "Leaves only shape variation"
 msgstr "형태 변이만 남깁니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:510
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:510
 msgid "**Handling Missing Landmarks**:"
 msgstr "**결측 랜드마크 처리**:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:512
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:512
 msgid ""
 "If your dataset has missing landmarks, Procrustes fills them in with an EM-"
 "style refinement loop (see :ref:`analysis-missing-landmarks`)."
@@ -1146,17 +1147,17 @@ msgstr ""
 "데이터셋에 결측 랜드마크가 있으면 프로크루스테스가 EM 방식의 반복 정밀화 루프로 이를 채웁니다 (:ref:`analysis-"
 "missing-landmarks` 참조)."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:515
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:515
 msgid "**Superimposition method**:"
 msgstr "**중첩정렬방식**:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:517
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:517
 msgid ""
 "*Procrustes* (Generalized Procrustes Analysis): the default; also imputes "
 "missing landmarks."
 msgstr "*프로크루스테스*\\ (Procrustes, 일반화 프로크루스테스 분석): 기본값이며 결측 랜드마크도 함께 대치합니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:519
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:519
 msgid ""
 "*Bookstein* (baseline registration): re-expresses each shape as Bookstein "
 "shape coordinates by fixing the dataset's baseline landmarks to a standard "
@@ -1168,60 +1169,57 @@ msgstr ""
 " 다시 표현합니다(2D: 양 끝점을 (-0.5, 0)과 (0.5, 0)에 고정, 3D는 3점 베이스라인 사용). 데이터셋에 "
 "**베이스라인이 정의되어 있어야** 하며, 결측 랜드마크는 (프로크루스테스와 마찬가지로) 먼저 대치합니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:524
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:525
 msgid ""
-"*Resistant Fit* (RFTRA): a robust alignment that uses repeated medians of "
-"pairwise landmark relationships, so a few displaced (outlier) landmarks do "
-"not pull the whole fit the way Procrustes can. Works for 2D and 3D; missing "
-"landmarks are imputed first."
+"Resistant Fit (RFTRA) was offered in earlier 0.2.0 pre-releases and has been"
+" withdrawn; see the note under :doc:`advanced_features`."
 msgstr ""
-"*강건적합*\\ (Resistant Fit, RFTRA): 랜드마크 쌍 관계의 반복 중앙값(repeated median)을 이용하는 "
-"강건한 정렬로, 몇 개의 이탈(이상치) 랜드마크가 프로크루스테스처럼 전체 정합을 끌어당기지 않습니다. 2D와 3D 모두 지원하며, 결측 "
-"랜드마크는 먼저 대치합니다."
+"Resistant Fit(RFTRA)은 이전 0.2.0 시험판에서 제공되었으나 철회되었습니다. "
+":doc:`advanced_features` 의 설명을 참고하십시오."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:529
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:528
 msgid "**When Procrustes Runs**:"
 msgstr "**Procrustes 실행 시점**:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:531
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:530
 msgid "Automatically as the first step of every analysis run"
 msgstr "모든 분석 실행의 첫 단계로 자동 수행됩니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:532
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:531
 msgid "The aligned shapes feed PCA, CVA, and MANOVA"
 msgstr "정렬된 형상이 PCA, CVA, MANOVA의 입력이 됩니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:537
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:536
 msgid "Principal Component Analysis (PCA)"
 msgstr "주성분 분석 (PCA)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:539
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:538
 msgid "**Purpose**: Identify major axes of shape variation"
 msgstr "**목적**: 형태 변이의 주요 축 식별"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:541
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:604
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:664
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:540
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:603
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:663
 msgid "**Use when**:"
 msgstr "**사용 시기**:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:543
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:542
 msgid "Exploring shape diversity"
 msgstr "형태 다양성 탐색"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:544
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:543
 msgid "Visualizing morphospace"
 msgstr "형태 공간 시각화"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:545
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:544
 msgid "Identifying outliers"
 msgstr "이상치 식별"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:546
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:545
 msgid "Reducing dimensionality"
 msgstr "차원 축소"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:548
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:547
 msgid ""
 "**Running PCA**: PCA is computed automatically as part of every analysis run"
 " (see `Running an Analysis`_). Open the completed analysis in the **Data "
@@ -1230,113 +1228,113 @@ msgstr ""
 "**PCA 실행**: PCA는 모든 분석 실행에서 자동으로 계산됩니다(`Running an Analysis`_ 참조). 완료된 분석을 "
 "**데이터 탐색**\\ (Data Exploration) 대화상자에서 열어 주성분을 살펴보세요."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:552
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:620
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:674
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:551
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:619
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:673
 msgid "**Interpreting Results**:"
 msgstr "**결과 해석**:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:554
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:553
 msgid "The **Data Exploration Dialog** opens with:"
 msgstr "**데이터 탐색 대화상자** 가 다음과 함께 열립니다:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:556
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:555
 msgid "**Scree Plot**: Shows variance explained by each PC"
 msgstr "**스크리 플롯**: 각 PC에 의해 설명되는 분산 표시"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:558
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:557
 msgid "X-axis: PC number"
 msgstr "X축: PC 번호"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:559
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:558
 msgid "Y-axis: % variance"
 msgstr "Y축: % 분산"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:560
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:559
 msgid "Look for \"elbow\" to determine how many PCs are meaningful"
 msgstr "의미 있는 PC 수를 결정하기 위해 \"엘보\"를 찾으세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:562
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:561
 msgid "**PC Score Plot**: Scatter plot of specimens"
 msgstr "**PC 점수 플롯**: 표본의 산점도"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:564
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:563
 msgid "X-axis: PC1 (usually highest variance)"
 msgstr "X축: PC1 (일반적으로 가장 높은 분산)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:565
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:564
 msgid "Y-axis: PC2 (second highest)"
 msgstr "Y축: PC2 (두 번째로 높은)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:566
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:565
 msgid "Points colored by groups (if variables defined)"
 msgstr "그룹별로 색상이 지정된 점들 (변수가 정의된 경우)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:568
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:567
 msgid "**Shape Variation Wireframes**:"
 msgstr "**형태 변이 와이어프레임**:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:570
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:569
 msgid "Shows shape changes along each PC"
 msgstr "각 PC를 따른 형태 변화 표시"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:571
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:570
 msgid "Min/Max shapes at extremes of PC axis"
 msgstr "PC 축의 극단에서 최소/최대 형태"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:573
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:572
 msgid "**PC Scores Table**: Numeric scores for each specimen"
 msgstr "**PC 점수 테이블**: 각 표본의 수치 점수"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:575
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:574
 msgid "**Exporting PCA Results**:"
 msgstr "**PCA 결과 내보내기**:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:577
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:576
 msgid "**Export PC Scores**: CSV file with scores for each object"
 msgstr "**PC 점수 내보내기**: 각 객체의 점수가 포함된 CSV 파일"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:578
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:577
 msgid "**Export Loadings**: Landmark contributions to each PC"
 msgstr "**로딩 내보내기**: 각 PC에 대한 랜드마크 기여도"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:579
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:578
 msgid "**Export Plot**: Save scatter plot as PNG/PDF"
 msgstr "**플롯 내보내기**: 산점도를 PNG/PDF로 저장"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:600
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:599
 msgid "Canonical Variate Analysis (CVA)"
 msgstr "정준 판별 분석 (CVA)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:602
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:601
 msgid "**Purpose**: Maximize separation between predefined groups"
 msgstr "**목적**: 사전 정의된 그룹 간 분리 최대화"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:606
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:605
 msgid "Discriminating between species/populations"
 msgstr "종/집단 간 판별"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:607
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:606
 msgid "Testing classification accuracy"
 msgstr "분류 정확도 테스트"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:608
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:607
 msgid "Identifying diagnostic features"
 msgstr "진단적 특징 식별"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:610
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:609
 msgid "**Requirements**:"
 msgstr "**요구사항**:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:612
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:611
 msgid "At least 2 groups defined via dataset variables"
 msgstr "데이터셋 변수를 통해 정의된 최소 2개 그룹"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:613
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:612
 msgid "At least 2 specimens per group"
 msgstr "그룹당 최소 2개 표본"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:615
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:614
 msgid ""
 "**Running CVA**: CVA is computed as part of every analysis run. In the "
 "analysis dialog, set the **CVA grouping variable** to the categorical "
@@ -1346,76 +1344,76 @@ msgstr ""
 "**CVA 실행**: CVA는 모든 분석 실행의 일부로 계산됩니다. 분석 대화상자에서 **CVA 그룹화 변수** 를 그룹을 정의하는 "
 "범주형 변수(예: \"Species\")로 지정한 뒤, 결과를 **데이터 탐색** 에서 엽니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:622
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:621
 msgid "**CV Score Plot**: Specimens plotted on CV axes"
 msgstr "**CV 점수 플롯**: CV 축에 표시된 표본"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:624
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:623
 msgid "Ideally, groups form distinct clusters"
 msgstr "이상적으로는 그룹이 뚜렷한 클러스터를 형성합니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:625
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:624
 msgid "Overlap indicates similarity"
 msgstr "중첩은 유사성을 나타냅니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:627
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:626
 msgid "**Classification Table**: Shows how well CVA discriminates"
 msgstr "**분류 테이블**: CVA가 얼마나 잘 판별하는지 표시"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:629
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:628
 msgid "Rows: True group"
 msgstr "행: 실제 그룹"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:630
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:629
 msgid "Columns: Predicted group"
 msgstr "열: 예측된 그룹"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:631
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:630
 msgid "Diagonal = correct classifications"
 msgstr "대각선 = 올바른 분류"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:632
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:631
 msgid "Off-diagonal = misclassifications"
 msgstr "비대각선 = 오분류"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:634
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:633
 msgid "**Discriminant Function**: Statistical details"
 msgstr "**판별 함수**: 통계적 세부사항"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:636
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:635
 msgid "Wilks' Lambda: Smaller = better separation (0-1 scale)"
 msgstr "Wilks' Lambda: 작을수록 더 나은 분리 (0-1 척도)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:637
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:636
 msgid "P-value: Significance of group differences"
 msgstr "P-값: 그룹 차이의 유의성"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:639
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:690
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:638
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:689
 msgid "**Example**:"
 msgstr "**예제**:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:660
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:659
 msgid "MANOVA"
 msgstr "MANOVA"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:662
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:661
 msgid "**Purpose**: Test if groups differ significantly in shape"
 msgstr "**목적**: 그룹이 형태에서 유의하게 다른지 검정"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:666
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:665
 msgid "Formal hypothesis testing"
 msgstr "공식적인 가설 검정"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:667
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:666
 msgid "Comparing multiple groups simultaneously"
 msgstr "여러 그룹을 동시에 비교"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:668
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:667
 msgid "Assessing effect size"
 msgstr "효과 크기 평가"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:670
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:669
 msgid ""
 "**Running MANOVA**: MANOVA is computed as part of every analysis run. In the"
 " analysis dialog, set the **MANOVA grouping variable** to the categorical "
@@ -1424,55 +1422,55 @@ msgstr ""
 "**MANOVA 실행**: MANOVA는 모든 분석 실행의 일부로 계산됩니다. 분석 대화상자에서 **MANOVA 그룹화 변수** 를 "
 "검정하려는 범주형 변수로 지정합니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:676
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:675
 msgid "**Wilks' Lambda**: Test statistic (0-1)"
 msgstr "**Wilks' Lambda**: 검정 통계량 (0-1)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:678
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:677
 msgid "Smaller = more group separation"
 msgstr "작을수록 = 더 많은 그룹 분리"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:679
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:678
 msgid "0 = perfect separation"
 msgstr "0 = 완벽한 분리"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:680
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:679
 msgid "1 = no separation"
 msgstr "1 = 분리 없음"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:682
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:681
 msgid "**F-statistic**: Ratio of between-group to within-group variation"
 msgstr "**F-통계량**: 그룹 간 변이 대 그룹 내 변이의 비율"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:683
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:682
 msgid "**P-value**: Probability that group differences are due to chance"
 msgstr "**P-값**: 그룹 차이가 우연으로 인한 것일 확률"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:685
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:684
 msgid "P < 0.05: Significant difference (reject null hypothesis)"
 msgstr "P < 0.05: 유의한 차이 (귀무가설 기각)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:686
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:685
 msgid "P ≥ 0.05: No significant difference"
 msgstr "P ≥ 0.05: 유의한 차이 없음"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:688
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:687
 msgid ""
 "**Effect Size (Partial η²)**: Proportion of variance explained by groups"
 msgstr "**효과 크기 (부분 η²)**: 그룹에 의해 설명되는 분산의 비율"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:708
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:707
 msgid "Handling Missing Landmarks"
 msgstr "결측 랜드마크 처리"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:710
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:709
 msgid ""
 "Modan2 fills in missing landmarks automatically during analysis, using an "
 "EM-style refinement loop that interleaves alignment and imputation:"
 msgstr ""
 "Modan2는 분석 중에 결측 랜드마크를 자동으로 채웁니다. 정렬과 대치를 번갈아 수행하는 EM 방식의 반복 정밀화 루프를 사용합니다:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:713
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:712
 msgid ""
 "Align all specimens, leaving missing landmarks as gaps (the mean shape is "
 "computed ignoring the gaps, and each specimen is aligned on the landmarks it"
@@ -1481,7 +1479,7 @@ msgstr ""
 "결측 랜드마크를 빈 자리로 남긴 채 모든 표본을 정렬합니다(평균 형상은 빈 자리를 무시하고 계산하며, 각 표본은 실제로 가지고 있는 "
 "랜드마크만으로 정렬합니다)."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:716
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:715
 msgid ""
 "For each specimen with missing data, fit the current mean shape onto its "
 "observed landmarks by a similarity transform (rotation, scale, and "
@@ -1490,20 +1488,20 @@ msgstr ""
 "결측이 있는 각 표본에 대해, 현재 평균 형상을 그 표본의 관측된 랜드마크에 상사변환(회전, 크기, 이동)으로 정합한 뒤, 정합된 평균 "
 "형상에서 결측 위치를 읽어옵니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:719
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:718
 msgid ""
 "Re-align with the filled-in values, then **re-open the original gaps** and "
 "re-estimate them from the improved mean."
 msgstr "채워 넣은 값으로 다시 정렬한 다음, **원래의 빈 자리를 다시 열어** 개선된 평균 형상으로부터 재추정합니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:721
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:720
 msgid ""
 "Repeat step 3 a small number of times so estimates keep improving as the "
 "alignment settles (they are never fitted on previous estimates)."
 msgstr ""
 "3단계를 몇 번 반복하여, 정렬이 수렴해 가면서 추정값이 계속 개선되도록 합니다(이전 추정값에 다시 맞추는 일은 결코 없습니다)."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:724
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:723
 msgid ""
 "Imputed values live only in the analysis working copy — they are never "
 "written back to the database. PCA, CVA, and MANOVA then run on the aligned "
@@ -1512,7 +1510,7 @@ msgstr ""
 "대치된 값은 분석용 작업 사본에만 존재하며 데이터베이스에 다시 기록되지 않습니다. 이후 PCA, CVA, MANOVA가 정렬된 좌표를 "
 "대상으로 수행됩니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:728
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:727
 msgid ""
 "This is the same shape-fitting method used by the \"Show Estimated\" and "
 "\"Show Expected\" previews in the Object Dialog. On synthetic test shapes "
@@ -1521,181 +1519,181 @@ msgstr ""
 "이는 객체 대화상자의 \"추정값 보기\"(Show Estimated)와 \"Show Expected\" 미리보기에 쓰이는 것과 동일한 "
 "형상 정합 방법입니다. 정답을 알고 있는 합성 시험 형상에서는 오차가 사실상 0입니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:732
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:731
 msgid "**Best Practices**:"
 msgstr "**모범 사례**:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:734
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:733
 msgid "Aim for <10% missing landmarks in your dataset"
 msgstr "데이터셋에서 <10% 결측 랜드마크를 목표로 하세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:735
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:734
 msgid "Keep a good number of complete (or near-complete) specimens"
 msgstr "완전한(또는 거의 완전한) 표본을 충분히 확보하세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:736
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:735
 msgid "Use biological knowledge to verify estimated positions make sense"
 msgstr "추정 위치가 타당한지 생물학적 지식을 사용하여 확인하세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:739
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:738
 msgid "Visualization"
 msgstr "시각화"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:742
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:741
 msgid "2D Viewer"
 msgstr "2D 뷰어"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:744
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:743
 msgid "**Features**:"
 msgstr "**기능**:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:746
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:745
 msgid "Zoom: mouse wheel"
 msgstr "확대/축소: 마우스 휠"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:747
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:746
 msgid "Pan: right-drag on empty space"
 msgstr "이동: 빈 공간에서 오른쪽 버튼 드래그"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:748
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:747
 msgid "Landmark overlay: colored circles with index or name labels"
 msgstr "랜드마크 오버레이: 인덱스 또는 이름 레이블이 붙은 색상 원"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:749
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:748
 msgid ""
 "Semi-landmark curves and their derived points (toggle with the **Curve** and"
 " **Semi-LM** checkboxes)"
 msgstr "준랜드마크 곡선과 그로부터 유도된 점들 (**Curve** 및 **Semi-LM** 체크박스로 켜고 끄기)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:753
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:752
 msgid "3D Viewer"
 msgstr "3D 뷰어"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:755
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:754
 msgid "**Controls**:"
 msgstr "**컨트롤**:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:757
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:756
 msgid "**Rotate**: left-drag"
 msgstr "**회전**: 왼쪽 버튼 드래그"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:758
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:757
 msgid "**Pan**: middle-drag"
 msgstr "**이동**: 가운데 버튼 드래그"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:759
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:758
 msgid "**Zoom**: right-drag or mouse wheel"
 msgstr "**확대/축소**: 오른쪽 버튼 드래그 또는 마우스 휠"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:761
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:760
 msgid "**Landmark Display**:"
 msgstr "**랜드마크 표시**:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:763
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:762
 msgid "Landmarks rendered as spheres"
 msgstr "랜드마크를 구체로 렌더링"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:764
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:763
 msgid "Size adjustable in **Preferences**"
 msgstr "크기는 **환경 설정**\\ (Preferences)에서 조정할 수 있습니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:765
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:764
 msgid "Index/name labels optional"
 msgstr "인덱스/이름 레이블은 선택 사항입니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:768
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:767
 msgid "Statistical Plots"
 msgstr "통계 플롯"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:770
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:769
 msgid "**Available Plots**:"
 msgstr "**사용 가능한 플롯**:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:772
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:771
 msgid "**Scree Plot** (PCA): Variance explained per PC"
 msgstr "**스크리 플롯** (PCA): PC당 설명되는 분산"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:773
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:772
 msgid "**PC Score Plot** (PCA): Specimens on PC axes"
 msgstr "**PC 점수 플롯** (PCA): PC 축의 표본"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:774
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:773
 msgid "**CV Score Plot** (CVA): Specimens on CV axes"
 msgstr "**CV 점수 플롯** (CVA): CV 축의 표본"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:775
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:774
 msgid "**Shape Variation Plot**: Wireframes at PC/CV extremes"
 msgstr "**형태 변이 플롯**: PC/CV 극단의 와이어프레임"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:777
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:776
 msgid "**Customization**:"
 msgstr "**사용자 정의**:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:779
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:778
 msgid "**Group Colors**: Auto-assigned by variable"
 msgstr "**그룹 색상**: 변수별 자동 할당"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:780
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:779
 msgid "**Point Size**: Adjustable"
 msgstr "**점 크기**: 조정 가능"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:781
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:780
 msgid "**Axis Labels**: Automatic with variance %"
 msgstr "**축 레이블**: 분산 %와 함께 자동"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:782
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:781
 msgid "**Legend**: Shows group names and colors"
 msgstr "**범례**: 그룹 이름 및 색상 표시"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:784
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:783
 msgid "**Exporting Plots**:"
 msgstr "**플롯 내보내기**:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:786
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:785
 msgid "Right-click on plot → **\"Export Plot\"**"
 msgstr "플롯에서 우클릭 → **\"플롯 내보내기\"**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:787
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:786
 msgid "Formats: PNG, SVG, PDF"
 msgstr "형식: PNG, SVG, PDF"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:788
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:787
 msgid "Resolution: 300 DPI default (adjustable)"
 msgstr "해상도: 300 DPI 기본값 (조정 가능)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:791
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:790
 msgid "Data Export"
 msgstr "데이터 내보내기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:794
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:793
 msgid "Exporting Datasets"
 msgstr "데이터셋 내보내기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:796
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:795
 msgid "Select a dataset and choose **Export** (``Ctrl+E``)."
 msgstr "데이터셋을 선택하고 **내보내기**\\ (Export, ``Ctrl+E``)를 선택합니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:798
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:797
 msgid "Choose the export **format**:"
 msgstr "내보낼 **형식** 을 선택합니다:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:800
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:799
 msgid "**TPS**: landmark coordinates in TPS format"
 msgstr "**TPS**: TPS 형식의 랜드마크 좌표"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:801
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:800
 msgid "**X1Y1**: plain coordinate columns"
 msgstr "**X1Y1**: 단순 좌표 열"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:802
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:801
 msgid "**Morphologika**: Morphologika format (with images and metadata)"
 msgstr "**Morphologika**: Morphologika 형식 (이미지 및 메타데이터 포함)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:803
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:802
 msgid "**JSON+ZIP**: a complete dataset package (see below)"
 msgstr "**JSON+ZIP**: 완전한 데이터셋 패키지 (아래 참조)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:805
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:804
 msgid ""
 "Choose the **superimposition** applied on export: **None** (raw coordinates)"
 " or **Procrustes** (aligned). For a raw TPS export, traced semi-landmark "
@@ -1706,19 +1704,19 @@ msgstr ""
 "TPS로 내보내면 추적한 준랜드마크 곡선이 ``CURVES=`` / ``POINTS=`` 블록으로 기록되고, 프로크루스테스로 내보내면 "
 "병합된 정렬 랜드마크가 기록됩니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:809
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:808
 msgid "Pick which objects to include from the object list."
 msgstr "객체 목록에서 포함할 객체를 선택합니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:810
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:809
 msgid "Click **\"Export\"**."
 msgstr "**\"Export\"**\\ (내보내기)를 클릭합니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:813
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:812
 msgid "Exporting a Dataset Package (JSON+ZIP)"
 msgstr "데이터셋 패키지 내보내기 (JSON+ZIP)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:815
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:814
 msgid ""
 "The **JSON+ZIP** format is Modan2's complete-backup format. It captures the "
 "dataset metadata, landmark names, curve scheme, variables, landmarks, and "
@@ -1728,7 +1726,7 @@ msgstr ""
 "**JSON+ZIP** 형식은 Modan2의 완전 백업 형식입니다. 데이터셋 메타데이터, 랜드마크 이름, 곡선 구성, 변수, 랜드마크, "
 "추적한 곡선을 JSON 매니페스트에 담고, 이미지와 3D 모델 파일도 함께 묶을 수 있습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:820
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:819
 msgid ""
 "Tick **\"Include image and model files\"** to bundle the media; an "
 "**Estimated size** figure updates as you change the options."
@@ -1736,7 +1734,7 @@ msgstr ""
 "미디어를 함께 묶으려면 **\"Include image and model files\"** 를 체크하세요. 옵션을 바꿀 때마다 "
 "**Estimated size**\\ (예상 크기) 값이 갱신됩니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:822
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:821
 msgid ""
 "The output is a ``<dataset>_<timestamp>.zip`` you can archive or share, and "
 "re-import losslessly on another machine (see `Importing a Dataset Package "
@@ -1745,181 +1743,181 @@ msgstr ""
 "결과물은 ``<dataset>_<timestamp>.zip`` 파일로, 보관하거나 공유할 수 있고 다른 컴퓨터에서 손실 없이 다시 가져올 수 있습니다(`Importing a Dataset Package\n"
 "(JSON+ZIP)`_ 참조)."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:827
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:826
 msgid "Exporting Analysis Results"
 msgstr "분석 결과 내보내기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:829
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:828
 msgid "In the **Data Exploration Dialog**:"
 msgstr "**데이터 탐색 대화상자** 에서:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:831
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:830
 msgid "**Export PC Scores**: CSV with scores per specimen"
 msgstr "**PC 점수 내보내기**: 표본당 점수가 포함된 CSV"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:832
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:831
 msgid "**Export Shape Data**: Aligned landmark coordinates (post-Procrustes)"
 msgstr "**형태 데이터 내보내기**: 정렬된 랜드마크 좌표 (Procrustes 이후)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:833
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:832
 msgid "**Export Statistics**: Summary statistics (mean, SD, etc.)"
 msgstr "**통계 내보내기**: 요약 통계 (평균, 표준편차 등)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:836
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:835
 msgid "Keyboard Shortcuts"
 msgstr "키보드 단축키"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:839
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:838
 msgid "Main Window"
 msgstr "메인 창"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:841
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:840
 msgid "``Ctrl+N`` - New Dataset"
 msgstr "``Ctrl+N`` - 새 데이터셋"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:842
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:841
 msgid "``Ctrl+Shift+N`` - New Object"
 msgstr "``Ctrl+Shift+N`` - 새 객체"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:843
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:842
 msgid "``Ctrl+Shift+O`` - Edit Object"
 msgstr "``Ctrl+Shift+O`` - 객체 편집"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:844
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:843
 msgid "``Ctrl+S`` - Save Changes"
 msgstr "``Ctrl+S`` - 변경사항 저장"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:845
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:844
 msgid "``Ctrl+I`` - Import"
 msgstr "``Ctrl+I`` - 가져오기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:846
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:845
 msgid "``Ctrl+E`` - Export"
 msgstr "``Ctrl+E`` - 내보내기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:847
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:846
 msgid "``Ctrl+G`` - Analyze"
 msgstr "``Ctrl+G`` - 분석"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:848
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:847
 msgid "``Ctrl+P`` - Toggle object preview"
 msgstr "``Ctrl+P`` - 객체 미리보기 켜기/끄기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:849
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:848
 msgid "``Ctrl+W`` - Exit"
 msgstr "``Ctrl+W`` - 종료"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:850
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:849
 msgid "``F1`` - About"
 msgstr "``F1`` - 정보"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:853
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:852
 msgid "Object Dialog (Curve mode)"
 msgstr "객체 대화상자 (Curve 모드)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:855
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:854
 msgid "**Enter** / **double-click** - Accept the current trace"
 msgstr "**Enter** / **더블클릭** - 현재 추적 확정"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:856
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:855
 msgid "**Esc** / **right-click** - Cancel the current trace"
 msgstr "**Esc** / **오른쪽 클릭** - 현재 추적 취소"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:857
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:856
 msgid "**Right-click a curve point** - Delete Point / Delete Curve"
 msgstr "**곡선의 점에서 오른쪽 클릭** - Delete Point / Delete Curve"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:861
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:860
 msgid "Preferences"
 msgstr "환경설정"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:863
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:862
 msgid "Open **Edit → Preferences**."
 msgstr "**Edit → Preferences**\\ (편집 → 환경 설정)를 엽니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:866
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:865
 msgid "General"
 msgstr "일반"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:868
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:867
 msgid "**Language**: English or Korean (한국어), applied immediately"
 msgstr "**언어**: English 또는 Korean (한국어). 즉시 적용됩니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:869
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:868
 msgid ""
 "**Remember Geometry**: restore window size/position between sessions "
 "(Yes/No)"
 msgstr "**Remember Geometry**: 세션 간에 창 크기/위치를 복원합니다 (예/아니오)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:870
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:869
 msgid "**Toolbar Icon Size**: Small / Medium / Large"
 msgstr "**Toolbar Icon Size**: 작게 / 중간 / 크게"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:873
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:872
 msgid "Viewer Appearance"
 msgstr "뷰어 외형"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:875
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:874
 msgid "Set separately for **2D** and **3D**:"
 msgstr "**2D** 와 **3D** 에 대해 각각 설정합니다:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:877
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:876
 msgid "**Landmark** size: Small / Medium / Large"
 msgstr "**랜드마크** 크기: 작게 / 중간 / 크게"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:878
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:877
 msgid "**Wireframe** thickness: Thin / Medium / Thick"
 msgstr "**와이어프레임** 두께: 얇게 / 중간 / 굵게"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:879
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:878
 msgid "**Index** (label) size: Small / Medium / Large"
 msgstr "**인덱스**\\ (레이블) 크기: 작게 / 중간 / 크게"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:881
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:880
 msgid "Also:"
 msgstr "그 외:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:883
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:882
 msgid "**Background Color**: viewer background"
 msgstr "**배경 색상**: 뷰어 배경"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:886
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:885
 msgid "Plot Appearance"
 msgstr "플롯 외형"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:888
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:887
 msgid "**Data point size**: Small / Medium / Large"
 msgstr "**데이터 점 크기**: 작게 / 중간 / 크게"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:889
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:888
 msgid ""
 "**Data point colors** and **Data point markers**: per-group defaults used in"
 " the Data Exploration plots"
 msgstr "**데이터 점 색상** 과 **데이터 점 표식**: 데이터 탐색 플롯에서 그룹별 기본값으로 사용됩니다"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:893
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:892
 msgid "Tips and Best Practices"
 msgstr "팁 및 모범 사례"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:896
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:895
 msgid "Data Organization"
 msgstr "데이터 구성"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:898
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:897
 msgid ""
 "**Use consistent naming**: ``species_ID_number.jpg`` (e.g., "
 "``sparrow_001.jpg``)"
 msgstr "**일관된 이름 사용**: ``species_ID_number.jpg`` (예: ``sparrow_001.jpg``)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:899
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:898
 msgid "**Organize hierarchically**: Group related datasets"
 msgstr "**계층적으로 구성**: 관련 데이터셋 그룹화"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:900
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:899
 msgid "**Document metadata**: Use description fields"
 msgstr "**메타데이터 문서화**: 설명 필드 사용"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:901
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:900
 msgid ""
 "**Back up regularly**: export datasets as JSON+ZIP packages, or copy "
 "``~/PaleoBytes/Modan2/`` while Modan2 is closed"
@@ -1927,60 +1925,60 @@ msgstr ""
 "**정기적으로 백업하세요**: 데이터셋을 JSON+ZIP 패키지로 내보내거나, Modan2를 종료한 상태에서 "
 "``~/PaleoBytes/Modan2/`` 를 복사하세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:905
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:904
 msgid "Landmark Placement"
 msgstr "랜드마크 배치"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:907
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:906
 msgid "**Define landmarks carefully**: Use anatomically meaningful points"
 msgstr "**랜드마크를 신중하게 정의**: 해부학적으로 의미 있는 점 사용"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:908
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:907
 msgid "**Be consistent**: Same landmarks across all specimens"
 msgstr "**일관성 유지**: 모든 표본에 동일한 랜드마크"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:909
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:908
 msgid "**Use high-resolution images**: Better precision"
 msgstr "**고해상도 이미지 사용**: 더 나은 정밀도"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:910
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:909
 msgid "**Avoid ambiguous points**: Choose clear, repeatable features"
 msgstr "**모호한 점 피하기**: 명확하고 반복 가능한 특징 선택"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:911
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:910
 msgid "**Document landmarks**: Write down definitions (e.g., \"tip of beak\")"
 msgstr "**랜드마크 문서화**: 정의를 기록 (예: \"부리 끝\")"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:916
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:915
 msgid "**Check assumptions**: Normal distribution, homogeneity of variance"
 msgstr "**가정 확인**: 정규 분포, 분산의 동질성"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:917
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:916
 msgid "**Sample size**: At least 30 specimens for PCA, 10+ per group for CVA"
 msgstr "**표본 크기**: PCA는 최소 30개 표본, CVA는 그룹당 10개 이상"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:918
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:917
 msgid "**Validate results**: Cross-validation, bootstrap resampling"
 msgstr "**결과 검증**: 교차 검증, 부트스트랩 재표본추출"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:919
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:918
 msgid ""
 "**Interpret cautiously**: Statistical significance ≠ biological significance"
 msgstr "**신중하게 해석**: 통계적 유의성 ≠ 생물학적 유의성"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:920
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:919
 msgid "**Visualize first**: Explore with PCA before formal tests"
 msgstr "**먼저 시각화**: 공식 검정 전에 PCA로 탐색"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:923
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:922
 msgid "Performance Optimization"
 msgstr "성능 최적화"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:925
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:924
 msgid "**Limit 3D polygon count**: Simplify meshes before import"
 msgstr "**3D 폴리곤 수 제한**: 가져오기 전에 메시 단순화"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:926
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:925
 msgid ""
 "**Let large photos downscale**: oversized images (longer side > 2560 px) are"
 " stored as a smaller working copy automatically, with the original archived;"
@@ -1989,110 +1987,110 @@ msgstr ""
 "**큰 사진은 축소되도록 두기**: 과도하게 큰 이미지(긴 변 > 2560 px)는 자동으로 더 작은 작업본으로 저장되고 원본은 따로 "
 "보관됩니다. 세밀하게 봐야 할 때만 **원본 보기**\\ (Show Original)를 사용하세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:929
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:928
 msgid "**Run analyses on subsets**: test on a small sample first"
 msgstr "**하위 집합에서 분석 실행**: 먼저 작은 샘플로 시험해 보세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:932
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:931
 msgid "Common Workflows"
 msgstr "일반적인 워크플로우"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:935
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:934
 msgid "Workflow 1: 2D Morphometric Study"
 msgstr "워크플로우 1: 2D 형태계측 연구"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:951
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:950
 msgid "Workflow 2: 3D Morphometric Study"
 msgstr "워크플로우 2: 3D 형태계측 연구"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:964
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:963
 msgid "Workflow 3: Missing Data Study"
 msgstr "워크플로우 3: 결측 데이터 연구"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:976
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:975
 msgid "Troubleshooting"
 msgstr "문제 해결"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:979
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:978
 msgid "Analysis Fails"
 msgstr "분석 실패"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:981
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:980
 msgid "**Error**: ``Not enough complete specimens for Procrustes``"
 msgstr "**오류**: ``Not enough complete specimens for Procrustes``"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:983
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:982
 msgid ""
 "**Solution**: Need at least 2 complete specimens without missing landmarks"
 msgstr "**해결책**: 결측 랜드마크가 없는 최소 2개의 완전한 표본 필요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:985
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:984
 msgid "**Error**: ``CVA requires at least 2 groups``"
 msgstr "**오류**: ``CVA requires at least 2 groups``"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:987
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:986
 msgid "**Solution**: Define a grouping variable with multiple values"
 msgstr "**해결책**: 여러 값을 가진 그룹화 변수 정의"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:990
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:989
 msgid "Landmarks Not Showing"
 msgstr "랜드마크가 표시되지 않음"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:992
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:991
 msgid "**Problem**: Placed landmarks but not visible"
 msgstr "**문제**: 랜드마크를 배치했지만 보이지 않음"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:994
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1005
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:993
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1004
 msgid "**Solution**:"
 msgstr "**해결책**:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:996
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:995
 msgid "Check the \"Show\" checkbox is enabled (with Index or Name selected)"
 msgstr "\"Show\" 체크박스가 켜져 있는지 확인하세요(Index 또는 Name 중 하나가 선택된 상태로)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:997
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:996
 msgid "Increase the landmark size in Preferences"
 msgstr "환경 설정에서 랜드마크 크기를 키우세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:998
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:997
 msgid "Zoom in - landmarks may be too small"
 msgstr "확대 - 랜드마크가 너무 작을 수 있음"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1001
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1000
 msgid "Slow Performance"
 msgstr "느린 성능"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1003
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1002
 msgid "**Problem**: Application freezes during analysis"
 msgstr "**문제**: 분석 중 애플리케이션 멈춤"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1007
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1006
 msgid "Reduce dataset size (split into smaller datasets)"
 msgstr "데이터셋 크기 축소 (더 작은 데이터셋으로 분할)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1008
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1007
 msgid "Close other applications"
 msgstr "다른 애플리케이션 닫기"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1009
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1008
 msgid "Simplify 3D meshes (reduce polygon count)"
 msgstr "3D 메시 단순화 (폴리곤 수 축소)"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1012
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1011
 msgid "File Format Reference"
 msgstr "파일 형식 레퍼런스"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1014
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1013
 msgid ""
 "What Modan2's readers actually expect. Blank lines are ignored throughout."
 msgstr "Modan2의 리더가 실제로 기대하는 형식입니다. 빈 줄은 어디서든 무시됩니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1017
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1016
 msgid "TPS"
 msgstr "TPS"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1019
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1018
 msgid ""
 "An object is an ``LM=<n>`` header, ``n`` coordinate lines, and optional "
 "``KEY=VALUE`` lines. Recognised keys are ``ID``, ``IMAGE``, ``COMMENT``, and"
@@ -2102,7 +2100,7 @@ msgstr ""
 "키는 ``ID``, ``IMAGE``, ``COMMENT``, ``SCALE`` 입니다. ``#``, ``\"``, ``'`` 로 "
 "시작하는 줄은 주석입니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1036
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1035
 msgid ""
 "Semi-landmark curves follow the landmarks as a ``CURVES=<k>`` header and "
 "then ``k`` blocks, each a ``POINTS=<m>`` header with ``m`` coordinate lines:"
@@ -2110,22 +2108,22 @@ msgstr ""
 "준랜드마크 곡선은 랜드마크 뒤에 ``CURVES=<k>`` 헤더로 시작해 ``k`` 개의 블록이 이어집니다. 각 블록은 "
 "``POINTS=<m>`` 헤더와 ``m`` 개의 좌표 줄입니다:"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1051
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1050
 msgid ""
 "Modan2 both reads and writes these blocks (see :ref:`semi-landmark-curves`)."
 msgstr "Modan2는 이 블록을 읽고 쓰는 것 모두 지원합니다(:ref:`semi-landmark-curves` 참조)."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1054
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1053
 msgid "NTS"
 msgstr "NTS"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1056
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1055
 msgid ""
 "An NTSYS-style matrix file: optional comment lines in quotes, then a header "
 "line, then the data."
 msgstr "NTSYS 방식의 행렬 파일입니다. 따옴표로 시작하는 선택적 주석 줄, 헤더 줄, 그리고 데이터 순으로 옵니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1068
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1067
 msgid ""
 "The header fields are, in order: the matrix type, the number of objects with"
 " a row-name flag, the number of variables with a column-name flag, a "
@@ -2134,7 +2132,7 @@ msgstr ""
 "헤더 필드는 순서대로 행렬 종류, 행 이름 플래그가 붙은 객체 수, 열 이름 플래그가 붙은 변수 수, 결측값 표시, 그리고 차원을 "
 "나타내는 ``DIM=<d>`` 입니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1072
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1071
 msgid ""
 "The row-name flag says where object names live — ``L`` on their own line, "
 "``B`` at the beginning of each data row, ``E`` at the end. The number of "
@@ -2143,17 +2141,17 @@ msgstr ""
 "행 이름 플래그는 객체 이름이 어디에 있는지를 나타냅니다 — ``L`` 은 별도의 줄, ``B`` 는 각 데이터 행의 앞, ``E`` 는"
 " 뒤입니다. 랜드마크 개수는 변수 수를 ``DIM`` 으로 나눈 값입니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1077
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1076
 msgid "Morphologika"
 msgstr "Morphologika"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1079
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1078
 msgid ""
 "A sectioned text file. ``[names]`` and ``[rawpoints]`` are required; the "
 "rest are optional."
 msgstr "섹션으로 나뉜 텍스트 파일입니다. ``[names]`` 와 ``[rawpoints]`` 는 필수이고 나머지는 선택입니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1098
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1097
 msgid ""
 "Optional sections Modan2 reads: ``[labels]`` and ``[labelvalues]`` "
 "(variables), ``[wireframe]``, ``[polygons]``, ``[images]``, and "
@@ -2162,23 +2160,23 @@ msgstr ""
 "Modan2가 읽는 선택 섹션: ``[labels]`` 와 ``[labelvalues]``\\ (변수), ``[wireframe]``, "
 "``[polygons]``, ``[images]``, ``[pixelspermm]``."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1102
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1101
 msgid "X1Y1"
 msgstr "X1Y1"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1104
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1103
 msgid "Plain coordinate columns, one row per object."
 msgstr "단순 좌표 열이며, 객체당 한 행입니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1107
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1106
 msgid "Glossary"
 msgstr "용어집"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1109
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1108
 msgid "**Landmark**"
 msgstr "**랜드마크(Landmark)**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1110
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1109
 msgid ""
 "A point location on a specimen, used for shape analysis. In Modan2 a "
 "landmark has an index, optionally a name, and coordinates in image (2D) or "
@@ -2187,11 +2185,11 @@ msgstr ""
 "형상 분석에 사용하는, 표본 위의 한 점입니다. Modan2에서 랜드마크는 인덱스와 (선택적으로) 이름, 그리고 이미지(2D) 또는 "
 "모델(3D) 공간의 좌표를 가집니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1114
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1113
 msgid "**Semi-landmark**"
 msgstr "**준랜드마크(Semi-landmark)**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1115
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1114
 msgid ""
 "A point placed along a *curve* rather than at a discrete feature. You trace "
 "the curve and Modan2 resamples it into evenly-spaced points (see :ref:`semi-"
@@ -2200,11 +2198,11 @@ msgstr ""
 "뚜렷한 특징점이 아니라 *곡선* 을 따라 놓이는 점입니다. 곡선을 추적하면 Modan2가 균등한 간격의 점들로 "
 "재표본화합니다(:ref:`semi-landmark-curves` 참조)."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1119
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1118
 msgid "**Type I / II / III landmark**"
 msgstr "**Type I / II / III 랜드마크**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1120
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1119
 msgid ""
 "The conventional classification: **Type I** is a true homologous point (e.g."
 " a suture intersection), **Type II** is geometrically defined (e.g. a point "
@@ -2214,34 +2212,34 @@ msgstr ""
 "관례적인 분류입니다. **Type I** 은 진정한 상동점(예: 봉합선 교차점), **Type II** 는 기하학적으로 정의되는 점(예:"
 " 곡률이 최대인 점), **Type III** 은 곡선이나 윤곽선 위의 임의의 점 — 준랜드마크가 담아내는 것 — 입니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1125
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1124
 msgid "**Superimposition**"
 msgstr "**중첩정렬(Superimposition)**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1126
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1125
+#, fuzzy
 msgid ""
 "Aligning specimens so that only shape differences remain. Modan2 offers "
-"Procrustes, Bookstein, and Resistant Fit (see `Procrustes "
-"Superimposition`_)."
+"Procrustes and Bookstein (see `Procrustes Superimposition`_)."
 msgstr ""
 "형상 차이만 남도록 표본들을 정렬하는 것입니다. Modan2는 프로크루스테스, 북스틴, 강건적합을 제공합니다(`Procrustes "
 "Superimposition`_ 참조)."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1129
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1128
 msgid "**Procrustes superimposition**"
 msgstr "**프로크루스테스 중첩정렬**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1130
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1129
 msgid ""
 "Superimposition that removes position, orientation, and size by translating,"
 " rotating, and scaling each configuration to best fit the others."
 msgstr "각 배열을 이동·회전·크기 조정하여 서로 가장 잘 맞게 함으로써 위치, 방향, 크기를 제거하는 중첩정렬입니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1133
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1132
 msgid "**Centroid size**"
 msgstr "**중심 크기(Centroid size)**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1134
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1133
 msgid ""
 "A measure of size: the square root of the summed squared distances from "
 "every landmark to the configuration's centroid. Reported in real units when "
@@ -2250,56 +2248,56 @@ msgstr ""
 "크기의 척도로, 모든 랜드마크에서 배열의 중심까지의 제곱 거리 합의 제곱근입니다. 객체가 캘리브레이션되어 있으면 실제 단위로, 그렇지 "
 "않으면 픽셀 단위로 표시됩니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1138
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1137
 msgid "**Procrustes distance**"
 msgstr "**프로크루스테스 거리(Procrustes distance)**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1139
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1138
 msgid "A measure of how different two shapes are, after superimposition."
 msgstr "중첩정렬 후 두 형상이 얼마나 다른지를 나타내는 척도입니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1141
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1140
 msgid "**Shape space**"
 msgstr "**형상 공간(Shape space)**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1142
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1141
 msgid ""
 "The mathematical space in which each point is one shape; PCA and CVA are "
 "explored as projections of it."
 msgstr "각 점이 하나의 형상에 대응하는 수학적 공간입니다. PCA와 CVA는 이 공간의 투영으로 이해할 수 있습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1145
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1144
 msgid "**PCA (Principal Component Analysis)**"
 msgstr "**PCA (주성분 분석)**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1146
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1145
 msgid ""
 "Finds the axes along which the dataset varies most, so a few components "
 "summarise the main patterns of shape variation."
 msgstr "데이터셋의 변이가 가장 큰 축들을 찾아, 몇 개의 성분으로 형상 변이의 주요 패턴을 요약합니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1149
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1148
 msgid "**CVA (Canonical Variate Analysis)**"
 msgstr "**CVA (정준변량 분석)**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1150
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1149
 msgid ""
 "Finds the axes that best separate groups you have defined with a variable."
 msgstr "변수로 정의한 그룹들을 가장 잘 분리하는 축을 찾습니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1152
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1151
 msgid "**MANOVA (Multivariate Analysis of Variance)**"
 msgstr "**MANOVA (다변량 분산 분석)**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1153
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1152
 msgid "Tests whether the group differences are statistically significant."
 msgstr "그룹 간 차이가 통계적으로 유의한지 검정합니다."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1155
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1154
 msgid "**Missing landmark**"
 msgstr "**결측 랜드마크(Missing landmark)**"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1156
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1155
 msgid ""
 "A landmark that could not be recorded. Marked explicitly so the landmark "
 "count stays consistent, and filled in during analysis by shape-fitting (see "
@@ -2308,19 +2306,19 @@ msgstr ""
 "기록할 수 없었던 랜드마크입니다. 랜드마크 개수를 일관되게 유지하도록 명시적으로 표시하며, 분석 중에 형상 정합으로 "
 "채워집니다(:ref:`analysis-missing-landmarks` 참조)."
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1161
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1160
 msgid "Next Steps"
 msgstr "다음 단계"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1163
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1162
 msgid "Explore the :doc:`developer_guide` to contribute or extend Modan2"
 msgstr "Modan2에 기여하거나 확장하려면 :doc:`developer_guide` 를 탐색하세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1164
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1163
 msgid "Check the :doc:`changelog` for latest features and bug fixes"
 msgstr "최신 기능 및 버그 수정 사항은 :doc:`changelog` 를 확인하세요"
 
-#: ../../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1165
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:1164
 msgid ""
 "Visit the `GitHub repository <https://github.com/jikhanjung/Modan2>`_ for "
 "example datasets"
@@ -2816,3 +2814,13 @@ msgstr ""
 
 #~ msgid "Press ``Enter`` or click away to save"
 #~ msgstr "``Enter`` 를 누르거나 다른 곳을 클릭하여 저장하세요"
+
+#~ msgid ""
+#~ "*Resistant Fit* (RFTRA): a robust alignment that uses repeated medians of "
+#~ "pairwise landmark relationships, so a few displaced (outlier) landmarks do "
+#~ "not pull the whole fit the way Procrustes can. Works for 2D and 3D; missing "
+#~ "landmarks are imputed first."
+#~ msgstr ""
+#~ "*강건적합*\\ (Resistant Fit, RFTRA): 랜드마크 쌍 관계의 반복 중앙값(repeated median)을 이용하는 "
+#~ "강건한 정렬로, 몇 개의 이탈(이상치) 랜드마크가 프로크루스테스처럼 전체 정합을 끌어당기지 않습니다. 2D와 3D 모두 지원하며, 결측 "
+#~ "랜드마크는 먼저 대치합니다."

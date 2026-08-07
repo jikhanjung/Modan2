@@ -136,22 +136,32 @@ models outgrow the drive Modan2 was installed on. The database, images, 3D
 models, backups and logs all move together; they are one library, and either
 half is useless without the other.
 
-Three things to know:
+When you pick a folder, Modan2 offers to move your existing library there:
 
-* **Your existing files are not moved.** The setting tells Modan2 where to look
-  from now on; everything already stored stays where it is until you move it
-  yourself. Modan2 tells you this before you confirm.
-* **It takes effect the next time you start Modan2**, because the database is
-  already open by the time you can change the setting.
-* **Avoid folders managed by OneDrive, Dropbox or a similar service, and network
-  drives.** The database is not safe to synchronise while it is open — if you
-  use Modan2 on two computers, the service will not merge the two copies, it
-  will silently keep both. To get your data into the cloud, put an exported
-  package there instead of the live folder.
+* **Move now** — Modan2 copies everything across, checks that it arrived, and
+  only then removes the originals. You can stop it partway; if you do, your data
+  is left exactly where it was. Nothing ends up half-moved, and when it finishes
+  you can carry on working without restarting.
+* **Change the setting only** — nothing is moved. Use this to point Modan2 at a
+  library that is already in the new folder, for instance one you copied there
+  yourself. The setting takes effect the next time Modan2 starts.
 
-So to move an existing library: quit Modan2, copy the folder to its new home,
-start Modan2, set **Data folder** to the new location, and restart. Keep the old
-copy until you have confirmed everything is there.
+.. warning::
+
+   **Do not put your library in a folder managed by Dropbox, OneDrive, Google
+   Drive or a similar service, and not on a network drive.** Modan2 warns you if
+   you try.
+
+   Modan2 keeps your data in a database file that it writes to as you work.
+   Sync services upload such a file while it is being written, and if you ever
+   open the same library from two computers they will not merge it — you get two
+   copies that have silently drifted apart, with no way to tell which one is
+   right. Over a network drive, the file locking the database relies on is
+   unreliable and can corrupt it outright.
+
+   Keep the library on a local disk, and put **backups and exported datasets**
+   in the sync folder instead. Those are snapshots: nothing is writing to them,
+   so they are safe to synchronise.
 
 If the folder is missing when Modan2 starts — an external drive that is not
 plugged in, a share that is down — Modan2 says so and asks what to do rather

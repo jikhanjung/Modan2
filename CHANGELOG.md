@@ -16,16 +16,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   The database, images, 3D models, backups and logs all move together — they are
   one library, and splitting them would leave either half useless on its own.
 
-  Two things it deliberately does not do. It **does not move your existing
-  files** — you keep them where they are until you move them yourself, and the
-  dialog says so before you confirm. And it takes effect **the next time you
-  start Modan2**, because the database is already open by the time you can
-  change the setting. Leave it alone and everything works exactly as before.
+  Leave it alone and everything works exactly as before.
 
   If a folder you chose is missing at startup (an external drive not plugged in,
   a network share that is down), Modan2 tells you which folder and asks what to
   do — quit, use the default, or start anyway — instead of quietly creating an
   empty library there, which looks the same as losing your data.
+
+- **Modan2 can move your library to the new folder for you.** Choosing a folder
+  now offers to move what you already have. It copies everything across, checks
+  that it arrived, and only then removes the originals — so if it fails, or if
+  you stop it partway, your data is left exactly where it was. A library split
+  across two folders is not a possible outcome. When it finishes you can keep
+  working; no restart is needed.
+
+  Declining is still a real answer, and one with a use: **Change the setting
+  only** points Modan2 at a library that is already in the new folder, such as
+  one you copied there yourself.
+
+- **Modan2 warns you before you put your data in a cloud-synced folder or on a
+  network drive.** Dropbox, OneDrive, Google Drive, iCloud and the like are
+  recognised by name, as are network shares.
+
+  Both break a live database quietly, which is why they are worth a warning
+  rather than a footnote. Modan2 writes to the database file as you work, and a
+  sync client will upload it mid-write; open the same library from two computers
+  and the client will not merge it, it keeps both copies and lets them drift
+  apart with no way to tell which is right. Over a network drive the file
+  locking the database depends on is unreliable and can corrupt it outright.
+
+  The warning explains this and can be overridden — it is your disk. The right
+  thing to put in a sync folder is backups and exported datasets: those are
+  snapshots, and nothing is writing to them.
 
 ### Removed
 - **Resistant Fit superimposition is no longer offered.** It does not converge.

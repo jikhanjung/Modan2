@@ -170,24 +170,39 @@ than starting an empty library.
 Can I backup my data?
 ~~~~~~~~~~~~~~~~~~~~~
 
-**Yes!** Multiple backup options:
+**Yes — use Data ▸ Back Up Library.** It writes your whole library to a single
+``.zip`` file: every dataset, object, landmark, variable, image, 3D model and
+saved analysis. Put that file wherever you keep your backups.
 
-1. **Copy the data folder**
+Two things make it worth using rather than copying folders by hand:
 
-   * Copy your data folder — it holds the database and the media files
-   * Restore by putting it back
-   * Quit Modan2 first, so the database is not mid-write
+* **A backup is complete or it is not written.** If it is interrupted, you get
+  no file at all rather than a truncated one that looks like a backup. And if
+  a file is recorded in the database but missing from your disk, Modan2 tells
+  you which ones instead of quietly leaving holes in the archive.
+* **It is safe to synchronise.** Unlike the live library, the archive is a
+  snapshot — nothing is writing to it — so a sync folder is a perfectly good
+  place for it. This is what to put in Dropbox or OneDrive instead of your
+  data folder.
 
-2. **Export datasets**
+To bring it back, use **Data ▸ Restore from Backup**. Restoring **adds** the
+datasets to your library alongside what is already there; nothing is replaced
+or deleted, and a dataset whose name is taken is given a new one. So a restore
+started by mistake cannot lose you anything.
 
-   * Export as JSON+ZIP package (includes all data and files)
-   * Export as TPS, Morphologika, or other formats
+.. note::
 
-3. **Manual backup**
+   Backups do not include your preferences — window layout, colours, chosen
+   language. Modan2 recreates those, and losing them costs you nothing but a
+   few clicks.
 
-   * Keep original image/model files
-   * Export landmark data regularly
-   * Export analysis results
+Two smaller options remain useful:
+
+* **Export a single dataset** as a JSON+ZIP package, or as TPS, Morphologika or
+  another format, when you want to hand one dataset to a colleague. A dataset
+  package deliberately leaves analyses out, so it stays small.
+* **Keep your original image and model files.** Modan2 copies what you import,
+  but the originals are still the only copy of anything you never imported.
 
 Data Management
 ---------------

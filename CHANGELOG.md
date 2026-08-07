@@ -34,6 +34,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   only** points Modan2 at a library that is already in the new folder, such as
   one you copied there yourself.
 
+- **You can back up your whole library to a single file.** **Data ▸ Back Up
+  Library** writes every dataset, object, landmark, variable, image, 3D model
+  and saved analysis into one `.zip`. **Data ▸ Restore from Backup** brings them
+  back.
+
+  This exists because the backups Modan2 already made were protecting the wrong
+  thing: they covered the database but not your images and 3D models, and they
+  sat on the same disk as the library they were backing up — so the one failure
+  they could not survive is the likely one.
+
+  Two things it will not do to you. **A backup is complete or it is not
+  written**: an interrupted run leaves no file rather than a truncated one that
+  looks like a backup. And if a file is recorded in the database but missing
+  from your disk, it tells you which ones instead of quietly leaving a hole in
+  the archive.
+
+  **Restoring adds; it never replaces.** Datasets arrive alongside what is
+  already in your library, and one whose name is taken is given a new one, so a
+  restore started by mistake cannot lose you anything.
+
+  The archive is a snapshot, which makes it exactly what belongs in the sync
+  folder that your live library should not be in.
+
 - **Modan2 warns you before you put your data in a cloud-synced folder or on a
   network drive.** Dropbox, OneDrive, Google Drive, iCloud and the like are
   recognised by name, as are network shares.

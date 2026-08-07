@@ -18,6 +18,7 @@ from PyQt5.QtWidgets import (
     QLabel,
     QLineEdit,
     QMessageBox,
+    QProgressDialog,
     QPushButton,
     QRadioButton,
     QScrollArea,
@@ -30,6 +31,19 @@ from dialogs.base_dialog import BaseDialog
 from MdHelpers import guard_slot
 
 logger = logging.getLogger(__name__)
+
+
+def _format_size(num_bytes):
+    """A size a person can read, for telling them what a move involves.
+
+    Decimal units, matching what file managers and disk vendors show, so the
+    number agrees with the one the user sees elsewhere.
+    """
+    for unit in ("bytes", "KB", "MB", "GB"):
+        if num_bytes < 1000 or unit == "GB":
+            return f"{num_bytes:.0f} {unit}" if unit == "bytes" else f"{num_bytes:.1f} {unit}"
+        num_bytes /= 1000.0
+    return f"{num_bytes:.1f} GB"
 
 
 class PreferencesDialog(BaseDialog):
@@ -112,10 +126,12 @@ class PreferencesDialog(BaseDialog):
         This row existed only as a dangling ``select_folder`` handler for a
         widget nothing ever built, so a chosen folder lived on the dialog
         instance and died with it. It is real now: it writes to
-        ``preferences.json`` and ``MdUtils.get_storage_directory`` reads it.
+        ``preferences.json`` and every path in ``MdUtils`` derives from it.
 
-        Only attachments (images, 3D models) follow this setting. The database
-        keeps its own location and its own switch (``--db``).
+        The whole library follows this setting -- database, attachments,
+        backups and logs -- because splitting it would leave either half
+        useless on its own. ``--db`` is the one exception: it names a file
+        outright and is independent of the data directory by design.
         """
         self.edtDataFolder = QLineEdit()
         self.edtDataFolder.setReadOnly(True)
@@ -902,14 +918,15 @@ class PreferencesDialog(BaseDialog):
     def select_folder(self):
         """Choose where the database, attachments and backups are kept.
 
-        Nothing is moved and nothing is reopened here. The database is opened
-        during startup, before this dialog can exist, so the change takes effect
-        on the next launch -- and applying it by halves (new attachments here,
-        database still there) would split a library in two. The message says so.
+        Two separate things happen here, and keeping them separate is the point:
+        recording *where* the library should live, and moving the library there.
+        The second is offered, never assumed -- relocating gigabytes has to be
+        something the user asked for.
 
-        Existing files stay put in any case: relocating gigabytes is phase 2's
-        job, and saying plainly that it has not happened beats a progress bar
-        that silently half-copies a library.
+        Declining the move is a legitimate answer with a real use (pointing
+        Modan2 at a library that is already in the new folder), so the message
+        for that case says what will actually be found there rather than
+        assuming it will be empty.
         """
         current = self.edtDataFolder.text() or mu.get_data_directory()
         folder = str(QFileDialog.getExistingDirectory(self, self.tr("Select a folder"), current))
@@ -920,24 +937,175 @@ class PreferencesDialog(BaseDialog):
         if os.path.abspath(folder) == os.path.abspath(self.edtDataFolder.text() or ""):
             return
 
-        answer = QMessageBox.question(
-            self,
-            self.tr("Change data folder"),
-            self.tr(
-                "Modan2 will use this folder the next time it starts:\n{}\n\n"
-                "Your database, images and 3D models are not moved. Until you move "
-                "them yourself, Modan2 will start with an empty library there.\n\n"
-                "Continue?"
-            ).format(folder),
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.No,
-        )
-        if answer != QMessageBox.Yes:
+        if not self._accept_location_risk(folder):
+            return
+
+        # The library to move is the one in use, which is not necessarily what
+        # the field shows: a folder chosen earlier in this session is pending
+        # until the next launch, while the data is still where it always was.
+        source = mu.get_data_directory()
+        moved = False
+
+        if mu.describe_move_problem(source, folder) is None:
+            choice = self._ask_about_moving(source, folder)
+            if choice == "cancel":
+                return
+            if choice == "move" and not self._move_library(source, folder):
+                return
+            moved = choice == "move"
+        elif not self._confirm_without_moving(folder):
             return
 
         self.data_folder = Path(folder)
         self.edtDataFolder.setText(folder)
-        self._apply_data_folder(folder)
+        self._apply_data_folder(folder, restart_required=not moved)
+
+    def _accept_location_risk(self, destination):
+        """Warn about a cloud-synced or network folder. True to go ahead.
+
+        A warning rather than a refusal: the folder is the user's, and there are
+        reasons to accept the risk. But both failure modes it describes are
+        silent ones -- a database that syncs itself into two divergent copies,
+        or locking that fails over SMB -- so nobody finds them on their own, and
+        by the time they do the damage is not attributable.
+
+        The safe answer is the default button, and the risky one has to be
+        chosen deliberately.
+        """
+        risk = mu.describe_location_risk(destination)
+        if not risk:
+            return True
+
+        logger.warning("Risky data folder chosen: %s", destination)
+        box = QMessageBox(self)
+        box.setWindowTitle(self.tr("This folder is not a good place for your data"))
+        box.setIcon(QMessageBox.Warning)
+        # Not wrapped in tr(): the text is assembled in MdUtils and tr() on a
+        # runtime string looks up nothing. Translating it means moving the
+        # wording here, which would put it out of reach of the non-GUI callers.
+        box.setText(risk)
+        use_anyway = box.addButton(self.tr("Use it anyway"), QMessageBox.DestructiveRole)
+        choose_another = box.addButton(self.tr("Choose another folder"), QMessageBox.RejectRole)
+        box.setDefaultButton(choose_another)
+        box.exec_()
+        return box.clickedButton() is use_anyway
+
+    def _ask_about_moving(self, source, destination):
+        """Offer the move. Returns "move", "setting-only" or "cancel"."""
+        count, size = mu.library_size(source)
+        box = QMessageBox(self)
+        box.setWindowTitle(self.tr("Change data folder"))
+        box.setIcon(QMessageBox.Question)
+        box.setText(self.tr("Modan2 will keep your data in:\n{}").format(destination))
+        box.setInformativeText(
+            self.tr(
+                "Move your existing library there now? It is {} files, {}.\n\n"
+                "Nothing is deleted until the copy has been checked, and you can "
+                "stop partway -- your data stays where it is if you do."
+            ).format(count, _format_size(size))
+        )
+        move_button = box.addButton(self.tr("Move now"), QMessageBox.AcceptRole)
+        setting_button = box.addButton(self.tr("Change the setting only"), QMessageBox.DestructiveRole)
+        box.addButton(QMessageBox.Cancel)
+        box.setDefaultButton(move_button)
+        box.exec_()
+
+        clicked = box.clickedButton()
+        if clicked is move_button:
+            return "move"
+        if clicked is setting_button:
+            return "setting-only"
+        return "cancel"
+
+    def _confirm_without_moving(self, destination):
+        """Confirm a change of setting with no move. True to go ahead.
+
+        Used when moving is not on offer -- most often because the chosen folder
+        already holds a library, which is the case where saying "Modan2 will
+        start with an empty library there" would be plain wrong.
+        """
+        if mu.library_members(destination):
+            detail = self.tr("Modan2 will open the library that is already in that folder.")
+        else:
+            detail = self.tr(
+                "Your database, images and 3D models are not moved. Until you move "
+                "them yourself, Modan2 will start with an empty library there."
+            )
+
+        answer = QMessageBox.question(
+            self,
+            self.tr("Change data folder"),
+            self.tr("Modan2 will use this folder the next time it starts:\n{}\n\n{}\n\nContinue?").format(
+                destination, detail
+            ),
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
+        return answer == QMessageBox.Yes
+
+    def _move_library(self, source, destination):
+        """Move the library and switch to it. True if it worked.
+
+        The database is closed first -- an open file cannot be renamed on
+        Windows -- and so is the log file, which follows the data directory and
+        would otherwise be the one thing keeping the old folder locked.
+
+        On any unhappy ending the database is reopened where it was. That is the
+        whole recovery: ``move_data_directory`` guarantees the source is intact
+        unless the move completed, so there is nothing else to undo.
+        """
+        import MdModel
+
+        # --db names a file outright and is independent of the data directory,
+        # so a database chosen that way is not part of this library and must not
+        # be redirected into the new folder.
+        db_in_library = os.path.dirname(os.path.abspath(MdModel.database_path)) == os.path.abspath(source)
+
+        progress = QProgressDialog(self.tr("Moving your data..."), self.tr("Stop"), 0, 100, self)
+        progress.setWindowTitle(self.tr("Change data folder"))
+        progress.setWindowModality(Qt.WindowModal)
+        progress.setMinimumDuration(0)
+        progress.setValue(0)
+
+        def report(done, total, member):
+            progress.setLabelText(self.tr("Moving {}...").format(member))
+            progress.setValue(int(done * 100 / total) if total else 100)
+            QApplication.processEvents()
+
+        detached = mu.detach_log_file()
+        if db_in_library:
+            MdModel.gDatabase.close()
+
+        try:
+            result = mu.move_data_directory(source, destination, progress=report, should_cancel=progress.wasCanceled)
+        except mu.DataDirectoryMoveError as e:
+            self._restore_after_failed_move(MdModel, db_in_library, detached)
+            QMessageBox.critical(self, self.tr("Could not move the data"), str(e))
+            return False
+        finally:
+            progress.close()
+
+        if result.cancelled:
+            self._restore_after_failed_move(MdModel, db_in_library, detached)
+            return False
+
+        mu.set_data_directory(destination)
+        mu.ensure_directories()
+        if db_in_library:
+            MdModel.set_database_path(mu.get_database_path())
+        mu.attach_log_file(detached)
+        # The mirror on the application object, kept in step with MdUtils rather
+        # than left pointing into a folder that no longer exists.
+        self.m_app.storage_directory = mu.get_storage_directory()
+        logger.info("Library moved to %s", destination)
+        return True
+
+    @staticmethod
+    def _restore_after_failed_move(MdModel, db_in_library, detached):  # noqa: N803 - module, not a Qt argument
+        """Put the database and the log file back the way they were."""
+        if db_in_library:
+            MdModel.set_database_path(MdModel.database_path)
+        mu.attach_log_file(detached)
 
     @guard_slot("Failed to reset the data folder")
     def reset_data_folder(self):
@@ -947,16 +1115,27 @@ class PreferencesDialog(BaseDialog):
         self.edtDataFolder.setText(os.path.abspath(mu.DEFAULT_DB_DIRECTORY))
         self._apply_data_folder("")
 
-    def _apply_data_folder(self, folder):
-        """Record the choice. It takes effect on the next launch.
+    def _apply_data_folder(self, folder, restart_required=True):
+        """Record the choice, and say whether it is already in effect.
 
         ``folder`` is "" for the default. The empty string is what gets stored:
         recording a resolved path would pin a user who never made a choice to
         whatever the default was on the day they first launched.
+
+        A move that just succeeded has already switched every path over, so
+        telling the user to restart would be asking for something that is not
+        needed -- and would suggest the move had not finished.
         """
         self.m_app.settings.setValue("Data/Directory", folder)
-        QMessageBox.information(
-            self,
-            self.tr("Restart required"),
-            self.tr("Restart Modan2 for the new data folder to take effect."),
-        )
+        if restart_required:
+            QMessageBox.information(
+                self,
+                self.tr("Restart required"),
+                self.tr("Restart Modan2 for the new data folder to take effect."),
+            )
+        else:
+            QMessageBox.information(
+                self,
+                self.tr("Data folder changed"),
+                self.tr("Your data is now in:\n{}").format(folder),
+            )

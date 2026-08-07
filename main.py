@@ -102,19 +102,21 @@ def setup_logging(debug: bool = False, config_path: str | None = None):
     the user (an unplugged drive would look like an empty library), and the log
     explaining that failure would be written to the very place nobody can find.
     """
+    # Imported up here rather than inside the try below, because the format and
+    # the file name come from it. It is not a risk worth guarding: every path out
+    # of this function ends in importing MdUtils anyway, so a failure here is an
+    # application that cannot start, not a log that cannot be written.
+    import MdUtils
+
     level = logging.DEBUG if debug else logging.INFO
-    format_str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    format_str = MdUtils.LOG_FORMAT
 
-    # Try to get proper log directory, with fallbacks
-    from datetime import datetime
-
-    date_str = datetime.now().astimezone().strftime("%Y%m%d")
-    log_filename = f"Modan2_{date_str}.log"
+    # One definition of the name, shared with the reopen that follows a library
+    # move (MdUtils.attach_log_file).
+    log_filename = MdUtils.log_file_name()
 
     log_file_path = None
     try:
-        import MdUtils
-
         configured = MdUtils.read_configured_data_directory(config_path)
         if configured and MdUtils.describe_data_directory_problem(configured):
             print(f"Warning: the configured data directory is unavailable ({configured}); logging to the default")

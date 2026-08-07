@@ -318,6 +318,515 @@ except Exception as e:
     print(f"Warning: Directory initialization failed: {e}")
 
 
+LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+
+def log_file_name():
+    """This day's log file name. One definition, used by every caller.
+
+    ``main.setup_logging`` opens it at startup and ``attach_log_file`` reopens it
+    after the log directory moves; deriving the name twice is how two places
+    start disagreeing about which file is the log.
+    """
+    return f"{PROGRAM_NAME}_{datetime.now().astimezone().strftime('%Y%m%d')}.log"
+
+
+def detach_log_file():
+    """Close the log file so the directory holding it can be moved.
+
+    Logs follow the data directory, which makes the log file an obstacle to
+    moving that directory: Windows refuses to rename a folder containing an open
+    file, and where the rename does succeed the handler carries on writing to a
+    path that no longer exists. Returns what ``attach_log_file`` needs to put it
+    back.
+    """
+    root = logging.getLogger()
+    detached = []
+    for handler in list(root.handlers):
+        if isinstance(handler, logging.FileHandler):
+            root.removeHandler(handler)
+            handler.close()
+            detached.append((handler.level, handler.formatter))
+    return detached
+
+
+def attach_log_file(detached=None):
+    """Reopen the log file in whatever the log directory is now.
+
+    Called after a move whether it succeeded or not -- the point is to get
+    logging back, and the failure path is exactly when the log matters most.
+    Failing to reopen is warned about rather than raised: the console handler is
+    still attached, so the application keeps running and keeps reporting.
+    """
+    # None means "no handler was captured, open a fresh one"; an empty list
+    # means "there was nothing open", and those are different. Conflating them
+    # made a move add a log file to a run that had deliberately been left
+    # logging to the console only.
+    if detached is None:
+        detached = [(logging.NOTSET, None)]
+
+    root = logging.getLogger()
+    for level, formatter in detached:
+        try:
+            os.makedirs(get_log_directory(), exist_ok=True)
+            handler = logging.FileHandler(os.path.join(get_log_directory(), log_file_name()), encoding="utf-8")
+        except OSError as e:
+            print(f"Warning: Could not reopen the log file in {get_log_directory()}: {e}")
+            continue
+        handler.setLevel(level)
+        handler.setFormatter(formatter or logging.Formatter(LOG_FORMAT))
+        root.addHandler(handler)
+
+
+# ---------------------------------------------------------------------------
+# Where a library must not go
+#
+# Making the location configurable means someone will put the library in a
+# synchronised folder or on a network share, and both are bad places for a live
+# SQLite database. The application cannot prevent it -- it is the user's disk --
+# but it can refuse to let it happen silently.
+# ---------------------------------------------------------------------------
+
+# Folder names the mainstream sync clients use, matched against whole path
+# components so that a directory merely *called* "boxes" is not flagged. Names
+# with a suffix in practice (OneDrive - Contoso, Dropbox (Personal)) are matched
+# by prefix, which is why the check below looks at both.
+SYNC_FOLDER_NAMES = (
+    "dropbox",
+    "onedrive",
+    "google drive",
+    "googledrive",
+    "my drive",
+    "icloud drive",
+    "icloud~",
+    "com~apple~clouddocs",
+    "nextcloud",
+    "owncloud",
+    "box sync",
+    "box",
+    "pclouddrive",
+    "mega",
+    "yandex.disk",
+    "creative cloud files",
+    "syncthing",
+)
+
+
+def _looks_like_sync_folder(path):
+    """The sync folder ``path`` is inside, or None."""
+    parts = Path(os.path.abspath(path)).parts
+    for i, part in enumerate(parts):
+        name = part.strip().lower()
+        for candidate in SYNC_FOLDER_NAMES:
+            if name == candidate or name.startswith((candidate + " ", candidate + "-")):
+                return os.path.join(*parts[: i + 1])
+    return None
+
+
+def _is_network_path(path):
+    """Whether ``path`` is on a network share.
+
+    UNC paths are recognisable anywhere; a mapped Windows drive letter is not,
+    so that case asks the OS. Failing to detect one is not serious -- the sync
+    check catches the common way people get here -- so every error means "no".
+    """
+    path = os.path.abspath(path)
+    if path.startswith(("\\\\", "//")):
+        return True
+    if sys.platform != "win32":
+        return False
+    try:
+        import ctypes
+
+        drive = os.path.splitdrive(path)[0]
+        if not drive:
+            return False
+        DRIVE_REMOTE = 4
+        return ctypes.windll.kernel32.GetDriveTypeW(drive + "\\") == DRIVE_REMOTE
+    except Exception:
+        return False
+
+
+def describe_location_risk(path):
+    """Why ``path`` is a risky home for the library, or None if it looks fine.
+
+    A warning, never a refusal: there are legitimate reasons to accept the risk,
+    and the folder belongs to the user. But the failures being warned about are
+    the *silent* kind, which is exactly what nobody discovers on their own.
+
+    Sync clients are the worse case of the two. A live SQLite database is a file
+    the application writes in place, and a sync client will upload it mid-write
+    and hold a handle open while doing so. Worse, opening the same library from
+    two machines does not merge -- the client writes a conflict copy
+    (``Modan2-DESKTOP-ABC.db``) and both sides carry on, so the library silently
+    splits in two and there is no later way to tell which half is real.
+
+    Network shares fail differently: SQLite's locking is unreliable over SMB and
+    NFS, which corrupts rather than duplicates.
+    """
+    sync_folder = _looks_like_sync_folder(path)
+    if sync_folder:
+        return (
+            f"{sync_folder} looks like a folder that syncs to the cloud (Dropbox, OneDrive, Google Drive "
+            "or similar).\n\n"
+            "Modan2 keeps your data in a database file that it writes to as you work. Sync clients upload "
+            "such a file while it is being written, and if you ever open the same library from two "
+            "computers they will not merge it -- you get two copies that have silently drifted apart, with "
+            "no way to tell which one is right.\n\n"
+            "Keep the library on a local disk, and use a sync folder for backups and exported datasets "
+            "instead."
+        )
+
+    if _is_network_path(path):
+        return (
+            f"{os.path.abspath(path)} is on a network drive.\n\n"
+            "Modan2's database relies on file locking, which is unreliable over network shares and can "
+            "corrupt the database. Keep the library on a local disk."
+        )
+
+    return None
+
+
+# ---------------------------------------------------------------------------
+# Moving an existing library
+#
+# Choosing a new data directory does not move anything by itself, and the dialog
+# says so plainly. This is the separate, explicitly requested move that follows.
+# It is deliberately not automatic: relocating gigabytes has to be something the
+# user asked for and can be told about when it fails.
+#
+# One invariant governs all of it: **either the whole library ends up at the
+# destination, or the source is left exactly as it was.** Anything in between is
+# the failure this feature exists to avoid -- a library split across two folders,
+# where neither half is usable and the user cannot tell which one is real.
+# ---------------------------------------------------------------------------
+
+
+class DataDirectoryMoveError(Exception):
+    """A library move was refused before starting, or failed partway.
+
+    The message reaches the user, so it names paths rather than error codes.
+    """
+
+
+class MoveResult:
+    """What a completed (or cancelled) move did.
+
+    ``cancelled`` and a successful move are told apart by the flag rather than
+    by an exception: cancelling is a legitimate answer, not an error, and it
+    leaves exactly the same state as never having started.
+    """
+
+    def __init__(self, moved=None, total_bytes=0, cancelled=False, source_removed=False):
+        self.moved = moved or []
+        self.total_bytes = total_bytes
+        self.cancelled = cancelled
+        self.source_removed = source_removed
+
+    def __repr__(self):
+        return (
+            f"MoveResult(moved={self.moved!r}, total_bytes={self.total_bytes}, "
+            f"cancelled={self.cancelled}, source_removed={self.source_removed})"
+        )
+
+
+class _CancelledError(Exception):
+    """Internal: unwinds out of the middle of a copy. Never seen by callers."""
+
+
+def library_members(source):
+    """The entries of ``source`` that make up the library, in the order to move.
+
+    Backups lead deliberately. They are the recovery path, so they should be the
+    first thing complete in the new location -- if a later step fails, the user
+    still has somewhere to recover from that is not the folder being disturbed.
+
+    ``temp/`` is not a member: those are genuinely temporary files and belong in
+    the OS temp location. Anything else the user happens to keep in the folder is
+    not a member either, and is left alone rather than swept along.
+    """
+    names = ["backups", DATABASE_FILENAME]
+    # SQLite side files. A clean close removes them, but a crash does not, and
+    # they belong to the database rather than to whatever is left behind.
+    names += [DATABASE_FILENAME + suffix for suffix in ("-journal", "-wal", "-shm")]
+    names += ["data", "logs"]
+    return [name for name in names if os.path.exists(os.path.join(source, name))]
+
+
+def library_size(path):
+    """``(file count, total bytes)`` of the library at ``path``.
+
+    For telling the user what a move is about to shift, before they agree to it.
+    """
+    return _tree_stats(path)
+
+
+def _tree_stats(path):
+    """``(file count, total bytes)`` for a file or a directory tree."""
+    if os.path.isfile(path):
+        return 1, os.path.getsize(path)
+    count = 0
+    total = 0
+    for dirpath, _, filenames in os.walk(path):
+        for name in filenames:
+            full = os.path.join(dirpath, name)
+            try:
+                total += os.path.getsize(full)
+                count += 1
+            except OSError:
+                # A file that vanished mid-walk. Counting it would fail the
+                # verification of an otherwise good copy.
+                continue
+    return count, total
+
+
+def _existing_ancestor(path):
+    """The nearest existing directory at or above ``path``.
+
+    Free space and volume identity have to be asked of something that exists,
+    and the destination may not have been created yet.
+    """
+    path = os.path.abspath(path)
+    while not os.path.isdir(path):
+        parent = os.path.dirname(path)
+        if parent == path:
+            return path
+        path = parent
+    return path
+
+
+def _same_volume(source, destination):
+    """Whether a rename can move between these two paths.
+
+    Renames within a volume are atomic and instantaneous; across volumes the
+    only option is copy-verify-delete, which is where the interesting failure
+    modes live. ``st_dev`` identifies the volume on every platform Python
+    supports, Windows included.
+    """
+    try:
+        return os.stat(_existing_ancestor(source)).st_dev == os.stat(_existing_ancestor(destination)).st_dev
+    except OSError:
+        # Unknown means "assume the slow, careful path", never the fast one.
+        return False
+
+
+def describe_move_problem(source, destination):
+    """Why the library at ``source`` cannot be moved to ``destination``, or None.
+
+    Checked before anything is touched, so the answer can be a message rather
+    than a half-finished move. Called by the dialog to decide whether to offer
+    the move at all.
+    """
+    source = os.path.abspath(source)
+    destination = os.path.abspath(destination)
+
+    if source == destination:
+        return f"The data is already in {destination}."
+
+    if not os.path.isdir(source):
+        return f"There is nothing to move: {source} does not exist."
+
+    if not library_members(source):
+        return f"There is nothing to move: {source} holds no database, images or backups."
+
+    # Copying a folder into itself never terminates, and renaming into itself
+    # fails halfway through. Neither is worth discovering during the move.
+    if os.path.commonpath([source, destination]) == source:
+        return f"{destination} is inside {source}, so the data cannot be moved there."
+
+    if os.path.exists(destination) and not os.path.isdir(destination):
+        return f"{destination} is a file, not a folder."
+
+    if os.path.isdir(destination) and os.listdir(destination):
+        # Merging into an occupied folder would make "did this work?"
+        # unanswerable afterwards, and an existing Modan2.db there would be
+        # silently overwritten.
+        return f"{destination} is not empty. Choose an empty folder."
+
+    _, needed = _tree_stats(source)
+    try:
+        free = shutil.disk_usage(_existing_ancestor(destination)).free
+    except OSError:
+        free = None
+    # Only meaningful across volumes: a rename within one moves no bytes. The
+    # margin covers the destination's own overhead and leaves the disk usable.
+    if free is not None and not _same_volume(source, destination) and free < needed * 1.1:
+        return f"There is not enough space in {destination}: {needed / 1e9:.1f} GB to move, {free / 1e9:.1f} GB free."
+
+    return None
+
+
+def move_data_directory(source, destination, progress=None, should_cancel=None):
+    """Move an existing library from ``source`` to ``destination``.
+
+    ``progress`` is called as ``(bytes_done, bytes_total, member)`` and
+    ``should_cancel`` is polled between files; both are optional.
+
+    How the invariant is kept depends on the volumes, and the two cases fail
+    differently:
+
+    *Within a volume*, each member is renamed -- atomic, instant, no bytes read.
+    If one fails, the ones already renamed are renamed back. There is nothing to
+    cancel partway because there is no partway.
+
+    *Across volumes*, everything is copied first, then verified, and only then
+    is the source deleted. That ordering is what makes cancelling safe: it does
+    not undo copies, it simply never reaches the deletion, so the source is
+    still whole. The partial copy is cleaned up on the way out.
+
+    The source directory itself is removed only if the move emptied it. Files
+    that are not part of the library are left where they are, and keep the
+    folder alive.
+    """
+    source = os.path.abspath(source)
+    destination = os.path.abspath(destination)
+
+    problem = describe_move_problem(source, destination)
+    if problem:
+        raise DataDirectoryMoveError(problem)
+
+    members = library_members(source)
+    _, total_bytes = _tree_stats(source)
+
+    try:
+        os.makedirs(destination, exist_ok=True)
+    except OSError as e:
+        raise DataDirectoryMoveError(f"Could not create {destination}: {e}") from e
+
+    if should_cancel and should_cancel():
+        return MoveResult(cancelled=True)
+
+    if _same_volume(source, destination):
+        result = _move_by_rename(source, destination, members, progress, total_bytes)
+    else:
+        result = _move_by_copy(source, destination, members, progress, should_cancel, total_bytes)
+
+    if not result.cancelled:
+        result.source_removed = _remove_if_empty(source)
+        logger.info("Moved the library from %s to %s (%s)", source, destination, ", ".join(result.moved))
+    return result
+
+
+def _move_by_rename(source, destination, members, progress, total_bytes):
+    """Move within a volume. Renames back on failure."""
+    done = []
+    for member in members:
+        src = os.path.join(source, member)
+        dst = os.path.join(destination, member)
+        try:
+            os.rename(src, dst)
+        except OSError as e:
+            _undo_renames(source, destination, done)
+            raise DataDirectoryMoveError(
+                f"Could not move {member} to {destination}: {e}. Nothing was moved; your data is still in {source}."
+            ) from e
+        done.append(member)
+        if progress:
+            progress(total_bytes, total_bytes, member)
+    return MoveResult(moved=done, total_bytes=total_bytes)
+
+
+def _undo_renames(source, destination, done):
+    """Put back what was already renamed, so a failure moves nothing at all."""
+    for member in reversed(done):
+        try:
+            os.rename(os.path.join(destination, member), os.path.join(source, member))
+        except OSError as e:
+            # Reported, not raised: the caller is already raising the real
+            # failure, and this one must not replace it.
+            logger.error("Could not put %s back in %s: %s", member, source, e)
+
+
+def _move_by_copy(source, destination, members, progress, should_cancel, total_bytes):
+    """Move across volumes: copy everything, verify everything, then delete.
+
+    The source is not touched until every member has been copied *and* checked,
+    which is what makes a failure or a cancellation halfway through harmless.
+    """
+    state = {"done": 0}
+
+    def copy_file(src, dst, *, follow_symlinks=True):
+        if should_cancel and should_cancel():
+            raise _CancelledError
+        shutil.copy2(src, dst, follow_symlinks=follow_symlinks)
+        state["done"] += os.path.getsize(dst)
+        if progress:
+            progress(state["done"], total_bytes, state.get("member", ""))
+
+    copied = []
+    try:
+        for member in members:
+            state["member"] = member
+            src = os.path.join(source, member)
+            dst = os.path.join(destination, member)
+            if os.path.isdir(src):
+                shutil.copytree(src, dst, copy_function=copy_file)
+            else:
+                copy_file(src, dst)
+            _verify_copy(src, dst, member)
+            copied.append(member)
+    except _CancelledError:
+        _discard_partial_copy(destination, members)
+        return MoveResult(cancelled=True)
+    except (OSError, shutil.Error, DataDirectoryMoveError) as e:
+        _discard_partial_copy(destination, members)
+        failed = state.get("member", "")
+        message = (
+            e.args[0] if isinstance(e, DataDirectoryMoveError) else f"Could not copy {failed} to {destination}: {e}"
+        )
+        raise DataDirectoryMoveError(f"{message} Nothing was moved; your data is still in {source}.") from e
+
+    # Everything is across and checked. Only now does the source go.
+    for member in copied:
+        src = os.path.join(source, member)
+        try:
+            if os.path.isdir(src):
+                shutil.rmtree(src)
+            else:
+                os.remove(src)
+        except OSError as e:
+            # The data is safely at the destination, so this is untidiness
+            # rather than loss. Saying so beats failing a move that worked.
+            logger.warning("Copied %s but could not remove the original at %s: %s", member, src, e)
+
+    return MoveResult(moved=copied, total_bytes=total_bytes)
+
+
+def _verify_copy(src, dst, member):
+    """Confirm the copy holds as many files and bytes as the original."""
+    src_stats = _tree_stats(src)
+    dst_stats = _tree_stats(dst)
+    if src_stats != dst_stats:
+        raise DataDirectoryMoveError(
+            f"The copy of {member} does not match the original "
+            f"({src_stats[0]} files/{src_stats[1]} bytes became {dst_stats[0]}/{dst_stats[1]})."
+        )
+
+
+def _discard_partial_copy(destination, members):
+    """Remove what was copied before the failure, leaving the source untouched."""
+    for member in members:
+        path = os.path.join(destination, member)
+        try:
+            if os.path.isdir(path):
+                shutil.rmtree(path)
+            elif os.path.exists(path):
+                os.remove(path)
+        except OSError as e:
+            logger.warning("Could not clean up %s after an incomplete move: %s", path, e)
+
+
+def _remove_if_empty(directory):
+    """Remove the old folder if the move emptied it. True if it went."""
+    try:
+        if os.path.isdir(directory) and not os.listdir(directory):
+            os.rmdir(directory)
+            return True
+    except OSError as e:
+        logger.warning("Could not remove the old data directory %s: %s", directory, e)
+    return False
+
+
 def resource_path(relative_path):
     try:
         base_path = sys._MEIPASS

@@ -1,6 +1,7 @@
 """UI tests for PreferencesDialog."""
 
 import os
+from contextlib import contextmanager
 from unittest.mock import Mock, patch
 
 import pytest
@@ -438,6 +439,29 @@ class TestPreferencesDialogIntegration:
         assert True
 
 
+@contextmanager
+def answering(label):
+    """Answer a multi-button QMessageBox by button text, with no user.
+
+    ``clickedButton`` is set by Qt during ``exec_``, so both have to be replaced
+    together. Matching on the visible label rather than on a role means the
+    tests break if a button is renamed -- which is the point, since the labels
+    are the part the user reads.
+    """
+
+    def clicked(box):
+        for button in box.buttons():
+            if button.text().replace("&", "") == label:
+                return button
+        raise AssertionError(f"No {label!r} button among {[b.text() for b in box.buttons()]}")
+
+    with (
+        patch.object(QMessageBox, "exec_", lambda box: 0),
+        patch.object(QMessageBox, "clickedButton", clicked),
+    ):
+        yield
+
+
 class TestDataFolderPreference:
     """The data-folder row, which used to be a handler with no widget.
 
@@ -456,6 +480,37 @@ class TestDataFolderPreference:
         monkeypatch.setattr(qapp, "settings", settings, raising=False)
         return calls
 
+    @pytest.fixture
+    def library(self, tmp_path, monkeypatch):
+        """A throwaway library standing in for the user's real one.
+
+        Without it the dialog would offer to move the *developer's* data
+        directory, since that is what ``get_data_directory`` answers -- the
+        mistake devlog 278 exists to prevent, and this time with a move rather
+        than a dropped table.
+        """
+        root = tmp_path / "library"
+        (root / "data" / "1").mkdir(parents=True)
+        (root / "backups").mkdir()
+        (root / mu.DATABASE_FILENAME).write_bytes(b"sqlite")
+        (root / "data" / "1" / "3.jpg").write_bytes(b"image")
+        monkeypatch.setattr(mu, "_configured_data_directory", str(root))
+        return root
+
+    @pytest.fixture
+    def restore_database_binding(self):
+        """Put peewee's binding back after a test lets the dialog rebind it.
+
+        ``monkeypatch`` restores ``MdModel.database_path``, but not the
+        ``gDatabase.init()`` that went with it -- so without this the rest of the
+        session would query a temp file that pytest has since deleted.
+        """
+        import MdModel
+
+        original = MdModel.database_path
+        yield
+        MdModel.set_database_path(original)
+
     def test_the_widgets_exist(self, dialog):
         assert dialog.edtDataFolder is not None
         assert dialog.btnDataFolder is not None
@@ -468,30 +523,31 @@ class TestDataFolderPreference:
         """A typo in a path silently sends a whole library somewhere else."""
         assert dialog.edtDataFolder.isReadOnly()
 
-    def test_choosing_a_folder_persists_it(self, dialog, recorded, tmp_path):
+    def test_choosing_a_folder_persists_it(self, dialog, recorded, library, tmp_path):
         chosen = str(tmp_path / "chosen")
         os.makedirs(chosen)
 
         with (
             patch.object(QFileDialog, "getExistingDirectory", return_value=chosen),
-            patch.object(QMessageBox, "question", return_value=QMessageBox.Yes),
             patch.object(QMessageBox, "information"),
+            answering("Change the setting only"),
         ):
             dialog.select_folder()
 
         assert dialog.edtDataFolder.text() == chosen
         assert recorded["Data/Directory"] == chosen
 
-    def test_choosing_a_folder_does_not_move_anything(self, dialog, recorded, tmp_path):
-        """Phase 1 points; phase 2 moves. The dialog must not pretend otherwise."""
+    def test_changing_the_setting_alone_moves_nothing(self, dialog, recorded, library, tmp_path):
+        """Pointing somewhere and moving there are separate acts, and declining
+        the move has a real use: opening a library that is already over there."""
         chosen = str(tmp_path / "chosen")
         os.makedirs(chosen)
         before = mu.get_data_directory()
 
         with (
             patch.object(QFileDialog, "getExistingDirectory", return_value=chosen),
-            patch.object(QMessageBox, "question", return_value=QMessageBox.Yes),
             patch.object(QMessageBox, "information") as info,
+            answering("Change the setting only"),
         ):
             dialog.select_folder()
 
@@ -499,19 +555,192 @@ class TestDataFolderPreference:
         # the database is already open and cannot follow until a restart.
         assert mu.get_data_directory() == before
         assert os.listdir(chosen) == []
-        info.assert_called_once()
+        assert (library / mu.DATABASE_FILENAME).exists()
+        assert "Restart" in info.call_args[0][1]
 
-    def test_declining_the_confirmation_changes_nothing(self, dialog, recorded, tmp_path):
+    def test_cancelling_the_choice_changes_nothing(self, dialog, recorded, library, tmp_path):
+        chosen = str(tmp_path / "chosen")
+        os.makedirs(chosen)
         before = dialog.edtDataFolder.text()
 
         with (
-            patch.object(QFileDialog, "getExistingDirectory", return_value=str(tmp_path)),
-            patch.object(QMessageBox, "question", return_value=QMessageBox.No),
+            patch.object(QFileDialog, "getExistingDirectory", return_value=chosen),
+            answering("Cancel"),
         ):
             dialog.select_folder()
 
         assert dialog.edtDataFolder.text() == before
         assert recorded == {}
+
+    def test_declining_the_confirmation_changes_nothing(self, dialog, recorded, library, tmp_path):
+        """The path taken when a move is not on offer -- here because the
+        destination already holds something."""
+        occupied = tmp_path / "occupied"
+        occupied.mkdir()
+        (occupied / mu.DATABASE_FILENAME).write_bytes(b"another library")
+        before = dialog.edtDataFolder.text()
+
+        with (
+            patch.object(QFileDialog, "getExistingDirectory", return_value=str(occupied)),
+            patch.object(QMessageBox, "question", return_value=QMessageBox.No) as question,
+        ):
+            dialog.select_folder()
+
+        assert dialog.edtDataFolder.text() == before
+        assert recorded == {}
+        # And it does not claim the folder will be empty, because it will not:
+        # pointing at an existing library is the reason to decline the move.
+        assert "already in that folder" in question.call_args[0][2]
+
+    def test_moving_relocates_the_library_and_switches_to_it(
+        self, dialog, recorded, library, tmp_path, monkeypatch, restore_database_binding
+    ):
+        """The move is only half the job. Leaving the paths behind would show
+        the user an empty library beside their data."""
+        chosen = str(tmp_path / "chosen")
+        os.makedirs(chosen)
+        monkeypatch.setattr("MdModel.database_path", str(library / mu.DATABASE_FILENAME))
+
+        with (
+            patch.object(QFileDialog, "getExistingDirectory", return_value=chosen),
+            patch.object(QMessageBox, "information") as info,
+            answering("Move now"),
+        ):
+            dialog.select_folder()
+
+        assert os.path.exists(os.path.join(chosen, mu.DATABASE_FILENAME))
+        assert os.path.exists(os.path.join(chosen, "data", "1", "3.jpg"))
+        assert not library.exists()
+        assert mu.get_data_directory() == chosen
+        assert dialog.m_app.storage_directory == os.path.join(chosen, "data")
+        assert recorded["Data/Directory"] == chosen
+        # No restart is needed after a successful move, and saying otherwise
+        # would read as "it did not finish".
+        assert "Restart" not in info.call_args[0][1]
+
+    def test_a_database_chosen_with_db_is_not_dragged_along(
+        self, dialog, recorded, library, tmp_path, monkeypatch, restore_database_binding
+    ):
+        """``--db`` names a file outright and is independent of the data
+        directory. Redirecting it into the new folder would point the running
+        application at a database that is not the one it was started with."""
+        import MdModel
+
+        elsewhere = str(tmp_path / "chosen-by-flag.db")
+        monkeypatch.setattr("MdModel.database_path", elsewhere)
+        chosen = str(tmp_path / "chosen")
+        os.makedirs(chosen)
+
+        with (
+            patch.object(QFileDialog, "getExistingDirectory", return_value=chosen),
+            patch.object(QMessageBox, "information"),
+            answering("Move now"),
+        ):
+            dialog.select_folder()
+
+        assert MdModel.database_path == elsewhere
+        assert mu.get_data_directory() == chosen  # the rest still moved
+
+    def test_a_failed_move_leaves_the_setting_alone(self, dialog, recorded, library, tmp_path, monkeypatch):
+        """A setting pointing at a folder the data never reached is the worst
+        of both: the library is here, and the application looks over there."""
+        chosen = str(tmp_path / "chosen")
+        os.makedirs(chosen)
+        before = dialog.edtDataFolder.text()
+
+        def refuse(*args, **kwargs):
+            raise mu.DataDirectoryMoveError("nope")
+
+        monkeypatch.setattr(mu, "move_data_directory", refuse)
+
+        with (
+            patch.object(QFileDialog, "getExistingDirectory", return_value=chosen),
+            patch.object(QMessageBox, "critical") as critical,
+            answering("Move now"),
+        ):
+            dialog.select_folder()
+
+        assert recorded == {}
+        assert dialog.edtDataFolder.text() == before
+        assert mu.get_data_directory() == str(library)
+        critical.assert_called_once()
+
+    def test_a_cancelled_move_leaves_the_setting_alone(self, dialog, recorded, library, tmp_path, monkeypatch):
+        chosen = str(tmp_path / "chosen")
+        os.makedirs(chosen)
+        monkeypatch.setattr(mu, "move_data_directory", lambda *a, **k: mu.MoveResult(cancelled=True))
+
+        with (
+            patch.object(QFileDialog, "getExistingDirectory", return_value=chosen),
+            answering("Move now"),
+        ):
+            dialog.select_folder()
+
+        assert recorded == {}
+        assert mu.get_data_directory() == str(library)
+
+
+class TestRiskyFolderWarning:
+    """Sync folders and network shares break a live SQLite database quietly.
+
+    Quietly is the problem: the user has no way to attribute a corrupted or
+    silently forked library back to where they put it, so the warning has to
+    arrive when they choose the folder.
+    """
+
+    @pytest.fixture
+    def recorded(self, qapp, monkeypatch):
+        calls = {}
+        settings = Mock()
+        settings.setValue = lambda k, v: calls.__setitem__(k, v)
+        settings.value = lambda k, default=None: calls.get(k, default)
+        monkeypatch.setattr(qapp, "settings", settings, raising=False)
+        return calls
+
+    @pytest.fixture
+    def dropbox(self, tmp_path):
+        folder = tmp_path / "Dropbox" / "Modan2"
+        folder.mkdir(parents=True)
+        return str(folder)
+
+    def test_choosing_another_folder_abandons_the_change(self, dialog, recorded, dropbox):
+        with (
+            patch.object(QFileDialog, "getExistingDirectory", return_value=dropbox),
+            answering("Choose another folder"),
+        ):
+            dialog.select_folder()
+
+        assert recorded == {}
+
+    def test_the_warning_can_be_overridden(self, dialog, recorded, dropbox, monkeypatch):
+        """It is the user's disk. The warning informs; it does not forbid."""
+        monkeypatch.setattr(mu, "describe_move_problem", lambda source, destination: "not offered")
+
+        with (
+            patch.object(QFileDialog, "getExistingDirectory", return_value=dropbox),
+            patch.object(QMessageBox, "question", return_value=QMessageBox.Yes),
+            patch.object(QMessageBox, "information"),
+            answering("Use it anyway"),
+        ):
+            dialog.select_folder()
+
+        assert recorded["Data/Directory"] == dropbox
+
+    def test_an_ordinary_folder_raises_no_warning(self, dialog, recorded, tmp_path, monkeypatch):
+        """The check must not cry wolf, or the real warning stops being read."""
+        chosen = str(tmp_path / "Documents" / "research")
+        os.makedirs(chosen)
+        monkeypatch.setattr(mu, "describe_move_problem", lambda source, destination: "not offered")
+
+        with (
+            patch.object(QFileDialog, "getExistingDirectory", return_value=chosen),
+            patch.object(QMessageBox, "question", return_value=QMessageBox.Yes),
+            patch.object(QMessageBox, "information"),
+            # No answering(): reaching a multi-button box here would raise.
+        ):
+            dialog.select_folder()
+
+        assert recorded["Data/Directory"] == chosen
 
     def test_cancelling_the_file_dialog_changes_nothing(self, dialog, recorded):
         before = dialog.edtDataFolder.text()

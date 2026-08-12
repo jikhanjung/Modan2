@@ -8,7 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
-## [Unreleased]
+## [0.2.0-beta.3] - 2026-08-12
+
+Beta.2 gathered everything you own into one folder. This one lets you choose
+which folder it is, move an existing library into it, and write the whole library
+out to a single archive — the first backup Modan2 has made that includes your
+images and 3D models and can be kept on a different disk from the library it
+protects.
+
+One analysis option is withdrawn: see **Removed**.
 
 ### Added
 - **You can choose where Modan2 keeps your data.** Preferences now has a **Data

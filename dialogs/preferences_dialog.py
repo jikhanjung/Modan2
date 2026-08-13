@@ -22,6 +22,7 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QRadioButton,
     QScrollArea,
+    QStyle,
     QVBoxLayout,
     QWidget,
 )
@@ -83,9 +84,41 @@ class PreferencesDialog(BaseDialog):
         # Open at a size that fits the screen; anything taller scrolls (important on
         # low-resolution monitors where the full form would otherwise be clipped).
         screen = self.m_app.primaryScreen() if hasattr(self.m_app, "primaryScreen") else None
-        avail_h = screen.availableGeometry().height() if screen is not None else 900
-        self.setMinimumWidth(480)
-        self.resize(560, min(760, int(avail_h * 0.9)))
+        available = screen.availableGeometry() if screen is not None else None
+        avail_h = available.height() if available is not None else 900
+        avail_w = available.width() if available is not None else 1200
+
+        # Width is taken from the form rather than fixed, because a fixed one was
+        # wrong: 560 was narrower than the form's own 634 on Linux and narrower
+        # still against Windows' wider default font, which is where it was
+        # reported -- the right-hand column of every row was cut off. The scroll
+        # area's horizontal bar is deliberately off, so too narrow does not mean
+        # "scroll to reach it", it means "unreachable". Hence a *minimum* too:
+        # the same clipping is a drag of the window edge away.
+        needed_w = min(self._width_the_form_needs(), avail_w)
+        self.setMinimumWidth(needed_w)
+        self.resize(needed_w, min(760, int(avail_h * 0.9)))
+
+    def _width_the_form_needs(self):
+        """The dialog width at which no preference row is clipped.
+
+        minimumSizeHint, not sizeHint: the latter is what the form would like if
+        space were free, and here that is half again as wide (1129px against
+        744px on this machine) because the twenty colour swatches would rather
+        spread out. What is being prevented is clipping, so the question is the
+        narrowest width that still fits everything -- the widest row decides it,
+        and that is the ten marker selectors.
+        """
+        margins = self.layout().contentsMargins()
+        return (
+            self.scroll_area.widget().minimumSizeHint().width()
+            + 2 * self.scroll_area.frameWidth()
+            # The vertical scrollbar is present whenever the form is taller than
+            # the screen, and it takes its width out of the form's.
+            + self.style().pixelMetric(QStyle.PM_ScrollBarExtent)
+            + margins.left()
+            + margins.right()
+        )
 
     def _init_defaults(self):
         """Initialize default preference values."""

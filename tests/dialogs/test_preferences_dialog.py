@@ -768,3 +768,46 @@ class TestRiskyFolderWarning:
 
         assert recorded == {}
         info.assert_not_called()
+
+
+class TestPreferencesDialogIsWideEnough:
+    """No preference row may be cut off at the dialog's opening width.
+
+    The width used to be the literal 560, which was narrower than the form's own
+    requirement even on Linux and narrower still under Windows' wider default
+    font, where it was reported: the right-hand column of every row -- the Large
+    radio buttons, the 3D colour swatches, the Browse button -- was off the edge.
+
+    The scroll area's horizontal scrollbar is deliberately off, so a too-narrow
+    dialog does not mean "scroll across to reach it", it means the controls
+    cannot be reached at all.
+    """
+
+    def test_the_form_is_not_clipped(self, dialog):
+        """The viewport is what must be wide enough, not the form.
+
+        setWidgetResizable fits the form to the viewport but never shrinks it
+        below its own minimum, so the form's width is 744 whatever the dialog
+        does -- asserting on it passes even at the width that produced the bug.
+        What gets cut off is how much of it the viewport shows.
+        """
+        form = dialog.scroll_area.widget()
+        dialog.show()
+        viewport = dialog.scroll_area.viewport().width()
+
+        assert viewport >= form.minimumSizeHint().width(), (
+            f"the form needs {form.minimumSizeHint().width()}px and only {viewport}px is visible"
+        )
+
+    def test_it_cannot_be_dragged_narrower_than_the_form(self, dialog):
+        """Otherwise the same clipping is one drag of the window edge away."""
+        form = dialog.scroll_area.widget()
+
+        assert dialog.minimumWidth() >= form.minimumSizeHint().width()
+
+    def test_the_width_is_measured_not_assumed(self, dialog):
+        """It must follow the form, so a new row or a wider font cannot outgrow it."""
+        assert dialog.minimumWidth() == min(
+            dialog._width_the_form_needs(),
+            dialog.screen().availableGeometry().width(),
+        )

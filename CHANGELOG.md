@@ -8,6 +8,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+## [0.2.0-beta.5] - 2026-08-13
+
+Mostly the things beta.4 made visible. Its own release notes are the first ones
+you could actually read in an installed copy, which is how the licence notice
+turned out to be describing the wrong licence, and the Preferences window turned
+out to have been cutting off the right-hand side of every row for as long as it
+has existed.
+
+### Changed
+- **Modan2 now tells you which licence applies to what.** The source code is
+  MIT, and the builds published on the releases page are GPL-3.0 — both were
+  already true, but only the first was written down, so the About box told you
+  the more permissive of the two. The application includes Qt through PyQt5,
+  which is offered only under the GPL-3.0 or a commercial licence, and that
+  makes the build as a whole GPL-3.0.
+
+  Nothing you do with Modan2 becomes harder: the GPL restricts redistributing a
+  build, not using it, including commercially. And source you copy out of the
+  project is MIT wherever you found it.
+
+  The licence texts now travel with the program instead of being absent
+  entirely — the Windows installer shows the GPL before installing, and every
+  package carries `LICENSE`, `LICENSES/` and `THIRD-PARTY-NOTICES.md`, the last
+  of which lists what is bundled and under what terms.
+
+- **CVA is several times faster.** Estimating the classification accuracy fits
+  the model once per specimen, and most of that work was going into computing
+  parts of the data reduction that were then discarded. On a 222-specimen,
+  72-landmark dataset it drops from about seven seconds to two. The answer is
+  unchanged; if the faster method ever fails to settle, Modan2 falls back to the
+  slower one, says so, and gives you the same result.
+
+### Fixed
+- **The Preferences window no longer cuts off its right-hand side.** The Large
+  radio buttons, the 3D colours and the Browse button were all beyond the edge
+  of a window that opened too narrow to hold its own contents — and it had no
+  horizontal scrollbar, so they could not be reached at all.
+
+  The window now sizes itself to what it contains rather than to a fixed number,
+  on whichever platform and font you are using. The eleven marker selectors,
+  which were the widest thing in it, are laid out over two rows, so it is
+  smaller than before rather than larger. If a screen is ever too small for it,
+  there is a scrollbar now.
+
 ## [0.2.0-beta.4] - 2026-08-13
 
 The beta that beta.3 could not have been. Installing beta.3 over beta.2 left

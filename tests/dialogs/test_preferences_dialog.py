@@ -829,11 +829,17 @@ class TestPreferencesDialogIsWideEnough:
         assert dialog.minimumWidth() <= available
 
     def test_the_width_is_measured_not_assumed(self, dialog):
-        """It must follow the form, so a new row or a wider font cannot outgrow it."""
-        assert dialog.minimumWidth() == min(
-            dialog._width_the_form_needs(),
-            dialog.screen().availableGeometry().width(),
-        )
+        """It must follow the form, so a new row or a wider font cannot outgrow it.
+
+        At least the estimate rather than exactly it: the estimate predicts the
+        scroll area's frame and scrollbar from the style, which is 5px short on
+        macOS's overlay scrollbars, so the dialog measures the real viewport
+        afterwards and tops the width up. Correction can only widen.
+        """
+        available = dialog.screen().availableGeometry().width()
+
+        assert dialog.minimumWidth() >= min(dialog._width_the_form_needs(), available)
+        assert dialog.minimumWidth() <= available
 
 
 class TestMarkerSelectorsAreWrapped:

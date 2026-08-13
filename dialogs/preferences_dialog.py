@@ -106,19 +106,36 @@ class PreferencesDialog(BaseDialog):
         #
         # Clamped to the screen: a dialog wider than the display is worse than a
         # scrollbar, and the scroll area shows one when this clamp binds.
+        height = min(760, int(avail_h * 0.9))
         needed_w = min(self._width_the_form_needs(), avail_w)
         self.setMinimumWidth(needed_w)
-        self.resize(needed_w, min(760, int(avail_h * 0.9)))
+        self.resize(needed_w, height)
+
+        # Then check the estimate against what the viewport actually got, and
+        # top it up. Predicting the chrome cannot be done portably: macOS uses
+        # overlay scrollbars, whose PM_ScrollBarExtent is not what the viewport
+        # loses, and the estimate came out 5px short there while being exact on
+        # Linux and Windows. Measuring is not an approximation of the arithmetic,
+        # it is the answer the arithmetic was trying to guess.
+        self.layout().activate()
+        shortfall = self.scroll_area.widget().minimumSizeHint().width() - self.scroll_area.viewport().width()
+        if shortfall > 0:
+            needed_w = min(needed_w + shortfall, avail_w)
+            self.setMinimumWidth(needed_w)
+            self.resize(needed_w, height)
 
     def _width_the_form_needs(self):
-        """The dialog width at which no preference row is clipped.
+        """An estimate of the dialog width at which no preference row is clipped.
 
         minimumSizeHint, not sizeHint: the latter is what the form would like if
         space were free, and here that is half again as wide (1129px against
-        744px on this machine) because the twenty colour swatches would rather
+        509px on this machine) because the twenty colour swatches would rather
         spread out. What is being prevented is clipping, so the question is the
-        narrowest width that still fits everything -- the widest row decides it,
-        and that is the ten marker selectors.
+        narrowest width that still fits everything.
+
+        An estimate because the scrollbar and frame widths come from the style
+        rather than from the laid-out widget; __init__ corrects it afterwards
+        against the real viewport.
         """
         margins = self.layout().contentsMargins()
         return (

@@ -1,0 +1,52 @@
+{
+  "environment": {
+    "modan2_version": "0.2.0-beta.3",
+    "git_describe": "v0.2.0-beta.3-2-ge402a73",
+    "git_dirty": true,
+    "repo": "/mnt/d/projects/modan2",
+    "cpu": "Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz",
+    "memory_gb": 16,
+    "platform": "Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "timestamp": "2026-08-13 10:02:35"
+  },
+  "dataset": "Cranial 222x72",
+  "n_objects": 222,
+  "n_landmarks": 72,
+  "dimension": 3,
+  "patterns": 10,
+  "floor": {
+    "mean": 1.6260728928832027,
+    "median": 1.4154738923957426
+  },
+  "conditions": {
+    "1%": {
+      "n_imputed": 1600,
+      "mean": 1.709883447024936,
+      "median": 1.453368833847231,
+      "p95": 3.6697731925863146,
+      "max": 9.598228776688345
+    },
+    "5%": {
+      "n_imputed": 7990,
+      "mean": 1.7033077198454214,
+      "median": 1.4917296839003829,
+      "p95": 3.6019569308813923,
+      "max": 9.566515517549881
+    },
+    "10%": {
+      "n_imputed": 15980,
+      "mean": 1.6940803874461825,
+      "median": 1.4688164630940226,
+      "p95": 3.551412309020854,
+      "max": 10.285032147793908
+    },
+    "20%": {
+      "n_imputed": 31970,
+      "mean": 1.6968300999428467,
+      "median": 1.4765455468474395,
+      "p95": 3.5640398897861765,
+      "max": 10.293355959995898
+    }
+  }
+}

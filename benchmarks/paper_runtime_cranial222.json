@@ -1,0 +1,52 @@
+{
+  "environment": {
+    "modan2_version": "0.2.0-beta.3",
+    "git_describe": "v0.2.0-beta.3-1-gc5c6a4c",
+    "git_dirty": true,
+    "repo": "/mnt/d/projects/modan2",
+    "cpu": "Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz",
+    "memory_gb": 16,
+    "platform": "Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "timestamp": "2026-08-13 09:29:13"
+  },
+  "dataset": "Cranial 222x72",
+  "file": "/mnt/d/projects/modan2/Morphometrics dataset/Thylacine2020_NeuroGM.txt",
+  "n_objects": 222,
+  "n_landmarks": 72,
+  "dimension": 3,
+  "group_variable": "FeedCat1",
+  "runs": 9,
+  "superimposition": {
+    "procrustes": 0.4291951381601393,
+    "bookstein": 0.18041553511284292
+  },
+  "downstream": {
+    "pca": 0.04065112699754536,
+    "cva": 0.062235236167907715,
+    "manova": 0.36425225296989083,
+    "full_workflow": 0.8963337542954832
+  },
+  "imputation": {
+    "0%": {
+      "time": 0.4291951381601393,
+      "relative": 1.0,
+      "n_removed": 0
+    },
+    "5%": {
+      "time": 1.9570451739709824,
+      "relative": 4.55980275629492,
+      "n_removed": 799
+    },
+    "10%": {
+      "time": 1.9618788461666554,
+      "relative": 4.5710649346513526,
+      "n_removed": 1598
+    },
+    "20%": {
+      "time": 2.1347509350162,
+      "relative": 4.9738469642675485,
+      "n_removed": 3197
+    }
+  }
+}

@@ -48,4 +48,20 @@ def test_still_reports_name_version_and_copyright(qtbot, main_window):
     assert mu.PROGRAM_NAME in text
     assert mu.PROGRAM_VERSION in text
     assert mu.PROGRAM_COPYRIGHT in text
-    assert "MIT License" in text
+
+
+def test_names_both_licences(qtbot, main_window):
+    """The source is MIT and this build is GPL-3.0; the box must say both.
+
+    It said only "MIT License", which is the licence of the source and not of
+    the binary printing the message -- the released build includes PyQt5, which
+    is GPL-or-commercial, so the whole is GPL-3.0. A reader of an installed copy
+    was being told they had permissive terms they did not have.
+
+    Asserting on MIT alone would still pass with the GPL line deleted, which is
+    how the wrong version of this box would come back.
+    """
+    text = _about(main_window).text()
+
+    assert "MIT" in text
+    assert "General Public License" in text or "GPL" in text

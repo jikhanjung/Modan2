@@ -827,6 +827,14 @@ class ModanMainWindow(QMainWindow):
 
         QMessageBox's label opens external links itself, so an anchor is all
         that is needed for the URL to reach the browser.
+
+        Both licences are named because both are true and the difference decides
+        what the reader may do. This said only "MIT" before, which is right for
+        the source and wrong for the thing displaying the message: the released
+        build includes PyQt5, available only under the GPL-3.0 or a commercial
+        licence, so the binary as a whole is GPL-3.0. Someone reading this in an
+        installed copy was being told they had permissive terms they did not
+        have. See THIRD-PARTY-NOTICES.md.
         """
         msg = QMessageBox(self)
         msg.setWindowTitle(self.tr("About"))
@@ -836,7 +844,11 @@ class ModanMainWindow(QMainWindow):
             f"<b>{mu.PROGRAM_NAME}</b> v{mu.PROGRAM_VERSION}<br><br>"
             "Morphometrics made easy<br><br>"
             f'<a href="{mu.PROGRAM_HOMEPAGE}">{mu.PROGRAM_HOMEPAGE}</a><br><br>'
-            "This software is distributed under the terms of the MIT License.<br><br>"
+            "Source code: MIT License.<br>"
+            "This build: GNU General Public License v3, because it includes Qt "
+            "via PyQt5.<br>"
+            f'See <a href="{mu.PROGRAM_HOMEPAGE}/blob/main/THIRD-PARTY-NOTICES.md">'
+            "THIRD-PARTY-NOTICES.md</a> for details.<br><br>"
             f"{mu.PROGRAM_COPYRIGHT}"
         )
         return msg

@@ -1118,7 +1118,16 @@ Community
 License
 -------
 
-Modan2 is released under the **MIT License**.
+Modan2's source code is released under the **MIT License**.
+
+The binaries published on the releases page are **GPL-3.0**: they bundle PyQt5,
+which Riverbank Computing offers only under the GPL-3.0 or a commercial licence,
+and the combined work takes those terms. MIT is GPL-compatible, so this is a
+permitted combination — and the source you clone stays MIT regardless of what
+the installers carry.
+
+See ``THIRD-PARTY-NOTICES.md`` at the repository root for the reasoning and the
+list of bundled components.
 
 You are free to:
 

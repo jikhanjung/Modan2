@@ -27,6 +27,12 @@ SolidCompression=no
 
 OutputBaseFilename=Modan2_v{#AppVersion}_build{#BuildNumber}_Installer
 
+; Shown as a page during installation. GPL-3.0 rather than the MIT of the source
+; tree: what is being installed includes PyQt5, which is GPL-or-commercial, so
+; the binary as a whole is GPL-3.0. build.py stages this file into dist/Modan2.
+; See THIRD-PARTY-NOTICES.md.
+LicenseFile={{DIST_PATH}}\Modan2\LICENSES\GPL-3.0.txt
+
 [Files]
 ; ignoreversion on the whole payload, and it is not optional.
 ;

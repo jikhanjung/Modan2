@@ -45,7 +45,7 @@ What makes Modan2 different from other morphometrics software?
 
 **Modan2 advantages:**
 
-* Free and open source (MIT license)
+* Free and open source (MIT source; the released builds are GPL-3.0)
 * Intuitive interface designed for researchers
 * Integrated 2D/3D workflow in one application
 * Hierarchical dataset organization
@@ -774,7 +774,7 @@ Is Modan2 open source?
 
 **Yes!**
 
-* **License:** MIT License (permissive)
+* **License:** MIT for the source code; GPL-3.0 for the builds we publish
 * **Repository:** https://github.com/jikhanjung/Modan2
 * **Free to use:** Commercial and non-commercial
 * **Free to modify:** Change, extend, redistribute
@@ -859,17 +859,27 @@ License and Legal
 Can I use Modan2 commercially?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Yes!** MIT License permits:
+**Yes**, under either licence. Which one applies depends on what you took.
+
+**Modan2's source code is MIT.** Copy it into your own project and MIT is all
+that follows you: include the licence text and the copyright notice.
+
+**The installers we publish are GPL-3.0.** They contain PyQt5, which is
+available only under the GPL-3.0 or a commercial licence from Riverbank
+Computing, so the build as a whole takes the GPL's terms. Using it for
+commercial work is fine and always was — the GPL restricts redistribution, not
+use. But if you *redistribute* a build, you must pass on the same freedoms and
+make the corresponding source available.
+
+Both licences permit:
 
 * **Commercial use** - Use in for-profit projects
 * **Modification** - Adapt to your needs
 * **Distribution** - Redistribute modified versions
 * **Private use** - Use internally without sharing
 
-**Requirements:**
-
-* Include MIT License text
-* Include copyright notice
+See ``THIRD-PARTY-NOTICES.md`` in the repository for the full account and the
+list of bundled components.
 
 **No warranty:** Software provided "as-is"
 
@@ -878,7 +888,7 @@ What if Modan2 damages my data?
 
 **Disclaimer:**
 
-* Software provided "as-is" (MIT License)
+* Software provided "as-is", under both licences
 * No warranty of any kind
 * **Always backup original data**
 

@@ -241,6 +241,29 @@ if os.path.exists(example_src):
     shutil.copytree(example_src, example_dst)
     print(f"Copied {example_src} to {example_dst}")
 
+# Licence texts travel with the binary, on every platform.
+#
+# The GPL requires the terms to accompany what they cover, and until now nothing
+# licence-related reached the user at all: the installer showed no licence, the
+# package contained none, and the About box named only the MIT licence of the
+# source -- which is not the licence of the thing it was printed in. Windows
+# additionally shows GPL-3.0 as a page during install (see the .iss template);
+# the AppImage and DMG carry the files.
+license_dst = Path("dist/Modan2")
+if license_dst.is_dir():
+    for item in ("LICENSE", "THIRD-PARTY-NOTICES.md", "LICENSES"):
+        src = Path(item)
+        if not src.exists():
+            # Loud, because a build that quietly drops these is the situation
+            # this code exists to end.
+            raise FileNotFoundError(f"{item} is missing; the build must not ship without it")
+        target = license_dst / src.name
+        if src.is_dir():
+            shutil.copytree(src, target, dirs_exist_ok=True)
+        else:
+            shutil.copy2(src, target)
+        print(f"Copied {item} to {target}")
+
 # 3. Run Inno Setup Compiler (Optional)
 iss_file = "InnoSetup/Modan2.iss"
 run_inno_setup(iss_file, VERSION, BUILD_NUMBER)

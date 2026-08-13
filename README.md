@@ -123,4 +123,9 @@ pytest
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+**Source code: MIT.** See the [LICENSE](LICENSE) file.
+
+**The builds on the releases page: GPL-3.0.** They include PyQt5, which is
+available only under the GPL-3.0 or a commercial licence, so the binary as a
+whole carries the GPL's terms. Copying Modan2 source into your own project is
+still MIT. See [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).

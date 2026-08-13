@@ -8,7 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
-## [Unreleased]
+## [0.2.0-beta.4] - 2026-08-13
+
+The beta that beta.3 could not have been. Installing beta.3 over beta.2 left
+beta.2 running — the installer had been skipping the program file since long
+before either of them — so the first thing to say about this release is that
+installing it will actually replace what you have.
+
+The rest came out of using beta.3 for real: moving a library to another drive
+turned out to be impossible on Windows, which is the main reason anyone moves
+one. And two statistical results were being reported with more confidence than
+the data supports; those numbers will now be lower, and that is the fix.
 
 ### Changed
 - **CVA now reports a classification accuracy you can believe, and it will be
@@ -24,7 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   classified without a single error.
 
   CVA now reduces the coordinates to as many dimensions as the data can support
-  before discriminating — the same rule MANOVA already used, so the two
+  before discriminating — by a rule it now shares with MANOVA, so the two
   analyses in one run finally describe the same data — and measures accuracy by
   setting each specimen aside in turn and classifying it with a model that has
   not seen it. The old figure is still reported next to the new one, named
@@ -44,6 +54,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   should not have trusted.
 
 ### Fixed
+- **A failed library move no longer leaves Modan2 unable to reach your data.**
+  Modan2 closes the database before moving a library, because Windows cannot
+  move a file that is open. If the move then failed in a way that had not been
+  anticipated, it reported the error and carried on with the database still
+  closed, so everything you did afterwards failed until you restarted. Your data
+  was never at risk — a move that does not finish leaves the library exactly
+  where it was — but the program was.
+
 - **Moving your library to another drive works on Windows.** Choosing a folder
   on a different drive — `D:\Modan2` when your library was on `C:` — failed with
   a message about the paths not sharing a drive, and Modan2 never got as far as
@@ -62,8 +80,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   This affected every upgrade, not only the most recent one. If you have been
   installing new versions and wondering why nothing seemed to change, this is
-  why. Installing the next release will replace what you have regardless of what
-  it says its version is, so there is nothing you need to uninstall first.
+  why. Installing this release replaces what you have regardless of what version
+  it thinks it is, so there is nothing you need to uninstall first.
 
 ## [0.2.0-beta.3] - 2026-08-12
 

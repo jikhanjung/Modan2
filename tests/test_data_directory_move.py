@@ -15,7 +15,9 @@ to choose between them, since a test cannot conjure a second filesystem.
 """
 
 import logging
+import ntpath
 import os
+import posixpath
 import sys
 
 import pytest
@@ -98,6 +100,28 @@ class TestRefusals:
 
     def test_same_place_is_refused(self, library):
         assert "already in" in mu.describe_move_problem(str(library), str(library))
+
+    def test_another_drive_is_allowed_on_windows(self):
+        """C:\\...\\Modan2 -> D:\\Modan2 must not be mistaken for a problem.
+
+        This was the reported failure, and it was invisible here: the check used
+        os.path.commonpath, which *raises* on Windows for paths on different
+        drives and quietly returns "/" on POSIX for paths under different
+        mounts. The developer's platform could not reproduce it, so the Windows
+        path module is asked directly.
+        """
+        assert not mu._is_within(r"D:\Modan2", r"C:\Users\x\PaleoBytes\Modan2", _path=ntpath)
+
+    def test_windows_containment_is_case_insensitive(self):
+        assert mu._is_within(r"C:\Users\X\Modan2\data", r"c:\users\x\modan2", _path=ntpath)
+
+    def test_a_sibling_with_a_shared_prefix_is_not_inside(self):
+        """C:\\Foo must not look like a parent of C:\\FooBar."""
+        assert not mu._is_within(r"C:\Modan2Backup", r"C:\Modan2", _path=ntpath)
+
+    def test_posix_containment(self):
+        assert mu._is_within("/home/x/Modan2/data", "/home/x/Modan2", _path=posixpath)
+        assert not mu._is_within("/mnt/d/Modan2", "/home/x/Modan2", _path=posixpath)
 
     def test_a_source_that_does_not_exist(self, tmp_path):
         problem = mu.describe_move_problem(str(tmp_path / "nowhere"), str(tmp_path / "new"))

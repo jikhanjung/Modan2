@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **Moving your library to another drive works on Windows.** Choosing a folder
+  on a different drive — `D:\Modan2` when your library was on `C:` — failed with
+  a message about the paths not sharing a drive, and Modan2 never got as far as
+  offering to move anything. Moving to a larger drive is the main reason to move
+  a library at all, so this made the feature unusable for what it was for.
+
 - **Installing a new version on Windows now actually replaces the old one.**
   Upgrading appeared to work — the installer ran to the end and reported
   success — and then Modan2 started up still showing the previous version,

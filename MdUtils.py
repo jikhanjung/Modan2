@@ -611,6 +611,30 @@ def _same_volume(source, destination):
         return False
 
 
+def _is_within(path, directory, _path=os.path):
+    """Whether ``path`` is inside ``directory``.
+
+    Deliberately not ``os.path.commonpath``, which **raises** on Windows when the
+    two paths are on different drives ("Paths don't have the same drive"). That
+    is not an exotic input here -- moving C:\\...\\PaleoBytes\\Modan2 to D:\\Modan2
+    is the ordinary reason to move a library at all, and the exception escaped
+    describe_move_problem, whose entire job is to return a message instead of
+    failing. It could not be reproduced on Linux or macOS, where commonpath
+    happily returns "/" for paths under different mounts.
+
+    Comparing normalised prefixes has neither problem: a different drive simply
+    fails to match. ``normcase`` is what makes it case-insensitive on Windows and
+    case-sensitive elsewhere, and the appended separator keeps C:\\Foo from
+    looking like a parent of C:\\FooBar.
+
+    ``_path`` exists so the Windows behaviour can be tested from any platform by
+    passing ``ntpath``; production callers use the default.
+    """
+    directory = _path.normcase(_path.abspath(directory)).rstrip("\\/")
+    path = _path.normcase(_path.abspath(path))
+    return path == directory or path.startswith(directory + _path.sep)
+
+
 def describe_move_problem(source, destination):
     """Why the library at ``source`` cannot be moved to ``destination``, or None.
 
@@ -632,7 +656,7 @@ def describe_move_problem(source, destination):
 
     # Copying a folder into itself never terminates, and renaming into itself
     # fails halfway through. Neither is worth discovering during the move.
-    if os.path.commonpath([source, destination]) == source:
+    if _is_within(destination, source):
         return f"{destination} is inside {source}, so the data cannot be moved there."
 
     if os.path.exists(destination) and not os.path.isdir(destination):

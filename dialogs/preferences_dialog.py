@@ -106,23 +106,38 @@ class PreferencesDialog(BaseDialog):
         #
         # Clamped to the screen: a dialog wider than the display is worse than a
         # scrollbar, and the scroll area shows one when this clamp binds.
+        self._available_width = avail_w
+        self._width_checked = False
         height = min(760, int(avail_h * 0.9))
         needed_w = min(self._width_the_form_needs(), avail_w)
         self.setMinimumWidth(needed_w)
         self.resize(needed_w, height)
 
-        # Then check the estimate against what the viewport actually got, and
-        # top it up. Predicting the chrome cannot be done portably: macOS uses
-        # overlay scrollbars, whose PM_ScrollBarExtent is not what the viewport
-        # loses, and the estimate came out 5px short there while being exact on
-        # Linux and Windows. Measuring is not an approximation of the arithmetic,
-        # it is the answer the arithmetic was trying to guess.
-        self.layout().activate()
+    def showEvent(self, event):
+        """Correct the width against the viewport the form actually got.
+
+        The width set in __init__ predicts the scroll area's chrome from the
+        style, and PM_ScrollBarExtent is not what an overlay scrollbar takes:
+        the estimate was exact on Linux and Windows and 5px short on macOS.
+
+        The check has to happen here rather than in __init__, which is where it
+        was first put and why it did nothing. Before the dialog is shown, the
+        vertical scrollbar has not been decided yet -- the viewport reports the
+        full width, the shortfall computes as zero, and the correction never
+        fires. The scrollbar appears with the first show, and only then is there
+        a real number to compare against.
+        """
+        super().showEvent(event)
+        if self._width_checked:
+            return
+        self._width_checked = True
+
         shortfall = self.scroll_area.widget().minimumSizeHint().width() - self.scroll_area.viewport().width()
-        if shortfall > 0:
-            needed_w = min(needed_w + shortfall, avail_w)
-            self.setMinimumWidth(needed_w)
-            self.resize(needed_w, height)
+        if shortfall <= 0:
+            return
+        target = min(self.width() + shortfall, self._available_width)
+        self.setMinimumWidth(target)
+        self.resize(target, self.height())
 
     def _width_the_form_needs(self):
         """An estimate of the dialog width at which no preference row is clipped.

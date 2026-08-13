@@ -875,3 +875,64 @@ class TestMarkerSelectorsAreWrapped:
         """800x600 is what the offscreen platform reports, and it is not
         configurable, so the dialog has to fit rather than the screen grow."""
         assert dialog._width_the_form_needs() <= 800
+
+
+class TestTheWidthCorrectsItselfOnShow:
+    """The opening width is an estimate; showing the dialog is what checks it.
+
+    __init__ predicts the scroll area's chrome from the style, and
+    PM_ScrollBarExtent is not what an overlay scrollbar takes out of the
+    viewport: exact on Linux and Windows, 5px short on macOS.
+
+    The check must run on show. In __init__ the vertical scrollbar has not been
+    decided yet, so the viewport reports the full width, the shortfall computes
+    as zero, and the correction never fires -- which is what happened, and why
+    macOS failed twice with identical numbers.
+    """
+
+    def test_a_dialog_opened_too_narrow_widens_itself(self, qtbot, mock_parent, mock_app):
+        dialog = PreferencesDialog(mock_parent)
+        qtbot.addWidget(dialog)
+
+        # Exactly the macOS shape: an under-reported scrollbar leaves it short.
+        too_narrow = dialog.width() - 8
+        dialog.setMinimumWidth(too_narrow)
+        dialog.resize(too_narrow, dialog.height())
+        dialog._width_checked = False
+
+        dialog.show()
+        qtbot.waitExposed(dialog)
+
+        form = dialog.scroll_area.widget()
+        assert dialog.scroll_area.viewport().width() >= form.minimumSizeHint().width()
+
+    def test_it_only_corrects_once(self, dialog):
+        """Widening inside showEvent must not be able to loop."""
+        assert dialog._width_checked
+
+        width = dialog.width()
+        dialog.hide()
+        dialog.show()
+
+        assert dialog.width() == width
+
+    def test_it_does_not_widen_past_the_screen(self, qtbot, mock_parent, mock_app):
+        """The correction is still bounded by the display.
+
+        Both halves have to be forced: a shortfall, so the correction runs at
+        all, and a screen too small to satisfy it. Asserting against a small
+        screen alone would pass without the clamp, because with nothing short
+        the correction never touches the width.
+        """
+        dialog = PreferencesDialog(mock_parent)
+        qtbot.addWidget(dialog)
+        too_narrow = dialog.width() - 20
+        dialog.setMinimumWidth(too_narrow)
+        dialog.resize(too_narrow, dialog.height())
+        dialog._available_width = too_narrow + 5  # room for 5 of the 20
+        dialog._width_checked = False
+
+        dialog.show()
+        qtbot.waitExposed(dialog)
+
+        assert dialog.minimumWidth() == too_narrow + 5

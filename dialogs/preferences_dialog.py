@@ -33,6 +33,14 @@ from MdHelpers import guard_slot
 
 logger = logging.getLogger(__name__)
 
+# Marker selectors per row. Named because the dialog's width used to depend on
+# it: a single row of all eleven was the widest row in the form. Six splits them
+# evenly over two rows; fewer per row buys nothing, because below about six the
+# colour swatches above become the widest row instead and the dialog stops
+# getting narrower -- 547px at four or five per row against 557px at six, for a
+# ragged third row. See _create_plot_widgets.
+MARKERS_PER_ROW = 6
+
 
 def _format_size(num_bytes):
     """A size a person can read, for telling them what a move involves.
@@ -365,9 +373,18 @@ class PreferencesDialog(BaseDialog):
         self.gbPlotColors.layout().addWidget(self.btnResetVivid, 0, 10)
         self.gbPlotColors.layout().addWidget(self.btnResetPastel, 1, 10)
 
-        # Plot markers
+        # Plot markers, wrapped like the colours above rather than strung out in
+        # one line. Ten combo boxes side by side made this the widest row in the
+        # dialog by a distance -- 579px of the 744 the form demanded here, and
+        # the reason the whole thing wanted 997px under Windows' font. Wrapping
+        # brings the form to 509px, which is an ordinary size for a preferences
+        # dialog and fits on any screen it is likely to meet.
+        #
+        # Five per row, not the colours' ten: these are combo boxes, several
+        # times the width of a colour swatch, so ten of them is what caused the
+        # problem in the first place.
         self.gbPlotMarkers = QGroupBox()
-        self.gbPlotMarkers.setLayout(QHBoxLayout())
+        self.gbPlotMarkers.setLayout(QGridLayout())
 
         self.btnResetMarkers = QPushButton(self.tr("Reset"))
         self.btnResetMarkers.setMinimumSize(60, 20)
@@ -379,8 +396,12 @@ class PreferencesDialog(BaseDialog):
             combo.addItems(mu.MARKER_LIST)
             combo.setCurrentIndex(mu.MARKER_LIST.index(marker))
             self.comboMarker_list.append(combo)
-            self.gbPlotMarkers.layout().addWidget(combo)
-        self.gbPlotMarkers.layout().addWidget(self.btnResetMarkers)
+        for i, combo in enumerate(self.comboMarker_list):
+            self.gbPlotMarkers.layout().addWidget(combo, i // MARKERS_PER_ROW, i % MARKERS_PER_ROW)
+        # Spans however many rows there turn out to be, so it sits beside the
+        # block rather than in it -- and stays correct if a marker is added.
+        marker_rows = -(-len(self.comboMarker_list) // MARKERS_PER_ROW)
+        self.gbPlotMarkers.layout().addWidget(self.btnResetMarkers, 0, MARKERS_PER_ROW, marker_rows, 1)
 
     def _create_language_widgets(self):
         """Create language selection widgets."""

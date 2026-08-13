@@ -834,3 +834,38 @@ class TestPreferencesDialogIsWideEnough:
             dialog._width_the_form_needs(),
             dialog.screen().availableGeometry().width(),
         )
+
+
+class TestMarkerSelectorsAreWrapped:
+    """All eleven markers must be present, and not in one line.
+
+    A single row of eleven combo boxes was the widest row in the dialog and the
+    reason the form demanded 744px here and 997px under Windows' font. Wrapping
+    them brings it to 557px -- small enough to fit the 800px screen the CI
+    runners report, which is what stops the width tests above from being skipped
+    everywhere they matter.
+    """
+
+    def test_every_marker_still_has_a_selector(self, dialog):
+        assert len(dialog.comboMarker_list) == len(mu.MARKER_LIST)
+        layout = dialog.gbPlotMarkers.layout()
+        assert all(layout.indexOf(combo) >= 0 for combo in dialog.comboMarker_list)
+
+    def test_they_are_not_all_on_one_row(self, dialog):
+        layout = dialog.gbPlotMarkers.layout()
+
+        assert layout.rowCount() > 1, "eleven selectors in one row is what made the dialog too wide"
+
+    def test_the_reset_button_spans_the_rows(self, dialog):
+        """It sits beside the block, not inside it, however many rows there are."""
+        layout = dialog.gbPlotMarkers.layout()
+        index = layout.indexOf(dialog.btnResetMarkers)
+        assert index >= 0
+        _row, _col, row_span, _col_span = layout.getItemPosition(index)
+
+        assert row_span == layout.rowCount()
+
+    def test_the_dialog_fits_a_small_screen(self, dialog):
+        """800x600 is what the offscreen platform reports, and it is not
+        configurable, so the dialog has to fit rather than the screen grow."""
+        assert dialog._width_the_form_needs() <= 800

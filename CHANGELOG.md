@@ -35,6 +35,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Canonical variate scores change as a result, so re-running an analysis will
   not reproduce numbers saved by an earlier version.
 
+- **MANOVA no longer uses more variables than a small dataset can support.** It
+  kept up to 20, chosen without reference to how many specimens you had, so
+  eight specimens could be compared using twenty variables — beyond the point
+  where the test's assumptions hold. It now applies the same limit as CVA, which
+  takes the specimen and group counts into account. Datasets with plenty of
+  specimens are unaffected; small ones were the ones getting an answer they
+  should not have trusted.
+
 ### Fixed
 - **Moving your library to another drive works on Windows.** Choosing a folder
   on a different drive — `D:\Modan2` when your library was on `C:` — failed with

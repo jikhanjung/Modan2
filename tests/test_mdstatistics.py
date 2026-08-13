@@ -1008,12 +1008,11 @@ class TestCVADimensionality:
 
         assert first["cross_validated_accuracy"] == second["cross_validated_accuracy"]
 
-    def test_cva_and_manova_agree_on_how_many_variables_to_use(self):
-        """The inconsistency that made the two analyses incomparable."""
+    def test_the_component_rule_is_the_documented_minimum(self):
         n_samples, n_groups = 60, 4
         variances = np.linspace(10.0, 0.01, 120)
 
-        k = ms.effective_component_count(variances, n_samples, n_groups, n_features=120)
+        k = ms.effective_component_count(variances, n_samples, n_groups)
 
         assert k == min(
             int(np.searchsorted(np.cumsum(variances) / variances.sum(), 0.95) + 1),
@@ -1021,14 +1020,16 @@ class TestCVADimensionality:
             n_samples - n_groups - 1,
         )
 
-    def test_no_reduction_when_the_data_is_already_narrow(self):
-        assert ms.effective_component_count([5.0, 1.0], n_samples=40, n_groups=2, n_features=2) is None
-
     def test_the_degrees_of_freedom_bound_wins_when_it_has_to(self):
         """95% of variance is not a safety condition; n - g - 1 is."""
         # 14 specimens, 381 variables: every component is needed for 95%.
         variances = np.ones(13)
 
-        k = ms.effective_component_count(variances, n_samples=14, n_groups=2, n_features=381)
+        k = ms.effective_component_count(variances, n_samples=14, n_groups=2)
 
         assert k == 14 - 2 - 1
+
+    def test_at_least_one_component_survives(self):
+        """Degenerate input must still leave something to analyse."""
+        assert ms.effective_component_count([1.0], n_samples=3, n_groups=3) == 1
+        assert ms.effective_component_count([0.0, 0.0], n_samples=10, n_groups=2) == 1

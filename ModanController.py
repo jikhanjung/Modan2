@@ -1294,30 +1294,19 @@ class ModanController(QObject):
                 # Use PCA scores with proper eigenvalue-based selection
                 self.logger.info("Using PCA scores for MANOVA")
 
-                # Get eigenvalues and calculate cumulative variance
+                # How many components to keep is MdStatistics' decision, not this
+                # module's. The rule used to live here in its own copy, which had
+                # drifted from CVA's (CVA had none at all) and was missing the
+                # n - g - 1 term that keeps the residual covariance invertible.
+                # One analysis run showed MANOVA 13 dimensions and CVA 216.
                 eigenvalues = pca_result["explained_variance"]
-                total_variance = sum(eigenvalues)
-                cumulative_variance = 0
-                effective_components = 0
-
-                # Find components that explain 95% of variance
-                for i, eigenvalue in enumerate(eigenvalues):
-                    cumulative_variance += eigenvalue
-                    if cumulative_variance / total_variance >= 0.95:
-                        effective_components = i + 1
-                        break
-
-                # Ensure we have at least some components but not too many
-                if effective_components == 0:
-                    effective_components = min(10, len(eigenvalues))
-                elif effective_components > 20:  # Limit for computational stability
-                    self.logger.warning(f"Limiting components from {effective_components} to 20 for MANOVA stability")
-                    effective_components = 20
-
-                # Extract PCA scores and truncate to effective components
                 pca_scores = pca_result["scores"]
+                effective_components = MdStatistics.effective_component_count(
+                    eigenvalues, n_samples=len(pca_scores), n_groups=len(set(groups))
+                )
                 manova_data = [score[:effective_components] for score in pca_scores]
 
+                total_variance = sum(eigenvalues)
                 cumulative_var_explained = sum(eigenvalues[:effective_components]) / total_variance * 100
                 self.logger.info(
                     f"MANOVA using {effective_components} PCA components ({cumulative_var_explained:.1f}% variance)"

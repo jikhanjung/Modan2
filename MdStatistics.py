@@ -422,14 +422,17 @@ def effective_component_count(
     explained_variance,
     n_samples,
     n_groups,
-    n_features,
     max_variables=MANOVA_MAX_VARIABLES,
     variance_target=0.95,
 ):
-    """How many principal components a discriminant analysis may safely use.
+    """How many principal components a group comparison may use. At least 1.
 
-    Returns ``None`` when the data is already well conditioned and should be used
-    as it is.
+    Answers only "how many are safe and useful", not "should we reduce at all".
+    The second question is CVA's alone -- it can fall back to the raw coordinates
+    when they are already few enough, which MANOVA must not do, because for
+    MANOVA the variance rule is deliberate noise reduction rather than a repair.
+    Folding that decision in here would have quietly handed MANOVA every
+    component of a well-conditioned dataset where it used to take eight.
 
     The binding term is ``n_samples - n_groups - 1``. A linear discriminant needs
     the within-group scatter matrix to be non-singular, and its degrees of
@@ -446,11 +449,10 @@ def effective_component_count(
     Shared so that MANOVA and CVA answer this question the same way. They did
     not: MANOVA reduced and CVA did not, so one analysis run had MANOVA looking
     at 13 dimensions and CVA at 216, and no reason to believe the two were
-    describing the same data.
+    describing the same data. MANOVA's own copy of the rule also lacked the
+    ``n - g - 1`` term, which is the one that matters -- statsmodels needs the
+    residual covariance invertible, roughly the same condition.
     """
-    if n_features <= n_samples - n_groups:
-        return None
-
     explained_variance = numpy.asarray(explained_variance, dtype=float)
     total = float(explained_variance.sum())
     if total <= 0:
@@ -519,11 +521,12 @@ def do_cva_analysis(landmarks_data, groups):
         # alternative (choosing k inside every fold) makes the reported
         # dimensionality vary from fold to fold with nothing to report to the
         # user. The *fitting* is what happens inside the folds.
+        # Whether to reduce at all is CVA's decision: coordinates that already
+        # fit comfortably inside the degrees of freedom are used untouched, so
+        # small well-conditioned datasets behave exactly as they always have.
         n_components = None
         if n_features > n_samples - n_groups:
-            n_components = effective_component_count(
-                PCA().fit(data_matrix).explained_variance_, n_samples, n_groups, n_features
-            )
+            n_components = effective_component_count(PCA().fit(data_matrix).explained_variance_, n_samples, n_groups)
 
         if n_components is None:
             estimator = LinearDiscriminantAnalysis()

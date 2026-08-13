@@ -2,10 +2,12 @@
 
 from unittest.mock import Mock, patch
 
+import numpy as np
 import pytest
 from PyQt5.QtCore import QObject
 
 import MdModel
+import MdStatistics
 from ModanController import ModanController
 
 
@@ -1588,3 +1590,56 @@ class TestAnalysisWithInconsistentGroups:
 
         # Analysis should complete or fail gracefully
         assert result is not None or result is None
+
+
+class TestManovaUsesTheSharedComponentRule:
+    """MANOVA and CVA must reduce by the same rule, because they are read together.
+
+    They did not. MANOVA kept its own copy of the 95%-of-variance rule inside
+    _run_manova and CVA had no rule at all, so a single analysis run showed
+    MANOVA 13 dimensions and CVA 216 and invited the reader to compare them.
+    MANOVA's copy was also missing the n - g - 1 term, the one that keeps the
+    residual covariance invertible -- the same condition MANOVA_MAX_VARIABLES
+    was introduced to approximate.
+    """
+
+    @pytest.fixture
+    def controller(self, mock_database):
+        return ModanController()
+
+    def _run(self, controller, monkeypatch, n_samples, n_components, groups):
+        """Run the PCA branch of _run_manova and report the width it passed on."""
+        seen = {}
+
+        def capture(manova_data, group_list):
+            seen["width"] = len(manova_data[0])
+            return {"p_value": 0.5}
+
+        monkeypatch.setattr(MdStatistics, "do_manova_analysis_on_pca", capture)
+
+        eigenvalues = list(np.linspace(10.0, 0.01, n_components))
+        pca_result = {
+            "scores": [list(np.arange(n_components, dtype=float)) for _ in range(n_samples)],
+            "explained_variance": eigenvalues,
+        }
+        controller._run_manova([], {"groups": groups, "pca_result": pca_result})
+        return seen["width"], eigenvalues
+
+    def test_it_truncates_to_the_shared_count(self, controller, monkeypatch):
+        groups = ["A"] * 20 + ["B"] * 20 + ["C"] * 20
+
+        width, eigenvalues = self._run(controller, monkeypatch, 60, 120, groups)
+
+        assert width == MdStatistics.effective_component_count(eigenvalues, n_samples=60, n_groups=3)
+
+    def test_the_degrees_of_freedom_bound_now_applies_to_manova_too(self, controller, monkeypatch):
+        """The term MANOVA's private copy of the rule did not have.
+
+        Eight specimens in two groups leave n - g - 1 = 5, well under both the
+        20-variable cap and the components needed for 95% of this variance.
+        """
+        groups = ["A"] * 4 + ["B"] * 4
+
+        width, _ = self._run(controller, monkeypatch, 8, 30, groups)
+
+        assert width == 8 - 2 - 1

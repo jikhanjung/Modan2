@@ -771,39 +771,62 @@ class TestRiskyFolderWarning:
 
 
 class TestPreferencesDialogIsWideEnough:
-    """No preference row may be cut off at the dialog's opening width.
+    """Every preference row must be reachable.
 
-    The width used to be the literal 560, which was narrower than the form's own
-    requirement even on Linux and narrower still under Windows' wider default
-    font, where it was reported: the right-hand column of every row -- the Large
-    radio buttons, the 3D colour swatches, the Browse button -- was off the edge.
+    The width used to be the literal 560, which was narrower than the form needs
+    even here and much narrower under Windows' wider default font, where it was
+    reported: the right-hand column of every row -- the Large radio buttons, the
+    3D colour swatches, the Browse button -- was off the edge.
 
-    The scroll area's horizontal scrollbar is deliberately off, so a too-narrow
-    dialog does not mean "scroll across to reach it", it means the controls
-    cannot be reached at all.
+    "Reachable" rather than "visible", because the two cannot always be the same
+    thing. The form's width follows the platform's font: 744px on this machine,
+    997px on the Windows CI runner. On a screen narrower than that the dialog
+    cannot open wide enough, and clamping it to the screen is right -- a window
+    wider than the display is worse. So the invariant is a disjunction: either
+    the viewport shows the whole form, or there is a horizontal scrollbar to
+    reach the rest with.
+
+    The first version of these tests asserted the viewport was always wide
+    enough, which is unsatisfiable on a small screen and duly failed on all
+    three CI runners against an 800px virtual display.
     """
 
-    def test_the_form_is_not_clipped(self, dialog):
-        """The viewport is what must be wide enough, not the form.
+    @staticmethod
+    def _fits_on_this_screen(dialog):
+        return dialog._width_the_form_needs() <= dialog.screen().availableGeometry().width()
 
-        setWidgetResizable fits the form to the viewport but never shrinks it
-        below its own minimum, so the form's width is 744 whatever the dialog
-        does -- asserting on it passes even at the width that produced the bug.
-        What gets cut off is how much of it the viewport shows.
-        """
+    def test_the_form_is_reachable(self, dialog):
         form = dialog.scroll_area.widget()
         dialog.show()
-        viewport = dialog.scroll_area.viewport().width()
 
-        assert viewport >= form.minimumSizeHint().width(), (
-            f"the form needs {form.minimumSizeHint().width()}px and only {viewport}px is visible"
+        needed = form.minimumSizeHint().width()
+        visible = dialog.scroll_area.viewport().width()
+        scrollable = dialog.scroll_area.horizontalScrollBarPolicy() != Qt.ScrollBarAlwaysOff
+
+        assert visible >= needed or scrollable, (
+            f"the form needs {needed}px, only {visible}px is visible, and there is no way to scroll to the rest"
         )
+
+    def test_it_opens_wide_enough_when_the_screen_allows(self, dialog):
+        if not self._fits_on_this_screen(dialog):
+            pytest.skip("screen is narrower than the form; the scrollbar case covers this")
+        form = dialog.scroll_area.widget()
+        dialog.show()
+
+        assert dialog.scroll_area.viewport().width() >= form.minimumSizeHint().width()
 
     def test_it_cannot_be_dragged_narrower_than_the_form(self, dialog):
         """Otherwise the same clipping is one drag of the window edge away."""
-        form = dialog.scroll_area.widget()
+        if not self._fits_on_this_screen(dialog):
+            pytest.skip("screen is narrower than the form; the minimum is the screen instead")
 
-        assert dialog.minimumWidth() >= form.minimumSizeHint().width()
+        assert dialog.minimumWidth() >= dialog.scroll_area.widget().minimumSizeHint().width()
+
+    def test_it_never_opens_wider_than_the_screen(self, dialog):
+        available = dialog.screen().availableGeometry().width()
+
+        assert dialog.width() <= available
+        assert dialog.minimumWidth() <= available
 
     def test_the_width_is_measured_not_assumed(self, dialog):
         """It must follow the form, so a new row or a wider font cannot outgrow it."""

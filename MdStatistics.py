@@ -493,6 +493,10 @@ def do_cva_analysis(landmarks_data, groups):
     """
     try:
         import numpy as np
+
+        # ArpackError: raised when the iterative solver gives up. Caught below to
+        # fall back rather than fail an analysis the exact solver can complete.
+        from scipy.sparse.linalg import ArpackError
         from sklearn.decomposition import PCA
         from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
         from sklearn.metrics import accuracy_score
@@ -528,9 +532,7 @@ def do_cva_analysis(landmarks_data, groups):
         if n_features > n_samples - n_groups:
             n_components = effective_component_count(PCA().fit(data_matrix).explained_variance_, n_samples, n_groups)
 
-        if n_components is None:
-            estimator = LinearDiscriminantAnalysis()
-        else:
+        def build(solver):
             # ARPACK, because this pipeline is refitted once per specimen during
             # cross-validation and the default solver spends nearly all of that
             # time on components it is about to discard: a full SVD of the 222 x
@@ -543,11 +545,43 @@ def do_cva_analysis(landmarks_data, groups):
             # holds by construction: this branch runs only when n_features
             # exceeds n_samples - n_groups, and effective_component_count caps
             # n_components at n_samples - n_groups - 1.
-            estimator = make_pipeline(PCA(n_components=n_components, svd_solver="arpack"), LinearDiscriminantAnalysis())
+            return make_pipeline(PCA(n_components=n_components, svd_solver=solver), LinearDiscriminantAnalysis())
 
-        # Fitted on everything: these are the coordinates that get drawn, and a
-        # plot of the data should show the model of the data.
-        cv_scores = estimator.fit_transform(data_matrix, group_array)
+        # Fitting and cross-validating are attempted together, because ARPACK is
+        # iterative and can fail to converge -- and the pipeline is refitted once
+        # per specimen during cross-validation, so a fold is where it is most
+        # likely to give up. Covering only the whole-data fit would leave the
+        # commoner failure uncaught.
+        #
+        # Convergence is worst on a flat eigenvalue spectrum, which is also where
+        # ARPACK saves the least: the case with nothing to gain is the case that
+        # fails. Falling back to the exact solver costs time and changes nothing
+        # about the answer, whereas not falling back would fail an analysis that
+        # the previous release completed.
+        solver_warning = None
+        pca_solver = None
+        solvers = [None] if n_components is None else ["arpack", "full"]
+        for attempt, solver in enumerate(solvers):
+            estimator = LinearDiscriminantAnalysis() if solver is None else build(solver)
+            try:
+                # Fitted on everything: these are the coordinates that get drawn,
+                # and a plot of the data should show the model of the data.
+                cv_scores = estimator.fit_transform(data_matrix, group_array)
+                cross_validated_accuracy, accuracy_method = _cross_validated_accuracy(
+                    estimator, data_matrix, group_array, n_groups, int(group_counts.min())
+                )
+            except ArpackError as e:
+                if attempt + 1 == len(solvers):
+                    raise
+                logger.warning("ARPACK did not converge for CVA; recomputing with the exact solver: %s", e)
+                solver_warning = (
+                    "The fast solver did not converge, so CVA was recomputed with the exact one. "
+                    "The result is the same; it took longer."
+                )
+                continue
+            pca_solver = solver
+            break
+
         lda = estimator[-1] if hasattr(estimator, "steps") else estimator
 
         # Pad CVA scores to at least 3 dimensions for UI compatibility
@@ -557,10 +591,6 @@ def do_cva_analysis(landmarks_data, groups):
 
         predictions = estimator.predict(data_matrix)
         resubstitution_accuracy = accuracy_score(group_array, predictions) * 100
-
-        cross_validated_accuracy, accuracy_method = _cross_validated_accuracy(
-            estimator, data_matrix, group_array, n_groups, int(group_counts.min())
-        )
 
         # Calculate group centroids
         centroids = []
@@ -582,6 +612,12 @@ def do_cva_analysis(landmarks_data, groups):
             "n_variables_total": n_features,
             "n_variables_used": n_features if n_components is None else n_components,
             "reduced": n_components is not None,
+            "pca_solver": pca_solver,
+            # Something the user should be told, or None. Carried in the result
+            # rather than logged alone, because a warning that only reaches the
+            # log reaches nobody, and an analysis that took a minute instead of
+            # two seconds needs an explanation.
+            "warning": solver_warning,
             "groups": unique_groups.tolist(),
             "n_components": cv_scores.shape[1],
         }

@@ -1247,6 +1247,12 @@ class ModanController(QObject):
             # Use existing CVA function
             cva_result = MdStatistics.do_cva_analysis(landmarks_data, groups)
 
+            # Anything the analysis needs the user to know reaches them here.
+            # MdStatistics cannot show a message and must not try; it records
+            # what happened and this is the layer with a way to say it.
+            if cva_result.get("warning"):
+                self.warning_occurred.emit(cva_result["warning"])
+
             return {
                 "analysis_type": "CVA",
                 "canonical_variables": cva_result.get("canonical_variables", []),
@@ -1264,6 +1270,8 @@ class ModanController(QObject):
                 "n_variables_total": cva_result["n_variables_total"],
                 "n_variables_used": cva_result["n_variables_used"],
                 "reduced": cva_result["reduced"],
+                "pca_solver": cva_result["pca_solver"],
+                "warning": cva_result["warning"],
             }
 
         except Exception as e:

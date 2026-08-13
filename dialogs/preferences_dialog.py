@@ -89,12 +89,15 @@ class PreferencesDialog(BaseDialog):
         avail_w = available.width() if available is not None else 1200
 
         # Width is taken from the form rather than fixed, because a fixed one was
-        # wrong: 560 was narrower than the form's own 634 on Linux and narrower
-        # still against Windows' wider default font, which is where it was
-        # reported -- the right-hand column of every row was cut off. The scroll
-        # area's horizontal bar is deliberately off, so too narrow does not mean
-        # "scroll to reach it", it means "unreachable". Hence a *minimum* too:
-        # the same clipping is a drag of the window edge away.
+        # wrong: 560 was narrower than the form's own requirement even here, and
+        # that requirement follows the platform's font -- 744px on this machine,
+        # 997px on a Windows CI runner. Measuring is the only way that survives
+        # a new row or a different font. The minimum matters as much as the
+        # opening size, since otherwise the same clipping is one drag of the
+        # window edge away.
+        #
+        # Clamped to the screen: a dialog wider than the display is worse than a
+        # scrollbar, and the scroll area shows one when this clamp binds.
         needed_w = min(self._width_the_form_needs(), avail_w)
         self.setMinimumWidth(needed_w)
         self.resize(needed_w, min(760, int(avail_h * 0.9)))
@@ -454,7 +457,14 @@ class PreferencesDialog(BaseDialog):
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
         self.scroll_area.setWidget(form_widget)
-        self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        # As-needed, not always-off. The dialog opens wide enough for the form
+        # whenever the screen allows, but it cannot when the screen is narrower
+        # than the form -- and the form is wider than it looks: 997px on a
+        # Windows CI runner against 744px here, because the width follows the
+        # platform's font. With the bar off, that case put the right-hand column
+        # of every row somewhere the user could not reach at all. A scrollbar
+        # that appears only when it is needed costs nothing the rest of the time.
+        self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
 
         outer_layout = QVBoxLayout()
         outer_layout.addWidget(self.scroll_area)

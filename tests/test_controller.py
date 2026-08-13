@@ -362,6 +362,8 @@ class TestAnalysisOperations:
             "n_variables_total": 10,
             "n_variables_used": 4,
             "reduced": True,
+            "pca_solver": "arpack",
+            "warning": None,
         }
 
         result = controller_with_data.run_analysis("CVA", {"name": "Test_CVA", "groups": [0, 0, 1, 1, 1]})
@@ -1643,3 +1645,58 @@ class TestManovaUsesTheSharedComponentRule:
         width, _ = self._run(controller, monkeypatch, 8, 30, groups)
 
         assert width == 8 - 2 - 1
+
+
+class TestCvaWarningsReachTheUser:
+    """MdStatistics cannot show a message; this is the layer that can.
+
+    The ARPACK fallback (devlog P04) recomputes with the exact solver, which can
+    turn a two-second analysis into a much longer one. A warning that only
+    reached the log would leave that unexplained.
+    """
+
+    @pytest.fixture
+    def controller(self, mock_database):
+        return ModanController()
+
+    @staticmethod
+    def _cva_result(**overrides):
+        result = {
+            "canonical_variables": [[1, 2], [3, 4]],
+            "eigenvalues": [0.8, 0.2],
+            "group_centroids": [[0, 0], [1, 1]],
+            "classification": ["A", "B"],
+            "resubstitution_accuracy": 85.0,
+            "cross_validated_accuracy": 60.0,
+            "accuracy_method": "leave-one-out",
+            "chance_accuracy": 50.0,
+            "n_variables_total": 10,
+            "n_variables_used": 4,
+            "reduced": True,
+            "pca_solver": "arpack",
+            "warning": None,
+        }
+        result.update(overrides)
+        return result
+
+    def test_a_warning_is_emitted(self, controller, monkeypatch):
+        note = "The fast solver did not converge, so CVA was recomputed with the exact one."
+        monkeypatch.setattr(
+            MdStatistics, "do_cva_analysis", lambda *a, **kw: self._cva_result(warning=note, pca_solver="full")
+        )
+        seen = []
+        controller.warning_occurred.connect(seen.append)
+
+        result = controller._run_cva([[[0.0, 0.0]]], {"groups": ["A", "B"]})
+
+        assert seen == [note]
+        assert result["pca_solver"] == "full"
+
+    def test_nothing_is_emitted_when_there_is_nothing_to_say(self, controller, monkeypatch):
+        monkeypatch.setattr(MdStatistics, "do_cva_analysis", lambda *a, **kw: self._cva_result())
+        seen = []
+        controller.warning_occurred.connect(seen.append)
+
+        controller._run_cva([[[0.0, 0.0]]], {"groups": ["A", "B"]})
+
+        assert seen == []

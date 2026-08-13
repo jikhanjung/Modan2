@@ -1072,3 +1072,90 @@ class TestCVADimensionality:
         """Degenerate input must still leave something to analyse."""
         assert ms.effective_component_count([1.0], n_samples=3, n_groups=3) == 1
         assert ms.effective_component_count([0.0, 0.0], n_samples=10, n_groups=2) == 1
+
+
+class TestCVAFallsBackWhenArpackGivesUp:
+    """ARPACK is an optimisation, so its failure must not become the user's.
+
+    The reducing pipeline is refitted once per specimen during cross-validation,
+    and ARPACK converges worst on a flat eigenvalue spectrum -- which is also
+    where it saves the least. Without a fallback, a dataset the previous release
+    analysed fine would come back as "CVA analysis failed".
+    """
+
+    @staticmethod
+    def _wide_data(seed=0):
+        rng = np.random.default_rng(seed)
+        landmarks_data, groups = [], []
+        for label, offset in (("A", 0.0), ("B", 0.6), ("C", 1.2)):
+            for _ in range(12):
+                landmarks_data.append(rng.normal(offset, 1.0, (20, 3)).tolist())
+                groups.append(label)
+        return landmarks_data, groups
+
+    @staticmethod
+    def _make_arpack_fail(monkeypatch):
+        """Make the iterative solver give up, wherever it is attempted.
+
+        A plain function rather than only a fixture, so the comparison test can
+        apply it halfway through. Calling a fixture directly would risk the
+        patch never being applied, and that test would then compare ARPACK with
+        itself and pass while proving nothing.
+        """
+        from scipy.sparse.linalg import ArpackError
+        from sklearn.decomposition import PCA
+
+        real_fit = PCA._fit
+
+        def fit(self, X):
+            if self.svd_solver == "arpack":
+                raise ArpackError(-1)
+            return real_fit(self, X)
+
+        monkeypatch.setattr(PCA, "_fit", fit)
+
+    @pytest.fixture
+    def arpack_always_fails(self, monkeypatch):
+        self._make_arpack_fail(monkeypatch)
+
+    def test_the_analysis_still_succeeds(self, arpack_always_fails):
+        landmarks_data, groups = self._wide_data()
+
+        result = ms.do_cva_analysis(landmarks_data, groups)
+
+        assert result["reduced"], "expected this configuration to be reduced"
+        assert result["pca_solver"] == "full"
+
+    def test_the_user_is_told(self, arpack_always_fails):
+        landmarks_data, groups = self._wide_data()
+
+        result = ms.do_cva_analysis(landmarks_data, groups)
+
+        assert result["warning"], "the fallback happened silently"
+        assert "exact" in result["warning"]
+
+    def test_nothing_is_said_when_nothing_went_wrong(self):
+        landmarks_data, groups = self._wide_data()
+
+        result = ms.do_cva_analysis(landmarks_data, groups)
+
+        assert result["pca_solver"] == "arpack"
+        assert result["warning"] is None
+
+    def test_the_answer_is_the_same_either_way(self, monkeypatch):
+        """A fallback that changed the result would be a bug, not a rescue."""
+        landmarks_data, groups = self._wide_data()
+        with_arpack = ms.do_cva_analysis(landmarks_data, groups)
+
+        assert with_arpack["pca_solver"] == "arpack", "the baseline must be the ARPACK path"
+
+        self._make_arpack_fail(monkeypatch)
+        after_fallback = ms.do_cva_analysis(landmarks_data, groups)
+        assert after_fallback["pca_solver"] == "full", "the patch did not take effect"
+
+        assert after_fallback["cross_validated_accuracy"] == pytest.approx(
+            with_arpack["cross_validated_accuracy"], abs=1e-9
+        )
+        assert after_fallback["resubstitution_accuracy"] == pytest.approx(
+            with_arpack["resubstitution_accuracy"], abs=1e-9
+        )

@@ -220,7 +220,7 @@ def restore(mm, originals):
 # benchmark
 # --------------------------------------------------------------------------
 def run(args, mm, MdStatistics, Morphologika):
-    spec = DATASETS[args.dataset] if args.dataset in DATASETS else None
+    spec = DATASETS.get(args.dataset)
     path = Path(args.file) if args.file else DEFAULT_REPO / spec["file"]
     name = spec["name"] if spec else path.stem
     group_var = args.group_var or (spec["group_var"] if spec else None)
@@ -257,9 +257,7 @@ def run(args, mm, MdStatistics, Morphologika):
     t_pca, _ = time_median(lambda: MdStatistics.do_pca_analysis(lm_data), args.runs)
     t_cva, _ = time_median(lambda: MdStatistics.do_cva_analysis(lm_data, groups), args.runs)
     pca_result = MdStatistics.do_pca_analysis(lm_data)
-    t_man, _ = time_median(
-        lambda: MdStatistics.do_manova_analysis_on_pca(pca_result["scores"], groups), args.runs
-    )
+    t_man, _ = time_median(lambda: MdStatistics.do_manova_analysis_on_pca(pca_result["scores"], groups), args.runs)
     full = t_proc + t_pca + t_cva + t_man
     results["downstream"] = {"pca": t_pca, "cva": t_cva, "manova": t_man, "full_workflow": full}
     print(f"(b) PCA                       {t_pca:7.3f} s")
@@ -301,12 +299,11 @@ def compare_manova_paths(args, mm, MdStatistics, Morphologika):
     pca_result = MdStatistics.do_pca_analysis(lm_data)
 
     paths = {
-        "do_manova_analysis_on_pca (used by ModanController)":
-            lambda: MdStatistics.do_manova_analysis_on_pca(pca_result["scores"], groups),
-        "do_manova_analysis_on_procrustes":
-            lambda: MdStatistics.do_manova_analysis_on_procrustes(flat, groups),
-        "do_manova_analysis (generic)":
-            lambda: MdStatistics.do_manova_analysis(lm_data, groups),
+        "do_manova_analysis_on_pca (used by ModanController)": lambda: MdStatistics.do_manova_analysis_on_pca(
+            pca_result["scores"], groups
+        ),
+        "do_manova_analysis_on_procrustes": lambda: MdStatistics.do_manova_analysis_on_procrustes(flat, groups),
+        "do_manova_analysis (generic)": lambda: MdStatistics.do_manova_analysis(lm_data, groups),
     }
     out = {}
     for label, fn in paths.items():
@@ -350,7 +347,7 @@ def measure_accuracy(args, mm, MdStatistics, Morphologika):
     """
     import numpy as np
 
-    spec = DATASETS[args.dataset] if args.dataset in DATASETS else None
+    spec = DATASETS.get(args.dataset)
     path = Path(args.file) if args.file else DEFAULT_REPO / spec["file"]
     name = spec["name"] if spec else path.stem
 
@@ -365,9 +362,7 @@ def measure_accuracy(args, mm, MdStatistics, Morphologika):
 
     # The floor no mean-shape estimator can beat: how far a specimen's own
     # landmark sits from the corresponding landmark of the mean shape.
-    floor = np.concatenate([
-        np.linalg.norm(cfg - mean_shape, axis=1) / cs * 100 for cfg, cs in zip(reference, ref_cs)
-    ])
+    floor = np.concatenate([np.linalg.norm(cfg - mean_shape, axis=1) / cs * 100 for cfg, cs in zip(reference, ref_cs)])
     print(f"Shape-variation floor: mean {floor.mean():.2f}%, median {np.median(floor):.2f}%\n")
 
     results = {
@@ -386,7 +381,7 @@ def measure_accuracy(args, mm, MdStatistics, Morphologika):
         for pattern in range(args.patterns):
             originals, _ = punch_holes(dataset, frac, seed=args.seed + pattern * 101 + int(frac * 1000))
             removed = {}
-            for obj_id, lm_str in originals.items():
+            for obj_id in originals:
                 obj = mm.MdObject.get_by_id(obj_id)
                 obj.unpack_landmark()
                 removed[obj_id] = [j for j, lm in enumerate(obj.landmark_list) if any(v is None for v in lm)]
@@ -419,8 +414,10 @@ def measure_accuracy(args, mm, MdStatistics, Morphologika):
             "max": float(e.max()),
         }
         results["conditions"][f"{frac * 100:g}%"] = cond
-        print(f"{frac * 100:>7g}% {e.size:>8} {e.mean():>7.2f}% {np.median(e):>7.2f}%"
-              f" {np.percentile(e, 95):>7.2f}% {e.max():>7.2f}%")
+        print(
+            f"{frac * 100:>7g}% {e.size:>8} {e.mean():>7.2f}% {np.median(e):>7.2f}%"
+            f" {np.percentile(e, 95):>7.2f}% {e.max():>7.2f}%"
+        )
 
     return results
 
@@ -476,25 +473,35 @@ def main():
         description="Reproduce the paper's runtime table on a real dataset.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    ap.add_argument("--dataset", default="cranial222", choices=sorted(DATASETS),
-                    help="which shipped dataset to use (default: cranial222)")
+    ap.add_argument(
+        "--dataset",
+        default="cranial222",
+        choices=sorted(DATASETS),
+        help="which shipped dataset to use (default: cranial222)",
+    )
     ap.add_argument("--file", default=None, help="override with an arbitrary Morphologika file")
     ap.add_argument("--group-var", default=None, help="grouping variable for CVA/MANOVA")
     ap.add_argument("--runs", type=int, default=5, help="repetitions per measurement (default: 5)")
     ap.add_argument("--seed", type=int, default=20260813, help="seed for the removal patterns")
-    ap.add_argument("--repo", default=None,
-                    help="run against another Modan2 checkout (e.g. a worktree at an earlier tag)")
+    ap.add_argument(
+        "--repo", default=None, help="run against another Modan2 checkout (e.g. a worktree at an earlier tag)"
+    )
     ap.add_argument("--markdown", action="store_true", help="also print the table in manuscript form")
-    ap.add_argument("--manova-paths", action="store_true",
-                    help="instead, time the three MANOVA entry points and exit")
-    ap.add_argument("--accuracy", action="store_true",
-                    help="instead, measure imputation accuracy against the complete data")
-    ap.add_argument("--patterns", type=int, default=10,
-                    help="removal patterns per condition, accuracy mode (default: 10)")
-    ap.add_argument("--fractions", type=float, nargs="+", default=[0.01, 0.05, 0.10, 0.20],
-                    help="missing fractions for accuracy mode (default: 0.01 0.05 0.10 0.20)")
-    ap.add_argument("--out", default=None,
-                    help="write JSON here (default: benchmarks/paper_tables_<dataset>.json)")
+    ap.add_argument("--manova-paths", action="store_true", help="instead, time the three MANOVA entry points and exit")
+    ap.add_argument(
+        "--accuracy", action="store_true", help="instead, measure imputation accuracy against the complete data"
+    )
+    ap.add_argument(
+        "--patterns", type=int, default=10, help="removal patterns per condition, accuracy mode (default: 10)"
+    )
+    ap.add_argument(
+        "--fractions",
+        type=float,
+        nargs="+",
+        default=[0.01, 0.05, 0.10, 0.20],
+        help="missing fractions for accuracy mode (default: 0.01 0.05 0.10 0.20)",
+    )
+    ap.add_argument("--out", default=None, help="write JSON here (default: benchmarks/paper_tables_<dataset>.json)")
     args = ap.parse_args()
 
     repo = Path(args.repo).resolve() if args.repo else DEFAULT_REPO

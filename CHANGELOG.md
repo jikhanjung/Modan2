@@ -8,6 +8,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+## [Unreleased]
+
+### Fixed
+- **Installing a new version on Windows now actually replaces the old one.**
+  Upgrading appeared to work — the installer ran to the end and reported
+  success — and then Modan2 started up still showing the previous version,
+  because it *was* the previous version. The installer was skipping the program
+  file it had come to replace.
+
+  Every build carried the same internal version number, `0.0.0.0`, and Windows
+  installers use that number to decide whether the copy already on disk needs
+  replacing. Same number meant "already up to date", every time.
+
+  This affected every upgrade, not only the most recent one. If you have been
+  installing new versions and wondering why nothing seemed to change, this is
+  why. Installing the next release will replace what you have regardless of what
+  it says its version is, so there is nothing you need to uninstall first.
+
 ## [0.2.0-beta.3] - 2026-08-12
 
 Beta.2 gathered everything you own into one folder. This one lets you choose

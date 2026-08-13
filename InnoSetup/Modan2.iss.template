@@ -28,11 +28,25 @@ SolidCompression=no
 OutputBaseFilename=Modan2_v{#AppVersion}_build{#BuildNumber}_Installer
 
 [Files]
+; ignoreversion on the whole payload, and it is not optional.
+;
+; Without it Inno decides per file whether the installed copy is already new
+; enough, by comparing the binary version resource. Every CI build stamped
+; 0.0.0.0 (build.py generated that from a template it could never find), so on
+; upgrade Inno saw "not older" and kept the existing Modan2.exe. The installer
+; reported success and the previous build went on launching -- found installing
+; 0.2.0-beta.3 over beta.2, and true of every upgrade before it.
+;
+; build.py now stamps a real, rising version, but this flag stays: the payload
+; is ours, it is replaced wholesale on every install, and there is no case where
+; keeping a file from the previous version is what we want. Relying on the
+; numbers alone would put the same silent failure one mistake away.
+;
 ; Include main executable
-Source: "{{DIST_PATH}}\Modan2\Modan2.exe"; DestDir: "{app}"
+Source: "{{DIST_PATH}}\Modan2\Modan2.exe"; DestDir: "{app}"; Flags: ignoreversion
 
 ; Include all other files and directories
-Source: "{{DIST_PATH}}\Modan2\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs
+Source: "{{DIST_PATH}}\Modan2\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 ; Example datasets
 Source: "{{DIST_PATH}}\ExampleDataset\*"; DestDir: "{%userprofile}\PaleoBytes\Modan2\ExampleDataset"; Flags: recursesubdirs createallsubdirs

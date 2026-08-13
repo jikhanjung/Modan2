@@ -81,9 +81,48 @@ def test_destination_inside_the_source_is_refused(self, library):
 테스트인데, 여기서는 그 점이 정확히 사각지대를 만들었다 — **테스트가 만들 수 있는
 경로의 집합이 사용자가 입력할 수 있는 경로의 집합보다 좁다.**
 
-## 관련해서 남겨 두는 것
+## 같이 고친 것 — 복구가 예외 목록에 매달려 있었다
 
-`_move_library` 는 `mu.DataDirectoryMoveError` 만 잡는다. 그 밖의 예외가 이전
-도중에 나면 `_restore_after_failed_move` 가 실행되지 않아 **데이터베이스가 닫힌 채
-남는다.** 이번 버그는 이전이 시작되기 전에 터졌으므로 그 경로를 타지 않았지만,
-좁은 `except` 절이라는 점은 같다. 별건으로 다룬다.
+`_move_library` 는 `mu.DataDirectoryMoveError` 만 잡았다. 그 밖의 예외가 나면
+`_restore_after_failed_move` 가 실행되지 않아 **데이터베이스가 닫힌 채 남는다.**
+
+**여기서 되돌리는 대상이 데이터가 아니라는 점이 중요하다.** 데이터는
+`move_data_directory` 가 책임지고, 실패하면 애초에 원본이 그대로다 — 되돌릴 것이
+없다. `_restore_after_failed_move` 가 되돌리는 것은 **이전을 시작하려고 이
+대화상자가 건드린 앱 상태 둘** 이다: 닫은 데이터베이스와 떼어낸 로그 파일. 둘 다
+Windows에서 열린 파일을 rename할 수 없어서 미리 놓은 것이다.
+
+그래서 증상이 "데이터가 반쯤 옮겨진다" 가 아니다. 그건 일어날 수 없다. **이전은
+시작도 못 했는데 데이터베이스만 닫힌 채로 남는다.**
+
+그리고 **죽지 않는다는 것이 더 나쁘다.** 호출부 `select_folder` 는 `guard_slot`
+이라 예외를 잡아 로그하고 대화상자를 띄운다. 창은 멀쩡히 살아 있고, 사용자는 이후
+모든 작업이 닫힌 데이터베이스에 대해 실패하는 앱을 쓰게 된다.
+
+고친 방식은 **잡을 예외를 늘리는 것이 아니다.** 복구를 `finally` 로 옮기고 성공만이
+복구를 끄게 했다:
+
+```python
+moved = False
+try:
+    result = mu.move_data_directory(...)
+    moved = not result.cancelled
+except mu.DataDirectoryMoveError as e:
+    failure = str(e)
+finally:
+    progress.close()
+    if not moved:
+        self._restore_after_failed_move(...)
+```
+
+**예외를 열거하는 방식은 이미 한 번 빠뜨렸다.** 한 항목을 더하는 것은 다음 항목을
+빠뜨릴 자리를 그대로 남겨 두는 것이다. 열거 자체를 없애는 편이 낫다.
+
+부수적으로 오류 대화상자가 복구 *뒤* 에 뜨게 됐다. 모달 대화상자가 닫힌
+데이터베이스 앞에 서 있지 않게 된다.
+
+테스트는 옛 코드에서 실제로 실패하는 것을 확인했다:
+
+```
+AssertionError: the database was left closed after an unexpected error
+```

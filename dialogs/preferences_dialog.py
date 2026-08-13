@@ -1053,6 +1053,14 @@ class PreferencesDialog(BaseDialog):
         On any unhappy ending the database is reopened where it was. That is the
         whole recovery: ``move_data_directory`` guarantees the source is intact
         unless the move completed, so there is nothing else to undo.
+
+        Recovery is the default and success is what switches it off, rather than
+        something each failure path remembers to do. Listing the failures had
+        already missed one: only DataDirectoryMoveError was caught, so any other
+        exception left the database closed. It did not crash -- the caller is a
+        guard_slot, which logs it and shows a dialog -- and that is worse, since
+        the window survives with every later operation failing against a closed
+        database. A move is not the place to enumerate what can go wrong.
         """
         import MdModel
 
@@ -1076,17 +1084,23 @@ class PreferencesDialog(BaseDialog):
         if db_in_library:
             MdModel.gDatabase.close()
 
+        moved = False
+        failure = None
         try:
             result = mu.move_data_directory(source, destination, progress=report, should_cancel=progress.wasCanceled)
+            moved = not result.cancelled
         except mu.DataDirectoryMoveError as e:
-            self._restore_after_failed_move(MdModel, db_in_library, detached)
-            QMessageBox.critical(self, self.tr("Could not move the data"), str(e))
-            return False
+            # Reported after the restoration below, so the modal dialog is not
+            # sitting in front of a closed database.
+            failure = str(e)
         finally:
             progress.close()
+            if not moved:
+                self._restore_after_failed_move(MdModel, db_in_library, detached)
 
-        if result.cancelled:
-            self._restore_after_failed_move(MdModel, db_in_library, detached)
+        if failure is not None:
+            QMessageBox.critical(self, self.tr("Could not move the data"), failure)
+        if not moved:
             return False
 
         mu.set_data_directory(destination)

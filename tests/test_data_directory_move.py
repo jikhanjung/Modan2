@@ -437,3 +437,86 @@ class TestRiskyLocations:
         """The check informs the dialog; it must not block the move itself."""
         monkeypatch.setattr(mu, "describe_location_risk", lambda p: "risky")
         assert mu.describe_move_problem(str(library), str(tmp_path / "new")) is None
+
+
+class TestTheDialogSurvivesAFailedMove:
+    """The dialog closes the database before moving; it must reopen it.
+
+    ``move_data_directory`` guarantees the *data* survives, so there is nothing
+    to roll back there. What needs restoring is what the dialog itself changed
+    in order to start: the database is closed because Windows cannot rename an
+    open file, and the log file is detached because it lives in the folder being
+    moved.
+
+    Only ``DataDirectoryMoveError`` used to be caught, so anything else left the
+    database closed. That does not crash -- ``select_folder`` is a ``guard_slot``
+    and reports it -- which is precisely the danger: the window stays up and
+    every later operation fails against a database nobody reopened. Restoration
+    now happens in ``finally``, so it does not depend on predicting the failure.
+    """
+
+    @pytest.fixture
+    def dialog(self, qtbot):
+        from PyQt5.QtWidgets import QWidget
+
+        from dialogs.preferences_dialog import PreferencesDialog
+
+        parent = QWidget()
+        parent.update_settings = lambda *a, **kw: None
+        qtbot.addWidget(parent)
+        dlg = PreferencesDialog(parent)
+        qtbot.addWidget(dlg)
+        return dlg
+
+    def _run_failing_move(self, dialog, monkeypatch, error):
+        """Drive _move_library with a move that fails, and report what was restored."""
+        import MdModel
+
+        calls = {"reopened": False, "log_reattached": False}
+
+        monkeypatch.setattr(MdModel, "database_path", "/somewhere/library/Modan2.db", raising=False)
+        monkeypatch.setattr(MdModel.gDatabase, "close", lambda: None)
+        monkeypatch.setattr(MdModel, "set_database_path", lambda p: calls.__setitem__("reopened", True), raising=False)
+        monkeypatch.setattr(mu, "detach_log_file", lambda: "the-handler")
+        monkeypatch.setattr(mu, "attach_log_file", lambda h: calls.__setitem__("log_reattached", True))
+
+        def explode(*args, **kwargs):
+            raise error
+
+        monkeypatch.setattr(mu, "move_data_directory", explode)
+
+        ok = dialog._move_library("/somewhere/library", "/somewhere/else")
+        return ok, calls
+
+    def test_an_unexpected_error_restores_before_it_propagates(self, dialog, monkeypatch):
+        """The failure nobody listed. This is the regression."""
+        import MdModel
+
+        calls = {"reopened": False, "log_reattached": False}
+        monkeypatch.setattr(MdModel, "database_path", "/somewhere/library/Modan2.db", raising=False)
+        monkeypatch.setattr(MdModel.gDatabase, "close", lambda: None)
+        monkeypatch.setattr(MdModel, "set_database_path", lambda p: calls.__setitem__("reopened", True), raising=False)
+        monkeypatch.setattr(mu, "detach_log_file", lambda: "the-handler")
+        monkeypatch.setattr(mu, "attach_log_file", lambda h: calls.__setitem__("log_reattached", True))
+        monkeypatch.setattr(mu, "move_data_directory", self._exploding(RuntimeError("unpredicted")))
+
+        with pytest.raises(RuntimeError):
+            dialog._move_library("/somewhere/library", "/somewhere/else")
+
+        assert calls["reopened"], "the database was left closed after an unexpected error"
+        assert calls["log_reattached"], "the log file was left detached after an unexpected error"
+
+    def test_a_known_move_error_restores_too(self, dialog, monkeypatch):
+        monkeypatch.setattr("dialogs.preferences_dialog.QMessageBox.critical", staticmethod(lambda *a, **kw: None))
+        ok, calls = self._run_failing_move(dialog, monkeypatch, mu.DataDirectoryMoveError("no room"))
+
+        assert ok is False
+        assert calls["reopened"]
+        assert calls["log_reattached"]
+
+    @staticmethod
+    def _exploding(error):
+        def explode(*args, **kwargs):
+            raise error
+
+        return explode

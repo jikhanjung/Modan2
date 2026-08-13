@@ -220,7 +220,12 @@ class TestMdCanonicalVariate:
 
         # With Z included the groups separate perfectly; with landmark[:2] every
         # feature is constant and the groups are indistinguishable.
-        assert result["accuracy"] >= 99.0
+        #
+        # Asserted on the cross-validated score rather than the resubstitution
+        # one: this separation is real (the groups are ten units apart in Z), so
+        # it survives holding a specimen out. An overfitted model would pass on
+        # the resubstitution number no matter what the Z axis did.
+        assert result["cross_validated_accuracy"] >= 99.0
 
     def test_cva_drops_zero_variance_column(self):
         """A constant (zero-variance) variable is excluded from the covariance,
@@ -623,7 +628,12 @@ class TestCVAAnalysis:
         assert "eigenvalues" in result
         assert "group_centroids" in result
         assert "classification" in result
-        assert "accuracy" in result
+        # Not "accuracy". The name was removed rather than redefined, so that a
+        # caller written against the old resubstitution number fails loudly
+        # instead of quietly reading a differently-defined one.
+        assert "accuracy" not in result
+        assert "resubstitution_accuracy" in result
+        assert "cross_validated_accuracy" in result
         assert len(result["canonical_variables"]) == 6
 
     def test_do_cva_analysis_three_groups(self):
@@ -918,3 +928,107 @@ class TestDoManovaAnalysis:
         groups = ["A", "B"]  # More groups than landmarks
         with pytest.raises(Exception):
             ms.do_manova_analysis(landmarks, groups)
+
+
+class TestCVADimensionality:
+    """CVA must not report a perfect score for data that has nothing in it.
+
+    With more variables than the within-group scatter matrix has degrees of
+    freedom (roughly n - g), a linear discriminant separates *any* partition
+    perfectly. Scoring that model on its own training data then returns 100%,
+    and 100% is what a user reads as "these groups are perfectly distinct".
+
+    The tests below use data with **no group structure at all** -- random
+    numbers with labels dealt out arbitrarily. That is the point: on real data
+    an honest accuracy can only be asserted to be "lower", but on noise the true
+    answer is known, so the assertion can be sharp.
+    """
+
+    @staticmethod
+    def _noise(n_specimens, n_landmarks, n_groups, dim=3, seed=0):
+        rng = np.random.default_rng(seed)
+        landmarks_data = [[list(coords) for coords in rng.normal(size=(n_landmarks, dim))] for _ in range(n_specimens)]
+        groups = [f"G{i % n_groups}" for i in range(n_specimens)]
+        return landmarks_data, groups
+
+    def test_noise_no_longer_classifies_perfectly(self):
+        """The regression. 60 specimens, 120 variables, 4 groups, no signal."""
+        landmarks_data, groups = self._noise(60, 40, 4)
+
+        result = ms.do_cva_analysis(landmarks_data, groups)
+
+        chance = result["chance_accuracy"]
+        assert result["cross_validated_accuracy"] < 3 * chance, (
+            f"cross-validated accuracy {result['cross_validated_accuracy']:.1f}% on data with no "
+            f"group structure (chance {chance:.1f}%)"
+        )
+
+    def test_resubstitution_still_reports_the_flattering_number(self):
+        """Kept, and named, rather than dropped: it is what older results were."""
+        landmarks_data, groups = self._noise(60, 40, 4)
+
+        result = ms.do_cva_analysis(landmarks_data, groups)
+
+        assert result["resubstitution_accuracy"] > result["cross_validated_accuracy"]
+
+    def test_wide_data_is_reduced(self):
+        landmarks_data, groups = self._noise(60, 40, 4)
+
+        result = ms.do_cva_analysis(landmarks_data, groups)
+
+        assert result["reduced"] is True
+        assert result["n_variables_total"] == 120
+        assert result["n_variables_used"] <= 60 - 4 - 1
+
+    def test_well_conditioned_data_is_left_alone(self):
+        """Small, sane datasets keep behaving exactly as they did."""
+        landmarks_data, groups = self._noise(40, 2, 2, dim=2)
+
+        result = ms.do_cva_analysis(landmarks_data, groups)
+
+        assert result["reduced"] is False
+        assert result["n_variables_used"] == result["n_variables_total"] == 4
+
+    def test_a_group_of_one_does_not_stop_the_analysis(self):
+        """Leave-one-out has no minimum group size; stratified folds do."""
+        landmarks_data, groups = self._noise(21, 10, 3)
+        groups = ["only-me"] + groups[1:]
+
+        result = ms.do_cva_analysis(landmarks_data, groups)
+
+        assert result["cross_validated_accuracy"] is not None
+        assert result["accuracy_method"] == "leave-one-out"
+
+    def test_the_same_data_gives_the_same_accuracy_twice(self):
+        """No fold shuffling: a number quoted in a paper must be reproducible."""
+        landmarks_data, groups = self._noise(30, 20, 3)
+
+        first = ms.do_cva_analysis(landmarks_data, groups)
+        second = ms.do_cva_analysis(landmarks_data, groups)
+
+        assert first["cross_validated_accuracy"] == second["cross_validated_accuracy"]
+
+    def test_cva_and_manova_agree_on_how_many_variables_to_use(self):
+        """The inconsistency that made the two analyses incomparable."""
+        n_samples, n_groups = 60, 4
+        variances = np.linspace(10.0, 0.01, 120)
+
+        k = ms.effective_component_count(variances, n_samples, n_groups, n_features=120)
+
+        assert k == min(
+            int(np.searchsorted(np.cumsum(variances) / variances.sum(), 0.95) + 1),
+            ms.MANOVA_MAX_VARIABLES,
+            n_samples - n_groups - 1,
+        )
+
+    def test_no_reduction_when_the_data_is_already_narrow(self):
+        assert ms.effective_component_count([5.0, 1.0], n_samples=40, n_groups=2, n_features=2) is None
+
+    def test_the_degrees_of_freedom_bound_wins_when_it_has_to(self):
+        """95% of variance is not a safety condition; n - g - 1 is."""
+        # 14 specimens, 381 variables: every component is needed for 95%.
+        variances = np.ones(13)
+
+        k = ms.effective_component_count(variances, n_samples=14, n_groups=2, n_features=381)
+
+        assert k == 14 - 2 - 1

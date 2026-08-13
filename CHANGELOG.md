@@ -10,6 +10,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **CVA now reports a classification accuracy you can believe, and it will be
+  lower than the one you saw before.** This is the fix, not a regression.
+
+  Two things were wrong. The analysis used every landmark coordinate as a
+  separate variable, and once those outnumber your specimens a discriminant
+  analysis can separate *any* grouping perfectly — whether or not the groups
+  really differ. On top of that, the accuracy was measured on the very
+  specimens the model was built from, which is a test an overfitted model
+  cannot fail. Together they produced 100% on data with nothing in it: a
+  222-specimen dataset of pure random numbers, split into 11 arbitrary groups,
+  classified without a single error.
+
+  CVA now reduces the coordinates to as many dimensions as the data can support
+  before discriminating — the same rule MANOVA already used, so the two
+  analyses in one run finally describe the same data — and measures accuracy by
+  setting each specimen aside in turn and classifying it with a model that has
+  not seen it. The old figure is still reported next to the new one, named
+  **resubstitution accuracy**, along with how often you would be right by always
+  guessing the largest group. An accuracy of 25% means nothing until you know
+  whether guessing scores 10% or 50%.
+
+  Canonical variate scores change as a result, so re-running an analysis will
+  not reproduce numbers saved by an earlier version.
+
 ### Fixed
 - **Moving your library to another drive works on Windows.** Choosing a folder
   on a different drive — `D:\Modan2` when your library was on `C:` — failed with

@@ -352,7 +352,14 @@ class TestAnalysisOperations:
             "canonical_variables": [[1, 2], [3, 4]],
             "eigenvalues": [0.8, 0.2],
             "group_centroids": [[0, 0], [1, 1]],
-            "accuracy": 85.0,
+            "classification": ["A", "B"],
+            "resubstitution_accuracy": 85.0,
+            "cross_validated_accuracy": 60.0,
+            "accuracy_method": "leave-one-out",
+            "chance_accuracy": 50.0,
+            "n_variables_total": 10,
+            "n_variables_used": 4,
+            "reduced": True,
         }
 
         result = controller_with_data.run_analysis("CVA", {"name": "Test_CVA", "groups": [0, 0, 1, 1, 1]})

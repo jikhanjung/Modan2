@@ -1253,7 +1253,17 @@ class ModanController(QObject):
                 "eigenvalues": cva_result.get("eigenvalues", []),
                 "group_centroids": cva_result.get("group_centroids", []),
                 "classification": cva_result.get("classification", []),
-                "accuracy": cva_result.get("accuracy", 0.0),
+                # Indexed, not .get(..., 0.0). The old key was "accuracy", and a
+                # default would have let its disappearance pass as a real score
+                # of zero -- the silent kind of wrong this change exists to
+                # remove. Anything reading these must say which one it means.
+                "resubstitution_accuracy": cva_result["resubstitution_accuracy"],
+                "cross_validated_accuracy": cva_result["cross_validated_accuracy"],
+                "accuracy_method": cva_result["accuracy_method"],
+                "chance_accuracy": cva_result["chance_accuracy"],
+                "n_variables_total": cva_result["n_variables_total"],
+                "n_variables_used": cva_result["n_variables_used"],
+                "reduced": cva_result["reduced"],
             }
 
         except Exception as e:

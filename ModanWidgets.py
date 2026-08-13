@@ -867,11 +867,23 @@ class AnalysisResultWidget(QWidget):
         return summary
 
     def _get_cva_summary(self) -> str:
-        """Get CVA-specific summary."""
-        results = self.analysis.results or {}
-        accuracy = results.get("accuracy", 0.0)
+        """Get CVA-specific summary.
 
-        return f"<ul>\\n<li><b>Classification accuracy:</b> {accuracy:.1f}%</li>\\n</ul>\\n"
+        The accuracy is shown with the method that produced it and with the
+        chance rate beside it. A bare "Classification accuracy: 100%" is how the
+        overfitting in devlog P04 presented itself to the reader, and 25% cannot
+        be judged without knowing whether guessing scores 10% or 50%.
+        """
+        results = self.analysis.results or {}
+        accuracy = results.get("cross_validated_accuracy")
+        method = results.get("accuracy_method", "unknown method")
+
+        if accuracy is None:
+            return "<ul>\\n<li><b>Classification accuracy:</b> not available</li>\\n</ul>\\n"
+
+        chance = results.get("chance_accuracy")
+        baseline = f" (chance {chance:.1f}%)" if chance is not None else ""
+        return f"<ul>\\n<li><b>Classification accuracy ({method}):</b> {accuracy:.1f}%{baseline}</li>\\n</ul>\\n"
 
     def _get_manova_summary(self) -> str:
         """Get MANOVA-specific summary."""

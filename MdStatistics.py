@@ -14,6 +14,14 @@ logger = logging.getLogger(__name__)
 # surface it rather than silently presenting a partial result.
 MANOVA_MAX_VARIABLES = 20
 
+# When leave-one-out cross-validation stops being worth the wait, measured
+# rather than guessed (devlog P04). It costs one model fit per specimen, and a
+# fit grows with the variables too, so a specimen count alone is the wrong
+# budget: 222 specimens x 216 variables takes ~4s, but 500 x 1000 takes ~4
+# minutes and 1000 x 2000 takes ~17. Four times the specimens, 240 times the
+# wait. Beyond this budget the estimate falls back to stratified folds.
+CVA_LOOCV_MAX_WORK = 200_000  # n_samples * n_features
+
 
 class MdPrincipalComponent:
     """Legacy Principal Component Analysis class.
@@ -410,6 +418,51 @@ def do_pca_analysis(landmarks_data, n_components=None):
         raise ValueError(f"PCA analysis failed: {str(e)}") from e
 
 
+def effective_component_count(
+    explained_variance,
+    n_samples,
+    n_groups,
+    n_features,
+    max_variables=MANOVA_MAX_VARIABLES,
+    variance_target=0.95,
+):
+    """How many principal components a discriminant analysis may safely use.
+
+    Returns ``None`` when the data is already well conditioned and should be used
+    as it is.
+
+    The binding term is ``n_samples - n_groups - 1``. A linear discriminant needs
+    the within-group scatter matrix to be non-singular, and its degrees of
+    freedom are roughly ``n - g``; once the variables outnumber that, the
+    discriminant separates *any* partition of the data perfectly, whether or not
+    the groups differ. That is not a numerical nuisance, it is a 100% accuracy
+    that means nothing -- see devlog P04, where 222 specimens of pure noise in
+    216 variables classified into 11 groups without a single error.
+
+    The 95% variance rule alone does not prevent it: on a dataset with few
+    specimens and many landmarks, the components needed to reach 95% can already
+    outnumber the specimens.
+
+    Shared so that MANOVA and CVA answer this question the same way. They did
+    not: MANOVA reduced and CVA did not, so one analysis run had MANOVA looking
+    at 13 dimensions and CVA at 216, and no reason to believe the two were
+    describing the same data.
+    """
+    if n_features <= n_samples - n_groups:
+        return None
+
+    explained_variance = numpy.asarray(explained_variance, dtype=float)
+    total = float(explained_variance.sum())
+    if total <= 0:
+        k_variance = 1
+    else:
+        cumulative = numpy.cumsum(explained_variance) / total
+        k_variance = int(numpy.searchsorted(cumulative, variance_target) + 1)
+        k_variance = min(k_variance, len(explained_variance))
+
+    return max(1, min(k_variance, max_variables, n_samples - n_groups - 1))
+
+
 def do_cva_analysis(landmarks_data, groups):
     """Perform CVA (Canonical Variate Analysis) on landmark data.
 
@@ -419,11 +472,29 @@ def do_cva_analysis(landmarks_data, groups):
 
     Returns:
         Dictionary with CVA results
+
+    Two things here are easy to get subtly wrong, and both were wrong before.
+
+    **The dimension reduction is part of the estimator, not a step before it.**
+    Reducing first and cross-validating the reduced scores lets every test fold
+    take part in computing its own principal components. On data with no group
+    structure at all that leak reports 12.6% where the truth is 9.1%; refitting
+    the PCA inside each fold gives 10.4%, and leave-one-out 9.5%. Far better
+    than 100%, but the point of this analysis is to survive a reader who is
+    looking for exactly this.
+
+    **Accuracy is cross-validated, and says so.** Scoring the model on the data
+    it was trained on (resubstitution) returns ~100% for an overfitted model by
+    definition. Both numbers are reported, under names that state which is
+    which, alongside the majority-class rate -- 25% means nothing until you know
+    whether chance is 10% or 50%.
     """
     try:
         import numpy as np
+        from sklearn.decomposition import PCA
         from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
         from sklearn.metrics import accuracy_score
+        from sklearn.pipeline import make_pipeline
 
         # Flatten landmark data. Use all coordinates (X, Y, Z) — slicing to
         # landmark[:2] silently dropped the Z axis for 3D datasets, inconsistent
@@ -438,21 +509,45 @@ def do_cva_analysis(landmarks_data, groups):
         data_matrix = np.array(flattened_data)
         group_array = np.array(groups)
 
-        # Perform LDA (equivalent to CVA) without standardization
-        lda = LinearDiscriminantAnalysis()
-        cv_scores = lda.fit_transform(data_matrix, group_array)
+        n_samples, n_features = data_matrix.shape
+        unique_groups, group_counts = np.unique(group_array, return_counts=True)
+        n_groups = len(unique_groups)
+
+        # The component count is chosen from a PCA of the whole dataset. That is
+        # a mild dependence on the test folds, kept deliberately: the choice uses
+        # no group labels, so it cannot manufacture discrimination, and the
+        # alternative (choosing k inside every fold) makes the reported
+        # dimensionality vary from fold to fold with nothing to report to the
+        # user. The *fitting* is what happens inside the folds.
+        n_components = None
+        if n_features > n_samples - n_groups:
+            n_components = effective_component_count(
+                PCA().fit(data_matrix).explained_variance_, n_samples, n_groups, n_features
+            )
+
+        if n_components is None:
+            estimator = LinearDiscriminantAnalysis()
+        else:
+            estimator = make_pipeline(PCA(n_components=n_components), LinearDiscriminantAnalysis())
+
+        # Fitted on everything: these are the coordinates that get drawn, and a
+        # plot of the data should show the model of the data.
+        cv_scores = estimator.fit_transform(data_matrix, group_array)
+        lda = estimator[-1] if hasattr(estimator, "steps") else estimator
 
         # Pad CVA scores to at least 3 dimensions for UI compatibility
         if cv_scores.shape[1] < 3:
             padding_width = 3 - cv_scores.shape[1]
             cv_scores = np.pad(cv_scores, ((0, 0), (0, padding_width)), mode="constant", constant_values=0)
 
-        # Predict classifications
-        predictions = lda.predict(data_matrix)
-        accuracy = accuracy_score(group_array, predictions) * 100
+        predictions = estimator.predict(data_matrix)
+        resubstitution_accuracy = accuracy_score(group_array, predictions) * 100
+
+        cross_validated_accuracy, accuracy_method = _cross_validated_accuracy(
+            estimator, data_matrix, group_array, n_groups, int(group_counts.min())
+        )
 
         # Calculate group centroids
-        unique_groups = np.unique(group_array)
         centroids = []
         for group in unique_groups:
             group_mask = group_array == group
@@ -464,13 +559,58 @@ def do_cva_analysis(landmarks_data, groups):
             "eigenvalues": lda.explained_variance_ratio_.tolist(),
             "group_centroids": centroids,
             "classification": predictions.tolist(),
-            "accuracy": accuracy,
+            "resubstitution_accuracy": resubstitution_accuracy,
+            "cross_validated_accuracy": cross_validated_accuracy,
+            "accuracy_method": accuracy_method,
+            # Always guessing the largest group is the score to beat.
+            "chance_accuracy": float(group_counts.max()) / n_samples * 100,
+            "n_variables_total": n_features,
+            "n_variables_used": n_features if n_components is None else n_components,
+            "reduced": n_components is not None,
             "groups": unique_groups.tolist(),
             "n_components": cv_scores.shape[1],
         }
 
     except Exception as e:
         raise ValueError(f"CVA analysis failed: {str(e)}") from e
+
+
+def _cross_validated_accuracy(estimator, data_matrix, group_array, n_groups, smallest_group):
+    """Honest classification accuracy, and the name of how it was obtained.
+
+    Leave-one-out by default. Stratified folds cannot be the default here
+    because the number of folds is capped by the smallest group, which in real
+    morphometric data is routinely 2 -- and a group of 1 rules them out
+    altogether. Leave-one-out has no such condition: the lone specimen of a
+    group is simply classified wrongly, which is the honest answer rather than a
+    reason to report nothing. It is also deterministic, which matters when the
+    number is going into a paper.
+
+    Only its cost argues against it, so that is what decides: past
+    CVA_LOOCV_MAX_WORK, stratified folds take over, with shuffle left off so
+    they stay deterministic too. Which one ran is reported to the caller, since
+    an accuracy without its method is not interpretable.
+    """
+    from sklearn.model_selection import LeaveOneOut, StratifiedKFold, cross_val_score
+
+    n_samples, n_features = data_matrix.shape
+    if n_samples * n_features > CVA_LOOCV_MAX_WORK and smallest_group >= 2:
+        n_splits = min(5, smallest_group)
+        cv, method = StratifiedKFold(n_splits=n_splits), f"stratified {n_splits}-fold"
+    else:
+        cv, method = LeaveOneOut(), "leave-one-out"
+
+    try:
+        scores = cross_val_score(estimator, data_matrix, group_array, cv=cv)
+    except ValueError as e:
+        # Reached only by data too small to hold anything out of: two specimens
+        # in two groups leaves a training set with a single class. Reported as
+        # absent rather than as a number, because a number here would be read as
+        # a measurement.
+        logger.warning("Cross-validated CVA accuracy unavailable (%s specimens, %s groups): %s", n_samples, n_groups, e)
+        return None, "unavailable"
+
+    return float(scores.mean()) * 100, method
 
 
 def do_manova_analysis_on_procrustes(flattened_landmarks, groups):

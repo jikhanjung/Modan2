@@ -676,6 +676,45 @@ class TestCVAAnalysis:
         with pytest.raises(ValueError, match="CVA analysis failed"):
             ms.do_cva_analysis([], [])
 
+    def test_arpack_matches_the_default_solver(self):
+        """The ARPACK solver is an optimisation, so it must not move the answer.
+
+        It is used because the reducing pipeline is refitted once per specimen
+        during cross-validation, and computing every component in order to keep
+        a dozen dominates that cost. Being exact rather than approximate is the
+        reason it was chosen over the randomized solver, so a divergence here
+        means the optimisation has turned into a change in results.
+        """
+        import numpy as np
+        from sklearn.decomposition import PCA
+        from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+        from sklearn.model_selection import LeaveOneOut, cross_val_score
+        from sklearn.pipeline import make_pipeline
+
+        rng = np.random.default_rng(0)
+        # More variables than the within-group degrees of freedom, which is the
+        # regime that triggers reduction in the first place.
+        landmarks_data, groups = [], []
+        for label, offset in (("A", 0.0), ("B", 0.6), ("C", 1.2)):
+            for _ in range(12):
+                landmarks_data.append(rng.normal(offset, 1.0, (20, 3)).tolist())
+                groups.append(label)
+
+        result = ms.do_cva_analysis(landmarks_data, groups)
+        assert result["reduced"], "expected this configuration to be reduced"
+
+        data = np.array([[c for point in specimen for c in point] for specimen in landmarks_data])
+        scores = {}
+        for solver in ("arpack", "full"):
+            estimator = make_pipeline(
+                PCA(n_components=result["n_variables_used"], svd_solver=solver),
+                LinearDiscriminantAnalysis(),
+            )
+            scores[solver] = cross_val_score(estimator, data, np.array(groups), cv=LeaveOneOut()).mean()
+
+        assert scores["arpack"] == pytest.approx(scores["full"], abs=1e-12)
+        assert result["cross_validated_accuracy"] == pytest.approx(scores["full"] * 100, abs=1e-9)
+
 
 class TestMANOVAOnProcrustes:
     """Test do_manova_analysis_on_procrustes function."""

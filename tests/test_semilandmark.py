@@ -578,6 +578,17 @@ class TestObjectDialogFinishCurve:
         dlg.finish_curve([[0, 0]])
         assert dlg.curve_raw_map == {}
 
+    def test_new_curve_keeps_existing_names(self, qtbot):
+        """Adding a curve rebuilds the scheme; the existing curves' names and
+        descriptions must survive it (they were once rebuilt from counts only)."""
+        named = [dict(SCHEME[0], name="margin", desc="outer edge")]
+        dlg = self._dlg(qtbot, named)
+        dlg.finish_curve([[0, 0], [1, 0]])
+        with patch("dialogs.object_dialog.QInputDialog.getInt", return_value=(6, True)):
+            dlg.finish_curve([[2, 2], [3, 3]])
+        assert dlg.curve_config[0]["name"] == "margin"
+        assert dlg.curve_config[0]["desc"] == "outer edge"
+
 
 class TestObjectDialogCurveTable:
     def _dlg(self, qtbot, scheme):

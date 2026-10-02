@@ -1254,13 +1254,15 @@ class ObjectDialog(QDialog):
         if target is None:
             # A brand-new curve: ask how many semi-landmarks it carries (this
             # count is dataset-wide and can be changed later in the curve table).
+            # The existing curves are rebuilt from their full entries, not just
+            # their counts, so their names and descriptions survive the new one.
             if config:
                 fixed_count = config[0].get("start", len(self.landmark_list))
-                counts = [c.get("n", 0) for c in config]
-                default_n = counts[-1] if counts else 10
+                entries = [{"n": c.get("n", 0), "name": c.get("name", ""), "desc": c.get("desc", "")} for c in config]
+                default_n = entries[-1]["n"] if entries else 10
             else:
                 fixed_count = len(self.landmark_list)
-                counts = []
+                entries = []
                 default_n = 10
             n, ok = QInputDialog.getInt(
                 self,
@@ -1272,8 +1274,8 @@ class ObjectDialog(QDialog):
             )
             if not ok:
                 return
-            counts.append(n)
-            self.curve_config = mu.build_curve_config(fixed_count, counts)
+            entries.append(n)
+            self.curve_config = mu.build_curve_config(fixed_count, entries)
             target = self.curve_config[-1]
         self.curve_raw_map[target["id"]] = [list(p) for p in raw_points]
         if anchors and len(anchors) >= 2:

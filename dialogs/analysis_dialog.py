@@ -80,9 +80,12 @@ class NewAnalysisDialog(BaseDialog):
         # it; until then the option would only produce answers no one should
         # trust.
         self.lblSuperimposition = QLabel(self.tr("Superimposition method"), self)
+        # The item data is the untranslated method name the controller matches;
+        # the text is translated (in Korean, "Bookstein" reads "북스틴", which
+        # the controller does not know and would quietly run as Procrustes).
         self.comboSuperimposition = QComboBox(self)
-        self.comboSuperimposition.addItem(self.tr("Procrustes"))
-        self.comboSuperimposition.addItem(self.tr("Bookstein"))
+        self.comboSuperimposition.addItem(self.tr("Procrustes"), "Procrustes")
+        self.comboSuperimposition.addItem(self.tr("Bookstein"), "Bookstein")
 
         # CVA grouping variable
         self.lblCvaGroupBy = QLabel(self.tr("CVA grouping variable"), self)
@@ -200,7 +203,7 @@ class NewAnalysisDialog(BaseDialog):
 
         # Store parameters for later use
         self.analysis_name = self.edtAnalysisName.text()
-        self.superimposition_method = self.comboSuperimposition.currentText()
+        self.superimposition_method = self.comboSuperimposition.currentData() or self.comboSuperimposition.currentText()
         self.cva_group_by = self.comboCvaGroupBy.currentData()
         self.manova_group_by = self.comboManovaGroupBy.currentData()
 

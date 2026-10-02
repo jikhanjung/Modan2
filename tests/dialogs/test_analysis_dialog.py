@@ -561,3 +561,19 @@ class TestNewAnalysisDialogIntegration:
 
         # Controls should be re-enabled
         assert dialog.edtAnalysisName.isEnabled()
+
+
+class TestSuperimpositionMethodName:
+    """The controller is given the untranslated method name, whatever the UI
+    language shows."""
+
+    def test_translated_label_still_runs_bookstein(self, dialog, mock_parent):
+        index = dialog.comboSuperimposition.findData("Bookstein")
+        dialog.comboSuperimposition.setItemText(index, "북스틴")  # as the Korean UI shows it
+        dialog.comboSuperimposition.setCurrentIndex(index)
+        dialog.btnOK_clicked()
+        assert mock_parent.controller.run_analysis.call_args.kwargs["superimposition_method"] == "Bookstein"
+
+    def test_default_is_procrustes(self, dialog, mock_parent):
+        dialog.btnOK_clicked()
+        assert mock_parent.controller.run_analysis.call_args.kwargs["superimposition_method"] == "Procrustes"

@@ -9,7 +9,7 @@
 # Core Testing Framework
 pytest>=9.1.1,<10.0              # Core testing framework
 pytest-cov>=7.1.0,<8.0          # Code coverage measurement
-pytest-mock>=3.14.0,<4.0        # Enhanced mocking capabilities
+pytest-mock>=3.16.0,<4.0        # Enhanced mocking capabilities
 pytest-qt>=4.5.0,<5.0           # PyQt5 UI testing support
 pytest-timeout>=2.4.0,<3.0      # Test timeout management
 
@@ -20,11 +20,11 @@ pytest-xvfb>=3.0.0,<4.0         # Headless GUI testing for Linux CI/CD
 psutil>=7.2.2,<8.0              # System and process utilities for memory testing
 
 # Coverage Reporting
-coverage[toml]>=7.15.4,<8.0     # Coverage with TOML config support
+coverage[toml]>=7.16.2,<8.0     # Coverage with TOML config support
 
 # Code Quality Tools (optional - uncomment to use)
 # ruff>=0.1.0,<1.0              # Fast Python linter (recommended)
 # mypy>=1.0.0,<2.0              # Static type checker
 # black>=23.0.0,<24.0           # Code formatter
 # isort>=5.12.0,<6.0            # Import sorting
-hypothesis>=6.165.2,<7.0            # Property-based / fuzz testing
+hypothesis>=6.168.3,<7.0            # Property-based / fuzz testing

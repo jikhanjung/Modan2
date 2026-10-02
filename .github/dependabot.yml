@@ -6,10 +6,13 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
-    reviewers:
-      - "@jikhanjung"
+    # A bare login, no "@": with the "@" Dependabot could not resolve the user
+    # and left an "Assignees could not be added" comment on every PR it opened
+    # (#37 through #61), none of which was ever assigned. `reviewers` is gone
+    # too: GitHub retired that option in favour of CODEOWNERS, and it never
+    # took effect here either.
     assignees:
-      - "@jikhanjung"
+      - "jikhanjung"
     commit-message:
       prefix: "deps"
       include: "scope"

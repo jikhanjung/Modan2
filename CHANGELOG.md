@@ -8,6 +8,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+## [Unreleased]
+
+### Added
+- **Outline analysis (elliptic Fourier).** A 2D dataset can now be analysed by
+  the shape of a closed outline instead of by landmarks. Mark a curve as
+  **Closed** in the curve table, trace it on every specimen starting from the
+  same landmark-like point, and choose **Elliptic Fourier (outline)** in the
+  analysis dialog. The number of harmonics is chosen for you — the fewest that
+  keep 99% of every outline's harmonic power — or can be set by hand. PCA, CVA
+  and MANOVA run on the normalised coefficients, and Data Exploration draws the
+  shapes as outlines. Outlines are always read clockwise, so the direction you
+  trace in does not matter; the starting point is kept, so where you start does.
+
+### Fixed
+- Data Exploration now offers every principal component of an analysis that
+  includes semi-landmark curves; the axis lists stopped at the count of fixed
+  landmarks.
+
 ## [0.2.0] - 2026-10-08
 
 The first stable release of the 0.2 series, after seven pre-releases. Over

@@ -426,9 +426,16 @@ available in Curve mode.)
   as you drag
 
 **The curve table** (in the Object Dialog) lists each curve with **Name**, **N**
-(point count), and **Traced** (✓). Editing **N** re-resamples the curve.
-Right-click a row → **"Delete Curve (all specimens)"** removes that curve from the
-whole dataset.
+(point count), **Traced** (✓), and **Closed**. Editing **N** re-resamples the
+curve. Right-click a row → **"Delete Curve (all specimens)"** removes that curve
+from the whole dataset.
+
+**Closed curves (outlines)** — tick **Closed** for a curve that goes all the way
+round, such as the outline of a shell or a leaf. Its end is joined back to its
+start, its first point is drawn as a small square, and its semi-landmarks are
+spread round the loop. Closed is dataset-wide, like **N**, and can also be set on
+the **Curves** tab of the dataset dialog. A closed curve is what
+:ref:`outline analysis <analysis-efa>` takes.
 
 Curves are held in memory while you work and written to the database on **Save**.
 
@@ -513,7 +520,9 @@ dataset and can be re-opened later.
 3. In the analysis dialog, set:
 
    - **Analysis name** (a unique name is suggested)
-   - **Superimposition method**: Procrustes or Bookstein
+   - **Superimposition method**: Procrustes, Bookstein, or — for a 2D dataset
+     with a closed curve — **Elliptic Fourier (outline)**
+     (see :ref:`analysis-efa`)
    - **CVA grouping variable**: the categorical variable that defines groups for CVA
    - **MANOVA grouping variable**: the categorical variable for MANOVA
 
@@ -565,6 +574,66 @@ withdrawn; see the note under :doc:`advanced_features`.
 - Automatically as the first step of every analysis run, using the method
   chosen in the analysis dialog
 - The aligned shapes feed PCA, CVA, and MANOVA
+
+.. _analysis-efa:
+
+Outline Analysis (Elliptic Fourier)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Elliptic Fourier analysis (EFA) describes a closed outline as a sum of
+*harmonics* — ellipses of increasing frequency, four coefficients each
+(Kuhl & Giardina 1982). It suits forms whose shape lies in the whole outline
+rather than in a few homologous points. Outline analysis is a **2D** feature.
+
+**Tracing outlines for EFA**:
+
+1. Define the outline as a curve and tick **Closed** (see
+   :ref:`semi-landmark-curves`).
+2. **Start every outline at the same landmark-like point** — an apex, a beak, the
+   end of a hinge line: a point you could place as a landmark on every specimen.
+   Modan2 keeps the first traced point as the outline's starting point and does
+   *not* move it, so it must correspond across specimens. A start placed at an
+   arbitrary point adds variation that is not shape.
+3. Trace round the outline in either direction and finish near the start. Modan2
+   always analyzes outlines **clockwise** (as seen on screen): a trace drawn
+   anticlockwise is reversed about its first point before analysis, so the
+   direction you traced in does not matter.
+
+**Running it**: in the analysis dialog choose **Elliptic Fourier (outline)**,
+pick the **Outline** (closed curve) and the number of **Harmonics**.
+
+- **Harmonics — Auto (99% power)**, the default, uses the fewest harmonics that
+  keep at least 99% of the harmonic power of *every* outline in the dataset. The
+  count is limited by the most coarsely traced outline (half its point count)
+  and by 50.
+- Or set a fixed number of harmonics.
+
+Every specimen must have the outline traced; the analysis names any that do not.
+Fixed landmarks and other curves are not used by an outline analysis.
+
+**Normalization** — what an outline analysis removes before comparing shapes:
+
+- **Position**: the outline's centre is dropped.
+- **Size**: each outline is divided by the semi-major axis of its first-harmonic
+  ellipse. That axis length (calibrated if the specimen has a scale) is what the
+  analysis reports as the specimen's size, in place of centroid size.
+- **Rotation**: each outline is turned so its first-harmonic ellipse's major
+  axis lies along x. Of the axis's two ends, the one nearer the starting point
+  is used.
+- **Starting point**: *not* normalized — it is your homologous start (step 2).
+
+.. note::
+
+   When the first-harmonic ellipse is nearly a circle, its major axis is poorly
+   defined and the rotation can differ between similar specimens. The same is
+   true when the starting point lies close to the ends of the ellipse's *minor*
+   axis, where "the nearer end" can switch between the two. Starting outlines at
+   a point near one end of the long axis of the form avoids both.
+
+**Results**: PCA, CVA and MANOVA run on the normalized coefficients, and are
+shown in the Data Exploration dialog like any other analysis; shapes there
+(including the shape grid and reconstructions along a PC) are drawn as outlines.
+The coefficients are stored with the analysis.
 
 .. _analysis-pca:
 

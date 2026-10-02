@@ -75,37 +75,37 @@
 <context>
     <name>DataExplorationDialog</name>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="136"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="137"/>
         <source>Modan2 - Data Exploration</source>
         <translation>모단2 - 데이터 탐색</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="211"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="212"/>
         <source>Analysis name</source>
         <translation>분석 제목</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="215"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="216"/>
         <source>Superimposition method</source>
         <translation>중첩정렬방식</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="219"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="220"/>
         <source>Ordination method</source>
         <translation>분석 방식</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="223"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="224"/>
         <source>Shape view</source>
         <translation>형태 보기</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="287"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="288"/>
         <source>Grouping variable</source>
         <translation>그룹 변수</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="292"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="293"/>
         <source>Chart dimension:</source>
         <translation>차원</translation>
     </message>
@@ -115,194 +115,194 @@
         <translation type="obsolete">범례 보기</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="395"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="396"/>
         <source>Overlay settings</source>
         <translation>오버레이 세팅</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="399"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="400"/>
         <source>Depth shade</source>
         <translation>Depth shade</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="404"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="405"/>
         <source>Group average</source>
         <translation>그룹 평균</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="408"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="409"/>
         <source>Convex hull</source>
         <translation>컨벡스 헐</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="412"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="413"/>
         <source>Confidence ellipse</source>
         <translation>신뢰 타원</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="416"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="417"/>
         <source>Shape grid</source>
         <translation>형태 격자</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="427"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="428"/>
         <source>Show arrow</source>
         <translation>화살표 보이기</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="430"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="431"/>
         <source>Arrow color</source>
         <translation>화살표 색</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="452"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="453"/>
         <source>Group by</source>
         <translation>그룹 변수</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="470"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="471"/>
         <source>Degree</source>
         <translation>회귀 차수</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="475"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="476"/>
         <source>Annotation</source>
         <translation>주석</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="480"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="481"/>
         <source>Regression settings</source>
         <translation>회귀분석 세팅</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="226"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="227"/>
         <source>Exploration</source>
         <translation>탐색</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="227"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="228"/>
         <source>Regression</source>
         <translation>회귀분석</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="228"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="229"/>
         <source>Average</source>
         <translation>평균</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="229"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="230"/>
         <source>Comparison</source>
         <translation>비교</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="230"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="231"/>
         <source>Comparison (overlap)</source>
         <translation>비교 (중첩)</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="356"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="357"/>
         <source>Flip</source>
         <translation>축 반전</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="449"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="450"/>
         <source>Show regression</source>
         <translation>회귀선 보기</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="467"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="468"/>
         <source>Extrapolate</source>
         <translation>외삽</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="533"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="534"/>
         <source>Reset Pose</source>
         <translation>원래대로</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="535"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="536"/>
         <source>Animate</source>
         <translation>애니메이션</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="538"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="539"/>
         <source>Record</source>
         <translation>영상 저장</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="509"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="510"/>
         <source>Export Chart</source>
         <translation>차트 내보내기</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="1149"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="1150"/>
         <source>Source shape</source>
         <translation>기준 형태</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="1153"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="1154"/>
         <source>Target shape</source>
         <translation>비교할 형태</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="303"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="304"/>
         <source>Legend</source>
         <translation>범례</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="317"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="318"/>
         <source>Var. explained</source>
         <translation>설명된 분산</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="321"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="322"/>
         <source>Labels</source>
         <translation>레이블</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="325"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="326"/>
         <source>Snap</source>
         <translation>스냅</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="902"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="903"/>
         <source>Error</source>
         <translation>오류</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="902"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="903"/>
         <source>Failed to save video:
 {e}</source>
         <translation>동영상 저장에 실패했습니다:
 {e}</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="308"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="309"/>
         <source>Movable</source>
         <translation>이동 가능</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="309"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="310"/>
         <source>Drag the legend to reposition it</source>
         <translation>범례를 끌어서 위치를 옮깁니다</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="313"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="314"/>
         <source>Order...</source>
         <translation>순서...</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="314"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="315"/>
         <source>Choose the order of legend entries</source>
         <translation>범례 항목의 순서를 지정합니다</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="1698"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="1699"/>
         <source>Legend Order</source>
         <translation>범례 순서</translation>
     </message>
     <message>
-        <location filename="../dialogs/data_exploration_dialog.py" line="1698"/>
+        <location filename="../dialogs/data_exploration_dialog.py" line="1699"/>
         <source>There are no legend entries to arrange yet.</source>
         <translation>아직 정렬할 범례 항목이 없습니다.</translation>
     </message>
@@ -465,87 +465,87 @@
         <translation>모단2 - 데이터셋 정보</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_dialog.py" line="125"/>
+        <location filename="../dialogs/dataset_dialog.py" line="127"/>
         <source>Add Variable</source>
         <translation>변수 추가</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_dialog.py" line="126"/>
+        <location filename="../dialogs/dataset_dialog.py" line="128"/>
         <source>Delete Variable</source>
         <translation>변수 삭제</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_dialog.py" line="127"/>
+        <location filename="../dialogs/dataset_dialog.py" line="129"/>
         <source>Move Up</source>
         <translation>위로</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_dialog.py" line="128"/>
+        <location filename="../dialogs/dataset_dialog.py" line="130"/>
         <source>Move Down</source>
         <translation>아래로</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_dialog.py" line="166"/>
+        <location filename="../dialogs/dataset_dialog.py" line="168"/>
         <source>Parent</source>
         <translation>상위 데이터셋</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_dialog.py" line="167"/>
+        <location filename="../dialogs/dataset_dialog.py" line="169"/>
         <source>Dataset Name</source>
         <translation>데이터셋 이름</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_dialog.py" line="168"/>
+        <location filename="../dialogs/dataset_dialog.py" line="170"/>
         <source>Description</source>
         <translation>설명</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_dialog.py" line="169"/>
+        <location filename="../dialogs/dataset_dialog.py" line="171"/>
         <source>Dimension</source>
         <translation>차원</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_dialog.py" line="170"/>
+        <location filename="../dialogs/dataset_dialog.py" line="172"/>
         <source>Wireframe</source>
         <translation>와이어프레임</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_dialog.py" line="171"/>
+        <location filename="../dialogs/dataset_dialog.py" line="173"/>
         <source>Baseline</source>
         <translation>베이스라인</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_dialog.py" line="172"/>
+        <location filename="../dialogs/dataset_dialog.py" line="174"/>
         <source>Polygons</source>
         <translation>다각형</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_dialog.py" line="176"/>
+        <location filename="../dialogs/dataset_dialog.py" line="178"/>
         <source>Variable Names</source>
         <translation>변수 이름</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_dialog.py" line="137"/>
+        <location filename="../dialogs/dataset_dialog.py" line="139"/>
         <source>Save</source>
         <translation>저장</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_dialog.py" line="139"/>
+        <location filename="../dialogs/dataset_dialog.py" line="141"/>
         <source>Delete</source>
         <translation>삭제</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_dialog.py" line="141"/>
+        <location filename="../dialogs/dataset_dialog.py" line="143"/>
         <source>Cancel</source>
         <translation>취소</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_dialog.py" line="222"/>
+        <location filename="../dialogs/dataset_dialog.py" line="224"/>
         <source>New Variable</source>
         <translation>새 변수</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_dialog.py" line="523"/>
+        <location filename="../dialogs/dataset_dialog.py" line="531"/>
         <source>Are you sure to delete this dataset?</source>
         <translation>데이터셋을 삭제하시겠습니까?</translation>
     </message>
@@ -555,59 +555,64 @@
         <translation>고정 랜드마크 수 (예: 5)</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_dialog.py" line="107"/>
+        <location filename="../dialogs/dataset_dialog.py" line="109"/>
         <source>Curve</source>
         <translation>곡선</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_dialog.py" line="116"/>
+        <location filename="../dialogs/dataset_dialog.py" line="118"/>
         <source>Name</source>
         <translation>이름</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_dialog.py" line="107"/>
+        <location filename="../dialogs/dataset_dialog.py" line="109"/>
         <source>N</source>
         <translation>N</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_dialog.py" line="116"/>
+        <location filename="../dialogs/dataset_dialog.py" line="118"/>
         <source>#</source>
         <translation>#</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_dialog.py" line="173"/>
+        <location filename="../dialogs/dataset_dialog.py" line="175"/>
         <source>Fixed Landmarks</source>
         <translation>고정 랜드마크</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_dialog.py" line="201"/>
+        <location filename="../dialogs/dataset_dialog.py" line="203"/>
         <source>Curves</source>
         <translation>곡선</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_dialog.py" line="175"/>
+        <location filename="../dialogs/dataset_dialog.py" line="177"/>
         <source>Landmark Names</source>
         <translation>랜드마크 이름</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_dialog.py" line="187"/>
+        <location filename="../dialogs/dataset_dialog.py" line="189"/>
         <source>General</source>
         <translation>일반</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_dialog.py" line="195"/>
+        <location filename="../dialogs/dataset_dialog.py" line="197"/>
         <source>Landmarks</source>
         <translation>랜드마크</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_dialog.py" line="207"/>
+        <location filename="../dialogs/dataset_dialog.py" line="209"/>
         <source>Variables</source>
         <translation>변수</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_dialog.py" line="437"/>
+        <location filename="../dialogs/dataset_dialog.py" line="445"/>
         <source>Delete Curve (all specimens)</source>
         <translation>곡선 삭제 (모든 개체)</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/dataset_dialog.py" line="109"/>
+        <source>Closed</source>
+        <translation>닫힘</translation>
     </message>
 </context>
 <context>
@@ -1474,27 +1479,27 @@ Continue?</source>
 <context>
     <name>NewAnalysisDialog</name>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="41"/>
+        <location filename="../dialogs/analysis_dialog.py" line="43"/>
         <source>Modan2 - New Analysis</source>
         <translation>모단2 - 새 분석</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="67"/>
+        <location filename="../dialogs/analysis_dialog.py" line="70"/>
         <source>Analysis name</source>
         <translation>분석 제목</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="82"/>
+        <location filename="../dialogs/analysis_dialog.py" line="85"/>
         <source>Superimposition method</source>
         <translation>중첩정렬방식</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="87"/>
+        <location filename="../dialogs/analysis_dialog.py" line="88"/>
         <source>Procrustes</source>
         <translation>프로크루스테스</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="88"/>
+        <location filename="../dialogs/analysis_dialog.py" line="89"/>
         <source>Bookstein</source>
         <translation>북스틴</translation>
     </message>
@@ -1504,111 +1509,136 @@ Continue?</source>
         <translation type="obsolete">강건적합</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="91"/>
+        <location filename="../dialogs/analysis_dialog.py" line="108"/>
         <source>CVA grouping variable</source>
         <translation>CVA 그룹 변수</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="95"/>
+        <location filename="../dialogs/analysis_dialog.py" line="112"/>
         <source>MANOVA grouping variable</source>
         <translation>MANOVA 그룹 변수</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="351"/>
+        <location filename="../dialogs/analysis_dialog.py" line="397"/>
         <source>OK</source>
         <translation>확인</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="352"/>
+        <location filename="../dialogs/analysis_dialog.py" line="398"/>
         <source>Cancel</source>
         <translation>취소</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="207"/>
+        <location filename="../dialogs/analysis_dialog.py" line="240"/>
         <source>Warning</source>
         <translation>경고</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="207"/>
+        <location filename="../dialogs/analysis_dialog.py" line="240"/>
         <source>Please enter an analysis name</source>
         <translation>분석 제목을 입력하세요</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="227"/>
+        <location filename="../dialogs/analysis_dialog.py" line="266"/>
         <source>Validating dataset...</source>
         <translation>데이터셋 검증 중...</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="230"/>
+        <location filename="../dialogs/analysis_dialog.py" line="269"/>
         <source>Running...</source>
         <translation>실행 중...</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="328"/>
+        <location filename="../dialogs/analysis_dialog.py" line="374"/>
         <source>Close</source>
         <translation>닫기</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="236"/>
+        <location filename="../dialogs/analysis_dialog.py" line="275"/>
         <source>Dataset validation failed</source>
         <translation>데이터셋 검증에 실패했습니다</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="239"/>
+        <location filename="../dialogs/analysis_dialog.py" line="278"/>
         <source>Starting analysis...</source>
         <translation>분석을 시작하는 중...</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="290"/>
+        <location filename="../dialogs/analysis_dialog.py" line="333"/>
         <source>Validating objects and landmarks...</source>
         <translation>개체와 랜드마크를 검증하는 중...</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="292"/>
+        <location filename="../dialogs/analysis_dialog.py" line="338"/>
         <source>Performing Procrustes superimposition...</source>
         <translation>프로크루스테스 중첩을 수행하는 중...</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="294"/>
+        <location filename="../dialogs/analysis_dialog.py" line="340"/>
         <source>Running PCA analysis...</source>
         <translation>주성분분석을 실행하는 중...</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="296"/>
+        <location filename="../dialogs/analysis_dialog.py" line="342"/>
         <source>Computing CVA and MANOVA...</source>
         <translation>CVA와 MANOVA를 계산하는 중...</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="298"/>
+        <location filename="../dialogs/analysis_dialog.py" line="344"/>
         <source>Finalizing results...</source>
         <translation>결과를 정리하는 중...</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="319"/>
+        <location filename="../dialogs/analysis_dialog.py" line="365"/>
         <source>Analysis completed successfully!</source>
         <translation>분석을 완료했습니다!</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="343"/>
+        <location filename="../dialogs/analysis_dialog.py" line="389"/>
         <source>Analysis failed: {}</source>
         <translation>분석 실패: {}</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="354"/>
+        <location filename="../dialogs/analysis_dialog.py" line="400"/>
         <source>Analysis Failed</source>
         <translation>분석 실패</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="354"/>
+        <location filename="../dialogs/analysis_dialog.py" line="400"/>
         <source>Analysis failed:
 {}</source>
         <translation>분석 실패:
 {}</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="109"/>
+        <location filename="../dialogs/analysis_dialog.py" line="126"/>
         <source>None (no variables)</source>
         <translation>없음 (변수 없음)</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/analysis_dialog.py" line="93"/>
+        <source>Outline</source>
+        <translation>윤곽선</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/analysis_dialog.py" line="95"/>
+        <source>Harmonics</source>
+        <translation>조화항 수</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/analysis_dialog.py" line="98"/>
+        <source>Auto (99% power)</source>
+        <translation>자동 (파워 99%)</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/analysis_dialog.py" line="102"/>
+        <source>Elliptic Fourier (outline)</source>
+        <translation>타원 푸리에 (윤곽선)</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/analysis_dialog.py" line="336"/>
+        <source>Computing elliptic Fourier coefficients...</source>
+        <translation>타원 푸리에 계수 계산 중...</translation>
     </message>
 </context>
 <context>
@@ -1619,152 +1649,152 @@ Continue?</source>
         <translation>모단2 - 개체 정보</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="309"/>
+        <location filename="../dialogs/object_dialog.py" line="312"/>
         <source>Add</source>
         <translation>추가</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="183"/>
+        <location filename="../dialogs/object_dialog.py" line="186"/>
         <source>Dataset Name</source>
         <translation>데이터셋 이름</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="184"/>
+        <location filename="../dialogs/object_dialog.py" line="187"/>
         <source>Object Name</source>
         <translation>개체 이름</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="185"/>
+        <location filename="../dialogs/object_dialog.py" line="188"/>
         <source>Sequence</source>
         <translation>순서</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="186"/>
+        <location filename="../dialogs/object_dialog.py" line="189"/>
         <source>Description</source>
         <translation>설명</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="187"/>
+        <location filename="../dialogs/object_dialog.py" line="190"/>
         <source>Landmarks</source>
         <translation>랜드마크</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="407"/>
+        <location filename="../dialogs/object_dialog.py" line="410"/>
         <source>Index</source>
         <translation>인덱스</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="418"/>
+        <location filename="../dialogs/object_dialog.py" line="421"/>
         <source>Wireframe</source>
         <translation>와이어프레임</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="421"/>
+        <location filename="../dialogs/object_dialog.py" line="424"/>
         <source>Polygon</source>
         <translation>다각형</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="435"/>
+        <location filename="../dialogs/object_dialog.py" line="438"/>
         <source>Baseline</source>
         <translation>베이스라인</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="439"/>
+        <location filename="../dialogs/object_dialog.py" line="442"/>
         <source>Rotate</source>
         <translation>회전</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="442"/>
+        <location filename="../dialogs/object_dialog.py" line="445"/>
         <source>3D Model</source>
         <translation>3D 모델</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="1111"/>
+        <location filename="../dialogs/object_dialog.py" line="1114"/>
         <source>Load Image</source>
         <translation>이미지 열기</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="486"/>
+        <location filename="../dialogs/object_dialog.py" line="489"/>
         <source>Previous</source>
         <translation>이전</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="489"/>
+        <location filename="../dialogs/object_dialog.py" line="492"/>
         <source>Next</source>
         <translation>다음</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="493"/>
+        <location filename="../dialogs/object_dialog.py" line="496"/>
         <source>Save</source>
         <translation>저장</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="496"/>
+        <location filename="../dialogs/object_dialog.py" line="499"/>
         <source>Delete</source>
         <translation>삭제</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="499"/>
+        <location filename="../dialogs/object_dialog.py" line="502"/>
         <source>Cancel</source>
         <translation>취소</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="551"/>
+        <location filename="../dialogs/object_dialog.py" line="554"/>
         <source>Open File</source>
         <translation>파일 열기</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="1087"/>
+        <location filename="../dialogs/object_dialog.py" line="1090"/>
         <source>Load 3D Model</source>
         <translation>3D 모델 불러오기</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="1759"/>
+        <location filename="../dialogs/object_dialog.py" line="1776"/>
         <source>Are you sure to delete this object?</source>
         <translation>이 개체를 삭제하시겠습니까?</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="595"/>
+        <location filename="../dialogs/object_dialog.py" line="598"/>
         <source>Add Missing</source>
         <translation>결측 추가</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="311"/>
+        <location filename="../dialogs/object_dialog.py" line="314"/>
         <source>Update</source>
         <translation>수정</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="424"/>
+        <location filename="../dialogs/object_dialog.py" line="427"/>
         <source>Show Estimated</source>
         <translation>추정값 보기</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="478"/>
+        <location filename="../dialogs/object_dialog.py" line="481"/>
         <source>Show Original</source>
         <translation>원본 보기</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="592"/>
+        <location filename="../dialogs/object_dialog.py" line="595"/>
         <source>Insert Missing</source>
         <translation>결측 삽입</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="593"/>
+        <location filename="../dialogs/object_dialog.py" line="596"/>
         <source>Insert a missing landmark before the selected row</source>
         <translation>선택한 행 앞에 결측 랜드마크를 삽입합니다</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="596"/>
+        <location filename="../dialogs/object_dialog.py" line="599"/>
         <source>Append a missing landmark (select a row to insert instead)</source>
         <translation>결측 랜드마크를 마지막에 추가합니다 (행을 선택하면 그 앞에 삽입)</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="1674"/>
+        <location filename="../dialogs/object_dialog.py" line="1691"/>
         <source>&apos;{}&apos; is not a number. Enter a number or {}.</source>
         <translation>'{}'은(는) 숫자가 아닙니다. 숫자 또는 {}을(를) 입력하세요.</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="409"/>
+        <location filename="../dialogs/object_dialog.py" line="412"/>
         <source>Name</source>
         <translation>이름</translation>
     </message>
@@ -1779,84 +1809,89 @@ Continue?</source>
         <translation>추적됨</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="188"/>
+        <location filename="../dialogs/object_dialog.py" line="191"/>
         <source>Curves</source>
         <translation>곡선</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="448"/>
+        <location filename="../dialogs/object_dialog.py" line="451"/>
         <source>Curve</source>
         <translation>곡선</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="356"/>
+        <location filename="../dialogs/object_dialog.py" line="359"/>
         <source>Trace a curve (semi-landmarks)</source>
         <translation>곡선 추적 (준랜드마크)</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="405"/>
+        <location filename="../dialogs/object_dialog.py" line="408"/>
         <source>Show</source>
         <translation>표시</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="415"/>
+        <location filename="../dialogs/object_dialog.py" line="418"/>
         <source>Landmark Names</source>
         <translation>랜드마크 이름</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="431"/>
+        <location filename="../dialogs/object_dialog.py" line="434"/>
         <source>Show Expected</source>
         <translation>예상 위치 보기</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="451"/>
+        <location filename="../dialogs/object_dialog.py" line="454"/>
         <source>Semi-LM</source>
         <translation>준랜드마크</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="457"/>
+        <location filename="../dialogs/object_dialog.py" line="460"/>
         <source>Snap to curve</source>
         <translation>가장자리에 맞춤</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="458"/>
+        <location filename="../dialogs/object_dialog.py" line="461"/>
         <source>Snap curve tracing to image edges (live-wire)</source>
         <translation>곡선 추적을 이미지 가장자리에 맞춥니다 (라이브와이어)</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="465"/>
+        <location filename="../dialogs/object_dialog.py" line="468"/>
         <source>Smooth curve</source>
         <translation>곡선 다듬기</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="466"/>
+        <location filename="../dialogs/object_dialog.py" line="469"/>
         <source>Smooth the traced curve (keeps the clicked anchors)</source>
         <translation>추적한 곡선을 매끄럽게 다듬습니다 (클릭한 기준점은 유지)</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="1267"/>
+        <location filename="../dialogs/object_dialog.py" line="1270"/>
         <source>Semi-landmarks</source>
         <translation>준랜드마크</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="1267"/>
+        <location filename="../dialogs/object_dialog.py" line="1270"/>
         <source>Number of semi-landmarks on this curve:</source>
         <translation>이 곡선의 준랜드마크 수:</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="1358"/>
+        <location filename="../dialogs/object_dialog.py" line="1365"/>
         <source>Delete Curve (all specimens)</source>
         <translation>곡선 삭제 (모든 개체)</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="1905"/>
+        <location filename="../dialogs/object_dialog.py" line="1922"/>
         <source>Unsaved changes</source>
         <translation>저장하지 않은 변경 사항</translation>
     </message>
     <message>
-        <location filename="../dialogs/object_dialog.py" line="1905"/>
+        <location filename="../dialogs/object_dialog.py" line="1922"/>
         <source>You have unsaved changes. Save them before closing?</source>
         <translation>저장하지 않은 변경 사항이 있습니다. 닫기 전에 저장하시겠습니까?</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/object_dialog.py" line="146"/>
+        <source>Closed</source>
+        <translation>닫힘</translation>
     </message>
 </context>
 <context>

@@ -4,6 +4,7 @@ This module provides the DataExplorationDialog class for exploring morphometric
 analysis results through interactive plots and 3D shape visualization.
 """
 
+import contextlib
 import glob
 import json
 import logging
@@ -1765,10 +1766,7 @@ class DataExplorationDialog(QDialog):
             self.comboRegressionBasedOn.setCurrentIndex(0)
         # print("going to set mode")
 
-        obj = self.analysis.dataset.object_list[0]
-        lm_list = obj.get_landmark_list()
-        dim = self.analysis.dataset.dimension
-        analysis_dim = len(lm_list) * dim
+        analysis_dim = self._analysis_variable_count()
         # print("set_analysis 3", analysis, analysis_method, group_by, self.ignore_change)
 
         self.comboAxis1.clear()
@@ -2567,15 +2565,48 @@ class DataExplorationDialog(QDialog):
         if self.canvas_down_xy == self.canvas_up_xy:
             self.tableView1.selectionModel().clearSelection()
 
+    def _analysis_variable_count(self):
+        """Number of shape variables (= PCs) the analysis ran on.
+
+        Read from the analysed shapes rather than the dataset's landmarks: those
+        omit curve semi-landmarks, and an outline analysis has no landmarks at
+        all, only its outline points.
+        """
+        dim = self.analysis.dimension or self.analysis.dataset.dimension
+        with contextlib.suppress(ValueError, TypeError, IndexError):
+            shapes = json.loads(self.analysis.superimposed_landmark_json)
+            if shapes and shapes[0]:
+                return len(shapes[0]) * dim
+        obj = self.analysis.dataset.object_list[0]
+        return len(obj.get_landmark_list()) * self.analysis.dataset.dimension
+
+    def _shape_dataset(self):
+        """The dataset a reconstructed shape is drawn with.
+
+        A landmark analysis uses its own dataset (wireframe, polygons, landmark
+        names). An outline analysis's shapes are outline points, which the
+        dataset's structure does not index, so they get a stand-in dataset that
+        is never saved: 2D, a closed-loop wireframe, and nothing else (id -1 so
+        a lookup of its objects matches none).
+        """
+        if not self.analysis.is_outline_analysis():
+            return MdDataset.get(MdDataset.id == self.analysis.dataset_id)
+        if getattr(self, "_outline_dataset_for", None) is not self.analysis:
+            ds = MdDataset(
+                id=-1,
+                dataset_name=self.analysis.analysis_name,
+                dimension=2,
+                wireframe=self.analysis.wireframe or "",
+                baseline="",
+                polygons="",
+            )
+            self._outline_dataset = ds
+            self._outline_dataset_for = self.analysis
+        return self._outline_dataset
+
     def shape_to_object(self, shape):
         obj = MdObject()
-        obj.dataset = self.analysis.dataset
-        # print("ds 1:", obj.dataset)
-        # ds = MdDataset()
-        # print("ds id", self.analysis.dataset_id)
-        ds = MdDataset.get(MdDataset.id == self.analysis.dataset_id)
-        # print("ds 2:", ds)
-        obj.dataset = ds
+        obj.dataset = self._shape_dataset()
         # print("dataset:", obj.dataset, obj.dataset_id, obj.dataset.polygon_list, obj.dataset.edge_list)
         obj.landmark_list = []
         for i in range(0, len(shape), self.analysis.dimension):

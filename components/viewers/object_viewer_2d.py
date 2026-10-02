@@ -559,7 +559,7 @@ class ObjectViewer2D(QLabel):
             raw = raw_map.get(curve.get("id"))
             if raw and len(raw) >= 2:
                 with contextlib.suppress(ValueError):
-                    semis.extend(mu.resample_polyline(raw, curve.get("n", 0)))
+                    semis.extend(mu.resample_polyline(raw, curve.get("n", 0), closed=bool(curve.get("closed"))))
         return semis
 
     def _curve_anchor_map(self):
@@ -1561,10 +1561,16 @@ class ObjectViewer2D(QLabel):
                 painter.setBrush(Qt.NoBrush)
                 for j in range(len(canvas_pts) - 1):
                     painter.drawLine(*canvas_pts[j], *canvas_pts[j + 1])
+                if curve.get("closed") and len(canvas_pts) >= 3:
+                    # A closed outline: join the end back to the start, and mark
+                    # the start, which is a homologous point (devlog 288).
+                    painter.drawLine(*canvas_pts[-1], *canvas_pts[0])
+                    sx, sy = canvas_pts[0]
+                    painter.drawRect(sx - 4, sy - 4, 8, 8)
 
             if self.show_semi_landmark and len(raw) >= 2:
                 try:
-                    semis = mu.resample_polyline(raw, curve.get("n", 0))
+                    semis = mu.resample_polyline(raw, curve.get("n", 0), closed=bool(curve.get("closed")))
                 except ValueError:
                     semis = []
                 for i, pt in enumerate(semis, start=1):

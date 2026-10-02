@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+## [Unreleased]
+
+### Fixed
+- **Bookstein analyses ran as Procrustes in the Korean interface.** The analysis
+  dialog sent the translated method name, which the analysis did not recognise,
+  so it fell back to Procrustes without saying so and saved the analysis under
+  the Korean name. The method is now passed by its fixed name in every language.
+- Adding a new curve while tracing no longer wipes the names and descriptions of
+  the dataset's existing curves.
+
+
 ## [0.2.0-beta.5] - 2026-08-13
 
 Mostly the things beta.4 made visible. Its own release notes are the first ones

@@ -439,13 +439,17 @@ msgid "Superimposition Methods"
 msgstr "중첩정렬 방식"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/advanced_features.rst:252
-#, fuzzy
 msgid ""
 "Modan2 offers two superimposition methods, chosen in the analysis dialog. "
-"Both impute missing landmarks first (see `Missing Landmark Handling`_)."
+"Both impute missing landmarks first (see `Missing Landmark Handling`_). For "
+"a 2D dataset with a closed curve, the dialog also offers **Elliptic Fourier "
+"(outline)**, which analyzes an outline instead of landmarks and has no "
+"superimposition step of its own (see :ref:`analysis-efa`)."
 msgstr ""
-"Modan2는 분석 대화상자에서 고를 수 있는 세 가지 중첩정렬 방식을 제공합니다. 세 방식 모두 결측 랜드마크를 먼저 "
-"대치합니다(`Missing Landmark Handling`_ 참조)."
+"Modan2는 분석 대화상자에서 고를 수 있는 두 가지 중첩정렬 방식을 제공합니다. 두 방식 모두 결측 랜드마크를 먼저 "
+"대치합니다(`Missing Landmark Handling`_ 참조). 닫힌 곡선이 있는 2D 데이터셋이라면 대화상자에 "
+"**Elliptic Fourier (outline)** 도 나타나는데, 이는 랜드마크 대신 윤곽선을 분석하며 별도의 중첩정렬 단계가 "
+"없습니다(:ref:`analysis-efa` 참조)."
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/advanced_features.rst:255
 msgid "**Procrustes** (Generalized Procrustes Analysis):"
@@ -529,6 +533,18 @@ msgstr "북스틴"
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/advanced_features.rst:276
 msgid "Needs a dataset baseline"
 msgstr "데이터셋 베이스라인 필요"
+
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/advanced_features.rst:282
+msgid "Whole outline, few landmarks"
+msgstr "윤곽선 전체, 랜드마크가 적음"
+
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/advanced_features.rst:282
+msgid "Elliptic Fourier (outline)"
+msgstr "타원 푸리에(윤곽선)"
+
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/advanced_features.rst:282
+msgid "2D, a closed curve traced from a homologous start"
+msgstr "2D, 상동 시작점에서 추적한 닫힌 곡선"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/advanced_features.rst:282
 msgid ""

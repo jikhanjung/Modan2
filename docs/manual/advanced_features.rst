@@ -250,7 +250,10 @@ Superimposition Methods
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 Modan2 offers two superimposition methods, chosen in the analysis dialog. Both
-impute missing landmarks first (see `Missing Landmark Handling`_).
+impute missing landmarks first (see `Missing Landmark Handling`_). For a 2D
+dataset with a closed curve, the dialog also offers **Elliptic Fourier
+(outline)**, which analyzes an outline instead of landmarks and has no
+superimposition step of its own (see :ref:`analysis-efa`).
 
 **Procrustes** (Generalized Procrustes Analysis):
 
@@ -275,6 +278,9 @@ impute missing landmarks first (see `Missing Landmark Handling`_).
 +------------------+-------------------+---------------------------+
 | Anchored on an   | Bookstein         | Needs a dataset baseline  |
 | anatomical axis  |                   |                           |
++------------------+-------------------+---------------------------+
+| Whole outline,   | Elliptic Fourier  | 2D, a closed curve traced |
+| few landmarks    | (outline)         | from a homologous start   |
 +------------------+-------------------+---------------------------+
 
 .. note::

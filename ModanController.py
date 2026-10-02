@@ -15,6 +15,7 @@ from PyQt5.QtCore import QObject, pyqtSignal
 import MdModel
 import MdStatistics
 import MdUtils as mu
+from MdOutline import ELLIPTIC_FOURIER
 
 
 def landmark_mismatch_message(obj, expected, found):
@@ -763,6 +764,8 @@ class ModanController(QObject):
         superimposition_method="",
         cva_group_by=None,
         manova_group_by=None,
+        outline_curve=None,
+        harmonics=None,
         **kwargs,
     ) -> MdModel.MdAnalysis | None:
         """Run statistical analysis.
@@ -770,9 +773,14 @@ class ModanController(QObject):
         Args:
             dataset: Dataset to analyze (defaults to current_dataset)
             analysis_name: Name for the analysis
-            superimposition_method: Method for superimposition
+            superimposition_method: Method for superimposition, or
+                "Elliptic Fourier" for an outline analysis (devlog 288)
             cva_group_by: Grouping variable for CVA
             manova_group_by: Grouping variable for MANOVA
+            outline_curve: id of the closed curve an elliptic Fourier analysis
+                uses (ignored otherwise)
+            harmonics: elliptic Fourier harmonic count; ``None`` chooses the
+                fewest that keep 99% of every outline's harmonic power
             **kwargs: Additional parameters for backward compatibility
 
         Returns:
@@ -807,7 +815,7 @@ class ModanController(QObject):
             self.logger.info(f"Starting {analysis_type} analysis")
             self.analysis_started.emit(analysis_type)
 
-            ds_ops, landmarks_data = self._prepare_landmarks(superimposition_method)
+            ds_ops, landmarks_data = self._prepare_landmarks(superimposition_method, outline_curve, harmonics)
 
             # Run analysis based on type
             self.analysis_progress.emit(25)
@@ -934,10 +942,17 @@ class ModanController(QObject):
         return str(group_by)
 
     def _serialize_object_data(self, analysis, ds_ops):
-        """Store per-object info plus raw and superimposed landmarks as JSON."""
+        """Store per-object info plus raw and superimposed landmarks as JSON.
+
+        For an outline analysis the size recorded as ``csize`` is the outline's
+        (the first harmonic's semi-major axis, which is what EFA divides out),
+        since the object may carry no landmarks at all.
+        """
         object_info_list = []
         raw_landmark_list = []
         property_len = len(self.current_dataset.get_variablename_list()) or 0
+        efa = getattr(ds_ops, "efa", None)
+        outline_size = {o["id"]: o["size"] for o in efa["objects"]} if efa else {}
         for obj in self.current_dataset.object_list.order_by(MdModel.MdObject.sequence):
             raw_landmark_list.append(obj.get_landmark_list())
             object_info_list.append(
@@ -945,7 +960,7 @@ class ModanController(QObject):
                     "id": obj.id,
                     "name": obj.object_name,
                     "sequence": obj.sequence,
-                    "csize": obj.get_centroid_size(),
+                    "csize": outline_size[obj.id] if obj.id in outline_size else obj.get_centroid_size(),
                     "variable_list": obj.get_variable_list()[:property_len],
                 }
             )
@@ -1046,6 +1061,19 @@ class ModanController(QObject):
         cva_group_by_name = self._resolve_group_by_name(cva_group_by, variablename_list, "CVA")
         manova_group_by_name = self._resolve_group_by_name(manova_group_by, variablename_list, "MANOVA")
 
+        # An outline analysis draws its shapes as a closed loop of outline
+        # points; the dataset's wireframe/baseline/polygons index fixed landmarks
+        # it does not use.
+        efa = getattr(ds_ops, "efa", None)
+        if efa:
+            structure = {"wireframe": ds_ops.wireframe, "baseline": None, "polygons": None}
+        else:
+            structure = {
+                "wireframe": self.current_dataset.wireframe,
+                "baseline": self.current_dataset.baseline,
+                "polygons": self.current_dataset.polygons,
+            }
+
         # Create analysis record with JSON data
         analysis = MdModel.MdAnalysis.create(
             dataset=self.current_dataset,
@@ -1055,10 +1083,11 @@ class ModanController(QObject):
             manova_group_by=manova_group_by_name,
             propertyname_str=self.current_dataset.propertyname_str,
             dimension=self.current_dataset.dimension,
-            wireframe=self.current_dataset.wireframe,
-            baseline=self.current_dataset.baseline,
-            polygons=self.current_dataset.polygons,
+            **structure,
         )
+        if efa:
+            analysis.set_efa(efa)
+            analysis.set_curve_config(self.current_dataset.get_curve_config())
 
         # Generate and save JSON data for analysis results
         try:
@@ -1082,12 +1111,14 @@ class ModanController(QObject):
 
         return analysis
 
-    def _prepare_landmarks(self, superimposition_method="Procrustes"):
+    def _prepare_landmarks(self, superimposition_method="Procrustes", outline_curve=None, harmonics=None):
         """Collect landmark-bearing objects, superimpose them, and return the
         superimposed dataset ops together with the superimposed landmark arrays.
 
         Args:
-            superimposition_method: "Procrustes" (default) or "Bookstein".
+            superimposition_method: "Procrustes" (default), "Bookstein", or
+                "Elliptic Fourier" (outline analysis of ``outline_curve`` with
+                ``harmonics``, see :func:`MdModel.outline_dataset_ops`).
                 "Resistant Fit" is rejected — the method does not converge and is
                 disabled in the UI. Anything else falls back to Procrustes.
 
@@ -1099,6 +1130,16 @@ class ModanController(QObject):
             ValueError: if fewer than 2 objects have landmarks, if superimposition
                 fails, or if no landmark data results.
         """
+        method = (superimposition_method or "Procrustes").strip().lower()
+        if method == ELLIPTIC_FOURIER.lower():
+            # The outline's normalized coefficients stand in for superimposed
+            # landmarks; there is no Procrustes step.
+            self.logger.info(f"Elliptic Fourier analysis of outline '{outline_curve}'")
+            ds_ops, efa = MdModel.outline_dataset_ops(self.current_dataset, outline_curve, harmonics)
+            ds_ops.efa = efa
+            self.logger.info(f"Elliptic Fourier: {efa['harmonics']} harmonics, {len(ds_ops.object_list)} objects")
+            return ds_ops, [obj.landmark_list for obj in ds_ops.object_list]
+
         # Get objects with landmarks
         objects = list(self.current_dataset.object_list)
         objects_with_landmarks = []
@@ -1112,7 +1153,6 @@ class ModanController(QObject):
                 f"At least 2 objects with landmarks are required for analysis (found {len(objects_with_landmarks)} objects with landmarks out of {len(objects)} total objects)"
             )
 
-        method = (superimposition_method or "Procrustes").strip().lower()
         method_labels = {"bookstein": "Bookstein", "resistant fit": "Resistant Fit"}
         method_label = method_labels.get(method, "Procrustes")
         self.logger.info(f"Found {len(objects_with_landmarks)} objects with landmarks before {method_label}")
@@ -1502,11 +1542,13 @@ class ModanController(QObject):
             self.logger.error(f"Failed to get dataset summary: {e}")
             return {}
 
-    def validate_dataset_for_analysis(self, dataset_or_analysis_type):
+    def validate_dataset_for_analysis(self, dataset_or_analysis_type, outline_curve=None):
         """Validate that dataset is suitable for analysis.
 
         Args:
             dataset_or_analysis_type: Either a MdDataset object or analysis type string
+            outline_curve: for an elliptic Fourier analysis, the closed curve's
+                id; objects then need that outline traced, not landmarks
 
         Returns:
             bool: True if dataset is valid for analysis, False otherwise
@@ -1516,7 +1558,23 @@ class ModanController(QObject):
             # Called with analysis_type string - use current_dataset
             return self._validate_dataset_for_analysis_type(dataset_or_analysis_type)
         # Called with dataset object - validate for general analysis
-        return self._validate_dataset_for_general_analysis(dataset_or_analysis_type)
+        return self._validate_dataset_for_general_analysis(dataset_or_analysis_type, outline_curve)
+
+    def _has_grouping_variables(self, dataset) -> bool:
+        """Warn and return False when the dataset has no grouping variables
+        (required for CVA/MANOVA)."""
+        from MdHelpers import show_warning
+
+        grouping_vars = dataset.get_grouping_variable_index_list()
+        has_grouping_vars = len(grouping_vars) > 0 and dataset.propertyname_str
+
+        if not has_grouping_vars:
+            show_warning(
+                None,
+                f"Dataset '{dataset.dataset_name}' has no grouping variables.\n\nCVA and MANOVA analyses require grouping variables.\nOnly PCA analysis will be available.\n\nTo add grouping variables, import data with grouping information\nor use the object property editor.",
+            )
+            return False
+        return True
 
     def _validate_dataset_for_analysis_type(self, analysis_type: str) -> tuple[bool, str]:
         """Validate that current dataset is suitable for specific analysis type.
@@ -1558,11 +1616,12 @@ class ModanController(QObject):
 
         return True, "Dataset is valid for analysis"
 
-    def _validate_dataset_for_general_analysis(self, dataset) -> bool:
+    def _validate_dataset_for_general_analysis(self, dataset, outline_curve=None) -> bool:
         """Validate that dataset is suitable for general analysis.
 
         Args:
             dataset: MdDataset object to validate
+            outline_curve: closed curve id for an elliptic Fourier analysis
 
         Returns:
             bool: True if dataset is valid for analysis, False otherwise
@@ -1572,6 +1631,18 @@ class ModanController(QObject):
         if dataset is None:
             show_warning(None, "No dataset selected")
             return False
+
+        if outline_curve is not None:
+            # An outline analysis reads the curve traces, not the landmarks; its
+            # own builder reports untraced objects by name.
+            traced = [obj for obj in dataset.object_list if obj.get_curve_raw().get(outline_curve)]
+            if len(traced) < 5:
+                show_warning(
+                    None,
+                    f"Dataset '{dataset.dataset_name}' has too few objects with the outline traced ({len(traced)}). At least 5 objects required for analysis.",
+                )
+                return False
+            return self._has_grouping_variables(dataset)
 
         # Check if dataset has objects with landmarks
         objects_with_landmarks = list(
@@ -1587,15 +1658,7 @@ class ModanController(QObject):
             )
             return False
 
-        # Check for grouping variables (required for CVA/MANOVA)
-        grouping_vars = dataset.get_grouping_variable_index_list()
-        has_grouping_vars = len(grouping_vars) > 0 and dataset.propertyname_str
-
-        if not has_grouping_vars:
-            show_warning(
-                None,
-                f"Dataset '{dataset.dataset_name}' has no grouping variables.\n\nCVA and MANOVA analyses require grouping variables.\nOnly PCA analysis will be available.\n\nTo add grouping variables, import data with grouping information\nor use the object property editor.",
-            )
+        if not self._has_grouping_variables(dataset):
             return False
 
         mismatch = MdModel.find_landmark_count_mismatch(objects_with_landmarks)

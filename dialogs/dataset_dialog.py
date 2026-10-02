@@ -101,11 +101,13 @@ class DatasetDialog(BaseDialog):
         # same for all objects (see devlog 237).
         self.edtFixedCount = QLineEdit()
         self.edtFixedCount.setPlaceholderText(self.tr("number of fixed landmarks, e.g. 5"))
-        # Curve list: id, editable name, editable semi-landmark count N.
-        # Right-click a row to delete the curve from the whole dataset.
-        self.curveTable = QTableWidget(0, 4)
+        # Curve list: id, editable name, editable semi-landmark count N, and
+        # whether the curve is a closed outline (the input to elliptic Fourier
+        # analysis, devlog 288). Right-click a row to delete the curve from the
+        # whole dataset.
+        self.curveTable = QTableWidget(0, 5)
         self.curveTable.setHorizontalHeaderLabels(
-            [self.tr("Curve"), self.tr("Name"), self.tr("Description"), self.tr("N")]
+            [self.tr("Curve"), self.tr("Name"), self.tr("Description"), self.tr("N"), self.tr("Closed")]
         )
         self.curveTable.setMaximumHeight(140)
         self.curveTable.verticalHeader().hide()
@@ -375,6 +377,10 @@ class DatasetDialog(BaseDialog):
             self.curveTable.setItem(row, 1, QTableWidgetItem(curve.get("name", "")))
             self.curveTable.setItem(row, 2, QTableWidgetItem(curve.get("desc", "")))
             self.curveTable.setItem(row, 3, QTableWidgetItem(str(curve.get("n", 0))))
+            closed_item = QTableWidgetItem()
+            closed_item.setFlags((closed_item.flags() | Qt.ItemIsUserCheckable) & ~Qt.ItemIsEditable)
+            closed_item.setCheckState(Qt.Checked if curve.get("closed") else Qt.Unchecked)
+            self.curveTable.setItem(row, 4, closed_item)
         self.curveTable.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
 
     def _populate_landmark_name_table(self):
@@ -396,7 +402,7 @@ class DatasetDialog(BaseDialog):
         """Rebuild the curve config from the fixed count and the curve table.
 
         Each table row is one curve; ids renumber positionally while the edited
-        name and count travel with it. Counts are clamped to a minimum of 2.
+        name, count and closed flag travel with it. Counts are clamped to a minimum of 2.
         """
         fixed_count = self._int(self.edtFixedCount.text(), 0)
         curves = []
@@ -404,11 +410,13 @@ class DatasetDialog(BaseDialog):
             name_item = self.curveTable.item(row, 1)
             desc_item = self.curveTable.item(row, 2)
             n_item = self.curveTable.item(row, 3)
+            closed_item = self.curveTable.item(row, 4)
             curves.append(
                 {
                     "n": max(2, self._int(n_item.text() if n_item else "", 2)),
                     "name": name_item.text().strip() if name_item else "",
                     "desc": desc_item.text().strip() if desc_item else "",
+                    "closed": closed_item is not None and closed_item.checkState() == Qt.Checked,
                 }
             )
         return mu.build_curve_config(fixed_count, curves)

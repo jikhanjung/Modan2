@@ -559,6 +559,11 @@
         <source>Delete Curve (all specimens)</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <location filename="../dialogs/dataset_dialog.py" line="109"/>
+        <source>Closed</source>
+        <translation>닫힘</translation>
+    </message>
 </context>
 <context>
     <name>ExportDatasetDialog</name>
@@ -1365,6 +1370,31 @@ Continuing without it will start an empty library in that location.</source>
         <translation>분석 실패:
 {}</translation>
     </message>
+    <message>
+        <location filename="../dialogs/analysis_dialog.py" line="93"/>
+        <source>Outline</source>
+        <translation>윤곽선</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/analysis_dialog.py" line="95"/>
+        <source>Harmonics</source>
+        <translation>조화항 수</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/analysis_dialog.py" line="98"/>
+        <source>Auto (99% power)</source>
+        <translation>자동 (파워 99%)</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/analysis_dialog.py" line="102"/>
+        <source>Elliptic Fourier (outline)</source>
+        <translation>타원 푸리에 (윤곽선)</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/analysis_dialog.py" line="328"/>
+        <source>Computing elliptic Fourier coefficients...</source>
+        <translation>타원 푸리에 계수 계산 중...</translation>
+    </message>
 </context>
 <context>
     <name>ObjectDialog</name>
@@ -1612,6 +1642,11 @@ Continuing without it will start an empty library in that location.</source>
         <location filename="../dialogs/object_dialog.py" line="1903"/>
         <source>You have unsaved changes. Save them before closing?</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../dialogs/object_dialog.py" line="146"/>
+        <source>Closed</source>
+        <translation>닫힘</translation>
     </message>
 </context>
 <context>

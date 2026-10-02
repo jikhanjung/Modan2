@@ -18,6 +18,7 @@ from peewee import CharField, DateTimeField, DoubleField, ForeignKeyField, Integ
 from PIL import Image
 from PIL.ExifTags import TAGS
 
+import MdOutline
 import MdUtils as mu
 
 logger = logging.getLogger(__name__)
@@ -1827,7 +1828,8 @@ class MdDatasetOps:
                     n = curve.get("n", 0)
                     raw = raw_map.get(curve.get("id"))
                     if raw and len(raw) >= 2:
-                        ops.landmark_list.extend([list(p) for p in mu.resample_polyline(raw, n)])
+                        closed = bool(curve.get("closed"))
+                        ops.landmark_list.extend([list(p) for p in mu.resample_polyline(raw, n, closed=closed)])
                     else:
                         # Curve not traced on this object: keep the layout aligned
                         # with a block of missing landmarks for the imputation path.
@@ -2609,6 +2611,12 @@ class MdAnalysis(Model):
     # later. See MdDataset.get_curve_config() for the format.
     curve_config_json = CharField(null=True)
 
+    # Elliptic Fourier analysis of a closed outline (devlog 288): which curve,
+    # the harmonic count and how it was chosen, the sample count of the shape
+    # points, and each object's normalized coefficients and outline size. Null
+    # for landmark (Procrustes/Bookstein) analyses. See get_efa().
+    efa_json = CharField(null=True)
+
     # virtual_specimens_json = CharField(null=True) # list of virtual specimens
 
     created_at = DateTimeField(default=datetime.datetime.now)
@@ -2631,6 +2639,32 @@ class MdAnalysis(Model):
     def set_curve_config(self, config):
         """Store the snapshotted semi-landmark curve configuration."""
         self.curve_config_json = json.dumps(config) if config else None
+
+    def get_efa(self):
+        """Elliptic Fourier settings and coefficients as a dict, ``{}`` when this
+        is not an outline analysis or the blob is unreadable. Never raises.
+
+        Keys: ``curve_id``, ``curve_name``, ``harmonics``, ``harmonics_auto``,
+        ``power_threshold``, ``n_points`` and ``objects`` -- one
+        ``{"id", "size", "coefficients"}`` per analyzed object, coefficients
+        flattened as ``a1, b1, c1, d1, a2, ...``.
+        """
+        if not self.efa_json:
+            return {}
+        try:
+            efa = json.loads(self.efa_json)
+        except (ValueError, TypeError) as e:
+            logger.warning("Ignoring unreadable EFA data for analysis %s: %s", self.id, e)
+            return {}
+        return efa if isinstance(efa, dict) else {}
+
+    def set_efa(self, efa):
+        """Store elliptic Fourier settings and coefficients (see :meth:`get_efa`)."""
+        self.efa_json = json.dumps(efa) if efa else None
+
+    def is_outline_analysis(self):
+        """True for an elliptic Fourier (outline) analysis."""
+        return bool(self.efa_json)
 
     def get_chart_settings(self):
         """Chart presentation settings as a dict, ``{}`` when unset or unreadable.
@@ -2671,9 +2705,7 @@ def delete_curve_from_dataset(dataset, curve_index):
     remaining = [c for i, c in enumerate(config) if i != curve_index]
     remaining_ids = [c["id"] for c in remaining]
     fixed = config[0].get("start", 0)
-    new_config = mu.build_curve_config(
-        fixed, [{"n": c.get("n", 0), "name": c.get("name", ""), "desc": c.get("desc", "")} for c in remaining]
-    )
+    new_config = mu.build_curve_config(fixed, mu.curve_scheme_entries(remaining))
     id_map = {old: new["id"] for old, new in zip(remaining_ids, new_config)}
 
     dataset.set_curve_config(new_config)
@@ -2688,6 +2720,95 @@ def delete_curve_from_dataset(dataset, curve_index):
         if anchors:
             obj.set_curve_anchors({id_map[old]: pts for old, pts in anchors.items() if old in id_map})
         obj.save()
+
+
+def outline_loop_wireframe(n_points):
+    """Wireframe string joining ``n_points`` outline points into a closed loop
+    (1-based, the stored wireframe convention)."""
+    return ",".join(f"{i + 1}-{(i + 1) % n_points + 1}" for i in range(n_points))
+
+
+def outline_dataset_ops(dataset, curve_id, harmonics=None, power_threshold=MdOutline.DEFAULT_POWER_THRESHOLD):
+    """Dataset ops whose shapes are elliptic Fourier outlines (devlog 288).
+
+    Every object's raw trace of the closed curve ``curve_id`` is analyzed with
+    :func:`MdOutline.analyze_outline`; its normalized coefficients become the
+    object's shape, expressed as the isometric shape points of
+    :func:`MdOutline.coefficients_to_points` so the landmark statistics and
+    viewers take them unchanged. Fixed landmarks and other curves are not used.
+
+    Args:
+        dataset: a 2D MdDataset.
+        curve_id: id of the closed curve to analyze.
+        harmonics: harmonic count, or ``None`` to choose the fewest that keep
+            ``power_threshold`` of every outline's power.
+        power_threshold: share of harmonic power for the automatic count.
+
+    Returns:
+        ``(ds_ops, efa)`` -- the ops (one object per dataset object, in sequence
+        order) and the dict stored by :meth:`MdAnalysis.set_efa`.
+
+    Raises:
+        ValueError: the dataset is not 2D, the curve is unknown or open, or an
+            object has no usable trace of it.
+    """
+    if dataset.dimension == 3:
+        raise ValueError("Elliptic Fourier analysis is available for 2D datasets only")
+    curve = next((c for c in dataset.get_curve_config() if c.get("id") == curve_id), None)
+    if curve is None:
+        raise ValueError(f"The dataset has no curve '{curve_id}'")
+    if not curve.get("closed"):
+        raise ValueError(f"Curve '{curve.get('name') or curve_id}' is not a closed outline")
+
+    ds_ops = MdDatasetOps(dataset)
+    objects = list(dataset.object_list.order_by(MdObject.sequence))
+    outlines = []
+    missing = []
+    for obj in objects:
+        raw = obj.get_curve_raw().get(curve_id)
+        try:
+            outlines.append(MdOutline.clean_outline(raw if raw else []))
+        except ValueError:
+            missing.append(obj.object_name)
+    if missing:
+        listed = ", ".join(missing[:10]) + (" ..." if len(missing) > 10 else "")
+        raise ValueError(
+            f"The outline '{curve.get('name') or curve_id}' is not traced on {len(missing)} object(s): {listed}"
+        )
+    if len(outlines) < 2:
+        raise ValueError("At least 2 objects with a traced outline are required for analysis")
+
+    limit = min(MdOutline.max_harmonics(p) for p in outlines)
+    harmonics_auto = harmonics is None
+    if harmonics_auto:
+        harmonics = MdOutline.choose_harmonics(outlines, power_threshold)
+    harmonics = max(1, min(int(harmonics), limit))
+    n_points = MdOutline.outline_points_count(harmonics)
+
+    efa_objects = []
+    for obj, ops, outline in zip(objects, ds_ops.object_list, outlines, strict=True):
+        result = MdOutline.analyze_outline(outline, harmonics)
+        coeffs = result["coefficients"]
+        ops.landmark_list = MdOutline.coefficients_to_points(coeffs, n_points).tolist()
+        size = result["size"]
+        if obj.pixels_per_mm:
+            size = size / obj.pixels_per_mm
+        efa_objects.append({"id": obj.id, "size": size, "coefficients": coeffs.ravel().tolist()})
+
+    ds_ops.wireframe = outline_loop_wireframe(n_points)
+    ds_ops.edge_list = [[i, (i + 1) % n_points] for i in range(n_points)]
+    ds_ops.baseline = ""
+    ds_ops.polygons = ""
+    efa = {
+        "curve_id": curve_id,
+        "curve_name": curve.get("name", ""),
+        "harmonics": harmonics,
+        "harmonics_auto": harmonics_auto,
+        "power_threshold": power_threshold,
+        "n_points": n_points,
+        "objects": efa_objects,
+    }
+    return ds_ops, efa
 
 
 def prepare_database():

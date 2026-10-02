@@ -14,9 +14,11 @@ from PyQt5.QtWidgets import (
     QMessageBox,
     QProgressBar,
     QPushButton,
+    QSpinBox,
 )
 
 from dialogs.base_dialog import BaseDialog
+from MdOutline import ELLIPTIC_FOURIER, MAX_HARMONICS
 
 
 class NewAnalysisDialog(BaseDialog):
@@ -59,6 +61,7 @@ class NewAnalysisDialog(BaseDialog):
         self._create_widgets()
         self._create_layout()
         self._connect_signals()
+        self.on_method_changed()
         self.get_analysis_name()
 
     def _create_widgets(self):
@@ -80,12 +83,26 @@ class NewAnalysisDialog(BaseDialog):
         # it; until then the option would only produce answers no one should
         # trust.
         self.lblSuperimposition = QLabel(self.tr("Superimposition method"), self)
-        # The item data is the untranslated method name the controller matches;
-        # the text is translated (in Korean, "Bookstein" reads "북스틴", which
-        # the controller does not know and would quietly run as Procrustes).
+        # The item data is the untranslated method name the controller matches.
         self.comboSuperimposition = QComboBox(self)
         self.comboSuperimposition.addItem(self.tr("Procrustes"), "Procrustes")
         self.comboSuperimposition.addItem(self.tr("Bookstein"), "Bookstein")
+
+        # Elliptic Fourier analysis of a closed outline (devlog 288), offered
+        # only for 2D datasets that have a closed curve.
+        self.lblOutlineCurve = QLabel(self.tr("Outline"), self)
+        self.comboOutlineCurve = QComboBox(self)
+        self.lblHarmonics = QLabel(self.tr("Harmonics"), self)
+        self.spinHarmonics = QSpinBox(self)
+        self.spinHarmonics.setRange(0, MAX_HARMONICS)
+        self.spinHarmonics.setSpecialValueText(self.tr("Auto (99% power)"))
+        self.spinHarmonics.setValue(0)
+        closed_curves = [c for c in self.dataset.get_curve_config() if c.get("closed")]
+        if self.dataset.dimension != 3 and closed_curves:
+            self.comboSuperimposition.addItem(self.tr("Elliptic Fourier (outline)"), ELLIPTIC_FOURIER)
+            for curve in closed_curves:
+                self.comboOutlineCurve.addItem(curve.get("name") or curve["id"], curve["id"])
+        self.comboSuperimposition.currentIndexChanged.connect(self.on_method_changed)
 
         # CVA grouping variable
         self.lblCvaGroupBy = QLabel(self.tr("CVA grouping variable"), self)
@@ -136,6 +153,12 @@ class NewAnalysisDialog(BaseDialog):
         self.layout.addWidget(self.lblSuperimposition, i, 0)
         self.layout.addWidget(self.comboSuperimposition, i, 1)
         i += 1
+        self.layout.addWidget(self.lblOutlineCurve, i, 0)
+        self.layout.addWidget(self.comboOutlineCurve, i, 1)
+        i += 1
+        self.layout.addWidget(self.lblHarmonics, i, 0)
+        self.layout.addWidget(self.spinHarmonics, i, 1)
+        i += 1
         self.layout.addWidget(self.lblCvaGroupBy, i, 0)
         self.layout.addWidget(self.comboCvaGroupBy, i, 1)
         i += 1
@@ -174,6 +197,16 @@ class NewAnalysisDialog(BaseDialog):
             self.signal_connections.append((self.controller.analysis_failed, self.on_analysis_failed))
             self.controller.analysis_failed.connect(self.on_analysis_failed)
 
+    def is_outline_method(self):
+        """True when elliptic Fourier (outline) analysis is selected."""
+        return self.comboSuperimposition.currentData() == ELLIPTIC_FOURIER
+
+    def on_method_changed(self, _index=None):
+        """Show the outline controls only for elliptic Fourier analysis."""
+        outline = self.is_outline_method()
+        for widget in (self.lblOutlineCurve, self.comboOutlineCurve, self.lblHarmonics, self.spinHarmonics):
+            widget.setVisible(outline)
+
     def edtAnalysisName_changed(self):
         """Handle analysis name text change."""
         if not self.ignore_change:
@@ -204,6 +237,12 @@ class NewAnalysisDialog(BaseDialog):
         # Store parameters for later use
         self.analysis_name = self.edtAnalysisName.text()
         self.superimposition_method = self.comboSuperimposition.currentData() or self.comboSuperimposition.currentText()
+        if self.is_outline_method():
+            self.outline_curve = self.comboOutlineCurve.currentData()
+            self.harmonics = self.spinHarmonics.value() or None  # 0 = automatic
+        else:
+            self.outline_curve = None
+            self.harmonics = None
         self.cva_group_by = self.comboCvaGroupBy.currentData()
         self.manova_group_by = self.comboManovaGroupBy.currentData()
 
@@ -226,7 +265,7 @@ class NewAnalysisDialog(BaseDialog):
 
         try:
             # Validate dataset
-            if not self.controller.validate_dataset_for_analysis(self.dataset):
+            if not self.controller.validate_dataset_for_analysis(self.dataset, outline_curve=self.outline_curve):
                 self.on_analysis_failed(self.tr("Dataset validation failed"))
                 return
 
@@ -240,6 +279,8 @@ class NewAnalysisDialog(BaseDialog):
                 superimposition_method=self.superimposition_method,
                 cva_group_by=self.cva_group_by,
                 manova_group_by=self.manova_group_by,
+                outline_curve=self.outline_curve,
+                harmonics=self.harmonics,
             )
 
         except Exception as e:
@@ -265,6 +306,8 @@ class NewAnalysisDialog(BaseDialog):
         """
         self.edtAnalysisName.setEnabled(enabled)
         self.comboSuperimposition.setEnabled(enabled)
+        self.comboOutlineCurve.setEnabled(enabled)
+        self.spinHarmonics.setEnabled(enabled)
         self.comboCvaGroupBy.setEnabled(enabled)
         self.comboManovaGroupBy.setEnabled(enabled)
         self.btnOK.setEnabled(enabled)
@@ -281,7 +324,10 @@ class NewAnalysisDialog(BaseDialog):
         if progress < 25:
             self.lblStatus.setText(self.tr("Validating objects and landmarks..."))
         elif progress < 50:
-            self.lblStatus.setText(self.tr("Performing Procrustes superimposition..."))
+            if self.is_outline_method():
+                self.lblStatus.setText(self.tr("Computing elliptic Fourier coefficients..."))
+            else:
+                self.lblStatus.setText(self.tr("Performing Procrustes superimposition..."))
         elif progress < 75:
             self.lblStatus.setText(self.tr("Running PCA analysis..."))
         elif progress < 90:

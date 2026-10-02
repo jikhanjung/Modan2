@@ -1425,6 +1425,7 @@ ANALYSIS_FIELDS = (
     "manova_analysis_result_json",
     "chart_settings_json",
     "curve_config_json",
+    "efa_json",
 )
 
 
@@ -2152,8 +2153,24 @@ def build_landmarks_with_curves(fixed_landmarks, curves):
         start = len(landmark_list)
         points = resample_polyline(curve["raw"], curve["n"], closed=curve.get("closed", False))
         landmark_list.extend(points)
-        config.append({"id": curve["id"], "n": curve["n"], "method": "equidistant", "start": start})
+        entry = {"id": curve["id"], "n": curve["n"], "method": "equidistant", "start": start}
+        if curve.get("closed"):
+            entry["closed"] = True
+        config.append(entry)
     return landmark_list, config
+
+
+def curve_scheme_entries(config):
+    """The per-curve entries of a config, ready to pass back to
+    :func:`build_curve_config` when the scheme is rebuilt (a count changed, a
+    curve was added or deleted). Carries every user-set field -- count, name,
+    description, closed -- so a rebuild loses none of them; only ids and start
+    indices are recomputed.
+    """
+    return [
+        {"n": c.get("n", 0), "name": c.get("name", ""), "desc": c.get("desc", ""), "closed": bool(c.get("closed"))}
+        for c in config
+    ]
 
 
 def build_curve_config(fixed_count, curves):
@@ -2165,15 +2182,19 @@ def build_curve_config(fixed_count, curves):
     laid out after the fixed landmarks in order; each curve's ``start`` index is
     derived from the fixed count plus the preceding curves' counts. Ids are
     positional (``curve1``, ``curve2``, ...) so they renumber when curves are
-    added or removed; the optional user ``name`` travels with the curve.
+    added or removed; the optional user ``name`` travels with the curve, and so
+    does ``closed`` (a closed outline -- the last point joins the first -- which
+    is what elliptic Fourier analysis takes; devlog 288).
 
     Args:
         fixed_count: number of fixed landmarks that precede the curves (K).
         curves: ordered per-curve entries, each either an int count or a dict
-            ``{"n": int, "name": str?}``.
+            ``{"n": int, "name": str?, "desc": str?, "closed": bool?}``.
 
     Returns:
-        list of ``{"id", "n", "method", "start", "name"}`` (empty if no curves).
+        list of ``{"id", "n", "method", "start", "name", "desc"}`` plus
+        ``"closed": True`` on closed curves (the key is absent on open ones, so
+        configs written before closed curves existed read back unchanged).
     """
     config = []
     start = int(fixed_count)
@@ -2182,12 +2203,15 @@ def build_curve_config(fixed_count, curves):
             n = int(curve.get("n", 0))
             name = curve.get("name", "")
             desc = curve.get("desc", "")
+            closed = bool(curve.get("closed", False))
         else:
             n = int(curve)
             name = ""
             desc = ""
-        config.append(
-            {"id": f"curve{i + 1}", "n": n, "method": "equidistant", "start": start, "name": name, "desc": desc}
-        )
+            closed = False
+        entry = {"id": f"curve{i + 1}", "n": n, "method": "equidistant", "start": start, "name": name, "desc": desc}
+        if closed:
+            entry["closed"] = True
+        config.append(entry)
         start += n
     return config

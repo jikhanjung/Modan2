@@ -577,3 +577,63 @@ class TestSuperimpositionMethodName:
     def test_default_is_procrustes(self, dialog, mock_parent):
         dialog.btnOK_clicked()
         assert mock_parent.controller.run_analysis.call_args.kwargs["superimposition_method"] == "Procrustes"
+
+
+class TestEllipticFourierOption:
+    """The outline (EFA) method appears only with a closed curve (devlog 288)."""
+
+    @staticmethod
+    def _methods(dlg):
+        return [dlg.comboSuperimposition.itemData(i) for i in range(dlg.comboSuperimposition.count())]
+
+    def test_hidden_without_a_closed_curve(self, dialog):
+        assert "Elliptic Fourier" not in self._methods(dialog)
+        assert not dialog.comboOutlineCurve.isVisible()
+        assert not dialog.spinHarmonics.isVisible()
+
+    def test_offered_for_a_closed_curve(self, qtbot, mock_parent, sample_dataset_with_variables):
+        import MdUtils as mu
+
+        ds = sample_dataset_with_variables
+        ds.set_curve_config(
+            mu.build_curve_config(10, [{"n": 8, "name": "open"}, {"n": 20, "name": "margin", "closed": True}])
+        )
+        ds.save()
+        dlg = NewAnalysisDialog(mock_parent, ds)
+        qtbot.addWidget(dlg)
+        dlg.show()
+        qtbot.waitExposed(dlg)
+
+        assert "Elliptic Fourier" in self._methods(dlg)
+        # Only the closed curve is offered as an outline.
+        assert [dlg.comboOutlineCurve.itemData(i) for i in range(dlg.comboOutlineCurve.count())] == ["curve2"]
+
+        dlg.comboSuperimposition.setCurrentIndex(self._methods(dlg).index("Elliptic Fourier"))
+        assert dlg.comboOutlineCurve.isVisible() and dlg.spinHarmonics.isVisible()
+        assert dlg.spinHarmonics.value() == 0  # automatic
+
+        dlg.btnOK_clicked()
+        kwargs = mock_parent.controller.run_analysis.call_args.kwargs
+        assert kwargs["superimposition_method"] == "Elliptic Fourier"
+        assert kwargs["outline_curve"] == "curve2"
+        assert kwargs["harmonics"] is None
+        assert mock_parent.controller.validate_dataset_for_analysis.call_args.kwargs["outline_curve"] == "curve2"
+
+    def test_explicit_harmonics_passed(self, qtbot, mock_parent, sample_dataset_with_variables):
+        import MdUtils as mu
+
+        ds = sample_dataset_with_variables
+        ds.set_curve_config(mu.build_curve_config(10, [{"n": 20, "closed": True}]))
+        ds.save()
+        dlg = NewAnalysisDialog(mock_parent, ds)
+        qtbot.addWidget(dlg)
+        dlg.comboSuperimposition.setCurrentIndex(self._methods(dlg).index("Elliptic Fourier"))
+        dlg.spinHarmonics.setValue(12)
+        dlg.btnOK_clicked()
+        assert mock_parent.controller.run_analysis.call_args.kwargs["harmonics"] == 12
+
+    def test_landmark_method_passes_no_outline(self, dialog, mock_parent):
+        dialog.btnOK_clicked()
+        kwargs = mock_parent.controller.run_analysis.call_args.kwargs
+        assert kwargs["superimposition_method"] == "Procrustes"
+        assert kwargs["outline_curve"] is None

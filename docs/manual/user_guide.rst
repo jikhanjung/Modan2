@@ -15,6 +15,25 @@ Launching Modan2
 
 See :doc:`installation` for how to obtain each package.
 
+Checking for Updates
+~~~~~~~~~~~~~~~~~~~~
+
+Open **Help → About** (``F1``). Modan2 asks GitHub whether a newer release has
+been published and, if there is one, shows its version with a link to the
+installer for your system and to its release notes. Nothing is downloaded or
+installed automatically, and Modan2 contacts GitHub only when you open this box
+(once per session).
+
+- Running a **beta or other pre-release**, you are offered later builds of the
+  same version (e.g. 0.2.0-beta.6 or 0.2.0-rc.1 after 0.2.0-beta.5) and any
+  newer stable release — not test builds of the next version.
+- Running a **stable** release, you are offered newer stable releases only.
+
+If the check fails (no internet, or a network that blocks the request), the box
+says so and links the releases page instead. On a network that inspects secure
+connections with its own certificate, the check trusts the certificates your
+operating system trusts, as your browser does.
+
 Main Window Overview
 ~~~~~~~~~~~~~~~~~~~~
 

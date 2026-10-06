@@ -43,8 +43,9 @@ listed below, installed from PyPI.
 
 ## What is bundled
 
-Everything below ships inside the released binaries. Only the first entry is
-copyleft; it is the one that sets the licence of the whole.
+Everything below ships inside the released binaries. Only the first entry's
+copyleft reaches the whole program; it is the one that sets the licence of the
+whole. The LGPL (Qt) and MPL (certifi) entries cover their own files only.
 
 | Component | Licence |
 |---|---|
@@ -65,6 +66,8 @@ copyleft; it is the one that sets the licence of the whole.
 | platformdirs | MIT |
 | XlsxWriter | BSD-2-Clause |
 | semver | BSD-3-Clause |
+| truststore | MIT |
+| certifi | MPL-2.0 (its CA bundle, shipped unmodified) |
 
 **Qt itself is LGPL-3.0**, which is a separate obligation from PyQt5's: if you
 redistribute the binaries you must also let recipients replace the Qt libraries

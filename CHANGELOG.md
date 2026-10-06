@@ -10,6 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **The About box tells you when a newer version is out.** Opening Help →
+  About asks GitHub for the latest releases and, if a newer one exists, links
+  the installer for your system and its release notes. Beta users are offered
+  later builds of the same version and newer stable releases; stable users are
+  offered stable releases only. GitHub is contacted only when the box is opened.
+
 ### Fixed
 - **Bookstein analyses ran as Procrustes in the Korean interface.** The analysis
   dialog sent the translated method name, which the analysis did not recognise,

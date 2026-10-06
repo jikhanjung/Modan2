@@ -1230,6 +1230,46 @@ Continuing without it will start an empty library in that location.</source>
         <source>Use default location</source>
         <translation type="obsolete">기본 위치 사용</translation>
     </message>
+    <message>
+        <location filename="../Modan2.py" line="881"/>
+        <source>Checking for updates...</source>
+        <translation>업데이트 확인 중...</translation>
+    </message>
+    <message>
+        <location filename="../Modan2.py" line="885"/>
+        <source>Download installer</source>
+        <translation>설치 파일 내려받기</translation>
+    </message>
+    <message>
+        <location filename="../Modan2.py" line="885"/>
+        <source>Download page</source>
+        <translation>내려받기 페이지</translation>
+    </message>
+    <message>
+        <location filename="../Modan2.py" line="886"/>
+        <source>A new version is available: v{}</source>
+        <translation>새 버전이 있습니다: v{}</translation>
+    </message>
+    <message>
+        <location filename="../Modan2.py" line="886"/>
+        <source>Release notes</source>
+        <translation>변경 내역</translation>
+    </message>
+    <message>
+        <location filename="../Modan2.py" line="892"/>
+        <source>You have the latest version.</source>
+        <translation>최신 버전을 사용 중입니다.</translation>
+    </message>
+    <message>
+        <location filename="../Modan2.py" line="893"/>
+        <source>Could not check for updates.</source>
+        <translation>업데이트를 확인할 수 없습니다.</translation>
+    </message>
+    <message>
+        <location filename="../Modan2.py" line="893"/>
+        <source>See all releases</source>
+        <translation>전체 릴리스 보기</translation>
+    </message>
 </context>
 <context>
     <name>NewAnalysisDialog</name>

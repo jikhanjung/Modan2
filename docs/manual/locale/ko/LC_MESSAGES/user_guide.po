@@ -54,6 +54,46 @@ msgid "See :doc:`installation` for how to obtain each package."
 msgstr "각 패키지를 받는 방법은 :doc:`installation` 을 참조하세요."
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:19
+msgid "Checking for Updates"
+msgstr "업데이트 확인"
+
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:21
+msgid ""
+"Open **Help → About** (``F1``). Modan2 asks GitHub whether a newer release "
+"has been published and, if there is one, shows its version with a link to "
+"the installer for your system and to its release notes. Nothing is "
+"downloaded or installed automatically, and Modan2 contacts GitHub only when "
+"you open this box (once per session)."
+msgstr ""
+"**Help → About**\\ (``F1``)를 여세요. Modan2가 GitHub에 새 릴리스가 나왔는지 묻고, 있으면 그 버전과 "
+"함께 사용 중인 시스템용 설치 파일 링크와 변경 내역 링크를 보여줍니다. 자동으로 내려받거나 설치하지는 않으며, GitHub에는 이 창을"
+" 열 때만(세션당 한 번) 접속합니다."
+
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:27
+msgid ""
+"Running a **beta or other pre-release**, you are offered later builds of the"
+" same version (e.g. 0.2.0-beta.6 or 0.2.0-rc.1 after 0.2.0-beta.5) and any "
+"newer stable release — not test builds of the next version."
+msgstr ""
+"**베타 등 프리 릴리스** 를 쓰고 있다면, 같은 버전의 이후 빌드(예: 0.2.0-beta.5 다음의 0.2.0-beta.6이나 "
+"0.2.0-rc.1)와 더 새로운 정식 릴리스를 알려줍니다. 다음 버전의 테스트 빌드는 알려주지 않습니다."
+
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:30
+msgid ""
+"Running a **stable** release, you are offered newer stable releases only."
+msgstr "**정식** 릴리스를 쓰고 있다면 더 새로운 정식 릴리스만 알려줍니다."
+
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:32
+msgid ""
+"If the check fails (no internet, or a network that blocks the request), the "
+"box says so and links the releases page instead. On a network that inspects "
+"secure connections with its own certificate, the check trusts the "
+"certificates your operating system trusts, as your browser does."
+msgstr ""
+"확인에 실패하면(인터넷이 없거나 네트워크가 요청을 막는 경우) 그 사실을 알리고 대신 릴리스 페이지 링크를 보여줍니다. 자체 인증서로 "
+"보안 연결을 검사하는 네트워크에서는 브라우저와 마찬가지로 운영체제가 신뢰하는 인증서를 신뢰합니다."
+
+#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:19
 msgid "Main Window Overview"
 msgstr "메인 창 개요"
 

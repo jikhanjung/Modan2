@@ -15,6 +15,7 @@ import contextlib
 import copy
 import datetime
 import logging
+import threading
 from pathlib import Path
 
 import matplotlib
@@ -22,10 +23,12 @@ import matplotlib.pyplot as plt
 from peewee import DoesNotExist
 from PyQt5.QtCore import (
     QItemSelectionModel,
+    QObject,
     QRect,
     QSize,
     QSortFilterProxyModel,
     Qt,
+    pyqtSignal,
     pyqtSlot,
 )
 from PyQt5.QtGui import QCursor, QIcon, QKeySequence, QStandardItem, QStandardItemModel
@@ -53,6 +56,7 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
+import MdUpdate
 import MdUtils as mu
 from dialogs import (
     DataExplorationDialog,
@@ -252,6 +256,12 @@ class SettingsWrapper:
     def sync(self):
         """Force save settings to file (alias for save)."""
         self.save()
+
+
+class _UpdateCheckSignals(QObject):
+    """Carries the update check's answer from its worker thread to the GUI."""
+
+    done = pyqtSignal(object)
 
 
 class ModanMainWindow(QMainWindow):
@@ -822,7 +832,7 @@ class ModanMainWindow(QMainWindow):
     def on_action_exit_triggered(self):
         self.close()
 
-    def build_about_message(self):
+    def build_about_message(self, update_status=None):
         """The About box, as rich text so the project link is clickable.
 
         QMessageBox's label opens external links itself, so an anchor is all
@@ -835,14 +845,23 @@ class ModanMainWindow(QMainWindow):
         licence, so the binary as a whole is GPL-3.0. Someone reading this in an
         installed copy was being told they had permissive terms they did not
         have. See THIRD-PARTY-NOTICES.md.
+
+        ``update_status`` is the rich-text line about newer releases (see
+        :meth:`update_status_html`); omitted, the box has no update line.
         """
         msg = QMessageBox(self)
         msg.setWindowTitle(self.tr("About"))
         msg.setIcon(QMessageBox.Information)
         msg.setTextFormat(Qt.RichText)
-        msg.setText(
+        msg.setText(self._about_text(update_status))
+        return msg
+
+    def _about_text(self, update_status=None):
+        update_line = f"{update_status}<br><br>" if update_status else ""
+        return (
             f"<b>{mu.PROGRAM_NAME}</b> v{mu.PROGRAM_VERSION}<br><br>"
             "Morphometrics made easy<br><br>"
+            f"{update_line}"
             f'<a href="{mu.PROGRAM_HOMEPAGE}">{mu.PROGRAM_HOMEPAGE}</a><br><br>'
             "Source code: MIT License.<br>"
             "This build: GNU General Public License v3, because it includes Qt "
@@ -851,11 +870,78 @@ class ModanMainWindow(QMainWindow):
             "THIRD-PARTY-NOTICES.md</a> for details.<br><br>"
             f"{mu.PROGRAM_COPYRIGHT}"
         )
-        return msg
+
+    def update_status_html(self, result):
+        """The About box's line about newer releases.
+
+        ``result`` is ``None`` while checking, else ``("update", info)`` from
+        :func:`MdUpdate.find_update`, ``("current", None)`` or ``("error", text)``.
+        """
+        if result is None:
+            return self.tr("Checking for updates...")
+        kind, info = result
+        if kind == "update":
+            link = info["asset_url"] or info["page_url"]
+            label = self.tr("Download installer") if info["asset_url"] else self.tr("Download page")
+            return (
+                "<b>" + self.tr("A new version is available: v{}").format(info["version"]) + "</b><br>"
+                f'<a href="{link}">{label}</a> · '
+                f'<a href="{info["page_url"]}">' + self.tr("Release notes") + "</a>"
+            )
+        if kind == "current":
+            return self.tr("You have the latest version.")
+        return (
+            self.tr("Could not check for updates.")
+            + f' <a href="{MdUpdate.RELEASES_PAGE_URL}">'
+            + self.tr("See all releases")
+            + "</a>"
+        )
+
+    def _start_update_check(self):
+        """Ask GitHub for a newer release on a background thread, once per session.
+
+        A daemon thread rather than a QThread: a slow or dead network must not
+        hold up the About box, nor keep the application from quitting (a QThread
+        still running at exit aborts the process). The answer is delivered to
+        the GUI thread through a queued signal.
+        """
+        if getattr(self, "_update_result", None) is not None or getattr(self, "_update_checking", False):
+            return
+        self._update_checking = True
+        if getattr(self, "_update_signals", None) is None:
+            self._update_signals = _UpdateCheckSignals()
+            self._update_signals.done.connect(self._on_update_check_done)
+        signals = self._update_signals
+        version = mu.PROGRAM_VERSION
+
+        def run():
+            try:
+                info = MdUpdate.check_for_update(version)
+                result = ("update", info) if info else ("current", None)
+            except Exception as e:  # any failure is reported as "could not check"
+                logger.info("Update check failed: %s", e)
+                result = ("error", str(e))
+            signals.done.emit(result)
+
+        threading.Thread(target=run, name="update-check", daemon=True).start()
+
+    def _on_update_check_done(self, result):
+        self._update_checking = False
+        self._update_result = result
+        box = getattr(self, "_about_box", None)
+        if box is not None:
+            box.setText(self._about_text(self.update_status_html(result)))
 
     @pyqtSlot()
     def on_action_about_triggered(self):
-        self.build_about_message().exec_()
+        self._start_update_check()
+        msg = self.build_about_message(self.update_status_html(getattr(self, "_update_result", None)))
+        self._about_box = msg
+        try:
+            msg.exec_()
+        finally:
+            self._about_box = None
+            msg.deleteLater()
 
     @pyqtSlot()
     def on_action_analyze_dataset_triggered(self):

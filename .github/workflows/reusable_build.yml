@@ -132,7 +132,7 @@ jobs:
 
       - name: Install macOS system dependencies
         run: |
-          brew install qt5 create-dmg
+          brew install qt5
           echo "export PATH=/usr/local/opt/qt5/bin:$PATH" >> ~/.bash_profile
           echo "export LDFLAGS=-L/usr/local/opt/qt5/lib" >> ~/.bash_profile
           echo "export CPPFLAGS=-I/usr/local/opt/qt5/include" >> ~/.bash_profile
@@ -237,21 +237,30 @@ jobs:
             echo "dist/Modan2.app already exists, skipping bundle creation"
           fi
 
+      # hdiutil ships with macOS. create-dmg drove Finder through AppleScript to
+      # lay out the window, which is fragile on a headless runner, and its
+      # failure was swallowed (`|| echo "...but continuing"`), so a missing DMG
+      # surfaced only at the upload step or as a release without a macOS file.
+      # Now any failure stops here. The retry covers hdiutil's transient
+      # "Resource busy" on hosted runners; a real failure still fails after it.
       - name: Create macOS DMG
         run: |
-          if [ -f "icons/Modan2_2.png" ]; then
-            ICON_ARG="--icon icons/Modan2_2.png"
-          else
-            ICON_ARG=""
-          fi
-          create-dmg \
-            --volname "Modan2 Installer" \
-            --window-pos 200 120 \
-            --window-size 800 400 \
-            --hide-extension "Modan2.app" \
-            --hdiutil-verbose \
-            "Modan2-macOS-Installer-v${{ steps.get_version.outputs.VERSION }}-build${{ inputs.build_number }}.dmg" \
-            "dist/Modan2.app" || echo "DMG creation failed, but continuing"
+          set -euo pipefail
+          DMG="Modan2-macOS-Installer-v${{ steps.get_version.outputs.VERSION }}-build${{ inputs.build_number }}.dmg"
+          [ -d "dist/Modan2.app" ] || { echo "ERROR: dist/Modan2.app not found"; ls -la dist/; exit 1; }
+          for attempt in 1 2 3; do
+            if hdiutil create -volname "Modan2 Installer" -srcfolder "dist/Modan2.app" -ov -format UDZO "$DMG"; then
+              break
+            fi
+            if [ "$attempt" -eq 3 ]; then
+              echo "ERROR: hdiutil failed 3 times"
+              exit 1
+            fi
+            echo "hdiutil failed (attempt $attempt), retrying in 10s..."
+            sleep 10
+          done
+          hdiutil verify "$DMG"
+          ls -la "$DMG"
 
       - name: Upload macOS artifact
         uses: actions/upload-artifact@v7

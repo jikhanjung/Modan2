@@ -9,12 +9,42 @@ on:
       - 'v*.*.*'
 
 jobs:
+  # Refuse the tag before anything is built. A tag that disagrees with
+  # version.py would publish artifacts named for a different version (the build
+  # reads version.py, not the tag), and a tag without a CHANGELOG section would
+  # publish a release with no notes. Both used to go through: the first
+  # silently, the second with a warning. Checked first so a bad tag costs
+  # seconds, not the 30 minutes of the build matrix.
+  verify-version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Tag matches version.py and has release notes
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          SRC_VERSION=$(sed -n 's/^__version__ = "\(.*\)"$/\1/p' version.py)
+          echo "tag: $TAG_VERSION   version.py: $SRC_VERSION"
+          if [ -z "$SRC_VERSION" ]; then
+            echo "::error::Could not read __version__ from version.py"
+            exit 1
+          fi
+          if [ "$TAG_VERSION" != "$SRC_VERSION" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match version.py ($SRC_VERSION). Bump version.py in the tagged commit, or tag v$SRC_VERSION."
+            exit 1
+          fi
+          if ! grep -qF "## [$TAG_VERSION]" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md has no '## [$TAG_VERSION]' section. Roll [Unreleased] into it before tagging."
+            exit 1
+          fi
+
   test:
+    needs: verify-version
     uses: ./.github/workflows/test.yml
 
   # Same commit-count build number as build.yml / manual-release.yml so every
   # build path stamps a consistent number (github.run_number is per-workflow).
   compute-build-number:
+    needs: verify-version
     runs-on: ubuntu-latest
     outputs:
       build_number: ${{ steps.bn.outputs.build_number }}
@@ -43,11 +73,21 @@ jobs:
         with:
           path: release-files/
 
+      # Each line names the file as it is published -- the bare filename, not
+      # the per-artifact folder it was downloaded into here. With the folder in
+      # the path (./modan2-macos/...), `sha256sum -c SHA256SUMS.txt` next to the
+      # downloaded files failed for every file, so the published checksums
+      # could not be checked the standard way.
       - name: Generate SHA256 checksums
         run: |
+          set -euo pipefail
           cd release-files
-          find . -type f \( -name "*.zip" -o -name "*.dmg" -o -name "*.AppImage" \) -exec sha256sum {} \; > ../SHA256SUMS.txt
+          find . -type f \( -name "*.zip" -o -name "*.dmg" -o -name "*.AppImage" \) -print0 | sort -z |
+            while IFS= read -r -d '' f; do
+              (cd "$(dirname "$f")" && sha256sum "$(basename "$f")")
+            done > ../SHA256SUMS.txt
           cd ..
+          [ -s SHA256SUMS.txt ] || { echo "::error::No release files found to checksum"; exit 1; }
           echo "=== Generated Checksums ==="
           cat SHA256SUMS.txt
 
@@ -65,13 +105,14 @@ jobs:
             found               { print }
           ' CHANGELOG.md | sed -e '/./,$!d' | tac | sed -e '/./,$!d' | tac)
 
-          if [ -n "$NOTES" ]; then
-            echo "Using CHANGELOG.md section for $VERSION"
-            HEADER="## What's changed"
-          else
-            echo "::warning::No CHANGELOG.md section found for $VERSION; publishing checksums only"
-            HEADER=""
+          # verify-version already required the heading; an empty section
+          # (heading with nothing under it) is caught here.
+          if [ -z "$NOTES" ]; then
+            echo "::error::The CHANGELOG.md section for $VERSION is empty; refusing to publish a release without notes"
+            exit 1
           fi
+          echo "Using CHANGELOG.md section for $VERSION"
+          HEADER="## What's changed"
 
           {
             echo 'RELEASE_BODY<<GH_EOF'

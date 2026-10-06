@@ -142,13 +142,13 @@ def _ssl_contexts():
 
         contexts.append(truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT))
     except ImportError:
-        pass
+        logger.debug("truststore not installed; the OS trust store is not consulted")
     try:
         import certifi
 
         contexts.append(ssl.create_default_context(cafile=certifi.where()))
     except ImportError:
-        pass
+        logger.debug("certifi not installed; no bundled CA list to fall back on")
     return contexts or [ssl.create_default_context()]
 
 
@@ -177,16 +177,20 @@ def fetch_releases(timeout=REQUEST_TIMEOUT):
         RELEASES_API_URL,
         headers={"Accept": "application/vnd.github+json", "User-Agent": f"{PROGRAM_NAME}/{PROGRAM_VERSION}"},
     )
-    contexts = _ssl_contexts()
-    for i, context in enumerate(contexts):
+    *fallbacks, last = _ssl_contexts()
+    for i, context in enumerate(fallbacks, start=1):
         try:
-            with urllib.request.urlopen(request, timeout=timeout, context=context) as response:  # noqa: S310
-                releases = json.loads(response.read().decode("utf-8"))
-            break
+            return _read_releases(request, timeout, context)
         except OSError as e:
-            if not _is_certificate_failure(e) or i == len(contexts) - 1:
+            if not _is_certificate_failure(e):
                 raise
-            logger.info("Update check: certificate not verified with trust source %d, trying the next: %s", i + 1, e)
+            logger.info("Update check: certificate not verified with trust source %d, trying the next: %s", i, e)
+    return _read_releases(request, timeout, last)
+
+
+def _read_releases(request, timeout, context):
+    with urllib.request.urlopen(request, timeout=timeout, context=context) as response:  # noqa: S310
+        releases = json.loads(response.read().decode("utf-8"))
     if not isinstance(releases, list):
         raise ValueError("unexpected response from GitHub")
     return releases

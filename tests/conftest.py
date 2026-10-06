@@ -227,6 +227,23 @@ def suppress_modal_dialogs(monkeypatch):
 ALL_MODELS = ("MdDataset", "MdObject", "MdImage", "MdThreeDModel", "MdAnalysis")
 
 
+@pytest.fixture(autouse=True)
+def _no_network_update_check(monkeypatch):
+    """Keep the About box's update check off the network.
+
+    Opening the About box asks GitHub for newer releases. Tests open it, and a
+    test suite must not depend on (or hit) the network; the check fails fast
+    here instead, which the box reports as "could not check". Tests of the
+    check itself replace ``fetch_releases`` or ``urlopen`` explicitly.
+    """
+    import MdUpdate
+
+    def _offline(*_args, **_kwargs):
+        raise OSError("network disabled in tests")
+
+    monkeypatch.setattr(MdUpdate, "fetch_releases", _offline)
+
+
 @pytest.fixture(autouse=True, scope="session")
 def _never_touch_the_real_database(tmp_path_factory):
     """Make the user's real database unreachable for the whole test session.

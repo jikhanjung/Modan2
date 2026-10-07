@@ -245,23 +245,28 @@ msgstr "**변수 추가**:"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:81
 msgid "Open the dataset dialog and go to the **Variables** tab"
-msgstr "데이터셋 대화상자를 열고 **Variables** 탭으로 이동합니다"
+msgstr "데이터셋 대화상자를 열고 **변수**\\ (Variables) 탭으로 이동합니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:82
 msgid "Click **\"Add Variable\"** and type the name (e.g. \"Species\", \"Sex\", \"Age\")"
-msgstr "**\"Add Variable\"** 을 클릭하고 이름을 입력합니다(예: \"Species\", \"Sex\", \"Age\")"
+msgstr ""
+"**\"변수 추가\"**\\ (Add Variable)를 클릭하고 이름을 입력합니다(예: \"Species\", \"Sex\", \"Age\")"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:83
 msgid ""
 "Double-click a name in the list to rename it, or select it and click "
 "**\"Delete Variable\"** to remove it"
-msgstr "목록에서 이름을 더블클릭하면 이름을 바꿀 수 있고, 선택한 뒤 **\"Delete Variable\"** 을 클릭하면 삭제됩니다"
+msgstr ""
+"목록에서 이름을 더블클릭하면 이름을 바꿀 수 있고, 선택한 뒤 **\"변수 삭제\"**\\ (Delete Variable)를 클릭하면 "
+"삭제됩니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:86
 msgid ""
 "The main window also has an **\"Add variable\"** action, which prompts for a"
 " name and appends it to the selected dataset."
-msgstr "메인 창에도 **\"Add variable\"** 동작이 있습니다. 이름을 물은 뒤 선택한 데이터셋에 변수를 추가합니다."
+msgstr ""
+"메인 창에도 **\"변수 추가\"**\\ (Add variable) 동작이 있습니다. 이름을 물은 뒤 선택한 데이터셋에 변수를 "
+"추가합니다."
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:89
 msgid "**Setting Object Variables**:"
@@ -570,8 +575,9 @@ msgid ""
 "landmark curve), and **Calibration** (set the image scale). Only one is "
 "active at a time."
 msgstr ""
-"객체 대화상자에는 클릭이 어떤 동작을 할지 결정하는 모드 버튼이 있습니다: **Landmark**\\ (랜드마크 배치/이동, 기본값), "
-"**Curve**\\ (준랜드마크 곡선 추적), **Calibration**\\ (이미지 축척 설정). 한 번에 하나만 활성화됩니다."
+"객체 대화상자에는 클릭이 어떤 동작을 할지 결정하는 모드 버튼이 있습니다: **Landmark**\\ (랜드마크 배치/이동, "
+"기본값), **곡선**\\ (Curve, 준랜드마크 곡선 추적), **Calibration**\\ (이미지 축척 설정). 한 번에 "
+"하나만 활성화됩니다."
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:263
 msgid "Placing Landmarks (2D)"
@@ -668,7 +674,7 @@ msgstr "**오른쪽 버튼 드래그** 또는 **마우스 휠**: 확대/축소"
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:296
 msgid ""
 "**3D Model** / **Rotate** checkboxes: show the mesh, and auto-rotate it"
-msgstr "**3D Model** / **Rotate** 체크박스: 메시를 표시하고 자동으로 회전시킵니다"
+msgstr "**3D 모델**\\ (3D Model) / **회전**\\ (Rotate) 체크박스: 메시를 표시하고 자동으로 회전시킵니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:299
 msgid "Editing Landmark Coordinates"
@@ -790,16 +796,18 @@ msgstr "각 랜드마크에 이름/약어와 설명을 **데이터셋** 수준�
 msgid ""
 "In the Object Dialog, click **\"Landmark Names\"** (or use the dataset "
 "dialog's landmark-names tab)"
-msgstr "객체 대화상자에서 **\"랜드마크 이름\"** 을 클릭합니다(또는 데이터셋 대화상자의 랜드마크 이름 탭을 사용합니다)"
+msgstr ""
+"객체 대화상자에서 **\"랜드마크 이름\"**\\ (Landmark Names)을 클릭합니다(또는 데이터셋 대화상자의 랜드마크 이름 탭을 "
+"사용합니다)"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:352
 msgid ""
 "Fill in the **Name** and **Description** columns for each landmark index"
-msgstr "각 랜드마크 인덱스에 대해 **Name**\\ (이름)과 **Description**\\ (설명) 열을 채웁니다"
+msgstr "각 랜드마크 인덱스에 대해 **이름**\\ (Name)과 **설명**\\ (Description) 열을 채웁니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:353
 msgid "Click **Save**"
-msgstr "**Save**\\ (저장)를 클릭합니다"
+msgstr "**저장**\\ (Save)을 클릭합니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:355
 msgid ""
@@ -807,8 +815,8 @@ msgid ""
 "**Index** / **Name** radio buttons: **Name** draws the landmark's name "
 "instead of its number, and the description appears as a tooltip."
 msgstr ""
-"디지타이징 중에는 **Show** 체크박스와 **Index** / **Name** 라디오 버튼으로 레이블 모드를 바꿀 수 있습니다. "
-"**Name** 을 선택하면 번호 대신 랜드마크 이름이 표시되고, 설명은 툴팁으로 나타납니다."
+"디지타이징 중에는 **표시**\\ (Show) 체크박스와 **인덱스**\\ (Index) / **이름**\\ (Name) 라디오 버튼으로 "
+"레이블 모드를 바꿀 수 있습니다. **이름** 을 선택하면 번호 대신 랜드마크 이름이 표시되고, 설명은 툴팁으로 나타납니다."
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:362
 msgid "Semi-landmark Curves"
@@ -846,8 +854,7 @@ msgid ""
 "Open the Object Dialog for a 2D object and click the **Curve** mode button "
 "(tooltip: *Trace a curve (semi-landmarks)*)"
 msgstr ""
-"2D 객체의 객체 대화상자를 열고 **Curve** 모드 버튼을 클릭합니다 (툴팁: *Trace a curve (semi-"
-"landmarks)*)"
+"2D 객체의 객체 대화상자를 열고 **곡선**\\ (Curve) 모드 버튼을 클릭합니다 (툴팁: *곡선 추적 (준랜드마크)*)"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:378
 msgid "Click along the curve to lay down points"
@@ -876,9 +883,10 @@ msgid ""
 "of points in between for a sharp one). Uncheck **\"Snap to curve\"** for a "
 "plain hand trace."
 msgstr ""
-"**곡선에 스냅(라이브와이어 경계 검출)** — Curve 모드에서 기본으로 켜져 있습니다. 추적선이 클릭한 점들 사이에서 이미지의 가장"
-" 강한 경계를 따라가므로, 깔끔한 윤곽선을 몇 번의 클릭만으로 얻을 수 있습니다(완만한 곡선은 시작점과 끝점만, 급하게 꺾이는 곡선은 "
-"중간에 점 몇 개를 더). 손으로 그대로 그리려면 **\"Snap to curve\"** 체크를 해제하세요."
+"**가장자리에 맞춤(라이브와이어 경계 검출)** — 곡선 모드에서 기본으로 켜져 있습니다. 추적선이 클릭한 점들 사이에서 이미지의 "
+"가장 강한 경계를 따라가므로, 깔끔한 윤곽선을 몇 번의 클릭만으로 얻을 수 있습니다(완만한 곡선은 시작점과 끝점만, 급하게 꺾이는 "
+"곡선은 중간에 점 몇 개를 더). 손으로 그대로 그리려면 **\"가장자리에 맞춤\"**\\ (Snap to curve) 체크를 "
+"해제하세요."
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:390
 msgid ""
@@ -887,9 +895,9 @@ msgid ""
 "clicked stay put. Toggle with the **\"Smooth curve\"** checkbox. (Snap and "
 "Smooth are only available in Curve mode.)"
 msgstr ""
-"**곡선 부드럽게(Smooth curve)** — 기본으로 켜져 있습니다. 스냅된 추적선의 픽셀 계단 현상을 제거해 준랜드마크가 매끄러운"
-" 곡선 위에 놓이게 하며, 사용자가 직접 클릭한 점은 그대로 유지합니다. **\"Smooth curve\"** 체크박스로 켜고 끕니다. "
-"(스냅과 부드럽게는 Curve 모드에서만 사용할 수 있습니다.)"
+"**곡선 다듬기**\\ (Smooth curve) — 기본으로 켜져 있습니다. 스냅된 추적선의 픽셀 계단 현상을 제거해 준랜드마크가 "
+"매끄러운 곡선 위에 놓이게 하며, 사용자가 직접 클릭한 점은 그대로 유지합니다. **\"곡선 다듬기\"** 체크박스로 켜고 끕니다. "
+"(가장자리 맞춤과 곡선 다듬기는 곡선 모드에서만 사용할 수 있습니다.)"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:395
 msgid "**Editing a traced curve**:"
@@ -905,8 +913,8 @@ msgid ""
 "Drag a point to move it; click the line to add a point; right-click a point "
 "for **Delete Point** or the whole curve for **Delete Curve**"
 msgstr ""
-"점을 드래그하면 이동하고, 선을 클릭하면 점이 추가됩니다. 점에서 오른쪽 클릭하면 **Delete Point**, 곡선 전체를 지우려면 "
-"**Delete Curve** 를 사용합니다"
+"점을 드래그하면 이동하고, 선을 클릭하면 점이 추가됩니다. 점에서 오른쪽 클릭하면 **점 삭제**\\ (Delete Point), "
+"곡선 전체를 지우려면 **곡선 삭제**\\ (Delete Curve)를 사용합니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:400
 msgid ""
@@ -921,15 +929,15 @@ msgid ""
 "curve. Right-click a row → **\"Delete Curve (all specimens)\"** removes that"
 " curve from the whole dataset."
 msgstr ""
-"**곡선 표**\\ (객체 대화상자 내)는 각 곡선을 **Name**\\ (이름), **N**\\ (점 개수), **Traced**\\ "
-"(추적 여부 ✓)와 함께 나열합니다. **N** 을 수정하면 곡선을 다시 재표본화합니다. 행에서 오른쪽 클릭 → **\"Delete "
-"Curve (all specimens)\"** 를 선택하면 데이터셋 전체에서 그 곡선이 삭제됩니다."
+"**곡선 표**\\ (객체 대화상자 내)는 각 곡선을 **이름**\\ (Name), **N**\\ (점 개수), **추적됨**\\ "
+"(Traced, ✓)과 함께 나열합니다. **N** 을 수정하면 곡선을 다시 재표본화합니다. 행에서 오른쪽 클릭 → **\"곡선 삭제 "
+"(모든 개체)\"**\\ (Delete Curve (all specimens))를 선택하면 데이터셋 전체에서 그 곡선이 삭제됩니다."
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:408
 msgid ""
 "Curves are held in memory while you work and written to the database on "
 "**Save**."
-msgstr "곡선은 작업하는 동안 메모리에 보관되며 **Save**\\ (저장) 시 데이터베이스에 기록됩니다."
+msgstr "곡선은 작업하는 동안 메모리에 보관되며 **저장**\\ (Save) 시 데이터베이스에 기록됩니다."
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:411
 msgid "Calibration (Setting the Scale)"
@@ -995,8 +1003,8 @@ msgid ""
 "and shown as a guide, so you know roughly where each one goes. Off by "
 "default."
 msgstr ""
-"**Show Expected** (2D): 새 표본에 랜드마크를 두 개 이상 배치하면, 나머지 위치를 데이터셋 평균 형상에서 예측해 "
-"안내선으로 보여주므로 각 랜드마크가 대략 어디쯤인지 알 수 있습니다. 기본은 꺼짐입니다."
+"**예상 위치 보기**\\ (Show Expected, 2D): 새 표본에 랜드마크를 두 개 이상 배치하면, 나머지 위치를 데이터셋 "
+"평균 형상에서 예측해 안내선으로 보여주므로 각 랜드마크가 대략 어디쯤인지 알 수 있습니다. 기본은 꺼짐입니다."
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:439
 msgid ""
@@ -1025,8 +1033,8 @@ msgid ""
 "**Show** + **Index** / **Name**: toggle landmark labels and choose whether "
 "the label is the index number or the landmark name"
 msgstr ""
-"**Show** + **Index** / **Name**: 랜드마크 레이블을 켜고 끄며, 레이블을 인덱스 번호로 할지 랜드마크 이름으로 "
-"할지 선택합니다"
+"**표시**\\ (Show) + **인덱스**\\ (Index) / **이름**\\ (Name): 랜드마크 레이블을 켜고 끄며, 레이블을 "
+"인덱스 번호로 할지 랜드마크 이름으로 할지 선택합니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:452
 msgid "**Wireframe**: connect landmarks along the dataset wireframe"
@@ -1050,20 +1058,22 @@ msgstr "**추정값 보기**\\ (Show Estimated): 결측 랜드마크의 추정 �
 msgid ""
 "**Show Expected**: predicted positions of not-yet-placed landmarks (see "
 "Digitizing Aids)"
-msgstr "**예상 위치 보기**: 아직 배치하지 않은 랜드마크의 예측 위치 (디지타이징 보조 기능 참조)"
+msgstr ""
+"**예상 위치 보기**\\ (Show Expected): 아직 배치하지 않은 랜드마크의 예측 위치 (디지타이징 보조 기능 참조)"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:458
 msgid "**Curve**: show the raw traced curves"
-msgstr "**Curve**: 추적한 원본 곡선을 표시합니다"
+msgstr "**곡선**\\ (Curve): 추적한 원본 곡선을 표시합니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:459
 msgid "**Semi-LM**: show the derived semi-landmarks"
-msgstr "**준랜드마크**: 곡선에서 유도된 준랜드마크를 표시합니다"
+msgstr "**준랜드마크**\\ (Semi-LM): 곡선에서 유도된 준랜드마크를 표시합니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:460
 msgid ""
 "**3D Model** / **Rotate** (3D objects): show the mesh and auto-rotate it"
-msgstr "**3D Model** / **Rotate** (3D 객체): 메시를 표시하고 자동으로 회전시킵니다"
+msgstr ""
+"**3D 모델**\\ (3D Model) / **회전**\\ (Rotate) — 3D 객체: 메시를 표시하고 자동으로 회전시킵니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:462
 msgid ""
@@ -1117,7 +1127,7 @@ msgstr ""
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:487
 msgid "Click **Analyze** (``Ctrl+G``) or use the **Data** menu"
-msgstr "**분석**\\ (Analyze, ``Ctrl+G``)을 클릭하거나 **Data** 메뉴를 사용합니다"
+msgstr "**분석**\\ (Analyze, ``Ctrl+G``)을 클릭하거나 **데이터**\\ (Data) 메뉴를 사용합니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:488
 msgid "In the analysis dialog, set:"
@@ -1148,8 +1158,8 @@ msgid ""
 "computed (e.g. too few groups) the failure is reported rather than silently "
 "skipped."
 msgstr ""
-"**\"OK\"** 를 클릭해 실행합니다. 진행 상황이 표시되며, CVA/MANOVA를 계산할 수 없는 경우(예: 그룹 수가 너무 "
-"적음)에는 조용히 건너뛰지 않고 실패를 알려줍니다."
+"**\"확인\"**\\ (OK)을 클릭해 실행합니다. 진행 상황이 표시되며, CVA/MANOVA를 계산할 수 없는 경우(예: 그룹 수가 "
+"너무 적음)에는 조용히 건너뛰지 않고 실패를 알려줍니다."
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:497
 msgid "Explore the results in the **Data Exploration** dialog."
@@ -1603,7 +1613,9 @@ msgstr "랜드마크 오버레이: 인덱스 또는 이름 레이블이 붙은 �
 msgid ""
 "Semi-landmark curves and their derived points (toggle with the **Curve** and"
 " **Semi-LM** checkboxes)"
-msgstr "준랜드마크 곡선과 그로부터 유도된 점들 (**곡선** 및 **준랜드마크** 체크박스로 켜고 끄기)"
+msgstr ""
+"준랜드마크 곡선과 그로부터 유도된 점들 (**곡선**\\ (Curve) 및 **준랜드마크**\\ (Semi-LM) 체크박스로 켜고 "
+"끄기)"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:752
 msgid "3D Viewer"
@@ -1740,9 +1752,9 @@ msgid ""
 "curves are written under ``CURVES=`` / ``POINTS=`` blocks; a Procrustes "
 "export writes the merged aligned landmarks."
 msgstr ""
-"내보낼 때 적용할 **중첩정렬** 을 선택합니다: **None**\\ (원좌표) 또는 **Procrustes**\\ (정렬됨). 원좌표 "
-"TPS로 내보내면 추적한 준랜드마크 곡선이 ``CURVES=`` / ``POINTS=`` 블록으로 기록되고, 프로크루스테스로 내보내면 "
-"병합된 정렬 랜드마크가 기록됩니다."
+"내보낼 때 적용할 **중첩정렬** 을 선택합니다: **정렬하지 않음**\\ (None, 원좌표) 또는 **프로크루스테스**\\ "
+"(Procrustes, 정렬됨). 원좌표 TPS로 내보내면 추적한 준랜드마크 곡선이 ``CURVES=`` / ``POINTS=`` "
+"블록으로 기록되고, 프로크루스테스로 내보내면 병합된 정렬 랜드마크가 기록됩니다."
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:808
 msgid "Pick which objects to include from the object list."
@@ -1750,7 +1762,7 @@ msgstr "객체 목록에서 포함할 객체를 선택합니다."
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:809
 msgid "Click **\"Export\"**."
-msgstr "**\"Export\"**\\ (내보내기)를 클릭합니다."
+msgstr "**\"내보내기\"**\\ (Export)를 클릭합니다."
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:812
 msgid "Exporting a Dataset Package (JSON+ZIP)"
@@ -1771,8 +1783,8 @@ msgid ""
 "Tick **\"Include image and model files\"** to bundle the media; an "
 "**Estimated size** figure updates as you change the options."
 msgstr ""
-"미디어를 함께 묶으려면 **\"Include image and model files\"** 를 체크하세요. 옵션을 바꿀 때마다 "
-"**Estimated size**\\ (예상 크기) 값이 갱신됩니다."
+"미디어를 함께 묶으려면 **\"이미지 및 모델 파일 포함\"**\\ (Include image and model files)을 "
+"체크하세요. 옵션을 바꿀 때마다 **Estimated size**\\ (예상 크기) 값이 갱신됩니다."
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:821
 msgid ""
@@ -1865,7 +1877,7 @@ msgstr "**Esc** / **오른쪽 클릭** - 현재 추적 취소"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:856
 msgid "**Right-click a curve point** - Delete Point / Delete Curve"
-msgstr "**곡선의 점에서 오른쪽 클릭** - 점 삭제 / 곡선 삭제"
+msgstr "**곡선의 점에서 오른쪽 클릭** - 점 삭제 (Delete Point) / 곡선 삭제 (Delete Curve)"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:860
 msgid "Preferences"
@@ -1887,11 +1899,11 @@ msgstr "**언어**: English 또는 Korean (한국어). 즉시 적용됩니다"
 msgid ""
 "**Remember Geometry**: restore window size/position between sessions "
 "(Yes/No)"
-msgstr "**Remember Geometry**: 세션 간에 창 크기/위치를 복원합니다 (예/아니오)"
+msgstr "**윈도우 모양 기억**\\ (Remember Geometry): 세션 간에 창 크기/위치를 복원합니다 (예/아니오)"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:869
 msgid "**Toolbar Icon Size**: Small / Medium / Large"
-msgstr "**Toolbar Icon Size**: 작게 / 중간 / 크게"
+msgstr "**툴바 아이콘 크기**\\ (Toolbar Icon Size): 작게 / 중간 / 크게"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:872
 msgid "Viewer Appearance"

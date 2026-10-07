@@ -259,7 +259,7 @@ msgstr "트리에서 상위 데이터셋을 오른쪽 클릭합니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/advanced_features.rst:128
 msgid "Select **\"Add child dataset\"**"
-msgstr "**\"Add child dataset\"**\\ (하위 데이터셋 추가)를 선택합니다"
+msgstr "**\"하위 데이터셋 추가\"**\\ (Add child dataset)를 선택합니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/advanced_features.rst:129
 msgid ""
@@ -350,15 +350,16 @@ msgid ""
 "mode), the trace follows the strongest image edge between clicks, so a clean"
 " outline usually needs only a handful of points."
 msgstr ""
-"**클릭 수를 줄이세요.** **\"Snap to curve\"**\\ 가 켜져 있으면(Curve 모드의 기본값) 추적선이 클릭 사이에서"
-" 이미지의 가장 강한 경계를 따라가므로, 깔끔한 윤곽선에 보통 점 몇 개면 충분합니다."
+"**클릭 수를 줄이세요.** **\"가장자리에 맞춤\"**\\ (Snap to curve)이 켜져 있으면(곡선 모드의 기본값) 추적선이 "
+"클릭 사이에서 이미지의 가장 강한 경계를 따라가므로, 깔끔한 윤곽선에 보통 점 몇 개면 충분합니다."
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/advanced_features.rst:195
 msgid ""
 "**Remove a curve everywhere.** Right-click a row in the curve table → "
 "**\"Delete Curve (all specimens)\"**."
 msgstr ""
-"**곡선을 전체에서 제거합니다.** 곡선 표의 행을 오른쪽 클릭 → **\"Delete Curve (all specimens)\"**."
+"**곡선을 전체에서 제거합니다.** 곡선 표의 행을 오른쪽 클릭 → **\"곡선 삭제 (모든 개체)\"**\\ (Delete Curve "
+"(all specimens))."
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/advanced_features.rst:197
 msgid ""
@@ -411,15 +412,15 @@ msgstr "완료된 분석을 **데이터 탐색** 에서 엽니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/advanced_features.rst:240
 msgid "Tick **\"Show regression\"**"
-msgstr "**\"Show regression\"** 을 체크합니다"
+msgstr "**\"회귀선 보기\"**\\ (Show regression)를 체크합니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/advanced_features.rst:241
 msgid ""
 "Choose the grouping with **Group by**, and whether the line is fitted to "
 "**All** points, **By group**, or a **Select group**"
 msgstr ""
-"**Group by** 로 그룹을 고르고, 회귀선을 **All**\\ (전체 점), **By group**\\ (그룹별), "
-"**Select group**\\ (선택한 그룹) 중 어디에 적합시킬지 정합니다"
+"**그룹 변수**\\ (Group by)로 그룹을 고르고, 회귀선을 **All**\\ (전체 점), **By group**\\ "
+"(그룹별), **Select group**\\ (선택한 그룹) 중 어디에 적합시킬지 정합니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/advanced_features.rst:244
 msgid "**Shape grid:**"
@@ -431,8 +432,8 @@ msgid ""
 "at positions across the plot, so you can see how shape changes along each "
 "axis."
 msgstr ""
-"데이터 탐색에서 **\"Shape grid\"** 를 체크하면 플롯의 여러 위치에서 복원한 형상을 그려 주므로, 각 축을 따라 형상이 "
-"어떻게 변하는지 볼 수 있습니다."
+"데이터 탐색에서 **\"형태 격자\"**\\ (Shape grid)를 체크하면 플롯의 여러 위치에서 복원한 형상을 그려 주므로, 각 축을 "
+"따라 형상이 어떻게 변하는지 볼 수 있습니다."
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/advanced_features.rst:250
 msgid "Superimposition Methods"
@@ -641,19 +642,19 @@ msgstr "**표시 토글** (뷰어 옆의 체크박스):"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/advanced_features.rst:330
 msgid "**3D Model:** show the mesh"
-msgstr "**3D Model:** 메시를 표시"
+msgstr "**3D 모델**\\ (3D Model): 메시를 표시"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/advanced_features.rst:331
 msgid "**Rotate:** spin the model continuously"
-msgstr "**Rotate:** 모델을 계속 회전"
+msgstr "**회전**\\ (Rotate): 모델을 계속 회전"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/advanced_features.rst:332
 msgid ""
 "**Wireframe** / **Polygon** / **Baseline:** draw the dataset's landmark "
 "connections, filled polygons, and baseline"
 msgstr ""
-"**Wireframe** / **Polygon** / **Baseline:** 데이터셋의 랜드마크 연결선, 채워진 폴리곤, 베이스라인을 "
-"표시"
+"**와이어프레임**\\ (Wireframe) / **다각형**\\ (Polygon) / **베이스라인**\\ (Baseline): "
+"데이터셋의 랜드마크 연결선, 채워진 폴리곤, 베이스라인을 표시"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/advanced_features.rst:336
 msgid "Landmark Visualization"
@@ -686,13 +687,15 @@ msgstr "**랜드마크 레이블:**"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/advanced_features.rst:347
 msgid "The **Show** checkbox toggles labels"
-msgstr "**Show** 체크박스로 레이블을 켜고 끕니다"
+msgstr "**표시**\\ (Show) 체크박스로 레이블을 켜고 끕니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/advanced_features.rst:348
 msgid ""
 "The **Index** / **Name** radio buttons choose whether the label is the "
 "landmark's number or its dataset-wide name"
-msgstr "**Index** / **Name** 라디오 버튼으로 레이블을 랜드마크 번호로 할지 데이터셋 전체 이름으로 할지 정합니다"
+msgstr ""
+"**인덱스**\\ (Index) / **이름**\\ (Name) 라디오 버튼으로 레이블을 랜드마크 번호로 할지 데이터셋 전체 이름으로 "
+"할지 정합니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/advanced_features.rst:351
 msgid "**Wireframe display:**"
@@ -1182,11 +1185,13 @@ msgstr "2D 뷰어에서 랜드마크 오른쪽 클릭: 삭제"
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/advanced_features.rst:860
 msgid ""
 "Right-click a curve point (Curve mode): **Delete Point** / **Delete Curve**"
-msgstr "곡선의 점 오른쪽 클릭 (곡선 모드): **점 삭제** / **곡선 삭제**"
+msgstr ""
+"곡선의 점 오른쪽 클릭 (곡선 모드): **점 삭제**\\ (Delete Point) / **곡선 삭제**\\ (Delete "
+"Curve)"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/advanced_features.rst:861
 msgid "Right-click a row in the curve table: **Delete Curve (all specimens)**"
-msgstr "곡선 표의 행 오른쪽 클릭: **곡선 삭제 (모든 개체)**"
+msgstr "곡선 표의 행 오른쪽 클릭: **곡선 삭제 (모든 개체)**\\ (Delete Curve (all specimens))"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/advanced_features.rst:863
 msgid "**Drag-and-drop:**"

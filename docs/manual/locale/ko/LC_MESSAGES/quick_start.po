@@ -55,16 +55,17 @@ msgstr "2. 데이터셋 만들기"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:20
 msgid "Click **\"New Dataset\"** (``Ctrl+N``)"
-msgstr "**\"New Dataset\"** 을 클릭합니다(``Ctrl+N``)"
+msgstr "**\"새 데이터셋\"**\\ (New Dataset)을 클릭합니다(``Ctrl+N``)"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:21
 msgid "Give it a **Name** and set the **Dimension** to 2D or 3D"
-msgstr "**Name** 을 입력하고 **Dimension** 을 2D 또는 3D로 설정합니다"
+msgstr ""
+"**데이터셋 이름**\\ (Dataset Name)을 입력하고 **차원**\\ (Dimension)을 2D 또는 3D로 설정합니다"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:22
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:80
 msgid "Click **OK**"
-msgstr "**OK** 를 클릭합니다"
+msgstr "**저장**\\ (Save)을 클릭합니다"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:24
 msgid "The dataset appears in the tree on the left."
@@ -83,12 +84,12 @@ msgid ""
 "Click **Import** (``Ctrl+I``) and pick the file — the format is detected "
 "from the extension (TPS, NTS, X1Y1, Morphologika, or a JSON+ZIP package)"
 msgstr ""
-"**Import**\\ (``Ctrl+I``)를 클릭하고 파일을 고릅니다 — 형식은 확장자로 자동 감지됩니다(TPS, NTS, X1Y1,"
-" Morphologika, 또는 JSON+ZIP 패키지)"
+"**불러오기**\\ (Import, ``Ctrl+I``)를 클릭하고 파일을 고릅니다 — 형식은 확장자로 자동 감지됩니다(TPS, "
+"NTS, X1Y1, Morphologika, 또는 JSON+ZIP 패키지)"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:33
 msgid "Click **Import**"
-msgstr "**Import** 를 클릭합니다"
+msgstr "**가져오기 실행**\\ (Execute Import)을 클릭합니다"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:35
 msgid ""
@@ -131,7 +132,8 @@ msgstr "랜드마크를 드래그하면 이동하고, 오른쪽 클릭하면 삭
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:51
 msgid ""
 "Click **Save**, then use **Next** / **Previous** to work through the dataset"
-msgstr "**Save** 를 클릭한 뒤 **Next** / **Previous** 로 데이터셋을 훑어 나갑니다"
+msgstr ""
+"**저장**\\ (Save)을 클릭한 뒤 **다음**\\ (Next) / **이전**\\ (Previous)으로 데이터셋을 훑어 나갑니다"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:54
 msgid ""
@@ -139,8 +141,8 @@ msgid ""
 "and trace it — the trace snaps to image edges and is resampled into evenly-"
 "spaced semi-landmarks. See :ref:`semi-landmark-curves`."
 msgstr ""
-"낱개의 점이 아니라 윤곽선을 담고 싶다면 **Curve** 모드로 전환해 추적하세요 — 추적선이 이미지 경계에 스냅되고 균등한 간격의 "
-"준랜드마크로 재표본화됩니다. :ref:`semi-landmark-curves` 를 참조하세요."
+"낱개의 점이 아니라 윤곽선을 담고 싶다면 **곡선**\\ (Curve) 모드로 전환해 추적하세요 — 추적선이 이미지 경계에 스냅되고 "
+"균등한 간격의 준랜드마크로 재표본화됩니다. :ref:`semi-landmark-curves` 를 참조하세요."
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:58
 msgid ""
@@ -164,8 +166,8 @@ msgid ""
 "Open the dataset dialog → **Variables** tab → **\"Add Variable\"**, and name"
 " it (e.g. ``Species``)"
 msgstr ""
-"데이터셋 대화상자 → **Variables** 탭 → **\"Add Variable\"** 을 열고 이름을 지정합니다(예: "
-"``Species``)"
+"데이터셋 대화상자 → **변수**\\ (Variables) 탭 → **\"변수 추가\"**\\ (Add Variable)를 클릭하고 이름을 "
+"지정합니다(예: ``Species``)"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:69
 msgid "Open each object and fill in its value for that variable"
@@ -212,8 +214,8 @@ msgid ""
 "data, or use the Data Exploration dialog's chart-image control to save a "
 "plot."
 msgstr ""
-"내보내려면 데이터셋을 선택하고 **Export**\\ (``Ctrl+E``)로 데이터를 내보내거나, 데이터 탐색 대화상자의 차트 이미지 "
-"저장 기능으로 플롯을 저장하세요."
+"내보내려면 데이터셋을 선택하고 **내보내기**\\ (Export, ``Ctrl+E``)로 데이터를 내보내거나, 데이터 탐색 대화상자의 "
+"차트 이미지 저장 기능으로 플롯을 저장하세요."
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:93
 msgid "Typical workflow"
@@ -308,7 +310,7 @@ msgid ""
 "Check that you opened the object dialog and that the **Landmark** mode "
 "button is selected — not **Curve** or **Calibration**."
 msgstr ""
-"객체 대화상자를 열었는지, 그리고 **Landmark** 모드 버튼이 선택되어 있는지 확인하세요 — **Curve** 나 "
+"객체 대화상자를 열었는지, 그리고 **Landmark** 모드 버튼이 선택되어 있는지 확인하세요 — **곡선**\\ (Curve)이나 "
 "**Calibration** 이 아니어야 합니다."
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:134

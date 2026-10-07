@@ -349,8 +349,8 @@ msgid ""
 "3D models, backups and logs all move together; they are one library, and "
 "either half is useless without the other."
 msgstr ""
-"**예.** **Preferences**\\ (환경 설정)에서 **Data folder**\\ (데이터 폴더)를 바꾸면 됩니다. 3D "
-"모델이 Modan2를 설치한 드라이브를 다 채웠을 때 유용합니다. 데이터베이스, 이미지, 3D 모델, 백업, 로그가 함께 옮겨집니다. "
+"**예.** **설정**\\ (Preferences)에서 **데이터 폴더**\\ (Data folder)를 바꾸면 됩니다. 3D 모델이 "
+"Modan2를 설치한 드라이브를 다 채웠을 때 유용합니다. 데이터베이스, 이미지, 3D 모델, 백업, 로그가 함께 옮겨집니다. "
 "이들은 하나의 라이브러리이고, 어느 한쪽만 있으면 쓸모가 없기 때문입니다."
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/faq.rst:139
@@ -730,15 +730,15 @@ msgstr ""
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/faq.rst:306
 msgid "Trace in the object dialog's **Curve** mode"
-msgstr "객체 대화상자의 **Curve** 모드에서 추적합니다"
+msgstr "객체 대화상자의 **곡선**\\ (Curve) 모드에서 추적합니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/faq.rst:307
 msgid ""
 "**\"Snap to curve\"** (on by default) follows the strongest image edge "
 "between your clicks, so a clean outline takes only a few points"
 msgstr ""
-"**\"Snap to curve\"**\\ (기본 켜짐)가 클릭 사이에서 이미지의 가장 강한 경계를 따라가므로, 깔끔한 윤곽선을 점 몇 "
-"개로 얻을 수 있습니다"
+"**\"가장자리에 맞춤\"**\\ (Snap to curve, 기본 켜짐)이 클릭 사이에서 이미지의 가장 강한 경계를 따라가므로, 깔끔한 "
+"윤곽선을 점 몇 개로 얻을 수 있습니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/faq.rst:309
 msgid ""
@@ -992,7 +992,7 @@ msgstr "트리 뷰에서 데이터셋을 선택합니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/faq.rst:413
 msgid "Click **Analyze** (``Ctrl+G``) or use the **Data** menu"
-msgstr "**분석**\\ (Analyze, ``Ctrl+G``)을 클릭하거나 **Data** 메뉴를 사용합니다"
+msgstr "**분석**\\ (Analyze, ``Ctrl+G``)을 클릭하거나 **데이터**\\ (Data) 메뉴를 사용합니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/faq.rst:414
 msgid ""
@@ -1002,7 +1002,7 @@ msgstr "분석 제목, 중첩정렬 방식, CVA와 MANOVA의 그룹화 변수를
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/faq.rst:416
 msgid "Click **OK**"
-msgstr "**OK** 를 클릭합니다"
+msgstr "**확인**\\ (OK)을 클릭합니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/faq.rst:417
 msgid "Open the finished analysis in the **Data Exploration** dialog"

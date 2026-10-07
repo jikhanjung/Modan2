@@ -24,6 +24,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the Korean name. The method is now passed by its fixed name in every language.
 - Adding a new curve while tracing no longer wipes the names and descriptions of
   the dataset's existing curves.
+- **The Korean interface covers everything again.** Features added during the
+  0.2 betas — library backup and restore, choosing and moving the data folder,
+  and most of the curve-tracing controls — appeared in English in an otherwise
+  Korean window. All 81 missing phrases are now translated, and the Korean
+  manual names those controls the way the window now shows them.
 
 
 ## [0.2.0-beta.5] - 2026-08-13

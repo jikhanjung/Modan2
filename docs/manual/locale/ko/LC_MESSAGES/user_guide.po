@@ -790,7 +790,7 @@ msgstr "각 랜드마크에 이름/약어와 설명을 **데이터셋** 수준�
 msgid ""
 "In the Object Dialog, click **\"Landmark Names\"** (or use the dataset "
 "dialog's landmark-names tab)"
-msgstr "객체 대화상자에서 **\"Landmark Names\"** 를 클릭합니다(또는 데이터셋 대화상자의 랜드마크 이름 탭을 사용합니다)"
+msgstr "객체 대화상자에서 **\"랜드마크 이름\"** 을 클릭합니다(또는 데이터셋 대화상자의 랜드마크 이름 탭을 사용합니다)"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:352
 msgid ""
@@ -1050,7 +1050,7 @@ msgstr "**추정값 보기**\\ (Show Estimated): 결측 랜드마크의 추정 �
 msgid ""
 "**Show Expected**: predicted positions of not-yet-placed landmarks (see "
 "Digitizing Aids)"
-msgstr "**Show Expected**: 아직 배치하지 않은 랜드마크의 예측 위치 (디지타이징 보조 기능 참조)"
+msgstr "**예상 위치 보기**: 아직 배치하지 않은 랜드마크의 예측 위치 (디지타이징 보조 기능 참조)"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:458
 msgid "**Curve**: show the raw traced curves"
@@ -1058,7 +1058,7 @@ msgstr "**Curve**: 추적한 원본 곡선을 표시합니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:459
 msgid "**Semi-LM**: show the derived semi-landmarks"
-msgstr "**Semi-LM**: 곡선에서 유도된 준랜드마크를 표시합니다"
+msgstr "**준랜드마크**: 곡선에서 유도된 준랜드마크를 표시합니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:460
 msgid ""
@@ -1603,7 +1603,7 @@ msgstr "랜드마크 오버레이: 인덱스 또는 이름 레이블이 붙은 �
 msgid ""
 "Semi-landmark curves and their derived points (toggle with the **Curve** and"
 " **Semi-LM** checkboxes)"
-msgstr "준랜드마크 곡선과 그로부터 유도된 점들 (**Curve** 및 **Semi-LM** 체크박스로 켜고 끄기)"
+msgstr "준랜드마크 곡선과 그로부터 유도된 점들 (**곡선** 및 **준랜드마크** 체크박스로 켜고 끄기)"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:752
 msgid "3D Viewer"
@@ -1865,7 +1865,7 @@ msgstr "**Esc** / **오른쪽 클릭** - 현재 추적 취소"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:856
 msgid "**Right-click a curve point** - Delete Point / Delete Curve"
-msgstr "**곡선의 점에서 오른쪽 클릭** - Delete Point / Delete Curve"
+msgstr "**곡선의 점에서 오른쪽 클릭** - 점 삭제 / 곡선 삭제"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:860
 msgid "Preferences"

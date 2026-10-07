@@ -1182,11 +1182,11 @@ msgstr "2D 뷰어에서 랜드마크 오른쪽 클릭: 삭제"
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/advanced_features.rst:860
 msgid ""
 "Right-click a curve point (Curve mode): **Delete Point** / **Delete Curve**"
-msgstr "곡선의 점 오른쪽 클릭 (Curve 모드): **Delete Point** / **Delete Curve**"
+msgstr "곡선의 점 오른쪽 클릭 (곡선 모드): **점 삭제** / **곡선 삭제**"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/advanced_features.rst:861
 msgid "Right-click a row in the curve table: **Delete Curve (all specimens)**"
-msgstr "곡선 표의 행 오른쪽 클릭: **Delete Curve (all specimens)**"
+msgstr "곡선 표의 행 오른쪽 클릭: **곡선 삭제 (모든 개체)**"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/advanced_features.rst:863
 msgid "**Drag-and-drop:**"

@@ -8,7 +8,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
-## [Unreleased]
+## [0.2.0] - 2026-10-08
+
+The first stable release of the 0.2 series, after seven pre-releases. Over
+beta.5 it adds an update check, fixes two bugs found in use, and finishes the
+Korean interface. Most of what is new,
+though, arrived during the betas — see the summary below if you are coming from
+0.1.x.
+
+### Coming from 0.1.x
+
+The full notes for every pre-release are in
+[CHANGELOG.md](https://github.com/jikhanjung/Modan2/blob/main/CHANGELOG.md); in
+short:
+
+- **Semi-landmark curves.** Define curves for a dataset, trace them on each
+  specimen (optionally snapping to image edges), and they are resampled into
+  semi-landmarks for analysis. They survive TPS and ZIP export and import.
+- **Bookstein superimposition**, alongside Procrustes, in 2D and 3D.
+- **CVA reports a classification accuracy you can believe — and it will be
+  lower than 0.1.x showed.** It now reduces the data to as many dimensions as
+  the specimens can support and measures accuracy on specimens the model has
+  not seen; the old figure is still shown, as *resubstitution accuracy*. MANOVA
+  applies the same limit. Re-running an analysis saved by 0.1.x will not
+  reproduce its CVA scores.
+- **Choose where your data lives, move it there, and back it up.** Preferences
+  has a **Data folder** row, and Modan2 can move an existing library there for
+  you without ever leaving it half-moved. **Data ▸ Back Up Library** writes
+  datasets, images, 3D models and analyses into one `.zip`; restoring adds and
+  never replaces.
+- **Windows: the installer is now per-user** and installs to
+  `%LOCALAPPDATA%\Programs` without asking for administrator rights. It finds an
+  existing 0.1.x installation and offers to remove it — accept, unless you want
+  both. Your datasets and images are stored outside the program folder and are
+  not affected either way.
+- **Upgrades on Windows actually replace the old version.** Every earlier
+  installer could leave the previous program in place while reporting success.
+- **Preferences** moved to your system's settings folder, and are carried over
+  from the old location automatically.
+- Resistant Fit, offered in the 0.2 alphas, was withdrawn: it does not converge.
+- **The published builds are GPL-3.0**, because they include Qt through PyQt5;
+  the source stays MIT. Using Modan2, commercially or not, is unaffected.
+- Python 3.12 is now the minimum for running from source.
 
 ### Added
 - **The About box tells you when a newer version is out.** Opening Help →

@@ -343,7 +343,7 @@ Install GLUT libraries: `sudo apt-get install -y libglut-dev libglut3.12 python3
 - Cross-platform application (Windows, macOS, Linux)
 - Supports various file formats: TPS, NTS, OBJ, PLY, STL, image formats
 - Core functionality: 2D/3D landmark analysis, statistical shape analysis
-- Version: see `version.py` (0.2.0-beta.1 as of 2026-07-28)
+- Version: see `version.py` (0.2.0 as of 2026-10-08)
 - License: MIT
 
 ### Development Workflow

@@ -85,12 +85,12 @@ msgstr ""
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:29
 msgid ""
-"**Data Import/Export**: Supports various file types (TPS, NTS, Morphologika,"
-" CSV, OBJ, PLY, STL) plus a JSON+ZIP package format that bundles images and "
-"3D models, all with drag-and-drop"
+"**Data Import/Export**: Supports various file types (TPS, NTS, X1Y1, "
+"Morphologika, OBJ, PLY, STL) plus a JSON+ZIP package format that bundles "
+"images and 3D models, all with drag-and-drop"
 msgstr ""
-"**데이터 가져오기/내보내기**: 다양한 파일 형식(TPS, NTS, Morphologika, CSV, OBJ, PLY, STL)과 "
-"이미지·3D 모델을 함께 묶는 JSON+ZIP 패키지 형식을 지원하며, 모두 드래그 앤 드롭이 가능합니다"
+"**데이터 가져오기/내보내기**: 다양한 파일 형식(TPS, NTS, X1Y1, Morphologika, OBJ, PLY, "
+"STL)과 이미지·3D 모델을 함께 묶는 JSON+ZIP 패키지 형식을 지원하며, 모두 드래그 앤 드롭이 가능합니다"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:30
 msgid ""
@@ -164,10 +164,12 @@ msgstr "**객체 가져오기**"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:61
 msgid ""
-"Drag and drop 2D images or 3D models into your dataset, or use File → Import"
-" to load landmark files (TPS, NTS)."
+"Drag and drop 2D images or 3D models onto your dataset's object table, or "
+"use **Data → Import** (``Ctrl+I``) to load a landmark file (TPS, NTS, "
+"X1Y1, Morphologika) as a new dataset."
 msgstr ""
-"2D 이미지나 3D 모델을 데이터셋에 드래그 앤 드롭하거나, 파일 → 가져오기를 사용하여 랜드마크 파일(TPS, NTS)을 불러오세요."
+"2D 이미지나 3D 모델을 데이터셋의 객체 표로 드래그 앤 드롭하거나, **데이터 → 불러오기**\\ (Data → Import, "
+"``Ctrl+I``)로 랜드마크 파일(TPS, NTS, X1Y1, Morphologika)을 새 데이터셋으로 불러오세요."
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:63
 msgid "**Place Landmarks**"
@@ -184,12 +186,12 @@ msgid "**Run Analysis**"
 msgstr "**분석 실행**"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:69
-msgid "Select your dataset and click \"Analyze Dataset\" to perform:"
-msgstr "데이터셋을 선택하고 \"데이터셋 분석\"을 클릭하여 다음을 수행하세요:"
+msgid "Select your dataset and click **Analyze** (``Ctrl+G``) to perform:"
+msgstr "데이터셋을 선택하고 **분석**\\ (Analyze, ``Ctrl+G``)을 클릭하여 다음을 수행하세요:"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:71
-msgid "Procrustes superimposition (aligns shapes)"
-msgstr "Procrustes 중첩 (형태 정렬)"
+msgid "Superimposition (Procrustes or Bookstein; aligns shapes)"
+msgstr "중첩정렬 (Procrustes 또는 Bookstein; 형태 정렬)"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:72
 msgid "Principal Component Analysis (PCA)"
@@ -209,9 +211,12 @@ msgstr "**결과 탐색**"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:78
 msgid ""
-"View PC plots, shape variations, and statistical outputs in the Data "
-"Exploration dialog."
-msgstr "데이터 탐색 대화상자에서 PC 플롯, 형태 변이, 통계 출력을 확인하세요."
+"Select the analysis in the tree to see its PCA, CVA and MANOVA results; "
+"click **Data Exploration** for interactive plots and shape variations, or "
+"**Analysis Details** for the result tables."
+msgstr ""
+"트리에서 분석을 선택하면 PCA, CVA, MANOVA 결과가 표시됩니다. 대화형 플롯과 형태 변이는 **데이터 탐색**\\ "
+"(Data Exploration)에서, 결과 표는 **분석 세부사항**\\ (Analysis Details)에서 확인하세요."
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:80
 msgid "**Keyboard Shortcuts**:"
@@ -230,12 +235,15 @@ msgid "``Ctrl+S`` - Save changes"
 msgstr "``Ctrl+S`` - 변경사항 저장"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:85
-msgid "``Ctrl+O`` - Open database"
-msgstr "``Ctrl+O`` - 데이터베이스 열기"
+msgid "``Ctrl+I`` - Import"
+msgstr "``Ctrl+I`` - 불러오기"
+
+msgid "``Ctrl+G`` - Analyze"
+msgstr "``Ctrl+G`` - 분석"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:86
-msgid "``Delete`` - Delete selected items"
-msgstr "``Delete`` - 선택한 항목 삭제"
+msgid "``Delete`` - Clear the selected cells in the object table"
+msgstr "``Delete`` - 객체 표에서 선택한 셀 비우기"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/index.rst:88
 msgid "For more detailed instructions, see the :doc:`user_guide`."

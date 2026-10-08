@@ -18,27 +18,31 @@ the AppImage (Linux).
 -------------------
 
 1. Click **"New Dataset"** (``Ctrl+N``)
-2. Give it a **Name** and set the **Dimension** to 2D or 3D
-3. Click **OK**
+2. Give it a **Dataset Name** and set the **Dimension** to 2D or 3D
+3. Click **Save**
 
-The dataset appears in the tree on the left.
+The dataset appears in the tree on the left. (Importing a landmark file creates
+its own dataset, so for that you can go straight to the next step.)
 
 3. Get your data in
 -------------------
 
 **If you already have landmark coordinates**:
 
-1. Click **Import** (``Ctrl+I``) and pick the file — the format is detected from
-   the extension (TPS, NTS, X1Y1, Morphologika, or a JSON+ZIP package)
-2. Click **Import**
+1. Click **Import** (``Ctrl+I``), then **Open File**, and pick the file — the
+   format is detected from the extension (TPS, NTS, X1Y1, Morphologika, or a
+   JSON+ZIP package)
+2. Check the **Dataset Name** — the import creates a new dataset — and click
+   **Execute Import**
 
-Objects appear in the centre table. You can also drag files straight onto the
-window.
+The new dataset appears in the tree with its objects. You can also drag a
+landmark file onto the dataset tree, which opens the same dialog with the file
+chosen.
 
 **If you are starting from photographs**:
 
-Import the images (``Ctrl+I``, or drag them in) and digitize them in the next
-step.
+Select a 2D dataset and drag the image files onto the object table — each image
+becomes an object named after its file. Digitize them in the next step.
 
 4. Digitize landmarks
 ---------------------
@@ -59,10 +63,11 @@ If a landmark cannot be placed on a specimen, mark it missing rather than skippi
 it, so every object keeps the same landmark count — see
 :ref:`analysis-missing-landmarks`.
 
-5. Add variables (optional)
----------------------------
+5. Add variables
+----------------
 
-Variables are what CVA and MANOVA group by.
+Variables are what CVA and MANOVA group by. An analysis currently needs at least
+one, even if you only want PCA.
 
 1. Open the dataset dialog → **Variables** tab → **"Add Variable"**, and name it
    (e.g. ``Species``)
@@ -75,8 +80,8 @@ One run computes **PCA, CVA, and MANOVA together** — there is no analysis type
 choose.
 
 1. Select the dataset and click **Analyze** (``Ctrl+G``)
-2. Set the **superimposition method** (Procrustes is the default) and, if you
-   defined variables, the **CVA** and **MANOVA grouping variables**
+2. Set the **superimposition method** (Procrustes is the default) and the
+   **CVA** and **MANOVA grouping variables**
 3. Click **OK**
 
 7. Explore the results
@@ -87,7 +92,7 @@ interactive scatter plot — PC1 vs PC2 by default, coloured by group, with othe
 axis combinations, a regression overlay, and a shape grid available.
 
 To export, select the dataset and choose **Export** (``Ctrl+E``) for the data, or
-use the Data Exploration dialog's chart-image control to save a plot.
+use **Export Chart** in the Data Exploration dialog to save a plot.
 
 Typical workflow
 ----------------
@@ -100,7 +105,7 @@ Typical workflow
         ↓
    3. Digitize landmarks / trace curves
         ↓
-   4. Add variables (optional, for grouping)
+   4. Add variables (for grouping)
         ↓
    5. Analyze  (superimposition → PCA + CVA + MANOVA)
         ↓
@@ -132,7 +137,8 @@ Quick fixes
    is selected — not **Curve** or **Calibration**.
 
 **Analysis fails**
-   Every object needs the same number of landmarks; mark gaps as missing rather
+   The dataset needs at least 5 digitized objects and at least one variable, and
+   every object needs the same number of landmarks; mark gaps as missing rather
    than leaving objects short. See :doc:`troubleshooting`.
 
 Next steps

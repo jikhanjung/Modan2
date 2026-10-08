@@ -174,11 +174,14 @@ Batch Operations
 1. Select the dataset
 2. Edit cells directly in the object table
 3. Copy/paste to and from a spreadsheet with ``Ctrl+C`` / ``Ctrl+V``
+4. Click **Save changes** (``Ctrl+S``) — nothing is stored until you do
 
 **Batch import:**
 
-Drag several landmark files onto the window at once, or select them together in
-**File → Import** — each becomes an object in the dataset.
+Drag several images (2D datasets) or 3D models (3D datasets) onto the object
+table at once — each becomes a new object in the selected dataset. A landmark
+file (TPS, NTS, X1Y1, Morphologika) is imported with **Data → Import**
+(``Ctrl+I``), or by dropping it on the dataset tree, and becomes a new dataset.
 
 Semi-landmark Curves at Scale
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -238,8 +241,9 @@ exploration below happens afterwards, in the **Data Exploration** dialog.
 
 1. Open a completed analysis in **Data Exploration**
 2. Tick **"Show regression"**
-3. Choose the grouping with **Group by**, and whether the line is fitted to
-   **All** points, **By group**, or a **Select group**
+3. Choose a variable in **Group by** to fit one line per group, or leave it at
+   *Select property* for a single line through all points; **Degree** sets the
+   polynomial degree and **Extrapolate** extends the lines
 
 **Shape grid:**
 
@@ -329,18 +333,19 @@ Advanced 3D Controls
 
 * **3D Model:** show the mesh
 * **Rotate:** spin the model continuously
-* **Wireframe** / **Polygon** / **Baseline:** draw the dataset's landmark
-  connections, filled polygons, and baseline
+* **Wireframe** / **Polygon:** draw the dataset's landmark connections and
+  filled polygons
 
 Landmark Visualization
 ~~~~~~~~~~~~~~~~~~~~~~
 
-**Customization** — set in **Edit → Preferences**, separately for 2D and 3D:
+**Customization** — set in **Edit → Preferences**; the first three are set
+separately for 2D and 3D:
 
 * **Landmark** size: Small / Medium / Large
 * **Wireframe** thickness: Thin / Medium / Thick
 * **Index** (label) size: Small / Medium / Large
-* **Background Color** for the viewer
+* **Background Color** for the viewers (one setting shared by 2D and 3D)
 
 **Landmark labels:**
 
@@ -350,7 +355,8 @@ Landmark Visualization
 
 **Wireframe display:**
 
-* Define the connections in the dataset dialog's wireframe tab
+* Define the connections in the **Wireframe** field on the dataset dialog's
+  **Landmarks** tab, or draw them with the wireframe tool in the Object Dialog
 
 Model Import and Processing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -425,9 +431,10 @@ Export data for analysis in R:
 
 **Import R results:**
 
-1. Save R results as CSV
-2. Import as variables in Modan2
-3. Visualize in Data Exploration
+1. Copy the R results, one row per specimen
+2. Add matching variables to the dataset, paste the values into the object
+   table (``Ctrl+V``), and click **Save changes**
+3. Run a new analysis and visualize it in Data Exploration
 
 Python/NumPy Integration
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -808,11 +815,10 @@ Workflow Optimization
 
 **Efficient data entry:**
 
-1. **Template datasets:**
+1. **Set up the structure first:**
 
-   * Create dataset with complete structure
-   * Duplicate for new studies
-   * Pre-defined variables and wireframes
+   * Define the variables, landmark names and wireframe before adding objects
+   * Every object added afterwards shares them
 
 2. **Keyboard navigation:**
 
@@ -848,23 +854,27 @@ Hidden Features
 
 **Double-click behaviors:**
 
-* Double-click dataset: Expand/collapse
+* Double-click dataset: Open the dataset dialog (name, landmarks, curves,
+  variables)
 * Double-click object: Open object dialog
-* Double-click analysis: Open results
+* Click analysis: Show its results (PCA / CVA / MANOVA tabs) beside the tree
 
 **Right-click context menus:**
 
-* Right-click dataset in the tree: add a child dataset, object, or analysis;
-  explore data; reload
-* Right-click a landmark in the 2D viewer: delete it
+* Right-click a dataset in the tree: **Add child dataset**, **Add object**,
+  **Add analysis**, **Export**, **Reload**
+* Right-click an analysis in the tree: **Delete analysis**, **Reload**
+* Right-click a landmark in the Object Dialog's viewer: delete it
 * Right-click a curve point (Curve mode): **Delete Point** / **Delete Curve**
 * Right-click a row in the curve table: **Delete Curve (all specimens)**
 
 **Drag-and-drop:**
 
-* Drag TPS file to window: Import
-* Drag image to object: Attach
-* Drag 3D model to object: Attach
+* Drag a TPS, NTS, X1Y1 or Morphologika file onto the dataset tree: open the
+  Import dialog with that file
+* Drag images or 3D models onto the object table: one new object per file
+* Drag an image or 3D model onto the Object Dialog's viewer: attach it to that
+  object
 
 Further Resources
 -----------------

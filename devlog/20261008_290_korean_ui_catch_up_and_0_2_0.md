@@ -92,3 +92,46 @@ UI(설정, 인덱스, 불러오기 …)까지 영어로 인용하는 게 사실�
   일치해야만 적용되게 해서 엉뚱한 곳이 바뀌지 않게 했다.
 - 검증: 한국어 Sphinx 빌드 경고 수 전후 동일(기존 2개), 렌더된 HTML에 닫히지 않은
   `**` 없음, 재스캔 시 남은 영어 라벨은 위의 의도된 3종뿐.
+
+## 후속 2: 영어 매뉴얼을 실제 UI에 맞춤 (같은 날)
+
+위 절에서 별도 작업으로 미룬 "영어 원문이 화면과 다른 곳"을 처리했다. 7개 문서를
+코드와 한 줄씩 대조하니 버튼 이름 몇 개 수준이 아니었다:
+
+- **메뉴 경로**: File 메뉴에는 Exit뿐이다. Import/Export/Analyze/백업은 전부 **Data**
+  메뉴. "File → Import"가 여러 문서에 있었다. "Settings → Visualization",
+  "View → Reset Camera", "Right-click → Properties", ``Ctrl+O``(데이터베이스 열기)도 없다.
+- **없는 기능**: Import Objects / Add Images 대화상자, 스크리 플롯, PC 점수 표, CSV 내보내기,
+  분류 테이블, 효과 크기(부분 η²), Fit to View, Estimate Missing, 변수 매핑, 조명 설정.
+  실제 경로로 바꿨다 — 이미지는 객체 표로 드롭하거나 New Object → Load Image, 결과 표는
+  Analysis Details(→ Save Results, ``.xlsx``), 플롯은 Export Chart(PNG/JPG/PDF/SVG).
+- **동작 차이**:
+  - 가져오기는 항상 **새 데이터셋**을 만든다(선택한 데이터셋에 추가하지 않음).
+    랜드마크 파일 드롭은 트리에만 연결돼 있다.
+  - 객체를 트리로 끌면 **복사**되고, Shift를 누르면 이동이다.
+  - 데이터셋 더블클릭은 데이터셋 대화상자를 연다. 분석 결과는 한 번 클릭으로 보인다.
+  - 3D 뷰어는 가운데 드래그가 이동, 오른쪽 드래그가 확대다.
+  - 회귀선의 All/By group 콤보는 숨겨져 있다.
+  - Baseline 체크박스는 늘 숨겨져 있다.
+  - 분석 최소 객체 수는 5개다.
+- **변수 0개면 분석 전체가 거부된다**(`_validate_dataset_for_general_analysis`). 경고문은
+  "Only PCA analysis will be available"이라고 하지만 `return False`라 PCA도 안 돈다.
+  Quick Start의 "변수 추가 (선택)"는 사실이 아니어서 "현재는 하나 이상 필요"로 썼다
+  — 코드가 의도대로 고쳐지면 되돌릴 문장이다.
+
+`.po`는 `sphinx-intl update` 없이 직접 고쳤다: 새 `.pot`와 기존 `.po`의 msgid 순서를
+정렬해 바뀐 문단을 찾고, msgid·msgstr을 함께 교체/삽입/삭제(주석은 보존). 한 문서 안의
+같은 원문은 번역을 하나만 가진다는 점에 주의 — Quick Start의 "Click **OK**"는 새
+데이터셋(실제는 Save)과 분석(실제 OK) 두 곳이 같은 항목이라, 앞의 후속 절에서 "저장"으로
+바꾼 번역이 분석 단계까지 "저장"으로 만들고 있었다. 영어를 "Click **Save**"로 고치면서
+항목이 갈라져 해결됐다.
+
+이전부터 남아 있던 번역 공백도 메웠다: FAQ·개발자 가이드의 라이선스 문단(GPL-3.0 빌드
+설명, 11개 미번역)과 Resistant Fit 철회 전의 fuzzy 4개. 이제 전 카탈로그 미번역 0 /
+fuzzy 0 / 남은 옛 항목 0. 한국어·영어 빌드 경고는 기존 2개 그대로.
+
+코드 쪽에서 본 것(매뉴얼은 손대지 않음):
+- 내보내기의 **X1Y1** 라디오는 `export_dataset`에 분기가 없어 아무 파일도 쓰지 않는다.
+- 내보내기의 Object List / Export List 선택을 무시하고 항상 전체 객체를 쓴다.
+- Analysis Details는 저장된 분석이 아니라 데이터셋에서 Procrustes PCA를 다시 계산한다.
+- 내보내기 대화상자에 비활성 "Resistant fit" 라디오가 남아 있다.

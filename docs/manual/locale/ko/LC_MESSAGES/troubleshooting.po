@@ -41,10 +41,12 @@ msgstr "Modan2가 파일을 보관하는 위치"
 msgid ""
 "Several problems below come down to a file being missing or unwritable, "
 "so it helps to know where things are. ``~`` is your home folder (for "
-"example ``C:\\Users\\<you>`` on Windows)."
+"example ``C:\\Users\\<you>`` on Windows). These are the defaults; **Edit → "
+"Preferences → Data folder** moves the whole library elsewhere."
 msgstr ""
 "아래 문제들 중 상당수는 파일이 없거나 쓸 수 없어서 생기므로, 각 파일의 위치를 알아 두면 도움이 됩니다. ``~`` 는 홈 "
-"폴더입니다(Windows에서는 예를 들어 ``C:\\Users\\<사용자>``)."
+"폴더입니다(Windows에서는 예를 들어 ``C:\\Users\\<사용자>``). 아래는 기본 위치이며, **편집 → 설정 → 데이터 "
+"폴더**\\ (Edit → Preferences → Data folder)에서 라이브러리 전체를 다른 곳으로 옮길 수 있습니다."
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:20
 msgid "What"
@@ -203,9 +205,9 @@ msgstr "**문제:** 설정이 저장되지 않음"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:88
 msgid ""
-"Preferences are written when the application exits, to your operating "
-"system's settings folder:"
-msgstr "설정은 애플리케이션을 종료할 때 운영체제의 설정 폴더에 기록됩니다:"
+"Preferences are saved when you close the Preferences dialog (window sizes "
+"and positions when you quit), to your operating system's settings folder:"
+msgstr "설정은 설정 대화상자를 닫을 때(창 크기와 위치는 프로그램을 끝낼 때) 운영체제의 설정 폴더에 저장됩니다:"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:95
 msgid "Platform"
@@ -320,20 +322,21 @@ msgid "If you have a recent backup:"
 msgstr "최근 백업이 있다면:"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:168
-msgid "Use backup database"
-msgstr "백업 데이터베이스를 사용"
+msgid "**Data → Back Up Library...** (or keep the backup you already have)"
+msgstr ""
+"**데이터 → 라이브러리 백업...**\\ (Data → Back Up Library...) (이미 있는 백업을 써도 됩니다)"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:169
-msgid "Export all datasets as JSON+ZIP"
-msgstr "모든 데이터셋을 JSON+ZIP으로 내보내기"
+msgid "Quit Modan2 and move ``Modan2.db`` aside"
+msgstr "Modan2를 끝내고 ``Modan2.db`` 를 다른 곳으로 옮기기"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:170
-msgid "Create new database (delete Modan2.db)"
-msgstr "새 데이터베이스 생성 (Modan2.db 삭제)"
+msgid "Start Modan2 — it creates a new, empty database"
+msgstr "Modan2를 시작하면 새 빈 데이터베이스가 만들어집니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:171
-msgid "Import datasets from JSON+ZIP"
-msgstr "JSON+ZIP에서 데이터셋 가져오기"
+msgid "**Data → Restore from Backup...**"
+msgstr "**데이터 → 백업에서 복원...**\\ (Data → Restore from Backup...)"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:174
 msgid "Cannot Access Database"
@@ -403,8 +406,12 @@ msgid "Import File Format Not Recognized"
 msgstr "가져올 파일 형식을 인식하지 못함"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:222
-msgid "**Problem:** \"Unknown file format\" or \"Failed to import\" error"
-msgstr "**문제:** \"Unknown file format\" 또는 \"Failed to import\" 오류"
+msgid ""
+"**Problem:** \"File type not supported.\", \"Failed to read package: …\" or "
+"\"Import failed: …\" error"
+msgstr ""
+"**문제:** \"파일 형식이 지원되지 않습니다\"(File type not supported.), \"Failed to read "
+"package: …\" 또는 \"Import failed: …\" 오류"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:224
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:314
@@ -524,8 +531,8 @@ msgid "Landmarks may be outside viewing range"
 msgstr "랜드마크가 보이는 범위 밖에 있을 수 있음"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:287
-msgid "Try \"Fit to View\" or zoom out"
-msgstr "\"화면에 맞추기\" 또는 축소를 시도"
+msgid "Zoom out with the mouse wheel"
+msgstr "마우스 휠로 축소해 보세요"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:288
 msgid "Check coordinate values are reasonable"
@@ -536,24 +543,29 @@ msgid "Image/Model Not Loading"
 msgstr "이미지/모델이 로드되지 않음"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:293
-msgid "**Problem:** \"Failed to load image\" or \"Model file not found\""
-msgstr "**문제:** \"Failed to load image\" 또는 \"Model file not found\""
+msgid ""
+"**Problem:** \"Failed to import image: …\" or \"Failed to import 3D model: "
+"…\", or an object shows no image or model"
+msgstr ""
+"**문제:** \"Failed to import image: …\" 또는 \"Failed to import 3D model: …\" 오류, "
+"또는 객체에 이미지나 모델이 보이지 않음"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:297
 msgid "**Check file paths:**"
 msgstr "**파일 경로 확인:**"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:299
-msgid "Image/model paths stored in database"
-msgstr "이미지/모델 경로는 데이터베이스에 저장됨"
+msgid ""
+"Modan2 keeps its own copy of each image or model in the data folder "
+"(``data/<dataset id>/``); moving or deleting your original file does not "
+"affect it"
+msgstr ""
+"Modan2는 이미지와 모델마다 자체 사본을 데이터 폴더(``data/<dataset id>/``)에 보관하므로, 원본 파일을 "
+"옮기거나 지워도 영향이 없습니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:300
-msgid "If files moved, update paths"
-msgstr "파일을 옮겼다면 경로를 갱신"
-
-#: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:301
-msgid "Use relative paths when possible"
-msgstr "가능하면 상대 경로 사용"
+msgid "If that copy is missing, re-attach the file (below)"
+msgstr "그 사본이 없어졌다면 파일을 다시 첨부하세요(아래 참조)"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:303
 msgid "**Verify file integrity:**"
@@ -572,16 +584,16 @@ msgid "**Re-attach files:**"
 msgstr "**파일 다시 첨부:**"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:321
-msgid "Right-click object → Properties"
-msgstr "객체 오른쪽 클릭 → 속성"
+msgid "Double-click the object (or right-click → **Edit object**)"
+msgstr "객체를 더블클릭 (또는 오른쪽 클릭 → **개체 편집**\\ (Edit object))"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:322
-msgid "Attach image/model again"
-msgstr "이미지/모델을 다시 첨부"
+msgid "Click **Load Image** / **Load 3D Model**"
+msgstr "**이미지 열기**\\ (Load Image) / **3D 모델 불러오기**\\ (Load 3D Model) 클릭"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:323
-msgid "Browse to correct file"
-msgstr "올바른 파일 찾아 선택"
+msgid "Browse to correct file, then **Save**"
+msgstr "올바른 파일을 찾아 선택한 뒤 **저장**\\ (Save)"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:326
 msgid "Analysis Errors"
@@ -605,41 +617,54 @@ msgstr "**객체 수 부족:**"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:337
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:787
-msgid "PCA: Need at least 3 objects"
-msgstr "PCA: 객체가 최소 3개 필요"
+msgid "Any analysis: at least 5 objects with landmarks"
+msgstr "모든 분석: 랜드마크가 있는 객체 5개 이상"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:338
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:788
-msgid "CVA/MANOVA: Need at least 2 groups with 3+ objects each"
-msgstr "CVA/MANOVA: 각각 3개 이상의 객체를 가진 그룹이 최소 2개 필요"
+msgid "CVA/MANOVA: at least 2 groups in the grouping variable"
+msgstr "CVA/MANOVA: 그룹화 변수에 그룹이 2개 이상"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:340
 msgid "**Missing landmarks:**"
 msgstr "**결측 랜드마크:**"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:342
-msgid "Some landmarks marked as missing"
-msgstr "일부 랜드마크가 결측으로 표시됨"
+msgid "Missing landmarks are estimated automatically during analysis"
+msgstr "결측 랜드마크는 분석 중에 자동으로 추정됩니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:343
-msgid "Not enough complete configurations"
-msgstr "완전한 배열이 충분하지 않음"
+msgid "A landmark missing in *every* object cannot be estimated"
+msgstr "*모든* 객체에서 빠진 랜드마크는 추정할 수 없습니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:344
-msgid "Solution: Estimate missing landmarks or exclude objects"
-msgstr "해결: 결측 랜드마크를 추정하거나 해당 객체를 제외"
+msgid "Objects with fewer landmarks than the dataset expects are refused"
+msgstr "데이터셋이 기대하는 것보다 랜드마크가 적은 객체는 거부됩니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:346
-msgid "**No grouping variable (CVA/MANOVA):**"
-msgstr "**그룹화 변수 없음 (CVA/MANOVA):**"
+msgid ""
+"Solution: record each landmark on at least one object, and use **Insert "
+"Missing** in the object dialog where a specimen is short"
+msgstr ""
+"해결: 각 랜드마크를 적어도 한 객체에는 기록하고, 랜드마크가 모자란 표본은 객체 대화상자에서 **결측 삽입**\\ (Insert "
+"Missing)을 사용하세요"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:348
-msgid "Need categorical variable for groups"
-msgstr "그룹을 정의할 범주형 변수가 필요"
+msgid "**No variables:**"
+msgstr "**변수 없음:**"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:349
-msgid "Solution: Add grouping variable to objects"
-msgstr "해결: 객체에 그룹화 변수를 추가"
+msgid ""
+"The analysis will not run at all without at least one variable (every run "
+"includes CVA and MANOVA)"
+msgstr "변수가 하나도 없으면 분석이 아예 실행되지 않습니다(모든 실행에 CVA와 MANOVA가 포함됨)"
+
+msgid ""
+"Solution: add one in the dataset dialog's **Variables** tab (or **Add "
+"variable** in the main window) and fill in its values"
+msgstr ""
+"해결: 데이터셋 대화상자의 **변수**\\ (Variables) 탭(또는 메인 창의 **변수 추가**\\ (Add "
+"variable))에서 변수를 추가하고 값을 채우세요"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:351
 msgid "**Insufficient variation:**"
@@ -659,12 +684,10 @@ msgid "**Check object count:**"
 msgstr "**객체 수 확인:**"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:360
-msgid "Select dataset"
-msgstr "데이터셋 선택"
-
-#: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:361
-msgid "View object count in status bar"
-msgstr "상태 표시줄에서 객체 수 확인"
+msgid ""
+"The number in brackets after the dataset's name in the tree is its object "
+"count"
+msgstr "트리에서 데이터셋 이름 뒤 괄호 안의 숫자가 객체 수입니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:362
 msgid "Ensure sufficient objects"
@@ -679,8 +702,8 @@ msgid "Review objects for missing landmarks"
 msgstr "객체들에 결측 랜드마크가 있는지 검토"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:367
-msgid "Use \"Estimate Missing\" feature or exclude"
-msgstr "결측 추정 기능을 쓰거나 해당 객체를 제외"
+msgid "Tick **Show Estimated** in the object dialog to see the estimates"
+msgstr "객체 대화상자에서 **추정값 보기**\\ (Show Estimated)를 체크하면 추정값을 볼 수 있습니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:369
 msgid "**Verify grouping variable:**"
@@ -856,12 +879,13 @@ msgid "**Reset view:**"
 msgstr "**시점 초기화:**"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:452
-msgid "Double-click in 3D viewer"
-msgstr "3D 뷰어에서 더블클릭"
-
-#: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:453
-msgid "Or use View → Reset Camera"
-msgstr "또는 View → Reset Camera 사용"
+msgid ""
+"Scroll or right-drag to zoom out, and middle-drag to pan (the object "
+"viewer has no reset-view command; in Data Exploration, use **Reset "
+"Pose**)"
+msgstr ""
+"휠이나 오른쪽 드래그로 축소하고 가운데 버튼 드래그로 이동하세요(객체 뷰어에는 보기 초기화 명령이 없습니다. 데이터 탐색에서는 "
+"**원래대로**\\ (Reset Pose)를 사용하세요)"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:455
 msgid "**Check OpenGL:**"
@@ -944,24 +968,28 @@ msgid "**Increase sphere size:**"
 msgstr "**구체 크기 키우기:**"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:517
-msgid "Settings → Visualization → Landmark size"
-msgstr "환경 설정 → 뷰어 외형 → 랜드마크 크기"
+msgid "**Edit → Preferences** → **Landmark**, 3D"
+msgstr "**편집 → 설정**\\ (Edit → Preferences) → **랜드마크**\\ (Landmark), 3D"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:518
-msgid "Increase value"
-msgstr "값을 키우세요"
+msgid "Choose **Large**"
+msgstr "**크게**\\ (Large) 선택"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:520
-msgid "**Check lighting:**"
-msgstr "**조명 확인:**"
+msgid "**Check colours:**"
+msgstr "**색상 확인:**"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:522
-msgid "Spheres may be too dark"
-msgstr "구체가 너무 어두울 수 있습니다"
+msgid "Spheres may be hard to see against the background"
+msgstr "구체가 배경과 잘 구분되지 않을 수 있습니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:523
-msgid "Adjust lighting in settings"
-msgstr "설정에서 조명을 조정하세요"
+msgid ""
+"Pick a brighter 3D landmark colour, or change **Background Color**, in "
+"**Edit → Preferences**"
+msgstr ""
+"**편집 → 설정**\\ (Edit → Preferences)에서 3D 랜드마크 색을 더 밝게 하거나 **배경색**\\ "
+"(Background Color)을 바꾸세요"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:525
 msgid "**Zoom in:**"
@@ -1044,12 +1072,9 @@ msgid "**Reduce loaded data:**"
 msgstr "**로드되는 데이터 줄이기:**"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:569
-msgid "Close unused datasets"
-msgstr "사용하지 않는 데이터셋을 닫으세요"
-
-#: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:570
-msgid "Archive old analyses"
-msgstr "오래된 분석을 정리하세요"
+msgid ""
+"Delete analyses you no longer need (right-click → **Delete analysis**)"
+msgstr "필요 없는 분석은 삭제하세요(오른쪽 클릭 → **분석결과 삭제**\\ (Delete analysis))"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:573
 msgid "Slow Analysis or Visualization"
@@ -1330,14 +1355,14 @@ msgid "**Modan2 version:**"
 msgstr "**Modan2 버전:**"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:717
-msgid "Help → About Modan2"
-msgstr "Help → About Modan2"
+msgid "**Help → About** (``F1``) shows the version"
+msgstr "**도움말 → 정보**\\ (Help → About, ``F1``)에서 버전 확인"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:718
 msgid ""
-"Note the version and build number, which also appear in the name of the "
-"package you downloaded"
-msgstr "버전과 빌드 번호를 적어 주세요. 내려받은 패키지 이름에도 들어 있습니다"
+"The build number appears on the splash screen and, with the version, in "
+"the name of the package you downloaded"
+msgstr "빌드 번호는 시작 화면에 나오며, 버전과 함께 내려받은 패키지 이름에도 들어 있습니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:721
 msgid "**Log files:**"
@@ -1417,28 +1442,35 @@ msgid "**Solution:** See \"Procrustes Alignment Issues\" section above"
 msgstr "**해결:** 위의 \"프로크루스테스 정렬 문제\" 절 참조"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:781
-msgid "\"Not enough objects for analysis\""
-msgstr "\"Not enough objects for analysis\""
+msgid "\"… has too few objects with landmarks\""
+msgstr "\"… has too few objects with landmarks\""
+
+msgid ""
+"**Solution:** At least 5 objects with landmarks (and at least one "
+"variable) are required"
+msgstr "**해결 방법:** 랜드마크가 있는 객체 5개 이상(그리고 변수 하나 이상)이 필요합니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:783
 msgid "**Cause:** Insufficient sample size"
 msgstr "**원인:** 표본 수 부족"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:791
-msgid "\"Invalid landmark count\""
-msgstr "\"Invalid landmark count\""
+msgid "\"Object '…' has N landmarks but this dataset expects M\""
+msgstr "\"Object '…' has N landmarks but this dataset expects M\""
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:793
 msgid "**Cause:** Object has wrong number of landmarks for dataset"
 msgstr "**원인:** 객체의 랜드마크 개수가 데이터셋과 맞지 않음"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:797
-msgid "Check dataset landmark count"
-msgstr "데이터셋의 랜드마크 개수 확인"
+msgid "Open the object"
+msgstr "객체 열기"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:798
-msgid "Verify object landmarks match"
-msgstr "객체의 랜드마크가 일치하는지 확인"
+msgid ""
+"Use **Insert Missing** to add a placeholder at each position that was not "
+"recorded"
+msgstr "기록하지 못한 위치마다 **결측 삽입**\\ (Insert Missing)으로 자리표시를 추가"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:799
 msgid "Re-digitize object if needed"
@@ -1583,10 +1615,8 @@ msgid "English and Korean interfaces are available"
 msgstr "영어와 한국어 인터페이스를 제공합니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:864
-msgid ""
-"Some newer dialogs (notably Curve mode) are still English-only in the "
-"Korean interface"
-msgstr "일부 최신 대화상자(특히 Curve 모드)는 한국어 인터페이스에서도 아직 영어로 표시됩니다"
+msgid "A few messages may still appear in English in the Korean interface"
+msgstr "한국어 인터페이스에서도 일부 메시지는 아직 영어로 표시될 수 있습니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:868
 msgid "Planned Improvements"

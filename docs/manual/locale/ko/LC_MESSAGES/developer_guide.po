@@ -1207,8 +1207,24 @@ msgid "License"
 msgstr "라이선스"
 
 #: ../../developer_guide.rst:1121
-msgid "Modan2 is released under the **MIT License**."
-msgstr "Modan2는 **MIT 라이선스** 하에 배포됩니다."
+msgid "Modan2's source code is released under the **MIT License**."
+msgstr "Modan2의 소스 코드는 **MIT 라이선스** 하에 배포됩니다."
+
+msgid ""
+"The binaries published on the releases page are **GPL-3.0**: they bundle "
+"PyQt5, which Riverbank Computing offers only under the GPL-3.0 or a "
+"commercial licence, and the combined work takes those terms. MIT is "
+"GPL-compatible, so this is a permitted combination — and the source you "
+"clone stays MIT regardless of what the installers carry."
+msgstr ""
+"릴리스 페이지에 게시되는 바이너리는 **GPL-3.0** 입니다. Riverbank Computing이 GPL-3.0 또는 상용 "
+"라이선스로만 제공하는 PyQt5가 들어 있어, 결합된 저작물이 그 조건을 따르기 때문입니다. MIT는 GPL과 호환되므로 허용되는 "
+"결합이며, 설치 파일의 라이선스와 관계없이 clone한 소스 코드는 계속 MIT입니다."
+
+msgid ""
+"See ``THIRD-PARTY-NOTICES.md`` at the repository root for the reasoning "
+"and the list of bundled components."
+msgstr "그 이유와 함께 포함된 구성 요소 목록은 저장소 최상위의 ``THIRD-PARTY-NOTICES.md`` 를 참조하세요."
 
 #: ../../developer_guide.rst:1123
 msgid "You are free to:"

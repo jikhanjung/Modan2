@@ -64,8 +64,8 @@ What file formats does Modan2 support?
 
 **Output Formats:**
 
-* Same as input for landmark data
-* Excel/CSV for analysis results
+* Landmark data: TPS, X1Y1, Morphologika (NTS is import-only)
+* Excel (``.xlsx``) for analysis results; PNG, JPG, PDF or SVG for charts
 * JSON+ZIP for complete dataset sharing
 
 Installation and Setup
@@ -319,17 +319,18 @@ How do I digitize landmarks on 2D images?
 **Steps:**
 
 1. Create dataset → Set dimension to 2D
-2. Create object → Attach image
-3. Open object dialog
+2. Click **New Object** (``Ctrl+Shift+N``) — the object dialog opens
+3. Click **Load Image** (or drop image files onto the object table, then
+   double-click an object)
 4. Click on image to place landmarks
 5. Landmarks numbered sequentially
-6. Right-click to delete last landmark
+6. Right-click a landmark to delete it
 7. Save when complete
 
 **Tips:**
 
 * Zoom in for precision (mouse wheel)
-* Pan by dragging with middle button
+* Pan by dragging with the right mouse button
 * Use wireframe to verify landmark placement
 * Mark missing landmarks if needed
 
@@ -339,8 +340,8 @@ How do I digitize landmarks on 3D models?
 **Steps:**
 
 1. Create dataset → Set dimension to 3D
-2. Create object → Attach 3D model
-3. Open object dialog
+2. Click **New Object** (``Ctrl+Shift+N``) — the object dialog opens
+3. Click **Load 3D Model**
 4. Rotate model to view landmark location
 5. Click to place landmark
 6. Landmark appears as sphere
@@ -371,9 +372,10 @@ Can I edit existing landmarks?
 
 3. **Batch editing:**
 
-   * Select multiple objects
-   * Apply transformations
-   * Update landmarks programmatically
+   * Select cells in the object table
+   * Right-click → **Fill value** / **Fill sequence** / **Paste**
+   * **Save changes** (``Ctrl+S``) — this edits sequence numbers and variable
+     values, not landmark coordinates
 
 Statistical Analysis
 --------------------
@@ -445,9 +447,9 @@ How many objects do I need for analysis?
 
 **Minimum requirements:**
 
-* **PCA:** At least 3 objects (more recommended)
-* **CVA:** At least 2 groups with 3+ objects each
-* **MANOVA:** At least 2 groups with 3+ objects each
+* **Any analysis:** at least 5 objects with landmarks, and at least one
+  variable (a single run always includes CVA and MANOVA)
+* **CVA / MANOVA:** at least 2 groups in the grouping variable
 
 **Recommended sample sizes:**
 
@@ -465,11 +467,11 @@ How do I import landmark data?
 
 **Steps:**
 
-1. File → Import → [Format]
-2. Select file (TPS, NTS, Morphologika, etc.)
-3. Choose or create target dataset
-4. Map variables if needed
-5. Click Import
+1. **Data → Import** (``Ctrl+I``), or drag the file onto the dataset tree
+2. Click **Open File** and select the file (TPS, NTS, Morphologika, etc.) — the
+   file type is detected automatically
+3. Check the **Dataset Name**: the import creates a new dataset
+4. Click **Execute Import**
 
 **Supported formats:**
 
@@ -502,21 +504,23 @@ How do I export my data?
 
 1. **Dataset export:**
 
-   * File → Export → Dataset
-   * Choose format (TPS, Morphologika, JSON+ZIP)
+   * Select the dataset, then **Data → Export** (``Ctrl+E``) or right-click it →
+     **Export**
+   * Choose format (TPS, X1Y1, Morphologika, JSON+ZIP)
    * Select objects to export
 
 2. **Analysis results:**
 
-   * Right-click analysis → Export
-   * Save as Excel or CSV
-   * Includes scores, loadings, statistics
+   * Select the analysis, click **Analysis Details**, then **Save Results**
+   * Saves an Excel (``.xlsx``) workbook
+   * Includes scores, rotation matrix, eigenvalues
+   * In Data Exploration, **Export Chart** saves the plot as PNG, JPG, PDF or SVG
 
 3. **Complete backup:**
 
-   * Export as JSON+ZIP
-   * Includes all data, images, models
-   * Perfect for sharing or archiving
+   * **Data → Back Up Library...**
+   * Includes all datasets, images, models and analyses
+   * Perfect for archiving (export a JSON+ZIP package to share one dataset)
 
 What is JSON+ZIP export?
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -529,7 +533,9 @@ What is JSON+ZIP export?
 * Object metadata and variables
 * Dataset settings (wireframe, baseline, polygons)
 * Attached images and 3D models (optional)
-* Analysis results
+
+Analysis results are not included — only a library backup (**Data → Back Up
+Library...**) keeps them.
 
 **Use cases:**
 
@@ -565,7 +571,7 @@ Can I improve performance?
 **Tips for best performance:**
 
 1. **Use SSD** for database storage
-2. **Close unused objects** in tree view
+2. **Collapse datasets** you are not using in the tree
 3. **Reduce polygon count** for 3D models
 4. **Disable** 3D preview during batch editing
 5. **Export subsets** for large analyses
@@ -626,7 +632,8 @@ How do I report a bug?
 1. **System info:**
 
    * Operating system and version
-   * Modan2 version and build number (Help → About)
+   * Modan2 version (Help → About) and build number (splash screen, or the
+     downloaded file name)
 
 2. **Problem description:**
 
@@ -710,12 +717,12 @@ Can I use Modan2 in a publication?
      year = {2025},
      publisher = {GitHub},
      url = {https://github.com/jikhanjung/Modan2},
-     version = {0.1.5-beta.1}
+     version = {0.2.0}
    }
 
 **In text:**
 
-"Geometric morphometric analyses were performed using Modan2 v0.1.5 (Jung, 2025), an open-source desktop application for landmark-based shape analysis."
+"Geometric morphometric analyses were performed using Modan2 v0.2.0 (Jung, 2025), an open-source desktop application for landmark-based shape analysis."
 
 Can I extend Modan2 with custom analyses?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -739,11 +746,11 @@ How does the database work?
 
 **Tables:**
 
-* md_dataset: Dataset definitions
-* md_object: Objects and landmark data
-* md_image: 2D image attachments
-* md_threedmodel: 3D model attachments
-* md_analysis: Analysis results
+* mddataset: Dataset definitions
+* mdobject: Objects and landmark data
+* mdimage: 2D image attachments
+* mdthreedmodel: 3D model attachments
+* mdanalysis: Analysis results
 
 **Advantages:**
 

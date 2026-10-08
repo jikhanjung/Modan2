@@ -25,7 +25,7 @@ Modan2 is distributed as a prebuilt package for each platform on the
 `releases page <https://github.com/jikhanjung/Modan2/releases>`_. Every file
 carries the version and build number, so the exact names change from release to
 release — ``<version>`` and ``<build>`` below stand for what you see on the
-release you are downloading (for example ``v0.1.12`` and ``build672``).
+release you are downloading (for example ``0.1.12`` and ``672``).
 
 Each release also publishes ``SHA256SUMS.txt`` if you want to verify a download.
 
@@ -127,7 +127,7 @@ To find out which one is missing, ask Qt:
 
 .. code-block:: bash
 
-   QT_DEBUG_PLUGINS=1 ./Modan2-Linux-<version>.AppImage
+   QT_DEBUG_PLUGINS=1 ./Modan2-Linux-v<version>-build<build>.AppImage
 
 OpenGL / 3D Rendering Errors
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -170,19 +170,21 @@ After installation, verify that Modan2 works correctly:
 2. **Create a test dataset**
 
    - Click "New Dataset" (``Ctrl+N``)
-   - Name it "Test"
-   - Click OK
+   - Enter "Test" as the **Dataset Name**
+   - Click **Save**
 
 3. **Import example data**
 
-   - Download example TPS file from `examples/ <https://github.com/jikhanjung/Modan2/tree/main/ExampleDataset>`_
-   - Drag and drop into your dataset
+   - Download ``Thylacine2020_NeuroGM.txt`` (a 3D Morphologika file with
+     grouping variables) from `ExampleDataset/ <https://github.com/jikhanjung/Modan2/tree/main/ExampleDataset>`_
+   - Drag it onto the dataset tree (or use **Data → Import**, ``Ctrl+I``) and
+     click **Execute Import** — this creates a new dataset from the file
 
 4. **Run a simple analysis**
 
-   - Select dataset → "Analyze Dataset"
-   - Choose PCA
-   - Verify that results display correctly
+   - Select the imported dataset → **Analyze** (``Ctrl+G``)
+   - Enter a name, pick the grouping variables, and click **OK**
+   - Select the new analysis in the tree and verify that its results display
 
 If all steps complete without errors, your installation is successful!
 
@@ -225,10 +227,12 @@ Uninstalling Modan2
 - **Linux**: delete the AppImage file.
 
 **This leaves your data untouched**, which is usually what you want. Datasets,
-images, 3D models, logs, backups and preferences all live in
-``~/PaleoBytes/Modan2/`` (on Windows, ``C:\Users\<you>\PaleoBytes\Modan2``).
-Delete that folder as well if you want to remove everything — but note that it
-holds the only copy of your datasets.
+images, 3D models, logs and backups live in ``~/PaleoBytes/Modan2/`` (on
+Windows, ``C:\Users\<you>\PaleoBytes\Modan2``) unless you chose another
+**Data folder** in Preferences; preferences are kept in your operating system's
+settings folder (see :ref:`where-things-live`). Delete the data folder as well if
+you want to remove everything — but note that it holds the only copy of your
+datasets.
 
 Getting Help
 ------------

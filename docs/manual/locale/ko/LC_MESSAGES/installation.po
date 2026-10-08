@@ -75,16 +75,16 @@ msgstr "설치 방법"
 #: ../../installation.rst:24
 msgid ""
 "Modan2 is distributed as a prebuilt package for each platform on the "
-"`releases page <https://github.com/jikhanjung/Modan2/releases>`_. Every file"
-" carries the version and build number, so the exact names change from "
-"release to release — ``<version>`` and ``<build>`` below stand for what you "
-"see on the release you are downloading (for example ``v0.1.12`` and "
-"``build672``)."
+"`releases page <https://github.com/jikhanjung/Modan2/releases>`_. Every "
+"file carries the version and build number, so the exact names change from "
+"release to release — ``<version>`` and ``<build>`` below stand for what "
+"you see on the release you are downloading (for example ``0.1.12`` and "
+"``672``)."
 msgstr ""
 "Modan2는 각 플랫폼별로 미리 빌드된 패키지 형태로 `릴리스 페이지 "
-"<https://github.com/jikhanjung/Modan2/releases>`_ 에서 배포됩니다. 모든 파일 이름에는 버전과 "
-"빌드 번호가 들어 있어 릴리스마다 이름이 달라집니다. 아래의 ``<version>`` 과 ``<build>`` 는 실제로 내려받는 "
-"릴리스에 표시된 값을 뜻합니다(예: ``v0.1.12``, ``build672``)."
+"<https://github.com/jikhanjung/Modan2/releases>`_ 에서 배포됩니다. 모든 파일 이름에는 "
+"버전과 빌드 번호가 들어 있어 릴리스마다 이름이 달라집니다. 아래의 ``<version>`` 과 ``<build>`` 는 실제로 "
+"내려받는 릴리스에 표시된 값을 뜻합니다(예: ``0.1.12``, ``672``)."
 
 #: ../../installation.rst:30
 msgid ""
@@ -352,12 +352,12 @@ msgid "Click \"New Dataset\" (``Ctrl+N``)"
 msgstr "\"New Dataset\" 클릭 (``Ctrl+N``)"
 
 #: ../../installation.rst:173
-msgid "Name it \"Test\""
-msgstr "\"Test\"로 이름 지정"
+msgid "Enter \"Test\" as the **Dataset Name**"
+msgstr "**데이터셋 이름**\\ (Dataset Name)에 \"Test\" 입력"
 
 #: ../../installation.rst:174
-msgid "Click OK"
-msgstr "확인 클릭"
+msgid "Click **Save**"
+msgstr "**저장**\\ (Save) 클릭"
 
 #: ../../installation.rst:176
 msgid "**Import example data**"
@@ -365,31 +365,38 @@ msgstr "**예제 데이터 가져오기**"
 
 #: ../../installation.rst:178
 msgid ""
-"Download example TPS file from `examples/ "
+"Download ``Thylacine2020_NeuroGM.txt`` (a 3D Morphologika file with "
+"grouping variables) from `ExampleDataset/ "
 "<https://github.com/jikhanjung/Modan2/tree/main/ExampleDataset>`_"
 msgstr ""
-"`examples/ <https://github.com/jikhanjung/Modan2/tree/main/ExampleDataset>`_"
-" 에서 예제 TPS 파일 다운로드"
+"`ExampleDataset/ "
+"<https://github.com/jikhanjung/Modan2/tree/main/ExampleDataset>`_ 에서 "
+"``Thylacine2020_NeuroGM.txt`` (그룹화 변수가 들어 있는 3D Morphologika 파일) 다운로드"
 
 #: ../../installation.rst:179
-msgid "Drag and drop into your dataset"
-msgstr "데이터셋으로 드래그 앤 드롭"
+msgid ""
+"Drag it onto the dataset tree (or use **Data → Import**, ``Ctrl+I``) and "
+"click **Execute Import** — this creates a new dataset from the file"
+msgstr ""
+"데이터셋 트리로 끌어다 놓고(또는 **데이터 → 불러오기**\\ (Data → Import, ``Ctrl+I``)) **가져오기 "
+"실행**\\ (Execute Import) 클릭 — 이 파일로 새 데이터셋이 만들어집니다"
 
 #: ../../installation.rst:181
 msgid "**Run a simple analysis**"
 msgstr "**간단한 분석 실행**"
 
 #: ../../installation.rst:183
-msgid "Select dataset → \"Analyze Dataset\""
-msgstr "데이터셋 선택 → \"Analyze Dataset\""
+msgid "Select the imported dataset → **Analyze** (``Ctrl+G``)"
+msgstr "가져온 데이터셋 선택 → **분석**\\ (Analyze, ``Ctrl+G``)"
 
 #: ../../installation.rst:184
-msgid "Choose PCA"
-msgstr "PCA 선택"
+msgid "Enter a name, pick the grouping variables, and click **OK**"
+msgstr "이름을 입력하고 그룹화 변수를 고른 뒤 **확인**\\ (OK) 클릭"
 
 #: ../../installation.rst:185
-msgid "Verify that results display correctly"
-msgstr "결과가 올바르게 표시되는지 확인"
+msgid ""
+"Select the new analysis in the tree and verify that its results display"
+msgstr "트리에서 새 분석을 선택하고 결과가 표시되는지 확인"
 
 #: ../../installation.rst:187
 msgid "If all steps complete without errors, your installation is successful!"
@@ -476,16 +483,19 @@ msgstr "**Linux**: AppImage 파일을 삭제합니다."
 #: ../../installation.rst:227
 msgid ""
 "**This leaves your data untouched**, which is usually what you want. "
-"Datasets, images, 3D models, logs, backups and preferences all live in "
+"Datasets, images, 3D models, logs and backups live in "
 "``~/PaleoBytes/Modan2/`` (on Windows, "
-"``C:\\Users\\<you>\\PaleoBytes\\Modan2``). Delete that folder as well if you"
-" want to remove everything — but note that it holds the only copy of your "
-"datasets."
+"``C:\\Users\\<you>\\PaleoBytes\\Modan2``) unless you chose another **Data "
+"folder** in Preferences; preferences are kept in your operating system's "
+"settings folder (see :ref:`where-things-live`). Delete the data folder as "
+"well if you want to remove everything — but note that it holds the only "
+"copy of your datasets."
 msgstr ""
-"**이렇게 하면 데이터는 그대로 남으며**, 보통은 그것이 바라는 바입니다. 데이터셋, 이미지, 3D 모델, 로그, 백업, 설정은 모두 "
-"``~/PaleoBytes/Modan2/`` (Windows에서는 "
-"``C:\\Users\\<사용자>\\PaleoBytes\\Modan2``) 에 있습니다. 전부 제거하려면 이 폴더도 삭제하십시오 — 다만"
-" 데이터셋의 유일한 사본이 여기 있다는 점에 유의하십시오."
+"**이렇게 하면 데이터는 그대로 남으며**, 보통은 그것이 바라는 바입니다. 데이터셋, 이미지, 3D 모델, 로그, 백업은 설정에서 "
+"다른 **데이터 폴더**\\ (Data folder)를 고르지 않았다면 ``~/PaleoBytes/Modan2/`` "
+"(Windows에서는 ``C:\\Users\\<사용자>\\PaleoBytes\\Modan2``) 에 있고, 설정 파일은 운영체제의 설정 "
+"폴더에 있습니다(:ref:`where-things-live` 참조). 전부 제거하려면 데이터 폴더도 삭제하십시오 — 다만 데이터셋의 "
+"유일한 사본이 여기 있다는 점에 유의하십시오."
 
 #: ../../installation.rst:234
 msgid "Getting Help"

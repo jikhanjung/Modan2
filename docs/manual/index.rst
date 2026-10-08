@@ -27,7 +27,7 @@ Features
 * **Statistical Analysis**: Perform Principal Component Analysis (PCA), Canonical Variate Analysis (CVA), and MANOVA
 * **Missing Landmark Support**: Advanced handling of incomplete landmark data with shape-fitted visual estimation
 * **Digitizing Aids**: Dataset-wide landmark names/descriptions and a "Show Expected" guide that predicts remaining landmark positions
-* **Data Import/Export**: Supports various file types (TPS, NTS, Morphologika, CSV, OBJ, PLY, STL) plus a JSON+ZIP package format that bundles images and 3D models, all with drag-and-drop
+* **Data Import/Export**: Supports various file types (TPS, NTS, X1Y1, Morphologika, OBJ, PLY, STL) plus a JSON+ZIP package format that bundles images and 3D models, all with drag-and-drop
 * **Persistent Storage**: All data and analyses saved in a local SQLite database managed by Peewee ORM
 
 Quick Start
@@ -59,7 +59,7 @@ Basic Usage
 
 2. **Import Objects**
 
-   Drag and drop 2D images or 3D models into your dataset, or use File → Import to load landmark files (TPS, NTS).
+   Drag and drop 2D images or 3D models onto your dataset's object table, or use **Data → Import** (``Ctrl+I``) to load a landmark file (TPS, NTS, X1Y1, Morphologika) as a new dataset.
 
 3. **Place Landmarks**
 
@@ -67,24 +67,25 @@ Basic Usage
 
 4. **Run Analysis**
 
-   Select your dataset and click "Analyze Dataset" to perform:
+   Select your dataset and click **Analyze** (``Ctrl+G``) to perform:
 
-   - Procrustes superimposition (aligns shapes)
+   - Superimposition (Procrustes or Bookstein; aligns shapes)
    - Principal Component Analysis (PCA)
    - Canonical Variate Analysis (CVA)
    - MANOVA (multivariate analysis of variance)
 
 5. **Explore Results**
 
-   View PC plots, shape variations, and statistical outputs in the Data Exploration dialog.
+   Select the analysis in the tree to see its PCA, CVA and MANOVA results; click **Data Exploration** for interactive plots and shape variations, or **Analysis Details** for the result tables.
 
 **Keyboard Shortcuts**:
 
 - ``Ctrl+N`` - New Dataset
 - ``Ctrl+Shift+N`` - New Object
 - ``Ctrl+S`` - Save changes
-- ``Ctrl+O`` - Open database
-- ``Delete`` - Delete selected items
+- ``Ctrl+I`` - Import
+- ``Ctrl+G`` - Analyze
+- ``Delete`` - Clear the selected cells in the object table
 
 For more detailed instructions, see the :doc:`user_guide`.
 

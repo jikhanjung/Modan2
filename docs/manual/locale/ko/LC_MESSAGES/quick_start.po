@@ -58,18 +58,26 @@ msgid "Click **\"New Dataset\"** (``Ctrl+N``)"
 msgstr "**\"새 데이터셋\"**\\ (New Dataset)을 클릭합니다(``Ctrl+N``)"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:21
-msgid "Give it a **Name** and set the **Dimension** to 2D or 3D"
+msgid "Give it a **Dataset Name** and set the **Dimension** to 2D or 3D"
 msgstr ""
 "**데이터셋 이름**\\ (Dataset Name)을 입력하고 **차원**\\ (Dimension)을 2D 또는 3D로 설정합니다"
+
+msgid "Click **Save**"
+msgstr "**저장**\\ (Save)을 클릭합니다"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:22
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:80
 msgid "Click **OK**"
-msgstr "**저장**\\ (Save)을 클릭합니다"
+msgstr "**확인**\\ (OK)을 클릭합니다"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:24
-msgid "The dataset appears in the tree on the left."
-msgstr "데이터셋이 왼쪽 트리에 나타납니다."
+msgid ""
+"The dataset appears in the tree on the left. (Importing a landmark file "
+"creates its own dataset, so for that you can go straight to the next "
+"step.)"
+msgstr ""
+"데이터셋이 왼쪽 트리에 나타납니다. (랜드마크 파일을 가져오면 데이터셋이 따로 만들어지므로, 그때는 바로 다음 단계로 넘어가도 "
+"됩니다.)"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:27
 msgid "3. Get your data in"
@@ -81,21 +89,29 @@ msgstr "**이미 랜드마크 좌표가 있는 경우**:"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:31
 msgid ""
-"Click **Import** (``Ctrl+I``) and pick the file — the format is detected "
-"from the extension (TPS, NTS, X1Y1, Morphologika, or a JSON+ZIP package)"
+"Click **Import** (``Ctrl+I``), then **Open File**, and pick the file — "
+"the format is detected from the extension (TPS, NTS, X1Y1, Morphologika, "
+"or a JSON+ZIP package)"
 msgstr ""
-"**불러오기**\\ (Import, ``Ctrl+I``)를 클릭하고 파일을 고릅니다 — 형식은 확장자로 자동 감지됩니다(TPS, "
-"NTS, X1Y1, Morphologika, 또는 JSON+ZIP 패키지)"
+"**불러오기**\\ (Import, ``Ctrl+I``)를 클릭하고 **파일 열기**\\ (Open File)를 눌러 파일을 고릅니다 "
+"— 형식은 확장자로 자동 감지됩니다(TPS, NTS, X1Y1, Morphologika, 또는 JSON+ZIP 패키지)"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:33
-msgid "Click **Import**"
-msgstr "**가져오기 실행**\\ (Execute Import)을 클릭합니다"
+msgid ""
+"Check the **Dataset Name** — the import creates a new dataset — and click "
+"**Execute Import**"
+msgstr ""
+"**데이터셋 이름**\\ (Dataset Name)을 확인하고(가져오기는 새 데이터셋을 만듭니다) **가져오기 실행**\\ "
+"(Execute Import)을 클릭합니다"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:35
 msgid ""
-"Objects appear in the centre table. You can also drag files straight onto "
-"the window."
-msgstr "객체가 가운데 표에 나타납니다. 파일을 창으로 바로 끌어다 놓아도 됩니다."
+"The new dataset appears in the tree with its objects. You can also drag a "
+"landmark file onto the dataset tree, which opens the same dialog with the "
+"file chosen."
+msgstr ""
+"새 데이터셋이 객체들과 함께 트리에 나타납니다. 랜드마크 파일을 데이터셋 트리로 끌어다 놓아도 되며, 그러면 그 파일이 선택된 채로 "
+"같은 대화상자가 열립니다."
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:38
 msgid "**If you are starting from photographs**:"
@@ -103,9 +119,12 @@ msgstr "**사진에서 시작하는 경우**:"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:40
 msgid ""
-"Import the images (``Ctrl+I``, or drag them in) and digitize them in the "
-"next step."
-msgstr "이미지를 가져온 뒤(``Ctrl+I`` 또는 끌어다 놓기), 다음 단계에서 디지타이징합니다."
+"Select a 2D dataset and drag the image files onto the object table — each "
+"image becomes an object named after its file. Digitize them in the next "
+"step."
+msgstr ""
+"2D 데이터셋을 선택하고 이미지 파일을 객체 표로 끌어다 놓습니다 — 이미지마다 파일 이름을 딴 객체가 하나씩 만들어집니다. "
+"디지타이징은 다음 단계에서 합니다."
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:44
 msgid "4. Digitize landmarks"
@@ -154,12 +173,16 @@ msgstr ""
 ":ref:`analysis-missing-landmarks` 참조."
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:63
-msgid "5. Add variables (optional)"
-msgstr "5. 변수 추가 (선택)"
+msgid "5. Add variables"
+msgstr "5. 변수 추가"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:65
-msgid "Variables are what CVA and MANOVA group by."
-msgstr "변수는 CVA와 MANOVA가 그룹을 나누는 기준입니다."
+msgid ""
+"Variables are what CVA and MANOVA group by. An analysis currently needs "
+"at least one, even if you only want PCA."
+msgstr ""
+"변수는 CVA와 MANOVA가 그룹을 나누는 기준입니다. 현재는 PCA만 원하더라도 분석을 실행하려면 변수가 하나 이상 있어야 "
+"합니다."
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:67
 msgid ""
@@ -189,11 +212,10 @@ msgstr "데이터셋을 선택하고 **분석**\\ (Analyze, ``Ctrl+G``)을 클�
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:78
 msgid ""
-"Set the **superimposition method** (Procrustes is the default) and, if you "
-"defined variables, the **CVA** and **MANOVA grouping variables**"
+"Set the **superimposition method** (Procrustes is the default) and the "
+"**CVA** and **MANOVA grouping variables**"
 msgstr ""
-"**중첩정렬 방식**\\ (기본값은 프로크루스테스)을 정하고, 변수를 정의했다면 **CVA** 와 **MANOVA** 의 그룹화 변수를 "
-"지정합니다"
+"**중첩정렬 방식**\\ (기본값은 프로크루스테스)을 정하고, **CVA** 와 **MANOVA** 의 그룹화 변수를 지정합니다"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:83
 msgid "7. Explore the results"
@@ -211,11 +233,11 @@ msgstr ""
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:89
 msgid ""
 "To export, select the dataset and choose **Export** (``Ctrl+E``) for the "
-"data, or use the Data Exploration dialog's chart-image control to save a "
+"data, or use **Export Chart** in the Data Exploration dialog to save a "
 "plot."
 msgstr ""
 "내보내려면 데이터셋을 선택하고 **내보내기**\\ (Export, ``Ctrl+E``)로 데이터를 내보내거나, 데이터 탐색 대화상자의 "
-"차트 이미지 저장 기능으로 플롯을 저장하세요."
+"**차트 내보내기**\\ (Export Chart)로 플롯을 저장하세요."
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:93
 msgid "Typical workflow"
@@ -319,11 +341,12 @@ msgstr "**분석이 실패함**"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:135
 msgid ""
-"Every object needs the same number of landmarks; mark gaps as missing rather"
-" than leaving objects short. See :doc:`troubleshooting`."
+"The dataset needs at least 5 digitized objects and at least one variable, "
+"and every object needs the same number of landmarks; mark gaps as missing "
+"rather than leaving objects short. See :doc:`troubleshooting`."
 msgstr ""
-"모든 객체의 랜드마크 개수가 같아야 합니다. 개수를 모자란 채로 두지 말고 빈 자리를 결측으로 표시하세요. "
-":doc:`troubleshooting` 을 참조하세요."
+"데이터셋에 디지타이징한 객체가 5개 이상, 변수가 하나 이상 있어야 하고, 모든 객체의 랜드마크 개수가 같아야 합니다. 개수를 "
+"모자란 채로 두지 말고 빈 자리를 결측으로 표시하세요. :doc:`troubleshooting` 을 참조하세요."
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:139
 msgid "Next steps"

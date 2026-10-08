@@ -44,8 +44,9 @@ The Modan2 main window consists of several key components:
 3. **Dataset Tree View** (Left): Hierarchical view of datasets
 4. **Object Table** (Center): List of objects in the selected dataset, with
    **LM Count** and **Curve** columns
-5. **Object Preview** (Right): Visual preview of the selected object
-   (toggle with ``Ctrl+P``)
+5. **Object Preview**: a floating preview of the selected object over the
+   object table (bottom-right by default; drag it to another corner; toggle with
+   ``Ctrl+P``)
 6. **Status Bar** (Bottom): Information and progress indicators
 
 Working with Datasets
@@ -57,12 +58,13 @@ Creating a New Dataset
 1. Click **"New Dataset"** button or press ``Ctrl+N``
 2. Enter dataset information:
 
-   - **Name**: Descriptive name for your dataset
-   - **Dimension**: 2D or 3D
+   - **Parent**: optional - create hierarchical structure (pre-filled with the
+     dataset selected in the tree)
+   - **Dataset Name**: Descriptive name for your dataset
    - **Description**: Optional detailed description
-   - **Parent Dataset**: Optional - create hierarchical structure
+   - **Dimension**: 2D or 3D
 
-3. Click **OK** to create the dataset
+3. Click **Save** to create the dataset
 
 .. note::
    Hierarchical datasets allow you to organize related studies. For example:
@@ -72,15 +74,16 @@ Creating a New Dataset
      - Subspecies_A (child)
      - Subspecies_B (child)
 
-The dataset dialog is organized into tabs. Beyond the basic information above, it
-also holds:
+The dataset dialog is organized into tabs — **General** (the basic information
+above), **Landmarks**, **Curves** and **Variables**:
 
-- **Wireframe / Baseline / Polygons**: define how landmarks are connected for
-  display.
-- **Landmark names**: a table giving each landmark index a name/abbreviation and
-  a description (see :ref:`landmark-names`).
-- **Curve scheme**: the dataset's semi-landmark curves — each with a name and a
-  point count ``N`` (see :ref:`semi-landmark-curves`).
+- **Landmarks** tab: **Wireframe** / **Baseline** / **Polygons** define how
+  landmarks are connected for display, and the **Landmark Names** table gives
+  each landmark index a name/abbreviation and a description (see
+  :ref:`landmark-names`).
+- **Curves** tab: the number of **Fixed Landmarks** and the dataset's
+  semi-landmark curves — each with a name, a description and a point count ``N``
+  (see :ref:`semi-landmark-curves`).
 
 These schemes are shared by every object in the dataset, so a landmark name or a
 curve you define once applies to all specimens.
@@ -128,14 +131,15 @@ number ("2.5") equally well.
 Editing and Organising Datasets
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Rename a dataset** by opening its dataset dialog, changing the name, and
-clicking OK.
+**Rename a dataset** by opening its dataset dialog (double-click it in the
+tree), changing the name, and clicking **Save**.
 
 **Re-parent a dataset** by dragging it onto another dataset in the tree; it
 becomes a child of the target.
 
-**Move objects between datasets** by selecting them in the object table and
-dragging them onto the destination dataset in the tree.
+**Copy objects to another dataset** by selecting them in the object table and
+dragging them onto a dataset in the tree; hold **Shift** while dropping to move
+them instead. Both datasets must have the same dimension.
 
 .. warning::
    **Deleting a dataset deletes everything under it** — every object, every
@@ -154,16 +158,14 @@ Importing 2D Images
 
 1. Select a dataset in the tree view
 2. Drag image files from your file manager
-3. Drop them onto the dataset or object table
+3. Drop them onto the object table (not the tree)
 4. Images are automatically imported with filenames as object names
 
-**Method 2: Import Dialog**
+**Method 2: Object Dialog**
 
-1. Select dataset → **File → Import Objects**
-2. Click **"Add Images"**
-3. Select one or more image files
-4. Review the list
-5. Click **"Import"**
+1. Select the dataset → **Data → New Object** (``Ctrl+Shift+N``)
+2. Click **"Load Image"** (or drop an image onto the viewer)
+3. Click **Save**
 
 .. tip::
    Use consistent naming: ``specimen_001.jpg``, ``specimen_002.jpg`` for easier sorting
@@ -176,14 +178,14 @@ Importing 3D Models
 **Method 1: Drag and Drop**
 
 1. Select a 3D dataset
-2. Drag 3D model files into the application
+2. Drag 3D model files onto the object table
 3. Models are imported with automatic scaling
 
-**Method 2: Import Dialog**
+**Method 2: Object Dialog**
 
-1. **File → Import Objects → Add 3D Models**
-2. Select files
-3. Review and import
+1. Select the dataset → **Data → New Object** (``Ctrl+Shift+N``)
+2. Click **"Load 3D Model"**
+3. Click **Save**
 
 **3D Model Requirements**:
 
@@ -197,11 +199,12 @@ Importing Landmark Files
 **Supported formats**: TPS, NTS, X1Y1, Morphologika, and JSON+ZIP dataset
 packages.
 
-Open **File → Import** (``Ctrl+I``). Modan2 detects the format from the file
-extension (``.tps``, ``.nts``, ``.txt`` for Morphologika, ``.zip`` for a
-JSON+ZIP package), but you can also pick it explicitly with the format radio
-buttons. An **Invert Y** option flips the Y axis for files that use a
-bottom-left origin.
+Open **Data → Import** (``Ctrl+I``). Modan2 detects the format from the file
+extension (``.tps``, ``.nts``, ``.x1y1``, ``.txt`` for Morphologika, ``.zip``
+for a JSON+ZIP package), but you can also pick it explicitly with the
+**File Type** radio buttons. The **Y coordinate: Inverted** checkbox flips the
+Y axis for files that use a bottom-left origin. Importing always creates a new
+dataset, named in the **Dataset Name** field.
 
 .. note::
    **Missing-landmark placeholder.** If an imported file contains the
@@ -232,15 +235,14 @@ bottom-left origin.
 
 **Importing a landmark file**:
 
-1. **File → Import** (``Ctrl+I``)
-2. Select the file (TPS, NTS, X1Y1, or Morphologika)
-3. Modan2 will:
+1. **Data → Import** (``Ctrl+I``)
+2. Click **Open File** and select the file (TPS, NTS, X1Y1, or Morphologika)
+3. Check the **Dataset Name** for the new dataset
+4. Click **"Execute Import"**. Modan2 will:
 
-   - Create objects for each specimen
+   - Create a new dataset with an object for each specimen
    - Link to image files (if an ``IMAGE=`` field exists)
    - Import landmark coordinates (and any curves, for TPS)
-
-4. Click **"Import"**
 
 Importing a Dataset Package (JSON+ZIP)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -250,9 +252,9 @@ bundles the dataset's metadata, landmark names, curve scheme, variables, and —
 optionally — the image and 3D-model files. Importing one recreates the whole
 dataset, including traced semi-landmark curves and missing landmarks.
 
-1. **File → Import** (``Ctrl+I``)
-2. Select the ``.zip`` package
-3. Click **"Import"**
+1. **Data → Import** (``Ctrl+I``)
+2. Click **Open File** and select the ``.zip`` package
+3. Click **"Execute Import"**
 
 Packages are imported inside a transaction and roll back on any error, and
 extraction is hardened against path-traversal ("Zip Slip") archives. Older
@@ -268,15 +270,18 @@ Viewing an Object
 
 The Object Dialog shows:
 
-- Object metadata (name, ID, creation date)
+- Object fields (Dataset Name, Object Name, Sequence, Description, and one
+  field per dataset variable)
 - Associated image or 3D model
 - Landmark table
 - 2D/3D viewer with landmarks visualized
 
 The Object Dialog has mode buttons that decide what a click does:
-**Landmark** (place/move landmarks, the default), **Curve** (trace a
-semi-landmark curve), and **Calibration** (set the image scale). Only one is
-active at a time.
+**Landmark** (place/move landmarks, the default), **Wireframe** (drag from one
+landmark to another to connect them; right-click an edge to delete it),
+**Calibration** (set the image scale), and **Curve** (trace a semi-landmark
+curve). Only one is active at a time. An image that has not been calibrated
+yet opens in **Calibration** mode first.
 
 Placing Landmarks (2D)
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -300,8 +305,8 @@ Placing Landmarks (3D)
 2. Rotate the model:
 
    - **Left mouse drag**: Rotate
-   - **Right mouse drag**: Pan
-   - **Mouse wheel**: Zoom
+   - **Middle mouse drag**: Pan
+   - **Right mouse drag** / **Mouse wheel**: Zoom
 
 3. Click on the surface to place a landmark
 4. Landmarks appear as colored spheres
@@ -366,8 +371,8 @@ Landmark Names
 You can give each landmark a name/abbreviation and a description at the **dataset**
 level, so they apply to every specimen.
 
-1. In the Object Dialog, click **"Landmark Names"** (or use the dataset dialog's
-   landmark-names tab)
+1. In the Object Dialog, click **"Landmark Names"** (or use the **Landmark
+   Names** table on the dataset dialog's **Landmarks** tab)
 2. Fill in the **Name** and **Description** columns for each landmark index
 3. Click **Save**
 
@@ -398,7 +403,8 @@ point count at any time. Semi-landmark curves are a **2D** feature.
 3. Press **Enter** or **double-click** to accept the trace; press **Esc** or
    **right-click** to cancel
 4. For a brand-new curve you are asked **"Number of semi-landmarks on this
-   curve"** (default 10). This count is dataset-wide, so it applies to that curve
+   curve"** (10 for the first curve, then the previous curve's count). This
+   count is dataset-wide, so it applies to that curve
    on every specimen.
 
 **Snap to curve (live-wire edge detection)** — on by default in Curve mode. The
@@ -469,8 +475,7 @@ In the Object Dialog, customize visualization:
 - **Show** + **Index** / **Name**: toggle landmark labels and choose whether the
   label is the index number or the landmark name
 - **Wireframe**: connect landmarks along the dataset wireframe
-- **Polygon**: fill defined polygons
-- **Baseline**: highlight the baseline landmarks
+- **Polygon** (3D objects): fill defined polygons
 - **Show Estimated**: hollow circles at estimated positions of missing landmarks
 - **Show Expected**: predicted positions of not-yet-placed landmarks (see
   Digitizing Aids)
@@ -493,7 +498,8 @@ Modan2 provides three main statistical analyses:
 2. **Canonical Variate Analysis (CVA)**: Discriminate between groups
 3. **MANOVA**: Test for group differences
 
-All analyses require **Procrustes superimposition** as a preprocessing step.
+All analyses run on superimposed shapes (Procrustes or Bookstein), computed as
+the first step of the run.
 
 Running an Analysis
 ~~~~~~~~~~~~~~~~~~~
@@ -513,7 +519,14 @@ dataset and can be re-opened later.
 
 4. Click **"OK"** to run. Progress is shown, and if CVA/MANOVA cannot be computed
    (e.g. too few groups) the failure is reported rather than silently skipped.
-5. Explore the results in the **Data Exploration** dialog.
+5. Select the new analysis in the tree: its results appear in **PCA**, **CVA**
+   and **MANOVA** tabs. Choose the PCA or CVA tab and click **Data Exploration**
+   for interactive plots, or **Analysis Details** for the result tables.
+
+The run is refused before it starts if the dataset has fewer than 5 objects with
+landmarks, has **no variables** (currently even for PCA, since every run includes
+CVA and MANOVA), has objects with differing landmark counts, or has a landmark
+that is missing in every object.
 
 .. _analysis-procrustes:
 
@@ -544,9 +557,10 @@ EM-style refinement loop (see :ref:`analysis-missing-landmarks`).
 Resistant Fit (RFTRA) was offered in earlier 0.2.0 pre-releases and has been
 withdrawn; see the note under :doc:`advanced_features`.
 
-**When Procrustes Runs**:
+**When the superimposition runs**:
 
-- Automatically as the first step of every analysis run
+- Automatically as the first step of every analysis run, using the method
+  chosen in the analysis dialog
 - The aligned shapes feed PCA, CVA, and MANOVA
 
 .. _analysis-pca:
@@ -564,37 +578,37 @@ Principal Component Analysis (PCA)
 - Reducing dimensionality
 
 **Running PCA**: PCA is computed automatically as part of every analysis run (see
-`Running an Analysis`_). Open the completed analysis in the **Data Exploration**
-dialog to explore its principal components.
+`Running an Analysis`_). Select the analysis, choose the **PCA** tab and click
+**Data Exploration** to explore its principal components.
 
 **Interpreting Results**:
 
-The **Data Exploration Dialog** opens with:
+The **Data Exploration Dialog** shows:
 
-- **Scree Plot**: Shows variance explained by each PC
+- **Score plot**: a scatter plot of specimens
 
-  - X-axis: PC number
-  - Y-axis: % variance
-  - Look for "elbow" to determine how many PCs are meaningful
+  - Axis 1 / Axis 2 (and Axis 3 for a 3D chart): any of PC1–PC10, plus
+    centroid size (CSize) on Axis 1
+  - Points coloured by the **Grouping variable**
+  - Tick **Var. explained** to add each axis's % variance to its label
 
-- **PC Score Plot**: Scatter plot of specimens
+- **Shape view**: the shape at a point of the plot — in *Exploration* mode,
+  click the chart to see the shape at that position; *Regression*, *Average*,
+  *Comparison* and *Comparison (overlap)* show other reconstructions
 
-  - X-axis: PC1 (usually highest variance)
-  - Y-axis: PC2 (second highest)
-  - Points colored by groups (if variables defined)
-
-- **Shape Variation Wireframes**:
-
-  - Shows shape changes along each PC
-  - Min/Max shapes at extremes of PC axis
-
-- **PC Scores Table**: Numeric scores for each specimen
+The eigenvalues (variance per PC) and the numeric scores are in the
+**Analysis Details** window (**Eigenvalues** and **Result table** tabs).
 
 **Exporting PCA Results**:
 
-- **Export PC Scores**: CSV file with scores for each object
-- **Export Loadings**: Landmark contributions to each PC
-- **Export Plot**: Save scatter plot as PNG/PDF
+- **Analysis Details → Save Results**: an Excel (``.xlsx``) workbook with the
+  scores and centroid size, the rotation matrix, and the eigenvalues
+- **Export Chart** (Data Exploration): save the plot as PNG, JPG, PDF or SVG
+
+.. note::
+   **Analysis Details** recomputes a Procrustes PCA from the dataset when it
+   opens, so its tables follow the dataset's current landmarks rather than a
+   stored Bookstein analysis.
 
 **Example Workflow**:
 
@@ -632,27 +646,19 @@ Canonical Variate Analysis (CVA)
 
 **Running CVA**: CVA is computed as part of every analysis run. In the analysis
 dialog, set the **CVA grouping variable** to the categorical variable that
-defines your groups (e.g. "Species"), then open the result in **Data
-Exploration**.
+defines your groups (e.g. "Species"), then select the analysis, choose the
+**CVA** tab and click **Data Exploration**.
 
 **Interpreting Results**:
 
-- **CV Score Plot**: Specimens plotted on CV axes
+- **CV Score Plot** (the **CVA** tab, and Data Exploration): specimens plotted
+  on CV axes
 
   - Ideally, groups form distinct clusters
   - Overlap indicates similarity
 
-- **Classification Table**: Shows how well CVA discriminates
-
-  - Rows: True group
-  - Columns: Predicted group
-  - Diagonal = correct classifications
-  - Off-diagonal = misclassifications
-
-- **Discriminant Function**: Statistical details
-
-  - Wilks' Lambda: Smaller = better separation (0-1 scale)
-  - P-value: Significance of group differences
+Modan2 shows the CV scores only; it does not display a classification table or
+discriminant-function statistics.
 
 **Example**:
 
@@ -663,14 +669,6 @@ Exploration**.
    CVA Results:
      CV1: 78% discrimination
      CV2: 15% discrimination
-
-   Classification Table:
-              Predicted A  Predicted B  Predicted C
-   Actual A      18           2            0
-   Actual B       1          19            0
-   Actual C       0           1           19
-
-   Overall accuracy: 93.3%
 
 .. _analysis-manova:
 
@@ -683,13 +681,14 @@ MANOVA
 
 - Formal hypothesis testing
 - Comparing multiple groups simultaneously
-- Assessing effect size
 
 **Running MANOVA**: MANOVA is computed as part of every analysis run. In the
 analysis dialog, set the **MANOVA grouping variable** to the categorical variable
 you want to test.
 
-**Interpreting Results**:
+**Interpreting Results** (the **MANOVA** tab: one row each for Wilks' lambda,
+Pillai's trace, Hotelling-Lawley trace and Roy's greatest root, with columns
+Value, Num DF, Den DF, F Value and Pr>F):
 
 - **Wilks' Lambda**: Test statistic (0-1)
 
@@ -703,7 +702,6 @@ you want to test.
   - P < 0.05: Significant difference (reject null hypothesis)
   - P ≥ 0.05: No significant difference
 
-- **Effect Size (Partial η²)**: Proportion of variance explained by groups
 
 **Example**:
 
@@ -715,10 +713,8 @@ you want to test.
      Wilks' Lambda: 0.234
      F(40, 18) = 3.45
      P-value: 0.002
-     Partial η²: 0.766
 
    Conclusion: Significant sex-related shape differences (P < 0.05)
-   76.6% of shape variation explained by sex
 
 .. _analysis-missing-landmarks:
 
@@ -787,23 +783,21 @@ Statistical Plots
 
 **Available Plots**:
 
-- **Scree Plot** (PCA): Variance explained per PC
 - **PC Score Plot** (PCA): Specimens on PC axes
 - **CV Score Plot** (CVA): Specimens on CV axes
-- **Shape Variation Plot**: Wireframes at PC/CV extremes
+- **Shape view** (Data Exploration): the shape at a chosen point of the plot
 
 **Customization**:
 
 - **Group Colors**: Auto-assigned by variable
 - **Point Size**: Adjustable
-- **Axis Labels**: Automatic with variance %
+- **Axis Labels**: tick **Var. explained** to add the variance %
 - **Legend**: Shows group names and colors
 
 **Exporting Plots**:
 
-1. Right-click on plot → **"Export Plot"**
-2. Formats: PNG, SVG, PDF
-3. Resolution: 300 DPI default (adjustable)
+1. In Data Exploration, click **"Export Chart"**
+2. Formats: PNG, JPG, PDF, SVG
 
 Data Export
 -----------
@@ -821,7 +815,7 @@ Select a dataset and choose **Export** (``Ctrl+E``).
    - **JSON+ZIP**: a complete dataset package (see below)
 
 2. Choose the **superimposition** applied on export: **None** (raw coordinates) or
-   **Procrustes** (aligned). For a raw TPS export, traced semi-landmark curves are
+   **Procrustes** (aligned; the default). For a raw TPS export, traced semi-landmark curves are
    written under ``CURVES=`` / ``POINTS=`` blocks; a Procrustes export writes the
    merged aligned landmarks.
 3. Pick which objects to include from the object list.
@@ -844,11 +838,9 @@ it.
 Exporting Analysis Results
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In the **Data Exploration Dialog**:
-
-- **Export PC Scores**: CSV with scores per specimen
-- **Export Shape Data**: Aligned landmark coordinates (post-Procrustes)
-- **Export Statistics**: Summary statistics (mean, SD, etc.)
+- **Analysis Details → Save Results**: an Excel (``.xlsx``) workbook with the
+  scores, the rotation matrix and the eigenvalues
+- **Export Chart** (Data Exploration): the plot as PNG, JPG, PDF or SVG
 
 Keyboard Shortcuts
 ------------------
@@ -883,7 +875,9 @@ Open **Edit → Preferences**.
 General
 ~~~~~~~
 
-- **Language**: English or Korean (한국어), applied immediately
+- **Language**: English or Korean, applied immediately
+- **Data folder**: where the whole library lives (**Browse...** / **Reset**); see
+  :doc:`faq`
 - **Remember Geometry**: restore window size/position between sessions (Yes/No)
 - **Toolbar Icon Size**: Small / Medium / Large
 
@@ -916,8 +910,8 @@ Data Organization
 1. **Use consistent naming**: ``species_ID_number.jpg`` (e.g., ``sparrow_001.jpg``)
 2. **Organize hierarchically**: Group related datasets
 3. **Document metadata**: Use description fields
-4. **Back up regularly**: export datasets as JSON+ZIP packages, or copy
-   ``~/PaleoBytes/Modan2/`` while Modan2 is closed
+4. **Back up regularly**: use **Data → Back Up Library...**, or export datasets
+   as JSON+ZIP packages
 
 Landmark Placement
 ~~~~~~~~~~~~~~~~~~
@@ -996,13 +990,24 @@ Troubleshooting
 Analysis Fails
 ~~~~~~~~~~~~~~
 
-**Error**: ``Not enough complete specimens for Procrustes``
+**Error**: ``… has too few objects with landmarks … At least 5 objects required``
 
-**Solution**: Need at least 2 complete specimens without missing landmarks
+**Solution**: Digitize at least 5 objects
 
-**Error**: ``CVA requires at least 2 groups``
+**Error**: ``… has no grouping variables``
 
-**Solution**: Define a grouping variable with multiple values
+**Solution**: Add a variable in the dataset dialog's **Variables** tab and fill in
+its value for each object — currently every run needs one
+
+**Error**: ``Object '…' has N landmarks but this dataset expects M``
+
+**Solution**: Open the object and use **"Insert Missing"** at each position that
+was not recorded
+
+**Error**: ``Landmark N is missing in every object``
+
+**Solution**: Record that landmark on at least one object, so there is something
+to estimate it from
 
 Landmarks Not Showing
 ~~~~~~~~~~~~~~~~~~~~~
@@ -1035,8 +1040,8 @@ TPS
 ~~~
 
 An object is an ``LM=<n>`` header, ``n`` coordinate lines, and optional
-``KEY=VALUE`` lines. Recognised keys are ``ID``, ``IMAGE``, ``COMMENT``, and
-``SCALE``. Lines beginning with ``#``, ``"`` or ``'`` are comments.
+``KEY=VALUE`` lines. Recognised keys are ``ID``, ``IMAGE`` and ``COMMENT``
+(others, such as ``SCALE``, are ignored). Lines beginning with ``#``, ``"`` or ``'`` are comments.
 
 .. code-block:: text
 
@@ -1119,7 +1124,8 @@ Optional sections Modan2 reads: ``[labels]`` and ``[labelvalues]`` (variables),
 X1Y1
 ~~~~
 
-Plain coordinate columns, one row per object.
+A tab-separated table: a header row (name, X1, Y1, X2, Y2, …) and then one
+row per object.
 
 Glossary
 --------

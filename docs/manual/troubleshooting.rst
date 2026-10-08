@@ -14,7 +14,8 @@ Where Modan2 Keeps Your Files
 
 Several problems below come down to a file being missing or unwritable, so it
 helps to know where things are. ``~`` is your home folder (for example
-``C:\Users\<you>`` on Windows).
+``C:\Users\<you>`` on Windows). These are the defaults; **Edit → Preferences →
+Data folder** moves the whole library elsewhere.
 
 +-------------------+-------------------------------------+
 | What              | Where                               |
@@ -85,8 +86,8 @@ Permission Issues
 
 **Problem:** Settings not saving
 
-Preferences are written when the application exits, to your operating system's
-settings folder:
+Preferences are saved when you close the Preferences dialog (window sizes and
+positions when you quit), to your operating system's settings folder:
 
 .. list-table::
    :header-rows: 1
@@ -165,10 +166,10 @@ Ensure no other Modan2 processes are running:
 
 If you have a recent backup:
 
-1. Use backup database
-2. Export all datasets as JSON+ZIP
-3. Create new database (delete Modan2.db)
-4. Import datasets from JSON+ZIP
+1. **Data → Back Up Library...** (or keep the backup you already have)
+2. Quit Modan2 and move ``Modan2.db`` aside
+3. Start Modan2 — it creates a new, empty database
+4. **Data → Restore from Backup...**
 
 Cannot Access Database
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -219,7 +220,8 @@ Data Loading and Import Issues
 Import File Format Not Recognized
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Problem:** "Unknown file format" or "Failed to import" error
+**Problem:** "File type not supported.", "Failed to read package: …" or
+"Import failed: …" error
 
 **Supported formats:**
 
@@ -284,21 +286,23 @@ Missing Data After Import
 3. **Check scale:**
 
    * Landmarks may be outside viewing range
-   * Try "Fit to View" or zoom out
+   * Zoom out with the mouse wheel
    * Check coordinate values are reasonable
 
 Image/Model Not Loading
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Problem:** "Failed to load image" or "Model file not found"
+**Problem:** "Failed to import image: …" or "Failed to import 3D model: …", or
+an object shows no image or model
 
 **Solution:**
 
 1. **Check file paths:**
 
-   * Image/model paths stored in database
-   * If files moved, update paths
-   * Use relative paths when possible
+   * Modan2 keeps its own copy of each image or model in the data folder
+     (``data/<dataset id>/``); moving or deleting your original file does not
+     affect it
+   * If that copy is missing, re-attach the file (below)
 
 2. **Verify file integrity:**
 
@@ -318,9 +322,9 @@ Image/Model Not Loading
 
 4. **Re-attach files:**
 
-   * Right-click object → Properties
-   * Attach image/model again
-   * Browse to correct file
+   * Double-click the object (or right-click → **Edit object**)
+   * Click **Load Image** / **Load 3D Model**
+   * Browse to correct file, then **Save**
 
 Analysis Errors
 ---------------
@@ -334,19 +338,23 @@ PCA/CVA/MANOVA Fails
 
 1. **Not enough objects:**
 
-   * PCA: Need at least 3 objects
-   * CVA/MANOVA: Need at least 2 groups with 3+ objects each
+   * Any analysis: at least 5 objects with landmarks
+   * CVA/MANOVA: at least 2 groups in the grouping variable
 
 2. **Missing landmarks:**
 
-   * Some landmarks marked as missing
-   * Not enough complete configurations
-   * Solution: Estimate missing landmarks or exclude objects
+   * Missing landmarks are estimated automatically during analysis
+   * A landmark missing in *every* object cannot be estimated
+   * Objects with fewer landmarks than the dataset expects are refused
+   * Solution: record each landmark on at least one object, and use **Insert
+     Missing** in the object dialog where a specimen is short
 
-3. **No grouping variable (CVA/MANOVA):**
+3. **No variables:**
 
-   * Need categorical variable for groups
-   * Solution: Add grouping variable to objects
+   * The analysis will not run at all without at least one variable (every run
+     includes CVA and MANOVA)
+   * Solution: add one in the dataset dialog's **Variables** tab (or **Add
+     variable** in the main window) and fill in its values
 
 4. **Insufficient variation:**
 
@@ -357,14 +365,14 @@ PCA/CVA/MANOVA Fails
 
 1. **Check object count:**
 
-   * Select dataset
-   * View object count in status bar
+   * The number in brackets after the dataset's name in the tree is its object
+     count
    * Ensure sufficient objects
 
 2. **Check for missing data:**
 
    * Review objects for missing landmarks
-   * Use "Estimate Missing" feature or exclude
+   * Tick **Show Estimated** in the object dialog to see the estimates
 
 3. **Verify grouping variable:**
 
@@ -449,8 +457,8 @@ Analysis Results Look Wrong
 
 1. **Reset view:**
 
-   * Double-click in 3D viewer
-   * Or use View → Reset Camera
+   * Scroll or right-drag to zoom out, and middle-drag to pan (the object viewer
+     has no reset-view command; in Data Exploration, use **Reset Pose**)
 
 2. **Check OpenGL:**
 
@@ -514,13 +522,14 @@ Landmark Spheres Not Visible
 
 1. **Increase sphere size:**
 
-   * Settings → Visualization → Landmark size
-   * Increase value
+   * **Edit → Preferences** → **Landmark**, 3D
+   * Choose **Large**
 
-2. **Check lighting:**
+2. **Check colours:**
 
-   * Spheres may be too dark
-   * Adjust lighting in settings
+   * Spheres may be hard to see against the background
+   * Pick a brighter 3D landmark colour, or change **Background Color**, in
+     **Edit → Preferences**
 
 3. **Zoom in:**
 
@@ -566,8 +575,7 @@ Application Slow to Start
 
 4. **Reduce loaded data:**
 
-   * Close unused datasets
-   * Archive old analyses
+   * Delete analyses you no longer need (right-click → **Delete analysis**)
 
 Slow Analysis or Visualization
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -714,9 +722,9 @@ When reporting issues, include this information:
 
 2. **Modan2 version:**
 
-   * Help → About Modan2
-   * Note the version and build number, which also appear in the name of the
-     package you downloaded
+   * **Help → About** (``F1``) shows the version
+   * The build number appears on the splash screen and, with the version, in
+     the name of the package you downloaded
 
 3. **Log files:**
 
@@ -777,25 +785,24 @@ Common Error Messages
 
 **Solution:** See "Procrustes Alignment Issues" section above
 
-"Not enough objects for analysis"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"… has too few objects with landmarks"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Cause:** Insufficient sample size
 
-**Solution:**
+**Solution:** At least 5 objects with landmarks (and at least one variable) are
+required
 
-* PCA: Need at least 3 objects
-* CVA/MANOVA: Need at least 2 groups with 3+ objects each
-
-"Invalid landmark count"
-~~~~~~~~~~~~~~~~~~~~~~~~
+"Object '…' has N landmarks but this dataset expects M"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Cause:** Object has wrong number of landmarks for dataset
 
 **Solution:**
 
-1. Check dataset landmark count
-2. Verify object landmarks match
+1. Open the object
+2. Use **Insert Missing** to add a placeholder at each position that was not
+   recorded
 3. Re-digitize object if needed
 
 Getting Additional Help
@@ -861,8 +868,7 @@ Current Limitations
 4. **Language:**
 
    * English and Korean interfaces are available
-   * Some newer dialogs (notably Curve mode) are still English-only in the
-     Korean interface
+   * A few messages may still appear in English in the Korean interface
 
 Planned Improvements
 ~~~~~~~~~~~~~~~~~~~~

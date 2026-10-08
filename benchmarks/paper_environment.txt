@@ -40,10 +40,17 @@ coordinates but specimen names, order, and dietary and prey categories of an
 earlier version, and the second's coordinates differ from the published ones
 by as much as two thylacines differ from each other.
 
-Code: Modan2 v0.2.0 (tag v0.2.0, commit 5173275, clean), run from a git
-worktree at the tag through --repo. The scripts themselves are run from this
-checkout; they postdate the tag, and only load the application code from the
-worktree.
+Code: Modan2 v0.2.0 (tag v0.2.0, commit c550bc2, build 924, clean), run from
+a git worktree at the tag through --repo. The scripts are run from this
+checkout and only load the application code from the worktree.
+
+v0.2.0 was published three times on 2026-10-08: build 908 (5173275), build 922
+(868d20f, with the post-release fixes of devlogs 291-292 and the CVA accuracy
+display), and build 924 (c550bc2, adding the MANOVA display of devlog 294).
+Every result here was rerun on build 924. Apart from the runtime table, they
+match those first computed on build 908: none of the fixes in between alters
+an analysis of these data (no rotation in any of them needed the reflection
+correction, and no specimen records too few landmarks).
 
 Machine: Intel Core i7-6700 (3.40 GHz, 4 cores / 8 threads), 16 GB RAM,
 Windows host running Linux under WSL 2

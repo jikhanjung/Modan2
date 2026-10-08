@@ -8,7 +8,7 @@
     "memory_gb": 16,
     "platform": "Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.39",
     "python": "3.12.3",
-    "timestamp": "2026-10-08 16:07:38"
+    "timestamp": "2026-10-08 18:03:39"
   },
   "dataset": "Cranial 206x72",
   "file": "/mnt/d/projects/modan2/benchmarks/data/rovinsky2021/neurocranium_222.txt",
@@ -23,8 +23,8 @@
   "group_variable": "DietFine",
   "runs": 9,
   "superimposition": {
-    "procrustes": 0.4106311630021082,
-    "bookstein": 0.1845828000077745
+    "procrustes": 0.3718757950118743,
+    "bookstein": 0.16883517600945197
   },
   "groups": {
     "n": 10,
@@ -42,31 +42,31 @@
     }
   },
   "downstream": {
-    "pca": 0.04557104699779302,
-    "cva": 1.7306442469998728,
-    "manova": 0.025273228995501995,
-    "full_workflow": 2.212119685995276
+    "pca": 0.040886582995881326,
+    "cva": 1.6469990739860805,
+    "manova": 0.022937344998354092,
+    "full_workflow": 2.08269879699219
   },
   "manova_components": 14,
   "imputation": {
     "0%": {
-      "time": 0.4106311630021082,
+      "time": 0.3718757950118743,
       "relative": 1.0,
       "n_removed": 0
     },
     "5%": {
-      "time": 1.8427611030056141,
-      "relative": 4.487630918056147,
+      "time": 1.7455539310030872,
+      "relative": 4.693916502275579,
       "n_removed": 742
     },
     "10%": {
-      "time": 1.9316720420029014,
-      "relative": 4.7041535471407565,
+      "time": 1.8918985859927488,
+      "relative": 5.087447506316831,
       "n_removed": 1483
     },
     "20%": {
-      "time": 1.9925028970028507,
-      "relative": 4.852293436366935,
+      "time": 2.0109987040050328,
+      "relative": 5.407716046538657,
       "n_removed": 2966
     }
   }

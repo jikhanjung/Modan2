@@ -8,7 +8,7 @@
     "memory_gb": 16,
     "platform": "Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.39",
     "python": "3.12.3",
-    "timestamp": "2026-10-08 16:23:13"
+    "timestamp": "2026-10-08 18:10:04"
   },
   "r_versions": {
     "R": "4.5.3",
@@ -63,18 +63,18 @@
       },
       "canonical_percent": {
         "modan2": [
-          51.26015874641639,
-          19.075869530484884
+          51.260158746416415,
+          19.075869530484887
         ],
         "r": [
           51.2601586128961,
           19.0758701114152
         ]
       },
-      "max_canonical_percent_difference": 7.872196262914688e-07,
+      "max_canonical_percent_difference": 7.872196075564553e-07,
       "canonical_score_correlation": [
-        0.9999999999999958,
-        0.999999999999995
+        0.9999999999999956,
+        0.9999999999999943
       ],
       "resubstitution_disagreements": 0,
       "loocv_accuracy": {

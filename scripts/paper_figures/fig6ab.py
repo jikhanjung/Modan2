@@ -115,6 +115,7 @@ def name_and_capture_scheme():
     dlg = w.dlg
     dlg.tabs.setCurrentIndex(2)
     dlg.curveTable.item(0, 1).setText(CURVE_NAME)
+    dlg.curveTable.resizeColumnToContents(1)  # show the whole name
     pump()
     shoot(dlg, "fig6a_curve_scheme")
     dlg.Okay()  # the Save button

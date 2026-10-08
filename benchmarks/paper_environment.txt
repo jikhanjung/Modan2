@@ -3,7 +3,9 @@ paper_accuracy_cranial222.json, paper_accuracy_dense14.json (the runtime and
 accuracy tables of the Modan2 paper), paper_worked_examples_cranial206.json
 (the figures of its worked example on the cranial dataset), and
 paper_r_comparison_cranial206.json (the same analyses compared with an
-independent R implementation).
+independent R implementation), and paper_refinement_sensitivity.json (the
+accuracy assessment repeated with the cap on refinement rounds raised from 5
+to 10 and 20).
 
 Code: Modan2 v0.2.0 (tag v0.2.0, commit 5173275, clean), run from a
 git worktree at the tag through --repo. The scripts themselves are run from
@@ -42,6 +44,7 @@ Commands (run one after another, 2026-10-08):
   python scripts/paper_worked_examples.py --repo <worktree>
   python scripts/paper_r_comparison.py --repo <worktree> \
       --rscript ~/micromamba/envs/modan2-r/bin/Rscript
+  python scripts/paper_refinement_sensitivity.py --repo <worktree>
 
 The R side runs in the micromamba environment of r-environment.yml (R 4.5.3,
 geomorph 4.1.1, RRPP 2.2.0, MASS 7.3-66, OpenBLAS 0.3.34); that file says how

@@ -193,6 +193,38 @@ def find_unimputable_landmarks(objects):
     return unimputable
 
 
+def find_unfittable_objects(objects, dimension):
+    """Objects whose missing landmarks cannot be estimated: too few are recorded.
+
+    Imputation fits the mean shape onto an object's recorded landmarks with a
+    similarity transform (:func:`impute_missing_landmarks`), which needs at least
+    as many shared landmarks as the data have dimensions. An object with fewer
+    keeps its gaps -- the fit only logs a warning -- and, as with a landmark that
+    no object records (:func:`find_unimputable_landmarks`), the ``None`` then
+    surfaces in the analysis matrix as an opaque ``float()``/``NoneType`` error.
+
+    Every landmark an object records is present in the mean shape, which is
+    computed from all the objects, so "shared" is simply "recorded here". A
+    landmark counts as recorded only with all its coordinates, as in the fit.
+
+    Pass ``MdDatasetOps.object_list`` rather than the stored objects, so that
+    semi-landmark curves are counted as the analysis will see them: a traced
+    curve adds recorded points, an untraced one adds gaps.
+
+    Returns:
+        ``(object, recorded_count)`` for each object that has a gap and fewer
+        than ``dimension`` recorded landmarks, in input order.
+    """
+    unfittable = []
+    for obj in objects:
+        landmark_position_count(obj)  # force unpack
+        landmarks = obj.landmark_list or []
+        recorded = sum(1 for lm in landmarks if len(lm) >= dimension and None not in lm[:dimension])
+        if recorded < len(landmarks) and recorded < dimension:
+            unfittable.append((obj, recorded))
+    return unfittable
+
+
 database_path = os.path.join(mu.DEFAULT_DB_DIRECTORY, DATABASE_FILENAME)
 
 gDatabase = SqliteDatabase(database_path, pragmas={"foreign_keys": 1})

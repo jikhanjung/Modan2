@@ -525,8 +525,9 @@ dataset and can be re-opened later.
 
 The run is refused before it starts if the dataset has fewer than 5 objects with
 landmarks, has **no variables** (currently even for PCA, since every run includes
-CVA and MANOVA), has objects with differing landmark counts, or has a landmark
-that is missing in every object.
+CVA and MANOVA), has objects with differing landmark counts, has a landmark
+that is missing in every object, or has an object that records too few landmarks
+for its missing ones to be estimated (fewer than 2 in 2D data, 3 in 3D).
 
 .. _analysis-procrustes:
 
@@ -1008,6 +1009,11 @@ was not recorded
 
 **Solution**: Record that landmark on at least one object, so there is something
 to estimate it from
+
+**Error**: ``Object '…' records N landmarks, so its missing landmarks cannot be estimated``
+
+**Solution**: Record more landmarks on that object — at least 2 in 2D data, 3 in
+3D — or remove it from the dataset
 
 Landmarks Not Showing
 ~~~~~~~~~~~~~~~~~~~~~

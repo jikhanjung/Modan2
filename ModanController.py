@@ -52,6 +52,29 @@ def unimputable_landmarks_message(indices):
     )
 
 
+def unfittable_objects_message(offenders, dimension):
+    """Explain objects that record too few landmarks for their gaps to be estimated.
+
+    ``offenders`` is what :func:`MdModel.find_unfittable_objects` returns. Shares
+    one wording across every gate, like ``unimputable_landmarks_message``.
+    """
+    need = f"at least {dimension} recorded landmarks in {dimension}D data"
+    if len(offenders) == 1:
+        obj, recorded = offenders[0]
+        return (
+            f"Object '{getattr(obj, 'object_name', '?')}' records {recorded} "
+            f"landmark{'' if recorded == 1 else 's'}, so its missing landmarks cannot be "
+            f"estimated: that takes {need}. Record more landmarks on it, or remove it "
+            f"from the dataset."
+        )
+    names = ", ".join(f"'{getattr(obj, 'object_name', '?')}' ({recorded})" for obj, recorded in offenders)
+    return (
+        f"Objects {names} record too few landmarks for their missing ones to be "
+        f"estimated: that takes {need}. Record more landmarks on them, or remove them "
+        f"from the dataset."
+    )
+
+
 class ModanController(QObject):
     """Main controller - handles business logic."""
 
@@ -1133,6 +1156,12 @@ class ModanController(QObject):
             raise ValueError(unimputable_landmarks_message(unimputable))
 
         ds_ops = MdDatasetOps(self.current_dataset)
+        # Likewise for an object that records too few landmarks to fit the mean
+        # onto: its gaps would stay None. Checked on ds_ops, whose objects carry
+        # the semi-landmark curves the analysis will see.
+        unfittable = MdModel.find_unfittable_objects(ds_ops.object_list, ds_ops.dimension)
+        if unfittable:
+            raise ValueError(unfittable_objects_message(unfittable, ds_ops.dimension))
         # Bookstein raises a ValueError with a specific reason (no baseline /
         # missing landmarks); Procrustes returns False on failure. Anything
         # unrecognized falls back to Procrustes.
@@ -1556,6 +1585,11 @@ class ModanController(QObject):
         if unimputable:
             return False, unimputable_landmarks_message(unimputable)
 
+        dimension = self.current_dataset.dimension
+        unfittable = MdModel.find_unfittable_objects(MdModel.MdDatasetOps(self.current_dataset).object_list, dimension)
+        if unfittable:
+            return False, unfittable_objects_message(unfittable, dimension)
+
         return True, "Dataset is valid for analysis"
 
     def _validate_dataset_for_general_analysis(self, dataset) -> bool:
@@ -1606,6 +1640,11 @@ class ModanController(QObject):
         unimputable = MdModel.find_unimputable_landmarks(objects_with_landmarks)
         if unimputable:
             show_warning(None, unimputable_landmarks_message(unimputable))
+            return False
+
+        unfittable = MdModel.find_unfittable_objects(MdModel.MdDatasetOps(dataset).object_list, dataset.dimension)
+        if unfittable:
+            show_warning(None, unfittable_objects_message(unfittable, dataset.dimension))
             return False
 
         return True

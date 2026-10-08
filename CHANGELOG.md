@@ -19,6 +19,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   which left that specimen fitted worse than it could be. It now chooses the
   best rotation. Datasets that never meet this case are unaffected; none of the
   datasets behind the Modan2 paper do.
+- **An analysis no longer stops with an unreadable error when an object records
+  too few landmarks.** Missing landmarks are estimated by fitting the mean shape
+  onto the landmarks an object does record, which takes at least 2 of them in 2D
+  data and 3 in 3D. An object with fewer was passed over with only a note in the
+  log, and the analysis then failed with "float() argument must be … not
+  'NoneType'". It is now refused before it starts, with a message naming the
+  object.
 
 
 ## [0.2.0] - 2026-10-08

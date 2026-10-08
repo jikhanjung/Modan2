@@ -15,8 +15,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from peewee import SqliteDatabase
 
-from MdModel import MdDataset, MdObject, find_unimputable_landmarks
-from ModanController import unimputable_landmarks_message
+from MdModel import MdDataset, MdDatasetOps, MdObject, find_unfittable_objects, find_unimputable_landmarks
+from ModanController import unfittable_objects_message, unimputable_landmarks_message
 
 test_db = SqliteDatabase(":memory:")
 
@@ -160,4 +160,111 @@ class TestGatesBailOut:
         ok, _ = self._controller(ds)._validate_dataset_for_analysis_type("PCA")
         assert ok is True
         ds_ops, landmarks = self._controller(ds)._prepare_landmarks()
+        assert all(c is not None for obj in landmarks for lm in obj for c in lm)
+
+
+# --------------------------------------------------------------------------- #
+# An object that records fewer landmarks than the data have dimensions cannot
+# have its gaps estimated either: the similarity fit of the mean shape onto it
+# needs that many shared points. The fit used to log a warning and move on,
+# and the None surfaced in the analysis matrix just as above (devlog 292).
+# --------------------------------------------------------------------------- #
+
+
+def _sparse_rows(recorded, dimension=2):
+    """BASE (or its 3D version) with object 0 keeping only its first `recorded` landmarks."""
+    missing = "\t".join(["Missing"] * dimension)
+    rows = [list(r) for r in BASE]
+    if dimension == 3:
+        rows = [[f"{lm}\t{i * 0.1}" for i, lm in enumerate(r)] for r in rows]
+    rows[0] = rows[0][:recorded] + [missing] * (len(rows[0]) - recorded)
+    return rows
+
+
+def _unfittable(ds):
+    ops = MdDatasetOps(ds)
+    return [(obj.object_name, n) for obj, n in find_unfittable_objects(ops.object_list, ops.dimension)]
+
+
+class TestUnfittableDetection:
+    def test_one_recorded_landmark_in_2d_is_reported(self, setup_database):
+        assert _unfittable(_dataset(_sparse_rows(1))) == [("O0", 1)]
+
+    def test_two_recorded_landmarks_in_2d_suffice(self, setup_database):
+        assert _unfittable(_dataset(_sparse_rows(2))) == []
+
+    def test_3d_needs_three(self, setup_database):
+        assert _unfittable(_dataset(_sparse_rows(2, 3), dimension=3)) == [("O0", 2)]
+        assert _unfittable(_dataset(_sparse_rows(3, 3), dimension=3)) == []
+
+    def test_a_partly_recorded_landmark_does_not_count(self, setup_database):
+        rows = _sparse_rows(2)
+        rows[0][1] = "1\tMissing"
+        assert _unfittable(_dataset(rows)) == [("O0", 1)]
+
+    def test_complete_objects_are_never_reported(self, setup_database):
+        assert _unfittable(_dataset([list(r) for r in BASE])) == []
+
+    def test_traced_curve_points_count_as_recorded(self, setup_database):
+        ds = _dataset(_sparse_rows(1))
+        ds.set_curve_config([{"id": "c", "n": 4, "method": "equidistant", "start": 4}])
+        ds.save()
+        for obj in ds.object_list:
+            obj.set_curve_raw({"c": [[0, 0], [0.5, 0.2], [1, 0]]})
+            obj.save()
+        assert _unfittable(ds) == []
+
+    def test_untraced_curve_adds_gaps(self, setup_database):
+        """With every fixed landmark recorded but the curve untraced, the object
+        records 4 points and misses 4 -- still enough to fit in 2D."""
+        ds = _dataset([list(r) for r in BASE])
+        ds.set_curve_config([{"id": "c", "n": 4, "method": "equidistant", "start": 4}])
+        ds.save()
+        assert _unfittable(ds) == []
+        ds2 = _dataset(_sparse_rows(1))
+        ds2.set_curve_config([{"id": "c", "n": 4, "method": "equidistant", "start": 4}])
+        ds2.save()
+        assert ("O0", 1) in _unfittable(ds2)
+
+
+class TestUnfittableMessage:
+    def test_singular_wording_names_the_object(self):
+        message = unfittable_objects_message([(type("O", (), {"object_name": "Skull 7"})(), 1)], 2)
+        assert "Object 'Skull 7' records 1 landmark," in message
+        assert "at least 2 recorded landmarks in 2D data" in message
+
+    def test_plural_wording_lists_each_object(self):
+        a, b = (type("O", (), {"object_name": n})() for n in ("A", "B"))
+        message = unfittable_objects_message([(a, 0), (b, 2)], 3)
+        assert "Objects 'A' (0), 'B' (2)" in message
+        assert "3D data" in message
+
+    def test_suggests_a_resolution(self):
+        message = unfittable_objects_message([(type("O", (), {"object_name": "X"})(), 0)], 2)
+        assert "Record more landmarks" in message
+        assert "remove" in message
+
+
+class TestUnfittableGates:
+    _controller = staticmethod(TestGatesBailOut._controller)
+
+    def test_analysis_path_raises_instead_of_crashing_later(self, setup_database, qapp):
+        ds = _dataset(_sparse_rows(1))
+        with pytest.raises(ValueError) as excinfo:
+            self._controller(ds)._prepare_landmarks()
+        message = str(excinfo.value)
+        assert "'O0'" in message
+        assert "NoneType" not in message
+
+    def test_validation_reports_it(self, setup_database, qapp):
+        ds = _dataset(_sparse_rows(1))
+        ok, message = self._controller(ds)._validate_dataset_for_analysis_type("PCA")
+        assert ok is False
+        assert "'O0'" in message
+
+    def test_fittable_sparse_object_still_proceeds(self, setup_database, qapp):
+        ds = _dataset(_sparse_rows(2))
+        ok, _ = self._controller(ds)._validate_dataset_for_analysis_type("PCA")
+        assert ok is True
+        _, landmarks = self._controller(ds)._prepare_landmarks()
         assert all(c is not None for obj in landmarks for lm in obj for c in lm)

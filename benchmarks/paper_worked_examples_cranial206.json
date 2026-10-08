@@ -1,0 +1,365 @@
+{
+  "environment": {
+    "modan2_version": "0.2.0",
+    "git_describe": "v0.2.0",
+    "git_dirty": false,
+    "repo": "/tmp/claude-1000/-mnt-d-vaults-paper-vault/481e94a7-10b8-4f24-bdbb-a66bd26c40ca/scratchpad/modan2-v0.2.0",
+    "cpu": "Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz",
+    "memory_gb": 16,
+    "platform": "Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "timestamp": "2026-10-08 10:26:11"
+  },
+  "dataset": "Cranial 222x72",
+  "file": "/mnt/d/projects/modan2/Morphometrics dataset/Thylacine2020_NeuroGM.txt",
+  "excluded": {
+    "variable": "FeedCat1",
+    "value": "Unknow",
+    "n": 16
+  },
+  "n_objects": 206,
+  "pca": {
+    "pc1_percent": 52.50852914357924,
+    "pc2_percent": 12.075667817521754,
+    "pc1_pc2_percent": 64.58419696110099,
+    "components_to_95_percent": 14
+  },
+  "groupings": {
+    "FeedCat1": {
+      "label": "dietary category",
+      "n_groups": 10,
+      "group_sizes": {
+        "HypCar": 102,
+        "CarIns": 27,
+        "CarFru": 20,
+        "GenGen": 20,
+        "InsCar": 12,
+        "InsFru": 8,
+        "Insect": 8,
+        "Frugiv": 4,
+        "GraIns": 3,
+        "InsHer": 2
+      },
+      "cva_variables": 14,
+      "canonical_axis_percent": [
+        31.101853856638485,
+        22.16061533507059,
+        18.382924093471733,
+        10.091154212346066,
+        7.981646546486794,
+        4.803764938514733,
+        2.904401371962377,
+        1.9043448169550354,
+        0.6692948285541904
+      ],
+      "cross_validation": "leave-one-out",
+      "cross_validated_accuracy": 57.28155339805825,
+      "majority_class_accuracy": 49.51456310679612,
+      "balanced_accuracy": 48.89869281045751,
+      "majority_class_balanced_accuracy": 10.0,
+      "per_group_recall": {
+        "HypCar": 78.43137254901961,
+        "CarIns": 22.22222222222222,
+        "CarFru": 40.0,
+        "GenGen": 40.0,
+        "InsCar": 16.666666666666664,
+        "InsFru": 87.5,
+        "Insect": 37.5,
+        "Frugiv": 0.0,
+        "GraIns": 66.66666666666666,
+        "InsHer": 100.0
+      },
+      "confusion_matrix": {
+        "labels": [
+          "HypCar",
+          "CarIns",
+          "CarFru",
+          "GenGen",
+          "InsCar",
+          "InsFru",
+          "Insect",
+          "Frugiv",
+          "GraIns",
+          "InsHer"
+        ],
+        "rows_true_columns_predicted": [
+          [
+            80,
+            6,
+            5,
+            4,
+            0,
+            1,
+            3,
+            2,
+            0,
+            1
+          ],
+          [
+            10,
+            6,
+            0,
+            1,
+            4,
+            4,
+            1,
+            1,
+            0,
+            0
+          ],
+          [
+            11,
+            1,
+            8,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            6,
+            2,
+            1,
+            8,
+            1,
+            0,
+            0,
+            1,
+            0,
+            1
+          ],
+          [
+            1,
+            4,
+            0,
+            4,
+            2,
+            0,
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0,
+            0,
+            7,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            1,
+            0,
+            0,
+            1,
+            2,
+            0,
+            3,
+            0,
+            0,
+            1
+          ],
+          [
+            4,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            2,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            2
+          ]
+        ]
+      },
+      "manova_variables": 14,
+      "manova": {
+        "Wilks' lambda": {
+          "value": 0.06287706202371576,
+          "df_num": 126,
+          "df_den": 1412,
+          "f_statistic": 4.891985054391327,
+          "p_value": 1.786337608748041e-51
+        },
+        "Pillai's trace": {
+          "value": 2.195641952271532,
+          "df_num": 126,
+          "df_den": 1719,
+          "f_statistic": 4.402300596410331,
+          "p_value": 1.3216656942433368e-45
+        },
+        "Hotelling-Lawley trace": {
+          "value": 3.6153406435615154,
+          "df_num": 126,
+          "df_den": 936,
+          "f_statistic": 5.204580903579834,
+          "p_value": 1.1897046574813464e-50
+        },
+        "Roy's greatest root": {
+          "value": 1.1244379633801578,
+          "df_num": 14,
+          "df_den": 191,
+          "f_statistic": 15.340546500400723,
+          "p_value": 1.70169385858152e-24
+        }
+      }
+    },
+    "PreyRatio": {
+      "label": "prey size",
+      "n_groups": 6,
+      "group_sizes": {
+        "MED": 72,
+        "SML": 56,
+        "XSM": 35,
+        "LRG": 26,
+        "XLG": 11,
+        "XXS": 6
+      },
+      "cva_variables": 14,
+      "canonical_axis_percent": [
+        44.16058205175191,
+        37.111663192879725,
+        8.470295916962991,
+        6.291143391372443,
+        3.966315447032938
+      ],
+      "cross_validation": "leave-one-out",
+      "cross_validated_accuracy": 56.310679611650485,
+      "majority_class_accuracy": 34.95145631067961,
+      "balanced_accuracy": 50.46347171347172,
+      "majority_class_balanced_accuracy": 16.666666666666668,
+      "per_group_recall": {
+        "MED": 72.22222222222221,
+        "SML": 55.35714285714286,
+        "XSM": 45.714285714285715,
+        "LRG": 46.15384615384615,
+        "XLG": 0.0,
+        "XXS": 83.33333333333334
+      },
+      "confusion_matrix": {
+        "labels": [
+          "MED",
+          "SML",
+          "XSM",
+          "LRG",
+          "XLG",
+          "XXS"
+        ],
+        "rows_true_columns_predicted": [
+          [
+            52,
+            7,
+            5,
+            5,
+            2,
+            1
+          ],
+          [
+            16,
+            31,
+            7,
+            2,
+            0,
+            0
+          ],
+          [
+            10,
+            7,
+            16,
+            0,
+            1,
+            1
+          ],
+          [
+            11,
+            3,
+            0,
+            12,
+            0,
+            0
+          ],
+          [
+            9,
+            0,
+            0,
+            2,
+            0,
+            0
+          ],
+          [
+            1,
+            0,
+            0,
+            0,
+            0,
+            5
+          ]
+        ]
+      },
+      "manova_variables": 14,
+      "manova": {
+        "Wilks' lambda": {
+          "value": 0.1654712869361013,
+          "df_num": 70,
+          "df_den": 894,
+          "f_statistic": 5.866579768091521,
+          "p_value": 6.767100719473803e-39
+        },
+        "Pillai's trace": {
+          "value": 1.386443620143167,
+          "df_num": 70,
+          "df_den": 955,
+          "f_statistic": 5.234469939829283,
+          "p_value": 8.85456138874209e-34
+        },
+        "Hotelling-Lawley trace": {
+          "value": 2.4399583923275827,
+          "df_num": 70,
+          "df_den": 653,
+          "f_statistic": 6.468250583558494,
+          "p_value": 8.941241610793773e-41
+        },
+        "Roy's greatest root": {
+          "value": 1.0774998278724293,
+          "df_num": 14,
+          "df_den": 191,
+          "f_statistic": 14.700176223116713,
+          "p_value": 1.2756071328969947e-23
+        }
+      }
+    }
+  }
+}

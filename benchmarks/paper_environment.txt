@@ -1,6 +1,7 @@
 Environment and commands behind paper_runtime_cranial222.json,
-paper_accuracy_cranial222.json and paper_accuracy_dense14.json
-(the runtime and accuracy tables of the Modan2 paper).
+paper_accuracy_cranial222.json, paper_accuracy_dense14.json (the runtime and
+accuracy tables of the Modan2 paper) and paper_worked_examples_cranial206.json
+(the figures of its worked example on the cranial dataset).
 
 Code: Modan2 v0.2.0 (tag v0.2.0, commit 5173275, clean), run from a
 git worktree at the tag through --repo; the benchmark script at the tag is
@@ -29,6 +30,7 @@ Commands (run one after another, 2026-10-08):
       --out benchmarks/paper_accuracy_cranial222.json
   python scripts/benchmark_paper_tables.py --repo <worktree> --accuracy --dataset dense14 --markdown \
       --out benchmarks/paper_accuracy_dense14.json
+  python scripts/paper_worked_examples.py --repo <worktree>
 
 Removal patterns come from the script's default seed, 20260813 (pattern p at
 missing fraction f uses seed 20260813 + 101 p + int(1000 f) in accuracy

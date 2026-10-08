@@ -1,11 +1,18 @@
-Environment and commands behind paper_runtime_cranial222.json,
+Environment and commands behind paper_runtime_cranial206.json,
 paper_accuracy_cranial222.json, paper_accuracy_dense14.json (the runtime and
 accuracy tables of the Modan2 paper) and paper_worked_examples_cranial206.json
 (the figures of its worked example on the cranial dataset).
 
 Code: Modan2 v0.2.0 (tag v0.2.0, commit 5173275, clean), run from a
-git worktree at the tag through --repo; the benchmark script at the tag is
-identical to the one in this directory's parent checkout.
+git worktree at the tag through --repo. The scripts themselves are run from
+this checkout; they postdate the tag, and only load the application code from
+the worktree.
+
+The runtime table uses the 206 specimens of known diet (dataset cranial206:
+the 16 thylacines, coded FeedCat1 = Unknow, are excluded), so that CVA and
+MANOVA compare the same 10 dietary groups as the worked example. It replaces
+paper_runtime_cranial222.json, which kept the thylacines as an 11th group.
+The accuracy table uses all 222 specimens, since it involves no grouping.
 
 Machine: Intel Core i7-6700 (3.40 GHz, 4 cores / 8 threads), 16 GB RAM,
 Windows host running Linux under WSL 2
@@ -24,8 +31,8 @@ Python environment, installed from requirements-linux.lock at v0.2.0:
   numpy BLAS: ['openblas configuration: OpenBLAS 0.3.34.106.0  USE64BITINT DYNAMIC_ARCH NO_AFFINITY']
 
 Commands (run one after another, 2026-10-08):
-  python scripts/benchmark_paper_tables.py --repo <worktree> --runs 9 --markdown \
-      --out benchmarks/paper_runtime_cranial222.json
+  python scripts/benchmark_paper_tables.py --repo <worktree> --dataset cranial206 --runs 9 --markdown \
+      --out benchmarks/paper_runtime_cranial206.json
   python scripts/benchmark_paper_tables.py --repo <worktree> --accuracy --markdown \
       --out benchmarks/paper_accuracy_cranial222.json
   python scripts/benchmark_paper_tables.py --repo <worktree> --accuracy --dataset dense14 --markdown \
@@ -36,4 +43,6 @@ Removal patterns come from the script's default seed, 20260813 (pattern p at
 missing fraction f uses seed 20260813 + 101 p + int(1000 f) in accuracy
 mode, and 20260813 + int(100 f) in the runtime table). The JSON files do not
 record the seed themselves. The accuracy results are identical, to the last
-digit, to the earlier runs on 0.2.0-beta.3, which used the same seed.
+digit, to the earlier runs on 0.2.0-beta.3, which used the same seed, and to
+the first runs on v0.2.0, made before the accuracy mode recorded how the
+imputation loop ended ("refinement" in each condition).

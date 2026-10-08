@@ -1,0 +1,72 @@
+{
+  "environment": {
+    "modan2_version": "0.2.0",
+    "git_describe": "v0.2.0",
+    "git_dirty": false,
+    "repo": "/tmp/claude-1000/-mnt-d-vaults-paper-vault/481e94a7-10b8-4f24-bdbb-a66bd26c40ca/scratchpad/modan2-v0.2.0",
+    "cpu": "Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz",
+    "memory_gb": 16,
+    "platform": "Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "timestamp": "2026-10-08 14:01:10"
+  },
+  "dataset": "Cranial 206x72",
+  "file": "/mnt/d/projects/modan2/Morphometrics dataset/Thylacine2020_NeuroGM.txt",
+  "excluded": {
+    "variable": "FeedCat1",
+    "value": "Unknow",
+    "n": 16
+  },
+  "n_objects": 206,
+  "n_landmarks": 72,
+  "dimension": 3,
+  "group_variable": "FeedCat1",
+  "runs": 9,
+  "superimposition": {
+    "procrustes": 0.390472373997909,
+    "bookstein": 0.16774663299293024
+  },
+  "groups": {
+    "n": 10,
+    "sizes": {
+      "HypCar": 102,
+      "CarIns": 27,
+      "CarFru": 20,
+      "GenGen": 20,
+      "InsCar": 12,
+      "InsFru": 8,
+      "Insect": 8,
+      "Frugiv": 4,
+      "GraIns": 3,
+      "InsHer": 2
+    }
+  },
+  "downstream": {
+    "pca": 0.043753538993769325,
+    "cva": 1.5738505359986448,
+    "manova": 0.36149777300306596,
+    "full_workflow": 2.369574221993389
+  },
+  "imputation": {
+    "0%": {
+      "time": 0.390472373997909,
+      "relative": 1.0,
+      "n_removed": 0
+    },
+    "5%": {
+      "time": 1.6477944559956086,
+      "relative": 4.220002657612937,
+      "n_removed": 742
+    },
+    "10%": {
+      "time": 1.7194761900027515,
+      "relative": 4.4035796243346,
+      "n_removed": 1483
+    },
+    "20%": {
+      "time": 1.8861044770019362,
+      "relative": 4.830314774104957,
+      "n_removed": 2966
+    }
+  }
+}

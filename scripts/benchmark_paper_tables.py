@@ -20,8 +20,14 @@ Two details matter for comparability with the published numbers:
     order of magnitude.
   * Every figure is the median of ``--runs`` repetitions.
 
+``--accuracy`` instead measures how well missing landmarks are reconstructed
+(the accuracy table), and records for every run how the imputation loop ended:
+at the convergence tolerance or at the cap on refinement rounds, and how far the
+last round still moved the estimates.
+
 Usage:
     python scripts/benchmark_paper_tables.py                     # 222 x 72 cranial dataset
+    python scripts/benchmark_paper_tables.py --dataset cranial206  # same, known diet only
     python scripts/benchmark_paper_tables.py --dataset dense14   # 14 x 381 dataset
     python scripts/benchmark_paper_tables.py --runs 9 --markdown
     python scripts/benchmark_paper_tables.py --manova-paths      # which MANOVA path costs what
@@ -41,6 +47,7 @@ import statistics
 import subprocess
 import sys
 import time
+from collections import Counter
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -51,6 +58,14 @@ DATASETS = {
         "file": "Morphometrics dataset/Thylacine2020_NeuroGM.txt",
         "name": "Cranial 222x72",
         "group_var": "FeedCat1",  # dietary category
+    },
+    # The specimens of known diet, as in the paper's worked example: the 16
+    # thylacines are coded "Unknow", and an unknown category is not a group.
+    "cranial206": {
+        "file": "Morphometrics dataset/Thylacine2020_NeuroGM.txt",
+        "name": "Cranial 206x72",
+        "group_var": "FeedCat1",
+        "exclude": ("FeedCat1", "Unknow"),
     },
     "dense14": {
         "file": "Morphometrics dataset/Rovinsky_etal Morphologika.txt",
@@ -141,6 +156,19 @@ def load_dataset(mm, Morphologika, path, name):
     return dataset, morph
 
 
+def apply_exclusion(mm, dataset, morph, spec):
+    """Delete the specimens a dataset entry excludes. Returns (dataset, record)."""
+    if not spec or "exclude" not in spec:
+        return dataset, None
+    variable, value = spec["exclude"]
+    idx = morph.variablename_list.index(variable)
+    excluded = [obj for obj in dataset.object_list if obj.get_variable_list()[idx] == value]
+    for obj in excluded:
+        obj.delete_instance()
+    # object_list is a backref query, so the same instance sees the deletion.
+    return dataset, {"variable": variable, "value": value, "n": len(excluded)}
+
+
 def groups_for(dataset, morph, var_name):
     idx = morph.variablename_list.index(var_name)
     return [obj.get_variable_list()[idx] for obj in dataset.object_list]
@@ -226,10 +254,12 @@ def run(args, mm, MdStatistics, Morphologika):
     group_var = args.group_var or (spec["group_var"] if spec else None)
 
     dataset, morph = load_dataset(mm, Morphologika, path, name)
+    dataset, excluded = apply_exclusion(mm, dataset, morph, spec)
     n_obj = len(list(dataset.object_list))
     results = {
         "dataset": name,
         "file": str(path),
+        "excluded": excluded,
         "n_objects": n_obj,
         "n_landmarks": dataset.landmark_count,
         "dimension": morph.dimension,
@@ -237,6 +267,8 @@ def run(args, mm, MdStatistics, Morphologika):
         "runs": args.runs,
     }
     print(f"# {name}: {n_obj} specimens x {dataset.landmark_count} landmarks, {morph.dimension}D")
+    if excluded:
+        print(f"# {excluded['n']} specimens excluded as {excluded['variable']} = {excluded['value']}")
     print(f"# grouping variable: {group_var}   (available: {morph.variablename_list})")
     print(f"# median of {args.runs} runs\n")
 
@@ -253,6 +285,9 @@ def run(args, mm, MdStatistics, Morphologika):
     # (b) downstream analysis ----------------------------------------------
     lm_data = superimpose(mm, dataset, "procrustes")
     groups = groups_for(dataset, morph, group_var)
+    group_sizes = dict(sorted(Counter(groups).items(), key=lambda kv: (-kv[1], kv[0])))
+    results["groups"] = {"n": len(group_sizes), "sizes": group_sizes}
+    print(f"    {len(group_sizes)} groups: {group_sizes}")
 
     t_pca, _ = time_median(lambda: MdStatistics.do_pca_analysis(lm_data), args.runs)
     t_cva, _ = time_median(lambda: MdStatistics.do_cva_analysis(lm_data, groups), args.runs)
@@ -293,6 +328,7 @@ def compare_manova_paths(args, mm, MdStatistics, Morphologika):
     spec = DATASETS[args.dataset]
     path = Path(args.file) if args.file else DEFAULT_REPO / spec["file"]
     dataset, morph = load_dataset(mm, Morphologika, path, spec["name"])
+    dataset, _ = apply_exclusion(mm, dataset, morph, spec)
     lm_data = superimpose(mm, dataset, "procrustes")
     groups = groups_for(dataset, morph, args.group_var or spec["group_var"])
     flat = [np.array(lm).flatten().tolist() for lm in lm_data]
@@ -336,6 +372,68 @@ def _apply_similarity(points, fit):
     return scale * ((points - src_mean) @ rotation) + tgt_mean
 
 
+class RefinementTrace:
+    """Record how one run of the imputation loop ended.
+
+    Wraps ``MdDatasetOps._estimates_converged``, the loop's convergence test,
+    without changing its answer, and keeps the largest change between successive
+    estimates that it was shown. The first round makes no test, so a run that
+    made k tests estimated k + 1 times. On a checkout without that test the trace
+    stays empty and records nothing.
+    """
+
+    NAME = "_estimates_converged"
+
+    def __init__(self, mm):
+        self.ops = mm.MdDatasetOps
+        self.cap = getattr(mm, "MAX_IMPUTATION_REFINEMENTS", None)
+        self.tests = []
+
+    def __enter__(self):
+        self.saved = vars(self.ops).get(self.NAME)
+        if self.saved is None:
+            return self
+        converged = getattr(self.ops, self.NAME)
+
+        def traced(previous, current, *args, **kwargs):
+            answer = converged(previous, current, *args, **kwargs)
+            change = max(
+                (abs(p - c) for pl, cl in zip(previous, current) for p, c in zip(pl, cl) if None not in (p, c)),
+                default=0.0,
+            )
+            self.tests.append((change, answer))
+            return answer
+
+        setattr(self.ops, self.NAME, staticmethod(traced))
+        return self
+
+    def __exit__(self, *exc):
+        if self.saved is not None:
+            setattr(self.ops, self.NAME, self.saved)
+
+    def outcome(self):
+        """(rounds of estimation, what ended the loop, last change) or None."""
+        if not self.tests:
+            return None
+        change, converged = self.tests[-1]
+        return len(self.tests) + 1, "tolerance" if converged else "cap", change
+
+
+def summarize_refinement(outcomes, cap):
+    outcomes = [o for o in outcomes if o is not None]
+    if not outcomes:
+        return None
+    last = sorted(o[2] for o in outcomes)
+    return {
+        "cap": cap,
+        "runs": len(outcomes),
+        "stopped_at_tolerance": sum(o[1] == "tolerance" for o in outcomes),
+        "stopped_at_cap": sum(o[1] == "cap" for o in outcomes),
+        "rounds": dict(sorted(Counter(o[0] for o in outcomes).items())),
+        "last_change": {"median": statistics.median(last), "max": last[-1]},
+    }
+
+
 def measure_accuracy(args, mm, MdStatistics, Morphologika):
     """Reconstruct removed landmarks and compare them with the positions the same
     specimens occupy when the complete dataset is analyzed.
@@ -344,6 +442,10 @@ def measure_accuracy(args, mm, MdStatistics, Morphologika):
     never-removed landmarks only, so the residual reflects the estimate rather
     than a difference in global alignment. Errors are a percentage of centroid
     size, pooled over `--patterns` independent removal patterns per condition.
+
+    Each condition also records how its runs of the imputation loop ended (see
+    ``RefinementTrace``). The change is in the aligned coordinates, that is, in
+    units of centroid size.
     """
     import numpy as np
 
@@ -352,6 +454,7 @@ def measure_accuracy(args, mm, MdStatistics, Morphologika):
     name = spec["name"] if spec else path.stem
 
     dataset, morph = load_dataset(mm, Morphologika, path, name)
+    dataset, excluded = apply_exclusion(mm, dataset, morph, spec)
     n_obj = len(list(dataset.object_list))
     print(f"# {name}: {n_obj} specimens x {dataset.landmark_count} landmarks, {morph.dimension}D")
     print(f"# {args.patterns} removal patterns per condition\n")
@@ -367,6 +470,7 @@ def measure_accuracy(args, mm, MdStatistics, Morphologika):
 
     results = {
         "dataset": name,
+        "excluded": excluded,
         "n_objects": n_obj,
         "n_landmarks": dataset.landmark_count,
         "dimension": morph.dimension,
@@ -378,6 +482,7 @@ def measure_accuracy(args, mm, MdStatistics, Morphologika):
     print(f"{'removed':>8} {'n':>8} {'mean':>8} {'median':>8} {'95th':>8} {'max':>8}")
     for frac in args.fractions:
         errors = []
+        outcomes = []
         for pattern in range(args.patterns):
             originals, _ = punch_holes(dataset, frac, seed=args.seed + pattern * 101 + int(frac * 1000))
             removed = {}
@@ -387,7 +492,9 @@ def measure_accuracy(args, mm, MdStatistics, Morphologika):
                 removed[obj_id] = [j for j, lm in enumerate(obj.landmark_list) if any(v is None for v in lm)]
             try:
                 imputed_ops = mm.MdDatasetOps(dataset)
-                imputed_ops.procrustes_superimposition()
+                with RefinementTrace(mm) as trace:
+                    imputed_ops.procrustes_superimposition()
+                outcomes.append(trace.outcome())
                 imputed = {o.id: np.asarray(o.landmark_list, dtype=float) for o in imputed_ops.object_list}
             finally:
                 restore(mm, originals)
@@ -412,6 +519,7 @@ def measure_accuracy(args, mm, MdStatistics, Morphologika):
             "median": float(np.median(e)),
             "p95": float(np.percentile(e, 95)),
             "max": float(e.max()),
+            "refinement": summarize_refinement(outcomes, getattr(mm, "MAX_IMPUTATION_REFINEMENTS", None)),
         }
         results["conditions"][f"{frac * 100:g}%"] = cond
         print(
@@ -419,7 +527,21 @@ def measure_accuracy(args, mm, MdStatistics, Morphologika):
             f" {np.percentile(e, 95):>7.2f}% {e.max():>7.2f}%"
         )
 
+    print("\nrefinement: how the imputation loop ended (change in units of centroid size)")
+    for key, cond in results["conditions"].items():
+        print(f"{key:>8} {refinement_line(cond['refinement'])}")
+
     return results
+
+
+def refinement_line(r):
+    if r is None:
+        return "not recorded"
+    return (
+        f"{r['stopped_at_tolerance']} of {r['runs']} at tolerance, {r['stopped_at_cap']} at the cap of"
+        f" {r['cap']} rounds; last-round change median {r['last_change']['median']:.1e},"
+        f" max {r['last_change']['max']:.1e}"
+    )
 
 
 def accuracy_as_markdown(r):
@@ -435,6 +557,8 @@ def accuracy_as_markdown(r):
             f"| {key} | {c['n_imputed']:,} | {c['mean']:.2f}% | {c['median']:.2f}%"
             f" | {c['p95']:.2f}% | {c['max']:.2f}% |"
         )
+    lines += ["", "Refinement:"]
+    lines += [f"- {key}: {refinement_line(c.get('refinement'))}" for key, c in r["conditions"].items()]
     return "\n".join(lines)
 
 

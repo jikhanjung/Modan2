@@ -8,9 +8,10 @@
     "memory_gb": 16,
     "platform": "Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.39",
     "python": "3.12.3",
-    "timestamp": "2026-10-08 10:00:01"
+    "timestamp": "2026-10-08 14:04:11"
   },
   "dataset": "Dense 14x381",
+  "excluded": null,
   "n_objects": 14,
   "n_landmarks": 381,
   "dimension": 3,
@@ -25,28 +26,80 @@
       "mean": 0.150721710105084,
       "median": 0.14091392998344401,
       "p95": 0.27940754394899614,
-      "max": 0.5495318966580023
+      "max": 0.5495318966580023,
+      "refinement": {
+        "cap": 5,
+        "runs": 10,
+        "stopped_at_tolerance": 0,
+        "stopped_at_cap": 10,
+        "rounds": {
+          "5": 10
+        },
+        "last_change": {
+          "median": 9.927229037420826e-08,
+          "max": 1.7799028409481998e-07
+        }
+      }
     },
     "5%": {
       "n_imputed": 2670,
       "mean": 0.15381472777304342,
       "median": 0.1416853297306539,
       "p95": 0.28886255243083253,
-      "max": 0.7889587799211428
+      "max": 0.7889587799211428,
+      "refinement": {
+        "cap": 5,
+        "runs": 10,
+        "stopped_at_tolerance": 0,
+        "stopped_at_cap": 10,
+        "rounds": {
+          "5": 10
+        },
+        "last_change": {
+          "median": 2.074883450312384e-06,
+          "max": 2.4982072748085116e-06
+        }
+      }
     },
     "10%": {
       "n_imputed": 5330,
       "mean": 0.1529278000699109,
       "median": 0.14195898509723417,
       "p95": 0.2861375862352189,
-      "max": 0.6710576088688442
+      "max": 0.6710576088688442,
+      "refinement": {
+        "cap": 5,
+        "runs": 10,
+        "stopped_at_tolerance": 0,
+        "stopped_at_cap": 10,
+        "rounds": {
+          "5": 10
+        },
+        "last_change": {
+          "median": 1.1350796944441244e-05,
+          "max": 2.3564442591834933e-05
+        }
+      }
     },
     "20%": {
       "n_imputed": 10670,
       "mean": 0.15484172113207006,
       "median": 0.14447346730240626,
       "p95": 0.28505030557233446,
-      "max": 0.9679752902848853
+      "max": 0.9679752902848853,
+      "refinement": {
+        "cap": 5,
+        "runs": 10,
+        "stopped_at_tolerance": 0,
+        "stopped_at_cap": 10,
+        "rounds": {
+          "5": 10
+        },
+        "last_change": {
+          "median": 3.290250464657238e-05,
+          "max": 9.504966158056793e-05
+        }
+      }
     }
   }
 }

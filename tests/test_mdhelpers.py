@@ -401,8 +401,8 @@ class TestValidationFunctions:
         assert "not a file" in message.lower()
 
 
-class TestColorFunctions:
-    """Test color helper functions."""
+class TestColorConversion:
+    """Test parsing colours and converting them to hex."""
 
     def test_parse_color_hex(self):
         """Test parsing hex color."""
@@ -417,12 +417,6 @@ class TestColorFunctions:
         color = helpers.parse_color("red")
         assert color is not None
         assert color.red() == 255
-
-    def test_parse_color_invalid(self):
-        """Test parsing invalid color."""
-        color = helpers.parse_color("invalid_color_xyz")
-        # May return None or invalid QColor depending on implementation
-        assert color is None or not color.isValid()
 
     def test_color_to_hex(self):
         """Test converting QColor to hex."""
@@ -543,30 +537,6 @@ class TestPathFunctions:
         assert "file" in backup
         assert backup != original
         assert ".backup" in backup or "_backup" in backup or "bak" in backup
-
-
-class TestFileBackup:
-    """Test file backup functions."""
-
-    def test_backup_file_success(self, tmp_path):
-        """Test successful file backup."""
-        original = tmp_path / "original.txt"
-        original.write_text("test content")
-
-        # Mock create_backup_filename to return predictable name
-        with patch("MdHelpers.create_backup_filename") as mock_backup:
-            backup_path = str(tmp_path / "original.txt.backup")
-            mock_backup.return_value = backup_path
-
-            result = helpers.backup_file(str(original))
-
-            if result:
-                assert Path(backup_path).exists()
-
-    def test_backup_file_nonexistent(self):
-        """Test backup of nonexistent file."""
-        result = helpers.backup_file("/nonexistent/file.txt")
-        assert result is False
 
 
 class TestFileFinding:

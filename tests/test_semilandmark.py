@@ -627,7 +627,7 @@ class TestObjectDialogCurveTable:
 # DatasetDialog curve scheme (number of curves vs semi-landmarks per curve)
 # --------------------------------------------------------------------------- #
 
-from PyQt5.QtWidgets import QLineEdit, QTableWidget, QTableWidgetItem  # noqa: E402
+from PyQt5.QtWidgets import QLineEdit, QTableWidgetItem  # noqa: E402
 
 from dialogs.dataset_dialog import DatasetDialog  # noqa: E402
 

@@ -73,6 +73,17 @@ F811(재정의)을 무시하게 해 두어 ruff도 잡지 않았다. 반사 보�
 
 13개 모두 지금 코드에서 통과한다. `test_mdmodel.py` 309 passed.
 
-남은 것: `tests/test_mdhelpers.py`(`TestColorFunctions`, `TestFileBackup`)와
-`tests/test_mdutils.py`(`TestUtilityFunctions`)에도 같은 문제가 있다. 이것까지 고치면
-`pyproject.toml`의 `"test_*.py"` 무시 목록에서 F811을 빼서 재발을 막을 수 있다.
+## 다른 두 파일, 그리고 재발 방지
+
+이어서 같은 문제가 있던 두 파일도 정리했다(별도 커밋).
+
+| 파일 | 가려져 있던 클래스 | 처리 |
+|---|---|---|
+| `tests/test_mdhelpers.py` | `TestFileBackup` (548행) | **삭제.** 두 테스트 모두 수집되던 쪽(705행)의 약한 사본이다. 성공 테스트는 `if result:` 안에서만 검사해 실패해도 통과했고, 실패 테스트는 고정 절대 경로를 썼다. |
+| | `TestColorFunctions` (404행) | `TestColorConversion`으로 이름 변경. 그 안의 `test_parse_color_invalid`는 수집되던 쪽의 엄격한 버전(`is None`)이 포괄하므로 삭제. 살아난 테스트 3개(hex·이름 파싱, `color_to_hex`). |
+| `tests/test_mdutils.py` | `TestUtilityFunctions` (170행) | `TestValueAndDroppedFileHelpers`로 이름 변경. 살아난 테스트 5개. 그중 `test_is_numeric`에는 R01 수정(`is_numeric(None)`이 예외 대신 False)의 회귀 검사가 들어 있었는데, 지금까지 한 번도 실행되지 않았다. 지금 코드에서 통과한다. |
+
+`pyproject.toml`의 `"test_*.py"` 무시 목록에서 F811을 뺐다. 다시 켜자 `tests/test_semilandmark.py`의
+중복 import(`QTableWidget`, 448행과 630행) 하나가 잡혀 뒤쪽에서 지웠다. `ruff check .` 통과.
+
+전체 스위트: 2127 passed, 10 skipped — 2106에 살아난 테스트 21개(13 + 3 + 5)가 더해진 수.

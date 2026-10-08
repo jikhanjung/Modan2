@@ -165,7 +165,7 @@ known-third-party = ["PyQt5", "peewee", "numpy", "pandas", "scipy", "matplotlib"
 "ModanController.py" = ["N813"]  # Allow "import MdUtils as mu"
 "ModanComponents.py" = ["N811", "N813", "B007", "B008", "B018", "E741", "N815", "F811", "F821"]  # Allow OpenGL lowercase imports, loop control, Qt naming conventions, duplicate functions, and undefined names
 "setup.py" = ["B904"]  # Allow raise without from
-"test_*.py" = ["N813", "F811"]  # Allow lowercase imports and class redefinitions in tests
+"test_*.py" = ["N813"]  # Allow lowercase imports in tests. F811 stays on: a redefined test class silently hides the earlier one's tests (devlog 291)
 "ModanWidgets.py" = ["N813"]  # Allow "import ModanWidgets as mw"
 "objloader.py" = ["F403", "F405"]  # OpenGL star imports are standard practice
 

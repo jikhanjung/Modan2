@@ -167,8 +167,8 @@ class TestAsGlColor:
         assert pytest.approx(b) == 0.0
 
 
-class TestUtilityFunctions:
-    """Test various utility functions."""
+class TestValueAndDroppedFileHelpers:
+    """Test value conversion, numeric checks, and dropped-file names."""
 
     def test_value_to_bool(self):
         """Test value_to_bool conversion."""

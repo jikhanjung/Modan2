@@ -524,10 +524,11 @@ dataset and can be re-opened later.
    for interactive plots, or **Analysis Details** for the result tables.
 
 The run is refused before it starts if the dataset has fewer than 5 objects with
-landmarks, has **no variables** (currently even for PCA, since every run includes
-CVA and MANOVA), has objects with differing landmark counts, has a landmark
-that is missing in every object, or has an object that records too few landmarks
-for its missing ones to be estimated (fewer than 2 in 2D data, 3 in 3D).
+landmarks, has objects with differing landmark counts, has a landmark that is
+missing in every object, or has an object that records too few landmarks for its
+missing ones to be estimated (fewer than 2 in 2D data, 3 in 3D). A dataset
+without variables runs PCA only: both grouping variables then read *None (no
+variables)*.
 
 .. _analysis-procrustes:
 
@@ -607,9 +608,9 @@ The eigenvalues (variance per PC) and the numeric scores are in the
 - **Export Chart** (Data Exploration): save the plot as PNG, JPG, PDF or SVG
 
 .. note::
-   **Analysis Details** recomputes a Procrustes PCA from the dataset when it
-   opens, so its tables follow the dataset's current landmarks rather than a
-   stored Bookstein analysis.
+   **Analysis Details** recomputes the PCA from the dataset's current landmarks
+   when it opens, with the analysis's superimposition method (Bookstein only if
+   the dataset has a baseline).
 
 **Example Workflow**:
 
@@ -811,7 +812,7 @@ Select a dataset and choose **Export** (``Ctrl+E``).
 1. Choose the export **format**:
 
    - **TPS**: landmark coordinates in TPS format
-   - **X1Y1**: plain coordinate columns
+   - **X1Y1**: a tab-separated table, one row per object
    - **Morphologika**: Morphologika format (with images and metadata)
    - **JSON+ZIP**: a complete dataset package (see below)
 
@@ -819,8 +820,13 @@ Select a dataset and choose **Export** (``Ctrl+E``).
    **Procrustes** (aligned; the default). For a raw TPS export, traced semi-landmark curves are
    written under ``CURVES=`` / ``POINTS=`` blocks; a Procrustes export writes the
    merged aligned landmarks.
-3. Pick which objects to include from the object list.
+3. Only the objects in the **Export List** are written; move any you want to
+   leave out to the **Object List** with ``<``. (A JSON+ZIP package always holds
+   the whole dataset.)
 4. Click **"Export"**.
+
+A missing landmark is written as ``-999``, which Modan2's import offers to turn
+back into a missing landmark.
 
 Exporting a Dataset Package (JSON+ZIP)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -994,11 +1000,6 @@ Analysis Fails
 **Error**: ``… has too few objects with landmarks … At least 5 objects required``
 
 **Solution**: Digitize at least 5 objects
-
-**Error**: ``… has no grouping variables``
-
-**Solution**: Add a variable in the dataset dialog's **Variables** tab and fill in
-its value for each object — currently every run needs one
 
 **Error**: ``Object '…' has N landmarks but this dataset expects M``
 

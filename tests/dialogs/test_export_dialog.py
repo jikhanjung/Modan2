@@ -94,7 +94,6 @@ class TestExportDatasetDialogInitialization:
         # Superimposition radio buttons
         assert dialog.rbProcrustes is not None
         assert dialog.rbBookstein is not None
-        assert dialog.rbRFTRA is not None
         assert dialog.rbNone is not None
 
         # JSON+ZIP options
@@ -252,14 +251,9 @@ class TestExportDatasetDialogSuperimposition:
         dialog.rbBookstein.setChecked(True)
         assert dialog.rbBookstein.isChecked()
 
-    def test_rftra_selection(self, qtbot, dialog):
-        """Test selecting Resistant fit superimposition."""
-        # RFTRA is currently disabled, but test the button exists
-        assert dialog.rbRFTRA is not None
-        # When enabled, it should work
-        dialog.rbRFTRA.setEnabled(True)
-        dialog.rbRFTRA.setChecked(True)
-        assert dialog.rbRFTRA.isChecked()
+    def test_rftra_is_not_offered(self, qtbot, dialog):
+        """Resistant fit was withdrawn (devlog 281); the export no longer shows it."""
+        assert not hasattr(dialog, "rbRFTRA")
 
     def test_none_selection(self, qtbot, dialog):
         """Test selecting no superimposition."""

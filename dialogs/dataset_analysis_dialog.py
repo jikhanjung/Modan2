@@ -54,8 +54,12 @@ logger = logging.getLogger(__name__)
 
 
 class DatasetAnalysisDialog(QDialog):
-    def __init__(self, parent, dataset):
+    def __init__(self, parent, dataset, superimposition_method="Procrustes"):
+        """``superimposition_method`` is the stored analysis' method when the
+        dialog is opened as its Analysis Details, so the tables are computed the
+        way that analysis was (they used to be Procrustes regardless)."""
         super().__init__()
+        self.superimposition_method = superimposition_method or "Procrustes"
         self.setWindowTitle(self.tr("Modan2 - Dataset Analysis"))
         self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
         self.parent = parent
@@ -176,6 +180,7 @@ class DatasetAnalysisDialog(QDialog):
         if set_result is None:
             self.close()
             return
+        self._select_superimposition()
         self.reset_tableView()
         self.load_object()
         self.chart_options_clicked()
@@ -384,10 +389,9 @@ class DatasetAnalysisDialog(QDialog):
 
         self.rbProcrustes = QRadioButton("Procrustes")
         self.rbBookstein = QRadioButton("Bookstein")
-        self.rbResistantFit = QRadioButton("Resistant Fit")
         self.rbProcrustes.setChecked(True)
+        # Enabled in set_dataset once the dataset is known to have a baseline.
         self.rbBookstein.setEnabled(False)
-        self.rbResistantFit.setEnabled(False)
         self.btnSuperimpose = QPushButton(self.tr("Superimpose"))
         self.btnSuperimpose.clicked.connect(self.on_btnSuperimpose_clicked)
         self.gbSuperimposition = QGroupBox()
@@ -395,7 +399,6 @@ class DatasetAnalysisDialog(QDialog):
         self.gbSuperimposition.setLayout(QHBoxLayout())
         self.gbSuperimposition.layout().addWidget(self.rbProcrustes)
         self.gbSuperimposition.layout().addWidget(self.rbBookstein)
-        self.gbSuperimposition.layout().addWidget(self.rbResistantFit)
         self.gbSuperimposition.setMaximumHeight(rbbox_height)
 
         self.left_bottom_layout.addWidget(self.gbSuperimposition)
@@ -594,6 +597,17 @@ class DatasetAnalysisDialog(QDialog):
         if self.ds_ops is not None:
             self.show_analysis_result()
 
+    def _select_superimposition(self):
+        """Offer Bookstein when the dataset has a baseline, and start on the
+        stored analysis' method."""
+        need = 3 if self.dataset.dimension == 3 else 2
+        has_baseline = len(self.dataset.unpack_baseline() or []) >= need
+        self.rbBookstein.setEnabled(has_baseline)
+        if has_baseline and self.superimposition_method.strip().lower() == "bookstein":
+            self.rbBookstein.setChecked(True)
+        else:
+            self.rbProcrustes.setChecked(True)
+
     def on_btnSuperimpose_clicked(self):
         logger = logging.getLogger(__name__)
         logger.debug("on_btnSuperimpose_clicked")
@@ -763,14 +777,23 @@ class DatasetAnalysisDialog(QDialog):
         elif self.rbPCA.isChecked():
             self.analysis_type = "PCA"
 
-        if not self.ds_ops.procrustes_superimposition():
-            logger = logging.getLogger(__name__)
+        logger = logging.getLogger(__name__)
+        if self.rbBookstein.isChecked():
+            try:
+                self.ds_ops.bookstein_superimposition()
+            except ValueError as e:
+                QApplication.restoreOverrideCursor()
+                logger.error(f"bookstein superimposition failed: {e}")
+                QMessageBox.warning(self, self.tr("Warning"), str(e))
+                return
+        elif not self.ds_ops.procrustes_superimposition():
+            QApplication.restoreOverrideCursor()
             logger.error("procrustes superimposition failed")
             return
         self.show_object_shape()
 
         if self.dataset.object_list is None or len(self.dataset.object_list) < 5:
-            logger = logging.getLogger(__name__)
+            QApplication.restoreOverrideCursor()
             logger.warning("too small number of objects for PCA analysis")
             return
 

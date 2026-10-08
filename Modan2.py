@@ -1191,7 +1191,8 @@ class ModanMainWindow(QMainWindow):
     @guard_slot("Failed to open analysis detail")
     def btnAnalysisDetail_clicked(self):
         # self.detail_dialog = DatasetAnalysisDialog(self.parent)
-        self.analysis_dialog = DatasetAnalysisDialog(self, self.analysis_info_widget.analysis.dataset)
+        analysis = self.analysis_info_widget.analysis
+        self.analysis_dialog = DatasetAnalysisDialog(self, analysis.dataset, analysis.superimposition_method)
         # Non-modal and parented: without this, every opened dialog (with its
         # large matplotlib canvases) would outlive its close until app exit.
         self.analysis_dialog.setAttribute(Qt.WA_DeleteOnClose)
@@ -1203,22 +1204,35 @@ class ModanMainWindow(QMainWindow):
     @guard_slot("Failed to open data exploration")
     def btnDataExploration_clicked(self):
         # print("btnExplore_clicked")
+        analysis = self.analysis_info_widget.analysis
+        tab_text = self.analysis_info_widget.analysis_tab.tabText(self.analysis_info_widget.analysis_tab.currentIndex())
+        if tab_text == "CVA" and not analysis.cva_analysis_result_json:
+            # No CV scores to plot: the run had no CVA grouping variable, or CVA failed.
+            QMessageBox.information(
+                self,
+                self.tr("Data Exploration"),
+                self.tr("This analysis has no CVA results. Choose the PCA tab to explore it."),
+            )
+            return
         self.exploration_dialog = DataExplorationDialog(self)
         self.exploration_dialog.setAttribute(Qt.WA_DeleteOnClose)
         # print("exploration dialog created")
-        # get tab text
-        tab_text = self.analysis_info_widget.analysis_tab.tabText(self.analysis_info_widget.analysis_tab.currentIndex())
         group_by = ""
+        ordination = tab_text
         if tab_text == "PCA":
             group_by = self.analysis_info_widget.comboPcaGroupBy.currentText()
         elif tab_text == "CVA":
             group_by = self.analysis_info_widget.comboCvaGroupBy.currentText()
         elif tab_text == "MANOVA":
+            # MANOVA has no scores of its own (it tests on the PCA scores), and the
+            # dialog only plots PCA or CVA: show the PCA scores, grouped by the
+            # MANOVA variable.
             group_by = self.analysis_info_widget.comboManovaGroupBy.currentText()
+            ordination = "PCA"
 
         # group_by = self.comboCvaGroupBy
         # print("going to call set_analysis")
-        self.exploration_dialog.set_analysis(self.analysis_info_widget.analysis, tab_text, group_by)
+        self.exploration_dialog.set_analysis(analysis, ordination, group_by)
         # print("going to update chart")
         # print("going to show")
         self.exploration_dialog.show()

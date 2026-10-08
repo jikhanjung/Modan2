@@ -1176,15 +1176,16 @@ msgstr ""
 
 msgid ""
 "The run is refused before it starts if the dataset has fewer than 5 "
-"objects with landmarks, has **no variables** (currently even for PCA, "
-"since every run includes CVA and MANOVA), has objects with differing "
-"landmark counts, has a landmark that is missing in every object, or has an "
-"object that records too few landmarks for its missing ones to be estimated "
-"(fewer than 2 in 2D data, 3 in 3D)."
+"objects with landmarks, has objects with differing landmark counts, has a "
+"landmark that is missing in every object, or has an object that records "
+"too few landmarks for its missing ones to be estimated (fewer than 2 in "
+"2D data, 3 in 3D). A dataset without variables runs PCA only: both "
+"grouping variables then read *None (no variables)*."
 msgstr ""
-"데이터셋에 랜드마크가 있는 객체가 5개 미만이거나, **변수가 하나도 없거나**\\ (모든 실행에 CVA와 MANOVA가 포함되므로 "
-"현재는 PCA만 원해도 마찬가지), 객체마다 랜드마크 개수가 다르거나, 모든 객체에서 빠진 랜드마크가 있거나, 기록된 랜드마크가 "
-"너무 적어 빠진 랜드마크를 추정할 수 없는 객체(2D 자료에서 2개, 3D에서 3개 미만)가 있으면 실행이 시작되기 전에 거부됩니다."
+"데이터셋에 랜드마크가 있는 객체가 5개 미만이거나, 객체마다 랜드마크 개수가 다르거나, 모든 객체에서 빠진 랜드마크가 있거나, "
+"기록된 랜드마크가 너무 적어 빠진 랜드마크를 추정할 수 없는 객체(2D 자료에서 2개, 3D에서 3개 미만)가 있으면 실행이 "
+"시작되기 전에 거부됩니다. 변수가 없는 데이터셋은 PCA만 실행하며, 이때 두 그룹화 변수는 *없음 (변수 없음)*\\ (None "
+"(no variables))으로 표시됩니다."
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:502
 msgid "Procrustes Superimposition"
@@ -1368,12 +1369,12 @@ msgstr "**차트 내보내기**\\ (Export Chart, 데이터 탐색): 플롯을 PN
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:578
 msgid ""
-"**Analysis Details** recomputes a Procrustes PCA from the dataset when it "
-"opens, so its tables follow the dataset's current landmarks rather than a "
-"stored Bookstein analysis."
+"**Analysis Details** recomputes the PCA from the dataset's current "
+"landmarks when it opens, with the analysis's superimposition method "
+"(Bookstein only if the dataset has a baseline)."
 msgstr ""
-"**분석 세부사항**\\ (Analysis Details)은 열릴 때 데이터셋으로부터 Procrustes PCA를 다시 계산하므로, "
-"그 표는 저장된 Bookstein 분석이 아니라 데이터셋의 현재 랜드마크를 따릅니다."
+"**분석 세부사항**\\ (Analysis Details)은 열릴 때 데이터셋의 현재 랜드마크로 PCA를 다시 계산하며, 그 분석의 "
+"중첩정렬 방식을 따릅니다(Bookstein은 데이터셋에 베이스라인이 있을 때만)."
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:599
 msgid "Canonical Variate Analysis (CVA)"
@@ -1728,8 +1729,8 @@ msgid "**TPS**: landmark coordinates in TPS format"
 msgstr "**TPS**: TPS 형식의 랜드마크 좌표"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:800
-msgid "**X1Y1**: plain coordinate columns"
-msgstr "**X1Y1**: 단순 좌표 열"
+msgid "**X1Y1**: a tab-separated table, one row per object"
+msgstr "**X1Y1**: 탭으로 구분한 표, 객체당 한 행"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:801
 msgid "**Morphologika**: Morphologika format (with images and metadata)"
@@ -1752,12 +1753,22 @@ msgstr ""
 "``POINTS=`` 블록으로 기록되고, 프로크루스테스로 내보내면 병합된 정렬 랜드마크가 기록됩니다."
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:808
-msgid "Pick which objects to include from the object list."
-msgstr "객체 목록에서 포함할 객체를 선택합니다."
+msgid ""
+"Only the objects in the **Export List** are written; move any you want to "
+"leave out to the **Object List** with ``<``. (A JSON+ZIP package always "
+"holds the whole dataset.)"
+msgstr ""
+"**내보내기 목록**\\ (Export List)에 있는 객체만 기록됩니다. 빼고 싶은 객체는 ``<`` 로 **개체 목록**\\ "
+"(Object List)으로 옮기세요. (JSON+ZIP 패키지는 항상 데이터셋 전체를 담습니다.)"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:809
 msgid "Click **\"Export\"**."
 msgstr "**\"내보내기\"**\\ (Export)를 클릭합니다."
+
+msgid ""
+"A missing landmark is written as ``-999``, which Modan2's import offers "
+"to turn back into a missing landmark."
+msgstr "결측 랜드마크는 ``-999`` 로 기록되며, Modan2로 가져올 때 이를 다시 결측 랜드마크로 바꿀지 묻습니다."
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:812
 msgid "Exporting a Dataset Package (JSON+ZIP)"
@@ -2077,18 +2088,6 @@ msgstr ""
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:982
 msgid "**Solution**: Digitize at least 5 objects"
 msgstr "**해결책**: 객체를 5개 이상 디지타이징하세요"
-
-#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:984
-msgid "**Error**: ``… has no grouping variables``"
-msgstr "**오류**: ``… has no grouping variables``"
-
-#: ../../../../../../mnt/d/projects/Modan2/docs/manual/user_guide.rst:986
-msgid ""
-"**Solution**: Add a variable in the dataset dialog's **Variables** tab "
-"and fill in its value for each object — currently every run needs one"
-msgstr ""
-"**해결책**: 데이터셋 대화상자의 **변수**\\ (Variables) 탭에서 변수를 추가하고 객체마다 값을 채우세요 — 현재는 "
-"모든 실행에 변수가 필요합니다"
 
 msgid "**Error**: ``Object '…' has N landmarks but this dataset expects M``"
 msgstr "**오류**: ``Object '…' has N landmarks but this dataset expects M``"

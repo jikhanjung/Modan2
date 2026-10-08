@@ -655,9 +655,9 @@ msgstr "**변수 없음:**"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:349
 msgid ""
-"The analysis will not run at all without at least one variable (every run "
-"includes CVA and MANOVA)"
-msgstr "변수가 하나도 없으면 분석이 아예 실행되지 않습니다(모든 실행에 CVA와 MANOVA가 포함됨)"
+"Without variables the analysis computes PCA only; CVA and MANOVA need a "
+"grouping variable"
+msgstr "변수가 없으면 분석은 PCA만 계산합니다. CVA와 MANOVA에는 그룹화 변수가 필요합니다"
 
 msgid ""
 "Solution: add one in the dataset dialog's **Variables** tab (or **Add "
@@ -1445,10 +1445,8 @@ msgstr "**해결:** 위의 \"프로크루스테스 정렬 문제\" 절 참조"
 msgid "\"… has too few objects with landmarks\""
 msgstr "\"… has too few objects with landmarks\""
 
-msgid ""
-"**Solution:** At least 5 objects with landmarks (and at least one "
-"variable) are required"
-msgstr "**해결 방법:** 랜드마크가 있는 객체 5개 이상(그리고 변수 하나 이상)이 필요합니다"
+msgid "**Solution:** At least 5 objects with landmarks are required"
+msgstr "**해결 방법:** 랜드마크가 있는 객체가 5개 이상 필요합니다"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/troubleshooting.rst:783
 msgid "**Cause:** Insufficient sample size"

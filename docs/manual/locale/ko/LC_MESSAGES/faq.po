@@ -1088,15 +1088,14 @@ msgid "**Minimum requirements:**"
 msgstr "**최소 요구 조건:**"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/faq.rst:448
-msgid ""
-"**Any analysis:** at least 5 objects with landmarks, and at least one "
-"variable (a single run always includes CVA and MANOVA)"
-msgstr ""
-"**모든 분석:** 랜드마크가 있는 객체 5개 이상과 변수 하나 이상 (한 번의 실행에 항상 CVA와 MANOVA가 포함됨)"
+msgid "**Any analysis:** at least 5 objects with landmarks"
+msgstr "**모든 분석:** 랜드마크가 있는 객체 5개 이상"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/faq.rst:449
-msgid "**CVA / MANOVA:** at least 2 groups in the grouping variable"
-msgstr "**CVA / MANOVA:** 그룹화 변수에 그룹이 2개 이상"
+msgid ""
+"**CVA / MANOVA:** a grouping variable with at least 2 groups (without "
+"variables, only PCA is computed)"
+msgstr "**CVA / MANOVA:** 그룹이 2개 이상인 그룹화 변수 (변수가 없으면 PCA만 계산됨)"
 
 #: ../../../../../../mnt/d/projects/Modan2/docs/manual/faq.rst:452
 msgid "**Recommended sample sizes:**"

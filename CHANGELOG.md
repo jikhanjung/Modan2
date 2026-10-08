@@ -10,6 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **The CVA tab shows the classification accuracy**, under the CV score plot:
+  the cross-validated figure and how it was estimated, the chance level
+  (always guessing the largest group), and the resubstitution figure 0.1.x
+  reported. Every CVA run computed these, but nothing stored or showed them —
+  although the 0.2.0 notes said the resubstitution figure is still shown.
+  Analyses saved before this have no accuracy stored; run them again to see it.
+
 ### Fixed
 - **Procrustes alignment could rotate a specimen to the wrong orientation.**
   When a specimen fits the mean shape best as a mirror image — a left-right

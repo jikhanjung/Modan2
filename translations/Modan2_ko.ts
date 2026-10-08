@@ -4,19 +4,64 @@
 <context>
     <name>AnalysisInfoWidget</name>
     <message>
-        <location filename="../components/widgets/analysis_info.py" line="170"/>
+        <location filename="../components/widgets/analysis_info.py" line="178"/>
         <source>Analysis Name</source>
         <translation>분석 제목</translation>
     </message>
     <message>
-        <location filename="../components/widgets/analysis_info.py" line="171"/>
+        <location filename="../components/widgets/analysis_info.py" line="179"/>
         <source>Superimposition</source>
         <translation>중첩정렬</translation>
     </message>
     <message>
-        <location filename="../components/widgets/analysis_info.py" line="172"/>
+        <location filename="../components/widgets/analysis_info.py" line="180"/>
         <source>Grouping variable</source>
         <translation>그룹 변수</translation>
+    </message>
+    <message>
+        <location filename="../components/widgets/analysis_info.py" line="480"/>
+        <source>leave-one-out cross-validation</source>
+        <translation>leave-one-out 교차검증</translation>
+    </message>
+    <message>
+        <location filename="../components/widgets/analysis_info.py" line="483"/>
+        <source>stratified {}-fold cross-validation</source>
+        <translation>층화 {}겹 교차검증</translation>
+    </message>
+    <message>
+        <location filename="../components/widgets/analysis_info.py" line="496"/>
+        <source>No CVA results: the analysis had no CVA grouping variable, or CVA failed.</source>
+        <translation>CVA 결과가 없습니다. 분석에 CVA 그룹화 변수가 없었거나 CVA가 실패했습니다.</translation>
+    </message>
+    <message>
+        <location filename="../components/widgets/analysis_info.py" line="498"/>
+        <source>Classification accuracy was not saved with this analysis. Run it again to see it.</source>
+        <translation>이 분석에는 분류 정확도가 저장되어 있지 않습니다. 분석을 다시 실행하면 볼 수 있습니다.</translation>
+    </message>
+    <message>
+        <location filename="../components/widgets/analysis_info.py" line="501"/>
+        <source>Classification accuracy: not available (too few specimens to cross-validate)</source>
+        <translation>분류 정확도: 계산할 수 없음 (교차검증하기에 표본이 너무 적음)</translation>
+    </message>
+    <message>
+        <location filename="../components/widgets/analysis_info.py" line="504"/>
+        <source>Classification accuracy: {:.1f}% ({})</source>
+        <translation>분류 정확도: {:.1f}% ({})</translation>
+    </message>
+    <message>
+        <location filename="../components/widgets/analysis_info.py" line="506"/>
+        <source>chance {:.1f}%</source>
+        <translation>우연 수준 {:.1f}%</translation>
+    </message>
+    <message>
+        <location filename="../components/widgets/analysis_info.py" line="508"/>
+        <source>resubstitution {:.1f}%</source>
+        <translation>재대입 {:.1f}%</translation>
+    </message>
+    <message>
+        <location filename="../components/widgets/analysis_info.py" line="510"/>
+        <source>{} of {} variables used</source>
+        <translation>변수 {1}개 중 {0}개 사용</translation>
     </message>
 </context>
 <context>

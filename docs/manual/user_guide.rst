@@ -520,8 +520,9 @@ dataset and can be re-opened later.
 4. Click **"OK"** to run. Progress is shown, and if CVA/MANOVA cannot be computed
    (e.g. too few groups) the failure is reported rather than silently skipped.
 5. Select the new analysis in the tree: its results appear in **PCA**, **CVA**
-   and **MANOVA** tabs. Choose the PCA or CVA tab and click **Data Exploration**
-   for interactive plots, or **Analysis Details** for the result tables.
+   and **MANOVA** tabs. On the **PCA** tab, click **Data Exploration** for
+   interactive plots, or **Analysis Details** for the result tables (both buttons
+   are available on the PCA tab only).
 
 The run is refused before it starts if the dataset has fewer than 5 objects with
 landmarks, has objects with differing landmark counts, has a landmark that is
@@ -648,19 +649,32 @@ Canonical Variate Analysis (CVA)
 
 **Running CVA**: CVA is computed as part of every analysis run. In the analysis
 dialog, set the **CVA grouping variable** to the categorical variable that
-defines your groups (e.g. "Species"), then select the analysis, choose the
-**CVA** tab and click **Data Exploration**.
+defines your groups (e.g. "Species"), then select the analysis and open its
+**CVA** tab.
 
 **Interpreting Results**:
 
-- **CV Score Plot** (the **CVA** tab, and Data Exploration): specimens plotted
-  on CV axes
+- **CV Score Plot** (the **CVA** tab): specimens plotted on CV axes
 
   - Ideally, groups form distinct clusters
   - Overlap indicates similarity
 
-Modan2 shows the CV scores only; it does not display a classification table or
-discriminant-function statistics.
+- **Classification accuracy** (the line under the plot): how often a specimen's
+  group is predicted correctly.
+
+  - The main figure is **cross-validated**: each specimen is classified by a
+    model fitted without it (leave-one-out; stratified folds for very large
+    data), so it estimates how well new specimens would be classified.
+  - **Chance** is what always guessing the largest group would score — the
+    figure to beat.
+  - **Resubstitution** classifies the very specimens the model was fitted on. It
+    is always optimistic, and is the figure Modan2 0.1.x reported.
+  - When the data have more variables than the specimens can support, CVA runs
+    on a reduced set, and the line says how many variables were used.
+  - Analyses saved before the accuracy was stored show none; run them again.
+
+Modan2 does not display a classification table or discriminant-function
+statistics.
 
 **Example**:
 
@@ -671,6 +685,8 @@ discriminant-function statistics.
    CVA Results:
      CV1: 78% discrimination
      CV2: 15% discrimination
+     Classification accuracy: 86.7% (leave-one-out cross-validation)
+       · chance 33.3% · resubstitution 96.7%
 
 .. _analysis-manova:
 

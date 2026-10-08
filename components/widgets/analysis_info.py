@@ -10,6 +10,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 from PyQt5.QtCore import (
+    Qt,
     QTranslator,
 )
 from PyQt5.QtWidgets import (
@@ -49,6 +50,7 @@ if GLUT_AVAILABLE and glut:
         GLUT_INITIALIZED = False
 import json
 import os
+import re
 
 import MdUtils as mu
 
@@ -122,6 +124,12 @@ class AnalysisInfoWidget(QWidget):
         i += 1
         self.cva_layout.addWidget(self.cva_plot_widget3, i, 0, 1, 3)
         self.cva_layout.setRowStretch(i, 1)
+        i += 1
+        # How well the CVA separates the groups: the plot alone cannot say.
+        self.lblCvaAccuracy = QLabel("")
+        self.lblCvaAccuracy.setWordWrap(True)
+        self.lblCvaAccuracy.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        self.cva_layout.addWidget(self.lblCvaAccuracy, i, 0, 1, 3)
 
         """ MANOVA info """
         self.lblManovaGroupBy = QLabel("Grouping variable")
@@ -202,6 +210,9 @@ class AnalysisInfoWidget(QWidget):
         self.analysis = analysis
         self.edtAnalysisName.setText(analysis.analysis_name)
         self.edtSuperimposition.setText(analysis.superimposition_method)
+        # Cleared here so a legacy analysis (no JSON payload) shows no stale line.
+        self.lblCvaAccuracy.setText("")
+        self.lblCvaAccuracy.setToolTip("")
         for combo in [self.comboPcaGroupBy, self.comboCvaGroupBy, self.comboManovaGroupBy]:
             combo.clear()
 
@@ -463,6 +474,51 @@ class AnalysisInfoWidget(QWidget):
         fig.canvas.draw()
         fig.canvas.flush_events()
 
+    def _accuracy_method_text(self, method):
+        """The accuracy method recorded by MdStatistics, in the interface language."""
+        if method == "leave-one-out":
+            return self.tr("leave-one-out cross-validation")
+        match = re.fullmatch(r"stratified (\d+)-fold", method or "")
+        if match:
+            return self.tr("stratified {}-fold cross-validation").format(match.group(1))
+        return method or ""
+
+    def cva_accuracy_text(self, accuracy, has_cva):
+        """One line summarizing the CVA's classification accuracy.
+
+        The cross-validated figure comes first because it is the honest one; the
+        chance level beside it is what makes it readable (always guessing the
+        largest group already scores that much). Resubstitution -- classifying
+        the specimens the model was fitted on -- is the optimistic figure 0.1.x
+        reported, kept for comparison.
+        """
+        if not has_cva:
+            return self.tr("No CVA results: the analysis had no CVA grouping variable, or CVA failed.")
+        if not accuracy:
+            return self.tr("Classification accuracy was not saved with this analysis. Run it again to see it.")
+        cross_validated = accuracy.get("cross_validated_accuracy")
+        if cross_validated is None:
+            parts = [self.tr("Classification accuracy: not available (too few specimens to cross-validate)")]
+        else:
+            method = self._accuracy_method_text(accuracy.get("accuracy_method"))
+            parts = [self.tr("Classification accuracy: {:.1f}% ({})").format(cross_validated, method)]
+        if accuracy.get("chance_accuracy") is not None:
+            parts.append(self.tr("chance {:.1f}%").format(accuracy["chance_accuracy"]))
+        if accuracy.get("resubstitution_accuracy") is not None:
+            parts.append(self.tr("resubstitution {:.1f}%").format(accuracy["resubstitution_accuracy"]))
+        if accuracy.get("reduced"):
+            parts.append(
+                self.tr("{} of {} variables used").format(
+                    accuracy.get("n_variables_used"), accuracy.get("n_variables_total")
+                )
+            )
+        return " \u00b7 ".join(parts)
+
+    def _show_cva_accuracy(self, has_cva):
+        accuracy = self.analysis.get_cva_accuracy() if has_cva else {}
+        self.lblCvaAccuracy.setText(self.cva_accuracy_text(accuracy, has_cva))
+        self.lblCvaAccuracy.setToolTip(accuracy.get("warning") or "")
+
     def show_analysis_result(self):
         """Populate the info fields, MANOVA table and PCA/CVA scatter plots."""
         logger = logging.getLogger(__name__)
@@ -478,6 +534,7 @@ class AnalysisInfoWidget(QWidget):
         object_info_list, pca_result_list, cva_result_list, manova_result = self._load_result_json()
 
         self._populate_manova_table(manova_result)
+        self._show_cva_accuracy(bool(cva_result_list))
 
         if self.analysis.propertyname_str:
             variablename_list = self.analysis.propertyname_str.split(",")

@@ -76,7 +76,7 @@ Basic Usage
 
 5. **Explore Results**
 
-   Select the analysis in the tree to see its PCA, CVA and MANOVA results; click **Data Exploration** for interactive plots and shape variations, or **Analysis Details** for the result tables.
+   Select the analysis in the tree to see its PCA, CVA (with classification accuracy) and MANOVA results; on the PCA tab, click **Data Exploration** for interactive plots and shape variations, or **Analysis Details** for the result tables.
 
 **Keyboard Shortcuts**:
 

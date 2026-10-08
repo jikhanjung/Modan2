@@ -1002,6 +1002,10 @@ class ModanController(QObject):
             self.logger.warning("CVA result not available for saving")
             return
         self.logger.debug(f"Saving CVA results: keys={list(cva_result.keys())}")
+        # Computed by every CVA run, and the honest measure of how well the groups
+        # separate -- stored so the CVA tab can show it.
+        if "resubstitution_accuracy" in cva_result:
+            analysis.cva_accuracy_json = json.dumps({key: cva_result.get(key) for key in MdModel.CVA_ACCURACY_KEYS})
         # CVA uses 'canonical_variables' instead of 'scores'
         if "canonical_variables" in cva_result:
             analysis.cva_analysis_result_json = json.dumps(cva_result["canonical_variables"])

@@ -2604,6 +2604,22 @@ class MdDatasetOps:
         return vec
 
 
+# What a CVA result says about its own classification accuracy, as stored on
+# MdAnalysis.cva_accuracy_json. Percentages; cross_validated_accuracy is None
+# when there were too few specimens to hold any out (accuracy_method is then
+# "unavailable"). See MdStatistics.do_cva_analysis.
+CVA_ACCURACY_KEYS = (
+    "cross_validated_accuracy",
+    "accuracy_method",
+    "resubstitution_accuracy",
+    "chance_accuracy",
+    "n_variables_total",
+    "n_variables_used",
+    "reduced",
+    "warning",
+)
+
+
 class MdAnalysis(Model):
     analysis_name = CharField()
     analysis_desc = CharField(null=True)
@@ -2632,6 +2648,9 @@ class MdAnalysis(Model):
     cva_analysis_result_json = CharField(null=True)  # CVA result in list of list format
     cva_rotation_matrix_json = CharField(null=True)  # rotation matrix from CVA
     cva_eigenvalues_json = CharField(null=True)  # CVA eigenvalues and percentages of variance explained
+    # Classification accuracy of the CVA (JSON; see CVA_ACCURACY_KEYS). Null for
+    # analyses saved before it was stored, and for runs without CVA.
+    cva_accuracy_json = CharField(null=True)
 
     """ MANOVA result"""
     manova_group_by = CharField(null=True)
@@ -2669,6 +2688,21 @@ class MdAnalysis(Model):
     def set_curve_config(self, config):
         """Store the snapshotted semi-landmark curve configuration."""
         self.curve_config_json = json.dumps(config) if config else None
+
+    def get_cva_accuracy(self):
+        """The CVA classification accuracy as a dict, ``{}`` when not stored.
+
+        Keys are :data:`CVA_ACCURACY_KEYS`. Never raises: an unreadable blob must
+        not stop an analysis from opening.
+        """
+        if not self.cva_accuracy_json:
+            return {}
+        try:
+            accuracy = json.loads(self.cva_accuracy_json)
+        except (ValueError, TypeError) as e:
+            logger.warning("Ignoring unreadable CVA accuracy for analysis %s: %s", self.id, e)
+            return {}
+        return accuracy if isinstance(accuracy, dict) else {}
 
     def get_chart_settings(self):
         """Chart presentation settings as a dict, ``{}`` when unset or unreadable.

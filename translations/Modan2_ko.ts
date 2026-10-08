@@ -265,146 +265,151 @@
 <context>
     <name>DatasetAnalysisDialog</name>
     <message>
-        <location filename="../dialogs/dataset_analysis_dialog.py" line="59"/>
+        <location filename="../dialogs/dataset_analysis_dialog.py" line="63"/>
         <source>Modan2 - Dataset Analysis</source>
         <translation>모단2 - 데이터셋 분석</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_analysis_dialog.py" line="96"/>
+        <location filename="../dialogs/dataset_analysis_dialog.py" line="100"/>
         <source>Index</source>
         <translation>인덱스</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_analysis_dialog.py" line="99"/>
+        <location filename="../dialogs/dataset_analysis_dialog.py" line="103"/>
         <source>Wireframe</source>
         <translation>와이어프레임</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_analysis_dialog.py" line="102"/>
+        <location filename="../dialogs/dataset_analysis_dialog.py" line="106"/>
         <source>Baseline</source>
         <translation>베이스라인</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_analysis_dialog.py" line="105"/>
+        <location filename="../dialogs/dataset_analysis_dialog.py" line="109"/>
         <source>Average</source>
         <translation>평균</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_analysis_dialog.py" line="108"/>
+        <location filename="../dialogs/dataset_analysis_dialog.py" line="112"/>
         <source>Rotate</source>
         <translation>회전</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_analysis_dialog.py" line="206"/>
+        <location filename="../dialogs/dataset_analysis_dialog.py" line="211"/>
         <source>Objects</source>
         <translation>개체들</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_analysis_dialog.py" line="207"/>
+        <location filename="../dialogs/dataset_analysis_dialog.py" line="212"/>
         <source>Groups</source>
         <translation>그룹</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_analysis_dialog.py" line="215"/>
+        <location filename="../dialogs/dataset_analysis_dialog.py" line="220"/>
         <source>All</source>
         <translation>전체선택</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_analysis_dialog.py" line="218"/>
+        <location filename="../dialogs/dataset_analysis_dialog.py" line="223"/>
         <source>None</source>
         <translation>전체해제</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_analysis_dialog.py" line="221"/>
+        <location filename="../dialogs/dataset_analysis_dialog.py" line="226"/>
         <source>Invert</source>
         <translation>반전</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_analysis_dialog.py" line="294"/>
+        <location filename="../dialogs/dataset_analysis_dialog.py" line="299"/>
         <source>Depth Shade</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_analysis_dialog.py" line="298"/>
+        <location filename="../dialogs/dataset_analysis_dialog.py" line="303"/>
         <source>Legend</source>
         <translation>범례</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_analysis_dialog.py" line="302"/>
+        <location filename="../dialogs/dataset_analysis_dialog.py" line="307"/>
         <source>Axis</source>
         <translation>축</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_analysis_dialog.py" line="306"/>
+        <location filename="../dialogs/dataset_analysis_dialog.py" line="311"/>
         <source>Chart</source>
         <translation>차트</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_analysis_dialog.py" line="314"/>
+        <location filename="../dialogs/dataset_analysis_dialog.py" line="319"/>
         <source>Grouping variable</source>
         <translation>그룹 변수</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_analysis_dialog.py" line="324"/>
+        <location filename="../dialogs/dataset_analysis_dialog.py" line="329"/>
         <source>Chart Options</source>
         <translation>차트 옵션</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_analysis_dialog.py" line="345"/>
+        <location filename="../dialogs/dataset_analysis_dialog.py" line="350"/>
         <source>Result table</source>
         <translation>결과 테이블</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_analysis_dialog.py" line="346"/>
+        <location filename="../dialogs/dataset_analysis_dialog.py" line="351"/>
         <source>Rotation matrix</source>
         <translation>회전 행렬</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_analysis_dialog.py" line="347"/>
+        <location filename="../dialogs/dataset_analysis_dialog.py" line="352"/>
         <source>Eigenvalues</source>
         <translation>고유값</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_analysis_dialog.py" line="348"/>
+        <location filename="../dialogs/dataset_analysis_dialog.py" line="353"/>
         <source>Shapes</source>
         <translation>형태</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_analysis_dialog.py" line="391"/>
+        <location filename="../dialogs/dataset_analysis_dialog.py" line="395"/>
         <source>Superimpose</source>
         <translation>중첩정렬</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_analysis_dialog.py" line="394"/>
+        <location filename="../dialogs/dataset_analysis_dialog.py" line="398"/>
         <source>Superimposition</source>
         <translation>중첩정렬</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_analysis_dialog.py" line="416"/>
+        <location filename="../dialogs/dataset_analysis_dialog.py" line="419"/>
         <source>Perform Analysis</source>
         <translation>분석 실행</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_analysis_dialog.py" line="693"/>
+        <location filename="../dialogs/dataset_analysis_dialog.py" line="707"/>
         <source>Save Results</source>
         <translation>결과 저장</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_analysis_dialog.py" line="540"/>
+        <location filename="../dialogs/dataset_analysis_dialog.py" line="543"/>
         <source>Error: landmark count is not consistent</source>
         <translation>오류: 랜드마크 수가 일정하지 않습니다</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_analysis_dialog.py" line="617"/>
+        <location filename="../dialogs/dataset_analysis_dialog.py" line="631"/>
         <source>Save File As</source>
         <translation>다른 이름으로 저장</translation>
     </message>
     <message>
-        <location filename="../dialogs/dataset_analysis_dialog.py" line="693"/>
+        <location filename="../dialogs/dataset_analysis_dialog.py" line="707"/>
         <source>Failed to save analysis results:
 {}</source>
         <translation>분석 결과 저장에 실패했습니다:
 {}</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/dataset_analysis_dialog.py" line="787"/>
+        <source>Warning</source>
+        <translation>경고</translation>
     </message>
 </context>
 <context>
@@ -563,94 +568,99 @@
 <context>
     <name>ExportDatasetDialog</name>
     <message>
-        <location filename="../dialogs/export_dialog.py" line="77"/>
+        <location filename="../dialogs/export_dialog.py" line="109"/>
         <source>Modan2 - Export</source>
         <translation>모단2 - 내보내기</translation>
     </message>
     <message>
-        <location filename="../dialogs/export_dialog.py" line="89"/>
+        <location filename="../dialogs/export_dialog.py" line="121"/>
         <source>Dataset Name</source>
         <translation>데이터셋 이름</translation>
     </message>
     <message>
-        <location filename="../dialogs/export_dialog.py" line="95"/>
+        <location filename="../dialogs/export_dialog.py" line="127"/>
         <source>Object List</source>
         <translation>개체 목록</translation>
     </message>
     <message>
-        <location filename="../dialogs/export_dialog.py" line="96"/>
+        <location filename="../dialogs/export_dialog.py" line="128"/>
         <source>Export List</source>
         <translation>내보내기 목록</translation>
     </message>
     <message>
-        <location filename="../dialogs/export_dialog.py" line="460"/>
+        <location filename="../dialogs/export_dialog.py" line="532"/>
         <source>Export</source>
         <translation>내보내기</translation>
     </message>
     <message>
-        <location filename="../dialogs/export_dialog.py" line="107"/>
+        <location filename="../dialogs/export_dialog.py" line="139"/>
         <source>Cancel</source>
         <translation>취소</translation>
     </message>
     <message>
-        <location filename="../dialogs/export_dialog.py" line="115"/>
+        <location filename="../dialogs/export_dialog.py" line="147"/>
         <source>Export Format</source>
         <translation>내보내기 형식</translation>
     </message>
     <message>
-        <location filename="../dialogs/export_dialog.py" line="134"/>
+        <location filename="../dialogs/export_dialog.py" line="166"/>
         <source>Superimposition</source>
         <translation>중첩정렬</translation>
     </message>
     <message>
-        <location filename="../dialogs/export_dialog.py" line="135"/>
+        <location filename="../dialogs/export_dialog.py" line="167"/>
         <source>Procrustes</source>
         <translation>프로크루스테스</translation>
     </message>
     <message>
-        <location filename="../dialogs/export_dialog.py" line="138"/>
+        <location filename="../dialogs/export_dialog.py" line="170"/>
         <source>Bookstein</source>
         <translation>북스틴</translation>
     </message>
     <message>
         <location filename="../dialogs/export_dialog.py" line="141"/>
         <source>Resistant fit</source>
-        <translation>강건적합</translation>
+        <translation type="obsolete">강건적합</translation>
     </message>
     <message>
-        <location filename="../dialogs/export_dialog.py" line="144"/>
+        <location filename="../dialogs/export_dialog.py" line="173"/>
         <source>None</source>
         <translation>정렬하지 않음</translation>
     </message>
     <message>
-        <location filename="../dialogs/export_dialog.py" line="127"/>
+        <location filename="../dialogs/export_dialog.py" line="159"/>
         <source>Include image and model files</source>
         <translation>이미지 및 모델 파일 포함</translation>
     </message>
     <message>
-        <location filename="../dialogs/export_dialog.py" line="278"/>
+        <location filename="../dialogs/export_dialog.py" line="318"/>
         <source>Estimated size: -</source>
         <translation>예상 크기: -</translation>
     </message>
     <message>
-        <location filename="../dialogs/export_dialog.py" line="276"/>
+        <location filename="../dialogs/export_dialog.py" line="316"/>
         <source>Estimated size: </source>
         <translation>예상 크기: </translation>
     </message>
     <message>
-        <location filename="../dialogs/export_dialog.py" line="439"/>
+        <location filename="../dialogs/export_dialog.py" line="511"/>
         <source>Exporting {}/{}...</source>
         <translation>내보내는 중 {}/{}...</translation>
     </message>
     <message>
-        <location filename="../dialogs/export_dialog.py" line="456"/>
+        <location filename="../dialogs/export_dialog.py" line="528"/>
         <source>Export completed.</source>
         <translation>내보내기를 완료했습니다.</translation>
     </message>
     <message>
-        <location filename="../dialogs/export_dialog.py" line="460"/>
+        <location filename="../dialogs/export_dialog.py" line="532"/>
         <source>Export failed: </source>
         <translation>내보내기 실패: </translation>
+    </message>
+    <message>
+        <location filename="../dialogs/export_dialog.py" line="350"/>
+        <source>The Export List is empty.</source>
+        <translation>내보내기 목록이 비어 있습니다.</translation>
     </message>
 </context>
 <context>
@@ -967,7 +977,7 @@ If you keep them, they are imported as real coordinates.</source>
         <translation>도움말</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="2024"/>
+        <location filename="../Modan2.py" line="2038"/>
         <source>Warning</source>
         <translation>경고</translation>
     </message>
@@ -1017,7 +1027,7 @@ If you keep them, they are imported as real coordinates.</source>
         <translation>개체 추가</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1232"/>
+        <location filename="../Modan2.py" line="1246"/>
         <source>Add Variable</source>
         <translation>변수 추가</translation>
     </message>
@@ -1032,87 +1042,87 @@ If you keep them, they are imported as real coordinates.</source>
         <translation>분석 세부사항</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1158"/>
+        <location filename="../Modan2.py" line="1211"/>
         <source>Data Exploration</source>
         <translation>데이터 탐색</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1232"/>
+        <location filename="../Modan2.py" line="1246"/>
         <source>Enter new variable name</source>
         <translation>새 변수 이름을 입력하세요</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1254"/>
+        <location filename="../Modan2.py" line="1268"/>
         <source>Are you sure to delete the selected object?</source>
         <translation>선택한 개체들을 삭제하시겠습니까?</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1282"/>
+        <location filename="../Modan2.py" line="1296"/>
         <source>Add child dataset</source>
         <translation>하위 데이터셋 추가</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1284"/>
+        <location filename="../Modan2.py" line="1298"/>
         <source>Add object</source>
         <translation>개체 추가</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1286"/>
+        <location filename="../Modan2.py" line="1300"/>
         <source>Add analysis</source>
         <translation>새 분석</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1288"/>
+        <location filename="../Modan2.py" line="1302"/>
         <source>Explore data</source>
         <translation>데이터 탐색</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1290"/>
+        <location filename="../Modan2.py" line="1304"/>
         <source>Delete analysis</source>
         <translation>분석결과 삭제</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1292"/>
+        <location filename="../Modan2.py" line="1306"/>
         <source>Reload</source>
         <translation>새로고침</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1317"/>
+        <location filename="../Modan2.py" line="1331"/>
         <source>Are you sure to delete the selected analysis?</source>
         <translation>선택한 분석결과를 삭제하시겠습니까?</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1784"/>
+        <location filename="../Modan2.py" line="1798"/>
         <source>Dimension mismatch</source>
         <translation>차원 불일치</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1893"/>
+        <location filename="../Modan2.py" line="1907"/>
         <source>Importing 3d model files...</source>
         <translation>3D 모델 파일 불러오는 중...</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1895"/>
+        <location filename="../Modan2.py" line="1909"/>
         <source>Importing image files...</source>
         <translation>이미지 파일 불러오는 중...</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1919"/>
+        <location filename="../Modan2.py" line="1933"/>
         <source>Dimension mismatch.</source>
         <translation>차원 불일치</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1927"/>
+        <location filename="../Modan2.py" line="1941"/>
         <source>Cannot process directory...</source>
         <translation>디렉토리에서 데이터를 불러올 수 없습니다.</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1930"/>
+        <location filename="../Modan2.py" line="1944"/>
         <source>Nothing to import.</source>
         <translation>불러올 데이터가 없습니다.</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="2024"/>
+        <location filename="../Modan2.py" line="2038"/>
         <source>Data has been changed. Do you want to save?</source>
         <translation>데이터가 수정되었습니다. 저장하시겠습니까?</translation>
     </message>
@@ -1281,61 +1291,61 @@ Continuing without it will start an empty library in that location.</source>
         <translation>백업에서 복원...</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1389"/>
+        <location filename="../Modan2.py" line="1403"/>
         <source>Back up library</source>
         <translation>라이브러리 백업</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1442"/>
+        <location filename="../Modan2.py" line="1456"/>
         <source>Modan2 library backup (*.zip)</source>
         <translation>Modan2 라이브러리 백업 (*.zip)</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1388"/>
+        <location filename="../Modan2.py" line="1402"/>
         <source>Backing up your library...</source>
         <translation>라이브러리를 백업하는 중...</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1476"/>
+        <location filename="../Modan2.py" line="1490"/>
         <source>Stop</source>
         <translation>중지</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1395"/>
+        <location filename="../Modan2.py" line="1409"/>
         <source>Backing up {}...</source>
         <translation>{} 백업 중...</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1395"/>
+        <location filename="../Modan2.py" line="1409"/>
         <source>Finishing...</source>
         <translation>마무리하는 중...</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1402"/>
+        <location filename="../Modan2.py" line="1416"/>
         <source>Could not back up the library</source>
         <translation>라이브러리를 백업하지 못했습니다</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1410"/>
+        <location filename="../Modan2.py" line="1424"/>
         <source>Backed up {} dataset(s) to:
 {}</source>
         <translation>데이터셋 {}개를 다음 위치에 백업했습니다:
 {}</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1415"/>
+        <location filename="../Modan2.py" line="1429"/>
         <source>
 ...and {} more.</source>
         <translation>
 ...외 {}개.</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1420"/>
+        <location filename="../Modan2.py" line="1434"/>
         <source>Backed up, with files missing</source>
         <translation>백업 완료 (일부 파일 누락)</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1420"/>
+        <location filename="../Modan2.py" line="1434"/>
         <source>{}
 
 These files are recorded in the database but were not on disk, so they are not in the backup:
@@ -1346,22 +1356,22 @@ These files are recorded in the database but were not on disk, so they are not i
 {}{}</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1429"/>
+        <location filename="../Modan2.py" line="1443"/>
         <source>Library backed up</source>
         <translation>라이브러리 백업 완료</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1477"/>
+        <location filename="../Modan2.py" line="1491"/>
         <source>Restore from backup</source>
         <translation>백업에서 복원</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1454"/>
+        <location filename="../Modan2.py" line="1468"/>
         <source>Not a library backup</source>
         <translation>라이브러리 백업 파일이 아닙니다</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1457"/>
+        <location filename="../Modan2.py" line="1471"/>
         <source>This backup holds {} dataset(s) and {} saved analysis(es), made on {}.
 
 They will be added to your library alongside what is already there — nothing is replaced or deleted. A dataset whose name is taken gets a new one.
@@ -1374,41 +1384,46 @@ Continue?</source>
 계속하시겠습니까?</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1476"/>
+        <location filename="../Modan2.py" line="1490"/>
         <source>Restoring...</source>
         <translation>복원하는 중...</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1483"/>
+        <location filename="../Modan2.py" line="1497"/>
         <source>Restoring {}...</source>
         <translation>{} 복원 중...</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1490"/>
+        <location filename="../Modan2.py" line="1504"/>
         <source>Could not restore the backup</source>
         <translation>백업을 복원하지 못했습니다</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1497"/>
+        <location filename="../Modan2.py" line="1511"/>
         <source>Restored, with failures</source>
         <translation>복원 완료 (일부 실패)</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1497"/>
+        <location filename="../Modan2.py" line="1511"/>
         <source>Restored {} dataset(s). These could not be restored:
 {}</source>
         <translation>데이터셋 {}개를 복원했습니다. 다음 항목은 복원하지 못했습니다:
 {}</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1506"/>
+        <location filename="../Modan2.py" line="1520"/>
         <source>Backup restored</source>
         <translation>백업 복원 완료</translation>
     </message>
     <message>
-        <location filename="../Modan2.py" line="1506"/>
+        <location filename="../Modan2.py" line="1520"/>
         <source>Restored {} dataset(s).</source>
         <translation>데이터셋 {}개를 복원했습니다.</translation>
+    </message>
+    <message>
+        <location filename="../Modan2.py" line="1211"/>
+        <source>This analysis has no CVA results. Choose the PCA tab to explore it.</source>
+        <translation>이 분석에는 CVA 결과가 없습니다. PCA 탭을 선택해 살펴보십시오.</translation>
     </message>
 </context>
 <context>
@@ -1454,96 +1469,101 @@ Continue?</source>
         <translation>MANOVA 그룹 변수</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="343"/>
+        <location filename="../dialogs/analysis_dialog.py" line="351"/>
         <source>OK</source>
         <translation>확인</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="344"/>
+        <location filename="../dialogs/analysis_dialog.py" line="352"/>
         <source>Cancel</source>
         <translation>취소</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="201"/>
+        <location filename="../dialogs/analysis_dialog.py" line="207"/>
         <source>Warning</source>
         <translation>경고</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="201"/>
+        <location filename="../dialogs/analysis_dialog.py" line="207"/>
         <source>Please enter an analysis name</source>
         <translation>분석 제목을 입력하세요</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="221"/>
+        <location filename="../dialogs/analysis_dialog.py" line="227"/>
         <source>Validating dataset...</source>
         <translation>데이터셋 검증 중...</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="224"/>
+        <location filename="../dialogs/analysis_dialog.py" line="230"/>
         <source>Running...</source>
         <translation>실행 중...</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="320"/>
+        <location filename="../dialogs/analysis_dialog.py" line="328"/>
         <source>Close</source>
         <translation>닫기</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="230"/>
+        <location filename="../dialogs/analysis_dialog.py" line="236"/>
         <source>Dataset validation failed</source>
         <translation>데이터셋 검증에 실패했습니다</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="233"/>
+        <location filename="../dialogs/analysis_dialog.py" line="239"/>
         <source>Starting analysis...</source>
         <translation>분석을 시작하는 중...</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="282"/>
+        <location filename="../dialogs/analysis_dialog.py" line="290"/>
         <source>Validating objects and landmarks...</source>
         <translation>개체와 랜드마크를 검증하는 중...</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="284"/>
+        <location filename="../dialogs/analysis_dialog.py" line="292"/>
         <source>Performing Procrustes superimposition...</source>
         <translation>프로크루스테스 중첩을 수행하는 중...</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="286"/>
+        <location filename="../dialogs/analysis_dialog.py" line="294"/>
         <source>Running PCA analysis...</source>
         <translation>주성분분석을 실행하는 중...</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="288"/>
+        <location filename="../dialogs/analysis_dialog.py" line="296"/>
         <source>Computing CVA and MANOVA...</source>
         <translation>CVA와 MANOVA를 계산하는 중...</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="290"/>
+        <location filename="../dialogs/analysis_dialog.py" line="298"/>
         <source>Finalizing results...</source>
         <translation>결과를 정리하는 중...</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="311"/>
+        <location filename="../dialogs/analysis_dialog.py" line="319"/>
         <source>Analysis completed successfully!</source>
         <translation>분석을 완료했습니다!</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="335"/>
+        <location filename="../dialogs/analysis_dialog.py" line="343"/>
         <source>Analysis failed: {}</source>
         <translation>분석 실패: {}</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="346"/>
+        <location filename="../dialogs/analysis_dialog.py" line="354"/>
         <source>Analysis Failed</source>
         <translation>분석 실패</translation>
     </message>
     <message>
-        <location filename="../dialogs/analysis_dialog.py" line="346"/>
+        <location filename="../dialogs/analysis_dialog.py" line="354"/>
         <source>Analysis failed:
 {}</source>
         <translation>분석 실패:
 {}</translation>
+    </message>
+    <message>
+        <location filename="../dialogs/analysis_dialog.py" line="109"/>
+        <source>None (no variables)</source>
+        <translation>없음 (변수 없음)</translation>
     </message>
 </context>
 <context>

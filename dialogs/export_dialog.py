@@ -5,7 +5,7 @@ import datetime
 import os
 import shutil
 
-from PyQt5.QtCore import QPoint, QRect
+from PyQt5.QtCore import QPoint, QRect, Qt
 from PyQt5.QtWidgets import (
     QApplication,
     QButtonGroup,
@@ -16,6 +16,7 @@ from PyQt5.QtWidgets import (
     QLabel,
     QLineEdit,
     QListWidget,
+    QListWidgetItem,
     QMessageBox,
     QPushButton,
     QRadioButton,
@@ -31,6 +32,18 @@ from MdModel import MdDatasetOps, MdObject
 NEWLINE = "\n"
 
 
+def format_coordinate(value):
+    """Text for one coordinate; a missing one (``None``) is the ``-999`` placeholder.
+
+    ``str(None)`` used to be written, which no reader -- Modan2's included -- can
+    parse back. ``-999`` is the morphometrics convention for "not recorded", and
+    Modan2's import offers to turn it back into a missing landmark.
+    """
+    if value is None:
+        return f"{mu.MISSING_SENTINEL:g}"
+    return str(value)
+
+
 def format_tps(rows, dimension):
     """Build TPS file text from ``(name, landmarks, curves)`` rows.
 
@@ -43,13 +56,30 @@ def format_tps(rows, dimension):
     lines = []
     for name, landmarks, curves in rows:
         lines.append(f"LM={len(landmarks)}")
-        lines.extend("\t".join(str(c) for c in lm[:dimension]) for lm in landmarks)
+        lines.extend("\t".join(format_coordinate(c) for c in lm[:dimension]) for lm in landmarks)
         if curves:
             lines.append(f"CURVES={len(curves)}")
             for pts in curves:
                 lines.append(f"POINTS={len(pts)}")
-                lines.extend("\t".join(str(c) for c in p[:dimension]) for p in pts)
+                lines.extend("\t".join(format_coordinate(c) for c in p[:dimension]) for p in pts)
         lines.append(f"ID={name}")
+    return NEWLINE.join(lines) + NEWLINE
+
+
+def format_x1y1(rows, dimension):
+    """Build X1Y1 file text from ``(name, landmarks)`` rows.
+
+    A tab-separated table: a header row (``name``, ``X1``, ``Y1`` [, ``Z1``], ...)
+    then one row per object -- the layout Modan2's X1Y1 reader expects (it tells
+    2D from 3D by whether the third coordinate column starts with ``X``).
+    """
+    axes = "XYZ"[:dimension]
+    count = max((len(landmarks) for _, landmarks in rows), default=0)
+    header = ["name"] + [f"{axis}{i + 1}" for i in range(count) for axis in axes]
+    lines = ["\t".join(header)]
+    for name, landmarks in rows:
+        fields = [name] + [format_coordinate(c) for lm in landmarks for c in list(lm[:dimension])]
+        lines.append("\t".join(fields))
     return NEWLINE.join(lines) + NEWLINE
 
 
@@ -58,11 +88,13 @@ class ExportDatasetDialog(BaseDialog):
 
     Supported formats:
     - TPS (landmark data)
+    - X1Y1 (tab-separated landmark table)
     - Morphologika (with images and metadata)
     - JSON+ZIP (complete dataset package)
 
     Features:
-    - Object selection for export
+    - Object selection for export (TPS, X1Y1, Morphologika; a JSON+ZIP package
+      is always the whole dataset)
     - Optional Procrustes superimposition
     - File size estimation for ZIP exports
     """
@@ -138,9 +170,6 @@ class ExportDatasetDialog(BaseDialog):
         self.rbBookstein = QRadioButton(self.tr("Bookstein"))
         self.rbBookstein.clicked.connect(self.on_rbBookstein_clicked)
         self.rbBookstein.setEnabled(False)
-        self.rbRFTRA = QRadioButton(self.tr("Resistant fit"))
-        self.rbRFTRA.clicked.connect(self.on_rbRFTRA_clicked)
-        self.rbRFTRA.setEnabled(False)
         self.rbNone = QRadioButton(self.tr("None"))
         self.rbNone.clicked.connect(self.on_rbNone_clicked)
 
@@ -176,6 +205,7 @@ class ExportDatasetDialog(BaseDialog):
         self.button_group2.addButton(self.rbX1Y1)
         self.button_group2.addButton(self.rbMorphologika)
         self.button_group2.addButton(self.rbJSONZip)
+        self.button_group2.buttonToggled.connect(self.on_export_format_changed)
 
         # Superimposition button group
         self.button_layout3 = QHBoxLayout()
@@ -183,12 +213,10 @@ class ExportDatasetDialog(BaseDialog):
         self.button_layout3.addWidget(self.rbNone)
         self.button_layout3.addWidget(self.rbProcrustes)
         self.button_layout3.addWidget(self.rbBookstein)
-        self.button_layout3.addWidget(self.rbRFTRA)
         self.button_group3 = QButtonGroup()
         self.button_group3.addButton(self.rbNone)
         self.button_group3.addButton(self.rbProcrustes)
         self.button_group3.addButton(self.rbBookstein)
-        self.button_group3.addButton(self.rbRFTRA)
 
         # Main layout
         self.layout = QVBoxLayout()
@@ -227,7 +255,10 @@ class ExportDatasetDialog(BaseDialog):
         self.ds_ops = MdDatasetOps(dataset)
         self.edtDatasetName.setText(self.dataset.dataset_name)
         for obj in self.dataset.object_list:
-            self.lstExportList.addItem(obj.object_name)
+            item = QListWidgetItem(obj.object_name)
+            # Names need not be unique; the id is what the export filters on.
+            item.setData(Qt.UserRole, obj.id)
+            self.lstExportList.addItem(item)
 
     # Radio button handlers
     def on_rbProcrustes_clicked(self):
@@ -235,9 +266,6 @@ class ExportDatasetDialog(BaseDialog):
 
     def on_rbBookstein_clicked(self):
         """Handle Bookstein radio button click."""
-
-    def on_rbRFTRA_clicked(self):
-        """Handle Resistant fit radio button click."""
 
     def on_rbNone_clicked(self):
         """Handle None radio button click."""
@@ -258,6 +286,18 @@ class ExportDatasetDialog(BaseDialog):
         """Handle JSON+ZIP radio button click - enable file inclusion."""
         self.chkIncludeFiles.setEnabled(True)
         self.update_estimated_size()
+
+    def on_export_format_changed(self, *_):
+        """A JSON+ZIP package is the whole dataset, so the object lists only
+        apply to the other formats; the file option only to JSON+ZIP."""
+        package = self.rbJSONZip.isChecked()
+        for widget in (self.lstObjectList, self.lstExportList, self.btnMoveRight, self.btnMoveLeft):
+            widget.setEnabled(not package)
+        self.chkIncludeFiles.setEnabled(package)
+
+    def selected_object_ids(self):
+        """Ids of the objects in the Export List."""
+        return {self.lstExportList.item(i).data(Qt.UserRole) for i in range(self.lstExportList.count())}
 
     def update_estimated_size(self):
         """Update estimated package size for ZIP export."""
@@ -294,20 +334,35 @@ class ExportDatasetDialog(BaseDialog):
     @guard_slot("Failed to export dataset")
     def export_dataset(self):
         """Export dataset to selected format."""
+        today = datetime.datetime.now().astimezone()
+        date_str = today.strftime("%Y%m%d_%H%M%S")
+
+        if self.rbJSONZip.isChecked():
+            self._export_json_zip(date_str)
+            self.close()
+            return
+
+        # Only the objects moved to the Export List are written (the lists used
+        # to be ignored). Filtering before the superimposition aligns the
+        # exported objects with each other, so the file is self-consistent.
+        selected = self.selected_object_ids()
+        if not selected:
+            QMessageBox.warning(self, self.tr("Export"), self.tr("The Export List is empty."))
+            return
+        self.ds_ops.object_list = [obj for obj in self.ds_ops.object_list if obj.id in selected]
+
         # Apply superimposition if selected
         if self.rbProcrustes.isChecked():
             self.ds_ops.procrustes_superimposition()
 
         object_list = self.ds_ops.object_list
-        today = datetime.datetime.now().astimezone()
-        date_str = today.strftime("%Y%m%d_%H%M%S")
 
         if self.rbTPS.isChecked():
             self._export_tps(date_str, object_list)
+        elif self.rbX1Y1.isChecked():
+            self._export_x1y1(date_str, object_list)
         elif self.rbMorphologika.isChecked():
             self._export_morphologika(date_str, object_list)
-        elif hasattr(self, "rbJSONZip") and self.rbJSONZip.isChecked():
-            self._export_json_zip(date_str)
 
         self.close()
 
@@ -325,6 +380,23 @@ class ExportDatasetDialog(BaseDialog):
             return
         with open(filename, "w", encoding="utf-8") as f:
             f.write(format_tps(self._tps_rows(object_list), self.ds_ops.dimension))
+
+    def _export_x1y1(self, date_str, object_list):
+        """Export dataset to X1Y1 format (written as merged landmarks, like a
+        Procrustes TPS export: the format has no place for curves).
+
+        Args:
+            date_str: Timestamp string for filename
+            object_list: List of objects to export
+        """
+        filename_candidate = f"{self.ds_ops.dataset_name}_{date_str}.x1y1"
+        filepath = os.path.join(mu.USER_PROFILE_DIRECTORY, filename_candidate)
+        filename, _ = QFileDialog.getSaveFileName(self, "Save File As", filepath, "X1Y1 format (*.x1y1)")
+        if not filename:
+            return
+        rows = [(obj.object_name, obj.landmark_list) for obj in object_list]
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write(format_x1y1(rows, self.ds_ops.dimension))
 
     def _tps_rows(self, object_list):
         """Assemble (name, landmarks, curves) rows for a TPS export.
@@ -380,7 +452,7 @@ class ExportDatasetDialog(BaseDialog):
             name_values += mo.object_name + NEWLINE
             rawpoint_values += "'#" + mo.object_name + NEWLINE
             for lm in mo.landmark_list:
-                rawpoint_values += "\t".join([str(c) for c in lm])
+                rawpoint_values += "\t".join([format_coordinate(c) for c in lm])
                 rawpoint_values += NEWLINE
 
         result_str += name_values + label_values + rawpoint_values

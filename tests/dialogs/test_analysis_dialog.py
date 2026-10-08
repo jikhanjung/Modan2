@@ -53,7 +53,9 @@ def sample_dataset_with_variables(mock_database):
         landmark_count=10,
         object_name="Test Object",
         object_desc="Test Description",
-        variablename_list=["ID", "Species", "Sex", "Age"],
+        # propertyname_str is the stored field; a variablename_list= keyword is
+        # not a model field and was silently dropped, leaving no variables.
+        propertyname_str="ID,Species,Sex,Age",
     )
 
     # Add several objects with landmark data and variable values
@@ -68,12 +70,14 @@ def sample_dataset_with_variables(mock_database):
         obj.landmark_str = landmark_str
 
         # Add variable values
-        obj.propertyvalue_list = [
-            f"ID_{i + 1}",
-            "Species_A" if i % 2 == 0 else "Species_B",
-            "Male" if i % 3 == 0 else "Female",
-            str(20 + i),
-        ]
+        obj.property_str = ",".join(
+            [
+                f"ID_{i + 1}",
+                "Species_A" if i % 2 == 0 else "Species_B",
+                "Male" if i % 3 == 0 else "Female",
+                str(20 + i),
+            ]
+        )
         obj.save()
 
     return dataset
@@ -171,6 +175,7 @@ class TestNewAnalysisDialogInitialization:
         """Test that grouping variables are populated from dataset."""
         # Get expected grouping variables (should exclude ID which is all unique)
         expected_count = len(sample_dataset_with_variables.get_grouping_variable_index_list())
+        assert expected_count > 0  # the fixture must really carry variables
 
         assert dialog.comboCvaGroupBy.count() == expected_count
         assert dialog.comboManovaGroupBy.count() == expected_count

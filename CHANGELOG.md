@@ -26,6 +26,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   log, and the analysis then failed with "float() argument must be … not
   'NoneType'". It is now refused before it starts, with a message naming the
   object.
+- **A dataset without variables can be analyzed.** It was refused outright,
+  even though the warning said a PCA-only analysis would be available. It now
+  runs PCA and skips CVA and MANOVA; the analysis dialog shows *None (no
+  variables)* for both grouping variables.
+- **Data Exploration opens from every analysis tab.** From the MANOVA tab it
+  failed with an error; it now shows the PCA scores, grouped by the MANOVA
+  variable. From the CVA tab of an analysis without CV scores it failed too; it
+  now says so.
+- **X1Y1 export writes a file.** Choosing X1Y1 used to close the dialog and
+  write nothing.
+- **Export writes only the objects in the Export List.** The list was ignored
+  and every object was written. (A JSON+ZIP package is the whole dataset, so
+  the lists are disabled for it.)
+- **Missing landmarks export as `-999`.** They were written as the text `None`,
+  which made a TPS export with gaps impossible to import again — Modan2's own
+  import included. The import offers to turn `-999` back into a gap.
+- **Analysis Details follows the analysis' superimposition.** It recomputed
+  with Procrustes even for a Bookstein analysis.
+- The withdrawn Resistant Fit option no longer appears, greyed out, in the
+  Export and Analysis Details dialogs.
 
 
 ## [0.2.0] - 2026-10-08

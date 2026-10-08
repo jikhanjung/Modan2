@@ -1621,16 +1621,10 @@ class ModanController(QObject):
             )
             return False
 
-        # Check for grouping variables (required for CVA/MANOVA)
-        grouping_vars = dataset.get_grouping_variable_index_list()
-        has_grouping_vars = len(grouping_vars) > 0 and dataset.propertyname_str
-
-        if not has_grouping_vars:
-            show_warning(
-                None,
-                f"Dataset '{dataset.dataset_name}' has no grouping variables.\n\nCVA and MANOVA analyses require grouping variables.\nOnly PCA analysis will be available.\n\nTo add grouping variables, import data with grouping information\nor use the object property editor.",
-            )
-            return False
+        # A dataset without variables still runs: PCA needs no groups, and
+        # run_analysis skips CVA and MANOVA when no grouping variable is given
+        # (the analysis dialog offers none then). This used to refuse the run
+        # outright while its own message promised a PCA-only analysis.
 
         mismatch = MdModel.find_landmark_count_mismatch(objects_with_landmarks)
         if mismatch is not None:

@@ -63,11 +63,11 @@ If a landmark cannot be placed on a specimen, mark it missing rather than skippi
 it, so every object keeps the same landmark count — see
 :ref:`analysis-missing-landmarks`.
 
-5. Add variables
-----------------
+5. Add variables (optional)
+---------------------------
 
-Variables are what CVA and MANOVA group by. An analysis currently needs at least
-one, even if you only want PCA.
+Variables are what CVA and MANOVA group by. Without any, an analysis computes
+PCA only.
 
 1. Open the dataset dialog → **Variables** tab → **"Add Variable"**, and name it
    (e.g. ``Species``)
@@ -105,7 +105,7 @@ Typical workflow
         ↓
    3. Digitize landmarks / trace curves
         ↓
-   4. Add variables (for grouping)
+   4. Add variables (optional, for grouping)
         ↓
    5. Analyze  (superimposition → PCA + CVA + MANOVA)
         ↓
@@ -137,8 +137,8 @@ Quick fixes
    is selected — not **Curve** or **Calibration**.
 
 **Analysis fails**
-   The dataset needs at least 5 digitized objects and at least one variable, and
-   every object needs the same number of landmarks; mark gaps as missing rather
+   The dataset needs at least 5 digitized objects, and every object needs the
+   same number of landmarks; mark gaps as missing rather
    than leaving objects short. See :doc:`troubleshooting`.
 
 Next steps

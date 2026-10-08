@@ -173,16 +173,14 @@ msgstr ""
 ":ref:`analysis-missing-landmarks` 참조."
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:63
-msgid "5. Add variables"
-msgstr "5. 변수 추가"
+msgid "5. Add variables (optional)"
+msgstr "5. 변수 추가 (선택)"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:65
 msgid ""
-"Variables are what CVA and MANOVA group by. An analysis currently needs "
-"at least one, even if you only want PCA."
-msgstr ""
-"변수는 CVA와 MANOVA가 그룹을 나누는 기준입니다. 현재는 PCA만 원하더라도 분석을 실행하려면 변수가 하나 이상 있어야 "
-"합니다."
+"Variables are what CVA and MANOVA group by. Without any, an analysis "
+"computes PCA only."
+msgstr "변수는 CVA와 MANOVA가 그룹을 나누는 기준입니다. 변수가 없으면 분석은 PCA만 계산합니다."
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:67
 msgid ""
@@ -341,12 +339,12 @@ msgstr "**분석이 실패함**"
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:135
 msgid ""
-"The dataset needs at least 5 digitized objects and at least one variable, "
-"and every object needs the same number of landmarks; mark gaps as missing "
-"rather than leaving objects short. See :doc:`troubleshooting`."
+"The dataset needs at least 5 digitized objects, and every object needs "
+"the same number of landmarks; mark gaps as missing rather than leaving "
+"objects short. See :doc:`troubleshooting`."
 msgstr ""
-"데이터셋에 디지타이징한 객체가 5개 이상, 변수가 하나 이상 있어야 하고, 모든 객체의 랜드마크 개수가 같아야 합니다. 개수를 "
-"모자란 채로 두지 말고 빈 자리를 결측으로 표시하세요. :doc:`troubleshooting` 을 참조하세요."
+"데이터셋에 디지타이징한 객체가 5개 이상 있어야 하고, 모든 객체의 랜드마크 개수가 같아야 합니다. 개수를 모자란 채로 두지 말고 "
+"빈 자리를 결측으로 표시하세요. :doc:`troubleshooting` 을 참조하세요."
 
 #: ../../../../../../../mnt/d/projects/Modan2/docs/manual/quick_start.rst:139
 msgid "Next steps"

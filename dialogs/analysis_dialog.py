@@ -102,6 +102,12 @@ class NewAnalysisDialog(BaseDialog):
             variablename = variablename_list[idx]
             self.comboCvaGroupBy.addItem(variablename, idx)
             self.comboManovaGroupBy.addItem(variablename, idx)
+        if not variablename_list:
+            # No variables to group by: the run is PCA only. The item's data is
+            # None, which run_analysis takes as "skip CVA / MANOVA".
+            for combo in (self.comboCvaGroupBy, self.comboManovaGroupBy):
+                combo.addItem(self.tr("None (no variables)"), None)
+                combo.setEnabled(False)
 
         self.ignore_change = False
 
@@ -265,8 +271,10 @@ class NewAnalysisDialog(BaseDialog):
         """
         self.edtAnalysisName.setEnabled(enabled)
         self.comboSuperimposition.setEnabled(enabled)
-        self.comboCvaGroupBy.setEnabled(enabled)
-        self.comboManovaGroupBy.setEnabled(enabled)
+        # Without variables the group-by combos stay disabled (one "None" item).
+        has_variables = bool(self.dataset.get_variablename_list())
+        self.comboCvaGroupBy.setEnabled(enabled and has_variables)
+        self.comboManovaGroupBy.setEnabled(enabled and has_variables)
         self.btnOK.setEnabled(enabled)
 
     def on_analysis_progress(self, progress):

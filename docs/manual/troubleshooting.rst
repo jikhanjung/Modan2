@@ -351,8 +351,8 @@ PCA/CVA/MANOVA Fails
 
 3. **No variables:**
 
-   * The analysis will not run at all without at least one variable (every run
-     includes CVA and MANOVA)
+   * Without variables the analysis computes PCA only; CVA and MANOVA need a
+     grouping variable
    * Solution: add one in the dataset dialog's **Variables** tab (or **Add
      variable** in the main window) and fill in its values
 
@@ -790,8 +790,7 @@ Common Error Messages
 
 **Cause:** Insufficient sample size
 
-**Solution:** At least 5 objects with landmarks (and at least one variable) are
-required
+**Solution:** At least 5 objects with landmarks are required
 
 "Object '…' has N landmarks but this dataset expects M"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

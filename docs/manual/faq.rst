@@ -447,9 +447,9 @@ How many objects do I need for analysis?
 
 **Minimum requirements:**
 
-* **Any analysis:** at least 5 objects with landmarks, and at least one
-  variable (a single run always includes CVA and MANOVA)
-* **CVA / MANOVA:** at least 2 groups in the grouping variable
+* **Any analysis:** at least 5 objects with landmarks
+* **CVA / MANOVA:** a grouping variable with at least 2 groups (without
+  variables, only PCA is computed)
 
 **Recommended sample sizes:**
 

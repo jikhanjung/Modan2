@@ -88,3 +88,14 @@ def test_chart_settings_column_exists_after_migrating(tmp_path):
         assert "chart_settings_json" in columns
     finally:
         db.close()
+
+
+def test_cva_accuracy_column_exists_after_migrating(tmp_path):
+    db = SqliteDatabase(str(tmp_path / "cols.db"), pragmas={"foreign_keys": 1})
+    db.connect()
+    try:
+        Router(db, migrate_dir=str(MIGRATIONS_DIR)).run()
+        columns = [row[1] for row in db.execute_sql("PRAGMA table_info(mdanalysis)")]
+        assert "cva_accuracy_json" in columns
+    finally:
+        db.close()

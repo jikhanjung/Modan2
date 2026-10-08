@@ -8,61 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
-## [Unreleased]
-
-### Added
-- **The CVA tab shows the classification accuracy**, under the CV score plot:
-  the cross-validated figure and how it was estimated, the chance level
-  (always guessing the largest group), and the resubstitution figure 0.1.x
-  reported. Every CVA run computed these, but nothing stored or showed them —
-  although the 0.2.0 notes said the resubstitution figure is still shown.
-  Analyses saved before this have no accuracy stored; run them again to see it.
-
-### Fixed
-- **Procrustes alignment could rotate a specimen to the wrong orientation.**
-  When a specimen fits the mean shape best as a mirror image — a left-right
-  flipped photograph, or landmarks that lie almost on one line or plane — the
-  rotation step must settle for the best rotation instead. It chose a rotation,
-  but not the best one: the mirror-image fit with one coordinate axis flipped,
-  which left that specimen fitted worse than it could be. It now chooses the
-  best rotation. Datasets that never meet this case are unaffected; none of the
-  datasets behind the Modan2 paper do.
-- **An analysis no longer stops with an unreadable error when an object records
-  too few landmarks.** Missing landmarks are estimated by fitting the mean shape
-  onto the landmarks an object does record, which takes at least 2 of them in 2D
-  data and 3 in 3D. An object with fewer was passed over with only a note in the
-  log, and the analysis then failed with "float() argument must be … not
-  'NoneType'". It is now refused before it starts, with a message naming the
-  object.
-- **A dataset without variables can be analyzed.** It was refused outright,
-  even though the warning said a PCA-only analysis would be available. It now
-  runs PCA and skips CVA and MANOVA; the analysis dialog shows *None (no
-  variables)* for both grouping variables.
-- **Data Exploration opens from every analysis tab.** From the MANOVA tab it
-  failed with an error; it now shows the PCA scores, grouped by the MANOVA
-  variable. From the CVA tab of an analysis without CV scores it failed too; it
-  now says so.
-- **X1Y1 export writes a file.** Choosing X1Y1 used to close the dialog and
-  write nothing.
-- **Export writes only the objects in the Export List.** The list was ignored
-  and every object was written. (A JSON+ZIP package is the whole dataset, so
-  the lists are disabled for it.)
-- **Missing landmarks export as `-999`.** They were written as the text `None`,
-  which made a TPS export with gaps impossible to import again — Modan2's own
-  import included. The import offers to turn `-999` back into a gap.
-- **Analysis Details follows the analysis' superimposition.** It recomputed
-  with Procrustes even for a Bookstein analysis.
-- The withdrawn Resistant Fit option no longer appears, greyed out, in the
-  Export and Analysis Details dialogs.
-
-
 ## [0.2.0] - 2026-10-08
 
 The first stable release of the 0.2 series, after seven pre-releases. Over
-beta.5 it adds an update check, fixes two bugs found in use, and finishes the
-Korean interface. Most of what is new,
-though, arrived during the betas — see the summary below if you are coming from
-0.1.x.
+beta.5 it adds an update check and shows the CVA's classification accuracy,
+fixes bugs found in use — in alignment, analysis and export — and finishes the
+Korean interface. Most of what is new, though, arrived during the betas — see
+the summary below if you are coming from 0.1.x.
+
+This build replaces the 0.2.0 first published on 2026-10-08 (build 908), with
+the fixes listed below. It keeps the version number, so Modan2's update check
+will not offer it to anyone who installed build 908: if you did, download it
+again.
 
 ### Coming from 0.1.x
 
@@ -77,7 +34,8 @@ short:
 - **CVA reports a classification accuracy you can believe — and it will be
   lower than 0.1.x showed.** It now reduces the data to as many dimensions as
   the specimens can support and measures accuracy on specimens the model has
-  not seen; the old figure is still shown, as *resubstitution accuracy*. MANOVA
+  not seen. The CVA tab shows that figure beside the chance level and the old
+  one, now called *resubstitution accuracy*. MANOVA
   applies the same limit. Re-running an analysis saved by 0.1.x will not
   reproduce its CVA scores.
 - **Choose where your data lives, move it there, and back it up.** Preferences
@@ -105,6 +63,12 @@ short:
   the installer for your system and its release notes. Beta users are offered
   later builds of the same version and newer stable releases; stable users are
   offered stable releases only. GitHub is contacted only when the box is opened.
+- **The CVA tab shows the classification accuracy**, under the CV score plot:
+  the cross-validated figure and how it was estimated, the chance level
+  (always guessing the largest group), and the resubstitution figure 0.1.x
+  reported. Every CVA run computed these, but nothing stored or showed them.
+  Analyses saved before this build have no accuracy stored; run them again to
+  see it.
 
 ### Fixed
 - **Bookstein analyses ran as Procrustes in the Korean interface.** The analysis
@@ -118,6 +82,37 @@ short:
   and most of the curve-tracing controls — appeared in English in an otherwise
   Korean window. All 81 missing phrases are now translated, and the Korean
   manual names those controls the way the window now shows them.
+- **Procrustes alignment could rotate a specimen to the wrong orientation.**
+  When a specimen fits the mean shape best as a mirror image — a left-right
+  flipped photograph, or landmarks that lie almost on one line or plane — the
+  rotation step must settle for the best rotation instead. It chose a rotation,
+  but not the best one: the mirror-image fit with one coordinate axis flipped,
+  which left that specimen fitted worse than it could be. It now chooses the
+  best rotation. Datasets that never meet this case are unaffected; none of the
+  datasets behind the Modan2 paper do.
+- **An analysis no longer stops with an unreadable error when an object records
+  too few landmarks.** Missing landmarks are estimated by fitting the mean shape
+  onto the landmarks an object does record, which takes at least 2 of them in 2D
+  data and 3 in 3D. An object with fewer was passed over with only a note in the
+  log, and the analysis then failed with "float() argument must be … not
+  'NoneType'". It is now refused before it starts, with a message naming the
+  object.
+- **A dataset without variables can be analyzed.** It was refused outright,
+  even though the warning said a PCA-only analysis would be available. It now
+  runs PCA and skips CVA and MANOVA; the analysis dialog shows *None (no
+  variables)* for both grouping variables.
+- **X1Y1 export writes a file.** Choosing X1Y1 used to close the dialog and
+  write nothing.
+- **Export writes only the objects in the Export List.** The list was ignored
+  and every object was written. (A JSON+ZIP package is the whole dataset, so
+  the lists are disabled for it.)
+- **Missing landmarks export as `-999`.** They were written as the text `None`,
+  which made a TPS export with gaps impossible to import again — Modan2's own
+  import included. The import offers to turn `-999` back into a gap.
+- **Analysis Details follows the analysis' superimposition.** It recomputed
+  with Procrustes even for a Bookstein analysis.
+- The withdrawn Resistant Fit option no longer appears, greyed out, in the
+  Export and Analysis Details dialogs.
 
 
 ## [0.2.0-beta.5] - 2026-08-13

@@ -1,0 +1,244 @@
+{
+  "environment": {
+    "modan2_version": "0.2.0",
+    "git_describe": "v0.2.0",
+    "git_dirty": false,
+    "repo": "/tmp/claude-1000/-mnt-d-vaults-paper-vault/481e94a7-10b8-4f24-bdbb-a66bd26c40ca/scratchpad/modan2-v0.2.0",
+    "cpu": "Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz",
+    "memory_gb": 16,
+    "platform": "Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "timestamp": "2026-10-08 14:26:54"
+  },
+  "r_versions": {
+    "R": "4.5.3",
+    "geomorph": "4.1.1",
+    "RRPP": "2.2.0",
+    "MASS": "7.3.66",
+    "jsonlite": "2.0.0"
+  },
+  "dataset": "Cranial 206x72",
+  "excluded": {
+    "variable": "FeedCat1",
+    "value": "Unknow",
+    "n": 16
+  },
+  "n_objects": 206,
+  "gpa": {
+    "r_iterations": 5,
+    "r_tolerance": 1e-10,
+    "modan2_rotations": 618,
+    "modan2_reflection_corrections": 0,
+    "max_centroid_size_difference": 2.9976021664879227e-15,
+    "max_coordinate_difference": 4.8944529011316074e-08,
+    "rms_coordinate_difference": 5.015644965255881e-09,
+    "max_pairwise_distance_difference": 2.1330036570343935e-08,
+    "units": "centroid size (each aligned configuration has size 1)"
+  },
+  "pca": {
+    "components_to_95_percent": {
+      "modan2": 14,
+      "r": 14
+    },
+    "pc1_percent": {
+      "modan2": 52.50852914357924,
+      "r": 52.5085300472092
+    },
+    "pc2_percent": {
+      "modan2": 12.075667817521754,
+      "r": 12.0756680435488
+    },
+    "max_variance_percent_difference_first_20": 1.021805623446781e-06,
+    "max_relative_eigenvalue_difference": 1.160561795554571e-07,
+    "max_score_difference": 4.742048623912476e-08,
+    "pc1_score_sd": 0.1145280874298049
+  },
+  "groupings": {
+    "FeedCat1": {
+      "n_groups": 10,
+      "components": {
+        "modan2_cva": 14,
+        "modan2_manova": 14,
+        "r": 14
+      },
+      "canonical_percent": {
+        "modan2": [
+          31.101853856638485,
+          22.160615335070595
+        ],
+        "r": [
+          31.1018548509309,
+          22.160615987912298
+        ]
+      },
+      "max_canonical_percent_difference": 1.4370332340751801e-06,
+      "canonical_score_correlation": [
+        0.9999999999999918,
+        0.9999999999999564
+      ],
+      "resubstitution_disagreements": 0,
+      "loocv_accuracy": {
+        "modan2": 57.28155339805825,
+        "r": 57.2815533980583
+      },
+      "loocv_disagreements": 0,
+      "loocv_disagreeing_specimens": [],
+      "true_groups_of_disagreements": [],
+      "manova": {
+        "Wilks' lambda": {
+          "modan2": {
+            "value": 0.06287706202371576,
+            "f_statistic": 4.891985054391327,
+            "df_num": 126,
+            "df_den": 1412
+          },
+          "r": {
+            "value": 0.0628770667171295,
+            "f_statistic": 4.89198489706101,
+            "df_num": 126,
+            "df_den": 1412.30956921616
+          },
+          "relative_value_difference": 7.464428586345662e-08
+        },
+        "Pillai's trace": {
+          "modan2": {
+            "value": 2.195641952271532,
+            "f_statistic": 4.402300596410331,
+            "df_num": 126,
+            "df_den": 1719
+          },
+          "r": {
+            "value": 2.19564189923021,
+            "f_statistic": 4.40230045574473,
+            "df_num": 126,
+            "df_den": 1719
+          },
+          "relative_value_difference": 2.4157546851810707e-08
+        },
+        "Hotelling-Lawley trace": {
+          "modan2": {
+            "value": 3.6153406435615154,
+            "f_statistic": 5.204580903579834,
+            "df_num": 126,
+            "df_den": 936
+          },
+          "r": {
+            "value": 3.61534053548662,
+            "f_statistic": 5.19984163437273,
+            "df_num": 126,
+            "df_den": 1631
+          },
+          "relative_value_difference": 2.9893420627757905e-08
+        },
+        "Roy's greatest root": {
+          "modan2": {
+            "value": 1.1244379633801578,
+            "f_statistic": 15.340546500400723,
+            "df_num": 14,
+            "df_den": 191
+          },
+          "r": {
+            "value": 1.12443796571392,
+            "f_statistic": 15.3405465322399,
+            "df_num": 14,
+            "df_den": 191
+          },
+          "relative_value_difference": 2.0754922225307837e-09
+        }
+      }
+    },
+    "PreyRatio": {
+      "n_groups": 6,
+      "components": {
+        "modan2_cva": 14,
+        "modan2_manova": 14,
+        "r": 14
+      },
+      "canonical_percent": {
+        "modan2": [
+          44.16058205175194,
+          37.11166319287967
+        ],
+        "r": [
+          44.160580400007795,
+          37.1116642291065
+        ]
+      },
+      "max_canonical_percent_difference": 1.6517441414620748e-06,
+      "canonical_score_correlation": [
+        0.9999999999999807,
+        0.9999999999999853
+      ],
+      "resubstitution_disagreements": 0,
+      "loocv_accuracy": {
+        "modan2": 56.310679611650485,
+        "r": 56.3106796116505
+      },
+      "loocv_disagreements": 0,
+      "loocv_disagreeing_specimens": [],
+      "true_groups_of_disagreements": [],
+      "manova": {
+        "Wilks' lambda": {
+          "modan2": {
+            "value": 0.1654712869361013,
+            "f_statistic": 5.866579768091521,
+            "df_num": 70,
+            "df_den": 894
+          },
+          "r": {
+            "value": 0.165471287548857,
+            "f_statistic": 5.86657975359048,
+            "df_num": 70,
+            "df_den": 894.385695710571
+          },
+          "relative_value_difference": 3.7030938315751882e-09
+        },
+        "Pillai's trace": {
+          "modan2": {
+            "value": 1.386443620143167,
+            "f_statistic": 5.234469939829283,
+            "df_num": 70,
+            "df_den": 955
+          },
+          "r": {
+            "value": 1.38644362179875,
+            "f_statistic": 5.23446994847812,
+            "df_num": 70,
+            "df_den": 955
+          },
+          "relative_value_difference": 1.1941221345068698e-09
+        },
+        "Hotelling-Lawley trace": {
+          "modan2": {
+            "value": 2.4399583923275827,
+            "f_statistic": 6.468250583558494,
+            "df_num": 70,
+            "df_den": 653
+          },
+          "r": {
+            "value": 2.43995837506659,
+            "f_statistic": 6.46240403910493,
+            "df_num": 70,
+            "df_den": 927
+          },
+          "relative_value_difference": 7.074298036258142e-09
+        },
+        "Roy's greatest root": {
+          "modan2": {
+            "value": 1.0774998278724293,
+            "f_statistic": 14.700176223116713,
+            "df_num": 14,
+            "df_den": 191
+          },
+          "r": {
+            "value": 1.077499779948,
+            "f_statistic": 14.7001755692906,
+            "df_num": 14,
+            "df_den": 191
+          },
+          "relative_value_difference": 4.447743773283719e-08
+        }
+      }
+    }
+  }
+}

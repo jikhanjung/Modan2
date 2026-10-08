@@ -1,0 +1,38 @@
+# R environment behind paper_r_comparison_cranial206.json, the comparison of the
+# Modan2 paper's analyses with an independent R implementation
+# (scripts/paper_r_comparison.R, driven by scripts/paper_r_comparison.py).
+#
+# geomorph and RRPP are not on conda-forge; they are installed from CRAN into
+# the same environment afterwards, compiled with the toolchain listed here:
+#
+#   micromamba create -f benchmarks/r-environment.yml
+#   micromamba run -n modan2-r Rscript -e \
+#     'remotes::install_version("RRPP", "2.2.0", repos = "https://cloud.r-project.org"); remotes::install_version("geomorph", "4.1.1", repos = "https://cloud.r-project.org")'
+#
+# The run used R 4.5.3, geomorph 4.1.1, RRPP 2.2.0, MASS 7.3-66, jsonlite 2.0.0,
+# and OpenBLAS 0.3.34. Of the packages below, the analysis itself uses only
+# r-base (prcomp, manova), r-mass (lda), and r-jsonlite; the others are
+# geomorph's and RRPP's dependencies, taken as binaries because several fail to
+# compile from source here.
+name: modan2-r
+channels:
+  - conda-forge
+dependencies:
+  - r-base=4.5.3
+  - r-mass=7.3_66
+  - r-jsonlite=2.0.0
+  - r-remotes=2.5.0
+  - r-rgl=1.3.36
+  - r-ape=5.8_1
+  - r-jpeg=0.1_11
+  - r-ggplot2=4.0.3
+  - r-matrix=1.7_5
+  - r-lme4=2.0_6
+  - r-nloptr=2.2.1
+  - r-data.table=1.18.6.1
+  - r-plotly=4.12.1
+  - zlib=1.3.2
+  - c-compiler=2.0.0
+  - cxx-compiler=2.0.0
+  - fortran-compiler=2.0.0
+  - make=4.4.1

@@ -1,7 +1,9 @@
 Environment and commands behind paper_runtime_cranial206.json,
 paper_accuracy_cranial222.json, paper_accuracy_dense14.json (the runtime and
-accuracy tables of the Modan2 paper) and paper_worked_examples_cranial206.json
-(the figures of its worked example on the cranial dataset).
+accuracy tables of the Modan2 paper), paper_worked_examples_cranial206.json
+(the figures of its worked example on the cranial dataset), and
+paper_r_comparison_cranial206.json (the same analyses compared with an
+independent R implementation).
 
 Code: Modan2 v0.2.0 (tag v0.2.0, commit 5173275, clean), run from a
 git worktree at the tag through --repo. The scripts themselves are run from
@@ -38,6 +40,13 @@ Commands (run one after another, 2026-10-08):
   python scripts/benchmark_paper_tables.py --repo <worktree> --accuracy --dataset dense14 --markdown \
       --out benchmarks/paper_accuracy_dense14.json
   python scripts/paper_worked_examples.py --repo <worktree>
+  python scripts/paper_r_comparison.py --repo <worktree> \
+      --rscript ~/micromamba/envs/modan2-r/bin/Rscript
+
+The R side runs in the micromamba environment of r-environment.yml (R 4.5.3,
+geomorph 4.1.1, RRPP 2.2.0, MASS 7.3-66, OpenBLAS 0.3.34); that file says how
+to rebuild it. Repeated runs of the comparison differ around 1e-14, because
+the ARPACK solver of Modan2's CVA starts from a random vector.
 
 Removal patterns come from the script's default seed, 20260813 (pattern p at
 missing fraction f uses seed 20260813 + 101 p + int(1000 f) in accuracy

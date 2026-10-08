@@ -364,7 +364,7 @@ class TestMdObject:
         assert mm.MdDataset.get_by_id(dataset.id) is not None
 
 
-class TestMdAnalysis:
+class TestMdAnalysisBasics:
     """Test MdAnalysis model."""
 
     def test_create_analysis(self, test_database):
@@ -1691,7 +1691,7 @@ class TestMdDatasetOpsAdvanced:
         assert avg_shape.landmark_list[2] == [20.0, 20.0]
 
 
-class TestMdObjectCopyOperations:
+class TestMdObjectChangeDataset:
     """Tests for MdObject copy and change operations."""
 
     def test_change_dataset(self, test_database):
@@ -1744,7 +1744,7 @@ class TestMdObjectCopyOperations:
                     os.remove(p)
 
 
-class TestMdDatasetAddOperations:
+class TestMdDatasetAddBasics:
     """Tests for MdDataset add operations."""
 
     def test_add_object_basic(self, test_database):
@@ -1861,7 +1861,7 @@ class TestMdDatasetRefresh:
         assert dataset2.dataset_name == "Modified"
 
 
-class TestMdObjectRefresh:
+class TestMdObjectRefreshOperation:
     """Tests for MdObject refresh operation."""
 
     def test_object_refresh(self, test_database):
@@ -2040,7 +2040,7 @@ class TestMdObjectCopyObject:
         assert new_obj.id != obj.id  # Different ID
 
 
-class TestMdDatasetOpsRotationMatrix:
+class TestMdDatasetOpsReferenceAndRotation:
     """Tests for MdDatasetOps rotation matrix operations."""
 
     def test_rotation_matrix_2d(self, test_database):
@@ -2183,7 +2183,7 @@ class TestMdObjectCentroidEdgeCases:
         assert size3 > size1  # Recalculated and larger
 
 
-class TestMdObjectOpsEdgeCases:
+class TestMdObjectOpsMissingLandmarks:
     """Tests for MdObjectOps edge cases."""
 
     def test_move_with_missing_landmarks(self, test_database):
@@ -2889,6 +2889,58 @@ class TestMdDatasetOpsRotationMatrix:
         # Should be -90 degree rotation matrix (clockwise)
         expected = np.array([[0.0, 1.0], [-1.0, 0.0]])
         assert np.allclose(rot_mx, expected, atol=0.01)
+
+    @staticmethod
+    def _mirrored_pair(dimension):
+        """A reference shape and a noisy mirror image of it, both centred, for
+        which the best orthogonal fit is a reflection."""
+        import numpy as np
+
+        rng = np.random.default_rng(291)
+        ref = rng.normal(size=(8, dimension))
+        mirror = np.ones(dimension)
+        mirror[-1] = -1
+        target = ref * mirror + rng.normal(scale=0.2, size=ref.shape)
+        ref -= ref.mean(axis=0)
+        target -= target.mean(axis=0)
+        u, _, vt = np.linalg.svd(ref.T @ target)
+        assert np.linalg.det(u) * np.linalg.det(vt) < 0  # the case under test
+        return ref, target
+
+    def test_rotation_matrix_mirrored_3d_is_best_rotation(self, test_database):
+        """When a reflection would fit best, the result is the best *rotation*.
+
+        Negating the last row of the SVD's left factor, as the code did until
+        devlog 291, also gave a rotation, but the reflected fit with the last
+        coordinate axis flipped; its residual was about 1.5 times the optimum.
+        SciPy's Kabsch implementation is the independent reference.
+        """
+        import numpy as np
+        from scipy.spatial.transform import Rotation
+
+        ref, target = self._mirrored_pair(3)
+        ds_ops = mm.MdDatasetOps(mm.MdDataset.create(dataset_name="Test", dimension=3))
+        rot_mx = ds_ops.rotation_matrix(ref, target)
+
+        assert np.isclose(np.linalg.det(rot_mx), 1.0)
+        best, _ = Rotation.align_vectors(ref, target)
+        assert np.allclose(rot_mx, best.as_matrix(), atol=1e-10)
+
+    def test_rotation_matrix_mirrored_2d_is_best_rotation(self, test_database):
+        """The 2D case of the test above, against the closed-form best angle."""
+        import numpy as np
+
+        ref, target = self._mirrored_pair(2)
+        ds_ops = mm.MdDatasetOps(mm.MdDataset.create(dataset_name="Test", dimension=2))
+        rot_mx = ds_ops.rotation_matrix(ref, target)
+
+        theta = np.arctan2(
+            (target[:, 0] * ref[:, 1] - target[:, 1] * ref[:, 0]).sum(),
+            (target[:, 0] * ref[:, 0] + target[:, 1] * ref[:, 1]).sum(),
+        )
+        best = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
+        assert np.isclose(np.linalg.det(rot_mx), 1.0)
+        assert np.allclose(rot_mx, best, atol=1e-10)
 
 
 class TestMdDatasetOpsEstimateMissing:

@@ -1960,9 +1960,15 @@ class MdDatasetOps:
                 "Cannot compute alignment rotation: landmark data is degenerate "
                 f"or contains missing/invalid values ({e})"
             ) from e
+        # When the best orthogonal fit v @ w is a reflection, the best proper
+        # rotation is v @ diag(1, ..., -1) @ w (Kabsch): it gives up the axis of
+        # the smallest singular value, the one along which the shapes agree
+        # least. Negating the last *row* of v instead, as this did until
+        # devlog 291, also yields a rotation, but it is the reflected fit with
+        # the coordinate system's last axis flipped -- not the best rotation.
         is_reflection = (np.linalg.det(v) * np.linalg.det(w)) < 0.0
         if is_reflection:
-            v[-1, :] = -v[-1, :]
+            v[:, -1] = -v[:, -1]
         rot_mx = np.dot(v, w)
         # print("rotation_matrix:",rot_mx)
         return rot_mx

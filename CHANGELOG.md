@@ -8,6 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+## [Unreleased]
+
+### Fixed
+- **Procrustes alignment could rotate a specimen to the wrong orientation.**
+  When a specimen fits the mean shape best as a mirror image — a left-right
+  flipped photograph, or landmarks that lie almost on one line or plane — the
+  rotation step must settle for the best rotation instead. It chose a rotation,
+  but not the best one: the mirror-image fit with one coordinate axis flipped,
+  which left that specimen fitted worse than it could be. It now chooses the
+  best rotation. Datasets that never meet this case are unaffected; none of the
+  datasets behind the Modan2 paper do.
+
+
 ## [0.2.0] - 2026-10-08
 
 The first stable release of the 0.2 series, after seven pre-releases. Over

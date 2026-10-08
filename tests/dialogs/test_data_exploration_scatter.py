@@ -113,57 +113,62 @@ def _snapshot(dialog):
 # docstring). A pure structural refactor of prepare_scatter_data must reproduce
 # these within _GOLDEN_ABS_TOL. Regenerate via the print in _snapshot's caller only
 # if the underlying PCA/library math legitimately changes.
+#
+# Regenerated in devlog 291, when the Procrustes rotation stopped mis-correcting
+# reflections: these near-collinear three-point shapes hit that case often, so the
+# alignment changed slightly -- the PC signs flipped and the scores moved by up to
+# 6e-5.
 GOLDEN = {
     "scatter_data": {
         "F": {
             "color": "#FF0000",
             "symbol": "s",
-            "x_val": [-0.09178866, -0.12508326, -0.00104061],
-            "y_val": [0.00487506, -0.0015675, 0.0396063],
-            "z_val": [-0.0003308, -0.00437171, 0.00460326],
+            "x_val": [0.09177809, 0.12507462, 0.00101979],
+            "y_val": [-0.00489254, 0.00154056, -0.03959911],
+            "z_val": [-0.00032839, -0.00436872, 0.00459506],
             "n_data": 3,
         },
         "M": {
             "color": "#0000FF",
             "symbol": "o",
-            "x_val": [0.01372182, 0.14431907, 0.05987165],
-            "y_val": [-0.01070517, 0.02803998, -0.06024867],
-            "z_val": [0.00432623, -0.00448432, 0.00025735],
+            "x_val": [-0.0137279, -0.14431839, -0.0598262],
+            "y_val": [0.01071854, -0.0280762, 0.06030875],
+            "z_val": [0.00433147, -0.00447733, 0.0002479],
             "n_data": 3,
         },
     },
     "average_shape": {
-        "F": {"color": "", "symbol": "", "x_val": -0.07263751, "y_val": 0.01430462, "z_val": -3.308e-05, "n_data": 0},
-        "M": {"color": "", "symbol": "", "x_val": 0.07263751, "y_val": -0.01430462, "z_val": 3.308e-05, "n_data": 0},
+        "F": {"color": "", "symbol": "", "x_val": 0.07262417, "y_val": -0.01431703, "z_val": -3.401e-05, "n_data": 0},
+        "M": {"color": "", "symbol": "", "x_val": -0.07262417, "y_val": 0.01431703, "z_val": 3.401e-05, "n_data": 0},
     },
     "regression_data": {
         "F": {
             "color": "#FF0000",
             "symbol": "s",
-            "x_val": [-0.09178866, -0.12508326, -0.00104061],
-            "y_val": [0.00487506, -0.0015675, 0.0396063],
-            "z_val": [-0.0003308, -0.00437171, 0.00460326],
+            "x_val": [0.09177809, 0.12507462, 0.00101979],
+            "y_val": [-0.00489254, 0.00154056, -0.03959911],
+            "z_val": [-0.00032839, -0.00436872, 0.00459506],
             "n_data": 3,
         },
         "M": {
             "color": "#0000FF",
             "symbol": "o",
-            "x_val": [0.01372182, 0.14431907, 0.05987165],
-            "y_val": [-0.01070517, 0.02803998, -0.06024867],
-            "z_val": [0.00432623, -0.00448432, 0.00025735],
+            "x_val": [-0.0137279, -0.14431839, -0.0598262],
+            "y_val": [0.01071854, -0.0280762, 0.06030875],
+            "z_val": [0.00433147, -0.00447733, 0.0002479],
             "n_data": 3,
         },
     },
     "data_range": {
-        "x_min": -0.12508326,
-        "x_max": 0.14431907,
-        "y_min": -0.06024867,
-        "y_max": 0.0396063,
-        "z_min": -0.00448432,
-        "z_max": 0.00460326,
+        "x_min": -0.14431839,
+        "x_max": 0.12507462,
+        "y_min": -0.03959911,
+        "y_max": 0.06030875,
+        "z_min": -0.00447733,
+        "z_max": 0.00459506,
         "x_sum": 0.0,
-        "y_sum": 0.0,
-        "z_sum": 0.0,
+        "y_sum": -0.0,
+        "z_sum": -0.0,
         "x_avg": 0.0,
         "y_avg": 0.0,
         "z_avg": 0.0,

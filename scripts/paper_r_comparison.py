@@ -170,6 +170,7 @@ def compare(m, r):
         "components_to_95_percent": {"modan2": m_k95, "r": k95},
         "pc1_percent": {"modan2": m_ratio[0] * 100, "r": r_ratio[0] * 100},
         "pc2_percent": {"modan2": m_ratio[1] * 100, "r": r_ratio[1] * 100},
+        "pc3_percent": {"modan2": m_ratio[2] * 100, "r": r_ratio[2] * 100},
         "max_variance_percent_difference_first_20": float(np.abs(m_ratio[:20] - r_ratio[:20]).max() * 100),
         "max_relative_eigenvalue_difference": float(np.abs(m_eig / r_eig - 1).max()),
         "max_score_difference": float(np.abs(m_scores - r_scores * signs).max()),
@@ -204,7 +205,7 @@ def compare(m, r):
                 "modan2_manova": mg["manova_components"],
                 "r": rg["components"],
             },
-            "canonical_percent": {"modan2": (m_prop[:2] * 100).tolist(), "r": (r_prop[:2] * 100).tolist()},
+            "canonical_percent": {"modan2": (m_prop[:3] * 100).tolist(), "r": (r_prop[:3] * 100).tolist()},
             "max_canonical_percent_difference": float(np.abs(m_prop - r_prop[: len(m_prop)]).max() * 100),
             "canonical_score_correlation": [
                 float(abs(np.corrcoef(m_cv[:, a], r_cv[:, a])[0, 1])) for a in range(r_cv.shape[1])

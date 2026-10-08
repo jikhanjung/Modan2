@@ -8,7 +8,7 @@
     "memory_gb": 16,
     "platform": "Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.39",
     "python": "3.12.3",
-    "timestamp": "2026-10-08 18:10:04"
+    "timestamp": "2026-10-08 19:03:37"
   },
   "r_versions": {
     "R": "4.5.3",
@@ -48,6 +48,10 @@
       "modan2": 12.07566781752175,
       "r": 12.0756680435488
     },
+    "pc3_percent": {
+      "modan2": 8.80442227629869,
+      "r": 8.80442125449307
+    },
     "max_variance_percent_difference_first_20": 1.0218056206712234e-06,
     "max_relative_eigenvalue_difference": 1.1605618022159092e-07,
     "max_score_difference": 4.742048591993564e-08,
@@ -63,18 +67,20 @@
       },
       "canonical_percent": {
         "modan2": [
-          51.260158746416415,
-          19.075869530484887
+          51.26015874641645,
+          19.07586953048486,
+          12.251985966221755
         ],
         "r": [
           51.2601586128961,
-          19.0758701114152
+          19.0758701114152,
+          12.2519859254376
         ]
       },
-      "max_canonical_percent_difference": 7.872196075564553e-07,
+      "max_canonical_percent_difference": 7.8721962490369e-07,
       "canonical_score_correlation": [
-        0.9999999999999956,
-        0.9999999999999943
+        0.9999999999999959,
+        0.999999999999994
       ],
       "resubstitution_disagreements": 0,
       "loocv_accuracy": {
@@ -164,7 +170,7 @@
       },
       "max_canonical_percent_difference": 0.0,
       "canonical_score_correlation": [
-        0.9999999999999954
+        0.9999999999999951
       ],
       "resubstitution_disagreements": 0,
       "loocv_accuracy": {

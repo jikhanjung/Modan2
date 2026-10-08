@@ -1,0 +1,37 @@
+Environment and commands behind paper_runtime_cranial222.json,
+paper_accuracy_cranial222.json and paper_accuracy_dense14.json
+(the runtime and accuracy tables of the Modan2 paper).
+
+Code: Modan2 v0.2.0 (tag v0.2.0, commit 5173275, clean), run from a
+git worktree at the tag through --repo; the benchmark script at the tag is
+identical to the one in this directory's parent checkout.
+
+Machine: Intel Core i7-6700 (3.40 GHz, 4 cores / 8 threads), 16 GB RAM,
+Windows host running Linux under WSL 2
+(kernel 5.15.167.4-microsoft-standard-WSL2, glibc 2.39).
+
+Python environment, installed from requirements-linux.lock at v0.2.0:
+  python 3.12.3
+  numpy 2.5.3
+  scipy 1.17.1
+  scikit-learn 1.9.0
+  statsmodels 0.14.6
+  pandas 2.3.3
+  PyQt5 5.15.11 Qt 5.15.14
+  peewee 4.2.6
+  platform Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.39
+  numpy BLAS: ['openblas configuration: OpenBLAS 0.3.34.106.0  USE64BITINT DYNAMIC_ARCH NO_AFFINITY']
+
+Commands (run one after another, 2026-10-08):
+  python scripts/benchmark_paper_tables.py --repo <worktree> --runs 9 --markdown \
+      --out benchmarks/paper_runtime_cranial222.json
+  python scripts/benchmark_paper_tables.py --repo <worktree> --accuracy --markdown \
+      --out benchmarks/paper_accuracy_cranial222.json
+  python scripts/benchmark_paper_tables.py --repo <worktree> --accuracy --dataset dense14 --markdown \
+      --out benchmarks/paper_accuracy_dense14.json
+
+Removal patterns come from the script's default seed, 20260813 (pattern p at
+missing fraction f uses seed 20260813 + 101 p + int(1000 f) in accuracy
+mode, and 20260813 + int(100 f) in the runtime table). The JSON files do not
+record the seed themselves. The accuracy results are identical, to the last
+digit, to the earlier runs on 0.2.0-beta.3, which used the same seed.

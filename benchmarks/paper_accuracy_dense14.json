@@ -1,14 +1,14 @@
 {
   "environment": {
-    "modan2_version": "0.2.0-beta.3",
-    "git_describe": "v0.2.0-beta.3-2-ge402a73",
-    "git_dirty": true,
-    "repo": "/mnt/d/projects/modan2",
+    "modan2_version": "0.2.0",
+    "git_describe": "v0.2.0",
+    "git_dirty": false,
+    "repo": "/tmp/claude-1000/-mnt-d-vaults-paper-vault/481e94a7-10b8-4f24-bdbb-a66bd26c40ca/scratchpad/modan2-v0.2.0",
     "cpu": "Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz",
     "memory_gb": 16,
     "platform": "Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.39",
     "python": "3.12.3",
-    "timestamp": "2026-08-13 10:04:49"
+    "timestamp": "2026-10-08 10:00:01"
   },
   "dataset": "Dense 14x381",
   "n_objects": 14,

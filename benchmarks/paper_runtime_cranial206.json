@@ -8,64 +8,65 @@
     "memory_gb": 16,
     "platform": "Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.39",
     "python": "3.12.3",
-    "timestamp": "2026-10-08 14:01:10"
+    "timestamp": "2026-10-08 16:07:38"
   },
   "dataset": "Cranial 206x72",
-  "file": "/mnt/d/projects/modan2/Morphometrics dataset/Thylacine2020_NeuroGM.txt",
+  "file": "/mnt/d/projects/modan2/benchmarks/data/rovinsky2021/neurocranium_222.txt",
   "excluded": {
-    "variable": "FeedCat1",
-    "value": "Unknow",
+    "variable": "DietFine",
+    "value": "NA",
     "n": 16
   },
   "n_objects": 206,
   "n_landmarks": 72,
   "dimension": 3,
-  "group_variable": "FeedCat1",
+  "group_variable": "DietFine",
   "runs": 9,
   "superimposition": {
-    "procrustes": 0.390472373997909,
-    "bookstein": 0.16774663299293024
+    "procrustes": 0.4106311630021082,
+    "bookstein": 0.1845828000077745
   },
   "groups": {
     "n": 10,
     "sizes": {
-      "HypCar": 102,
-      "CarIns": 27,
-      "CarFru": 20,
+      "Carniv": 90,
+      "CarIns": 23,
       "GenGen": 20,
-      "InsCar": 12,
-      "InsFru": 8,
+      "CarFru": 16,
+      "DurCar": 16,
+      "InsCar": 16,
+      "InsFru": 11,
       "Insect": 8,
       "Frugiv": 4,
-      "GraIns": 3,
       "InsHer": 2
     }
   },
   "downstream": {
-    "pca": 0.043753538993769325,
-    "cva": 1.5738505359986448,
-    "manova": 0.36149777300306596,
-    "full_workflow": 2.369574221993389
+    "pca": 0.04557104699779302,
+    "cva": 1.7306442469998728,
+    "manova": 0.025273228995501995,
+    "full_workflow": 2.212119685995276
   },
+  "manova_components": 14,
   "imputation": {
     "0%": {
-      "time": 0.390472373997909,
+      "time": 0.4106311630021082,
       "relative": 1.0,
       "n_removed": 0
     },
     "5%": {
-      "time": 1.6477944559956086,
-      "relative": 4.220002657612937,
+      "time": 1.8427611030056141,
+      "relative": 4.487630918056147,
       "n_removed": 742
     },
     "10%": {
-      "time": 1.7194761900027515,
-      "relative": 4.4035796243346,
+      "time": 1.9316720420029014,
+      "relative": 4.7041535471407565,
       "n_removed": 1483
     },
     "20%": {
-      "time": 1.8861044770019362,
-      "relative": 4.830314774104957,
+      "time": 1.9925028970028507,
+      "relative": 4.852293436366935,
       "n_removed": 2966
     }
   }

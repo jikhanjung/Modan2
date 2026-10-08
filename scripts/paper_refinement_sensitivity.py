@@ -32,7 +32,7 @@ import numpy as np
 
 CAPS = (5, 10, 20)
 FRACTIONS = (0.01, 0.05, 0.10, 0.20)
-DATASET_KEYS = ("cranial222", "dense14")
+DATASET_KEYS = ("cranial222", "dense16")
 
 
 def reconstruct(mm, dataset, reference, ref_cs, frac, pattern, seed):

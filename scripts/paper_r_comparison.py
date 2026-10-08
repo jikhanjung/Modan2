@@ -183,9 +183,10 @@ def compare(m, r):
         cva = mg["cva"]
         groups = np.asarray(mg["groups"])
         m_cv = np.asarray(cva["canonical_variables"], dtype=float)
-        r_cv = np.asarray(rg["canonical_scores"], dtype=float)
+        # With two groups there is one canonical axis, and R writes its values unboxed.
+        r_cv = np.asarray(rg["canonical_scores"], dtype=float).reshape(len(groups), -1)
         m_prop = np.asarray(cva["eigenvalues"], dtype=float)
-        r_prop = np.asarray(rg["canonical_proportions"], dtype=float)
+        r_prop = np.atleast_1d(np.asarray(rg["canonical_proportions"], dtype=float))
         m_loo = np.asarray(mg["loocv_predictions"])
         r_loo = np.asarray(rg["loocv_predictions"])
         manova = {}

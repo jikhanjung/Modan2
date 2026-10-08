@@ -9,10 +9,13 @@ It runs the same code paths as the application -- Procrustes superimposition,
 ``do_pca_analysis``, ``do_cva_analysis``, and MANOVA on the principal component
 scores truncated by ``effective_component_count`` as ``ModanController`` does.
 
-The 16 thylacine specimens are removed before superimposition. The dataset
-codes their diet and prey size as unknown, and an unknown category is not a
-group to be discriminated; left in, it acts as an eleventh "diet" that is in
-fact one family, and it dominates the first canonical axis.
+The data are those of Rovinsky et al. (2021), fetched from figshare by
+``scripts/rovinsky2021_data.py``; the groupings are the published dietary
+category (FeedCatgFine, ten categories) and prey category (PreyCatg, small or
+large prey). The 16 thylacine specimens are removed before superimposition.
+The dataset codes their diet and prey as NA, and an unknown category is not a
+group to be discriminated; left in, it would act as one more "diet" that is in
+fact one species.
 
 ``do_cva_analysis`` reports the cross-validated accuracy but not the
 out-of-fold predictions, so the script refits the same PCA + LDA pipeline under
@@ -33,10 +36,8 @@ from pathlib import Path
 import benchmark_paper_tables as bench
 import numpy as np
 
-DATASET_FILE = "Morphometrics dataset/Thylacine2020_NeuroGM.txt"
-DATASET_NAME = "Cranial 222x72"
-EXCLUDE_VARIABLE, EXCLUDE_VALUE = "FeedCat1", "Unknow"  # the 16 thylacines
-GROUP_VARIABLES = {"FeedCat1": "dietary category", "PreyRatio": "prey size"}
+DATASET_KEY = "cranial206"  # bench.DATASETS: the 222 specimens less the 16 thylacines
+GROUP_VARIABLES = {"DietFine": "dietary category", "PreyCatg": "prey size"}
 
 
 def out_of_fold_predictions(data_matrix, groups, n_components):
@@ -118,13 +119,10 @@ def main():
     import MdStatistics
     from components.formats.morphologika import Morphologika
 
-    path = Path(args.file) if args.file else bench.DEFAULT_REPO / DATASET_FILE
-    dataset, morph = bench.load_dataset(mm, Morphologika, path, DATASET_NAME)
-    exclude_idx = morph.variablename_list.index(EXCLUDE_VARIABLE)
-    excluded = [obj for obj in dataset.object_list if obj.get_variable_list()[exclude_idx] == EXCLUDE_VALUE]
-    for obj in excluded:
-        obj.delete_instance()
-    dataset = mm.MdDataset.get_by_id(dataset.id)
+    spec = bench.DATASETS[DATASET_KEY]
+    path = Path(args.file) if args.file else bench.DEFAULT_REPO / spec["file"]
+    dataset, morph = bench.load_dataset(mm, Morphologika, path, spec["name"])
+    dataset, excluded = bench.apply_exclusion(mm, dataset, morph, spec)
 
     aligned = bench.superimpose(mm, dataset, "procrustes")
     data_matrix = np.asarray([np.asarray(config, dtype=float).ravel() for config in aligned])
@@ -134,9 +132,9 @@ def main():
 
     results = {
         "environment": env,
-        "dataset": DATASET_NAME,
+        "dataset": spec["name"],
         "file": str(path),
-        "excluded": {"variable": EXCLUDE_VARIABLE, "value": EXCLUDE_VALUE, "n": len(excluded)},
+        "excluded": excluded,
         "n_objects": len(data_matrix),
         "pca": {
             "pc1_percent": ratio[0] * 100,
@@ -154,12 +152,15 @@ def main():
         }
 
     p = results["pca"]
-    print(f"# {results['n_objects']} specimens ({len(excluded)} excluded as {EXCLUDE_VARIABLE} = {EXCLUDE_VALUE})")
+    print(
+        f"# {results['n_objects']} specimens ({excluded['n']} excluded as {excluded['variable']} = {excluded['value']})"
+    )
     print(f"PCA: PC1 {p['pc1_percent']:.1f}%, PC2 {p['pc2_percent']:.1f}%, {p['components_to_95_percent']} PCs to 95%")
     for variable, r in results["groupings"].items():
         wilks = r["manova"]["Wilks' lambda"]
+        axes = ", ".join(f"CV{i + 1} {v:.1f}%" for i, v in enumerate(r["canonical_axis_percent"][:2]))
         print(
-            f"{variable}: {r['n_groups']} groups, CV1 {r['canonical_axis_percent'][0]:.1f}%, CV2 {r['canonical_axis_percent'][1]:.1f}%,"
+            f"{variable}: {r['n_groups']} groups, {axes},"
             f" LOOCV {r['cross_validated_accuracy']:.1f}% (majority {r['majority_class_accuracy']:.1f}%),"
             f" balanced {r['balanced_accuracy']:.1f}%, Wilks {wilks['value']:.3f},"
             f" F({wilks['df_num']}, {wilks['df_den']}) = {wilks['f_statistic']:.2f}"

@@ -2,9 +2,12 @@
 """Reproduce the runtime table of the Modan2 paper on a real published dataset.
 
 Unlike ``benchmark_analysis.py``, which times the analysis primitives on random
-data, this script reads one of the Morphologika datasets shipped with the
-repository and times the code paths the application itself runs, so that the
-figures can be quoted directly in the manuscript.
+data, this script reads the published cranial data of Rovinsky et al. (2021)
+and times the code paths the application itself runs, so that the figures can
+be quoted directly in the manuscript. The data are not part of the repository:
+``scripts/rovinsky2021_data.py`` downloads them from figshare, checks them
+against the published checksums, and writes the files read here into
+``benchmarks/data/rovinsky2021``.
 
 It reports the three parts of the runtime table:
 
@@ -14,10 +17,12 @@ It reports the three parts of the runtime table:
 
 Two details matter for comparability with the published numbers:
 
-  * MANOVA is timed on PCA scores (``do_manova_analysis_on_pca``), because that
-    is what ``ModanController._run_manova`` calls when a PCA result is present.
-    Timing ``do_manova_analysis_on_procrustes`` instead understates it by an
-    order of magnitude.
+  * MANOVA is timed as ``ModanController._run_manova`` runs it: on the PCA
+    scores truncated to ``effective_component_count`` components, through
+    ``do_manova_analysis_on_pca`` (``manova_scores``). Until devlog 293 this
+    passed every score instead -- more variables than specimens, a degenerate
+    test (numpy warned of invalid values) and a time that was not the
+    application's.
   * Every figure is the median of ``--runs`` repetitions.
 
 ``--accuracy`` instead measures how well missing landmarks are reconstructed
@@ -26,9 +31,10 @@ at the convergence tolerance or at the cap on refinement rounds, and how far the
 last round still moved the estimates.
 
 Usage:
+    python scripts/rovinsky2021_data.py                          # once, to fetch the data
     python scripts/benchmark_paper_tables.py                     # 222 x 72 cranial dataset
     python scripts/benchmark_paper_tables.py --dataset cranial206  # same, known diet only
-    python scripts/benchmark_paper_tables.py --dataset dense14   # 14 x 381 dataset
+    python scripts/benchmark_paper_tables.py --dataset dense16   # 16 thylacines x 381
     python scripts/benchmark_paper_tables.py --runs 9 --markdown
     python scripts/benchmark_paper_tables.py --manova-paths      # which MANOVA path costs what
     python scripts/benchmark_paper_tables.py --repo /path/to/other/checkout
@@ -53,24 +59,27 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 DEFAULT_REPO = HERE.parent
 
+DATA_DIR = "benchmarks/data/rovinsky2021"  # written by scripts/rovinsky2021_data.py
 DATASETS = {
     "cranial222": {
-        "file": "Morphometrics dataset/Thylacine2020_NeuroGM.txt",
+        "file": f"{DATA_DIR}/neurocranium_222.txt",
         "name": "Cranial 222x72",
-        "group_var": "FeedCat1",  # dietary category
+        "group_var": "DietFine",  # dietary category (FeedCatgFine)
     },
     # The specimens of known diet, as in the paper's worked example: the 16
-    # thylacines are coded "Unknow", and an unknown category is not a group.
+    # thylacines are coded NA, and an unknown category is not a group.
     "cranial206": {
-        "file": "Morphometrics dataset/Thylacine2020_NeuroGM.txt",
+        "file": f"{DATA_DIR}/neurocranium_222.txt",
         "name": "Cranial 206x72",
-        "group_var": "FeedCat1",
-        "exclude": ("FeedCat1", "Unknow"),
+        "group_var": "DietFine",
+        "exclude": ("DietFine", "NA"),
     },
-    "dense14": {
-        "file": "Morphometrics dataset/Rovinsky_etal Morphologika.txt",
-        "name": "Dense 14x381",
-        "group_var": "Sex",
+    # The whole-cranium scheme, for the thylacines alone. Accuracy mode only:
+    # it carries no grouping variable to time an analysis by.
+    "dense16": {
+        "file": f"{DATA_DIR}/skull_thylacines_16.txt",
+        "name": "Dense 16x381",
+        "group_var": None,
     },
 }
 
@@ -134,6 +143,8 @@ def describe_environment(repo):
 # --------------------------------------------------------------------------
 def load_dataset(mm, Morphologika, path, name):
     """Read a Morphologika file into a fresh in-memory database."""
+    if not Path(path).exists():
+        raise SystemExit(f"{path} not found -- run scripts/rovinsky2021_data.py first to fetch the data")
     mm.gDatabase.init(":memory:")
     mm.gDatabase.create_tables([mm.MdDataset, mm.MdObject, mm.MdAnalysis, mm.MdImage, mm.MdThreeDModel])
 
@@ -292,9 +303,13 @@ def run(args, mm, MdStatistics, Morphologika):
     t_pca, _ = time_median(lambda: MdStatistics.do_pca_analysis(lm_data), args.runs)
     t_cva, _ = time_median(lambda: MdStatistics.do_cva_analysis(lm_data, groups), args.runs)
     pca_result = MdStatistics.do_pca_analysis(lm_data)
-    t_man, _ = time_median(lambda: MdStatistics.do_manova_analysis_on_pca(pca_result["scores"], groups), args.runs)
+    t_man, _ = time_median(
+        lambda: MdStatistics.do_manova_analysis_on_pca(manova_scores(MdStatistics, pca_result, groups), groups),
+        args.runs,
+    )
     full = t_proc + t_pca + t_cva + t_man
     results["downstream"] = {"pca": t_pca, "cva": t_cva, "manova": t_man, "full_workflow": full}
+    results["manova_components"] = len(manova_scores(MdStatistics, pca_result, groups)[0])
     print(f"(b) PCA                       {t_pca:7.3f} s")
     print(f"    CVA                       {t_cva:7.3f} s")
     print(f"    MANOVA (on PCA scores)    {t_man:7.3f} s")
@@ -316,12 +331,20 @@ def run(args, mm, MdStatistics, Morphologika):
     return results
 
 
+def manova_scores(MdStatistics, pca_result, groups):
+    """The PCA scores MANOVA is run on, truncated as ``ModanController._run_manova`` does."""
+    k = MdStatistics.effective_component_count(
+        pca_result["eigenvalues"], n_samples=len(pca_result["scores"]), n_groups=len(set(groups))
+    )
+    return [score[:k] for score in pca_result["scores"]]
+
+
 def compare_manova_paths(args, mm, MdStatistics, Morphologika):
     """Time the three MANOVA entry points on the same aligned data.
 
-    ``ModanController`` uses the PCA-score path; the other two exist for callers
-    that have no PCA result. They differ by an order of magnitude, so quoting the
-    wrong one silently misreports the workflow cost.
+    ``ModanController`` uses the PCA-score path, on scores truncated as it truncates
+    them; the other two exist for callers that have no PCA result. Quoting the
+    wrong one misreports the workflow cost.
     """
     import numpy as np
 
@@ -336,7 +359,7 @@ def compare_manova_paths(args, mm, MdStatistics, Morphologika):
 
     paths = {
         "do_manova_analysis_on_pca (used by ModanController)": lambda: MdStatistics.do_manova_analysis_on_pca(
-            pca_result["scores"], groups
+            manova_scores(MdStatistics, pca_result, groups), groups
         ),
         "do_manova_analysis_on_procrustes": lambda: MdStatistics.do_manova_analysis_on_procrustes(flat, groups),
         "do_manova_analysis (generic)": lambda: MdStatistics.do_manova_analysis(lm_data, groups),

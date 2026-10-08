@@ -1,22 +1,49 @@
-Environment and commands behind paper_runtime_cranial206.json,
-paper_accuracy_cranial222.json, paper_accuracy_dense14.json (the runtime and
-accuracy tables of the Modan2 paper), paper_worked_examples_cranial206.json
-(the figures of its worked example on the cranial dataset), and
-paper_r_comparison_cranial206.json (the same analyses compared with an
-independent R implementation), and paper_refinement_sensitivity.json (the
-accuracy assessment repeated with the cap on refinement rounds raised from 5
-to 10 and 20).
+Environment and commands behind the machine-readable results of the Modan2
+paper:
 
-Code: Modan2 v0.2.0 (tag v0.2.0, commit 5173275, clean), run from a
-git worktree at the tag through --repo. The scripts themselves are run from
-this checkout; they postdate the tag, and only load the application code from
-the worktree.
+  paper_runtime_cranial206.json        runtime table
+  paper_accuracy_cranial222.json       accuracy table, neurocranial patch
+  paper_accuracy_dense16.json          accuracy table, whole-cranium scheme
+  paper_worked_examples_cranial206.json  figures of the worked example
+  paper_r_comparison_cranial206.json   the same analyses against R
+  paper_refinement_sensitivity.json    accuracy with the refinement cap at 10, 20
 
-The runtime table uses the 206 specimens of known diet (dataset cranial206:
-the 16 thylacines, coded FeedCat1 = Unknow, are excluded), so that CVA and
-MANOVA compare the same 10 dietary groups as the worked example. It replaces
-paper_runtime_cranial222.json, which kept the thylacines as an 11th group.
-The accuracy table uses all 222 specimens, since it involves no grouping.
+Data: the published data of Rovinsky, Evans & Adams (2021), BMC Ecology and
+Evolution 21: 58, deposited on figshare under CC BY 4.0 as "Data and Code for
+Rovinsky et al., 2021", version 1, https://doi.org/10.6084/m9.figshare.14330759.v1.
+They are not part of this repository. scripts/rovinsky2021_data.py downloads
+the three files used, checks them against figshare's MD5 checksums,
+
+  Thylacine2021_NeuroGM.txt   67874394da3d73a3edce0c8e3c80429c
+  Thylacine2021_SkullGM.txt   03d9bed716968f391f4bfae07c7202c8
+  REA_2021_dataforR.xlsx      9c909ef6fa0908886f95c5bdf73de648
+
+and writes into benchmarks/data/rovinsky2021 (ignored by git):
+
+  neurocranium_222.txt       NeuroGM, 222 specimens x 72 landmarks, with the
+                             Classifier_Total classification attached
+                             (DietFine = FeedCatgFine, ten categories;
+                             PreyCatg, small or large prey; NA for the
+                             16 thylacines)
+  skull_thylacines_16.txt    SkullGM, 381 landmarks, its 16 thylacines
+
+Datasets in benchmark_paper_tables.py: cranial222 (all 222), cranial206 (the
+16 thylacines, DietFine = NA, excluded, as in the worked example), dense16.
+The runtime table uses cranial206 so that CVA and MANOVA compare the same ten
+dietary groups as the worked example; the accuracy table uses cranial222,
+since it involves no grouping.
+
+Until devlog 293 these results came from two files kept in "Morphometrics
+dataset/" -- Thylacine2020_NeuroGM.txt and "Rovinsky_etal Morphologika.txt" --
+which turned out not to be the published data: the first has the published
+coordinates but specimen names, order, and dietary and prey categories of an
+earlier version, and the second's coordinates differ from the published ones
+by as much as two thylacines differ from each other.
+
+Code: Modan2 v0.2.0 (tag v0.2.0, commit 5173275, clean), run from a git
+worktree at the tag through --repo. The scripts themselves are run from this
+checkout; they postdate the tag, and only load the application code from the
+worktree.
 
 Machine: Intel Core i7-6700 (3.40 GHz, 4 cores / 8 threads), 16 GB RAM,
 Windows host running Linux under WSL 2
@@ -34,13 +61,15 @@ Python environment, installed from requirements-linux.lock at v0.2.0:
   platform Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.39
   numpy BLAS: ['openblas configuration: OpenBLAS 0.3.34.106.0  USE64BITINT DYNAMIC_ARCH NO_AFFINITY']
 
-Commands (run one after another, 2026-10-08):
+Commands (2026-10-08; the runtime table alone on an otherwise idle machine,
+the rest afterwards, concurrently):
+  python scripts/rovinsky2021_data.py
   python scripts/benchmark_paper_tables.py --repo <worktree> --dataset cranial206 --runs 9 --markdown \
       --out benchmarks/paper_runtime_cranial206.json
-  python scripts/benchmark_paper_tables.py --repo <worktree> --accuracy --markdown \
+  python scripts/benchmark_paper_tables.py --repo <worktree> --accuracy --dataset cranial222 --markdown \
       --out benchmarks/paper_accuracy_cranial222.json
-  python scripts/benchmark_paper_tables.py --repo <worktree> --accuracy --dataset dense14 --markdown \
-      --out benchmarks/paper_accuracy_dense14.json
+  python scripts/benchmark_paper_tables.py --repo <worktree> --accuracy --dataset dense16 --markdown \
+      --out benchmarks/paper_accuracy_dense16.json
   python scripts/paper_worked_examples.py --repo <worktree>
   python scripts/paper_r_comparison.py --repo <worktree> \
       --rscript ~/micromamba/envs/modan2-r/bin/Rscript
@@ -54,7 +83,5 @@ the ARPACK solver of Modan2's CVA starts from a random vector.
 Removal patterns come from the script's default seed, 20260813 (pattern p at
 missing fraction f uses seed 20260813 + 101 p + int(1000 f) in accuracy
 mode, and 20260813 + int(100 f) in the runtime table). The JSON files do not
-record the seed themselves. The accuracy results are identical, to the last
-digit, to the earlier runs on 0.2.0-beta.3, which used the same seed, and to
-the first runs on v0.2.0, made before the accuracy mode recorded how the
-imputation loop ended ("refinement" in each condition).
+record the seed themselves. Patterns are drawn over specimen positions, so
+they depend on the order of the specimens in the file as well as on the seed.

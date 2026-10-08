@@ -8,111 +8,123 @@
     "memory_gb": 16,
     "platform": "Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.39",
     "python": "3.12.3",
-    "timestamp": "2026-10-08 10:26:11"
+    "timestamp": "2026-10-08 16:09:15"
   },
-  "dataset": "Cranial 222x72",
-  "file": "/mnt/d/projects/modan2/Morphometrics dataset/Thylacine2020_NeuroGM.txt",
+  "dataset": "Cranial 206x72",
+  "file": "/mnt/d/projects/modan2/benchmarks/data/rovinsky2021/neurocranium_222.txt",
   "excluded": {
-    "variable": "FeedCat1",
-    "value": "Unknow",
+    "variable": "DietFine",
+    "value": "NA",
     "n": 16
   },
   "n_objects": 206,
   "pca": {
-    "pc1_percent": 52.50852914357924,
-    "pc2_percent": 12.075667817521754,
-    "pc1_pc2_percent": 64.58419696110099,
+    "pc1_percent": 52.508529143579196,
+    "pc2_percent": 12.07566781752175,
+    "pc1_pc2_percent": 64.58419696110094,
     "components_to_95_percent": 14
   },
   "groupings": {
-    "FeedCat1": {
+    "DietFine": {
       "label": "dietary category",
       "n_groups": 10,
       "group_sizes": {
-        "HypCar": 102,
-        "CarIns": 27,
-        "CarFru": 20,
+        "Carniv": 90,
+        "CarIns": 23,
         "GenGen": 20,
-        "InsCar": 12,
-        "InsFru": 8,
+        "CarFru": 16,
+        "DurCar": 16,
+        "InsCar": 16,
+        "InsFru": 11,
         "Insect": 8,
         "Frugiv": 4,
-        "GraIns": 3,
         "InsHer": 2
       },
       "cva_variables": 14,
       "canonical_axis_percent": [
-        31.101853856638485,
-        22.16061533507059,
-        18.382924093471733,
-        10.091154212346066,
-        7.981646546486794,
-        4.803764938514733,
-        2.904401371962377,
-        1.9043448169550354,
-        0.6692948285541904
+        51.26015874641651,
+        19.075869530484802,
+        12.251985966221756,
+        5.090676310088977,
+        4.7127400795389365,
+        3.0868065837775305,
+        2.6045279778460975,
+        1.2825132056304187,
+        0.634721599994966
       ],
       "cross_validation": "leave-one-out",
       "cross_validated_accuracy": 57.28155339805825,
-      "majority_class_accuracy": 49.51456310679612,
-      "balanced_accuracy": 48.89869281045751,
+      "majority_class_accuracy": 43.689320388349515,
+      "balanced_accuracy": 48.8977821695213,
       "majority_class_balanced_accuracy": 10.0,
       "per_group_recall": {
-        "HypCar": 78.43137254901961,
-        "CarIns": 22.22222222222222,
-        "CarFru": 40.0,
-        "GenGen": 40.0,
-        "InsCar": 16.666666666666664,
-        "InsFru": 87.5,
-        "Insect": 37.5,
+        "Carniv": 78.88888888888889,
+        "CarIns": 13.043478260869565,
+        "GenGen": 30.0,
+        "CarFru": 37.5,
+        "DurCar": 100.0,
+        "InsCar": 25.0,
+        "InsFru": 54.54545454545454,
+        "Insect": 50.0,
         "Frugiv": 0.0,
-        "GraIns": 66.66666666666666,
         "InsHer": 100.0
       },
       "confusion_matrix": {
         "labels": [
-          "HypCar",
+          "Carniv",
           "CarIns",
-          "CarFru",
           "GenGen",
+          "CarFru",
+          "DurCar",
           "InsCar",
           "InsFru",
           "Insect",
           "Frugiv",
-          "GraIns",
           "InsHer"
         ],
         "rows_true_columns_predicted": [
           [
-            80,
+            71,
             6,
-            5,
             4,
+            3,
+            0,
             0,
             1,
             3,
             2,
+            0
+          ],
+          [
+            9,
+            3,
+            1,
             0,
+            0,
+            4,
+            4,
+            1,
+            1,
+            0
+          ],
+          [
+            7,
+            2,
+            6,
+            1,
+            0,
+            2,
+            0,
+            0,
+            1,
             1
           ],
           [
             10,
+            0,
+            0,
             6,
             0,
-            1,
-            4,
-            4,
-            1,
-            1,
-            0,
-            0
-          ],
-          [
-            11,
-            1,
-            8,
-            0,
-            0,
             0,
             0,
             0,
@@ -120,52 +132,52 @@
             0
           ],
           [
-            6,
-            2,
-            1,
-            8,
-            1,
-            0,
-            0,
-            1,
-            0,
-            1
-          ],
-          [
-            1,
-            4,
-            0,
-            4,
-            2,
-            0,
-            1,
-            0,
-            0,
-            0
-          ],
-          [
-            0,
-            1,
             0,
             0,
             0,
-            7,
+            0,
+            16,
+            0,
             0,
             0,
             0,
             0
           ],
           [
-            1,
-            0,
-            0,
             1,
             2,
+            4,
+            0,
+            0,
+            4,
+            4,
+            1,
+            0,
+            0
+          ],
+          [
             0,
             3,
+            1,
             0,
             0,
-            1
+            1,
+            6,
+            0,
+            0,
+            0
+          ],
+          [
+            2,
+            0,
+            1,
+            0,
+            0,
+            1,
+            0,
+            4,
+            0,
+            0
           ],
           [
             4,
@@ -177,18 +189,6 @@
             0,
             0,
             0,
-            0
-          ],
-          [
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            1,
-            2,
             0
           ],
           [
@@ -208,156 +208,100 @@
       "manova_variables": 14,
       "manova": {
         "Wilks' lambda": {
-          "value": 0.06287706202371576,
+          "value": 0.024673660479962306,
           "df_num": 126,
           "df_den": 1412,
-          "f_statistic": 4.891985054391327,
-          "p_value": 1.786337608748041e-51
+          "f_statistic": 6.989460513381065,
+          "p_value": 9.450446976653514e-83
         },
         "Pillai's trace": {
-          "value": 2.195641952271532,
+          "value": 2.5878709696976134,
           "df_num": 126,
           "df_den": 1719,
-          "f_statistic": 4.402300596410331,
-          "p_value": 1.3216656942433368e-45
+          "f_statistic": 5.506120319301614,
+          "p_value": 2.2937700759158387e-63
         },
         "Hotelling-Lawley trace": {
-          "value": 3.6153406435615154,
+          "value": 6.095764389233878,
           "df_num": 126,
           "df_den": 936,
-          "f_statistic": 5.204580903579834,
-          "p_value": 1.1897046574813464e-50
+          "f_statistic": 8.775355370573067,
+          "p_value": 6.239063400761101e-94
         },
         "Roy's greatest root": {
-          "value": 1.1244379633801578,
+          "value": 3.1246985027288083,
           "df_num": 14,
           "df_den": 191,
-          "f_statistic": 15.340546500400723,
-          "p_value": 1.70169385858152e-24
+          "f_statistic": 42.62981528722874,
+          "p_value": 4.278859959419838e-51
         }
       }
     },
-    "PreyRatio": {
+    "PreyCatg": {
       "label": "prey size",
-      "n_groups": 6,
+      "n_groups": 2,
       "group_sizes": {
-        "MED": 72,
-        "SML": 56,
-        "XSM": 35,
-        "LRG": 26,
-        "XLG": 11,
-        "XXS": 6
+        "SML": 157,
+        "LRG": 49
       },
       "cva_variables": 14,
       "canonical_axis_percent": [
-        44.16058205175191,
-        37.111663192879725,
-        8.470295916962991,
-        6.291143391372443,
-        3.966315447032938
+        100.0
       ],
       "cross_validation": "leave-one-out",
-      "cross_validated_accuracy": 56.310679611650485,
-      "majority_class_accuracy": 34.95145631067961,
-      "balanced_accuracy": 50.46347171347172,
-      "majority_class_balanced_accuracy": 16.666666666666668,
+      "cross_validated_accuracy": 85.92233009708737,
+      "majority_class_accuracy": 76.2135922330097,
+      "balanced_accuracy": 78.83140517353438,
+      "majority_class_balanced_accuracy": 50.0,
       "per_group_recall": {
-        "MED": 72.22222222222221,
-        "SML": 55.35714285714286,
-        "XSM": 45.714285714285715,
-        "LRG": 46.15384615384615,
-        "XLG": 0.0,
-        "XXS": 83.33333333333334
+        "SML": 92.35668789808918,
+        "LRG": 65.3061224489796
       },
       "confusion_matrix": {
         "labels": [
-          "MED",
           "SML",
-          "XSM",
-          "LRG",
-          "XLG",
-          "XXS"
+          "LRG"
         ],
         "rows_true_columns_predicted": [
           [
-            52,
-            7,
-            5,
-            5,
-            2,
-            1
+            145,
+            12
           ],
           [
-            16,
-            31,
-            7,
-            2,
-            0,
-            0
-          ],
-          [
-            10,
-            7,
-            16,
-            0,
-            1,
-            1
-          ],
-          [
-            11,
-            3,
-            0,
-            12,
-            0,
-            0
-          ],
-          [
-            9,
-            0,
-            0,
-            2,
-            0,
-            0
-          ],
-          [
-            1,
-            0,
-            0,
-            0,
-            0,
-            5
+            17,
+            32
           ]
         ]
       },
       "manova_variables": 14,
       "manova": {
         "Wilks' lambda": {
-          "value": 0.1654712869361013,
-          "df_num": 70,
-          "df_den": 894,
-          "f_statistic": 5.866579768091521,
-          "p_value": 6.767100719473803e-39
-        },
-        "Pillai's trace": {
-          "value": 1.386443620143167,
-          "df_num": 70,
-          "df_den": 955,
-          "f_statistic": 5.234469939829283,
-          "p_value": 8.85456138874209e-34
-        },
-        "Hotelling-Lawley trace": {
-          "value": 2.4399583923275827,
-          "df_num": 70,
-          "df_den": 653,
-          "f_statistic": 6.468250583558494,
-          "p_value": 8.941241610793773e-41
-        },
-        "Roy's greatest root": {
-          "value": 1.0774998278724293,
+          "value": 0.5752742604685677,
           "df_num": 14,
           "df_den": 191,
-          "f_statistic": 14.700176223116713,
-          "p_value": 1.2756071328969947e-23
+          "f_statistic": 10.072539286916848,
+          "p_value": 9.781043623115144e-17
+        },
+        "Pillai's trace": {
+          "value": 0.4247257395314324,
+          "df_num": 14,
+          "df_den": 191,
+          "f_statistic": 10.07253928691685,
+          "p_value": 9.781043623115144e-17
+        },
+        "Hotelling-Lawley trace": {
+          "value": 0.7383013089886696,
+          "df_num": 14,
+          "df_den": 191,
+          "f_statistic": 10.07253928691685,
+          "p_value": 9.781043623114747e-17
+        },
+        "Roy's greatest root": {
+          "value": 0.7383013089886696,
+          "df_num": 14,
+          "df_den": 191,
+          "f_statistic": 10.07253928691685,
+          "p_value": 9.781043623115144e-17
         }
       }
     }

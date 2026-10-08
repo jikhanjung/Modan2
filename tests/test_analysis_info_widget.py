@@ -353,6 +353,24 @@ class TestAnalysisInfoWidgetManovaDisplay:
         # Table should be cleared (row count = 0)
         assert widget.tabManovaResult.rowCount() == 0
 
+    def test_manova_value_has_four_significant_figures(self, qtbot):
+        """Statistic values show as d.ddde+XX; degrees of freedom stay integers."""
+        widget = AnalysisInfoWidget(Mock())
+        qtbot.addWidget(widget)
+        widget.tabManovaResult.setRowCount(0)
+        widget.tabManovaResult.setColumnCount(6)  # set by show_analysis_result in use
+        widget._fill_manova_stat_dict(
+            {
+                "column_names": ["", "Value", "Num DF", "Den DF", "F Value", "Pr > F"],
+                "Wilks' lambda": [0.024673660479962306, 126, 1412.3, 6.989460513381065, 9.45e-83],
+                "Pillai's trace": [2.5878709696976134, 126, 1719, 5.506120319301614, 2.29e-63],
+            }
+        )
+        assert widget.tabManovaResult.item(0, 1).text() == "2.467e-02"
+        assert widget.tabManovaResult.item(1, 1).text() == "2.588e+00"
+        assert widget.tabManovaResult.item(0, 3).text() == "1412"
+        assert widget.tabManovaResult.item(0, 4).text() == "6.989"
+
     def test_manova_table_has_widget(self, qtbot):
         """Test that MANOVA results are displayed in a table widget"""
         parent = Mock()

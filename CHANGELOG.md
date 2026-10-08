@@ -16,10 +16,10 @@ fixes bugs found in use — in alignment, analysis and export — and finishes t
 Korean interface. Most of what is new, though, arrived during the betas — see
 the summary below if you are coming from 0.1.x.
 
-This build replaces the 0.2.0 first published on 2026-10-08 (build 908), with
-the fixes listed below. It keeps the version number, so Modan2's update check
-will not offer it to anyone who installed build 908: if you did, download it
-again.
+This build replaces the two earlier 0.2.0 builds published on 2026-10-08
+(builds 908 and 922), with the fixes and changes listed below. It keeps the
+version number, so Modan2's update check will not offer it to anyone who
+installed either of them: if you did, download it again.
 
 ### Coming from 0.1.x
 
@@ -69,6 +69,11 @@ short:
   reported. Every CVA run computed these, but nothing stored or showed them.
   Analyses saved before this build have no accuracy stored; run them again to
   see it.
+
+### Changed
+- **The MANOVA table shows each statistic to four significant figures** (for
+  example `2.467e-02`), instead of seven, which crowded the column and claimed a
+  precision the F approximations do not carry.
 
 ### Fixed
 - **Bookstein analyses ran as Procrustes in the Korean interface.** The analysis

@@ -307,7 +307,9 @@ class AnalysisInfoWidget(QWidget):
             self.tabManovaResult.insertRow(row)
             self.tabManovaResult.setItem(row, 0, QTableWidgetItem(stat_name))
             if isinstance(stat_values, list) and len(stat_values) >= 5:
-                self.tabManovaResult.setItem(row, 1, QTableWidgetItem(f"{stat_values[0]:.6e}"))
+                # Four significant figures: seven (".6e") crowded the column and
+                # claimed a precision the F approximations do not carry.
+                self.tabManovaResult.setItem(row, 1, QTableWidgetItem(f"{stat_values[0]:.3e}"))
                 self.tabManovaResult.setItem(row, 2, QTableWidgetItem(str(int(stat_values[1]))))
                 self.tabManovaResult.setItem(row, 3, QTableWidgetItem(str(int(stat_values[2]))))
                 self.tabManovaResult.setItem(row, 4, QTableWidgetItem(f"{stat_values[3]:.3f}"))

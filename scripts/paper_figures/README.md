@@ -29,7 +29,7 @@ Requirements: Xvfb, and a Python environment with Modan2's dependencies
 
 | Script | Figures |
 |---|---|
-| `fig2_3.py` | 2a main window with preview; 2c analysis panel (PCA); 2d Data Exploration; 3a new-dataset dialog; 3b imported objects; 3c object dialog (also 2b); 3d editing a variable |
+| `fig2_3.py` | 2a main window with an analysis in the tree and a specimen previewed; 2b and 3c the object dialog, on two specimens; 2c analysis panel (PCA); 2d Data Exploration; 3a new-dataset dialog (General tab); 3b imported objects; 3d editing a variable |
 | `fig4_5.py` | 4a New Analysis dialog; 4b–d PCA, CVA and MANOVA tabs; 5a a specimen picked in morphospace; 5b shape grid with convex hulls |
 | `fig6cd.py` | 6c the object list and 6d the object dialog for a specimen with a missing landmark |
 | `fig6ab.py` | 6b a curve traced along the body outline with edge snapping off and on; 6a the resulting curve scheme |

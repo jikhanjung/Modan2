@@ -2,7 +2,7 @@ pyqt5
 pyqt5-sip
 peewee
 pillow
-numpy>=2.5.3,<3.0.0
+numpy>=2.5.4,<3.0.0
 trimesh
 matplotlib
 scipy
@@ -17,7 +17,7 @@ peewee-migrate
 # Resolves the per-OS configuration directory for preferences.json. Pure Python,
 # no compiled extension, so one wheel covers all three platforms. Preferred over
 # Qt's QStandardPaths because MdUtils is imported before the QApplication exists.
-platformdirs>=4.12.1
+platformdirs>=4.14.3
 scikit-learn
 statsmodels
 pyopengl
@@ -27,7 +27,7 @@ semver>=3.1.0
 # verifies with the OS's own store, which is where an institute's TLS-inspecting
 # proxy has its root certificate installed. certifi is the fallback for a frozen
 # build whose OpenSSL cannot find the system certificates (macOS PyInstaller).
-truststore>=0.10.0
-certifi>=2025.1.31
+truststore>=0.10.5
+certifi>=2026.10.23
 # sudo apt-get update && sudo apt-get install -y libxcb-xinerama0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1   libxcb-randr0 libxcb-render-util0 libxcb-xfixes0 libxcb-shape0 libxcb-cursor0 qt5-qmake qtbase5-dev libqt5gui5   libqt5core5a libqt5widgets5 python3-pyqt5
 # sudo apt-get install -y libglut-dev libglut3.12 python3-opengl

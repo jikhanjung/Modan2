@@ -22,7 +22,7 @@ scikit-learn
 statsmodels
 pyopengl
 pyopengl-accelerate
-semver>=3.1.0
+semver>=3.1.1
 # Certificate trust for the About box's update check (MdUpdate). truststore
 # verifies with the OS's own store, which is where an institute's TLS-inspecting
 # proxy has its root certificate installed. certifi is the fallback for a frozen

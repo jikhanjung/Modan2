@@ -116,6 +116,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: modan2-windows
+          retention-days: 3
           path: |
             Modan2-Windows-*.zip
 
@@ -266,6 +267,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: modan2-macos
+          retention-days: 3
           path: |
             Modan2-macOS-Installer-v${{ steps.get_version.outputs.VERSION }}-build${{ inputs.build_number }}.dmg
 
@@ -353,5 +355,6 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: modan2-linux
+          retention-days: 3
           path: |
             build_linux/Modan2-Linux-v${{ steps.get_version.outputs.VERSION }}-build${{ inputs.build_number }}.AppImage

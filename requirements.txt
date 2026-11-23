@@ -2,7 +2,7 @@ pyqt5
 pyqt5-sip
 peewee
 pillow>=13.0.0
-numpy>=2.5.4,<3.0.0
+numpy>=2.5.5,<3.0.0
 trimesh
 matplotlib
 scipy
@@ -22,7 +22,7 @@ scikit-learn
 statsmodels
 pyopengl
 pyopengl-accelerate
-semver>=3.1.1
+semver>=3.1.2
 # Certificate trust for the About box's update check (MdUpdate). truststore
 # verifies with the OS's own store, which is where an institute's TLS-inspecting
 # proxy has its root certificate installed. certifi is the fallback for a frozen
